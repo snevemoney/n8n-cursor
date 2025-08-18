@@ -1,0 +1,242 @@
+{
+  "name": "AI Agent with Tools Memory and Output Parser",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an intelligent AI assistant with access to Gmail and internet search capabilities.\n\nYour primary function is to help users by:\n1. Searching the internet for relevant information using the Tavily search tool\n2. Composing and managing emails via Gmail\n3. Maintaining context of our conversation using memory\n4. Providing structured responses in the format specified by the output parser\n\nWhen responding about emails, always structure your response with a 'subject' and 'email' field.\n\nBe helpful, accurate, and concise in your responses."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        600,
+        300
+      ],
+      "id": "agent-node-001",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "messageLimit": 10,
+          "simplifyHistory": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        380,
+        500
+      ],
+      "id": "llm-node-001",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "{{YOUR_OPENROUTER_CREDENTIAL_ID}}",
+          "name": "OpenRouter API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "access": ["read", "send", "draft"],
+          "maxResults": 10
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        820,
+        500
+      ],
+      "id": "gmail-tool-001",
+      "name": "Gmail Tool",
+      "webhookId": "{{YOUR_WEBHOOK_ID}}",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "{{YOUR_GMAIL_CREDENTIAL_ID}}",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "windowSize": 10,
+        "options": {
+          "sessionIdType": "customKey",
+          "sessionKey": "sessionId"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        500
+      ],
+      "id": "memory-node-001",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\",\n      \"description\": \"The subject line of the email or main topic\"\n    },\n    \"email\": {\n      \"type\": \"string\",\n      \"description\": \"The body content of the email or detailed response\"\n    },\n    \"searchResults\": {\n      \"type\": \"array\",\n      \"description\": \"Any search results from internet queries\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"title\": { \"type\": \"string\" },\n          \"url\": { \"type\": \"string\" },\n          \"snippet\": { \"type\": \"string\" }\n        }\n      }\n    },\n    \"actionsTaken\": {\n      \"type\": \"array\",\n      \"description\": \"List of actions performed by the agent\",\n      \"items\": { \"type\": \"string\" }\n    }\n  },\n  \"required\": [\"subject\", \"email\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        600,
+        100
+      ],
+      "id": "parser-node-001",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the internet for current information, news, facts, or any topic. Returns relevant search results with titles, URLs, and snippets.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"api_key\": \"{{YOUR_TAVILY_API_KEY}}\",\n    \"query\": \"{searchTerm}\",\n    \"search_depth\": \"advanced\",\n    \"include_answer\": true,\n    \"topic\": \"general\",\n    \"include_raw_content\": false,\n    \"max_results\": 5\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "searchTerm",
+              "description": "The search query to look up on the internet",
+              "type": "string"
+            }
+          ]
+        },
+        "headers": {
+          "entries": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "responseFormat": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        500
+      ],
+      "id": "search-tool-001",
+      "name": "Tavily Search Tool"
+    },
+    {
+      "parameters": {
+        "content": "## AI Agent Workflow Overview\n\nThis workflow implements an AI agent with:\n\n### Components:\n1. **AI Agent**: Main orchestrator that processes user queries\n2. **OpenRouter LLM**: Provides the AI intelligence\n3. **Gmail Tool**: Enables email operations (read, send, draft)\n4. **Tavily Search**: Internet search capabilities\n5. **Memory**: Maintains conversation context\n6. **Output Parser**: Structures responses in JSON format\n\n### Usage:\n- Send a query with `{\"query\": \"your question here\"}`\n- Agent can search the internet and compose emails\n- Responses are structured with subject and email fields\n\n### Configuration Required:\n1. Add OpenRouter API credentials\n2. Configure Gmail OAuth2\n3. Add Tavily API key (or use the dev key)\n4. Set session ID for memory persistence",
+        "height": 350,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        50
+      ],
+      "id": "note-001",
+      "name": "Workflow Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        380,
+        300
+      ],
+      "id": "trigger-001",
+      "name": "Manual Trigger"
+    }
+  ],
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Search Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {},
+  "meta": {
+    "templateId": "ai-agent-tools-memory-parser",
+    "templateCredsSetupCompleted": false,
+    "instanceId": "{{YOUR_INSTANCE_ID}}"
+  }
+}

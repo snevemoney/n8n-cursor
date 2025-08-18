@@ -1,0 +1,41 @@
+{
+  "credentials": {
+    "openRouter": {
+      "apiKey": "YOUR_OPENROUTER_API_KEY",
+      "description": "Get your API key from https://openrouter.ai/keys"
+    },
+    "gmail": {
+      "clientId": "YOUR_GOOGLE_CLIENT_ID",
+      "clientSecret": "YOUR_GOOGLE_CLIENT_SECRET",
+      "description": "Create OAuth2 credentials at https://console.cloud.google.com/apis/credentials"
+    },
+    "tavily": {
+      "apiKey": "tvly-YOUR_API_KEY",
+      "description": "Get your API key from https://tavily.com/ or use the dev key for testing"
+    }
+  },
+  "workflow": {
+    "webhookId": "GENERATED_AFTER_SAVE",
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "settings": {
+    "memory": {
+      "windowSize": 10,
+      "sessionTimeout": 3600
+    },
+    "search": {
+      "maxResults": 5,
+      "searchDepth": "advanced",
+      "defaultTopic": "general"
+    },
+    "agent": {
+      "model": "openai/gpt-4-turbo-preview",
+      "temperature": 0.7,
+      "maxTokens": 2000
+    }
+  },
+  "testData": {
+    "testWebhookUrl": "https://your-n8n-instance.com/webhook/YOUR_WEBHOOK_ID",
+    "testSessionId": "test-session-default"
+  }
+}
