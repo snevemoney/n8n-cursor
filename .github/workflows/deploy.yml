@@ -1,0 +1,124 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "04-staging", "main" ]
+  workflow_dispatch:
+
+env:
+  PROJECT_PATH: "/home/n8n-cursor"
+
+jobs:
+  deploy-staging:
+    if: github.ref == 'refs/heads/04-staging'
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+      - name: Deploy to Staging
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST_STAGING }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ env.PROJECT_PATH }}
+            git fetch --all --prune
+            git checkout 04-staging
+            git pull origin 04-staging
+            
+            # Run health checks
+            make guard
+            make doctor
+            make wf-validate
+            
+            # Deploy
+            DRY_RUN=0 make up
+            
+            # Verify deployment
+            sleep 10
+            make health
+            
+            echo "✅ Staging deployment complete"
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST_PRODUCTION }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ env.PROJECT_PATH }}
+            
+            # Create backup before deployment
+            echo "Creating pre-deployment backup..."
+            DRY_RUN=0 make db-backup
+            DRY_RUN=0 make n8n-backup
+            
+            # Deploy
+            git fetch --all --prune
+            git checkout main
+            git pull origin main
+            
+            # Run health checks
+            make guard
+            make doctor
+            make wf-validate
+            
+            # Deploy
+            DRY_RUN=0 make up
+            
+            # Verify deployment
+            sleep 15
+            make health
+            
+            # Post-deployment verification
+            make status
+            
+            echo "✅ Production deployment complete"
+            
+      - name: Create Release Tag
+        if: success()
+        uses: actions/checkout@v4
+        
+      - name: Get version
+        if: success()
+        id: version
+        run: |
+          # Generate version based on date
+          VERSION="v$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Production Release ${{ steps.version.outputs.version }}
+          body: |
+            🚀 Production deployment successful
+            
+            **Deployed from:** ${{ github.sha }}
+            **Branch:** main
+            **Timestamp:** ${{ github.event.head_commit.timestamp }}
+            
+            ## Health Checks
+            - ✅ Repository structure validated
+            - ✅ Workflows validated  
+            - ✅ System health verified
+            - ✅ Services started successfully
+            
+            ## Backup Status
+            - ✅ Database backup created
+            - ✅ n8n workflows backed up
+            
+          draft: false
+          prerelease: false

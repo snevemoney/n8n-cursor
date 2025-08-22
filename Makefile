@@ -6,6 +6,9 @@ export SAFE_FLAGS := set -Eeuo pipefail
 default: help
 help:
 	@echo "Targets: up, down, restart, status, logs, backup, restore, wf-import, wf-validate, wf-dedupe, fmt, lint, guard, doctor, repair, repair-remote, new-workflow, new-script, ci, brain-index, brain-suggest"
+	@echo "Security: secure-ssh, tls-check, ports, health"
+	@echo "Backups: db-backup, db-restore, n8n-backup"
+	@echo "Protocol: protocol"
 
 up:       ; @$(SAFE_FLAGS); scripts/ops/n8n.sh up
 down:     ; @$(SAFE_FLAGS); scripts/ops/n8n.sh down
@@ -34,5 +37,15 @@ brain-index:  ; @$(SAFE_FLAGS); scripts/ops/repo-brain.sh index
 brain-suggest: ; @$(SAFE_FLAGS); scripts/ops/repo-brain.sh suggest
 
 protocol: ; @bash scripts/ops/protocol.sh $(PLAY) $(EXEC)
+
+# Security targets
+secure-ssh:        ; @bash scripts/ops/harden-ssh.sh
+tls-check:         ; @bash scripts/ops/certbot-check.sh
+health:            ; @bash scripts/ops/health-endpoint.sh
+
+# Backup targets
+db-backup:         ; @bash scripts/ops/backup-db.sh
+db-restore:        ; @bash scripts/ops/restore-db.sh "$(FILE)"
+n8n-backup:        ; @bash scripts/ops/backup-n8n.sh
 
 ci: fmt lint guard
