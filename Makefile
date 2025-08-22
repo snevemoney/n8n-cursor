@@ -136,7 +136,7 @@ mcp-setup: ## Set up MCP integration
 	@echo "✅ MCP integration setup complete"
 
 # Enhanced Project Management
-.PHONY: project-status project-metrics project-insights
+.PHONY: project-status project-metrics project-insights roadmap-generate timeline-create
 
 project-status: ## Show comprehensive project status
 	@echo "🏗️  n8n-cursor Project Status"
@@ -156,6 +156,12 @@ project-status: ## Show comprehensive project status
 	@echo ""
 	@echo "📈 System Metrics:"
 	@make ports
+	@echo ""
+	@echo "🗺️  Roadmap Status:"
+	@make roadmap-status
+	@echo ""
+	@echo "🗓️  Timeline Status:"
+	@make timeline-status
 
 project-metrics: ## Show project metrics and insights
 	@echo "📊 Project Metrics & Insights"
@@ -173,6 +179,8 @@ project-metrics: ## Show project metrics and insights
 	@echo "   - n8n workflows: $(shell find workflows -name "*.json" | wc -l)"
 	@echo "   - GitHub integration: Active"
 	@echo "   - Project board sync: Active"
+	@echo "   - Roadmap generator: Active"
+	@echo "   - Timeline manager: Active"
 
 project-insights: ## Generate project insights report
 	@echo "🔍 Generating Project Insights Report..."
@@ -185,4 +193,194 @@ project-insights: ## Generate project insights report
 	@echo "" >> reports/insights/$(shell date +%Y%m%d)-insights.md
 	@echo "## Recent Activity" >> reports/insights/$(shell date +%Y%m%d)-insights.md
 	@git log --oneline -10 >> reports/insights/$(shell date +%Y%m%d)-insights.md
+	@echo "" >> reports/insights/$(shell date +%Y%m%d)-insights.md
+	@echo "## Roadmap Status" >> reports/insights/$(shell date +%Y%m%d)-insights.md
+	@make roadmap-status >> reports/insights/$(shell date +%Y%m%d)-insights.md 2>&1 || true
+	@echo "" >> reports/insights/$(shell date +%Y%m%d)-insights.md
+	@echo "## Timeline Status" >> reports/insights/$(shell date +%Y%m%d)-insights.md
+	@make timeline-status >> reports/insights/$(shell date +%Y%m%d)-insights.md 2>&1 || true
 	@echo "✅ Insights report generated: reports/insights/$(shell date +%Y%m%d)-insights.md"
+
+# Advanced Roadmap Management
+.PHONY: roadmap-generate roadmap-export roadmap-status roadmap-clean
+
+roadmap-generate: ## Generate master roadmap from chat history and GitHub data
+	@echo "🗺️  Generating Master Roadmap..."
+	@python3 scripts/mcp/roadmap-generator.py
+	@echo "✅ Master roadmap generated successfully"
+
+roadmap-export: ## Export roadmap in various formats
+	@echo "📤 Exporting Roadmap..."
+	@echo "📄 JSON format:"
+	@python3 scripts/mcp/roadmap-generator.py --export json > reports/roadmap-$(shell date +%Y%m%d).json
+	@echo "📄 YAML format:"
+	@python3 scripts/mcp/roadmap-generator.py --export yaml > reports/roadmap-$(shell date +%Y%m%d).yaml
+	@echo "📄 Markdown format:"
+	@python3 scripts/mcp/roadmap-generator.py --markdown
+	@echo "✅ Roadmap exported in multiple formats"
+
+roadmap-status: ## Check roadmap status and health
+	@echo "🗺️  Roadmap Status:"
+	@echo "===================="
+	@if [ -f "docs/MASTER_ROADMAP.md" ]; then \
+		echo "✅ Master Roadmap: docs/MASTER_ROADMAP.md"; \
+		echo "   📊 Items: $(shell grep -c '^### ' docs/MASTER_ROADMAP.md || echo '0')"; \
+	else \
+		echo "❌ Master Roadmap: Missing"; \
+	fi
+	@if [ -f "logs/roadmap.db" ]; then \
+		echo "✅ Roadmap Database: logs/roadmap.db"; \
+		echo "   📊 Size: $(shell ls -lh logs/roadmap.db | awk '{print $5}')"; \
+	else \
+		echo "❌ Roadmap Database: Missing"; \
+	fi
+	@if [ -f "config/project-board.yml" ]; then \
+		echo "✅ Configuration: config/project-board.yml"; \
+		echo "   📊 Categories: $(shell grep -c 'name:' config/project-board.yml || echo '0')"; \
+	else \
+		echo "❌ Configuration: Missing"; \
+	fi
+
+roadmap-clean: ## Clean roadmap artifacts
+	@echo "🧹 Cleaning roadmap artifacts..."
+	@rm -f docs/MASTER_ROADMAP.md
+	@rm -f reports/roadmap-*.json
+	@rm -f reports/roadmap-*.yaml
+	@echo "✅ Roadmap cleanup complete"
+
+# Advanced Timeline Management
+.PHONY: timeline-create timeline-export timeline-status timeline-clean
+
+timeline-create: ## Create master timeline with GitHub milestones and releases
+	@echo "🗓️  Creating Master Timeline..."
+	@python3 scripts/mcp/github-timeline.py --create
+	@echo "✅ Master timeline created successfully"
+
+timeline-export: ## Export timeline in various formats
+	@echo "📤 Exporting Timeline..."
+	@echo "📄 JSON format:"
+	@python3 scripts/mcp/github-timeline.py --export json > reports/timeline-$(shell date +%Y%m%d).json
+	@echo "📄 YAML format:"
+	@python3 scripts/mcp/github-timeline.py --export yaml > reports/timeline-$(shell date +%Y%m%d).yaml
+	@echo "📄 Markdown format:"
+	@python3 scripts/mcp/github-timeline.py --markdown
+	@echo "✅ Timeline exported in multiple formats"
+
+timeline-status: ## Check timeline status and health
+	@echo "🗓️  Timeline Status:"
+	@echo "====================="
+	@if [ -f "docs/MASTER_TIMELINE.md" ]; then \
+		echo "✅ Master Timeline: docs/MASTER_TIMELINE.md"; \
+		echo "   📊 Milestones: $(shell grep -c '^### 🎯' docs/MASTER_TIMELINE.md || echo '0')"; \
+		echo "   🚀 Releases: $(shell grep -c '^### 🚀' docs/MASTER_TIMELINE.md || echo '0')"; \
+	else \
+		echo "❌ Master Timeline: Missing"; \
+	fi
+	@if [ -f "config/project-board.yml" ]; then \
+		echo "✅ Timeline Configuration: config/project-board.yml"; \
+		echo "   📊 Timeline Features: $(shell grep -c 'timeline_features:' config/project-board.yml || echo '0')"; \
+	else \
+		echo "❌ Timeline Configuration: Missing"; \
+	fi
+
+timeline-clean: ## Clean timeline artifacts
+	@echo "🧹 Cleaning timeline artifacts..."
+	@rm -f docs/MASTER_TIMELINE.md
+	@rm -f reports/timeline-*.json
+	@rm -f reports/timeline-*.yaml
+	@echo "✅ Timeline cleanup complete"
+
+# Comprehensive System Management
+.PHONY: system-full-status system-generate-all system-clean-all
+
+system-full-status: ## Show comprehensive system status
+	@echo "🏗️  n8n-cursor Complete System Status"
+	@echo "====================================="
+	@echo ""
+	@echo "📋 Repository Health:"
+	@make guard
+	@echo ""
+	@echo "🔌 MCP Integration:"
+	@make mcp-status
+	@echo ""
+	@echo "📊 Project Board:"
+	@make board-status
+	@echo ""
+	@echo "🗺️  Roadmap:"
+	@make roadmap-status
+	@echo ""
+	@echo "🗓️  Timeline:"
+	@make timeline-status
+	@echo ""
+	@echo "🚀 Deployment Pipeline:"
+	@make doctor
+	@echo ""
+	@echo "📈 System Metrics:"
+	@make ports
+	@echo ""
+	@echo "📊 Performance Metrics:"
+	@python3 scripts/mcp/project-board-sync.py --performance 2>/dev/null || echo "   Performance data not available"
+
+system-generate-all: ## Generate all system components (roadmap, timeline, insights)
+	@echo "🚀 Generating Complete System..."
+	@echo ""
+	@echo "🗺️  Generating Master Roadmap..."
+	@make roadmap-generate
+	@echo ""
+	@echo "🗓️  Creating Master Timeline..."
+	@make timeline-create
+	@echo ""
+	@echo "📤 Exporting All Components..."
+	@make roadmap-export
+	@make timeline-export
+	@echo ""
+	@echo "🔍 Generating Insights Report..."
+	@make project-insights
+	@echo ""
+	@echo "✅ Complete system generated successfully!"
+	@echo ""
+	@echo "📁 Generated Files:"
+	@echo "   - docs/MASTER_ROADMAP.md"
+	@echo "   - docs/MASTER_TIMELINE.md"
+	@echo "   - reports/insights/$(shell date +%Y%m%d)-insights.md"
+	@echo "   - reports/roadmap-$(shell date +%Y%m%d).json"
+	@echo "   - reports/timeline-$(shell date +%Y%m%d).json"
+
+system-clean-all: ## Clean all system artifacts
+	@echo "🧹 Cleaning Complete System..."
+	@make board-clean
+	@make roadmap-clean
+	@make timeline-clean
+	@echo "✅ Complete system cleanup finished"
+
+# Advanced Development Commands
+.PHONY: dev-setup dev-test dev-deploy dev-monitor
+
+dev-setup: ## Complete development environment setup
+	@echo "🔧 Setting up Development Environment..."
+	@make board-setup
+	@make mcp-setup
+	@echo "✅ Development environment setup complete"
+
+dev-test: ## Test all system components
+	@echo "🧪 Testing System Components..."
+	@make mcp-test
+	@make board-status
+	@make roadmap-status
+	@make timeline-status
+	@echo "✅ System component testing complete"
+
+dev-deploy: ## Deploy all system components
+	@echo "🚀 Deploying System Components..."
+	@make system-generate-all
+	@echo "✅ System deployment complete"
+
+dev-monitor: ## Monitor system performance and health
+	@echo "📊 Monitoring System Health..."
+	@make system-full-status
+	@echo ""
+	@echo "📈 Performance Metrics:"
+	@python3 scripts/mcp/project-board-sync.py --performance 2>/dev/null || echo "   Performance data not available"
+	@echo ""
+	@echo "🔍 Recent Activity:"
+	@git log --oneline -10 --graph

@@ -1,0 +1,175 @@
+{
+  "generated_at": "2025-08-22T20:45:23.228286",
+  "total_items": 5,
+  "categories": {
+    "Infrastructure & DevOps": [
+      "\ud83d\ude80 Production-Ready Deployment Pipeline",
+      "\ud83c\udf10 Multi-Cloud Infrastructure"
+    ],
+    "AI & MCP Integration": [
+      "\ud83d\udd0c MCP Integration & Dynamic Project Board",
+      "\ud83d\udcca Master Roadmap with Vector Intelligence"
+    ],
+    "Security & Monitoring": [
+      "\ud83d\udee1\ufe0f Advanced Security & Monitoring"
+    ]
+  },
+  "priorities": {
+    "critical": [
+      "\ud83d\ude80 Production-Ready Deployment Pipeline",
+      "\ud83d\udee1\ufe0f Advanced Security & Monitoring"
+    ],
+    "high": [
+      "\ud83d\udd0c MCP Integration & Dynamic Project Board",
+      "\ud83d\udcca Master Roadmap with Vector Intelligence",
+      "\ud83c\udf10 Multi-Cloud Infrastructure"
+    ]
+  },
+  "timelines": {
+    "immediate": [
+      "\ud83d\ude80 Production-Ready Deployment Pipeline"
+    ],
+    "short-term": [
+      "\ud83d\udd0c MCP Integration & Dynamic Project Board"
+    ],
+    "medium-term": [
+      "\ud83d\udcca Master Roadmap with Vector Intelligence"
+    ],
+    "ongoing": [
+      "\ud83d\udee1\ufe0f Advanced Security & Monitoring"
+    ],
+    "long-term": [
+      "\ud83c\udf10 Multi-Cloud Infrastructure"
+    ]
+  },
+  "dependencies": {
+    "MCP Integration & Dynamic Project Board": [
+      "\ud83d\udcca Master Roadmap with Vector Intelligence"
+    ],
+    "Production-Ready Deployment Pipeline": [
+      "\ud83c\udf10 Multi-Cloud Infrastructure"
+    ]
+  },
+  "insights": {
+    "critical_path": [
+      "\ud83d\ude80 Production-Ready Deployment Pipeline",
+      "\ud83d\udee1\ufe0f Advanced Security & Monitoring"
+    ],
+    "quick_wins": [],
+    "resource_allocation": {
+      "Infrastructure & DevOps": 2,
+      "AI & MCP Integration": 2,
+      "Security & Monitoring": 1
+    },
+    "risk_assessment": {
+      "high_risk_items": [
+        "\ud83d\udee1\ufe0f Advanced Security & Monitoring"
+      ],
+      "risk_level": "high"
+    },
+    "recommendations": [
+      "Focus on 2 critical items first"
+    ]
+  },
+  "items": [
+    {
+      "id": "roadmap_0cd71e13",
+      "title": "\ud83d\ude80 Production-Ready Deployment Pipeline",
+      "description": "Complete self-healing deployment pipeline with rollback, health checks, and Slack notifications",
+      "category": "Infrastructure & DevOps",
+      "priority": "critical",
+      "timeline": "immediate",
+      "estimated_effort": "2-3 days",
+      "dependencies": [],
+      "status": "completed",
+      "created_from": "chat_history",
+      "created_at": "2025-08-22T20:45:22.729432",
+      "updated_at": "2025-08-22T20:45:22.729432",
+      "metadata": {
+        "source": "chat_analysis",
+        "confidence": 0.95,
+        "extracted_at": "2025-08-22T20:45:22.729433"
+      }
+    },
+    {
+      "id": "roadmap_be4f648a",
+      "title": "\ud83d\udd0c MCP Integration & Dynamic Project Board",
+      "description": "Real-time project board with MCP tools, time tracking, and auto-updating capabilities",
+      "category": "AI & MCP Integration",
+      "priority": "high",
+      "timeline": "short-term",
+      "estimated_effort": "1-2 days",
+      "dependencies": [],
+      "status": "in_progress",
+      "created_from": "chat_history",
+      "created_at": "2025-08-22T20:45:22.828840",
+      "updated_at": "2025-08-22T20:45:22.828846",
+      "metadata": {
+        "source": "chat_analysis",
+        "confidence": 0.95,
+        "extracted_at": "2025-08-22T20:45:22.828847"
+      }
+    },
+    {
+      "id": "roadmap_1ab86980",
+      "title": "\ud83d\udcca Master Roadmap with Vector Intelligence",
+      "description": "AI-powered roadmap generation from chat history, GitHub data, and vector embeddings",
+      "category": "AI & MCP Integration",
+      "priority": "high",
+      "timeline": "medium-term",
+      "estimated_effort": "3-5 days",
+      "dependencies": [
+        "MCP Integration & Dynamic Project Board"
+      ],
+      "status": "planned",
+      "created_from": "chat_history",
+      "created_at": "2025-08-22T20:45:22.927340",
+      "updated_at": "2025-08-22T20:45:22.927345",
+      "metadata": {
+        "source": "chat_analysis",
+        "confidence": 0.95,
+        "extracted_at": "2025-08-22T20:45:22.927346"
+      }
+    },
+    {
+      "id": "roadmap_83ddbe68",
+      "title": "\ud83d\udee1\ufe0f Advanced Security & Monitoring",
+      "description": "SOC2 compliance, comprehensive logging, and AI-powered threat detection",
+      "category": "Security & Monitoring",
+      "priority": "critical",
+      "timeline": "ongoing",
+      "estimated_effort": "1-2 weeks",
+      "dependencies": [],
+      "status": "planned",
+      "created_from": "chat_history",
+      "created_at": "2025-08-22T20:45:23.028410",
+      "updated_at": "2025-08-22T20:45:23.028415",
+      "metadata": {
+        "source": "chat_analysis",
+        "confidence": 0.95,
+        "extracted_at": "2025-08-22T20:45:23.028416"
+      }
+    },
+    {
+      "id": "roadmap_c5622cd1",
+      "title": "\ud83c\udf10 Multi-Cloud Infrastructure",
+      "description": "AWS, Azure, and GCP integration with unified management and cost optimization",
+      "category": "Infrastructure & DevOps",
+      "priority": "high",
+      "timeline": "long-term",
+      "estimated_effort": "2-3 weeks",
+      "dependencies": [
+        "Production-Ready Deployment Pipeline"
+      ],
+      "status": "planned",
+      "created_from": "chat_history",
+      "created_at": "2025-08-22T20:45:23.033858",
+      "updated_at": "2025-08-22T20:45:23.033861",
+      "metadata": {
+        "source": "chat_analysis",
+        "confidence": 0.95,
+        "extracted_at": "2025-08-22T20:45:23.033862"
+      }
+    }
+  ]
+}
