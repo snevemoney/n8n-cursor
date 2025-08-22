@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source "$(dirname "$0")/../utils/lib.sh"
 require_cmd docker
-COMPOSE="docker compose -f docker-compose.yml"
+COMPOSE="docker compose -f infra/docker/docker-compose.yml"
 
 case "${1:-help}" in
   up)       run "$COMPOSE up -d" ;;
