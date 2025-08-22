@@ -1,0 +1,48 @@
+{
+  "name": "n8n-workflow-visualizer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Professional n8n workflow visualization with GitHub sync",
+  "scripts": {
+    "gen": "node tools/gen-all.js",
+    "watch": "node tools/watch.js",
+    "sync": "node tools/github-sync.js",
+    "backup": "node -e \"import('./tools/backup.js').then(m => m.createBackup())\"",
+    "setup": "npm run gen && npm run sync",
+    "spec:validate": "node tools/validate-spec.js",
+    "spec:build": "node tools/spec2n8n.js",
+    "spec:tojson": "node tools/spec2n8n.js",
+    "explain": "node tools/explain.js",
+    "import": "bash tools/import-n8n.sh",
+    "capture": "node tools/capture.js",
+    "capture:legacy": "node tools/capture.js",
+    "export:mermaid": "node scripts/export-mermaid.js",
+    "refresh": "npm run gen && npm run capture",
+    "build:gpt5": "node scripts/create-gpt5-support-agent.js",
+    "shot:gpt5": "node scripts/capture-workflow.js --name \"GPT-5 Support Agent\"",
+    "gpt5": "npm run build:gpt5 && npm run shot:gpt5 && npm run gen",
+    "ai-business:setup": "node scripts/setup-ai-business.js",
+    "ai-business:import": "node scripts/import-ai-workflows.js",
+    "ai-business:start": "n8n start --tunnel",
+    "mcp:setup": "./tools/setup-mcp-server.sh",
+    "mcp:test": "node tools/test-mcp-credentials.js",
+    "mcp:start": "./tools/start-mcp-server.sh"
+  },
+  "keywords": [
+    "n8n",
+    "workflow",
+    "visualization",
+    "mermaid"
+  ],
+  "author": "Evens Louis",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "node-fetch": "^3.3.2",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.9.0",
+    "puppeteer": "^23.11.1"
+  }
+}

@@ -19,7 +19,7 @@ wf-import:   ; @$(SAFE_FLAGS); scripts/workflows/manage.sh import
 wf-validate: ; @$(SAFE_FLAGS); scripts/workflows/manage.sh validate
 wf-dedupe:   ; @$(SAFE_FLAGS); scripts/workflows/manage.sh dedupe
 
-fmt:      ; @shfmt -w .
+fmt:      ; @find . -name "*.sh" -not -path "./PROTECTED_BACKUP/*" -not -path "./consolidation-backup/*" -not -path "./safety-rollback/*" -exec shfmt -w {} \; 2>/dev/null || true
 lint:     ; @shellcheck -x $$(git ls-files '*.sh') || true
 guard:    ; @bash scripts/safety/structure-guard.sh
 doctor:   ; @bash scripts/ops/doctor.sh

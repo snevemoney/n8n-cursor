@@ -25,11 +25,11 @@ VERIFICATION_REPORT="$SCRIPT_DIR/safety-verification-report.txt"
 mkdir -p "$ROLLBACK_DIR"
 
 log() {
-    local level="$1"
-    shift
-    local message="$*"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[$timestamp] [$level] $message" | tee -a "$SAFETY_LOG"
+  local level="$1"
+  shift
+  local message="$*"
+  local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+  echo -e "[$timestamp] [$level] $message" | tee -a "$SAFETY_LOG"
 }
 
 echo -e "${CYAN}🛡️  SAFETY VERIFICATION SYSTEM${NC}"
@@ -37,7 +37,7 @@ echo -e "${BLUE}================================${NC}"
 
 # Step 1: Create comprehensive backup database
 log "INFO" "📊 Creating comprehensive backup database..."
-cat > "$BACKUP_DB" << 'EOF'
+cat >"$BACKUP_DB" <<'EOF'
 {
   "backup_metadata": {
     "created": "$(date)",
@@ -73,34 +73,34 @@ log "INFO" "📦 Creating comprehensive safety backup..."
 
 # Backup all critical files
 critical_files=(
-    "n8n-enterprise-protection.sh"
-    "n8n-dynamic-live-system.sh"
-    "start-enterprise-protection.sh"
-    "docker-compose-smart.yml"
-    "nginx-smart.conf"
-    "package.json"
-    "*.md"
+  "n8n-enterprise-protection.sh"
+  "n8n-dynamic-live-system.sh"
+  "start-enterprise-protection.sh"
+  "docker-compose-smart.yml"
+  "nginx-smart.conf"
+  "package.json"
+  "*.md"
 )
 
 for pattern in "${critical_files[@]}"; do
-    for file in $pattern; do
-        if [[ -f "$file" ]]; then
-            cp "$file" "$ROLLBACK_DIR/"
-            log "INFO" "💾 Backed up: $file"
-        fi
-    done
+  for file in $pattern; do
+    if [[ -f "$file" ]]; then
+      cp "$file" "$ROLLBACK_DIR/"
+      log "INFO" "💾 Backed up: $file"
+    fi
+  done
 done
 
 # Backup consolidated directory
 if [[ -d "consolidated" ]]; then
-    cp -r consolidated "$ROLLBACK_DIR/"
-    log "INFO" "💾 Backed up consolidated directory"
+  cp -r consolidated "$ROLLBACK_DIR/"
+  log "INFO" "💾 Backed up consolidated directory"
 fi
 
 # Backup backup directories
 if [[ -d "consolidation-backup" ]]; then
-    cp -r consolidation-backup "$ROLLBACK_DIR/"
-    log "INFO" "💾 Backed up consolidation backup"
+  cp -r consolidation-backup "$ROLLBACK_DIR/"
+  log "INFO" "💾 Backed up consolidation backup"
 fi
 
 log "INFO" "✅ Safety backup created at: $ROLLBACK_DIR"
@@ -110,69 +110,69 @@ log "INFO" "🔍 Verifying no functionality was lost..."
 
 # Check if all critical functions are accessible
 functionality_check() {
-    local missing_functions=()
-    local verification_results=()
-    
-    # Check enterprise protection system
-    if [[ -f "n8n-enterprise-protection.sh" ]]; then
-        if ./n8n-enterprise-protection.sh --help >/dev/null 2>&1; then
-            verification_results+=("✅ Enterprise protection system: FUNCTIONAL")
+  local missing_functions=()
+  local verification_results=()
+
+  # Check enterprise protection system
+  if [[ -f "n8n-enterprise-protection.sh" ]]; then
+    if ./n8n-enterprise-protection.sh --help >/dev/null 2>&1; then
+      verification_results+=("✅ Enterprise protection system: FUNCTIONAL")
+    else
+      verification_results+=("❌ Enterprise protection system: BROKEN")
+      missing_functions+=("enterprise_protection")
+    fi
+  else
+    verification_results+=("❌ Enterprise protection system: MISSING")
+    missing_functions+=("enterprise_protection")
+  fi
+
+  # Check consolidated scripts
+  if [[ -d "consolidated" ]]; then
+    for script in consolidated/*.sh; do
+      if [[ -f "$script" ]]; then
+        local script_name=$(basename "$script")
+        if bash -n "$script" 2>/dev/null; then
+          verification_results+=("✅ $script_name: SYNTAX VALID")
         else
-            verification_results+=("❌ Enterprise protection system: BROKEN")
-            missing_functions+=("enterprise_protection")
+          verification_results+=("❌ $script_name: SYNTAX ERROR")
+          missing_functions+=("$script_name")
         fi
+      fi
+    done
+  else
+    verification_results+=("❌ Consolidated directory: MISSING")
+    missing_functions+=("consolidated_scripts")
+  fi
+
+  # Check Docker configuration
+  if [[ -f "docker-compose-smart.yml" ]]; then
+    if docker-compose -f docker-compose-smart.yml config >/dev/null 2>&1; then
+      verification_results+=("✅ Docker compose: VALID")
     else
-        verification_results+=("❌ Enterprise protection system: MISSING")
-        missing_functions+=("enterprise_protection")
+      verification_results+=("❌ Docker compose: INVALID")
+      missing_functions+=("docker_compose")
     fi
-    
-    # Check consolidated scripts
-    if [[ -d "consolidated" ]]; then
-        for script in consolidated/*.sh; do
-            if [[ -f "$script" ]]; then
-                local script_name=$(basename "$script")
-                if bash -n "$script" 2>/dev/null; then
-                    verification_results+=("✅ $script_name: SYNTAX VALID")
-                else
-                    verification_results+=("❌ $script_name: SYNTAX ERROR")
-                    missing_functions+=("$script_name")
-                fi
-            fi
-        done
+  else
+    verification_results+=("❌ Docker compose: MISSING")
+    missing_functions+=("docker_compose")
+  fi
+
+  # Check Nginx configuration
+  if [[ -f "nginx-smart.conf" ]]; then
+    if nginx -t -c "$(pwd)/nginx-smart.conf" >/dev/null 2>&1; then
+      verification_results+=("✅ Nginx config: VALID")
     else
-        verification_results+=("❌ Consolidated directory: MISSING")
-        missing_functions+=("consolidated_scripts")
+      verification_results+=("❌ Nginx config: INVALID")
+      missing_functions+=("nginx_config")
     fi
-    
-    # Check Docker configuration
-    if [[ -f "docker-compose-smart.yml" ]]; then
-        if docker-compose -f docker-compose-smart.yml config >/dev/null 2>&1; then
-            verification_results+=("✅ Docker compose: VALID")
-        else
-            verification_results+=("❌ Docker compose: INVALID")
-            missing_functions+=("docker_compose")
-        fi
-    else
-        verification_results+=("❌ Docker compose: MISSING")
-        missing_functions+=("docker_compose")
-    fi
-    
-    # Check Nginx configuration
-    if [[ -f "nginx-smart.conf" ]]; then
-        if nginx -t -c "$(pwd)/nginx-smart.conf" >/dev/null 2>&1; then
-            verification_results+=("✅ Nginx config: VALID")
-        else
-            verification_results+=("❌ Nginx config: INVALID")
-            missing_functions+=("nginx_config")
-        fi
-    else
-        verification_results+=("❌ Nginx config: MISSING")
-        missing_functions+=("nginx_config")
-    fi
-    
-    # Return results
-    echo "MISSING_FUNCTIONS:${missing_functions[*]}"
-    echo "VERIFICATION_RESULTS:${verification_results[*]}"
+  else
+    verification_results+=("❌ Nginx config: MISSING")
+    missing_functions+=("nginx_config")
+  fi
+
+  # Return results
+  echo "MISSING_FUNCTIONS:${missing_functions[*]}"
+  echo "VERIFICATION_RESULTS:${verification_results[*]}"
 }
 
 # Run functionality check
@@ -187,40 +187,40 @@ verification_results=$(echo "$verification_output" | grep "VERIFICATION_RESULTS:
 log "INFO" "🔌 Verifying service connectivity..."
 
 connectivity_check() {
-    local connectivity_results=()
-    
-    # Check if Docker is running
-    if docker info >/dev/null 2>&1; then
-        connectivity_results+=("✅ Docker daemon: RUNNING")
+  local connectivity_results=()
+
+  # Check if Docker is running
+  if docker info >/dev/null 2>&1; then
+    connectivity_results+=("✅ Docker daemon: RUNNING")
+  else
+    connectivity_results+=("❌ Docker daemon: NOT RUNNING")
+  fi
+
+  # Check if n8n containers are accessible
+  if docker ps | grep -q "n8n"; then
+    connectivity_results+=("✅ n8n containers: RUNNING")
+  else
+    connectivity_results+=("❌ n8n containers: NOT RUNNING")
+  fi
+
+  # Check if Nginx is accessible
+  if systemctl is-active --quiet nginx; then
+    connectivity_results+=("✅ Nginx service: RUNNING")
+  else
+    connectivity_results+=("❌ Nginx service: NOT RUNNING")
+  fi
+
+  # Check port accessibility
+  local ports=(15678 15680 15682)
+  for port in "${ports[@]}"; do
+    if netstat -tlnp 2>/dev/null | grep -q ":$port "; then
+      connectivity_results+=("✅ Port $port: LISTENING")
     else
-        connectivity_results+=("❌ Docker daemon: NOT RUNNING")
+      connectivity_results+=("❌ Port $port: NOT LISTENING")
     fi
-    
-    # Check if n8n containers are accessible
-    if docker ps | grep -q "n8n"; then
-        connectivity_results+=("✅ n8n containers: RUNNING")
-    else
-        connectivity_results+=("❌ n8n containers: NOT RUNNING")
-    fi
-    
-    # Check if Nginx is accessible
-    if systemctl is-active --quiet nginx; then
-        connectivity_results+=("✅ Nginx service: RUNNING")
-    else
-        connectivity_results+=("❌ Nginx service: NOT RUNNING")
-    fi
-    
-    # Check port accessibility
-    local ports=(15678 15680 15682)
-    for port in "${ports[@]}"; do
-        if netstat -tlnp 2>/dev/null | grep -q ":$port "; then
-            connectivity_results+=("✅ Port $port: LISTENING")
-        else
-            connectivity_results+=("❌ Port $port: NOT LISTENING")
-        fi
-    done
-    
-    echo "${connectivity_results[*]}"
+  done
+
+  echo "${connectivity_results[*]}"
 }
 
 connectivity_results=$(connectivity_check)
@@ -228,7 +228,7 @@ connectivity_results=$(connectivity_check)
 # Step 5: Generate comprehensive safety report
 log "INFO" "📋 Generating comprehensive safety report..."
 
-cat > "$VERIFICATION_REPORT" << EOF
+cat >"$VERIFICATION_REPORT" <<EOF
 🛡️  SAFETY VERIFICATION REPORT
 ===============================
 Generated: $(date)
@@ -274,14 +274,14 @@ log "INFO" "📊 Updating backup database..."
 
 # Update the JSON database with verification results
 jq --arg missing "$missing_functions" \
-   --arg results "$verification_results" \
-   --arg connectivity "$connectivity_results" \
-   --arg backup "$ROLLBACK_DIR" \
-   '.file_inventory.rollback_points += [$backup] |
+  --arg results "$verification_results" \
+  --arg connectivity "$connectivity_results" \
+  --arg backup "$ROLLBACK_DIR" \
+  '.file_inventory.rollback_points += [$backup] |
     .functionality_checklist.missing_functions = ($missing | split(" ")) |
     .functionality_checklist.verification_results = ($results | split(" ")) |
     .service_connections.verification_results = ($connectivity | split(" "))' \
-   "$BACKUP_DB" > "$BACKUP_DB.tmp" && mv "$BACKUP_DB.tmp" "$BACKUP_DB"
+  "$BACKUP_DB" >"$BACKUP_DB.tmp" && mv "$BACKUP_DB.tmp" "$BACKUP_DB"
 
 log "INFO" "✅ Backup database updated"
 
@@ -291,33 +291,33 @@ echo -e "${BLUE}====================================${NC}"
 
 echo -e "\n${BLUE}📊 FUNCTIONALITY STATUS:${NC}"
 echo "$verification_results" | tr ' ' '\n' | while read -r result; do
-    if [[ "$result" == ✅* ]]; then
-        echo -e "   $result"
-    else
-        echo -e "   $result"
-    fi
+  if [[ "$result" == ✅* ]]; then
+    echo -e "   $result"
+  else
+    echo -e "   $result"
+  fi
 done
 
 echo -e "\n${BLUE}🔌 CONNECTIVITY STATUS:${NC}"
 echo "$connectivity_results" | tr ' ' '\n' | while read -r result; do
-    if [[ "$result" == ✅* ]]; then
-        echo -e "   $result"
-    else
-        echo -e "   $result"
-    fi
+  if [[ "$result" == ✅* ]]; then
+    echo -e "   $result"
+  else
+    echo -e "   $result"
+  fi
 done
 
 if [[ -n "$missing_functions" ]]; then
-    echo -e "\n${RED}🚨 MISSING FUNCTIONALITY DETECTED:${NC}"
-    echo "$missing_functions" | tr ' ' '\n' | while read -r func; do
-        echo -e "   ❌ $func"
-    done
-    
-    echo -e "\n${YELLOW}🔄 ROLLBACK RECOMMENDED${NC}"
-    echo -e "   Use rollback directory: $ROLLBACK_DIR"
+  echo -e "\n${RED}🚨 MISSING FUNCTIONALITY DETECTED:${NC}"
+  echo "$missing_functions" | tr ' ' '\n' | while read -r func; do
+    echo -e "   ❌ $func"
+  done
+
+  echo -e "\n${YELLOW}🔄 ROLLBACK RECOMMENDED${NC}"
+  echo -e "   Use rollback directory: $ROLLBACK_DIR"
 else
-    echo -e "\n${GREEN}✅ ALL FUNCTIONALITY VERIFIED${NC}"
-    echo -e "   No functionality was lost during consolidation"
+  echo -e "\n${GREEN}✅ ALL FUNCTIONALITY VERIFIED${NC}"
+  echo -e "   No functionality was lost during consolidation"
 fi
 
 echo -e "\n${BLUE}📁 SAFETY BACKUP LOCATIONS:${NC}"

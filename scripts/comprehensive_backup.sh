@@ -16,11 +16,11 @@ mkdir -p "$BACKUP_DIR"/{docker_data,nginx_config,system_services,n8n_project,log
 echo "💾 Step 1: Backing up N8N Docker data..."
 # Backup Docker volume data
 if [ -d "/var/snap/docker/common/var-lib-docker/volumes/n8n-cursor_n8n_data/_data" ]; then
-    sudo cp -r /var/snap/docker/common/var-lib-docker/volumes/n8n-cursor_n8n_data/_data "$BACKUP_DIR/docker_data/"
-    echo "   ✅ Docker data backed up from snap location"
+  sudo cp -r /var/snap/docker/common/var-lib-docker/volumes/n8n-cursor_n8n_data/_data "$BACKUP_DIR/docker_data/"
+  echo "   ✅ Docker data backed up from snap location"
 elif [ -d "/var/lib/docker/volumes/n8n-cursor_n8n_data/_data" ]; then
-    sudo cp -r /var/lib/docker/volumes/n8n-cursor_n8n_data/_data "$BACKUP_DIR/docker_data/"
-    echo "   ✅ Docker data backed up from standard location"
+  sudo cp -r /var/lib/docker/volumes/n8n-cursor_n8n_data/_data "$BACKUP_DIR/docker_data/"
+  echo "   ✅ Docker data backed up from standard location"
 fi
 
 echo "🌐 Step 2: Backing up Nginx configuration..."
@@ -42,7 +42,7 @@ cp -r /home/evens/n8n-cursor/* "$BACKUP_DIR/n8n_project/" 2>/dev/null || echo " 
 
 echo "📋 Step 5: Creating system state snapshot..."
 # Create system state information
-cat > "$BACKUP_DIR/system_state.txt" << EOF
+cat >"$BACKUP_DIR/system_state.txt" <<EOF
 # N8N System State Backup - $TIMESTAMP
 # =====================================
 
@@ -94,4 +94,4 @@ echo "📊 Backup size: $(du -h "$BACKUP_ROOT/complete_backup_$TIMESTAMP.tar.gz"
 echo ""
 
 # Log the backup
-echo "$(date): Comprehensive backup completed - complete_backup_$TIMESTAMP.tar.gz" >> /home/evens/n8n-cursor/logs/backup.log
+echo "$(date): Comprehensive backup completed - complete_backup_$TIMESTAMP.tar.gz" >>/home/evens/n8n-cursor/logs/backup.log

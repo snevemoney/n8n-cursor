@@ -4,9 +4,9 @@ echo "🚀 Setting up MCP Integration with n8n..."
 echo "=========================================="
 
 # Check if n8n is running
-if ! curl -s "https://n8ncloud.tech/api/v1/version" > /dev/null; then
-    echo "❌ n8n is not accessible. Please start n8n first."
-    exit 1
+if ! curl -s "https://n8ncloud.tech/api/v1/version" >/dev/null; then
+  echo "❌ n8n is not accessible. Please start n8n first."
+  exit 1
 fi
 
 echo "✅ n8n is accessible"
@@ -24,7 +24,7 @@ cp /home/evens/.cursor/mcp.json "$MCP_DIR/cursor-mcp-backup.json"
 echo "📋 Copied MCP server configurations"
 
 # Create n8n MCP client configuration
-cat > "$MCP_DIR/n8n-mcp-client.json" << 'EOF'
+cat >"$MCP_DIR/n8n-mcp-client.json" <<'EOF'
 {
   "mcpClientTool": {
     "servers": {
@@ -50,7 +50,7 @@ EOF
 echo "📝 Created n8n MCP client configuration"
 
 # Create integration guide
-cat > "$MCP_DIR/INTEGRATION_GUIDE.md" << 'EOF'
+cat >"$MCP_DIR/INTEGRATION_GUIDE.md" <<'EOF'
 # MCP Integration Guide for n8n
 
 ## 🎯 What This Setup Provides

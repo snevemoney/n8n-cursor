@@ -3,7 +3,7 @@
 echo "🛡️ Creating N8N Protection Services..."
 
 # 1. Port Guardian Service
-sudo tee /etc/systemd/system/n8n-port-guardian.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-port-guardian.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Port Guardian - Prevents Docker conflicts
 After=network.target
@@ -20,7 +20,7 @@ WantedBy=multi-user.target
 EOF
 
 # 2. Port Guardian Script
-sudo tee /usr/local/bin/n8n-port-guardian > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-port-guardian >/dev/null <<'EOF'
 #!/bin/bash
 while true; do
     pkill -f "docker-proxy.*:5678" 2>/dev/null || true
@@ -34,7 +34,7 @@ EOF
 sudo chmod +x /usr/local/bin/n8n-port-guardian
 
 # 3. Health Monitor Service
-sudo tee /etc/systemd/system/n8n-health-monitor.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-health-monitor.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Health Monitor
 After=docker.service
@@ -52,7 +52,7 @@ WantedBy=multi-user.target
 EOF
 
 # 4. Health Monitor Script
-sudo tee /usr/local/bin/n8n-health-monitor > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-health-monitor >/dev/null <<'EOF'
 #!/bin/bash
 LOG_FILE="/home/evens/n8n-cursor/logs/health.log"
 
@@ -78,7 +78,7 @@ EOF
 sudo chmod +x /usr/local/bin/n8n-health-monitor
 
 # 5. Auto Backup Service
-sudo tee /etc/systemd/system/n8n-auto-backup.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-auto-backup.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Auto Backup
 
@@ -88,7 +88,7 @@ ExecStart=/usr/local/bin/n8n-auto-backup
 User=evens
 EOF
 
-sudo tee /etc/systemd/system/n8n-auto-backup.timer > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-auto-backup.timer >/dev/null <<'EOF'
 [Unit]
 Description=N8N Auto Backup Timer
 
@@ -101,7 +101,7 @@ WantedBy=timers.target
 EOF
 
 # 6. Auto Backup Script
-sudo tee /usr/local/bin/n8n-auto-backup > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-auto-backup >/dev/null <<'EOF'
 #!/bin/bash
 BACKUP_DIR="/home/evens/n8n-cursor/backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")

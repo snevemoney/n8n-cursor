@@ -209,7 +209,64 @@ your branches → feat/*, fix/*, chore/* → PR → dev or staging → main
 
 ---
 
-## 10) When You're Totally Stuck
+## 10) CI/CD Troubleshooting (When GitHub Actions Fails)
+
+### 🔴 Red CI = Linting/Formatting Issues (Most Common)
+
+**What happened:** The linter (code style checker) failed because code doesn't match style rules.
+
+**Quick Fix:**
+```bash
+# 1. Run linter locally to see errors
+make lint
+
+# 2. Auto-fix what you can
+make fmt
+
+# 3. Re-run all checks
+make ci
+
+# 4. Commit and push
+git add .
+git commit -m "fix: resolve linting issues"
+git push
+```
+
+**If you forget, paste this in Cursor:**
+*"My CI pipeline failed because of lint errors. Show me how to run the linter locally, auto-fix issues, and push again so GitHub Actions passes."*
+
+### 🟡 Yellow CI = Structure Guard Issues
+
+**What happened:** Files are in wrong locations or contain forbidden content.
+
+**Quick Fix:**
+```bash
+# 1. Check what's wrong
+make guard
+
+# 2. Move files to correct locations (follow error messages)
+# 3. Remove forbidden strings (like MASTER_UNLOCK)
+# 4. Re-run check
+make guard
+```
+
+### 🔵 Blue CI = Workflow Validation Issues
+
+**What happened:** n8n workflow JSON files are malformed.
+
+**Quick Fix:**
+```bash
+# 1. Validate workflows
+make wf-validate
+
+# 2. Fix JSON syntax errors
+# 3. Re-run validation
+make wf-validate
+```
+
+---
+
+## 11) When You're Totally Stuck
 
 Say to Cursor:
 *"Walk me through recovery step by step, one command at a time, starting with checking health. I'm on macOS and connected over SSH to my VPS."*

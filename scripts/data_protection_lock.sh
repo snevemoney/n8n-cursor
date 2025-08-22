@@ -12,12 +12,12 @@ PROTECTED_BACKUP="/home/evens/n8n-cursor/PROTECTED_BACKUP"
 sudo mkdir -p "$PROTECTED_BACKUP"
 sudo cp -r /home/n8n/.n8n/* "$PROTECTED_BACKUP/"
 sudo chown -R evens:evens "$PROTECTED_BACKUP"
-sudo chmod -R 444 "$PROTECTED_BACKUP"  # Read-only
+sudo chmod -R 444 "$PROTECTED_BACKUP" # Read-only
 sudo chattr +i "$PROTECTED_BACKUP" 2>/dev/null || echo "   Note: chattr not available (file immutability not set)"
 
 # 2. CREATE DATA PROTECTION SERVICE
 echo "🔒 Step 2: Creating data protection service..."
-sudo tee /etc/systemd/system/n8n-data-guardian.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-data-guardian.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Data Guardian - Prevents data deletion
 After=network.target
@@ -34,7 +34,7 @@ WantedBy=multi-user.target
 EOF
 
 # 3. CREATE DATA GUARDIAN SCRIPT
-sudo tee /usr/local/bin/n8n-data-guardian > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-data-guardian >/dev/null <<'EOF'
 #!/bin/bash
 # N8N Data Guardian - Monitors and protects data
 
@@ -92,7 +92,7 @@ sudo chmod +x /usr/local/bin/n8n-data-guardian
 echo "🚫 Step 3: Creating deletion prevention hooks..."
 
 # Override dangerous commands with protection
-sudo tee /usr/local/bin/protected-rm > /dev/null << 'EOF'
+sudo tee /usr/local/bin/protected-rm >/dev/null <<'EOF'
 #!/bin/bash
 # Protected rm command that prevents n8n data deletion
 
@@ -115,7 +115,7 @@ sudo chmod +x /usr/local/bin/protected-rm
 
 # 5. CREATE BACKUP VERIFICATION SERVICE
 echo "🔍 Step 4: Creating backup verification service..."
-sudo tee /etc/systemd/system/n8n-backup-verifier.timer > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-backup-verifier.timer >/dev/null <<'EOF'
 [Unit]
 Description=N8N Backup Verifier Timer
 
@@ -127,7 +127,7 @@ Persistent=true
 WantedBy=timers.target
 EOF
 
-sudo tee /etc/systemd/system/n8n-backup-verifier.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-backup-verifier.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Backup Verifier
 
@@ -137,7 +137,7 @@ ExecStart=/usr/local/bin/n8n-backup-verifier
 User=evens
 EOF
 
-sudo tee /usr/local/bin/n8n-backup-verifier > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-backup-verifier >/dev/null <<'EOF'
 #!/bin/bash
 # Verifies backup integrity every 10 minutes
 
@@ -169,7 +169,7 @@ sudo systemctl start n8n-backup-verifier.timer
 
 # 7. CREATE PROTECTION STATUS CHECKER
 echo "📊 Step 6: Creating protection status checker..."
-tee /home/evens/n8n-cursor/scripts/check_protection_status.sh > /dev/null << 'EOF'
+tee /home/evens/n8n-cursor/scripts/check_protection_status.sh >/dev/null <<'EOF'
 #!/bin/bash
 
 echo "🔒 N8N DATA PROTECTION STATUS"

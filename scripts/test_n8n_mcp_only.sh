@@ -9,7 +9,7 @@ cat ~/.cursor/mcp.json | jq '.mcpServers["n8n-mcp"]' 2>/dev/null || echo "JSON p
 echo ""
 echo "🌐 Testing n8n API Connection..."
 curl -s -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NTQ4MjE5fQ.6_iCUNXDTKkvh_xeZoCqj2vQRtJ-FWEf-TZ8g2nQpBw" \
-https://n8ncloud.tech/api/v1/workflows | jq '.data | length' 2>/dev/null && echo "✅ n8n API working" || echo "❌ n8n API failed"
+  https://n8ncloud.tech/api/v1/workflows | jq '.data | length' 2>/dev/null && echo "✅ n8n API working" || echo "❌ n8n API failed"
 
 echo ""
 echo "🔧 n8n MCP Package Status:"

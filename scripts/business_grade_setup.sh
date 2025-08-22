@@ -21,7 +21,7 @@ sudo pkill -f "n8n" 2>/dev/null || true
 echo "🔒 Step 2: Port Protection System"
 
 # Create port blocker service that runs continuously
-sudo tee /etc/systemd/system/n8n-port-guardian.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-port-guardian.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Port Guardian - Prevents Docker conflicts
 After=network.target
@@ -39,7 +39,7 @@ WantedBy=multi-user.target
 EOF
 
 # Create the port guardian script
-sudo tee /usr/local/bin/n8n-port-guardian > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-port-guardian >/dev/null <<'EOF'
 #!/bin/bash
 # N8N Port Guardian - Runs every 10 seconds
 
@@ -72,7 +72,7 @@ sudo chmod +x /usr/local/bin/n8n-port-guardian
 echo "💾 Step 3: N8N Persistence Layer"
 
 # Create backup service that runs every hour
-sudo tee /etc/systemd/system/n8n-auto-backup.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-auto-backup.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Auto Backup Service
 After=docker.service
@@ -84,7 +84,7 @@ User=evens
 Group=docker
 EOF
 
-sudo tee /etc/systemd/system/n8n-auto-backup.timer > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-auto-backup.timer >/dev/null <<'EOF'
 [Unit]
 Description=N8N Auto Backup Timer
 Requires=n8n-auto-backup.service
@@ -98,7 +98,7 @@ WantedBy=timers.target
 EOF
 
 # Create the backup script
-sudo tee /usr/local/bin/n8n-auto-backup > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-auto-backup >/dev/null <<'EOF'
 #!/bin/bash
 BACKUP_DIR="/home/evens/n8n-cursor/backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
@@ -126,7 +126,7 @@ sudo chmod +x /usr/local/bin/n8n-auto-backup
 echo "🏥 Step 4: Health Monitoring System"
 
 # Create health monitor service
-sudo tee /etc/systemd/system/n8n-health-monitor.service > /dev/null << 'EOF'
+sudo tee /etc/systemd/system/n8n-health-monitor.service >/dev/null <<'EOF'
 [Unit]
 Description=N8N Health Monitor
 After=docker.service
@@ -145,7 +145,7 @@ WantedBy=multi-user.target
 EOF
 
 # Create the health monitor script
-sudo tee /usr/local/bin/n8n-health-monitor > /dev/null << 'EOF'
+sudo tee /usr/local/bin/n8n-health-monitor >/dev/null <<'EOF'
 #!/bin/bash
 # N8N Health Monitor - Checks every 30 seconds
 
@@ -187,7 +187,7 @@ sudo chmod +x /usr/local/bin/n8n-health-monitor
 echo "🚀 Step 5: Business Recovery System"
 
 # Create instant recovery script
-tee /home/evens/n8n-cursor/scripts/instant_recovery.sh > /dev/null << 'EOF'
+tee /home/evens/n8n-cursor/scripts/instant_recovery.sh >/dev/null <<'EOF'
 #!/bin/bash
 # Instant N8N Recovery - Use when everything breaks
 
@@ -249,7 +249,7 @@ sudo systemctl start n8n-auto-backup.timer
 echo "🎛️ Step 7: Creating Management Interface"
 
 # Update n8n-manager with business commands
-tee -a /home/evens/n8n-cursor/n8n-manager.sh > /dev/null << 'EOF'
+tee -a /home/evens/n8n-cursor/n8n-manager.sh >/dev/null <<'EOF'
 
     "business-status")
         echo "🏢 Business-Grade N8N Status:"

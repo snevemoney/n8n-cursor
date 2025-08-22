@@ -1,0 +1,437 @@
+{
+  "name": "🚀 AI SaaS Master Scaffold - Enhanced",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-saas-hook",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "🌐 Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 400],
+      "webhookId": "ai-saas-master",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action-field",
+              "name": "action",
+              "value": "={{ $json.action || $('🌐 Webhook Trigger').first().query.action || 'default' }}",
+              "type": "string"
+            },
+            {
+              "id": "prompt-field", 
+              "name": "prompt",
+              "value": "={{ $json.prompt || 'Hello from Enhanced n8n Workflow!' }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp-field",
+              "name": "timestamp", 
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "request-id-field",
+              "name": "requestId",
+              "value": "={{ $runIndex }}_{{ Date.now() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "prep-payload",
+      "name": "📦 Prepare Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 400],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.action }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "openai",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "value2": "supabase", 
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "value2": "discord",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "value2": "all",
+              "operator": {
+                "type": "string", 
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "router",
+      "name": "🔀 API Router",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [600, 400],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.prompt) }}\n    }\n  ],\n  \"temperature\": 0.7,\n  \"max_tokens\": 1000\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxRetries": 3,
+            "waitBetweenRetries": 1000
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "openai-request",
+      "name": "🤖 OpenAI Chat",
+      "type": "n8n-nodes-base.httpRequest", 
+      "typeVersion": 4.2,
+      "position": [800, 200],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "url": "https://your-project.supabase.co/rest/v1/workflow_logs",
+        "method": "POST",
+        "authentication": "predefinedCredentialType", 
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={\n  \"request_id\": {{ JSON.stringify($json.requestId) }},\n  \"action\": {{ JSON.stringify($json.action) }},\n  \"prompt\": {{ JSON.stringify($json.prompt) }},\n  \"timestamp\": {{ JSON.stringify($json.timestamp) }},\n  \"status\": \"processing\"\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxRetries": 2,
+            "waitBetweenRetries": 500
+          }
+        }
+      },
+      "id": "supabase-request",
+      "name": "🗄️ Supabase Insert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 400],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2
+    },
+    {
+      "parameters": {
+        "url": "https://discord.com/api/webhooks/your-webhook-id/your-webhook-token",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={\n  \"embeds\": [\n    {\n      \"title\": \"🚀 AI SaaS Action Executed\",\n      \"description\": {{ JSON.stringify(\"Action: \" + $json.action + \"\\nPrompt: \" + $json.prompt) }},\n      \"color\": 5814783,\n      \"timestamp\": {{ JSON.stringify($json.timestamp) }},\n      \"footer\": {\n        \"text\": {{ JSON.stringify(\"Request ID: \" + $json.requestId) }}\n      }\n    }\n  ]\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxRetries": 2,
+            "waitBetweenRetries": 500
+          }
+        }
+      },
+      "id": "discord-request",
+      "name": "💬 Discord Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 600],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "input2"
+      },
+      "id": "merge-results",
+      "name": "🔄 Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [1000, 400],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced response assembly with error handling\ntry {\n  const items = $input.all();\n  const originalData = items[0]?.json || {};\n  \n  const response = {\n    success: true,\n    requestId: originalData.requestId,\n    action: originalData.action || 'unknown',\n    timestamp: originalData.timestamp || new Date().toISOString(),\n    results: {},\n    errors: []\n  };\n  \n  // Process OpenAI response\n  const openaiResults = $('🤖 OpenAI Chat').all();\n  if (openaiResults.length > 0) {\n    const openaiData = openaiResults[0];\n    if (openaiData.json?.choices?.[0]?.message?.content) {\n      response.results.openai = {\n        success: true,\n        model: openaiData.json.model,\n        message: openaiData.json.choices[0].message.content,\n        usage: openaiData.json.usage\n      };\n    } else if (openaiData.error) {\n      response.errors.push({\n        service: 'openai',\n        error: openaiData.error.message || 'Unknown OpenAI error'\n      });\n    }\n  }\n  \n  // Process Supabase response\n  const supabaseResults = $('🗄️ Supabase Insert').all();\n  if (supabaseResults.length > 0) {\n    const supabaseData = supabaseResults[0];\n    if (supabaseData.json && !supabaseData.error) {\n      response.results.supabase = {\n        success: true,\n        status: 'inserted',\n        recordId: supabaseData.json[0]?.id || 'unknown'\n      };\n    } else if (supabaseData.error) {\n      response.errors.push({\n        service: 'supabase',\n        error: supabaseData.error.message || 'Unknown Supabase error'\n      });\n    }\n  }\n  \n  // Process Discord response\n  const discordResults = $('💬 Discord Notify').all();\n  if (discordResults.length > 0) {\n    const discordData = discordResults[0];\n    if (discordData.json && !discordData.error) {\n      response.results.discord = {\n        success: true,\n        status: 'notified',\n        messageId: discordData.json.id || 'sent'\n      };\n    } else if (discordData.error) {\n      response.errors.push({\n        service: 'discord',\n        error: discordData.error.message || 'Unknown Discord error'\n      });\n    }\n  }\n  \n  // Set overall success based on errors\n  response.success = response.errors.length === 0;\n  response.totalServices = Object.keys(response.results).length;\n  response.executionTime = Date.now() - new Date(response.timestamp).getTime();\n  \n  return [{ json: response }];\n  \n} catch (error) {\n  return [{\n    json: {\n      success: false,\n      error: 'Response assembly failed: ' + error.message,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "assemble-response",
+      "name": "📋 Assemble Response", 
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 400],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $json }}",
+        "responseCode": "={{ $json.success ? 200 : 500 }}",
+        "responseHeaders": {
+          "entries": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Request-ID", 
+              "value": "={{ $json.requestId || 'unknown' }}"
+            }
+          ]
+        }
+      },
+      "id": "respond-webhook",
+      "name": "✅ Respond JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1400, 400],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error-response",
+              "name": "error",
+              "value": "Workflow execution failed",
+              "type": "string"
+            },
+            {
+              "id": "error-timestamp",
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "error-success",
+              "name": "success",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "id": "error-handler",
+      "name": "⚠️ Error Handler",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1200, 600]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $json }}",
+        "responseCode": 500,
+        "responseHeaders": {
+          "entries": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "error-response",
+      "name": "❌ Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1400, 600]
+    }
+  ],
+  "connections": {
+    "🌐 Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "📦 Prepare Payload",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📦 Prepare Payload": {
+      "main": [
+        [
+          {
+            "node": "🔀 API Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 API Router": {
+      "main": [
+        [
+          {
+            "node": "🤖 OpenAI Chat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🗄️ Supabase Insert", 
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "💬 Discord Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 OpenAI Chat": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗄️ Supabase Insert": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "💬 Discord Notify": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "🔄 Merge Results": {
+      "main": [
+        [
+          {
+            "node": "📋 Assemble Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Assemble Response": {
+      "main": [
+        [
+          {
+            "node": "✅ Respond JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚠️ Error Handler": {
+      "main": [
+        [
+          {
+            "node": "❌ Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false
+  },
+  "staticData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Enhanced AI SaaS Master Scaffold with proper error handling, updated node versions, and improved structure"
+  }
+}

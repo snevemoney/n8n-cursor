@@ -1,0 +1,30 @@
+{
+  "install": "bash .cursor/setup.sh",
+  "start": "npm run watch",
+  "terminals": [
+    {
+      "name": "✅ Verify Setup",
+      "command": "bash .cursor/verify-setup.sh"
+    },
+    {
+      "name": "🚀 Generate All Visuals",
+      "command": "npm run refresh"
+    },
+    {
+      "name": "📊 Generate Diagrams Only", 
+      "command": "npm run gen"
+    },
+    {
+      "name": "📸 Capture Screenshots",
+      "command": "npm run capture"
+    },
+    {
+      "name": "🔍 Validate Spec",
+      "command": "npm run spec:validate"
+    },
+    {
+      "name": "🏗️ Build from Spec", 
+      "command": "npm run spec:build"
+    }
+  ]
+}

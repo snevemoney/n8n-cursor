@@ -6,3 +6,6 @@ backups/
 .env.*
 !.env.example
 .DS_Store
+
+# Protected backup directory (read-only)
+PROTECTED_BACKUP/

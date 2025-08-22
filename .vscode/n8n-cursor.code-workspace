@@ -1,0 +1,53 @@
+{
+	"folders": [
+		{
+			"name": "n8n-cursor",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/node_modules": true,
+			"**/.git": true,
+			"**/.cursor": true,
+			"**/logs": true,
+			"**/*.log": true,
+			"**/PROTECTED_BACKUP": true
+		},
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/.git": true,
+			"**/logs": true,
+			"**/*.log": true
+		},
+		"files.watcherExclude": {
+			"**/node_modules/**": true,
+			"**/.git/**": true,
+			"**/logs/**": true
+		},
+		"remote.SSH.defaultExtensions": [
+			"ms-vscode.vscode-json",
+			"ms-vscode.vscode-typescript-next",
+			"ms-vscode.vscode-javascript-debug",
+			"ms-vscode.vscode-node-debug2"
+		],
+		"files.associations": {
+			"*.sh": "shellscript",
+			"*.json": "json",
+			"*.md": "markdown",
+			"*.js": "javascript",
+			"*.yml": "yaml",
+			"*.yaml": "yaml"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.vscode-json",
+			"ms-vscode.vscode-typescript-next",
+			"ms-vscode.vscode-javascript-debug",
+			"ms-vscode.vscode-node-debug2",
+			"ms-vscode.powershell",
+			"redhat.vscode-yaml"
+		]
+	}
+}

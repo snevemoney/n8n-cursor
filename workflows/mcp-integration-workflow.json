@@ -1,0 +1,162 @@
+{
+  "name": "MCP Integration Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/mcp-integration",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "position": [240, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "serverName": "tavily-remote",
+        "toolName": "tavily_search",
+        "toolParameters": {
+          "query": "={{ $json.query || 'default search' }}",
+          "max_results": "={{ $json.max_results || 5 }}",
+          "search_depth": "={{ $json.search_depth || 'basic' }}"
+        }
+      },
+      "id": "tavily-mcp",
+      "name": "Tavily MCP Client",
+      "type": "n8n-nodes-base.mcpClient",
+      "position": [460, 200],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "serverName": "n8n-automation", 
+        "toolName": "workflows.list",
+        "toolParameters": {
+          "limit": "={{ $json.workflow_limit || 10 }}"
+        }
+      },
+      "id": "n8n-mcp",
+      "name": "n8n MCP Client", 
+      "type": "n8n-nodes-base.mcpClient",
+      "position": [460, 400],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "search_results",
+              "name": "search_results",
+              "type": "object",
+              "value": "={{ $('Tavily MCP Client').item.json }}"
+            },
+            {
+              "id": "workflow_data",
+              "name": "workflow_data", 
+              "type": "object",
+              "value": "={{ $('n8n MCP Client').item.json }}"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "type": "string", 
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "id": "merge-results",
+      "name": "Merge MCP Results",
+      "type": "n8n-nodes-base.set",
+      "position": [680, 300],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "text": "=🔗 MCP Integration Results:\n\n📊 Tavily Search: {{ $json.search_results?.results?.length || 0 }} results\n⚙️ n8n Workflows: {{ $json.workflow_data?.data?.length || 0 }} workflows\n🕒 Processed at: {{ $json.timestamp }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "slack-notify", 
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "position": [900, 300],
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackApi": {
+          "id": "your-slack-credential-id",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Tavily MCP Client",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "n8n MCP Client", 
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily MCP Client": {
+      "main": [
+        [
+          {
+            "node": "Merge MCP Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "n8n MCP Client": {
+      "main": [
+        [
+          {
+            "node": "Merge MCP Results",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge MCP Results": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": null
+}

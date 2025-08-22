@@ -1,0 +1,550 @@
+{
+  "name": "AI Automation Agency - Client Onboarding",
+  "nodes": [
+    {
+      "id": "webhook-new-lead",
+      "name": "New Lead Captured",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-lead",
+        "options": {}
+      }
+    },
+    {
+      "id": "qualify-lead",
+      "name": "AI Lead Qualification",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a lead qualification AI for an automation agency. Analyze the lead information and provide a qualification score (1-100), identify pain points, suggest automation opportunities, and estimate project value. Return structured JSON."
+            },
+            {
+              "role": "user",
+              "content": "Company: {{ $json.company_name }}\nIndustry: {{ $json.industry }}\nSize: {{ $json.company_size }}\nCurrent challenges: {{ $json.challenges }}\nBudget range: {{ $json.budget_range }}\nTimeline: {{ $json.timeline }}\nContact: {{ $json.contact_name }} ({{ $json.contact_email }})"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "store-qualified-lead",
+      "name": "Store Qualified Lead",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO leads (company_name, industry, company_size, contact_name, contact_email, challenges, budget_range, timeline, qualification_score, pain_points, automation_opportunities, estimated_value, status, created_at) VALUES ('{{ $node[\"New Lead Captured\"].json[\"company_name\"] }}', '{{ $node[\"New Lead Captured\"].json[\"industry\"] }}', '{{ $node[\"New Lead Captured\"].json[\"company_size\"] }}', '{{ $node[\"New Lead Captured\"].json[\"contact_name\"] }}', '{{ $node[\"New Lead Captured\"].json[\"contact_email\"] }}', '{{ $node[\"New Lead Captured\"].json[\"challenges\"] }}', '{{ $node[\"New Lead Captured\"].json[\"budget_range\"] }}', '{{ $node[\"New Lead Captured\"].json[\"timeline\"] }}', {{ JSON.parse($node[\"AI Lead Qualification\"].json[\"choices\"][0][\"message\"][\"content\"]).qualification_score }}, '{{ JSON.stringify(JSON.parse($node[\"AI Lead Qualification\"].json[\"choices\"][0][\"message\"][\"content\"]).pain_points) }}', '{{ JSON.stringify(JSON.parse($node[\"AI Lead Qualification\"].json[\"choices\"][0][\"message\"][\"content\"]).automation_opportunities) }}', {{ JSON.parse($node[\"AI Lead Qualification\"].json[\"choices\"][0][\"message\"][\"content\"]).estimated_value }}, 'qualified', NOW()) RETURNING id"
+      }
+    },
+    {
+      "id": "route-by-score",
+      "name": "Route by Qualification Score",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "dataType": "number",
+        "value1": "={{ JSON.parse($node['AI Lead Qualification'].json['choices'][0]['message']['content']).qualification_score }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "largerEqual",
+              "value2": 80,
+              "output": 0
+            },
+            {
+              "operation": "largerEqual",
+              "value2": 60,
+              "output": 1
+            },
+            {
+              "operation": "smaller",
+              "value2": 60,
+              "output": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "high-value-lead-flow",
+      "name": "High Value Lead (80+)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        900,
+        50
+      ],
+      "parameters": {
+        "functionCode": "// High-value lead processing\nconst leadData = $node['Store Qualified Lead'].json;\nconst qualification = JSON.parse($node['AI Lead Qualification'].json.choices[0].message.content);\n\nreturn {\n  lead_id: leadData.id,\n  priority: 'high',\n  action: 'immediate_outreach',\n  assigned_to: 'senior_consultant',\n  follow_up_hours: 2,\n  qualification_score: qualification.qualification_score,\n  estimated_value: qualification.estimated_value\n};"
+      }
+    },
+    {
+      "id": "medium-value-lead-flow",
+      "name": "Medium Value Lead (60-79)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        900,
+        150
+      ],
+      "parameters": {
+        "functionCode": "// Medium-value lead processing\nconst leadData = $node['Store Qualified Lead'].json;\nconst qualification = JSON.parse($node['AI Lead Qualification'].json.choices[0].message.content);\n\nreturn {\n  lead_id: leadData.id,\n  priority: 'medium',\n  action: 'nurture_sequence',\n  assigned_to: 'automation_specialist',\n  follow_up_hours: 24,\n  qualification_score: qualification.qualification_score,\n  estimated_value: qualification.estimated_value\n};"
+      }
+    },
+    {
+      "id": "low-value-lead-flow",
+      "name": "Low Value Lead (<60)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        900,
+        250
+      ],
+      "parameters": {
+        "functionCode": "// Low-value lead processing\nconst leadData = $node['Store Qualified Lead'].json;\nconst qualification = JSON.parse($node['AI Lead Qualification'].json.choices[0].message.content);\n\nreturn {\n  lead_id: leadData.id,\n  priority: 'low',\n  action: 'educational_content',\n  assigned_to: 'marketing_automation',\n  follow_up_hours: 168, // 1 week\n  qualification_score: qualification.qualification_score,\n  estimated_value: qualification.estimated_value\n};"
+      }
+    },
+    {
+      "id": "send-immediate-outreach",
+      "name": "Send Immediate Outreach",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        50
+      ],
+      "parameters": {
+        "toEmail": "{{ $node['New Lead Captured'].json['contact_email'] }}",
+        "subject": "🚀 Immediate AI Automation Opportunities for {{ $node['New Lead Captured'].json['company_name'] }}",
+        "message": "Hi {{ $node['New Lead Captured'].json['contact_name'] }},\n\nThank you for your interest in AI automation solutions. Based on your requirements, I can see significant opportunities to transform your operations.\n\nKey opportunities I've identified:\n{{ JSON.parse($node['AI Lead Qualification'].json['choices'][0]['message']['content']).automation_opportunities.join('\\n• ') }}\n\nEstimated potential value: ${{ JSON.parse($node['AI Lead Qualification'].json['choices'][0]['message']['content']).estimated_value.toLocaleString() }}\n\nI'd love to schedule a 30-minute strategy call to discuss how we can help {{ $node['New Lead Captured'].json['company_name'] }} achieve these results.\n\nAre you available for a call this week?\n\nBest regards,\n[Your Name]\nSenior AI Automation Consultant"
+      }
+    },
+    {
+      "id": "add-to-nurture-sequence",
+      "name": "Add to Nurture Sequence",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1100,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mailchimp.com/3.0/lists/{{ $credentials.mailchimp.list_id }}/members",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.mailchimp.api_key }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email_address": "={{ $node['New Lead Captured'].json['contact_email'] }}",
+          "status": "subscribed",
+          "merge_fields": {
+            "FNAME": "={{ $node['New Lead Captured'].json['contact_name'] }}",
+            "COMPANY": "={{ $node['New Lead Captured'].json['company_name'] }}",
+            "INDUSTRY": "={{ $node['New Lead Captured'].json['industry'] }}",
+            "BUDGET": "={{ $node['New Lead Captured'].json['budget_range'] }}"
+          },
+          "tags": [
+            "medium-value-lead",
+            "automation-interested"
+          ]
+        }
+      }
+    },
+    {
+      "id": "send-educational-content",
+      "name": "Send Educational Content",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        250
+      ],
+      "parameters": {
+        "toEmail": "{{ $node['New Lead Captured'].json['contact_email'] }}",
+        "subject": "Free AI Automation Guide for {{ $node['New Lead Captured'].json['industry'] }} Companies",
+        "message": "Hi {{ $node['New Lead Captured'].json['contact_name'] }},\n\nThank you for your interest in AI automation. I've put together a comprehensive guide specifically for {{ $node['New Lead Captured'].json['industry'] }} companies like {{ $node['New Lead Captured'].json['company_name'] }}.\n\nThis guide covers:\n• Top 10 automation opportunities in {{ $node['New Lead Captured'].json['industry'] }}\n• ROI calculations and case studies\n• Implementation roadmaps\n• Common pitfalls to avoid\n\nDownload your free guide: [Link to guide]\n\nI'll also be sending you a series of practical tips over the next few weeks to help you identify automation opportunities in your business.\n\nFeel free to reach out if you have any questions!\n\nBest regards,\n[Your Name]\nAI Automation Specialist"
+      }
+    },
+    {
+      "id": "create-follow-up-task",
+      "name": "Create Follow-up Task",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        150
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO follow_up_tasks (lead_id, task_type, priority, assigned_to, due_date, description, status) VALUES ({{ $json.lead_id }}, 'follow_up', '{{ $json.priority }}', '{{ $json.assigned_to }}', NOW() + INTERVAL '{{ $json.follow_up_hours }} hours', 'Follow up on {{ $json.priority }} priority lead - Qualification score: {{ $json.qualification_score }}', 'pending')"
+      }
+    },
+    {
+      "id": "webhook-discovery-call-scheduled",
+      "name": "Discovery Call Scheduled",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        400
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "discovery-call-scheduled",
+        "options": {}
+      }
+    },
+    {
+      "id": "prepare-discovery-call",
+      "name": "Prepare Discovery Call Materials",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        300,
+        400
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are preparing materials for a discovery call with a potential automation client. Create a comprehensive call agenda, key questions to ask, and preliminary automation recommendations based on their industry and challenges."
+            },
+            {
+              "role": "user",
+              "content": "Client: {{ $json.company_name }} in {{ $json.industry }}\nChallenges: {{ $json.challenges }}\nCall duration: {{ $json.call_duration || '30 minutes' }}\nObjective: {{ $json.call_objective || 'Understand requirements and present solutions' }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "generate-proposal",
+      "name": "Generate Custom Proposal",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        400
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are creating a detailed automation proposal for a client. Include executive summary, proposed solutions, implementation timeline, ROI projections, pricing, and next steps. Make it professional and compelling."
+            },
+            {
+              "role": "user",
+              "content": "Discovery call notes: {{ $json.call_notes }}\nClient requirements: {{ $json.requirements }}\nBudget: {{ $json.budget }}\nTimeline: {{ $json.timeline }}\nPriority solutions: {{ $json.priority_solutions }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "create-proposal-document",
+      "name": "Create Proposal Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        700,
+        400
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.notion.api_token }}",
+          "Content-Type": "application/json",
+          "Notion-Version": "2022-06-28"
+        },
+        "body": {
+          "parent": {
+            "database_id": "{{ $credentials.notion.proposals_database_id }}"
+          },
+          "properties": {
+            "Client": {
+              "title": [
+                {
+                  "text": {
+                    "content": "{{ $node['Discovery Call Scheduled'].json['company_name'] }}"
+                  }
+                }
+              ]
+            },
+            "Value": {
+              "number": "{{ $node['Discovery Call Scheduled'].json['proposal_value'] }}"
+            },
+            "Status": {
+              "select": {
+                "name": "Draft"
+              }
+            }
+          },
+          "children": [
+            {
+              "object": "block",
+              "type": "paragraph",
+              "paragraph": {
+                "rich_text": [
+                  {
+                    "type": "text",
+                    "text": {
+                      "content": "{{ $node['Generate Custom Proposal'].json['choices'][0]['message']['content'] }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "send-proposal",
+      "name": "Send Proposal to Client",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "toEmail": "{{ $node['Discovery Call Scheduled'].json['contact_email'] }}",
+        "subject": "AI Automation Proposal for {{ $node['Discovery Call Scheduled'].json['company_name'] }}",
+        "message": "Hi {{ $node['Discovery Call Scheduled'].json['contact_name'] }},\n\nThank you for the excellent discovery call yesterday. I've prepared a comprehensive automation proposal tailored specifically to {{ $node['Discovery Call Scheduled'].json['company_name'] }}'s needs.\n\nProposal highlights:\n• {{ $node['Discovery Call Scheduled'].json['key_solutions'].join('\\n• ') }}\n• Projected ROI: {{ $node['Discovery Call Scheduled'].json['projected_roi'] }}%\n• Implementation timeline: {{ $node['Discovery Call Scheduled'].json['timeline'] }}\n\nView full proposal: {{ $node['Create Proposal Document'].json['url'] }}\n\nI'm excited to discuss this further and answer any questions you might have. Are you available for a follow-up call this week?\n\nBest regards,\n[Your Name]"
+      }
+    },
+    {
+      "id": "track-proposal-sent",
+      "name": "Track Proposal Metrics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        400
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO proposals (lead_id, proposal_value, proposal_url, sent_date, status, key_solutions, projected_roi, timeline) VALUES ((SELECT id FROM leads WHERE contact_email = '{{ $node[\"Discovery Call Scheduled\"].json[\"contact_email\"] }}'), {{ $node[\"Discovery Call Scheduled\"].json[\"proposal_value\"] }}, '{{ $node[\"Create Proposal Document\"].json[\"url\"] }}', NOW(), 'sent', '{{ JSON.stringify($node[\"Discovery Call Scheduled\"].json[\"key_solutions\"]) }}', {{ $node[\"Discovery Call Scheduled\"].json[\"projected_roi\"] }}, '{{ $node[\"Discovery Call Scheduled\"].json[\"timeline\"] }}')"
+      }
+    }
+  ],
+  "connections": {
+    "New Lead Captured": {
+      "main": [
+        [
+          {
+            "node": "AI Lead Qualification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Qualification": {
+      "main": [
+        [
+          {
+            "node": "Store Qualified Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Qualified Lead": {
+      "main": [
+        [
+          {
+            "node": "Route by Qualification Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Qualification Score": {
+      "main": [
+        [
+          {
+            "node": "High Value Lead (80+)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Medium Value Lead (60-79)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Low Value Lead (<60)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Value Lead (80+)": {
+      "main": [
+        [
+          {
+            "node": "Send Immediate Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Medium Value Lead (60-79)": {
+      "main": [
+        [
+          {
+            "node": "Add to Nurture Sequence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Low Value Lead (<60)": {
+      "main": [
+        [
+          {
+            "node": "Send Educational Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Immediate Outreach": {
+      "main": [
+        [
+          {
+            "node": "Create Follow-up Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Nurture Sequence": {
+      "main": [
+        [
+          {
+            "node": "Create Follow-up Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Educational Content": {
+      "main": [
+        [
+          {
+            "node": "Create Follow-up Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discovery Call Scheduled": {
+      "main": [
+        [
+          {
+            "node": "Prepare Discovery Call Materials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Discovery Call Materials": {
+      "main": [
+        [
+          {
+            "node": "Generate Custom Proposal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Custom Proposal": {
+      "main": [
+        [
+          {
+            "node": "Create Proposal Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Proposal Document": {
+      "main": [
+        [
+          {
+            "node": "Send Proposal to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Proposal to Client": {
+      "main": [
+        [
+          {
+            "node": "Track Proposal Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

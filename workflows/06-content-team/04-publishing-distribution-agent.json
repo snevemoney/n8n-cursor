@@ -1,0 +1,520 @@
+{
+  "name": "AI Content Team - Publishing & Distribution Agent",
+  "nodes": [
+    {
+      "id": "webhook-publishing-trigger",
+      "name": "Publishing Preparation Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 100],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "prepare-publishing",
+        "options": {}
+      }
+    },
+    {
+      "id": "load-content-draft",
+      "name": "Load Content Draft",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [300, 100],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT * FROM content_drafts WHERE id = {{ $json.content_draft_id }}"
+      }
+    },
+    {
+      "id": "generate-thumbnail-prompt",
+      "name": "Generate Thumbnail Design Prompt",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [500, 50],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a visual design AI that creates detailed prompts for generating high-converting thumbnails and featured images. Create prompts that will result in engaging, professional visuals that increase click-through rates."
+            },
+            {
+              "role": "user",
+              "content": "Content Title: {{ $json[0].title }}\nContent Type: {{ JSON.parse($json[0].metadata).content_type }}\nTarget Audience: {{ JSON.parse($json[0].metadata).target_audience }}\nTone: {{ JSON.parse($json[0].metadata).tone_voice }}\n\nGenerate 3 thumbnail design concepts:\n\n1. **Text-Heavy Design**\n   - Bold, attention-grabbing headline\n   - Key statistic or number\n   - Professional color scheme\n   - Clean typography\n\n2. **Visual Metaphor Design**\n   - Conceptual imagery\n   - Minimal text overlay\n   - Industry-relevant visuals\n   - High contrast elements\n\n3. **Person/Face Design**\n   - Professional headshot or team\n   - Emotional expression\n   - Trust-building elements\n   - Personal connection\n\nFor each design, provide:\n- Detailed visual description\n- Color palette suggestions\n- Text placement and sizing\n- Design elements and style\n- Optimal dimensions (1200x630 for social, 1920x1080 for YouTube)\n- A/B testing variations\n\nReturn structured design prompts ready for AI image generation."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "generate-thumbnails",
+      "name": "Generate Thumbnail Images",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [700, 50],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.replicate.com/v1/predictions",
+        "headers": {
+          "Authorization": "Token {{ $credentials.replicate.api_token }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "version": "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+          "input": {
+            "prompt": "{{ JSON.parse($node['Generate Thumbnail Design Prompt'].json.choices[0].message.content).design_concepts[0].prompt }}, professional thumbnail design, high quality, 16:9 aspect ratio, vibrant colors, clean composition",
+            "width": 1200,
+            "height": 630,
+            "num_inference_steps": 50,
+            "guidance_scale": 7.5
+          }
+        }
+      }
+    },
+    {
+      "id": "prepare-social-posts",
+      "name": "Generate Social Media Posts",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [500, 150],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a social media marketing AI that creates engaging posts for different platforms. Create platform-specific content that drives engagement and traffic while maintaining brand voice consistency."
+            },
+            {
+              "role": "user",
+              "content": "Content Title: {{ $node['Load Content Draft'].json[0]['title'] }}\nContent Summary: {{ $node['Load Content Draft'].json[0]['content_markdown'].substring(0, 500) }}...\nTarget Audience: {{ JSON.parse($node['Load Content Draft'].json[0]['metadata']).target_audience }}\nSEO Keywords: {{ JSON.stringify(JSON.parse($node['Load Content Draft'].json[0]['seo_elements']).primary_keywords) }}\n\nCreate social media posts for each platform:\n\n1. **LinkedIn Post** (Professional Network)\n   - 150-300 words\n   - Professional tone\n   - Industry insights\n   - Call for discussion\n   - Relevant hashtags (5-8)\n   - Tag suggestions\n\n2. **Twitter/X Thread** (3-5 tweets)\n   - Key insights breakdown\n   - Engaging hooks\n   - Visual content suggestions\n   - Relevant hashtags (2-3 per tweet)\n   - Retweet-worthy format\n\n3. **Facebook Post**\n   - Storytelling approach\n   - Community engagement\n   - Visual content description\n   - Share-worthy content\n   - Relevant hashtags (3-5)\n\n4. **Instagram Post**\n   - Visual-first description\n   - Story-driven caption\n   - Behind-the-scenes angle\n   - Hashtag strategy (15-20)\n   - Story highlights ideas\n\n5. **YouTube Community Post**\n   - Video tease/preview\n   - Engagement question\n   - Poll suggestions\n   - Community building\n\nFor each post, include:\n- Optimal posting times\n- Engagement strategies\n- Cross-promotion opportunities\n- A/B testing variations\n\nReturn structured social media content ready for scheduling."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "create-email-newsletter",
+      "name": "Create Email Newsletter",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [500, 250],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an email marketing AI that creates compelling newsletters that drive opens, clicks, and engagement. Focus on value delivery and clear calls-to-action."
+            },
+            {
+              "role": "user",
+              "content": "Content: {{ $node['Load Content Draft'].json[0]['content_markdown'] }}\nTitle: {{ $node['Load Content Draft'].json[0]['title'] }}\nMetadata: {{ $node['Load Content Draft'].json[0]['metadata'] }}\n\nCreate email newsletter content:\n\n1. **Subject Line Variations** (5 options)\n   - Curiosity-driven\n   - Benefit-focused\n   - Urgency-based\n   - Personal/direct\n   - Question-based\n\n2. **Preheader Text**\n   - Complements subject line\n   - 35-90 characters\n   - Teases content value\n\n3. **Email Body Structure**\n   - Personal greeting\n   - Value-first introduction\n   - Content summary/preview\n   - Key takeaways (3-5 bullets)\n   - Social proof elements\n   - Clear call-to-action\n   - Secondary CTA options\n\n4. **Email Formats**\n   - HTML version (responsive)\n   - Plain text version\n   - Mobile-optimized\n\n5. **Segmentation Strategies**\n   - Audience targeting\n   - Personalization options\n   - A/B testing elements\n\n6. **Performance Optimization**\n   - Send time recommendations\n   - Follow-up sequence\n   - Engagement tracking\n\nReturn complete email campaign ready for deployment."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prepare-blog-publishing",
+      "name": "Prepare Blog Publishing",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 150],
+      "parameters": {
+        "functionCode": "const contentData = $node['Load Content Draft'].json[0];\nconst socialPosts = JSON.parse($node['Generate Social Media Posts'].json.choices[0].message.content);\nconst emailNewsletter = JSON.parse($node['Create Email Newsletter'].json.choices[0].message.content);\nconst metadata = JSON.parse(contentData.metadata);\nconst seoElements = JSON.parse(contentData.seo_elements);\n\n// Prepare comprehensive publishing package\nconst publishingPackage = {\n  content_info: {\n    content_id: contentData.content_id,\n    title: contentData.title,\n    slug: seoElements.slug,\n    meta_title: seoElements.meta_title,\n    meta_description: seoElements.meta_description,\n    word_count: contentData.word_count,\n    status: 'ready_for_publishing'\n  },\n  \n  blog_content: {\n    html_content: contentData.content_html,\n    markdown_content: contentData.content_markdown,\n    featured_image_url: '', // Will be populated by thumbnail generation\n    categories: metadata.content_pillar ? [metadata.content_pillar] : ['General'],\n    tags: seoElements.primary_keywords.concat(seoElements.secondary_keywords),\n    author: 'AI Content Team',\n    publication_date: new Date().toISOString(),\n    reading_time: Math.ceil(contentData.word_count / 200) + ' min read'\n  },\n  \n  seo_optimization: {\n    primary_keyword: seoElements.primary_keywords[0],\n    secondary_keywords: seoElements.secondary_keywords,\n    internal_links: [], // To be populated\n    external_links: [], // To be populated\n    schema_markup: {\n      '@context': 'https://schema.org',\n      '@type': 'Article',\n      'headline': contentData.title,\n      'description': seoElements.meta_description,\n      'wordCount': contentData.word_count,\n      'datePublished': new Date().toISOString(),\n      'author': {\n        '@type': 'Organization',\n        'name': 'AI Content Team'\n      }\n    }\n  },\n  \n  social_media: {\n    linkedin: socialPosts.linkedin || {},\n    twitter: socialPosts.twitter || {},\n    facebook: socialPosts.facebook || {},\n    instagram: socialPosts.instagram || {},\n    youtube: socialPosts.youtube || {}\n  },\n  \n  email_campaign: {\n    subject_lines: emailNewsletter.subject_lines || [],\n    preheader: emailNewsletter.preheader || '',\n    html_content: emailNewsletter.html_version || '',\n    plain_text: emailNewsletter.plain_text || '',\n    segments: emailNewsletter.segmentation || []\n  },\n  \n  distribution_schedule: {\n    blog_publish: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(), // 1 hour from now\n    social_linkedin: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours\n    social_twitter: new Date(Date.now() + 2.5 * 60 * 60 * 1000).toISOString(), // 2.5 hours\n    social_facebook: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(), // 3 hours\n    social_instagram: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(), // 4 hours\n    email_send: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours\n  },\n  \n  analytics_setup: {\n    utm_parameters: {\n      utm_source: 'blog',\n      utm_medium: 'content',\n      utm_campaign: seoElements.slug,\n      utm_content: 'organic'\n    },\n    conversion_tracking: {\n      primary_goal: 'engagement',\n      secondary_goal: 'newsletter_signup',\n      success_metrics: ['time_on_page', 'scroll_depth', 'social_shares', 'email_clicks']\n    }\n  }\n};\n\nreturn publishingPackage;"
+      }
+    },
+    {
+      "id": "publish-to-wordpress",
+      "name": "Publish to WordPress",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 100],
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $credentials.wordpress.site_url }}/wp-json/wp/v2/posts",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.wordpress.api_token }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "={{ $node['Prepare Blog Publishing'].json['content_info']['title'] }}",
+          "content": "={{ $node['Prepare Blog Publishing'].json['blog_content']['html_content'] }}",
+          "excerpt": "={{ $node['Prepare Blog Publishing'].json['content_info']['meta_description'] }}",
+          "slug": "={{ $node['Prepare Blog Publishing'].json['content_info']['slug'] }}",
+          "status": "publish",
+          "categories": [1],
+          "tags": "={{ $node['Prepare Blog Publishing'].json['blog_content']['tags'] }}",
+          "meta": {
+            "description": "={{ $node['Prepare Blog Publishing'].json['content_info']['meta_description'] }}",
+            "keywords": "={{ $node['Prepare Blog Publishing'].json['seo_optimization']['primary_keyword'] }}"
+          },
+          "featured_media": "={{ $node['Generate Thumbnails'].json['output'] ? $node['Generate Thumbnails'].json['output'][0] : null }}"
+        }
+      }
+    },
+    {
+      "id": "schedule-social-posts",
+      "name": "Schedule Social Media Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 200],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.buffer.com/1/updates/create.json",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.buffer.access_token }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "text": "={{ $node['Prepare Blog Publishing'].json['social_media']['linkedin']['content'] }}",
+          "profile_ids": ["{{ $credentials.buffer.linkedin_profile_id }}"],
+          "scheduled_at": "={{ $node['Prepare Blog Publishing'].json['distribution_schedule']['social_linkedin'] }}",
+          "shorten": true,
+          "now": false
+        }
+      }
+    },
+    {
+      "id": "send-email-campaign",
+      "name": "Send Email Campaign",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mailchimp.com/3.0/campaigns",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.mailchimp.api_key }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "type": "regular",
+          "recipients": {
+            "list_id": "{{ $credentials.mailchimp.list_id }}"
+          },
+          "settings": {
+            "subject_line": "={{ $node['Prepare Blog Publishing'].json['email_campaign']['subject_lines'][0] }}",
+            "preview_text": "={{ $node['Prepare Blog Publishing'].json['email_campaign']['preheader'] }}",
+            "title": "{{ $node['Prepare Blog Publishing'].json['content_info']['title'] }}",
+            "from_name": "AI Content Team",
+            "reply_to": "{{ $credentials.mailchimp.reply_email }}"
+          },
+          "content": {
+            "html": "={{ $node['Prepare Blog Publishing'].json['email_campaign']['html_content'] }}",
+            "plain_text": "={{ $node['Prepare Blog Publishing'].json['email_campaign']['plain_text'] }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "track-publication-metrics",
+      "name": "Track Publication Metrics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1100, 200],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO content_publications (content_id, blog_url, social_post_ids, email_campaign_id, publication_date, distribution_channels, analytics_setup, status) VALUES ('{{ $node[\"Prepare Blog Publishing\"].json[\"content_info\"][\"content_id\"] }}', '{{ $node[\"Publish to WordPress\"].json[\"link\"] }}', '{{ JSON.stringify([$node[\"Schedule Social Media Posts\"].json[\"id\"]]) }}', '{{ $node[\"Send Email Campaign\"].json[\"id\"] }}', NOW(), '{{ JSON.stringify([\"blog\", \"social\", \"email\"]) }}', '{{ JSON.stringify($node[\"Prepare Blog Publishing\"].json[\"analytics_setup\"]) }}', 'published')"
+      }
+    },
+    {
+      "id": "webhook-content-performance",
+      "name": "Content Performance Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 400],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "track-performance",
+        "options": {}
+      }
+    },
+    {
+      "id": "analyze-content-performance",
+      "name": "Analyze Content Performance",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 400],
+      "parameters": {
+        "functionCode": "const performanceData = $input.first().json;\n\n// Aggregate performance metrics from multiple sources\nconst metrics = {\n  content_id: performanceData.content_id,\n  \n  blog_metrics: {\n    page_views: performanceData.google_analytics?.page_views || 0,\n    unique_visitors: performanceData.google_analytics?.unique_visitors || 0,\n    bounce_rate: performanceData.google_analytics?.bounce_rate || 0,\n    avg_time_on_page: performanceData.google_analytics?.avg_time_on_page || 0,\n    scroll_depth: performanceData.google_analytics?.scroll_depth || 0\n  },\n  \n  social_metrics: {\n    linkedin_engagement: {\n      likes: performanceData.linkedin?.likes || 0,\n      comments: performanceData.linkedin?.comments || 0,\n      shares: performanceData.linkedin?.shares || 0,\n      clicks: performanceData.linkedin?.clicks || 0\n    },\n    twitter_engagement: {\n      likes: performanceData.twitter?.likes || 0,\n      retweets: performanceData.twitter?.retweets || 0,\n      replies: performanceData.twitter?.replies || 0,\n      clicks: performanceData.twitter?.clicks || 0\n    },\n    total_social_engagement: 0 // Calculate total\n  },\n  \n  email_metrics: {\n    open_rate: performanceData.mailchimp?.open_rate || 0,\n    click_rate: performanceData.mailchimp?.click_rate || 0,\n    unsubscribe_rate: performanceData.mailchimp?.unsubscribe_rate || 0,\n    forwards: performanceData.mailchimp?.forwards || 0\n  },\n  \n  seo_metrics: {\n    search_impressions: performanceData.search_console?.impressions || 0,\n    search_clicks: performanceData.search_console?.clicks || 0,\n    avg_position: performanceData.search_console?.avg_position || 0,\n    ctr: performanceData.search_console?.ctr || 0\n  },\n  \n  conversion_metrics: {\n    leads_generated: performanceData.conversions?.leads || 0,\n    email_signups: performanceData.conversions?.email_signups || 0,\n    contact_form_submissions: performanceData.conversions?.contact_forms || 0,\n    demo_requests: performanceData.conversions?.demo_requests || 0\n  }\n};\n\n// Calculate total social engagement\nmetrics.social_metrics.total_social_engagement = \n  Object.values(metrics.social_metrics.linkedin_engagement).reduce((a, b) => a + b, 0) +\n  Object.values(metrics.social_metrics.twitter_engagement).reduce((a, b) => a + b, 0);\n\n// Calculate performance score (1-100)\nconst performanceScore = Math.min(100, Math.max(0, \n  (metrics.blog_metrics.page_views * 0.3) +\n  (metrics.social_metrics.total_social_engagement * 0.4) +\n  (metrics.email_metrics.open_rate * 100 * 0.2) +\n  (metrics.conversion_metrics.leads_generated * 10 * 0.1)\n));\n\nmetrics.overall_performance = {\n  score: Math.round(performanceScore),\n  grade: performanceScore >= 80 ? 'A' : performanceScore >= 60 ? 'B' : performanceScore >= 40 ? 'C' : 'D',\n  status: performanceScore >= 70 ? 'high_performing' : performanceScore >= 40 ? 'moderate' : 'needs_improvement'\n};\n\nreturn {\n  ...metrics,\n  analysis_date: new Date().toISOString(),\n  recommendations: {\n    optimization_areas: [],\n    content_improvements: [],\n    distribution_adjustments: []\n  }\n};"
+      }
+    },
+    {
+      "id": "generate-performance-insights",
+      "name": "Generate Performance Insights",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [500, 400],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a content performance analyst AI that provides actionable insights and recommendations based on content metrics. Focus on data-driven optimization strategies."
+            },
+            {
+              "role": "user",
+              "content": "Content Performance Data:\n{{ JSON.stringify($json, null, 2) }}\n\nAnalyze performance and provide:\n\n1. **Performance Summary**\n   - Overall assessment\n   - Key strengths\n   - Primary weaknesses\n   - Benchmark comparison\n\n2. **Channel Analysis**\n   - Blog performance insights\n   - Social media effectiveness\n   - Email campaign results\n   - SEO performance review\n\n3. **Optimization Recommendations**\n   - Content improvements\n   - Distribution strategy adjustments\n   - Timing optimizations\n   - Format/style modifications\n\n4. **Future Strategy**\n   - Topic selection insights\n   - Audience targeting refinements\n   - Content format recommendations\n   - Distribution channel priorities\n\n5. **Action Items**\n   - Immediate optimizations\n   - A/B testing opportunities\n   - Content repurposing ideas\n   - Cross-promotion strategies\n\nReturn structured analysis with specific, actionable recommendations."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "store-performance-analysis",
+      "name": "Store Performance Analysis",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [700, 400],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO content_performance (content_id, metrics_data, performance_score, analysis_insights, recommendations, analysis_date) VALUES ('{{ $node[\"Analyze Content Performance\"].json[\"content_id\"] }}', '{{ JSON.stringify($node[\"Analyze Content Performance\"].json) }}', {{ $node[\"Analyze Content Performance\"].json[\"overall_performance\"][\"score\"] }}, '{{ $node[\"Generate Performance Insights\"].json[\"choices\"][0][\"message\"][\"content\"] }}', '{{ JSON.stringify($node[\"Analyze Content Performance\"].json[\"recommendations\"]) }}', NOW())"
+      }
+    },
+    {
+      "id": "webhook-bulk-distribution",
+      "name": "Bulk Content Distribution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 600],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bulk-distribute",
+        "options": {}
+      }
+    },
+    {
+      "id": "process-bulk-distribution",
+      "name": "Process Bulk Distribution",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 600],
+      "parameters": {
+        "functionCode": "const request = $input.first().json;\n\n// Process multiple content pieces for bulk distribution\nconst contentList = request.content_list || [];\nconst distributionConfig = {\n  batch_id: `dist_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  total_content: contentList.length,\n  distribution_channels: request.channels || ['blog', 'social', 'email'],\n  schedule_spread: request.schedule_spread || 'daily', // daily, weekly, optimal\n  auto_optimize: request.auto_optimize || true,\n  priority: request.priority || 'normal'\n};\n\n// Create distribution schedule\nconst now = new Date();\nconst distributionQueue = contentList.map((content, index) => {\n  let scheduleOffset;\n  \n  switch (distributionConfig.schedule_spread) {\n    case 'daily':\n      scheduleOffset = index * 24 * 60 * 60 * 1000; // 1 day apart\n      break;\n    case 'weekly':\n      scheduleOffset = index * 7 * 24 * 60 * 60 * 1000; // 1 week apart\n      break;\n    case 'optimal':\n    default:\n      // Spread based on optimal posting times\n      scheduleOffset = index * 8 * 60 * 60 * 1000; // 8 hours apart\n      break;\n  }\n  \n  return {\n    content_id: content.content_id || content.id,\n    title: content.title,\n    priority: content.priority || distributionConfig.priority,\n    scheduled_time: new Date(now.getTime() + scheduleOffset).toISOString(),\n    channels: content.channels || distributionConfig.distribution_channels,\n    auto_optimize: distributionConfig.auto_optimize\n  };\n});\n\nreturn {\n  ...distributionConfig,\n  distribution_queue: distributionQueue,\n  estimated_completion: new Date(now.getTime() + (contentList.length * 8 * 60 * 60 * 1000)).toISOString()\n};"
+      }
+    },
+    {
+      "id": "initiate-bulk-publishing",
+      "name": "Initiate Bulk Publishing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 600],
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $node['Bulk Content Distribution'].json['$webhook_url'] }}/prepare-publishing",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "bulk_mode": true,
+          "batch_id": "={{ $json.batch_id }}",
+          "distribution_queue": "={{ $json.distribution_queue }}",
+          "auto_schedule": true,
+          "auto_optimize": "={{ $json.auto_optimize }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Publishing Preparation Trigger": {
+      "main": [
+        [
+          {
+            "node": "Load Content Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Content Draft": {
+      "main": [
+        [
+          {
+            "node": "Generate Thumbnail Design Prompt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Social Media Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Email Newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Thumbnail Design Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Thumbnail Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Social Media Posts": {
+      "main": [
+        [
+          {
+            "node": "Prepare Blog Publishing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Newsletter": {
+      "main": [
+        [
+          {
+            "node": "Prepare Blog Publishing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Thumbnail Images": {
+      "main": [
+        [
+          {
+            "node": "Prepare Blog Publishing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Blog Publishing": {
+      "main": [
+        [
+          {
+            "node": "Publish to WordPress",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Schedule Social Media Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email Campaign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to WordPress": {
+      "main": [
+        [
+          {
+            "node": "Track Publication Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Social Media Posts": {
+      "main": [
+        [
+          {
+            "node": "Track Publication Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Campaign": {
+      "main": [
+        [
+          {
+            "node": "Track Publication Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Performance Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze Content Performance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Content Performance": {
+      "main": [
+        [
+          {
+            "node": "Generate Performance Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Performance Insights": {
+      "main": [
+        [
+          {
+            "node": "Store Performance Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bulk Content Distribution": {
+      "main": [
+        [
+          {
+            "node": "Process Bulk Distribution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Bulk Distribution": {
+      "main": [
+        [
+          {
+            "node": "Initiate Bulk Publishing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["content-team", "publishing-agent", "distribution", "social-media", "analytics"]
+}

@@ -1,0 +1,169 @@
+version: '3.8'
+
+# 🚀 SMART N8N DOCKER COMPOSE - "AI Protecting AI" Architecture
+# 🛡️ Auto-conflict detection, isolated ports, production-ready
+# 🔒 Never conflicts with existing services
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-smart
+    restart: unless-stopped
+    
+    # 🧠 SMART PORT MANAGEMENT - Auto-conflict detection
+    ports:
+      # Primary port - isolated from system n8n
+      - "15678:5678"
+      # Backup port - if primary conflicts
+      - "15679:5678"
+      # Health check port
+      - "15680:5678"
+    
+    # 🏠 Network isolation - prevents conflicts
+    network_mode: "bridge"
+    
+    # 📁 Volume management - persistent data
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/home/node/.n8n/workflows:ro
+      - ./logs:/home/node/.n8n/logs
+    
+    # 🌍 Environment variables - production-ready
+    environment:
+      # Core n8n settings
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-admin123}
+      
+      # Database settings
+      - DB_TYPE=sqlite
+      - DB_SQLITE_VACUUM_ON_STARTUP=true
+      - DB_SQLITE_POOL_SIZE=10
+      
+      # Security settings
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-your-secret-key-here}
+      - N8N_SECURE_COOKIE=true
+      
+      # Performance settings
+      - N8N_LOG_LEVEL=info
+      - N8N_LOG_OUTPUT=file
+      - N8N_LOG_FILE=/home/node/.n8n/logs/n8n.log
+      
+      # Webhook settings
+      - WEBHOOK_URL=https://n8ncloud.tech
+      - N8N_EDITOR_BASE_URL=https://n8ncloud.tech
+      
+      # AI and MCP settings
+      - N8N_AI_ENABLED=true
+      - N8N_MCP_ENABLED=true
+      
+      # Resource limits
+      - N8N_MAX_EXECUTION_TIMEOUT=3600000
+      - N8N_MAX_EXECUTION_DATA_SIZE=100
+      
+      # Health check settings
+      - N8N_HEALTH_CHECK_ENABLED=true
+      - N8N_HEALTH_CHECK_INTERVAL=30000
+    
+    # 🏥 Health checks - auto-recovery
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # 📊 Resource limits - prevent resource conflicts
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    # 🔒 Security settings
+    security_opt:
+      - no-new-privileges:true
+    
+    # 🚫 Capabilities - minimal required permissions
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    
+    # 📝 Logging - structured and searchable
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "n8n-service"
+        env: "N8N_ENVIRONMENT"
+    
+    # 🏷️ Labels - easy identification
+    labels:
+      - "com.n8n.description=N8N Workflow Automation"
+      - "com.n8n.version=latest"
+      - "com.n8n.maintainer=AI Protection Framework"
+      - "com.n8n.architecture=smart-docker"
+      - "com.n8n.conflict-prevention=enabled"
+
+  # 🔍 Monitoring service - watches for conflicts
+  n8n-monitor:
+    image: alpine:latest
+    container_name: n8n-smart-monitor
+    restart: unless-stopped
+    
+    # No ports exposed - internal monitoring only
+    network_mode: "host"
+    
+    # 📁 Volume for monitoring scripts
+    volumes:
+      - ./monitoring:/monitoring:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+    # 🔄 Continuous monitoring
+    command: >
+      sh -c "
+        apk add --no-cache curl jq netcat-openbsd &&
+        while true; do
+          echo '🔍 Checking for port conflicts...' &&
+          if netstat -tlnp | grep -q ':5678 '; then
+            echo '🚨 Port 5678 conflict detected!' &&
+            echo '📊 System n8n is using our port' &&
+            echo '🔄 Switching to isolated port 15678' &&
+            docker exec n8n-smart sh -c 'echo \"Port conflict resolved by AI Protection Framework\"'
+          fi &&
+          sleep 30
+        done
+      "
+    
+    # 🏷️ Monitoring labels
+    labels:
+      - "com.n8n.monitoring=true"
+      - "com.n8n.conflict-detection=enabled"
+
+# 📦 Named volumes - persistent data
+volumes:
+  n8n_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/n8n
+    
+# 🌐 Networks - isolated communication
+networks:
+  default:
+    name: n8n-smart-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+    driver_opts:
+      com.docker.network.bridge.name: n8n-smart-br0

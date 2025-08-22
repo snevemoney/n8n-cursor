@@ -1,0 +1,30 @@
+{
+  "n8n": {
+    "password": "admin123",
+    "encryption_key": "your-secret-key-here",
+    "protocol": "https",
+    "domain": "n8ncloud.tech",
+    "ports": {
+      "system": 5678,
+      "docker": 15678,
+      "proxy": 15680,
+      "status": 15682
+    }
+  },
+  "docker": {
+    "memory_limit": "2G",
+    "cpu_limit": "2.0",
+    "health_check": true,
+    "logging": true
+  },
+  "nginx": {
+    "ssl": true,
+    "basic_auth": true,
+    "proxy_timeout": 600
+  },
+  "protection": {
+    "auto_recovery": true,
+    "integrity_checking": true,
+    "backup_strategy": "multi-layer"
+  }
+}

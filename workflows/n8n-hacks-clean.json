@@ -1,0 +1,111 @@
+{
+  "name": "n8n Hacks",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d0ec2c2-c3f9-4a2c-991f-fd1c54d578a4",
+              "name": "testt",
+              "value": "hello",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        20,
+        -1000
+      ],
+      "id": "816c3201-d543-442c-9ae7-c2ba896b5fda",
+      "name": "1"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        -1000
+      ],
+      "id": "a232a2d5-dec0-4b18-a78f-9374da246e83",
+      "name": "2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Hello"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        300,
+        -1000
+      ],
+      "id": "9fd3cab8-c4c5-4db8-9e1d-e6e3be1bad0a",
+      "name": "3",
+      "credentials": {
+        "openAiApi": {
+          "id": "WnxUhaEPMn5hIsEp",
+          "name": "Demo 4/2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -1360
+      ],
+      "id": "f559e95c-73af-4a80-9476-7e7d687568eb",
+      "name": "When clicking 'Test workflow'"
+    }
+  ],
+  "connections": {
+    "1": {
+      "main": [
+        [
+          {
+            "node": "2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2": {
+      "main": [
+        [
+          {
+            "node": "3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "name": "Tavily MCP Test Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/tavily-test",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "position": [240, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "serverName": "tavily-remote",
+        "toolName": "tavily_search",
+        "toolParameters": {
+          "query": "={{ $json.query || 'What are the latest updates with Nvidia?' }}",
+          "max_results": 5,
+          "search_depth": "basic"
+        }
+      },
+      "id": "tavily-mcp",
+      "name": "Tavily MCP Client",
+      "type": "n8n-nodes-base.mcpClient",
+      "position": [460, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "search_results",
+              "name": "search_results",
+              "type": "object",
+              "value": "={{ $('Tavily MCP Client').item.json }}"
+            },
+            {
+              "id": "query_used",
+              "name": "query_used",
+              "type": "string",
+              "value": "={{ $json.query || 'default query' }}"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "type": "string",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "id": "format-results",
+      "name": "Format Results",
+      "type": "n8n-nodes-base.set",
+      "position": [680, 300],
+      "typeVersion": 3
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Tavily MCP Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily MCP Client": {
+      "main": [
+        [
+          {
+            "node": "Format Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": null
+}

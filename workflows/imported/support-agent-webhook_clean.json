@@ -1,0 +1,163 @@
+{
+  "name": "Support Agent Webhook",
+  "nodes": [
+    {
+      "id": "support-webhook-trigger",
+      "name": "Support Agent Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-agent",
+        "options": {}
+      }
+    },
+    {
+      "id": "support-request-validator",
+      "name": "Support Request Validator",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "functionCode": "const input = $input.first().json;\n\n// Validate support request\nconst request = {\n  request_id: `support_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  timestamp: new Date().toISOString(),\n  master_request_id: input.master_request_id || null,\n  \n  // Support request details\n  query: input.query || 'General support request',\n  user_id: input.user_id || 'anonymous',\n  priority: input.priority || 'normal',\n  service_tier: input.service_tier || 'basic',\n  context: input.context || '',\n  \n  // Support categories\n  category: input.category || 'general',\n  subcategory: input.subcategory || '',\n  urgency: input.urgency || 'medium',\n  \n  // User context\n  user_experience: input.user_experience || 'beginner',\n  platform: input.platform || 'web',\n  browser: input.browser || '',\n  device: input.device || '',\n  \n  // AI configuration\n  ai_config: input.ai_config || {\n    model: 'gpt-4',\n    temperature: 0.3,\n    max_tokens: 1500\n  },\n  \n  // Validation\n  validated: false,\n  errors: []\n};\n\n// Validate required fields\nif (!request.query || request.query.length < 10) {\n  request.errors.push('Support query must be at least 10 characters long');\n}\n\nif (!['low', 'medium', 'high', 'critical'].includes(request.urgency)) {\n  request.urgency = 'medium';\n}\n\nif (!['general', 'technical', 'billing', 'feature', 'bug'].includes(request.category)) {\n  request.category = 'general';\n}\n\nrequest.validated = request.errors.length === 0;\n\nreturn request;"
+      }
+    },
+    {
+      "id": "technical-support-agent",
+      "name": "Technical Support Agent",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "={{ $json.ai_config.model }}",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an expert technical support specialist with deep knowledge of software, APIs, and technical troubleshooting. Provide clear, step-by-step solutions and always prioritize user experience and safety."
+            },
+            {
+              "role": "user",
+              "content": "Technical Support Request:\nQuery: {{ $json.query }}\nContext: {{ $json.context }}\nUser Experience: {{ $json.user_experience }}\nPlatform: {{ $json.platform }}\nDevice: {{ $json.device }}\nBrowser: {{ $json.browser }}\nPriority: {{ $json.priority }}\n\nProvide comprehensive technical support including:\n1. Problem diagnosis and analysis\n2. Step-by-step troubleshooting steps\n3. Alternative solutions if applicable\n4. Prevention tips for future\n5. Escalation criteria if needed\n6. Relevant documentation links\n\nTailor the response to the user's experience level and provide clear, actionable guidance."
+            }
+          ]
+        },
+        "options": {
+          "temperature": "={{ $json.ai_config.temperature }}",
+          "maxTokens": "={{ $json.ai_config.max_tokens }}"
+        }
+      }
+    },
+    {
+      "id": "support-storage",
+      "name": "Support Storage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/support_tickets",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "headers": {
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        "body": {
+          "request_id": "={{ $node['Support Request Validator'].json['request_id'] }}",
+          "master_request_id": "={{ $node['Support Request Validator'].json['master_request_id'] }}",
+          "category": "={{ $node['Support Request Validator'].json['category'] }}",
+          "priority": "={{ $node['Support Request Validator'].json['priority'] }}",
+          "user_id": "={{ $node['Support Request Validator'].json['user_id'] }}",
+          "query": "={{ $node['Support Request Validator'].json['query'] }}",
+          "support_response": "={{ $json.choices ? $json.choices[0].message.content : $json.message || 'No response' }}",
+          "created_at": "NOW()"
+        }
+      }
+    },
+    {
+      "id": "support-response",
+      "name": "Support Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "Content-Type": "application/json",
+            "X-Request-ID": "={{ $node['Support Request Validator'].json['request_id'] }}",
+            "X-Category": "={{ $node['Support Request Validator'].json['category'] }}"
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Support Agent Trigger": {
+      "main": [
+        [
+          {
+            "node": "Support Request Validator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Request Validator": {
+      "main": [
+        [
+          {
+            "node": "Technical Support Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technical Support Agent": {
+      "main": [
+        [
+          {
+            "node": "Support Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Storage": {
+      "main": [
+        [
+          {
+            "node": "Support Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
