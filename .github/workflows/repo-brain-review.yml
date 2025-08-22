@@ -1,0 +1,22 @@
+name: Repo Brain Review
+on: pull_request
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node
+        uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: |
+          npm i node-fetch@3
+          BAD=0
+          for f in $(git diff --name-only origin/${{ github.base_ref }}... | tr -s '\n'); do
+            node apps/repo-brain/cli/suggest.mjs "$f" > /tmp/repobrain.json || true
+            tgt=$(jq -r .target_path /tmp/repobrain.json 2>/dev/null || echo "")
+            if [[ -n "$tgt" && "$f" != "$tgt" && "$f" != *".github/"* ]]; then
+              echo "::warning file=$f::Suggest move to $tgt"
+              BAD=1
+            fi
+          done
+          exit $BAD

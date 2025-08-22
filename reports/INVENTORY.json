@@ -1,8 +1,49 @@
 {
-  "inventory_generated": "2025-08-22T13:30:00Z",
-  "repository_state": "chore/consolidate-repo-safe",
-  "total_files": 0,
-  "shell_scripts": [],
-  "duplicate_analysis": {},
-  "recommendations": []
+  "repository": "n8n-cursor",
+  "generated_at": "2025-08-22T15:04:00Z",
+  "structure": {
+    "canonical_directories": {
+      "infra/docker": "✅ Exists",
+      "infra/nginx": "✅ Exists", 
+      "scripts/ops": "✅ Exists",
+      "scripts/workflows": "✅ Exists",
+      "scripts/safety": "✅ Exists",
+      "scripts/utils": "✅ Exists",
+      "scripts/bin": "✅ Exists",
+      "workflows": "✅ Exists",
+      "templates": "✅ Exists",
+      "docs": "✅ Exists",
+      "reports": "✅ Exists",
+      "apps/repo-brain": "✅ Exists",
+      "config": "✅ Exists",
+      ".github/workflows": "✅ Exists",
+      "backups": "✅ Exists",
+      "logs": "✅ Exists"
+    },
+    "core_files": {
+      "Makefile": "✅ Exists",
+      "scripts/utils/lib.sh": "✅ Exists",
+      "scripts/safety/structure-guard.sh": "✅ Exists",
+      ".env.example": "❌ Missing - blocked by gitignore",
+      "config/repo.schema": "✅ Exists",
+      "templates/workflow.json.tmpl": "✅ Exists",
+      "templates/script.sh.tmpl": "✅ Exists"
+    }
+  },
+  "issues": {
+    "forbidden_paths": [
+      "docker-compose.yml - moved to infra/docker/",
+      "examples/test-payloads.json - moved to workflows/",
+      "n8n-manager.sh - moved to scripts/ops/",
+      "setup-comprehensive-n8n.sh - moved to scripts/ops/",
+      "test-remote-n8n.js - moved to tools/"
+    ],
+    "security_issues": [
+      "MASTER_UNLOCK string found in code - must use env var only"
+    ],
+    "missing_files": [
+      ".env.example - blocked by gitignore, needs manual creation"
+    ]
+  },
+  "status": "STRUCTURE_READY_BUT_NEEDS_SECURITY_FIXES"
 }

@@ -1,6 +1,24 @@
 {
-  "name": "{{NAME}}",
-  "nodes": [],
+  "name": "{{WORKFLOW_NAME}}",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [240, 300]
+    }
+  ],
   "connections": {},
-  "meta": { "owner": "evens", "created_at": "{{DATE}}" }
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "{{WORKFLOW_ID}}",
+  "tags": ["{{WORKFLOW_TAGS}}"]
 }

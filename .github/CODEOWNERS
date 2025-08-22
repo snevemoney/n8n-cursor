@@ -1,0 +1,33 @@
+# Global repository owner
+* @evenslouis
+
+# Scripts and operations
+scripts/** @evenslouis
+Makefile @evenslouis
+
+# Infrastructure and configuration
+infra/** @evenslouis
+config/** @evenslouis
+.env* @evenslouis
+
+# Workflows and templates
+workflows/** @evenslouis
+templates/** @evenslouis
+
+# Documentation
+docs/** @evenslouis
+README.md @evenslouis
+
+# GitHub Actions
+.github/** @evenslouis
+
+# Reports and logs
+reports/** @evenslouis
+logs/** @evenslouis
+
+# Applications
+apps/** @evenslouis
+
+# Safety and validation
+scripts/safety/** @evenslouis
+scripts/utils/** @evenslouis

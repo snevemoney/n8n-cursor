@@ -1,30 +1,47 @@
-infra/
-scripts/
-workflows/
-templates/
-docs/
-reports/
-apps/
-config/
-.github/
-backups/
-logs/
-README.md
-Makefile
-.gitignore
-.editorconfig
-.gitattributes
-.pre-commit-config.yaml
-.cursor/
-.vscode/
-ai/
-mcp-server/
-systems/
-tools/
-visualizations/
-workflow_data/
-consolidated/
-consolidation-backup/
-safety-rollback/
-PROTECTED_BACKUP/
-node_modules/
+{
+  "name": "n8n-cursor",
+  "version": "1.0.0",
+  "description": "n8n automation platform with MCP integration and DevOps tooling",
+  "structure": {
+    "required_directories": [
+      "infra/docker",
+      "infra/nginx", 
+      "scripts/ops",
+      "scripts/workflows",
+      "scripts/safety",
+      "scripts/utils",
+      "scripts/bin",
+      "workflows",
+      "templates",
+      "docs",
+      "reports",
+      "apps/repo-brain",
+      "config",
+      ".github/workflows",
+      "backups",
+      "logs"
+    ],
+    "forbidden_paths": [
+      "docker-compose.yml",
+      "examples/test-payloads.json",
+      "n8n-manager.sh",
+      "setup-comprehensive-n8n.sh",
+      "test-remote-n8n.js"
+    ],
+    "forbidden_strings": [
+      "MASTER_UNLOCK"
+    ],
+    "required_files": [
+      "Makefile",
+      "scripts/utils/lib.sh",
+      "scripts/safety/structure-guard.sh",
+      ".env.example"
+    ]
+  },
+  "rules": {
+    "no_secrets_in_code": true,
+    "use_env_vars": true,
+    "dry_run_default": true,
+    "log_to_logs_dir": true
+  }
+}

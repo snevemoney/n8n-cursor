@@ -5,7 +5,7 @@ export SAFE_FLAGS := set -Eeuo pipefail
 
 default: help
 help:
-	@echo "Targets: up, down, restart, status, logs, backup, restore, wf-import, wf-validate, wf-dedupe, fmt, lint, guard, doctor, repair, repair-remote, new-workflow, new-script, ci"
+	@echo "Targets: up, down, restart, status, logs, backup, restore, wf-import, wf-validate, wf-dedupe, fmt, lint, guard, doctor, repair, repair-remote, new-workflow, new-script, ci, brain-index, brain-suggest"
 
 up:       ; @$(SAFE_FLAGS); scripts/ops/n8n.sh up
 down:     ; @$(SAFE_FLAGS); scripts/ops/n8n.sh down
@@ -28,5 +28,8 @@ repair-remote: ; @bash scripts/ops/repair-remote.sh
 
 new-workflow: ; @scripts/bin/new.sh workflow "$(NAME)"
 new-script:   ; @scripts/bin/new.sh script   "$(NAME)" "$(DESC)"
+
+brain-index:  ; @$(SAFE_FLAGS); scripts/ops/repo-brain.sh index
+brain-suggest: ; @$(SAFE_FLAGS); scripts/ops/repo-brain.sh suggest
 
 ci: fmt lint guard

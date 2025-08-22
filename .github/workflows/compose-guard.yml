@@ -1,0 +1,14 @@
+name: Compose Guard
+on: pull_request
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose
+        run: docker compose -f infra/docker/docker-compose.yml config
+      - name: Fail on service/port changes
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          if git diff --unified=0 origin/${{ github.base_ref }} -- infra/docker/docker-compose.yml | grep -E 'ports:|container_name:'; then
+            echo "::error::Compose service/port changed. Review required."; exit 1; fi

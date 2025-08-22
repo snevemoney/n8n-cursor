@@ -64,12 +64,12 @@
 ./consolidation-backup/20250822_054347/stop-n8n.sh
 ./consolidation-backup/20250822_054347/update-n8n.sh
 ./consolidation-backup/20250822_054347/workflow-manager.sh
-./direct_db_restore.py
 ./docker-compose-isolated.yml
 ./docker-compose-smart.yml
 ./docker-compose.yml
 ./docs/BACKUP_RESTORE_PROCEDURES.md
 ./docs/DOCKER_RULES.md
+./docs/MIGRATION.md
 ./docs/SYSTEM_MEMORY.md
 ./docs/business/monetization-strategies.md
 ./docs/setup-guide.md
@@ -87,6 +87,7 @@
 ./n8n-manager.sh
 ./n8n-protection-framework.sh
 ./n8n-safe-manager.sh
+./reports/SAFETY_STATUS_SUMMARY.md
 ./restore_complete_n8n.sh
 ./restore_workflows.sh
 ./safety-rollback/20250822_054744/BEGINNER_PRODUCTION_GUIDE.md
@@ -164,9 +165,11 @@
 ./scripts/emergency_recovery.sh
 ./scripts/export-mermaid.js
 ./scripts/mcp_guardian.sh
+./scripts/ops/n8n.sh
 ./scripts/setup-mcp-integration.sh
 ./scripts/test_mcp.sh
 ./scripts/test_n8n_mcp_only.sh
+./scripts/utils/lib.sh
 ./setup-comprehensive-n8n.sh
 ./setup-mcp-integration.sh
 ./smart-consolidation.sh

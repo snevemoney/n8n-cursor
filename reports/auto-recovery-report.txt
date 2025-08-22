@@ -1,0 +1,41 @@
+🔧 AUTO-RECOVERY REPORT
+========================
+Generated: Fri Aug 22 05:49:44 UTC 2025
+System: n8n Production Stack
+
+📊 RECOVERY ACTIONS TAKEN
+==========================
+[2025-08-22 05:49:40] [INFO]    Connectivity issues: ❌
+❌
+❌
+[2025-08-22 05:49:41] [INFO] 🔄 File exists but may be broken - checking syntax...
+[2025-08-22 05:49:42] [INFO] ✅ Enterprise protection system restored from backup
+[2025-08-22 05:49:42] [INFO] 🔄 Testing nginx configuration...
+[2025-08-22 05:49:42] [INFO] ✅ Nginx configuration restored from backup
+[2025-08-22 05:49:43] [ERROR] ❌ Enterprise protection system: STILL BROKEN
+[2025-08-22 05:49:43] [ERROR] ❌ Nginx configuration: STILL BROKEN
+[2025-08-22 05:49:44] [ERROR] ❌ n8n containers: STILL NOT RUNNING
+
+🔍 RECOVERY VERIFICATION
+========================
+Enterprise Protection: ❌ STILL BROKEN
+Nginx Configuration: ❌ STILL BROKEN
+n8n Containers: ❌ STILL NOT RUNNING
+
+📁 RECOVERY RESOURCES
+=====================
+Recovery Log: /home/evens/n8n-cursor/auto-recovery.log
+Safety Database: /home/evens/n8n-cursor/safety-backup-database.json
+Rollback Directory: /home/evens/n8n-cursor/safety-rollback
+
+🔄 NEXT STEPS
+=============
+❌ Some issues remain unresolved
+🔄 Manual intervention may be required
+📁 Check rollback directory for original files
+
+📞 EMERGENCY CONTACTS
+=====================
+- Server: 69.62.66.78:22222
+- User: evens
+- Password: xuzGeb-xucpyz-kufpu3

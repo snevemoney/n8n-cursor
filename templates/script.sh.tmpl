@@ -1,10 +1,26 @@
-#!/usr/bin/env bash
-# {{NAME}} — purpose: {{DESC}}
+#!/bin/bash
 set -Eeuo pipefail
-source "$(dirname "$0")/../utils/lib.sh"
 
-main() {
-  info "{{NAME}} starting"
-  # TODO: implement
-}
-main "$@"
+# {{SCRIPT_NAME}} - {{SCRIPT_DESCRIPTION}}
+# Created: {{DATE}}
+# Author: evenslouis
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Source common utilities
+if [[ -f "$SCRIPT_DIR/../utils/lib.sh" ]]; then
+    source "$SCRIPT_DIR/../utils/lib.sh"
+else
+    # Fallback logging functions
+    log_info() { echo "[INFO] $*"; }
+    log_warn() { echo "[WARN] $*"; }
+    log_error() { echo "[ERROR] $*"; }
+fi
+
+log_info "Starting {{SCRIPT_NAME}}"
+
+# Main logic here
+{{MAIN_LOGIC}}
+
+log_info "{{SCRIPT_NAME}} completed successfully"

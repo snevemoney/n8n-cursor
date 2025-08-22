@@ -1,0 +1,50 @@
+# Pull Request
+
+## Description
+Brief description of changes made.
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Documentation update
+- [ ] Refactoring
+- [ ] Other (please describe)
+
+## Safety Checklist
+**Before submitting this PR, ensure:**
+
+- [ ] **No secrets committed**: Check that no API keys, passwords, or sensitive data are in the code
+- [ ] **No service/port changes**: Docker compose services and ports remain unchanged
+- [ ] **Structure guard passing**: Run `make guard` locally and it passes
+- [ ] **CI checks passing**: All GitHub Actions checks are green
+- [ ] **Workflows validated**: Run `make wf-validate` if adding/modifying workflows
+- [ ] **No forbidden paths**: Files are in their canonical locations
+- [ ] **Environment variables**: Use env vars instead of hardcoded values
+
+## Testing
+- [ ] Tested locally with `make doctor`
+- [ ] Validated structure with `make guard`
+- [ ] Checked workflows with `make wf-validate` (if applicable)
+- [ ] Verified no breaking changes
+
+## Files Changed
+List the main files that were modified:
+
+- `path/to/file1` - Description of change
+- `path/to/file2` - Description of change
+
+## Breaking Changes
+- [ ] No breaking changes
+- [ ] Breaking changes documented below
+
+If there are breaking changes, describe them and provide migration steps:
+
+## Additional Notes
+Any additional information or context for reviewers.
+
+## Related Issues
+Closes #(issue number)
+
+---
+
+**Remember**: This repository uses strict safety measures. If in doubt, ask for help!
