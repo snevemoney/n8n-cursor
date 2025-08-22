@@ -22,6 +22,7 @@ For **both** environments, add these secrets (names must match exactly):
 | `SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY-----...` | Full private key content (no quotes) |
 | `PROJECT_PATH` | `/home/evens/n8n-cursor` | Absolute path to repo on server |
 | `HEALTH_URL` | `https://n8ncloud.tech/healthz` | Must return 200 when healthy |
+| `SLACK_WEBHOOK` | `https://hooks.slack.com/...` | Slack webhook URL for notifications |
 
 **Important**: Don't add quotes around values, paste raw content.
 
@@ -63,6 +64,12 @@ chown -R $USER:$USER ~/.ssh
 7. Deploy services (`DRY_RUN=0 make up`)
 8. **Health verification**: Curl health endpoint with 20s timeout
 9. **Auto-rollback**: If health check fails, automatically rolls back to previous commit
+10. **Slack notification**: Success/failure alert sent to your Slack channel
+
+### **Manual Emergency Deploy**
+- **Trigger**: Go to Actions → Deploy (Manual) → Run workflow
+- **Inputs**: Choose environment (staging/production) and branch
+- **Use case**: Hotfixes, emergency deployments, or testing specific branches
 
 ## 🧪 **Validation Commands**
 
@@ -73,6 +80,7 @@ cd /home/evens/n8n-cursor
 make guard          # ✅ Repository structure validated
 make doctor         # ✅ System health verified
 make ports          # ✅ Port configuration checked
+curl -fsS -m 5 https://n8ncloud.tech/healthz  # ✅ Health endpoint returns 200
 ```
 
 ### **Test Deploy**
@@ -122,14 +130,19 @@ git push origin test-deploy
   make ports-resolve  # Auto-resolve conflicts
   ```
 
+### **Slack Notifications Not Working**
+- **Cause**: Missing SLACK_WEBHOOK secret
+- **Fix**: Add SLACK_WEBHOOK secret to both environments with your Slack webhook URL
+
 ## 📋 **Pre-Deployment Checklist**
 
 - [ ] GitHub environments created (`staging`, `production`)
-- [ ] All secrets configured in both environments
+- [ ] All secrets configured in both environments (including SLACK_WEBHOOK)
 - [ ] SSH key working (`ssh -p 22222 evens@69.62.66.78`)
 - [ ] Server health checks pass (`make doctor`)
 - [ ] Port configuration valid (`make ports`)
 - [ ] Repository structure clean (`make guard`)
+- [ ] Health endpoint accessible (`curl -f https://n8ncloud.tech/healthz`)
 
 ## 🔒 **Security Notes**
 
@@ -138,6 +151,7 @@ git push origin test-deploy
 - **Rotate SSH keys** regularly
 - **Monitor deployment logs** for any sensitive information
 - **Use branch protection** on `main` and `04-staging`
+- **Consider deploy keys** instead of general SSH keys for stronger scoping
 
 ## 📚 **Related Commands**
 
@@ -164,6 +178,13 @@ make ci              # Run all checks
 ```
 
 ## 🆘 **Emergency Procedures**
+
+### **Manual Emergency Deploy**
+1. Go to **Actions** → **Deploy (Manual)**
+2. Click **Run workflow**
+3. Choose environment (staging/production)
+4. Enter branch name (e.g., `hotfix-branch`)
+5. Click **Run workflow**
 
 ### **Manual Deploy (if pipeline fails)**
 ```bash
@@ -195,6 +216,7 @@ DRY_RUN=0 make up
    - Watch the Deploy workflow run
    - Verify it chooses `staging` environment
    - Check that health endpoint returns 200
+   - Confirm Slack notification received
 
 2. **Test Production Deploy**:
    - Merge a small change to `main`
@@ -202,9 +224,29 @@ DRY_RUN=0 make up
    - Verify it chooses `production` environment
    - Confirm successful deployment
 
-3. **Monitor Disaster Recovery**:
+3. **Test Manual Deploy**:
+   - Use the manual deploy workflow
+   - Deploy a test branch to staging
+   - Verify the process works correctly
+
+4. **Monitor Disaster Recovery**:
    - Check that disaster-recovery.yml runs every 15 minutes
    - Verify health monitoring is working
+
+## 🔔 **Slack Integration**
+
+### **Setup Slack Webhook**
+1. Go to your Slack workspace
+2. Create a new app or use existing one
+3. Enable **Incoming Webhooks**
+4. Create a webhook for your deployment channel
+5. Copy the webhook URL
+6. Add as `SLACK_WEBHOOK` secret in both environments
+
+### **Notifications You'll Receive**
+- **Deploy Success**: Green notification with environment and commit SHA
+- **Deploy Failure**: Red notification with failure details
+- **Manual Deploy**: Status updates for manual deployments
 
 ---
 

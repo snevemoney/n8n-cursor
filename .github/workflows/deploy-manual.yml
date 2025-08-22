@@ -1,0 +1,82 @@
+name: Deploy (Manual)
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        type: string
+        default: '04-staging'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate inputs
+        run: |
+          echo "Deploying to: ${{ inputs.env }}"
+          echo "Branch: ${{ inputs.branch }}"
+          echo "Environment: ${{ inputs.env }}"
+          
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key:      ${{ secrets.SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd "${{ secrets.PROJECT_PATH }}"
+            
+            echo "🚀 Manual deployment to ${{ inputs.env }}"
+            echo "Branch: ${{ inputs.branch }}"
+            
+            # Fetch and checkout
+            git fetch --all --prune
+            git checkout "${{ inputs.branch }}"
+            git pull origin "${{ inputs.branch }}"
+            
+            # Health check before deploy
+            echo "🔍 Pre-deployment health check..."
+            if curl -fsS -m 10 "${{ secrets.HEALTH_URL }}" >/dev/null; then
+              echo "✅ Pre-deployment health check passed"
+            else
+              echo "⚠️ Pre-deployment health check failed"
+            fi
+            
+            # Deploy
+            echo "🚀 Starting deployment..."
+            DRY_RUN=0 make up
+            
+            # Wait for services to stabilize
+            echo "⏳ Waiting for services to stabilize..."
+            sleep 10
+            
+            # Post-deployment health check
+            echo "🔍 Post-deployment health check..."
+            if curl -fsS -m 20 "${{ secrets.HEALTH_URL }}" >/dev/null; then
+              echo "✅ Deployment successful - health check passed"
+            else
+              echo "❌ Deployment failed - health check failed"
+              exit 1
+            fi
+            
+            echo "🎉 Manual deployment completed successfully!"
+            
+      - name: Slack notify
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR:  ${{ job.status == 'success' && 'good' || 'danger' }}
+          SLACK_MESSAGE: "Manual Deploy ${{ job.status }} to ${{ inputs.env }} (${{ inputs.branch }}) – ${{ github.sha }}"

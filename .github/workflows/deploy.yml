@@ -78,3 +78,11 @@ jobs:
             fi
 
             echo "✅ Deploy healthy."
+
+      - name: Slack notify
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_COLOR:  ${{ job.status == 'success' && 'good' || 'danger' }}
+          SLACK_MESSAGE: "Deploy ${{ job.status }} on ${{ steps.pick.outputs.env }} – ${{ github.sha }}"

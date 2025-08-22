@@ -1,0 +1,34 @@
+[0;34m[INFO][0m n8n-cursor Doctor - System Health Check
+[0;34m[INFO][0m == Environment ==
+[0;34m[INFO][0m OK: .env present (or .env.local)
+[0;34m[INFO][0m == Dependencies ==
+[0;34m[INFO][0m OK: docker installed
+[0;34m[INFO][0m OK: jq installed
+[0;34m[INFO][0m == Docker ==
+[0;34m[INFO][0m OK: daemon running
+[0;34m[INFO][0m OK: compose present
+[0;34m[INFO][0m OK: docker-compose.yml found
+[0;34m[INFO][0m [DRY-RUN] docker compose -f /home/evens/n8n-cursor/infra/docker/docker-compose.yml config >/dev/null
+[0;34m[INFO][0m == Disk space ==
+Filesystem: /dev/sda1, Size: 96G, Used: 32G, Avail: 65G, Use%: 33%
+[0;34m[INFO][0m == Ports ==
+[1;33m[WARN][0m Port 5678 busy
+[1;33m[WARN][0m Port 5432 busy
+[0;34m[INFO][0m == Repository Structure ==
+[0;34m[INFO][0m OK: infra/docker exists
+[0;34m[INFO][0m OK: scripts/ops exists
+[0;34m[INFO][0m OK: scripts/workflows exists
+[0;34m[INFO][0m OK: scripts/safety exists
+[0;34m[INFO][0m OK: scripts/utils exists
+[0;34m[INFO][0m OK: scripts/bin exists
+[0;34m[INFO][0m OK: workflows exists
+[0;34m[INFO][0m OK: templates exists
+[0;34m[INFO][0m OK: docs exists
+[0;34m[INFO][0m OK: reports exists
+[0;34m[INFO][0m OK: apps/repo-brain exists
+[0;34m[INFO][0m OK: config exists
+[0;34m[INFO][0m OK: backups exists
+[0;34m[INFO][0m OK: logs exists
+[0;34m[INFO][0m == File Permissions ==
+[0;34m[INFO][0m Cleaning up...
+make: *** [Makefile:29: doctor] Error 1

@@ -1,0 +1,64 @@
+[0;34m[INFO][0m Using schema: /home/evens/n8n-cursor/config/repo.schema
+[0;34m[INFO][0m == Checking Forbidden Paths ==
+[0;34m[INFO][0m == Checking Forbidden Strings ==
+/home/evens/n8n-cursor/config/protocol.yml:    act:    ["export MASTER_UNLOCK=…", "make db-restore FILE=<file.sql.gz>"]
+/home/evens/n8n-cursor/config/repo.schema:      "MASTER_UNLOCK"
+/home/evens/n8n-cursor/config/policy.yml:      - "MASTER_UNLOCK"
+/home/evens/n8n-cursor/reports/AMBIGUITIES.md:### 1. MASTER_UNLOCK Usage
+/home/evens/n8n-cursor/reports/AMBIGUITIES.md:**Question**: What is the exact purpose of MASTER_UNLOCK and where should it be used?
+/home/evens/n8n-cursor/reports/AMBIGUITIES.md:- Define MASTER_UNLOCK usage patterns
+/home/evens/n8n-cursor/reports/STACK_SUMMARY.md:- Some MASTER_UNLOCK references in documentation (expected)
+/home/evens/n8n-cursor/reports/STACK_SUMMARY.md:- `MASTER_UNLOCK`: Backup/restore operations
+/home/evens/n8n-cursor/reports/SECURITY_BASELINE.md:| MASTER_UNLOCK | ❌ Missing | Required for backups |
+/home/evens/n8n-cursor/reports/SECURITY_BASELINE.md:export MASTER_UNLOCK="your_secure_key_here"
+/home/evens/n8n-cursor/reports/SECURITY_BASELINE.md:   export MASTER_UNLOCK="your_32_character_encryption_key"
+/home/evens/n8n-cursor/reports/ENV_REQUIREMENTS.md:| `MASTER_UNLOCK` | ✅ Yes | None | Backup/restore encryption key | ❌ Missing |
+/home/evens/n8n-cursor/reports/ENV_REQUIREMENTS.md:export MASTER_UNLOCK="your_backup_key"
+/home/evens/n8n-cursor/reports/ENV_REQUIREMENTS.md:export MASTER_UNLOCK="your_backup_key"
+/home/evens/n8n-cursor/reports/CI_CD_STATUS.md:| Forbidden Strings | ✅ Active | Blocks MASTER_UNLOCK in code |
+/home/evens/n8n-cursor/reports/CI_CD_STATUS.md:3. **Structure Guard**: May flag documentation references to MASTER_UNLOCK
+/home/evens/n8n-cursor/reports/DEVOPS_SETUP_SUMMARY.md:- MASTER_UNLOCK usage patterns (needs clarification)
+/home/evens/n8n-cursor/reports/DEVOPS_SETUP_SUMMARY.md:export MASTER_UNLOCK="your_key_here"
+/home/evens/n8n-cursor/reports/TODO_GAPS.md:| `MASTER_UNLOCK` | Backup encryption | ❌ Missing | Set in shell, add to GitHub secrets |
+/home/evens/n8n-cursor/reports/TODO_GAPS.md:export MASTER_UNLOCK="your_32_char_encryption_key_here"
+/home/evens/n8n-cursor/reports/TODO_GAPS.md:env | grep -E "(OPENAI_API_KEY|SUPABASE_URL|SUPABASE_ANON_KEY|MASTER_UNLOCK)"
+/home/evens/n8n-cursor/reports/TODO_GAPS.md:export MASTER_UNLOCK="your_encryption_key_here"
+/home/evens/n8n-cursor/reports/TODO_GAPS.md:env | grep -E "(OPENAI_API_KEY|SUPABASE_URL|SUPABASE_ANON_KEY|MASTER_UNLOCK|N8N_BASIC_AUTH_PASSWORD|DB_POSTGRESDB_PASSWORD)"
+/home/evens/n8n-cursor/README.md:export MASTER_UNLOCK="your_key"
+/home/evens/n8n-cursor/scripts/safety/structure-guard.sh:  "MASTER_UNLOCK"
+/home/evens/n8n-cursor/scripts/ops/restore-db.sh:if [[ -z "${MASTER_UNLOCK:-}" ]]; then
+/home/evens/n8n-cursor/scripts/ops/restore-db.sh:  log_info "Set it with: export MASTER_UNLOCK='your_encryption_key'"
+/home/evens/n8n-cursor/scripts/ops/restore-db.sh:log_info "MASTER_UNLOCK: ${MASTER_UNLOCK:0:8}... (truncated)"
+/home/evens/n8n-cursor/scripts/ops/repair-remote.sh:# Check if MASTER_UNLOCK is set
+/home/evens/n8n-cursor/scripts/ops/repair-remote.sh:if [[ -z "${MASTER_UNLOCK:-}" ]]; then
+/home/evens/n8n-cursor/scripts/ops/repair-remote.sh:    log_error "Set it with: export MASTER_UNLOCK='your_key_here'"
+/home/evens/n8n-cursor/scripts/ops/repair-remote.sh:log_info "MASTER_UNLOCK verified"
+/home/evens/n8n-cursor/help.sh:  echo "export MASTER_UNLOCK=your_master_key_here"
+/home/evens/n8n-cursor/MASTER_STACK_CHEAT_SHEET.md:  export MASTER_UNLOCK=your-secret
+/home/evens/n8n-cursor/MASTER_STACK_CHEAT_SHEET.md:| **"Restore (needs unlock)."** | `export MASTER_UNLOCK=your-secret && make restore` |
+/home/evens/n8n-cursor/MASTER_STACK_CHEAT_SHEET.md:export MASTER_UNLOCK=...
+/home/evens/n8n-cursor/MASTER_STACK_CHEAT_SHEET.md:# 3. Remove forbidden strings (like MASTER_UNLOCK)
+/home/evens/n8n-cursor/.github/workflows/pr-review.yml:          - No MASTER_UNLOCK strings in committed files
+/home/evens/n8n-cursor/.github/workflows/pr-review.yml:          if git grep -n "MASTER_UNLOCK\|SSH_KEY\|SUPABASE_SERVICE_ROLE_KEY" -- ':!*.md' ':!*.txt' ':!docs/' ':!config/' >/dev/null 2>&1; then
+/home/evens/n8n-cursor/docs/MIGRATION.md:export MASTER_UNLOCK="hardcoded_key_in_script"
+/home/evens/n8n-cursor/docs/MIGRATION.md:export MASTER_UNLOCK="your_key_here"
+/home/evens/n8n-cursor/docs/MIGRATION.md:2. **"MASTER_UNLOCK not found"**:
+/home/evens/n8n-cursor/docs/MIGRATION.md:   - Set `export MASTER_UNLOCK="your_key"`
+/home/evens/n8n-cursor/docs/GO_NO_GO.md:   export MASTER_UNLOCK="your_encryption_key"
+/home/evens/n8n-cursor/docs/BACKUPS.md:   export MASTER_UNLOCK="your_encryption_key"
+/home/evens/n8n-cursor/docs/BACKUPS.md:   export MASTER_UNLOCK="your_encryption_key"
+/home/evens/n8n-cursor/docs/BACKUPS.md:1. **"MASTER_UNLOCK not set"**:
+/home/evens/n8n-cursor/docs/BACKUPS.md:   - Set the environment variable: `export MASTER_UNLOCK="your_key"`
+/home/evens/n8n-cursor/docs/READ_ME_FIRST.md:export MASTER_UNLOCK="your_32_char_encryption_key_here"
+/home/evens/n8n-cursor/docs/READ_ME_FIRST.md:env | grep -E "(OPENAI_API_KEY|SUPABASE_URL|SUPABASE_ANON_KEY|MASTER_UNLOCK)"
+/home/evens/n8n-cursor/docs/READ_ME_FIRST.md:# Emergency restore (requires MASTER_UNLOCK)
+/home/evens/n8n-cursor/docs/READ_ME_FIRST.md:export MASTER_UNLOCK="your_key"
+/home/evens/n8n-cursor/docs/NEXT_LEVEL_UPGRADE.md:      - "MASTER_UNLOCK"
+[0;34m[INFO][0m == Checking Required Directories ==
+[0;34m[INFO][0m == Checking Required Files ==
+[0;34m[INFO][0m == Checking File Permissions ==
+[0;34m[INFO][0m Found 45 executable scripts
+[0;34m[INFO][0m == Structure Guard Summary ==
+[0;34m[INFO][0m PASSED: Structure Guard
+[0;34m[INFO][0m PASSED: All required directories present
+[0;34m[INFO][0m Cleaning up...
