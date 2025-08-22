@@ -1,0 +1,85 @@
+version: 1
+severity:
+  P0: "Production down, data loss risk"
+  P1: "Critical feature broken"
+  P2: "Degraded or partial outage"
+  P3: "Chore / maintenance / improvement"
+
+playbooks:
+  health:
+    detect: ["make guard", "make doctor", "make wf-validate", "make ports"]
+    act:    []
+    verify: ["make doctor"]
+    docs:   "reports/STACK_SUMMARY.md"
+
+  restart:
+    detect: ["make doctor"]
+    act:    ["DRY_RUN=0 make repair"]
+    verify: ["make status", "make doctor"]
+    docs:   "docs/READ_ME_FIRST.md"
+
+  start:
+    detect: ["make doctor"]
+    act:    ["DRY_RUN=0 make up"]
+    verify: ["make status"]
+    docs:   "docs/READ_ME_FIRST.md"
+
+  remote_fix:
+    detect: []
+    act:    ["make repair-remote"]
+    verify: []
+    docs:   "docs/READ_ME_FIRST.md"
+
+  backup:
+    detect: []
+    act:    ["DRY_RUN=0 make backup"]
+    verify: []
+    docs:   "docs/MIGRATION.md"
+
+  db_backup:
+    detect: []
+    act:    ["make db-backup"]
+    verify: []
+    docs:   "docs/DB_POLICIES.md"
+
+  db_restore:
+    detect: []
+    act:    ["export MASTER_UNLOCK=…", "make db-restore FILE=<file.sql.gz>"]
+    verify: []
+    docs:   "docs/DB_POLICIES.md"
+
+  cleanup:
+    detect: ["make doctor"]
+    act:    ["DRY_RUN=0 docker system prune -f"]
+    verify: ["make doctor"]
+    docs:   "reports/STACK_SUMMARY.md"
+
+  structure_clean:
+    detect: ["make guard"]
+    act:    ["# fix files per guard output or run Repo Brain suggestions"]
+    verify: ["make guard"]
+    docs:   "docs/MIGRATION.md"
+
+  repo_brain_index:
+    detect: []
+    act:    ["make brain-index"]
+    verify: []
+    docs:   "reports/STACK_SUMMARY.md"
+
+  stripe_webhook:
+    detect: ["# check nginx log and app log for 400/500 near /stripe/webhook"]
+    act:    ["# run stripe listen for local; verify signatures"]
+    verify: ["# test event delivery"]
+    docs:   "integrations/stripe/README.md"
+
+  supabase_rls:
+    detect: ["# list tables and RLS state (reports/DB_SUPABASE.md)"]
+    act:    ["# apply RLS.sql in staging first"]
+    verify: ["# query access with tenant claims"]
+    docs:   "integrations/supabase/RLS.sql"
+
+  ports_conflict:
+    detect: ["make ports"]
+    act:    ["# stop conflicting service or change that other app's port"]
+    verify: ["make ports"]
+    docs:   "reports/PORTS_AND_DOCKER.md"

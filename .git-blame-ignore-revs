@@ -1,0 +1,5 @@
+# Add commit hashes of bulk formatting or file moves here.
+# Example after your first "fmt" commit:
+# a8f1376 Fix: repo-wide shfmt + prettier sweep
+
+# Add your formatting commits here to ignore them in git blame

@@ -1,0 +1,15 @@
+# Who can bind what. 127.0.0.1 = local only; 0.0.0.0 = public via nginx
+ports:
+  http_public: 80
+  https_public: 443
+
+  # App layer (behind nginx)
+  n8n_app: { host: "127.0.0.1", port: 5678 }
+  admin_pg: { host: "127.0.0.1", port: 5433 }   # if you run a local PG for tools
+  redis:    { host: "127.0.0.1", port: 6379 }
+
+# VS Code/Cursor auto-forwarded ports are OK; never bind those in compose.
+rules:
+  - "Public ports (80/443) are nginx only"
+  - "All app/admin services bind to 127.0.0.1 and are reverse-proxied"
+  - "No hard-coding random ports in new services; add here first"

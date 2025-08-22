@@ -23,7 +23,7 @@ fmt:      ; @find . -name "*.sh" -not -path "./PROTECTED_BACKUP/*" -not -path ".
 lint:     ; @shellcheck -x $$(git ls-files '*.sh') || true
 guard:    ; @bash scripts/safety/structure-guard.sh
 doctor:   ; @bash scripts/ops/doctor.sh
-ports:    ; @bash scripts/ops/ports.sh
+ports:    ; @bash scripts/ops/ports-check.sh
 repair:   ; @DRY_RUN=0 bash scripts/ops/n8n.sh restart
 repair-remote: ; @bash scripts/ops/repair-remote.sh
 
@@ -32,5 +32,7 @@ new-script:   ; @scripts/bin/new.sh script   "$(NAME)" "$(DESC)"
 
 brain-index:  ; @$(SAFE_FLAGS); scripts/ops/repo-brain.sh index
 brain-suggest: ; @$(SAFE_FLAGS); scripts/ops/repo-brain.sh suggest
+
+protocol: ; @bash scripts/ops/protocol.sh $(PLAY) $(EXEC)
 
 ci: fmt lint guard

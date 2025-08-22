@@ -1,0 +1,10 @@
+.git
+.gitignore
+.gitattributes
+node_modules
+logs
+backups
+workflows/*.export.json
+PROTECTED_BACKUP/
+consolidation-backup/
+safety-rollback/

@@ -1,1 +1,16 @@
 * text=auto eol=lf
+
+# Collapse noisy diffs on GitHub; still versioned
+*.lock linguist-generated
+package-lock.json linguist-generated
+pnpm-lock.yaml linguist-generated
+yarn.lock linguist-generated
+
+# Large machine JSON (n8n workflows etc.)
+workflows/*.json linguist-generated
+
+# Generated code from external tools
+integrations/sandbox/** linguist-generated
+
+# Ignore blame for format-sweeps
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
