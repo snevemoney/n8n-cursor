@@ -1,0 +1,124 @@
+# Dynamic Project Board Configuration
+# This file drives the auto-updating GitHub Projects board
+
+project:
+  name: "n8n-cursor"
+  description: "AI-Powered Workflow Automation with MCP Integration"
+  
+# Board Structure
+columns:
+  - name: "Backlog"
+    description: "Items waiting to be prioritized"
+    color: "green"
+    auto_populate: true
+    
+  - name: "Ready"
+    description: "Ready for development"
+    color: "blue"
+    auto_populate: true
+    
+  - name: "In Progress"
+    description: "Currently being worked on"
+    color: "orange"
+    auto_populate: true
+    
+  - name: "In Review"
+    description: "Ready for review/testing"
+    color: "purple"
+    auto_populate: true
+    
+  - name: "Done"
+    description: "Completed items"
+    color: "gray"
+    auto_populate: true
+
+# MCP Integration Rules
+mcp_integration:
+  # Auto-create items from GitHub Actions
+  github_actions:
+    - workflow: "Deploy"
+      trigger: "on_success"
+      action: "create_item"
+      column: "Done"
+      title: "Deployment Successful - {{ env }}"
+      body: "Environment: {{ env }}\nBranch: {{ branch }}\nSHA: {{ sha }}"
+      
+    - workflow: "Deploy"
+      trigger: "on_failure"
+      action: "create_item"
+      column: "Backlog"
+      title: "🚨 Deployment Failed - {{ env }}"
+      body: "Environment: {{ env }}\nBranch: {{ branch }}\nSHA: {{ sha }}\nPriority: High"
+      
+    - workflow: "Disaster Recovery"
+      trigger: "on_failure"
+      action: "create_item"
+      column: "Backlog"
+      title: "🚨 Health Check Failed - {{ env }}"
+      body: "Environment: {{ env }}\nEndpoint: {{ secrets.HEALTH_URL }}\nPriority: Critical"
+      
+  # Auto-update based on n8n status
+  n8n_status:
+    - check_interval: "5m"
+      action: "update_health_status"
+      columns: ["Ready", "In Progress"]
+      
+  # Auto-archive completed items
+  auto_archive:
+    - condition: "status:done"
+      action: "move_to_done"
+      after: "24h"
+      
+# Smart Automation Rules
+automation:
+  # Auto-assign based on labels
+  auto_assign:
+    - label: "bug"
+      assignee: "snevemoney"
+      priority: "high"
+      
+    - label: "enhancement"
+      assignee: "snevemoney"
+      priority: "medium"
+      
+    - label: "deployment"
+      assignee: "snevemoney"
+      priority: "high"
+      
+  # Auto-label based on content
+  auto_label:
+    - pattern: "deploy|deployment|ci/cd"
+      labels: ["deployment", "automation"]
+      
+    - pattern: "bug|fix|issue"
+      labels: ["bug", "urgent"]
+      
+    - pattern: "feature|enhancement|improvement"
+      labels: ["enhancement", "feature"]
+
+# Real-time Updates
+real_time:
+  enabled: true
+  update_interval: "1m"
+  webhook_endpoints:
+    - github_actions
+    - n8n_webhooks
+    - manual_updates
+    
+# Metrics and Insights
+metrics:
+  - name: "Deployment Success Rate"
+    source: "github_actions"
+    calculation: "successful_deployments / total_deployments"
+    
+  - name: "Health Check Status"
+    source: "disaster_recovery"
+    calculation: "healthy_checks / total_checks"
+    
+  - name: "Issue Resolution Time"
+    source: "project_items"
+    calculation: "average_time_to_resolution"
+    
+  - name: "Workflow Performance"
+    source: "n8n_executions"
+    calculation: "successful_executions / total_executions"

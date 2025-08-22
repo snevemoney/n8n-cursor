@@ -1,0 +1,22 @@
+# MCP Integration Dependencies
+# Python packages required for dynamic project board and MCP tools
+
+# Core dependencies
+pyyaml>=6.0.1
+requests>=2.31.0
+
+# GitHub API integration
+PyGithub>=2.1.1
+
+# n8n integration (if needed)
+# n8n-python>=0.1.0
+
+# Optional: Enhanced features
+python-dotenv>=1.0.0
+schedule>=1.2.0
+colorama>=0.4.6
+
+# Development dependencies
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
