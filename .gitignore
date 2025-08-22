@@ -1,7 +1,6 @@
 node_modules/
+logs/
+backups/
 .env
-*.log
+.env.local
 .DS_Store
-.vscode/
-temp/
-*.tmp

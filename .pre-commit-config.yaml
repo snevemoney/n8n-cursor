@@ -1,0 +1,17 @@
+repos:
+- repo: https://github.com/jumanjihouse/pre-commit-hooks
+  rev: 3.0.0
+  hooks:
+    - id: shellcheck
+    - id: shfmt
+- repo: https://github.com/adrienverge/yamllint
+  rev: v1.35.1
+  hooks:
+    - id: yamllint
+- repo: local
+  hooks:
+    - id: structure-guard
+      name: repo structure guard
+      entry: bash scripts/safety/structure-guard.sh
+      language: system
+      pass_filenames: false

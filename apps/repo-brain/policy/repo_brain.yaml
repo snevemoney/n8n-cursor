@@ -1,0 +1,18 @@
+version: 1
+roots: [infra/, scripts/, scripts/ops/, scripts/workflows/, scripts/safety/, scripts/utils/, docs/, workflows/, templates/, apps/]
+forbid: ["^node_modules/", "^logs/", "^backups/"]
+naming:
+  scripts: "kebab-case .sh"
+  workflows: "kebab-case .json"
+routing:
+  - match: "Docker|compose|nginx"
+    to: "infra/"
+  - match: "start|stop|status|backup|restore|n8n"
+    to: "scripts/ops/"
+  - match: "workflow|import|export|validate|dedupe"
+    to: "scripts/workflows/"
+  - match: "safety|guard|verify|snapshot"
+    to: "scripts/safety/"
+thresholds:
+  min_similarity: 0.62
+  hard_block: 0.40

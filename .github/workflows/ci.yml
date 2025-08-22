@@ -1,0 +1,17 @@
+name: CI
+on: [pull_request, push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y shellcheck yamllint shfmt || sudo snap install shfmt
+      - name: shfmt
+        run: shfmt -d .
+      - name: shellcheck
+        run: shellcheck -x $(git ls-files '*.sh') || true
+      - name: yamllint
+        run: yamllint -s .
+      - name: structure guard
+        run: bash scripts/safety/structure-guard.sh

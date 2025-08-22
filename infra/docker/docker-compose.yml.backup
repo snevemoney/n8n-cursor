@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    restart: "no"
+    network_mode: "host"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=yourStrongPassword123
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_EDITOR_BASE_URL=http://localhost:5678/
+      - WEBHOOK_URL=http://localhost:5678/
+      - N8N_SECURE_COOKIE=false
+      - N8N_USER_MANAGEMENT_DISABLED=false
+      - N8N_LOG_LEVEL=info
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_PROXY_HOPS=1
+      - EXPRESS_RATE_LIMIT_TRUST_PROXY=true
+      - N8N_METRICS=true
+      - N8N_DEFAULT_TIMEZONE=America/New_York
+    volumes:
+      - n8n-cursor_n8n_data:/home/node/.n8n
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5678/ > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  n8n-cursor_n8n_data:

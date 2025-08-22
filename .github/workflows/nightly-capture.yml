@@ -1,0 +1,50 @@
+name: Nightly Capture
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # daily at 03:17 UTC
+  workflow_dispatch:        # manual trigger
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with: 
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Refresh diagrams and screenshots
+        env:
+          N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+          N8N_EMAIL: ${{ secrets.N8N_EMAIL }}
+          N8N_PASSWORD: ${{ secrets.N8N_PASSWORD }}
+        run: |
+          echo "🔄 Generating Mermaid diagrams..."
+          npm run gen
+          echo "📸 Capturing n8n UI screenshots..."
+          npm run capture || echo "⚠️ Screenshot capture failed, continuing..."
+
+      - name: Commit results
+        run: |
+          git config user.name "workflow-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add visualizations/
+          if git diff --cached --quiet; then
+            echo "📭 No changes to commit"
+          else
+            git commit -m "🤖 Nightly: refresh diagrams & screenshots"
+            git push
+          fi
+
+      - name: Upload review artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-review-${{ github.run_number }}
+          path: visualizations/reviews/*.md
+          retention-days: 30
