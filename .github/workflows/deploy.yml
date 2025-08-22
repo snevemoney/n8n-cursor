@@ -1,55 +1,80 @@
 name: Deploy
-
 on:
-  push:
-    branches: [ "04-staging", "main" ]
+  push: { branches: ["04-staging","main"] }
   workflow_dispatch: {}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     concurrency:
       group: deploy-${{ github.ref }}
       cancel-in-progress: true
-
-    # Map branch -> environment
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Pick environment (staging/main)
-        id: pick
+      - name: Fail fast if required secrets missing
+        shell: bash
+        run: |
+          missing=0
+          if [ -z "${{ secrets.SSH_HOST }}" ]; then echo "❌ Missing secret: SSH_HOST"; missing=1; fi
+          if [ -z "${{ secrets.SSH_USER }}" ]; then echo "❌ Missing secret: SSH_USER"; missing=1; fi
+          if [ -z "${{ secrets.SSH_KEY }}" ]; then echo "❌ Missing secret: SSH_KEY"; missing=1; fi
+          if [ -z "${{ secrets.PROJECT_PATH }}" ]; then echo "❌ Missing secret: PROJECT_PATH"; missing=1; fi
+          if [ -z "${{ secrets.HEALTH_URL }}" ]; then echo "❌ Missing secret: HEALTH_URL"; missing=1; fi
+          [ $missing -eq 0 ] || exit 1
+
+      - id: pick
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
             echo "env=production" >> $GITHUB_OUTPUT
+            echo "branch=main" >> $GITHUB_OUTPUT
           else
             echo "env=staging" >> $GITHUB_OUTPUT
+            echo "branch=04-staging" >> $GITHUB_OUTPUT
           fi
 
-      - name: Deploy over SSH
+      - name: Deploy over SSH (with rollback)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host:     ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key:      ${{ secrets.SSH_KEY }}
           script: |
-            set -e
+            set -euo pipefail
             cd "${{ secrets.PROJECT_PATH }}"
-            git fetch --all --prune
-            if [[ "${{ steps.pick.outputs.env }}" == "production" ]]; then
-              git checkout main && git pull origin main
-            else
-              git checkout 04-staging && git pull origin 04-staging
-            fi
 
-            # Pre-flight health & structure checks
+            echo "==> Fetch & checkout"
+            git fetch --all --prune
+            git checkout "${{ steps.pick.outputs.branch }}"
+            git pull origin "${{ steps.pick.outputs.branch }}"
+
+            echo "==> Preflight checks"
             make guard || true
-            make wf-validate || true
             make doctor || true
 
-            # Bring up stack safely
-            DRY_RUN=0 make up
+            echo "==> Start/refresh stack"
+            PREV_HEALTH=0
+            if curl -fsS -m 5 "${{ secrets.HEALTH_URL }}" >/dev/null 2>&1; then PREV_HEALTH=1; fi
 
-            # Health check (fail pipeline if unhealthy)
-            curl -fsS -m 10 "${{ secrets.HEALTH_URL }}"
+            set +e
+            DRY_RUN=0 make up
+            sleep 5
+            curl -fsS -m 20 "${{ secrets.HEALTH_URL }}"
+            OK=$?
+            set -e
+
+            if [ $OK -ne 0 ]; then
+              echo "❌ Health check failed after deploy. Attempting rollback…"
+              git reset --hard HEAD~1 || true      # simple rollback to previous commit on server
+              DRY_RUN=0 make up || true
+              if [ $PREV_HEALTH -eq 1 ] && curl -fsS -m 20 "${{ secrets.HEALTH_URL }}" >/dev/null; then
+                echo "✅ Rolled back to prior healthy version."
+                exit 1
+              else
+                echo "❗ Rollback didn't restore health. Manual attention required."
+                exit 1
+              fi
+            fi
+
+            echo "✅ Deploy healthy."

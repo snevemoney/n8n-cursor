@@ -13,15 +13,17 @@ Go to your repository → **Settings** → **Environments** and create:
 
 ### 2. **Add Required Secrets**
 
-For **both** environments, add these secrets:
+For **both** environments, add these secrets (names must match exactly):
 
-| Secret Name | Description | Example Value |
-|-------------|-------------|---------------|
-| `SSH_HOST` | Your VPS IP address | `69.62.66.78` |
-| `SSH_USER` | Linux username | `evens` |
-| `SSH_KEY` | Private SSH key content | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
-| `PROJECT_PATH` | Absolute path on server | `/home/evens/n8n-cursor` |
-| `HEALTH_URL` | Health endpoint URL | `https://n8ncloud.tech/healthz` |
+| Secret Name | Example Value | Notes |
+|-------------|---------------|-------|
+| `SSH_HOST` | `69.62.66.78` | Your VPS IP address |
+| `SSH_USER` | `evens` | The Linux username you SSH with |
+| `SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY-----...` | Full private key content (no quotes) |
+| `PROJECT_PATH` | `/home/evens/n8n-cursor` | Absolute path to repo on server |
+| `HEALTH_URL` | `https://n8ncloud.tech/healthz` | Must return 200 when healthy |
+
+**Important**: Don't add quotes around values, paste raw content.
 
 ### 3. **SSH Key Setup**
 
@@ -53,12 +55,14 @@ chown -R $USER:$USER ~/.ssh
 
 ### **Deployment Flow**
 1. Push to branch triggers workflow
-2. Workflow automatically selects environment
-3. SSH to server using environment secrets
-4. Pull latest code
-5. Run health checks (`make guard`, `make doctor`)
-6. Deploy services (`DRY_RUN=0 make up`)
-7. Verify health endpoint returns 200
+2. **Fail-fast validation**: Checks all required secrets are present
+3. Workflow automatically selects environment
+4. SSH to server using environment secrets
+5. Pull latest code
+6. Run health checks (`make guard`, `make doctor`)
+7. Deploy services (`DRY_RUN=0 make up`)
+8. **Health verification**: Curl health endpoint with 20s timeout
+9. **Auto-rollback**: If health check fails, automatically rolls back to previous commit
 
 ## 🧪 **Validation Commands**
 
@@ -183,6 +187,24 @@ git log --oneline -10
 git reset --hard HEAD~1
 DRY_RUN=0 make up
 ```
+
+## 🎯 **Next Steps After Setup**
+
+1. **Test Staging Deploy**:
+   - Push a small change to `04-staging`
+   - Watch the Deploy workflow run
+   - Verify it chooses `staging` environment
+   - Check that health endpoint returns 200
+
+2. **Test Production Deploy**:
+   - Merge a small change to `main`
+   - Watch the Deploy workflow run
+   - Verify it chooses `production` environment
+   - Confirm successful deployment
+
+3. **Monitor Disaster Recovery**:
+   - Check that disaster-recovery.yml runs every 15 minutes
+   - Verify health monitoring is working
 
 ---
 
