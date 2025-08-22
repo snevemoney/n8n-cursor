@@ -9,6 +9,7 @@ help:
 	@echo "Security: secure-ssh, tls-check, ports, health"
 	@echo "Backups: db-backup, db-restore, n8n-backup"
 	@echo "Protocol: protocol"
+	@echo "Ports: ports-list, ports-check, ports-cleanup, ports-status"
 
 up:       ; @$(SAFE_FLAGS); scripts/ops/n8n.sh up
 down:     ; @$(SAFE_FLAGS); scripts/ops/n8n.sh down
@@ -47,5 +48,12 @@ health:            ; @bash scripts/ops/health-endpoint.sh
 db-backup:         ; @bash scripts/ops/backup-db.sh
 db-restore:        ; @bash scripts/ops/restore-db.sh "$(FILE)"
 n8n-backup:        ; @bash scripts/ops/backup-n8n.sh
+
+# Port management targets
+ports-list:        ; @bash scripts/ops/ports-manager.sh list
+ports-check:       ; @bash scripts/ops/ports-check.sh
+ports-cleanup:     ; @bash scripts/ops/ports-manager.sh cleanup
+ports-status:      ; @bash scripts/ops/ports-manager.sh status
+ports-resolve:     ; @bash scripts/ops/ports-manager.sh conflicts
 
 ci: fmt lint guard

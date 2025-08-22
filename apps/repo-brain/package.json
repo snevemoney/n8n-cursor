@@ -1,0 +1,62 @@
+{
+  "name": "repo-brain",
+  "version": "1.0.0",
+  "description": "AI-powered repository structure enforcement and file routing",
+  "main": "cli/index.mjs",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/mcp/server.js",
+    "dev": "ts-node src/mcp/server.ts",
+    "cli:suggest": "node cli/suggest.mjs",
+    "cli:enforce": "node cli/enforce.mjs",
+    "cli:index": "node cli/index.mjs",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "repository",
+    "structure",
+    "enforcement",
+    "ai",
+    "routing",
+    "policy",
+    "mcp"
+  ],
+  "author": "Evens Louis",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "prettier": "^3.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evenslouis/n8n-cursor.git",
+    "directory": "apps/repo-brain"
+  },
+  "bin": {
+    "repo-brain": "./cli/index.mjs"
+  },
+  "files": [
+    "dist/",
+    "cli/",
+    "policy/",
+    "README.md"
+  ]
+}

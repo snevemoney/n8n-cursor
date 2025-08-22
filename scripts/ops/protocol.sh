@@ -2,10 +2,16 @@
 # Usage: scripts/ops/protocol.sh <playbook> [--execute]
 # Example: scripts/ops/protocol.sh restart --execute
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"; cd "$ROOT"
+ROOT="$(cd -- "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+cd "$ROOT"
 
-play="${1:-}"; exec_flag="${2:-}"
-[[ -z "$play" ]] && { echo "Playbooks:"; grep -E '^[ ]{2}[a-z_]+:' -n config/protocol.yml | sed 's/://g;s/^ *//'; exit 1; }
+play="${1:-}"
+exec_flag="${2:-}"
+[[ -z "$play" ]] && {
+  echo "Playbooks:"
+  grep -E '^[ ]{2}[a-z_]+:' -n config/protocol.yml | sed 's/://g;s/^ *//'
+  exit 1
+}
 
 echo "Running playbook: $play"
 echo "========================"
@@ -17,7 +23,10 @@ playbook_section=$(awk -v p="$play" '
   f{print}
 ' config/protocol.yml)
 
-[[ -z "$playbook_section" ]] && { echo "Unknown playbook: $play"; exit 1; }
+[[ -z "$playbook_section" ]] && {
+  echo "Unknown playbook: $play"
+  exit 1
+}
 
 echo "== detect =="
 detect_line=$(echo "$playbook_section" | grep "detect:")
@@ -27,7 +36,8 @@ if [[ -n "$detect_line" ]]; then
     echo "$commands" | tr ' ' '\n' | while read -r cmd; do
       [[ -z "$cmd" ]] && continue
       if [[ "$exec_flag" == "--execute" ]]; then
-        echo "+ $cmd"; bash -lc "$cmd"
+        echo "+ $cmd"
+        bash -lc "$cmd"
       else
         echo "DRY: $cmd"
       fi
@@ -48,7 +58,8 @@ if [[ -n "$act_line" ]]; then
     echo "$commands" | tr ' ' '\n' | while read -r cmd; do
       [[ -z "$cmd" ]] && continue
       if [[ "$exec_flag" == "--execute" ]]; then
-        echo "+ $cmd"; bash -lc "$cmd"
+        echo "+ $cmd"
+        bash -lc "$cmd"
       else
         echo "DRY: $cmd"
       fi
@@ -69,7 +80,8 @@ if [[ -n "$verify_line" ]]; then
     echo "$commands" | tr ' ' '\n' | while read -r cmd; do
       [[ -z "$cmd" ]] && continue
       if [[ "$exec_flag" == "--execute" ]]; then
-        echo "+ $cmd"; bash -lc "$cmd"
+        echo "+ $cmd"
+        bash -lc "$cmd"
       else
         echo "DRY: $cmd"
       fi

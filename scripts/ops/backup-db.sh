@@ -37,10 +37,10 @@ log_info "Creating database backup..."
 log_info "Backup file: $BACKUP_FILE"
 
 # Create the backup
-if docker exec n8n-postgres pg_dump -U n8n -d n8n | gzip > "$BACKUP_FILE"; then
+if docker exec n8n-postgres pg_dump -U n8n -d n8n | gzip >"$BACKUP_FILE"; then
   log_info "✅ Database backup created successfully"
   log_info "Size: $(du -h "$BACKUP_FILE" | cut -f1)"
-  
+
   # Verify backup
   if [[ -s "$BACKUP_FILE" ]]; then
     log_info "✅ Backup file verified (non-empty)"
@@ -48,11 +48,11 @@ if docker exec n8n-postgres pg_dump -U n8n -d n8n | gzip > "$BACKUP_FILE"; then
     log_error "❌ Backup file is empty"
     exit 1
   fi
-  
+
   # Clean up old backups (keep last 7 days)
   log_info "Cleaning up old backups (keeping last 7 days)..."
   find "$BACKUP_DIR" -name "n8n_backup_*.sql.gz" -mtime +7 -delete 2>/dev/null || true
-  
+
   log_info "Backup complete: $BACKUP_FILE"
 else
   log_error "❌ Database backup failed"

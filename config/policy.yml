@@ -1,0 +1,170 @@
+version: "2.0"
+metadata:
+  name: "n8n-cursor Production Policy"
+  description: "Comprehensive operational policy for production n8n stack"
+  last_updated: "2024-12-19"
+
+# Repository Structure Policy
+structure:
+  allowed_roots:
+    - "infra/"
+    - "scripts/"
+    - "workflows/"
+    - "templates/"
+    - "docs/"
+    - "reports/"
+    - "apps/"
+    - "config/"
+    - "tools/"
+    - "integrations/"
+    - "examples/"
+    - "visualizations/"
+    - "mcp-server/"
+    - "ai/"
+  
+  forbidden_paths:
+    - "^node_modules/"
+    - "^logs/"
+    - "^backups/"
+    - "^PROTECTED_*"
+    - "^consolidation-backup/"
+    - "^safety-rollback/"
+    - "^workflow_data/"
+  
+  naming_conventions:
+    scripts: "kebab-case.sh"
+    workflows: "kebab-case.json"
+    configs: "kebab-case.yml"
+    docs: "kebab-case.md"
+    templates: "kebab-case.tmpl"
+
+# Security Policy
+security:
+  secrets:
+    forbidden_in_code:
+      - "MASTER_UNLOCK"
+      - "SSH_KEY"
+      - "SUPABASE_SERVICE_ROLE_KEY"
+      - "STRIPE_SECRET_KEY"
+      - "OPENAI_API_KEY"
+    
+    allowed_patterns:
+      - "example_key"
+      - "placeholder_secret"
+      - "template_password"
+  
+  file_permissions:
+    scripts: "755"
+    configs: "644"
+    docs: "644"
+  
+  git_hooks:
+    required: true
+    pre_commit: ["structure-guard", "security-scan", "format-check"]
+    pre_push: ["test-run", "security-audit"]
+
+# Quality Gates
+quality:
+  ci_required: true
+  test_coverage: 80
+  security_scan: true
+  dependency_audit: true
+  
+  linting:
+    shell: ["shellcheck", "shfmt"]
+    yaml: ["yamllint"]
+    json: ["jq validation"]
+    markdown: ["markdownlint"]
+
+# Deployment Policy
+deployment:
+  environments:
+    staging:
+      branch: "04-staging"
+      auto_deploy: true
+      health_check: true
+      rollback_auto: true
+    
+    production:
+      branch: "main"
+      auto_deploy: false
+      manual_approval: true
+      health_check: true
+      rollback_auto: true
+  
+  rollback_triggers:
+    - "health_check_failure"
+    - "error_rate > 5%"
+    - "response_time > 2s"
+    - "disk_usage > 90%"
+
+# Backup Policy
+backup:
+  frequency:
+    database: "daily"
+    workflows: "daily"
+    configs: "weekly"
+    full_repo: "weekly"
+  
+  retention:
+    daily: "7 days"
+    weekly: "4 weeks"
+    monthly: "12 months"
+  
+  verification:
+    required: true
+    test_restore: "weekly"
+
+# Monitoring Policy
+monitoring:
+  endpoints:
+    - "/healthz"
+    - "/readyz"
+    - "/metrics"
+  
+  alerts:
+    critical:
+      - "service_down"
+      - "disk_full"
+      - "memory_high"
+      - "error_rate_high"
+    
+    warning:
+      - "disk_usage > 80%"
+      - "memory_usage > 80%"
+      - "response_time > 1s"
+
+# Emergency Procedures
+emergency:
+  lockdown:
+    triggers:
+      - "security_breach"
+      - "data_corruption"
+      - "service_abuse"
+    
+    actions:
+      - "disable_public_access"
+      - "enable_maintenance_mode"
+      - "notify_team"
+      - "initiate_incident_response"
+  
+  recovery:
+    priority_order:
+      1. "database_integrity"
+      2. "core_services"
+      3. "workflows"
+      4. "monitoring"
+      5. "documentation"
+
+# Compliance
+compliance:
+  data_protection:
+    encryption: "at_rest_and_in_transit"
+    access_logging: true
+    audit_trail: true
+  
+  change_management:
+    change_window: "maintenance_window"
+    approval_required: true
+    rollback_plan: true
+    testing_required: true

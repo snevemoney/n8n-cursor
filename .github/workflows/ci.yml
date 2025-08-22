@@ -15,3 +15,37 @@ jobs:
         run: yamllint -s .
       - name: structure guard
         run: bash scripts/safety/structure-guard.sh
+      - name: Repo Brain validation
+        run: node apps/repo-brain/cli/enforce.mjs --staged
+      - name: Security scan
+        run: |
+          if command -v gitleaks >/dev/null; then
+            gitleaks detect --source . --verbose
+          else
+            echo "Gitleaks not available, skipping security scan"
+          fi
+      - name: Dependency check
+        run: |
+          if [ -f "package.json" ]; then
+            npm audit --audit-level=moderate || true
+          fi
+      - name: Docker security
+        run: |
+          if command -v trivy >/dev/null; then
+            find . -name "Dockerfile" -exec trivy config {} \;
+          else
+            echo "Trivy not available, skipping Docker security scan"
+          fi
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run security checks
+        run: |
+          # Check for secrets in code
+          if git grep -n "password\|secret\|key\|token" -- ':!*.md' ':!*.txt' ':!docs/' | grep -v "example\|template\|placeholder"; then
+            echo "::warning::Potential secrets found in code"
+          fi
+          # Check file permissions
+          find . -name "*.sh" -exec ls -la {} \;

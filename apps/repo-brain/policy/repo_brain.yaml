@@ -1,18 +1,171 @@
-version: 1
-roots: [infra/, scripts/, scripts/ops/, scripts/workflows/, scripts/safety/, scripts/utils/, docs/, workflows/, templates/, apps/]
-forbid: ["^node_modules/", "^logs/", "^backups/"]
+version: "2.0"
+metadata:
+  name: "n8n-cursor Repo Brain Policy"
+  description: "AI-powered file routing and structure enforcement"
+  last_updated: "2024-12-19"
+
+# Allowed repository roots
+roots:
+  - "infra/"
+  - "scripts/"
+  - "workflows/"
+  - "templates/"
+  - "docs/"
+  - "reports/"
+  - "apps/"
+  - "config/"
+  - "tools/"
+  - "integrations/"
+  - "examples/"
+  - "visualizations/"
+  - "mcp-server/"
+  - "ai/"
+
+# Forbidden paths (regex patterns)
+forbid:
+  - "^node_modules/"
+  - "^logs/"
+  - "^backups/"
+  - "^PROTECTED_*"
+  - "^consolidation-backup/"
+  - "^safety-rollback/"
+  - "^workflow_data/"
+  - "^\.env$"
+  - "^\.env\.local$"
+
+# Naming conventions
 naming:
   scripts: "kebab-case .sh"
   workflows: "kebab-case .json"
+  configs: "kebab-case .yml"
+  docs: "kebab-case .md"
+  templates: "kebab-case .tmpl"
+  docker: "kebab-case .dockerfile"
+  compose: "docker-compose.yml"
+
+# Routing rules (priority order)
 routing:
-  - match: "Docker|compose|nginx"
-    to: "infra/"
-  - match: "start|stop|status|backup|restore|n8n"
+  # High priority - exact matches
+  - match: "docker-compose\.yml$"
+    to: "infra/docker/"
+    reason: "Docker Compose configuration"
+    priority: 10
+  
+  - match: "Dockerfile$"
+    to: "infra/docker/"
+    reason: "Docker container definition"
+    priority: 10
+  
+  - match: "nginx.*\.conf$"
+    to: "infra/nginx/"
+    reason: "Nginx configuration"
+    priority: 10
+  
+  # Medium priority - content-based
+  - match: "start|stop|restart|status|backup|restore|up|down"
     to: "scripts/ops/"
-  - match: "workflow|import|export|validate|dedupe"
+    reason: "Operational commands"
+    priority: 8
+  
+  - match: "n8n|workflow|import|export|validate|dedupe"
     to: "scripts/workflows/"
-  - match: "safety|guard|verify|snapshot"
+    reason: "n8n workflow management"
+    priority: 8
+  
+  - match: "safety|guard|verify|snapshot|protection|security"
     to: "scripts/safety/"
+    reason: "Safety and security scripts"
+    priority: 8
+  
+  - match: "library|helpers|utils|logging|colors|common"
+    to: "scripts/utils/"
+    reason: "Utility functions"
+    priority: 8
+  
+  - match: "docker|container|compose|kubernetes|helm"
+    to: "infra/"
+    reason: "Infrastructure configuration"
+    priority: 7
+  
+  - match: "api|endpoint|route|controller|service"
+    to: "apps/"
+    reason: "Application code"
+    priority: 7
+  
+  - match: "mcp|tool|integration|connector"
+    to: "mcp-server/"
+    reason: "MCP server and tools"
+    priority: 7
+  
+  - match: "ai|ml|model|training|inference"
+    to: "ai/"
+    reason: "AI/ML components"
+    priority: 7
+  
+  - match: "test|spec|specification|example|demo"
+    to: "examples/"
+    reason: "Examples and tests"
+    priority: 6
+  
+  - match: "visualization|chart|graph|diagram|flow"
+    to: "visualizations/"
+    reason: "Visual representations"
+    priority: 6
+  
+  - match: "config|setting|parameter|option"
+    to: "config/"
+    reason: "Configuration files"
+    priority: 6
+  
+  - match: "template|boilerplate|scaffold"
+    to: "templates/"
+    reason: "Template files"
+    priority: 6
+  
+  - match: "readme|documentation|guide|manual|tutorial"
+    to: "docs/"
+    reason: "Documentation"
+    priority: 5
+
+# Similarity thresholds
 thresholds:
-  min_similarity: 0.62
-  hard_block: 0.40
+  min_similarity: 0.65        # cosine similarity
+  hard_block: 0.45            # below this, always block
+  confidence_threshold: 0.75  # minimum confidence for auto-routing
+
+# Decision weights
+weights:
+  rules: 0.6                  # policy rules weight
+  embeddings: 0.3             # semantic similarity weight
+  filename: 0.1               # filename pattern weight
+
+# MCP integration
+mcp:
+  enabled: true
+  tools:
+    - "suggestPath"
+    - "enforceStructure"
+    - "explainDecision"
+    - "validatePolicy"
+    - "updatePolicy"
+  
+  auto_suggest: true          # suggest paths in Cursor
+  enforce_on_save: true       # validate structure on file save
+
+# Learning and adaptation
+learning:
+  track_decisions: true       # log all routing decisions
+  feedback_loop: true         # allow human feedback on decisions
+  auto_improve: true          # learn from corrections
+  
+  metrics:
+    - "accuracy"
+    - "confidence"
+    - "human_override_rate"
+    - "decision_time"
+
+# Emergency overrides
+emergency:
+  allow_override: true        # allow manual override in emergencies
+  require_approval: true      # require approval for overrides
+  audit_trail: true           # log all overrides

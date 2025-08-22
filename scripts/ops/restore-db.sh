@@ -70,14 +70,14 @@ docker exec n8n-postgres psql -U n8n -d postgres -c "CREATE DATABASE n8n;"
 log_info "Restoring database from backup..."
 if gunzip -c "$BACKUP_FILE" | docker exec -i n8n-postgres psql -U n8n -d n8n; then
   log_info "✅ Database restore completed successfully"
-  
+
   log_info "Restarting n8n service..."
   docker start n8n
-  
+
   # Wait for n8n to start
   log_info "Waiting for n8n to start..."
   sleep 5
-  
+
   # Verify n8n is running
   if docker ps --filter "name=n8n" --filter "status=running" | grep -q n8n; then
     log_info "✅ n8n service restarted successfully"

@@ -39,7 +39,7 @@ log_info "TLS Setup Commands:"
 log_info "==================="
 
 log_info "1. Install Certbot and Nginx:"
-cat << 'EOF'
+cat <<'EOF'
 sudo apt update
 sudo apt install -y nginx certbot python3-certbot-nginx
 sudo systemctl enable nginx
@@ -48,7 +48,7 @@ EOF
 
 log_info ""
 log_info "2. Basic Nginx configuration for your domain:"
-cat << 'EOF'
+cat <<'EOF'
 sudo tee /etc/nginx/sites-available/n8n << 'NGINXEOF'
 server {
     listen 80;
@@ -122,14 +122,14 @@ echo "sudo systemctl restart nginx"
 
 log_info ""
 log_info "5. Obtain SSL certificate (replace your-domain.com):"
-cat << 'EOF'
+cat <<'EOF'
 sudo certbot --nginx -d your-domain.com
 # Follow the prompts and choose to redirect HTTP to HTTPS
 EOF
 
 log_info ""
 log_info "6. Set up automatic renewal:"
-cat << 'EOF'
+cat <<'EOF'
 sudo systemctl enable certbot.timer
 sudo systemctl start certbot.timer
 
@@ -139,7 +139,7 @@ EOF
 
 log_info ""
 log_info "7. Check certificate status:"
-cat << 'EOF'
+cat <<'EOF'
 sudo certbot certificates
 openssl x509 -in /etc/letsencrypt/live/your-domain.com/fullchain.pem -text -noout | grep -A 2 "Validity"
 EOF
@@ -148,7 +148,7 @@ log_info ""
 log_info "Health check endpoint setup:"
 log_info "=============================="
 log_info "Add this to your n8n application (if not already present):"
-cat << 'EOF'
+cat <<'EOF'
 # Health endpoint that returns JSON
 GET /healthz
 Response: {"status": "ok", "timestamp": "2024-01-01T00:00:00Z", "services": {"database": "ok", "n8n": "ok"}}

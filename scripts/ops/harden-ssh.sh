@@ -24,7 +24,7 @@ echo "sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup.$(date +%Y%m%d)"
 
 log_info ""
 log_info "2. Apply secure settings:"
-cat << 'EOF'
+cat <<'EOF'
 sudo tee -a /etc/ssh/sshd_config.secure << 'SSHEOF'
 # Security hardening
 PermitRootLogin no
@@ -55,7 +55,7 @@ echo "sudo systemctl restart sshd"
 
 log_info ""
 log_info "5. Install fail2ban:"
-cat << 'EOF'
+cat <<'EOF'
 sudo apt update
 sudo apt install -y fail2ban
 sudo systemctl enable fail2ban
@@ -64,7 +64,7 @@ EOF
 
 log_info ""
 log_info "6. Configure fail2ban for SSH:"
-cat << 'EOF'
+cat <<'EOF'
 sudo tee /etc/fail2ban/jail.local << 'F2BEOF'
 [DEFAULT]
 bantime = 3600

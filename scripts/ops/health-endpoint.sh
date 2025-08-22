@@ -24,7 +24,7 @@ fi
 check_service() {
   local service_name="$1"
   local check_command="$2"
-  
+
   log_info "Checking $service_name..."
   if eval "$check_command" &>/dev/null; then
     log_info "✅ $service_name: OK"
