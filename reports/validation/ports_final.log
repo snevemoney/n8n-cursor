@@ -1,0 +1,27 @@
+🔍 Port Configuration Check
+==========================
+
+Expected ports (config/ports.yaml):
+"http: 80"
+"https: 443"
+"db: 5432"
+"n8n: 5678"
+"redis: 6379"
+"rabbitmq: 15672"
+"supabase: 54321"
+"dev_min: 3000"
+"dev_max: 3010"
+"ssh: 22"
+
+Listening sockets:
+COMMAND   PID  USER   FD   TYPE  DEVICE SIZE/OFF NODE NAME
+node    23666 evens   19u  IPv4 7022939      0t0  TCP 127.0.0.1:35705 (LISTEN)
+node    56500 evens   19u  IPv4 8658536      0t0  TCP 127.0.0.1:34179 (LISTEN)
+
+Port conflicts:
+
+Summary:
+✅ All expected ports are active
+
+Cursor/VS Code auto-forwarded ports:
+  None detected

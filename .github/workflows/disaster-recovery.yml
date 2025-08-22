@@ -4,21 +4,86 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  monitor:
+  health-staging:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v4
+      - name: Check health (staging)
+        run: curl -fsS -m 10 "${{ secrets.HEALTH_URL }}"
       
-      - name: Check health
-        run: |
-          set -e
-          URL="${{ secrets.HEALTH_URL }}"
-          echo "Checking ${URL}"
-          curl -fsS -m 10 "$URL"
-          
-      - name: Log health status
-        run: |
-          echo "✅ Health check passed at $(date -u)"
-          echo "URL: ${{ secrets.HEALTH_URL }}"
-          echo "Timestamp: $(date -u +%FT%TZ)"
+      - name: Open incident issue (on failure)
+        if: failure()
+        uses: dacbd/create-issue-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Health check failed – ${{ github.job }}"
+          body: |
+            **Health Check Failure Detected**
+            
+            **Environment**: Staging
+            **Endpoint**: ${{ secrets.HEALTH_URL }}
+            **Workflow**: ${{ github.workflow }} / ${{ github.run_id }}
+            **Time**: ${{ github.run_started_at }}
+            
+            **Immediate Actions**:
+            1. SSH to server: `ssh -p 22222 evens@69.62.66.78`
+            2. Check services: `make status`
+            3. Run diagnostics: `make doctor`
+            4. Check logs: `make logs`
+            
+            **Recovery Commands**:
+            ```bash
+            cd /home/evens/n8n-cursor
+            make doctor          # Check system health
+            DRY_RUN=0 make up   # Restart services
+            curl -f https://n8ncloud.tech/healthz  # Verify recovery
+            ```
+
+  health-prod:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check health (production)
+        run: curl -fsS -m 10 "${{ secrets.HEALTH_URL }}"
+      
+      - name: Open incident issue (on failure)
+        if: failure()
+        uses: dacbd/create-issue-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "🚨 PRODUCTION HEALTH CHECK FAILED – ${{ github.job }}"
+          body: |
+            **🚨 PRODUCTION HEALTH CHECK FAILURE**
+            
+            **Environment**: Production
+            **Endpoint**: ${{ secrets.HEALTH_URL }}
+            **Workflow**: ${{ github.workflow }} / ${{ github.run_id }}
+            **Time**: ${{ github.run_started_at }}
+            
+            **URGENT - Production Down**
+            
+            **Immediate Actions**:
+            1. SSH to server: `ssh -p 22222 evens@69.62.66.78`
+            2. Check services: `make status`
+            3. Run diagnostics: `make doctor`
+            4. Check logs: `make logs`
+            
+            **Emergency Recovery**:
+            ```bash
+            cd /home/evens/n8n-cursor
+            
+            # Quick health check
+            make doctor
+            
+            # Restart services
+            DRY_RUN=0 make up
+            
+            # Verify recovery
+            curl -f https://n8ncloud.tech/healthz
+            
+            # If still failing, rollback
+            git reset --hard HEAD~1
+            DRY_RUN=0 make up
+            ```
+            
+            **Escalation**: If not resolved in 15 minutes, consider manual intervention.
