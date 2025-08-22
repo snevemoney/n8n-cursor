@@ -1,116 +1,250 @@
 # n8n Health Report
 
-Generated: 2025-08-22T15:04:00Z
+## Overview
+**Status**: 🔍 Needs investigation via n8n-mcp  
+**Last Updated**: $(date)  
+**Report Type**: Template (requires n8n-mcp data)
 
-## System Overview
+## Instance Information
 
-- **Repository**: n8n-cursor
-- **Status**: DevOps setup in progress
-- **Last Health Check**: Not yet performed
+### Basic Details
+| Item | Status | Notes |
+|------|--------|-------|
+| n8n URL | ❓ TBD | Check if accessible |
+| n8n Version | ❓ TBD | Current version |
+| Instance Status | ❓ TBD | Running/stopped/error |
+| Database Connection | ❓ TBD | PostgreSQL status |
 
-## Current Issues
-
-### 1. Structure Guard Failures
-- **Forbidden paths detected**: Several files are in incorrect locations
-- **MASTER_UNLOCK string found**: Security issue - needs environment variable usage
-- **Missing docker-compose.yml**: Expected in infra/docker/ directory
-
-### 2. Doctor System Issues
-- **Port 443 busy**: Potential conflict with existing services
-- **Docker compose validation**: File not found in expected location
-
-### 3. Workflow Validation
-- **Status**: ✅ All workflows are valid JSON
-- **Total workflows**: 50+ workflows detected
-- **Categories**: Marketplace, Knowledge Chatbots, Custom Models, Agency Operations, Content Team
-
-## Repository Structure Status
-
-### ✅ Canonical Directories (All Present)
-- infra/docker
-- infra/nginx
-- scripts/ops
-- scripts/workflows
-- scripts/safety
-- scripts/utils
-- scripts/bin
-- workflows
-- templates
-- docs
-- reports
-- apps/repo-brain
-- config
-- backups
-- logs
-
-### ✅ Core Files (All Present)
-- Makefile
-- scripts/utils/lib.sh
-- scripts/safety/structure-guard.sh
-- config/repo.schema
-- templates/workflow.json.tmpl
-- templates/script.sh.tmpl
-
-### ❌ Missing Files
-- .env.example (blocked by gitignore, needs manual creation)
+### Container Status
+| Service | Status | Port | Health |
+|---------|--------|------|--------|
+| n8n | ❓ TBD | 5678 | ❓ TBD |
+| postgres | ❓ TBD | 5432 | ❓ TBD |
 
 ## Workflow Analysis
 
+### Workflow Count
+**Total Workflows**: 61 (from local validation)  
+**Valid JSON**: ✅ 61/61  
+**Duplicate Detection**: 🔍 Needs n8n-mcp validation
+
 ### Workflow Categories
-1. **Marketplace Operations** (01-marketplace/)
-2. **Knowledge Management** (02-knowledge-chatbots/)
-3. **Custom AI Models** (03-custom-models/)
-4. **Creative Coding** (04-vibe-coding/)
-5. **Agency Operations** (05-agency-operations/)
-6. **Content Team** (06-content-team/)
-7. **AI Services** (07-ais-plus-download/)
+| Category | Count | Status |
+|----------|-------|--------|
+| AI/ML | 15+ | ✅ Valid |
+| Webhooks | 2 | ✅ Valid |
+| Agency Operations | 2 | ✅ Valid |
+| Knowledge Chatbots | 2 | ✅ Valid |
+| Custom Models | 2 | ✅ Valid |
+| Content Team | 4 | ✅ Valid |
+| Marketplace | 2 | ✅ Valid |
+| Enhanced | 2 | ✅ Valid |
+| Imported | 15+ | ✅ Valid |
 
-### Potential Duplicates Identified
-- Multiple versions of similar workflows (clean vs enhanced)
-- Some workflows appear to be variations of the same base
+### Workflow Health
+| Metric | Status | Details |
+|--------|--------|---------|
+| JSON Validation | ✅ Pass | All 61 workflows valid |
+| Duplicate Detection | 🔍 TBD | Needs n8n-mcp |
+| Execution Status | 🔍 TBD | Needs n8n-mcp |
+| Error Rate | 🔍 TBD | Needs n8n-mcp |
 
-## Security Status
+## System Health
 
-### ❌ Critical Issues
-- **MASTER_UNLOCK hardcoded**: Found in scripts, must use environment variables
-- **Forbidden file paths**: Several files in root directory that should be moved
+### Resource Usage
+| Resource | Status | Details |
+|----------|--------|---------|
+| CPU Usage | 🔍 TBD | Needs monitoring |
+| Memory Usage | 🔍 TBD | Needs monitoring |
+| Disk Space | 🔍 TBD | Needs monitoring |
+| Network I/O | 🔍 TBD | Needs monitoring |
 
-### ⚠️ Warnings
-- Port 443 conflict (may affect HTTPS services)
-- Some scripts have overlapping functionality
+### Service Health
+| Service | Status | Last Check | Issues |
+|---------|--------|------------|---------|
+| n8n API | 🔍 TBD | Never | Unknown |
+| Database | 🔍 TBD | Never | Unknown |
+| Webhooks | 🔍 TBD | Never | Unknown |
+| Cron Jobs | 🔍 TBD | Never | Unknown |
 
-## Recommendations
+## Configuration Status
 
-### Immediate Actions Required
-1. **Fix MASTER_UNLOCK usage**: Remove hardcoded strings, use environment variables
-2. **Move forbidden files**: Relocate files to canonical directories
-3. **Create .env.example**: Document required environment variables
+### Docker Compose
+**File**: `infra/docker/docker-compose.yml`  
+**Status**: ✅ Configured
 
-### Short-term Improvements
-1. **Workflow deduplication**: Run `make wf-dedupe` to identify exact duplicates
-2. **Script consolidation**: Merge overlapping functionality in similar scripts
-3. **Port conflict resolution**: Investigate what's using port 443
+| Setting | Value | Status |
+|---------|-------|--------|
+| n8n Port | 5678 | ✅ Configured |
+| Database Port | 5432 | ✅ Configured |
+| Authentication | Basic Auth | ✅ Enabled |
+| Database Type | PostgreSQL | ✅ Configured |
 
-### Long-term Goals
-1. **Automated health checks**: Integrate health monitoring into CI/CD
-2. **Workflow organization**: Implement better categorization and versioning
-3. **Security hardening**: Implement additional security checks and validations
+### Environment Variables
+| Variable | Status | Notes |
+|----------|--------|-------|
+| N8N_BASIC_AUTH_ACTIVE | ✅ Set | Basic auth enabled |
+| N8N_BASIC_AUTH_USER | ✅ Set | admin |
+| N8N_BASIC_AUTH_PASSWORD | ⚠️ Default | changeme (needs change) |
+| DB_TYPE | ✅ Set | postgresdb |
+| DB_POSTGRESDB_HOST | ✅ Set | postgres |
+
+## Issues and Recommendations
+
+### 🔴 Critical Issues
+1. **Default Passwords**
+   - n8n admin password: `changeme`
+   - PostgreSQL password: `n8n`
+   - **Action**: Change immediately
+
+2. **Health Monitoring**
+   - No active health checks
+   - No performance monitoring
+   - **Action**: Implement monitoring
+
+### 🟡 High Priority
+1. **Instance Validation**
+   - n8n instance status unknown
+   - Database connectivity untested
+   - **Action**: Test connectivity
+
+2. **Workflow Management**
+   - Duplicate detection needed
+   - Execution monitoring needed
+   - **Action**: Enable n8n-mcp
+
+### 🟢 Medium Priority
+1. **Performance Optimization**
+   - Resource usage unknown
+   - Scaling configuration needed
+   - **Action**: Monitor and optimize
+
+2. **Backup Strategy**
+   - Workflow backup needed
+   - Database backup needed
+   - **Action**: Implement backup
+
+## Required Actions
+
+### Immediate (Today)
+1. **Test n8n Connectivity**
+   ```bash
+   # Check if n8n is running
+   curl -u admin:changeme http://localhost:5678/healthz
+   
+   # Check database connection
+   docker exec n8n-postgres pg_isready
+   ```
+
+2. **Change Default Passwords**
+   ```bash
+   # Set secure passwords
+   export N8N_BASIC_AUTH_PASSWORD="secure_password_123"
+   export DB_POSTGRESDB_PASSWORD="secure_db_password_456"
+   
+   # Restart services
+   DRY_RUN=0 make restart
+   ```
+
+### This Week
+1. **Enable n8n-mcp Integration**
+   - Configure n8n-mcp tool
+   - Test workflow validation
+   - Enable duplicate detection
+
+2. **Implement Monitoring**
+   - Set up health checks
+   - Configure alerts
+   - Monitor resource usage
+
+### This Month
+1. **Performance Optimization**
+   - Analyze workflow performance
+   - Optimize resource usage
+   - Implement scaling
+
+2. **Backup Strategy**
+   - Automated workflow backup
+   - Database backup
+   - Disaster recovery plan
+
+## n8n-mcp Integration
+
+### Required Setup
+**Status**: 🔍 Needs configuration
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| n8n-mcp Server | ❓ TBD | Check if enabled |
+| Authentication | ❓ TBD | API key setup |
+| Workflow Access | ❓ TBD | Read permissions |
+| Health Checks | ❓ TBD | Monitoring access |
+
+### Expected Capabilities
+1. **Workflow Management**
+   - List all workflows
+   - Validate workflow JSON
+   - Detect duplicates
+   - Monitor execution
+
+2. **System Health**
+   - Instance status
+   - Resource usage
+   - Error monitoring
+   - Performance metrics
+
+3. **Configuration**
+   - Environment variables
+   - Database settings
+   - Authentication status
+   - Service configuration
+
+## Monitoring Commands
+
+### Local Health Check
+```bash
+# Check container status
+make status
+
+# Check logs
+make logs
+
+# Run health check
+make doctor
+
+# Validate workflows
+make wf-validate
+```
+
+### n8n API Check
+```bash
+# Health endpoint
+curl -u admin:changeme http://localhost:5678/healthz
+
+# Workflows endpoint
+curl -u admin:changeme http://localhost:5678/api/v1/workflows
+
+# Database status
+curl -u admin:changeme http://localhost:5678/api/v1/health
+```
 
 ## Next Steps
 
-1. **Run structure guard**: `make guard` to identify remaining issues
-2. **Fix security issues**: Remove MASTER_UNLOCK hardcoding
-3. **Validate workflows**: `make wf-validate` to ensure all workflows are valid
-4. **Check system health**: `make doctor` to verify overall system status
+### 1. Enable n8n-mcp
+- Verify n8n-mcp tool availability
+- Configure authentication
+- Test basic connectivity
 
-## Notes
+### 2. Populate Report
+- Run health checks via n8n-mcp
+- Update status information
+- Identify actual issues
 
-- Repository has comprehensive workflow collection
-- DevOps structure is well-designed and implemented
-- Security measures are in place but need enforcement
-- All workflows are syntactically valid JSON
-- System is ready for production use after security fixes
+### 3. Implement Fixes
+- Resolve critical issues
+- Set up monitoring
+- Optimize performance
 
 ---
-
-**Status**: 🟡 SETUP_IN_PROGRESS - Ready for final security fixes and validation
+*Generated by Discovery & Context Harvest process*  
+*Note: This report requires n8n-mcp integration for complete data*

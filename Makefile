@@ -23,6 +23,7 @@ fmt:      ; @find . -name "*.sh" -not -path "./PROTECTED_BACKUP/*" -not -path ".
 lint:     ; @shellcheck -x $$(git ls-files '*.sh') || true
 guard:    ; @bash scripts/safety/structure-guard.sh
 doctor:   ; @bash scripts/ops/doctor.sh
+ports:    ; @bash scripts/ops/ports.sh
 repair:   ; @DRY_RUN=0 bash scripts/ops/n8n.sh restart
 repair-remote: ; @bash scripts/ops/repair-remote.sh
 

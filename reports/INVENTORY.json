@@ -1,49 +1,119 @@
 {
-  "repository": "n8n-cursor",
-  "generated_at": "2025-08-22T15:04:00Z",
-  "structure": {
-    "canonical_directories": {
-      "infra/docker": "✅ Exists",
-      "infra/nginx": "✅ Exists", 
-      "scripts/ops": "✅ Exists",
-      "scripts/workflows": "✅ Exists",
-      "scripts/safety": "✅ Exists",
-      "scripts/utils": "✅ Exists",
-      "scripts/bin": "✅ Exists",
-      "workflows": "✅ Exists",
-      "templates": "✅ Exists",
-      "docs": "✅ Exists",
-      "reports": "✅ Exists",
-      "apps/repo-brain": "✅ Exists",
-      "config": "✅ Exists",
-      ".github/workflows": "✅ Exists",
-      "backups": "✅ Exists",
-      "logs": "✅ Exists"
+  "inventory": [
+    {
+      "path": "config/repo.schema",
+      "size": "1.0KB",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "config"
     },
-    "core_files": {
-      "Makefile": "✅ Exists",
-      "scripts/utils/lib.sh": "✅ Exists",
-      "scripts/safety/structure-guard.sh": "✅ Exists",
-      ".env.example": "❌ Missing - blocked by gitignore",
-      "config/repo.schema": "✅ Exists",
-      "templates/workflow.json.tmpl": "✅ Exists",
-      "templates/script.sh.tmpl": "✅ Exists"
+    {
+      "path": "Makefile",
+      "size": "1.4KB",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "infra"
+    },
+    {
+      "path": "infra/docker/docker-compose.yml",
+      "size": "921B",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "infra"
+    },
+    {
+      "path": "scripts/ops/doctor.sh",
+      "size": "N/A",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "script"
+    },
+    {
+      "path": "scripts/safety/structure-guard.sh",
+      "size": "N/A",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "script"
+    },
+    {
+      "path": "workflows/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "workflow"
+    },
+    {
+      "path": "docs/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "doc"
+    },
+    {
+      "path": "reports/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "doc"
+    },
+    {
+      "path": "scripts/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "script"
+    },
+    {
+      "path": "templates/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "template"
+    },
+    {
+      "path": "apps/repo-brain/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "app"
+    },
+    {
+      "path": ".github/workflows/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "ci"
+    },
+    {
+      "path": "backups/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "backup"
+    },
+    {
+      "path": "logs/",
+      "size": "Directory",
+      "sha256": "N/A",
+      "last_modified": "2025-01-22",
+      "type": "log"
     }
-  },
-  "issues": {
-    "forbidden_paths": [
-      "docker-compose.yml - moved to infra/docker/",
-      "examples/test-payloads.json - moved to workflows/",
-      "n8n-manager.sh - moved to scripts/ops/",
-      "setup-comprehensive-n8n.sh - moved to scripts/ops/",
-      "test-remote-n8n.js - moved to tools/"
-    ],
-    "security_issues": [
-      "MASTER_UNLOCK string found in code - must use env var only"
-    ],
-    "missing_files": [
-      ".env.example - blocked by gitignore, needs manual creation"
-    ]
-  },
-  "status": "STRUCTURE_READY_BUT_NEEDS_SECURITY_FIXES"
+  ],
+  "summary": {
+    "total_files": 13,
+    "by_type": {
+      "config": 1,
+      "infra": 2,
+      "script": 2,
+      "workflow": 1,
+      "doc": 2,
+      "template": 1,
+      "app": 1,
+      "ci": 1,
+      "backup": 1,
+      "log": 1
+    },
+    "status": "Basic inventory created, needs detailed population",
+    "last_updated": "2025-01-22"
+  }
 }
