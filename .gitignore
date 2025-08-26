@@ -1,0 +1,12 @@
+# Build outputs
+.next/
+*.pack.gz
+
+# Test outputs
+bot-test-results/
+playwright-report/
+
+# Large files
+*.tar.gz
+*.sqlite
+*.db
