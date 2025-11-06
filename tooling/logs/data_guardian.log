@@ -1,8 +1,0 @@
-2025-08-19 20:37:20: ALERT: N8N database missing or too small at /var/lib/docker/volumes/n8n-cursor_n8n_data/_data
-2025-08-19 20:37:20: CRITICAL: Data loss detected at /var/lib/docker/volumes/n8n-cursor_n8n_data/_data - RESTORING IMMEDIATELY
-2025-08-19 20:37:21: SUCCESS: Data restored from protected backup to /var/lib/docker/volumes/n8n-cursor_n8n_data/_data
-2025-08-19 20:37:50: INFO: N8N container restarted to load restored data
-2025-08-21 02:24:11: ALERT: N8N database missing or too small at /var/snap/docker/common/var-lib-docker/volumes/n8n-cursor_n8n_data/_data
-2025-08-21 02:24:11: CRITICAL: Data loss detected at /var/snap/docker/common/var-lib-docker/volumes/n8n-cursor_n8n_data/_data - RESTORING IMMEDIATELY
-2025-08-21 02:24:13: SUCCESS: Data restored from protected backup to /var/snap/docker/common/var-lib-docker/volumes/n8n-cursor_n8n_data/_data
-2025-08-21 02:24:26: INFO: N8N container restarted to load restored data

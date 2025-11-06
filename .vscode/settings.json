@@ -1,0 +1,31 @@
+{
+  "files.maxMemoryForLargeFilesMB": 64,
+  "search.followSymlinks": false,
+  "editor.largeFileOptimizations": true,
+  "workbench.editor.restoreViewState": false,
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/tooling/backups/**": true,
+    "**/PROTECTED_BACKUP/**": true,
+    "**/docker_data/**": true,
+    "**/*.log": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/tooling/backups": true,
+    "**/PROTECTED_BACKUP": true,
+    "**/docker_data": true,
+    "**/*.log": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/tooling/backups": true,
+    "**/PROTECTED_BACKUP": true,
+    "**/docker_data": true
+  },
+  "editor.maxTokenizationLineLength": 20000,
+  "workbench.startupEditor": "none",
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "git.ignoreLimitWarning": true
+}
