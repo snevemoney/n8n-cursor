@@ -10,7 +10,7 @@ export default function ScorpionHomePage() {
       <div className="max-w-2xl w-full space-y-8 p-8">
         {/* ASCII Logo */}
         <div className="flex justify-center">
-          <div className="sc-mono text-[6px] leading-tight text-emerald-400/80 whitespace-pre">
+          <div className="sc-mono text-[8px] leading-tight text-emerald-400/80 whitespace-pre">
             {`
     ...******..*****..*****..*****..*****..*****..*****..*****..*****.
     ..*****....*****....*****....*****....*****....*****....*****....*****.
@@ -35,13 +35,13 @@ export default function ScorpionHomePage() {
 
         {/* Quick Access */}
         <div className="grid grid-cols-2 gap-3">
-          <Link href="/ops" className="sc-panel p-4 hover:bg-white/5 transition-colors">
+          <Link href="/ops" className="sc-panel p-4 hover:bg-white/5 transition-colors block">
             <div className="sc-title mb-2">Operations</div>
-            <div className="text-sm">Monitor agents & workflows</div>
+            <div className="text-sm text-white/70">Monitor agents & workflows</div>
           </Link>
-          <Link href="/council" className="sc-panel p-4 hover:bg-white/5 transition-colors">
+          <Link href="/council" className="sc-panel p-4 hover:bg-white/5 transition-colors block">
             <div className="sc-title mb-2">Council</div>
-            <div className="text-sm">Multi-agent deliberation</div>
+            <div className="text-sm text-white/70">Multi-agent deliberation</div>
           </Link>
         </div>
       </div>

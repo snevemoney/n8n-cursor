@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
+  Home,
   Activity, 
   Workflow, 
   Sparkles, 
@@ -17,6 +18,7 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   const navItems = [
+    { href: '/', label: 'Home', icon: Home },
     { href: '/ops', label: 'Operations', icon: Activity },
     { href: '/workflows', label: 'Workflows', icon: Workflow },
     { href: '/build', label: 'Build', icon: Sparkles },
@@ -38,7 +40,9 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (pathname?.startsWith(item.href + '/') && item.href !== '/');
+            const isActive = item.href === '/' 
+              ? pathname === '/' 
+              : pathname === item.href || (pathname?.startsWith(item.href + '/') && item.href !== '/');
             return (
               <Link
                 key={item.href}

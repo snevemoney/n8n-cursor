@@ -7,7 +7,7 @@ export default function BuildPage() {
   const [selectedProject, setSelectedProject] = useState('');
 
   return (
-    <div className="grid grid-cols-[320px_1fr] gap-4 p-4">
+    <div className="h-full grid grid-cols-[320px_1fr] gap-4 p-4">
       <Panel title="Build Steps">
         <div className="space-y-2">
           {['Analyze Requirements', 'Extract Knowledge', 'Generate Plan', 'Create Scaffold', 'Deploy'].map((step, idx) => (

@@ -14,7 +14,7 @@ const MOCK_LOGS = [
 
 export default function LogsPage() {
   return (
-    <div className="p-4">
+    <div className="h-full p-4 overflow-y-auto">
       <Panel title="System Logs">
         <div className="space-y-0">
           {MOCK_LOGS.map((log, idx) => (

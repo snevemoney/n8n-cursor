@@ -6,7 +6,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
   const id = params.id;
 
   return (
-    <div className="h-full grid grid-cols-[360px_1fr] p-4 gap-4">
+    <div className="h-full grid grid-cols-[360px_1fr] p-4 gap-4 overflow-y-auto">
       {/* Left: Agent Profile */}
       <Panel title="Agent Details">
         <div className="text-2xl font-semibold mb-2 sc-mono">AGENT {id.toUpperCase()}</div>

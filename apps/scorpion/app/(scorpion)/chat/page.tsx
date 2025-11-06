@@ -105,7 +105,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="h-full flex flex-col p-4">
+    <div className="h-full flex flex-col p-4 overflow-hidden">
       {/* Header */}
       <Panel className="mb-4">
         <div className="flex items-center justify-between">

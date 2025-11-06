@@ -10,7 +10,7 @@ export default function SettingsPage() {
   const [ollamaUrl, setOllamaUrl] = useState('http://localhost:11434');
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-4">
+    <div className="h-full grid grid-cols-2 gap-4 p-4 overflow-y-auto">
       <Panel title="Model Configuration">
         <div className="space-y-3">
           <div>

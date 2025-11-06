@@ -45,7 +45,7 @@ export default function KnowledgePage() {
   const displayKnowledge = knowledge.length > 0 ? knowledge : MOCK_KNOWLEDGE;
 
   return (
-    <div className="grid grid-cols-[280px_1fr_400px] gap-4 p-4">
+    <div className="h-full grid grid-cols-[280px_1fr_400px] gap-4 p-4 overflow-y-auto">
       <Panel title="Filters">
         <div className="space-y-3">
           <div>

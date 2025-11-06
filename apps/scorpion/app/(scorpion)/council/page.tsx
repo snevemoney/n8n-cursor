@@ -52,7 +52,7 @@ export default function CouncilPage() {
   }
 
   return (
-    <div className="grid grid-cols-[280px_1.1fr_0.7fr] gap-4 p-4">
+    <div className="h-full grid grid-cols-[280px_1.1fr_0.7fr] gap-4 p-4 overflow-y-auto">
       <Panel title="Council Members">
         <div className="space-y-2">
           {members.map((member) => (

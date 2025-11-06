@@ -14,9 +14,9 @@ const ACTIONS = [
 
 export default function WorkflowsPage() {
   return (
-    <div className="h-full flex">
+    <div className="h-full flex overflow-hidden">
       {/* Left Palette */}
-      <aside className="w-64 border-r border-white/5 bg-[#0f1318] p-3 overflow-y-auto shrink-0">
+      <aside className="w-64 border-r border-white/5 bg-[#0f1318] p-4 overflow-y-auto shrink-0">
         <h2 className="sc-title mb-3">Build Block</h2>
         <Section title="Rules" items={RULES} />
         <Section title="List & Sequence" items={ACTIONS} />
@@ -24,7 +24,7 @@ export default function WorkflowsPage() {
 
       {/* Canvas */}
       <div className="flex-1 relative bg-[#0a0d10] sc-grid-bg overflow-hidden">
-        <div className="relative w-full h-full p-10">
+        <div className="relative w-full h-full p-8">
           <WorkflowNode x={80} y={40} label="Generate e-book outline" status="done" />
           <WorkflowNode x={340} y={90} label="Expand outline into chapters" status="running" />
           <WorkflowNode x={620} y={160} label="Format into PDF" status="idle" />

@@ -20,7 +20,7 @@ const MOCK_LOGS = [
 
 export default function AgentsPage() {
   return (
-    <div className="grid grid-cols-[1.1fr_0.9fr] gap-4 p-4">
+    <div className="h-full grid grid-cols-[1.1fr_0.9fr] gap-4 p-4 overflow-y-auto">
       <Panel title="Agent Data Overview">
         <DataTable
           columns={[
