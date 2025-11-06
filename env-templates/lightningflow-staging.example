@@ -1,0 +1,37 @@
+# LightningFlow AI - Staging Environment
+# Copy this to apps/lightningflow/.env.staging and fill in your values
+
+# Environment
+NODE_ENV=staging
+NEXT_PUBLIC_APP_MODE=staging
+NEXT_PUBLIC_MOCK_MODE=false
+
+# Lightning Network (Staging)
+NEXT_PUBLIC_LIGHTNING_NETWORK=testnet
+
+# API Configuration
+NEXT_PUBLIC_API_BASE_URL=https://api-staging.lfa.example.com
+
+# Feature Flags
+NEXT_PUBLIC_ENABLE_AI_ASSISTANT=true
+NEXT_PUBLIC_ENABLE_TRUST_TILES=true
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+
+# Supabase (Staging)
+SUPABASE_URL=https://your-staging-project.supabase.co
+SUPABASE_ANON_KEY=your-staging-anon-key
+SUPABASE_SERVICE_KEY=your-staging-service-role-key
+
+# OpenAI (Staging)
+OPENAI_API_KEY=sk-your-openai-api-key
+
+# Lightning Network (Staging)
+LIGHTNING_NETWORK=testnet
+LNBITS_URL=https://staging-lnbits.example.com
+LNBITS_ADMIN_KEY=your-staging-admin-key
+
+# Redis (Staging)
+REDIS_URL=redis://staging-redis:6379
+
+# Database (Staging)
+DATABASE_URL=postgresql://postgres:password@staging-postgres:5432/lightningflow_stg

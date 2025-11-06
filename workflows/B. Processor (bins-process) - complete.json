@@ -1,0 +1,224 @@
+{
+  "name": "B. Processor (bins-process)",
+  "nodes": [
+    {
+      "id": "Webhook_Processor",
+      "name": "Webhook: /webhook/bins-process",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 260],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bins-process",
+        "responseMode": "lastNode"
+      }
+    },
+    {
+      "id": "Switch_Bin",
+      "name": "Switch by bin",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [460, 260],
+      "parameters": {
+        "propertyName": "bin",
+        "rules": {
+          "values": [
+            { "operation": "equal", "value": "CONTRACT" },
+            { "operation": "equal", "value": "BANKING" },
+            { "operation": "equal", "value": "CARFAX" },
+            { "operation": "equal", "value": "DEALER BOS" },
+            { "operation": "equal", "value": "INSURANCE" },
+            { "operation": "equal", "value": "PPSA" },
+            { "operation": "equal", "value": "UCC" },
+            { "operation": "equal", "value": "OWNERSHIP" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Exec_Contract",
+      "name": "Execute WF: Extractor – CONTRACT",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 80],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Exec_Banking",
+      "name": "Execute WF: Extractor – BANKING",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 140],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Exec_Carfax",
+      "name": "Execute WF: Extractor – CARFAX",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 200],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Exec_BOS",
+      "name": "Execute WF: Extractor – DEALER BOS",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 260],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Exec_Insurance",
+      "name": "Execute WF: Extractor – INSURANCE",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 320],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Exec_PPSA",
+      "name": "Execute WF: Extractor – PPSA",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 380],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Exec_UCC",
+      "name": "Execute WF: Extractor – UCC",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 440],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Exec_Ownership",
+      "name": "Execute WF: Extractor – OWNERSHIP",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [700, 500],
+      "parameters": {
+        "workflowId": "LrbzH5K9awpBMHyD",
+        "options": {
+          "arguments": "={\"file_url\": $json[\"file_url\"], \"id_number\": $json[\"id_number\"]}",
+          "waitForCompletion": true
+        }
+      }
+    },
+    {
+      "id": "Merge_Values",
+      "name": "Merge (take extractor result)",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [960, 300],
+      "parameters": {
+        "mode": "passThrough"
+      }
+    },
+    {
+      "id": "Code_ValuesToRows",
+      "name": "Code: values → rows",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1180, 300],
+      "parameters": {
+        "functionCode": "// Convert {values} → rows for Update Rows\nconst vals = $json.values || {};\nconst rows = Object.entries(vals)\n  .filter(([k,v]) => (v ?? '') !== '')\n  .map(([k,v]) => ({ json: { Attribute: k, output: String(v) } }));\nreturn rows.length ? rows : [{ json: { Attribute: '__noop__', output: '' } }];"
+      }
+    },
+    {
+      "id": "Sheets_UpdateRows",
+      "name": "Google Sheets: Update Rows (Key = Attribute)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 5,
+      "position": [1400, 300],
+      "parameters": {
+        "operation": "update",
+        "sheetId": "GOOGLE_SHEET_ID",
+        "range": "LOAN_AGREEMENT_ATTRIBUTES!A:C",
+        "key": "Attribute",
+        "options": { "valueInputMode": "RAW", "continueOnFail": true },
+        "columns": [ "Attribute", "output" ]
+      }
+    },
+    {
+      "id": "Webhook_Response",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1640, 300],
+      "parameters": {
+        "responseBody": "={ { job_id: $json.job_id || 'unknown', status: 'processed', attributes_written: $items().length } }",
+        "options": { "responseCode": 200 }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook: /webhook/bins-process": { "main": [ [ { "node": "Switch by bin", "type": "main", "index": 0 } ] ] },
+    "Switch by bin": {
+      "main": [
+        [ { "node": "Execute WF: Extractor – CONTRACT", "type": "main", "index": 0 } ],
+        [ { "node": "Execute WF: Extractor – BANKING", "type": "main", "index": 0 } ],
+        [ { "node": "Execute WF: Extractor – CARFAX", "type": "main", "index": 0 } ],
+        [ { "node": "Execute WF: Extractor – DEALER BOS", "type": "main", "index": 0 } ],
+        [ { "node": "Execute WF: Extractor – INSURANCE", "type": "main", "index": 0 } ],
+        [ { "node": "Execute WF: Extractor – PPSA", "type": "main", "index": 0 } ],
+        [ { "node": "Execute WF: Extractor – UCC", "type": "main", "index": 0 } ],
+        [ { "node": "Execute WF: Extractor – OWNERSHIP", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Execute WF: Extractor – CONTRACT": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Execute WF: Extractor – BANKING": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Execute WF: Extractor – CARFAX": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Execute WF: Extractor – DEALER BOS": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Execute WF: Extractor – INSURANCE": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Execute WF: Extractor – PPSA": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Execute WF: Extractor – UCC": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Execute WF: Extractor – OWNERSHIP": { "main": [ [ { "node": "Merge (take extractor result)", "type": "main", "index": 0 } ] ] },
+    "Merge (take extractor result)": { "main": [ [ { "node": "Code: values → rows", "type": "main", "index": 0 } ] ] },
+    "Code: values → rows": { "main": [ [ { "node": "Google Sheets: Update Rows (Key = Attribute)", "type": "main", "index": 0 } ] ] },
+    "Google Sheets: Update Rows (Key = Attribute)": { "main": [ [ { "node": "Respond", "type": "main", "index": 0 } ] ] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

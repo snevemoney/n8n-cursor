@@ -1,0 +1,170 @@
+{
+  "name": "Compliance Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "daily-trigger",
+      "name": "Daily Compliance Check",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 2.1,
+      "position": [-400, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT tenant_id FROM tenants WHERE is_active = true",
+        "options": {}
+      },
+      "id": "get-tenants",
+      "name": "Get Active Tenants",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [-200, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false,
+          "options": {}
+        }
+      },
+      "id": "split-tenants",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [0, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_expiring_compliance('{{ $json.tenant_id }}', 30)",
+        "options": {}
+      },
+      "id": "check-expiring",
+      "name": "Check Expiring Compliance",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [200, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-expiring",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "gt",
+                "singleValue": false
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has-expiring",
+      "name": "Has Expiring Items?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [400, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT admin_email FROM tenants WHERE tenant_id = '{{ $json[0].tenant_id }}'",
+        "options": {}
+      },
+      "id": "get-admin-email",
+      "name": "Get Admin Email",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [600, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "{{ $('Get Admin Email').item.json.admin_email }}",
+        "toEmail": "{{ $('Get Admin Email').item.json.admin_email }}",
+        "subject": "⚠️ Compliance Alert: {{ $json.document_name }} expiring soon",
+        "text": "=Your compliance record \"{{ $json.document_name }}\" will expire on {{ $json.expiry_date }} ({{ $json.days_until_expiry }} days).\n\nRecord Type: {{ $json.record_type }}\nIssuing Authority: {{ $json.issuing_authority }}\n\nPlease renew this compliance record before the expiration date.",
+        "options": {}
+      },
+      "id": "send-alert",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [800, 400]
+    }
+  ],
+  "connections": {
+    "Daily Compliance Check": {
+      "main": [[{"node": "Get Active Tenants", "type": "main", "index": 0}]]
+    },
+    "Get Active Tenants": {
+      "main": [[{"node": "Split In Batches", "type": "main", "index": 0}]]
+    },
+    "Split In Batches": {
+      "main": [[{"node": "Check Expiring Compliance", "type": "main", "index": 0}]]
+    },
+    "Check Expiring Compliance": {
+      "main": [[{"node": "Has Expiring Items?", "type": "main", "index": 0}]]
+    },
+    "Has Expiring Items?": {
+      "main": [
+        [{"node": "Get Admin Email", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Get Admin Email": {
+      "main": [[{"node": "Send Alert Email", "type": "main", "index": 0}]]
+    },
+    "Send Alert Email": {
+      "main": [[{"node": "Split In Batches", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-25T00:00:00.000Z",
+  "versionId": "1"
+}

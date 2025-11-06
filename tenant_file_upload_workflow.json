@@ -1,0 +1,152 @@
+{
+  "name": "Multi-Tenant File Upload Handler",
+  "nodes": [
+    {
+      "name": "File Upload Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tenant-file-upload",
+        "options": {}
+      },
+      "position": [100, 200],
+      "id": "file-upload-webhook"
+    },
+    {
+      "name": "Extract Upload Data",
+      "type": "n8n-nodes-base.function",
+      "parameters": {
+        "functionCode": "const input = $input.first().json;\n\nreturn {\n  tenantId: input.tenantId,\n  fileId: input.fileId,\n  fileName: input.fileName,\n  fileUrl: input.fileUrl,\n  fileType: input.fileType,\n  userId: input.userId || 'system',\n  source: input.source || 'manual_upload'\n};"
+      },
+      "position": [300, 200],
+      "id": "extract-upload-data"
+    },
+    {
+      "name": "Validate Tenant",
+      "type": "n8n-nodes-base.postgres",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT tenant_id, business_name, is_active FROM tenants WHERE tenant_id = '{{ $json.tenantId }}' AND is_active = true;"
+      },
+      "position": [500, 200],
+      "id": "validate-tenant"
+    },
+    {
+      "name": "Check File Exists",
+      "type": "n8n-nodes-base.postgres",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM document_metadata WHERE id = '{{ $json.fileId }}' AND tenant_id = '{{ $json.tenantId }}';"
+      },
+      "position": [700, 200],
+      "id": "check-file-exists"
+    },
+    {
+      "name": "Add File to Tenant Knowledge Base",
+      "type": "n8n-nodes-base.postgres",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT add_file_to_tenant_knowledge_base(\n  '{{ $json.tenantId }}',\n  '{{ $json.fileId }}',\n  '{{ $json.fileName }}',\n  '{{ $json.fileUrl }}',\n  '{{ $json.fileType }}',\n  '{{ $json.userId }}'\n);"
+      },
+      "position": [900, 200],
+      "id": "add-file-to-knowledge-base"
+    },
+    {
+      "name": "Process File Content",
+      "type": "n8n-nodes-base.function",
+      "parameters": {
+        "functionCode": "const input = $input.first().json;\n\n// This would trigger the actual file processing\n// For now, return success\nreturn {\n  success: true,\n  message: 'File added to tenant knowledge base',\n  tenantId: input.tenantId,\n  fileId: input.fileId,\n  fileName: input.fileName\n};"
+      },
+      "position": [1100, 200],
+      "id": "process-file-content"
+    },
+    {
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"File successfully added to tenant knowledge base\",\n  \"tenantId\": \"{{ $json.tenantId }}\",\n  \"fileId\": \"{{ $json.fileId }}\",\n  \"fileName\": \"{{ $json.fileName }}\"\n}"
+      },
+      "position": [1300, 200],
+      "id": "respond-success"
+    },
+    {
+      "name": "Handle Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"{{ $json.error || 'Unknown error occurred' }}\",\n  \"tenantId\": \"{{ $json.tenantId }}\"\n}"
+      },
+      "position": [500, 400],
+      "id": "handle-error"
+    }
+  ],
+  "connections": {
+    "File Upload Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Upload Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Upload Data": {
+      "main": [
+        [
+          {
+            "node": "Validate Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Tenant": {
+      "main": [
+        [
+          {
+            "node": "Check File Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check File Exists": {
+      "main": [
+        [
+          {
+            "node": "Add File to Tenant Knowledge Base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add File to Tenant Knowledge Base": {
+      "main": [
+        [
+          {
+            "node": "Process File Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process File Content": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

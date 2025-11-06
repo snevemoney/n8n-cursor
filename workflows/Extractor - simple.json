@@ -1,0 +1,43 @@
+{
+  "name": "Extractor – CONTRACT",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "extract-contract",
+        "responseMode": "lastNode"
+      }
+    },
+    {
+      "id": "code-extract",
+      "name": "Code: Extract Contract Fields",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [400, 200],
+      "parameters": {
+        "functionCode": "// Extract contract-specific fields\nconst text = ($json.text || '').toLowerCase();\nconst id_number = $json.id_number || '';\n\n// Contract-specific extraction patterns\nconst patterns = {\n  borrower_name: /borrower[\\s\\-]*name[\\s\\-]*:?[\\s\\-]*([^\\n]+)/i,\n  lender_name: /lender[\\s\\-]*name[\\s\\-]*:?[\\s\\-]*([^\\n]+)/i,\n  loan_amount: /(?:loan|principal)[\\s\\-]*amount[\\s\\-]*:?[\\s\\-]*\\$?([0-9,]+(?:\\.\\d{2})?)/i,\n  interest_rate: /(?:interest|rate)[\\s\\-]*:?[\\s\\-]*([0-9]+(?:\\.\\d+)?)[\\s\\-]*%/i,\n  term_months: /(?:term|duration)[\\s\\-]*:?[\\s\\-]*([0-9]+)[\\s\\-]*(?:months?|years?)/i\n};\n\nconst extracted = {};\n\n// Extract each field\nObject.entries(patterns).forEach(([key, pattern]) => {\n  const match = text.match(pattern);\n  if (match) {\n    extracted[key] = match[1].trim();\n  }\n});\n\n// Add metadata\nconst result = {\n  job_id: $json.job_id || (\"jb_\" + Date.now()),\n  document_type: 'CONTRACT',\n  id_number: id_number,\n  extraction_confidence: 0.85,\n  extracted_at: new Date().toISOString(),\n  values: extracted\n};\n\nreturn [{ json: result }];"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code: Extract Contract Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

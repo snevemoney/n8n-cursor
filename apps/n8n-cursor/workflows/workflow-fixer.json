@@ -1,0 +1,245 @@
+{
+  "name": "🔧 Workflow Expression Fixer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "workflow-fixer",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "🚀 Trigger Workflow Fixer",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 400],
+      "webhookId": "workflow-fixer"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "api_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1Nzk3MDk3fQ.OaBAfzzTz6Y7AmAp5t_7_ZvBgujYXwDlJIV3F4WIjX8"
+            },
+            {
+              "name": "base_url",
+              "value": "https://n8ncloud.tech"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "setup-config",
+      "name": "⚙️ Setup Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [400, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.base_url }}/api/v1/workflows",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "={{ $json.api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-workflows",
+      "name": "📋 Get All Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter workflows that have AI expressions\nconst items = $input.all();\nconst brokenWorkflows = [];\n\nfor (const item of items) {\n  if (item.json && item.json.data) {\n    for (const workflow of item.json.data) {\n      // Check if workflow has AI expressions by looking at the workflow data\n      const workflowJson = JSON.stringify(workflow);\n      if (workflowJson.includes('$fromAI') || workflowJson.includes('n8n-auto-generated-fromAI-override')) {\n        brokenWorkflows.push({\n          id: workflow.id,\n          name: workflow.name,\n          hasAIExpressions: true\n        });\n      }\n    }\n  }\n}\n\nreturn brokenWorkflows.map(workflow => ({ json: workflow }));"
+      },
+      "id": "filter-broken",
+      "name": "🔍 Filter Broken Workflows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.base_url }}/api/v1/workflows/{{ $('🔍 Filter Broken Workflows').item.json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "={{ $('⚙️ Setup Configuration').item.json.api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-workflow-details",
+      "name": "📥 Get Workflow Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean the workflow by removing AI expressions and read-only properties\nconst workflow = $input.first().json;\n\n// Remove read-only properties\nconst cleanWorkflow = {\n  name: workflow.name,\n  nodes: workflow.nodes,\n  connections: workflow.connections,\n  settings: workflow.settings,\n  staticData: workflow.staticData\n};\n\n// Fix AI expressions in nodes\nif (cleanWorkflow.nodes) {\n  cleanWorkflow.nodes = cleanWorkflow.nodes.map(node => {\n    if (node.parameters) {\n      // Convert parameters to string and fix expressions\n      const paramsStr = JSON.stringify(node.parameters);\n      let fixedParamsStr = paramsStr;\n      \n      // Replace $fromAI expressions\n      fixedParamsStr = fixedParamsStr.replace(/\\$fromAI\\([^)]*\\)/g, '{{ $json.default_value }}');\n      \n      // Remove AI comment markers\n      fixedParamsStr = fixedParamsStr.replace(/\\/\\*n8n-auto-generated-fromAI-override\\*\\/ /g, '');\n      \n      // Parse back to object\n      try {\n        node.parameters = JSON.parse(fixedParamsStr);\n      } catch (e) {\n        // If parsing fails, keep original but log\n        console.log('Failed to parse fixed parameters for node:', node.name);\n      }\n    }\n    return node;\n  });\n}\n\nreturn [{ json: cleanWorkflow }];"
+      },
+      "id": "clean-workflow",
+      "name": "🧹 Clean Workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('⚙️ Setup Configuration').item.json.base_url }}/api/v1/workflows",
+        "sendMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "={{ $('⚙️ Setup Configuration').item.json.api_key }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ $('🧹 Clean Workflow').item.json }}",
+        "options": {}
+      },
+      "id": "import-clean-workflow",
+      "name": "📤 Import Clean Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1400, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if import was successful and prepare response\nconst importResult = $input.first().json;\nconst originalWorkflow = $('🔍 Filter Broken Workflows').item.json;\n\nif (importResult.id) {\n  return [{\n    json: {\n      status: 'success',\n      message: `✅ Successfully imported clean workflow: ${originalWorkflow.name}`,\n      newId: importResult.id,\n      originalId: originalWorkflow.id,\n      workflowName: originalWorkflow.name\n    }\n  }];\n} else {\n  return [{\n    json: {\n      status: 'error',\n      message: `❌ Failed to import workflow: ${originalWorkflow.name}`,\n      error: importResult.message || importResult.error || 'Unknown error',\n      workflowName: originalWorkflow.name\n    }\n  }];\n}"
+      },
+      "id": "check-import-result",
+      "name": "✅ Check Import Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1600, 400]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $('✅ Check Import Result').item.json }}",
+        "responseCode": 200
+      },
+      "id": "respond-webhook",
+      "name": "📤 Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1800, 400]
+    }
+  ],
+  "connections": {
+    "🚀 Trigger Workflow Fixer": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Setup Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Setup Configuration": {
+      "main": [
+        [
+          {
+            "node": "📋 Get All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "🔍 Filter Broken Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Filter Broken Workflows": {
+      "main": [
+        [
+          {
+            "node": "📥 Get Workflow Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Get Workflow Details": {
+      "main": [
+        [
+          {
+            "node": "🧹 Clean Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧹 Clean Workflow": {
+      "main": [
+        [
+          {
+            "node": "📤 Import Clean Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📤 Import Clean Workflow": {
+      "main": [
+        [
+          {
+            "node": "✅ Check Import Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Check Import Result": {
+      "main": [
+        [
+          {
+            "node": "📤 Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null
+}

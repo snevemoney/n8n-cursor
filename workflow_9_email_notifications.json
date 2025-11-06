@@ -1,0 +1,393 @@
+{
+  "name": "Email Notification System",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/notifications/email",
+        "httpMethod": "POST"
+      },
+      "id": "email-webhook-entry",
+      "name": "Email Notification Entry",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "ALL"
+      },
+      "id": "split-notifications",
+      "name": "Split Notifications",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different email types based on type\nconst emailType = $input.item.json.type || 'generic';\n\n// Map email types to templates\nconst templateMap = {\n  'welcome': 'welcome_email',\n  'verification': 'verification_email',\n  'password-reset': 'password_reset_email',\n  'work-order': 'work_order_notification',\n  'compliance-alert': 'compliance_alert_email',\n  'monthly-report': 'monthly_report_email'\n};\n\nreturn {\n  json: {\n    emailType,\n    template: templateMap[emailType] || 'generic_email',\n    recipient: $input.item.json.recipient,\n    data: $input.item.json.data || {}\n  }\n};"
+      },
+      "id": "route-email-type",
+      "name": "Route Email Type",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "welcome-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "welcome",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "verification-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "verification",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "password-reset-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "password-reset",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "work-order-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "work-order",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "compliance-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "compliance-alert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "monthly-report-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "monthly-report",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "if-email-type",
+      "name": "Route by Email Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@n8ncloud.tech",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Welcome to Your SaaS Platform!",
+        "html": "={{ `<h1>Welcome {{ $json.data.name }}!</h1><p>We're excited to have you on board.</p>` }}",
+        "options": {}
+      },
+      "id": "send-welcome",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@n8ncloud.tech",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Verify Your Email",
+        "html": "={{ `<h1>Verify Your Email</h1><p>Click here to verify: {{ $json.data.verificationLink }}</p>` }}",
+        "options": {}
+      },
+      "id": "send-verification",
+      "name": "Send Verification Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        150
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@n8ncloud.tech",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Password Reset Request",
+        "html": "={{ `<h1>Reset Your Password</h1><p>Click here to reset: {{ $json.data.resetLink }}</p>` }}",
+        "options": {}
+      },
+      "id": "send-password-reset",
+      "name": "Send Password Reset",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@n8ncloud.tech",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Work Order Update",
+        "html": "={{ `<h1>Work Order Update</h1><p>{{ $json.data.message }}</p>` }}",
+        "options": {}
+      },
+      "id": "send-work-order",
+      "name": "Send Work Order Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@n8ncloud.tech",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Compliance Alert",
+        "html": "={{ `<h1>Compliance Alert</h1><p>{{ $json.data.message }}</p>` }}",
+        "options": {}
+      },
+      "id": "send-compliance",
+      "name": "Send Compliance Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@n8ncloud.tech",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Monthly Report",
+        "html": "={{ `<h1>Monthly Report</h1><p>{{ $json.data.message }}</p>` }}",
+        "options": {}
+      },
+      "id": "send-monthly-report",
+      "name": "Send Monthly Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Email sent successfully' } }}"
+      },
+      "id": "respond-email",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Email Notification Entry": {
+      "main": [
+        [
+          {
+            "node": "Split Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Notifications": {
+      "main": [
+        [
+          {
+            "node": "Route Email Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Email Type": {
+      "main": [
+        [
+          {
+            "node": "Route by Email Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Email Type": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Verification Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Password Reset",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Work Order Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Compliance Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Monthly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Verification Email": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Password Reset": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Work Order Notification": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Compliance Alert": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Monthly Report": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-20T10:00:00.000Z",
+      "updatedAt": "2024-01-20T10:00:00.000Z",
+      "id": "email",
+      "name": "Email"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-20T10:00:00.000Z",
+  "versionId": "1"
+}
+

@@ -1,0 +1,27 @@
+# Port & Domain Registry - Single Source of Truth
+# Use these exact names everywhere (compose, nginx/traefik, health checks)
+
+# LightningFlow AI Services
+lfa_web:        3000
+lfa_api:        4000
+
+# n8n Services  
+n8n_ui:         5678
+n8n_webhook:    5679
+
+# Infrastructure Services
+pg_main:        5432
+redis_main:     6379
+traefik_http:   80
+traefik_https:  443
+vector_sink:    8686
+
+# Node.js Versions (not actual ports, but referenced in compose)
+node_20:        20
+node_16:        16
+
+# Domains (DNS → server IP)
+# lfa.example.com          -> Traefik → lfa-web
+# api.lfa.example.com      -> Traefik → lfa-api  
+# n8n.example.com          -> Traefik → n8n-ui
+# hooks.n8n.example.com    -> Traefik → n8n-webhook

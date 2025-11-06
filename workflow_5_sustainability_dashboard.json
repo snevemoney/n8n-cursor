@@ -1,0 +1,114 @@
+{
+  "name": "Sustainability Dashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "sustainability-metrics",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-get",
+      "name": "GET /sustainability-metrics Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-400, 400]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sustainability-metrics",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-post",
+      "name": "POST /sustainability-metrics Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-400, 500]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_sustainability_dashboard('{{ $json.query.tenantId }}', 30)",
+        "options": {}
+      },
+      "id": "get-metrics",
+      "name": "Get Sustainability Metrics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [-200, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO sustainability_metrics (tenant_id, metric_type, measurement_date, value, unit, source, device_id, baseline_value, target_value) VALUES ('{{ $json.tenantId }}', '{{ $json.metricType }}', '{{ $json.measurementDate }}', {{ $json.value }}, '{{ $json.unit }}', '{{ $json.source }}', {{ $json.deviceId }}, {{ $json.baselineValue }}, {{ $json.targetValue }}) RETURNING *",
+        "options": {}
+      },
+      "id": "add-metric",
+      "name": "Add Sustainability Metric",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [-200, 500],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json } }}",
+        "options": {}
+      },
+      "id": "respond-get",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [0, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json } }}",
+        "options": {}
+      },
+      "id": "respond-post",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [0, 500]
+    }
+  ],
+  "connections": {
+    "GET /sustainability-metrics Webhook": {
+      "main": [[{"node": "Get Sustainability Metrics", "type": "main", "index": 0}]]
+    },
+    "Get Sustainability Metrics": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    },
+    "POST /sustainability-metrics Webhook": {
+      "main": [[{"node": "Add Sustainability Metric", "type": "main", "index": 0}]]
+    },
+    "Add Sustainability Metric": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-25T00:00:00.000Z",
+  "versionId": "1"
+}

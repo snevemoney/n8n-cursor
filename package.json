@@ -1,0 +1,63 @@
+{
+  "name": "lightning-meta-workspace",
+  "version": "1.0.0",
+  "description": "Meta-workspace containing LightningFlow AI product and n8n-cursor development tools",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "verify-structure": "node tooling/scripts/verify-structure.mjs",
+    "ports-check": "bash tooling/scripts/ports-check.sh",
+    "scan-secrets": "bash tooling/scripts/scan-secrets.sh",
+    "sync:down": "node scripts/sync-down.mjs",
+    "promote": "node scripts/promote-n8n.mjs",
+    "promote:activate": "node scripts/promote-n8n.mjs --activate",
+    "cred:sync": "node scripts/n8n-cred-sync.mjs",
+    "cred:dry": "node scripts/n8n-cred-sync.mjs --dry",
+    "radar:audit": "node scripts/audit-depreciation.mjs",
+    "radar:collect": "node scripts/radar-collect.mjs",
+    "radar:cleanup": "node scripts/radar-cleanup.mjs",
+    "contracts:generate": "cd packages/contracts && npm run generate:all",
+    "contracts:build": "cd packages/contracts && npm run build",
+    "contracts:validate": "cd packages/contracts && npm run validate:all",
+    "migrate:create": "node scripts/migrate/create-migration.js",
+    "migrate:up": "node scripts/migrate/migrate.js up",
+    "migrate:down": "node scripts/migrate/migrate.js down",
+    "migrate:status": "node scripts/migrate/migrate.js status",
+    "migrate:validate": "node scripts/migrate/migrate.js validate",
+    "schema:update": "node scripts/migrate/update-schema.js update",
+    "schema:validate": "node scripts/migrate/update-schema.js validate",
+    "schema:status": "node scripts/migrate/update-schema.js status",
+    "consistency:check": "node scripts/consistency-check.js",
+    "consistency:validate": "node scripts/consistency-validate.js"
+  },
+  "keywords": [
+    "lightning",
+    "ai",
+    "n8n",
+    "cursor",
+    "workspace",
+    "monorepo"
+  ],
+  "author": "Evens Louis",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/node": "^20.0.0",
+    "dotenv": "^16.0.3",
+    "husky": "^9.1.7",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "pg": "^8.16.3"
+  }
+}

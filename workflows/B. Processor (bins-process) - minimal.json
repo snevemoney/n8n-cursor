@@ -1,0 +1,21 @@
+{
+  "name": "B. Processor (bins-process)",
+  "nodes": [
+    {
+      "id": "webhook-processor",
+      "name": "Webhook: /webhook/bins-process",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bins-process",
+        "responseMode": "lastNode"
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

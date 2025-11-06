@@ -1,0 +1,7 @@
+[Unit]
+Description=N8N Auto Backup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/n8n-auto-backup
+User=evens

@@ -1,0 +1,44 @@
+# Integration Environment Caddyfile
+# All services bind to 127.0.0.1 - Caddy is the only public listener
+
+(common) {
+  encode gzip zstd
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Frame-Options "DENY"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+  }
+}
+
+# Integration domains (internal testing)
+int.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  handle_path /api/* { reverse_proxy 127.0.0.1:4000 }   # API (int)
+  handle_path /      { reverse_proxy 127.0.0.1:3000 }   # landing (int)
+}
+
+app.int.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  handle_path / { reverse_proxy 127.0.0.1:3001 }        # customer app (int)
+}
+
+ops.int.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  basicauth /* { {$OPS_INT_USER} {$OPS_INT_PASS} }
+  handle_path / { reverse_proxy 127.0.0.1:3002 }        # internal ops (int)
+}
+
+int.n8ncloud.tech {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  basicauth /* { {$N8N_INT_USER} {$N8N_INT_PASS} }
+  handle_path / { reverse_proxy 127.0.0.1:5678 }        # n8n (int)
+}

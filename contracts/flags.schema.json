@@ -1,0 +1,483 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LightningFlow AI Feature Flags",
+  "description": "Feature flag registry with types and validation",
+  "type": "object",
+  "properties": {
+    "NEW_DASHBOARD": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable new dashboard UI",
+      "environments": {
+        "int": true,
+        "staging": false,
+        "prod": false
+      },
+      "sunsetOn": "2024-06-01T00:00:00Z"
+    },
+    "BITCOIN_LIGHTNING_INTEGRATION": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Bitcoin Lightning Network integration",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "LNbits_WEBHOOK_VALIDATION": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable LNbits webhook signature validation",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "AGENT_AUTO_SCALING": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable automatic agent scaling based on load",
+      "environments": {
+        "int": true,
+        "staging": false,
+        "prod": false
+      },
+      "sunsetOn": "2024-05-01T00:00:00Z"
+    },
+    "MAX_CONCURRENT_AGENTS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10,
+      "description": "Maximum number of concurrent agent executions",
+      "environments": {
+        "int": 5,
+        "staging": 10,
+        "prod": 20
+      }
+    },
+    "AGENT_TIMEOUT_MS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 300000,
+      "default": 30000,
+      "description": "Default agent execution timeout in milliseconds",
+      "environments": {
+        "int": 60000,
+        "staging": 30000,
+        "prod": 30000
+      }
+    },
+    "ENABLE_METRICS_COLLECTION": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable metrics collection and reporting",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "METRICS_RETENTION_DAYS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 365,
+      "default": 30,
+      "description": "Metrics retention period in days",
+      "environments": {
+        "int": 7,
+        "staging": 14,
+        "prod": 30
+      }
+    },
+    "ENABLE_DEBUG_LOGGING": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable debug-level logging",
+      "environments": {
+        "int": true,
+        "staging": false,
+        "prod": false
+      }
+    },
+    "LOG_LEVEL": {
+      "type": "string",
+      "enum": ["debug", "info", "warn", "error"],
+      "default": "info",
+      "description": "Application log level",
+      "environments": {
+        "int": "debug",
+        "staging": "info",
+        "prod": "warn"
+      }
+    },
+    "ENABLE_RATE_LIMITING": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable API rate limiting",
+      "environments": {
+        "int": false,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "RATE_LIMIT_REQUESTS_PER_MINUTE": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000,
+      "default": 100,
+      "description": "Rate limit requests per minute per IP",
+      "environments": {
+        "int": 1000,
+        "staging": 500,
+        "prod": 100
+      }
+    },
+    "ENABLE_CORS": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable CORS for API endpoints",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "CORS_ORIGINS": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "default": ["https://lightningflow.online"],
+      "description": "Allowed CORS origins",
+      "environments": {
+        "int": ["http://localhost:3000", "http://localhost:3001"],
+        "staging": ["https://staging.lightningflow.online"],
+        "prod": ["https://lightningflow.online"]
+      }
+    },
+    "ENABLE_WEBHOOK_RETRY": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable webhook retry mechanism",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "WEBHOOK_MAX_RETRIES": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10,
+      "default": 3,
+      "description": "Maximum webhook retry attempts",
+      "environments": {
+        "int": 1,
+        "staging": 3,
+        "prod": 3
+      }
+    },
+    "WEBHOOK_RETRY_DELAY_MS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 300000,
+      "default": 5000,
+      "description": "Webhook retry delay in milliseconds",
+      "environments": {
+        "int": 2000,
+        "staging": 5000,
+        "prod": 5000
+      }
+    },
+    "ENABLE_DATABASE_POOLING": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable database connection pooling",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "DATABASE_POOL_SIZE": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10,
+      "description": "Database connection pool size",
+      "environments": {
+        "int": 5,
+        "staging": 10,
+        "prod": 20
+      }
+    },
+    "ENABLE_REDIS_CACHING": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Redis caching",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "REDIS_CACHE_TTL_SECONDS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 86400,
+      "default": 3600,
+      "description": "Redis cache TTL in seconds",
+      "environments": {
+        "int": 300,
+        "staging": 1800,
+        "prod": 3600
+      }
+    },
+    "ENABLE_SECURITY_HEADERS": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable security headers",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "ENABLE_CSRF_PROTECTION": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable CSRF protection",
+      "environments": {
+        "int": false,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "ENABLE_SQL_INJECTION_PROTECTION": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable SQL injection protection",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "ENABLE_XSS_PROTECTION": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable XSS protection",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "ENABLE_CONTENT_SECURITY_POLICY": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Content Security Policy",
+      "environments": {
+        "int": false,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "ENABLE_STRICT_TRANSPORT_SECURITY": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Strict Transport Security",
+      "environments": {
+        "int": false,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "ENABLE_AGENT_MONITORING": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable agent monitoring and alerting",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "AGENT_HEALTH_CHECK_INTERVAL_MS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 300000,
+      "default": 30000,
+      "description": "Agent health check interval in milliseconds",
+      "environments": {
+        "int": 10000,
+        "staging": 30000,
+        "prod": 30000
+      }
+    },
+    "ENABLE_AGENT_AUTO_RECOVERY": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable automatic agent recovery on failure",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "AGENT_MAX_FAILURES": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 5,
+      "description": "Maximum agent failures before disabling",
+      "environments": {
+        "int": 3,
+        "staging": 5,
+        "prod": 5
+      }
+    },
+    "ENABLE_BITCOIN_PRICE_TRACKING": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Bitcoin price tracking",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "BITCOIN_PRICE_UPDATE_INTERVAL_MS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 3600000,
+      "default": 60000,
+      "description": "Bitcoin price update interval in milliseconds",
+      "environments": {
+        "int": 30000,
+        "staging": 60000,
+        "prod": 60000
+      }
+    },
+    "ENABLE_LIGHTNING_NETWORK_MONITORING": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Lightning Network monitoring",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "LIGHTNING_NETWORK_CHECK_INTERVAL_MS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 300000,
+      "default": 30000,
+      "description": "Lightning Network check interval in milliseconds",
+      "environments": {
+        "int": 10000,
+        "staging": 30000,
+        "prod": 30000
+      }
+    },
+    "ENABLE_WORKFLOWS": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable workflow functionality",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
+    "MAX_CONCURRENT_WORKFLOWS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "default": 6,
+      "description": "Maximum concurrent workflow executions",
+      "environments": {
+        "int": 3,
+        "staging": 6,
+        "prod": 6
+      }
+    },
+    "WORKFLOW_TIMEOUT_MS": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 600000,
+      "default": 300000,
+      "description": "Workflow execution timeout in milliseconds",
+      "environments": {
+        "int": 60000,
+        "staging": 300000,
+        "prod": 300000
+      }
+    },
+    "WORKFLOW_QUEUE_BACKPRESSURE_LIMIT": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 10000,
+      "default": 3000,
+      "description": "Workflow queue backpressure limit",
+      "environments": {
+        "int": 1000,
+        "staging": 3000,
+        "prod": 3000
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "NEW_DASHBOARD",
+    "BITCOIN_LIGHTNING_INTEGRATION",
+    "LNbits_WEBHOOK_VALIDATION",
+    "AGENT_AUTO_SCALING",
+    "MAX_CONCURRENT_AGENTS",
+    "AGENT_TIMEOUT_MS",
+    "ENABLE_METRICS_COLLECTION",
+    "METRICS_RETENTION_DAYS",
+    "ENABLE_DEBUG_LOGGING",
+    "LOG_LEVEL",
+    "ENABLE_RATE_LIMITING",
+    "RATE_LIMIT_REQUESTS_PER_MINUTE",
+    "ENABLE_CORS",
+    "CORS_ORIGINS",
+    "ENABLE_WEBHOOK_RETRY",
+    "WEBHOOK_MAX_RETRIES",
+    "WEBHOOK_RETRY_DELAY_MS",
+    "ENABLE_DATABASE_POOLING",
+    "DATABASE_POOL_SIZE",
+    "ENABLE_REDIS_CACHING",
+    "REDIS_CACHE_TTL_SECONDS",
+    "ENABLE_SECURITY_HEADERS",
+    "ENABLE_CSRF_PROTECTION",
+    "ENABLE_SQL_INJECTION_PROTECTION",
+    "ENABLE_XSS_PROTECTION",
+    "ENABLE_CONTENT_SECURITY_POLICY",
+    "ENABLE_STRICT_TRANSPORT_SECURITY",
+    "ENABLE_AGENT_MONITORING",
+    "AGENT_HEALTH_CHECK_INTERVAL_MS",
+    "ENABLE_AGENT_AUTO_RECOVERY",
+    "AGENT_MAX_FAILURES",
+    "ENABLE_BITCOIN_PRICE_TRACKING",
+    "BITCOIN_PRICE_UPDATE_INTERVAL_MS",
+    "ENABLE_LIGHTNING_NETWORK_MONITORING",
+    "LIGHTNING_NETWORK_CHECK_INTERVAL_MS",
+    "ENABLE_WORKFLOWS",
+    "MAX_CONCURRENT_WORKFLOWS",
+    "WORKFLOW_TIMEOUT_MS",
+    "WORKFLOW_QUEUE_BACKPRESSURE_LIMIT"
+  ]
+}
+
+
+
+
+
+

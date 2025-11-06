@@ -1,0 +1,831 @@
+{
+  "config": {
+    "configFile": "/Users/evenslouis/dev/lightning-platform/web/playwright.config.ts",
+    "rootDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/junit.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "bots",
+        "name": "bots",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "admin-bot",
+        "name": "admin-bot",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/tests\\/bots\\/adminBot\\.spec\\.ts/"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "user-bot",
+        "name": "user-bot",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/tests\\/bots\\/userBot\\.spec\\.ts/"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "qa-bot",
+        "name": "qa-bot",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/tests\\/bots\\/qaBot\\.spec\\.ts/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "mobile-bots",
+        "name": "mobile-bots",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Microsoft Edge",
+        "name": "Microsoft Edge",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/Users/evenslouis/dev/lightning-platform/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Google Chrome",
+        "name": "Google Chrome",
+        "testDir": "/Users/evenslouis/dev/lightning-platform/web/tests",
+        "testIgnore": [
+          "/tests\\/bots\\/.*\\.spec\\.ts/"
+        ],
+        "testMatch": [
+          "/.*\\.spec\\.ts/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.52.0",
+    "workers": 4,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "bots/broken-button.spec.ts",
+      "file": "bots/broken-button.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Self-Healing Demo Test",
+          "file": "bots/broken-button.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Broken button should trigger self-heal",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "bots",
+                  "projectName": "bots",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573671815\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-05-30T02:54:31.790Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots/trace.zip"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573675408\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-05-30T02:54:35.395Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dbacaf6d23cc0e06029c-c5f09178565f6dbf1c32",
+              "file": "bots/broken-button.spec.ts",
+              "line": 12,
+              "column": 7
+            },
+            {
+              "title": "Another broken selector to test pattern detection",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "bots",
+                  "projectName": "bots",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 12,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573671812\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-05-30T02:54:31.789Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots/trace.zip"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 15,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573675409\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-05-30T02:54:35.395Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dbacaf6d23cc0e06029c-e4aa72d49567c3e073df",
+              "file": "bots/broken-button.spec.ts",
+              "line": 37,
+              "column": 7
+            },
+            {
+              "title": "Timeout failure simulation",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "bots",
+                  "projectName": "bots",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 6,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573671789\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-05-30T02:54:31.778Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots/trace.zip"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 5,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573675439\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-05-30T02:54:35.415Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dbacaf6d23cc0e06029c-2dd5b35541aecbc16f98",
+              "file": "bots/broken-button.spec.ts",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "Broken button should trigger self-heal",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile-bots",
+                  "projectName": "mobile-bots",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 3,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573671809\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-05-30T02:54:31.790Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots/error-context.md"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 4,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573675422\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-05-30T02:54:35.407Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dbacaf6d23cc0e06029c-34d206bb105a0b715428",
+              "file": "bots/broken-button.spec.ts",
+              "line": 12,
+              "column": 7
+            },
+            {
+              "title": "Another broken selector to test pattern detection",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile-bots",
+                  "projectName": "mobile-bots",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 7,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573676584\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-05-30T02:54:36.573Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots/error-context.md"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 3,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573677157\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-05-30T02:54:37.151Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dbacaf6d23cc0e06029c-697a4bc679b39e8e5a80",
+              "file": "bots/broken-button.spec.ts",
+              "line": 37,
+              "column": 7
+            },
+            {
+              "title": "Timeout failure simulation",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "mobile-bots",
+                  "projectName": "mobile-bots",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 6,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573676584\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-05-30T02:54:36.567Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots/error-context.md"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2,
+                      "error": {
+                        "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+                        "stack": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "📝 Created test session: broken-button-demo-1748573677158\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2025-05-30T02:54:37.152Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "_error-context-0",
+                          "contentType": "text/markdown",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/evenslouis/dev/lightning-platform/web/test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dbacaf6d23cc0e06029c-aa58582d463eacacafff",
+              "file": "bots/broken-button.spec.ts",
+              "line": 57,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-05-30T02:54:30.872Z",
+    "duration": 6326.76,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 6,
+    "flaky": 0
+  }
+}

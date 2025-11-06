@@ -1,0 +1,50 @@
+{
+  "name": "AI Research Agent Demo",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/research-agent",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Research Question Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "demo-research-agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simple demo response\nconst question = $input.first().json.body.question || 'No question provided';\n\nreturn [{\n  json: {\n    question: question,\n    answer: `Based on your question: \"${question}\", here's a comprehensive research summary. This is a demo showing how n8n-MCP can automatically build complex workflows with AI integration, multiple data sources, and intelligent processing.`,\n    timestamp: new Date().toISOString(),\n    source: 'n8n-MCP Demo Agent'\n  }\n}];"
+      },
+      "id": "demo-response",
+      "name": "Demo Research Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Research Question Input": {
+      "main": [
+        [
+          {
+            "node": "Demo Research Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

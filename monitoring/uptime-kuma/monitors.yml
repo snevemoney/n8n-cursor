@@ -1,0 +1,69 @@
+# LightningFlow AI Uptime Monitors
+# Import these into Uptime Kuma after setup
+
+monitors:
+  - name: "LightningFlow AI - Main API"
+    type: "http"
+    url: "https://api.lightningflow.ai/health"
+    interval: 60
+    retryInterval: 30
+    acceptedStatusCodes: [200, 201, 202]
+    timeout: 10
+
+  - name: "n8n - Workflow Engine"
+    type: "http"
+    url: "http://n8n:5678/healthz"
+    interval: 60
+    retryInterval: 30
+    acceptedStatusCodes: [200]
+    timeout: 10
+
+  - name: "Grafana - Monitoring Dashboard"
+    type: "http"
+    url: "http://grafana:3000/api/health"
+    interval: 60
+    retryInterval: 30
+    acceptedStatusCodes: [200]
+    timeout: 10
+
+  - name: "Prometheus - Metrics"
+    type: "http"
+    url: "http://prometheus:9090/-/healthy"
+    interval: 60
+    retryInterval: 30
+    acceptedStatusCodes: [200]
+    timeout: 10
+
+  - name: "Postgres - Database"
+    type: "tcp"
+    hostname: "postgres"
+    port: 5432
+    interval: 60
+    retryInterval: 30
+    timeout: 10
+
+  - name: "Redis - Cache"
+    type: "tcp"
+    hostname: "redis"
+    port: 6379
+    interval: 60
+    retryInterval: 30
+    timeout: 10
+
+  - name: "MinIO - Object Storage"
+    type: "http"
+    url: "http://minio:9000/minio/health/live"
+    interval: 60
+    retryInterval: 30
+    acceptedStatusCodes: [200]
+    timeout: 10
+
+  - name: "LightningFlow AI - Webhook Test"
+    type: "http"
+    url: "https://webhook.lightningflow.ai/test"
+    method: "POST"
+    body: '{"test": true, "timestamp": "{{timestamp}}"}'
+    interval: 300
+    retryInterval: 60
+    acceptedStatusCodes: [200, 201]
+    timeout: 15

@@ -1,0 +1,300 @@
+name: 🤖 Lightning Platform Bot Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'web/src/**'
+      - 'web/scripts/**'
+      - 'web/package.json'
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bot_count:
+        description: 'Number of bots to run'
+        required: false
+        default: '10'
+        type: string
+      test_duration:
+        description: 'Test duration in seconds'
+        required: false
+        default: '60'
+        type: string
+      test_mode:
+        description: 'Test mode (mock or real)'
+        required: false
+        default: 'mock'
+        type: choice
+        options:
+          - mock
+          - real
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  bot-test:
+    name: 🤖 Bot Simulation Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        test-scenario:
+          - name: "Quick Smoke Test"
+            bots: 5
+            duration: 30
+            concurrency: 3
+          - name: "Load Test"
+            bots: 20
+            duration: 120
+            concurrency: 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: 📥 Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: 🔧 Setup environment
+        working-directory: ./web
+        run: |
+          cp .env.example .env.local || true
+          # Set mock environment variables
+          cat >> .env.local << EOF
+          NEXT_PUBLIC_SUPABASE_URL=https://mock.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=mock-anon-key
+          SUPABASE_SERVICE_ROLE_KEY=mock-service-key
+          OPENAI_API_KEY=mock-openai-key
+          NODE_ENV=test
+          EOF
+
+      - name: 🏗️ Build application
+        working-directory: ./web
+        run: npm run build
+
+      - name: 🚀 Start development server
+        working-directory: ./web
+        run: |
+          npm run dev &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+          # Wait for server to start
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/test-system; do sleep 2; done'
+        env:
+          NODE_ENV: development
+
+      - name: 🤖 Run bot simulation - ${{ matrix.test-scenario.name }}
+        working-directory: ./web
+        run: |
+          export BOT_COUNT="${{ github.event.inputs.bot_count || matrix.test-scenario.bots }}"
+          export TEST_DURATION="${{ github.event.inputs.test_duration || matrix.test-scenario.duration }}"
+          export CONCURRENCY="${{ matrix.test-scenario.concurrency }}"
+          export TEST_MODE="${{ github.event.inputs.test_mode || 'mock' }}"
+          export BASE_URL="http://localhost:3000"
+          
+          echo "🤖 Running bot test with configuration:"
+          echo "   Bots: $BOT_COUNT"
+          echo "   Duration: ${TEST_DURATION}s"
+          echo "   Concurrency: $CONCURRENCY"
+          echo "   Mode: $TEST_MODE"
+          
+          npx tsx scripts/simulate-bots.ts
+
+      - name: 📊 Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bot-test-report-${{ matrix.test-scenario.name }}-${{ github.run_number }}
+          path: web/bot-test-report-*.json
+          retention-days: 7
+
+      - name: 🛑 Stop development server
+        if: always()
+        run: |
+          if [ ! -z "$SERVER_PID" ]; then
+            kill $SERVER_PID || true
+          fi
+
+      - name: 📈 Parse and comment results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Find the latest report file
+            const reportFiles = fs.readdirSync('./web').filter(f => f.startsWith('bot-test-report-'));
+            if (reportFiles.length === 0) {
+              console.log('No bot test report found');
+              return;
+            }
+            
+            const reportPath = path.join('./web', reportFiles[0]);
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            
+            const emoji = report.summary.successRate === '100.00%' ? '✅' : '⚠️';
+            
+            const comment = `## ${emoji} Bot Test Results - ${{ matrix.test-scenario.name }}
+            
+            | Metric | Value |
+            |--------|-------|
+            | 🤖 Bots | ${report.summary.totalBots} |
+            | 📈 Total Requests | ${report.summary.totalRequests} |
+            | ✅ Success Rate | ${report.summary.successRate} |
+            | ⚡ Avg Response Time | ${report.summary.avgResponseTime} |
+            | 🚀 Requests/sec | ${report.summary.requestsPerSecond} |
+            | 🕐 Duration | ${report.duration} |
+            
+            ${report.summary.failedRequests > 0 ? `### ❌ Failed Requests: ${report.summary.failedRequests}` : ''}
+            
+            <details>
+            <summary>📋 Full Configuration</summary>
+            
+            \`\`\`json
+            ${JSON.stringify(report.configuration, null, 2)}
+            \`\`\`
+            </details>
+            `;
+            
+            // Add comment to PR
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  performance-benchmark:
+    name: 📊 Performance Benchmark
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: bot-test
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: 📥 Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: 🔧 Setup environment
+        working-directory: ./web
+        run: |
+          cp .env.example .env.local || true
+          cat >> .env.local << EOF
+          NEXT_PUBLIC_SUPABASE_URL=https://mock.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=mock-anon-key
+          SUPABASE_SERVICE_ROLE_KEY=mock-service-key
+          OPENAI_API_KEY=mock-openai-key
+          NODE_ENV=test
+          EOF
+
+      - name: 🏗️ Build application
+        working-directory: ./web
+        run: npm run build
+
+      - name: 🚀 Start production server
+        working-directory: ./web
+        run: |
+          npm run start &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/test-system; do sleep 2; done'
+
+      - name: 🎯 Run performance benchmark
+        working-directory: ./web
+        run: |
+          export BOT_COUNT=50
+          export TEST_DURATION=300
+          export CONCURRENCY=10
+          export TEST_MODE=mock
+          export BASE_URL="http://localhost:3000"
+          
+          npx tsx scripts/simulate-bots.ts
+
+      - name: 📊 Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-benchmark-${{ github.sha }}
+          path: web/bot-test-report-*.json
+          retention-days: 30
+
+      - name: 🛑 Stop server
+        if: always()
+        run: |
+          if [ ! -z "$SERVER_PID" ]; then
+            kill $SERVER_PID || true
+          fi
+
+  security-test:
+    name: 🔒 Security Bot Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: 📥 Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: 🔧 Setup environment
+        working-directory: ./web
+        run: |
+          cp .env.example .env.local || true
+
+      - name: 🏗️ Build application
+        working-directory: ./web
+        run: npm run build
+
+      - name: 🚀 Start server
+        working-directory: ./web
+        run: |
+          npm run dev &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+          timeout 60 bash -c 'until curl -f http://localhost:3000/api/test-system; do sleep 2; done'
+
+      - name: 🔒 Run security-focused bot test
+        working-directory: ./web
+        run: |
+          # Test without proper auth to ensure endpoints are secured
+          export BOT_COUNT=5
+          export TEST_DURATION=60
+          export CONCURRENCY=2
+          export TEST_MODE=mock
+          export BASE_URL="http://localhost:3000"
+          
+          npx tsx scripts/simulate-bots.ts
+
+      - name: 🛑 Stop server
+        if: always()
+        run: |
+          if [ ! -z "$SERVER_PID" ]; then
+            kill $SERVER_PID || true
+          fi 

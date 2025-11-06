@@ -1,0 +1,43 @@
+{
+  "name": "A. Classifier (bins-classify)",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bins-classify",
+        "responseMode": "lastNode"
+      }
+    },
+    {
+      "id": "code-classify",
+      "name": "Code: Classify Document",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [400, 200],
+      "parameters": {
+        "functionCode": "// Simple classification logic\nconst text = ($json.text || \"\").toLowerCase();\nconst bins = [\n  {bin: \"CONTRACT\", kw: [\"loan agreement\", \"borrower\", \"lender\"]},\n  {bin: \"BANKING\", kw: [\"void cheque\", \"account number\", \"bank statement\"]},\n  {bin: \"CARFAX\", kw: [\"carfax\", \"vehicle history\", \"odometer\"]},\n  {bin: \"INSURANCE\", kw: [\"policy\", \"coverage\", \"insured\"]}\n];\n\nlet best = \"MISC\";\nlet score = 0;\n\nfor (const b of bins) {\n  const s = b.kw.reduce((c, k) => c + (text.includes(k) ? 1 : 0), 0);\n  if (s > score) {\n    score = s;\n    best = b.bin;\n  }\n}\n\nreturn [{ json: { bin: best, confidence: score, job_id: \"jb_\" + Date.now() } }];"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code: Classify Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

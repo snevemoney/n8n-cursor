@@ -1,0 +1,9 @@
+# 🚀 ONE-LINER DEPLOYMENT - Copy this entire line and paste it into your VPS terminal:
+
+curl -fsSL https://raw.githubusercontent.com/yourusername/n8n-cursor/main/deploy-now.sh | bash
+
+# OR if you want to see what's happening first:
+curl -fsSL https://raw.githubusercontent.com/yourusername/n8n-cursor/main/deploy-now.sh | bash -x
+
+# OR download and run manually:
+curl -fsSL https://raw.githubusercontent.com/yourusername/n8n-cursor/main/deploy-now.sh -o deploy.sh && chmod +x deploy.sh && ./deploy.sh

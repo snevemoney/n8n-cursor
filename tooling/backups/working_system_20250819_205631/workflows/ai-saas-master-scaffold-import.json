@@ -1,0 +1,350 @@
+{
+  "name": "🚀 AI SaaS Master Scaffold - Import Ready",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-saas-hook",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "dc6b1f85-4b7c-4c4c-9f5a-1234567890ab",
+      "name": "🌐 Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 400],
+      "webhookId": "ai-saas-import-ready"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action-field",
+              "name": "action",
+              "value": "={{ $json.action || $query.action || 'default' }}",
+              "type": "string"
+            },
+            {
+              "id": "prompt-field",
+              "name": "prompt",
+              "value": "={{ $json.prompt || 'Hello from AI SaaS Workflow!' }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp-field",
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "request-id-field",
+              "name": "requestId",
+              "value": "={{ $runIndex }}_{{ Date.now() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "bc5a2f74-3a6b-4d4d-8e7a-2345678901bc",
+      "name": "📦 Prepare Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 400]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.action }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "openai",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "value2": "supabase",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "value2": "discord",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "value2": "all",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "ad4b3c63-2957-4e4e-9a8b-3456789012cd",
+      "name": "🔀 API Router",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [600, 400]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "prompt": "={{ $json.prompt }}",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 1000
+        }
+      },
+      "id": "9e3a2d52-1846-4f4f-8c9d-4567890123de",
+      "name": "🤖 OpenAI Chat",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [800, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "create",
+        "tableId": "workflow_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "request_id",
+              "fieldValue": "={{ $json.requestId }}"
+            },
+            {
+              "fieldId": "action",
+              "fieldValue": "={{ $json.action }}"
+            },
+            {
+              "fieldId": "prompt",
+              "fieldValue": "={{ $json.prompt }}"
+            },
+            {
+              "fieldId": "timestamp",
+              "fieldValue": "={{ $json.timestamp }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            }
+          ]
+        }
+      },
+      "id": "8d29bc41-1735-4e4e-9b8c-5678901234ef",
+      "name": "🗄️ Supabase Insert",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [800, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "resource": "message",
+        "operation": "sendLegacy",
+        "webhookURL": "https://discord.com/api/webhooks/your-webhook-id/your-webhook-token",
+        "text": "🚀 AI SaaS Action Executed",
+        "embeds": [
+          {
+            "color": "5814783",
+            "title": "Action: {{ $json.action }}",
+            "description": "Prompt: {{ $json.prompt }}",
+            "timestamp": "{{ $json.timestamp }}",
+            "footer": {
+              "text": "Request ID: {{ $json.requestId }}"
+            }
+          }
+        ]
+      },
+      "id": "7c18ab30-0624-4d4d-8a7b-6789012345f0",
+      "name": "💬 Discord Notify",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [800, 600]
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "input2"
+      },
+      "id": "6b079a2f-f513-4c4c-9968-7890123456g1",
+      "name": "🔄 Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced response assembly\nconst items = $input.all();\nconst originalData = items[0]?.json || {};\n\nconst response = {\n  success: true,\n  requestId: originalData.requestId,\n  action: originalData.action || 'unknown',\n  timestamp: originalData.timestamp || new Date().toISOString(),\n  results: {}\n};\n\n// Check OpenAI results\nconst openaiData = $node['🤖 OpenAI Chat']?.first()?.json;\nif (openaiData?.message) {\n  response.results.openai = {\n    success: true,\n    message: openaiData.message,\n    model: 'gpt-4o-mini'\n  };\n}\n\n// Check Supabase results  \nconst supabaseData = $node['🗄️ Supabase Insert']?.first()?.json;\nif (supabaseData) {\n  response.results.supabase = {\n    success: true,\n    status: 'inserted'\n  };\n}\n\n// Check Discord results\nconst discordData = $node['💬 Discord Notify']?.first()?.json;\nif (discordData) {\n  response.results.discord = {\n    success: true,\n    status: 'notified'\n  };\n}\n\nresponse.totalServices = Object.keys(response.results).length;\n\nreturn { json: response };"
+      },
+      "id": "5a96892e-e402-4b4b-8857-8901234567h2",
+      "name": "📋 Assemble Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $json }}",
+        "responseCode": "={{ $json.success ? 200 : 500 }}",
+        "responseHeaders": {
+          "entries": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Request-ID",
+              "value": "={{ $json.requestId || 'unknown' }}"
+            }
+          ]
+        }
+      },
+      "id": "49857d1c-d2f1-4a4a-7746-9012345678i3",
+      "name": "✅ Respond JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1400, 400]
+    }
+  ],
+  "connections": {
+    "🌐 Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "📦 Prepare Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📦 Prepare Payload": {
+      "main": [
+        [
+          {
+            "node": "🔀 API Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 API Router": {
+      "main": [
+        [
+          {
+            "node": "🤖 OpenAI Chat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🗄️ Supabase Insert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "💬 Discord Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 OpenAI Chat": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗄️ Supabase Insert": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "💬 Discord Notify": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "🔄 Merge Results": {
+      "main": [
+        [
+          {
+            "node": "📋 Assemble Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Assemble Response": {
+      "main": [
+        [
+          {
+            "node": "✅ Respond JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "import-ready-version",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

@@ -1,0 +1,119 @@
+name: lfai_dev
+
+x-dflt: &dflt
+  restart: unless-stopped
+  init: true
+  networks: [private]
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+  security_opt: ["no-new-privileges:true"]
+
+services:
+  caddy:
+    <<: *dflt
+    image: caddy:2.7
+    ports:
+      - "80:80"      # needs sudo on Mac; change to 8080:80 if you prefer
+      - "443:443"    # (TLS is optional locally)
+    volumes:
+      - ../caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - landing
+      - web
+      - ops
+      - api
+      - n8n
+      - dozzle
+
+  landing:
+    <<: *dflt
+    build: ../../apps/landing
+    environment: [NODE_ENV=development, PORT=3000]
+    ports: ["127.0.0.1:3000:3000"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3000/healthz"], interval: 10s, timeout: 2s, retries: 10 }
+
+  web:
+    <<: *dflt
+    build: ../../apps/lightningflow/web
+    environment: 
+      - NODE_ENV=development
+      - PORT=3001
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    ports: ["127.0.0.1:3001:3001"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3001/healthz"], interval: 10s, timeout: 2s, retries: 10 }
+
+  ops:
+    <<: *dflt
+    build: ../../apps/ops
+    environment: [NODE_ENV=development, PORT=3002]
+    ports: ["127.0.0.1:3002:3002"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3002/healthz"], interval: 10s, timeout: 2s, retries: 10 }
+
+  api:
+    <<: *dflt
+    build: ../../apps/n8n-cursor/backend
+    env_file: [../../.env.dev]
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - REDIS_URL=redis://redis:6379/0
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on: { redis: { condition: service_healthy } }
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:4000/health"], interval: 10s, timeout: 2s, retries: 10 }
+
+  worker:
+    <<: *dflt
+    build: ../../apps/n8n-cursor/backend
+    env_file: [../../.env.dev]
+    environment: 
+      - REDIS_URL=redis://redis:6379/0
+      - NODE_ENV=development
+    command: ["npm", "run", "worker"]
+    depends_on: { redis: { condition: service_healthy }, api: { condition: service_healthy } }
+    healthcheck: { test: ["CMD","node","-e","process.exit(0)"], interval: 15s, timeout: 3s, retries: 20 }
+
+  n8n:
+    <<: *dflt
+    image: n8nio/n8n:1.55.1
+    env_file: [../../.env.dev]
+    environment:
+      - N8N_PROTOCOL=http
+      - N8N_PORT=5678
+      - N8N_HOST=n8n.local
+      - WEBHOOK_URL=http://n8n.local/
+      - N8N_SECURE_COOKIE=false
+    ports: ["127.0.0.1:5678:5678"]
+    volumes:
+      - n8n-data:/home/node/.n8n
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/"], interval: 10s, timeout: 3s, retries: 10 }
+
+  redis:
+    <<: *dflt
+    image: redis:7.2-alpine
+    command: ["redis-server","--save","","--appendonly","no"]
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck: { test: ["CMD","redis-cli","ping"], interval: 5s, timeout: 2s, retries: 20 }
+
+  mailhog:
+    <<: *dflt
+    image: mailhog/mailhog:latest
+    ports:
+      - "127.0.0.1:1025:1025"  # SMTP
+      - "127.0.0.1:8025:8025"  # UI
+    healthcheck: { test: ["CMD","wget","-qO-","http://localhost:8025"], interval: 10s, timeout: 3s, retries: 10 }
+
+  dozzle:
+    <<: *dflt
+    image: amir20/dozzle:latest
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+    ports: ["127.0.0.1:7000:8080"]
+    healthcheck: { test: ["CMD","wget","-qO-","http://localhost:8080"], interval: 10s, timeout: 3s, retries: 10 }
+
+
+volumes:
+  n8n-data:
+
+networks:
+  private: { driver: bridge }

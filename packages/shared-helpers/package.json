@@ -1,0 +1,20 @@
+{
+  "name": "@lf/shared-helpers",
+  "version": "1.0.0",
+  "description": "Shared utility functions with zero external dependencies",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "echo 'No linting configured yet'",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

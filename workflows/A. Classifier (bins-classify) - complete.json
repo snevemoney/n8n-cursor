@@ -1,0 +1,83 @@
+{
+  "name": "A. Classifier (bins-classify)",
+  "nodes": [
+    {
+      "id": "Webhook_Classifier",
+      "name": "Webhook: /webhook/bins-classify",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bins-classify",
+        "responseMode": "lastNode",
+        "options": { "binaryData": true }
+      }
+    },
+    {
+      "id": "Drive_Upload",
+      "name": "Google Drive: upload file",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [460, 200],
+      "parameters": {
+        "operation": "upload",
+        "fileName": "={{$binary.file?.fileName || $binary.data?.fileName || $json.job_id || (\"upload_\"+$now)}}",
+        "parentId": "GOOGLE_DRIVE_INTAKE_FOLDER_ID",
+        "binaryPropertyName": "={{$binary.file ? 'file' : 'data'}}"
+      }
+    },
+    {
+      "id": "Drive_Download",
+      "name": "Google Drive: download (for OCR)",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [700, 200],
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{$json.id}}",
+        "options": { "download": true }
+      }
+    },
+    {
+      "id": "Tesseract_OCR",
+      "name": "Tesseract OCR → text",
+      "type": "n8n-nodes-base.tesseractOcr",
+      "typeVersion": 1,
+      "position": [940, 200],
+      "parameters": {
+        "operation": "ocr",
+        "imagePropertyName": "data",
+        "options": { "pdfToImage": true, "preserveInterwordSpaces": true, "splitPages": false }
+      }
+    },
+    {
+      "id": "Code_Classify",
+      "name": "Code: classify + id_number",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1180, 200],
+      "parameters": {
+        "functionCode": "// Heuristic classification + id_number\nconst text = ($json.text || '').toLowerCase();\nconst job_id = $json.job_id || (\"jb_\" + Date.now());\nconst bins = [\n  {bin:'CONTRACT',   kw:['loan agreement','governing law','borrower','lender']},\n  {bin:'BANKING',    kw:['void cheque','transit','institution','account number','bank statement']},\n  {bin:'CARFAX',     kw:['carfax','vehicle history','odometer','accident']},\n  {bin:'DEALER BOS', kw:['bill of sale','sale price','dealer','purchase price']},\n  {bin:'INSURANCE',  kw:['policy','binder','coverage','deductible','insured']},\n  {bin:'PPSA',       kw:['ppsa','financing statement','registration']},\n  {bin:'UCC',        kw:['ucc','filing number','secured party']},\n  {bin:'OWNERSHIP',  kw:['certificate of title','plate','owner']} \n];\nlet best='MISC', score=0;\nfor (const b of bins){ const s=b.kw.reduce((c,k)=>c+(text.includes(k)?1:0),0); if(s>score){score=s;best=b.bin;} }\nconst idnum = ( ($json.text||'').match(/\\b(?:agreement|contract)\\s*(?:no\\.?|number|#)\\s*[:\\-]?\\s*([A-Z0-9\\-\\/]+)/i)?.[1] || '' ).trim();\nreturn [{ json: { job_id, bin: score?best:'UNASGD FAX', confidence: score? Math.min(1, 0.3 + score*0.15):0.1, id_number:idnum } }];"
+      }
+    },
+    {
+      "id": "Code_Response",
+      "name": "Code: build response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1420, 200],
+      "parameters": {
+        "functionCode": "// Build response with file_url\nconst fileId = $items(1)[0].json.id; // from Drive_Upload\nconst fileUrl = `https://drive.google.com/uc?id=${fileId}`;\nconst out = { ...$json, file_url: fileUrl };\nreturn [{ json: out }];"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook: /webhook/bins-classify": { "main": [ [ { "node": "Google Drive: upload file", "type": "main", "index": 0 } ] ] },
+    "Google Drive: upload file": { "main": [ [ { "node": "Google Drive: download (for OCR)", "type": "main", "index": 0 } ] ] },
+    "Google Drive: download (for OCR)": { "main": [ [ { "node": "Tesseract OCR → text", "type": "main", "index": 0 } ] ] },
+    "Tesseract OCR → text": { "main": [ [ { "node": "Code: classify + id_number", "type": "main", "index": 0 } ] ] },
+    "Code: classify + id_number": { "main": [ [ { "node": "Code: build response", "type": "main", "index": 0 } ] ] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

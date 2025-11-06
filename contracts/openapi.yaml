@@ -1,0 +1,910 @@
+openapi: 3.0.3
+info:
+  title: LightningFlow AI API
+  description: Enterprise-grade AI automation platform for Bitcoin Lightning Network
+  version: 1.0.0
+  contact:
+    name: LightningFlow AI Support
+    url: https://lightningflow.online/support
+    email: support@lightningflow.online
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://lightningflow.online/api/v1
+    description: Production server
+  - url: https://staging.lightningflow.online/api/v1
+    description: Staging server
+  - url: http://localhost:4000/api/v1
+    description: Development server
+
+security:
+  - bearerAuth: []
+  - apiKey: []
+
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      description: Check service health status
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents:
+    get:
+      summary: List agents
+      description: Get list of all available agents
+      tags:
+        - Agents
+      parameters:
+        - name: status
+          in: query
+          description: Filter by agent status
+          schema:
+            type: string
+            enum: [active, inactive, error]
+        - name: type
+          in: query
+          description: Filter by agent type
+          schema:
+            type: string
+            enum: [bitcoin, lightning, trading, analytics, webhook]
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Agent'
+                  total:
+                    type: integer
+                    description: Total number of agents
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create agent
+      description: Create a new agent
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentRequest'
+      responses:
+        '201':
+          description: Agent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /agents/{agentId}:
+    get:
+      summary: Get agent
+      description: Get agent by ID
+      tags:
+        - Agents
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: Agent ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update agent
+      description: Update agent configuration
+      tags:
+        - Agents
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: Agent ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgentRequest'
+      responses:
+        '200':
+          description: Agent updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete agent
+      description: Delete an agent
+      tags:
+        - Agents
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: Agent ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Agent deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /agents/{agentId}/execute:
+    post:
+      summary: Execute agent
+      description: Execute an agent with parameters
+      tags:
+        - Agents
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: Agent ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteAgentRequest'
+      responses:
+        '200':
+          description: Agent executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecuteAgentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /agents/{agentId}/health:
+    get:
+      summary: Agent health check
+      description: Check agent health status
+      tags:
+        - Agents
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: Agent ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Agent health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentHealthResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /webhooks/lnbits:
+    post:
+      summary: LNbits webhook
+      description: Handle LNbits webhook events
+      tags:
+        - Webhooks
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LNbitsWebhookRequest'
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /webhooks/lightning:
+    post:
+      summary: Lightning webhook
+      description: Handle Lightning Network webhook events
+      tags:
+        - Webhooks
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LightningWebhookRequest'
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /workflows/0/run:
+    post:
+      summary: Start workflow(0) execution
+      description: Initiates a new workflow(0) run with the provided payload
+      operationId: startWorkflow0
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workflow0RunRequest'
+      responses:
+        '200':
+          description: Workflow run started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow0RunResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /workflows/0/status/{id}:
+    get:
+      summary: Get workflow(0) run status
+      description: Returns the current status and progress of a workflow(0) run
+      operationId: getWorkflow0Status
+      tags:
+        - Workflows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workflow run ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Workflow run status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow0StatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /lnbits/webhook:
+    post:
+      summary: LNbits webhook endpoint
+      description: Handles webhooks from LNbits for payment events
+      operationId: handleLnbitsWebhook
+      tags:
+        - Webhooks
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          description: Webhook authentication token
+          schema:
+            type: string
+        - name: host
+          in: query
+          required: true
+          description: LNbits host identifier
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LnbitsWebhookPayload'
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Webhook processed"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /metrics:
+    get:
+      summary: System metrics
+      description: Get system performance metrics
+      tags:
+        - Metrics
+      responses:
+        '200':
+          description: System metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        services:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, unhealthy]
+            redis:
+              type: string
+              enum: [healthy, unhealthy]
+            external:
+              type: string
+              enum: [healthy, unhealthy]
+      required:
+        - status
+        - timestamp
+        - version
+
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [bitcoin, lightning, trading, analytics, webhook]
+        status:
+          type: string
+          enum: [active, inactive, error]
+        config:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastExecutedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - name
+        - type
+        - status
+        - config
+        - createdAt
+        - updatedAt
+
+    CreateAgentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          enum: [bitcoin, lightning, trading, analytics, webhook]
+        config:
+          type: object
+      required:
+        - name
+        - type
+        - config
+
+    UpdateAgentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        config:
+          type: object
+        status:
+          type: string
+          enum: [active, inactive]
+
+    ExecuteAgentRequest:
+      type: object
+      properties:
+        parameters:
+          type: object
+        timeout:
+          type: integer
+          minimum: 1000
+          maximum: 300000
+          default: 30000
+      required:
+        - parameters
+
+    ExecuteAgentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        result:
+          type: object
+        executionTime:
+          type: integer
+          description: Execution time in milliseconds
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - success
+        - executionTime
+        - timestamp
+
+    AgentHealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        details:
+          type: object
+        lastCheck:
+          type: string
+          format: date-time
+        uptime:
+          type: integer
+          description: Uptime in seconds
+      required:
+        - status
+        - lastCheck
+
+    LNbitsWebhookRequest:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: [payment_received, payment_sent, invoice_created, invoice_paid]
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+        signature:
+          type: string
+      required:
+        - event
+        - data
+        - timestamp
+        - signature
+
+    LightningWebhookRequest:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: [payment_received, payment_sent, channel_opened, channel_closed]
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+        signature:
+          type: string
+      required:
+        - event
+        - data
+        - timestamp
+        - signature
+
+    WebhookResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - success
+        - timestamp
+
+    MetricsResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        system:
+          type: object
+          properties:
+            cpu:
+              type: number
+            memory:
+              type: number
+            disk:
+              type: number
+        services:
+          type: object
+          properties:
+            api:
+              type: object
+              properties:
+                requests:
+                  type: integer
+                errors:
+                  type: integer
+                avgResponseTime:
+                  type: number
+            agents:
+              type: object
+              properties:
+                active:
+                  type: integer
+                total:
+                  type: integer
+                errors:
+                  type: integer
+      required:
+        - timestamp
+
+    Workflow0RunRequest:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: Tenant identifier
+          example: "t_123"
+        payload:
+          type: object
+          description: Workflow payload data
+          additionalProperties: true
+        metadata:
+          type: object
+          description: Additional metadata
+          properties:
+            source:
+              type: string
+              example: "dashboard"
+            userId:
+              type: string
+              example: "user_456"
+      required:
+        - tenantId
+        - payload
+
+    Workflow0RunResponse:
+      type: object
+      properties:
+        workflowRunId:
+          type: string
+          format: uuid
+          description: Unique identifier for this workflow run
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        status:
+          type: string
+          enum: [created, queued, running, completed, failed]
+          description: Initial status of the workflow run
+          example: "created"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the run was created
+          example: "2024-01-01T00:00:00Z"
+
+    Workflow0StatusResponse:
+      type: object
+      properties:
+        workflowRunId:
+          type: string
+          format: uuid
+          description: Workflow run identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        status:
+          type: string
+          enum: [created, queued, running, completed, failed]
+          description: Current status of the workflow run
+          example: "running"
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Progress percentage (0-100)
+          example: 45
+        steps:
+          type: array
+          description: List of workflow steps and their status
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+        lastEventAt:
+          type: string
+          format: date-time
+          description: Timestamp of the last status update
+          example: "2024-01-01T00:05:00Z"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the run was created
+          example: "2024-01-01T00:00:00Z"
+        completedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the run completed (if applicable)
+          example: "2024-01-01T00:10:00Z"
+        error:
+          type: object
+          description: Error details (if status is failed)
+          properties:
+            code:
+              type: string
+              example: "LFAI-0001"
+            message:
+              type: string
+              example: "Invalid webhook token"
+
+    WorkflowStep:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Step identifier
+          example: "validate_input"
+        name:
+          type: string
+          description: Human-readable step name
+          example: "Validate Input"
+        status:
+          type: string
+          enum: [pending, running, completed, failed, skipped]
+          description: Step status
+          example: "completed"
+        startedAt:
+          type: string
+          format: date-time
+          description: When the step started
+          example: "2024-01-01T00:01:00Z"
+        completedAt:
+          type: string
+          format: date-time
+          description: When the step completed
+          example: "2024-01-01T00:02:00Z"
+        duration:
+          type: number
+          description: Step duration in milliseconds
+          example: 1000
+
+    LnbitsWebhookPayload:
+      type: object
+      properties:
+        payment_hash:
+          type: string
+          description: Lightning payment hash
+          example: "abc123def456"
+        amount:
+          type: number
+          description: Payment amount in sats
+          example: 1000
+        status:
+          type: string
+          enum: [paid, failed, pending]
+          description: Payment status
+          example: "paid"
+        memo:
+          type: string
+          description: Payment memo
+          example: "Workflow payment"
+        time:
+          type: number
+          description: Payment timestamp
+          example: 1704067200
+      required:
+        - payment_hash
+        - amount
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+          nullable: true
+      required:
+        - error
+        - message
+        - code
+        - timestamp
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Agents
+    description: Agent management
+  - name: Webhooks
+    description: Webhook handlers
+  - name: Workflows
+    description: Workflow execution and management
+  - name: Metrics
+    description: System metrics
+
+
+
+
+
+

@@ -1,0 +1,46 @@
+# Monitoring Dashboard - Add this to your main Caddyfile
+# Access via https://yourdomain.com/monitoring/
+
+handle_path /monitoring/* {
+    # Uptime Kuma
+    handle_path /monitoring/uptime/* {
+        reverse_proxy 127.0.0.1:3001
+    }
+    
+    # Grafana
+    handle_path /monitoring/grafana/* {
+        reverse_proxy 127.0.0.1:3000
+    }
+    
+    # Prometheus
+    handle_path /monitoring/prometheus/* {
+        reverse_proxy 127.0.0.1:9090
+    }
+    
+    # Default to uptime dashboard
+    handle {
+        redir /monitoring/ /monitoring/uptime/ 301
+    }
+}
+
+# Security headers for monitoring endpoints
+header /monitoring/* {
+    # Security headers
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    X-XSS-Protection "1; mode=block"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Remove server info
+    -Server
+}
+
+# Rate limiting for monitoring endpoints
+rate_limit /monitoring/* {
+    zone monitoring {
+        key {remote_host}
+        events 10
+        window 1m
+    }
+}

@@ -1,0 +1,97 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  trivy-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker images
+      run: |
+        # Build your application images here
+        # Example for a Node.js API:
+        # docker build -t ghcr.io/yourorg/lightningflow-api:latest -f apps/lightningflow/api/Dockerfile .
+        
+        # For now, we'll scan the base images used in docker-compose
+        echo "Scanning base images from docker-compose files..."
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.20.0
+      with:
+        scan-type: 'image'
+        image-ref: 'n8nio/n8n:1.69.0-alpine'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        exit-code: '1'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Scan additional images
+      run: |
+        # Scan other images used in your stack
+        trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed \
+          node:20-alpine \
+          redis:7-alpine \
+          postgres:16-alpine \
+          caddy:2-alpine
+
+  dockerfile-security:
+    name: Dockerfile Security Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Hadolint
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: '**/Dockerfile*'
+        format: sarif
+        output-file: hadolint-results.sarif
+        no-fail: true
+
+    - name: Upload Hadolint results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'hadolint-results.sarif'
+
+  secrets-scan:
+    name: Secrets Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run TruffleHog
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified

@@ -1,0 +1,282 @@
+{
+  "mcpServers": {
+    "n8n-mcp": {
+      "command": "node",
+      "args": ["tools/mcp-servers/comprehensive-n8n-server.mjs"],
+      "env": {
+        "N8N_BASE_URL": "https://n8ncloud.tech",
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2OTQ5NjYwfQ.GaodXlSEJJuKirhnni4hq8XjgTbrZ8Px6DC1znpUn7A",
+        "N8N_API_PATH": "/api/v1",
+        "N8N_AUTH_HEADER": "X-N8N-API-KEY"
+      }
+    },
+    "radar-audit": {
+      "command": "node",
+      "args": ["./mcp/radar/if-enabled.mjs", "./mcp/radar/server.mjs"],
+      "env": {
+        "ENABLED": "1",
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_SERVICE_KEY": "${SUPABASE_SERVICE_KEY}"
+      }
+    },
+    "lightningflow-ai": {
+      "command": "node",
+      "args": ["./mcp/lightningflow/if-enabled.mjs", "./mcp/lightningflow/server.mjs"],
+      "env": {
+        "ENABLED": "1",
+        "LNFLOW_ENV": "${LNFLOW_ENV}",
+        "LN_BACKEND": "${LN_BACKEND}",
+        "LNBITS_BASE_URL": "${LNBITS_BASE_URL}",
+        "LNBITS_API_KEY": "${LNBITS_API_KEY}",
+        "LND_REST_URL": "${LND_REST_URL}",
+        "LND_MACAROON": "${LND_MACAROON}",
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_SERVICE_KEY": "${SUPABASE_SERVICE_KEY}",
+        "SLACK_WEBHOOK_URL": "${SLACK_WEBHOOK_URL}"
+      }
+    },
+    "side-hustles": {
+      "command": "node",
+      "args": ["./mcp/side-hustle/if-enabled.mjs", "./mcp/side-hustle/server.mjs"],
+      "env": {
+        "ENABLED": "1",
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_SERVICE_KEY": "${SUPABASE_SERVICE_KEY}",
+        "SIDE_HUSTLE_ENABLED": "1"
+      }
+    }
+  },
+  "tools": {
+    "radar_audit_now": {
+      "description": "Run all depreciation checks and return a condensed report.",
+      "parameters": {
+        "env": {
+          "type": "string",
+          "enum": ["local", "int", "test", "stg", "prod"],
+          "default": "local"
+        }
+      },
+      "required": ["env"]
+    },
+    "radar_list_deadletters": {
+      "description": "List top N oldest dead letters for triage.",
+      "parameters": {
+        "limit": {
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100
+        },
+        "env": {
+          "type": "string",
+          "enum": ["local", "int", "test", "stg", "prod"],
+          "description": "Filter by environment (optional)"
+        }
+      }
+    },
+    "radar_credential_health": {
+      "description": "Check credential health and identify issues.",
+      "parameters": {}
+    },
+    "radar_workflow_health": {
+      "description": "Check workflow health and identify stale workflows.",
+      "parameters": {}
+    },
+    "ln_create_invoice": {
+      "description": "Create a Lightning invoice (bolt11) for LightningFlow AI business.",
+      "parameters": {
+        "amount_sats": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Amount in satoshis"
+        },
+        "memo": {
+          "type": "string",
+          "description": "Invoice memo/description"
+        },
+        "payer_ref": {
+          "type": "string",
+          "description": "Unique reference for the payer (used for idempotency)"
+        },
+        "expiry_secs": {
+          "type": "integer",
+          "default": 3600,
+          "description": "Invoice expiry time in seconds"
+        }
+      },
+      "required": ["amount_sats", "payer_ref"]
+    },
+    "ln_get_invoice_status": {
+      "description": "Get LightningFlow AI invoice status by payment_hash or ext_id.",
+      "parameters": {
+        "payment_hash": {
+          "type": "string",
+          "description": "Payment hash from the invoice"
+        },
+        "ext_id": {
+          "type": "string",
+          "description": "External ID used when creating the invoice"
+        }
+      }
+    },
+    "ln_pay_invoice": {
+      "description": "Pay a bolt11 invoice (outbound) for LightningFlow AI business.",
+      "parameters": {
+        "bolt11": {
+          "type": "string",
+          "description": "BOLT11 invoice string to pay"
+        },
+        "max_fee_sats": {
+          "type": "integer",
+          "default": 500,
+          "description": "Maximum fee in satoshis"
+        }
+      },
+      "required": ["bolt11"]
+    },
+    "ln_liquidity_check": {
+      "description": "Check LightningFlow AI channel inbound/outbound liquidity.",
+      "parameters": {}
+    },
+    "ln_health": {
+      "description": "Health check for LightningFlow AI Lightning backend.",
+      "parameters": {}
+    },
+    "side_hustle_list_tenants": {
+      "description": "List all active side-hustle tenants (separate from LightningFlow AI).",
+      "parameters": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive", "suspended"],
+          "default": "active",
+          "description": "Filter by tenant status"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Maximum number of tenants to return"
+        }
+      }
+    },
+    "side_hustle_create_tenant": {
+      "description": "Create a new side-hustle tenant with default mappings (for your existing workflows).",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "description": "Business name"
+        },
+        "slug": {
+          "type": "string",
+          "description": "Unique slug (e.g., 'my-business')"
+        },
+        "description": {
+          "type": "string",
+          "description": "Business description"
+        },
+        "business_type": {
+          "type": "string",
+          "description": "Type of business"
+        },
+        "industry": {
+          "type": "string",
+          "description": "Industry category"
+        },
+        "contact_email": {
+          "type": "string",
+          "description": "Contact email address"
+        },
+        "contact_phone": {
+          "type": "string",
+          "description": "Contact phone number"
+        },
+        "contact_name": {
+          "type": "string",
+          "description": "Contact person name"
+        },
+        "rate_limit_per_hour": {
+          "type": "integer",
+          "default": 1000,
+          "description": "Hourly rate limit"
+        },
+        "rate_limit_per_day": {
+          "type": "integer",
+          "default": 10000,
+          "description": "Daily rate limit"
+        }
+      },
+      "required": ["name", "slug"]
+    },
+    "side_hustle_get_mappings": {
+      "description": "Get field mappings for a side-hustle tenant (for your existing n8n workflows).",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant UUID"
+        },
+        "tenant_slug": {
+          "type": "string",
+          "description": "Tenant slug (alternative to tenant_id)"
+        }
+      }
+    },
+    "side_hustle_create_job": {
+      "description": "Create a new side-hustle job (e.g., voice transcript processing for your existing workflows).",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant UUID"
+        },
+        "tenant_slug": {
+          "type": "string",
+          "description": "Tenant slug (alternative to tenant_id)"
+        },
+        "job_type": {
+          "type": "string",
+          "description": "Type of job (e.g., 'voice_transcript', 'data_import')"
+        },
+        "input_data": {
+          "type": "object",
+          "description": "Input data for the job"
+        },
+        "webhook_signature": {
+          "type": "string",
+          "description": "HMAC signature for webhook verification"
+        },
+        "webhook_secret": {
+          "type": "string",
+          "description": "Secret for webhook verification"
+        }
+      },
+      "required": ["job_type", "input_data"]
+    },
+    "side_hustle_get_job_status": {
+      "description": "Get status and results of a side-hustle job.",
+      "parameters": {
+        "job_id": {
+          "type": "string",
+          "description": "Job UUID"
+        }
+      },
+      "required": ["job_id"]
+    },
+    "side_hustle_get_rate_limit_status": {
+      "description": "Check rate limit status for a side-hustle tenant.",
+      "parameters": {
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant UUID"
+        },
+        "tenant_slug": {
+          "type": "string",
+          "description": "Tenant slug (alternative to tenant_id)"
+        }
+      }
+    },
+    "side_hustle_health": {
+      "description": "Health check for side-hustle systems (separate from LightningFlow AI).",
+      "parameters": {}
+    }
+  }
+}

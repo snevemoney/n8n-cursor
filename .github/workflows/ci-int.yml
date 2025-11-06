@@ -1,0 +1,69 @@
+name: CI - Integration
+on:
+  push:
+    branches: [int]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable && pnpm i --frozen-lockfile
+      - run: pnpm -w lint && pnpm -w typecheck && pnpm -w test
+      - name: Build :int images
+        run: |
+          for s in landing web ops api worker; do
+            docker build -t ghcr.io/${{ github.repository }}/lfai-$s:int apps/$s
+          done
+      - name: Push images
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          for s in landing web ops api worker; do
+            docker push ghcr.io/${{ github.repository }}/lfai-$s:int
+          done
+
+  n8n-dryrun:
+    needs: build
+    runs-on: ubuntu-latest
+    services:
+      n8n:
+        image: n8nio/n8n:1.55.1
+        ports: ["5678:5678"]
+        env:
+          N8N_HOST: localhost
+          N8N_PORT: 5678
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import workflows (inactive)
+        run: |
+          for f in workflows/lfai/*.json; do
+            jq 'del(.id) | .active=false' "$f" > /tmp/wf.json
+            curl -fsS -X POST -H "Content-Type: application/json" \
+              -d @/tmp/wf.json http://localhost:5678/rest/workflows >/dev/null
+          done
+      - name: Sanity check HMAC headers present
+        run: rg -n 'X-Workflow-Signature' workflows/lfai || (echo "Missing HMAC" && exit 1)
+
+  deploy-int:
+    needs: [build, n8n-dryrun]
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy to Integration
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER_INT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/repo
+            git pull --rebase
+            docker pull ghcr.io/${{ github.repository }}/lfai-landing:int
+            docker pull ghcr.io/${{ github.repository }}/lfai-web:int
+            docker pull ghcr.io/${{ github.repository }}/lfai-ops:int
+            docker pull ghcr.io/${{ github.repository }}/lfai-api:int
+            docker pull ghcr.io/${{ github.repository }}/lfai-worker:int
+            docker compose -f infra/docker/docker-compose.int.yml up -d
+            sudo cp infra/caddy/Caddyfile.int /etc/caddy/Caddyfile
+            sudo systemctl reload caddy
+            bash scripts/smoke-int.sh

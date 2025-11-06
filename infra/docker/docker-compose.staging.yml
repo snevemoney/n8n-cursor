@@ -1,0 +1,71 @@
+name: lfai_staging
+x:dflt: &dflt
+  restart: unless-stopped
+  init: true
+  networks: [private]
+  security_opt: ["no-new-privileges:true"]
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "5" } }
+
+services:
+  landing:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-landing:staging
+    env_file: [../../.env.staging]
+    ports: ["127.0.0.1:3100:3000"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3000/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+
+  web:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-web:staging
+    env_file: [../../.env.staging]
+    ports: ["127.0.0.1:3101:3001"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3001/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+
+  ops:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-ops:staging
+    env_file: [../../.env.staging]
+    ports: ["127.0.0.1:3102:3002"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3002/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+
+  api:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-api:staging
+    env_file: [../../.env.staging]
+    ports: ["127.0.0.1:4100:4000"]
+    depends_on: { redis: { condition: service_healthy } }
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:4000/health"], interval: 10s, timeout: 2s, retries: 10 }
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+
+  worker:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-worker:staging
+    env_file: [../../.env.staging]
+    depends_on:
+      redis: { condition: service_healthy }
+      api: { condition: service_healthy }
+    healthcheck: { test: ["CMD","node","-e","process.exit(0)"], interval: 15s, timeout: 3s, retries: 20 }
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+
+  redis:
+    <<: *dflt
+    image: redis:7.2-alpine
+    command: ["redis-server","--save","","--appendonly","no","--maxmemory","256mb","--maxmemory-policy","allkeys-lru"]
+    ports: ["127.0.0.1:6381:6379"]   # isolate from integration
+    healthcheck: { test: ["CMD","redis-cli","ping"], interval: 5s, timeout: 2s, retries: 20 }
+
+  n8n:
+    <<: *dflt
+    image: n8nio/n8n:1.55.1
+    env_file: [../../.env.staging]
+    environment:
+      - N8N_HOST=staging.n8ncloud.tech
+      - N8N_PORT=5678
+      - WEBHOOK_URL=https://staging.n8ncloud.tech/
+    ports: ["127.0.0.1:5688:5678"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/"], interval: 15s, timeout: 3s, retries: 10 }
+
+networks:
+  private: { driver: bridge, internal: true }

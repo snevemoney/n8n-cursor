@@ -1,0 +1,16 @@
+{
+  "name": "@lf/n8n-cursor",
+  "version": "1.0.0",
+  "description": "n8n-cursor development workbench and tools",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'n8n-cursor development tools'",
+    "build": "echo 'n8n-cursor build'",
+    "lint": "echo 'No linting configured yet'",
+    "typecheck": "echo 'No TypeScript configured yet'"
+  },
+  "dependencies": {
+    "@lf/shared-types": "workspace:*",
+    "@lf/shared-helpers": "workspace:*"
+  }
+}

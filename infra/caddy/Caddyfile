@@ -1,0 +1,205 @@
+# LightningFlow AI Platform - Hardened Caddy Configuration
+# Dual domain setup: lightningflow.online + n8ncloud.tech
+
+# Common security headers and settings
+(common) {
+  encode gzip
+  
+  # Security headers
+  header {
+    # HTTPS enforcement
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Content protection
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    X-XSS-Protection "1; mode=block"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Remove server information
+    -Server
+    -X-Powered-By
+    
+    # Content Security Policy (tightened for security)
+    Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://*.lightningflow.online; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+  }
+  
+  # Rate limiting
+  rate_limit {
+    zone static {
+      key {remote_host}
+      events 100
+      window 1m
+    }
+  }
+}
+
+# LightningFlow Domain - SaaS UI/API
+lightningflow.online, www.lightningflow.online {
+  import common
+  
+  # Health endpoints (no rate limiting for monitoring)
+  @health path /healthz
+  handle @health {
+    respond 200 {
+      body "OK"
+      header Content-Type "text/plain"
+    }
+  }
+  
+  @apihealth path /api/healthz
+  handle @apihealth {
+    reverse_proxy 127.0.0.1:4000 {
+      health_uri /api/healthz
+      health_interval 30s
+      health_timeout 5s
+    }
+  }
+  
+  # API routes
+  handle_path /api/* {
+    reverse_proxy 127.0.0.1:4000 {
+      health_uri /api/healthz
+      health_interval 30s
+      health_timeout 5s
+      
+      # API-specific headers
+      header_up X-Forwarded-Proto {scheme}
+      header_up X-Forwarded-Host {host}
+      header_up X-Real-IP {remote_host}
+    }
+  }
+  
+  # Web UI (everything else)
+  handle {
+    reverse_proxy 127.0.0.1:3000 {
+      health_uri /healthz
+      health_interval 30s
+      health_timeout 5s
+      
+      # Web-specific headers
+      header_up X-Forwarded-Proto {scheme}
+      header_up X-Forwarded-Host {host}
+      header_up X-Real-IP {remote_host}
+    }
+  }
+}
+
+# n8nCloud Domain - n8n + Integration Tooling
+n8ncloud.tech, www.n8ncloud.tech {
+  import common
+  
+  # Health endpoint for n8n
+  @health path /healthz
+  handle @health {
+    respond 200 {
+      body "OK"
+      header Content-Type "text/plain"
+    }
+  }
+  
+  # n8n UI/API
+  handle {
+    reverse_proxy 127.0.0.1:5678 {
+      health_uri /
+      health_interval 30s
+      health_timeout 5s
+      
+      # n8n-specific headers
+      header_up X-Forwarded-Proto {scheme}
+      header_up X-Forwarded-Host {host}
+      header_up X-Real-IP {remote_host}
+    }
+  }
+}
+
+# Development/Integration Domain (if needed)
+dev.lightningflow.online, dev.n8ncloud.tech {
+  import common
+  
+  # Health endpoints
+  @health path /healthz
+  handle @health {
+    respond 200 {
+      body "OK"
+      header Content-Type "text/plain"
+    }
+  }
+  
+  # Development UI
+  handle_path / {
+    reverse_proxy 127.0.0.1:3002 {
+      health_uri /healthz
+      health_interval 30s
+      health_timeout 5s
+    }
+  }
+  
+  # Development API
+  handle_path /api/* {
+    reverse_proxy 127.0.0.1:4000 {
+      health_uri /api/healthz
+      health_interval 30s
+      health_timeout 5s
+    }
+  }
+}
+
+# Staging Domain (if needed)
+staging.lightningflow.online, staging.n8ncloud.tech {
+  import common
+  
+  # Health endpoints
+  @health path /healthz
+  handle @health {
+    respond 200 {
+      body "OK"
+      header Content-Type "text/plain"
+    }
+  }
+  
+  # Staging UI
+  handle_path / {
+    reverse_proxy 127.0.0.1:3000 {
+      health_uri /healthz
+      health_interval 30s
+      health_timeout 5s
+    }
+  }
+  
+  # Staging API
+  handle_path /api/* {
+    reverse_proxy 127.0.0.1:4000 {
+      health_uri /api/healthz
+      health_interval 30s
+      health_timeout 5s
+    }
+  }
+}
+
+# Global error handling
+{
+  # Global options
+  auto_https off
+  servers {
+    metrics
+  }
+  
+  # Logging
+  log {
+    output file /var/log/caddy/access.log {
+      roll_size 100mb
+      roll_keep 5
+      roll_keep_for 720h
+    }
+    format json
+    level INFO
+  }
+  
+  # Error handling
+  errors {
+    * {
+      respond "Service temporarily unavailable" 503
+    }
+  }
+}

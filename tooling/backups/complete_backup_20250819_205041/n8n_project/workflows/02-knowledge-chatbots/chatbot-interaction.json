@@ -1,0 +1,271 @@
+{
+  "name": "AI Knowledge Chatbot Interaction & Monetization",
+  "nodes": [
+    {
+      "id": "webhook-chat-message",
+      "name": "Chat Message Received",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 100],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat/{{ $parameter[\"chatbot_id\"] }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "validate-subscription",
+      "name": "Validate User Subscription",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [300, 100],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT u.*, s.plan_type, s.messages_limit, s.expires_at, COUNT(m.id) as messages_used FROM users u JOIN subscriptions s ON u.id = s.user_id LEFT JOIN chat_messages m ON u.id = m.user_id AND m.created_at >= DATE_TRUNC('month', NOW()) WHERE u.session_token = '{{ $json.session_token }}' AND s.status = 'active' GROUP BY u.id, s.id"
+      }
+    },
+    {
+      "id": "check-usage-limits",
+      "name": "Check Message Limits",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 100],
+      "parameters": {
+        "functionCode": "const userData = $input.first().json;\n\n// Check subscription status\nif (!userData || userData.length === 0) {\n  return {\n    error: 'Invalid session or expired subscription',\n    code: 'SUBSCRIPTION_INVALID'\n  };\n}\n\nconst user = userData[0];\nconst now = new Date();\nconst expiresAt = new Date(user.expires_at);\n\n// Check if subscription is expired\nif (now > expiresAt) {\n  return {\n    error: 'Subscription expired',\n    code: 'SUBSCRIPTION_EXPIRED',\n    expires_at: user.expires_at\n  };\n}\n\n// Check message limits\nif (user.messages_used >= user.messages_limit) {\n  return {\n    error: 'Monthly message limit reached',\n    code: 'LIMIT_REACHED',\n    messages_used: user.messages_used,\n    messages_limit: user.messages_limit\n  };\n}\n\n// All checks passed\nreturn {\n  valid: true,\n  user_id: user.id,\n  plan_type: user.plan_type,\n  messages_remaining: user.messages_limit - user.messages_used,\n  chatbot_id: $node[\"Chat Message Received\"].json.chatbot_id,\n  message: $node[\"Chat Message Received\"].json.message\n};"
+      }
+    },
+    {
+      "id": "handle-subscription-error",
+      "name": "Handle Subscription Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "parameters": {
+        "functionCode": "const errorData = $input.first().json;\n\nif (errorData.code === 'SUBSCRIPTION_INVALID') {\n  return {\n    response: {\n      message: 'Please log in or subscribe to access this chatbot.',\n      action: 'redirect_to_login',\n      upgrade_url: '/subscribe'\n    }\n  };\n}\n\nif (errorData.code === 'SUBSCRIPTION_EXPIRED') {\n  return {\n    response: {\n      message: 'Your subscription has expired. Please renew to continue.',\n      action: 'redirect_to_billing',\n      renewal_url: '/billing/renew'\n    }\n  };\n}\n\nif (errorData.code === 'LIMIT_REACHED') {\n  return {\n    response: {\n      message: `You've reached your monthly limit of ${errorData.messages_limit} messages. Upgrade for more access.`,\n      action: 'upgrade_prompt',\n      upgrade_url: '/subscribe/upgrade'\n    }\n  };\n}\n\nreturn {\n  response: {\n    message: 'An error occurred. Please try again later.',\n    action: 'error'\n  }\n};"
+      }
+    },
+    {
+      "id": "search-knowledge-base",
+      "name": "Search Knowledge Base",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [700, 100],
+      "parameters": {
+        "resource": "embedding",
+        "operation": "create",
+        "model": "text-embedding-ada-002",
+        "input": "={{ $json.message }}"
+      }
+    },
+    {
+      "id": "query-vector-database",
+      "name": "Query Vector Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 100],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pinecone.io/query",
+        "headers": {
+          "Api-Key": "{{ $credentials.pinecone.api_key }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "vector": "={{ $node['Search Knowledge Base'].json.data[0].embedding }}",
+          "topK": 5,
+          "includeMetadata": true,
+          "filter": {
+            "chatbot_id": "={{ $node['Check Message Limits'].json.chatbot_id }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "generate-ai-response",
+      "name": "Generate AI Response",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1100, 100],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a helpful AI assistant with access to a specialized knowledge base. Use the provided context to answer questions accurately and helpfully. If the context doesn't contain relevant information, politely say you don't have that information in your knowledge base.\n\nContext from knowledge base:\n{{ $node['Query Vector Database'].json.matches.map(match => match.metadata.text).join('\\n\\n') }}"
+            },
+            {
+              "role": "user",
+              "content": "{{ $node['Check Message Limits'].json.message }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      }
+    },
+    {
+      "id": "log-conversation",
+      "name": "Log Conversation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1300, 100],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO chat_messages (user_id, chatbot_id, message, response, tokens_used, created_at) VALUES ('{{ $node[\"Check Message Limits\"].json[\"user_id\"] }}', '{{ $node[\"Check Message Limits\"].json[\"chatbot_id\"] }}', '{{ $node[\"Check Message Limits\"].json[\"message\"] }}', '{{ $node[\"Generate AI Response\"].json[\"choices\"][0][\"message\"][\"content\"] }}', {{ $node[\"Generate AI Response\"].json[\"usage\"][\"total_tokens\"] }}, NOW())"
+      }
+    },
+    {
+      "id": "update-usage-stats",
+      "name": "Update Usage Statistics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1300, 200],
+      "parameters": {
+        "operation": "update",
+        "query": "UPDATE chatbot_stats SET total_messages = total_messages + 1, total_tokens = total_tokens + {{ $node[\"Generate AI Response\"].json[\"usage\"][\"total_tokens\"] }}, last_activity = NOW() WHERE chatbot_id = '{{ $node[\"Check Message Limits\"].json[\"chatbot_id\"] }}'"
+      }
+    },
+    {
+      "id": "format-chat-response",
+      "name": "Format Chat Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1500, 100],
+      "parameters": {
+        "functionCode": "const aiResponse = $node['Generate AI Response'].json;\nconst userLimits = $node['Check Message Limits'].json;\n\nreturn {\n  success: true,\n  message: aiResponse.choices[0].message.content,\n  timestamp: new Date().toISOString(),\n  usage: {\n    tokens_used: aiResponse.usage.total_tokens,\n    messages_remaining: userLimits.messages_remaining - 1\n  },\n  sources: $node['Query Vector Database'].json.matches.map(match => ({\n    source: match.metadata.source,\n    relevance: match.score\n  }))\n};"
+      }
+    },
+    {
+      "id": "send-upgrade-prompt",
+      "name": "Send Upgrade Prompt",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "parameters": {
+        "functionCode": "const errorInfo = $node['Handle Subscription Error'].json;\n\nreturn {\n  success: false,\n  error: errorInfo.response.message,\n  action: errorInfo.response.action,\n  upgrade_url: errorInfo.response.upgrade_url || errorInfo.response.renewal_url,\n  timestamp: new Date().toISOString()\n};"
+      }
+    }
+  ],
+  "connections": {
+    "Chat Message Received": {
+      "main": [
+        [
+          {
+            "node": "Validate User Subscription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate User Subscription": {
+      "main": [
+        [
+          {
+            "node": "Check Message Limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Message Limits": {
+      "main": [
+        [
+          {
+            "node": "Search Knowledge Base",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Subscription Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Subscription Error": {
+      "main": [
+        [
+          {
+            "node": "Send Upgrade Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Knowledge Base": {
+      "main": [
+        [
+          {
+            "node": "Query Vector Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Vector Database": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Response": {
+      "main": [
+        [
+          {
+            "node": "Log Conversation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Usage Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Conversation": {
+      "main": [
+        [
+          {
+            "node": "Format Chat Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Usage Statistics": {
+      "main": [
+        [
+          {
+            "node": "Format Chat Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["knowledge-chatbot", "monetization", "subscription", "ai-chat"]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@lf/lightningflow",
+  "version": "1.0.0",
+  "description": "LightningFlow AI - AI-powered business node platform",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'LightningFlow AI development server'",
+    "build": "echo 'LightningFlow AI build'",
+    "lint": "echo 'No linting configured yet'",
+    "typecheck": "echo 'No TypeScript configured yet'"
+  },
+  "dependencies": {
+    "@lf/shared-types": "workspace:*",
+    "@lf/shared-helpers": "workspace:*"
+  }
+}

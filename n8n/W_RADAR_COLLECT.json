@@ -1,0 +1,399 @@
+{
+  "name": "Radar Collector - Depreciation Monitoring",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hour",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cron Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get current environment from env var or default to 'local'\nconst env = $env.NODE_ENV || 'local';\nconst timestamp = new Date().toISOString();\n\nreturn {\n  env,\n  timestamp,\n  collection_id: $json.id || $now.toISOString()\n};"
+      },
+      "id": "setup-env",
+      "name": "Setup Environment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT count(*) as count FROM v_stale_workflows;",
+        "options": {}
+      },
+      "id": "query-stale-workflows",
+      "name": "Query Stale Workflows",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 200],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-service",
+          "name": "Supabase Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT count(*) as count FROM v_credential_issues;",
+        "options": {}
+      },
+      "id": "query-credential-issues",
+      "name": "Query Credential Issues",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 300],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-service",
+          "name": "Supabase Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT coalesce(sum(dl_count), 0) as count FROM v_deadletters_backlog;",
+        "options": {}
+      },
+      "id": "query-deadletters",
+      "name": "Query Dead Letters",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 400],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-service",
+          "name": "Supabase Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT old_jobs, old_results FROM v_jobs_bloat;",
+        "options": {}
+      },
+      "id": "query-jobs-bloat",
+      "name": "Query Jobs Bloat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 500],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-service",
+          "name": "Supabase Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT count(*) as count FROM v_invoices_stale;",
+        "options": {}
+      },
+      "id": "query-stale-invoices",
+      "name": "Query Stale Invoices",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 600],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-service",
+          "name": "Supabase Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT entries_90d_plus as count FROM v_memory_bloat;",
+        "options": {}
+      },
+      "id": "query-memory-bloat",
+      "name": "Query Memory Bloat",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 700],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-service",
+          "name": "Supabase Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all the query results into a single snapshot\nconst env = $('Setup Environment').first().json.env;\nconst timestamp = $('Setup Environment').first().json.timestamp;\n\nconst staleWorkflows = $('Query Stale Workflows').first().json.rows[0]?.count || 0;\nconst credentialIssues = $('Query Credential Issues').first().json.rows[0]?.count || 0;\nconst deadletters = $('Query Dead Letters').first().json.rows[0]?.count || 0;\nconst jobsBloat = $('Query Jobs Bloat').first().json.rows[0] || { old_jobs: 0, old_results: 0 };\nconst staleInvoices = $('Query Stale Invoices').first().json.rows[0]?.count || 0;\nconst memoryBloat = $('Query Memory Bloat').first().json.rows[0]?.count || 0;\n\n// Calculate depreciation score (0-100)\nlet score = 0;\nif (staleWorkflows > 10) score += 25;\nelse if (staleWorkflows > 5) score += 15;\nelse if (staleWorkflows > 0) score += 5;\n\nif (credentialIssues > 5) score += 25;\nelse if (credentialIssues > 2) score += 15;\nelse if (credentialIssues > 0) score += 10;\n\nif (deadletters > 100) score += 25;\nelse if (deadletters > 50) score += 15;\nelse if (deadletters > 10) score += 10;\n\nif (jobsBloat.old_jobs > 1000) score += 15;\nelse if (jobsBloat.old_jobs > 500) score += 10;\nelse if (jobsBloat.old_jobs > 100) score += 5;\n\nif (memoryBloat > 1000) score += 10;\nelse if (memoryBloat > 500) score += 5;\n\nreturn {\n  env,\n  timestamp,\n  snapshot: {\n    stale_workflows: staleWorkflows,\n    credential_issues: credentialIssues,\n    deadletters: deadletters,\n    jobs_old: jobsBloat.old_jobs,\n    results_old: jobsBloat.old_results,\n    invoices_stale: staleInvoices,\n    memory_bloat: memoryBloat\n  },\n  depreciation_score: score,\n  severity: score > 50 ? 'critical' : score > 25 ? 'warning' : 'ok'\n};"
+      },
+      "id": "aggregate-results",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "radar_snapshots",
+        "columns": "env, stale_workflows, credential_issues, deadletters, jobs_old, results_old, invoices_stale, memory_bloat",
+        "values": "={{ $json.env }}, {{ $json.snapshot.stale_workflows }}, {{ $json.snapshot.credential_issues }}, {{ $json.snapshot.deadletters }}, {{ $json.snapshot.jobs_old }}, {{ $json.snapshot.results_old }}, {{ $json.snapshot.invoices_stale }}, {{ $json.snapshot.memory_bloat }}"
+      },
+      "id": "store-snapshot",
+      "name": "Store Snapshot",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1120, 400],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-service",
+          "name": "Supabase Service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare Slack alert message\nconst env = $json.env;\nconst score = $json.depreciation_score;\nconst severity = $json.severity;\nconst snapshot = $json.snapshot;\n\nlet emoji = '✅';\nlet color = 'good';\nif (severity === 'critical') {\n  emoji = '🚨';\n  color = 'danger';\n} else if (severity === 'warning') {\n  emoji = '⚠️';\n  color = 'warning';\n}\n\nconst message = {\n  attachments: [{\n    color: color,\n    title: `${emoji} Depreciation Radar - ${env.toUpperCase()}`,\n    text: `Score: ${score}/100 (${severity})`,\n    fields: [\n      {\n        title: 'Stale Workflows',\n        value: snapshot.stale_workflows,\n        short: true\n      },\n      {\n        title: 'Credential Issues',\n        value: snapshot.credential_issues,\n        short: true\n      },\n      {\n        title: 'Dead Letters',\n        value: snapshot.deadletters,\n        short: true\n      },\n      {\n        title: 'Old Jobs',\n        value: snapshot.jobs_old,\n        short: true\n      },\n      {\n        title: 'Stale Invoices',\n        value: snapshot.invoices_stale,\n        short: true\n      },\n      {\n        title: 'Memory Bloat',\n        value: snapshot.memory_bloat,\n        short: true\n      }\n    ],\n    footer: `Collected at ${new Date().toISOString()}`\n  }]\n};\n\nreturn message;"
+      },
+      "id": "prepare-slack-message",
+      "name": "Prepare Slack Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "payload",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        }
+      },
+      "id": "send-slack-alert",
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Final summary for logs\nconst env = $json.env;\nconst score = $json.depreciation_score;\nconst severity = $json.severity;\nconst snapshot = $json.snapshot;\n\nconsole.log(`🚀 Radar Collection Complete for ${env}`);\nconsole.log(`📊 Depreciation Score: ${score}/100 (${severity})`);\nconsole.log(`📈 Metrics:`, JSON.stringify(snapshot, null, 2));\n\nreturn {\n  success: true,\n  env,\n  score,\n  severity,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "final-summary",
+      "name": "Final Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 400]
+    }
+  ],
+  "connections": {
+    "Cron Trigger": {
+      "main": [
+        [
+          {
+            "node": "Setup Environment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Environment": {
+      "main": [
+        [
+          {
+            "node": "Query Stale Workflows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query Credential Issues",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query Dead Letters",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query Jobs Bloat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query Stale Invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query Memory Bloat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Stale Workflows": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Credential Issues": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Dead Letters": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Jobs Bloat": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Stale Invoices": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Memory Bloat": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Store Snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Snapshot": {
+      "main": [
+        [
+          {
+            "node": "Prepare Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Slack Message": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Slack Alert": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-08-24T20:00:00.000Z",
+      "updatedAt": "2025-08-24T20:00:00.000Z",
+      "id": "radar",
+      "name": "radar"
+    },
+    {
+      "createdAt": "2025-08-24T20:00:00.000Z",
+      "updatedAt": "2025-08-24T20:00:00.000Z",
+      "id": "monitoring",
+      "name": "monitoring"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-24T20:00:00.000Z",
+  "versionId": "1"
+}

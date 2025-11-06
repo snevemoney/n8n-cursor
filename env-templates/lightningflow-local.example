@@ -1,0 +1,144 @@
+# LightningFlow AI - Local Environment Configuration
+# Copy to .env.local and customize
+
+# =============================================================================
+# LIGHTNINGFLOW AI CORE CONFIGURATION
+# =============================================================================
+
+# Application Environment
+NODE_ENV=development
+LNFLOW_ENV=local
+PORT=4000
+
+# =============================================================================
+# LIGHTNING BACKEND CONFIGURATION
+# =============================================================================
+
+# Choose your Lightning backend: lnbits, lnd, or cln
+LN_BACKEND=lnbits
+
+# LNbits Configuration (if using LNbits)
+LNBITS_BASE_URL=http://localhost:5000
+LNBITS_API_KEY=your_lnbits_api_key_here
+
+# LND Configuration (if using LND)
+LND_REST_URL=http://localhost:8080
+LND_MACAROON=your_lnd_macaroon_here
+
+# Core Lightning Configuration (if using CLN)
+CLN_REST_URL=http://localhost:3001
+CLN_TOKEN=your_cln_token_here
+
+# =============================================================================
+# DATABASE & STORAGE
+# =============================================================================
+
+# Supabase Configuration
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_key
+
+# Redis Configuration
+REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=
+
+# =============================================================================
+# EXTERNAL INTEGRATIONS
+# =============================================================================
+
+# Slack Integration
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+
+# Email Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+
+# =============================================================================
+# SECURITY & AUTHENTICATION
+# =============================================================================
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=24h
+
+# API Keys
+LIGHTNINGFLOW_API_KEY=your-api-key-here
+N8N_API_KEY=your-n8n-api-key-here
+
+# =============================================================================
+# MONITORING & OBSERVABILITY
+# =============================================================================
+
+# Logging
+LOG_LEVEL=debug
+LOG_FORMAT=json
+
+# Metrics
+ENABLE_METRICS=true
+METRICS_PORT=9090
+
+# Health Checks
+HEALTH_CHECK_INTERVAL=30000
+HEALTH_CHECK_TIMEOUT=5000
+
+# =============================================================================
+# DEVELOPMENT & DEBUGGING
+# =============================================================================
+
+# Debug Mode
+DEBUG=true
+ENABLE_SWAGGER=true
+
+# CORS
+CORS_ORIGIN=http://localhost:3000,http://localhost:3001
+CORS_CREDENTIALS=true
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# =============================================================================
+# LIGHTNING-SPECIFIC SETTINGS
+# =============================================================================
+
+# Invoice Settings
+DEFAULT_INVOICE_EXPIRY_SECS=3600
+MAX_INVOICE_AMOUNT_SATS=1000000
+MIN_INVOICE_AMOUNT_SATS=1
+
+# Payment Settings
+MAX_PAYMENT_FEE_SATS=1000
+DEFAULT_PAYMENT_TIMEOUT_MS=60000
+
+# Channel Management
+AUTO_REBALANCE_ENABLED=false
+REBALANCE_THRESHOLD_PERCENT=20
+MAX_REBALANCE_AMOUNT_SATS=100000
+
+# =============================================================================
+# FEATURE FLAGS
+# =============================================================================
+
+# Enable/disable features
+FEATURE_INVOICES=true
+FEATURE_PAYMENTS=true
+FEATURE_CHANNEL_MANAGEMENT=true
+FEATURE_LNURL=true
+FEATURE_WEBHOOKS=true
+FEATURE_API=true
+
+# =============================================================================
+# TESTING & MOCKING
+# =============================================================================
+
+# Test Mode
+TEST_MODE=false
+MOCK_LIGHTNING=false
+MOCK_PAYMENTS=false
+
+# Test Data
+TEST_INVOICE_AMOUNT_SATS=1000
+TEST_PAYER_REF=test-user-123

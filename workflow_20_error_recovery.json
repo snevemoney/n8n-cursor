@@ -1,0 +1,275 @@
+{
+  "name": "Error Recovery System",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/error-recovery",
+        "httpMethod": "POST"
+      },
+      "id": "recovery-webhook-entry",
+      "name": "Recovery Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different recovery operations\nconst recoveryAction = $input.item.json.body?.action || 'retry';\n\nreturn {\n  json: {
+    action: recoveryAction,
+    data: $input.item.json.body?.data || {}
+  }\n};"
+      },
+      "id": "route-recovery-action",
+      "name": "Route Recovery Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "retry-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "retry",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "circuit-breaker-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "circuit-breaker",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "fallback-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "fallback",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "recover-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "recover",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "if-recovery-action",
+      "name": "Route by Recovery Action",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retry logic with exponential backoff\nconst retryConfig = {\n  maxRetries: $json.data.maxRetries || 3,\n  baseDelayMs: 1000,\n  maxDelayMs: 10000\n};\n\nconst attempt = $json.data.currentAttempt || 1;\nconst delay = Math.min(retryConfig.baseDelayMs * Math.pow(2, attempt - 1), retryConfig.maxDelayMs);\n\nreturn {\n  json: {\n    retryConfig,\n    attempt,\n    delay,\n    shouldRetry: attempt <= retryConfig.maxRetries\n  }\n};"
+      },
+      "id": "execute-retry",
+      "name": "Execute Retry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Circuit breaker logic\nconst circuitState = {\n  name: $json.data.serviceName,\n  state: 'closed', // closed, open, half-open\n  failureCount: 0,\n  lastFailureTime: null,\n  failureThreshold: 5,\n  timeout: 60000\n};\n\nreturn {\n  json: {\n    circuitState,\n    shouldAllowRequest: circuitState.state === 'closed' || circuitState.state === 'half-open'\n  }\n};"
+      },
+      "id": "check-circuit-breaker",
+      "name": "Check Circuit Breaker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        150
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fallback mechanism\nconst fallback = {\n  primaryService: $json.data.primaryService,\n  fallbackService: $json.data.fallbackService,\n  fallbackActive: true,\n  reason: $json.data.reason || 'primary service unavailable'\n};\n\nreturn {\n  json: {\n    fallback,\n    routingTo: 'fallback'\n  }\n};"
+      },
+      "id": "execute-fallback",
+      "name": "Execute Fallback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM error_logs WHERE tenant_id = $1 AND recovered = false ORDER BY created_at DESC LIMIT 1;",
+        "additionalFields": {
+          "queryParameters": "={{ `{\"$1\": $json.data.tenantId}` }}"
+        }
+      },
+      "id": "recover-from-error",
+      "name": "Recover from Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        900,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, data: $json, timestamp: new Date().toISOString() } }}"
+      },
+      "id": "respond-recovery",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Recovery Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Route Recovery Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Recovery Action": {
+      "main": [
+        [
+          {
+            "node": "Route by Recovery Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Recovery Action": {
+      "main": [
+        [
+          {
+            "node": "Execute Retry",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Circuit Breaker",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Fallback",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Recover from Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Retry": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Circuit Breaker": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Fallback": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recover from Error": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-20T10:00:00.000Z",
+      "updatedAt": "2024-01-20T10:00:00.000Z",
+      "id": "recovery",
+      "name": "Recovery"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-20T10:00:00.000Z",
+  "versionId": "1"
+}
+

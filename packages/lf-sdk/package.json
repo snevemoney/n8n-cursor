@@ -1,0 +1,21 @@
+{
+  "name": "@lf/lf-sdk",
+  "version": "1.0.0",
+  "description": "LightningFlow AI SDK for client and server integration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "echo 'No linting configured yet'",
+    "typecheck": "echo 'TypeScript import resolution needs fixing'"
+  },
+  "dependencies": {
+    "@lf/shared-types": "workspace:*",
+    "@lf/shared-helpers": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,340 @@
+{
+  "name": "Security & Monitoring System",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/security",
+        "httpMethod": "POST"
+      },
+      "id": "security-webhook-entry",
+      "name": "Security Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "ALL"
+      },
+      "id": "split-security",
+      "name": "Split Security",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different security operations\nconst securityType = $input.item.json.body?.action || 'monitor';\n\nreturn {\n  json: {\n    securityType,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "route-security-action",
+      "name": "Route Security Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "rate-limit-condition",
+              "leftValue": "={{ $json.securityType }}",
+              "rightValue": "rate-limit",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "webhook-validate-condition",
+              "leftValue": "={{ $json.securityType }}",
+              "rightValue": "validate-webhook",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "error-log-condition",
+              "leftValue": "={{ $json.securityType }}",
+              "rightValue": "error-log",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "alert-condition",
+              "leftValue": "={{ $json.securityType }}",
+              "rightValue": "alert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "health-check-condition",
+              "leftValue": "={{ $json.securityType }}",
+              "rightValue": "health-check",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "if-security-type",
+      "name": "Route by Security Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ `\nSELECT COUNT(*) as request_count \nFROM rate_limits \nWHERE ip_address = $1 \nAND created_at > NOW() - INTERVAL '1 minute'\n` }}",
+        "additionalFields": {
+          "queryParameters": "={{ `{\"$1\": $json.data.ip}` }}"
+        }
+      },
+      "id": "check-rate-limit",
+      "name": "Check Rate Limit",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1120,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate webhook signature using n8n built-in functions\nconst receivedSignature = $json.data.signature;\nconst payload = $json.data.payload;\nconst secret = $env.WEBHOOK_SECRET || 'default-secret';\n\n// Create HMAC using n8n built-in hash\nconst expectedSignature = $hash(JSON.stringify(payload), {\n  algorithm: 'sha256',\n  secret: secret\n});\n\n// Simple comparison (n8n doesn't have timingSafeEqual)\nconst isValid = receivedSignature === expectedSignature;\n\nreturn {\n  json: {\n    valid: isValid\n  }\n};"
+      },
+      "id": "validate-webhook",
+      "name": "Validate Webhook",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        150
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ `\nINSERT INTO error_logs (level, message, stack, metadata)\nVALUES ($1, $2, $3, $4)\n` }}",
+        "additionalFields": {
+          "queryParameters": "={{ `{\"$1\": $json.data.level, \"$2\": $json.data.message, \"$3\": $json.data.stack, \"$4\": JSON.stringify($json.data.metadata)}` }}"
+        }
+      },
+      "id": "log-error",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1120,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Send alert via webhook\nconst alertData = $json.data;\n\n// Critical alerts get higher priority\nconst priority = alertData.severity === 'critical' ? 'high' : 'normal';\n\nreturn {\n  json: {\n    alert: {\n      priority,\n      message: alertData.message,\n      timestamp: new Date().toISOString()\n    }\n  }\n};"
+      },
+      "id": "send-alert",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'ok', timestamp: new Date().toISOString() } }}"
+      },
+      "id": "respond-health",
+      "name": "Respond Health Check",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-security",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Security Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Split Security",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Security": {
+      "main": [
+        [
+          {
+            "node": "Route Security Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Security Action": {
+      "main": [
+        [
+          {
+            "node": "Route by Security Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Security Type": {
+      "main": [
+        [
+          {
+            "node": "Check Rate Limit",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Validate Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond Health Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Rate Limit": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Alert": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond Health Check": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-20T10:00:00.000Z",
+      "updatedAt": "2024-01-20T10:00:00.000Z",
+      "id": "security",
+      "name": "Security"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-20T10:00:00.000Z",
+  "versionId": "1"
+}
+

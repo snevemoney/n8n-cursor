@@ -1,0 +1,85 @@
+name: lfai_prod
+x:dflt: &dflt
+  restart: unless-stopped
+  init: true
+  networks: [private]
+  security_opt: ["no-new-privileges:true"]
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "10" } }
+  ulimits: { nofile: 65535 }
+
+services:
+  landing:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-landing:prod
+    env_file: [../../.env.production]
+    ports: ["127.0.0.1:3000:3000"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3000/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1"; mem_limit: "512m"; pids_limit: 200
+
+  web:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-web:prod
+    env_file: [../../.env.production]
+    ports: ["127.0.0.1:3001:3001"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3001/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "2"; mem_limit: "1.5g"; pids_limit: 300
+
+  ops:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-ops:prod
+    env_file: [../../.env.production]
+    ports: ["127.0.0.1:3002:3002"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3002/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1"; mem_limit: "768m"; pids_limit: 250
+
+  api:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-api:prod
+    env_file: [../../.env.production]
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on: { redis: { condition: service_healthy } }
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:4000/health"], interval: 10s, timeout: 2s, retries: 10 }
+    cpus: "2"; mem_limit: "1.5g"; pids_limit: 350
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+
+  worker:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-worker:prod
+    env_file: [../../.env.production]
+    depends_on:
+      redis: { condition: service_healthy }
+      api:   { condition: service_healthy }
+    healthcheck: { test: ["CMD","node","-e","process.exit(0)"], interval: 15s, timeout: 3s, retries: 20 }
+    cpus: "2"; mem_limit: "1.5g"; pids_limit: 350
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+
+  redis:
+    <<: *dflt
+    image: redis:7.2-alpine
+    command: ["redis-server","--save","","--appendonly","no","--maxmemory","512mb","--maxmemory-policy","allkeys-lru"]
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck: { test: ["CMD","redis-cli","ping"], interval: 5s, timeout: 2s, retries: 20 }
+    cpus: "0.5"; mem_limit: "512m"; pids_limit: 180
+
+  n8n:
+    <<: *dflt
+    image: n8nio/n8n:1.55.1
+    env_file: [../../.env.production]
+    environment:
+      - N8N_HOST=n8ncloud.tech
+      - N8N_PORT=5678
+      - WEBHOOK_URL=https://n8ncloud.tech/
+      - N8N_PROTOCOL=https
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-your-encryption-key}
+      - N8N_EDITOR_BASE_URL=https://n8ncloud.tech
+      - N8N_PUBLIC_URL=https://n8ncloud.tech
+    ports: ["127.0.0.1:5679:5678"]  # ✅ SECURE: localhost only, external port 5679
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1.5"; mem_limit: "1g"; pids_limit: 250
+    volumes:
+      - ${PROD_DATA_ROOT:-./data}/n8n_data:/home/node/.n8n
+
+networks:
+  private: { driver: bridge, internal: true }

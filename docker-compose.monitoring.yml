@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+  # Grafana - Dashboards & Visualization
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: lightningflow-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=lightningflow2024
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - monitoring
+
+  # Loki - Log Aggregation
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: lightningflow-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - monitoring
+
+  # Promtail - Log Collection
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: lightningflow-promtail
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitoring
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: lightningflow-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitoring
+
+  # Uptime Kuma - Uptime Monitoring
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: lightningflow-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"  # Bind to localhost only
+    volumes:
+      - uptime_kuma_data:/app/data
+    networks:
+      - monitoring
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "1000:1000"
+    pids_limit: 100
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # MinIO - S3-Compatible Storage
+  minio:
+    image: minio/minio:latest
+    container_name: lightningflow-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=lightningflow
+      - MINIO_ROOT_PASSWORD=lightningflow2024
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - monitoring
+
+  # Redis - Cache & Queue (using different port to avoid conflict)
+  redis-monitoring:
+    image: redis:7-alpine
+    container_name: lightningflow-redis-monitoring
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_monitoring_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - monitoring
+
+  # Postgres - Database (using different port to avoid conflict)
+  postgres-monitoring:
+    image: postgres:15-alpine
+    container_name: lightningflow-postgres-monitoring
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=lightningflow_monitoring
+      - POSTGRES_USER=lightningflow
+      - POSTGRES_PASSWORD=lightningflow2024
+    volumes:
+      - postgres_monitoring_data:/var/lib/postgresql/data
+      - ./monitoring/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - monitoring
+
+  # Traefik - Reverse Proxy
+  traefik:
+    image: traefik:v3.0
+    container_name: lightningflow-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./monitoring/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./monitoring/traefik/dynamic:/etc/traefik/dynamic
+    networks:
+      - monitoring
+
+  # Caddy - Alternative to Traefik (simpler)
+  caddy:
+    image: caddy:2-alpine
+    container_name: lightningflow-caddy
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+      - "8443:443"
+    volumes:
+      - ./monitoring/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - monitoring
+
+volumes:
+  grafana_data:
+  loki_data:
+  prometheus_data:
+  uptime_kuma_data:
+  minio_data:
+  redis_monitoring_data:
+  postgres_monitoring_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  monitoring:
+    driver: bridge
