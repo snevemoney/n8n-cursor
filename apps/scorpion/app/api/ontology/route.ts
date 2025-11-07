@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OntologyStore } from '@scorpion/core/ontology';
-import { RAGStore } from '@scorpion/core/rag';
 import { OntologyEntity, EntityQuery, EntitySearch } from '@scorpion/core/ontology';
-
-let ontologyStore: OntologyStore | null = null;
-
-function getOntologyStore(): OntologyStore {
-  if (!ontologyStore) {
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-    const ragStore = new RAGStore(ollamaUrl);
-    ontologyStore = new OntologyStore(ragStore);
-  }
-  return ontologyStore;
-}
+import { getOntologyStore } from '@/lib/shared-stores';
 
 /**
  * POST /api/ontology - Store an entity
@@ -30,7 +18,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const store = getOntologyStore();
+    const store = await getOntologyStore();
     await store.store(entity);
 
     return NextResponse.json({ success: true, id: entity.id });
@@ -49,7 +37,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const store = getOntologyStore();
+    const store = await getOntologyStore();
 
     // Check if it's a search query
     const query = searchParams.get('q');

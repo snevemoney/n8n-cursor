@@ -1,108 +1,159 @@
 'use client';
 
-import { Panel } from '@/components/scorpion';
+import { useState, useEffect } from 'react';
+import { Panel, DataTable } from '@/components/scorpion';
 
-const RULES = ['Validate', 'Split', 'If', 'Contains', 'Match', 'Compare'];
-const ACTIONS = [
-  'Manage Sequence',
-  'Run AI Prompt',
-  'Fetch Data',
-  'Enrich Data',
-  'Assign Manual Task',
-  'Send Notification',
-];
+interface Workflow {
+  id: string;
+  name: string;
+  path: string;
+  trigger?: string;
+  nodes: number;
+  active: boolean;
+  syncedToN8n: boolean;
+  n8nId?: string;
+  lastSync?: string;
+}
 
 export default function WorkflowsPage() {
-  return (
-    <div className="h-full flex overflow-hidden">
-      {/* Left Palette */}
-      <aside className="w-64 border-r border-white/5 bg-[#0f1318] p-4 overflow-y-auto shrink-0">
-        <h2 className="sc-title mb-3">Build Block</h2>
-        <Section title="Rules" items={RULES} />
-        <Section title="List & Sequence" items={ACTIONS} />
-      </aside>
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState<{
+    total: number;
+    synced: number;
+    active: number;
+    inN8n: number;
+  } | null>(null);
 
-      {/* Canvas */}
-      <div className="flex-1 relative bg-[#0a0d10] sc-grid-bg overflow-hidden">
-        <div className="relative w-full h-full p-8">
-          <WorkflowNode x={80} y={40} label="Generate e-book outline" status="done" />
-          <WorkflowNode x={340} y={90} label="Expand outline into chapters" status="running" />
-          <WorkflowNode x={620} y={160} label="Format into PDF" status="idle" />
-          <WorkflowNode x={880} y={160} label="Create product page" status="idle" />
-          <Connector from={{ x: 230, y: 70 }} to={{ x: 340, y: 120 }} />
-          <Connector from={{ x: 500, y: 120 }} to={{ x: 620, y: 190 }} />
-        </div>
+  useEffect(() => {
+    loadWorkflows();
+  }, []);
 
-        {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-[#0f1318]/95 border-t border-white/5 flex items-center justify-between px-4">
-          <div className="sc-title">Template: Simple Workflow</div>
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-1 bg-white/5 rounded-sm text-xs hover:bg-white/10">Run</button>
-            <button className="px-3 py-1 bg-white/5 rounded-sm text-xs hover:bg-white/10">Step</button>
-            <div className="text-xs text-white/40 sc-mono">900%</div>
-          </div>
-        </div>
+  const loadWorkflows = async () => {
+    try {
+      const response = await fetch('/api/workflows');
+      if (response.ok) {
+        const data = await response.json();
+        setWorkflows(data.workflows || []);
+        setSummary(data.summary || null);
+      }
+    } catch (error) {
+      console.error('Failed to load workflows:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSync = async () => {
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sync' })
+      });
+      if (response.ok) {
+        await loadWorkflows();
+      }
+    } catch (error) {
+      console.error('Failed to sync workflows:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-sm text-white/40">Loading workflows...</div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-function Section({ title, items }: { title: string; items: string[] }) {
   return (
-    <div className="mb-4">
-      <div className="sc-title mb-2">{title}</div>
-      <div className="space-y-1">
-        {items.map((i) => (
-          <div
-            key={i}
-            className="bg-white/0 hover:bg-white/5 border border-white/5 rounded-sm px-2 py-1 text-xs cursor-pointer transition-colors"
+    <div className="h-full overflow-y-auto p-4 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold mb-1">Workflows</h1>
+          {summary && (
+            <div className="text-sm text-white/40">
+              {summary.total} total, {summary.synced} synced, {summary.active} active
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-white/40">Auto-sync enabled</span>
+          <button
+            onClick={handleSync}
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-sm text-sm hover:bg-white/10 text-white/60"
+            title="Manual sync (auto-sync runs automatically)"
           >
-            {i}
-          </div>
-        ))}
+            Force Sync
+          </button>
+        </div>
       </div>
+
+      {/* Summary */}
+      {summary && (
+        <Panel title="Summary">
+          <div className="grid grid-cols-4 gap-4">
+            <div>
+              <div className="sc-title mb-1">Total</div>
+              <div className="text-2xl font-semibold">{summary.total}</div>
+            </div>
+            <div>
+              <div className="sc-title mb-1">Synced</div>
+              <div className="text-2xl font-semibold text-emerald-400">{summary.synced}</div>
+            </div>
+            <div>
+              <div className="sc-title mb-1">Active</div>
+              <div className="text-2xl font-semibold text-emerald-400">{summary.active}</div>
+            </div>
+            <div>
+              <div className="sc-title mb-1">In n8n</div>
+              <div className="text-2xl font-semibold">{summary.inN8n}</div>
+            </div>
+          </div>
+        </Panel>
+      )}
+
+      {/* Workflows Table */}
+      <Panel title="All Workflows">
+        <DataTable
+          columns={[
+            { key: 'name', label: 'Name' },
+            { key: 'trigger', label: 'Trigger' },
+            { key: 'nodes', label: 'Nodes' },
+            { key: 'status', label: 'Status' },
+            { key: 'sync', label: 'Sync Status' },
+            { key: 'path', label: 'Path' }
+          ]}
+          data={workflows.map(w => ({
+            name: w.name,
+            trigger: w.trigger || 'Manual',
+            nodes: w.nodes.toString(),
+            status: (
+              <span className={w.active ? 'text-emerald-400' : 'text-white/40'}>
+                {w.active ? 'Active' : 'Inactive'}
+              </span>
+            ),
+            sync: (
+              <div className="flex items-center gap-2">
+                {w.syncedToN8n ? (
+                  <>
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                    <span className="text-xs text-emerald-400">Synced</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 bg-white/20 rounded-full"></div>
+                    <span className="text-xs text-white/40">Not Synced</span>
+                  </>
+                )}
+              </div>
+            ),
+            path: <span className="text-xs text-white/40 sc-mono">{w.path}</span>
+          }))}
+        />
+      </Panel>
     </div>
   );
 }
-
-function WorkflowNode({ x, y, label, status }: { x: number; y: number; label: string; status: 'done' | 'running' | 'idle' }) {
-  const color =
-    status === 'done'
-      ? 'border-emerald-400/80'
-      : status === 'running'
-      ? 'border-amber-400/80'
-      : 'border-white/10';
-
-  return (
-    <div
-      className={`absolute bg-[#10151b] border ${color} rounded-sm px-3 py-2 w-48`}
-      style={{ left: x, top: y }}
-    >
-      <div className="text-[10px] uppercase text-white/30 mb-1">/true</div>
-      <div className="text-sm">{label}</div>
-    </div>
-  );
-}
-
-function Connector({ from, to }: { from: { x: number; y: number }; to: { x: number; y: number } }) {
-  const width = to.x - from.x;
-  const height = to.y - from.y;
-
-  return (
-    <svg
-      className="absolute overflow-visible pointer-events-none"
-      style={{ left: from.x, top: from.y }}
-      width={Math.abs(width)}
-      height={Math.abs(height)}
-    >
-      <path
-        d={`M0 0 L ${width} ${height}`}
-        stroke="rgba(255,255,255,0.12)"
-        strokeWidth={1.1}
-        fill="none"
-        strokeDasharray="4 4"
-      />
-    </svg>
-  );
-}
-

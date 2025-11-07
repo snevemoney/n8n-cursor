@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { ErrorBoundary } from '@/components/scorpion/ErrorBoundary';
 import { 
   Home,
   Activity, 
@@ -11,14 +13,21 @@ import {
   Users, 
   Bot, 
   FileText, 
-  Settings 
+  Settings,
+  Bell
 } from 'lucide-react';
 
 export default function ScorpionLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
+    { href: '/project', label: 'Project', icon: Activity },
     { href: '/ops', label: 'Operations', icon: Activity },
     { href: '/workflows', label: 'Workflows', icon: Workflow },
     { href: '/build', label: 'Build', icon: Sparkles },
@@ -26,6 +35,7 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
     { href: '/council', label: 'Council', icon: Users },
     { href: '/agents', label: 'Agents', icon: Bot },
     { href: '/chat', label: 'Chat', icon: Bot },
+    { href: '/notifications', label: 'Notifications', icon: Bell },
     { href: '/logs', label: 'System Logs', icon: FileText },
     { href: '/settings', label: 'Settings', icon: Settings },
   ];
@@ -75,7 +85,9 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

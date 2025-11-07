@@ -1,24 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runCouncil } from '@scorpion/core/council';
 import { councilMembers } from '@scorpion/core/council';
-import { OntologyStore } from '@scorpion/core/ontology';
-import { RAGStore } from '@scorpion/core/rag';
-
-let ontologyStore: OntologyStore | null = null;
-
-function getOntologyStore(): OntologyStore | undefined {
-  if (!ontologyStore) {
-    try {
-      const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-      const ragStore = new RAGStore(ollamaUrl);
-      ontologyStore = new OntologyStore(ragStore);
-    } catch (error) {
-      console.warn('Failed to initialize ontology store:', error);
-      return undefined;
-    }
-  }
-  return ontologyStore;
-}
+import { getOntologyStore } from '@/lib/shared-stores';
 
 /**
  * POST /api/council - Run a council meeting
@@ -29,7 +12,7 @@ export async function POST(req: NextRequest) {
     const topic = body.topic || "Should we deploy the latest Scorpion build?";
     
     // Get ontology store for context-aware deliberation
-    const store = getOntologyStore();
+    const store = await getOntologyStore();
     const result = await runCouncil(topic, store);
     
     return NextResponse.json(result);

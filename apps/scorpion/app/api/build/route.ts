@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ScorpionAgent, RAGStore, KnowledgeExtractor } from '@scorpion/core';
+import { ScorpionAgent, KnowledgeExtractor } from '@scorpion/core';
+import { getRAGStore, getOrchestrator } from '@/lib/shared-stores';
 import path from 'path';
-
-// In-memory RAG store (in production, use persistent storage)
-let ragStore: RAGStore | null = null;
-
-function getRAGStore(): RAGStore {
-  if (!ragStore) {
-    ragStore = new RAGStore(process.env.OLLAMA_URL || 'http://localhost:11434');
-  }
-  return ragStore;
-}
 
 /**
  * Build a new side hustle using accumulated knowledge
@@ -26,7 +17,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const store = getRAGStore();
+    const store = await getRAGStore();
+    
+    // Ensure project knowledge is ingested before building
+    try {
+      const orchestrator = await getOrchestrator();
+      // Quick check if knowledge exists, if not ingest
+      const summary = await orchestrator.getSummary();
+      if (summary.totalKnowledge === 0) {
+        console.log('No knowledge found, ingesting project knowledge...');
+        await orchestrator.ingestAll();
+      }
+    } catch (error) {
+      console.warn('Failed to ensure project knowledge:', error);
+    }
+    
     const agent = new ScorpionAgent(store);
 
     const plan = await agent.buildSideHustle({
@@ -68,7 +73,7 @@ export async function PUT(request: NextRequest) {
     const extractor = new KnowledgeExtractor(fullPath);
     const knowledge = await extractor.extractKnowledge(sideHustleId);
 
-    const store = getRAGStore();
+    const store = await getRAGStore();
     for (const k of knowledge) {
       await store.addKnowledge(k);
     }
@@ -96,7 +101,7 @@ export async function PUT(request: NextRequest) {
  */
 export async function GET() {
   try {
-    const store = getRAGStore();
+    const store = await getRAGStore();
     const knowledge = store.getAllKnowledge();
     
     return NextResponse.json({ 

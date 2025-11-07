@@ -7,21 +7,25 @@
     "build": "next build",
     "start": "next start -p 3003",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "backup": "bash ../../scripts/backup-scorpion.sh",
+    "health": "curl -f http://localhost:3003/api/health || exit 1"
   },
   "dependencies": {
-    "@lightningflow/shared-config": "workspace:*",
     "@lightning-platform/core": "workspace:*",
     "@lightningflow/agent-factory": "workspace:*",
+    "@lightningflow/shared-config": "workspace:*",
     "@scorpion/core": "workspace:*",
+    "chokidar": "^4.0.3",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.358.0",
     "next": "14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "lucide-react": "^0.358.0",
-    "clsx": "^2.1.0",
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {
+    "@types/chokidar": "^2.1.7",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
@@ -33,4 +37,3 @@
     "typescript": "^5.0.0"
   }
 }
-

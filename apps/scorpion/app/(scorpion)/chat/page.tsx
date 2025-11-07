@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Panel } from '@/components/scorpion';
-import { Send, Bot, User, Loader2, AlertCircle } from 'lucide-react';
+import { Send, Bot, User, Loader2, AlertCircle, Edit2, Check, X } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,6 +23,8 @@ export default function ChatPage() {
   const [models, setModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
+  const [correctingId, setCorrectingId] = useState<string | null>(null);
+  const [correction, setCorrection] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,9 +84,11 @@ export default function ChatPage() {
       const data = await response.json();
 
       const assistantMessage: Message = {
+        id: `msg-${Date.now()}`,
         role: 'assistant',
         content: data.message,
         timestamp: new Date(),
+        canCorrect: true,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -101,6 +105,33 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCorrect = async (messageId: string, originalInput: string, wrongOutput: string, correctedOutput: string) => {
+    try {
+      await fetch('/api/chat/correct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalInput,
+          wrongOutput,
+          correctedOutput,
+          correction: 'User correction via chat interface'
+        })
+      });
+      
+      // Update the message to show it was corrected
+      setMessages((prev) => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: correctedOutput, canCorrect: false }
+          : msg
+      ));
+      
+      setCorrectingId(null);
+      setCorrection('');
+    } catch (error) {
+      console.error('Failed to submit correction:', error);
     }
   };
 
@@ -167,7 +198,7 @@ export default function ChatPage() {
           <div className="space-y-4">
             {messages.map((message, idx) => (
               <div
-                key={idx}
+                key={message.id || idx}
                 className={`flex gap-4 ${
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
@@ -185,9 +216,64 @@ export default function ChatPage() {
                   }`}
                 >
                   <div className="whitespace-pre-wrap">{message.content}</div>
-                  <div className="text-xs opacity-70 mt-2 sc-mono">
-                    {message.timestamp.toLocaleTimeString()}
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="text-xs opacity-70 sc-mono">
+                      {message.timestamp.toLocaleTimeString()}
+                    </div>
+                    {message.role === 'assistant' && message.canCorrect && (
+                      <button
+                        onClick={() => {
+                          setCorrectingId(message.id || `msg-${idx}`);
+                          setCorrection(message.content);
+                        }}
+                        className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1"
+                      >
+                        <Edit2 size={12} />
+                        Correct
+                      </button>
+                    )}
                   </div>
+                  {correctingId === (message.id || `msg-${idx}`) && (
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                      <div className="text-xs text-white/60 mb-2">Provide correction:</div>
+                      <textarea
+                        value={correction}
+                        onChange={(e) => setCorrection(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-sm px-2 py-1 text-sm text-white mb-2"
+                        rows={3}
+                        placeholder="Enter corrected response..."
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            const userMsg = messages[idx - 1];
+                            if (userMsg && userMsg.role === 'user') {
+                              handleCorrect(
+                                message.id || `msg-${idx}`,
+                                userMsg.content,
+                                message.content,
+                                correction
+                              );
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-emerald-500/20 border border-emerald-500/50 rounded hover:bg-emerald-500/30 text-emerald-300 flex items-center gap-1"
+                        >
+                          <Check size={12} />
+                          Submit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCorrectingId(null);
+                            setCorrection('');
+                          }}
+                          className="px-2 py-1 text-xs bg-white/5 border border-white/10 rounded hover:bg-white/10 text-white/60 flex items-center gap-1"
+                        >
+                          <X size={12} />
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {message.role === 'user' && (
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">

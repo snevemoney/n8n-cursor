@@ -9,9 +9,9 @@ interface MetricProps {
 
 export function Metric({ label, value, hint, className = '' }: MetricProps) {
   return (
-    <div className={`sc-panel px-3 py-2 ${className}`}>
-      <div className="sc-title mb-1">{label}</div>
-      <div className="text-2xl font-semibold">{value}</div>
+    <div className={`sc-panel px-4 py-3 ${className}`}>
+      <div className="sc-title mb-1.5">{label}</div>
+      <div className="text-2xl font-semibold text-white">{value}</div>
       {hint && <div className="text-[10px] text-white/30 mt-1">{hint}</div>}
     </div>
   );

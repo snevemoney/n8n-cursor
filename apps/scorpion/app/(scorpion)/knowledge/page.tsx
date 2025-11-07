@@ -23,11 +23,18 @@ export default function KnowledgePage() {
 
   const loadKnowledge = async () => {
     try {
-      const response = await fetch('/api/build');
+      // Try new project knowledge API first
+      const response = await fetch('/api/project/knowledge');
       if (response.ok) {
         const data = await response.json();
-        // Transform knowledge data if needed
         setKnowledge(data.knowledge || []);
+      } else {
+        // Fallback to old API
+        const fallbackResponse = await fetch('/api/build');
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          setKnowledge(fallbackData.knowledge || []);
+        }
       }
     } catch (error) {
       console.error('Failed to load knowledge:', error);

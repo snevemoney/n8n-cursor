@@ -28,12 +28,62 @@ export interface N8nExecution {
 export class N8nClient {
   private baseUrl: string;
   private apiKey?: string;
+  private maxRetries: number;
+  private retryDelay: number;
 
-  constructor(apiKey?: string) {
+  constructor(apiKey?: string, options?: { maxRetries?: number; retryDelay?: number }) {
     // Remove /webhook from base URL to get API base
     const webhookUrl = getN8nBaseUrl();
     this.baseUrl = webhookUrl.replace('/webhook', '');
     this.apiKey = apiKey || process.env.N8N_API_KEY;
+    this.maxRetries = options?.maxRetries || 3;
+    this.retryDelay = options?.retryDelay || 1000; // 1 second base delay
+  }
+
+  /**
+   * Sleep helper for retries
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Make request with retry logic
+   */
+  private async fetchWithRetry(
+    url: string,
+    options: RequestInit,
+    retries: number = 0
+  ): Promise<Response> {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(30000) // 30 second timeout
+      });
+
+      // Retry on server errors or rate limits
+      if ((response.status >= 500 || response.status === 429) && retries < this.maxRetries) {
+        const retryAfter = response.headers.get('Retry-After');
+        const delay = retryAfter 
+          ? parseInt(retryAfter) * 1000 
+          : this.retryDelay * Math.pow(2, retries); // Exponential backoff
+        
+        console.warn(`Retrying request (${retries + 1}/${this.maxRetries}) after ${delay}ms...`);
+        await this.sleep(delay);
+        return this.fetchWithRetry(url, options, retries + 1);
+      }
+
+      return response;
+    } catch (error: any) {
+      // Retry on network errors
+      if (retries < this.maxRetries && (error.name === 'TypeError' || error.name === 'NetworkError')) {
+        const delay = this.retryDelay * Math.pow(2, retries);
+        console.warn(`Network error, retrying (${retries + 1}/${this.maxRetries}) after ${delay}ms...`);
+        await this.sleep(delay);
+        return this.fetchWithRetry(url, options, retries + 1);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -49,7 +99,7 @@ export class N8nClient {
         headers['X-N8N-API-KEY'] = this.apiKey;
       }
 
-      const response = await fetch(`${this.baseUrl}/api/v1/workflows`, {
+      const response = await this.fetchWithRetry(`${this.baseUrl}/api/v1/workflows`, {
         headers,
       });
 
@@ -78,7 +128,7 @@ export class N8nClient {
         headers['X-N8N-API-KEY'] = this.apiKey;
       }
 
-      const response = await fetch(`${this.baseUrl}/api/v1/workflows/${id}`, {
+      const response = await this.fetchWithRetry(`${this.baseUrl}/api/v1/workflows/${id}`, {
         headers,
       });
 
@@ -110,7 +160,7 @@ export class N8nClient {
         headers['X-N8N-API-KEY'] = this.apiKey;
       }
 
-      const response = await fetch(`${this.baseUrl}/api/v1/workflows/${workflowId}/execute`, {
+      const response = await this.fetchWithRetry(`${this.baseUrl}/api/v1/workflows/${workflowId}/execute`, {
         method: 'POST',
         headers,
         body: JSON.stringify(data || {}),
@@ -124,6 +174,25 @@ export class N8nClient {
     } catch (error) {
       console.error('Failed to trigger n8n workflow:', error);
       return null;
+    }
+  }
+
+  /**
+   * Export workflow from n8n to filesystem
+   */
+  async exportWorkflow(id: string, filePath: string): Promise<boolean> {
+    try {
+      const workflow = await this.getWorkflow(id);
+      if (!workflow) {
+        return false;
+      }
+
+      const fs = await import('fs/promises');
+      await fs.writeFile(filePath, JSON.stringify(workflow, null, 2), 'utf-8');
+      return true;
+    } catch (error) {
+      console.error(`Failed to export workflow ${id}:`, error);
+      return false;
     }
   }
 }
