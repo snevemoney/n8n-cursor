@@ -1,0 +1,416 @@
+{
+  "createdAt": "2025-10-02T02:46:29.325Z",
+  "updatedAt": "2025-10-06T17:36:17.000Z",
+  "id": "FEBJNC9dc29DgPdN",
+  "name": "Kenny James Email Agent copy",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "53849246-ad32-4845-9976-9f9688f5a6f2",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.needsReply }}",
+              "rightValue": "true"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ed7e3380-daa7-4f03-8854-b319fca5bc0a",
+      "name": "If Needs Reply",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3008,
+        560
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "responseFormat": "json_object",
+          "temperature": 0
+        }
+      },
+      "id": "71b2526f-01da-4655-bf89-465b72fc1b02",
+      "name": "OpenAI Chat",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2656,
+        688
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Receive Email\n",
+        "height": 394.42512272977456,
+        "width": 304.10628068244364,
+        "color": 3
+      },
+      "id": "3ca55c9a-161f-4503-8333-6d0427da1a29",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2272,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: {{ $('Gmail Trigger1').item.json.headers.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.text.replace(/\\n/g, \"<br />\\n\") }}",
+        "options": {
+          "threadId": "={{ $('Gmail Trigger1').item.json.threadId }}",
+          "sendTo": "={{ $('Gmail Trigger1').item.json.headers.from }}"
+        }
+      },
+      "id": "4beecc01-aa66-4e82-a1ed-787b1622bdb3",
+      "name": "Gmail - Create Draft",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        3568,
+        544
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "cbedbcf5-0da3-4bb9-b382-d388990be027",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YquaU61NUzoqwdTs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Checks if it needs a Reply\n",
+        "height": 394,
+        "width": 584
+      },
+      "id": "c1b414b4-d1ad-44a3-a87c-353537a3b7c7",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2576,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Generates Reply\n",
+        "height": 394,
+        "width": 324,
+        "color": 4
+      },
+      "id": "db3867c4-9ae2-4015-a211-850396d80fc1",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3168,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Saves it as a Draft\n",
+        "height": 394,
+        "width": 264,
+        "color": 5
+      },
+      "id": "b5b256ac-a204-4fcf-9393-115eaa56aea3",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3488,
+        432
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "-from:me"
+        },
+        "options": {}
+      },
+      "id": "cfa3a5d1-d4d7-4cc1-beab-e1610b61ffa0",
+      "name": "Gmail Trigger1",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        2352,
+        560
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YquaU61NUzoqwdTs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"needsReply\": {\n      \"type\": \"boolean\"\n      }\n  },\n  \"required\": [\"needsReply\"]\n}\n"
+      },
+      "id": "baa5d808-5ef6-49ac-8af3-cf8001a23237",
+      "name": "JSON Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        2784,
+        688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "gpt-4-turbo",
+        "options": {}
+      },
+      "id": "27e7e8af-7151-48bf-a791-071a1b19eed4",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        3344,
+        688
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "prompt": "=Subject: {{ $json.subject }}\nMessage:\n{{ $json.textAsHtml }} ",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Your task is to assess if the message requires a response. Return in JSON format true if it does, false otherwise.\nMarketing emails don't require a response."
+            }
+          ]
+        }
+      },
+      "id": "31329bc0-3138-4975-9cae-e54b12be93d1",
+      "name": "Assess if message needs a reply1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        2656,
+        560
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $('Gmail Trigger1').item.json.subject }}\nMessage: {{ $('Gmail Trigger1').item.json.textAsHtml }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You're a helpful personal assistant and your task is to draft replies on my behalf to my incoming emails. Whenever I provide some text from an email, return an appropriate draft reply for it and nothing else.\nEnsure that the reply is suitable for a professional email setting and addresses the topic in a clear, structured,using everyday words,easy to understand and detailed manner.\nDo not make things up.\n\nDetailed instructions:\n- Be concise and maintain a business casual tone.\nWhen generating a response, always begin with an appropriate translation of \"Hello,\" in the target language, and always end with an appropriate translation of \"Best, Kenny James\" in the same target language.\n- When replying to yes-no questions, draft 2 responses: one affirmative and one negative separated by \" - - - - - - - OR - - - - - - - \"\n- If you don't know an answer, you can leave placeholders like \"[YOUR_ANSWER_HERE]\".\n- Don't use any special formatting, only plain text.\n- Reply in the same language as the inbound email."
+            }
+          ]
+        }
+      },
+      "id": "7af83bcd-b70a-481b-b044-b38e95480987",
+      "name": "Generate email reply1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        3216,
+        544
+      ],
+      "typeVersion": 1.4
+    }
+  ],
+  "connections": {
+    "If Needs Reply": {
+      "main": [
+        [
+          {
+            "node": "Generate email reply1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "OpenAI Chat": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Assess if message needs a reply1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Assess if message needs a reply1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Assess if message needs a reply1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate email reply1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assess if message needs a reply1": {
+      "main": [
+        [
+          {
+            "node": "If Needs Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate email reply1": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Create Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Gmail Trigger1": {
+      "lastTimeChecked": 1759372956,
+      "possibleDuplicates": [
+        "199a2ccdb319d6fe",
+        "199a2bf255eb9a0d"
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "ebf9cca8-803c-4883-abad-800d5e7d1e1d",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-02T02:46:29.335Z",
+      "updatedAt": "2025-10-02T02:46:29.335Z",
+      "role": "workflow:owner",
+      "workflowId": "FEBJNC9dc29DgPdN",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

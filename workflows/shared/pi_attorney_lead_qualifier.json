@@ -1,0 +1,449 @@
+{
+  "createdAt": "2025-10-16T23:33:03.731Z",
+  "updatedAt": "2025-10-18T05:11:33.000Z",
+  "id": "NH2iQVOJxleV42kV",
+  "name": "PI Attorney Lead Qualifier",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=Role & Purpose\n\nYou are a demo chatbot for a fictional personal-injury firm, ABC Law, created by Precision Data Strategies (PDS).\n\nYour goals:\n\nDemonstrate how a chatbot can screen potential clients with structured, compliant intake questions.\n\nIf the (real) user—an attorney—thinks this would help their firm, collect their business contact details (consented) so PDS can follow up.\n\nMandatory Opening (always say first)\n\nThis is a demo only for a fictional firm (ABC Law). It is not legal advice, does not create an attorney-client relationship, and no personal or sensitive information should be provided. I’ll show how screening works using a hypothetical scenario.\n\nCollect info such as the following in a friendly, conversational way using short, friendly questions politely thanking the user at intervals. DO NOT attempt to collect all info at once, guide the user stap by step asking pertinent questions one by one. Be sure to stay conversational, friendly and caring but professional:\n\nIncident Type (e.g., auto collision, slip & fall, workplace injury, product liability, dog bite, other).\nDate/Recency (approximate, e.g., “within last 24 months?”).\nLocation (city/state only).\nParties Involved (e.g., single-vehicle vs multi-party).\nInjury Types (e.g., soft tissue, fracture, head/neck, back, other).\nMedical Care (ER visit / urgent care / ongoing treatment / none yet).\nInsurance Known? (yes/no/unsure).\nWas the accident reported to police or other law enforcement?\n\nGuardrails\n\nDo not store any case/incident details.\n\nYou may ask and echo back examples to demonstrate capability, but do not persist them.\n\nOnly store the attorney’s business lead info after they confirm interest.\n\nStay neutral, professional, and concise; no guarantees or legal conclusions.\n\nIf asked for legal advice: reiterate demo + no legal advice and keep examples generic.\n\nPII/PHI safety: remind user not to share sensitive info in the demo.\n\nDemo Flow (High Level)\n\nDisclaimer (above).\n\nDemo Intake Walkthrough (non-persisted): briefly ask a small set of screening questions for a hypothetical personal-injury matter and summarize the hypothetical back purely for illustration.\n\nValue Prompt: ask the attorney if a chatbot like this would be useful to pre-screen potential clients from website chat, contact forms, or voice agents.\n\nIf YES → collect their business lead info (persist).\n\nConfirm the collected info.\n\nTrigger tools:\n\nEmail the attorney a thank-you + summary.\n\nEmail info@precisiondatastrategies.com with the lead JSON.\n\nAppend the JSON to Google Sheets.\n\nProvide a short closing with next steps.\n\nDemo Intake (Non-Persisted, Illustrative Only)\n\nUse 5–7 concise, checkbox-style questions to illustrate screening structure. Keep answers short; remind that this is only an example.\n\nIncident Type (e.g., auto collision, slip & fall, workplace injury, product liability, dog bite, other).\n\nDate/Recency (approximate, e.g., “within last 24 months?”).\n\nLocation (city/state only).\n\nParties Involved (e.g., single-vehicle vs multi-party).\n\nInjury Types (e.g., soft tissue, fracture, head/neck, back, other).\n\nMedical Care (ER visit / urgent care / ongoing treatment / none yet).\n\nInsurance Known? (yes/no/unsure).\n\nAfter collecting these demo answers, summarize back based on what was discussed. Here is an example:\n\n“A hypothetical slip-and-fall, occurred within 12 months, in San Diego, soft-tissue injury, urgent care visit, insurance unknown.”\n\nThen say:\n\n“In a real deployment, these would be validated and routed for review—but this demo will not store them.”\n\nTransition to Value\n\nAsk:\n\n“Would implementing a chatbot like this help your firm save time and reduce intake costs by automatically pre-screening and prioritizing inbound leads — whether they come from your website chat, contact forms, or even voice calls — so your attorneys and staff can focus on the highest-value cases first?”\n\nIf Attorney Says NO\n\nThank them.\n\nEnd politely. Advise them that no information was stored.\n\nIf Attorney Says YES, maybe, probably or other positive buying signal, Begin Persisted Lead Capture as follows:\n\nCollect business lead info in structured form. Validate each field.\n\nFields (Schema Below):\n\nJSON Schema (Store This Exact Structure):\n{\n  \"attorney_name\": \"<string or empty>\",\n  \"firm_name\": \"<string or empty>\",\n  \"phone_e164\": \"<string or empty>\",\n  \"email\": \"<string or empty>\",\n  \"preferred_channels\": \"<array or empty>\",\n  \"best_time_to_contact\": \"<string or empty>\",\n  \"summary\": \"<string>\"\n}\n\nValidation & Confirmation\n\nValidate email and phone_e164. Convert phone to e164 format (+1) if necessary. Do not demand the user gives e164 format phone. If email syntax is invalid, request correction.\n\nSet timestamp_iso to current ISO 8601.\n\nRead back the captured fields in a tidy summary and ask:\n\nDoes this look correct? May I proceed to send a summary to you and notify our automation department about our discussion?\n\nAttorney Name:\nFirm Name:\nPhone Number:\nEmail:\nPreferred Contact Method:\nBest Time to Contact:\nSummary:\n\nBy answering “Yes,” you consent to Precision Data Strategies collecting and securely storing the business contact information you provide. We may share this information with trusted third-party service providers only as needed to contact you, follow up on your inquiry, and deliver our services. We do not sell or share your information for marketing unrelated to your request.\n\n**If confirmed, proceed with tools. If user responds with no or anything else that might indicate they do not want to agree to the disclaimer, abort all storage of their info, politely thank them for their time, notify them that no info was stored, and end the chat immediately.\n\n──────── END-OF-CHAT TOOL CALLS (REQUIRED) ────────\nCall tools ONLY after the user confirms the summary (“Yes”, “That’s correct”, “Send it”, etc.). Do NOT call tools during collection.\n\nCall the THREE tools in EXACT order, exactly once each:\n1) Append Row in Sheet (Google Sheets)\n2) Send Email (Gmail) — Sales\n3) Send Email (Gmail) — Customer (ONLY if email is valid)\n\nTool arguments (top-level; use empty strings for missing values; do not print to chat):\n\nPost-call chat message (after all tools succeed):\n“Thanks! I’ve sent your request to our team. We’ll follow up by email shortly. If you need us sooner, email info@precisiondatastrategies.com.”\n\nIf user revokes consent before sending: delete staged lead data and confirm deletion.\n\nTone & Style\n\nProfessional, clear, concise.\n\nNo legal advice.\n\nKeep the demo moving; avoid long walls of text.\n\nUse short lists, yes/no, and multiple-choice where possible.\n\nCustomer email rule:\n- Only call the Customer email tool if a valid email was collected (contains “@” and a domain). Otherwise skip it.\n\n──────── SUDDEN-END FALLBACK (disconnect/timeout/close) ────────\nIf the user ends the chat or becomes unresponsive before confirmation, still call the three tools in the same order with whatever fields were collected. In the “summary”, append:\n“Chat ended before confirmation; some details may be incomplete.”\nIf a final chat message can still be delivered, use the same post-call message.\n\nSummary Construction (must include all products and useful context; no inventions)\n- One sentence covering: a summary of what was discussed, and the needs of the attorney.\n- If sudden-end fallback was used, append the fallback note above.",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        448,
+        0
+      ],
+      "id": "6bf7f19e-46d0-4fab-b891-c7b5700adf58",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        224
+      ],
+      "id": "2984f93e-6d35-4791-b649-e9b4e4204f7b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }} {{ $json.chatId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        400
+      ],
+      "id": "b299a1c8-63f8-48de-8d17-6892ab77b1eb",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "info@precisiondatastrategies.com",
+        "subject": "New Quote Request",
+        "emailType": "text",
+        "message": "={{\n[\n  \"Dear Team,\",\n  \"\",\n  \"New attorney lead from Samantha:\",\n  \"\",\n  \"Customer name: \" + ($fromAI('name') || ''),\n  \"Company: \" + ($fromAI('company') || ''),\n  \"Email: \" + ($fromAI('email') || ''),\n  \"Phone: \" + ($fromAI('phone') || ''),\n  \"Website: \" + ($fromAI('website') || ''),\n  \"\",\n  \"Business Type: \" + ($fromAI('business_type') || ''),\n  \"Area of Interest: \" + ($fromAI('interest_area') || ''),\n  \"Preferred Follow-Up: \" + ($fromAI('preferred_followup_time') || ''),\n\n  \"Summary: \" + ($fromAI('summary') || ''),\n  \"\",\n\n  \"— Samantha (AI Assistant)\"\n].join('\\n')\n}}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        464,
+        208
+      ],
+      "id": "37dc8cb4-5196-43b2-9d6b-0ad05ce828f2",
+      "name": "Send Email",
+      "webhookId": "e918a501-3b1c-4930-ab80-846bc0f1cc58",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YquaU61NUzoqwdTs",
+          "name": "Gmail account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('To', ``, 'string') }}",
+        "subject": "=Personal Injury Chat - {{ $fromAI('company') || '' }}",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Thank You - Precision Data Strategies</title>\n    <style>\n        body {\n            margin: 0;\n            padding: 0;\n            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n            line-height: 1.6;\n            color: #333333;\n            background-color: #f8f9fa;\n        }\n        .email-container {\n            max-width: 600px;\n            margin: 0 auto;\n            background-color: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\n        }\n        .header {\n            background: linear-gradient(135deg, #2c5aa0 0%, #1e4080 100%);\n            color: white;\n            padding: 30px 40px;\n            text-align: center;\n        }\n        .logo {\n            max-width: 200px;\n            height: auto;\n            margin-bottom: 10px;\n        }\n        .company-name {\n            font-size: 24px;\n            font-weight: bold;\n            margin: 0;\n            letter-spacing: 0.5px;\n        }\n        .content {\n            padding: 40px;\n        }\n        .greeting {\n            font-size: 18px;\n            color: #2c5aa0;\n            margin-bottom: 20px;\n            font-weight: 500;\n        }\n        .main-text {\n            font-size: 16px;\n            margin-bottom: 25px;\n            line-height: 1.7;\n        }\n        .info-section {\n            background-color: #f8f9fa;\n            border-left: 4px solid #2c5aa0;\n            padding: 25px;\n            margin: 25px 0;\n            border-radius: 0 6px 6px 0;\n        }\n        .info-title {\n            font-size: 16px;\n            font-weight: bold;\n            color: #2c5aa0;\n            margin-bottom: 15px;\n        }\n        .info-item {\n            margin-bottom: 8px;\n            font-size: 14px;\n        }\n        .info-label {\n            font-weight: bold;\n            color: #555555;\n            display: inline-block;\n            min-width: 80px;\n        }\n        .summary-section {\n            background-color: #fff;\n            border: 1px solid #e0e0e0;\n            padding: 20px;\n            margin: 20px 0;\n            border-radius: 6px;\n        }\n        .summary-label {\n            font-weight: bold;\n            color: #2c5aa0;\n            margin-bottom: 10px;\n            font-size: 14px;\n        }\n        .summary-text {\n            font-size: 14px;\n            line-height: 1.6;\n            color: #555555;\n        }\n        .note {\n            background-color: #fff3cd;\n            border: 1px solid #ffeaa7;\n            padding: 15px;\n            border-radius: 6px;\n            margin: 20px 0;\n            font-size: 14px;\n            color: #856404;\n        }\n        .signature {\n            margin-top: 30px;\n            padding-top: 20px;\n            border-top: 2px solid #e0e0e0;\n            color: #666666;\n        }\n        .signature-name {\n            font-weight: bold;\n            color: #2c5aa0;\n        }\n        .footer {\n            background-color: #2c5aa0;\n            color: white;\n            padding: 20px 40px;\n            text-align: center;\n            font-size: 12px;\n        }\n        .footer a {\n            color: #ffffff;\n            text-decoration: none;\n        }\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 0;\n                border-radius: 0;\n            }\n            .header, .content, .footer {\n                padding: 20px;\n            }\n            .company-name {\n                font-size: 20px;\n            }\n        }\n    </style>\n</head>\n<body>\n    <div class=\"email-container\">\n        <div class=\"header\">\n            <img src=\"https://precisiondatastrategies.com/wp-content/uploads/2025/07/PDS-logo.jpg\" alt=\"Precision Data Strategies Logo\" class=\"logo\">\n            <h1 class=\"company-name\">Precision Data Strategies LLC</h1>\n        </div>\n        \n        <div class=\"content\">\n            <div class=\"greeting\">\n                Dear {{ $fromAI('name') || 'prospective client' }},\n            </div>\n            \n            <div class=\"main-text\">\n                Thank you for reaching out to us. We've received your request and our automations department will be in touch with you shortly to discuss your inquiry in more detail.\n            </div>\n            \n            <div class=\"info-section\">\n                <div class=\"info-title\">Summary of Information Received:</div>\n                \n                <div class=\"info-item\">\n                    <span class=\"info-label\">Name:</span> {{ $fromAI('name') || '' }}\n                </div>\n                \n                <div class=\"info-item\">\n                    <span class=\"info-label\">Company:</span> {{ $fromAI('company') || '' }}\n                </div>\n                \n                <div class=\"info-item\">\n                    <span class=\"info-label\">Email:</span> {{ $fromAI('email') || '' }}\n                </div>\n                \n                <div class=\"info-item\">\n                    <span class=\"info-label\">Phone:</span> {{ $fromAI('phone') || '' }}\n                </div>\n            </div>\n            \n            <div class=\"summary-section\">\n                <div class=\"summary-label\">Summary of our discussion:</div>\n                <div class=\"summary-text\">{{ $fromAI('summary') || '' }}</div>\n            </div>\n            \n            <div class=\"note\">\n                <strong>Please note:</strong> If you notice any errors in the details above, please reply to this email so we can update your information before our sales team contacts you.\n            </div>\n            \n            <div class=\"main-text\">\n                We appreciate your interest and look forward to speaking with you soon.\n            </div>\n            \n            <div class=\"signature\">\n                —<br>\n                <span class=\"signature-name\">Samantha</span><br>\n                AI Assistant\n            </div>\n        </div>\n        \n        <div class=\"footer\">\n            <p>&copy; 2025 Precision Data Strategies LLC. All rights reserved.</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        208
+      ],
+      "id": "a5a2d8b8-6a7d-474d-9c5d-e91d7b263534",
+      "name": "Send a message in Gmail - Customer",
+      "webhookId": "c713ac7e-6e10-47bf-85f2-ac8db08288cf",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "14u-PR1jrRxmYBMz5i0B2InyQBZB5MxSEeeW4enZoLy8",
+          "mode": "list",
+          "cachedResultName": "Attorney Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14u-PR1jrRxmYBMz5i0B2InyQBZB5MxSEeeW4enZoLy8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14u-PR1jrRxmYBMz5i0B2InyQBZB5MxSEeeW4enZoLy8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "attorney_name": "={{ $fromAI('attorney_name') }}",
+            "firm_name": "={{ $fromAI('firm_name') }}",
+            "phone_e164": "={{ $fromAI('phone_e164') }}",
+            "email": "={{ $fromAI('email') }}",
+            "preferred_channels": "={{ $fromAI('preferred_channels') }}",
+            "best_time_to_contact": "={{ $fromAI('best_time_to_collect') }}",
+            "summary": "={{ $fromAI('summary') }}",
+            "date": "={{ new Date().toISOString().split('T')[0] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "attorney_name",
+              "displayName": "attorney_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "firm_name",
+              "displayName": "firm_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone_e164",
+              "displayName": "phone_e164",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "preferred_channels",
+              "displayName": "preferred_channels",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "best_time_to_contact",
+              "displayName": "best_time_to_contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        880,
+        208
+      ],
+      "id": "b754fc46-5bd1-4215-989d-19a21c2a1cab",
+      "name": "Append row in sheet in Google Sheets",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "50c74187-415d-4c6a-8655-b4a8cc3c9d0a",
+      "name": "When chat message received",
+      "webhookId": "627ce96d-c188-46a1-8347-1d2ec9f83d2c"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        -176
+      ],
+      "id": "2b658dfe-a9cc-4887-a09d-7d4b28a7568d",
+      "name": "Webhook",
+      "webhookId": "bec1bfd4-b40e-46e5-a159-dad51c877bc3"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"output\": {{ JSON.stringify($json.output) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        912,
+        -144
+      ],
+      "id": "7d33a270-665a-4511-88c2-e36d23406922",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail - Customer": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        []
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "57a742d3-1388-410a-96ea-55073c6057b7",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T23:33:03.736Z",
+      "updatedAt": "2025-10-16T23:33:03.736Z",
+      "role": "workflow:owner",
+      "workflowId": "NH2iQVOJxleV42kV",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

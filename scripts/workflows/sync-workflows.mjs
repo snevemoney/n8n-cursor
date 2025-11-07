@@ -13,7 +13,7 @@
  *   WORKFLOWS_DIR - Directory containing workflow files (default: ./workflows)
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -22,7 +22,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = resolve(__dirname, '../..');
 
-const N8N_BASE_URL = process.env.N8N_BASE_URL || 'http://localhost:5678';
+// Load Scorpion's .env.local if it exists (for n8ncloud.tech credentials)
+const scorpionEnvPath = join(ROOT_DIR, 'apps/scorpion/.env.local');
+if (existsSync(scorpionEnvPath)) {
+  const envContent = readFileSync(scorpionEnvPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^#=]+)=(.+)$/);
+    if (match && !process.env[match[1]]) {
+      process.env[match[1]] = match[2].trim();
+    }
+  });
+  console.log('✅ Loaded Scorpion environment from apps/scorpion/.env.local');
+}
+
+const N8N_BASE_URL = process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'http://localhost:5678';
 const N8N_API_KEY = process.env.N8N_API_KEY;
 const WORKFLOWS_DIR = process.env.WORKFLOWS_DIR || join(ROOT_DIR, 'workflows');
 
@@ -64,10 +77,20 @@ function getWorkflowFiles() {
 function readWorkflow(filePath) {
   try {
     const content = readFileSync(filePath, 'utf-8');
-    return JSON.parse(content);
+    
+    // Validate JSON before parsing
+    const workflow = JSON.parse(content);
+    
+    // Validate required fields
+    if (!workflow.name && !workflow.meta?.name) {
+      console.warn(`⚠️ Workflow ${filePath} has no name, skipping...`);
+      return null;
+    }
+    
+    return workflow;
   } catch (error) {
-    console.error(`Error reading workflow ${filePath}:`, error.message);
-    return null;
+    console.error(`❌ Error reading workflow ${filePath}:`, error.message);
+    return null; // Skip invalid workflows instead of crashing
   }
 }
 
@@ -82,29 +105,42 @@ function getWorkflowName(workflow) {
  * List workflows from n8n
  */
 async function listN8nWorkflows() {
-  try {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (N8N_API_KEY) {
-      headers['X-N8N-API-KEY'] = N8N_API_KEY;
+  const maxRetries = 3;
+  const retryDelay = 1000;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (N8N_API_KEY) {
+        headers['X-N8N-API-KEY'] = N8N_API_KEY;
+      }
+      
+      const response = await fetch(`${N8N_BASE_URL}/workflows`, {
+        headers,
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to list workflows: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      if (attempt < maxRetries) {
+        console.warn(`⚠️ Retry ${attempt}/${maxRetries} after error:`, error.message);
+        await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+        continue;
+      }
+      console.error('❌ Failed to list n8n workflows after retries:', error.message);
+      return [];
     }
-    
-    const response = await fetch(`${N8N_BASE_URL}/api/v1/workflows`, {
-      headers,
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to list workflows: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    return data.data || [];
-  } catch (error) {
-    console.error('Failed to list n8n workflows:', error.message);
-    return [];
   }
+  
+  return [];
 }
 
 /**
@@ -125,8 +161,8 @@ async function upsertWorkflow(workflow) {
     const existingWorkflow = existing.find(w => w.name === getWorkflowName(workflow));
     
     const url = existingWorkflow
-      ? `${N8N_BASE_URL}/api/v1/workflows/${existingWorkflow.id}`
-      : `${N8N_BASE_URL}/api/v1/workflows`;
+      ? `${N8N_BASE_URL}/workflows/${existingWorkflow.id}`
+      : `${N8N_BASE_URL}/workflows`;
     
     const method = existingWorkflow ? 'PUT' : 'POST';
     

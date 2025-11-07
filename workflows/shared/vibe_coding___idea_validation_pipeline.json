@@ -1,0 +1,553 @@
+{
+  "createdAt": "2025-08-21T19:28:17.925Z",
+  "updatedAt": "2025-08-21T19:28:17.925Z",
+  "id": "pstJWO8bY19WS2pL",
+  "name": "Vibe Coding - Idea Validation Pipeline",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-idea-submission",
+      "name": "New Idea Submission",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "submit-idea",
+        "options": {}
+      }
+    },
+    {
+      "id": "generate-mvp-code",
+      "name": "Generate MVP with AI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a senior developer who specializes in rapid prototyping. Create a complete, working web application based on the user's idea. Generate HTML, CSS, and JavaScript code that creates a functional MVP. Focus on core functionality and modern, clean design. Make it production-ready with proper error handling."
+            },
+            {
+              "role": "user",
+              "content": "Create an MVP for this idea: {{ $json.idea_description }}. Target audience: {{ $json.target_audience }}. Key features needed: {{ $json.key_features }}. Tech stack preference: {{ $json.tech_stack || 'HTML/CSS/JavaScript' }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 3000
+        }
+      }
+    },
+    {
+      "id": "extract-code-files",
+      "name": "Extract Code Files",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const aiResponse = $node['Generate MVP with AI'].json.choices[0].message.content;\nconst ideaData = $node['New Idea Submission'].json;\n\n// Extract code blocks from AI response\nconst codeBlocks = [];\nconst htmlMatch = aiResponse.match(/```html([\\s\\S]*?)```/i);\nconst cssMatch = aiResponse.match(/```css([\\s\\S]*?)```/i);\nconst jsMatch = aiResponse.match(/```javascript([\\s\\S]*?)```/i);\n\nif (htmlMatch) {\n  codeBlocks.push({\n    filename: 'index.html',\n    content: htmlMatch[1].trim(),\n    type: 'html'\n  });\n}\n\nif (cssMatch) {\n  codeBlocks.push({\n    filename: 'style.css',\n    content: cssMatch[1].trim(),\n    type: 'css'\n  });\n}\n\nif (jsMatch) {\n  codeBlocks.push({\n    filename: 'script.js',\n    content: jsMatch[1].trim(),\n    type: 'javascript'\n  });\n}\n\n// Generate a project ID\nconst projectId = `vibe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\nreturn {\n  project_id: projectId,\n  idea_title: ideaData.idea_title,\n  idea_description: ideaData.idea_description,\n  code_files: codeBlocks,\n  ai_response: aiResponse,\n  created_at: new Date().toISOString(),\n  user_email: ideaData.user_email\n};"
+      }
+    },
+    {
+      "id": "deploy-to-netlify",
+      "name": "Deploy MVP to Netlify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.netlify.com/api/v1/sites",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.netlify.api_token }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "name": "{{ $json.project_id }}",
+          "files": "={{ $json.code_files.reduce((acc, file) => { acc[file.filename] = file.content; return acc; }, {}) }}"
+        }
+      }
+    },
+    {
+      "id": "store-project-data",
+      "name": "Store Project Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO vibe_projects (project_id, idea_title, idea_description, deploy_url, user_email, status, created_at) VALUES ('{{ $node[\"Extract Code Files\"].json[\"project_id\"] }}', '{{ $node[\"Extract Code Files\"].json[\"idea_title\"] }}', '{{ $node[\"Extract Code Files\"].json[\"idea_description\"] }}', '{{ $json.url }}', '{{ $node[\"Extract Code Files\"].json[\"user_email\"] }}', 'deployed', NOW()) RETURNING id"
+      }
+    },
+    {
+      "id": "setup-analytics-tracking",
+      "name": "Setup Analytics Tracking",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mixpanel.com/engage",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "MVP Deployed",
+          "properties": {
+            "project_id": "={{ $node['Extract Code Files'].json['project_id'] }}",
+            "deploy_url": "={{ $node['Deploy MVP to Netlify'].json['url'] }}",
+            "idea_title": "={{ $node['Extract Code Files'].json['idea_title'] }}",
+            "deployment_time": "={{ new Date().toISOString() }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "notify-deployment-complete",
+      "name": "Notify Deployment Complete",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "toEmail": "={{ $node['Extract Code Files'].json['user_email'] }}",
+        "subject": "🚀 Your MVP is Live! - {{ $node['Extract Code Files'].json['idea_title'] }}",
+        "message": "Congratulations! Your MVP has been successfully deployed and is now live.\n\n🌐 Live URL: {{ $node['Deploy MVP to Netlify'].json['url'] }}\n📊 Analytics Dashboard: https://dashboard.your-domain.com/projects/{{ $node['Extract Code Files'].json['project_id'] }}\n\nNext Steps:\n1. Test your MVP thoroughly\n2. Share it with potential users\n3. Gather feedback and iterate\n4. Monitor analytics for user engagement\n\nIf you need any modifications or have feedback, simply reply to this email with your requirements.\n\nHappy vibing! 🎉"
+      }
+    },
+    {
+      "id": "webhook-feedback-received",
+      "name": "User Feedback Received",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "feedback/{{ $parameter[\"project_id\"] }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "analyze-feedback-sentiment",
+      "name": "Analyze Feedback Sentiment",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Analyze the sentiment and extract insights from user feedback. Return a JSON object with sentiment (positive/negative/neutral), key_insights (array of strings), suggested_improvements (array of strings), and urgency_score (1-10)."
+            },
+            {
+              "role": "user",
+              "content": "Analyze this feedback: {{ $json.feedback_text }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "store-feedback-analysis",
+      "name": "Store Feedback Analysis",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO project_feedback (project_id, feedback_text, sentiment, key_insights, suggested_improvements, urgency_score, created_at) VALUES ('{{ $node[\"User Feedback Received\"].json[\"project_id\"] }}', '{{ $node[\"User Feedback Received\"].json[\"feedback_text\"] }}', '{{ JSON.parse($node[\"Analyze Feedback Sentiment\"].json[\"choices\"][0][\"message\"][\"content\"]).sentiment }}', '{{ JSON.stringify(JSON.parse($node[\"Analyze Feedback Sentiment\"].json[\"choices\"][0][\"message\"][\"content\"]).key_insights) }}', '{{ JSON.stringify(JSON.parse($node[\"Analyze Feedback Sentiment\"].json[\"choices\"][0][\"message\"][\"content\"]).suggested_improvements) }}', {{ JSON.parse($node[\"Analyze Feedback Sentiment\"].json[\"choices\"][0][\"message\"][\"content\"]).urgency_score }}, NOW())"
+      }
+    },
+    {
+      "id": "check-iteration-trigger",
+      "name": "Check if Iteration Needed",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "functionCode": "const feedbackAnalysis = JSON.parse($node['Analyze Feedback Sentiment'].json.choices[0].message.content);\nconst projectId = $node['User Feedback Received'].json.project_id;\n\n// Determine if auto-iteration should be triggered\nconst shouldIterate = (\n  feedbackAnalysis.urgency_score >= 7 || \n  feedbackAnalysis.sentiment === 'negative' ||\n  feedbackAnalysis.suggested_improvements.length >= 3\n);\n\nreturn {\n  should_iterate: shouldIterate,\n  project_id: projectId,\n  feedback_analysis: feedbackAnalysis,\n  iteration_reason: shouldIterate ? 'High urgency feedback received' : 'Low priority feedback'\n};"
+      }
+    },
+    {
+      "id": "trigger-auto-iteration",
+      "name": "Trigger Auto Iteration",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $node['New Idea Submission'].json['$webhook_url'] }}/iterate-project",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "project_id": "={{ $json.project_id }}",
+          "improvements": "={{ $json.feedback_analysis.suggested_improvements }}",
+          "auto_iteration": true
+        }
+      }
+    },
+    {
+      "id": "webhook-iteration-request",
+      "name": "Manual Iteration Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        500
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "iterate-project",
+        "options": {}
+      }
+    },
+    {
+      "id": "get-project-context",
+      "name": "Get Project Context",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        300,
+        500
+      ],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT p.*, array_agg(f.feedback_text) as feedback_history, array_agg(f.suggested_improvements) as all_improvements FROM vibe_projects p LEFT JOIN project_feedback f ON p.project_id = f.project_id WHERE p.project_id = '{{ $json.project_id }}' GROUP BY p.id"
+      }
+    },
+    {
+      "id": "generate-iteration",
+      "name": "Generate Project Iteration",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        500
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are improving an existing web application based on user feedback. Generate updated code that addresses the feedback while maintaining the core functionality. Focus on the specific improvements requested."
+            },
+            {
+              "role": "user",
+              "content": "Original project: {{ $node['Get Project Context'].json[0]['idea_description'] }}\nCurrent URL: {{ $node['Get Project Context'].json[0]['deploy_url'] }}\nUser feedback: {{ $node['Get Project Context'].json[0]['feedback_history'] }}\nRequested improvements: {{ $json.improvements }}\n\nGenerate updated code that addresses these improvements."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.8,
+          "maxTokens": 3000
+        }
+      }
+    },
+    {
+      "id": "deploy-iteration",
+      "name": "Deploy Updated Version",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        700,
+        500
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "https://api.netlify.com/api/v1/sites/{{ $node['Get Project Context'].json[0]['project_id'] }}",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.netlify.api_token }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "files": "={{ /* Updated files would be extracted similar to initial deployment */ {\"index.html\": $node['Generate Project Iteration'].json.choices[0].message.content} }}"
+        }
+      }
+    },
+    {
+      "id": "log-iteration",
+      "name": "Log Iteration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        900,
+        500
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO project_iterations (project_id, iteration_number, improvements_made, deploy_url, created_at) VALUES ('{{ $node[\"Manual Iteration Request\"].json[\"project_id\"] }}', (SELECT COALESCE(MAX(iteration_number), 0) + 1 FROM project_iterations WHERE project_id = '{{ $node[\"Manual Iteration Request\"].json[\"project_id\"] }}'), '{{ JSON.stringify($node[\"Manual Iteration Request\"].json[\"improvements\"]) }}', '{{ $node[\"Deploy Updated Version\"].json[\"url\"] }}', NOW())"
+      }
+    }
+  ],
+  "connections": {
+    "New Idea Submission": {
+      "main": [
+        [
+          {
+            "node": "Generate MVP with AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate MVP with AI": {
+      "main": [
+        [
+          {
+            "node": "Extract Code Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Code Files": {
+      "main": [
+        [
+          {
+            "node": "Deploy MVP to Netlify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy MVP to Netlify": {
+      "main": [
+        [
+          {
+            "node": "Store Project Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Project Data": {
+      "main": [
+        [
+          {
+            "node": "Setup Analytics Tracking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Analytics Tracking": {
+      "main": [
+        [
+          {
+            "node": "Notify Deployment Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Feedback Received": {
+      "main": [
+        [
+          {
+            "node": "Analyze Feedback Sentiment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Feedback Sentiment": {
+      "main": [
+        [
+          {
+            "node": "Store Feedback Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Feedback Analysis": {
+      "main": [
+        [
+          {
+            "node": "Check if Iteration Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Iteration Needed": {
+      "main": [
+        [
+          {
+            "node": "Trigger Auto Iteration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Iteration Request": {
+      "main": [
+        [
+          {
+            "node": "Get Project Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Project Context": {
+      "main": [
+        [
+          {
+            "node": "Generate Project Iteration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Project Iteration": {
+      "main": [
+        [
+          {
+            "node": "Deploy Updated Version",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy Updated Version": {
+      "main": [
+        [
+          {
+            "node": "Log Iteration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "8ff1d452-7a28-477a-8201-776f01c440e7",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T19:28:18.119Z",
+      "updatedAt": "2025-08-21T19:28:18.119Z",
+      "role": "workflow:owner",
+      "workflowId": "pstJWO8bY19WS2pL",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

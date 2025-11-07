@@ -1,0 +1,383 @@
+{
+  "createdAt": "2025-10-27T18:06:47.799Z",
+  "updatedAt": "2025-10-28T22:28:57.000Z",
+  "id": "jv7Y59JNJwEiaiJX",
+  "name": "Asset Management API (Corrected)",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assets",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "4fdedd30-b9fa-4f75-99e7-9c729510c68e",
+      "name": "POST /assets Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "59f0c0b3-70b1-4092-bd14-8e2d55d064ae"
+    },
+    {
+      "parameters": {
+        "path": "assets",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "5c0ddf16-124f-4c16-abba-419e0e0100f3",
+      "name": "GET /assets Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        224
+      ],
+      "webhookId": "85684924-ea8e-4435-a990-bee573d206b8"
+    },
+    {
+      "parameters": {
+        "httpMethod": "PUT",
+        "path": "assets/:assetId",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "2c721f96-00c2-4e89-9408-0371d89022a5",
+      "name": "PUT /assets/:assetId Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        448
+      ],
+      "webhookId": "2d246dc7-8e45-4296-8ce8-ff49ad75262c"
+    },
+    {
+      "parameters": {
+        "httpMethod": "DELETE",
+        "path": "assets/:assetId",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "374c86a5-4402-4093-b8f4-f2df23ffcc5f",
+      "name": "DELETE /assets/:assetId Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        672
+      ],
+      "webhookId": "8e3fe089-6346-4f81-a512-df9117867ea8"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO tenant_assets (\n  tenant_id, \n  asset_type, \n  asset_name, \n  asset_category, \n  location, \n  purchase_date, \n  purchase_price, \n  current_value, \n  condition_status, \n  status, \n  manufacturer, \n  model, \n  serial_number\n) VALUES (\n  '{{ $json.body.tenantId }}', \n  '{{ $json.body.assetType }}', \n  '{{ $json.body.assetName }}', \n  '{{ $json.body.assetCategory }}', \n  '{\"address\":\"{{ $json.body.location }}\"}'::jsonb, \n  '{{ $json.body.purchaseDate }}'::timestamptz, \n  {{ $json.body.purchasePrice }}::numeric, \n  {{ $json.body.currentValue }}::numeric, \n  '{{ $json.body.conditionStatus }}', \n  '{{ $json.body.status }}', \n  '{{ $json.body.manufacturer || \"\" }}', \n  '{{ $json.body.model || \"\" }}', \n  '{{ $json.body.serialNumber || \"\" }}'\n) RETURNING *;",
+        "options": {}
+      },
+      "id": "952c7aca-0356-4d51-a0a8-f3192522ba9a",
+      "name": "Create Asset",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM tenant_assets WHERE tenant_id = '{{ $json.tenantId }}' ORDER BY created_at DESC;",
+        "options": {}
+      },
+      "id": "0d274226-1523-4fcd-bb7e-ae300d08de31",
+      "name": "Get Assets",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        224
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tenant_assets SET asset_name = '{{ $json.assetName }}', location = '{{ $json.location }}'::jsonb, condition_status = '{{ $json.conditionStatus }}', status = '{{ $json.status }}', updated_at = NOW() WHERE id = {{ $json.pathParameters.assetId }} RETURNING *;",
+        "options": {}
+      },
+      "id": "712ff8f0-943a-470f-a53a-29493a09bb7c",
+      "name": "Update Asset",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        448
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM tenant_assets WHERE id = {{ $json.pathParameters.assetId }};",
+        "options": {}
+      },
+      "id": "13100c7c-fc79-46d8-9d06-506fa91caf3e",
+      "name": "Delete Asset",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        672
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, data: $json } }}",
+        "options": {}
+      },
+      "id": "d1bb3e3d-2512-45b7-9a5f-c314c91e7f41",
+      "name": "Respond (POST)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, data: $json } }}",
+        "options": {}
+      },
+      "id": "19a74a3c-240c-4344-8b00-32f1f6263828",
+      "name": "Respond (GET)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, data: $json } }}",
+        "options": {}
+      },
+      "id": "81a3e807-4cb9-4852-94d0-4cebb2adf75a",
+      "name": "Respond (PUT)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Asset deleted successfully' } }}",
+        "options": {}
+      },
+      "id": "b1683e66-e3a2-4440-b62b-aee18679d4e3",
+      "name": "Respond (DELETE)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        672
+      ]
+    }
+  ],
+  "connections": {
+    "POST /assets Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Asset": {
+      "main": [
+        [
+          {
+            "node": "Respond (POST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /assets Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Assets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Assets": {
+      "main": [
+        [
+          {
+            "node": "Respond (GET)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PUT /assets/:assetId Webhook": {
+      "main": [
+        [
+          {
+            "node": "Update Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Asset": {
+      "main": [
+        [
+          {
+            "node": "Respond (PUT)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DELETE /assets/:assetId Webhook": {
+      "main": [
+        [
+          {
+            "node": "Delete Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Asset": {
+      "main": [
+        [
+          {
+            "node": "Respond (DELETE)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "7b5770f2-e6e0-495b-9fbf-2aabfb1c6025",
+  "triggerCount": 4,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T18:06:47.804Z",
+      "updatedAt": "2025-10-27T18:06:47.804Z",
+      "role": "workflow:owner",
+      "workflowId": "jv7Y59JNJwEiaiJX",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T18:06:38.098Z",
+      "updatedAt": "2025-10-27T18:06:38.098Z",
+      "id": "XRYi0IXNgSx85GjC",
+      "name": "Assets"
+    }
+  ]
+}

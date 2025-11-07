@@ -1,0 +1,128 @@
+{
+  "createdAt": "2025-08-18T05:27:25.457Z",
+  "updatedAt": "2025-09-04T01:48:49.000Z",
+  "id": "WAVzRx4WG8XKqt9d",
+  "name": "AI Avatar Content Creation System",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "schedule-trigger",
+      "name": "Daily Content Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "content-research",
+      "name": "Content Research Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        200
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Firecrawl Content Research Simulation\nconst topics = [\n  \"AI Automation Trends 2024\",\n  \"How to Scale Your Business with AI\",\n  \"AI Avatar Marketing Secrets\",\n  \"Content Creation Revolution\",\n  \"24/7 Business Automation\"\n];\n\nconst randomTopic = topics[Math.floor(Math.random() * topics.length)];\n\nreturn [{\n  json: {\n    topic: randomTopic,\n    keywords: [\"AI\", \"automation\", \"business\", \"scaling\"],\n    trend_score: Math.floor(Math.random() * 100) + 1,\n    research_source: \"Firecrawl API\",\n    timestamp: new Date().toISOString()\n  }\n}];"
+      }
+    }
+  ],
+  "connections": {
+    "Daily Content Schedule": {
+      "main": [
+        [
+          {
+            "node": "Content Research Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Daily Content Schedule": {
+      "recurrenceRules": [
+        18
+      ]
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "0420d6c0-e6f6-4524-bf6f-a52fc0315433",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-08-18T05:27:25.460Z",
+      "updatedAt": "2025-08-18T05:27:25.460Z",
+      "role": "workflow:owner",
+      "workflowId": "WAVzRx4WG8XKqt9d",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

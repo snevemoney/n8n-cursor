@@ -1,0 +1,303 @@
+{
+  "createdAt": "2025-10-27T05:45:48.608Z",
+  "updatedAt": "2025-10-27T14:06:32.000Z",
+  "id": "gwYX4LOFlX4ziXT5",
+  "name": "Backup & Restore System",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/backup",
+        "options": {}
+      },
+      "id": "59ce4bab-1da1-408f-8a16-ea98637816b2",
+      "name": "Backup Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        400
+      ],
+      "webhookId": "1249920c-3876-4ab0-b662-99d755e7722c"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different backup operations\nconst backupAction = $input.item.json.body?.action || 'schedule-daily';\n\nreturn {\n  json: {\n    action: backupAction,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "b5249467-47d1-457d-908f-0906cefdd260",
+      "name": "Route Backup Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "schedule-daily-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "schedule-daily",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "restore-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "restore",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "list-backups-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "list-backups",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "891ddafa-3877-44f3-b6e4-038ba77180e0",
+      "name": "Route by Backup Action",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Schedule daily automated backup\nconst cronExpression = '0 2 * * *'; // 2 AM daily\nconst targetDirectory = '/backups/postgres';\n\nreturn {\n  json: {\n    schedule: {\n      cron: cronExpression,\n      description: 'Daily backup at 2 AM'\n    },\n    targetDirectory,\n    retentionDays: 30\n  }\n};"
+      },
+      "id": "9342be71-f258-45e9-8ea8-0d20b8fa68bf",
+      "name": "Schedule Daily Backup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  bs.backup_id,\n  bs.created_at,\n  bs.file_path,\n  bs.size_mb\nFROM backup_schedules bs\nWHERE bs.tenant_id = $1\nORDER BY bs.created_at DESC\nLIMIT 10;",
+        "options": {}
+      },
+      "id": "54a8006a-b572-4c2d-a958-cf0250a684c2",
+      "name": "List Backups",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        208,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Restore from backup\nconst backupId = $json.data.backupId;\nconst database = 'postgres';\n\nreturn {\n  json: {\n    action: 'restore',\n    backupId,\n    database,\n    status: 'initiating',\n    estimatedTime: '5-10 minutes'\n  }\n};"
+      },
+      "id": "315db87d-2c6f-4c06-b100-3ed297faa7bc",
+      "name": "Restore from Backup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "6e2dae79-fcc7-45f7-bd38-4d036c7ffdcd",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        432,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Backup Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Route Backup Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Backup Action": {
+      "main": [
+        [
+          {
+            "node": "Route by Backup Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Backup Action": {
+      "main": [
+        [
+          {
+            "node": "Schedule Daily Backup",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Backups",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Restore from Backup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Daily Backup": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Backups": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore from Backup": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9a54739b-bdc3-4ded-8ed0-a9c22ff25bae",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T05:45:48.611Z",
+      "updatedAt": "2025-10-27T05:45:48.611Z",
+      "role": "workflow:owner",
+      "workflowId": "gwYX4LOFlX4ziXT5",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T05:45:44.944Z",
+      "updatedAt": "2025-10-27T05:45:44.944Z",
+      "id": "8D3FAHma2I5n8V9R",
+      "name": "Backup"
+    }
+  ]
+}

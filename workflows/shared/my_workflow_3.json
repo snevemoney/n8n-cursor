@@ -1,0 +1,779 @@
+{
+  "createdAt": "2025-09-06T19:54:23.810Z",
+  "updatedAt": "2025-09-06T19:58:31.000Z",
+  "id": "01XBVbQkI5VEdkca",
+  "name": "My workflow 3",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Reverse Engineer Short Form Video",
+        "formDescription": "Provide an IG Reel url or a TikTok url.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Url",
+              "placeholder": "https://www.instagram.com/reel/DKzbAvyoCMJ/",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -768,
+        400
+      ],
+      "id": "9b639d2b-acef-4967-917b-c1fef93c00b0",
+      "name": "form_trigger",
+      "webhookId": "8db8f807-4b93-4a74-81b6-290cc1d459e8"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('form_trigger').item.json.Url }}",
+                    "rightValue": "=instagram.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "c5641e00-9155-4ca8-b4cd-90798531103a"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4da252f9-8606-476f-85a3-23f95b6f6e72",
+                    "leftValue": "={{ $('form_trigger').item.json.Url }}",
+                    "rightValue": "tiktok.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -256,
+        400
+      ],
+      "id": "1e13dc22-b08a-4e1f-ae48-f9564dfb1fb8",
+      "name": "switch_platform"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": " https://api.apify.com/v2/acts/apify~instagram-api-scraper/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"directUrls\": [\n      \"{{ $('form_trigger').item.json.Url }}\"\n    ],\n    \"resultsLimit\": 1,\n    \"resultsType\": \"posts\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        80
+      ],
+      "id": "1d3591e0-6021-47ef-a180-30f2fd6d2400",
+      "name": "scrape_ig_reel",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Qkh0Nbafkf2ffskI",
+          "name": "instagram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('scrape_ig_reel').item.json.videoUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        544,
+        80
+      ],
+      "id": "a32578b5-7b56-42c3-a4d1-ca758b4dee0d",
+      "name": "download_ig_reel"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apidojo~tiktok-scraper/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"maxItems\": 1,\n    \"startUrls\": [\n        \"{{ $('form_trigger').item.json.Url }}\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        608
+      ],
+      "id": "9cde292c-3425-43bd-a308-cf66bffe4c98",
+      "name": "scrape_tiktok",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Qkh0Nbafkf2ffskI",
+          "name": "instagram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('scrape_tiktok').item.json.video.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        544,
+        608
+      ],
+      "id": "da5b5cb1-4b56-4122-ab35-496cc2431102",
+      "name": "download_tiktok"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        832
+      ],
+      "id": "19ff1d82-9478-491d-9b6d-79fce7858f4e",
+      "name": "tiktok_to_base64"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eccbeb92-af90-4244-8e23-2cd3e2616a07",
+              "name": "result",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        832
+      ],
+      "id": "eb3b6e93-c2ad-4309-9b84-6eb08873aef3",
+      "name": "set_tiktok_result"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"inline_data\": {\n            \"mime_type\": \"video/mp4\",\n            \"data\": \"{{ $json.data }}\"\n          }\n        },\n        {\n          \"text\": {{ JSON.stringify($('build_final_tiktok_prompt').item.json.prompt) }}\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        832
+      ],
+      "id": "6dee0f0c-0b15-4502-a4f5-f55fbd509994",
+      "name": "analyze_tiktok",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Qkh0Nbafkf2ffskI",
+          "name": "instagram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f302b2c5-43cb-41f0-91f5-e91f72397ae4",
+              "name": "prompt",
+              "value": "=**Your Persona:** You are a \"Digital Twin Architect,\" a specialized AI analyst with a dual mastery of forensic video analysis and generative AI video synthesis. Your function is to deconstruct a source video into its absolute, quantifiable components and then architect a \"Generative Manifest\"—a flawless, multi-part prompt designed to compel an AI video model to render a perfect digital replica. You do not interpret; you transcribe reality into data.\n\n**Your Mission:** Your sole objective is to analyze the provided short-form video and produce a **Generative Manifest**. This manifest must be so detailed that it leaves no room for creative interpretation by the target AI video model (Google Veo, Sora, etc.). The goal is not a similar video; it is a shot-for-shot, motion-for-motion, photon-for-photon digital twin.\n\n**The Process: Forensic Deconstruction**\n\nBefore writing the manifest, you will perform a deep forensic analysis, dissecting the video across multiple layers. Think like a VFX artist creating a CG replica of a live-action shot.\n\n**Layer 1: The Global Aesthetic & Physics Core**\nThis is the foundational DNA of the video.\n*   **Visual Medium:** Is it emulating a specific film stock (e.g., Kodak Vision3 50D 35mm, Ektachrome 16mm)? Or is it a specific digital camera sensor (e.g., ARRI Alexa 65, RED Komodo, a high-end smartphone sensor)? Note the inherent grain, noise pattern, and sharpness.\n*   **Color Science & Grading:** Be precise. \"Cinematic teal and orange\" is too vague. Specify \"A high-contrast color grade with crushed blacks, lifted mid-tones, desaturated blues, and a heavy push of orange into the skin tones. The overall white balance is shifted slightly warm, around 4500K.\"\n*   **Lens Emulation:** Identify the characteristics of the lens. \"Emulating a Cooke Anamorphic/i SF 50mm lens, creating distinct oval bokeh, soft lens flares, and slight edge distortion.\" Or \"Emulating a sterile, hyper-sharp Zeiss Supreme Prime lens with zero chromatic aberration.\"\n*   **Physics & Reality Engine:** Define the environmental physics. \"Hyperrealistic physics model. All fluid dynamics (water, steam) must be viscous and turbulent. Fabric simulation must show weight and react to air currents. Particle effects (dust motes, sparks) must be dense and interact with light.\"\n\n**Layer 2: Per-Shot Deconstruction**\nBreak the video into a numbered sequence of shots. For EACH shot, you must detail the following:\n\n*   **Shot ID & Absolute Timing:**\n    *   `[SHOT X]`\n    *   `DURATION:` Start time to end time (e.g., 0.0s - 3.2s).\n\n*   **Camera Specification:**\n    *   `FRAMING:` Extreme Close-Up (ECU), Medium Shot (MS), etc.\n    *   `ANGLE:` Low Angle, High Angle, etc.\n    *   `MOVEMENT:` Be precise. Not \"pan,\" but \"A slow, 15-degree pan to the right with a smooth ease-in and ease-out, taking 2.0 seconds, starting at the 1.0s mark of the shot. The motion is perfectly stable, as if on a geared head tripod.\" Not \"handheld,\" but \"Subtle, high-frequency handheld shake emulating a person breathing, with a maximum vertical displacement of 2 pixels.\"\n\n*   **Subject & Action Choreography:**\n    *   `SUBJECT(S):` Hyper-specific descriptions. \"Male, early 30s, olive skin, short black hair, with a 3-day stubble. Wearing a navy blue heavyweight cotton t-shirt with visible fabric weave and slight pilling on the collar.\"\n    *   `ACTION MANIFEST:` A time-stamped log of all actions. \"At 0.5s, the subject's right hand enters the frame from the left. At 0.7s, his fingers make contact with the ceramic mug. At 1.2s, a micro-expression of concentration appears: slight furrowing of the brow, lips press together.\"\n\n*   **Lighting & Environmental Detail:**\n    *   `LIGHTING BLUEPRINT:` \"A single, large, soft key light (emulating a 4x4 silk diffuser) is positioned camera left and slightly high, creating a Rembrandt lighting pattern on the subject's face. A weak, cool-toned fill light (approx. 6000K) from the right prevents shadows from being completely black. A hard rim light from behind separates the subject from the background.\"\n    *   `ENVIRONMENT STATE:` \"The background shows a plaster wall with visible texture and a 2-inch scuff mark three feet to the right of the subject's head. Dust motes are visible, floating slowly in the shafts of light.\"\n\n*   **Focus & Depth Plane:**\n    *   `DEPTH OF FIELD:` \"Extremely shallow depth of field (emulating f/1.4 aperture). The focal plane is locked precisely on the subject's leading eyeball.\"\n    *   `FOCUS DYNAMICS:` \"At 2.5s, a slow, deliberate rack focus begins, shifting the focal plane from the subject's eye to the coffee cup in their hand over 0.7 seconds.\"",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -496,
+        400
+      ],
+      "id": "27944599-f241-43d5-ad30-cf15fc84c2a4",
+      "name": "set_base_prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aab55ec6-6c4b-4e60-a576-62812f91299f",
+              "name": "prompt",
+              "value": "={{ $('set_base_prompt').item.json.prompt }}\n---\nVideo Title: {{ $json.title }}\nVideo Hashtags: {{ $json.hashtags.join(\",\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        608
+      ],
+      "id": "356a73f5-8cef-45d2-a7fc-78e7504dc8cf",
+      "name": "build_final_tiktok_prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aab55ec6-6c4b-4e60-a576-62812f91299f",
+              "name": "prompt",
+              "value": "={{ $('set_base_prompt').item.json.prompt }}\n---\nVideo Caption: {{ $json.caption }}\nVideo Hashtags: {{ $json.hashtags.join(\",\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        80
+      ],
+      "id": "c3bcfd07-c009-4732-993c-68992703bc06",
+      "name": "build_final_ig_prompt"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        320
+      ],
+      "id": "9c1e7c10-1530-40a1-abb6-b3a97def6b0a",
+      "name": "ig_to_base64"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"inline_data\": {\n            \"mime_type\": \"video/mp4\",\n            \"data\": \"{{ $json.data }}\"\n          }\n        },\n        {\n          \"text\": {{ JSON.stringify($('build_final_ig_prompt').item.json.prompt) }}\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        320
+      ],
+      "id": "c1d3be27-1595-40cb-84c2-9eb9719fb967",
+      "name": "analyze_ig_reel",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Qkh0Nbafkf2ffskI",
+          "name": "instagram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eccbeb92-af90-4244-8e23-2cd3e2616a07",
+              "name": "result",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        320
+      ],
+      "id": "bb04aff0-b878-4a64-911c-b4574201614f",
+      "name": "set_ig_result"
+    },
+    {
+      "parameters": {
+        "content": "## 1. Url Input + Build Video Reverse Engineering Prompt",
+        "height": 540,
+        "width": 820,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -848,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "a9f5cfcc-20a3-4e88-90e1-823482a3c61d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 2.1 Download IG Reel + Analyze Video",
+        "height": 500,
+        "width": 840,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "8bea208e-d24e-4177-8089-b2bb6f238650",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 2.2 Download TikTok + Analyze Video",
+        "height": 480,
+        "width": 840,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "2b9a9899-eeb5-4913-8256-35eb5ee0374a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C08KC39K8DR",
+          "mode": "list",
+          "cachedResultName": "ai-tools-content"
+        },
+        "text": "=*AI Video Generator Prompt:*\n\n```\n{{ $json.permalink }}\n```",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        432
+      ],
+      "id": "8f904ce1-1630-45c1-ac91-5aaf10157df9",
+      "name": "send_prompt_msg",
+      "webhookId": "ca19d833-4129-4c90-a668-295227a9c8ab",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "ps0KfQQZaId5hevT",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "result",
+        "binaryPropertyName": "prompt.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        432
+      ],
+      "id": "d8e06669-1ac5-4274-b929-60ca028cbb03",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "binaryPropertyName": "prompt.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        432
+      ],
+      "id": "a45935c1-c04a-4a39-a1b0-def6681a024f",
+      "name": "upload_file",
+      "webhookId": "8fdada13-d12e-4aea-87a7-63382dbb04b0",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "ps0KfQQZaId5hevT",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 3. Share Prompt In Slack",
+        "height": 540,
+        "width": 840
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        864,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "527d3751-5b79-4947-9f1c-7e59e7d3440f",
+      "name": "Sticky Note3"
+    }
+  ],
+  "connections": {
+    "form_trigger": {
+      "main": [
+        [
+          {
+            "node": "set_base_prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "switch_platform": {
+      "main": [
+        [
+          {
+            "node": "scrape_ig_reel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "scrape_tiktok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrape_ig_reel": {
+      "main": [
+        [
+          {
+            "node": "build_final_ig_prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrape_tiktok": {
+      "main": [
+        [
+          {
+            "node": "build_final_tiktok_prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "download_tiktok": {
+      "main": [
+        [
+          {
+            "node": "tiktok_to_base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tiktok_to_base64": {
+      "main": [
+        [
+          {
+            "node": "analyze_tiktok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "analyze_tiktok": {
+      "main": [
+        [
+          {
+            "node": "set_tiktok_result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_base_prompt": {
+      "main": [
+        [
+          {
+            "node": "switch_platform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_final_tiktok_prompt": {
+      "main": [
+        [
+          {
+            "node": "download_tiktok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_final_ig_prompt": {
+      "main": [
+        [
+          {
+            "node": "download_ig_reel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "download_ig_reel": {
+      "main": [
+        [
+          {
+            "node": "ig_to_base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ig_to_base64": {
+      "main": [
+        [
+          {
+            "node": "analyze_ig_reel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "analyze_ig_reel": {
+      "main": [
+        [
+          {
+            "node": "set_ig_result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_ig_result": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_tiktok_result": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "upload_file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upload_file": {
+      "main": [
+        [
+          {
+            "node": "send_prompt_msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "aadce409-bd2e-40e1-b29e-f93bcf05fa5b",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-06T19:54:23.817Z",
+      "updatedAt": "2025-09-06T19:54:23.817Z",
+      "role": "workflow:owner",
+      "workflowId": "01XBVbQkI5VEdkca",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -1,0 +1,264 @@
+{
+  "createdAt": "2025-08-21T14:51:15.030Z",
+  "updatedAt": "2025-08-21T14:51:15.030Z",
+  "id": "cL7Cp2mWWfXSA21l",
+  "name": "AI Workflow Marketplace - Payment Processing",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Payment Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "payment-received",
+        "options": {}
+      }
+    },
+    {
+      "id": "http-request-verify",
+      "name": "Verify Stripe Payment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.stripe.com/v1/payment_intents/={{ $json.data.object.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "stripeApi",
+        "options": {}
+      }
+    },
+    {
+      "id": "switch-payment-status",
+      "name": "Check Payment Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.status }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "equal",
+              "value2": "succeeded",
+              "output": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "database-get-workflow",
+      "name": "Get Workflow Details",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT w.*, p.customer_email FROM workflows w JOIN purchases p ON w.id = p.workflow_id WHERE p.stripe_payment_id = '{{ $node[\"Payment Webhook\"].json[\"data\"][\"object\"][\"id\"] }}'"
+      }
+    },
+    {
+      "id": "email-send-workflow",
+      "name": "Send Workflow File",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "toEmail": "={{ $json.customer_email }}",
+        "subject": "Your AI Workflow Purchase - {{ $json.name }}",
+        "message": "Thank you for purchasing our AI workflow template!\n\nWorkflow: {{ $json.name }}\nDescription: {{ $json.description }}\n\nPlease find your workflow file attached. Import it into your n8n instance and follow the setup instructions included in the documentation.\n\nIf you need any assistance, don't hesitate to reach out to our support team.\n\nBest regards,\nThe AI Workflow Team",
+        "attachments": "={{ [{\"name\": $json.name + \".json\", \"data\": $json.workflow_file, \"type\": \"application/json\"}] }}"
+      }
+    },
+    {
+      "id": "analytics-track-sale",
+      "name": "Track Sale Analytics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mixpanel.com/track",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "Workflow Purchase",
+          "properties": {
+            "workflow_id": "={{ $node[\"Get Workflow Details\"].json[\"id\"] }}",
+            "workflow_name": "={{ $node[\"Get Workflow Details\"].json[\"name\"] }}",
+            "amount": "={{ $node[\"Payment Webhook\"].json[\"data\"][\"object\"][\"amount\"] }}",
+            "customer_email": "={{ $node[\"Get Workflow Details\"].json[\"customer_email\"] }}",
+            "currency": "={{ $node[\"Payment Webhook\"].json[\"data\"][\"object\"][\"currency\"] }}",
+            "timestamp": "={{ new Date().toISOString() }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "update-purchase-status",
+      "name": "Update Purchase Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "operation": "update",
+        "query": "UPDATE purchases SET status = 'completed', delivered_at = NOW() WHERE stripe_payment_id = '{{ $node[\"Payment Webhook\"].json[\"data\"][\"object\"][\"id\"] }}'"
+      }
+    }
+  ],
+  "connections": {
+    "Payment Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Stripe Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Stripe Payment": {
+      "main": [
+        [
+          {
+            "node": "Check Payment Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Payment Status": {
+      "main": [
+        [
+          {
+            "node": "Get Workflow Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Workflow Details": {
+      "main": [
+        [
+          {
+            "node": "Send Workflow File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Purchase Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Workflow File": {
+      "main": [
+        [
+          {
+            "node": "Track Sale Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "933d309a-3b7e-4d90-93ce-98c42065c833",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T14:51:15.034Z",
+      "updatedAt": "2025-08-21T14:51:15.034Z",
+      "role": "workflow:owner",
+      "workflowId": "cL7Cp2mWWfXSA21l",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

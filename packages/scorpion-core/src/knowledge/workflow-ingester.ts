@@ -137,7 +137,16 @@ export class WorkflowIngester {
       for (const file of files) {
         try {
           const content = await fs.readFile(file, 'utf-8');
-          const workflow = JSON.parse(content);
+          
+          // Validate JSON before parsing
+          let workflow;
+          try {
+            workflow = JSON.parse(content);
+          } catch (jsonError: any) {
+            console.error(`Error reading workflow file ${file}: ${jsonError.message}`);
+            continue; // Skip this file and continue with others
+          }
+          
           const relativePath = path.relative(this.workspaceRoot, file);
           const fileName = path.basename(file, '.json');
 

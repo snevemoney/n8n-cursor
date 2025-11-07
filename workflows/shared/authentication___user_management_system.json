@@ -1,0 +1,392 @@
+{
+  "createdAt": "2025-10-27T02:50:38.088Z",
+  "updatedAt": "2025-10-27T06:57:00.000Z",
+  "id": "v6LEf9ttiVXH8kK9",
+  "name": "Authentication & User Management System",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/auth",
+        "options": {}
+      },
+      "id": "99d8bb12-82ea-4f75-8c3c-f50488a4673d",
+      "name": "Auth Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        336
+      ],
+      "webhookId": "0038aaf2-2974-4504-b528-b73341e7154e"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "71b3bc70-3e8e-46d1-8e46-6d4588997d0c",
+      "name": "Split Auth Routes",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different auth operations based on body.action\nconst action = $input.item.json.body?.action || 'unknown';\n\n// Map actions to routes\nconst routeMap = {\n  'signup': '/auth/signup',\n  'login': '/auth/login',\n  'logout': '/auth/logout',\n  'refresh': '/auth/refresh',\n  'verify-email': '/auth/verify-email',\n  'reset-password-request': '/password/reset-request',\n  'reset-password-complete': '/password/reset-complete',\n  'change-password': '/password/change'\n};\n\nreturn {\n  json: {\n    action,\n    route: routeMap[action] || '/auth/login',\n    payload: $input.item.json.body\n  }\n};"
+      },
+      "id": "c21c2899-a804-41e7-90ac-39090a7e119e",
+      "name": "Route Auth Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "signup-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "signup",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "login-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "login",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "logout-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "logout",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "refresh-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "refresh",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "0e4bcb44-ddeb-4487-b2ba-5bbbe1ad342a",
+      "name": "Route by Auth Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -544,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.route.includes('/auth/signup') ? `INSERT INTO users (email, password_hash, tenant_id, role) VALUES ($1, $2, $3, 'user') RETURNING *;` : '' }}",
+        "options": {}
+      },
+      "id": "2c7a78f2-07f9-4643-a317-878e53717a70",
+      "name": "Handle Signup",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -320,
+        48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.route.includes('/auth/login') ? `SELECT * FROM users WHERE email = $1;` : '' }}",
+        "options": {}
+      },
+      "id": "e5773273-fc55-4d00-b38c-3f18dd37f7f8",
+      "name": "Handle Login",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -320,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.route.includes('/auth/logout') ? `DELETE FROM sessions WHERE user_id = $1 AND token = $2;` : '' }}",
+        "options": {}
+      },
+      "id": "b9da1d98-e61a-446a-ac53-c9730ee9368c",
+      "name": "Handle Logout",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -320,
+        432
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.route.includes('/auth/refresh') ? `SELECT * FROM sessions WHERE token = $1;` : '' }}",
+        "options": {}
+      },
+      "id": "9293ceb8-a430-400f-a137-d6780a2df1b7",
+      "name": "Handle Refresh",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        -320,
+        624
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "6937fc2e-5374-47f0-a998-c95ae467c1e1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        336
+      ]
+    }
+  ],
+  "connections": {
+    "Auth Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Split Auth Routes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Auth Routes": {
+      "main": [
+        [
+          {
+            "node": "Route Auth Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Auth Action": {
+      "main": [
+        [
+          {
+            "node": "Route by Auth Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Auth Type": {
+      "main": [
+        [
+          {
+            "node": "Handle Signup",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Handle Login",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Handle Logout",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Handle Refresh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Signup": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Login": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Logout": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Refresh": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "tc3wTgVAWLpipm48"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "704742b2-8760-4f26-8d50-a37f0879bf0a",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T02:50:38.094Z",
+      "updatedAt": "2025-10-27T02:50:38.094Z",
+      "role": "workflow:owner",
+      "workflowId": "v6LEf9ttiVXH8kK9",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T02:50:17.627Z",
+      "updatedAt": "2025-10-27T02:50:17.627Z",
+      "id": "U105m5pfNRSt60NX",
+      "name": "Authentication"
+    }
+  ]
+}

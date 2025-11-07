@@ -38,6 +38,34 @@ export const councilMembers: CouncilMember[] = [
     specialty: "user intent, privacy, business rules",
     weight: 1.0,
     goal: "Ensure decisions match Evens' goals and values."
+  },
+  {
+    name: "Nexus",
+    role: "Integration Specialist",
+    specialty: "API design, data flows, webhooks",
+    weight: 1.1,
+    goal: "Ensure seamless communication between all services."
+  },
+  {
+    name: "Sentinel",
+    role: "Security & Performance",
+    specialty: "Security, rate limiting, optimization",
+    weight: 1.2,
+    goal: "Protect system integrity and maximize performance."
+  },
+  {
+    name: "Catalyst",
+    role: "Innovation Advisor",
+    specialty: "New technologies, AI trends, experimentation",
+    weight: 0.9,
+    goal: "Identify opportunities for cutting-edge improvements."
+  },
+  {
+    name: "Oracle",
+    role: "Data & Analytics",
+    specialty: "Metrics, insights, predictive analytics",
+    weight: 1.1,
+    goal: "Turn data into actionable intelligence."
   }
 ];
 

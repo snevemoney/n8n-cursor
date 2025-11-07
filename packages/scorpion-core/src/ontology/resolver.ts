@@ -123,7 +123,8 @@ export function extractRelations(entity: OntologyEntity): string[] {
   const relations: string[] = [];
   const schema = ontologySchema[entity.type];
   
-  if (!schema.relations) return relations;
+  // Safety check: ensure schema exists before accessing relations
+  if (!schema || !schema.relations) return relations;
 
   schema.relations.forEach(relationType => {
     // Look for fields that reference other entities

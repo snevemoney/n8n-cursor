@@ -1,0 +1,341 @@
+{
+  "createdAt": "2025-10-27T05:46:17.502Z",
+  "updatedAt": "2025-10-28T22:33:40.000Z",
+  "id": "tc3wTgVAWLpipm48",
+  "name": "Error Recovery System",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/error-recovery",
+        "options": {}
+      },
+      "id": "ceff3a65-9d06-4453-94d3-01cff33677aa",
+      "name": "Recovery Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        496
+      ],
+      "webhookId": "d9cc739b-7002-4cdb-8f88-be1c5a8db383"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different recovery operations\nconst recoveryAction = $input.item.json.body?.action || 'retry';\n\nreturn {\n  json: {\n    action: recoveryAction,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "c8bad953-8339-489b-97f5-90b29cbe855d",
+      "name": "Route Recovery Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "retry-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "retry",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "circuit-breaker-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "circuit-breaker",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "fallback-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "fallback",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "recover-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "recover",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "f5b273bd-2904-4c25-b74a-0525d3a86877",
+      "name": "Route by Recovery Action",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retry logic with exponential backoff\nconst retryConfig = {\n  maxRetries: $json.data.maxRetries || 3,\n  baseDelayMs: 1000,\n  maxDelayMs: 10000\n};\n\nconst attempt = $json.data.currentAttempt || 1;\nconst delay = Math.min(retryConfig.baseDelayMs * Math.pow(2, attempt - 1), retryConfig.maxDelayMs);\n\nreturn {\n  json: {\n    retryConfig,\n    attempt,\n    delay,\n    shouldRetry: attempt <= retryConfig.maxRetries\n  }\n};"
+      },
+      "id": "98356631-1ae5-47bf-98e4-d6dcba96fdb1",
+      "name": "Execute Retry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Circuit breaker logic\nconst circuitState = {\n  name: $json.data.serviceName,\n  state: 'closed', // closed, open, half-open\n  failureCount: 0,\n  lastFailureTime: null,\n  failureThreshold: 5,\n  timeout: 60000\n};\n\nreturn {\n  json: {\n    circuitState,\n    shouldAllowRequest: circuitState.state === 'closed' || circuitState.state === 'half-open'\n  }\n};"
+      },
+      "id": "5af7ced0-79c0-4f8a-9ed5-f6767dd98505",
+      "name": "Check Circuit Breaker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fallback mechanism\nconst fallback = {\n  primaryService: $json.data.primaryService,\n  fallbackService: $json.data.fallbackService,\n  fallbackActive: true,\n  reason: $json.data.reason || 'primary service unavailable'\n};\n\nreturn {\n  json: {\n    fallback,\n    routingTo: 'fallback'\n  }\n};"
+      },
+      "id": "0f7fc81e-bb91-4e2c-b554-fc37a9cdb5c7",
+      "name": "Execute Fallback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM error_logs \nWHERE tenant_id = '{{ $('Recovery Entry Point').item.json.body.tenantId }}' \n  AND recovered = false \nORDER BY created_at DESC \nLIMIT 1;",
+        "options": {}
+      },
+      "id": "cdc54da4-31ab-4f0d-b5d9-242772fd9ff3",
+      "name": "Recover from Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        208,
+        784
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json, \"timestamp\": new Date().toISOString() } }}",
+        "options": {}
+      },
+      "id": "38f30223-1c69-449a-8edf-6b53f2ab035f",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        432,
+        496
+      ]
+    }
+  ],
+  "connections": {
+    "Recovery Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Route Recovery Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Recovery Action": {
+      "main": [
+        [
+          {
+            "node": "Route by Recovery Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Recovery Action": {
+      "main": [
+        [
+          {
+            "node": "Execute Retry",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Circuit Breaker",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Fallback",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Recover from Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Retry": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Circuit Breaker": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Fallback": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recover from Error": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f15ab126-1a55-4ee7-b836-4addc3606ec6",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T05:46:17.506Z",
+      "updatedAt": "2025-10-27T05:46:17.506Z",
+      "role": "workflow:owner",
+      "workflowId": "tc3wTgVAWLpipm48",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T05:46:11.608Z",
+      "updatedAt": "2025-10-27T05:46:11.608Z",
+      "id": "r4LYff9UK0L5XFA7",
+      "name": "Recovery"
+    }
+  ]
+}

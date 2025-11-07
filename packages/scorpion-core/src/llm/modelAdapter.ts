@@ -23,6 +23,56 @@ export interface LLMResponse {
 export type ModelSource = 'openai' | 'ollama' | 'local' | 'custom';
 
 /**
+ * LLMAdapter class - Object-oriented wrapper for runModel
+ */
+export class LLMAdapter {
+  private provider: ModelSource;
+  private model?: string;
+  private temperature?: number;
+  private maxTokens?: number;
+
+  constructor(config: {
+    provider?: ModelSource;
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+  } = {}) {
+    this.provider = config.provider || (process.env.SCORPION_MODEL_SOURCE as ModelSource) || 'ollama';
+    this.model = config.model;
+    this.temperature = config.temperature;
+    this.maxTokens = config.maxTokens;
+  }
+
+  async chat(prompt: string, system?: string): Promise<string> {
+    const response = await runModel({
+      prompt,
+      system,
+      model: this.model,
+      temperature: this.temperature,
+      maxTokens: this.maxTokens
+    });
+    return response.content;
+  }
+
+  async generate(request: {
+    system?: string;
+    user: string;
+    jsonOutput?: boolean;
+  }): Promise<string> {
+    return this.chat(request.user, request.system);
+  }
+
+  async request(req: LLMRequest): Promise<LLMResponse> {
+    return runModel({
+      ...req,
+      model: req.model || this.model,
+      temperature: req.temperature || this.temperature,
+      maxTokens: req.maxTokens || this.maxTokens
+    });
+  }
+}
+
+/**
  * Run a model request - works with any model source
  */
 export async function runModel(req: LLMRequest): Promise<LLMResponse> {
@@ -47,7 +97,7 @@ export async function runModel(req: LLMRequest): Promise<LLMResponse> {
  */
 async function runOllama(req: LLMRequest, retries: number = 0): Promise<LLMResponse> {
   const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-  const model = req.model || process.env.OLLAMA_MODEL || 'llama3.2:3b';
+  const model = req.model || process.env.OLLAMA_MODEL || 'llama3.2:3b-instruct-q4_K_M';
   const maxRetries = 3;
   const baseDelay = 1000; // 1 second
   

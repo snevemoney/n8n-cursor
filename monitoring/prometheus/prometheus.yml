@@ -56,3 +56,11 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 15s
     honor_labels: true
+
+  # Scorpion metrics
+  - job_name: 'scorpion'
+    static_configs:
+      - targets: ['localhost:3003']
+    metrics_path: '/api/metrics'
+    scrape_interval: 15s
+    honor_labels: true

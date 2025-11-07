@@ -1,0 +1,1963 @@
+{
+  "createdAt": "2025-09-16T21:28:03.748Z",
+  "updatedAt": "2025-10-28T22:23:33.000Z",
+  "id": "f9iC7hLKkB5XNLp0",
+  "name": "Chat with Google Drive Documents using GPT, Pinecone, and RAG",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "gpt-4o-2024-08-06",
+        "options": {}
+      },
+      "id": "b30ce82d-44b4-46d7-810c-eb64257b4327",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        3056,
+        1184
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=docs-{{ $json.sessionId }}"
+      },
+      "id": "18f18c72-0066-4803-8128-5d7d143d2c85",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        3200,
+        1184
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {
+          "dimensions": 1024
+        }
+      },
+      "id": "2b385fec-c2f9-43a9-bb28-e42b38346c44",
+      "name": "Embeddings OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        2688,
+        1408
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5431b1f1-1c98-4073-a15e-f46bc04a9481",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        2496,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 2000,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "id": "f4ffd33e-8a9b-4f5a-b4a9-ec286b13ce68",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        2384,
+        1248
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 2. Create a Vector Store\n[Read more about the In-Memory Vector Store](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.vectorstoreinmemory/)",
+        "height": 731.1875,
+        "width": 614.6875,
+        "color": 7
+      },
+      "id": "918aa3af-19fa-48d3-8669-3dc841a9ba0b",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1472,
+        848
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 4. AI Agent Responds\n[Learn more about using AI Agents](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.agent/)\n\nn8n's AI agents are powerful nodes which make it incredibly easy to use state-of-the-art AI in your workflows. Not only do they have the ability to remember conversations per individual customer but also tap into resources such as our product catalogue vector store to pull factual information and data for every question.",
+        "height": 929.1875,
+        "width": 746.6875,
+        "color": 7
+      },
+      "id": "95668d63-a834-47a2-82f3-3039d2cb9d84",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2368,
+        864
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "id": "20a21f7b-e05e-4300-853e-7c1efbb6dfc7",
+      "name": "Download File From Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1072,
+        1072
+      ],
+      "typeVersion": 3,
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "notesInFlow": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1dh_sPGCcAM47WTzz73RVJOkO6894O-dp",
+          "mode": "list",
+          "cachedResultName": "nurse study",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1dh_sPGCcAM47WTzz73RVJOkO6894O-dp"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "id": "c81c5d09-a9d2-41b1-a0a6-d00eb1a7b58a",
+      "name": "Google Drive File Updated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        848,
+        1280
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1dh_sPGCcAM47WTzz73RVJOkO6894O-dp",
+          "mode": "list",
+          "cachedResultName": "nurse study",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1dh_sPGCcAM47WTzz73RVJOkO6894O-dp"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "186f3de8-cdb9-4190-91ec-aceba939a70c",
+      "name": "Google Drive File Created",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        1488,
+        960
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Add documents to vector store when updating or creating new documents in Google Drive",
+        "width": 320
+      },
+      "id": "91e7cd3d-e35b-4483-b092-0350873fdb7c",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 1. Build Databse\n[Read more about the HTTP Request Tool](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest)\n\nImport your marketing PDF document to build your vector store. This will be used as the knowledgebase by the AI Agent.",
+        "height": 655,
+        "width": 640,
+        "color": 7
+      },
+      "id": "bcda0f55-7251-48b0-b3ed-b2739b151dbe",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        736,
+        864
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "id": "d74cef89-3f35-4a1e-b0db-fcced3f11227",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        2992,
+        992
+      ],
+      "webhookId": "7d2ecd50-140d-4b7d-a07b-42300ce295b0",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "julianna",
+          "mode": "list",
+          "cachedResultName": "julianna"
+        },
+        "options": {}
+      },
+      "id": "d1ecb940-335c-40c9-9880-d899b50aaa1b",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        1792,
+        992
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "zhIbmdAm5wPAWE9h",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "0AGMjmhIM2B3eUk9PVA",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/0AGMjmhIM2B3eUk9PVA",
+          "cachedResultName": "Shape Labs"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1WlejjfGrijAhMsJ2zWUa-2OZsiXIj4Bu",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1WlejjfGrijAhMsJ2zWUa-2OZsiXIj4Bu",
+          "cachedResultName": "4. Personal Helper"
+        },
+        "options": {}
+      },
+      "id": "0efaa10f-2908-41a6-aeda-cd54c168f4ba",
+      "name": "Download File From Google Drive1",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1136,
+        1312
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a university nurse study AI assistant agent. Your role is to help me make decisions and answer study-related questions based strictly on my internal information PDFs and course materials. Your goal is not to facilitate or explain outside concepts but to provide clear, factual answers drawn only from the documents available. Always respond in short, human-like messages written in one paragraph of 100–200 words. Do your best to answer any questions factually, citing or referring to the material when relevant. If the answer cannot be obtained from the datastore or you are unsure, say so clearly rather than guessing. "
+        }
+      },
+      "id": "f2a080c7-5fbe-4426-b7d7-226934e76f3f",
+      "name": "AI nurse study Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        3280,
+        992
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "jsCode": "// Keep only what the next node needs and guard for PDFs\nconst items = $input.all();\nreturn items.map(i => {\n  const j = i.json || {};\n  return {\n    json: {\n      id: j.id,                    // used by Download node: {{$json.id}}\n      name: j.name || 'document.pdf',\n      mimeType: j.mimeType\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        1024
+      ],
+      "id": "9d78834a-4a97-457e-b6af-22bf612c961d",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "url": "https://api.pinecone.io/indexes/quickstart",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1616,
+        1152
+      ],
+      "id": "3e4f440d-933d-4f6a-ad14-28bebd65c215",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TLwqruguExLWYFkF",
+          "name": "Pinecone"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        3808,
+        1424
+      ],
+      "id": "c26c7549-6868-491e-bdef-3e25e321438a",
+      "name": "Reranker Cohere1",
+      "credentials": {
+        "cohereApi": {
+          "id": "GJtKKEhDRjArtKOI",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to find information on the PDFs that are asked. ",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "julianna",
+          "mode": "list",
+          "cachedResultName": "julianna"
+        },
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        3712,
+        1264
+      ],
+      "id": "751fb6fd-a5d7-4767-ba16-45fd5d157943",
+      "name": "Pinecone Vector Store2",
+      "credentials": {
+        "pineconeApi": {
+          "id": "zhIbmdAm5wPAWE9h",
+          "name": "PineconeApi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI nurse study Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI nurse study Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive File Created": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive File Updated": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI nurse study Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File From Google Drive": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI nurse study Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Download File From Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "Reranker Cohere1": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI nurse study Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": {
+    "node:Google Drive File Updated": {
+      "lastTimeChecked": "2025-10-21T02:42:13Z"
+    },
+    "node:Google Drive File Created": {
+      "lastTimeChecked": "2025-10-21T02:42:13Z"
+    }
+  },
+  "meta": {
+    "templateId": "7979",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Google Drive File Created": [
+      {
+        "json": {
+          "parents": [
+            "1dh_sPGCcAM47WTzz73RVJOkO6894O-dp"
+          ],
+          "lastModifyingUser": {
+            "displayName": "Evens Louis",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "09373460172711036547",
+            "emailAddress": "snevemoney12@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Evens Louis",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "09373460172711036547",
+              "emailAddress": "snevemoney12@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "09373460172711036547",
+              "type": "user",
+              "emailAddress": "snevemoney12@gmail.com",
+              "role": "owner",
+              "displayName": "Evens Louis",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "09373460172711036547"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "1YXDEcobDAfSlXEKLM2X8StQYLiXyC5LE",
+          "name": "Soins Critiques 2e édition .pdf",
+          "mimeType": "application/pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "1",
+          "webContentLink": "https://drive.google.com/uc?id=1YXDEcobDAfSlXEKLM2X8StQYLiXyC5LE&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1YXDEcobDAfSlXEKLM2X8StQYLiXyC5LE/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "hasThumbnail": false,
+          "thumbnailVersion": "0",
+          "viewedByMe": true,
+          "viewedByMeTime": "2025-09-16T21:52:33.668Z",
+          "createdTime": "2025-09-16T21:52:33.668Z",
+          "modifiedTime": "2025-09-16T21:06:37.000Z",
+          "modifiedByMeTime": "2025-09-16T21:06:37.000Z",
+          "modifiedByMe": true,
+          "shared": false,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "originalFilename": "Soins Critiques 2e édition .pdf",
+          "fullFileExtension": "pdf",
+          "fileExtension": "pdf",
+          "md5Checksum": "8f23bb1dca236a78852c918de3370610",
+          "sha1Checksum": "8c8dc95bb365c785dc862d5c9b10dd5fe1e3db94",
+          "sha256Checksum": "5832066cb64b666b0c6eefcd9fd4bff525310a5aaec5a47793e58268fd3f56d6",
+          "size": "584989165",
+          "quotaBytesUsed": "584989165",
+          "headRevisionId": "0B_s12k7sL1J0ZmRiTlpkcmVqS004UDhRNnlyMjF0Z2NGcVFFPQ",
+          "isAppAuthorized": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ],
+    "Pinecone Vector Store": [
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 1,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "1dh_sPGCcAM47WTzz73RVJOkO6894O-dp"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 2,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 3,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 4,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 5,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 6,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 7,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 8,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 9,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 10,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 11,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 12,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#permission"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 13,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 14,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 15,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 16,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "owner"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 17,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 18,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 19,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 20,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 21,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#file"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 22,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "1YXDEcobDAfSlXEKLM2X8StQYLiXyC5LE"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 23,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Soins Critiques 2e édition .pdf"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 24,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "application/pdf"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 25,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "1"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 26,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://drive.google.com/uc?id=1YXDEcobDAfSlXEKLM2X8StQYLiXyC5LE&export=download"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 27,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://drive.google.com/file/d/1YXDEcobDAfSlXEKLM2X8StQYLiXyC5LE/view?usp=drivesdk"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 28,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 29,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "0"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 30,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "2025-09-16T21:52:33.668Z"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 31,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "2025-09-16T21:52:33.668Z"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 32,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "2025-09-16T21:06:37.000Z"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 33,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "2025-09-16T21:06:37.000Z"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 34,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Soins Critiques 2e édition .pdf"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 35,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "pdf"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 36,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "pdf"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 37,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "8f23bb1dca236a78852c918de3370610"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 38,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "8c8dc95bb365c785dc862d5c9b10dd5fe1e3db94"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 39,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "5832066cb64b666b0c6eefcd9fd4bff525310a5aaec5a47793e58268fd3f56d6"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 40,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "584989165"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 41,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "584989165"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 42,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "0B_s12k7sL1J0ZmRiTlpkcmVqS004UDhRNnlyMjF0Z2NGcVFFPQ"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 43,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "1dh_sPGCcAM47WTzz73RVJOkO6894O-dp"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 44,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 45,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 46,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 47,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 48,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 49,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 50,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 51,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 52,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 53,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 54,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 55,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 56,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 57,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 58,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 59,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#permission"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 60,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 61,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 62,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 63,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "owner"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 64,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 65,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 66,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive#permission"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 67,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 68,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "user"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 69,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "snevemoney12@gmail.com"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 70,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "owner"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 71,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "Evens Louis"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 72,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 73,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "drive"
+        }
+      },
+      {
+        "json": {
+          "metadata": {
+            "source": "blob",
+            "blobType": "application/json",
+            "line": 74,
+            "loc": {
+              "lines": {
+                "from": 1,
+                "to": 1
+              }
+            }
+          },
+          "pageContent": "09373460172711036547"
+        }
+      }
+    ]
+  },
+  "versionId": "4743841e-a001-44a2-9123-024ae56cbe9b",
+  "triggerCount": 3,
+  "shared": [
+    {
+      "createdAt": "2025-09-16T21:28:03.776Z",
+      "updatedAt": "2025-09-16T21:28:03.776Z",
+      "role": "workflow:owner",
+      "workflowId": "f9iC7hLKkB5XNLp0",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

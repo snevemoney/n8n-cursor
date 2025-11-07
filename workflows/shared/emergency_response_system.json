@@ -1,0 +1,383 @@
+{
+  "createdAt": "2025-10-27T05:46:01.825Z",
+  "updatedAt": "2025-10-29T02:26:38.000Z",
+  "id": "tITd7lRSoVosLXfB",
+  "name": "Emergency Response System",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/emergency",
+        "options": {}
+      },
+      "id": "fb334fe5-db37-4a4c-95d1-8113c7c9b443",
+      "name": "Emergency Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        496
+      ],
+      "webhookId": "bf128cc0-342a-4ea8-8564-e5a03d9e136e"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different emergency operations\nconst emergencyType = $input.item.json.body?.type || 'incident';\n\nreturn {\n  json: {\n    emergencyType,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "4d78155d-14fa-4681-97ac-ad4a4304dd94",
+      "name": "Route Emergency Type",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "incident-condition",
+              "leftValue": "={{ $json.emergencyType }}",
+              "rightValue": "incident",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "escalate-condition",
+              "leftValue": "={{ $json.emergencyType }}",
+              "rightValue": "escalate",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "restore-condition",
+              "leftValue": "={{ $json.emergencyType }}",
+              "rightValue": "restore",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "report-condition",
+              "leftValue": "={{ $json.emergencyType }}",
+              "rightValue": "report",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "4d9c1661-14c2-4e93-83ec-824ed0e60887",
+      "name": "Route by Emergency Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Detect and log incident\n// Generate a UUID using available methods\nfunction generateUUID() {\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {\n    const r = Math.random() * 16 | 0;\n    const v = c == 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  });\n}\n\nconst incident = {\n  id: generateUUID(),\n  type: $json.emergencyType || $json.data?.type || 'emergency',\n  severity: $json.severity || $json.data?.severity || 'medium',\n  detectedAt: new Date().toISOString(),\n  affectedServices: $json.affectedServices || $json.data?.affectedServices || [],\n  description: $json.description || $json.data?.description || 'Emergency incident detected'\n};\n\nreturn {\n  json: {\n    incident,\n    status: 'detected',\n    timestamp: new Date().toISOString()\n  }\n};\n\nreturn {\n  json: {\n    incident,\n    requiresEscalation: incident.severity === 'critical' || incident.severity === 'high'\n  }\n};"
+      },
+      "id": "b3cf1f2f-1802-418c-bc5a-4b6d642d9ed4",
+      "name": "Detect Incident",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO incidents (tenant_id, incident_type, severity, title, description, reported_by, reported_at, status)\nVALUES (\n  'test-tenant-webhook-validation',  -- Hardcoded for testing\n  'emergency',\n  'high',\n  'Emergency Incident',\n  'Emergency escalation',\n  'system',\n  NOW(),\n  'open'\n) RETURNING *;",
+        "options": {}
+      },
+      "id": "7d36bd3a-227d-41eb-a406-6e5699a13cec",
+      "name": "Escalate Incident",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        464,
+        432
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Restore service\nconst restoration = {\n  action: 'restore',\n  service: $json.data.serviceName,\n  method: 'auto',\n  fallback: true,\n  rollback: false\n};\n\nreturn {\n  json: {\n    restoration,\n    status: 'in-progress',\n    estimatedTime: '5-15 minutes'\n  }\n};"
+      },
+      "id": "e67f8936-9218-46a1-a718-a6ee3899487d",
+      "name": "Restore Service",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  incident_id,\n  type,\n  severity,\n  description,\n  status,\n  created_at,\n  resolved_at\nFROM incidents\nWHERE tenant_id = $1\nORDER BY created_at DESC\nLIMIT 10;",
+        "options": {}
+      },
+      "id": "a6a9ae04-96a5-4e2a-b38a-de62d3553568",
+      "name": "Generate Incident Report",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        240,
+        880
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json, \"timestamp\": new Date().toISOString() } }}",
+        "options": {}
+      },
+      "id": "7249d46d-0995-4ed1-b43c-3c1c4761642b",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        832,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3dd65ec4-77be-48d0-bb9f-87016a4cfbcc",
+              "name": "tenantId",
+              "value": "={{ $('Emergency Entry Point').item.json.headers[\"x-tenant-id\"] || $json.body?.headers?.[\"x-tenant-id\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        432
+      ],
+      "id": "2a11635d-659c-4add-9d2a-716225cec6b4",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "Emergency Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Route Emergency Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Emergency Type": {
+      "main": [
+        [
+          {
+            "node": "Route by Emergency Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Emergency Type": {
+      "main": [
+        [
+          {
+            "node": "Detect Incident",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Restore Service",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Incident Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Incident": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalate Incident": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Service": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Incident Report": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Escalate Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "c5eac5c4-cc74-4f31-b280-fa3ae318af5c",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T05:46:01.838Z",
+      "updatedAt": "2025-10-27T05:46:01.838Z",
+      "role": "workflow:owner",
+      "workflowId": "tITd7lRSoVosLXfB",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T05:45:58.700Z",
+      "updatedAt": "2025-10-27T05:45:58.700Z",
+      "id": "A3KFsCVddp0jFxBH",
+      "name": "Emergency"
+    }
+  ]
+}

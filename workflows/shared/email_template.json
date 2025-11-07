@@ -1,0 +1,509 @@
+{
+  "createdAt": "2025-10-16T01:24:48.123Z",
+  "updatedAt": "2025-10-16T01:25:10.000Z",
+  "id": "wqDHBGep7EM0h5v2",
+  "name": "Email template",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://api.quotable.io/random?tags={{ $json.Category }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "a5ed40cd-bcf1-4f27-b3ee-c778c46fc368",
+      "name": "Fetch Quote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -448,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.content }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "91a53c98-aa21-475f-9bfd-4c03b349f5a4",
+      "name": "Quote Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "quote",
+              "value": "={{ $json.content }}"
+            },
+            {
+              "name": "author",
+              "value": "={{ $json.author }}"
+            },
+            {
+              "name": "category",
+              "value": "={{ $('Get row(s) in sheet').item.json.Category }}"
+            },
+            {
+              "name": "date",
+              "value": "={{ new Date().toDateString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "afe4461a-c384-4a01-bb88-cfc93f1e996b",
+      "name": "Process Quote",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "quote",
+              "value": "The only way to do great work is to love what you do."
+            },
+            {
+              "name": "author",
+              "value": "Steve Jobs"
+            },
+            {
+              "name": "category",
+              "value": "motivational"
+            },
+            {
+              "name": "date",
+              "value": "={{ new Date().toDateString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2bc75402-4846-4a19-8617-0eb0cea36997",
+      "name": "Fallback Quote",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "emailHTML",
+              "value": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Daily Quote</title>\n    <style>\n        body {\n            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n            line-height: 1.6;\n            margin: 0;\n            padding: 0;\n            background-color: #f4f4f4;\n        }\n        .container {\n            max-width: 600px;\n            margin: 20px auto;\n            background: white;\n            border-radius: 10px;\n            overflow: hidden;\n            box-shadow: 0 0 20px rgba(0,0,0,0.1);\n        }\n        .header {\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 30px;\n            text-align: center;\n        }\n        .header h1 {\n            margin: 0;\n            font-size: 28px;\n        }\n        .date {\n            opacity: 0.9;\n            font-size: 16px;\n            margin-top: 5px;\n        }\n        .quote-section {\n            padding: 40px 30px;\n            text-align: center;\n        }\n        .quote-text {\n            font-size: 24px;\n            font-style: italic;\n            color: #333;\n            margin-bottom: 20px;\n            line-height: 1.4;\n        }\n        .quote-author {\n            font-size: 18px;\n            color: #666;\n            margin-bottom: 20px;\n        }\n        .category-tag {\n            display: inline-block;\n            background: linear-gradient(45deg, #667eea, #764ba2);\n            color: white;\n            padding: 8px 20px;\n            border-radius: 25px;\n            font-size: 14px;\n            font-weight: 500;\n            text-transform: capitalize;\n        }\n        .footer {\n            background: #f8f9fa;\n            padding: 20px;\n            text-align: center;\n            color: #666;\n            font-size: 14px;\n        }\n        .motivational-icon {\n            font-size: 48px;\n            margin-bottom: 20px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>Daily Inspiration</h1>\n            <div class=\"date\">{{ $json.date }}</div>\n        </div>\n        \n        <div class=\"quote-section\">\n            <div class=\"motivational-icon\">✨</div>\n            <div class=\"quote-text\">\"{{ $json.quote }}\"</div>\n            <div class=\"quote-author\">— {{ $json.author }}</div>\n            <div class=\"category-tag\">{{ $json.category }}</div>\n        </div>\n        \n        <div class=\"footer\">\n            <p>Have a wonderful day ahead! 🌟</p>\n            <small>This is your daily dose of inspiration.</small>\n        </div>\n    </div>\n</body>\n</html>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "da9bac9c-8dc9-4908-83c5-ec70552b8c5e",
+      "name": "Create Email Template",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -672,
+        176
+      ],
+      "id": "0a21fba4-ef54-47a9-809f-c7dbf1daf3e3",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        176
+      ],
+      "id": "bd8126eb-aab6-4556-9597-3a00b1988394",
+      "name": "Wait",
+      "webhookId": "59d0e464-9eef-4147-9d07-e283193ed822"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Ek76IlH44zMAugzralOndPpUaTS6-GP6CjQ9HiCc9f8",
+          "mode": "list",
+          "cachedResultName": "Lead sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ek76IlH44zMAugzralOndPpUaTS6-GP6CjQ9HiCc9f8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ek76IlH44zMAugzralOndPpUaTS6-GP6CjQ9HiCc9f8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -896,
+        176
+      ],
+      "id": "5fc1a755-faae-4634-b1ff-80056ed5d3dd",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
+        "subject": "=Daily Quote - {{ $json.date }}",
+        "message": "={{ $json.emailHTML }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "RIshab"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        96
+      ],
+      "id": "2a495c13-1301-4f88-8ed8-99a88b66f096",
+      "name": "Send a message",
+      "webhookId": "3fbf6bf1-efca-44a5-8ed0-8e0fb1d4143f"
+    },
+    {
+      "parameters": {
+        "path": "3ee0c405-c707-4b4c-84fc-7de789727d04",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1568,
+        176
+      ],
+      "id": "8748eb75-acb9-4ce6-b50f-74f494c67801",
+      "name": "Webhook",
+      "webhookId": "3ee0c405-c707-4b4c-84fc-7de789727d04"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Ek76IlH44zMAugzralOndPpUaTS6-GP6CjQ9HiCc9f8",
+          "mode": "list",
+          "cachedResultName": "Lead sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ek76IlH44zMAugzralOndPpUaTS6-GP6CjQ9HiCc9f8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ek76IlH44zMAugzralOndPpUaTS6-GP6CjQ9HiCc9f8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.query.email }}",
+            "Category": "={{ $json.query.category }}",
+            "Name": "={{ $json.query.name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1344,
+        176
+      ],
+      "id": "36df74d2-bf40-4564-bdec-9eb499f787ea",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -1120,
+        176
+      ],
+      "id": "a8314c70-9157-40f3-a9bd-8717731b5a8a",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Fetch Quote": {
+      "main": [
+        [
+          {
+            "node": "Quote Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quote Exists?": {
+      "main": [
+        [
+          {
+            "node": "Process Quote",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Quote": {
+      "main": [
+        [
+          {
+            "node": "Create Email Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Quote": {
+      "main": [
+        [
+          {
+            "node": "Create Email Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Template": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "e9b34aff-72ce-4be8-82da-ab2f11b0edb2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T01:24:48.126Z",
+      "updatedAt": "2025-10-16T01:24:48.126Z",
+      "role": "workflow:owner",
+      "workflowId": "wqDHBGep7EM0h5v2",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

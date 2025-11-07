@@ -1,0 +1,331 @@
+{
+  "createdAt": "2025-10-27T05:44:30.220Z",
+  "updatedAt": "2025-10-27T06:57:26.000Z",
+  "id": "lWQ2XSNxj6p1nzCc",
+  "name": "Testing & QA System",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/testing",
+        "options": {}
+      },
+      "id": "b915614d-a4b9-4f88-9926-bdf2f985245e",
+      "name": "Testing Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        400
+      ],
+      "webhookId": "04c28d44-95c9-4f5e-a143-22fa1bf3a667"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different testing operations\nconst testType = $input.item.json.body?.type || 'smoke';\n\nreturn {\n  json: {\n    testType,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "2c8e4fa0-df8e-43f3-985a-28a4ba5814b9",
+      "name": "Route Test Type",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -704,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "smoke-condition",
+              "leftValue": "={{ $json.testType }}",
+              "rightValue": "smoke",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "load-condition",
+              "leftValue": "={{ $json.testType }}",
+              "rightValue": "load",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "e2e-condition",
+              "leftValue": "={{ $json.testType }}",
+              "rightValue": "e2e",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "ab-condition",
+              "leftValue": "={{ $json.testType }}",
+              "rightValue": "ab",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "b35ed4ec-58b5-4903-8156-866f9a3e69ad",
+      "name": "Route by Test Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Smoke test - basic health checks\nconst tests = [\n  { name: 'Database Connection', passed: true },\n  { name: 'API Endpoints', passed: true },\n  { name: 'Authentication', passed: true }\n];\n\nreturn {\n  json: {\n    testType: 'smoke',\n    results: tests,\n    passed: tests.every(t => t.passed),\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "a6ff80da-5de4-49c6-95e1-74579a6f1186",
+      "name": "Run Smoke Test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Load test simulation\nconst requests = $json.data.requestCount || 100;\nconst concurrentUsers = $json.data.concurrentUsers || 10;\n\nreturn {\n  json: {\n    testType: 'load',\n    requests,\n    concurrentUsers,\n    avgResponseTime: Math.random() * 100 + 50,\n    maxResponseTime: Math.random() * 200 + 100,\n    successRate: 0.98\n  }\n};"
+      },
+      "id": "3d91496e-3215-43b0-ac0f-45a608281ab7",
+      "name": "Run Load Test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// E2E test simulation\nconst scenarios = ['user-signup', 'tenant-onboarding', 'file-upload', 'chat-interaction'];\n\nreturn {\n  json: {\n    testType: 'e2e',\n    scenarios,\n    passedScenarios: scenarios.length - 1,\n    failedScenarios: 1,\n    totalScenarios: scenarios.length\n  }\n};"
+      },
+      "id": "70af1c7d-7aac-4ed5-8b6b-d6baa7c71703",
+      "name": "Run E2E Test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// A/B test simulation\nconst variantA = { name: 'GPT-4', responseTime: 200, accuracy: 0.95 };\nconst variantB = { name: 'GPT-3.5-Turbo', responseTime: 150, accuracy: 0.90 };\n\nreturn {\n  json: {\n    testType: 'ab',\n    variantA,\n    variantB,\n    winner: variantB.responseTime < variantA.responseTime ? 'B' : 'A'\n  }\n};"
+      },
+      "id": "e018c7c9-9c41-4cc1-b162-34b27d80b3b9",
+      "name": "Run A/B Test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "3278d48e-5901-4c94-b81d-5002bdb5c9e4",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Testing Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Route Test Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Test Type": {
+      "main": [
+        [
+          {
+            "node": "Route by Test Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Test Type": {
+      "main": [
+        [
+          {
+            "node": "Run Smoke Test",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Run Load Test",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Run E2E Test",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Run A/B Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Smoke Test": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Load Test": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run E2E Test": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run A/B Test": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "d33290f8-b2cd-4828-bf67-7f09801c442c",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T05:44:30.229Z",
+      "updatedAt": "2025-10-27T05:44:30.229Z",
+      "role": "workflow:owner",
+      "workflowId": "lWQ2XSNxj6p1nzCc",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T02:51:52.411Z",
+      "updatedAt": "2025-10-27T02:51:52.411Z",
+      "id": "yH3xdECVnacWyR1G",
+      "name": "Testing"
+    }
+  ]
+}

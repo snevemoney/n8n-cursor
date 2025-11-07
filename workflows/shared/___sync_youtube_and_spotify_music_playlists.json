@@ -1,0 +1,412 @@
+{
+  "createdAt": "2025-10-14T22:57:11.497Z",
+  "updatedAt": "2025-10-14T23:03:02.000Z",
+  "id": "D9Nm29w8emwao0Io",
+  "name": "🎵 Sync YouTube and Spotify Music Playlists",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Playlist avant ajout",
+              "field2": "Nouvelle pistes"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ab8e653f-a60c-497c-b732-6dea355aa985",
+      "name": "Compare the two Datasets",
+      "type": "n8n-nodes-base.compareDatasets",
+      "position": [
+        1920,
+        448
+      ],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dd3db6c8-ecf5-4595-ac4b-559965b6e507",
+              "name": "Playlist avant ajout",
+              "type": "string",
+              "value": "={{ $json.track.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "606aa397-efd6-4f6b-bfa6-946523ed80f2",
+      "name": "Extract the spotify track ID",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1600,
+        368
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9593caf-e403-4626-a96f-499e9f78465e",
+              "name": "Nouvelle pistes",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75e48bf0-5003-4904-b8c7-0cca005bacd7",
+      "name": "Extract the Spotify Track ID",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1600,
+        544
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "track",
+        "operation": "search",
+        "query": "={{ $json.snippet.title }}",
+        "limit": "={{ 1 }}",
+        "filters": {}
+      },
+      "id": "c536f1fb-cfbe-4a22-8f8f-37422629cc2b",
+      "name": "Find the returned tracks on Spotify",
+      "type": "n8n-nodes-base.spotify",
+      "position": [
+        1600,
+        720
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "spotifyOAuth2Api": {
+          "id": "0Ai75Os6otoMprBK",
+          "name": "Spotify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "playlistItem",
+        "operation": "getAll",
+        "playlistId": "=PL552450E1514256AB",
+        "part": [
+          "snippet"
+        ],
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "6be6eb69-0e90-46d8-9e74-92372c9ed5b8",
+      "name": "Get my tracks inside my playlist",
+      "type": "n8n-nodes-base.youTube",
+      "position": [
+        1168,
+        560
+      ],
+      "executeOnce": true,
+      "typeVersion": 1,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "G5yTF50eqhxXgmup",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "8a2d297f-748c-4e59-a935-fecc944060aa",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1376,
+        560
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {},
+      "id": "677e635b-8ae6-48b4-8687-0615a044739c",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        928,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Workflow Overview\n\nThis workflow automates the process of updating a Spotify playlist with tracks from a YouTube playlist, ensuring no duplicates are added.\n\n## Key Components\n\n1. **Manual Trigger**: Starts the workflow when you click ‘Test workflow’.\n   \n2. **Spotify Integration**: Retrieves tracks from a specified Spotify playlist.\n\n3. **YouTube Integration**: Fetches tracks from a designated YouTube playlist.\n\n4. **Batch Processing**: Processes tracks in batches to handle multiple items efficiently.\n\n5. **Track Search**: Searches for YouTube tracks on Spotify to find corresponding IDs.\n\n6. **Comparison**: Compares existing Spotify tracks with YouTube tracks to identify which ones to add.\n\n7. **Track Addition**: Adds new Spotify tracks to the playlist that are not already included.\n\nIf you have any questions or need clarification, feel free to ask!\n",
+        "height": 847,
+        "width": 518
+      },
+      "id": "d7e52845-2279-40a5-82d3-5a923ead191c",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Retrieve the playlists you want to synchronise ",
+        "height": 468.0906115664312,
+        "width": 251.65748259981103,
+        "color": 5
+      },
+      "id": "cd92585a-6c56-4a35-8714-96d2c73444bd",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "playlist",
+        "operation": "getTracks",
+        "id": "5SY22gVudzaD31v5rq5jcH",
+        "returnAll": true
+      },
+      "id": "a0ec1b4c-2422-4daa-92d6-4c84a1cecbf6",
+      "name": "Get tracks inside the Spotify Playlist",
+      "type": "n8n-nodes-base.spotify",
+      "position": [
+        1168,
+        368
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "spotifyOAuth2Api": {
+          "id": "0Ai75Os6otoMprBK",
+          "name": "Spotify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Search for the tracks on spotify one-by-one",
+        "height": 80,
+        "width": 414.86223899716344,
+        "color": 6
+      },
+      "id": "accba86b-6786-412e-8e87-17be458f6255",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1328,
+        912
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "playlist",
+        "id": "spotify:playlist:5SY22gVudzaD31v5rq5jcH",
+        "trackID": "=spotify:track:{{ $json['Nouvelle pistes'] }}",
+        "additionalFields": {}
+      },
+      "id": "062e4341-bb5c-4302-85f6-dedb03481e64",
+      "name": "Add tracks not already in playlist",
+      "type": "n8n-nodes-base.spotify",
+      "position": [
+        2128,
+        592
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "spotifyOAuth2Api": {
+          "id": "0Ai75Os6otoMprBK",
+          "name": "Spotify account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Extract the Spotify Track ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find the returned tracks on Spotify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare the two Datasets": {
+      "main": [
+        null,
+        null,
+        null,
+        [
+          {
+            "node": "Add tracks not already in playlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract the Spotify Track ID": {
+      "main": [
+        [
+          {
+            "node": "Compare the two Datasets",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Extract the spotify track ID": {
+      "main": [
+        [
+          {
+            "node": "Compare the two Datasets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get my tracks inside my playlist": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get my tracks inside my playlist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get tracks inside the Spotify Playlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find the returned tracks on Spotify": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get tracks inside the Spotify Playlist": {
+      "main": [
+        [
+          {
+            "node": "Extract the spotify track ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": {
+    "templateId": "2518"
+  },
+  "pinData": {},
+  "versionId": "29903c1f-68c1-4ab9-8e51-8b2a69fcd770",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-14T22:57:11.502Z",
+      "updatedAt": "2025-10-14T22:57:11.502Z",
+      "role": "workflow:owner",
+      "workflowId": "D9Nm29w8emwao0Io",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -6,4 +6,6 @@ export * from './context';
 export * from './council';
 export * from './ontology';
 export * from './storage/persistent-store';
+export * from './agents';
+export * from './utils/error-handler';
 

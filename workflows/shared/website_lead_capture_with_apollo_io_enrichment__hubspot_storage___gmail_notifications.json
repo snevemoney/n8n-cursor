@@ -1,0 +1,295 @@
+{
+  "createdAt": "2025-10-15T01:22:39.268Z",
+  "updatedAt": "2025-10-15T01:42:27.000Z",
+  "id": "mb6HfALiB1QVLasT",
+  "name": "Website Lead Capture with Apollo.io Enrichment, HubSpot Storage & Gmail Notifications",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-intake",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "3496a319-7020-4326-9696-1cc61c304fd5",
+      "name": "Webhook - Collect Lead",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        368,
+        240
+      ],
+      "webhookId": "lead-intake-id",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook - Collect Lead').item.json.body.email }}",
+        "subject": "Thanks for Getting in touch!",
+        "emailType": "text",
+        "message": "=Thank You for Reaching Out!\n\nDear {{ $json.body.name }}\n\nI hope this message finds you well. Thank you for reaching out to us at InfyOm Technologies. Your interest and support mean a lot to us.\n\nWe have received your request and our team will soon get back to you.\n\nThanks,\nInfyOm Sales Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "2d67475d-c742-4e00-8a70-2047342f43fc",
+      "name": "Gmail - Send Thank You",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        640,
+        64
+      ],
+      "webhookId": "c6ed3568-2220-4961-8911-59a199571df8",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YquaU61NUzoqwdTs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $('Webhook - Collect Lead').item.json.body.email }}",
+        "additionalFields": {
+          "city": "={{ $json.contacts[0].city }}",
+          "companyName": "={{ $json.contacts[0].organization_name }}",
+          "country": "={{ $json.contacts[0].country }}",
+          "firstName": "={{ $('Webhook - Collect Lead').item.json.body.first_name }}",
+          "jobTitle": "={{ $json.contacts[0].title }}",
+          "message": "=Person LinkedIn: {{ $json.contacts[0].linkedin_url }}\nCompany Phone: {{ $json.contacts[0].account.primary_phone.number }}\nCompany LinkedIn: {{ $json.contacts[0].account.linkedin_url }}\n\n",
+          "twitterUsername": "={{ $json.contacts[0].twitter_url }}",
+          "websiteUrl": "={{ $json.contacts[0].account.website_url }}"
+        },
+        "options": {}
+      },
+      "id": "ea3642bb-fc87-4737-9feb-a0b4de50e44f",
+      "name": "HubSpot - Create Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        848,
+        240
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "Xhfnb8tFMLRkfx3B",
+          "name": "HubSpot App Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "snevemoney12@gmail.com",
+        "subject": "New Lead Notification",
+        "emailType": "text",
+        "message": "=A new form has been submitted on the website. \n\nName : {{ $json.body.name }}\nEmail : {{ $json.body.email }}\n\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "260877fc-f0bf-4f09-a722-aafbdbacff61",
+      "name": "Gmail - Notify Team",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        640,
+        432
+      ],
+      "webhookId": "bb1666fd-e9d3-48e0-9224-cd038efb945f",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YquaU61NUzoqwdTs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/contacts/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q_keywords",
+              "value": "={{ $json.body.email }}"
+            },
+            {
+              "name": "sort_ascending",
+              "value": "false"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "fZ4Qt4kcxxQUmGQnH6y8JQ"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "257d6356-5fca-4440-800f-33acc1c6fdd6",
+      "name": "Enrich Data from Apollo",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        640,
+        240
+      ],
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "Webhook - Collect Lead": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send Thank You",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail - Notify Team",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enrich Data from Apollo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Data from Apollo": {
+      "main": [
+        [
+          {
+            "node": "HubSpot - Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": {
+    "templateId": "4618"
+  },
+  "pinData": {
+    "Webhook - Collect Lead": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8ncloud.tech",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+            "content-length": "105",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "fr,en;q=0.9,ja;q=0.8",
+            "content-type": "application/json",
+            "dnt": "1",
+            "origin": "https://e3d9eeba-76d1-4f56-986f-7eda7ac593b6.lovableproject.com",
+            "priority": "u=1, i",
+            "referer": "https://e3d9eeba-76d1-4f56-986f-7eda7ac593b6.lovableproject.com/",
+            "sec-ch-ua": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "107.159.52.42",
+            "x-forwarded-host": "n8ncloud.tech",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "name": "evens",
+            "email": "sneve1@hotmail.com",
+            "phone": "4384019991",
+            "company": "snevemoney",
+            "message": "n8n"
+          },
+          "webhookUrl": "https://n8ncloud.tech/webhook/lead-intake",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "bb105335-8529-4bd2-aa1e-c1ea26382113",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-15T01:22:39.272Z",
+      "updatedAt": "2025-10-15T01:22:39.272Z",
+      "role": "workflow:owner",
+      "workflowId": "mb6HfALiB1QVLasT",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

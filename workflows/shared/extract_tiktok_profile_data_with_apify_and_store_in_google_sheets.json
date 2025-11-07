@@ -1,0 +1,405 @@
+{
+  "createdAt": "2025-09-14T18:28:22.197Z",
+  "updatedAt": "2025-10-16T03:54:21.000Z",
+  "id": "LbFaMgVudjlwiSaf",
+  "name": "Extract Tiktok Profile Data with Apify and Store in Google Sheets",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "tik tok profile scraper",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "profile",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -560,
+        112
+      ],
+      "id": "56108e3a-77b8-4edc-af69-8b62f99340f6",
+      "name": "On form submission",
+      "webhookId": "2b3bc611-ba7f-4fcc-9821-a97cd7d1ea4e"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1sOoavCvrf0fqJ69JGcPEbepob7zEMSDz581fJ7ZS0DM",
+          "mode": "list",
+          "cachedResultName": "Scraped_Influencer_Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sOoavCvrf0fqJ69JGcPEbepob7zEMSDz581fJ7ZS0DM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1248178974,
+          "mode": "list",
+          "cachedResultName": "tiktok",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sOoavCvrf0fqJ69JGcPEbepob7zEMSDz581fJ7ZS0DM/edit#gid=1248178974"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Username": "={{ $json.username }}",
+            "Full Name": "={{ $json.Name }}",
+            "Followers": "={{ $json.followersCount }}",
+            "Following": "={{ $json.followsCount }}",
+            "Bio": "={{ $json.biography }}",
+            "Profile Pic URL": "={{ $json.profilePicUrl }}",
+            "Website": "={{ $json.website }}",
+            "Business Category": "={{ $json.businessCategory }}",
+            "tiktok link ": "={{ $json.tikToklink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Following",
+              "displayName": "Following",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Bio",
+              "displayName": "Bio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Profile Pic URL",
+              "displayName": "Profile Pic URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business Category",
+              "displayName": "Business Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tiktok link ",
+              "displayName": "tiktok link ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        112
+      ],
+      "id": "a755bf6e-47db-4661-971b-c6b43cdc81a5",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/clockworks~tiktok-profile-scraper/run-sync-get-dataset-items?token=apify_api_Lb527sCnsEJIdzwX8l2Td6yfawp4Du0qTfQV",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"profiles\": [\"{{ $json.profile }}\"],\n  \"resultsLimit\": 1\n}\n",
+        "options": {}
+      },
+      "id": "bd8fc640-672a-4e96-845f-52cdc27a7b7f",
+      "name": "Scrape Tiktok Profile via Apify",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -336,
+        112
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5dc90212-ac40-4351-a15a-ef9f35ffd389",
+              "name": "username",
+              "type": "string",
+              "value": "={{ $json.authorMeta.name }}"
+            },
+            {
+              "id": "02339555-2d6b-4d20-a59c-2e8dfa63361c",
+              "name": "Name",
+              "type": "string",
+              "value": "={{ $json.authorMeta.nickName }}"
+            },
+            {
+              "id": "f5a95d72-443d-468a-a1a6-8cc394b93fa4",
+              "name": "followersCount",
+              "type": "number",
+              "value": "={{ $json.authorMeta.fans }}"
+            },
+            {
+              "id": "826fe0c8-4fbe-44e7-abf3-8a73022151f2",
+              "name": "followsCount",
+              "type": "number",
+              "value": "={{ $json.authorMeta.following }}"
+            },
+            {
+              "id": "dac8d9cc-5fa8-47d8-859d-d9f164ec20bd",
+              "name": "biography",
+              "type": "string",
+              "value": "={{ $json.authorMeta.signature }}"
+            },
+            {
+              "id": "4c775459-f8f5-43d1-8b1a-aa122413cd12",
+              "name": "profilePicUrl",
+              "type": "string",
+              "value": "={{ $json.authorMeta.avatar }}"
+            },
+            {
+              "id": "238cb88f-8f7e-4a3d-a34e-ff17a13ccdc0",
+              "name": "businessCategory",
+              "value": "={{ $json.authorMeta.commerceUserInfo.category }}",
+              "type": "string"
+            },
+            {
+              "id": "4b7dfe38-cb01-41fc-94d8-66289fff4611",
+              "name": "website",
+              "value": "={{ $json.authorMeta.bioLink }}",
+              "type": "string"
+            },
+            {
+              "id": "b3abcecf-b2eb-47d1-9127-c1b4d437dbd9",
+              "name": "tikToklink",
+              "value": "={{ $json.authorMeta.profileUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4cd4fcbe-3588-4497-8089-ce759509c6db",
+      "name": "Format tiktok Profile Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -112,
+        112
+      ],
+      "typeVersion": 3.4,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -704,
+        272
+      ],
+      "id": "8c738e48-ddd9-4810-a13d-bd53e0c2061b",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Scrape Tiktok Profile via Apify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Tiktok Profile via Apify": {
+      "main": [
+        [
+          {
+            "node": "Format tiktok Profile Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format tiktok Profile Data": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Scrape Tiktok Profile via Apify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "inputRaw": "mediacontrolagency",
+          "platform": "tiktok",
+          "wasUrl": true,
+          "username": "mediacontrolagency",
+          "profileUrl": "https://www.tiktok.com/@mediacontrolagency"
+        }
+      }
+    ]
+  },
+  "versionId": "0eda33e7-ed25-4711-a664-177095bcf90c",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-14T18:28:22.204Z",
+      "updatedAt": "2025-09-14T18:28:22.204Z",
+      "role": "workflow:owner",
+      "workflowId": "LbFaMgVudjlwiSaf",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -1,0 +1,1721 @@
+{
+  "createdAt": "2025-09-04T02:18:57.675Z",
+  "updatedAt": "2025-09-14T20:18:25.000Z",
+  "id": "uyJrIv9U9nBZ53Aa",
+  "name": "OCR contracts",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1QgzkdV2cig-S6OUA1DWXDM481l1vbxHY",
+          "mode": "list",
+          "cachedResultName": "tax - unprocessed",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1QgzkdV2cig-S6OUA1DWXDM481l1vbxHY"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        464
+      ],
+      "id": "624cdb4d-9978-4e5a-b431-a81882602dab",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-tesseractjs.tesseractNode",
+      "typeVersion": 1,
+      "position": [
+        624,
+        336
+      ],
+      "id": "4474856b-936f-4a1a-be40-57687ea276b2",
+      "name": "Tesseract"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -480,
+        464
+      ],
+      "id": "c2d05fea-7737-4112-823e-e80f67edbfb3",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1584,
+        688
+      ],
+      "id": "03983a50-d4d7-4112-a9c5-8639ffc31c49",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.markdown }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "agreement_type",
+              "description": "Type of agreement (e.g., Auto Loan, Mortgage, Business Loan). Helps classify the loan.",
+              "required": true
+            },
+            {
+              "name": "agreement_date",
+              "description": "Date the agreement was created or signed. Useful for tracking timelines.",
+              "required": true
+            },
+            {
+              "name": "governing_law",
+              "description": "Jurisdiction (state/province/country) whose laws apply to the contract.",
+              "required": true
+            },
+            {
+              "name": "lender_name",
+              "description": "Legal name of the lending institution. Identifies who provides the funds.",
+              "required": true
+            },
+            {
+              "name": "lender_address",
+              "description": "Full address of the lender. Useful for legal and regulatory purposes.",
+              "required": true
+            },
+            {
+              "name": "borrower_name",
+              "description": "Legal name of the borrower (individual or business). Identifies the party receiving the loan.",
+              "required": true
+            },
+            {
+              "name": "loan_amount",
+              "description": "Original principal borrowed. Core measure of loan size."
+            },
+            {
+              "name": "interest_rate_percent",
+              "description": "Annual percentage interest rate charged. Determines cost of borrowing."
+            },
+            {
+              "name": "term_months",
+              "description": "Loan duration in months. Defines repayment period."
+            },
+            {
+              "name": "monthly_payment",
+              "description": "Scheduled amount due each month. Key for affordability checks."
+            },
+            {
+              "name": "collateral_vin",
+              "description": "Vehicle Identification Number (if applicable). Unique ID for auto loans."
+            },
+            {
+              "name": "payment_due_day",
+              "description": "Day of the month when payments are due. Needed for repayment tracking."
+            },
+            {
+              "name": "late_fee_amount",
+              "description": "Amount charged if payment is late. Impacts borrower costs."
+            },
+            {
+              "name": "late_fee_trigger_days",
+              "description": "Number of days after due date before late fee applies. Defines grace period."
+            },
+            {
+              "name": "acceleration_clause",
+              "description": "Boolean (true/false). Indicates if the lender can demand full repayment if the borrower defaults. Critical for risk assessment."
+            },
+            {
+              "name": "collateral_type",
+              "description": "Type of asset pledged (vehicle, real estate, equipment, etc.). Defines secured vs. unsecured loan.",
+              "required": true
+            },
+            {
+              "name": "collateral_description",
+              "description": "Details of the pledged asset (e.g., “2023 Toyota Camry”). Helps identify the collateral.",
+              "required": true
+            },
+            {
+              "name": "signatures_required",
+              "description": "List of parties required to sign (e.g., Lender, Borrower, Guarantor). Ensures enforceability of contract",
+              "required": true
+            },
+            {
+              "name": "ID_number",
+              "description": "Unique identification number assigned to the loan agreement or borrower (e.g., contract ID, customer ID, or government-issued ID used for verification)**if theres none, just write N/A",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        464
+      ],
+      "id": "669bce28-da54-45da-8d27-8caba9032f31",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Yvmd1UH9uihqWaIXwAoRs4xFtksaWw83wtR_YmGiqp4",
+          "mode": "list",
+          "cachedResultName": "loan_agreement_attributes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Yvmd1UH9uihqWaIXwAoRs4xFtksaWw83wtR_YmGiqp4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1067650200,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Yvmd1UH9uihqWaIXwAoRs4xFtksaWw83wtR_YmGiqp4/edit#gid=1067650200"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "agreement_type": "={{ $json.output.agreement_type }}",
+            "agreement_date": "={{ $json.output.agreement_date }}",
+            "governing_law": "={{ $json.output.governing_law }}",
+            "Lender_name": "={{ $json.output.lender_name }}",
+            "Lender_address": "={{ $json.output.lender_address }}",
+            "borrower_name": "={{ $json.output.borrower_name }}",
+            "loan_amount": "={{ $json.output.loan_amount }}",
+            "interest_rate_percent": "={{ $json.output.interest_rate_percent }}",
+            "term_months": "={{ $json.output.term_months }}",
+            "monthly_payment": "={{ $json.output.monthly_payment }}",
+            "collateral_vin": "={{ $json.output.collateral_vin }}",
+            "payment_due_day": "={{ $json.output.payment_due_day }}",
+            "late_fee_amount": "={{ $json.output.late_fee_amount }}",
+            "late_fee_trigger_days": "={{ $json.output.late_fee_trigger_days }}",
+            "acceleration_clause": "={{ $json.output.acceleration_clause }}",
+            "collateral_type": "={{ $json.output.collateral_type }}",
+            "collateral_description": "={{ $json.output.collateral_description }}",
+            "signatures_required": "={{ $json.output.signatures_required }}",
+            "ID_number": "={{ $json.output.ID_number }}"
+          },
+          "matchingColumns": [
+            "agreement_type"
+          ],
+          "schema": [
+            {
+              "id": "ID_number",
+              "displayName": "ID_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "agreement_type",
+              "displayName": "agreement_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "agreement_date",
+              "displayName": "agreement_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "governing_law",
+              "displayName": "governing_law",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lender_name",
+              "displayName": "Lender_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lender_address",
+              "displayName": "Lender_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "borrower_name",
+              "displayName": "borrower_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "loan_amount",
+              "displayName": "loan_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interest_rate_percent",
+              "displayName": "interest_rate_percent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "term_months",
+              "displayName": "term_months",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "monthly_payment",
+              "displayName": "monthly_payment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "collateral_vin",
+              "displayName": "collateral_vin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payment_due_day",
+              "displayName": "payment_due_day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "late_fee_amount",
+              "displayName": "late_fee_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "late_fee_trigger_days",
+              "displayName": "late_fee_trigger_days",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "acceleration_clause",
+              "displayName": "acceleration_clause",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "collateral_type",
+              "displayName": "collateral_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "collateral_description",
+              "displayName": "collateral_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "signatures_required",
+              "displayName": "signatures_required",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2080,
+        464
+      ],
+      "id": "9c0cfdda-466f-4449-97e4-45d0e80c9594",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "18ue7QCI098bWPs9t3EiMZ31-x6urkjl2",
+          "mode": "list",
+          "cachedResultName": "tax - processed",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/18ue7QCI098bWPs9t3EiMZ31-x6urkjl2"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2528,
+        464
+      ],
+      "id": "c59300ed-2e6b-4879-8ba6-6ed932dd6355",
+      "name": "Google Drive1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2304,
+        464
+      ],
+      "id": "e8b321db-7438-4817-81ff-1da516e8e4d7",
+      "name": "Google Drive2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2752,
+        464
+      ],
+      "id": "0e72ed4c-39c6-4ebd-b88c-ce2124f1f3a9",
+      "name": "Google Drive3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## New documents\nTriggers when new docs is added to the folder.\nThe new docs is downloaded for use in the flow.\nWe select the best extraction process based on document type.",
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        208
+      ],
+      "id": "b142a550-0dcf-48de-9532-c71e2a2ce521",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Extract data from the document\nWe use OCR (top route) for PNG\nWe use LlamaParse (bottom route) for PDF, DOCX, TXT",
+        "width": 720,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        128
+      ],
+      "id": "fba3f13e-142b-486e-9bb9-dd552015bbba",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Clean Up Files\nOnce the documents has been successfully processed, we then move the file to the processed folder, and wipe it from the unprocessed folder.",
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        128
+      ],
+      "id": "98ecc79a-212d-4395-9f61-9cabf0692c6d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Yvmd1UH9uihqWaIXwAoRs4xFtksaWw83wtR_YmGiqp4",
+          "mode": "list",
+          "cachedResultName": "loan_agreement_attributes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Yvmd1UH9uihqWaIXwAoRs4xFtksaWw83wtR_YmGiqp4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1067650200,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Yvmd1UH9uihqWaIXwAoRs4xFtksaWw83wtR_YmGiqp4/edit#gid=1067650200"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        272,
+        960
+      ],
+      "id": "9d03ff97-22fe-4417-9bb4-64506164fd49",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// INPUT: Google Sheets \"Get rows\" gives rows with keys like:\n// { row_number: \"2\", agreement_type: \"Auto Loan\", governing_law: \"State of Illinois\", ... }\n\nconst rows = $input.all();\n\n// Merge all rows into a single object\nlet data = {};\nfor (const row of rows) {\n  Object.assign(data, row.json);\n}\n\n// Remove helper columns you don't want\ndelete data.row_number;\n\nconst system = \"You are a loan-agreement analysis assistant. Return a plain text report with these sections:\\n1. Executive Summary\\n2. Loan Breakdown\\n3. Borrower & Lender Analysis\\n4. Observations & Risks\\n5. Recommendations\";\n\nconst user = \"Data (attribute → value):\\n\" + JSON.stringify(data, null, 2);\n\nreturn [{\n  json: {\n    messages: [\n      { role: \"system\", content: system },\n      { role: \"user\", content: user }\n    ],\n    data\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        960
+      ],
+      "id": "41b6b891-fb38-4534-980f-be0736606ce0",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        1120
+      ],
+      "id": "c45f900f-0db2-4cc9-a81c-7a5b948bc8b3",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## loan-agreement analysis Report\nThis agent will generate a report on your loan-agreement.",
+        "width": 540,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        784
+      ],
+      "id": "5f129bf0-db4d-4fd2-8a01-e7009a1bc0fc",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Google Drive Trigger').item.json.fileExtension }}",
+                    "rightValue": "=png",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "36584cf8-8764-4e7a-bb1a-0877c2a78014"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PNG"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "30167564-7a8e-40a1-9009-64be1031fded",
+                    "leftValue": "={{ $('Google Drive Trigger').item.json.fileExtension }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "44f80dbe-4ca8-437e-8217-4a873187348d",
+                    "leftValue": "={{ $('Google Drive Trigger').item.json.fileExtension }}",
+                    "rightValue": "PNG",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PNG"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ea56e38a-702c-4048-82cf-26fe0da5e517",
+                    "leftValue": "={{ $('Google Drive Trigger').item.json.fileExtension }}",
+                    "rightValue": "PDF",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -48,
+        432
+      ],
+      "id": "39567253-e459-4d62-b5da-6127126278f1",
+      "name": "Switch",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloud.llamaindex.ai/api/v1/parsing/upload",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-Or7JODWI4TMKYtQyLKmqnmnebR82u4KjMFowSsgyTgjPACTL"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        560
+      ],
+      "id": "a7d86f33-f22f-4825-a606-16d4ff090667",
+      "name": "Upload"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        560
+      ],
+      "id": "5b70d7ce-a2e3-4342-bec5-b97db9969276",
+      "name": "Wait",
+      "webhookId": "f9f4e27a-8336-4d19-88e1-feb2545d6517"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "SUCCESS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "5fe5fdf8-6137-4466-8e88-acaaebbf94a5"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a1480222-bc5d-4697-b169-5e94a5afa0ed",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "PENDING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PENDING"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        848,
+        560
+      ],
+      "id": "0a44d3fd-2e25-4653-83b5-62c2b3e0822e",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/v1/parsing/job/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-Or7JODWI4TMKYtQyLKmqnmnebR82u4KjMFowSsgyTgjPACTL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        624,
+        480
+      ],
+      "id": "8c7cb8af-9e4e-43df-a8ed-ea81ad2eff1c",
+      "name": "Status"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/v1/parsing/job/{{ $json.id }}/result/markdown",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-Or7JODWI4TMKYtQyLKmqnmnebR82u4KjMFowSsgyTgjPACTL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        560
+      ],
+      "id": "f644c80d-a6c0-4a00-9192-f2b443f6889d",
+      "name": "Get"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Build Markdown from parsed text block\nconst markdownItems = items.map(item => {\n  const text = item.json.text || '';\n  return {\n    json: {\n      markdown: `### Parsed Invoice\\n\\n\\`\\`\\`\\n${text.trim()}\\n\\`\\`\\``\n    }\n  };\n});\n\nreturn markdownItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        432
+      ],
+      "id": "8e0f648e-22df-4f5f-928c-6f19691e6baf",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "content": "## Data Processing and Logging\nOnce we have extracted data from the invoice, we run it through a data extractor agent to pull out structured data. \nOnce we have pulled the data, we log it in google sheets.",
+        "width": 540,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        128
+      ],
+      "id": "0930d2a3-04fe-4ee1-82f3-b12ffb17467c",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        464
+      ],
+      "id": "bc7e0658-44e6-4c29-9730-5b1594fe22c3",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "folderId": "18ue7QCI098bWPs9t3EiMZ31-x6urkjl2",
+        "title": "=Loan Agreement  Report {{ $('Code').item.json.data.borrower_name }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        848,
+        960
+      ],
+      "id": "3a09766a-51d7-4180-b8ed-7b060644d22a",
+      "name": "Generate",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "aS3dh8MuSyT08akb",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $('loan-agreement analysis assistant').item.json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        992,
+        960
+      ],
+      "id": "afdff10f-e785-4c5d-a5f6-ef085a9b97be",
+      "name": "Update",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "aS3dh8MuSyT08akb",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        960
+      ],
+      "id": "c7b9ecb1-c374-43f2-b070-fe32fc336a65",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.messages[1].content}}",
+        "options": {
+          "systemMessage": "{{$json.messages[0].content}}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        544,
+        960
+      ],
+      "id": "20c50a09-4e34-49c0-8cc1-0c0df108ce29",
+      "name": "loan-agreement analysis assistant"
+    },
+    {
+      "parameters": {
+        "formTitle": "LOAD MULTIPLE FILES",
+        "formDescription": "add multiple files to run this form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "data",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -704,
+        720
+      ],
+      "id": "0a1b9f5f-40e0-4ee5-ad1b-8c78d578d127",
+      "name": "On form submission",
+      "webhookId": "5c49e28a-28a1-449e-889d-1139b9913e16"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "files",
+        "options": {
+          "includeBinary": true
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        720
+      ],
+      "id": "7f15b2c4-ad95-42bd-9590-b91e5a4e62df",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a0ec90c1-b78a-4492-8b8e-bd17ba1f2085",
+              "leftValue": "=",
+              "rightValue": "=contracts",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            },
+            {
+              "id": "27d660a9-3ebe-4975-be07-d299b81f7081",
+              "leftValue": "=",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b765ca95-9455-4e1e-8048-ab393f998d55",
+              "leftValue": "=",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "50b4019b-9c10-4d31-a0fc-5452d63d72cb",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1872,
+        464
+      ],
+      "id": "09657d40-0584-44e3-97bd-81e8fd202810",
+      "name": "If"
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Google Drive2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive2": {
+      "main": [
+        [
+          {
+            "node": "Google Drive1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive1": {
+      "main": [
+        [
+          {
+            "node": "Google Drive3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "loan-agreement analysis assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "loan-agreement analysis assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Tesseract",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tesseract",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Get",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate": {
+      "main": [
+        [
+          {
+            "node": "Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tesseract": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "loan-agreement analysis assistant": {
+      "main": [
+        [
+          {
+            "node": "Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        []
+      ]
+    },
+    "Google Drive3": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Google Drive Trigger": {
+      "lastTimeChecked": "2025-09-04T03:18:45Z"
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "files": [
+            {
+              "filename": "Auto_Loan_Agreement_AG-20250903-001.pdf",
+              "mimetype": "application/pdf",
+              "size": 57762
+            }
+          ],
+          "submittedAt": "2025-09-03T22:55:19.168-04:00",
+          "formMode": "test"
+        }
+      }
+    ],
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "parents": [
+            "1QgzkdV2cig-S6OUA1DWXDM481l1vbxHY"
+          ],
+          "lastModifyingUser": {
+            "displayName": "Evens Louis",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "09373460172711036547",
+            "emailAddress": "snevemoney12@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Evens Louis",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "09373460172711036547",
+              "emailAddress": "snevemoney12@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "09373460172711036547",
+              "type": "user",
+              "emailAddress": "snevemoney12@gmail.com",
+              "role": "owner",
+              "displayName": "Evens Louis",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKS1-WHsctrbylqI3g09_H4Zq7hOTV_PGZxud2VmOYezdYm5IoA3Q=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "09373460172711036547"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "1gK_bRWLDQ1HQCCd9fWMF1ZgxAwAY1NJ9",
+          "name": "Realistic_Auto_Loan_Agreement_Dummy.pdf",
+          "mimeType": "application/pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "3",
+          "webContentLink": "https://drive.google.com/uc?id=1gK_bRWLDQ1HQCCd9fWMF1ZgxAwAY1NJ9&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1gK_bRWLDQ1HQCCd9fWMF1ZgxAwAY1NJ9/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "hasThumbnail": true,
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBO06LC25jcwz8SZxto0orpbuLwH5Lvp1C07a-R_Rz3em3_-9egGIAfmFX34mJpwjievGaPFVg69EeaTun-6bX8yd9eVVrHAm2LcL5syAQaIZO4=s220",
+          "thumbnailVersion": "1",
+          "viewedByMe": true,
+          "viewedByMeTime": "2025-09-04T03:05:49.742Z",
+          "createdTime": "2025-09-04T03:05:49.742Z",
+          "modifiedTime": "2025-09-04T03:05:10.000Z",
+          "modifiedByMeTime": "2025-09-04T03:05:10.000Z",
+          "modifiedByMe": true,
+          "shared": false,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "originalFilename": "Realistic_Auto_Loan_Agreement_Dummy.pdf",
+          "fullFileExtension": "pdf",
+          "fileExtension": "pdf",
+          "md5Checksum": "9f179be5ea02549b0878d3d2f3967a03",
+          "sha1Checksum": "a28cb108ce1988b1d2e412aad1e1fa45c779f2c2",
+          "sha256Checksum": "39ed1c59e7161438a8761d9c48a6433e17c06e1d23df29a19cece8646ed3d487",
+          "size": "5137",
+          "quotaBytesUsed": "5137",
+          "headRevisionId": "0B_s12k7sL1J0UjAvbm95U1VQT3RWVG91dk04U1AxaXBKUmtNPQ",
+          "isAppAuthorized": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "versionId": "815ddff7-7930-4269-ae38-842c41f7aa40",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "createdAt": "2025-09-04T02:18:57.680Z",
+      "updatedAt": "2025-09-04T02:18:57.680Z",
+      "role": "workflow:owner",
+      "workflowId": "uyJrIv9U9nBZ53Aa",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

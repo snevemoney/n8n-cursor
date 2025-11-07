@@ -26,6 +26,12 @@ export class WorkspaceIngester {
       const manifestContent = await fs.readFile(manifestPath, 'utf-8');
       const manifest: WorkspaceStructure = JSON.parse(manifestContent);
 
+      // Calculate app and package counts safely
+      const appsCount = manifest.apps?.length || 
+                        (manifest.apps && typeof manifest.apps === 'object' ? Object.keys(manifest.apps).length : 0) || 
+                        0;
+      const packagesCount = manifest.packages?.length || 0;
+      
       // Extract workspace structure knowledge
       knowledge.push({
         id: 'workspace-structure',
@@ -33,7 +39,7 @@ export class WorkspaceIngester {
         type: 'architecture',
         category: 'workspace',
         title: 'Workspace Structure',
-        description: `Complete workspace structure with ${manifest.apps.length} apps and ${manifest.packages.length} packages`,
+        description: `Complete workspace structure with ${appsCount} apps and ${packagesCount} packages`,
         codeSnippets: [{
           file: 'workspace.manifest.json',
           language: 'json',
@@ -46,7 +52,7 @@ export class WorkspaceIngester {
           'Package sharing',
           'Import boundaries'
         ],
-        dependencies: manifest.packages.map(p => p.name),
+        dependencies: manifest.packages?.map(p => p.name) || [],
         useCases: [
           'Understanding project structure',
           'Dependency management',
@@ -57,10 +63,11 @@ export class WorkspaceIngester {
         extractedAt: new Date().toISOString()
       });
 
-      // Extract knowledge for each app
-      for (const [appKey, app] of Object.entries(manifest.apps)) {
-        const appId = typeof app === 'object' && 'id' in app ? (app as any).id : appKey;
-        const appData = typeof app === 'object' ? app : null;
+      // Extract knowledge for each app (safely handle missing apps)
+      if (manifest.apps && typeof manifest.apps === 'object') {
+        for (const [appKey, app] of Object.entries(manifest.apps)) {
+          const appId = typeof app === 'object' && 'id' in app ? (app as any).id : appKey;
+          const appData = typeof app === 'object' ? app : null;
         
         if (!appData || typeof appData !== 'object') continue;
 
@@ -137,10 +144,12 @@ export class WorkspaceIngester {
             });
           }
         }
+        }
       }
 
-      // Extract knowledge for each package
-      for (const pkg of manifest.packages) {
+      // Extract knowledge for each package (safely handle missing packages)
+      if (manifest.packages && Array.isArray(manifest.packages)) {
+        for (const pkg of manifest.packages) {
         knowledge.push({
           id: `package-${pkg.name}`,
           source: 'workspace',
@@ -169,6 +178,7 @@ export class WorkspaceIngester {
           tags: ['package', pkg.name, 'shared'],
           extractedAt: new Date().toISOString()
         });
+        }
       }
 
       // Extract policies knowledge

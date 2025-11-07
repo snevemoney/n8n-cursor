@@ -32,6 +32,11 @@ export class ProjectKnowledgeOrchestrator {
   private infrastructureIngester: InfrastructureIngester;
   private ragStore: RAGStore;
   private ontologyStore: OntologyStore;
+  
+  // Cache for getSummary() results (30 second TTL)
+  private summaryCache: any = null;
+  private summaryCacheTime: number = 0;
+  private SUMMARY_CACHE_TTL = 30000; // 30 seconds
 
   constructor(
     workspaceRoot: string,
@@ -57,11 +62,18 @@ export class ProjectKnowledgeOrchestrator {
 
     const knowledge: ExtractedKnowledge[] = [];
 
-    // Ingest workspace structure
+    // Ingest workspace structure (with error recovery - don't fail entire ingestion)
     console.log('📁 Ingesting workspace structure...');
-    const workspaceKnowledge = await this.workspaceIngester.extractWorkspaceKnowledge();
-    knowledge.push(...workspaceKnowledge);
-    const workspace = await this.workspaceIngester.getWorkspaceStructure();
+    let workspaceKnowledge: ExtractedKnowledge[] = [];
+    let workspace: any = null;
+    try {
+      workspaceKnowledge = await this.workspaceIngester.extractWorkspaceKnowledge();
+      knowledge.push(...workspaceKnowledge);
+      workspace = await this.workspaceIngester.getWorkspaceStructure();
+    } catch (error: any) {
+      console.error('Error extracting workspace knowledge:', error.message);
+      // Continue with other ingestions even if workspace fails
+    }
 
     // Ingest database schemas
     console.log('🗄️ Ingesting database schemas...');
@@ -248,7 +260,7 @@ export class ProjectKnowledgeOrchestrator {
   }
 
   /**
-   * Get project knowledge summary
+   * Get project knowledge summary (with caching)
    */
   async getSummary(): Promise<{
     totalKnowledge: number;
@@ -258,6 +270,13 @@ export class ProjectKnowledgeOrchestrator {
     services: ServiceStatus[];
     status: ProjectStatus;
   }> {
+    const now = Date.now();
+    
+    // Return cached summary if still fresh
+    if (this.summaryCache && (now - this.summaryCacheTime) < this.SUMMARY_CACHE_TTL) {
+      return this.summaryCache;
+    }
+
     const workspace = await this.workspaceIngester.getWorkspaceStructure();
     const databases = await this.databaseIngester.getDatabaseStructure();
     const workflows = await this.workflowIngester.getWorkflows();
@@ -266,7 +285,7 @@ export class ProjectKnowledgeOrchestrator {
     const allKnowledge = this.ragStore.getAllKnowledge();
     const status = await this.calculateProjectStatus(allKnowledge, workflows, services);
 
-    return {
+    const result = {
       totalKnowledge: allKnowledge.length,
       workspace,
       databases: databases.length,
@@ -274,6 +293,20 @@ export class ProjectKnowledgeOrchestrator {
       services, // Return array, not length
       status
     };
+
+    // Cache the result
+    this.summaryCache = result;
+    this.summaryCacheTime = now;
+
+    return result;
+  }
+
+  /**
+   * Invalidate the summary cache (call after ingestion or major changes)
+   */
+  invalidateCache() {
+    this.summaryCache = null;
+    this.summaryCacheTime = 0;
   }
 }
 

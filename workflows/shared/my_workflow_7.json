@@ -1,0 +1,169 @@
+{
+  "createdAt": "2025-10-19T17:08:34.076Z",
+  "updatedAt": "2025-10-19T18:58:14.000Z",
+  "id": "1EtWYrHkLhncceZU",
+  "name": "My workflow 7",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "7aba31d1-d198-4e6a-8c02-b4228108072e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========= UNIVERSAL BUSINESS SCRAPER — pages from ALL links + image canon =========\n\n// 1) Load input\nconst html = String($json.data ?? $json.body ?? \"\");\nconst enteredUrl = (\n  $json.url ??\n  $node[\"Edit Fields1\"]?.json?.url ??\n  $node[\"HTTP Request\"]?.parameter?.url ??\n  \"\"\n).toString().trim();\n\n// 2) utils\nfunction strip(s){ return (s ?? \"\").toString().replace(/[\\u0000-\\u001F\\u007F-\\u009F\\u200B-\\u200D\\uFEFF]/g,\"\").trim(); }\nfunction decode(s){\n  if(!s) return \"\";\n  const map = {\"&nbsp;\":\" \",\"&amp;\":\"&\",\"&lt;\":\"<\",\"&gt;\":\">\",\"&quot;\":'\"',\"&#39;\":\"'\",\"&#8211;\":\"–\",\"&#8212;\":\"—\",\"&#038;\":\"&\"};\n  s = s.replace(/(&nbsp;|&amp;|&lt;|&gt;|&quot;|&#39;|&#8211;|&#8212;|&#038;)/g, m=>map[m]||m);\n  s = s.replace(/&#(\\d+);/g, (_,n)=>String.fromCharCode(parseInt(n,10)));\n  s = s.replace(/&#x([0-9a-fA-F]+);/g, (_,h)=>String.fromCharCode(parseInt(h,16)));\n  return s.trim();\n}\nfunction originFromAnything(v){\n  v = (v ?? \"\").toString().trim().replace(/[\\u0000-\\u001F\\u007F-\\u009F\\u200B-\\u200D\\uFEFF]/g,\"\");\n  if (/^\\{\\{\\s*\\$json\\./.test(v)) v = \"\";\n  if (!v) return \"\";\n  try {\n    if (!/^https?:\\/\\//i.test(v)) v = \"https://\" + v;\n    const u = new URL(v);\n    return `${u.protocol}//${u.hostname}${u.port?\":\" + u.port:\"\"}/`;\n  } catch {}\n  const m = v.match(/^(?:https?:\\/\\/)?([^\\/\\s?#]+)/i);\n  return m && m[1] ? `https://${m[1]}/` : \"\";\n}\nfunction host(u){ try { return new URL(u).hostname.replace(/^www\\./i,\"\"); } catch { return \"\"; } }\nfunction clean(u){ try { const x = new URL(u); x.hash=\"\"; x.search=\"\"; return x.toString(); } catch { return \"\"; } }\nfunction absolutize(href, base){\n  href = strip(href);\n  if (!href || href === \"#\" || href.startsWith(\"javascript:\") || href.startsWith(\"mailto:\") || href.startsWith(\"tel:\")) return \"\";\n  try {\n    if (/^https?:\\/\\//i.test(href)) return new URL(href).toString();\n    if (href.startsWith(\"//\")) return new URL((base || \"https://\") + href.replace(/^\\/\\//,\"\")).toString();\n    if (base) return new URL(href, base).toString();\n  } catch {}\n  return \"\";\n}\nfunction pick(rx){ const m = html.match(rx); return m ? decode(m[1]) : \"\"; }\nfunction stripTagsKeepText(s){\n  s = s.replace(/<!--[\\s\\S]*?-->/g, \" \");\n  s = s.replace(/<script[\\s\\S]*?<\\/script>/gi, \" \");\n  s = s.replace(/<style[\\s\\S]*?<\\/style>/gi, \" \");\n  s = s.replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, \" \");\n  s = s.replace(/<(br|hr)\\s*\\/?>/gi, \"\\n\");\n  s = s.replace(/<\\/(p|div|section|article|li|h[1-6]|header|footer|main)\\s*>/gi, \"\\n\");\n  s = s.replace(/<li[^>]*>/gi, \"• \");\n  s = s.replace(/<[^>]+>/g, \" \");\n  return s.replace(/\\u00A0/g, \" \").replace(/[ \\t]{2,}/g, \" \").replace(/\\n{3,}/g, \"\\n\\n\").trim();\n}\nfunction dedupe(arr){\n  const seen = new Set(); const out = [];\n  for (const it of arr) { if (!seen.has(it.url)) { seen.add(it.url); out.push(it); } }\n  return out;\n}\n\n// --- NEW: Canonicalize Jetpack/Photon image URLs (i0.wp.com etc.)\nfunction canonImage(u, targetW=500){\n  try{\n    const url = new URL(u);\n    const isPhoton = /\\.wp\\.com$/i.test(url.hostname) || /(^|\\.)wp\\.com$/i.test(url.hostname);\n    if (!isPhoton) return u;\n\n    // parse fit/resize -> width\n    let w = targetW;\n    const fit = url.searchParams.get(\"fit\") || \"\";\n    const resize = url.searchParams.get(\"resize\") || \"\";\n    const wParam = url.searchParams.get(\"w\");\n    if (wParam) w = parseInt(wParam,10) || targetW;\n    else if (fit && /\\d+[,xX]\\d+/.test(fit)) w = parseInt(fit.split(/[xX,]/)[0],10) || targetW;\n    else if (resize && /\\d+[,xX]\\d+/.test(resize)) w = parseInt(resize.split(/[xX,]/)[0],10) || targetW;\n\n    // rebuild query: keep ssl=1 if present, set w=\n    const hadSSL = url.searchParams.has(\"ssl\") ? url.searchParams.get(\"ssl\") : \"1\";\n    url.search = \"\"; // wipe existing params\n    url.searchParams.set(\"w\", String(w));\n    if (hadSSL) url.searchParams.set(\"ssl\", String(hadSSL));\n    return url.toString();\n  }catch{ return u; }\n}\n\n// 3) baseUrl\nlet baseUrl = originFromAnything(enteredUrl);\nif (!baseUrl) {\n  const canon = pick(/<link[^>]*rel=[\"']canonical[\"'][^>]*href=[\"']([^\"']+)[\"']/i);\n  const base  = pick(/<base[^>]*href=[\"']([^\"']+)[\"']/i);\n  const ogurl = pick(/<meta[^>]*property=[\"']og:url[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\n  baseUrl = originFromAnything(canon || base || ogurl);\n  if (!baseUrl) {\n    const anyAbs = (html.match(/https?:\\/\\/[^\"'()<>\\s]+/gi) || [])[0];\n    baseUrl = originFromAnything(anyAbs);\n  }\n}\nconst baseHost = host(baseUrl || enteredUrl);\n\n// 4) collect every href (anchors, permissive href=, raw absolute)\nconst rawHrefs = new Set();\n\n// A) <a ... href=...>...</a>\n{\n  const aPairRx = /<a\\b([^>]*?)>([\\s\\S]*?)<\\/a>/gi;\n  const hrefAttrRx = /href\\s*=\\s*(?:\"([^\"]+)\"|'([^']+)'|([^'\"\\s>]+))/i;\n  let m;\n  while ((m = aPairRx.exec(html))) {\n    const attrs = m[1] || \"\";\n    const hm = attrs.match(hrefAttrRx);\n    if (!hm) continue;\n    rawHrefs.add(hm[1] || hm[2] || hm[3] || \"\");\n  }\n}\n// B) any href=\n{\n  const hrefAnyRx = /href\\s*=\\s*(?:\"([^\"]+)\"|'([^']+)'|([^'\"\\s>]+))/gi;\n  let h; while ((h = hrefAnyRx.exec(html))) rawHrefs.add(h[1] || h[2] || h[3] || \"\");\n}\n// C) raw absolute URLs\n(html.match(/https?:\\/\\/[^\\s\"'<>]+/gi) || []).forEach(u => rawHrefs.add(u));\n\n// 5) resolve & classify\nconst internal = [];\nconst external = [];\nconst relatives = [];\n\nfor (const raw of rawHrefs) {\n  const abs = absolutize(raw, baseUrl);\n  if (!abs) { relatives.push({ text: \"\", url: raw }); continue; }\n  const url = clean(abs); if (!url) continue;\n  if (host(url) === baseHost) internal.push({ text: \"\", url });\n  else external.push({ text: \"\", url });\n}\n\nconst internalLinks = dedupe(internal);\nconst externalLinks = dedupe(external);\nconst relativeLinks = dedupe(relatives);\n\nconst navWords = /(home|services?|about|à propos|contact|pricing|tarifs?|plans?|book|booking|reservation|blog|news|portfolio|shop|store|produits?|faq|support|terms|privacy|policy|\\/fr\\/?$)/i;\nconst navLinks = internalLinks.filter(it => navWords.test(it.url));\n\n// 6) business signals\nconst titleTag = pick(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\nconst metaDesc = pick(/<meta[^>]*name=[\"']description[\"'][^>]*content=[\"']([^\"']+)[\"']/i) || pick(/<meta[^>]*content=[\"']([^\"']+)[\"'][^>]*name=[\"']description[\"'][^>]*>/i);\nconst ogTitle  = pick(/<meta[^>]*property=[\"']og:title[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\nconst ogDesc   = pick(/<meta[^>]*property=[\"']og:description[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\nconst langAttr = pick(/<html[^>]*lang=[\"']([a-zA-Z-]+)[\"']/i) || \"\";\n\n// ---- build EVERY url set for pages/socials\nconst everyUrl = Array.from(new Set([\n  ...internalLinks.map(x=>x.url),\n  ...externalLinks.map(x=>x.url),\n  ...relativeLinks.map(x=>absolutize(x.url, baseUrl) || x.url)\n].filter(Boolean)));\n\nconst findOne = (rx) => (everyUrl.find(u => rx.test(u)) || null);\n\nconst pages = {\n  home:    findOne(new RegExp(`^${(baseUrl||\"\").replace(/[.*+?^${}()|[\\]\\\\]/g,\"\\\\$&\")}$`)) || baseUrl || null,\n  services:findOne(/\\/services?\\/?$/i),\n  about:   findOne(/about-us?|à-propos/i),\n  contact: findOne(/contact(-us)?\\/?$/i),\n  blog:    findOne(/\\/(blog|news)\\/?$/i),\n  pricing: findOne(/\\/(pricing|tarifs?|plans?)\\/?$/i),\n  french:  findOne(/\\/fr\\/?$/i)\n};\n\n// favicon/logo (with image canon)\nconst guessAsset = (nameRx) => {\n  const pool = everyUrl;\n  return pool.find(u => nameRx.test(u)) || null;\n};\nconst favicon = (() => {\n  const m = html.match(/<link[^>]+rel=[\"'](?:shortcut icon|icon|mask-icon)[\"'][^>]*href=[\"']([^\"']+)[\"']/i);\n  const abs = absolutize(m ? m[1] : \"\", baseUrl);\n  const raw = clean(abs) || guessAsset(/favicon\\.(ico|png|svg)/i);\n  return raw ? canonImage(raw, 64) : null;\n})();\nconst logo = (() => {\n  const ogM = html.match(/<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\n  const abs = absolutize(ogM ? ogM[1] : \"\", baseUrl);\n  const raw = clean(abs) || guessAsset(/logo|og[-_]?image/i);\n  return raw ? canonImage(raw, 500) : null;   // << w=500\n})();\n\n// cms\nconst cmsHint = (() => {\n  const h = html.toLowerCase();\n  if (/wp-content|wp-includes|jetpack|wordpress/i.test(h)) return \"WordPress\";\n  if (/woocommerce/i.test(h)) return \"WooCommerce (WordPress)\";\n  if (/shopify|cdn\\.shopify|cart\\/add/i.test(h)) return \"Shopify\";\n  if (/squarespace\\.com|sqs-/i.test(h)) return \"Squarespace\";\n  if (/wixstatic\\.com/i.test(h)) return \"Wix\";\n  return \"\";\n})();\n\n// contacts\nconst textForPlain = stripTagsKeepText(html);\nconst emailsOut = Array.from(new Set([\n  ...[...html.matchAll(/mailto:([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,})/gi)].map(m=>m[1].toLowerCase()),\n  ...[...textForPlain.matchAll(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi)].map(m=>m[0].toLowerCase())\n])).slice(0, 10);\nconst phonesOut = Array.from(new Set([\n  ...[...html.matchAll(/tel:([+0-9()[\\]\\s.-]+)/gi)].map(m=>(m[1]||\"\").replace(/[^\\d+]/g,\"\")),\n  ...[...textForPlain.matchAll(/(\\+?\\d[\\d\\s().-]{8,}\\d)/g)].map(m=>(m[1]||\"\").replace(/[^\\d+]/g,\"\"))\n].filter(n => n.length>=10 && n.length<=15))).slice(0, 10);\n\n// socials from everyUrl\nconst socials = {\n  instagram: everyUrl.filter(u=>/instagram\\.com\\//i.test(u)).slice(0,5),\n  linkedin:  everyUrl.filter(u=>/linkedin\\.com\\//i.test(u)).slice(0,5),\n  tiktok:    everyUrl.filter(u=>/tiktok\\.com\\//i.test(u)).slice(0,5),\n  facebook:  everyUrl.filter(u=>/facebook\\.com\\//i.test(u)).slice(0,5),\n  youtube:   everyUrl.filter(u=>/youtu(\\.be|be\\.com)/i.test(u)).slice(0,5),\n  x:         everyUrl.filter(u=>/(x\\.com|twitter\\.com)\\//i.test(u)).slice(0,5),\n};\n\n// business name/desc\nconst businessName = (ogTitle || titleTag || \"\").split(\" | \")[0].split(\" – \")[0].trim()\n                   || (host(baseUrl).split(\".\")[0] || \"(no title)\");\nconst description  = ogDesc || metaDesc || \"\";\n\n// 7) Output\nreturn [{\n  json: {\n    enteredUrl: enteredUrl || \"(not provided)\",\n    baseUrl: baseUrl || \"(unknown)\",\n    internalLinks: internalLinks.slice(0, 200),\n    navLinks: navLinks.slice(0, 50),\n    externalLinks: externalLinks.slice(0, 100),\n    relativeLinks: relativeLinks.slice(0, 200),\n    businessCard: {\n      name: businessName,\n      description,\n      language: (pick(/<html[^>]*lang=[\"']([a-zA-Z-]+)[\"']/i) || null),\n      favicon,\n      logo,                   // <- now canonicalized to ?w=500&ssl=1 when Jetpack\n      cms: cmsHint || null,\n      contacts: { emails: emailsOut, phones: phonesOut },\n      socials,\n      pages                   // <- now built from ALL links (includes your relativeLinks)\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "6aaf909d-b75d-4987-8a23-71eae768e819",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "987980a0-e2b1-4a41-86aa-5843d70dab94",
+              "name": "=url",
+              "value": "https://mediacontrolagency.com/",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b0827fd3-46fd-4cb8-87c5-4a882924724c",
+      "name": "Edit Fields1"
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "dbc1e038-ed47-41f6-9c92-00c48404b8b7",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-19T17:08:34.088Z",
+      "updatedAt": "2025-10-19T17:08:34.088Z",
+      "role": "workflow:owner",
+      "workflowId": "1EtWYrHkLhncceZU",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -1,0 +1,331 @@
+{
+  "createdAt": "2025-10-27T00:35:44.334Z",
+  "updatedAt": "2025-10-27T18:08:39.000Z",
+  "id": "p5irmmjYAQxcpOet",
+  "name": "Asset Management API",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assets",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "34f7d3bd-cfa5-4aa4-b4a7-e4ae6670d11c",
+      "name": "POST /assets Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -752,
+        48
+      ],
+      "webhookId": "688dfbd5-2526-466b-92f0-3561579f7508"
+    },
+    {
+      "parameters": {
+        "path": "assets",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "31835459-a0b9-4973-afc2-2d000d4b8e38",
+      "name": "GET /assets Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -752,
+        240
+      ],
+      "webhookId": "1eb3b1e1-c129-4f92-bb8f-804fceea5fa1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "PUT",
+        "path": "assets/:assetId",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "ff7a6781-98c1-4f01-a8f9-d30f4bd04704",
+      "name": "PUT /assets/:assetId Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -752,
+        432
+      ],
+      "webhookId": "96fb3100-44a2-40f3-ba06-6da53954216c"
+    },
+    {
+      "parameters": {
+        "httpMethod": "DELETE",
+        "path": "assets/:assetId",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "7d09fa05-227d-4f6c-a4df-cbfc7e1b03a7",
+      "name": "DELETE /assets/:assetId Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -752,
+        624
+      ],
+      "webhookId": "ce0d12df-96a7-46a2-97c6-3e885093139f"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO tenant_assets (tenant_id, asset_type, asset_name, asset_category, location, purchase_date, purchase_price, current_value, condition_status, status, manufacturer, model, serial_number) VALUES ('{{ $json.body.tenantId }}', '{{ $json.body.assetType }}', '{{ $json.body.assetName }}', '{{ $json.body.assetCategory }}', '{{ $json.body.location }}'::jsonb, '{{ $json.body.purchaseDate }}', {{ $json.body.purchasePrice }}, {{ $json.body.currentValue }}, '{{ $json.body.conditionStatus }}', '{{ $json.body.status }}', '{{ $json.body.manufacturer }}', '{{ $json.body.model }}', '{{ $json.body.serialNumber }}') RETURNING *",
+        "options": {}
+      },
+      "id": "652a7951-235a-4a3e-acc2-a1f64c57c513",
+      "name": "Create Asset",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -528,
+        48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM tenant_assets WHERE tenant_id = '{{ $json.body.tenantId }}' ORDER BY created_at DESC",
+        "options": {}
+      },
+      "id": "83fabbbe-8f3b-4c60-8ac8-91c90c657a19",
+      "name": "Get Assets",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -528,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tenant_assets SET asset_name = '{{ $json.body.assetName }}', location = '{{ $json.body.location }}'::jsonb, condition_status = '{{ $json.body.conditionStatus }}', status = '{{ $json.body.status }}', updated_at = NOW() WHERE id = {{ $json.pathParameters.assetId }} RETURNING *",
+        "options": {}
+      },
+      "id": "e59f7a43-5ef3-432b-b8ab-948d70665b4f",
+      "name": "Update Asset",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -528,
+        432
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM tenant_assets WHERE id = {{ $json.pathParameters.assetId }}",
+        "options": {}
+      },
+      "id": "6ebde0ab-be9a-4200-985f-d594f1bfbb4c",
+      "name": "Delete Asset",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -528,
+        624
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Asset deleted successfully\" } }}",
+        "options": {}
+      },
+      "id": "09fe4cff-9540-4c80-b7f1-c2f14885afec",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        336
+      ]
+    }
+  ],
+  "connections": {
+    "POST /assets Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Asset": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /assets Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Assets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Assets": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PUT /assets/:assetId Webhook": {
+      "main": [
+        [
+          {
+            "node": "Update Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Asset": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DELETE /assets/:assetId Webhook": {
+      "main": [
+        [
+          {
+            "node": "Delete Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Asset": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "5ae98ddb-4491-447e-9a82-f5aa094bfcb1",
+  "triggerCount": 4,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T00:35:44.337Z",
+      "updatedAt": "2025-10-27T00:35:44.337Z",
+      "role": "workflow:owner",
+      "workflowId": "p5irmmjYAQxcpOet",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

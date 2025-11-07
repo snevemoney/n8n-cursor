@@ -1,0 +1,271 @@
+{
+  "createdAt": "2025-10-27T02:48:19.906Z",
+  "updatedAt": "2025-10-27T18:08:29.000Z",
+  "id": "wGSQP9u9I4mdtp3e",
+  "name": "Work Order Management",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "work-orders",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d2730c4f-cb0f-4e25-ac81-adacd82da94c",
+      "name": "POST /work-orders Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "8322db01-aca8-4c51-b4bb-c0abd7656ac4"
+    },
+    {
+      "parameters": {
+        "path": "work-orders",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "fa16a128-dc9c-4e44-a5d4-2b5061589cce",
+      "name": "GET /work-orders Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ],
+      "webhookId": "674f57ef-3f56-4cb2-9b04-5b2c4e17374c"
+    },
+    {
+      "parameters": {
+        "httpMethod": "PUT",
+        "path": "work-orders/:orderId/status",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a208732f-4215-4155-a01d-406c6533bf48",
+      "name": "PUT /work-orders/:orderId/status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        384
+      ],
+      "webhookId": "56a700f9-28ef-4f3b-acb6-f862ccf75391"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO work_orders (tenant_id, asset_id, title, description, priority, status, requested_by, scheduled_date, due_date) VALUES ('{{ $json.body.tenantId }}', {{ $json.body.assetId }}, '{{ $json.body.title }}', '{{ $json.body.description }}', '{{ $json.body.priority }}', 'pending', '{{ $json.body.requestedBy }}', '{{ $json.body.scheduledDate }}', '{{ $json.body.dueDate }}') RETURNING *",
+        "options": {}
+      },
+      "id": "3ee05f0f-7610-4556-ab32-49bcf49c8aad",
+      "name": "Create Work Order",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT wo.*, ta.asset_name, ta.asset_category, v.vendor_name FROM work_orders wo LEFT JOIN tenant_assets ta ON wo.asset_id = ta.id LEFT JOIN vendors v ON wo.vendor_id = v.id WHERE wo.tenant_id = '{{ $json.body.tenantId }}' ORDER BY wo.created_at DESC",
+        "options": {}
+      },
+      "id": "bfeb5271-a5eb-485c-8b49-f259d02e857a",
+      "name": "Get Work Orders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        192
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE work_orders SET status = '{{ $json.body.status }}', completed_date = CASE WHEN '{{ $json.body.status }}' = 'completed' THEN NOW() ELSE completed_date END, resolution_notes = '{{ $json.body.resolutionNotes }}', updated_at = NOW() WHERE id = {{ $json.pathParameters.orderId }} RETURNING *",
+        "options": {}
+      },
+      "id": "c550d539-0341-4e33-9830-341ffeebbd3b",
+      "name": "Update Work Order Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        384
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json } }}",
+        "options": {}
+      },
+      "id": "07f65dd7-d465-4abe-961e-acf72446290f",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        192
+      ]
+    }
+  ],
+  "connections": {
+    "POST /work-orders Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Work Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Work Order": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /work-orders Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Work Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Work Orders": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PUT /work-orders/:orderId/status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Update Work Order Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Work Order Status": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "7453dce6-d068-4a6b-822c-5bc8d3d8121d",
+  "triggerCount": 3,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T02:48:19.921Z",
+      "updatedAt": "2025-10-27T02:48:19.921Z",
+      "role": "workflow:owner",
+      "workflowId": "wGSQP9u9I4mdtp3e",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-07",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

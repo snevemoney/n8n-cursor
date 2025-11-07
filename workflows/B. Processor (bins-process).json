@@ -36,7 +36,6 @@
       "position": [ 460, 260 ]
     },
 
-    /* CONTRACT */
     {
       "parameters": {
         "workflowId": "Extractor – CONTRACT",
@@ -52,7 +51,6 @@
       "position": [ 700, 80 ]
     },
 
-    /* BANKING */
     {
       "parameters": {
         "workflowId": "Extractor – BANKING",
@@ -68,7 +66,6 @@
       "position": [ 700, 140 ]
     },
 
-    /* CARFAX */
     {
       "parameters": {
         "workflowId": "Extractor – CARFAX",
@@ -84,7 +81,6 @@
       "position": [ 700, 200 ]
     },
 
-    /* DEALER BOS */
     {
       "parameters": {
         "workflowId": "Extractor – DEALER BOS",
@@ -100,7 +96,6 @@
       "position": [ 700, 260 ]
     },
 
-    /* INSURANCE */
     {
       "parameters": {
         "workflowId": "Extractor – INSURANCE",
@@ -116,7 +111,6 @@
       "position": [ 700, 320 ]
     },
 
-    /* PPSA */
     {
       "parameters": {
         "workflowId": "Extractor – PPSA",
@@ -132,7 +126,6 @@
       "position": [ 700, 380 ]
     },
 
-    /* UCC */
     {
       "parameters": {
         "workflowId": "Extractor – UCC",
@@ -148,7 +141,6 @@
       "position": [ 700, 440 ]
     },
 
-    /* OWNERSHIP */
     {
       "parameters": {
         "workflowId": "Extractor – OWNERSHIP",
@@ -164,7 +156,6 @@
       "position": [ 700, 500 ]
     },
 
-    /* Merge extractor output to a single stream */
     {
       "parameters": {
         "mode": "passThrough"
