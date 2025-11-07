@@ -1,0 +1,31 @@
+{
+  "name": "scorpion",
+  "version": "1.0.0",
+  "type": "orchestrator",
+  "description": "Central orchestrator for the Lightning Meta Workspace",
+  "imports": {
+    "allowed": [
+      "@scorpion/core",
+      "@lightningflow/*",
+      "@lightning-platform/*"
+    ],
+    "disallowed": []
+  },
+  "exports": [
+    "lib/**",
+    "components/**",
+    "app/api/**"
+  ],
+  "dependencies": {
+    "internal": [
+      "@scorpion/core",
+      "@lightningflow/shared-config"
+    ],
+    "external": [
+      "next",
+      "react",
+      "chokidar"
+    ]
+  }
+}
+

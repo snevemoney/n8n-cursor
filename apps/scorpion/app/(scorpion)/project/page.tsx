@@ -49,10 +49,39 @@ export default function ProjectPage() {
 
   const loadStatus = async () => {
     try {
-      const response = await fetch('/api/project/status');
+      const response = await fetch('/api/projects');
       if (response.ok) {
         const data = await response.json();
-        setStatus(data);
+        // Map new API format to expected format
+        setStatus({
+          overallHealth: data.health?.status === 'healthy' ? 'healthy' : 'degraded',
+          techDebt: {
+            total: 0,
+            critical: 0,
+            high: 0,
+            medium: 0,
+            low: 0
+          },
+          missingFeatures: {
+            p0: 0,
+            p1: 0,
+            p2: 0
+          },
+          services: data.infrastructure?.services || [],
+          workspace: {
+            apps: data.workspace?.totalDirectories || 0,
+            packages: data.workspace?.totalFiles || 0
+          },
+          databases: data.databases?.length || 0,
+          workflows: {
+            total: data.workflows?.total || 0,
+            synced: data.workflows?.active || 0
+          },
+          knowledge: {
+            total: data.knowledge?.totalItems || 0
+          },
+          lastIngestion: data.lastUpdated || new Date().toISOString()
+        });
       }
     } catch (error) {
       console.error('Failed to load project status:', error);

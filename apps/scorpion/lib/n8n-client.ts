@@ -4,6 +4,8 @@
  */
 
 import { getN8nBaseUrl } from '@lightningflow/shared-config';
+import { getCircuitBreaker } from './circuit-breaker';
+import { getMetricsCollector } from './metrics';
 
 export interface N8nWorkflow {
   id: string;
@@ -30,6 +32,8 @@ export class N8nClient {
   private apiKey?: string;
   private maxRetries: number;
   private retryDelay: number;
+  private circuitBreaker = getCircuitBreaker('n8n');
+  private metrics = getMetricsCollector();
 
   constructor(apiKey?: string, options?: { maxRetries?: number; retryDelay?: number }) {
     // Remove /webhook from base URL to get API base
@@ -90,26 +94,45 @@ export class N8nClient {
    * List all workflows
    */
   async listWorkflows(): Promise<N8nWorkflow[]> {
+    const startTime = Date.now();
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (this.apiKey) {
-        headers['X-N8N-API-KEY'] = this.apiKey;
-      }
+      return await this.circuitBreaker.execute(async () => {
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (this.apiKey) {
+          headers['X-N8N-API-KEY'] = this.apiKey;
+        }
 
-      const response = await this.fetchWithRetry(`${this.baseUrl}/api/v1/workflows`, {
-        headers,
+        const response = await this.fetchWithRetry(`${this.baseUrl}/api/v1/workflows`, {
+          headers,
+        });
+
+        const duration = (Date.now() - startTime) / 1000;
+        this.metrics.observeHistogram('scorpion_workflow_sync_duration_seconds', duration, { operation: 'list' });
+
+        if (!response.ok) {
+          this.metrics.incrementCounter('scorpion_api_requests_total', {
+            method: 'GET',
+            endpoint: '/api/v1/workflows',
+            status: response.status.toString()
+          });
+          throw new Error(`Failed to list workflows: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.metrics.incrementCounter('scorpion_api_requests_total', {
+          method: 'GET',
+          endpoint: '/api/v1/workflows',
+          status: '200'
+        });
+        return data.data || [];
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to list workflows: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.data || [];
     } catch (error) {
+      const duration = (Date.now() - startTime) / 1000;
+      this.metrics.observeHistogram('scorpion_workflow_sync_duration_seconds', duration, { operation: 'list', status: 'error' });
+      this.metrics.incrementCounter('scorpion_errors_total', { severity: 'medium', source: 'n8n-client' });
       console.error('Failed to list n8n workflows:', error);
       return [];
     }
@@ -119,29 +142,48 @@ export class N8nClient {
    * Get workflow by ID
    */
   async getWorkflow(id: string): Promise<N8nWorkflow | null> {
+    const startTime = Date.now();
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (this.apiKey) {
-        headers['X-N8N-API-KEY'] = this.apiKey;
-      }
-
-      const response = await this.fetchWithRetry(`${this.baseUrl}/api/v1/workflows/${id}`, {
-        headers,
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          return null;
+      return await this.circuitBreaker.execute(async () => {
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (this.apiKey) {
+          headers['X-N8N-API-KEY'] = this.apiKey;
         }
-        throw new Error(`Failed to get workflow: ${response.status}`);
-      }
 
-      const data = await response.json();
-      return data;
+        const response = await this.fetchWithRetry(`${this.baseUrl}/api/v1/workflows/${id}`, {
+          headers,
+        });
+
+        const duration = (Date.now() - startTime) / 1000;
+        this.metrics.observeHistogram('scorpion_workflow_sync_duration_seconds', duration, { operation: 'get' });
+
+        if (!response.ok) {
+          this.metrics.incrementCounter('scorpion_api_requests_total', {
+            method: 'GET',
+            endpoint: `/api/v1/workflows/${id}`,
+            status: response.status.toString()
+          });
+          if (response.status === 404) {
+            return null;
+          }
+          throw new Error(`Failed to get workflow: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.metrics.incrementCounter('scorpion_api_requests_total', {
+          method: 'GET',
+          endpoint: `/api/v1/workflows/${id}`,
+          status: '200'
+        });
+        return data;
+      });
     } catch (error) {
+      const duration = (Date.now() - startTime) / 1000;
+      this.metrics.observeHistogram('scorpion_workflow_sync_duration_seconds', duration, { operation: 'get', status: 'error' });
+      this.metrics.incrementCounter('scorpion_errors_total', { severity: 'medium', source: 'n8n-client' });
       console.error('Failed to get n8n workflow:', error);
       return null;
     }

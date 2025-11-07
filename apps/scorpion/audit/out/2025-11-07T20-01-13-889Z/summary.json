@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-11-07T20:02:09.396Z",
+  "pagesAudited": 22,
+  "totalConsoleErrors": 0,
+  "totalConsoleWarnings": 0,
+  "totalNetworkFailures": 0,
+  "totalPageCrashes": 0,
+  "totalIssues": 0,
+  "pagesWithErrors": 0,
+  "pagesWithWarnings": 0,
+  "pagesWithNetworkFailures": 0,
+  "pagesWithCrashes": 0,
+  "slowestPages": [
+    {
+      "url": "http://localhost:3003/agents/E-001",
+      "loadTime": 2837
+    },
+    {
+      "url": "http://localhost:3003/knowledge",
+      "loadTime": 2546
+    },
+    {
+      "url": "http://localhost:3003/dashboard",
+      "loadTime": 2144
+    },
+    {
+      "url": "http://localhost:3003/workflows",
+      "loadTime": 2079
+    },
+    {
+      "url": "http://localhost:3003/agents",
+      "loadTime": 1859
+    }
+  ],
+  "artifactsLocation": "audit/out/2025-11-07T20-01-13-889Z"
+}

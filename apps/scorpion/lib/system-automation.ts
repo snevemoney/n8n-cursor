@@ -4,7 +4,9 @@
  */
 
 import { getOrchestrator, getRAGStore, getOntologyStore } from './shared-stores';
-import { N8nClient } from './n8n-client';
+import { getMCPn8nClient } from './mcp-n8n-client';
+import { getCircuitBreaker } from './circuit-breaker';
+import { getMetricsCollector } from './metrics';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs/promises';
@@ -112,14 +114,40 @@ class SystemAutomation {
       this.checkMCPTools();
     }, 5 * 60 * 1000);
 
+    // Update circuit breaker metrics (every 30 seconds)
+    setInterval(() => {
+      this.updateCircuitBreakerMetrics();
+    }, 30 * 1000);
+
     // Initial checks
     await Promise.all([
       this.detectErrors(),
       this.checkMCPTools(),
-      this.getSystemHealth()
+      this.getSystemHealth(),
+      this.updateCircuitBreakerMetrics()
     ]);
 
     console.log('✅ System-wide automation initialized');
+  }
+
+  /**
+   * Update circuit breaker metrics
+   */
+  private updateCircuitBreakerMetrics(): void {
+    try {
+      const metrics = getMetricsCollector();
+      const n8nBreaker = getCircuitBreaker('n8n');
+      const stats = n8nBreaker.getStats();
+      
+      // Update circuit breaker state (0=closed, 1=open, 0.5=half-open)
+      const stateValue = stats.state === 'closed' ? 0 : stats.state === 'open' ? 1 : 0.5;
+      metrics.setGauge('scorpion_circuit_breaker_state', stateValue, { service: 'n8n' });
+      
+      // Note: Failure counter is incremented by the circuit breaker itself when failures occur
+      // This function only updates the state gauge
+    } catch (error) {
+      console.warn('Failed to update circuit breaker metrics:', error);
+    }
   }
 
   /**
@@ -147,12 +175,19 @@ class SystemAutomation {
   }
 
   /**
+   * Check stack health (alias for checkServiceHealth)
+   */
+  async checkStackHealth(): Promise<StackStatus> {
+    return this.checkServiceHealth();
+  }
+
+  /**
    * Check service health
    */
   async checkServiceHealth(): Promise<StackStatus> {
     const services = [
-      { name: 'n8n', url: process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678' },
-      { name: 'Ollama', url: process.env.OLLAMA_URL || 'http://localhost:11434' },
+      { name: 'n8n', url: process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678', healthPath: '/healthz' },
+      { name: 'Ollama', url: process.env.OLLAMA_URL || 'http://localhost:11434', healthPath: '/api/version' },
       { name: 'PostgreSQL', port: 5432 },
       { name: 'Redis', port: 6379 },
       { name: 'Caddy', port: 80 },
@@ -162,7 +197,8 @@ class SystemAutomation {
       services.map(async (service) => {
         try {
           if ('url' in service) {
-            const response = await fetch(`${service.url}/healthz`, {
+            const healthPath = 'healthPath' in service ? service.healthPath : '/healthz';
+            const response = await fetch(`${service.url}${healthPath}`, {
               signal: AbortSignal.timeout(5000)
             });
             return {
@@ -238,6 +274,10 @@ class SystemAutomation {
       
       // Update backup status
       await this.updateBackupStatus();
+      
+      // Update metrics
+      const metrics = getMetricsCollector();
+      metrics.incrementCounter('scorpion_backups_total');
       
       console.log('✅ Automatic backup completed');
     } catch (error) {
@@ -335,8 +375,6 @@ class SystemAutomation {
               timestamp: new Date().toISOString()
             }
           });
-        }
-
       } catch (error) {
         console.warn('⚠️ Could not read MCP config:', error);
       }
@@ -393,9 +431,19 @@ class SystemAutomation {
   private calculateOverallHealth(services: StackStatus['services']): 'healthy' | 'degraded' | 'critical' {
     const offline = services.filter(s => s.status === 'offline').length;
     const degraded = services.filter(s => s.status === 'degraded').length;
+    const total = services.length;
+    const online = total - offline - degraded;
     
-    if (offline > 0) return 'critical';
-    if (degraded > 0) return 'degraded';
+    // Critical: More than 50% offline or core services (n8n) offline
+    const coreServicesOffline = services.some(s => 
+      (s.name === 'n8n' || s.name === 'PostgreSQL') && s.status === 'offline'
+    );
+    if (coreServicesOffline || offline > total / 2) return 'critical';
+    
+    // Degraded: 1-2 services offline or any degraded
+    if (offline > 0 || degraded > 0) return 'degraded';
+    
+    // Healthy: All services online
     return 'healthy';
   }
 
@@ -427,24 +475,38 @@ class SystemAutomation {
 
   private async checkN8nErrors(): Promise<void> {
     try {
-      const n8nClient = new N8nClient(process.env.N8N_API_KEY);
+      const mcpClient = getMCPn8nClient();
       // Check recent n8n executions for errors
-      // This would require n8n API access to executions
+      // This would require n8n API access to executions via MCP
     } catch (error) {
       // Silent fail
     }
   }
 
   private async storeErrors(): Promise<void> {
-    const ontologyStore = await getOntologyStore();
-    for (const error of this.errorLog.slice(-10)) { // Store last 10 errors
-      await ontologyStore.store({
-          id: error.id,
-          type: 'Error',
-          createdAt: new Date(error.detectedAt),
-          updatedAt: new Date(error.detectedAt),
-          data: error
-        });
+    try {
+      const ontologyStore = await getOntologyStore();
+      for (const error of this.errorLog.slice(-10)) { // Store last 10 errors
+        try {
+          // Only store basic error info to avoid schema validation issues
+          await ontologyStore.store({
+            id: error.id,
+            type: 'Error',
+            createdAt: new Date(error.detectedAt),
+            updatedAt: new Date(error.detectedAt),
+            data: {
+              message: error.message,
+              severity: error.severity,
+              source: error.source,
+              detectedAt: error.detectedAt
+            }
+          });
+        } catch (storeError: any) {
+          console.error(`Failed to store error ${error.id}:`, storeError.message);
+        }
+      }
+    } catch (error: any) {
+      console.error('Failed to access ontology store:', error.message);
     }
   }
 
@@ -488,6 +550,13 @@ class SystemAutomation {
 
   private async updateDatabaseSyncStatus(): Promise<void> {
     // Update database sync status
+  }
+
+  /**
+   * Get recent errors (public method for health checks)
+   */
+  getErrors(): ErrorReport[] {
+    return this.errorLog.slice(-50); // Last 50 errors
   }
 
   private async getRecentErrors(): Promise<ErrorReport[]> {

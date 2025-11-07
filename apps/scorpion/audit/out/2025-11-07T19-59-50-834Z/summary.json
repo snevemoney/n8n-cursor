@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-11-07T19:59:54.925Z",
+  "pagesAudited": 1,
+  "consoleErrors": 0,
+  "consoleWarnings": 0,
+  "networkFailures": 0,
+  "pageErrors": 0,
+  "totalIssues": 0,
+  "artifactsLocation": "audit/out/2025-11-07T19-59-50-834Z"
+}

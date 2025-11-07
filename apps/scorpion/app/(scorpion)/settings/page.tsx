@@ -1,16 +1,102 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Panel } from '@/components/scorpion';
+import { Save } from 'lucide-react';
 
 export default function SettingsPage() {
   const [ragIndexing, setRagIndexing] = useState(true);
   const [autoTrigger, setAutoTrigger] = useState(false);
+  const [councilAutoContext, setCouncilAutoContext] = useState(true);
   const [modelSource, setModelSource] = useState('ollama');
   const [ollamaUrl, setOllamaUrl] = useState('http://localhost:11434');
+  const [openaiKey, setOpenaiKey] = useState('');
+  const [entityRetention, setEntityRetention] = useState('90 days');
+  const [ragModel, setRagModel] = useState('nomic-embed-text');
+  const [maxAgents, setMaxAgents] = useState(4);
+  const [requestTimeout, setRequestTimeout] = useState(30000);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load settings on mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const data = await response.json();
+        // Update state with loaded settings
+        if (data.ragIndexing !== undefined) setRagIndexing(data.ragIndexing);
+        if (data.autoTrigger !== undefined) setAutoTrigger(data.autoTrigger);
+        if (data.councilAutoContext !== undefined) setCouncilAutoContext(data.councilAutoContext);
+        if (data.modelSource) setModelSource(data.modelSource);
+        if (data.ollamaUrl) setOllamaUrl(data.ollamaUrl);
+        if (data.openaiKey) setOpenaiKey(data.openaiKey);
+        if (data.entityRetention) setEntityRetention(data.entityRetention);
+        if (data.ragModel) setRagModel(data.ragModel);
+        if (data.maxAgents !== undefined) setMaxAgents(data.maxAgents);
+        if (data.requestTimeout !== undefined) setRequestTimeout(data.requestTimeout);
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const settings = {
+        ragIndexing,
+        autoTrigger,
+        councilAutoContext,
+        modelSource,
+        ollamaUrl,
+        openaiKey,
+        entityRetention,
+        ragModel,
+        maxAgents,
+        requestTimeout
+      };
+      
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+      
+      if (response.ok) {
+        alert('Settings saved successfully!');
+      } else {
+        throw new Error('Failed to save');
+      }
+    } catch (error) {
+      alert('Failed to save settings');
+      console.error('Save error:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="h-full grid grid-cols-2 gap-4 p-4 overflow-y-auto">
+    <div className="h-full overflow-y-auto p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Settings</h1>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-sm hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <Save className="w-4 h-4" />
+          {saving ? 'Saving...' : 'Save Settings'}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
       <Panel title="Model Configuration">
         <div className="space-y-3">
           <div>
@@ -39,6 +125,8 @@ export default function SettingsPage() {
               <label className="sc-title block mb-1">OpenAI API Key</label>
               <input
                 type="password"
+                value={openaiKey}
+                onChange={(e) => setOpenaiKey(e.target.value)}
                 placeholder="sk-..."
                 className="w-full bg-white/5 border border-white/5 rounded-sm px-3 py-2 text-sm sc-mono focus:outline-none focus:border-emerald-400/50 text-white placeholder-white/30"
               />
@@ -80,7 +168,8 @@ export default function SettingsPage() {
             </div>
             <input 
               type="checkbox" 
-              defaultChecked
+              checked={councilAutoContext}
+              onChange={(e) => setCouncilAutoContext(e.target.checked)}
               className="w-4 h-4 accent-emerald-500"
             />
           </div>
@@ -91,7 +180,11 @@ export default function SettingsPage() {
         <div className="space-y-3">
           <div>
             <label className="sc-title block mb-1">Entity Retention</label>
-            <select className="w-full bg-white/5 border border-white/5 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-emerald-400/50 text-white">
+            <select 
+              value={entityRetention}
+              onChange={(e) => setEntityRetention(e.target.value)}
+              className="w-full bg-white/5 border border-white/5 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-emerald-400/50 text-white"
+            >
               <option>30 days</option>
               <option>90 days</option>
               <option>1 year</option>
@@ -100,7 +193,11 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className="sc-title block mb-1">RAG Embedding Model</label>
-            <select className="w-full bg-white/5 border border-white/5 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-emerald-400/50 text-white">
+            <select 
+              value={ragModel}
+              onChange={(e) => setRagModel(e.target.value)}
+              className="w-full bg-white/5 border border-white/5 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-emerald-400/50 text-white"
+            >
               <option>nomic-embed-text</option>
               <option>all-minilm</option>
             </select>
@@ -114,7 +211,10 @@ export default function SettingsPage() {
             <div className="sc-title mb-1">Max Concurrent Agents</div>
             <input
               type="number"
-              defaultValue={4}
+              value={maxAgents}
+              onChange={(e) => setMaxAgents(parseInt(e.target.value) || 4)}
+              min={1}
+              max={16}
               className="w-full bg-white/5 border border-white/5 rounded-sm px-3 py-2 text-sm sc-mono focus:outline-none focus:border-emerald-400/50 text-white"
             />
           </div>
@@ -122,12 +222,17 @@ export default function SettingsPage() {
             <div className="sc-title mb-1">Request Timeout (ms)</div>
             <input
               type="number"
-              defaultValue={30000}
+              value={requestTimeout}
+              onChange={(e) => setRequestTimeout(parseInt(e.target.value) || 30000)}
+              min={1000}
+              max={120000}
+              step={1000}
               className="w-full bg-white/5 border border-white/5 rounded-sm px-3 py-2 text-sm sc-mono focus:outline-none focus:border-emerald-400/50 text-white"
             />
           </div>
         </div>
       </Panel>
+      </div>
     </div>
   );
 }

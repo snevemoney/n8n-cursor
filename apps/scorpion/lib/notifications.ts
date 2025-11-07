@@ -190,6 +190,13 @@ class NotificationSystem {
   }
 
   /**
+   * Get notifications requiring action
+   */
+  getNotificationsRequiringAction(): Notification[] {
+    return this.notifications.filter(n => n.requiresApproval && !n.approvedAt && !n.dismissedAt);
+  }
+
+  /**
    * Get pending approvals
    */
   getPendingApprovals(): PendingApproval[] {

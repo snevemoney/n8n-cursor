@@ -13,6 +13,7 @@ interface Workflow {
   syncedToN8n: boolean;
   n8nId?: string;
   lastSync?: string;
+  source?: 'filesystem' | 'n8n';
 }
 
 export default function WorkflowsPage() {
@@ -23,6 +24,8 @@ export default function WorkflowsPage() {
     synced: number;
     active: number;
     inN8n: number;
+    filesystemOnly?: number;
+    n8nOnly?: number;
   } | null>(null);
 
   useEffect(() => {
@@ -94,7 +97,7 @@ export default function WorkflowsPage() {
       {/* Summary */}
       {summary && (
         <Panel title="Summary">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-6 gap-4">
             <div>
               <div className="sc-title mb-1">Total</div>
               <div className="text-2xl font-semibold">{summary.total}</div>
@@ -109,7 +112,15 @@ export default function WorkflowsPage() {
             </div>
             <div>
               <div className="sc-title mb-1">In n8n</div>
-              <div className="text-2xl font-semibold">{summary.inN8n}</div>
+              <div className="text-2xl font-semibold text-blue-400">{summary.inN8n}</div>
+            </div>
+            <div>
+              <div className="sc-title mb-1">Filesystem Only</div>
+              <div className="text-2xl font-semibold text-yellow-400">{summary.filesystemOnly || 0}</div>
+            </div>
+            <div>
+              <div className="sc-title mb-1">n8n Only</div>
+              <div className="text-2xl font-semibold text-purple-400">{summary.n8nOnly || 0}</div>
             </div>
           </div>
         </Panel>
@@ -127,7 +138,16 @@ export default function WorkflowsPage() {
             { key: 'path', label: 'Path' }
           ]}
           data={workflows.map(w => ({
-            name: w.name,
+            name: (
+              <div className="flex items-center gap-2">
+                {w.name}
+                {w.source === 'n8n' && (
+                  <span className="text-xs px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded border border-purple-500/30">
+                    n8n
+                  </span>
+                )}
+              </div>
+            ),
             trigger: w.trigger || 'Manual',
             nodes: w.nodes.toString(),
             status: (
@@ -137,15 +157,20 @@ export default function WorkflowsPage() {
             ),
             sync: (
               <div className="flex items-center gap-2">
-                {w.syncedToN8n ? (
+                {w.source === 'n8n' ? (
+                  <>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <span className="text-xs text-purple-400">n8n Only</span>
+                  </>
+                ) : w.syncedToN8n ? (
                   <>
                     <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
                     <span className="text-xs text-emerald-400">Synced</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-2 h-2 bg-white/20 rounded-full"></div>
-                    <span className="text-xs text-white/40">Not Synced</span>
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                    <span className="text-xs text-yellow-400">Filesystem Only</span>
                   </>
                 )}
               </div>

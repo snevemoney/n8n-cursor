@@ -3,6 +3,8 @@ import { runModel, checkModelAvailability, listModels, getUserContextPrompt } fr
 import { getRAGStore } from '@/lib/shared-stores';
 import { getTrainingDataCollector } from '@/lib/fine-tuning/collector';
 import { withRateLimit, getClientIdentifier } from '@/lib/rate-limiter';
+import { getMetricsCollector } from '@/lib/metrics';
+import { trace } from '@/lib/tracing';
 
 /**
  * Unified chat endpoint - works with any model source
@@ -11,75 +13,106 @@ import { withRateLimit, getClientIdentifier } from '@/lib/rate-limiter';
 export const POST = withRateLimit(
   async (request: Request) => {
     const req = request as NextRequest;
-    try {
-    const { message, useRAG = true, model } = await request.json(); // Default to true
-
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Missing message' },
-        { status: 400 }
-      );
-    }
-
-    // Load user context
-    const systemPrompt = getUserContextPrompt();
-
-    // Always inject RAG context (unless explicitly disabled)
-    let enhancedPrompt = message;
-    let ragContext: string[] = [];
+    const startTime = Date.now();
+    const metrics = getMetricsCollector();
     
-    if (useRAG) {
-      try {
-        const store = await getRAGStore();
-        const relevantKnowledge = await store.search(message, 5); // Get more context
-        
-        if (relevantKnowledge.length > 0) {
-          ragContext = relevantKnowledge.map(k => `${k.title}: ${k.description}`);
-          const context = ragContext.join('\n');
-          
-          enhancedPrompt = `Context from knowledge base:\n${context}\n\nUser question: ${message}`;
-        }
-      } catch (error) {
-        console.warn('RAG context injection failed, continuing without it:', error);
-      }
-    }
-
-    // Run model through adapter
-    const response = await runModel({
-      prompt: enhancedPrompt,
-      system: systemPrompt,
-      model,
-      temperature: 0.7
-    });
-
-    // Collect training data (async, don't wait)
     try {
-      const collector = getTrainingDataCollector();
-      await collector.collectInteraction(
-        message,
-        response.content,
-        {
-          ragContext,
-          userFeedback: undefined, // Will be set if user provides feedback
-          metadata: {
-            model: response.model,
-            usage: response.usage,
-            timestamp: new Date().toISOString()
+      return await trace('chat.request', async (spanId) => {
+        const { message, useRAG = true, model } = await request.json(); // Default to true
+
+        if (!message) {
+          return NextResponse.json(
+            { error: 'Missing message' },
+            { status: 400 }
+          );
+        }
+
+        // Load user context
+        const systemPrompt = getUserContextPrompt();
+
+        // Always inject RAG context (unless explicitly disabled)
+        let enhancedPrompt = message;
+        let ragContext: string[] = [];
+        
+        if (useRAG) {
+          try {
+            const store = await getRAGStore();
+            const relevantKnowledge = await store.search(message, 5); // Get more context
+            
+            if (relevantKnowledge.length > 0) {
+              ragContext = relevantKnowledge.map(k => `${k.title}: ${k.description}`);
+              const context = ragContext.join('\n');
+              
+              enhancedPrompt = `Context from knowledge base:\n${context}\n\nUser question: ${message}`;
+            }
+          } catch (error) {
+            console.warn('RAG context injection failed, continuing without it:', error);
           }
         }
-      );
-    } catch (error) {
-      console.warn('Failed to collect training data:', error);
-      // Don't fail the request if training data collection fails
-    }
 
-    return NextResponse.json({
-      message: response.content,
-      model: response.model,
-      usage: response.usage,
-      ragUsed: useRAG && ragContext.length > 0
-    });
+        // Run model through adapter
+        const response = await runModel({
+          prompt: enhancedPrompt,
+          system: systemPrompt,
+          model,
+          temperature: 0.7
+        });
+
+        // Collect training data (async, don't wait)
+        try {
+          const collector = getTrainingDataCollector();
+          await collector.collectInteraction(
+            message,
+            response.content,
+            {
+              ragContext,
+              userFeedback: undefined, // Will be set if user provides feedback
+              metadata: {
+                model: response.model,
+                usage: response.usage,
+                timestamp: new Date().toISOString()
+              }
+            }
+          );
+        } catch (error) {
+          console.warn('Failed to collect training data:', error);
+          // Don't fail the request if training data collection fails
+        }
+
+        const duration = (Date.now() - startTime) / 1000;
+        metrics.incrementCounter('scorpion_api_requests_total', {
+          method: 'POST',
+          endpoint: '/api/chat',
+          status: '200'
+        });
+        metrics.observeHistogram('scorpion_api_request_duration_seconds', duration, {
+          method: 'POST',
+          endpoint: '/api/chat'
+        });
+
+        return NextResponse.json({
+          message: response.content,
+          model: response.model,
+          usage: response.usage,
+          ragUsed: useRAG && ragContext.length > 0
+        });
+      }, { useRAG: String(useRAG), model: model || 'default' });
     } catch (error: any) {
+      const duration = (Date.now() - startTime) / 1000;
+      metrics.incrementCounter('scorpion_api_requests_total', {
+        method: 'POST',
+        endpoint: '/api/chat',
+        status: '500'
+      });
+      metrics.observeHistogram('scorpion_api_request_duration_seconds', duration, {
+        method: 'POST',
+        endpoint: '/api/chat',
+        status: 'error'
+      });
+      metrics.incrementCounter('scorpion_errors_total', {
+        severity: 'high',
+        source: 'chat-api'
+      });
       console.error('Chat error:', error);
       return NextResponse.json(
         { error: error.message || 'Failed to get response from model' },

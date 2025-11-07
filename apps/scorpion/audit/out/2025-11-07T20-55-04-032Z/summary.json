@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-11-07T20:56:07.384Z",
+  "pagesAudited": 22,
+  "totalConsoleErrors": 2,
+  "totalConsoleWarnings": 0,
+  "totalNetworkFailures": 2,
+  "totalPageCrashes": 0,
+  "totalIssues": 4,
+  "pagesWithErrors": 1,
+  "pagesWithWarnings": 0,
+  "pagesWithNetworkFailures": 1,
+  "pagesWithCrashes": 0,
+  "slowestPages": [
+    {
+      "url": "http://localhost:3003/",
+      "loadTime": 3727
+    },
+    {
+      "url": "http://localhost:3003/agents",
+      "loadTime": 2579
+    },
+    {
+      "url": "http://localhost:3003/notifications",
+      "loadTime": 2296
+    },
+    {
+      "url": "http://localhost:3003/knowledge",
+      "loadTime": 2287
+    },
+    {
+      "url": "http://localhost:3003/build",
+      "loadTime": 2070
+    }
+  ],
+  "artifactsLocation": "audit/out/2025-11-07T20-55-04-032Z"
+}

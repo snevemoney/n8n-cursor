@@ -5,6 +5,7 @@ const nextConfig = {
   experimental: {
     instrumentationHook: true,
   },
+  transpilePackages: ['@scorpion/core'],
 }
 
 module.exports = nextConfig

@@ -14,7 +14,11 @@ import {
   Bot, 
   FileText, 
   Settings,
-  Bell
+  Bell,
+  Search,
+  MessageSquare,
+  Eye,
+  ShoppingCart
 } from 'lucide-react';
 
 export default function ScorpionLayout({ children }: { children: React.ReactNode }) {
@@ -27,14 +31,18 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
+    { href: '/dashboard', label: 'Dashboard', icon: Activity },
     { href: '/project', label: 'Project', icon: Activity },
     { href: '/ops', label: 'Operations', icon: Activity },
     { href: '/workflows', label: 'Workflows', icon: Workflow },
     { href: '/build', label: 'Build', icon: Sparkles },
     { href: '/knowledge', label: 'Knowledge', icon: Database },
+    { href: '/research', label: 'Research', icon: Search },
     { href: '/council', label: 'Council', icon: Users },
     { href: '/agents', label: 'Agents', icon: Bot },
-    { href: '/chat', label: 'Chat', icon: Bot },
+    { href: '/chat', label: 'Chat AGI', icon: MessageSquare, badge: 'New' },
+    { href: '/observability', label: 'Observability', icon: Eye, badge: 'Live' },
+    { href: '/selling', label: 'Selling', icon: ShoppingCart },
     { href: '/notifications', label: 'Notifications', icon: Bell },
     { href: '/logs', label: 'System Logs', icon: FileText },
     { href: '/settings', label: 'Settings', icon: Settings },
@@ -57,7 +65,7 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 px-2 py-1.5 rounded-sm text-[13px] transition-colors ${
+                className={`flex items-center gap-2 px-2 py-1.5 rounded-sm text-[13px] transition-colors relative ${
                   isActive
                     ? 'bg-white/10 text-white'
                     : 'text-white/70 hover:bg-white/5 hover:text-white'
@@ -65,6 +73,11 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
               >
                 <Icon className="w-4 h-4" />
                 {item.label}
+                {'badge' in item && (
+                  <span className="ml-auto px-1.5 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}

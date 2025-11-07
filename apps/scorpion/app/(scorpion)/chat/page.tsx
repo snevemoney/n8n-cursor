@@ -1,338 +1,337 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Panel } from '@/components/scorpion';
-import { Send, Bot, User, Loader2, AlertCircle, Edit2, Check, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useChatStore } from '@/lib/chat/chatStore';
+import { ConversationList } from '@/components/chat/ConversationList';
+import { MessageList } from '@/components/chat/MessageList';
+import { Composer } from '@/components/chat/Composer';
+import { PlanTimeline } from '@/components/chat/PlanTimeline';
+import { CouncilPanel } from '@/components/chat/CouncilPanel';
+import { KnowledgePanel } from '@/components/chat/KnowledgePanel';
+import { ToolCallCard } from '@/components/chat/ToolCallCard';
+import type { CouncilVote } from '@/lib/chat/types';
+import { Settings } from 'lucide-react';
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
-
-interface ModelInfo {
-  available: boolean;
-  source: string;
-  models: string[];
-}
-
+/**
+ * Chat-AGI Page - Integrated with Scorpion layout
+ */
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [models, setModels] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>('');
-  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
-  const [correctingId, setCorrectingId] = useState<string | null>(null);
-  const [correction, setCorrection] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  const {
+    currentConversation,
+    conversations,
+    messages,
+    addConversation,
+    addMessage,
+    updateMessage,
+    setCurrentConversation,
+    setStreaming,
+    provider,
+    model,
+    setProvider,
+    setModel,
+  } = useChatStore();
+  
+  const [streamingContent, setStreamingContent] = useState('');
+  const [planSteps, setPlanSteps] = useState<any[]>([]);
+  const [councilVotes, setCouncilVotes] = useState<CouncilVote[]>([]);
+  const [knowledgeHits, setKnowledgeHits] = useState<any[]>([]);
+  const [toolCalls, setToolCalls] = useState<any[]>([]);
+  const [activePanel, setActivePanel] = useState<'plan' | 'council' | 'tools' | 'knowledge'>('plan');
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // Initialize and load persisted data
   useEffect(() => {
-    checkModelStatus();
+    // Load persisted conversations
+    useChatStore.getState().loadPersistedData();
+    
+    // Create first conversation if none exist
+    const state = useChatStore.getState();
+    if (state.conversations.length === 0) {
+      handleNewConversation();
+    } else if (!state.currentConversation) {
+      // Select most recent conversation
+      setCurrentConversation(state.conversations[0].id);
+    }
   }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const checkModelStatus = async () => {
+  
+  const handleNewConversation = () => {
+    const newConv = {
+      id: uuidv4(),
+      title: 'New Chat',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    addConversation(newConv);
+  };
+  
+  const handleSend = async (content: string) => {
+    if (!currentConversation) return;
+    
+    // Add user message
+    const userMsg = {
+      id: uuidv4(),
+      role: 'user' as const,
+      content,
+      ts: Date.now(),
+    };
+    addMessage(currentConversation, userMsg);
+    
+    // Reset state
+    setStreamingContent('');
+    setPlanSteps([]);
+    setCouncilVotes([]);
+    setKnowledgeHits([]);
+    setToolCalls([]);
+    setStreaming(true);
+    
     try {
-      const response = await fetch('/api/chat');
-      if (response.ok) {
-        const data = await response.json();
-        setModelInfo(data);
-        setModels(data.models || []);
-        if (data.models && data.models.length > 0 && !selectedModel) {
-          setSelectedModel(data.models[0]);
+      // Connect to streaming API
+      const response = await fetch('/api/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: currentConversation,
+          messages: [userMsg],
+          provider,
+          model,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      // Handle SSE stream
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
+      
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let assistantContent = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          
+          try {
+            const event = JSON.parse(line.slice(6));
+            
+            switch (event.type) {
+              case 'delta':
+                assistantContent += event.data.content;
+                setStreamingContent(assistantContent);
+                break;
+                
+              case 'plan_step':
+                setPlanSteps(prev => {
+                  const existing = prev.find(s => s.id === event.data.id);
+                  if (existing) {
+                    return prev.map(s => s.id === event.data.id ? { ...s, ...event.data } : s);
+                  }
+                  return [...prev, event.data];
+                });
+                break;
+                
+              case 'council_vote':
+                setCouncilVotes(prev => [...prev, event.data]);
+                break;
+                
+              case 'tool':
+                setToolCalls(prev => {
+                  const existing = prev.find(t => t.callId === event.data.callId);
+                  if (existing) {
+                    return prev.map(t => t.callId === event.data.callId ? { ...t, ...event.data } : t);
+                  }
+                  return [...prev, event.data];
+                });
+                break;
+                
+              case 'status':
+                // Update active panel based on phase
+                if (event.data.phase === 'planning') setActivePanel('plan');
+                else if (event.data.phase === 'council') setActivePanel('council');
+                else if (event.data.phase === 'executing') setActivePanel('tools');
+                break;
+                
+              case 'done':
+                // Add final assistant message
+                addMessage(currentConversation, {
+                  id: event.data.messageId,
+                  role: 'assistant' as const,
+                  content: assistantContent,
+                  ts: Date.now(),
+                });
+                setStreamingContent('');
+                break;
+                
+              case 'error':
+                console.error('[Chat] Error:', event.data.message);
+                break;
+            }
+          } catch (error) {
+            console.error('[Chat] Failed to parse event:', error);
+          }
         }
       }
-    } catch (error) {
-      console.error('Failed to check model status:', error);
-    }
-  };
-
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      role: 'user',
-      content: input,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: input,
-          useRAG: true,
-          model: selectedModel || undefined
-        })
+    } catch (error: any) {
+      console.error('[Chat] Stream error:', error);
+      addMessage(currentConversation, {
+        id: uuidv4(),
+        role: 'assistant' as const,
+        content: `Error: ${error.message}`,
+        ts: Date.now(),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Chat request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      const assistantMessage: Message = {
-        id: `msg-${Date.now()}`,
-        role: 'assistant',
-        content: data.message,
-        timestamp: new Date(),
-        canCorrect: true,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      const errorMsg = error instanceof Error
-        ? error.message
-        : 'Failed to get response. Check your model configuration.';
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: `Error: ${errorMsg}`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      setIsLoading(false);
+      setStreaming(false);
     }
   };
-
-  const handleCorrect = async (messageId: string, originalInput: string, wrongOutput: string, correctedOutput: string) => {
-    try {
-      await fetch('/api/chat/correct', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          originalInput,
-          wrongOutput,
-          correctedOutput,
-          correction: 'User correction via chat interface'
-        })
-      });
-      
-      // Update the message to show it was corrected
-      setMessages((prev) => prev.map(msg => 
-        msg.id === messageId 
-          ? { ...msg, content: correctedOutput, canCorrect: false }
-          : msg
-      ));
-      
-      setCorrectingId(null);
-      setCorrection('');
-    } catch (error) {
-      console.error('Failed to submit correction:', error);
-    }
-  };
-
+  
+  const currentMessages = currentConversation ? messages[currentConversation] || [] : [];
+  
   return (
-    <div className="h-full flex flex-col p-4 overflow-hidden">
-      {/* Header */}
-      <Panel className="mb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="sc-title mb-1">Chat Interface</div>
-            <div className="text-sm">Direct communication with Scorpion AI</div>
+    <div className="h-full flex flex-col">
+      {/* Top Bar with Model Settings */}
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/5">
+        <div>
+          <h1 className="text-xl font-semibold text-white">Chat AGI</h1>
+          <p className="text-sm text-white/40 mt-0.5">
+            AI-powered conversational interface with council deliberation
+          </p>
+        </div>
+        
+        {/* Model Configuration */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-white/60">Provider</label>
+            <select
+              value={provider}
+              onChange={(e) => setProvider(e.target.value as any)}
+              className="px-3 py-1.5 bg-[#0f1318] border border-white/10 rounded text-sm text-white focus:outline-none focus:border-emerald-400/50"
+            >
+              <option value="ollama">Ollama</option>
+              <option value="openai">OpenAI</option>
+              <option value="azure">Azure</option>
+              <option value="local">Local</option>
+            </select>
           </div>
-          <div className="flex items-center gap-4">
-            {modelInfo && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-white/40">Source:</span>
-                <span className="text-white capitalize sc-mono">{modelInfo.source}</span>
-              </div>
-            )}
-            {models.length > 0 && (
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="bg-white/5 border border-white/5 rounded-sm px-3 py-1 text-sm focus:outline-none focus:border-emerald-400/50 text-white"
+          
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-white/60">Model</label>
+            <input
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder="qwen2.5-coder"
+              className="w-48 px-3 py-1.5 bg-[#0f1318] border border-white/10 rounded text-sm text-white focus:outline-none focus:border-emerald-400/50"
+            />
+          </div>
+          
+          <div className="h-6 w-px bg-white/10" />
+          
+          <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 px-2 py-1 rounded text-xs ${
+              true ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                true ? 'bg-emerald-400' : 'bg-red-400'
+              }`} />
+              Connected
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left: Conversation List */}
+        <ConversationList
+          conversations={conversations}
+          currentId={currentConversation}
+          onSelect={setCurrentConversation}
+          onNew={handleNewConversation}
+          onDelete={(id) => useChatStore.getState().deleteConversation(id)}
+        />
+        
+        {/* Center: Chat Messages */}
+        <div className="flex-1 flex flex-col bg-[#0a0e13]">
+          <MessageList messages={currentMessages} streamingContent={streamingContent} />
+          <Composer onSend={handleSend} />
+        </div>
+        
+        {/* Right: Side Panels */}
+        <div className="w-80 border-l border-white/5 bg-[#0a0e13] flex flex-col">
+          {/* Panel Tabs */}
+          <div className="flex border-b border-white/5">
+            {(['plan', 'council', 'tools', 'knowledge'] as const).map((panel) => (
+              <button
+                key={panel}
+                onClick={() => setActivePanel(panel)}
+                className={`flex-1 px-4 py-3 text-xs font-medium uppercase tracking-wide transition-colors ${
+                  activePanel === panel
+                    ? 'text-emerald-400 border-b-2 border-emerald-400 bg-emerald-400/5'
+                    : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+                }`}
               >
-                {models.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-              </select>
+                {panel}
+              </button>
+            ))}
+          </div>
+          
+          {/* Panel Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {activePanel === 'plan' && (
+              planSteps.length > 0 ? (
+                <PlanTimeline steps={planSteps} />
+              ) : (
+                <div className="text-center text-white/40 text-sm py-8">
+                  No plan steps yet
+                </div>
+              )
             )}
-            {modelInfo?.available === true && (
-              <div className="flex items-center gap-2 text-emerald-300 text-sm">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                Connected
-              </div>
+            
+            {activePanel === 'council' && (
+              councilVotes.length > 0 ? (
+                <CouncilPanel votes={councilVotes} />
+              ) : (
+                <div className="text-center text-white/40 text-sm py-8">
+                  No council votes yet
+                </div>
+              )
             )}
-            {modelInfo?.available === false && (
-              <div className="flex items-center gap-2 text-red-300 text-sm">
-                <AlertCircle className="h-4 w-4" />
-                Disconnected
-              </div>
+            
+            {activePanel === 'tools' && (
+              toolCalls.length > 0 ? (
+                <div className="space-y-2">
+                  {toolCalls.map((tool, i) => (
+                    <ToolCallCard key={i} {...tool} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-white/40 text-sm py-8">
+                  No tool calls yet
+                </div>
+              )
+            )}
+            
+            {activePanel === 'knowledge' && (
+              knowledgeHits.length > 0 ? (
+                <KnowledgePanel hits={knowledgeHits} />
+              ) : (
+                <div className="text-center text-white/40 text-sm py-8">
+                  No knowledge hits yet
+                </div>
+              )
             )}
           </div>
         </div>
-      </Panel>
-
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto mb-4">
-        {messages.length === 0 ? (
-          <Panel>
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <Bot className="h-16 w-16 text-white/20 mb-4" />
-              <h2 className="text-2xl font-semibold mb-2">Start a conversation</h2>
-              <p className="text-gray-400 mb-6">
-                {modelInfo?.available
-                  ? `Select a model and start chatting with ${modelInfo.source}`
-                  : 'Model service is not available. Check your configuration.'}
-              </p>
-            </div>
-          </Panel>
-        ) : (
-          <div className="space-y-4">
-            {messages.map((message, idx) => (
-              <div
-                key={message.id || idx}
-                className={`flex gap-4 ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                {message.role === 'assistant' && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-emerald-400" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[80%] rounded-sm p-4 border ${
-                    message.role === 'user'
-                      ? 'bg-emerald-500/20 border-emerald-400/50 text-white'
-                      : 'bg-[#0f1318] border-white/5 text-gray-100'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="text-xs opacity-70 sc-mono">
-                      {message.timestamp.toLocaleTimeString()}
-                    </div>
-                    {message.role === 'assistant' && message.canCorrect && (
-                      <button
-                        onClick={() => {
-                          setCorrectingId(message.id || `msg-${idx}`);
-                          setCorrection(message.content);
-                        }}
-                        className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1"
-                      >
-                        <Edit2 size={12} />
-                        Correct
-                      </button>
-                    )}
-                  </div>
-                  {correctingId === (message.id || `msg-${idx}`) && (
-                    <div className="mt-3 pt-3 border-t border-white/10">
-                      <div className="text-xs text-white/60 mb-2">Provide correction:</div>
-                      <textarea
-                        value={correction}
-                        onChange={(e) => setCorrection(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-sm px-2 py-1 text-sm text-white mb-2"
-                        rows={3}
-                        placeholder="Enter corrected response..."
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => {
-                            const userMsg = messages[idx - 1];
-                            if (userMsg && userMsg.role === 'user') {
-                              handleCorrect(
-                                message.id || `msg-${idx}`,
-                                userMsg.content,
-                                message.content,
-                                correction
-                              );
-                            }
-                          }}
-                          className="px-2 py-1 text-xs bg-emerald-500/20 border border-emerald-500/50 rounded hover:bg-emerald-500/30 text-emerald-300 flex items-center gap-1"
-                        >
-                          <Check size={12} />
-                          Submit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setCorrectingId(null);
-                            setCorrection('');
-                          }}
-                          className="px-2 py-1 text-xs bg-white/5 border border-white/10 rounded hover:bg-white/10 text-white/60 flex items-center gap-1"
-                        >
-                          <X size={12} />
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {message.role === 'user' && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                    <User className="h-4 w-4 text-white/40" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex gap-4 justify-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-emerald-400" />
-                </div>
-                <div className="bg-[#0f1318] border border-white/5 rounded-sm p-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-emerald-400" />
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
       </div>
-
-      {/* Input Area */}
-      <Panel>
-        <form onSubmit={handleSend} className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              modelInfo?.available && selectedModel
-                ? `Message ${selectedModel}...`
-                : modelInfo?.available
-                  ? 'Select a model first...'
-                  : 'Model not available...'
-            }
-            disabled={!modelInfo?.available || isLoading}
-            className="flex-1 bg-white/5 border border-white/5 rounded-sm px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading || !modelInfo?.available}
-            className="bg-emerald-500/20 hover:bg-emerald-500/30 disabled:bg-white/5 disabled:cursor-not-allowed border border-emerald-400/50 px-6 py-3 rounded-sm font-medium transition-colors flex items-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4" />
-                Send
-              </>
-            )}
-          </button>
-        </form>
-      </Panel>
     </div>
   );
 }

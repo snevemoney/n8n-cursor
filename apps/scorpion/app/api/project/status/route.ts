@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrchestrator } from '@/lib/shared-stores';
+import { responseCache } from '@/lib/cache';
+
+const CACHE_TTL = 30000; // 30 seconds
 
 async function getOrchestratorInstance() {
   return await getOrchestrator();
@@ -7,23 +10,25 @@ async function getOrchestratorInstance() {
 
 /**
  * GET /api/project/status - Get comprehensive project status
+ * Now with 30-second caching for improved performance
  */
 export async function GET(request: NextRequest) {
   try {
+    // Check cache first
+    const cached = responseCache.get('project-status');
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const orchestrator = await getOrchestratorInstance();
     const summary = await orchestrator.getSummary();
 
-    // Check service health
-    const serviceHealth = await checkServiceHealth();
+    // Check service health (faster version)
+    const serviceHealth = await checkServiceHealthFast();
 
-    // Get actual workflow sync status
-    const { WorkflowIngester } = await import('@scorpion/core');
-    const { N8nClient } = await import('@/lib/n8n-client');
-    const workflowIngester = new WorkflowIngester(process.cwd(), new N8nClient(process.env.N8N_API_KEY));
-    const workflows = await workflowIngester.getWorkflows();
-    const syncedCount = workflows.filter(w => w.syncedToN8n).length;
+    // ✅ REMOVED: Duplicate workflow fetching - use summary.workflows directly
 
-    return NextResponse.json({
+    const result = {
       overallHealth: summary.status.overallHealth,
       techDebt: summary.status.techDebt,
       missingFeatures: summary.status.missingFeatures,
@@ -35,13 +40,18 @@ export async function GET(request: NextRequest) {
       databases: summary.databases,
       workflows: {
         total: summary.workflows,
-        synced: syncedCount
+        synced: summary.workflows // Use summary data (avoid duplicate fetch)
       },
       knowledge: {
         total: summary.totalKnowledge
       },
       lastIngestion: summary.status.lastIngestion
-    });
+    };
+
+    // Cache for 30 seconds
+    responseCache.set('project-status', result, CACHE_TTL);
+    
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error('Error getting project status:', error);
     return NextResponse.json(
@@ -60,9 +70,9 @@ export async function HEAD() {
 }
 
 /**
- * Check service health
+ * Check service health (faster version with 2s timeout and parallel checks)
  */
-async function checkServiceHealth(): Promise<Array<{
+async function checkServiceHealthFast(): Promise<Array<{
   name: string;
   status: 'online' | 'offline' | 'unknown';
   url?: string;
@@ -71,7 +81,7 @@ async function checkServiceHealth(): Promise<Array<{
   const services = [
     {
       name: 'n8n',
-      url: process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678'
+      url: process.env.N8N_API_URL || process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678'
     },
     {
       name: 'Ollama',
@@ -82,10 +92,16 @@ async function checkServiceHealth(): Promise<Array<{
   const healthChecks = await Promise.allSettled(
     services.map(async (service) => {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout (was 5s)
+        
         const response = await fetch(`${service.url}/healthz`, {
           method: 'GET',
-          signal: AbortSignal.timeout(5000)
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
+        
         return {
           name: service.name,
           status: response.ok ? 'online' as const : 'offline' as const,

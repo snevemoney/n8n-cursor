@@ -25,6 +25,8 @@ export default function CouncilPage() {
   const [result, setResult] = useState<CouncilResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState<CouncilMember[]>([]);
+  const [liveResponses, setLiveResponses] = useState<CouncilMember[]>([]);
+  const [currentSpeaker, setCurrentSpeaker] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/council')
@@ -36,6 +38,10 @@ export default function CouncilPage() {
   async function runCouncil() {
     if (!topic.trim() || loading) return;
     setLoading(true);
+    setResult(null);
+    setLiveResponses([]);
+    setCurrentSpeaker(null);
+    
     try {
       const res = await fetch('/api/council', {
         method: 'POST',
@@ -43,11 +49,44 @@ export default function CouncilPage() {
         body: JSON.stringify({ topic }),
       });
       const data = await res.json();
+      
+      // Validate response structure
+      if (data.error) {
+        console.error('Council error:', data.error);
+        alert(`Council meeting failed: ${data.error}`);
+        setLoading(false);
+        return;
+      }
+      
+      if (!data.consensus || !data.members) {
+        console.error('Invalid council response:', data);
+        alert('Received invalid response from council. Please try again.');
+        setLoading(false);
+        return;
+      }
+      
+      // Simulate real-time agent responses streaming in
+      const agentResponses = data.members;
+      for (let i = 0; i < agentResponses.length; i++) {
+        setCurrentSpeaker(agentResponses[i].name);
+        
+        // Simulate thinking time (500-1500ms per agent)
+        await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+        
+        setLiveResponses(prev => [...prev, agentResponses[i]]);
+        setCurrentSpeaker(null);
+        
+        // Small delay before next agent
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
       setResult(data);
     } catch (error) {
       console.error('Error:', error);
+      alert('Failed to run council meeting. Please try again.');
     } finally {
       setLoading(false);
+      setCurrentSpeaker(null);
     }
   }
 
@@ -87,19 +126,47 @@ export default function CouncilPage() {
           </button>
         </Panel>
 
-        {result && (
+        {/* Live Deliberation Feed */}
+        {(loading || liveResponses.length > 0) && (
+          <Panel title="Live Deliberation Feed">
+            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              {liveResponses.map((m, idx) => (
+                <div key={idx} className="border border-emerald-500/20 rounded-sm p-3 bg-emerald-500/5 animate-fade-in">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <div className="text-sm font-semibold">{m.name}</div>
+                    <div className="text-xs text-white/40">— {m.role}</div>
+                  </div>
+                  <div className="text-xs text-white/70 whitespace-pre-wrap pl-4 border-l-2 border-emerald-500/30">
+                    {m.reply || 'No response'}
+                  </div>
+                </div>
+              ))}
+              
+              {currentSpeaker && (
+                <div className="border border-yellow-500/20 rounded-sm p-3 bg-yellow-500/5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                    <div className="text-sm font-semibold text-yellow-300">{currentSpeaker}</div>
+                    <div className="text-xs text-white/40">is thinking...</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Panel>
+        )}
+
+        {/* Final Consensus */}
+        {result && result.consensus && !loading && (
           <>
-            <Metric label="Consensus Score" value={`${result.consensus.score}/10`} />
-            <Panel title="Deliberation Transcript">
+            <Panel title="Final Consensus">
               <div className="space-y-3">
-                {result.members.map((m, idx) => (
-                  <details key={idx} className="border border-white/5 rounded-sm p-2">
-                    <summary className="cursor-pointer text-sm font-semibold mb-2">
-                      {m.name} — {m.role}
-                    </summary>
-                    <div className="text-xs text-white/70 mt-2 whitespace-pre-wrap">{m.reply}</div>
-                  </details>
-                ))}
+                <Metric label="Consensus Score" value={`${result.consensus.score.toFixed(1)}/10`} />
+                {result.consensus.summary && (
+                  <div className="text-sm text-white/80 whitespace-pre-wrap mt-3 p-3 bg-white/5 rounded-sm border border-white/10">
+                    {result.consensus.summary}
+                  </div>
+                )}
               </div>
             </Panel>
           </>

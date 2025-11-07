@@ -60,6 +60,12 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.4",
-    "pg": "^8.16.3"
+    "cytoscape": "^3.33.1",
+    "cytoscape-dagre": "^2.5.0",
+    "pg": "^8.16.3",
+    "recharts": "^2.15.4",
+    "ws": "^8.18.3",
+    "zod": "^3.25.76",
+    "zustand": "^4.5.7"
   }
 }

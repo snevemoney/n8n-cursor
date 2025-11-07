@@ -1,0 +1,14 @@
+[
+  {
+    "url": "http://localhost:3003/api/projects",
+    "status": 500,
+    "method": "GET",
+    "page": "http://localhost:3003/project"
+  },
+  {
+    "url": "http://localhost:3003/api/projects",
+    "status": 500,
+    "method": "GET",
+    "page": "http://localhost:3003/project"
+  }
+]

@@ -6,35 +6,36 @@ import { Panel, Metric } from '@/components/scorpion';
 import { NotificationBadge } from '@/components/scorpion/NotificationBadge';
 import Link from 'next/link';
 
-interface QuickStatus {
-  overallHealth?: 'healthy' | 'degraded' | 'critical';
-  workspace?: { apps: number; packages: number };
-  workflows?: { total: number; synced: number };
-  knowledge?: { total: number };
+interface SystemStats {
+  projects: { total: number; active: number };
+  agents: { total: number; active: number };
+  workflows: { total: number; active: number };
+  knowledge: { total: number };
+  operations: { total: number; running: number; completed: number; failed: number };
+  system: { health: string };
+  recentActivity: Array<{ type: string; message: string; timestamp: string }>;
 }
 
 export default function ScorpionHomePage() {
-  const [status, setStatus] = useState<QuickStatus | null>(null);
+  const [stats, setStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadQuickStatus();
+    loadStats();
+    // Refresh every 30 seconds
+    const interval = setInterval(loadStats, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadQuickStatus = async () => {
+  const loadStats = async () => {
     try {
-      const response = await fetch('/api/project/status');
+      const response = await fetch('/api/stats');
       if (response.ok) {
         const data = await response.json();
-        setStatus({
-          overallHealth: data.overallHealth,
-          workspace: data.workspace,
-          workflows: data.workflows,
-          knowledge: data.knowledge
-        });
+        setStats(data);
       }
     } catch (error) {
-      console.error('Failed to load status:', error);
+      console.error('Failed to load stats:', error);
     } finally {
       setLoading(false);
     }
@@ -63,34 +64,74 @@ export default function ScorpionHomePage() {
           <div className="text-center space-y-4">
             <div className="sc-title">System Status</div>
             <div className="flex items-center justify-center gap-2">
-              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
+              <div className={`w-3 h-3 rounded-full animate-pulse ${
+                stats?.system.health === 'healthy' ? 'bg-emerald-400' : 'bg-yellow-400'
+              }`}></div>
               <div className="text-lg font-semibold">SCORPION // SYSTEM ONLINE</div>
             </div>
-            {status && (
-              <div className={`text-sm sc-mono ${getHealthColor(status.overallHealth)}`}>
-                Project Status: {status.overallHealth?.toUpperCase() || 'UNKNOWN'}
+            {stats && (
+              <div className={`text-sm sc-mono ${getHealthColor(stats.system.health)}`}>
+                System Status: {stats.system.health.toUpperCase()}
               </div>
+            )}
+            {loading && !stats && (
+              <div className="text-sm text-white/40">Loading...</div>
             )}
           </div>
         </Panel>
 
         {/* Quick Stats */}
-        {status && (
-          <Panel title="Quick Stats">
-            <div className="grid grid-cols-3 gap-4">
+        {stats && (
+          <Panel title="System Overview">
+            <div className="grid grid-cols-4 gap-4">
               <Metric 
-                label="Apps" 
-                value={status.workspace?.apps.toString() || '0'} 
+                label="Projects" 
+                value={stats.projects.active.toString()} 
+                valueColor="text-emerald-400"
+              />
+              <Metric 
+                label="Active Agents" 
+                value={`${stats.agents.active}/${stats.agents.total}`} 
+                valueColor="text-cyan-400"
               />
               <Metric 
                 label="Workflows" 
-                value={`${status.workflows?.synced || 0}/${status.workflows?.total || 0}`} 
+                value={stats.workflows.total.toString()} 
+                valueColor="text-blue-400"
               />
               <Metric 
-                label="Knowledge" 
-                value={status.knowledge?.total.toString() || '0'} 
+                label="Knowledge Items" 
+                value={stats.knowledge.total.toString()} 
+                valueColor="text-purple-400"
               />
             </div>
+            <div className="grid grid-cols-4 gap-4 mt-4">
+              <Metric 
+                label="Total Ops" 
+                value={stats.operations.total.toString()} 
+              />
+              <Metric 
+                label="Running" 
+                value={stats.operations.running.toString()} 
+                valueColor="text-yellow-400"
+              />
+              <Metric 
+                label="Completed" 
+                value={stats.operations.completed.toString()} 
+                valueColor="text-emerald-400"
+              />
+              <Metric 
+                label="Failed" 
+                value={stats.operations.failed.toString()} 
+                valueColor="text-red-400"
+              />
+            </div>
+          </Panel>
+        )}
+        
+        {loading && !stats && (
+          <Panel title="System Overview">
+            <div className="text-center py-8 text-white/40">Loading system statistics...</div>
           </Panel>
         )}
 

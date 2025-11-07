@@ -4,7 +4,7 @@
  */
 
 import { RAGStore, OntologyStore, ProjectKnowledgeOrchestrator } from '@scorpion/core';
-import { N8nClient } from './n8n-client';
+import { getMCPn8nClient } from './mcp-n8n-client';
 import path from 'path';
 
 let ragStore: RAGStore | null = null;
@@ -34,14 +34,20 @@ export async function getOntologyStore(): Promise<OntologyStore> {
 
 export async function getOrchestrator(): Promise<ProjectKnowledgeOrchestrator> {
   if (!orchestrator) {
-    const workspaceRoot = process.cwd();
-    const n8nClient = new N8nClient(process.env.N8N_API_KEY);
+    // Resolve to monorepo root (not apps/scorpion)
+    const workspaceRoot = path.resolve(process.cwd(), '../..');
+    const mcpClient = getMCPn8nClient();
+    const compatClient = {
+      listWorkflows: () => mcpClient.listWorkflows(),
+      getWorkflow: (id: string) => mcpClient.getWorkflow(id),
+      exportWorkflow: (id: string) => mcpClient.exportWorkflow(id)
+    } as any;
     
     orchestrator = new ProjectKnowledgeOrchestrator(
       workspaceRoot,
       await getRAGStore(),
       await getOntologyStore(),
-      n8nClient
+      compatClient
     );
   }
   return orchestrator;

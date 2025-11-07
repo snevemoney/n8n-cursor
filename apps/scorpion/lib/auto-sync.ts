@@ -5,7 +5,8 @@
 
 import { getOrchestrator as getOrchestratorAsync, getRAGStore } from './shared-stores';
 import { WorkflowIngester } from '@scorpion/core';
-import { N8nClient } from './n8n-client';
+import { getMCPn8nClient } from './mcp-n8n-client';
+import { responseCache } from './cache';
 import path from 'path';
 import chokidar from 'chokidar';
 import { spawn, ChildProcess } from 'child_process';
@@ -14,7 +15,9 @@ let syncInterval: NodeJS.Timeout | null = null;
 let workflowWatcher: ReturnType<typeof chokidar.watch> | null = null;
 let n8nPollInterval: NodeJS.Timeout | null = null;
 let lastN8nWorkflowHashes: Map<string, string> = new Map();
+let ingestionTimeout: NodeJS.Timeout | null = null;
 let isInitialized = false;
+let isSyncing = false; // Prevent overlapping syncs
 
 /**
  * Initialize automatic syncing
@@ -155,40 +158,33 @@ async function syncWorkflows() {
   try {
     // Find workspace root (go up from apps/scorpion/lib)
     const workspaceRoot = path.resolve(process.cwd(), '../..');
-    const n8nClient = new N8nClient(process.env.N8N_API_KEY);
-    const workflowIngester = new WorkflowIngester(workspaceRoot, n8nClient);
+    const mcpClient = getMCPn8nClient();
+    const compatClient = {
+      listWorkflows: () => mcpClient.listWorkflows(),
+      getWorkflow: (id: string) => mcpClient.getWorkflow(id),
+      exportWorkflow: (id: string) => mcpClient.exportWorkflow(id)
+    } as any;
+    const workflowIngester = new WorkflowIngester(workspaceRoot, compatClient);
     
     // Get workflows and check sync status
     const workflows = await workflowIngester.getWorkflows();
     const unsynced = workflows.filter(w => !w.syncedToN8n);
     
     if (unsynced.length > 0) {
-      console.log(`🔄 Found ${unsynced.length} unsynced workflows, triggering sync...`);
+      console.log(`🔄 Found ${unsynced.length} unsynced workflows (filesystem-only)`);
       
-      // Trigger the sync script via pnpm
-      const syncProcess = spawn('pnpm', ['run', 'workflows:sync'], {
-        cwd: workspaceRoot,
-        stdio: 'pipe',
-        shell: true
-      });
+      // Note: These are workflows in the filesystem that don't exist in n8n yet.
+      // For now, we'll just log them. To actually sync them to n8n, 
+      // use the sync script: pnpm run workflows:sync
+      // 
+      // We don't auto-upload because:
+      // 1. Prevents accidental overwrites of n8n workflows
+      // 2. Gives user control over what gets synced
+      // 3. Avoids API rate limiting
       
-      syncProcess.stdout?.on('data', (data: Buffer) => {
-        console.log(`📥 Sync: ${data.toString().trim()}`);
-      });
-      
-      syncProcess.stderr?.on('data', (data: Buffer) => {
-        console.error(`❌ Sync error: ${data.toString().trim()}`);
-      });
-      
-      syncProcess.on('close', (code: number | null) => {
-        if (code === 0) {
-          console.log('✅ Workflow sync completed');
-        } else {
-          console.error(`❌ Workflow sync failed with code ${code}`);
-        }
-      });
+      console.log('💡 Run `pnpm run workflows:sync` to upload these to n8n');
     } else {
-      console.log('✅ All workflows are synced');
+      console.log('✅ All filesystem workflows exist in n8n');
     }
   } catch (error) {
     console.error('❌ Error syncing workflows:', error);
@@ -199,10 +195,10 @@ async function syncWorkflows() {
  * Watch n8n workflows for changes
  */
 function watchN8nWorkflows() {
-  // Poll n8n every 30 seconds for changes
+  // Poll n8n for workflow changes every 5 minutes (reduced from 30s to avoid API hammering)
   n8nPollInterval = setInterval(() => {
     checkN8nWorkflowChanges();
-  }, 30 * 1000); // 30 seconds
+  }, 5 * 60 * 1000); // 5 minutes
 
   // Initial check
   checkN8nWorkflowChanges();
@@ -212,6 +208,13 @@ function watchN8nWorkflows() {
  * Check for workflow changes in n8n
  */
 async function checkN8nWorkflowChanges() {
+  // Skip if already syncing (prevent thundering herd)
+  if (isSyncing) {
+    console.log('⏭️ Sync already in progress, skipping...');
+    return;
+  }
+  
+  isSyncing = true;
   try {
     const workspaceRoot = path.resolve(process.cwd(), '../..');
     const workflowsDir = path.join(workspaceRoot, 'workflows', 'shared');
@@ -223,13 +226,15 @@ async function checkN8nWorkflowChanges() {
       fs.mkdirSync(workflowsDir, { recursive: true });
     }
     
-    const n8nClient = new N8nClient(process.env.N8N_API_KEY);
+    const mcpClient = getMCPn8nClient();
     
-    // Get workflows from n8n
-    const n8nWorkflows = await n8nClient.listWorkflows();
+    // Get workflows from n8n using MCP
+    const n8nWorkflows = await mcpClient.listWorkflows();
     
     // Calculate hash of each workflow (simple hash based on updatedAt + nodes count)
     const currentHashes = new Map<string, string>();
+    let hasChanges = false;
+    const workflowsToExport: any[] = [];
     
     for (const workflow of n8nWorkflows) {
       const hash = `${workflow.id}-${(workflow as any).updatedAt || Date.now()}-${workflow.nodes?.length || 0}`;
@@ -239,24 +244,59 @@ async function checkN8nWorkflowChanges() {
       const lastHash = lastN8nWorkflowHashes.get(workflow.id);
       if (lastHash && lastHash !== hash) {
         console.log(`🔄 Workflow changed in n8n: ${workflow.name}`);
-        await exportWorkflowFromN8n(workflow, workflowsDir);
+        workflowsToExport.push(workflow);
+        hasChanges = true;
       } else if (!lastHash) {
         // New workflow in n8n
         console.log(`📥 New workflow in n8n: ${workflow.name}`);
-        await exportWorkflowFromN8n(workflow, workflowsDir);
+        workflowsToExport.push(workflow);
+        hasChanges = true;
+      }
+    }
+    
+    // Export workflows in small batches (5 at a time) to avoid API hammering
+    if (workflowsToExport.length > 0) {
+      console.log(`📦 Exporting ${workflowsToExport.length} workflows in batches...`);
+      for (let i = 0; i < workflowsToExport.length; i += 5) {
+        const batch = workflowsToExport.slice(i, i + 5);
+        await Promise.all(batch.map(w => exportWorkflowFromN8n(w, workflowsDir)));
+        // Small delay between batches to respect rate limits
+        if (i + 5 < workflowsToExport.length) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // 2s between batches
+        }
       }
     }
     
     // Update hashes
     lastN8nWorkflowHashes = currentHashes;
     
-    // Re-ingest knowledge after workflow changes
-    if (currentHashes.size !== lastN8nWorkflowHashes.size) {
-      const orchestrator = await getOrchestratorAsync();
-      await orchestrator.ingestAll();
+    // Debounced re-ingestion: wait 5 seconds after last change to batch multiple updates
+    if (hasChanges) {
+      if (ingestionTimeout) {
+        clearTimeout(ingestionTimeout);
+      }
+      ingestionTimeout = setTimeout(async () => {
+        console.log('🦂 Re-ingesting knowledge after workflow changes (debounced)...');
+        try {
+          const orchestrator = await getOrchestratorAsync();
+          await orchestrator.ingestAll();
+          
+          // Invalidate caches after ingestion
+          orchestrator.invalidateCache();
+          responseCache.invalidate('workflows-list');
+          responseCache.invalidate('project-status');
+          responseCache.invalidate('health-check');
+          
+          console.log('✅ Knowledge re-ingestion complete');
+        } catch (error) {
+          console.error('❌ Error during debounced re-ingestion:', error);
+        }
+      }, 5000); // 5 second debounce
     }
   } catch (error) {
     console.error('❌ Error checking n8n workflow changes:', error);
+  } finally {
+    isSyncing = false;
   }
 }
 
@@ -266,10 +306,10 @@ async function checkN8nWorkflowChanges() {
 async function exportWorkflowFromN8n(workflow: any, workflowsDir: string) {
   try {
     const fs = await import('fs/promises');
-    const n8nClient = new N8nClient(process.env.N8N_API_KEY);
+    const mcpClient = getMCPn8nClient();
     
-    // Get full workflow data
-    const fullWorkflow = await n8nClient.getWorkflow(workflow.id);
+    // Get full workflow data using MCP
+    const fullWorkflow = await mcpClient.getWorkflow(workflow.id);
     if (!fullWorkflow) {
       return;
     }
@@ -285,9 +325,8 @@ async function exportWorkflowFromN8n(workflow: any, workflowsDir: string) {
     await fs.writeFile(filePath, JSON.stringify(fullWorkflow, null, 2), 'utf-8');
     console.log(`✅ Exported workflow from n8n: ${filePath}`);
     
-    // Update knowledge
-    const orchestrator = await getOrchestratorAsync();
-    await orchestrator.ingestAll();
+    // Note: Re-ingestion is handled by the debounced logic in checkN8nWorkflowChanges
+    // We don't trigger full ingestion here to avoid cascading re-ingestions
   } catch (error) {
     console.error(`❌ Error exporting workflow ${workflow.name}:`, error);
   }

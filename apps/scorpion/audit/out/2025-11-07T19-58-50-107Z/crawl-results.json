@@ -1,0 +1,146 @@
+[
+  {
+    "url": "http://localhost:3003",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:58:53.213Z"
+  },
+  {
+    "url": "http://localhost:3003/",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:58:54.399Z"
+  },
+  {
+    "url": "http://localhost:3003/dashboard",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:58:58.051Z"
+  },
+  {
+    "url": "http://localhost:3003/project",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:00.058Z"
+  },
+  {
+    "url": "http://localhost:3003/ops",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:01.400Z"
+  },
+  {
+    "url": "http://localhost:3003/workflows",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:03.997Z"
+  },
+  {
+    "url": "http://localhost:3003/build",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:06.621Z"
+  },
+  {
+    "url": "http://localhost:3003/knowledge",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:08.980Z"
+  },
+  {
+    "url": "http://localhost:3003/research",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:10.415Z"
+  },
+  {
+    "url": "http://localhost:3003/council",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:12.007Z"
+  },
+  {
+    "url": "http://localhost:3003/agents",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:14.490Z"
+  },
+  {
+    "url": "http://localhost:3003/chat",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:16.349Z"
+  },
+  {
+    "url": "http://localhost:3003/notifications",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:18.029Z"
+  },
+  {
+    "url": "http://localhost:3003/logs",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:19.654Z"
+  },
+  {
+    "url": "http://localhost:3003/settings",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:21.108Z"
+  },
+  {
+    "url": "http://localhost:3003/api/metrics",
+    "status": 200,
+    "title": "",
+    "timestamp": "2025-11-07T19:59:21.908Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/E-001",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:24.857Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/A-002",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:26.628Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/P-003",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:27.787Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/S-004",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:28.975Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/N-005",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:30.173Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/S-006",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:31.576Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/C-007",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:37.952Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/O-008",
+    "status": 200,
+    "title": "Scorpion - Operations Console",
+    "timestamp": "2025-11-07T19:59:40.707Z"
+  }
+]
