@@ -5,4 +5,5 @@ export * from './llm';
 export * from './context';
 export * from './council';
 export * from './ontology';
+export * from './storage/persistent-store';
 

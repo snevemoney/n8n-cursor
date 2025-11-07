@@ -4,4 +4,5 @@ export { DataTable } from './DataTable';
 export { LogRow } from './LogRow';
 export { Radar } from './Radar';
 export { ASCIILogo } from './ASCIILogo';
+export { NotificationBadge } from './NotificationBadge';
 
