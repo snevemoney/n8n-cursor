@@ -1,5 +1,8 @@
 // Shared utility functions for LightningFlow AI and n8n-cursor
 
+// Export abuse detection engine
+export * from './abuse/detection-engine'
+
 // Date utilities
 export function formatDate(date: Date, format: 'short' | 'long' | 'iso' = 'short'): string {
   switch (format) {

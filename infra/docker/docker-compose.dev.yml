@@ -28,7 +28,7 @@ services:
 
   landing:
     <<: *dflt
-    build: ../../apps/landing
+    build: ../../apps/lightningflow/landing
     environment: [NODE_ENV=development, PORT=3000]
     ports: ["127.0.0.1:3000:3000"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3000/healthz"], interval: 10s, timeout: 2s, retries: 10 }
@@ -46,7 +46,7 @@ services:
 
   ops:
     <<: *dflt
-    build: ../../apps/ops
+    build: ../../apps/lightningflow/ops
     environment: [NODE_ENV=development, PORT=3002]
     ports: ["127.0.0.1:3002:3002"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3002/healthz"], interval: 10s, timeout: 2s, retries: 10 }

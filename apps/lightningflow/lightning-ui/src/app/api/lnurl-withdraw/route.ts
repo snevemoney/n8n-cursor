@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { encodeLnurl } from '@/lib/lnurl';
 import { logger } from '@/lib/logger';
 import { APIValidator } from '@/api/validate';
-import { AbuseDetectionEngine } from '@/lib/abuse/detection-engine';
+import { AbuseDetectionEngine } from '@lf/shared-helpers';
 import crypto from 'crypto';
 
 const validator = new APIValidator();

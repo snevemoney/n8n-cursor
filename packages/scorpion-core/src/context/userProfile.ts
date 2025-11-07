@@ -61,4 +61,5 @@ ${profile.preferences.focusAreas ? `- Focus areas: ${profile.preferences.focusAr
 ` : ''}
 
 Keep answers structured, actionable, and aligned with these goals.`;
+}
 

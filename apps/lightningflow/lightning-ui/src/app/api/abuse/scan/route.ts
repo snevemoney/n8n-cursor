@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { abuseDetectionEngine, NodeActivity } from '../../../../lib/abuse/detection-engine'
+import { abuseDetectionEngine, NodeActivity } from '@lf/shared-helpers'
 
 export async function POST(request: NextRequest) {
   try {

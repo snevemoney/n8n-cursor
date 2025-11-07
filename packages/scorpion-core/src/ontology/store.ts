@@ -8,14 +8,60 @@ import { EntityRelation } from './schema';
 import { RAGStore } from '../rag/store';
 import { describeEntity, extractRelations } from './resolver';
 import { ExtractedKnowledge } from '../knowledge/types';
+import { PersistentStore } from '../storage/persistent-store';
 
 export class OntologyStore {
   private entities: Map<string, OntologyEntity> = new Map();
   private relations: Map<string, EntityRelation[]> = new Map();
   private ragStore: RAGStore;
+  private persistentStore: PersistentStore;
+  private autoSaveInterval: NodeJS.Timeout | null = null;
+  private dataDir?: string;
 
-  constructor(ragStore: RAGStore) {
+  constructor(ragStore: RAGStore, dataDir?: string) {
     this.ragStore = ragStore;
+    this.dataDir = dataDir;
+    this.persistentStore = new PersistentStore(dataDir);
+  }
+
+  /**
+   * Initialize and load from disk
+   */
+  async initialize(): Promise<void> {
+    await this.persistentStore.initialize();
+    
+    // Load from disk
+    const saved = await this.persistentStore.loadOntology();
+    if (saved) {
+      if (saved.entities) {
+        for (const [id, entity] of Object.entries(saved.entities)) {
+          this.entities.set(id, entity as OntologyEntity);
+        }
+      }
+      if (saved.relations) {
+        for (const [id, relations] of Object.entries(saved.relations)) {
+          this.relations.set(id, relations as EntityRelation[]);
+        }
+      }
+      console.log(`✅ Loaded ${this.entities.size} ontology entities from disk`);
+    }
+
+    // Auto-save every 30 seconds
+    this.autoSaveInterval = setInterval(() => {
+      this.save();
+    }, 30 * 1000);
+  }
+
+  /**
+   * Save to disk
+   */
+  private async save(): Promise<void> {
+    const data = {
+      entities: Object.fromEntries(this.entities),
+      relations: Object.fromEntries(this.relations),
+      lastSaved: new Date().toISOString()
+    };
+    await this.persistentStore.saveOntology(data);
   }
 
   /**
@@ -40,6 +86,9 @@ export class OntologyStore {
 
     // Index in RAG for semantic search
     await this.indexInRAG(entity);
+
+    // Save immediately
+    await this.save();
   }
 
   /**

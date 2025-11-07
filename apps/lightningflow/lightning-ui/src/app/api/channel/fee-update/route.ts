@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/logger';
 import { APIValidator } from '@/api/validate';
-import { AbuseDetectionEngine } from '@/lib/abuse/detection-engine';
+import { AbuseDetectionEngine } from '@lf/shared-helpers';
 
 const validator = new APIValidator();
 const abuseDetector = new AbuseDetectionEngine();

@@ -4,17 +4,9 @@
 
 import { runModel } from '../llm/modelAdapter';
 import { computeConsensus } from './consensus';
-import { councilMembers } from './members';
+import { councilMembers, CouncilMember } from './members';
 import { OntologyStore } from '../ontology/store';
 import { formatForCouncil } from '../ontology/resolver';
-
-export interface CouncilMember {
-  name: string;
-  role: string;
-  specialty: string;
-  weight: number;
-  goal: string;
-}
 
 export interface CouncilResponse {
   members: Array<CouncilMember & { reply: string }>;

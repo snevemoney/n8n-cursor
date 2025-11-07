@@ -43,11 +43,13 @@ export async function runModel(req: LLMRequest): Promise<LLMResponse> {
 }
 
 /**
- * Ollama (local) model
+ * Ollama (local) model with retry logic
  */
-async function runOllama(req: LLMRequest): Promise<LLMResponse> {
+async function runOllama(req: LLMRequest, retries: number = 0): Promise<LLMResponse> {
   const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
   const model = req.model || process.env.OLLAMA_MODEL || 'llama3.2:3b';
+  const maxRetries = 3;
+  const baseDelay = 1000; // 1 second
   
   try {
     const messages = [
@@ -66,10 +68,19 @@ async function runOllama(req: LLMRequest): Promise<LLMResponse> {
           temperature: req.temperature || 0.7,
           num_predict: req.maxTokens || 2048
         }
-      })
+      }),
+      signal: AbortSignal.timeout(60000) // 60 second timeout
     });
 
     if (!response.ok) {
+      // Retry on server errors
+      if ((response.status >= 500 || response.status === 429) && retries < maxRetries) {
+        const delay = baseDelay * Math.pow(2, retries);
+        console.warn(`Ollama API error ${response.status}, retrying in ${delay}ms... (${retries + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return runOllama(req, retries + 1);
+      }
+      
       const errorText = await response.text();
       throw new Error(`Ollama API error: ${response.status} - ${errorText}`);
     }
@@ -80,20 +91,29 @@ async function runOllama(req: LLMRequest): Promise<LLMResponse> {
       model: data.model || model
     };
   } catch (error: any) {
+    // Retry on network errors
+    if (retries < maxRetries && (error.name === 'TypeError' || error.name === 'AbortError')) {
+      const delay = baseDelay * Math.pow(2, retries);
+      console.warn(`Ollama network error, retrying in ${delay}ms... (${retries + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return runOllama(req, retries + 1);
+    }
     throw new Error(`Ollama request failed: ${error.message}`);
   }
 }
 
 /**
- * OpenAI model
+ * OpenAI model with retry logic
  */
-async function runOpenAI(req: LLMRequest): Promise<LLMResponse> {
+async function runOpenAI(req: LLMRequest, retries: number = 0): Promise<LLMResponse> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error('OPENAI_API_KEY not set');
   }
 
   const model = req.model || process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const maxRetries = 3;
+  const baseDelay = 1000;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -114,6 +134,17 @@ async function runOpenAI(req: LLMRequest): Promise<LLMResponse> {
     });
 
     if (!response.ok) {
+      // Retry on server errors or rate limits
+      if ((response.status >= 500 || response.status === 429) && retries < maxRetries) {
+        const retryAfter = response.headers.get('Retry-After');
+        const delay = retryAfter 
+          ? parseInt(retryAfter) * 1000 
+          : baseDelay * Math.pow(2, retries);
+        console.warn(`OpenAI API error ${response.status}, retrying in ${delay}ms... (${retries + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return runOpenAI(req, retries + 1);
+      }
+      
       const error = await response.json().catch(() => ({}));
       throw new Error(`OpenAI API error: ${response.status} - ${error.error?.message || 'Unknown error'}`);
     }
@@ -128,6 +159,13 @@ async function runOpenAI(req: LLMRequest): Promise<LLMResponse> {
       }
     };
   } catch (error: any) {
+    // Retry on network errors
+    if (retries < maxRetries && (error.name === 'TypeError' || error.name === 'AbortError')) {
+      const delay = baseDelay * Math.pow(2, retries);
+      console.warn(`OpenAI network error, retrying in ${delay}ms... (${retries + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return runOpenAI(req, retries + 1);
+    }
     throw new Error(`OpenAI request failed: ${error.message}`);
   }
 }

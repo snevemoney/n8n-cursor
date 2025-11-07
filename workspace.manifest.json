@@ -2,12 +2,31 @@
   "apps": {
     "lightningflow": {
       "role": "product",
+      "isSideHustle": true,
+      "description": "Side hustle: Lightning Network SaaS platform with 3-UI architecture",
       "importsAllowedFrom": ["packages/*"],
       "importsDeniedFrom": ["apps/n8n-cursor/*"],
       "framework": "nextjs+n8n",
       "entry": "apps/lightningflow/src/app",
       "envFile": "apps/lightningflow/.env.example",
-      "doc": "apps/lightningflow/README.md"
+      "doc": "apps/lightningflow/README.md",
+      "subApps": {
+        "landing": {
+          "entry": "apps/lightningflow/landing/app",
+          "port": 3000,
+          "description": "Public marketing landing page"
+        },
+        "ops": {
+          "entry": "apps/lightningflow/ops/app",
+          "port": 3002,
+          "description": "Internal operations dashboard"
+        },
+        "web": {
+          "entry": "apps/lightningflow/web/src/app",
+          "port": 3001,
+          "description": "Customer dashboard"
+        }
+      }
     },
     "n8n-cursor": {
       "role": "dev",
@@ -28,21 +47,14 @@
     },
     "scorpion": {
       "role": "product",
+      "isCentral": true,
+      "description": "Central operations orchestrator - manages all operations, workflows, side hustles, and agents",
       "importsAllowedFrom": ["packages/*"],
       "importsDeniedFrom": ["apps/n8n-cursor/*"],
       "framework": "nextjs",
       "entry": "apps/scorpion/app",
       "envFile": "apps/scorpion/.env.local",
       "doc": "apps/scorpion/README.md"
-    },
-    "ops": {
-      "role": "dev",
-      "importsAllowedFrom": ["packages/*"],
-      "importsDeniedFrom": ["apps/n8n-cursor/*"],
-      "framework": "nextjs",
-      "entry": "apps/ops/app",
-      "envFile": "apps/ops/.env.local",
-      "doc": "apps/ops/README.md"
     }
   },
   "packages": [

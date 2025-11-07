@@ -5,13 +5,52 @@
 
 import { ExtractedKnowledge } from '../knowledge/types';
 import { RAGDocument } from './types';
+import { PersistentStore } from '../storage/persistent-store';
+import path from 'path';
 
 export class RAGStore {
   private documents: Map<string, RAGDocument> = new Map();
   private ollamaUrl: string;
+  private persistentStore: PersistentStore;
+  private autoSaveInterval: NodeJS.Timeout | null = null;
+  private dataDir?: string;
 
-  constructor(ollamaUrl: string = 'http://localhost:11434') {
+  constructor(ollamaUrl: string = 'http://localhost:11434', dataDir?: string) {
     this.ollamaUrl = ollamaUrl;
+    this.dataDir = dataDir;
+    this.persistentStore = new PersistentStore(dataDir);
+  }
+
+  /**
+   * Initialize and load from disk
+   */
+  async initialize(): Promise<void> {
+    await this.persistentStore.initialize();
+    
+    // Load from disk
+    const saved = await this.persistentStore.loadRAG();
+    if (saved && saved.documents) {
+      for (const [id, doc] of Object.entries(saved.documents)) {
+        this.documents.set(id, doc as RAGDocument);
+      }
+      console.log(`✅ Loaded ${this.documents.size} RAG documents from disk`);
+    }
+
+    // Auto-save every 30 seconds
+    this.autoSaveInterval = setInterval(() => {
+      this.save();
+    }, 30 * 1000);
+  }
+
+  /**
+   * Save to disk
+   */
+  private async save(): Promise<void> {
+    const data = {
+      documents: Object.fromEntries(this.documents),
+      lastSaved: new Date().toISOString()
+    };
+    await this.persistentStore.saveRAG(data);
   }
 
   /**
@@ -39,6 +78,9 @@ export class RAGStore {
     }
     
     this.documents.set(knowledge.id, doc);
+    
+    // Save immediately
+    await this.save();
   }
 
   /**

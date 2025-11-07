@@ -33,9 +33,9 @@ echo "✅ Local tests passed"
 
 # Build production images
 echo "🐳 Building production Docker images..."
-docker build -t lfai-landing:prod apps/landing
+docker build -t lfai-landing:prod apps/lightningflow/landing
 docker build -t lfai-web:prod apps/lightningflow/web
-docker build -t lfai-ops:prod apps/ops
+docker build -t lfai-ops:prod apps/lightningflow/ops
 docker build -t lfai-api:prod apps/n8n-cursor/backend
 
 echo "✅ Production images built"

@@ -12,7 +12,8 @@
     "./llm": "./src/llm/index.ts",
     "./context": "./src/context/index.ts",
     "./council": "./src/council/index.ts",
-    "./ontology": "./src/ontology/index.ts"
+    "./ontology": "./src/ontology/index.ts",
+    "./storage/persistent-store": "./src/storage/persistent-store.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

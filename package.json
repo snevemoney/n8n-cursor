@@ -13,6 +13,8 @@
     "ports-check": "bash tooling/scripts/ports-check.sh",
     "scan-secrets": "bash tooling/scripts/scan-secrets.sh",
     "sync:down": "node scripts/sync-down.mjs",
+    "workflows:sync": "node scripts/workflows/sync-workflows.mjs",
+    "workflows:watch": "node scripts/workflows/sync-workflows.mjs --watch",
     "promote": "node scripts/promote-n8n.mjs",
     "promote:activate": "node scripts/promote-n8n.mjs --activate",
     "cred:sync": "node scripts/n8n-cred-sync.mjs",

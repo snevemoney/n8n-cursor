@@ -1,6 +1,8 @@
-# ⚡ LightningFlow AI
+# 🦂 Scorpion OS
 
-Your AI-powered workflow automation platform with Fortune-500 level reliability and security.
+**Central Operations Orchestrator** - Your personal AI stack dashboard for managing operations, workflows, and side hustles.
+
+> **Note**: This workspace contains Scorpion (central orchestrator), LightningFlow (side hustle), and supporting development tools.
 
 ## 🚀 Quick Start
 
@@ -31,10 +33,24 @@ open http://n8n.local
 
 ## 🏗️ Architecture
 
-### 3-UI Split Architecture
-- **Landing** (`lightningflow.local`) - Public marketing site
-- **Web** (`app.lightningflow.local`) - Customer dashboard  
-- **Ops** (`ops.lightningflow.local`) - Internal admin panel
+### Central System
+- **🦂 Scorpion** (`scorpion.local` / port 3003) - Main operations console and orchestrator
+  - Operations monitoring
+  - Workflow builder
+  - Knowledge base
+  - Multi-agent council
+  - Agent management
+  - Chat interface
+
+### Side Hustles
+- **💰 LightningFlow** - Lightning Network SaaS platform
+  - **Landing** (`lightningflow.local` / port 3000) - Public marketing site
+  - **Web** (`app.lightningflow.local` / port 3001) - Customer dashboard  
+  - **Ops** (`ops.lightningflow.local` / port 3002) - Internal admin panel
+
+### Supporting Tools
+- **🔧 Lovable Frontend** - n8n workflows testing dashboard
+- **🔧 n8n-cursor** - n8n development tools and scripts
 
 ### Services
 - **API** - Express.js backend with BullMQ workers
