@@ -5,19 +5,35 @@ import { getNotificationManager } from '@/lib/notification-manager';
 interface SystemControl {
   status: 'running' | 'paused' | 'stopped';
   acceptingNew: boolean;
+  startedAt?: string; // Track when system started running
 }
 
 // In-memory system state (could be moved to database)
 let systemControl: SystemControl = {
   status: 'running',
-  acceptingNew: true
+  acceptingNew: true,
+  startedAt: new Date().toISOString() // Initialize with current time
 };
 
 /**
  * GET /api/operations/control - Get current system control state
  */
 export async function GET() {
-  return NextResponse.json(systemControl);
+  // Calculate runtime if system is running
+  let runtime = null;
+  if (systemControl.status === 'running' && systemControl.startedAt) {
+    const startTime = new Date(systemControl.startedAt).getTime();
+    const now = Date.now();
+    const diffMs = now - startTime;
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    runtime = { hours, minutes, totalSeconds: Math.floor(diffMs / 1000) };
+  }
+  
+  return NextResponse.json({
+    ...systemControl,
+    runtime
+  });
 }
 
 /**
@@ -30,7 +46,12 @@ export async function POST(request: NextRequest) {
     
     switch (action) {
       case 'run':
+        // Update startedAt when resuming from paused/stopped
+        const wasRunning = systemControl.status === 'running';
         systemControl.status = 'running';
+        if (!wasRunning) {
+          systemControl.startedAt = new Date().toISOString();
+        }
         notificationManager.notify(
           'success',
           'medium',
@@ -91,9 +112,23 @@ export async function POST(request: NextRequest) {
         );
     }
     
+    // Calculate runtime for response
+    let runtime = null;
+    if (systemControl.status === 'running' && systemControl.startedAt) {
+      const startTime = new Date(systemControl.startedAt).getTime();
+      const now = Date.now();
+      const diffMs = now - startTime;
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      runtime = { hours, minutes, totalSeconds: Math.floor(diffMs / 1000) };
+    }
+    
     return NextResponse.json({
       success: true,
-      status: systemControl
+      status: {
+        ...systemControl,
+        runtime
+      }
     });
     
   } catch (error: any) {

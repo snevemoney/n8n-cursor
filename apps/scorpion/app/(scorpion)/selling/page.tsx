@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Panel, Metric, DataTable } from '@/components/scorpion';
+import { Panel, Metric, DataTable, useToast } from '@/components/scorpion';
 import { DollarSign, TrendingUp, Users, ShoppingCart, CreditCard, Package } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Product {
   id: string;
@@ -24,6 +25,8 @@ interface SalesMetrics {
 }
 
 export default function SellingPage() {
+  const router = useRouter();
+  const { showToast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [metrics, setMetrics] = useState<SalesMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,26 +38,19 @@ export default function SellingPage() {
 
   const loadSellingData = async () => {
     try {
-      // Mock data for now - replace with actual API calls
-      const mockProducts: Product[] = [
-        { id: 'P-001', name: 'Scorpion Pro License', price: 99, currency: 'USD', status: 'active', sales: 45, revenue: 4455 },
-        { id: 'P-002', name: 'n8n Workflow Templates', price: 49, currency: 'USD', status: 'active', sales: 128, revenue: 6272 },
-        { id: 'P-003', name: 'AI Agent Consulting', price: 500, currency: 'USD', status: 'active', sales: 12, revenue: 6000 },
-        { id: 'P-004', name: 'LightningFlow Setup', price: 199, currency: 'USD', status: 'active', sales: 34, revenue: 6766 },
-        { id: 'P-005', name: 'Custom Integration', price: 299, currency: 'USD', status: 'draft', sales: 0, revenue: 0 },
-      ];
-
-      const mockMetrics: SalesMetrics = {
-        totalRevenue: mockProducts.reduce((sum, p) => sum + p.revenue, 0),
-        monthlyRevenue: 8450,
-        totalSales: mockProducts.reduce((sum, p) => sum + p.sales, 0),
-        activeCustomers: 156,
-        conversionRate: 3.2,
-        avgOrderValue: 107.50
-      };
-
-      setProducts(mockProducts);
-      setMetrics(mockMetrics);
+      const response = await fetch('/api/selling');
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data.products || []);
+        setMetrics(data.metrics || {
+          totalRevenue: 0,
+          monthlyRevenue: 0,
+          totalSales: 0,
+          activeCustomers: 0,
+          conversionRate: 0,
+          avgOrderValue: 0
+        });
+      }
     } catch (error) {
       console.error('Failed to load selling data:', error);
     } finally {
@@ -63,15 +59,58 @@ export default function SellingPage() {
   };
 
   const handleCreateProduct = () => {
-    alert('Create Product:\n\nThis will open a form to create a new product/service for sale. Features:\n- Product name & description\n- Pricing & currency\n- Stripe/PayPal integration\n- Inventory management\n- Digital delivery options');
+    showToast('info', 'Product creation coming soon! Will include: pricing, Stripe/PayPal integration, and inventory management.');
+    // TODO: Open modal for product creation
   };
 
   const handleViewAnalytics = () => {
-    alert('Sales Analytics:\n\nOpens detailed analytics including:\n- Revenue trends\n- Customer lifetime value\n- Product performance\n- Sales funnel conversion\n- Geographic distribution');
+    showToast('info', 'Sales analytics dashboard coming soon!');
+    // TODO: Navigate to analytics page or open modal
+    // router.push('/selling/analytics');
   };
 
   const handleExportData = () => {
-    alert('Export Sales Data:\n\nExport options:\n- CSV format\n- JSON format\n- PDF reports\n- QuickBooks integration');
+    if (products.length === 0) {
+      showToast('warning', 'No sales data to export yet.');
+      return;
+    }
+    
+    // Export as JSON for now
+    const dataStr = JSON.stringify({ products, metrics, exportedAt: new Date().toISOString() }, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `sales-export-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    showToast('success', 'Sales data exported successfully!');
+  };
+
+  const handleEditProduct = (product: Product) => {
+    showToast('info', `Editing ${product.name} - feature coming soon!`);
+    // TODO: Open edit modal
+  };
+
+  const handleDuplicateProduct = (product: Product) => {
+    showToast('info', `Duplicating ${product.name} - feature coming soon!`);
+    // TODO: Duplicate product logic
+  };
+
+  const handlePaymentIntegration = () => {
+    showToast('info', 'Payment integration setup coming soon! Will support Stripe and PayPal.');
+    // TODO: Open payment settings
+  };
+
+  const handleManageCustomers = () => {
+    showToast('info', 'Customer management coming soon!');
+    // TODO: Navigate to customers page
+    // router.push('/selling/customers');
+  };
+
+  const handleViewOrders = () => {
+    showToast('info', 'Orders management coming soon!');
+    // TODO: Navigate to orders page
+    // router.push('/selling/orders');
   };
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -226,10 +265,16 @@ export default function SellingPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <button className="flex-1 px-3 py-2 text-xs bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+                  <button 
+                    onClick={() => handleEditProduct(selectedProduct)}
+                    className="flex-1 px-3 py-2 text-xs bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                  >
                     Edit
                   </button>
-                  <button className="flex-1 px-3 py-2 text-xs bg-white/5 hover:bg-white/10 border border-white/10 rounded transition-colors">
+                  <button 
+                    onClick={() => handleDuplicateProduct(selectedProduct)}
+                    className="flex-1 px-3 py-2 text-xs bg-white/5 hover:bg-white/10 border border-white/10 rounded transition-colors"
+                  >
                     Duplicate
                   </button>
                 </div>
@@ -245,21 +290,21 @@ export default function SellingPage() {
           <Panel title="Quick Actions">
             <div className="space-y-2">
               <button
-                onClick={() => alert('Integration: Connect Stripe, PayPal, or other payment processors')}
+                onClick={handlePaymentIntegration}
                 className="w-full text-left px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-sm text-sm transition-colors flex items-center gap-2"
               >
                 <CreditCard className="h-4 w-4" />
                 Payment Integration
               </button>
               <button
-                onClick={() => alert('Customers: View and manage customer database')}
+                onClick={handleManageCustomers}
                 className="w-full text-left px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-sm text-sm transition-colors flex items-center gap-2"
               >
                 <Users className="h-4 w-4" />
                 Manage Customers
               </button>
               <button
-                onClick={() => alert('Orders: View and process orders')}
+                onClick={handleViewOrders}
                 className="w-full text-left px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-sm text-sm transition-colors flex items-center gap-2"
               >
                 <ShoppingCart className="h-4 w-4" />

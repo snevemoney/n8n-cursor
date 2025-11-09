@@ -63,9 +63,41 @@ export class DocumentationIngester {
           const fileName = path.basename(file, '.md');
 
           // Extract priority and status from content
-          const priorityMatch = content.match(/Priority[:\s]+(P0|P1|P2|Critical|High|Medium|Low)/i);
-          const statusMatch = content.match(/Status[:\s]+(\w+)/i);
-          const priority = priorityMatch ? priorityMatch[1] : 'Unknown';
+          let priorityMatch = content.match(/Priority[:\s]+(P0|P1|P2|Critical|High|Medium|Low)/i);
+          let statusMatch = content.match(/Status[:\s]+(\w+)/i);
+          
+          // If no explicit priority, infer from content patterns
+          if (!priorityMatch) {
+            // Check for critical indicators
+            if (content.match(/\b(critical|urgent|blocking|p0|security|vulnerability)\b/i)) {
+              priorityMatch = ['', 'Critical'];
+            }
+            // Check for high priority indicators
+            else if (content.match(/\b(high|important|p1|performance|bug)\b/i)) {
+              priorityMatch = ['', 'High'];
+            }
+            // Check for medium priority indicators
+            else if (content.match(/\b(medium|moderate|p2|enhancement|improvement)\b/i)) {
+              priorityMatch = ['', 'Medium'];
+            }
+            // Check for low priority or completed items
+            else if (content.match(/\b(low|nice to have|completed|done|fixed|resolved|consolidated)\b/i)) {
+              priorityMatch = ['', 'Low'];
+            }
+          }
+          
+          // If no explicit status, infer from content
+          if (!statusMatch) {
+            if (content.match(/\b(completed|done|fixed|resolved|consolidated|✅)\b/i)) {
+              statusMatch = ['', 'Completed'];
+            } else if (content.match(/\b(deferred|pending|in progress|⏸️)\b/i)) {
+              statusMatch = ['', 'Deferred'];
+            } else if (content.match(/\b(active|open|todo|⚠️)\b/i)) {
+              statusMatch = ['', 'Active'];
+            }
+          }
+          
+          const priority = priorityMatch ? priorityMatch[1] : 'Medium'; // Default to Medium instead of Unknown
           const status = statusMatch ? statusMatch[1] : 'Unknown';
 
           knowledge.push({

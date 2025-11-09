@@ -23,8 +23,32 @@ export class MCPn8nClient {
   private circuitBreakerTimeout: number = 60000; // 1 minute
   
   constructor() {
-    this.baseUrl = process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'https://n8ncloud.tech';
-    this.apiKey = process.env.N8N_API_KEY || '';
+    let baseUrl = process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'https://n8ncloud.tech';
+    
+    // Ensure baseUrl includes /api/v1 for n8n API endpoints
+    // If N8N_API_URL already includes /api/v1, use it as-is
+    // Otherwise, append /api/v1 if it's not already there
+    if (!baseUrl.includes('/api/v1')) {
+      // Remove trailing slash if present
+      baseUrl = baseUrl.replace(/\/$/, '');
+      // Append /api/v1
+      baseUrl = `${baseUrl}/api/v1`;
+    }
+    
+    this.baseUrl = baseUrl;
+    // Trim whitespace that can cause auth failures
+    this.apiKey = (process.env.N8N_API_KEY || '').trim();
+    
+    // Debug logging
+    console.log('🔍 Scorpion n8n Client Init:', {
+      baseUrl: this.baseUrl,
+      hasApiKey: !!this.apiKey,
+      apiKeyLength: this.apiKey.length,
+      apiKeyStart: this.apiKey.substring(0, 15) + '...',
+      apiKeyEnd: '...' + this.apiKey.substring(this.apiKey.length - 15),
+      envVarExists: !!process.env.N8N_API_KEY,
+      envVarLength: process.env.N8N_API_KEY?.length || 0
+    });
     
     if (!this.apiKey) {
       console.warn('⚠️ N8N_API_KEY not set - n8n operations will be disabled');

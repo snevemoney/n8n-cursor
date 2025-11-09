@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Panel, DataTable } from '@/components/scorpion';
+import { Panel, DataTable, useToast } from '@/components/scorpion';
 
 interface KnowledgeItem {
   id: string;
@@ -14,9 +14,11 @@ interface KnowledgeItem {
 }
 
 export default function KnowledgePage() {
+  const { showToast } = useToast();
   const [knowledge, setKnowledge] = useState<KnowledgeItem[]>([]);
   const [selected, setSelected] = useState<KnowledgeItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   
   // Filter states
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -24,6 +26,7 @@ export default function KnowledgePage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   useEffect(() => {
+    setMounted(true);
     loadKnowledge();
   }, []);
 
@@ -48,13 +51,15 @@ export default function KnowledgePage() {
   };
 
   const handleViewFull = async (item: KnowledgeItem) => {
-    // Open in new window/modal with full details
-    alert(`View Full: ${item.title}\n\nFeature: Opens detailed view with complete content, related items, and metadata.`);
+    showToast('info', `Viewing ${item.title} - full preview coming soon!`);
+    // TODO: Open modal with full content
+    // setSelected(item);
+    // openDetailModal();
   };
 
   const handleExtract = async (item: KnowledgeItem) => {
     try {
-      // Trigger extraction from source
+      showToast('info', 'Starting content extraction...');
       const response = await fetch('/api/project/knowledge/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,12 +67,14 @@ export default function KnowledgePage() {
       });
       
       if (response.ok) {
-        alert('Content extraction started! This may take a few moments.');
+        showToast('success', 'Content extraction started! Knowledge base will be updated.');
         await loadKnowledge(); // Refresh
+      } else {
+        throw new Error('Extraction failed');
       }
     } catch (error) {
       console.error('Extract failed:', error);
-      alert('Extraction failed. Feature coming soon!');
+      showToast('error', 'Failed to extract content. Please try again.');
     }
   };
 
@@ -82,13 +89,7 @@ export default function KnowledgePage() {
     link.click();
   };
 
-  const MOCK_KNOWLEDGE: KnowledgeItem[] = [
-    { id: 'K-001', source: 'LightningFlow', type: 'Architecture', title: 'Multi-tenant Payment System', category: 'payment', extracted: '2024-01-15' },
-    { id: 'K-002', source: 'n8n-cursor', type: 'Pattern', title: 'Workflow Orchestration', category: 'automation', extracted: '2024-02-01' },
-    { id: 'K-003', source: 'LightningFlow', type: 'Feature', title: 'Lightning Invoice Generation', category: 'payment', extracted: '2024-01-20' },
-  ];
-
-  const displayKnowledge = knowledge.length > 0 ? knowledge : MOCK_KNOWLEDGE;
+  const displayKnowledge = knowledge;
 
   // Apply filters
   const filteredKnowledge = useMemo(() => {
@@ -105,8 +106,17 @@ export default function KnowledgePage() {
   const types = useMemo(() => ['all', ...new Set(displayKnowledge.map(k => k.type))], [displayKnowledge]);
   const categories = useMemo(() => ['all', ...new Set(displayKnowledge.map(k => k.category))], [displayKnowledge]);
 
+  // Don't render content until client-side hydration is complete
+  if (!mounted || loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-sm text-white/40">Loading knowledge...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full grid grid-cols-[280px_1fr_400px] gap-4 p-4 overflow-y-auto">
+    <div className="h-full max-w-[1000px] mx-auto grid grid-cols-[180px_1fr_240px] gap-2 p-3 overflow-y-auto">
       <Panel title="Filters">
         <div className="space-y-3">
           <div>

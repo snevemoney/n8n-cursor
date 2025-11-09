@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Panel } from '@/components/scorpion';
+import { Panel, useToast } from '@/components/scorpion';
 import { Save } from 'lucide-react';
 
 export default function SettingsPage() {
+  const { showToast } = useToast();
   const [ragIndexing, setRagIndexing] = useState(true);
   const [autoTrigger, setAutoTrigger] = useState(false);
   const [councilAutoContext, setCouncilAutoContext] = useState(true);
@@ -70,12 +71,12 @@ export default function SettingsPage() {
       });
       
       if (response.ok) {
-        alert('Settings saved successfully!');
+        showToast('success', 'Settings saved successfully!');
       } else {
         throw new Error('Failed to save');
       }
     } catch (error) {
-      alert('Failed to save settings');
+      showToast('error', 'Failed to save settings. Please try again.');
       console.error('Save error:', error);
     } finally {
       setSaving(false);

@@ -1,0 +1,61 @@
+{
+  "conversations": [
+    {
+      "id": "982d1f05-a8e6-48a9-a3b7-efabc1c3fb75",
+      "title": "New Chat",
+      "createdAt": 1762647192558,
+      "updatedAt": 1762647849277,
+      "messages": [
+        {
+          "id": "9513fd17-d7b4-438a-a51a-3bb4e51805df",
+          "role": "user",
+          "content": "Do you know what is Lightning Flow?",
+          "ts": 1762647486080
+        },
+        {
+          "id": "1768d21b-9a69-43f2-912b-3b62d24ca9b4",
+          "role": "assistant",
+          "content": "⏹️ **Generation stopped**",
+          "ts": 1762647530414
+        },
+        {
+          "id": "ec57742a-0183-4a5b-846c-2dcce1f2931b",
+          "role": "user",
+          "content": "Do you know what is Lightning Flow?",
+          "ts": 1762647848219
+        },
+        {
+          "id": "4cc9f0d2-1267-4c8b-97e1-6742e6a26164",
+          "role": "assistant",
+          "content": "❌ **Error:** Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.2:1b\\\" not found, try pulling it first\"}\n\n```\nError: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.2:1b\\\" not found, try pulling it first\"}\n    at runOllama (webpack-internal:///(rsc)/./lib/chat/modelRunner.ts:98:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.start (webpack-internal:///(rsc)/./app/api/chat/stream/route.ts:308:38)\n```",
+          "ts": 1762647849277
+        }
+      ],
+      "syncedAt": 1762648386191
+    },
+    {
+      "id": "b80b7ba3-f722-4974-ab21-6526793db18f",
+      "title": "New Chat",
+      "createdAt": 1762646847705,
+      "updatedAt": 1762646847705,
+      "messages": [
+        {
+          "id": "b88b24b3-eb01-41a5-bc09-2fdba888d157",
+          "role": "user",
+          "content": "What do you know about Lightning Flow?\n",
+          "ts": 1762646851127
+        }
+      ],
+      "syncedAt": 1762646852375
+    },
+    {
+      "id": "1eb8c5ba-cfdb-490f-be06-4eb7fc226b7f",
+      "title": "New Chat",
+      "createdAt": 1762642053150,
+      "updatedAt": 1762642053150,
+      "messages": [],
+      "syncedAt": 1762646246075
+    }
+  ],
+  "lastUpdated": 1762648386191
+}

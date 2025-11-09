@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { councilMembers } from '@scorpion/core';
+import { getAgentOperationsExecutor } from '@/lib/agent-operations-executor';
 
 export interface AgentActivity {
   id: string;
@@ -31,44 +32,37 @@ export interface AgentDossier {
     high: number;
   };
   recentActivities: AgentActivity[];
+  lastActivity?: string; // Timestamp of last activity
+  currentOperation?: {
+    id: string;
+    startedAt: string;
+    status: 'running' | 'completed' | 'failed';
+  };
+  nextOperation?: {
+    id: string;
+    name: string;
+    type: 'analyze' | 'review' | 'monitor' | 'optimize' | 'cleanup' | 'update' | 'index' | 'test' | 'scan' | 'suggest';
+  };
 }
 
 /**
- * Generate mock activities for an agent
+ * Get real activities for an agent from system logs and operations
+ * TODO: Connect to actual log aggregation system
  */
-function generateAgentActivities(agentId: string, count: number = 10): AgentActivity[] {
-  const activityTypes: Array<'task' | 'analysis' | 'decision' | 'collaboration'> = ['task', 'analysis', 'decision', 'collaboration'];
-  const riskLevels: Array<'low' | 'medium' | 'high'> = ['low', 'low', 'medium', 'high'];
-  const statuses: Array<'success' | 'failed' | 'pending'> = ['success', 'success', 'success', 'failed', 'pending'];
-  
-  const descriptions: Record<string, string[]> = {
-    task: ['Executed workflow analysis', 'Processed knowledge ingestion', 'Performed system health check', 'Updated ontology relations'],
-    analysis: ['Analyzed RAG query patterns', 'Evaluated system performance', 'Assessed security vulnerabilities', 'Reviewed code quality metrics'],
-    decision: ['Approved workflow deployment', 'Rejected risky operation', 'Escalated critical issue', 'Authorized backup restoration'],
-    collaboration: ['Participated in council meeting', 'Shared expertise with peer agents', 'Coordinated multi-agent task', 'Reviewed collaborative decision']
-  };
-
+async function getAgentActivities(agentId: string, agentName: string, count: number = 10): Promise<AgentActivity[]> {
   const activities: AgentActivity[] = [];
-  const now = Date.now();
-
-  for (let i = 0; i < count; i++) {
-    const type = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-    const risk = riskLevels[Math.floor(Math.random() * riskLevels.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const descList = descriptions[type];
-    const description = descList[Math.floor(Math.random() * descList.length)];
-
-    activities.push({
-      id: `${agentId}-act-${i}`,
-      timestamp: new Date(now - (i * 3600000)).toISOString(), // 1 hour apart
-      type,
-      description,
-      risk,
-      status
-    });
-  }
-
-  return activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  // For now, return empty array - activities will come from:
+  // - System logs
+  // - Council deliberation history
+  // - Workflow execution participation
+  // - RAG query processing
+  
+  // TODO: Implement when logging/telemetry system is set up
+  // const logs = await getSystemLogs({ agent: agentName, limit: count });
+  // const deliberations = await getCouncilHistory({ member: agentName, limit: count });
+  
+  return activities;
 }
 
 /**
@@ -83,12 +77,16 @@ function generateAgentId(name: string, index: number): string {
 }
 
 /**
- * Convert council members to agent dossiers
+ * Convert council members to agent dossiers with real activity data
  */
-function councilMembersToAgentDossiers(): AgentDossier[] {
-  return councilMembers.map((member, index) => {
+async function councilMembersToAgentDossiers(): Promise<AgentDossier[]> {
+  const dossiers: AgentDossier[] = [];
+  
+  for (let index = 0; index < councilMembers.length; index++) {
+    const member = councilMembers[index];
     const agentId = generateAgentId(member.name, index);
-    const activities = generateAgentActivities(agentId, 15);
+    const activities = await getAgentActivities(agentId, member.name, 15);
+    
     const successCount = activities.filter(a => a.status === 'success').length;
     const failedCount = activities.filter(a => a.status === 'failed').length;
     const pendingCount = activities.filter(a => a.status === 'pending').length;
@@ -100,7 +98,7 @@ function councilMembersToAgentDossiers(): AgentDossier[] {
     // Calculate creation date (stagger by 30 days each)
     const createdAt = new Date(Date.now() - (index * 30 * 24 * 60 * 60 * 1000)).toISOString();
 
-    return {
+    dossiers.push({
       id: agentId,
       codename: member.name,
       role: member.role,
@@ -120,9 +118,12 @@ function councilMembersToAgentDossiers(): AgentDossier[] {
         medium: mediumRisk,
         high: highRisk
       },
-      recentActivities: activities.slice(0, 10) // Top 10 most recent
-    };
-  });
+      recentActivities: activities.slice(0, 10), // Top 10 most recent
+      lastActivity: activities.length > 0 ? activities[0].timestamp : createdAt
+    });
+  }
+  
+  return dossiers;
 }
 
 /**
@@ -130,7 +131,35 @@ function councilMembersToAgentDossiers(): AgentDossier[] {
  */
 export async function GET() {
   try {
-    const agents = councilMembersToAgentDossiers();
+    const agents = await councilMembersToAgentDossiers();
+    
+    const executor = getAgentOperationsExecutor();
+    const activeExecutions = executor.getActiveExecutions();
+
+    // Add current operation to each agent dossier
+    agents.forEach(dossier => {
+      const activeExecution = activeExecutions.find(
+        exec => exec.agentId === dossier.id
+      );
+      
+      if (activeExecution) {
+        dossier.currentOperation = {
+          id: activeExecution.operationId,
+          startedAt: new Date(activeExecution.startedAt).toISOString(),
+          status: activeExecution.status
+        };
+      }
+      
+      // Get next available operation
+      const nextOp = executor.getNextOperation(dossier.id);
+      if (nextOp) {
+        dossier.nextOperation = {
+          id: nextOp.id,
+          name: nextOp.name,
+          type: nextOp.type
+        };
+      }
+    });
     
     return NextResponse.json({
       agents,

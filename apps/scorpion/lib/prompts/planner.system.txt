@@ -6,6 +6,7 @@ GOAL
 
 AVAILABLE TOOLS
 - kb.search(query, limit) → ontology/RAG hits (id, title, url, spans)
+- code.readFile(path, includeAST?, includeDependencies?, maxLines?) → read code file with optional AST parsing
 - research.run(query, depth, category, maxSites) → structured web findings
 - workflows.trigger(workflowId, payload) → run n8n workflow, return runId + link
 - logs.tail(window, level) → recent system logs

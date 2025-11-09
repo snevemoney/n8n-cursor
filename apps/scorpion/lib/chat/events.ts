@@ -76,6 +76,91 @@ export const ChatEventSchema = z.discriminatedUnion('type', [
       messageId: z.string(),
     }),
   }),
+  
+  // Council deliberation events
+  z.object({
+    type: z.literal('council_start'),
+    data: z.object({
+      message: z.string(),
+      members: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        role: z.string().optional(),
+      })),
+      planSummary: z.string().optional(),
+    }),
+  }),
+  
+  z.object({
+    type: z.literal('council_thinking'),
+    data: z.object({
+      memberId: z.string(),
+      memberName: z.string(),
+      memberRole: z.string().optional(),
+      status: z.enum(['analyzing', 'formulating', 'completed']),
+      message: z.string(),
+      fullResponse: z.string().optional(),
+    }),
+  }),
+  
+  z.object({
+    type: z.literal('council_thinking_delta'),
+    data: z.object({
+      memberId: z.string(),
+      memberName: z.string(),
+      content: z.string(),
+      accumulated: z.string(),
+    }),
+  }),
+  
+  z.object({
+    type: z.literal('council_communication'),
+    data: z.object({
+      memberId: z.string(),
+      memberName: z.string(),
+      message: z.string(),
+      vote: z.string(),
+      confidence: z.number(),
+    }),
+  }),
+  
+  z.object({
+    type: z.literal('council_complete'),
+    data: z.object({
+      message: z.string(),
+      totalVotes: z.number(),
+    }),
+  }),
+  
+  z.object({
+    type: z.literal('council_error'),
+    data: z.object({
+      message: z.string(),
+    }),
+  }),
+  
+  z.object({
+    type: z.literal('council_consensus'),
+    data: z.object({
+      score: z.number(),
+      approved: z.boolean(),
+      summary: z.string(),
+    }),
+  }),
+  
+  // Knowledge search results
+  z.object({
+    type: z.literal('knowledge'),
+    data: z.object({
+      hits: z.array(z.object({
+        id: z.string(),
+        title: z.string(),
+        url: z.string(),
+        spans: z.array(z.object({ text: z.string() })),
+        relevance: z.number().optional(),
+      })),
+    }),
+  }),
 ]);
 
 export type ChatEvent = z.infer<typeof ChatEventSchema>;

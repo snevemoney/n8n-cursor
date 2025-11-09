@@ -9,6 +9,8 @@ import { DatabaseIngester } from './database-ingester';
 import { WorkflowIngester } from './workflow-ingester';
 import { DocumentationIngester } from './docs-ingester';
 import { InfrastructureIngester } from './infrastructure-ingester';
+import { ConversationIngester } from './conversation-ingester';
+import { CodeIngester } from './code-ingester';
 import { RAGStore } from '../rag';
 import { OntologyStore } from '../ontology';
 import { WorkspaceStructure, DatabaseSchema, WorkflowInfo, ServiceStatus, ProjectStatus } from './project-types';
@@ -30,6 +32,8 @@ export class ProjectKnowledgeOrchestrator {
   private workflowIngester: WorkflowIngester;
   private docsIngester: DocumentationIngester;
   private infrastructureIngester: InfrastructureIngester;
+  private conversationIngester: ConversationIngester;
+  private codeIngester: CodeIngester;
   private ragStore: RAGStore;
   private ontologyStore: OntologyStore;
   
@@ -50,6 +54,8 @@ export class ProjectKnowledgeOrchestrator {
     this.workflowIngester = new WorkflowIngester(workspaceRoot, n8nClient);
     this.docsIngester = new DocumentationIngester(workspaceRoot);
     this.infrastructureIngester = new InfrastructureIngester(workspaceRoot);
+    this.conversationIngester = new ConversationIngester(workspaceRoot);
+    this.codeIngester = new CodeIngester(workspaceRoot);
     this.ragStore = ragStore;
     this.ontologyStore = ontologyStore;
   }
@@ -92,17 +98,45 @@ export class ProjectKnowledgeOrchestrator {
     const docsKnowledge = await this.docsIngester.extractDocumentationKnowledge();
     knowledge.push(...docsKnowledge);
 
+    // Ingest source code (comprehensive codebase understanding)
+    console.log('💻 Ingesting source code...');
+    let codeKnowledge: ExtractedKnowledge[] = [];
+    try {
+      codeKnowledge = await this.codeIngester.extractCodeKnowledge();
+      knowledge.push(...codeKnowledge);
+      console.log(`✅ Ingested ${codeKnowledge.length} code files`);
+    } catch (error: any) {
+      console.error('Error extracting code knowledge:', error.message);
+      // Continue with other ingestions even if code extraction fails
+    }
+
     // Ingest infrastructure
     console.log('🏗️ Ingesting infrastructure...');
     const infraKnowledge = await this.infrastructureIngester.extractInfrastructureKnowledge();
     knowledge.push(...infraKnowledge);
     const services = await this.infrastructureIngester.getServiceStatuses();
 
+    // Ingest conversations
+    console.log('💬 Ingesting conversations...');
+    let conversationKnowledge: ExtractedKnowledge[] = [];
+    let conversationStats: { total: number; totalMessages: number; recentConversations: number } = { total: 0, totalMessages: 0, recentConversations: 0 };
+    try {
+      conversationKnowledge = await this.conversationIngester.extractConversationKnowledge();
+      knowledge.push(...conversationKnowledge);
+      conversationStats = await this.conversationIngester.getConversationStats();
+    } catch (error: any) {
+      console.error('Error extracting conversation knowledge:', error.message);
+      // Continue with other ingestions even if conversations fail
+    }
+
     // Store all knowledge in RAG
     console.log('💾 Storing knowledge in RAG...');
     for (const k of knowledge) {
       await this.ragStore.addKnowledge(k);
     }
+    
+    // Invalidate summary cache so next getSummary() call gets fresh data
+    this.invalidateCache();
 
     // Store entities in ontology
     console.log('🔗 Storing entities in ontology...');
@@ -265,9 +299,14 @@ export class ProjectKnowledgeOrchestrator {
   async getSummary(): Promise<{
     totalKnowledge: number;
     workspace: WorkspaceStructure | null;
-    databases: number;
-    workflows: number;
+    databases: DatabaseSchema[];
+    workflows: WorkflowInfo[];
     services: ServiceStatus[];
+    conversations: {
+      total: number;
+      totalMessages: number;
+      recentConversations: number;
+    };
     status: ProjectStatus;
   }> {
     const now = Date.now();
@@ -282,15 +321,24 @@ export class ProjectKnowledgeOrchestrator {
     const workflows = await this.workflowIngester.getWorkflows();
     const services = await this.infrastructureIngester.getServiceStatuses();
     
+    // Get conversation stats
+    let conversationStats = { total: 0, totalMessages: 0, recentConversations: 0 };
+    try {
+      conversationStats = await this.conversationIngester.getConversationStats();
+    } catch (error) {
+      // If conversation stats fail, use defaults
+    }
+    
     const allKnowledge = this.ragStore.getAllKnowledge();
     const status = await this.calculateProjectStatus(allKnowledge, workflows, services);
 
     const result = {
       totalKnowledge: allKnowledge.length,
       workspace,
-      databases: databases.length,
-      workflows: workflows.length,
+      databases: databases, // Return array, not length
+      workflows: workflows, // Return array, not length
       services, // Return array, not length
+      conversations: conversationStats,
       status
     };
 

@@ -83,6 +83,8 @@ class SystemAutomation {
   private backupInterval: NodeJS.Timeout | null = null;
   private databaseSyncInterval: NodeJS.Timeout | null = null;
   private mcpCheckInterval: NodeJS.Timeout | null = null;
+  private lastHealthErrorTimes: Map<string, number> = new Map();
+  private readonly HEALTH_ERROR_THROTTLE = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
     this.workspaceRoot = path.resolve(process.cwd(), '../..');
@@ -186,7 +188,7 @@ class SystemAutomation {
    */
   async checkServiceHealth(): Promise<StackStatus> {
     const services = [
-      { name: 'n8n', url: process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678', healthPath: '/healthz' },
+      { name: 'n8n', url: process.env.N8N_API_URL || process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678', healthPath: '/healthz' },
       { name: 'Ollama', url: process.env.OLLAMA_URL || 'http://localhost:11434', healthPath: '/api/version' },
       { name: 'PostgreSQL', port: 5432 },
       { name: 'Redis', port: 6379 },
@@ -196,11 +198,47 @@ class SystemAutomation {
     const serviceStatuses = await Promise.all(
       services.map(async (service) => {
         try {
+          // Special handling for n8n - check if client is configured first
+          if (service.name === 'n8n') {
+            try {
+              const mcpClient = getMCPn8nClient();
+              if (!mcpClient.isConfigured()) {
+                // n8n not configured - don't report error, just mark as offline
+                return {
+                  name: service.name,
+                  status: 'offline' as const,
+                  health: 0,
+                  lastCheck: new Date().toISOString()
+                };
+              }
+            } catch (clientError) {
+              // Client initialization failed - skip health check
+              return {
+                name: service.name,
+                status: 'offline' as const,
+                health: 0,
+                lastCheck: new Date().toISOString()
+              };
+            }
+          }
+
           if ('url' in service) {
             const healthPath = 'healthPath' in service ? service.healthPath : '/healthz';
             const response = await fetch(`${service.url}${healthPath}`, {
               signal: AbortSignal.timeout(5000)
             });
+            
+            // Check for auth errors (401/403) - don't report these as errors
+            if (!response.ok && (response.status === 401 || response.status === 403)) {
+              // Auth error - don't report, just mark as offline
+              return {
+                name: service.name,
+                status: 'offline' as const,
+                health: 0,
+                lastCheck: new Date().toISOString()
+              };
+            }
+            
             return {
               name: service.name,
               status: response.ok ? 'online' as const : 'offline' as const,
@@ -217,13 +255,31 @@ class SystemAutomation {
               lastCheck: new Date().toISOString()
             };
           }
-        } catch (error) {
-          this.reportError({
-            severity: 'medium',
-            source: 'health-check',
-            message: `Service ${service.name} health check failed`,
-            context: { service, error: (error as Error).message }
-          });
+        } catch (error: any) {
+          // Only report errors if they're not auth-related and not throttled
+          const errorMessage = error.message || String(error);
+          const isAuthError = errorMessage.includes('401') || 
+                            errorMessage.includes('403') || 
+                            errorMessage.includes('authentication') ||
+                            errorMessage.includes('Unauthorized') ||
+                            errorMessage.includes('Forbidden');
+          
+          if (!isAuthError) {
+            // Throttle error reporting to prevent spam
+            const lastErrorTime = this.lastHealthErrorTimes.get(service.name) || 0;
+            const now = Date.now();
+            
+            if (now - lastErrorTime > this.HEALTH_ERROR_THROTTLE) {
+              this.reportError({
+                severity: 'medium',
+                source: 'health-check',
+                message: `Service ${service.name} health check failed`,
+                context: { service: service.name, error: errorMessage }
+              });
+              this.lastHealthErrorTimes.set(service.name, now);
+            }
+          }
+          
           return {
             name: service.name,
             status: 'offline' as const,

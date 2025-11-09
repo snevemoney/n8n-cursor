@@ -5,41 +5,23 @@ import { councilMembers } from '@scorpion/core';
 import type { AgentDossier, AgentActivity } from '../route';
 
 /**
- * Generate mock activities for an agent
+ * Get real activities for an agent from system logs and operations
+ * TODO: Connect to actual log aggregation system
  */
-function generateAgentActivities(agentId: string, count: number = 20): AgentActivity[] {
-  const activityTypes: Array<'task' | 'analysis' | 'decision' | 'collaboration'> = ['task', 'analysis', 'decision', 'collaboration'];
-  const riskLevels: Array<'low' | 'medium' | 'high'> = ['low', 'low', 'medium', 'high'];
-  const statuses: Array<'success' | 'failed' | 'pending'> = ['success', 'success', 'success', 'failed', 'pending'];
-  
-  const descriptions: Record<string, string[]> = {
-    task: ['Executed workflow analysis', 'Processed knowledge ingestion', 'Performed system health check', 'Updated ontology relations', 'Monitored n8n workflows', 'Validated data integrity'],
-    analysis: ['Analyzed RAG query patterns', 'Evaluated system performance', 'Assessed security vulnerabilities', 'Reviewed code quality metrics', 'Studied user interaction patterns', 'Examined error logs'],
-    decision: ['Approved workflow deployment', 'Rejected risky operation', 'Escalated critical issue', 'Authorized backup restoration', 'Validated system configuration', 'Approved agent collaboration'],
-    collaboration: ['Participated in council meeting', 'Shared expertise with peer agents', 'Coordinated multi-agent task', 'Reviewed collaborative decision', 'Mentored junior agent', 'Facilitated knowledge transfer']
-  };
-
+async function getAgentActivities(agentId: string, agentName: string, count: number = 20): Promise<AgentActivity[]> {
   const activities: AgentActivity[] = [];
-  const now = Date.now();
-
-  for (let i = 0; i < count; i++) {
-    const type = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-    const risk = riskLevels[Math.floor(Math.random() * riskLevels.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const descList = descriptions[type];
-    const description = descList[Math.floor(Math.random() * descList.length)];
-
-    activities.push({
-      id: `${agentId}-act-${i}`,
-      timestamp: new Date(now - (i * 1800000)).toISOString(), // 30 minutes apart
-      type,
-      description,
-      risk,
-      status
-    });
-  }
-
-  return activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  // For now, return empty array - activities will come from:
+  // - System logs
+  // - Council deliberation history
+  // - Workflow execution participation
+  // - RAG query processing
+  
+  // TODO: Implement when logging/telemetry system is set up
+  // const logs = await getSystemLogs({ agent: agentName, limit: count });
+  // const deliberations = await getCouncilHistory({ member: agentName, limit: count });
+  
+  return activities;
 }
 
 /**
@@ -80,8 +62,8 @@ export async function GET(
       );
     }
 
-    // Generate detailed activities
-    const activities = generateAgentActivities(id, 30);
+    // Get real activities for agent
+    const activities = await getAgentActivities(id, member.name, 30);
     const successCount = activities.filter(a => a.status === 'success').length;
     const failedCount = activities.filter(a => a.status === 'failed').length;
     const pendingCount = activities.filter(a => a.status === 'pending').length;
@@ -113,7 +95,8 @@ export async function GET(
         medium: mediumRisk,
         high: highRisk
       },
-      recentActivities: activities
+      recentActivities: activities,
+      lastActivity: activities.length > 0 ? activities[0].timestamp : createdAt
     };
     
     return NextResponse.json(dossier);

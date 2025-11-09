@@ -1330,7 +1330,7 @@
             "projectId": "SF4pJV9FxUwRkZkW",
             "user": {
               "createdAt": "2025-08-18T02:57:31.575Z",
-              "updatedAt": "2025-11-07T01:42:52.000Z",
+              "updatedAt": "2025-11-09T00:01:08.000Z",
               "id": "db619a70-c346-4444-89df-3e5181528a34",
               "email": "snevemoney12@gmail.com",
               "firstName": "evens",
@@ -1355,7 +1355,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-11-07",
+              "lastActiveAt": "2025-11-09",
               "isPending": false
             }
           }

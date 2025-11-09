@@ -1,68 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Panel, DataTable } from '@/components/scorpion';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 
-interface Workflow {
-  id: string;
-  name: string;
-  path: string;
-  trigger?: string;
-  nodes: number;
-  active: boolean;
-  syncedToN8n: boolean;
-  n8nId?: string;
-  lastSync?: string;
-  source?: 'filesystem' | 'n8n';
-}
+// Dynamically import the client component with SSR disabled to prevent hydration errors
+const WorkflowsClient = dynamic(
+  () => import('./WorkflowsClient').then(mod => ({ default: mod.WorkflowsClient })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-sm text-white/40">Loading workflows...</div>
+      </div>
+    )
+  }
+);
 
 export default function WorkflowsPage() {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [summary, setSummary] = useState<{
-    total: number;
-    synced: number;
-    active: number;
-    inN8n: number;
-    filesystemOnly?: number;
-    n8nOnly?: number;
-  } | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    loadWorkflows();
+    setMounted(true);
   }, []);
 
-  const loadWorkflows = async () => {
-    try {
-      const response = await fetch('/api/workflows');
-      if (response.ok) {
-        const data = await response.json();
-        setWorkflows(data.workflows || []);
-        setSummary(data.summary || null);
-      }
-    } catch (error) {
-      console.error('Failed to load workflows:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Return null on server to prevent any server-side rendering
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
-  const handleSync = async () => {
-    try {
-      const response = await fetch('/api/workflows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'sync' })
-      });
-      if (response.ok) {
-        await loadWorkflows();
-      }
-    } catch (error) {
-      console.error('Failed to sync workflows:', error);
-    }
-  };
-
-  if (loading) {
+  // Don't render until mounted to prevent hydration errors
+  if (!mounted) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-sm text-white/40">Loading workflows...</div>
@@ -70,115 +37,5 @@ export default function WorkflowsPage() {
     );
   }
 
-  return (
-    <div className="h-full overflow-y-auto p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold mb-1">Workflows</h1>
-          {summary && (
-            <div className="text-sm text-white/40">
-              {summary.total} total, {summary.synced} synced, {summary.active} active
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-white/40">Auto-sync enabled</span>
-          <button
-            onClick={handleSync}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-sm text-sm hover:bg-white/10 text-white/60"
-            title="Manual sync (auto-sync runs automatically)"
-          >
-            Force Sync
-          </button>
-        </div>
-      </div>
-
-      {/* Summary */}
-      {summary && (
-        <Panel title="Summary">
-          <div className="grid grid-cols-6 gap-4">
-            <div>
-              <div className="sc-title mb-1">Total</div>
-              <div className="text-2xl font-semibold">{summary.total}</div>
-            </div>
-            <div>
-              <div className="sc-title mb-1">Synced</div>
-              <div className="text-2xl font-semibold text-emerald-400">{summary.synced}</div>
-            </div>
-            <div>
-              <div className="sc-title mb-1">Active</div>
-              <div className="text-2xl font-semibold text-emerald-400">{summary.active}</div>
-            </div>
-            <div>
-              <div className="sc-title mb-1">In n8n</div>
-              <div className="text-2xl font-semibold text-blue-400">{summary.inN8n}</div>
-            </div>
-            <div>
-              <div className="sc-title mb-1">Filesystem Only</div>
-              <div className="text-2xl font-semibold text-yellow-400">{summary.filesystemOnly || 0}</div>
-            </div>
-            <div>
-              <div className="sc-title mb-1">n8n Only</div>
-              <div className="text-2xl font-semibold text-purple-400">{summary.n8nOnly || 0}</div>
-            </div>
-          </div>
-        </Panel>
-      )}
-
-      {/* Workflows Table */}
-      <Panel title="All Workflows">
-        <DataTable
-          columns={[
-            { key: 'name', label: 'Name' },
-            { key: 'trigger', label: 'Trigger' },
-            { key: 'nodes', label: 'Nodes' },
-            { key: 'status', label: 'Status' },
-            { key: 'sync', label: 'Sync Status' },
-            { key: 'path', label: 'Path' }
-          ]}
-          data={workflows.map(w => ({
-            name: (
-              <div className="flex items-center gap-2">
-                {w.name}
-                {w.source === 'n8n' && (
-                  <span className="text-xs px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded border border-purple-500/30">
-                    n8n
-                  </span>
-                )}
-              </div>
-            ),
-            trigger: w.trigger || 'Manual',
-            nodes: w.nodes.toString(),
-            status: (
-              <span className={w.active ? 'text-emerald-400' : 'text-white/40'}>
-                {w.active ? 'Active' : 'Inactive'}
-              </span>
-            ),
-            sync: (
-              <div className="flex items-center gap-2">
-                {w.source === 'n8n' ? (
-                  <>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span className="text-xs text-purple-400">n8n Only</span>
-                  </>
-                ) : w.syncedToN8n ? (
-                  <>
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                    <span className="text-xs text-emerald-400">Synced</span>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                    <span className="text-xs text-yellow-400">Filesystem Only</span>
-                  </>
-                )}
-              </div>
-            ),
-            path: <span className="text-xs text-white/40 sc-mono">{w.path}</span>
-          }))}
-        />
-      </Panel>
-    </div>
-  );
+  return <WorkflowsClient />;
 }

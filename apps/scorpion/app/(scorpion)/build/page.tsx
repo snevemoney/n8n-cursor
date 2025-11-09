@@ -92,40 +92,41 @@ export default function BuildPage() {
       return;
     }
 
-    try {
-      // Create n8n workflow with the build plan
-      const response = await fetch('/api/workflows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `Build: ${selectedProject}`,
-          nodes: [
-            {
-              name: 'Start',
-              type: 'n8n-nodes-base.start',
-              position: [250, 300]
-            },
-            {
-              name: 'Build Plan',
-              type: 'n8n-nodes-base.code',
-              parameters: {
-                code: `// Generated Build Plan\n${JSON.stringify(plan, null, 2)}`
-              },
-              position: [450, 300]
-            }
-          ]
-        })
-      });
-      
-      if (response.ok) {
-        alert('Build plan sent to n8n successfully!');
-      } else {
-        throw new Error('Failed to create workflow');
-      }
-    } catch (error) {
-      console.error('Send error:', error);
-      alert('Failed to send to n8n');
-    }
+    alert('Send to n8n coming soon! Will create workflow from build plan.');
+    // TODO: Implement workflow creation endpoint
+    // try {
+    //   const response = await fetch('/api/workflows/create', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //       name: `Build: ${selectedProject}`,
+    //       nodes: [
+    //         {
+    //           name: 'Start',
+    //           type: 'n8n-nodes-base.start',
+    //           position: [250, 300]
+    //         },
+    //         {
+    //           name: 'Build Plan',
+    //           type: 'n8n-nodes-base.code',
+    //           parameters: {
+    //             code: `// Generated Build Plan\n${JSON.stringify(plan, null, 2)}`
+    //           },
+    //           position: [450, 300]
+    //         }
+    //       ]
+    //     })
+    //   });
+    //   
+    //   if (response.ok) {
+    //     alert('Build plan sent to n8n successfully!');
+    //   } else {
+    //     throw new Error('Failed to create workflow');
+    //   }
+    // } catch (error) {
+    //   console.error('Send error:', error);
+    //   alert('Failed to send to n8n');
+    // }
   };
 
   return (

@@ -16,7 +16,7 @@ export function DataTable({ columns, data }: DataTableProps) {
       <thead className="text-white/30 border-b border-white/5">
         <tr>
           {columns.map(col => (
-            <th key={col.key} className="py-2 text-left sc-title">{col.label}</th>
+            <th key={col.key} className="py-1 px-1.5 text-left sc-title whitespace-nowrap">{col.label}</th>
           ))}
         </tr>
       </thead>
@@ -24,7 +24,7 @@ export function DataTable({ columns, data }: DataTableProps) {
         {data.map((row, idx) => (
           <tr key={idx} className="border-b border-white/5/20 hover:bg-white/5 transition-colors">
             {columns.map(col => (
-              <td key={col.key} className="py-2">{row[col.key]}</td>
+              <td key={col.key} className="py-1 px-1.5 truncate max-w-[200px]">{row[col.key]}</td>
             ))}
           </tr>
         ))}

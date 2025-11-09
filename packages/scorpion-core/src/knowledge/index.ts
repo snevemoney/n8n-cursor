@@ -6,5 +6,6 @@ export * from './database-ingester';
 export * from './workflow-ingester';
 export * from './docs-ingester';
 export * from './infrastructure-ingester';
+export * from './code-ingester';
 export * from './project-knowledge';
 

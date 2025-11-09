@@ -25,12 +25,15 @@ export async function handler(args: z.infer<typeof schema>) {
     }
     
     const data = await response.json();
+    const sessionId = data.sessionId;
     
     return {
       ok: true,
-      sessionId: data.sessionId,
+      sessionId,
       status: 'started',
-      message: `Research started with session ${data.sessionId}`,
+      message: `Research started for: "${args.query}"`,
+      viewUrl: `/research?session=${sessionId}`,
+      summary: `Researching "${args.query}" with ${args.depth} depth. This will analyze up to ${args.maxSites} sources.`,
     };
   } catch (error: any) {
     return {

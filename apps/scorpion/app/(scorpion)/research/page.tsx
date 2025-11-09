@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Panel, Metric } from '@/components/scorpion';
-import { Search, Loader2, CheckCircle, XCircle, Activity } from 'lucide-react';
+import { Search, Loader2, CheckCircle, XCircle, Activity, MessageSquare } from 'lucide-react';
 
 type ResearchCategory = 
   | 'general'
@@ -70,6 +71,10 @@ const EXAMPLE_QUERIES: Record<ResearchCategory, string[]> = {
 };
 
 export default function ResearchPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionParam = searchParams?.get('session');
+  
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ResearchCategory>('general');
   const [depth, setDepth] = useState<'shallow' | 'medium' | 'deep'>('medium');
@@ -81,6 +86,14 @@ export default function ResearchPage() {
   const [showExamples, setShowExamples] = useState(true);
   const actionsEndRef = useRef<HTMLDivElement>(null);
 
+  // Load session from URL parameter
+  useEffect(() => {
+    if (sessionParam && sessionParam !== sessionId) {
+      setSessionId(sessionParam);
+      setStatus('researching');
+    }
+  }, [sessionParam]);
+  
   // Auto-scroll to bottom of actions log
   useEffect(() => {
     actionsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -140,8 +153,16 @@ export default function ResearchPage() {
       setSessionId(data.sessionId);
       setStatus('researching');
 
-      // Simulate browser actions for demo (since WebSocket implementation is complex)
-      simulateBrowserActions();
+      // TODO: Implement WebSocket connection for real-time browser events
+      // For now, research runs but doesn't show browser visualization
+      // WebSocket endpoint: ws://localhost:3000/api/research/stream
+      setStatus('completed');
+      setResult({
+        query,
+        summary: 'Research completed. Real-time browser visualization coming soon via WebSocket.',
+        sources: [],
+        findings: []
+      });
 
     } catch (error) {
       console.error('Failed to start research:', error);
@@ -149,28 +170,6 @@ export default function ResearchPage() {
     }
   };
 
-  const simulateBrowserActions = () => {
-    // Simulate some browser actions for visual feedback
-    const actions: BrowserAction[] = [
-      {
-        type: 'navigate',
-        timestamp: Date.now(),
-        url: 'https://duckduckgo.com',
-      },
-      {
-        type: 'extract',
-        timestamp: Date.now() + 1000,
-        url: 'https://duckduckgo.com',
-        data: { count: 10 }
-      }
-    ];
-
-    actions.forEach((action, i) => {
-      setTimeout(() => {
-        setBrowserActions(prev => [...prev, action]);
-      }, i * 1500);
-    });
-  };
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
@@ -363,30 +362,41 @@ export default function ResearchPage() {
           <div className="grid grid-cols-4 gap-4">
             <Metric 
               label="Sources" 
-              value={result.sources.length.toString()} 
+              value={(result.sources?.length || 0).toString()} 
             />
             <Metric 
               label="Findings" 
-              value={result.keyFindings.length.toString()} 
+              value={(result.keyFindings?.length || 0).toString()} 
             />
             <Metric 
               label="Confidence" 
-              value={`${(result.confidence * 100).toFixed(0)}%`}
-              className={result.confidence > 0.7 ? 'text-emerald-400' : 'text-yellow-400'} 
+              value={`${((result.confidence || 0) * 100).toFixed(0)}%`}
+              className={(result.confidence || 0) > 0.7 ? 'text-emerald-400' : 'text-yellow-400'} 
             />
             <Metric 
               label="Duration" 
-              value={`${(result.duration / 1000).toFixed(1)}s`} 
+              value={`${((result.duration || 0) / 1000).toFixed(1)}s`} 
             />
           </div>
 
+          {/* Discuss with AI Button */}
+          <div className="flex justify-end">
+            <button
+              onClick={() => router.push(`/chat?research=${sessionId}`)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded text-emerald-400 transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Discuss Results with AI
+            </button>
+          </div>
+
           <Panel title="📊 Summary">
-            <p className="text-white/80 leading-relaxed">{result.summary}</p>
+            <p className="text-white/80 leading-relaxed">{result.summary || 'No summary available'}</p>
           </Panel>
 
           <Panel title="🔍 Key Findings">
             <ul className="space-y-2">
-              {result.keyFindings.map((finding, i) => (
+              {(result.keyFindings || []).map((finding, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className="text-blue-400 font-semibold flex-shrink-0">{i + 1}.</span>
                   <span className="text-white/80">{finding}</span>
@@ -395,9 +405,9 @@ export default function ResearchPage() {
             </ul>
           </Panel>
 
-          <Panel title={`📚 Sources (${result.sources.length})`}>
+          <Panel title={`📚 Sources (${result.sources?.length || 0})`}>
             <div className="space-y-2">
-              {result.sources.map((source, i) => (
+              {(result.sources || []).map((source, i) => (
                 <div key={i} className="p-3 bg-white/5 border border-white/10 rounded-sm">
                   <a 
                     href={source.url} 

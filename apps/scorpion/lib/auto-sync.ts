@@ -18,6 +18,8 @@ let lastN8nWorkflowHashes: Map<string, string> = new Map();
 let ingestionTimeout: NodeJS.Timeout | null = null;
 let isInitialized = false;
 let isSyncing = false; // Prevent overlapping syncs
+let lastAuthErrorTime: number = 0;
+const AUTH_ERROR_THROTTLE = 5 * 60 * 1000; // Only log auth errors once per 5 minutes
 
 /**
  * Initialize automatic syncing
@@ -159,6 +161,13 @@ async function syncWorkflows() {
     // Find workspace root (go up from apps/scorpion/lib)
     const workspaceRoot = path.resolve(process.cwd(), '../..');
     const mcpClient = getMCPn8nClient();
+    
+    // Check if client is configured before attempting API calls
+    if (!mcpClient.isConfigured()) {
+      // Silently skip if not configured (no need to log every time)
+      return;
+    }
+    
     const compatClient = {
       listWorkflows: () => mcpClient.listWorkflows(),
       getWorkflow: (id: string) => mcpClient.getWorkflow(id),
@@ -167,7 +176,22 @@ async function syncWorkflows() {
     const workflowIngester = new WorkflowIngester(workspaceRoot, compatClient);
     
     // Get workflows and check sync status
-    const workflows = await workflowIngester.getWorkflows();
+    let workflows;
+    try {
+      workflows = await workflowIngester.getWorkflows();
+    } catch (error: any) {
+      // Handle auth errors gracefully
+      if (error.message?.includes('401') || error.message?.includes('403') || error.message?.includes('authentication')) {
+        const now = Date.now();
+        if (now - lastAuthErrorTime > AUTH_ERROR_THROTTLE) {
+          console.warn('⚠️ n8n authentication failed - check N8N_API_KEY. Skipping workflow sync.');
+          lastAuthErrorTime = now;
+        }
+        return; // Silently skip
+      }
+      throw error; // Re-throw other errors
+    }
+    
     const unsynced = workflows.filter(w => !w.syncedToN8n);
     
     if (unsynced.length > 0) {
@@ -186,8 +210,11 @@ async function syncWorkflows() {
     } else {
       console.log('✅ All filesystem workflows exist in n8n');
     }
-  } catch (error) {
-    console.error('❌ Error syncing workflows:', error);
+  } catch (error: any) {
+    // Only log non-auth errors to prevent spam
+    if (!error.message?.includes('401') && !error.message?.includes('403') && !error.message?.includes('authentication')) {
+      console.error('❌ Error syncing workflows:', error);
+    }
   }
 }
 
@@ -228,8 +255,33 @@ async function checkN8nWorkflowChanges() {
     
     const mcpClient = getMCPn8nClient();
     
+    // Check if client is configured before attempting API calls
+    if (!mcpClient.isConfigured()) {
+      const now = Date.now();
+      if (now - lastAuthErrorTime > AUTH_ERROR_THROTTLE) {
+        console.warn('⚠️ n8n client not configured - skipping workflow sync. Set N8N_API_KEY to enable.');
+        lastAuthErrorTime = now;
+      }
+      return;
+    }
+    
     // Get workflows from n8n using MCP
-    const n8nWorkflows = await mcpClient.listWorkflows();
+    let n8nWorkflows;
+    try {
+      n8nWorkflows = await mcpClient.listWorkflows();
+    } catch (error: any) {
+      // Handle authentication errors gracefully
+      if (error.message?.includes('401') || error.message?.includes('403') || error.message?.includes('authentication')) {
+        const now = Date.now();
+        if (now - lastAuthErrorTime > AUTH_ERROR_THROTTLE) {
+          console.warn('⚠️ n8n authentication failed - check N8N_API_KEY. Skipping workflow sync.');
+          lastAuthErrorTime = now;
+        }
+        return; // Exit gracefully, don't throw
+      }
+      // Re-throw other errors (network issues, etc.)
+      throw error;
+    }
     
     // Calculate hash of each workflow (simple hash based on updatedAt + nodes count)
     const currentHashes = new Map<string, string>();
@@ -293,8 +345,11 @@ async function checkN8nWorkflowChanges() {
         }
       }, 5000); // 5 second debounce
     }
-  } catch (error) {
-    console.error('❌ Error checking n8n workflow changes:', error);
+  } catch (error: any) {
+    // Only log non-auth errors (auth errors are handled above)
+    if (!error.message?.includes('401') && !error.message?.includes('403') && !error.message?.includes('authentication')) {
+      console.error('❌ Error checking n8n workflow changes:', error);
+    }
   } finally {
     isSyncing = false;
   }
@@ -309,7 +364,17 @@ async function exportWorkflowFromN8n(workflow: any, workflowsDir: string) {
     const mcpClient = getMCPn8nClient();
     
     // Get full workflow data using MCP
-    const fullWorkflow = await mcpClient.getWorkflow(workflow.id);
+    let fullWorkflow;
+    try {
+      fullWorkflow = await mcpClient.getWorkflow(workflow.id);
+    } catch (error: any) {
+      // Handle auth errors gracefully - silently skip this workflow
+      if (error.message?.includes('401') || error.message?.includes('403') || error.message?.includes('authentication')) {
+        return;
+      }
+      throw error; // Re-throw other errors
+    }
+    
     if (!fullWorkflow) {
       return;
     }
@@ -327,8 +392,11 @@ async function exportWorkflowFromN8n(workflow: any, workflowsDir: string) {
     
     // Note: Re-ingestion is handled by the debounced logic in checkN8nWorkflowChanges
     // We don't trigger full ingestion here to avoid cascading re-ingestions
-  } catch (error) {
-    console.error(`❌ Error exporting workflow ${workflow.name}:`, error);
+  } catch (error: any) {
+    // Only log non-auth errors to prevent spam
+    if (!error.message?.includes('401') && !error.message?.includes('403') && !error.message?.includes('authentication')) {
+      console.error(`❌ Error exporting workflow ${workflow.name}:`, error);
+    }
   }
 }
 

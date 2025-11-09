@@ -51,7 +51,7 @@ export default function ScorpionHomePage() {
   };
 
   return (
-    <div className="h-full flex items-center justify-center sc-grid-bg relative">
+    <div className="min-h-full flex items-center justify-center sc-grid-bg relative py-8">
       <NotificationBadge />
       <div className="max-w-2xl w-full space-y-8 p-8">
         {/* ASCII Logo */}

@@ -6,6 +6,8 @@ interface Agent {
   dist: number;
   status: 'ok' | 'warn' | 'error';
   time: string;
+  isActive?: boolean; // Is currently executing a mission
+  currentOperation?: string; // Name of current operation
 }
 
 interface RadarProps {
@@ -54,16 +56,56 @@ export function Radar({ agents, size = 420 }: RadarProps) {
       {/* Agents */}
       {agents.map((agent) => {
         const rad = (agent.angle * Math.PI) / 180;
-        const radius = agent.dist * 2;
-        const x = center + Math.cos(rad) * radius;
-        const y = center + Math.sin(rad) * radius;
+        // When active, move closer to center and add slight rotation
+        const baseRadius = agent.dist * 2;
+        const activeRadius = agent.isActive ? baseRadius * 0.7 : baseRadius;
+        const activeAngle = agent.isActive ? agent.angle + 5 : agent.angle; // Slight rotation when active
+        const activeRad = (activeAngle * Math.PI) / 180;
+        
+        const x = center + Math.cos(activeRad) * activeRadius;
+        const y = center + Math.sin(activeRad) * activeRadius;
         const color = agent.status === 'ok' ? '#13c6a8' : agent.status === 'warn' ? '#f4c95d' : '#ff5f5f';
         
         return (
-          <div key={agent.id} className="absolute" style={{ left: x - 6, top: y - 6 }}>
-            <div className="w-3 h-3 rotate-45" style={{ background: color }}></div>
+          <div 
+            key={agent.id} 
+            className="absolute transition-all duration-500 ease-in-out" 
+            style={{ 
+              left: x - 6, 
+              top: y - 6,
+              transform: agent.isActive ? 'scale(1.2)' : 'scale(1)'
+            }}
+          >
+            {/* Agent marker with pulse animation when active */}
+            <div 
+              className={`w-3 h-3 rotate-45 transition-all duration-300 ${
+                agent.isActive ? 'animate-pulse' : ''
+              }`}
+              style={{ 
+                background: color,
+                boxShadow: agent.isActive ? `0 0 12px ${color}, 0 0 24px ${color}40` : 'none'
+              }}
+            ></div>
+            
+            {/* Active operation indicator */}
+            {agent.isActive && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+            )}
+            
             <div className="text-[9px] text-white/60 -ml-2 mt-1 sc-mono">{agent.id}</div>
+            
+            {/* Show operation name when active */}
+            {agent.isActive && agent.currentOperation ? (
+              <div className="text-[7px] text-cyan-400 -ml-2 mt-0 sc-mono truncate w-16 animate-pulse">
+                {agent.currentOperation}
+              </div>
+            ) : agent.currentOperation === 'Completed' ? (
+              <div className="text-[7px] text-emerald-400 -ml-2 mt-0 sc-mono truncate w-16">
+                ✓ Completed
+              </div>
+            ) : (
             <div className="text-[8px] text-white/40 -ml-2 mt-0 sc-mono">{agent.time}</div>
+            )}
           </div>
         );
       })}

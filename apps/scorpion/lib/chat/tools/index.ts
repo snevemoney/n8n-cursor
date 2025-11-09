@@ -11,6 +11,7 @@ import * as agentDeploy from './agent-deploy';
 import * as systemHealth from './system-health';
 import * as projectAnalyze from './project-analyze';
 import * as backupCreate from './backup-create';
+import * as code from './code';
 
 /**
  * Tools registry - all available tools for Chat-AGI
@@ -25,6 +26,7 @@ export const tools: Record<string, ToolSpec & { handler: (args: any) => Promise<
   'system.health': systemHealth,
   'project.analyze': projectAnalyze,
   'backup.create': backupCreate,
+  'code.readFile': code,
 };
 
 /**

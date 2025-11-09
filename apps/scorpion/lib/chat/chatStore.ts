@@ -17,6 +17,7 @@ interface ChatState {
   // UI state
   inputValue: string;
   isStreaming: boolean;
+  streamingConversations: Set<string>; // Track which conversations are streaming
   
   // Model config
   provider: 'ollama' | 'openai' | 'azure' | 'local';
@@ -31,31 +32,37 @@ interface ChatState {
   loadPersistedData: () => void;
   setInputValue: (value: string) => void;
   setStreaming: (streaming: boolean) => void;
+  setConversationStreaming: (conversationId: string, streaming: boolean) => void;
   setProvider: (provider: 'ollama' | 'openai' | 'azure' | 'local') => void;
   setModel: (model: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
-  // Initial state
+  // Initial state - don't access localStorage during SSR
   currentConversation: null,
   conversations: [],
   messages: {},
   inputValue: '',
   isStreaming: false,
-  provider: (typeof window !== 'undefined' && localStorage.getItem('chat-provider') as any) || 'ollama',
-  model: (typeof window !== 'undefined' && localStorage.getItem('chat-model')) || 'qwen2.5-coder:7b-instruct-q4_K_M',
+  streamingConversations: new Set(),
+  provider: 'ollama', // Default, will be loaded from localStorage in useEffect
+  model: 'llama3.2:1b', // Default, optimized for 8GB RAM systems
   
   // Actions
   setCurrentConversation: (id) => {
     set({ currentConversation: id });
     
-    // Load messages if not already loaded
+    // Always reload messages from storage when switching conversations
+    // This ensures we have the latest persisted state
     if (id) {
       const state = get();
-      if (!state.messages[id]) {
-        const messages = loadMessages(id);
+      const persistedMessages = loadMessages(id);
+      
+      // Only update if persisted messages exist or if we don't have messages in memory
+      // This prevents overwriting with empty array if storage hasn't been initialized yet
+      if (persistedMessages.length > 0 || !state.messages[id]) {
         set(state => ({
-          messages: { ...state.messages, [id]: messages },
+          messages: { ...state.messages, [id]: persistedMessages },
         }));
       }
     }
@@ -130,7 +137,29 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
   
   setInputValue: (value) => set({ inputValue: value }),
-  setStreaming: (streaming) => set({ isStreaming: streaming }),
+  setStreaming: (streaming) => {
+    const state = get();
+    set({ 
+      isStreaming: streaming,
+      streamingConversations: streaming && state.currentConversation
+        ? new Set([...state.streamingConversations, state.currentConversation])
+        : state.streamingConversations
+    });
+  },
+  setConversationStreaming: (conversationId, streaming) => {
+    set(state => {
+      const newSet = new Set(state.streamingConversations);
+      if (streaming) {
+        newSet.add(conversationId);
+      } else {
+        newSet.delete(conversationId);
+      }
+      return {
+        streamingConversations: newSet,
+        isStreaming: newSet.size > 0,
+      };
+    });
+  },
   setProvider: (provider) => {
     set({ provider });
     if (typeof window !== 'undefined') {

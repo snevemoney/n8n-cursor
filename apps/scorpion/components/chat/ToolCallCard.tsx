@@ -1,7 +1,8 @@
 'use client';
 
-import { CheckCircle, XCircle, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface ToolCallCardProps {
   tool: string;
@@ -73,6 +74,18 @@ export function ToolCallCard({ tool, args, status, result, error }: ToolCallCard
           {result && (
             <div>
               <div className="text-xs text-white/40 mb-1">Result:</div>
+              
+              {/* Special handling for research tool */}
+              {tool === 'research.run' && result.viewUrl && (
+                <Link
+                  href={result.viewUrl}
+                  className="inline-flex items-center gap-2 px-3 py-2 mb-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded text-emerald-400 text-sm transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Full Research Results
+                </Link>
+              )}
+              
               <pre className="text-xs bg-black/30 p-2 rounded overflow-x-auto">
                 {JSON.stringify(result, null, 2)}
               </pre>

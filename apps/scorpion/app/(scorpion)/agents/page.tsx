@@ -97,7 +97,7 @@ export default function AgentsPage() {
         </div>
       </Panel>
 
-      <div className="grid grid-cols-[1.1fr_0.9fr] gap-4">
+      <div className="grid grid-cols-[1fr_1fr] gap-4">
         <Panel title="Agent Roster">
           {loading ? (
             <div className="text-center py-8 text-white/40">Loading agents...</div>

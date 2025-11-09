@@ -13,17 +13,18 @@
     "./context": "./src/context/index.ts",
     "./council": "./src/council/index.ts",
     "./ontology": "./src/ontology/index.ts",
-    "./storage/persistent-store": "./src/storage/persistent-store.ts"
+    "./storage/persistent-store": "./src/storage/persistent-store.ts",
+    "./code": "./src/code/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@lightningflow/shared-config": "workspace:*"
+    "@lightningflow/shared-config": "workspace:*",
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "@types/node": "^20.0.0"
   }
 }
 

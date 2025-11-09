@@ -10,6 +10,8 @@
 import { ExtractedKnowledge } from './types';
 import fs from 'fs/promises';
 import path from 'path';
+import { getFileCache } from '../code/file-cache';
+import { getASTParser } from '../code/ast-parser';
 
 export class KnowledgeExtractor {
   private sideHustlePath: string;
@@ -233,21 +235,42 @@ export class KnowledgeExtractor {
 
   private async extractCodeSnippets(files: string[]): Promise<ExtractedKnowledge['codeSnippets']> {
     const snippets: ExtractedKnowledge['codeSnippets'] = [];
+    const fileCache = getFileCache();
+    const astParser = getASTParser(this.sideHustlePath);
 
     for (const file of files.slice(0, 3)) {
       try {
-        const content = await fs.readFile(file, 'utf-8');
-        const language = path.extname(file).slice(1) || 'typescript';
+        // Use file cache for performance
+        const fileContent = await fileCache.get(file);
+        if (!fileContent) continue;
+
         const relativePath = path.relative(this.sideHustlePath, file);
         
-        // Extract first 50 lines as snippet
-        const lines = content.split('\n').slice(0, 50).join('\n');
+        // Store full file content (with reasonable size limit)
+        const maxFileSize = 100000; // 100KB limit
+        const content = fileContent.content.length > maxFileSize
+          ? fileContent.content.substring(0, maxFileSize) + '\n... (truncated)'
+          : fileContent.content;
+
+        // Extract AST info if available
+        const ast = await astParser.parseFile(file);
+        let explanation = `Code from ${relativePath} showing implementation pattern`;
+        
+        if (ast) {
+          const imports = ast.imports.length > 0 ? `Imports: ${ast.imports.map(i => i.from).join(', ')}` : '';
+          const exports = ast.exports.length > 0 ? `Exports: ${ast.exports.map(e => e.name).join(', ')}` : '';
+          const functions = ast.functions.length > 0 ? `Functions: ${ast.functions.map(f => f.name).join(', ')}` : '';
+          const parts = [imports, exports, functions].filter(Boolean);
+          if (parts.length > 0) {
+            explanation += `. ${parts.join('. ')}`;
+          }
+        }
         
         snippets.push({
           file: relativePath,
-          language,
-          code: lines,
-          explanation: `Code from ${relativePath} showing implementation pattern`
+          language: fileContent.language,
+          code: content,
+          explanation
         });
       } catch (error) {
         // Skip files that can't be read

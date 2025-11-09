@@ -154,6 +154,18 @@ export class RAGStore {
   }
 
   private knowledgeToText(knowledge: ExtractedKnowledge): string {
+    // Include full file content in code examples (not truncated)
+    const codeExamples = knowledge.codeSnippets.map(s => {
+      // For full file content, include it all (up to reasonable limit)
+      // For very large files, we still truncate but at a higher limit
+      const maxSnippetSize = 50000; // 50KB per snippet
+      const code = s.code.length > maxSnippetSize
+        ? s.code.substring(0, maxSnippetSize) + '\n... (truncated)'
+        : s.code;
+      
+      return `${s.file}:\n${code}`;
+    }).join('\n\n');
+
     return `
 Title: ${knowledge.title}
 Description: ${knowledge.description}
@@ -168,10 +180,48 @@ Use Cases:
 ${knowledge.useCases.map(u => `- ${u}`).join('\n')}
 
 Code Examples:
-${knowledge.codeSnippets.map(s => `${s.file}:\n${s.code.substring(0, 500)}`).join('\n\n')}
+${codeExamples}
 
 Tags: ${knowledge.tags.join(', ')}
     `.trim();
+  }
+
+  /**
+   * Store a file directly in RAG (for full file content storage)
+   */
+  async storeFile(
+    filePath: string,
+    content: string,
+    metadata?: {
+      source?: string;
+      type?: string;
+      category?: string;
+      tags?: string[];
+      ast?: any;
+    }
+  ): Promise<void> {
+    const id = `file-${filePath.replace(/[^a-zA-Z0-9]/g, '-')}`;
+    const doc: RAGDocument = {
+      id,
+      content: content,
+      metadata: {
+        source: metadata?.source || 'file-system',
+        type: metadata?.type || 'code',
+        category: metadata?.category || 'file',
+        tags: metadata?.tags || [],
+        extractedAt: new Date().toISOString()
+      }
+    };
+
+    // Generate embedding
+    try {
+      doc.embedding = await this.generateEmbedding(content);
+    } catch (error) {
+      console.warn('Failed to generate embedding for file:', error);
+    }
+
+    this.documents.set(id, doc);
+    await this.save();
   }
 
   private documentToKnowledge(doc: RAGDocument): ExtractedKnowledge {

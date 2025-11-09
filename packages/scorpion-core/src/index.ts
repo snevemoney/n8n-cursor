@@ -8,4 +8,5 @@ export * from './ontology';
 export * from './storage/persistent-store';
 export * from './agents';
 export * from './utils/error-handler';
+export * from './code';
 
