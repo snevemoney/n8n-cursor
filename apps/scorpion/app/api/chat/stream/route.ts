@@ -4,7 +4,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { runModelUnified, parseModelJSON } from '@/lib/chat/modelRunner';
 import { runCouncilDeliberationStreaming, computeConsensus } from '@/lib/chat/council';
-import { executeTool, detectUserTool, getUserToolBySlashCommand, isUserTool } from '@/lib/chat/tools';
+import { executeTool, detectUserTool, getUserToolBySlashCommand, isUserTool, tools, userTools, listTools } from '@/lib/chat/tools';
 import { remember } from '@/lib/chat/memory';
 import { createSSEMessage } from '@/lib/chat/events';
 import type { Message, Plan } from '@/lib/chat/types';
@@ -416,12 +416,67 @@ export async function POST(req: NextRequest) {
         
         let plannerPrompt = readFileSync(getPromptPath('planner.system.txt'), 'utf-8');
         
-        // Add explicit enforcement message for codebase questions
-        // Only trigger if it mentions codebase keywords
+        // Generate dynamic tools list from registry
+        const generateToolsList = () => {
+          let toolsList = '\nAI-Callable Tools (for planning):\n';
+          
+          // Add all AI-callable tools
+          try {
+            Object.entries(tools).forEach(([name, tool]) => {
+              const desc = tool?.description || tool?.label || name;
+              toolsList += `- ${name} → ${desc}\n`;
+            });
+          } catch (e) {
+            console.error('[Planner] Error generating AI tools list:', e);
+          }
+          
+          toolsList += '\nUser Tools (can be planned, but execute directly):\n';
+          
+          // Add implemented user tools
+          try {
+            Object.entries(userTools).forEach(([name, tool]) => {
+              if (tool && tool.implemented !== false) {
+                const desc = tool?.description || tool?.label || name;
+                toolsList += `- ${name} → ${desc}\n`;
+              }
+            });
+          } catch (e) {
+            console.error('[Planner] Error generating user tools list:', e);
+          }
+          
+          return toolsList;
+        };
+        
+        // Inject dynamic tools list into prompt (replace the static AVAILABLE TOOLS section)
+        const toolsList = generateToolsList();
+        // Replace everything from "AVAILABLE TOOLS" until "CRITICAL:" or next major section
+        plannerPrompt = plannerPrompt.replace(
+          /AVAILABLE TOOLS[\s\S]*?(?=\nCRITICAL:|PLANNING STRATEGY|CONTEXT HINTS|OUTPUT FORMAT)/,
+          `AVAILABLE TOOLS${toolsList}\n\n`
+        );
+        
+        // Add explicit enforcement messages based on question type
         const codebaseKeywords = /(lightningflow|lightning flow|scorpion|n8n|workflow|codebase|project|app|code|implementation|repository|repo|package|module)/i;
+        const operationalKeywords = /(system health|check system|system status|show logs|recent errors|system metrics|uptime|health check)/i;
+        const workflowKeywords = /(trigger workflow|run workflow|workflow status|execute workflow|workflow id)/i;
+        const analysisKeywords = /(analyze project|project structure|dependencies|project health|project analysis)/i;
+        
         const isCodebaseQuestionCheck = codebaseKeywords.test(userMessage);
+        const isOperationalQuestion = operationalKeywords.test(userMessage);
+        const isWorkflowQuestion = workflowKeywords.test(userMessage);
+        const isAnalysisQuestion = analysisKeywords.test(userMessage);
+        
         if (isCodebaseQuestionCheck) {
           plannerPrompt += `\n\n⚠️ CRITICAL: This is a CODEBASE QUESTION. You MUST include code.readFile steps in your plan. DO NOT create a plan with only kb.search. Reading actual code files is REQUIRED.`;
+        } else if (isOperationalQuestion) {
+          plannerPrompt += `\n\n⚠️ CRITICAL: This is an OPERATIONAL QUESTION. Use system.health or logs.tail directly. DO NOT use kb.search - use the appropriate operational tool!`;
+        } else if (isWorkflowQuestion) {
+          plannerPrompt += `\n\n⚠️ CRITICAL: This is a WORKFLOW QUESTION. Use workflows.trigger or project.analyze directly. DO NOT default to kb.search!`;
+        } else if (isAnalysisQuestion) {
+          plannerPrompt += `\n\n⚠️ CRITICAL: This is an ANALYSIS QUESTION. Use project.analyze directly - this is the right tool! DO NOT use kb.search for project analysis.`;
+        } else {
+          // General question - discourage kb.search-only plans
+          plannerPrompt += `\n\n⚠️ IMPORTANT: DO NOT create plans with ONLY kb.search. If kb.search is used, ensure there's a follow-up step with a different tool (research.run, code.readFile, etc.). Tool diversity is required!`;
         }
         
         const planResponse = await runModelUnified(
@@ -516,6 +571,54 @@ export async function POST(req: NextRequest) {
             type: 'status', 
             data: { message: 'Using fallback plan (JSON parse failed)', phase: 'planning' } 
           });
+        }
+        
+        // Plan validation: Detect and fix kb.search-heavy plans
+        const kbSearchSteps = plan.plan.filter(step => step.tool === 'kb.search');
+        const hasOnlyKbSearch = plan.plan.length === kbSearchSteps.length && kbSearchSteps.length > 0;
+        const hasMultipleKbSearch = kbSearchSteps.length > 1;
+        
+        // If plan has only kb.search or multiple kb.search steps, inject appropriate tools
+        if (hasOnlyKbSearch || hasMultipleKbSearch) {
+          console.log('[Chat Stream] Plan validation: Detected kb.search-heavy plan, injecting appropriate tools');
+          
+          // Determine what tool to add based on question type
+          if (isOperationalQuestion) {
+            // Replace kb.search with system.health
+            plan.plan = plan.plan.map(step => 
+              step.tool === 'kb.search' 
+                ? { ...step, tool: 'system.health', title: 'Check system health', args: { includeMetrics: true, includeAlerts: true } }
+                : step
+            );
+          } else if (isWorkflowQuestion) {
+            // Replace kb.search with project.analyze
+            plan.plan = plan.plan.map(step => 
+              step.tool === 'kb.search' 
+                ? { ...step, tool: 'project.analyze', title: 'Analyze project and workflows', args: { includeFiles: true, includeDependencies: true } }
+                : step
+            );
+          } else if (isAnalysisQuestion) {
+            // Replace kb.search with project.analyze
+            plan.plan = plan.plan.map(step => 
+              step.tool === 'kb.search' 
+                ? { ...step, tool: 'project.analyze', title: 'Analyze project structure', args: { includeFiles: true, includeDependencies: true } }
+                : step
+            );
+          } else if (!isCodebaseQuestionCheck) {
+            // For general questions, add research.run as follow-up
+            const lastKbSearch = kbSearchSteps[kbSearchSteps.length - 1];
+            const lastKbSearchIndex = plan.plan.indexOf(lastKbSearch);
+            if (lastKbSearchIndex >= 0) {
+              plan.plan.splice(lastKbSearchIndex + 1, 0, {
+                id: `s${plan.plan.length + 1}`,
+                title: 'Research online if knowledge base insufficient',
+                tool: 'research.run',
+                args: { query: userMessage, depth: 'medium', category: 'general', maxSites: 5 },
+                dependsOn: [lastKbSearch.id],
+                success: 'Research completed'
+              });
+            }
+          }
         }
         
         // Detect if this is a codebase question and enforce code.readFile steps
@@ -1250,10 +1353,35 @@ export async function POST(req: NextRequest) {
           .filter(r => r.step === 'research_fallback' || r.result?.sessionId)
           .map(r => r.result);
         
+        // Extract tool results for better summarization
+        const systemHealthResults = results
+          .filter(r => {
+            const step = plan.plan.find(s => s.id === r.step);
+            return step?.tool === 'system.health' && r.result?.ok;
+          })
+          .map(r => r.result);
+        
+        const logsResults = results
+          .filter(r => {
+            const step = plan.plan.find(s => s.id === r.step);
+            return step?.tool === 'logs.tail' && r.result?.ok;
+          })
+          .map(r => r.result);
+        
+        const projectAnalyzeResults = results
+          .filter(r => {
+            const step = plan.plan.find(s => s.id === r.step);
+            return step?.tool === 'project.analyze' && r.result?.ok;
+          })
+          .map(r => r.result);
+        
         // Build comprehensive context with actual results
         const hasKnowledge = prioritizedKnowledgeHits.length > 0;
         const hasResearch = researchResults.length > 0;
-        const hasResults = hasKnowledge || hasResearch;
+        const hasSystemHealth = systemHealthResults.length > 0;
+        const hasLogs = logsResults.length > 0;
+        const hasProjectAnalyze = projectAnalyzeResults.length > 0;
+        const hasResults = hasKnowledge || hasResearch || hasSystemHealth || hasLogs || hasProjectAnalyze || codeReadResults.length > 0;
         
         // Use questionType from plan for adaptive summarizer output
         const finalQuestionType = questionType; // Use the determined question type
@@ -1291,6 +1419,66 @@ export async function POST(req: NextRequest) {
         if (isCasual) {
           // For casual questions, prioritize knowledge base results over council consensus
           summaryContext += `User Question: ${userMessage}\n\n`;
+          
+          // Add system health results if available
+          if (hasSystemHealth) {
+            summaryContext += `=== SYSTEM HEALTH (PRIMARY SOURCE) ===\n`;
+            systemHealthResults.forEach((result, idx) => {
+              summaryContext += `\nSystem Status: ${result.status || 'unknown'}\n`;
+              summaryContext += `Uptime: ${result.uptime || 'N/A'} seconds\n`;
+              if (result.services) {
+                summaryContext += `Services:\n${JSON.stringify(result.services, null, 2)}\n`;
+              }
+              if (result.agents) {
+                summaryContext += `Agents: ${result.agents.total || 0} total, ${result.agents.active || 0} active\n`;
+              }
+              if (result.workflows) {
+                summaryContext += `Workflows: ${result.workflows.total || 0} total, ${result.workflows.active || 0} active\n`;
+              }
+              if (result.alerts && result.alerts.length > 0) {
+                summaryContext += `Alerts: ${JSON.stringify(result.alerts, null, 2)}\n`;
+              }
+            });
+            summaryContext += `\nCRITICAL: Synthesize the system health information above into a clear, intelligent answer. Explain what the metrics mean and what the status indicates.\n\n`;
+          }
+          
+          // Add logs results if available
+          if (hasLogs) {
+            summaryContext += `=== LOGS (PRIMARY SOURCE) ===\n`;
+            logsResults.forEach((result, idx) => {
+              summaryContext += `\nLogs (${result.count || 0} entries):\n`;
+              if (result.logs && result.logs.length > 0) {
+                result.logs.slice(0, 20).forEach((log: any) => {
+                  summaryContext += `[${log.level || 'info'}] ${log.message || log.content || JSON.stringify(log)}\n`;
+                });
+              }
+            });
+            summaryContext += `\nCRITICAL: Summarize key errors, warnings, and patterns from the logs above. Don't just list them - explain what they mean.\n\n`;
+          }
+          
+          // Add project analysis results if available
+          if (hasProjectAnalyze) {
+            summaryContext += `=== PROJECT ANALYSIS (PRIMARY SOURCE) ===\n`;
+            projectAnalyzeResults.forEach((result, idx) => {
+              summaryContext += `\nProject Analysis:\n`;
+              if (result.summary) {
+                summaryContext += `Summary: ${JSON.stringify(result.summary, null, 2)}\n`;
+              }
+              if (result.structure) {
+                summaryContext += `Structure: ${JSON.stringify(result.structure, null, 2)}\n`;
+              }
+              if (result.health) {
+                summaryContext += `Health Score: ${result.health.score || 'N/A'}\n`;
+                if (result.health.issues) {
+                  summaryContext += `Issues: ${JSON.stringify(result.health.issues, null, 2)}\n`;
+                }
+                if (result.health.recommendations) {
+                  summaryContext += `Recommendations: ${JSON.stringify(result.health.recommendations, null, 2)}\n`;
+                }
+              }
+            });
+            summaryContext += `\nCRITICAL: Synthesize the project analysis above into clear insights about project structure, health, and recommendations.\n\n`;
+          }
           
           if (hasKnowledge) {
             // Highlight README files prominently

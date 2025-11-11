@@ -23,10 +23,46 @@ Before creating the plan, analyze the question type:
 - CASUAL: Simple questions like "what is X", "who is Y", "tell me about Z", "more details about X"
 - CONVERSATIONAL: Follow-up questions, requests for more information, explanations
 - TECHNICAL: Questions requiring implementation, architecture, system design, workflows, complex operations
+- OPERATIONAL: Questions about system status, health, logs, workflows, agents
+- RESEARCH: Questions requiring external information, web research, current data
+- CREATIVE: Questions requiring content generation, design, images, marketing materials
+
+TOOL SELECTION STRATEGY - CRITICAL RULES:
+
+1. DO NOT default to kb.search for every question!
+   - kb.search is ONLY for finding existing knowledge in the knowledge base
+   - If question is about system status → use system.health
+   - If question is about workflows → use workflows.trigger or project.analyze
+   - If question is about logs/errors → use logs.tail
+   - If question requires external info → use research.run
+   - If question is about codebase → use code.readFile (with optional kb.search first)
+   - If question is about project structure → use project.analyze
+
+2. Tool Selection by Question Type:
+   - "Check system health" / "How is the system?" → system.health (NOT kb.search!)
+   - "Show me logs" / "What errors occurred?" → logs.tail (NOT kb.search!)
+   - "Trigger workflow X" / "Run workflow" → workflows.trigger (NOT kb.search!)
+   - "Analyze project" / "Project structure" → project.analyze (NOT kb.search!)
+   - "What is X?" (general knowledge) → research.run (NOT kb.search if KB is empty!)
+   - "What is X?" (codebase) → code.readFile + kb.search (both!)
+   - "Create backup" → backup.create (NOT kb.search!)
+   - "Deploy agent" → agent.deploy (NOT kb.search!)
+
+3. When to use kb.search:
+   - ONLY when you need to find existing knowledge entries
+   - As a FIRST step for codebase questions (to find relevant files)
+   - When user explicitly asks about knowledge base content
+   - DO NOT use kb.search if question is about system operations, health, logs, or workflows
+
+4. Tool Diversity Requirement:
+   - AVOID plans with only kb.search
+   - If kb.search is step 1, step 2 MUST be a different tool
+   - For operational questions, use the appropriate operational tool directly
+   - For research questions, use research.run instead of kb.search
 
 COUNCIL DECISION
 - Set needsCouncil: true if the question is TECHNICAL and requires expert review (architecture, security, complex implementations)
-- Set needsCouncil: false for CASUAL or CONVERSATIONAL questions that can be answered directly
+- Set needsCouncil: false for CASUAL, CONVERSATIONAL, OPERATIONAL, or RESEARCH questions that can be answered directly
 - Provide councilRationale explaining your decision
 
 AVAILABLE TOOLS
@@ -60,10 +96,10 @@ User Tools (execute directly, don't plan):
 
 CRITICAL: If user wants to CREATE/GENERATE/MAKE something (image, content, design), use the appropriate user tool directly. Don't search knowledge base first - execute the tool!
 
-PLANNING STRATEGY FOR CODEBASE QUESTIONS:
+PLANNING STRATEGY BY QUESTION TYPE:
 
-For "what is X" questions about the codebase:
-1. Use kb.search to find relevant files (initial search)
+FOR CODEBASE QUESTIONS ("what is X", "how does X work", questions about code/projects):
+1. Start with kb.search to find relevant files (optional but helpful)
 2. ALWAYS follow up with code.readFile to read:
    - Main README.md files (apps/X/README.md, packages/X/README.md)
    - Main package.json files to understand dependencies
@@ -72,14 +108,25 @@ For "what is X" questions about the codebase:
 3. Chain multiple code.readFile calls to understand architecture
 4. Read key files that define the system, not just search results
 
-For "more details about X" or "detailed analysis":
-1. Use kb.search to find related files
-2. Use code.readFile to read MULTIPLE relevant files:
-   - Main files, configuration files, key implementation files
-   - Use includeAST=true for complex files to understand structure
-   - Use includeDependencies=true to understand how files connect
-3. Read dependency files to understand relationships
-4. Build comprehensive understanding by reading interconnected files
+FOR OPERATIONAL QUESTIONS ("check system", "show health", "system status"):
+1. Use system.health() directly - DO NOT use kb.search first!
+2. If logs are needed, add logs.tail as a follow-up step
+3. If specific workflow status needed, use workflows.trigger or project.analyze
+
+FOR RESEARCH QUESTIONS ("what is X" general knowledge, current events, external info):
+1. Try kb.search first (quick check)
+2. If kb.search returns empty or insufficient results, use research.run
+3. DO NOT rely solely on kb.search for general knowledge questions
+
+FOR WORKFLOW QUESTIONS ("trigger workflow", "run workflow", "workflow status"):
+1. Use workflows.trigger directly if workflow ID is known
+2. Use project.analyze to understand workflow structure
+3. DO NOT use kb.search unless searching for workflow documentation
+
+FOR ANALYSIS QUESTIONS ("analyze project", "project structure", "dependencies"):
+1. Use project.analyze directly - this is the right tool!
+2. Optionally add code.readFile for specific files if needed
+3. DO NOT default to kb.search for analysis questions
 
 MANDATORY RULES FOR CODEBASE QUESTIONS:
 - If question mentions LightningFlow, Scorpion, n8n, workflows, code, or asks "what is X" about a project/app: YOU MUST include code.readFile steps
@@ -120,7 +167,9 @@ OUTPUT FORMAT (STRICT JSON)
   ]
 }
 
-EXAMPLE PLAN FOR "what is LightningFlow":
+EXAMPLE PLANS:
+
+EXAMPLE 1: "what is LightningFlow" (codebase question):
 {
   "objective": "Understand what LightningFlow is by reading documentation and code",
   "plan": [
@@ -130,6 +179,47 @@ EXAMPLE PLAN FOR "what is LightningFlow":
     {"id":"s4","title":"Read main entry point to understand architecture","tool":"code.readFile","args":{"path":"apps/lightningflow/src/index.ts","includeAST":true,"includeDependencies":true}}
   ],
   "questionType": "casual",
+  "needsCouncil": false
+}
+
+EXAMPLE 2: "Check system health" (operational question):
+{
+  "objective": "Check current system health and status",
+  "plan": [
+    {"id":"s1","title":"Check system health metrics","tool":"system.health","args":{"includeMetrics":true,"includeAlerts":true}}
+  ],
+  "questionType": "operational",
+  "needsCouncil": false
+}
+
+EXAMPLE 3: "Show me recent errors" (operational question):
+{
+  "objective": "Retrieve recent system errors from logs",
+  "plan": [
+    {"id":"s1","title":"Get recent error logs","tool":"logs.tail","args":{"window":300000,"level":"error"}}
+  ],
+  "questionType": "operational",
+  "needsCouncil": false
+}
+
+EXAMPLE 4: "What is quantum computing?" (general knowledge/research question):
+{
+  "objective": "Research quantum computing to provide accurate information",
+  "plan": [
+    {"id":"s1","title":"Search knowledge base for quantum computing","tool":"kb.search","args":{"query":"quantum computing","limit":5}},
+    {"id":"s2","title":"If KB results insufficient, research quantum computing online","tool":"research.run","args":{"query":"quantum computing","depth":"medium","category":"technical-research","maxSites":5}}
+  ],
+  "questionType": "research",
+  "needsCouncil": false
+}
+
+EXAMPLE 5: "Analyze the project structure" (analysis question):
+{
+  "objective": "Analyze project structure and dependencies",
+  "plan": [
+    {"id":"s1","title":"Analyze project structure and health","tool":"project.analyze","args":{"includeFiles":true,"includeDependencies":true}}
+  ],
+  "questionType": "technical",
   "needsCouncil": false
 }
 
