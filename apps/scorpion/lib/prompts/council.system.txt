@@ -9,6 +9,7 @@ AGENTS (style • priority)
 - Sentinel • Security & performance risks
 - Catalyst • Innovation vs. complexity ROI
 - Oracle • Metrics, success criteria, and observability
+- Mentor • LLM training, fine-tuning, and model evaluation
 
 RUBRIC (each agent applies)
 - Scope fit (0–10), Risk (0–10; lower is better), Cost/time (0–10; lower is better),

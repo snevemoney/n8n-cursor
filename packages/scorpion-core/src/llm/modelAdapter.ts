@@ -1,7 +1,9 @@
 /**
  * Model Adapter - Model-agnostic LLM interface
- * Swap between OpenAI, Ollama, or your own trained model via env vars
+ * Supports Ollama (local) and OpenAI (cloud fallback)
  */
+
+import { generateGroundedSystemPrompt, GroundingOptions } from '../context/grounding';
 
 export interface LLMRequest {
   prompt: string;
@@ -9,6 +11,7 @@ export interface LLMRequest {
   model?: string; // Optional model override
   temperature?: number;
   maxTokens?: number;
+  grounding?: GroundingOptions; // Optional grounding context
 }
 
 export interface LLMResponse {
@@ -20,7 +23,7 @@ export interface LLMResponse {
   };
 }
 
-export type ModelSource = 'openai' | 'ollama' | 'local' | 'custom';
+export type ModelSource = 'ollama' | 'openai';
 
 /**
  * LLMAdapter class - Object-oriented wrapper for runModel
@@ -43,10 +46,19 @@ export class LLMAdapter {
     this.maxTokens = config.maxTokens;
   }
 
-  async chat(prompt: string, system?: string): Promise<string> {
+  async chat(prompt: string, system?: string, grounding?: GroundingOptions): Promise<string> {
+    // Apply grounding if provided
+    let enhancedSystem = system;
+    if (grounding) {
+      enhancedSystem = generateGroundedSystemPrompt({
+        basePrompt: system || '',
+        ...grounding
+      });
+    }
+
     const response = await runModel({
       prompt,
-      system,
+      system: enhancedSystem,
       model: this.model,
       temperature: this.temperature,
       maxTokens: this.maxTokens
@@ -58,8 +70,9 @@ export class LLMAdapter {
     system?: string;
     user: string;
     jsonOutput?: boolean;
+    grounding?: GroundingOptions;
   }): Promise<string> {
-    return this.chat(request.user, request.system);
+    return this.chat(request.user, request.system, request.grounding);
   }
 
   async request(req: LLMRequest): Promise<LLMResponse> {
@@ -74,21 +87,27 @@ export class LLMAdapter {
 
 /**
  * Run a model request - works with any model source
+ * Automatically applies grounding context if provided
  */
 export async function runModel(req: LLMRequest): Promise<LLMResponse> {
+  // Apply grounding to system prompt if provided
+  let enhancedReq = { ...req };
+  if (req.grounding && req.system) {
+    enhancedReq.system = generateGroundedSystemPrompt({
+      basePrompt: req.system,
+      ...req.grounding
+    });
+  }
+
   const source = (process.env.SCORPION_MODEL_SOURCE || 'ollama') as ModelSource;
   
   switch (source) {
     case 'ollama':
-      return runOllama(req);
+      return runOllama(enhancedReq);
     case 'openai':
-      return runOpenAI(req);
-    case 'local':
-      return runLocalModel(req);
-    case 'custom':
-      return runCustomModel(req);
+      return runOpenAI(enhancedReq);
     default:
-      throw new Error(`Unknown model source: ${source}`);
+      throw new Error(`Unknown model source: ${source}. Supported: ollama, openai`);
   }
 }
 
@@ -97,7 +116,7 @@ export async function runModel(req: LLMRequest): Promise<LLMResponse> {
  */
 async function runOllama(req: LLMRequest, retries: number = 0): Promise<LLMResponse> {
   const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-  const model = req.model || process.env.OLLAMA_MODEL || 'llama3.2:3b-instruct-q4_K_M';
+  const model = req.model || process.env.OLLAMA_MODEL || 'scorpion:latest';
   const maxRetries = 3;
   const baseDelay = 1000; // 1 second
   
@@ -220,53 +239,6 @@ async function runOpenAI(req: LLMRequest, retries: number = 0): Promise<LLMRespo
   }
 }
 
-/**
- * Local custom model (your trained model)
- */
-async function runLocalModel(req: LLMRequest): Promise<LLMResponse> {
-  const localUrl = process.env.LOCAL_MODEL_URL || 'http://localhost:8000/generate';
-  const model = req.model || process.env.LOCAL_MODEL_NAME || 'scorpion-v1';
-
-  try {
-    const response = await fetch(localUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt: req.prompt,
-        system: req.system,
-        model,
-        temperature: req.temperature || 0.7,
-        max_tokens: req.maxTokens || 2048
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Local model API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    return {
-      content: data.response || data.output || data.text || '',
-      model: data.model || model
-    };
-  } catch (error: any) {
-    throw new Error(`Local model request failed: ${error.message}`);
-  }
-}
-
-/**
- * Custom model endpoint (for future extensibility)
- */
-async function runCustomModel(req: LLMRequest): Promise<LLMResponse> {
-  const customUrl = process.env.CUSTOM_MODEL_URL;
-  if (!customUrl) {
-    throw new Error('CUSTOM_MODEL_URL not set');
-  }
-
-  // Similar to local model but with custom endpoint
-  return runLocalModel(req);
-}
 
 /**
  * List available models for current source
@@ -311,15 +283,6 @@ export async function checkModelAvailability(): Promise<boolean> {
     if (source === 'openai') {
       // Can't really check without making a request, so assume available if key is set
       return !!process.env.OPENAI_API_KEY;
-    }
-    
-    if (source === 'local' || source === 'custom') {
-      const url = source === 'local' 
-        ? (process.env.LOCAL_MODEL_URL || 'http://localhost:8000/generate')
-        : process.env.CUSTOM_MODEL_URL;
-      if (!url) return false;
-      const response = await fetch(url, { method: 'HEAD' });
-      return response.ok;
     }
     
     return false;

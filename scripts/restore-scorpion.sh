@@ -3,11 +3,40 @@ set -euo pipefail
 
 # Scorpion Data Restoration Script
 # Restores Scorpion persistent data from a backup
+# Now supports SSD auto-detection
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SCORPION_DATA_DIR="$WORKSPACE_ROOT/apps/scorpion/data/scorpion"
 BACKUP_ROOT="$WORKSPACE_ROOT/backups/scorpion"
+
+# Detect actual data directory (SSD-aware)
+SCORPION_DATA_DIR=""
+
+# Check for manual override
+if [ -n "${SCORPION_SSD_PATH:-}" ] && [ -d "${SCORPION_SSD_PATH}/scorpion-data" ]; then
+    SCORPION_DATA_DIR="${SCORPION_SSD_PATH}/scorpion-data"
+    echo "📀 Using manual SSD path: $SCORPION_DATA_DIR"
+# Check for SSD at /Volumes/SSD
+elif [ -d "/Volumes/SSD/scorpion-data" ]; then
+    SCORPION_DATA_DIR="/Volumes/SSD/scorpion-data"
+    echo "📀 Using detected SSD: $SCORPION_DATA_DIR"
+# Check for other external drives
+else
+    # Check all volumes for scorpion-data
+    for volume in /Volumes/*; do
+        if [ -d "${volume}/scorpion-data" ] && [ "${volume}" != "/Volumes/Macintosh HD" ]; then
+            SCORPION_DATA_DIR="${volume}/scorpion-data"
+            echo "📀 Using external drive: $SCORPION_DATA_DIR"
+            break
+        fi
+    done
+fi
+
+# Fallback to default location
+if [ -z "$SCORPION_DATA_DIR" ]; then
+    SCORPION_DATA_DIR="$WORKSPACE_ROOT/apps/scorpion/data/scorpion"
+    echo "💾 Using default location: $SCORPION_DATA_DIR"
+fi
 
 echo "🦂 SCORPION DATA RESTORATION"
 echo "============================="
@@ -85,7 +114,8 @@ echo ""
 echo "💾 Creating backup of current data..."
 CURRENT_BACKUP="$BACKUP_ROOT/pre-restore-$(date -u +%Y%m%d-%H%M%S).tar.gz"
 if [ -d "$SCORPION_DATA_DIR" ] && [ "$(ls -A $SCORPION_DATA_DIR 2>/dev/null)" ]; then
-    tar -czf "$CURRENT_BACKUP" -C "$WORKSPACE_ROOT" "apps/scorpion/data/scorpion" 2>/dev/null || true
+    # Use detected data directory (SSD-aware)
+    tar -czf "$CURRENT_BACKUP" -C "$(dirname "$SCORPION_DATA_DIR")" "$(basename "$SCORPION_DATA_DIR")" 2>/dev/null || true
     echo "   ✅ Current data backed up to: $(basename "$CURRENT_BACKUP")"
 else
     echo "   ℹ️  No existing data to backup"

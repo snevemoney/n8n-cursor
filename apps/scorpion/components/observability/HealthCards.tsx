@@ -60,7 +60,7 @@ export function HealthCards() {
             <div>
               <div className="text-sm font-medium text-white capitalize">{service}</div>
               <div className="text-xs text-white/40 mt-0.5">
-                {new Date(data.lastCheck).toLocaleTimeString()}
+                {new Date(data.lastSeen).toLocaleTimeString()}
               </div>
             </div>
             {getIcon(data.status)}
@@ -70,9 +70,9 @@ export function HealthCards() {
             <div className="text-xs text-white/60">
               Status: <span className="capitalize">{data.status}</span>
             </div>
-            {data.uptime !== undefined && (
-              <div className="text-xs text-white/60">
-                Uptime: {formatUptime(data.uptime)}
+            {data.lastError && (
+              <div className="text-xs text-red-400 truncate" title={data.lastError}>
+                Error: {data.lastError}
               </div>
             )}
           </div>

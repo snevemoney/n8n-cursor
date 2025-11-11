@@ -11,6 +11,9 @@ import { DocumentationIngester } from './docs-ingester';
 import { InfrastructureIngester } from './infrastructure-ingester';
 import { ConversationIngester } from './conversation-ingester';
 import { CodeIngester } from './code-ingester';
+import { N8nCursorIngester } from './n8n-cursor-ingester';
+import { TechDebtAnalyzer } from './tech-debt-analyzer';
+import { RecommendationEngine } from './recommendation-engine';
 import { RAGStore } from '../rag';
 import { OntologyStore } from '../ontology';
 import { WorkspaceStructure, DatabaseSchema, WorkflowInfo, ServiceStatus, ProjectStatus } from './project-types';
@@ -34,6 +37,9 @@ export class ProjectKnowledgeOrchestrator {
   private infrastructureIngester: InfrastructureIngester;
   private conversationIngester: ConversationIngester;
   private codeIngester: CodeIngester;
+  private n8nCursorIngester: N8nCursorIngester;
+  private techDebtAnalyzer: TechDebtAnalyzer;
+  private recommendationEngine: RecommendationEngine;
   private ragStore: RAGStore;
   private ontologyStore: OntologyStore;
   
@@ -55,9 +61,56 @@ export class ProjectKnowledgeOrchestrator {
     this.docsIngester = new DocumentationIngester(workspaceRoot);
     this.infrastructureIngester = new InfrastructureIngester(workspaceRoot);
     this.conversationIngester = new ConversationIngester(workspaceRoot);
-    this.codeIngester = new CodeIngester(workspaceRoot);
+    this.codeIngester = new CodeIngester(workspaceRoot, ragStore); // Pass RAGStore for hybrid indexing
+    this.n8nCursorIngester = new N8nCursorIngester(workspaceRoot);
+    this.techDebtAnalyzer = new TechDebtAnalyzer(workspaceRoot);
+    this.recommendationEngine = new RecommendationEngine(workspaceRoot);
     this.ragStore = ragStore;
     this.ontologyStore = ontologyStore;
+  }
+
+  /**
+   * Lightweight ingestion - only tech debt and recommendations
+   * Fast and focused on what's needed for the dashboard
+   */
+  async ingestEssential(): Promise<{ techDebt: ExtractedKnowledge[]; recommendations: ExtractedKnowledge[] }> {
+    console.log('🦂 Starting essential ingestion (tech debt + recommendations only)...');
+    
+    const techDebtKnowledge: ExtractedKnowledge[] = [];
+    const recommendations: ExtractedKnowledge[] = [];
+
+    // Analyze codebase for tech debt and missing features
+    console.log('🔍 Analyzing codebase for tech debt and missing features...');
+    try {
+      const techDebt = await this.techDebtAnalyzer.analyzeCodebase();
+      techDebtKnowledge.push(...techDebt);
+      console.log(`✅ Found ${techDebt.length} tech debt/missing feature items`);
+    } catch (error: any) {
+      console.error('❌ Error analyzing tech debt:', error.message);
+    }
+
+    // Generate intelligent recommendations
+    console.log('🧠 Generating intelligent recommendations...');
+    try {
+      const recs = await this.recommendationEngine.generateRecommendations();
+      recommendations.push(...recs);
+      console.log(`✅ Generated ${recs.length} recommendations`);
+    } catch (error: any) {
+      console.error('❌ Error generating recommendations:', error.message);
+    }
+
+    // Store in RAG
+    console.log('💾 Storing essential knowledge in RAG...');
+    for (const k of [...techDebtKnowledge, ...recommendations]) {
+      await this.ragStore.addKnowledge(k);
+    }
+
+    // Invalidate cache
+    this.invalidateCache();
+
+    console.log(`✅ Essential ingestion complete: ${techDebtKnowledge.length} tech debt + ${recommendations.length} recommendations`);
+
+    return { techDebt: techDebtKnowledge, recommendations };
   }
 
   /**
@@ -98,6 +151,17 @@ export class ProjectKnowledgeOrchestrator {
     const docsKnowledge = await this.docsIngester.extractDocumentationKnowledge();
     knowledge.push(...docsKnowledge);
 
+    // Ingest n8n-cursor development tools
+    console.log('🛠️ Ingesting n8n-cursor knowledge...');
+    let n8nCursorKnowledge: ExtractedKnowledge[] = [];
+    try {
+      n8nCursorKnowledge = await this.n8nCursorIngester.extractN8nCursorKnowledge();
+      knowledge.push(...n8nCursorKnowledge);
+    } catch (error: any) {
+      console.error('Error extracting n8n-cursor knowledge:', error.message);
+      // Continue with other ingestions
+    }
+
     // Ingest source code (comprehensive codebase understanding)
     console.log('💻 Ingesting source code...');
     let codeKnowledge: ExtractedKnowledge[] = [];
@@ -108,6 +172,55 @@ export class ProjectKnowledgeOrchestrator {
     } catch (error: any) {
       console.error('Error extracting code knowledge:', error.message);
       // Continue with other ingestions even if code extraction fails
+    }
+
+    // Analyze codebase for tech debt and missing features
+    console.log('🔍 Analyzing codebase for tech debt and missing features...');
+    let techDebtKnowledge: ExtractedKnowledge[] = [];
+    try {
+      console.log('🔍 Calling techDebtAnalyzer.analyzeCodebase()...');
+      techDebtKnowledge = await this.techDebtAnalyzer.analyzeCodebase();
+      console.log(`🔍 Tech debt analyzer returned ${techDebtKnowledge.length} items`);
+      knowledge.push(...techDebtKnowledge);
+      console.log(`✅ Found ${techDebtKnowledge.length} tech debt/missing feature items`);
+      
+      // Debug: Log category breakdown
+      const techDebtItems = techDebtKnowledge.filter(k => k.category === 'tech-debt');
+      const missingFeatureItems = techDebtKnowledge.filter(k => k.category === 'missing-features');
+      console.log(`   Tech Debt items: ${techDebtItems.length}`);
+      console.log(`   Missing Feature items: ${missingFeatureItems.length}`);
+    } catch (error: any) {
+      console.error('❌ Error analyzing tech debt:', error);
+      console.error('   Error message:', error.message);
+      console.error('   Error stack:', error.stack);
+      // Continue with other ingestions even if tech debt analysis fails
+    }
+
+    // Generate intelligent recommendations
+    console.log('🧠 Generating intelligent recommendations...');
+    let recommendations: ExtractedKnowledge[] = [];
+    try {
+      console.log('🧠 Calling recommendationEngine.generateRecommendations()...');
+      recommendations = await this.recommendationEngine.generateRecommendations();
+      console.log(`🧠 Recommendation engine returned ${recommendations.length} items`);
+      knowledge.push(...recommendations);
+      console.log(`✅ Generated ${recommendations.length} recommendations`);
+      
+      // Debug: Log category breakdown
+      const techDebtRecs = recommendations.filter(r => r.category === 'tech-debt');
+      const missingFeatureRecs = recommendations.filter(r => r.category === 'missing-features');
+      console.log(`   Tech Debt Recommendations: ${techDebtRecs.length}`);
+      console.log(`   Missing Feature Recommendations: ${missingFeatureRecs.length}`);
+      
+      // Debug: Log first few recommendation IDs and categories
+      if (recommendations.length > 0) {
+        console.log(`   Sample recommendations:`, recommendations.slice(0, 3).map(r => ({ id: r.id, category: r.category, title: r.title })));
+      }
+    } catch (error: any) {
+      console.error('❌ Error generating recommendations:', error);
+      console.error('   Error message:', error.message);
+      console.error('   Error stack:', error.stack);
+      // Continue with other ingestions even if recommendations fail
     }
 
     // Ingest infrastructure
@@ -253,18 +366,35 @@ export class ProjectKnowledgeOrchestrator {
     workflows: WorkflowInfo[],
     services: ServiceStatus[]
   ): Promise<ProjectStatus> {
+    // Debug: Log knowledge breakdown
+    console.log(`[calculateProjectStatus] Total knowledge items: ${knowledge.length}`);
+    
     // Count tech debt
     const techDebtKnowledge = knowledge.filter(k => k.category === 'tech-debt');
-    const critical = techDebtKnowledge.filter(k => k.tags.some(t => t.includes('critical') || t.includes('p0'))).length;
-    const high = techDebtKnowledge.filter(k => k.tags.some(t => t.includes('high') || t.includes('p1'))).length;
-    const medium = techDebtKnowledge.filter(k => k.tags.some(t => t.includes('medium') || t.includes('p2'))).length;
-    const low = techDebtKnowledge.filter(k => k.tags.some(t => t.includes('low'))).length;
+    console.log(`[calculateProjectStatus] Tech debt items: ${techDebtKnowledge.length}`);
+    if (techDebtKnowledge.length > 0) {
+      console.log(`[calculateProjectStatus] Sample tech debt tags:`, techDebtKnowledge[0].tags);
+    }
+    
+    const critical = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('critical') || t.includes('p0'))).length;
+    const high = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('high') || t.includes('p1'))).length;
+    const medium = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('medium') || t.includes('p2'))).length;
+    const low = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('low'))).length;
+    
+    console.log(`[calculateProjectStatus] Tech debt counts - Critical: ${critical}, High: ${high}, Medium: ${medium}, Low: ${low}`);
 
     // Count missing features
     const missingFeaturesKnowledge = knowledge.filter(k => k.category === 'missing-features');
-    const p0 = missingFeaturesKnowledge.filter(k => k.tags.some(t => t.includes('p0'))).length;
-    const p1 = missingFeaturesKnowledge.filter(k => k.tags.some(t => t.includes('p1'))).length;
-    const p2 = missingFeaturesKnowledge.filter(k => k.tags.some(t => t.includes('p2'))).length;
+    console.log(`[calculateProjectStatus] Missing features items: ${missingFeaturesKnowledge.length}`);
+    if (missingFeaturesKnowledge.length > 0) {
+      console.log(`[calculateProjectStatus] Sample missing feature tags:`, missingFeaturesKnowledge[0].tags);
+    }
+    
+    const p0 = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p0'))).length;
+    const p1 = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p1'))).length;
+    const p2 = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p2'))).length;
+    
+    console.log(`[calculateProjectStatus] Missing features counts - P0: ${p0}, P1: ${p1}, P2: ${p2}`);
 
     // Calculate overall health
     let overallHealth: 'healthy' | 'degraded' | 'critical' = 'healthy';
@@ -330,6 +460,22 @@ export class ProjectKnowledgeOrchestrator {
     }
     
     const allKnowledge = this.ragStore.getAllKnowledge();
+    
+    // Debug: Log knowledge breakdown by category
+    const techDebtItems = allKnowledge.filter(k => k.category === 'tech-debt');
+    const missingFeatureItems = allKnowledge.filter(k => k.category === 'missing-features');
+    console.log(`[getSummary] Total knowledge: ${allKnowledge.length}, Tech Debt: ${techDebtItems.length}, Missing Features: ${missingFeatureItems.length}`);
+    
+    // Debug: Check if knowledge items have tags
+    if (techDebtItems.length > 0) {
+      const sample = techDebtItems[0];
+      console.log(`[getSummary] Sample tech debt item - ID: ${sample.id}, Category: ${sample.category}, Tags: ${JSON.stringify(sample.tags)}`);
+    }
+    if (missingFeatureItems.length > 0) {
+      const sample = missingFeatureItems[0];
+      console.log(`[getSummary] Sample missing feature item - ID: ${sample.id}, Category: ${sample.category}, Tags: ${JSON.stringify(sample.tags)}`);
+    }
+    
     const status = await this.calculateProjectStatus(allKnowledge, workflows, services);
 
     const result = {

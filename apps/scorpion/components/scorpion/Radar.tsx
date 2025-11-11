@@ -69,7 +69,7 @@ export function Radar({ agents, size = 420 }: RadarProps) {
         return (
           <div 
             key={agent.id} 
-            className="absolute transition-all duration-500 ease-in-out" 
+            className="absolute transition-all duration-150 ease-in-out" 
             style={{ 
               left: x - 6, 
               top: y - 6,
@@ -78,7 +78,7 @@ export function Radar({ agents, size = 420 }: RadarProps) {
           >
             {/* Agent marker with pulse animation when active */}
             <div 
-              className={`w-3 h-3 rotate-45 transition-all duration-300 ${
+              className={`w-3 h-3 rotate-45 transition-all duration-100 ${
                 agent.isActive ? 'animate-pulse' : ''
               }`}
               style={{ 

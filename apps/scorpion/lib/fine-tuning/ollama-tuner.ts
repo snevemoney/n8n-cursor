@@ -6,6 +6,7 @@
 import { TrainingDataset, TrainingExample } from './collector';
 import fs from 'fs/promises';
 import path from 'path';
+import { calculateSimilarity } from '@/lib/utils/similarity';
 
 export interface FineTuneConfig {
   baseModel: string; // e.g., 'llama3.2:3b'
@@ -219,14 +220,7 @@ class OllamaFineTuner {
    * Calculate similarity between two strings
    */
   private calculateSimilarity(str1: string, str2: string): number {
-    // Simple word overlap similarity
-    const words1 = new Set(str1.toLowerCase().split(/\s+/));
-    const words2 = new Set(str2.toLowerCase().split(/\s+/));
-    
-    const intersection = new Set([...words1].filter(x => words2.has(x)));
-    const union = new Set([...words1, ...words2]);
-    
-    return intersection.size / union.size;
+    return calculateSimilarity(str1, str2);
   }
 }
 

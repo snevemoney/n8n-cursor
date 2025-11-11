@@ -1,8 +1,9 @@
 'use client';
 
 import { Bell, AlertTriangle, CheckCircle, XCircle, Info } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import Link from 'next/link';
+import { Alert, Button } from './index';
 
 interface Notification {
   id: string;
@@ -14,18 +15,14 @@ interface Notification {
   createdAt: string;
 }
 
-export function NotificationBadge() {
+export const NotificationBadge = memo(function NotificationBadge() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start false so component renders immediately
 
-  useEffect(() => {
-    loadNotifications();
-    // Refresh every 30 seconds
-    const interval = setInterval(loadNotifications, 30 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
+    // Only load when tab is visible
+    if (document.visibilityState !== 'visible') return;
+    
     try {
       const response = await fetch('/api/notifications?homepage=true');
       if (response.ok) {
@@ -37,9 +34,42 @@ export function NotificationBadge() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleApprove = async (id: string) => {
+  useEffect(() => {
+    // Defer data fetch to avoid blocking render
+    const loadData = () => {
+      loadNotifications();
+    };
+    
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(loadData, { timeout: 0 }); // Immediate - no delay
+    } else {
+      setTimeout(loadData, 0); // Immediate fallback
+    }
+    // Refresh every 30 seconds, but only when tab is visible
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadNotifications();
+      }
+    }, 30 * 1000);
+    
+    // Refresh when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadNotifications();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadNotifications]);
+
+  const handleApprove = useCallback(async (id: string) => {
     try {
       await fetch('/api/notifications', {
         method: 'POST',
@@ -50,9 +80,9 @@ export function NotificationBadge() {
     } catch (error) {
       console.error('Failed to approve:', error);
     }
-  };
+  }, [loadNotifications]);
 
-  const handleReject = async (id: string) => {
+  const handleReject = useCallback(async (id: string) => {
     try {
       await fetch('/api/notifications', {
         method: 'POST',
@@ -63,9 +93,9 @@ export function NotificationBadge() {
     } catch (error) {
       console.error('Failed to reject:', error);
     }
-  };
+  }, [loadNotifications]);
 
-  const handleDismiss = async (id: string) => {
+  const handleDismiss = useCallback(async (id: string) => {
     try {
       await fetch('/api/notifications', {
         method: 'POST',
@@ -76,7 +106,7 @@ export function NotificationBadge() {
     } catch (error) {
       console.error('Failed to dismiss:', error);
     }
-  };
+  }, [loadNotifications]);
 
   if (loading || notifications.length === 0) {
     return null;
@@ -92,63 +122,26 @@ export function NotificationBadge() {
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
       {critical.slice(0, 3).map((notif) => (
-        <div
+        <Alert
           key={notif.id}
-          className={`bg-[#0c1014] border rounded-sm p-3 shadow-lg ${
-            notif.type === 'danger' ? 'border-red-500/50' :
-            notif.type === 'warning' ? 'border-yellow-500/50' :
-            notif.type === 'info' ? 'border-blue-500/50' :
-            'border-emerald-500/50'
-          }`}
-        >
-          <div className="flex items-start gap-2">
-            <div className={`mt-0.5 ${
-              notif.type === 'danger' ? 'text-red-400' :
-              notif.type === 'warning' ? 'text-yellow-400' :
-              notif.type === 'info' ? 'text-blue-400' :
-              'text-emerald-400'
-            }`}>
-              {notif.type === 'danger' ? <AlertTriangle size={16} /> :
-               notif.type === 'warning' ? <AlertTriangle size={16} /> :
-               notif.type === 'info' ? <Info size={16} /> :
-               <CheckCircle size={16} />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold mb-1">{notif.title}</div>
-              <div className="text-xs text-white/70 mb-2">{notif.message}</div>
-              {notif.requiresApproval && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleApprove(notif.id)}
-                    className="px-2 py-1 text-xs bg-emerald-500/20 border border-emerald-500/50 rounded hover:bg-emerald-500/30 text-emerald-300"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => handleReject(notif.id)}
-                    className="px-2 py-1 text-xs bg-red-500/20 border border-red-500/50 rounded hover:bg-red-500/30 text-red-300"
-                  >
-                    Reject
-                  </button>
-                </div>
-              )}
-              {!notif.requiresApproval && (
-                <button
-                  onClick={() => handleDismiss(notif.id)}
-                  className="px-2 py-1 text-xs bg-white/5 border border-white/10 rounded hover:bg-white/10 text-white/60"
-                >
-                  Dismiss
-                </button>
-              )}
-            </div>
-            <button
-              onClick={() => handleDismiss(notif.id)}
-              className="text-white/30 hover:text-white/60"
-            >
-              <XCircle size={14} />
-            </button>
-          </div>
-        </div>
+          variant={notif.type === 'danger' ? 'danger' : notif.type === 'warning' ? 'warning' : notif.type === 'info' ? 'info' : 'success'}
+          title={notif.title}
+          message={notif.message}
+          onClose={() => handleDismiss(notif.id)}
+          action={
+            notif.requiresApproval ? (
+              <div className="flex gap-2 mt-2">
+                <Button variant="success" size="sm" onClick={() => handleApprove(notif.id)}>
+                  Approve
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleReject(notif.id)}>
+                  Reject
+                </Button>
+              </div>
+            ) : undefined
+          }
+          className="shadow-lg"
+        />
       ))}
       {count > 3 && (
         <Link
@@ -160,5 +153,5 @@ export function NotificationBadge() {
       )}
     </div>
   );
-}
+});
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Panel, Metric } from '@/components/scorpion';
+import { Panel, Metric, PageLoadingBar } from '@/components/scorpion';
 import { Search, Loader2, CheckCircle, XCircle, Activity, MessageSquare } from 'lucide-react';
 
 type ResearchCategory = 
@@ -99,7 +99,100 @@ export default function ResearchPage() {
     actionsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [browserActions]);
 
-  // Poll for session status
+  // Connect to browser activity stream via SSE
+  useEffect(() => {
+    if (!sessionId || status === 'idle') return;
+
+    const eventSource = new EventSource(`/api/research/stream?sessionId=${sessionId}`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        
+        switch (message.type) {
+          case 'connected':
+            console.log('[Research Stream] Connected:', message.data);
+            break;
+            
+          case 'browser-action':
+            // Add browser action to the list
+            setBrowserActions(prev => [...prev, message.data]);
+            
+            // Update screenshot if available
+            if (message.data.screenshot) {
+              setCurrentScreenshot(message.data.screenshot);
+            }
+            break;
+            
+          case 'research-complete':
+            setStatus('completed');
+            if (message.data) {
+              // Handle different result types
+              if (message.data.type === 'company-profile') {
+                setResult({
+                  query,
+                  category: 'company-research',
+                  summary: `Company research completed for ${query}`,
+                  sources: [],
+                  keyFindings: [],
+                  confidence: 0.8,
+                  duration: 0,
+                });
+              } else {
+                setResult(message.data);
+              }
+            }
+            eventSource.close();
+            break;
+            
+          case 'research-failed':
+            console.error('[Research Stream] Research failed:', message.data);
+            setStatus('failed');
+            // Store error message for display
+            if (message.data?.error) {
+              setResult({
+                query,
+                category,
+                summary: `Research failed: ${message.data.error}`,
+                sources: [],
+                keyFindings: [],
+                confidence: 0,
+                duration: 0,
+              });
+            }
+            eventSource.close();
+            break;
+            
+          case 'error':
+            console.error('[Research Stream] Error:', message.data);
+            setStatus('failed');
+            eventSource.close();
+            break;
+            
+          case 'heartbeat':
+            // Keep connection alive, no action needed
+            break;
+        }
+      } catch (error) {
+        console.error('[Research Stream] Failed to parse message:', error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('[Research Stream] Connection error:', error);
+      // Don't close on error, let it reconnect automatically
+      // Only close if status is completed or failed
+      if (status === 'completed' || status === 'failed') {
+        eventSource.close();
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [sessionId, status, query, category]);
+
+  // Poll for session status (fallback)
   useEffect(() => {
     if (!sessionId || status === 'completed' || status === 'failed') return;
 
@@ -107,19 +200,32 @@ export default function ResearchPage() {
       try {
         const response = await fetch(`/api/research/start?sessionId=${sessionId}`);
         if (response.ok) {
-          const data = await response.json();
+          const result = await response.json();
+          const data = result.success && result.data ? result.data : result;
           
           if (data.status === 'completed') {
             setStatus('completed');
             setResult(data.result);
           } else if (data.status === 'failed') {
             setStatus('failed');
+            // Display error message if available
+            if (data.error) {
+              setResult({
+                query,
+                category,
+                summary: `Research failed: ${data.error}`,
+                sources: [],
+                keyFindings: [],
+                confidence: 0,
+                duration: 0,
+              });
+            }
           }
         }
       } catch (error) {
         console.error('Failed to poll status:', error);
       }
-    }, 2000);
+    }, 5000); // Poll less frequently since we have SSE
 
     return () => clearInterval(interval);
   }, [sessionId, status]);
@@ -149,20 +255,11 @@ export default function ResearchPage() {
         throw new Error('Failed to start research');
       }
 
-      const data = await response.json();
+      const result = await response.json();
+      const data = result.success && result.data ? result.data : result;
       setSessionId(data.sessionId);
       setStatus('researching');
-
-      // TODO: Implement WebSocket connection for real-time browser events
-      // For now, research runs but doesn't show browser visualization
-      // WebSocket endpoint: ws://localhost:3000/api/research/stream
-      setStatus('completed');
-      setResult({
-        query,
-        summary: 'Research completed. Real-time browser visualization coming soon via WebSocket.',
-        sources: [],
-        findings: []
-      });
+      // Browser activity will be streamed via SSE (see useEffect above)
 
     } catch (error) {
       console.error('Failed to start research:', error);
@@ -172,8 +269,10 @@ export default function ResearchPage() {
 
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-4">
-      <div className="flex items-center justify-between">
+    <>
+      <PageLoadingBar loading={status === 'loading' || status === 'researching'} />
+      <div className="h-full overflow-y-auto p-4 space-y-4">
+        <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold mb-1">Web Research & Company Intelligence</h1>
           <p className="text-sm text-white/40">Automated research with live browser visualization</p>
@@ -290,16 +389,46 @@ export default function ResearchPage() {
               ) : (
                 <>
                   {browserActions.map((action, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-white/40 flex-shrink-0">
-                        [{new Date(action.timestamp).toLocaleTimeString()}]
-                      </span>
-                      <span className="text-blue-400">{action.type}</span>
-                      <span className="text-white/60 truncate">{action.url}</span>
-                      {action.data && (
-                        <span className="text-emerald-400">
-                          {JSON.stringify(action.data)}
+                    <div key={i} className="flex flex-col gap-1 py-1 border-b border-white/5 last:border-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-white/40 flex-shrink-0 text-[10px]">
+                          [{new Date(action.timestamp).toLocaleTimeString()}]
                         </span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                          action.type === 'navigate' ? 'bg-blue-500/20 text-blue-400' :
+                          action.type === 'click' ? 'bg-purple-500/20 text-purple-400' :
+                          action.type === 'type' ? 'bg-emerald-500/20 text-emerald-400' :
+                          action.type === 'scroll' ? 'bg-yellow-500/20 text-yellow-400' :
+                          action.type === 'extract' ? 'bg-cyan-500/20 text-cyan-400' :
+                          'bg-white/10 text-white/60'
+                        }`}>
+                          {action.type.toUpperCase()}
+                        </span>
+                        {action.selector && (
+                          <span className="text-orange-400/80 text-[10px] font-mono">
+                            {action.selector}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-white/60 text-[10px] truncate pl-4">
+                        {action.url}
+                      </div>
+                      {action.data && (
+                        <div className="text-emerald-400/80 text-[10px] pl-4 font-mono">
+                          {typeof action.data === 'string' ? action.data : JSON.stringify(action.data, null, 2)}
+                        </div>
+                      )}
+                      {action.screenshot && (
+                        <div className="pl-4 mt-1">
+                          <a 
+                            href={action.screenshot} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-400/80 hover:text-blue-400 text-[10px] underline"
+                          >
+                            📸 View Screenshot
+                          </a>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -346,9 +475,23 @@ export default function ResearchPage() {
               )}
 
               {status === 'failed' && (
-                <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-sm">
-                  <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm">Research failed. Please try again.</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-sm">
+                    <XCircle className="w-4 h-4 text-red-400" />
+                    <span className="text-sm font-semibold">Research failed</span>
+                  </div>
+                  {result && result.summary && result.summary.includes('Research failed:') && (
+                    <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-sm">
+                      <p className="text-xs text-red-300/80 font-mono break-words">
+                        {result.summary.replace('Research failed: ', '')}
+                      </p>
+                    </div>
+                  )}
+                  <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-sm">
+                    <p className="text-xs text-yellow-400/80">
+                      💡 <strong>Common causes:</strong> LLM connection issues, browser initialization problems, or network errors. Check the browser console for detailed logs.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -429,7 +572,8 @@ export default function ResearchPage() {
           </Panel>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

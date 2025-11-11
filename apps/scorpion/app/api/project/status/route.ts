@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrchestrator } from '@/lib/shared-stores';
 import { responseCache } from '@/lib/cache';
+import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
 const CACHE_TTL = 30000; // 30 seconds
 
@@ -12,13 +13,12 @@ async function getOrchestratorInstance() {
  * GET /api/project/status - Get comprehensive project status
  * Now with 30-second caching for improved performance
  */
-export async function GET(request: NextRequest) {
-  try {
-    // Check cache first
-    const cached = responseCache.get('project-status');
-    if (cached) {
-      return NextResponse.json(cached);
-    }
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  // Check cache first
+  const cached = responseCache.get('project-status');
+  if (cached) {
+    return createSuccessResponse(cached);
+  }
 
     const orchestrator = await getOrchestratorInstance();
     const summary = await orchestrator.getSummary();
@@ -51,15 +51,8 @@ export async function GET(request: NextRequest) {
     // Cache for 30 seconds
     responseCache.set('project-status', result, CACHE_TTL);
     
-    return NextResponse.json(result);
-  } catch (error: any) {
-    console.error('Error getting project status:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get project status' },
-      { status: 500 }
-    );
-  }
-}
+    return createSuccessResponse(result);
+});
 
 /**
  * Health check endpoint (lightweight)
@@ -81,6 +74,7 @@ async function checkServiceHealthFast(): Promise<Array<{
   const services = [
     {
       name: 'n8n',
+      // Standardize on N8N_API_URL, with fallback to N8N_BASE_URL for backward compatibility
       url: process.env.N8N_API_URL || process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678'
     },
     {
@@ -93,7 +87,7 @@ async function checkServiceHealthFast(): Promise<Array<{
     services.map(async (service) => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout (was 5s)
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout (increased from 2s)
         
         const response = await fetch(`${service.url}/healthz`, {
           method: 'GET',

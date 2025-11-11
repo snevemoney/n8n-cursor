@@ -9,7 +9,7 @@
   --sc-border: rgba(255, 255, 255, 0.04);
   --sc-border-strong: rgba(255, 255, 255, 0.08);
   --sc-text: #e4e8ee;
-  --sc-text-muted: rgba(228, 232, 238, 0.55);
+  --sc-text-muted: rgba(228, 232, 238, 0.65); /* Improved contrast from 0.55 to 0.65 for better readability */
   --sc-accent: #13c6a8;
   --sc-warn: #f4c95d;
   --sc-danger: #ff5f5f;
@@ -22,31 +22,53 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  /* Optimize rendering performance */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Prevent layout shifts */
+  contain: layout style paint;
+  /* Optimize scrolling */
+  overscroll-behavior: none;
 }
 
 #__next {
   height: 100vh;
   overflow: hidden;
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  will-change: scroll-position;
 }
 
-/* Grid background pattern */
+/* Grid background pattern - Optimized with GPU acceleration */
 .sc-grid-bg {
   background-image: 
     linear-gradient(rgba(16, 20, 25, 0.4) 1px, transparent 1px),
     linear-gradient(90deg, rgba(16, 20, 25, 0.4) 1px, transparent 1px);
   background-size: 32px 32px;
+  will-change: background-position;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
-/* Panel component */
+/* Panel component - Optimized transitions */
 .sc-panel {
   background: var(--sc-surface);
   border: 1px solid var(--sc-border);
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: border-color 0.1s ease, background-color 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  will-change: border-color, background-color, transform;
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 .sc-panel:hover {
   border-color: var(--sc-border-strong);
+  transform: scale(1.01) translateZ(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.sc-panel:active {
+  transform: scale(0.98) translateZ(0);
+  transition: transform 0.1s ease;
 }
 
 /* Title styling */
@@ -70,6 +92,17 @@ body {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -106,20 +139,141 @@ body {
   }
 }
 
+@keyframes slide-in-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-to-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fade-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
+@keyframes backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdrop-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes tab-indicator-slide {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 .animate-fade-in-up {
   animation: fade-in-up 0.4s ease-out;
+  will-change: opacity, transform;
+  transform: translateZ(0);
 }
 
 .animate-slide-up {
   animation: slide-up 0.5s ease-out;
+  will-change: opacity, transform;
+  transform: translateZ(0);
 }
 
 .animate-scale-in {
   animation: scale-in 0.3s ease-out;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+.animate-slide-in-from-right {
+  animation: slide-in-from-right 0.3s ease-out;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+.animate-slide-out-to-right {
+  animation: slide-out-to-right 0.2s ease-in;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+.animate-fade-scale-in {
+  animation: fade-scale-in 0.2s ease-out;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+.animate-fade-scale-out {
+  animation: fade-scale-out 0.15s ease-in;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+.animate-backdrop-fade-in {
+  animation: backdrop-fade-in 0.2s ease-out;
+  will-change: opacity;
+}
+
+.animate-backdrop-fade-out {
+  animation: backdrop-fade-out 0.15s ease-in;
+  will-change: opacity;
+}
+
+.animate-tab-indicator {
+  animation: tab-indicator-slide 0.2s ease-out;
+  will-change: transform, opacity;
+  transform-origin: left;
 }
 
 .delay-100 {
@@ -132,4 +286,242 @@ body {
 
 .delay-300 {
   animation-delay: 300ms;
+}
+
+/* Button base styles - Enhanced focus and hover states */
+button:not(:disabled),
+a[role="button"],
+[role="button"] {
+  transition: all 0.08s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled):hover,
+a[role="button"]:hover,
+[role="button"]:hover {
+  transition: all 0.08s ease;
+}
+
+button:not(:disabled):active,
+a[role="button"]:active,
+[role="button"]:active {
+  transition: transform 0.05s ease;
+}
+
+/* Enhanced focus-visible styles for better accessibility */
+button:not(:disabled):focus-visible,
+a[role="button"]:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(19, 198, 168, 0.8);
+  outline-offset: 2px;
+  transition: outline 0.15s ease;
+  z-index: 1;
+}
+
+/* Ensure focus is visible even when outline is removed */
+button:not(:disabled):focus-visible:not(.focus-visible\:outline-none),
+a[role="button"]:focus-visible:not(.focus-visible\:outline-none),
+[role="button"]:focus-visible:not(.focus-visible\:outline-none) {
+  outline: 2px solid rgba(19, 198, 168, 0.8) !important;
+  outline-offset: 2px !important;
+}
+
+button:not(:disabled):active,
+a[role="button"]:active,
+[role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
+}
+
+/* Form input focus animations */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  transition: border-color 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgba(19, 198, 168, 0.5);
+  box-shadow: 0 0 0 3px rgba(19, 198, 168, 0.1);
+  transition: border-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Enhanced focus-visible for form inputs */
+input[type="text"]:focus-visible,
+input[type="number"]:focus-visible,
+input[type="email"]:focus-visible,
+input[type="password"]:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(19, 198, 168, 0.8);
+  outline-offset: 2px;
+  border-color: rgba(19, 198, 168, 0.5);
+  box-shadow: 0 0 0 3px rgba(19, 198, 168, 0.1);
+}
+
+/* Reduced motion support - disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-slide-up,
+  .animate-scale-in,
+  .animate-slide-in-from-right,
+  .animate-slide-out-to-right,
+  .animate-fade-scale-in,
+  .animate-fade-scale-out,
+  .animate-backdrop-fade-in,
+  .animate-backdrop-fade-out,
+  .animate-tab-indicator {
+    animation: none !important;
+  }
+  
+  button:not(:disabled):active,
+  a[role="button"]:active {
+    transform: none !important;
+  }
+}
+
+/* Responsive breakpoint utilities - Exact pixel breakpoints */
+/* Phone: ≤767px, Tablet: 768px-1279px, Desktop: ≥1280px */
+
+@media (max-width: 767px) {
+  /* Phone-specific styles */
+  /* Ensure text remains readable - minimum 14px for body text */
+  body {
+    font-size: 14px;
+  }
+  
+  /* Prevent horizontal scrolling */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure containers don't overflow */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Responsive text sizing */
+  .sc-title {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  /* Tablet-specific styles */
+  body {
+    font-size: 15px;
+  }
+  
+  .sc-title {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 1280px) {
+  /* Desktop-specific styles */
+  body {
+    font-size: 16px;
+  }
+  
+  .sc-title {
+    font-size: 10px;
+  }
+}
+
+/* Global responsive utilities */
+/* Prevent horizontal scroll on all devices */
+html {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Improve link responsiveness */
+a {
+  transition: opacity 0.08s ease, transform 0.08s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+a:active {
+  opacity: 0.8;
+  transition: opacity 0.05s ease;
+}
+
+/* Ensure minimum touch target size for accessibility on interactive elements */
+button:not(:disabled),
+a[role="button"],
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Ensure navigation links have adequate touch targets */
+nav a,
+aside a {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure flex children don't overflow */
+.flex > * {
+  min-width: 0;
+}
+
+/* Ensure grid items don't overflow */
+.grid > * {
+  min-width: 0;
+}
+
+/* Responsive container utility */
+.responsive-container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .responsive-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .responsive-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }

@@ -5,18 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Zap,
   ArrowRight,
-  ArrowLeft,
   Coffee,
-  DollarSign,
   Lock,
   Users,
   TrendingUp,
   CheckCircle,
-  AlertCircle,
-  ExternalLink
+  AlertCircle
 } from 'lucide-react';
 
 interface Step {
@@ -29,7 +27,7 @@ interface Step {
 }
 
 export function LightningBasics() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [activeTab, setActiveTab] = useState('problem');
 
   const steps: Step[] = [
     {
@@ -348,7 +346,22 @@ export function LightningBasics() {
     }
   ];
 
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  const currentStepIndex = steps.findIndex(step => step.id === activeTab);
+  const progress = ((currentStepIndex + 1) / steps.length) * 100;
+
+  // Short labels for mobile/compact views
+  const getShortLabel = (id: string) => {
+    const labels: Record<string, string> = {
+      'problem': 'Problem',
+      'solution': 'Solution',
+      'coffee-example': 'Example',
+      'how-it-works': 'How It Works',
+      'routing': 'Routing',
+      'limitations': 'Limitations',
+      'get-started': 'Start'
+    };
+    return labels[id] || id;
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -363,67 +376,58 @@ export function LightningBasics() {
             </p>
           </div>
           <Badge variant="outline" className="px-3 py-1">
-            {currentStep + 1} of {steps.length}
+            {currentStepIndex + 1} of {steps.length}
           </Badge>
         </div>
         
         <Progress value={progress} className="h-2" />
       </div>
 
-      <Card className="min-h-[500px]">
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-lg bg-muted/50 ${steps[currentStep].color}`}>
-              {steps[currentStep].icon}
-            </div>
-            <div>
-              <CardTitle className="text-xl">{steps[currentStep].title}</CardTitle>
-              <CardDescription className="text-base">
-                {steps[currentStep].subtitle}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="pb-8">
-          {steps[currentStep].content}
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center justify-between mt-8">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-          disabled={currentStep === 0}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Previous
-        </Button>
-        
-        <div className="flex items-center gap-2">
-          {steps.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentStep(index)}
-              className={`w-3 h-3 rounded-full transition-colors ${
-                index === currentStep 
-                  ? 'bg-blue-500' 
-                  : index < currentStep 
-                    ? 'bg-green-500' 
-                    : 'bg-muted'
-              }`}
-            />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 mb-6 h-auto p-1 bg-muted/50">
+          {steps.map((step, index) => (
+            <TabsTrigger
+              key={step.id}
+              value={step.id}
+              className={`flex flex-col items-center gap-1.5 py-3 px-2 h-auto text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all ${step.color}`}
+            >
+              <div className="h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center">
+                {step.icon}
+              </div>
+              <span className="hidden sm:inline text-center leading-tight">
+                {step.title}
+              </span>
+              <span className="sm:hidden text-center leading-tight font-medium">
+                {getShortLabel(step.id)}
+              </span>
+            </TabsTrigger>
           ))}
-        </div>
-        
-        <Button
-          onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
-          disabled={currentStep === steps.length - 1}
-        >
-          Next
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+        </TabsList>
+
+        {steps.map((step) => (
+          <TabsContent key={step.id} value={step.id} className="mt-0">
+            <Card className="min-h-[500px]">
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-lg bg-muted/50 ${step.color}`}>
+                    {step.icon}
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">{step.title}</CardTitle>
+                    <CardDescription className="text-base">
+                      {step.subtitle}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="pb-8">
+                {step.content}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
       
       <div className="mt-8 text-center">
         <p className="text-sm text-muted-foreground">

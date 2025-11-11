@@ -33,9 +33,9 @@ export function computeBackpressure(events: DomainEvent[]): BackpressureMetrics 
   let dequeues = 0;
   
   recentEvents.forEach(event => {
-    if (event.type === 'queue.enqueue') {
+    if (event.type === 'job.queued') {
       enqueues++;
-    } else if (event.type === 'queue.dequeue') {
+    } else if (event.type === 'job.completed' || event.type === 'job.failed') {
       dequeues++;
     }
   });
@@ -52,8 +52,8 @@ export function computeBackpressure(events: DomainEvent[]): BackpressureMetrics 
   const firstHalf = recentEvents.filter(e => e.ts < midpoint);
   const secondHalf = recentEvents.filter(e => e.ts >= midpoint);
   
-  const firstEnqueues = firstHalf.filter(e => e.type === 'queue.enqueue').length;
-  const secondEnqueues = secondHalf.filter(e => e.type === 'queue.enqueue').length;
+  const firstEnqueues = firstHalf.filter(e => e.type === 'job.queued').length;
+  const secondEnqueues = secondHalf.filter(e => e.type === 'job.queued').length;
   
   let trend: 'up' | 'down' | 'stable' = 'stable';
   if (secondEnqueues > firstEnqueues * 1.2) {
@@ -81,8 +81,9 @@ export function computeAgentKPIs(events: DomainEvent[]): AgentKPI[] {
     lastSeen: number;
   }>();
   
+  // First pass: collect agent names from agent.started events
   events.forEach(event => {
-    if (event.type === 'agent.completed' || event.type === 'agent.failed') {
+    if (event.type === 'agent.started') {
       const agentId = 'agentId' in event ? String(event.agentId) : 'unknown';
       const agentName = 'agentName' in event ? String(event.agentName) : agentId;
       
@@ -93,11 +94,33 @@ export function computeAgentKPIs(events: DomainEvent[]): AgentKPI[] {
           errors: 0,
           lastSeen: event.ts,
         });
+      } else {
+        // Update name if we see it again
+        const stats = agentStats.get(agentId)!;
+        stats.name = agentName;
+        stats.lastSeen = Math.max(stats.lastSeen, event.ts);
+      }
+    }
+  });
+  
+  // Second pass: count operations
+  events.forEach(event => {
+    if (event.type === 'agent.operation.completed' || event.type === 'agent.operation.failed') {
+      const agentId = 'agentId' in event ? String(event.agentId) : 'unknown';
+      
+      if (!agentStats.has(agentId)) {
+        // If we haven't seen agent.started, use agentId as name
+        agentStats.set(agentId, {
+          name: agentId,
+          successes: 0,
+          errors: 0,
+          lastSeen: event.ts,
+        });
       }
       
       const stats = agentStats.get(agentId)!;
       
-      if (event.type === 'agent.completed') {
+      if (event.type === 'agent.operation.completed') {
         stats.successes++;
       } else {
         stats.errors++;
@@ -129,13 +152,13 @@ export function computeQueueDepth(events: DomainEvent[], queueId: string): numbe
   
   events
     .filter(e => 
-      (e.type === 'queue.enqueue' || e.type === 'queue.dequeue') &&
-      'queueId' in e && e.queueId === queueId
+      (e.type === 'job.queued' || e.type === 'job.completed' || e.type === 'job.failed') &&
+      'queue' in e && e.queue === queueId
     )
     .forEach(event => {
-      if (event.type === 'queue.enqueue') {
+      if (event.type === 'job.queued') {
         depth++;
-      } else if (event.type === 'queue.dequeue') {
+      } else if (event.type === 'job.completed' || event.type === 'job.failed') {
         depth = Math.max(0, depth - 1);
       }
       depths.push(depth);

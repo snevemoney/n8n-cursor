@@ -1,10 +1,11 @@
-import type { Conversation, Message } from './types';
+import type { Conversation, Message, Folder } from './types';
 
 /**
  * Conversation persistence - stores to localStorage and optionally to database
  */
 
 const STORAGE_KEY = 'scorpion-conversations';
+const FOLDERS_KEY = 'scorpion-folders';
 
 /**
  * Load all conversations from storage
@@ -183,6 +184,60 @@ export async function syncToDatabase(conversationId: string): Promise<boolean> {
   } catch (error) {
     console.error('[Persistence] Error syncing to database:', error);
     return false;
+  }
+}
+
+/**
+ * Folder persistence functions
+ */
+export function loadFolders(): Folder[] {
+  if (typeof window === 'undefined') return [];
+  
+  try {
+    const stored = localStorage.getItem(FOLDERS_KEY);
+    if (!stored) return [];
+    return JSON.parse(stored);
+  } catch (error) {
+    console.error('[Persistence] Error loading folders:', error);
+    return [];
+  }
+}
+
+export function saveFolder(folder: Folder): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const folders = loadFolders();
+    const index = folders.findIndex(f => f.id === folder.id);
+    
+    if (index >= 0) {
+      folders[index] = folder;
+    } else {
+      folders.push(folder);
+    }
+    
+    localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
+  } catch (error) {
+    console.error('[Persistence] Error saving folder:', error);
+  }
+}
+
+export function deleteFolderStorage(folderId: string): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const folders = loadFolders().filter(f => f.id !== folderId);
+    localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
+    
+    // Move conversations out of deleted folder
+    const conversations = loadConversations();
+    conversations.forEach(conv => {
+      if (conv.folderId === folderId) {
+        saveConversation({ ...conv, folderId: undefined });
+      }
+    });
+  } catch (error) {
+    console.error('[Persistence] Error deleting folder:', error);
   }
 }
 

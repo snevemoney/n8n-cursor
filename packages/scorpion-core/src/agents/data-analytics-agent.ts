@@ -42,11 +42,11 @@ export class DataAnalyticsAgent {
 
     // Get relevant analytics knowledge from RAG
     const knowledge = await this.ragStore.search(
-      `${query.type} analytics ${query.question}`,
-      { filter: { type: 'knowledge', domain: 'data-analytics' } }
+      `data-analytics ${query.type} analytics ${query.question}`,
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `You are a data analytics expert. Use the following knowledge base to answer the query.
 
@@ -77,11 +77,11 @@ Provide a comprehensive analysis following the ${query.type} analytics framework
     goal: string
   ): Promise<VisualizationRecommendation> {
     const knowledge = await this.ragStore.search(
-      'data visualization chart types best practices',
-      { filter: { type: 'knowledge', domain: 'data-analytics' } }
+      'data-analytics data visualization chart types best practices',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Based on data visualization best practices:
 
@@ -111,11 +111,11 @@ Return JSON: { chartType, reasoning, dataFormat, libraries }`;
     description: string
   ): Promise<MetricSuggestion[]> {
     const knowledge = await this.ragStore.search(
-      `${domain} metrics KPIs business analytics`,
-      { filter: { type: 'knowledge', domain: 'data-analytics' } }
+      `data-analytics ${domain} metrics KPIs business analytics`,
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Suggest 5-10 key metrics for this business scenario:
 
@@ -142,11 +142,11 @@ Relevance is a score from 0-1 indicating how relevant this metric is.`;
    */
   async designMLPipeline(useCase: string): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'ML system data pipelines machine learning workflow',
-      { filter: { type: 'knowledge', domain: 'data-analytics' } }
+      'data-analytics ML system data pipelines machine learning workflow',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a complete ML pipeline for this use case:
 

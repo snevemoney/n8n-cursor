@@ -25,6 +25,14 @@ class DemoEventGenerator {
     this.running = true;
     console.log('[DemoEventGenerator] Starting synthetic events...');
     
+    // Emit immediate startup event
+    try {
+      telemetry.systemLog('info', 'Demo event generator started', 'demo-generator');
+      console.log('[DemoEventGenerator] Emitted startup event');
+    } catch (error) {
+      console.error('[DemoEventGenerator] Failed to emit startup event:', error);
+    }
+    
     // Generate initial burst
     this.generateBurst();
     
@@ -72,12 +80,23 @@ class DemoEventGenerator {
     const agent = this.randomAgent();
     const eventType = Math.random();
     
-    if (eventType < 0.7) {
+    if (eventType < 0.4) {
       telemetry.agentStarted(agent.id, agent.name);
-    } else if (eventType < 0.9) {
+    } else if (eventType < 0.7) {
       telemetry.agentStopped(agent.id, agent.name);
+    } else if (eventType < 0.9) {
+      // Agent operation completed
+      const operationId = `op-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const operations = ['analyze', 'process', 'execute', 'evaluate', 'generate'];
+      const operationName = operations[Math.floor(Math.random() * operations.length)];
+      const duration = 200 + Math.random() * 1500;
+      telemetry.agentOperationCompleted(agent.id, operationId, operationName, duration);
     } else {
-      telemetry.agentError(agent.id, agent.name, 'Simulated error for demo');
+      // Agent operation failed
+      const operationId = `op-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const operations = ['analyze', 'process', 'execute', 'evaluate', 'generate'];
+      const operationName = operations[Math.floor(Math.random() * operations.length)];
+      telemetry.agentOperationFailed(agent.id, operationId, operationName, 'Simulated operation failure');
     }
   }
   
@@ -130,10 +149,24 @@ class DemoEventGenerator {
     if (eventType < 0.1) {
       // Occasional errors
       telemetry.httpError('GET', `/api/${service}/check`, 500, 'Service unavailable');
+      telemetry.systemLog('error', `Service ${service} returned 500 error`, service);
+    } else if (eventType < 0.3) {
+      // System logs
+      const levels: Array<'info' | 'warn' | 'error' | 'critical'> = ['info', 'warn', 'error', 'critical'];
+      const level = levels[Math.floor(Math.random() * levels.length)];
+      const messages = [
+        `Processing request for ${service}`,
+        `Cache hit rate: ${Math.floor(Math.random() * 100)}%`,
+        `Memory usage: ${Math.floor(Math.random() * 80)}%`,
+        `Connection pool: ${Math.floor(Math.random() * 50)} active`,
+        `Request latency: ${Math.floor(Math.random() * 500)}ms`,
+      ];
+      telemetry.systemLog(level, messages[Math.floor(Math.random() * messages.length)], service);
     } else {
       // Mostly healthy
       const status = Math.random() < 0.95 ? 'healthy' : 'degraded';
       telemetry.systemHealth(service, status, Math.random() * 86400);
+      telemetry.systemLog('info', `Health check: ${service} is ${status}`, service);
     }
     
     // Queue depth updates
@@ -170,9 +203,9 @@ export function stopDemoEvents(): void {
   }
 }
 
-// Auto-start if SCORPION_DEMO=1
-if (process.env.SCORPION_DEMO === '1') {
-  console.log('[Demo] SCORPION_DEMO=1 detected, starting demo events...');
-  startDemoEvents();
-}
+// Auto-start disabled - only real system data is shown
+// if (process.env.SCORPION_DEMO === '1') {
+//   console.log('[Demo] SCORPION_DEMO=1 detected, starting demo events...');
+//   startDemoEvents();
+// }
 

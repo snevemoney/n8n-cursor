@@ -1,6 +1,15 @@
 import { create } from 'zustand';
-import type { Message, Conversation } from './types';
-import { loadConversations, loadMessages, saveConversation, saveMessages, deleteConversation as deleteConversationStorage } from './persistence';
+import type { Message, Conversation, Folder } from './types';
+import { 
+  loadConversations, 
+  loadMessages, 
+  saveConversation, 
+  saveMessages, 
+  deleteConversation as deleteConversationStorage,
+  loadFolders,
+  saveFolder,
+  deleteFolderStorage,
+} from './persistence';
 
 /**
  * Chat store for managing conversations and messages with persistence
@@ -14,13 +23,16 @@ interface ChatState {
   // Messages
   messages: Record<string, Message[]>; // conversationId -> messages
   
+  // Folders
+  folders: Folder[];
+  
   // UI state
   inputValue: string;
   isStreaming: boolean;
   streamingConversations: Set<string>; // Track which conversations are streaming
   
   // Model config
-  provider: 'ollama' | 'openai' | 'azure' | 'local';
+  provider: 'ollama' | 'openai';
   model: string;
   
   // Actions
@@ -33,8 +45,15 @@ interface ChatState {
   setInputValue: (value: string) => void;
   setStreaming: (streaming: boolean) => void;
   setConversationStreaming: (conversationId: string, streaming: boolean) => void;
-  setProvider: (provider: 'ollama' | 'openai' | 'azure' | 'local') => void;
+  setProvider: (provider: 'ollama' | 'openai') => void;
   setModel: (model: string) => void;
+  updateConversation: (id: string, update: Partial<Conversation>) => void;
+  
+  // Folder actions
+  addFolder: (folder: Folder) => void;
+  updateFolder: (id: string, update: Partial<Folder>) => void;
+  deleteFolder: (id: string) => void;
+  loadFolders: () => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -42,11 +61,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   currentConversation: null,
   conversations: [],
   messages: {},
+  folders: [],
   inputValue: '',
   isStreaming: false,
   streamingConversations: new Set(),
   provider: 'ollama', // Default, will be loaded from localStorage in useEffect
-  model: 'llama3.2:1b', // Default, optimized for 8GB RAM systems
+  model: 'scorpion:latest', // Default to scorpion:latest (can be overridden via localStorage)
   
   // Actions
   setCurrentConversation: (id) => {
@@ -161,6 +181,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
   setProvider: (provider) => {
+    // Validate provider - only allow ollama or openai
+    if (provider !== 'ollama' && provider !== 'openai') {
+      console.warn(`Invalid provider "${provider}", defaulting to ollama`);
+      provider = 'ollama';
+    }
     set({ provider });
     if (typeof window !== 'undefined') {
       localStorage.setItem('chat-provider', provider);
@@ -171,6 +196,46 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (typeof window !== 'undefined') {
       localStorage.setItem('chat-model', model);
     }
+  },
+  updateConversation: (id, update) => {
+    set(state => {
+      const conversation = state.conversations.find(c => c.id === id);
+      if (!conversation) return state;
+      
+      const updated = { ...conversation, ...update, updatedAt: Date.now() };
+      saveConversation(updated);
+      
+      return {
+        conversations: state.conversations.map(c => c.id === id ? updated : c),
+      };
+    });
+  },
+  
+  // Folder actions
+  addFolder: (folder) => {
+    set(state => ({ folders: [...state.folders, folder] }));
+    saveFolder(folder);
+  },
+  
+  updateFolder: (id, update) => {
+    set(state => {
+      const updated = state.folders.map(f => 
+        f.id === id ? { ...f, ...update, updatedAt: Date.now() } : f
+      );
+      const folder = updated.find(f => f.id === id);
+      if (folder) saveFolder(folder);
+      return { folders: updated };
+    });
+  },
+  
+  deleteFolder: (id) => {
+    set(state => ({ folders: state.folders.filter(f => f.id !== id) }));
+    deleteFolderStorage(id);
+  },
+  
+  loadFolders: () => {
+    const folders = loadFolders();
+    set({ folders });
   },
 }));
 

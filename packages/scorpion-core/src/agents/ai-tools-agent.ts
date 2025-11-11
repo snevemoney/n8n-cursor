@@ -45,11 +45,11 @@ export class AIToolsAgent {
     console.log(`🤖 AIToolsAgent recommending tools for: ${useCase}`);
 
     const knowledge = await this.ragStore.search(
-      `AI tools hierarchy ${useCase} machine learning frameworks`,
-      { filter: { type: 'knowledge', domain: 'ai-tools' } }
+      `ai-tools AI tools hierarchy ${useCase} machine learning frameworks`,
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Recommend AI tools for this use case:
 
@@ -81,11 +81,11 @@ Return JSON array of ToolRecommendation objects.`;
     constraints?: string[];
   }): Promise<AgentDesign> {
     const knowledge = await this.ragStore.search(
-      'agentic AI design patterns reflection tool use ReAct planning multi-agent',
-      { filter: { type: 'knowledge', domain: 'ai-tools' } }
+      'ai-tools agentic AI design patterns reflection tool use ReAct planning multi-agent',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design an AI agent for these requirements:
 
@@ -119,11 +119,11 @@ Return JSON matching AgentDesign interface.`;
    */
   async designMultiAgentSystem(scenario: string): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'multi-agent system hierarchical collaborative specialized agents',
-      { filter: { type: 'knowledge', domain: 'ai-tools' } }
+      'ai-tools multi-agent system hierarchical collaborative specialized agents',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a multi-agent system for this scenario:
 
@@ -156,11 +156,11 @@ Return JSON.`;
    */
   async recommendMLFramework(projectType: string, requirements: string[]): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'machine learning frameworks TensorFlow PyTorch scikit-learn',
-      { filter: { type: 'knowledge', domain: 'ai-tools' } }
+      'ai-tools machine learning frameworks TensorFlow PyTorch scikit-learn',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Recommend the best ML framework:
 
@@ -194,11 +194,11 @@ Return JSON.`;
    */
   async designToolSystem(agentPurpose: string, availableAPIs: string[]): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'tool use pattern AI agent tool integration error handling',
-      { filter: { type: 'knowledge', domain: 'ai-tools' } }
+      'ai-tools tool use pattern AI agent tool integration error handling',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a tool-use system for an AI agent:
 
@@ -232,11 +232,11 @@ Return JSON.`;
    */
   async evaluateAgent(agentDescription: string, metrics: any): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'AI agent evaluation metrics testing success rate efficiency quality',
-      { filter: { type: 'knowledge', domain: 'ai-tools' } }
+      'ai-tools AI agent evaluation metrics testing success rate efficiency quality',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Evaluate this AI agent:
 

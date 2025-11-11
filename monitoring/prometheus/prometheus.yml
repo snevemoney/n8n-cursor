@@ -1,9 +1,21 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  external_labels:
+    cluster: 'scorpion'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
 
 rule_files:
   - "rules/*.yml"
+  - "rules/scorpion-slo.yml"
+  - "../alertmanager/scorpion-alerts.yml"
 
 scrape_configs:
   # Prometheus itself
@@ -62,5 +74,13 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:3003']
     metrics_path: '/api/metrics'
+    scrape_interval: 15s
+    honor_labels: true
+
+  # Navigation flow monitor metrics
+  - job_name: 'navigation-flow-monitor'
+    static_configs:
+      - targets: ['localhost:9091']
+    metrics_path: '/metrics'
     scrape_interval: 15s
     honor_labels: true

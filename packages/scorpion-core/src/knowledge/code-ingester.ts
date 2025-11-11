@@ -2,11 +2,14 @@
  * Code Ingester
  * Extracts comprehensive source code knowledge from all apps and packages
  * Provides Cursor-level understanding of the entire codebase
+ * Uses hybrid RAG indexing: Summary, Query, and Sub-chunks strategies
  */
 
 import { ExtractedKnowledge } from './types';
 import { getASTParser } from '../code/ast-parser';
 import { getFileCache } from '../code/file-cache';
+import { LLMAdapter } from '../llm/modelAdapter';
+import { RAGStore } from '../rag';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -14,11 +17,15 @@ export class CodeIngester {
   private workspaceRoot: string;
   private astParser: ReturnType<typeof getASTParser>;
   private fileCache: ReturnType<typeof getFileCache>;
+  private llm: LLMAdapter;
+  private ragStore?: RAGStore;
 
-  constructor(workspaceRoot: string) {
+  constructor(workspaceRoot: string, ragStore?: RAGStore) {
     this.workspaceRoot = workspaceRoot;
     this.astParser = getASTParser(workspaceRoot);
     this.fileCache = getFileCache();
+    this.llm = new LLMAdapter({ temperature: 0.3, maxTokens: 500 });
+    this.ragStore = ragStore;
   }
 
   /**
@@ -123,6 +130,11 @@ export class CodeIngester {
     itemName: string
   ): Promise<ExtractedKnowledge | null> {
     try {
+      // Skip test files as a safety net (should already be filtered in findCodeFiles)
+      if (this.isTestFile(filePath)) {
+        return null;
+      }
+
       const fileContent = await this.fileCache.get(filePath);
       if (!fileContent) return null;
 
@@ -206,11 +218,12 @@ export class CodeIngester {
       // Limit file content size for RAG (keep first 50KB)
       const maxContentSize = 50000;
       let codeContent = fileContent.content;
-      if (codeContent.length > maxContentSize) {
+      const isLargeFile = codeContent.length > maxContentSize;
+      if (isLargeFile) {
         codeContent = codeContent.substring(0, maxContentSize) + '\n... (truncated)';
       }
 
-      return {
+      const knowledge: ExtractedKnowledge = {
         id: `code-${relativePath.replace(/\//g, '-').replace(/\./g, '_')}`,
         source: type === 'app' ? `apps/${itemName}` : `packages/${itemName}`,
         type: this.determineType(category),
@@ -237,6 +250,44 @@ export class CodeIngester {
         tags,
         extractedAt: new Date().toISOString()
       };
+
+      // Apply hybrid indexing strategies
+      if (this.ragStore) {
+        // 1. Query Indexing: Generate common questions about this code file
+        try {
+          const queries = await this.generateCodeQueries(fileName, description, ast, patterns);
+          for (const query of queries) {
+            await this.ragStore.addQueryEntry(
+              knowledge.id,
+              query,
+              {
+                source: knowledge.source,
+                type: knowledge.type,
+                category: knowledge.category,
+                tags: knowledge.tags,
+                extractedAt: knowledge.extractedAt
+              }
+            );
+          }
+          if (queries.length > 0) {
+            console.log(`  ✓ Generated ${queries.length} query entries for ${fileName}`);
+          }
+        } catch (error) {
+          console.warn(`  ⚠ Failed to generate queries for ${fileName}:`, error);
+        }
+
+        // 2. Sub-chunks Indexing: Split large files by functions/classes
+        if (isLargeFile && ast && (ast.functions.length > 0 || ast.classes.length > 0)) {
+          try {
+            await this.indexSubChunks(knowledge, fileContent.content, ast);
+            console.log(`  ✓ Indexed sub-chunks for ${fileName}`);
+          } catch (error) {
+            console.warn(`  ⚠ Failed to index sub-chunks for ${fileName}:`, error);
+          }
+        }
+      }
+
+      return knowledge;
     } catch (error) {
       console.error(`Error extracting file knowledge from ${filePath}:`, error);
       return null;
@@ -244,7 +295,7 @@ export class CodeIngester {
   }
 
   /**
-   * Extract knowledge from README file
+   * Extract knowledge from README file with Summary Indexing
    */
   private async extractReadmeKnowledge(
     readmePath: string,
@@ -262,7 +313,7 @@ export class CodeIngester {
       // Extract key sections
       const sections = this.extractMarkdownSections(content);
 
-      return {
+      const knowledge: ExtractedKnowledge = {
         id: `readme-${type}-${itemName}`,
         source: type === 'app' ? `apps/${itemName}` : `packages/${itemName}`,
         type: 'best-practice',
@@ -286,9 +337,160 @@ export class CodeIngester {
         tags: ['readme', 'documentation', type, itemName],
         extractedAt: new Date().toISOString()
       };
+
+      // Generate and index summary (Summary Indexing strategy)
+      if (this.ragStore) {
+        try {
+          const summary = await this.generateSummary(content, title);
+          if (summary) {
+            await this.ragStore.addSummaryEntry(
+              knowledge.id,
+              summary,
+              {
+                source: knowledge.source,
+                type: knowledge.type,
+                category: knowledge.category,
+                tags: knowledge.tags,
+                extractedAt: knowledge.extractedAt
+              }
+            );
+            console.log(`  ✓ Generated summary for ${itemName} README`);
+          }
+        } catch (error) {
+          console.warn(`  ⚠ Failed to generate summary for ${itemName} README:`, error);
+        }
+      }
+
+      return knowledge;
     } catch (error) {
       console.error(`Error extracting README from ${readmePath}:`, error);
       return null;
+    }
+  }
+
+  /**
+   * Generate a concise summary of README content using LLM
+   */
+  private async generateSummary(content: string, title: string): Promise<string | null> {
+    try {
+      // Extract first 2000 chars for summary generation (to avoid token limits)
+      const contentPreview = content.substring(0, 2000);
+      
+      const prompt = `Generate a concise 2-3 sentence summary of this README file. Focus on what the project is, its main purpose, and key features.
+
+Title: ${title}
+
+Content:
+${contentPreview}
+
+Summary (2-3 sentences):`;
+
+      const summary = await this.llm.chat(prompt, 'You are a technical documentation expert. Generate clear, concise summaries.');
+      return summary.trim();
+    } catch (error) {
+      console.warn('Failed to generate summary:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate common questions about a code file (Query Indexing)
+   */
+  private async generateCodeQueries(
+    fileName: string,
+    description: string,
+    ast: any,
+    patterns: string[]
+  ): Promise<string[]> {
+    try {
+      const functionsList = ast?.functions.slice(0, 10).map((f: any) => f.name).join(', ') || 'none';
+      const classesList = ast?.classes.slice(0, 5).map((c: any) => c.name).join(', ') || 'none';
+      
+      const prompt = `Generate 3-5 common questions developers might ask about this code file. Focus on "how to" and "what does" questions.
+
+File: ${fileName}
+Description: ${description}
+Functions: ${functionsList}
+Classes: ${classesList}
+Patterns: ${patterns.slice(0, 5).join(', ')}
+
+Generate questions like:
+- "How do I use [function/class]?"
+- "What does [function/class] do?"
+- "How to [common use case]?"
+
+Return only the questions, one per line, no numbering:`;
+
+      const response = await this.llm.chat(prompt, 'You are a code documentation expert. Generate practical questions developers would ask.');
+      const queries = response
+        .split('\n')
+        .map(q => q.trim())
+        .filter(q => q.length > 0 && !q.match(/^\d+[\.\)]/)) // Remove numbering
+        .slice(0, 5); // Limit to 5 queries
+
+      return queries;
+    } catch (error) {
+      console.warn('Failed to generate code queries:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Index code file as sub-chunks by function/class (Sub-chunks Indexing)
+   */
+  private async indexSubChunks(
+    knowledge: ExtractedKnowledge,
+    fullContent: string,
+    ast: any
+  ): Promise<void> {
+    if (!this.ragStore) return;
+
+    const chunks: Array<{ content: string; index: number }> = [];
+    let chunkIndex = 0;
+
+    // Create chunks from classes
+    for (const classInfo of ast.classes) {
+      // Extract class code (simplified - in production would parse AST more precisely)
+      const classMatch = fullContent.match(
+        new RegExp(`(export\\s+)?(class|interface|type)\\s+${classInfo.name}[\\s\\S]*?(?=\\n(export\\s+)?(class|interface|type|function|const|let|var|$))`, 'm')
+      );
+      if (classMatch) {
+        chunks.push({
+          content: `Class: ${classInfo.name}\n\n${classMatch[0]}`,
+          index: chunkIndex++
+        });
+      }
+    }
+
+    // Create chunks from exported functions
+    for (const funcInfo of ast.functions.filter((f: any) => f.isExported).slice(0, 20)) {
+      // Extract function code (simplified)
+      const funcMatch = fullContent.match(
+        new RegExp(`(export\\s+)?(function|const|let|var)\\s+${funcInfo.name}[\\s\\S]*?(?=\\n(export\\s+)?(function|const|let|var|class|interface|type|$))`, 'm')
+      );
+      if (funcMatch) {
+        chunks.push({
+          content: `Function: ${funcInfo.name}\n\n${funcMatch[0]}`,
+          index: chunkIndex++
+        });
+      }
+    }
+
+    // Index each chunk
+    for (const chunk of chunks) {
+      await this.ragStore.addSubChunkEntry(
+        knowledge.id,
+        chunk.content.substring(0, 10000), // Limit chunk size
+        chunk.index,
+        chunks.length,
+        {
+          source: knowledge.source,
+          type: knowledge.type,
+          category: knowledge.category,
+          tags: knowledge.tags,
+          extractedAt: knowledge.extractedAt
+        }
+      );
     }
   }
 
@@ -365,6 +567,10 @@ export class CodeIngester {
           const subFiles = await this.findCodeFiles(fullPath);
           files.push(...subFiles);
         } else if (this.isCodeFile(entry.name)) {
+          // Skip test files
+          if (this.isTestFile(fullPath)) {
+            continue;
+          }
           files.push(fullPath);
         }
       }
@@ -403,6 +609,33 @@ export class CodeIngester {
   private isCodeFile(fileName: string): boolean {
     const ext = path.extname(fileName).toLowerCase();
     return ['.ts', '.tsx', '.js', '.jsx'].includes(ext);
+  }
+
+  /**
+   * Check if a file is a test file (should be excluded from indexing)
+   */
+  private isTestFile(filePath: string): boolean {
+    const normalized = filePath.toLowerCase();
+    const fileName = path.basename(filePath).toLowerCase();
+    
+    // Skip test files and test directories
+    return (
+      normalized.includes('/test/') ||
+      normalized.includes('/tests/') ||
+      normalized.includes('/__tests__/') ||
+      normalized.includes('/__test__/') ||
+      fileName.startsWith('test-') ||
+      fileName.endsWith('.test.ts') ||
+      fileName.endsWith('.test.tsx') ||
+      fileName.endsWith('.test.js') ||
+      fileName.endsWith('.test.jsx') ||
+      fileName.endsWith('.spec.ts') ||
+      fileName.endsWith('.spec.tsx') ||
+      fileName.endsWith('.spec.js') ||
+      fileName.endsWith('.spec.jsx') ||
+      fileName.match(/test-\d+/) || // Matches test-1748574172423-test_fix-1748574172424.ts
+      fileName.match(/test_\d+/)    // Matches test_1748574172423 patterns
+    );
   }
 
   /**

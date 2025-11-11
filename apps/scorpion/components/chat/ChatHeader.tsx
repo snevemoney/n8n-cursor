@@ -1,15 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useChatStore } from '@/lib/chat/chatStore';
 import { Settings, Zap } from 'lucide-react';
+import { ExportImport } from './ExportImport';
 
 /**
- * ChatHeader - Model selector, live pill, settings
+ * ChatHeader - Header with title and actions
+ * Model selector is now in the Composer component
  */
 export function ChatHeader() {
-  const { provider, model, setProvider, setModel } = useChatStore();
-  
   // Keyboard shortcut ⌘K / Ctrl+K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -36,35 +35,9 @@ export function ChatHeader() {
         </div>
       </div>
       
-      {/* Center: Model Config */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-white/60">Provider</label>
-          <select
-            value={provider}
-            onChange={(e) => setProvider(e.target.value as any)}
-            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded text-sm text-white focus:outline-none focus:border-emerald-400/50"
-          >
-            <option value="ollama">Ollama</option>
-            <option value="openai">OpenAI</option>
-            <option value="azure">Azure</option>
-            <option value="local">Local</option>
-          </select>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-white/60">Model</label>
-          <input
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            placeholder="qwen2.5-coder:7b-instruct-q4_K_M"
-            className="w-64 px-3 py-1.5 bg-white/5 border border-white/10 rounded text-sm text-white placeholder-white/30 focus:outline-none focus:border-emerald-400/50"
-          />
-        </div>
-      </div>
-      
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
+        <ExportImport />
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
           className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-xs text-white/60 hover:text-white transition-colors"

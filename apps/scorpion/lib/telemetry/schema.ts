@@ -156,6 +156,41 @@ export const DomainEventSchema = z.discriminatedUnion('type', [
     status: z.enum(['healthy', 'degraded', 'down']),
     uptime: z.number().optional(),
   }),
+  z.object({
+    type: z.literal('system.log'),
+    id: z.string(),
+    ts: z.number(),
+    source: z.string(),
+    severity: z.enum(['info', 'warn', 'error', 'critical']).optional(),
+    level: z.enum(['info', 'warn', 'error', 'critical']).optional(),
+    message: z.string(),
+    context: z.record(z.any()).optional(),
+  }),
+  
+  // Agent operation events
+  z.object({
+    type: z.literal('agent.operation.completed'),
+    id: z.string(),
+    ts: z.number(),
+    source: z.string(),
+    severity: z.enum(['info', 'warn', 'error', 'critical']).optional(),
+    agentId: z.string(),
+    operationId: z.string(),
+    operationName: z.string(),
+    duration: z.number(),
+  }),
+  z.object({
+    type: z.literal('agent.operation.failed'),
+    id: z.string(),
+    ts: z.number(),
+    source: z.string(),
+    severity: z.enum(['info', 'warn', 'error', 'critical']).optional(),
+    agentId: z.string(),
+    operationId: z.string(),
+    operationName: z.string(),
+    duration: z.number().optional(),
+    error: z.string().optional(),
+  }),
   
   // Deploy events
   z.object({

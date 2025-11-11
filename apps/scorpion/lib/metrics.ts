@@ -245,6 +245,14 @@ class MetricsCollector {
     // Circuit breaker metrics
     this.registerGauge('scorpion_circuit_breaker_state', 'Circuit breaker state (0=closed, 1=open, 0.5=half-open)');
     this.registerCounter('scorpion_circuit_breaker_failures_total', 'Total circuit breaker failures');
+
+    // Navigation flow metrics
+    this.registerCounter('scorpion_navigation_requests_total', 'Total number of navigation requests');
+    this.registerHistogram('scorpion_navigation_duration_seconds', 'Duration of navigation requests in seconds', [0.1, 0.5, 1, 2, 5, 10, 30]);
+    this.registerCounter('scorpion_navigation_errors_total', 'Total number of navigation errors');
+    this.registerGauge('scorpion_route_availability', 'Route availability (1 = available, 0 = unavailable)');
+    this.registerGauge('scorpion_route_load_time_seconds', 'Route load time in seconds');
+    this.registerGauge('scorpion_navigation_success_rate', 'Navigation success rate (0-1)');
   }
 }
 

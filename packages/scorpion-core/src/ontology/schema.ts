@@ -52,6 +52,12 @@ export const ontologySchema: Record<string, EntitySchema> = {
     relations: ['Project', 'Workflow', 'Knowledge'],
     required: ['id', 'name', 'status'],
     indexed: ['name', 'description', 'category']
+  },
+  LLMExperiment: {
+    fields: ['id', 'name', 'description', 'status', 'baseModel', 'strategy', 'hyperparameters', 'dataset', 'metrics', 'metricsHistory', 'trainedModelName', 'createdAt', 'updatedAt', 'startedAt', 'completedAt', 'error', 'logs', 'metadata'],
+    relations: [],
+    required: ['id', 'name', 'status', 'baseModel'],
+    indexed: ['name', 'status', 'baseModel', 'strategy']
   }
 };
 

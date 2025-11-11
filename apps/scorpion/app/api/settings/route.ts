@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { z } from 'zod';
 
 const SETTINGS_FILE = path.join(process.cwd(), 'data', 'scorpion', 'settings.json');
 
@@ -24,108 +26,109 @@ const DEFAULT_SETTINGS: Settings = {
   soundEnabled: false
 };
 
+const settingsSchema = z.object({
+  ollamaUrl: z.string().url().optional(),
+  ollamaModel: z.string().optional(),
+  autoRefresh: z.boolean().optional(),
+  refreshInterval: z.number().min(1).max(3600).optional(),
+  theme: z.enum(['dark', 'light', 'auto']).optional(),
+  notifications: z.boolean().optional(),
+  soundEnabled: z.boolean().optional(),
+  ragIndexing: z.boolean().optional(),
+  autoTrigger: z.boolean().optional(),
+  councilAutoContext: z.boolean().optional(),
+  modelSource: z.string().optional(),
+  openaiKey: z.string().optional(),
+  entityRetention: z.string().optional(),
+  ragModel: z.string().optional(),
+  useOpenAIEmbeddings: z.boolean().optional(),
+  useOpenAIFunctionCalling: z.boolean().optional(),
+  maxAgents: z.number().min(1).max(16).optional(),
+  requestTimeout: z.number().min(1000).max(120000).optional(),
+}).passthrough();
+
 /**
  * GET /api/settings - Load user settings
  */
-export async function GET() {
+export const GET = withErrorHandling(async () => {
+  // Ensure directory exists
+  await fs.mkdir(path.dirname(SETTINGS_FILE), { recursive: true });
+  
+  // Try to read existing settings
   try {
-    // Ensure directory exists
-    await fs.mkdir(path.dirname(SETTINGS_FILE), { recursive: true });
-    
-    // Try to read existing settings
-    try {
-      const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
-      const settings = JSON.parse(data);
-      return NextResponse.json(settings);
-    } catch (error) {
-      // File doesn't exist, return defaults
-      return NextResponse.json(DEFAULT_SETTINGS);
-    }
-  } catch (error: any) {
-    console.error('Error loading settings:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to load settings' },
-      { status: 500 }
-    );
+    const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
+    const settings = JSON.parse(data);
+    return createSuccessResponse(settings);
+  } catch (error) {
+    // File doesn't exist, return defaults
+    return createSuccessResponse(DEFAULT_SETTINGS);
   }
-}
+});
 
 /**
  * POST /api/settings - Save user settings
  */
-export async function POST(request: NextRequest) {
-  try {
-    const settings = await request.json();
-    
-    // Validate required fields
-    if (!settings.ollamaUrl || !settings.ollamaModel) {
-      return NextResponse.json(
-        { error: 'Missing required settings' },
-        { status: 400 }
-      );
-    }
-    
-    // Ensure directory exists
-    await fs.mkdir(path.dirname(SETTINGS_FILE), { recursive: true });
-    
-    // Merge with existing settings to preserve any we didn't send
-    let existingSettings = DEFAULT_SETTINGS;
-    try {
-      const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
-      existingSettings = JSON.parse(data);
-    } catch (error) {
-      // File doesn't exist yet, use defaults
-    }
-    
-    const mergedSettings = {
-      ...existingSettings,
-      ...settings,
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Save to file
-    await fs.writeFile(
-      SETTINGS_FILE,
-      JSON.stringify(mergedSettings, null, 2),
-      'utf-8'
-    );
-    
-    return NextResponse.json({
-      success: true,
-      settings: mergedSettings
-    });
-    
-  } catch (error: any) {
-    console.error('Error saving settings:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to save settings' },
-      { status: 500 }
-    );
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const validation = await validateRequest(request, settingsSchema);
+  if (!validation.success) {
+    return validation.error;
   }
-}
+  
+  const settings = validation.data;
+  
+  // Ensure directory exists
+  await fs.mkdir(path.dirname(SETTINGS_FILE), { recursive: true });
+  
+  // Merge with existing settings to preserve any we didn't send
+  let existingSettings = DEFAULT_SETTINGS;
+  try {
+    const data = await fs.readFile(SETTINGS_FILE, 'utf-8');
+    existingSettings = JSON.parse(data);
+  } catch (error) {
+    // File doesn't exist yet, use defaults
+  }
+  
+  const mergedSettings = {
+    ...existingSettings,
+    ...settings,
+    updatedAt: new Date().toISOString()
+  };
+  
+  // Save to file
+  await fs.writeFile(
+    SETTINGS_FILE,
+    JSON.stringify(mergedSettings, null, 2),
+    'utf-8'
+  );
+  
+  // Sync OpenAI settings to environment variables (if API key provided)
+  if (settings.openaiKey) {
+    process.env.OPENAI_API_KEY = settings.openaiKey;
+  }
+  if (settings.useOpenAIEmbeddings !== undefined) {
+    process.env.USE_OPENAI_EMBEDDINGS = settings.useOpenAIEmbeddings ? 'true' : 'false';
+  }
+  if (settings.useOpenAIFunctionCalling !== undefined) {
+    process.env.USE_OPENAI_FUNCTION_CALLING = settings.useOpenAIFunctionCalling ? 'true' : 'false';
+  }
+  
+  return createSuccessResponse({
+    settings: mergedSettings
+  });
+});
 
 /**
  * DELETE /api/settings - Reset to defaults
  */
-export async function DELETE() {
+export const DELETE = withErrorHandling(async () => {
   try {
-    try {
-      await fs.unlink(SETTINGS_FILE);
-    } catch (error) {
-      // File doesn't exist, that's fine
-    }
-    
-    return NextResponse.json({
-      success: true,
-      settings: DEFAULT_SETTINGS
-    });
-    
-  } catch (error: any) {
-    console.error('Error resetting settings:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to reset settings' },
-      { status: 500 }
-    );
+    await fs.unlink(SETTINGS_FILE);
+  } catch (error) {
+    // File doesn't exist, that's fine
   }
-}
+  
+  return createSuccessResponse({
+    settings: DEFAULT_SETTINGS
+  });
+});
 

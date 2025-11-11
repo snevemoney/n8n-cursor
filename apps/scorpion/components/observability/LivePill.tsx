@@ -6,7 +6,7 @@ import { useTelemetryStore } from '@/lib/telemetry/store';
  * LivePill - Connection status indicator with pulsing dot
  */
 export function LivePill() {
-  const connected = useTelemetryStore(state => state.connected);
+  const connected = useTelemetryStore(state => state.liveConnected);
   const lastHeartbeat = useTelemetryStore(state => state.lastHeartbeat);
   
   const isStale = Date.now() - lastHeartbeat > 30000; // 30s threshold

@@ -66,6 +66,13 @@ export const councilMembers: CouncilMember[] = [
     specialty: "Metrics, insights, predictive analytics",
     weight: 1.1,
     goal: "Turn data into actionable intelligence."
+  },
+  {
+    name: "Mentor",
+    role: "LLM Training & Evaluation",
+    specialty: "Model training, fine-tuning, evaluation, prompt engineering",
+    weight: 1.2,
+    goal: "Guide LLM development, training strategies, and model optimization."
   }
 ];
 

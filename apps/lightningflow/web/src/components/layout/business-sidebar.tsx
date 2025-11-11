@@ -257,7 +257,7 @@ export function BusinessSidebar() {
 
   if (isCollapsed) {
     return (
-      <div className="w-16 bg-gray-900/50 border-r border-gray-800 flex flex-col items-center py-4 space-y-4">
+      <div className="max-md:hidden md:w-16 bg-gray-900/50 border-r border-gray-800 flex flex-col items-center py-4 space-y-4">
         <Button
           variant="ghost"
           size="sm"
@@ -286,17 +286,17 @@ export function BusinessSidebar() {
   }
 
   return (
-    <div className="w-80 bg-gray-900/50 border-r border-gray-800 flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-800">
+    <div className="max-md:w-72 md:w-72 lg:w-80 bg-gray-900/50 border-r border-gray-800 flex flex-col max-md:fixed max-md:z-50 max-md:h-full">
+      {/* Header - Responsive */}
+      <div className="max-md:p-4 md:p-5 lg:p-6 border-b border-gray-800">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="bg-amber-500/20 p-2 rounded-lg">
-              <Zap className="h-5 w-5 text-amber-400" />
+            <div className="bg-amber-500/20 max-md:p-1.5 md:p-2 rounded-lg">
+              <Zap className="max-md:h-4 max-md:w-4 md:h-5 md:w-5 text-amber-400" />
             </div>
             <div>
-              <h2 className="font-semibold text-white">Lightning Business</h2>
-              <p className="text-xs text-gray-400">Node Active</p>
+              <h2 className="max-md:text-sm md:text-base lg:text-lg font-semibold text-white">Lightning Business</h2>
+              <p className="max-md:text-[10px] md:text-xs text-gray-400 max-md:hidden md:block">Node Active</p>
             </div>
           </div>
           <Button
@@ -327,8 +327,8 @@ export function BusinessSidebar() {
         </Button>
       </div>
 
-      {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      {/* Navigation Sections - Responsive */}
+      <div className="flex-1 overflow-y-auto max-md:p-3 md:p-4 space-y-2">
         {sections.map(section => {
           const Icon = section.icon
           const isExpanded = expandedSections.includes(section.id)
@@ -409,14 +409,14 @@ export function BusinessSidebar() {
         })}
       </div>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-800">
-        <div className="text-center text-xs text-gray-400 mb-2">
+      {/* Footer - Responsive */}
+      <div className="max-md:p-3 md:p-4 border-t border-gray-800">
+        <div className="text-center max-md:text-[10px] md:text-xs text-gray-400 mb-2 max-md:hidden md:block">
           Sovereign • Non-custodial • Secure
         </div>
         <div className="flex items-center justify-center gap-2">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-          <span className="text-xs text-green-400">Node Online</span>
+          <span className="max-md:text-[10px] md:text-xs text-green-400">Node Online</span>
         </div>
       </div>
     </div>

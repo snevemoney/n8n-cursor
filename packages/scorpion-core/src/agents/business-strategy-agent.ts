@@ -89,11 +89,11 @@ export class BusinessStrategyAgent {
     console.log(`💼 BusinessStrategyAgent analyzing business model for: ${productDescription}`);
 
     const knowledge = await this.ragStore.search(
-      'business models revenue streams SaaS marketplace pricing strategy',
-      { filter: { type: 'knowledge', domain: 'business-strategy' } }
+      'business-strategy business models revenue streams SaaS marketplace pricing strategy',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Analyze business model options:
 
@@ -130,11 +130,11 @@ Return JSON matching BusinessModelAnalysis interface.`;
     budget?: string
   ): Promise<GTMStrategy> {
     const knowledge = await this.ragStore.search(
-      'go-to-market strategy customer acquisition sales funnel product-led growth',
-      { filter: { type: 'knowledge', domain: 'business-strategy' } }
+      'business-strategy go-to-market strategy customer acquisition sales funnel product-led growth',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a comprehensive go-to-market strategy:
 
@@ -171,11 +171,11 @@ Return JSON matching GTMStrategy interface.`;
     competitors: string[]
   ): Promise<CompetitiveAnalysis> {
     const knowledge = await this.ragStore.search(
-      'competitive strategy Porter five forces competitive advantage differentiation',
-      { filter: { type: 'knowledge', domain: 'business-strategy' } }
+      'business-strategy competitive strategy Porter five forces competitive advantage differentiation',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Perform comprehensive competitive analysis:
 
@@ -211,11 +211,11 @@ Return JSON matching CompetitiveAnalysis interface.`;
     goals: string[]
   ): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'content marketing strategy SEO social media brand storytelling',
-      { filter: { type: 'knowledge', domain: 'business-strategy' } }
+      'business-strategy content marketing strategy SEO social media brand storytelling',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a content marketing strategy:
 
@@ -254,11 +254,11 @@ Return JSON.`;
     traction: any
   ): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'fundraising strategy venture capital angel investors pitch deck',
-      { filter: { type: 'knowledge', domain: 'business-strategy' } }
+      'business-strategy fundraising strategy venture capital angel investors pitch deck',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a fundraising strategy:
 
@@ -297,11 +297,11 @@ Return JSON.`;
     competition: any
   ): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'pricing strategy value-based cost-plus competitive freemium tiered',
-      { filter: { type: 'knowledge', domain: 'business-strategy' } }
+      'business-strategy pricing strategy value-based cost-plus competitive freemium tiered',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design an optimal pricing strategy:
 
@@ -340,11 +340,11 @@ Return JSON.`;
     theirPosition: any
   ): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'negotiation frameworks BATNA win-win anchoring tactics',
-      { filter: { type: 'knowledge', domain: 'business-strategy' } }
+      'business-strategy negotiation frameworks BATNA win-win anchoring tactics',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a negotiation strategy:
 

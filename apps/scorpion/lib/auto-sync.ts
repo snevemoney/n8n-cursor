@@ -7,6 +7,7 @@ import { getOrchestrator as getOrchestratorAsync, getRAGStore } from './shared-s
 import { WorkflowIngester } from '@scorpion/core';
 import { getMCPn8nClient } from './mcp-n8n-client';
 import { responseCache } from './cache';
+import { getOptimizedBatchSize, getOptimizedBatchDelay } from './storage/performance-optimizer';
 import path from 'path';
 import chokidar from 'chokidar';
 import { spawn, ChildProcess } from 'child_process';
@@ -32,16 +33,22 @@ export function initializeAutoSync() {
 
   isInitialized = true;
 
-  // Initial sync on startup
-  performInitialSync();
+  // Initial sync on startup (don't await - let it run in background)
+  performInitialSync().catch(err => {
+    console.error('❌ Failed to perform initial sync:', err);
+  });
 
   // Periodic sync every 5 minutes
   syncInterval = setInterval(() => {
-    performPeriodicSync();
+    performPeriodicSync().catch(err => {
+      console.error('❌ Failed to perform periodic sync:', err);
+    });
   }, 5 * 60 * 1000); // 5 minutes
 
   // Watch workflow files for changes (filesystem → n8n)
-  watchWorkflowFiles();
+  watchWorkflowFiles().catch(err => {
+    console.error('Failed to initialize workflow watcher:', err);
+  });
 
   // Watch n8n workflows for changes (n8n → filesystem)
   watchN8nWorkflows();
@@ -51,37 +58,72 @@ export function initializeAutoSync() {
 
 /**
  * Perform initial sync on startup
+ * Always runs full ingestion to ensure recommendations and tech debt analysis are up to date
+ * Now runs in background with deferred start to avoid blocking server startup
  */
 async function performInitialSync() {
   try {
-    console.log('🦂 Performing initial knowledge ingestion...');
+    // Defer heavy ingestion slightly to allow server to start faster
+    // Minimal delay - just enough to let server initialize
+    await new Promise(resolve => setTimeout(resolve, 500)); // Reduced from 2s to 500ms
+    
+    console.log('🦂 Performing initial knowledge ingestion (including recommendations)...');
+    console.log('🦂 Getting orchestrator...');
     const orchestrator = await getOrchestratorAsync();
+    console.log('🦂 Orchestrator ready, starting ingestion...');
     
-    // Check if knowledge exists
-    const summary = await orchestrator.getSummary();
+    // Run lightweight essential ingestion (tech debt + recommendations only)
+    // This is faster and focuses on what the dashboard needs
+    console.log('🦂 Running essential ingestion (tech debt + recommendations only)...');
+    const result = await orchestrator.ingestEssential();
     
-    if (summary.totalKnowledge === 0) {
-      console.log('🦂 No knowledge found, ingesting...');
-      await orchestrator.ingestAll();
-      console.log(`✅ Ingested ${summary.totalKnowledge} knowledge items`);
-    } else {
-      console.log(`✅ Knowledge already exists: ${summary.totalKnowledge} items`);
-    }
+    const totalItems = result.techDebt.length + result.recommendations.length;
+    console.log(`🦂 Essential ingestion returned ${totalItems} items (${result.techDebt.length} tech debt + ${result.recommendations.length} recommendations)`);
+    
+    // Invalidate caches to ensure fresh data
+    orchestrator.invalidateCache();
+    responseCache.invalidate('project-status');
+    responseCache.invalidate('health-check');
+    responseCache.invalidate('workflows-list');
+    
+    // Verify what was actually stored
+    const ragStore = await getRAGStore();
+    const storedKnowledge = ragStore.getAllKnowledge();
+    const techDebtStored = storedKnowledge.filter(k => k.category === 'tech-debt').length;
+    const missingFeaturesStored = storedKnowledge.filter(k => k.category === 'missing-features').length;
+    const recommendationsStored = storedKnowledge.filter(k => k.source === 'recommendation-engine').length;
+    
+    console.log(`✅ Essential ingestion complete: ${totalItems} items processed`);
+    console.log(`   Stored in RAG: ${storedKnowledge.length} total`);
+    console.log(`   Tech Debt items: ${techDebtStored}`);
+    console.log(`   Missing Features items: ${missingFeaturesStored}`);
+    console.log(`   Recommendations: ${recommendationsStored}`);
   } catch (error) {
     console.error('❌ Error during initial sync:', error);
+    if (error instanceof Error) {
+      console.error('   Error message:', error.message);
+      console.error('   Error stack:', error.stack);
+    }
   }
 }
 
 /**
  * Perform periodic sync
+ * Runs full ingestion including recommendations and tech debt analysis
  */
 async function performPeriodicSync() {
   try {
-    console.log('🦂 Performing periodic sync...');
+    console.log('🦂 Performing periodic sync (essential: tech debt + recommendations)...');
     const orchestrator = await getOrchestratorAsync();
     
-    // Re-ingest to catch any changes
-    const result = await orchestrator.ingestAll();
+    // Run lightweight essential ingestion (faster, focused on dashboard needs)
+    const result = await orchestrator.ingestEssential();
+    
+    // Invalidate caches to ensure fresh data
+    orchestrator.invalidateCache();
+    responseCache.invalidate('project-status');
+    responseCache.invalidate('health-check');
+    responseCache.invalidate('workflows-list');
     
     // Sync workflows (filesystem → n8n)
     await syncWorkflows();
@@ -89,7 +131,8 @@ async function performPeriodicSync() {
     // Check n8n for changes (n8n → filesystem)
     await checkN8nWorkflowChanges();
     
-    console.log(`✅ Periodic sync completed: ${result.knowledge.length} knowledge items`);
+    const totalItems = result.techDebt.length + result.recommendations.length;
+    console.log(`✅ Periodic sync completed: ${totalItems} items (${result.techDebt.length} tech debt + ${result.recommendations.length} recommendations)`);
   } catch (error) {
     console.error('❌ Error during periodic sync:', error);
   }
@@ -98,17 +141,19 @@ async function performPeriodicSync() {
 /**
  * Watch workflow files for changes
  */
-function watchWorkflowFiles() {
+async function watchWorkflowFiles() {
   try {
-    // Find workspace root (go up from apps/scorpion/lib)
-    const workspaceRoot = path.resolve(process.cwd(), '../..');
-    const workflowsDir = path.join(workspaceRoot, 'workflows');
+    // Use SSD-aware workflow directory
+    const { getOptimalWorkflowDir } = await import('./storage/workflow-storage');
+    const workflowsDir = await getOptimalWorkflowDir();
     
-    // Check if directory exists before watching
-    const fs = require('fs');
-    if (!fs.existsSync(workflowsDir)) {
-      console.warn(`⚠️ Workflows directory not found: ${workflowsDir}. Creating it...`);
-      fs.mkdirSync(workflowsDir, { recursive: true });
+    // Use async fs - NEVER use existsSync!
+    const fs = await import('fs/promises');
+    try {
+      await fs.access(workflowsDir);
+    } catch {
+      // Directory doesn't exist, create it
+      await fs.mkdir(workflowsDir, { recursive: true });
     }
     
     console.log(`🦂 Watching workflow files in ${workflowsDir}...`);
@@ -119,15 +164,18 @@ function watchWorkflowFiles() {
       ignoreInitial: true
     });
 
-    // Debounce sync to avoid multiple syncs for rapid changes
+    // Debounce sync to avoid multiple syncs for rapid changes (optimized based on storage)
     let syncTimeout: NodeJS.Timeout | null = null;
-    const debouncedSync = () => {
+    const debouncedSync = async () => {
       if (syncTimeout) {
         clearTimeout(syncTimeout);
       }
+      // Get optimized debounce delay (shorter on SSD)
+      const { getFileWatcherDebounce } = await import('./storage/performance-optimizer');
+      const debounceDelay = await getFileWatcherDebounce();
       syncTimeout = setTimeout(() => {
         syncWorkflows();
-      }, 2000); // Wait 2 seconds after last change
+      }, debounceDelay);
     };
 
     workflowWatcher
@@ -243,14 +291,17 @@ async function checkN8nWorkflowChanges() {
   
   isSyncing = true;
   try {
-    const workspaceRoot = path.resolve(process.cwd(), '../..');
-    const workflowsDir = path.join(workspaceRoot, 'workflows', 'shared');
+    // Use SSD-aware workflow directory
+    const { getOptimalWorkflowDir } = await import('./storage/workflow-storage');
+    const baseWorkflowsDir = await getOptimalWorkflowDir();
+    const workflowsDir = path.join(baseWorkflowsDir, 'shared');
     
-    // Ensure workflows directory exists
-    const fs = require('fs');
-    if (!fs.existsSync(workflowsDir)) {
-      console.warn(`⚠️ Workflows directory not found: ${workflowsDir}. Creating it...`);
-      fs.mkdirSync(workflowsDir, { recursive: true });
+    // Use async fs - NEVER use existsSync!
+    const fs = await import('fs/promises');
+    try {
+      await fs.access(workflowsDir);
+    } catch {
+      await fs.mkdir(workflowsDir, { recursive: true });
     }
     
     const mcpClient = getMCPn8nClient();
@@ -306,15 +357,17 @@ async function checkN8nWorkflowChanges() {
       }
     }
     
-    // Export workflows in small batches (5 at a time) to avoid API hammering
+    // Export workflows in optimized batches (size based on storage type)
     if (workflowsToExport.length > 0) {
-      console.log(`📦 Exporting ${workflowsToExport.length} workflows in batches...`);
-      for (let i = 0; i < workflowsToExport.length; i += 5) {
-        const batch = workflowsToExport.slice(i, i + 5);
+      const batchSize = await getOptimizedBatchSize();
+      const batchDelay = await getOptimizedBatchDelay();
+      console.log(`📦 Exporting ${workflowsToExport.length} workflows in batches of ${batchSize}...`);
+      for (let i = 0; i < workflowsToExport.length; i += batchSize) {
+        const batch = workflowsToExport.slice(i, i + batchSize);
         await Promise.all(batch.map(w => exportWorkflowFromN8n(w, workflowsDir)));
-        // Small delay between batches to respect rate limits
-        if (i + 5 < workflowsToExport.length) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // 2s between batches
+        // Optimized delay between batches (shorter on SSD)
+        if (i + batchSize < workflowsToExport.length) {
+          await new Promise(resolve => setTimeout(resolve, batchDelay));
         }
       }
     }

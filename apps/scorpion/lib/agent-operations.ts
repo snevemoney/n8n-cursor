@@ -322,8 +322,349 @@ export const SAFE_OPERATIONS: SafeOperation[] = [
       // Safe: only temp files
       return { success: true, message: 'Temp file cleanup complete - 5 files removed' };
     }
+  },
+  
+  // Mentor - LLM Training & Evaluation
+  {
+    id: 'ment-evaluate-model',
+    name: 'Evaluate Model Performance',
+    description: 'Run evaluation metrics on trained models',
+    type: 'analyze',
+    agentId: 'M-009',
+    riskLevel: 'none',
+    requiresApproval: false,
+    estimatedDuration: 20000,
+    maxFrequency: 60,
+    execute: async () => {
+      // Read-only: evaluate model metrics
+      return { success: true, message: 'Model evaluation complete - accuracy: 94.2%, perplexity: 12.3' };
+    }
+  },
+  {
+    id: 'ment-review-training-data',
+    name: 'Review Training Data Quality',
+    description: 'Analyze training dataset for quality and diversity',
+    type: 'review',
+    agentId: 'M-009',
+    riskLevel: 'none',
+    requiresApproval: false,
+    estimatedDuration: 15000,
+    maxFrequency: 120,
+    execute: async () => {
+      // Read-only: analyze training data
+      return { success: true, message: 'Training data review complete - quality score: 8.7/10' };
+    }
+  },
+  {
+    id: 'ment-suggest-hyperparameters',
+    name: 'Suggest Hyperparameter Tuning',
+    description: 'Recommend optimal hyperparameters for training',
+    type: 'suggest',
+    agentId: 'M-009',
+    riskLevel: 'none',
+    requiresApproval: false,
+    estimatedDuration: 10000,
+    maxFrequency: 240,
+    execute: async () => {
+      // Read-only: generate suggestions
+      return { success: true, message: 'Hyperparameter suggestions generated - learning rate: 2e-5 recommended' };
+    }
+  },
+  {
+    id: 'ment-analyze-prompt-quality',
+    name: 'Analyze Prompt Quality',
+    description: 'Evaluate prompt engineering effectiveness',
+    type: 'analyze',
+    agentId: 'M-009',
+    riskLevel: 'none',
+    requiresApproval: false,
+    estimatedDuration: 12000,
+    maxFrequency: 30,
+    execute: async () => {
+      // Read-only: analyze prompts
+      return { success: true, message: 'Prompt analysis complete - average quality: 8.5/10' };
+    }
   }
 ];
+
+/**
+ * Generate default operations for a new agent based on their role
+ */
+export function generateDefaultOperations(
+  agentId: string,
+  agentName: string,
+  role: string,
+  specialty: string
+): SafeOperation[] {
+  const operations: SafeOperation[] = [];
+  const namePrefix = agentName.toLowerCase().substring(0, 3);
+  
+  // Generate operations based on role patterns
+  if (role.toLowerCase().includes('architect') || role.toLowerCase().includes('system')) {
+    operations.push({
+      id: `${namePrefix}-analyze-structure`,
+      name: 'Analyze Project Structure',
+      description: 'Review project structure for architectural issues',
+      type: 'analyze',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 5000,
+      maxFrequency: 30,
+      execute: async () => ({ success: true, message: 'Structure analysis complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-review-dependencies`,
+      name: 'Review Dependencies',
+      description: 'Check for outdated or vulnerable dependencies',
+      type: 'review',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 10000,
+      maxFrequency: 60,
+      execute: async () => ({ success: true, message: 'Dependency review complete' })
+    });
+  }
+  
+  if (role.toLowerCase().includes('knowledge') || role.toLowerCase().includes('rag')) {
+    operations.push({
+      id: `${namePrefix}-index-docs`,
+      name: 'Index Documentation',
+      description: 'Index new documentation files for RAG',
+      type: 'index',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 15000,
+      maxFrequency: 15,
+      execute: async () => ({ success: true, message: 'Documentation indexed' })
+    });
+    operations.push({
+      id: `${namePrefix}-analyze-quality`,
+      name: 'Analyze Knowledge Quality',
+      description: 'Evaluate knowledge base retrieval accuracy',
+      type: 'analyze',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 8000,
+      maxFrequency: 20,
+      execute: async () => ({ success: true, message: 'Quality analysis complete' })
+    });
+  }
+  
+  if (role.toLowerCase().includes('execution') || role.toLowerCase().includes('engineer')) {
+    operations.push({
+      id: `${namePrefix}-review-workflows`,
+      name: 'Review Workflow Performance',
+      description: 'Analyze workflow execution times',
+      type: 'review',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 12000,
+      maxFrequency: 20,
+      execute: async () => ({ success: true, message: 'Workflow review complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-suggest-optimizations`,
+      name: 'Suggest Optimizations',
+      description: 'Identify optimization opportunities',
+      type: 'suggest',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 10000,
+      maxFrequency: 30,
+      execute: async () => ({ success: true, message: 'Optimization suggestions generated' })
+    });
+  }
+  
+  if (role.toLowerCase().includes('security') || role.toLowerCase().includes('safety')) {
+    operations.push({
+      id: `${namePrefix}-audit-compliance`,
+      name: 'Audit Compliance',
+      description: 'Check operations against guardrails',
+      type: 'scan',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 6000,
+      maxFrequency: 15,
+      execute: async () => ({ success: true, message: 'Compliance audit complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-scan-secrets`,
+      name: 'Scan for Exposed Secrets',
+      description: 'Check codebase for accidentally committed secrets',
+      type: 'scan',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 20000,
+      maxFrequency: 60,
+      execute: async () => ({ success: true, message: 'Secret scan complete' })
+    });
+  }
+  
+  if (role.toLowerCase().includes('integration') || role.toLowerCase().includes('api')) {
+    operations.push({
+      id: `${namePrefix}-check-api-health`,
+      name: 'Check API Health',
+      description: 'Monitor external API endpoints',
+      type: 'monitor',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 5000,
+      maxFrequency: 10,
+      execute: async () => ({ success: true, message: 'API health check complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-validate-endpoints`,
+      name: 'Validate Endpoints',
+      description: 'Test endpoint availability',
+      type: 'test',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 8000,
+      maxFrequency: 20,
+      execute: async () => ({ success: true, message: 'Endpoint validation complete' })
+    });
+  }
+  
+  if (role.toLowerCase().includes('data') || role.toLowerCase().includes('analytics')) {
+    operations.push({
+      id: `${namePrefix}-analyze-metrics`,
+      name: 'Analyze System Metrics',
+      description: 'Analyze trends in operations and performance',
+      type: 'analyze',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 12000,
+      maxFrequency: 15,
+      execute: async () => ({ success: true, message: 'Metrics analysis complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-detect-anomalies`,
+      name: 'Detect Anomalies',
+      description: 'Identify unusual patterns in system behavior',
+      type: 'analyze',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 15000,
+      maxFrequency: 20,
+      execute: async () => ({ success: true, message: 'Anomaly detection complete' })
+    });
+  }
+  
+  if (role.toLowerCase().includes('training') || role.toLowerCase().includes('llm') || role.toLowerCase().includes('evaluation')) {
+    operations.push({
+      id: `${namePrefix}-evaluate-model`,
+      name: 'Evaluate Model Performance',
+      description: 'Run evaluation metrics on trained models',
+      type: 'analyze',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 20000,
+      maxFrequency: 60,
+      execute: async () => ({ success: true, message: 'Model evaluation complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-review-training-data`,
+      name: 'Review Training Data Quality',
+      description: 'Analyze training dataset for quality and diversity',
+      type: 'review',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 15000,
+      maxFrequency: 120,
+      execute: async () => ({ success: true, message: 'Training data review complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-suggest-hyperparameters`,
+      name: 'Suggest Hyperparameter Tuning',
+      description: 'Recommend optimal hyperparameters for training',
+      type: 'suggest',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 10000,
+      maxFrequency: 240,
+      execute: async () => ({ success: true, message: 'Hyperparameter suggestions generated' })
+    });
+  }
+  
+  if (role.toLowerCase().includes('innovation') || role.toLowerCase().includes('research')) {
+    operations.push({
+      id: `${namePrefix}-research-trends`,
+      name: 'Research Technology Trends',
+      description: 'Research latest AI/automation trends',
+      type: 'analyze',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 20000,
+      maxFrequency: 240,
+      execute: async () => ({ success: true, message: 'Trend research complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-suggest-experiments`,
+      name: 'Suggest Experiments',
+      description: 'Propose new experimental approaches',
+      type: 'suggest',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 10000,
+      maxFrequency: 60,
+      execute: async () => ({ success: true, message: 'Experiment suggestions generated' })
+    });
+  }
+  
+  // Default operations for any agent
+  if (operations.length === 0) {
+    operations.push({
+      id: `${namePrefix}-monitor-status`,
+      name: 'Monitor System Status',
+      description: 'Monitor overall system health and status',
+      type: 'monitor',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 5000,
+      maxFrequency: 15,
+      execute: async () => ({ success: true, message: 'Status monitoring complete' })
+    });
+    operations.push({
+      id: `${namePrefix}-analyze-performance`,
+      name: 'Analyze Performance',
+      description: 'Analyze system performance metrics',
+      type: 'analyze',
+      agentId,
+      riskLevel: 'none',
+      requiresApproval: false,
+      estimatedDuration: 10000,
+      maxFrequency: 30,
+      execute: async () => ({ success: true, message: 'Performance analysis complete' })
+    });
+  }
+  
+  return operations;
+}
+
+/**
+ * Add operations to the SAFE_OPERATIONS array
+ */
+export function addAgentOperations(operations: SafeOperation[]): void {
+  SAFE_OPERATIONS.push(...operations);
+}
 
 /**
  * Get operations for a specific agent

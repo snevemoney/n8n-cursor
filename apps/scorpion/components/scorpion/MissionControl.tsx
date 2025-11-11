@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Play, CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
 
 interface Operation {
@@ -27,14 +27,24 @@ interface MissionControlProps {
   onMissionExecuted?: () => void;
 }
 
-export function MissionControl({ agentId, agentName, onMissionExecuted }: MissionControlProps) {
+export const MissionControl = memo(function MissionControl({ agentId, agentName, onMissionExecuted }: MissionControlProps) {
   const [operations, setOperations] = useState<Operation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start false so component renders immediately
   const [executing, setExecuting] = useState<Set<string>>(new Set());
   const [results, setResults] = useState<Map<string, { success: boolean; message: string }>>(new Map());
 
   useEffect(() => {
-    loadOperations();
+    // Defer data fetch to avoid blocking render
+    const loadData = () => {
+      loadOperations();
+    };
+    
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(loadData, { timeout: 0 }); // Immediate - no delay
+    } else {
+      setTimeout(loadData, 0); // Immediate fallback
+    }
+    
     // Refresh every 5 seconds to update status
     const interval = setInterval(loadOperations, 5000);
     return () => clearInterval(interval);
@@ -44,7 +54,9 @@ export function MissionControl({ agentId, agentName, onMissionExecuted }: Missio
     try {
       const response = await fetch(`/api/agents/operations?agentId=${agentId}`);
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        // Handle wrapped response structure: { success: true, data: { operations: [...] } }
+        const data = result.success && result.data ? result.data : result;
         setOperations(data.operations || []);
       }
     } catch (error) {
@@ -155,22 +167,18 @@ export function MissionControl({ agentId, agentName, onMissionExecuted }: Missio
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-8 text-white/40">
-        <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
-        Loading missions...
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-3">
       <div className="text-xs text-white/40 mb-2">
         Available missions for <span className="text-white/60 font-medium">{agentName}</span>
       </div>
       
-      {operations.length === 0 ? (
+      {loading && operations.length === 0 ? (
+        <div className="text-center py-8 text-white/40">
+          <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
+          Loading missions...
+        </div>
+      ) : operations.length === 0 ? (
         <div className="text-center py-8 text-white/40 text-sm">
           No missions available
         </div>
@@ -267,5 +275,5 @@ export function MissionControl({ agentId, agentName, onMissionExecuted }: Missio
       )}
     </div>
   );
-}
+});
 

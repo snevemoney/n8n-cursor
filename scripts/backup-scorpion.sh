@@ -3,13 +3,42 @@ set -euo pipefail
 
 # Scorpion Data Backup Script
 # Backs up all Scorpion persistent data (RAG, Ontology, Training Data, Mistakes)
+# Now supports SSD auto-detection
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SCORPION_DATA_DIR="$WORKSPACE_ROOT/apps/scorpion/data/scorpion"
 BACKUP_ROOT="$WORKSPACE_ROOT/backups/scorpion"
 TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
 BACKUP_DIR="$BACKUP_ROOT/scorpion-backup-$TIMESTAMP"
+
+# Detect actual data directory (SSD-aware)
+SCORPION_DATA_DIR=""
+
+# Check for manual override
+if [ -n "${SCORPION_SSD_PATH:-}" ] && [ -d "${SCORPION_SSD_PATH}/scorpion-data" ]; then
+    SCORPION_DATA_DIR="${SCORPION_SSD_PATH}/scorpion-data"
+    echo "📀 Using manual SSD path: $SCORPION_DATA_DIR"
+# Check for SSD at /Volumes/SSD
+elif [ -d "/Volumes/SSD/scorpion-data" ]; then
+    SCORPION_DATA_DIR="/Volumes/SSD/scorpion-data"
+    echo "📀 Using detected SSD: $SCORPION_DATA_DIR"
+# Check for other external drives
+else
+    # Check all volumes for scorpion-data
+    for volume in /Volumes/*; do
+        if [ -d "${volume}/scorpion-data" ] && [ "${volume}" != "/Volumes/Macintosh HD" ]; then
+            SCORPION_DATA_DIR="${volume}/scorpion-data"
+            echo "📀 Using external drive: $SCORPION_DATA_DIR"
+            break
+        fi
+    done
+fi
+
+# Fallback to default location
+if [ -z "$SCORPION_DATA_DIR" ]; then
+    SCORPION_DATA_DIR="$WORKSPACE_ROOT/apps/scorpion/data/scorpion"
+    echo "💾 Using default location: $SCORPION_DATA_DIR"
+fi
 
 echo "🦂 SCORPION DATA BACKUP"
 echo "======================"

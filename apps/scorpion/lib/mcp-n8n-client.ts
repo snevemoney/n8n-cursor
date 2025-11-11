@@ -21,17 +21,16 @@ export class MCPn8nClient {
   private circuitBreakerResetTime: number = 0;
   private maxFailures: number = 10;
   private circuitBreakerTimeout: number = 60000; // 1 minute
-  
+  private startupGracePeriod: number = 10000; // 10 seconds grace period on startup
+  private initializedAt: number = Date.now();
+
   constructor() {
+    // Standardize on N8N_API_URL, with fallback to N8N_BASE_URL for backward compatibility
     let baseUrl = process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'https://n8ncloud.tech';
     
     // Ensure baseUrl includes /api/v1 for n8n API endpoints
-    // If N8N_API_URL already includes /api/v1, use it as-is
-    // Otherwise, append /api/v1 if it's not already there
     if (!baseUrl.includes('/api/v1')) {
-      // Remove trailing slash if present
       baseUrl = baseUrl.replace(/\/$/, '');
-      // Append /api/v1
       baseUrl = `${baseUrl}/api/v1`;
     }
     
@@ -39,27 +38,87 @@ export class MCPn8nClient {
     // Trim whitespace that can cause auth failures
     this.apiKey = (process.env.N8N_API_KEY || '').trim();
     
+    // VALIDATE API KEY - Detect placeholder values
+    const placeholderPatterns = [
+      'your-api-key',
+      'your_n8n_api_key',
+      'your-actual-n8n-api-key',
+      'your_production_n8n_api_key',
+      'your-api-key-here',
+      'NOT SET'
+    ];
+    
+    const isPlaceholder = placeholderPatterns.some(pattern => 
+      this.apiKey.toLowerCase().includes(pattern.toLowerCase())
+    );
+    
+    // JWT tokens are typically 200+ characters, placeholders are < 50
+    const isValidFormat = this.apiKey.length > 100 && this.apiKey.includes('.');
+    
+    if (!this.apiKey) {
+      console.error('❌❌❌ N8N_API_KEY is NOT SET!');
+      console.error('   Set it in apps/scorpion/.env.local:');
+      console.error('   N8N_API_KEY=your_actual_api_key_here');
+    } else if (isPlaceholder || !isValidFormat) {
+      console.error('❌❌❌ INVALID N8N_API_KEY DETECTED!');
+      console.error(`   Current value looks like a placeholder (length: ${this.apiKey.length})`);
+      console.error(`   Preview: ${this.apiKey.substring(0, 20)}...`);
+      console.error('   Update apps/scorpion/.env.local with your real API key from n8ncloud.tech');
+      console.error('   Then restart the server.');
+      // Don't set apiKey to empty - keep it so we can show the error
+    }
+    
     // Debug logging
     console.log('🔍 Scorpion n8n Client Init:', {
       baseUrl: this.baseUrl,
-      hasApiKey: !!this.apiKey,
+      hasApiKey: !!this.apiKey && !isPlaceholder && isValidFormat,
       apiKeyLength: this.apiKey.length,
-      apiKeyStart: this.apiKey.substring(0, 15) + '...',
-      apiKeyEnd: '...' + this.apiKey.substring(this.apiKey.length - 15),
+      isValidFormat,
+      isPlaceholder,
       envVarExists: !!process.env.N8N_API_KEY,
       envVarLength: process.env.N8N_API_KEY?.length || 0
     });
     
-    if (!this.apiKey) {
-      console.warn('⚠️ N8N_API_KEY not set - n8n operations will be disabled');
-    }
+    // ALWAYS reset circuit breaker on init - never block on startup
+    this.circuitBreakerOpen = false;
+    this.failureCount = 0;
+    
+    this.initializedAt = Date.now();
   }
 
   /**
-   * Check if n8n is configured
+   * Check if n8n is configured with a VALID API key
    */
   isConfigured(): boolean {
-    return !!this.apiKey;
+    if (!this.apiKey) return false;
+    // Reject placeholder values
+    const placeholderPatterns = ['your-api-key', 'your_n8n_api_key', 'your-actual-n8n-api-key'];
+    const isPlaceholder = placeholderPatterns.some(p => this.apiKey.toLowerCase().includes(p.toLowerCase()));
+    const isValidFormat = this.apiKey.length > 100 && this.apiKey.includes('.');
+    return !isPlaceholder && isValidFormat;
+  }
+
+  /**
+   * Get circuit breaker status (for debugging)
+   */
+  getCircuitBreakerStatus(): {
+    open: boolean;
+    failureCount: number;
+    resetTime: number | null;
+    timeUntilReset: number | null;
+    initializedAt: number;
+    timeSinceInit: number;
+  } {
+    return {
+      open: this.circuitBreakerOpen,
+      failureCount: this.failureCount,
+      resetTime: this.circuitBreakerResetTime || null,
+      timeUntilReset: this.circuitBreakerOpen && this.circuitBreakerResetTime 
+        ? Math.max(0, this.circuitBreakerResetTime - Date.now())
+        : null,
+      initializedAt: this.initializedAt,
+      timeSinceInit: Date.now() - this.initializedAt
+    };
   }
 
   /**
@@ -91,15 +150,39 @@ export class MCPn8nClient {
   }
 
   /**
+   * Reset the circuit breaker manually
+   */
+  resetCircuitBreaker(): void {
+    this.circuitBreakerOpen = false;
+    this.failureCount = 0;
+    this.circuitBreakerResetTime = 0;
+    console.log('✅ Circuit breaker manually reset');
+  }
+
+  /**
    * Make a request to n8n API (with queueing and circuit breaker)
    */
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
     if (!this.isConfigured()) {
-      throw new Error('n8n client not configured - missing API key');
+      const errorMsg = !this.apiKey 
+        ? 'N8N_API_KEY is not set. Add it to apps/scorpion/.env.local'
+        : 'N8N_API_KEY appears to be a placeholder. Update apps/scorpion/.env.local with your real API key';
+      throw new Error(`n8n client not configured - ${errorMsg}`);
     }
 
-    // Check circuit breaker
-    if (this.circuitBreakerOpen) {
+    // NEVER block on startup - always allow requests through for first 30 seconds
+    const timeSinceInit = Date.now() - this.initializedAt;
+    const startupPeriod = 30000; // 30 seconds
+    
+    if (this.circuitBreakerOpen && timeSinceInit < startupPeriod) {
+      // Force reset during startup period
+      console.log('🔄 Resetting circuit breaker during startup period');
+      this.circuitBreakerOpen = false;
+      this.failureCount = 0;
+    }
+
+    // Check circuit breaker (only after startup period)
+    if (this.circuitBreakerOpen && timeSinceInit >= startupPeriod) {
       if (Date.now() < this.circuitBreakerResetTime) {
         throw new Error('Circuit breaker open - n8n API temporarily disabled');
       } else {
@@ -121,15 +204,17 @@ export class MCPn8nClient {
             'Content-Type': 'application/json',
             ...options.headers
           },
-          signal: AbortSignal.timeout(30000) // Increased to 30 seconds
+          signal: AbortSignal.timeout(30000)
         });
 
         if (!response.ok) {
-          // Throttle auth error logging
+          // Better error messages
           if (response.status === 401 || response.status === 403) {
             const now = Date.now();
             if (now - this.lastAuthError > this.authErrorThrottle) {
-              console.error(`❌ n8n authentication failed - check N8N_API_KEY`);
+              console.error('❌ n8n authentication failed (401/403)');
+              console.error('   Check that N8N_API_KEY in apps/scorpion/.env.local is correct');
+              console.error('   Get your API key from: https://n8ncloud.tech/settings/api');
               this.lastAuthError = now;
             }
           } else {
@@ -149,13 +234,20 @@ export class MCPn8nClient {
         return result;
       } catch (error: any) {
         // Track failures for circuit breaker
-        this.failureCount++;
+        const isInGracePeriod = (Date.now() - this.initializedAt) < this.startupGracePeriod;
         
-        // Open circuit breaker if too many failures
-        if (this.failureCount >= this.maxFailures) {
-          this.circuitBreakerOpen = true;
-          this.circuitBreakerResetTime = Date.now() + this.circuitBreakerTimeout;
-          console.error(`🚨 Circuit breaker OPEN - too many n8n API failures (${this.failureCount}). Pausing for ${this.circuitBreakerTimeout/1000}s`);
+        // Don't count failures during startup grace period
+        if (!isInGracePeriod) {
+          this.failureCount++;
+          
+          // Open circuit breaker if too many failures (but only after startup period)
+          if (this.failureCount >= this.maxFailures) {
+            this.circuitBreakerOpen = true;
+            this.circuitBreakerResetTime = Date.now() + this.circuitBreakerTimeout;
+            console.error(`🚨 Circuit breaker OPEN - too many n8n API failures (${this.failureCount}). Pausing for ${this.circuitBreakerTimeout/1000}s`);
+          }
+        } else {
+          console.log(`⚠️ Failure during startup grace period (not counted): ${error.message}`);
         }
         
         // Only log non-auth errors in detail
@@ -177,7 +269,6 @@ export class MCPn8nClient {
     tags?: string[] 
   } = {}): Promise<any[]> {
     const queryParams = new URLSearchParams();
-    // Default to n8n's max limit of 250
     const limit = options.limit || 250;
     queryParams.append('limit', limit.toString());
     if (options.offset) queryParams.append('offset', options.offset.toString());
@@ -293,6 +384,75 @@ export class MCPn8nClient {
    */
   async exportWorkflow(id: string): Promise<any | null> {
     return this.getWorkflow(id);
+  }
+
+  /**
+   * List executions (completed and running)
+   */
+  async listExecutions(options: {
+    limit?: number;
+    workflowId?: string;
+    status?: 'waiting' | 'error' | 'success' | 'running';
+    includeData?: boolean;
+  } = {}): Promise<any[]> {
+    try {
+      const queryParams = new URLSearchParams();
+      const limit = options.limit || 50;
+      queryParams.append('limit', limit.toString());
+      if (options.workflowId) queryParams.append('workflowId', options.workflowId);
+      if (options.status) queryParams.append('status', options.status);
+      if (options.includeData !== undefined) queryParams.append('includeData', options.includeData.toString());
+      
+      const endpoint = `/executions${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await this.request(endpoint);
+      
+      // n8n API returns { data: [...executions] }
+      const executions = response.data || [];
+      
+      if (Array.isArray(executions)) {
+        return executions;
+      }
+      
+      console.warn('n8n returned non-array executions:', response);
+      return [];
+    } catch (error) {
+      console.error('listExecutions error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get active (running) executions
+   */
+  async getActiveExecutions(workflowId?: string): Promise<any[]> {
+    try {
+      return await this.listExecutions({
+        status: 'running',
+        limit: 100,
+        workflowId,
+        includeData: false
+      });
+    } catch (error) {
+      console.error('getActiveExecutions error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get completed executions (successful)
+   */
+  async getCompletedExecutions(limit: number = 100, workflowId?: string): Promise<any[]> {
+    try {
+      return await this.listExecutions({
+        status: 'success',
+        limit,
+        workflowId,
+        includeData: false
+      });
+    } catch (error) {
+      console.error('getCompletedExecutions error:', error);
+      return [];
+    }
   }
 }
 

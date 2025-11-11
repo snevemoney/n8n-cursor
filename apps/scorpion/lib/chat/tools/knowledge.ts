@@ -23,7 +23,7 @@ export async function handler(args: z.infer<typeof schema>) {
         title: r.title,
         url: `/knowledge?id=${r.id}`,
         spans: [{ text: r.description.slice(0, 200) }],
-        relevance: r.similarity,
+        relevance: (r as any).similarity || 0.5, // Use actual similarity score from RAG store
       })),
     };
   } catch (error: any) {

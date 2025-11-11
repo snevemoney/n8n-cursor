@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { X, ExternalLink, Play, Pause, Code } from 'lucide-react';
+import { X, ExternalLink, Play, Pause, Code, Zap, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import ReactFlow, {
   Node,
   Edge,
@@ -50,11 +50,22 @@ const getNodeColor = (type: string) => {
   return '#8c564b';
 };
 
+interface NodeExecutionState {
+  nodeId: string;
+  status: 'pending' | 'running' | 'success' | 'failed';
+  startTime?: number;
+  endTime?: number;
+  error?: string;
+}
+
 export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [fullWorkflow, setFullWorkflow] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [simulationMode, setSimulationMode] = useState(false);
+  const [executionStates, setExecutionStates] = useState<Record<string, NodeExecutionState>>({});
+  const [isSimulating, setIsSimulating] = useState(false);
 
   // Fetch full workflow details from n8n when component mounts
   useEffect(() => {
@@ -100,6 +111,81 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
 
   // Use fullWorkflow if available, otherwise use original workflow
   const displayWorkflow = fullWorkflow || workflow;
+
+  // Load execution states if workflow has n8nId
+  useEffect(() => {
+    if (displayWorkflow.n8nId || displayWorkflow.id) {
+      loadExecutionStates();
+    }
+  }, [displayWorkflow]);
+
+  const loadExecutionStates = async () => {
+    try {
+      const workflowId = displayWorkflow.n8nId || displayWorkflow.id;
+      const response = await fetch(`/api/workflows/${workflowId}/executions`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          // Convert execution data to node states
+          const states: Record<string, NodeExecutionState> = {};
+          result.data.nodes?.forEach((nodeExec: any) => {
+            states[nodeExec.nodeId] = {
+              nodeId: nodeExec.nodeId,
+              status: nodeExec.status,
+              startTime: nodeExec.startTime,
+              endTime: nodeExec.endTime,
+              error: nodeExec.error,
+            };
+          });
+          setExecutionStates(states);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load execution states:', error);
+    }
+  };
+
+  const simulateWorkflow = async () => {
+    if (!displayWorkflow.n8nId && !displayWorkflow.id) return;
+    
+    setIsSimulating(true);
+    setExecutionStates({});
+    
+    // Simulate execution by updating node states sequentially
+    const nodes = Array.isArray(displayWorkflow.nodes) ? displayWorkflow.nodes : [];
+    const nodeIds = nodes.map((n: any) => n.id || n.name);
+    
+    for (let i = 0; i < nodeIds.length; i++) {
+      const nodeId = nodeIds[i];
+      // Set node to running
+      setExecutionStates(prev => ({
+        ...prev,
+        [nodeId]: {
+          nodeId,
+          status: 'running',
+          startTime: Date.now(),
+        },
+      }));
+      
+      // Immediate state update without artificial delay
+      // Set node to success (or failed randomly)
+      const success = Math.random() > 0.1; // 90% success rate
+      setExecutionStates(prev => ({
+        ...prev,
+        [nodeId]: {
+          ...prev[nodeId],
+          status: success ? 'success' : 'failed',
+          endTime: Date.now(),
+          error: success ? undefined : 'Simulated error',
+        },
+      }));
+      
+      // Use requestAnimationFrame for smooth updates without blocking
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    
+    setIsSimulating(false);
+  };
 
   // Convert n8n workflow to ReactFlow format
   const { reactFlowNodes, reactFlowEdges } = useMemo(() => {
@@ -147,10 +233,29 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
           )
         );
       
-      // Build node label
+      // Get execution state for this node
+      const execState = executionStates[nodeId];
+      const nodeStatus = execState?.status || 'pending';
+      
+      // Build node label with execution status
       const nodeLabel = (
         <div className="px-3 py-2">
-          <div className="font-semibold text-sm text-white">{nodeName}</div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="font-semibold text-sm text-white">{nodeName}</div>
+            {execState && (
+              <div className={`flex items-center gap-1 ${
+                nodeStatus === 'success' ? 'text-emerald-400' :
+                nodeStatus === 'failed' ? 'text-red-400' :
+                nodeStatus === 'running' ? 'text-yellow-400' :
+                'text-white/40'
+              }`}>
+                {nodeStatus === 'success' && <CheckCircle2 className="w-3 h-3" />}
+                {nodeStatus === 'failed' && <XCircle className="w-3 h-3" />}
+                {nodeStatus === 'running' && <Clock className="w-3 h-3 animate-spin" />}
+                {nodeStatus === 'pending' && <Clock className="w-3 h-3" />}
+              </div>
+            )}
+          </div>
           <div className="text-xs text-white/60 mt-0.5">
             {nodeType.replace('n8n-nodes-base.', '').replace('@n8n/n8n-nodes-langchain.', '')}
           </div>
@@ -160,6 +265,11 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span>
                 <span>Chat Model • Memory • Tools</span>
               </div>
+            </div>
+          )}
+          {execState && execState.error && (
+            <div className="mt-2 pt-2 border-t border-red-500/30">
+              <div className="text-xs text-red-400">{execState.error}</div>
             </div>
           )}
         </div>
@@ -181,12 +291,22 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
           isAISubComponent,
         },
         style: {
-          background: getNodeColor(nodeType),
+          background: execState 
+            ? (nodeStatus === 'success' ? '#10b981' :
+               nodeStatus === 'failed' ? '#ef4444' :
+               nodeStatus === 'running' ? '#f59e0b' :
+               getNodeColor(nodeType))
+            : getNodeColor(nodeType),
           color: '#fff',
-          border: selectedNode?.id === nodeId ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.2)',
+          border: selectedNode?.id === nodeId 
+            ? '2px solid #3b82f6' 
+            : execState && nodeStatus === 'running'
+            ? '2px solid #f59e0b'
+            : '1px solid rgba(255,255,255,0.2)',
           borderRadius,
           minWidth: 150,
           fontSize: 12,
+          opacity: execState && nodeStatus === 'pending' ? 0.6 : 1,
         },
         // Main flow connections from sides (for regular nodes)
         // AI sub-components will connect from top/bottom
@@ -326,7 +446,7 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
     );
 
     return { reactFlowNodes: nodes, reactFlowEdges: uniqueEdges };
-  }, [displayWorkflow, selectedNode]);
+  }, [displayWorkflow, selectedNode, executionStates]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(reactFlowNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(reactFlowEdges);
@@ -379,6 +499,29 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSimulationMode(!simulationMode)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+                simulationMode
+                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                  : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
+              }`}
+              title="Toggle simulation mode"
+            >
+              <Zap className="w-4 h-4" />
+              Simulation
+            </button>
+            {simulationMode && (
+              <button
+                onClick={simulateWorkflow}
+                disabled={isSimulating}
+                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors text-sm disabled:opacity-50"
+                title="Run simulation"
+              >
+                <Play className="w-4 h-4" />
+                {isSimulating ? 'Simulating...' : 'Run Simulation'}
+              </button>
+            )}
             <button
               onClick={() => setShowRaw(!showRaw)}
               className="p-2 hover:bg-white/5 rounded transition-colors"
@@ -450,8 +593,26 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
                   maskColor="rgba(0, 0, 0, 0.6)"
                 />
                 <Panel position="top-left" className="text-xs text-white/60 bg-[#1a1a1a]/80 px-3 py-1.5 rounded border border-white/10">
-                  {reactFlowNodes.length} nodes • {reactFlowEdges.length} connections • Read-only
+                  {reactFlowNodes.length} nodes • {reactFlowEdges.length} connections • {simulationMode ? 'Simulation Mode' : 'Read-only'}
                 </Panel>
+                {simulationMode && Object.keys(executionStates).length > 0 && (
+                  <Panel position="top-right" className="text-xs text-white/60 bg-[#1a1a1a]/80 px-3 py-1.5 rounded border border-white/10">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                        <span>Running: {Object.values(executionStates).filter(s => s.status === 'running').length}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                        <span>Success: {Object.values(executionStates).filter(s => s.status === 'success').length}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-red-400"></div>
+                        <span>Failed: {Object.values(executionStates).filter(s => s.status === 'failed').length}</span>
+                      </div>
+                    </div>
+                  </Panel>
+                )}
               </ReactFlow>
             )}
           </div>

@@ -41,6 +41,12 @@ logs/
 apps/scorpion/data/
 **/data/scorpion/*.json
 
+# Scorpion backups (large files)
+apps/scorpion/backups/
+**/backups/
+
 # Audit outputs (large files)
 apps/scorpion/audit/out/
 *.har
+.env.bak
+apps/scorpion/.env.local.bak

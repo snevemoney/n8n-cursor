@@ -18,6 +18,18 @@ module.exports = {
         '2xl': '6rem',
       },
     },
+    screens: {
+      // Explicit pixel-based breakpoints
+      'phone': { 'max': '767px' },      // Phone: ≤767px
+      'tablet': { 'min': '768px', 'max': '1279px' }, // Tablet: 768px-1279px
+      'desktop': { 'min': '1280px' },   // Desktop: ≥1280px
+      // Keep Tailwind defaults for backward compatibility
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],

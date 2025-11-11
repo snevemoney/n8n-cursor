@@ -2,162 +2,273 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, useTransition } from 'react';
 import { ErrorBoundary } from '@/components/scorpion/ErrorBoundary';
 import { ToastProvider } from '@/components/scorpion';
+import { StorageModeIndicator } from '@/components/scorpion/StorageModeIndicator';
+import { NavLink } from '@/components/navigation/nav-link';
+import { BreadcrumbNav } from '@/components/navigation/breadcrumb-nav';
 import { 
   Home,
-  Activity, 
+  LayoutDashboard,
+  FolderKanban,
+  Settings2,
   Workflow, 
-  Sparkles, 
+  Hammer,
   Database, 
+  BookOpen,
+  Network,
+  Search,
+  Camera,
   Users, 
   Bot, 
-  FileText, 
-  Settings,
-  Bell,
-  Search,
   MessageSquare,
+  Brain,
+  Sparkles,
+  BarChart3,
   Eye,
   ShoppingCart,
+  Bell,
+  FileText, 
+  Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  List,
+  Plus,
+  type LucideIcon
 } from 'lucide-react';
 
+interface NavSection {
+  title: string;
+  items: Array<{
+    href: string;
+    label: string;
+    icon: LucideIcon;
+  }>;
+}
+
+const navigationSections: NavSection[] = [
+  {
+    title: 'Overview',
+    items: [
+      { href: '/', label: 'Home', icon: Home },
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: 'Project & Operations',
+    items: [
+      { href: '/project', label: 'Project', icon: FolderKanban },
+      { href: '/ops', label: 'Operations', icon: Network },
+    ],
+  },
+  {
+    title: 'Automation',
+    items: [
+      { href: '/workflows', label: 'Workflows', icon: Workflow },
+      { href: '/build', label: 'Build', icon: Hammer },
+    ],
+  },
+  {
+    title: 'Knowledge & Research',
+    items: [
+      { href: '/knowledge', label: 'Knowledge', icon: BookOpen },
+      { href: '/ontology', label: 'Ontology', icon: Database },
+      { href: '/research', label: 'Research', icon: Search },
+    ],
+  },
+  {
+    title: 'AI & Agents',
+    items: [
+      { href: '/council', label: 'Council', icon: Users },
+      { href: '/agents', label: 'Agents', icon: Bot },
+      { href: '/agents/specialized', label: 'Specialized', icon: Sparkles },
+      { href: '/agents/create', label: 'Create Agent', icon: Plus },
+      { href: '/chat', label: 'Chat', icon: MessageSquare },
+      { href: '/llm/experiments', label: 'LLM Experiments', icon: Brain },
+      { href: '/llm/models', label: 'LLM Models', icon: List },
+      { href: '/llm/prompts', label: 'LLM Prompts', icon: FileText },
+    ],
+  },
+  {
+    title: 'Monitoring & Business',
+    items: [
+      { href: '/observability', label: 'Observability', icon: Eye },
+      { href: '/selling', label: 'Selling', icon: ShoppingCart },
+    ],
+  },
+  {
+    title: 'System',
+    items: [
+      { href: '/notifications', label: 'Notifications', icon: Bell },
+      { href: '/settings', label: 'Settings', icon: Settings },
+    ],
+  },
+];
+
+// Throttle function for resize events
+function throttle<T extends (...args: any[]) => void>(func: T, wait: number): T {
+  let timeout: NodeJS.Timeout | null = null;
+  let previous = 0;
+  return ((...args: Parameters<T>) => {
+    const now = Date.now();
+    const remaining = wait - (now - previous);
+    if (remaining <= 0 || remaining > wait) {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      previous = now;
+      func(...args);
+    } else if (!timeout) {
+      timeout = setTimeout(() => {
+        previous = Date.now();
+        timeout = null;
+        func(...args);
+      }, remaining);
+    }
+  }) as T;
+}
+
+// Debounce function for localStorage writes
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T {
+  let timeout: NodeJS.Timeout | null = null;
+  return ((...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  }) as T;
+}
+
+// SIMPLIFIED LAYOUT - Remove most hooks
 export default function ScorpionLayout({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
 
-  // All hooks must be called before any conditional returns (Rules of Hooks)
+  // Load sidebar state from localStorage on mount and set mounted flag
   useEffect(() => {
     setMounted(true);
-    // Restore sidebar state from localStorage (only on client)
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('scorpion-sidebar-open');
-      if (saved !== null) {
-        setSidebarOpen(saved === 'true');
+    const saved = localStorage.getItem('scorpion-sidebar-open');
+    if (saved === 'true') {
+      setSidebarOpen(true);
+    } else {
+      // Default to open on desktop, closed on mobile
+      if (typeof window !== 'undefined') {
+        const isDesktop = window.innerWidth >= 768;
+        setSidebarOpen(isDesktop);
       }
     }
   }, []);
 
+  // Close sidebar when clicking outside on mobile
   useEffect(() => {
-    // Save sidebar state to localStorage (only on client)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('scorpion-sidebar-open', String(sidebarOpen));
-    }
+    if (!sidebarOpen) return;
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (window.innerWidth < 768 && !target.closest('aside') && !target.closest('button[aria-label*="sidebar"]')) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [sidebarOpen]);
 
-  // Return same loading state on both server and client to prevent hydration mismatch
-  // Don't render anything until mounted to prevent hydration errors
-  if (typeof window === 'undefined' || !mounted) {
-    return (
-      <div className="h-screen bg-[#0a0d10] flex items-center justify-center">
-        <div className="text-sm text-white/40">Loading...</div>
-      </div>
-    );
-  }
-
-  const navItems = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/dashboard', label: 'Dashboard', icon: Activity },
-    { href: '/project', label: 'Project', icon: Activity },
-    { href: '/ops', label: 'Operations', icon: Activity },
-    { href: '/workflows', label: 'Workflows', icon: Workflow },
-    { href: '/build', label: 'Build', icon: Sparkles },
-    { href: '/knowledge', label: 'Knowledge', icon: Database },
-    { href: '/research', label: 'Research', icon: Search },
-    { href: '/council', label: 'Council', icon: Users },
-    { href: '/agents', label: 'Agents', icon: Bot },
-    { href: '/chat', label: 'Chat AGI', icon: MessageSquare, badge: 'New' },
-    { href: '/observability', label: 'Observability', icon: Eye, badge: 'Live' },
-    { href: '/selling', label: 'Selling', icon: ShoppingCart },
-    { href: '/notifications', label: 'Notifications', icon: Bell },
-    { href: '/logs', label: 'System Logs', icon: FileText },
-    { href: '/settings', label: 'Settings', icon: Settings },
-  ];
+  const toggleSidebar = () => {
+    setSidebarOpen(prev => {
+      const newState = !prev;
+      localStorage.setItem('scorpion-sidebar-open', String(newState));
+      return newState;
+    });
+  };
 
   return (
     <ToastProvider>
-      <div className="flex h-screen bg-[#0a0d10] text-[#e4e8ee]">
-        {/* Sidebar Toggle Button */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`fixed left-0 top-16 z-50 p-2 bg-[#0c1014]/90 backdrop-blur border-r border-b border-white/5 transition-all duration-300 ${
-            sidebarOpen ? 'translate-x-56' : 'translate-x-0'
-          } hover:bg-white/5`}
-          aria-label="Toggle sidebar"
-        >
-          {sidebarOpen ? (
-            <ChevronLeft className="h-4 w-4 text-white/60" />
-          ) : (
-            <ChevronRight className="h-4 w-4 text-white/60" />
-          )}
-        </button>
+      <div className="flex h-screen overflow-hidden">
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 z-40 md:hidden"
+            onClick={toggleSidebar}
+            aria-hidden="true"
+          />
+        )}
 
-        {/* Left Rail */}
-        <aside className={`border-r border-white/5 bg-[#0c1014]/80 backdrop-blur flex flex-col shrink-0 transition-all duration-300 ${
-          sidebarOpen ? 'w-56' : 'w-0 overflow-hidden'
-        }`}>
-          <div className={`h-12 flex items-center px-4 border-b border-white/5 transition-opacity ${
-            sidebarOpen ? 'opacity-100' : 'opacity-0'
-          }`}>
-            <div className="text-[10px] tracking-[0.4em] uppercase font-semibold">SCORPION</div>
+        {/* Sidebar */}
+        <aside
+          className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#0f1318] border-r border-white/10 flex flex-col transition-transform duration-200 ease-out ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
+        >
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <div className="text-emerald-400 font-bold text-lg">🦂</div>
+              <span className="text-sm font-semibold text-white">SCORPION</span>
+            </div>
+            {mounted && (
+              <button
+                onClick={toggleSidebar}
+                className="md:hidden p-1.5 hover:bg-white/10 rounded transition-colors"
+                aria-label="Toggle sidebar"
+              >
+                <ChevronLeft className="w-4 h-4 text-white/70" />
+              </button>
+            )}
           </div>
-          <nav className={`flex-1 px-2 py-4 space-y-1 overflow-y-auto transition-opacity ${
-            sidebarOpen ? 'opacity-100' : 'opacity-0'
-          }`}>
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = item.href === '/' 
-                ? pathname === '/' 
-                : pathname === item.href || (pathname?.startsWith(item.href + '/') && item.href !== '/');
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded-sm text-[13px] transition-colors relative ${
-                    isActive
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/70 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {item.label}
-                  {'badge' in item && (
-                    <span className="ml-auto px-1.5 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto py-4 px-2">
+            {navigationSections.map((section, sectionIdx) => (
+              <div key={section.title} className={sectionIdx > 0 ? 'mt-6' : ''}>
+                <div className="px-2 mb-2">
+                  <span className="sc-title text-[10px] text-white/40">{section.title}</span>
+                </div>
+                <div className="space-y-1">
+                  {section.items.map((item) => (
+                    <NavLink
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      icon={item.icon}
+                      isActive={pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </nav>
+
+          {/* Sidebar Footer */}
+          <div className="p-4 border-t border-white/10">
+            <div className="text-xs text-white/40 sc-mono">
+              v0.1.0
+            </div>
+          </div>
         </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top Bar */}
-          <header className="h-12 border-b border-white/5 flex items-center justify-between px-4 bg-[#0c1014]/60 backdrop-blur shrink-0">
-            <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">
-              Scorpion Operations Environment
-            </div>
-            <div className="text-xs text-white/35">
-              Status: <span className="text-emerald-300">Online</span>
-            </div>
-          </header>
-
-          {/* Page Content */}
-          <main className="flex-1 overflow-y-auto">
-            <ErrorBoundary>
-              {mounted ? children : (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-sm text-white/40">Loading...</div>
-                </div>
-              )}
-            </ErrorBoundary>
-          </main>
-        </div>
+        {/* Main content */}
+        <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+          {/* Top bar with toggle button */}
+          <div className="flex items-center gap-2 p-2 border-b border-white/10 bg-[#0f1318]">
+            {mounted && (
+              <button
+                onClick={toggleSidebar}
+                className="md:hidden p-2 hover:bg-white/10 rounded transition-colors"
+                aria-label="Toggle sidebar"
+              >
+                <ChevronRight className="w-5 h-5 text-white/70" />
+              </button>
+            )}
+            <BreadcrumbNav />
+          </div>
+          
+          {/* Page content */}
+          <div className="flex-1 overflow-auto">
+            {children}
+          </div>
+        </main>
       </div>
     </ToastProvider>
   );

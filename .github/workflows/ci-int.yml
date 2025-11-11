@@ -15,12 +15,15 @@ jobs:
           for s in landing web ops api worker; do
             docker build -t ghcr.io/${{ github.repository }}/lfai-$s:int apps/$s
           done
+          # Build Scorpion (different Dockerfile path - builds from workspace root)
+          docker build -t ghcr.io/${{ github.repository }}/scorpion:int -f apps/scorpion/Dockerfile .
       - name: Push images
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
           for s in landing web ops api worker; do
             docker push ghcr.io/${{ github.repository }}/lfai-$s:int
           done
+          docker push ghcr.io/${{ github.repository }}/scorpion:int
 
   n8n-dryrun:
     needs: build
@@ -63,6 +66,7 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}/lfai-ops:int
             docker pull ghcr.io/${{ github.repository }}/lfai-api:int
             docker pull ghcr.io/${{ github.repository }}/lfai-worker:int
+            docker pull ghcr.io/${{ github.repository }}/scorpion:int
             docker compose -f infra/docker/docker-compose.int.yml up -d
             sudo cp infra/caddy/Caddyfile.int /etc/caddy/Caddyfile
             sudo systemctl reload caddy

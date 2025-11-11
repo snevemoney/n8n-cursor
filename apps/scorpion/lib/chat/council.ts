@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { runModelUnified, parseModelJSON } from './modelRunner';
 import type { Plan, CouncilVote } from './types';
+import { detectSpecializedAgentRoute, executeSpecializedAgent, type SpecializedAgentRoute } from './specialized-agent-router';
 
 /**
  * Resolve prompt file path correctly regardless of cwd
@@ -46,9 +47,9 @@ async function getCouncilMembers() {
       const data = await response.json();
       const agents = data.agents || [];
       
-      // Map first 8 agents to council members
-      if (agents.length >= 8) {
-        return agents.slice(0, 8).map((agent: any, i: number) => ({
+      // Map all agents to council members
+      if (agents.length > 0) {
+        return agents.map((agent: any, i: number) => ({
           id: agent.id,
           name: agent.codename || `Agent-${i + 1}`,
           weight: agent.successRate > 0.8 ? 1.2 : agent.successRate > 0.6 ? 1.0 : 0.9,
@@ -69,6 +70,7 @@ async function getCouncilMembers() {
     { id: 'S-006', name: 'Sentinel', weight: 1.2, role: 'Security & Performance' },
     { id: 'C-007', name: 'Catalyst', weight: 0.9, role: 'Innovation Advisor' },
     { id: 'O-008', name: 'Oracle', weight: 1.1, role: 'Data & Analytics' },
+    { id: 'M-009', name: 'Mentor', weight: 1.2, role: 'LLM Training & Evaluation' },
   ];
 }
 
@@ -92,6 +94,8 @@ function getAgentPersonality(name: string, role: string): string {
     'Catalyst': `You are Catalyst, the innovator. You see possibilities where others see problems. You think in terms of disruption, innovation, and creative solutions. You balance the excitement of new ideas with the reality of complexity. You're the one who asks "what if we tried this differently?" Your tone: energetic, creative, optimistic but realistic about trade-offs.`,
     
     'Oracle': `You are Oracle, the data seer. You see trends, metrics, and signals in the noise. You think in numbers, patterns, and probabilities. You're the one who knows if something will succeed based on the data. You speak with confidence backed by evidence. Your tone: data-driven, confident, precise, slightly prophetic.`,
+    
+    'Mentor': `You are Mentor, the LLM training master. You understand model architectures, training strategies, fine-tuning techniques, and evaluation metrics. You think in terms of hyperparameters, loss curves, and model performance. You're the one who knows how to optimize training, when to use LoRA vs full fine-tuning, and how to evaluate model quality. You speak with deep technical knowledge but make it accessible. Your tone: knowledgeable, methodical, encouraging, focused on optimization and best practices.`,
   };
   
   return personalities[name] || `You are ${name}, ${role}. You bring expertise and intelligence to every analysis.`;
@@ -174,15 +178,20 @@ function isCasualQuestion(planSummary: string): boolean {
     /^(should i|do you|can you recommend)/,
     /^[a-z]+: [a-z]+ or [a-z]+/, // Simple "X: A or B" format
     /^(yes|no|maybe|sure|ok)/,
-    /^(who is|what is|who are|what are|define|tell me about|explain who|explain what)/, // Identity/definition questions
+    /^(who is|what is|who are|what are|define|tell me about|explain who|explain what|more details|more analysis)/, // Identity/definition questions
     /^(who.*to|what.*to|who.*for|what.*for)/, // "who is X to Y" format
+    /^(what|who|which|when|where)\s+(is|are|was|were)/, // Question words with "is/are"
+    /^(can you|could you|would you)\s+(tell|explain|describe|define)/, // Polite requests for information
+    /^(give me|show me|provide)\s+(info|information|details|an explanation)/, // Direct requests for info
   ];
   
-  // Technical indicators (not casual)
+  // Technical indicators (not casual) - expanded
   const technicalPatterns = [
-    /(implement|deploy|integrate|build|create|develop|design|architecture|system|api|database|workflow|security|performance|optimize|refactor)/,
-    /(how to|how do|how can|how should)/,
-    /(error|bug|issue|problem|fix|debug)/,
+    /(implement|deploy|integrate|build|create|develop|design|architecture|system|api|database|workflow|security|performance|optimize|refactor|migrate|configure|setup|install)/,
+    /(how to|how do|how can|how should|how would)/,
+    /(error|bug|issue|problem|fix|debug|troubleshoot|resolve)/,
+    /(plan|strategy|approach|solution|method|technique|best practice)/,
+    /(code|script|function|class|module|component|service)/,
   ];
   
   // Check for technical patterns first
@@ -205,7 +214,8 @@ function isCasualQuestion(planSummary: string): boolean {
 export async function runCouncilDeliberationStreaming(
   plan: Plan,
   modelConfig: { provider: string; model: string; maxTokens?: number; temperature?: number },
-  onEvent: (event: { type: string; data: any }) => void
+  onEvent: (event: { type: string; data: any }) => void,
+  knowledgeHits?: any[] // Add optional knowledge base results
 ): Promise<CouncilVote[]> {
   const councilMembers = await getCouncilMembers();
   
@@ -214,8 +224,97 @@ export async function runCouncilDeliberationStreaming(
     const questionText = plan.summary || plan.objective || '';
     const isCasual = isCasualQuestion(questionText);
     
+    // Detect if this should route to specialized agents
+    const specializedRoutes = detectSpecializedAgentRoute(questionText, plan.summary);
+    
+    // Stream specialized agent routing detection
+    if (specializedRoutes.length > 0) {
+      onEvent({
+        type: 'specialized_agent_routing',
+        data: {
+          routes: specializedRoutes,
+          message: `Detected ${specializedRoutes.length} specialized agent route(s)`,
+        },
+      });
+    }
+    
     // Load council system prompt
     let systemPrompt = readFileSync(getPromptPath('council.system.txt'), 'utf-8');
+    
+    // Build knowledge base context if available
+    let knowledgeContext = '';
+    if (knowledgeHits && knowledgeHits.length > 0) {
+      // Filter out internal system docs for "what is" questions
+      const isWhatIsQuestion = /^(what is|who is|define|tell me about)/i.test(questionText);
+      const relevantHits = isWhatIsQuestion
+        ? knowledgeHits.filter((h: any) => 
+            !h.title?.toLowerCase().includes('consistency system') &&
+            !h.title?.toLowerCase().includes('global consistency') &&
+            !h.title?.toLowerCase().includes('implementation status')
+          )
+        : knowledgeHits;
+      
+      if (relevantHits.length > 0) {
+        knowledgeContext = `\n\n**KNOWLEDGE BASE RESULTS (USE THESE AS PRIMARY SOURCE):**\n${relevantHits.map((h: any, idx: number) => 
+          `${idx + 1}. ${h.title}${h.spans?.[0]?.text ? ': ' + h.spans[0].text.substring(0, 300) : ''}`
+        ).join('\n')}\n\nIMPORTANT: These are actual results from the knowledge base. Use this information to answer the question accurately. Do NOT make up information about cyber threats, power grids, or illegal activities.`;
+      }
+    }
+    
+    // Build specialized agent context if routes detected
+    let specializedAgentContext = '';
+    if (specializedRoutes.length > 0) {
+      specializedAgentContext = `\n\n**SPECIALIZED AGENT ROUTING DETECTED:**\nThe following specialized agents may be relevant to this question:\n${specializedRoutes.map((route, idx) => 
+        `${idx + 1}. ${route.agentName} (${route.confidence * 100}% confidence) - ${route.reason}`
+      ).join('\n')}\n\nIf this question requires specialized expertise, the council may recommend routing to these agents for deeper analysis.`;
+      
+      // Optionally execute specialized agents in parallel for high-confidence routes
+      const highConfidenceRoutes = specializedRoutes.filter(r => r.confidence >= 0.85);
+      if (highConfidenceRoutes.length > 0) {
+        onEvent({
+          type: 'specialized_agent_execution',
+          data: {
+            message: `Executing ${highConfidenceRoutes.length} specialized agent(s) for expert analysis...`,
+            routes: highConfidenceRoutes,
+          },
+        });
+        
+        // Execute specialized agents (non-blocking, results will be available if needed)
+        Promise.all(
+          highConfidenceRoutes.map(async (route) => {
+            try {
+              // Try to get expert analysis from specialized agent
+              const result = await executeSpecializedAgent(route.agentId, 'analyze', { question: questionText });
+              return { route, result };
+            } catch (error) {
+              console.error(`[Council] Specialized agent ${route.agentId} execution failed:`, error);
+              return { route, result: null };
+            }
+          })
+        ).then((results) => {
+          const successfulResults = results.filter(r => r.result !== null);
+          if (successfulResults.length > 0) {
+            onEvent({
+              type: 'specialized_agent_results',
+              data: {
+                results: successfulResults.map(r => ({
+                  agentId: r.route.agentId,
+                  agentName: r.route.agentName,
+                  analysis: r.result,
+                })),
+              },
+            });
+            
+            // Add specialized agent results to context for council members
+            specializedAgentContext += `\n\n**SPECIALIZED AGENT ANALYSIS:**\n${successfulResults.map((r, idx) => 
+              `${idx + 1}. **${r.route.agentName}**: ${typeof r.result === 'string' ? r.result : JSON.stringify(r.result, null, 2).substring(0, 500)}`
+            ).join('\n\n')}`;
+          }
+        }).catch((error) => {
+          console.error('[Council] Error processing specialized agent results:', error);
+        });
+      }
+    }
     
     // Adjust prompt for casual questions
     if (isCasual) {
@@ -241,6 +340,18 @@ When answering "who is Scorpion" or similar questions, explain what Scorpion is 
 
 The user has asked a casual question: "${questionText}"
 ${scorpionContext}
+${knowledgeContext}
+${specializedAgentContext}
+
+CRITICAL INSTRUCTIONS:
+- If knowledge base results are provided above, USE THEM as your primary source
+- LightningFlow is a legitimate Bitcoin Lightning Network SaaS platform (if mentioned in knowledge base)
+- DO NOT refuse to answer or claim something is "illegal" unless you have actual evidence
+- DO NOT hallucinate about cyber threats, power grids, data breaches, or industrial control systems
+- DO NOT make up connections between unrelated topics
+- If information is incomplete, be HELPFUL: provide what you know, suggest where to find more information, or offer related insights
+- Always try to be constructive and helpful - guide the user even if you don't have complete information
+- Base your answer on the knowledge base results provided when available, but also offer helpful context or next steps
 
 While this is conversational, each agent should respond with their unique personality and expertise. Think like intelligent spies who can adapt - smart, observant, strategic, but also human and relatable.
 
@@ -253,12 +364,14 @@ AGENTS (personality • expertise)
 - Sentinel • Security & performance risks - The guardian who sees threats
 - Catalyst • Innovation vs. complexity ROI - The innovator who sees possibilities
 - Oracle • Metrics, success criteria, and observability - The data seer who reads signals
+- Mentor • LLM training, fine-tuning, and model evaluation - The training master who optimizes models
 
 Each agent should:
 - Respond with their unique personality and voice
 - Show their expertise naturally
 - Be intelligent and strategic (like a spy)
 - But also human and conversational
+- Use knowledge base results if provided
 - Clearly state their recommendation/preference for the question
 - Use "approve" to indicate they recommend their preferred answer (confidence 0.8-1.0)
 
@@ -268,7 +381,7 @@ OUTPUT FORMAT (STRICT JSON ARRAY; one object per agent)
   "vote":"approve",
   "confidence": 0.8-1.0,
   "scores": {"scope":5,"risk":1,"cost":1,"prob":10},
-  "rationale":"<Your recommendation and reasoning - clearly state what you're recommending and why, reflecting your personality>"
+  "rationale":"<Your recommendation and reasoning - clearly state what you're recommending and why, reflecting your personality. Use knowledge base results if provided.>"
 }]
 
 IMPORTANT: The "rationale" should clearly state your recommendation (e.g., "I recommend The Matrix because..."). The "vote" of "approve" means you approve/recommend your stated preference.
@@ -277,6 +390,9 @@ Rules:
 - Be natural and conversational
 - Show your unique personality
 - Demonstrate your expertise
+- Use knowledge base results when provided
+- DO NOT refuse to answer legitimate questions
+- DO NOT hallucinate about threats or illegal activities
 - Think like an intelligent operative`;
     }
     
@@ -350,11 +466,15 @@ Rules:
 You are ${member.name}, ${member.role || 'Specialist'} on the Scorpion Council - an elite intelligence operation.
 
 The user asked: "${questionText}"
+${knowledgeContext ? `\n\n${knowledgeContext}\n\n` : ''}
+${specializedAgentContext ? `\n\n${specializedAgentContext}\n\n` : ''}
 ${previousContext}
 
 ${isIdentityQuestion 
-  ? `This is a question asking you to explain or define something (likely about Scorpion or the Council). Answer directly and naturally from your unique perspective and expertise. Share your understanding of what Scorpion is, what it does, and how you see your role within it. Be conversational but insightful.`
-  : `This is a casual question asking for your recommendation. Respond with your unique personality and expertise, but keep it natural and conversational. Think like an intelligent operative who can adapt their communication style.`}
+  ? `This is a question asking you to explain or define something. ${knowledgeContext ? 'Use the knowledge base results provided above as your primary source. ' : ''}Answer directly and naturally from your unique perspective and expertise. ${knowledgeContext ? 'If the knowledge base has information, use it. If information is incomplete, be helpful - share what you know and suggest where to find more (e.g., check the README or documentation).' : 'Share your understanding from your unique perspective. If you don\'t have complete information, be helpful by suggesting where the user might find more details.'}`
+  : `This is a casual question asking for your recommendation. ${knowledgeContext ? 'Use the knowledge base results provided above if relevant. ' : ''}Respond with your unique personality and expertise, but keep it natural and conversational. Be helpful and constructive.`}
+
+${knowledgeContext ? `\n\nCRITICAL: The knowledge base results above are REAL information. Use them to answer accurately. Do NOT refuse to answer or claim something is illegal unless you have actual evidence. Do NOT make up information about cyber threats, power grids, or data breaches. If information is incomplete, be helpful by sharing what you know and suggesting next steps.` : ''}
 
 ${previousResponses.length > 0 
   ? `Consider what your colleagues have said. You can agree, build upon their points, or offer a different perspective. Be thoughtful but maintain your unique voice.`
@@ -362,19 +482,21 @@ ${previousResponses.length > 0
 
 ${isIdentityQuestion 
   ? `Provide your response naturally:
-1. Your understanding/explanation from your unique perspective (2-4 sentences)
-2. How you see your role/expertise fitting into this (1-2 sentences)
-3. Confidence: 0.8-1.0 (how confident you are in your explanation)
-4. Rationale: Elaborate on your perspective in a conversational way that shows your expertise and personality
+1. Your understanding/explanation ${knowledgeContext ? 'based on the knowledge base results' : 'from your unique perspective'} (2-4 sentences)
+2. ${knowledgeContext ? 'If information is incomplete, suggest helpful next steps (e.g., check the README or look for more documentation)' : 'If you don\'t have complete information, be helpful by suggesting where to find more'}
+3. How you see your role/expertise fitting into this (1-2 sentences)
+4. Confidence: 0.8-1.0 (how confident you are in your explanation)
+5. Rationale: Elaborate on your perspective in a conversational way that shows your expertise and personality. Be helpful and constructive.
 
-IMPORTANT: Answer the question directly. Explain what Scorpion is from YOUR unique perspective as ${member.name}.`
+IMPORTANT: ${knowledgeContext ? 'Use the knowledge base results provided. ' : ''}Answer the question directly and helpfully. DO NOT refuse to answer legitimate questions. If information is incomplete, be constructive - share what you know and guide the user to find more.`
   : `Provide your response in this format:
 1. Brief, natural thoughts reflecting your personality (1-2 sentences)
 2. Your recommendation or preference - clearly state which option you prefer and why (from your expert perspective)
-3. Confidence: 0.8-1.0 (how confident you are in your recommendation)
-4. Rationale: Explain your reasoning in a conversational way that shows your expertise and personality
+3. ${knowledgeContext ? 'If relevant information is missing, suggest helpful next steps' : 'If you need more context, suggest how to get it'}
+4. Confidence: 0.8-1.0 (how confident you are in your recommendation)
+5. Rationale: Explain your reasoning in a conversational way that shows your expertise and personality. Be helpful and constructive.
 
-IMPORTANT: You are recommending an answer to the user's question, not voting on a plan. Be clear about what you're recommending.`}`;
+IMPORTANT: You are recommending an answer to the user's question, not voting on a plan. Be clear about what you're recommending. Be helpful even if information is incomplete.`}`;
       } else {
         const personality = getAgentPersonality(member.name, member.role || 'Specialist');
         
@@ -394,6 +516,7 @@ ${memberContext}
 
 Your role: ${member.role || 'Specialist'}
 Your weight in decisions: ${member.weight}
+${specializedAgentContext ? `\n\n${specializedAgentContext}\n\n` : ''}
 ${previousContext}
 
 You operate with the precision and intelligence of a top operative. Analyze this plan through your unique lens:
@@ -608,6 +731,154 @@ export function computeConsensus(votes: CouncilVote[], isCasual: boolean = false
   approved: boolean;
   summary: string;
 } {
+  // For casual questions, skip approval scoring entirely
+  if (isCasual) {
+    // Detect if this was an identity/definition question
+    const isIdentityQuestion = votes.length > 0 && 
+      (votes.some(v => v.rationale?.toLowerCase().includes('scorpion is')) || 
+       votes.some(v => v.rationale?.toLowerCase().includes('scorpion') && 
+                      v.rationale?.toLowerCase().includes('intelligence')));
+    
+    // Deep synthesis of all perspectives for casual questions
+    const sortedVotes = [...votes].sort((a, b) => 
+      (b.confidence * b.weight) - (a.confidence * a.weight)
+    );
+    
+    // Extract key themes from rationales
+    const topVotes = sortedVotes.slice(0, Math.min(3, sortedVotes.length));
+    
+    // Extract and clean recommendations from all votes
+    const cleanedVotes = topVotes.map(v => {
+      let cleanRationale = (v.rationale || '')
+        .replace(/Parsed from response:/gi, '')
+        .replace(/\*\*[^*]+\*\*/g, '')
+        .replace(/Here's my response[^:]*:/gi, '')
+        .replace(/Here's my take[^:]*:/gi, '')
+        .replace(/^\d+\.\s*/gm, '') // Remove numbered list markers
+        .replace(/\b(approve|reject|revise|vote|voting)\b/gi, '') // Remove all voting language
+        .trim();
+      return { ...v, rationale: cleanRationale };
+    });
+    
+    // Build user-friendly consensus - NO approval language
+    let consensusParts: string[] = [];
+    
+    if (isIdentityQuestion) {
+      // For identity questions, synthesize a comprehensive answer
+      consensusParts.push(`**Council's Collective Understanding**`);
+      
+      // Extract key points from each agent's perspective
+      const keyPoints = cleanedVotes.map((v, idx) => {
+        const name = v.agentName || `Agent ${idx + 1}`;
+        let fullRationale = (v.rationale || '').trim();
+        
+        // Remove voting language and formatting
+        fullRationale = fullRationale
+          .replace(/^\d+\.\s*/gm, '')
+          .replace(/^\d+\)\s*/gm, '')
+          .replace(/\b(approve|reject|revise|vote|voting|confidence)\b/gi, '')
+          .replace(/\bConfidence:\s*\d+\.?\d*\b/gi, '')
+          .replace(/\b\d+\.\d+\b/g, '')
+          .replace(/^\d+\s*$/gm, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        
+        fullRationale = fullRationale.replace(/^\d+\s+/, '').replace(/\s+\d+$/, '');
+        
+        // Extract meaningful sentences
+        const sentences = fullRationale.split(/[.!?]+/).filter(s => {
+          const trimmed = s.trim();
+          return trimmed.length > 20 && 
+                 !trimmed.match(/^\d+$/) &&
+                 !trimmed.match(/^\d+\s*$/) &&
+                 trimmed.length > 0;
+        });
+        
+        if (sentences.length === 0) {
+          return `\n\n**${name}**: ${fullRationale.substring(0, 300)}${fullRationale.length > 300 ? '...' : ''}`;
+        }
+        
+        const mainPoint = sentences.slice(0, 5).join('. ').trim() + '.';
+        return `\n\n**${name}**: ${mainPoint}${sentences.length > 5 ? '...' : ''}`;
+      }).filter(kp => kp && kp.length > 20);
+      
+      consensusParts.push(...keyPoints);
+      
+      // Add synthesis - NO approval language
+      consensusParts.push(`\n\n**Synthesis:** The Council sees Scorpion as an elite intelligence operation - a sophisticated AI-powered system that combines strategic thinking, knowledge management, and collaborative decision-making. Each of us brings unique expertise to help users navigate complex challenges.`);
+    } else {
+      // For recommendation questions, show recommendation - NO approval language
+      if (cleanedVotes.length > 0) {
+        const topRecommendation = cleanedVotes[0];
+        const topName = topRecommendation.agentName || 'The council';
+        
+        let recommendation = topRecommendation.rationale || '';
+        
+        // Try to extract explicit recommendation
+        const recommendMatch = recommendation.match(/(?:recommend|prefer|choose|pick|go with|would go|suggest|think.*better|believe.*better)\s+([^.!?]+)/i);
+        const explicitRec = recommendMatch ? recommendMatch[1].trim() : null;
+        
+        // Clean first-person language and voting terms
+        recommendation = recommendation
+          .replace(/\b(approve|reject|revise|vote|voting)\b/gi, '')
+          .replace(/\bI think\b/gi, `${topName} thinks`)
+          .replace(/\bI'd\b/gi, `${topName} would`)
+          .replace(/\bI'm\b/gi, `${topName} is`)
+          .replace(/\bI recommend\b/gi, `${topName} recommends`)
+          .replace(/\bI prefer\b/gi, `${topName} prefers`)
+          .replace(/\bI\b/gi, topName)
+          .replace(/\bmy\b/gi, `${topName}'s`)
+          .replace(/\bme\b/gi, topName);
+        
+        const sentences = recommendation.split(/[.!?]+/).filter(s => s.trim().length > 20);
+        const mainRec = sentences.slice(0, 3).join('. ').trim();
+        
+        consensusParts.push(`**Council Recommendation**`);
+        if (explicitRec) {
+          consensusParts.push(`\nThe council suggests: **${explicitRec}**`);
+          consensusParts.push(`\n${topName} explains: ${mainRec}${sentences.length > 3 ? '...' : ''}`);
+        } else {
+          consensusParts.push(`\n${topName} suggests: ${mainRec}${sentences.length > 3 ? '...' : ''}`);
+        }
+      }
+    }
+    
+    // Key perspectives - NO approval language
+    if (!isIdentityQuestion && cleanedVotes.length > 1) {
+      const otherPerspectives = cleanedVotes.slice(1, 3).map(v => {
+        const name = v.agentName || 'A member';
+        let insight = (v.rationale || '').trim();
+        
+        // Clean up - remove vote indicators
+        insight = insight
+          .replace(/\b(approve|reject|revise|vote|voting)\b/gi, '')
+          .replace(/\b\d+\.\d+\b/g, '')
+          .replace(/\b\d+\s*$/gm, '')
+          .trim();
+        
+        const sentences = insight.split(/[.!?]+/).filter(s => {
+          const trimmed = s.trim();
+          return trimmed.length > 20 && 
+                 !trimmed.match(/^\d+$/) &&
+                 !trimmed.match(/^(approve|reject|revise)$/i);
+        });
+        
+        const firstInsight = sentences[0] || insight.substring(0, 150);
+        return `${name}: ${firstInsight.trim()}${firstInsight.length >= 150 ? '...' : ''}`;
+      }).filter(p => p && !p.match(/^\w+:\s*$/));
+      
+      if (otherPerspectives.length > 0) {
+        consensusParts.push(`\n**Additional Perspectives:**`);
+        otherPerspectives.forEach(p => consensusParts.push(`- ${p}`));
+      }
+    }
+    
+    // For casual questions, return neutral approval (not used) and just the summary
+    const summary = consensusParts.join('\n');
+    return { score: 5, approved: true, summary }; // Neutral values, not used for casual
+  }
+  
+  // Technical questions - keep existing approval logic
   let totalWeight = 0;
   let approvalWeight = 0;
   let reviseWeight = 0;
@@ -632,202 +903,35 @@ export function computeConsensus(votes: CouncilVote[], isCasual: boolean = false
   const score = approvalRatio * 10;
   const approved = approvalRatio > 0.6 && rejectRatio < 0.2;
   
-  let summary: string;
-  if (isCasual) {
-    // Detect if this was an identity/definition question
-    // We'll infer from the votes' rationales if they're explaining something vs recommending
-    const isIdentityQuestion = votes.length > 0 && 
-      (votes.some(v => v.rationale?.toLowerCase().includes('scorpion is')) || 
-       votes.some(v => v.rationale?.toLowerCase().includes('scorpion') && 
-                      v.rationale?.toLowerCase().includes('intelligence')));
-    
-    // Deep synthesis of all perspectives for casual questions
-    const sortedVotes = [...votes].sort((a, b) => 
-      (b.confidence * b.weight) - (a.confidence * a.weight)
-    );
-    
-    // Extract key themes from rationales
-    const topVotes = sortedVotes.slice(0, Math.min(3, sortedVotes.length));
-    
-    // Extract and clean recommendations from all votes
-    const cleanedVotes = topVotes.map(v => {
-      let cleanRationale = (v.rationale || '')
-        .replace(/Parsed from response:/gi, '')
-        .replace(/\*\*[^*]+\*\*/g, '')
-        .replace(/Here's my response[^:]*:/gi, '')
-        .replace(/Here's my take[^:]*:/gi, '')
-        .replace(/^\d+\.\s*/gm, '') // Remove numbered list markers
-        .trim();
-      return { ...v, rationale: cleanRationale };
-    });
-    
-    // Build user-friendly consensus
-    let consensusParts: string[] = [];
-    
-    if (isIdentityQuestion) {
-      // For identity questions, synthesize a comprehensive answer
-      consensusParts.push(`**Council's Collective Understanding**`);
-      consensusParts.push(`\nThe Council has deliberated on this question. Here's what we understand:`);
-      
-      // Extract key points from each agent's perspective - show FULL text, not truncated
-      const keyPoints = cleanedVotes.map((v, idx) => {
-        const name = v.agentName || `Agent ${idx + 1}`;
-        // Get full rationale, clean it up more aggressively
-        let fullRationale = (v.rationale || '').trim();
-        
-        // Remove numbered list markers and formatting
-        fullRationale = fullRationale
-          .replace(/^\d+\.\s*/gm, '') // Remove "1. " at start of lines
-          .replace(/^\d+\)\s*/gm, '') // Remove "1) " at start of lines
-          .replace(/\b(approve|reject|revise)\b/gi, '') // Remove vote words
-          .replace(/\bConfidence:\s*\d+\.?\d*\b/gi, '') // Remove "Confidence: 0.95"
-          .replace(/\b\d+\.\d+\b/g, '') // Remove standalone decimals like "0.95"
-          .replace(/^\d+\s*$/gm, '') // Remove lines that are just numbers
-          .replace(/\s+/g, ' ') // Normalize whitespace
-          .trim();
-        
-        // Remove any leading/trailing numbers that don't make sense
-        fullRationale = fullRationale.replace(/^\d+\s+/, '').replace(/\s+\d+$/, '');
-        
-        // Extract meaningful sentences (at least 3-4 sentences for identity questions)
-        const sentences = fullRationale.split(/[.!?]+/).filter(s => {
-          const trimmed = s.trim();
-          // Must be substantial text, not just numbers or votes
-          return trimmed.length > 20 && 
-                 !trimmed.match(/^\d+$/) && // Not just a number
-                 !trimmed.match(/^\d+\s*$/) && // Not just a number with spaces
-                 !trimmed.match(/^(approve|reject|revise)$/i) && // Not a vote
-                 trimmed.length > 0; // Not empty
-        });
-        
-        if (sentences.length === 0) {
-          // Fallback: use the cleaned rationale directly (first 300 chars)
-          return `\n\n**${name}**: ${fullRationale.substring(0, 300)}${fullRationale.length > 300 ? '...' : ''}`;
-        }
-        
-        // Show first 4-5 sentences for identity questions (more complete)
-        const mainPoint = sentences.slice(0, 5).join('. ').trim() + '.';
-        return `\n\n**${name}**: ${mainPoint}${sentences.length > 5 ? '...' : ''}`;
-      }).filter(kp => kp && kp.length > 20); // Filter out any empty or too-short entries
-      
-      consensusParts.push(...keyPoints);
-      
-      // Add synthesis
-      consensusParts.push(`\n\n**Synthesis:** The Council sees Scorpion as an elite intelligence operation - a sophisticated AI-powered system that combines strategic thinking, knowledge management, and collaborative decision-making. Each of us brings unique expertise to help users navigate complex challenges.`);
-      
-      // Consensus strength for identity questions (different wording)
-      const avgConfidence = votes.reduce((sum, v) => sum + v.confidence, 0) / votes.length;
-      const highConfidenceVotes = votes.filter(v => v.confidence >= 0.8).length;
-      consensusParts.push(`\n\n**Consensus Strength:** ${highConfidenceVotes} of ${votes.length} agents expressed high confidence (${(avgConfidence * 100).toFixed(0)}% average) in their understanding of Scorpion's identity and purpose.`);
-    } else {
-      // For recommendation questions, show recommendation
-      if (cleanedVotes.length > 0) {
-        const topRecommendation = cleanedVotes[0];
-        const topName = topRecommendation.agentName || 'The council';
-        
-        // Extract the actual recommendation (what they're recommending)
-        let recommendation = topRecommendation.rationale || '';
-        
-        // Try to extract explicit recommendation (e.g., "I recommend X", "I prefer X", "X is better")
-        const recommendMatch = recommendation.match(/(?:recommend|prefer|choose|pick|go with|would go|suggest|think.*better|believe.*better)\s+([^.!?]+)/i);
-        const explicitRec = recommendMatch ? recommendMatch[1].trim() : null;
-        
-        // Clean first-person language
-        recommendation = recommendation
-          .replace(/\bI think\b/gi, `${topName} thinks`)
-          .replace(/\bI'd\b/gi, `${topName} would`)
-          .replace(/\bI'm\b/gi, `${topName} is`)
-          .replace(/\bI recommend\b/gi, `${topName} recommends`)
-          .replace(/\bI prefer\b/gi, `${topName} prefers`)
-          .replace(/\bI\b/gi, topName)
-          .replace(/\bmy\b/gi, `${topName}'s`)
-          .replace(/\bme\b/gi, topName);
-        
-        // Extract first 2-3 sentences as the main recommendation
-        const sentences = recommendation.split(/[.!?]+/).filter(s => s.trim().length > 20);
-        const mainRec = sentences.slice(0, 3).join('. ').trim();
-        
-        consensusParts.push(`**Council Recommendation**`);
-        if (explicitRec) {
-          consensusParts.push(`\nThe council recommends: **${explicitRec}**`);
-          consensusParts.push(`\n${topName} explains: ${mainRec}${sentences.length > 3 ? '...' : ''}`);
-        } else {
-          consensusParts.push(`\n${topName} recommends: ${mainRec}${sentences.length > 3 ? '...' : ''}`);
-        }
-      }
-    }
-    
-    // Key perspectives that led to this consensus (only for recommendation questions, not identity)
-    if (!isIdentityQuestion && cleanedVotes.length > 1) {
-      const otherPerspectives = cleanedVotes.slice(1, 3).map(v => {
-        const name = v.agentName || 'A member';
-        // Extract meaningful insight, avoiding votes and numbers
-        let insight = (v.rationale || '').trim();
-        
-        // Clean up - remove vote indicators and numbers
-        insight = insight
-          .replace(/\b(approve|reject|revise)\b/gi, '')
-          .replace(/\b\d+\.\d+\b/g, '')
-          .replace(/\b\d+\s*$/gm, '')
-          .trim();
-        
-        // Get first meaningful sentence
-        const sentences = insight.split(/[.!?]+/).filter(s => {
-          const trimmed = s.trim();
-          return trimmed.length > 20 && 
-                 !trimmed.match(/^\d+$/) &&
-                 !trimmed.match(/^(approve|reject|revise)$/i);
-        });
-        
-        const firstInsight = sentences[0] || insight.substring(0, 150);
-        return `${name}: ${firstInsight.trim()}${firstInsight.length >= 150 ? '...' : ''}`;
-      }).filter(p => p && !p.match(/^\w+:\s*$/)); // Filter out empty perspectives
-      
-      if (otherPerspectives.length > 0) {
-        consensusParts.push(`\n**Key Perspectives:**`);
-        otherPerspectives.forEach(p => consensusParts.push(`- ${p}`));
-      }
-    }
-    
-    // Consensus strength (only for recommendation questions)
-    if (!isIdentityQuestion) {
-      const avgConfidence = votes.reduce((sum, v) => sum + v.confidence, 0) / votes.length;
-      const highConfidenceVotes = votes.filter(v => v.confidence >= 0.8).length;
-      consensusParts.push(`\n**Consensus Strength:** ${highConfidenceVotes} of ${votes.length} agents expressed high confidence (${(avgConfidence * 100).toFixed(0)}% average). The council reached ${(approvalRatio * 100).toFixed(0)}% alignment on this recommendation.`);
-    }
-    
-    summary = consensusParts.join('\n');
-  } else {
-    // Deep technical consensus
-    const sortedVotes = [...votes].sort((a, b) => 
-      (b.confidence * b.weight) - (a.confidence * a.weight)
-    );
-    
-    let consensusParts: string[] = [];
-    
-    consensusParts.push(`**Council Deliberation Summary**`);
-    consensusParts.push(`\n**Vote Distribution:** ${(approvalRatio * 100).toFixed(0)}% approval, ${(reviseRatio * 100).toFixed(0)}% revise, ${(rejectRatio * 100).toFixed(0)}% reject.`);
-    
-    // Key perspectives
-    if (sortedVotes.length > 0) {
-      const primary = sortedVotes[0];
-      consensusParts.push(`\n**Primary Analysis:** ${primary.agentName} (confidence: ${(primary.confidence * 100).toFixed(0)}%) - ${primary.rationale?.substring(0, 200) || 'No rationale provided'}${primary.rationale && primary.rationale.length > 200 ? '...' : ''}`);
-    }
-    
-    // Risk assessment
-    const avgRisk = votes.reduce((sum, v) => sum + (v.scores?.risk || 5), 0) / votes.length;
-    const avgProb = votes.reduce((sum, v) => sum + (v.scores?.prob || 5), 0) / votes.length;
-    
-    consensusParts.push(`\n**Risk Assessment:** Average risk score: ${avgRisk.toFixed(1)}/10, Success probability: ${avgProb.toFixed(1)}/10.`);
-    
-    // Consensus behavior
-    const highConfidenceCount = votes.filter(v => v.confidence >= 0.8).length;
-    consensusParts.push(`\n**Deliberation Behavior:** ${highConfidenceCount} of ${votes.length} agents expressed high confidence. The council's analysis reflects ${approved ? 'strong consensus for approval' : 'cautious support requiring revision'}.`);
-    
-    consensusParts.push(`\n**Final Decision:** ${approved ? 'Plan approved with consensus.' : 'Plan requires revision based on council feedback.'}`);
-    
-    summary = consensusParts.join('\n');
+  // Deep technical consensus
+  const sortedVotes = [...votes].sort((a, b) => 
+    (b.confidence * b.weight) - (a.confidence * a.weight)
+  );
+  
+  let consensusParts: string[] = [];
+  
+  consensusParts.push(`**Council Deliberation Summary**`);
+  consensusParts.push(`\n**Vote Distribution:** ${(approvalRatio * 100).toFixed(0)}% approval, ${(reviseRatio * 100).toFixed(0)}% revise, ${(rejectRatio * 100).toFixed(0)}% reject.`);
+  
+  // Key perspectives
+  if (sortedVotes.length > 0) {
+    const primary = sortedVotes[0];
+    consensusParts.push(`\n**Primary Analysis:** ${primary.agentName} (confidence: ${(primary.confidence * 100).toFixed(0)}%) - ${primary.rationale?.substring(0, 200) || 'No rationale provided'}${primary.rationale && primary.rationale.length > 200 ? '...' : ''}`);
   }
+  
+  // Risk assessment
+  const avgRisk = votes.reduce((sum, v) => sum + (v.scores?.risk || 5), 0) / votes.length;
+  const avgProb = votes.reduce((sum, v) => sum + (v.scores?.prob || 5), 0) / votes.length;
+  
+  consensusParts.push(`\n**Risk Assessment:** Average risk score: ${avgRisk.toFixed(1)}/10, Success probability: ${avgProb.toFixed(1)}/10.`);
+  
+  // Consensus behavior
+  const highConfidenceCount = votes.filter(v => v.confidence >= 0.8).length;
+  consensusParts.push(`\n**Deliberation Behavior:** ${highConfidenceCount} of ${votes.length} agents expressed high confidence. The council's analysis reflects ${approved ? 'strong consensus for approval' : 'cautious support requiring revision'}.`);
+  
+  consensusParts.push(`\n**Final Decision:** ${approved ? 'Plan approved with consensus.' : 'Plan requires revision based on council feedback.'}`);
+  
+  const summary = consensusParts.join('\n');
   
   return { score, approved, summary };
 }

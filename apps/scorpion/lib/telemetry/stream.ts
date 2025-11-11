@@ -39,31 +39,74 @@ export function connectTelemetryStream(): void {
     eventSource.onopen = () => {
       console.log('[Telemetry] Stream connected');
       useTelemetryStore.getState().setLiveConnected(true);
+      useTelemetryStore.getState().setLastHeartbeat(Date.now());
       reconnectAttempts = 0;
     };
     
     // Message received
     eventSource.onmessage = (e) => {
       try {
-        const event = eventAdapter(e.data);
-        if (event) {
-          useTelemetryStore.getState().addEvent(event);
+        // Parse SSE message format: {"type":"event|heartbeat|connected","data":{...},"ts":...}
+        // EventSource automatically strips "data: " prefix, but may include trailing newlines
+        const rawData = e.data.trim();
+        if (!rawData) return;
+        
+        const message = JSON.parse(rawData);
+        console.log('[Telemetry] Received message type:', message.type, 'has data:', !!message.data);
+        
+        if (message.type === 'heartbeat') {
+          // Update heartbeat timestamp
+          useTelemetryStore.getState().setLastHeartbeat(message.ts || Date.now());
+        } else if (message.type === 'connected') {
+          // Connection confirmed
+          console.log('[Telemetry] Stream connected successfully');
+          useTelemetryStore.getState().setLastHeartbeat(Date.now());
+        } else if (message.type === 'event' && message.data) {
+          // Parse domain event - message.data is already the event object
+          console.log('[Telemetry] Processing event:', message.data.type, message.data.source);
+          try {
+            const event = eventAdapter(JSON.stringify(message.data));
+            if (event) {
+              console.log('[Telemetry] Event validated, adding to store:', event.type);
+              useTelemetryStore.getState().addEvent(event);
+            } else {
+              console.warn('[Telemetry] Event adapter returned null for:', message.data);
+            }
+          } catch (adapterError) {
+            console.error('[Telemetry] Error in event adapter:', adapterError, 'Data:', message.data);
+          }
+        } else if (message.type === 'metrics' && message.data) {
+          // Handle metrics if needed
+          // For now, we can store metrics in the store if needed
+          console.log('[Telemetry] Received metrics:', message.data);
+        } else if (message.type) {
+          // Unknown message type, log for debugging
+          console.warn('[Telemetry] Unknown message type:', message.type, message);
         }
       } catch (error) {
-        console.error('[Telemetry] Error processing event:', error);
+        console.error('[Telemetry] Error processing message:', error, 'Raw data:', e.data);
       }
     };
     
     // Connection error
     eventSource.onerror = (error) => {
-      console.warn('[Telemetry] Stream error:', error);
-      useTelemetryStore.getState().setLiveConnected(false);
-      
-      // Close and attempt reconnect
-      eventSource?.close();
-      eventSource = null;
-      
-      scheduleReconnect();
+      const readyState = eventSource?.readyState;
+      // Only log and reconnect if connection is actually closed (readyState === 2)
+      // readyState: 0 = CONNECTING, 1 = OPEN, 2 = CLOSED
+      if (readyState === EventSource.CLOSED) {
+        console.warn('[Telemetry] Stream closed, attempting reconnect');
+        useTelemetryStore.getState().setLiveConnected(false);
+        
+        // Close and attempt reconnect
+        eventSource?.close();
+        eventSource = null;
+        
+        scheduleReconnect();
+      } else if (readyState === EventSource.CONNECTING) {
+        // Still connecting, don't log as error
+        console.debug('[Telemetry] Stream connecting...');
+      }
+      // If OPEN (1), don't do anything - connection is fine
     };
   } catch (error) {
     console.error('[Telemetry] Failed to connect:', error);
@@ -95,7 +138,8 @@ export function disconnectTelemetryStream(): void {
  */
 function scheduleReconnect(): void {
   if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-    console.error('[Telemetry] Max reconnect attempts reached');
+    console.error('[Telemetry] Max reconnect attempts reached. Stream will not reconnect automatically.');
+    useTelemetryStore.getState().setLiveConnected(false);
     return;
   }
   
@@ -109,6 +153,7 @@ function scheduleReconnect(): void {
   console.log(`[Telemetry] Reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
   
   reconnectTimeout = setTimeout(() => {
+    // Reset attempts if we successfully connect
     connectTelemetryStream();
   }, delay);
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Panel, Metric, DataTable, useToast } from '@/components/scorpion';
-import { DollarSign, TrendingUp, Users, ShoppingCart, CreditCard, Package } from 'lucide-react';
+import { Panel, Metric, DataTable, useToast, Modal, Button, Input, Textarea, Select, PageLoadingBar, LoadingState } from '@/components/scorpion';
+import { DollarSign, TrendingUp, Users, ShoppingCart, CreditCard, Package, X, Save, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Product {
@@ -24,49 +24,131 @@ interface SalesMetrics {
   avgOrderValue: number;
 }
 
+interface ProductFormData {
+  name: string;
+  description?: string;
+  price: number;
+  currency: string;
+  status: 'active' | 'draft' | 'archived';
+}
+
 export default function SellingPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [metrics, setMetrics] = useState<SalesMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start false so page renders immediately
+  const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // Modal states
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: '',
+    description: '',
+    price: 0,
+    currency: 'USD',
+    status: 'draft'
+  });
 
   useEffect(() => {
-    loadSellingData();
+    // Defer data fetch aggressively so page renders instantly
+    const loadData = () => {
+      loadSellingData();
+    };
+    
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(loadData, { timeout: 0 }); // Immediate - no delay
+    } else {
+      setTimeout(loadData, 0); // Immediate fallback
+    }
   }, []);
 
   const loadSellingData = async () => {
     try {
-      const response = await fetch('/api/selling');
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data.products || []);
-        setMetrics(data.metrics || {
-          totalRevenue: 0,
-          monthlyRevenue: 0,
-          totalSales: 0,
-          activeCustomers: 0,
-          conversionRate: 0,
-          avgOrderValue: 0
-        });
+      setError(null);
+      // Only show loading spinner on initial load
+      if (products.length === 0 && !metrics) {
+        setLoading(true);
       }
-    } catch (error) {
+      const response = await fetch('/api/selling');
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `Failed to load: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      const data = result.data || result; // Handle both wrapped and unwrapped responses
+      
+      setProducts(data.products || []);
+      setMetrics(data.metrics || {
+        totalRevenue: 0,
+        monthlyRevenue: 0,
+        totalSales: 0,
+        activeCustomers: 0,
+        conversionRate: 0,
+        avgOrderValue: 0
+      });
+    } catch (error: any) {
       console.error('Failed to load selling data:', error);
+      setError(error.message || 'Failed to load selling data. Please try again.');
+      showToast('error', error.message || 'Failed to load selling data');
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateProduct = () => {
-    showToast('info', 'Product creation coming soon! Will include: pricing, Stripe/PayPal integration, and inventory management.');
-    // TODO: Open modal for product creation
+    setFormData({
+      name: '',
+      description: '',
+      price: 0,
+      currency: 'USD',
+      status: 'draft'
+    });
+    setShowCreateModal(true);
+  };
+
+  const handleSaveProduct = async () => {
+    if (!formData.name.trim()) {
+      showToast('error', 'Product name is required');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await fetch('/api/selling', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to save product');
+      }
+
+      showToast('success', `Product "${formData.name}" ${showEditModal ? 'updated' : 'created'} successfully`);
+      setShowCreateModal(false);
+      setShowEditModal(false);
+      await loadSellingData();
+    } catch (error: any) {
+      console.error('Failed to save product:', error);
+      showToast('error', error.message || 'Failed to save product');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleViewAnalytics = () => {
-    showToast('info', 'Sales analytics dashboard coming soon!');
-    // TODO: Navigate to analytics page or open modal
-    // router.push('/selling/analytics');
+    setShowAnalyticsModal(true);
   };
 
   const handleExportData = () => {
@@ -75,42 +157,66 @@ export default function SellingPage() {
       return;
     }
     
-    // Export as JSON for now
-    const dataStr = JSON.stringify({ products, metrics, exportedAt: new Date().toISOString() }, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `sales-export-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    showToast('success', 'Sales data exported successfully!');
+    try {
+      // Export as JSON for now
+      const dataStr = JSON.stringify({ products, metrics, exportedAt: new Date().toISOString() }, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sales-export-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('success', 'Sales data exported successfully!');
+    } catch (error: any) {
+      console.error('Failed to export data:', error);
+      showToast('error', 'Failed to export data');
+    }
   };
 
   const handleEditProduct = (product: Product) => {
-    showToast('info', `Editing ${product.name} - feature coming soon!`);
-    // TODO: Open edit modal
+    setFormData({
+      name: product.name,
+      description: '',
+      price: product.price,
+      currency: product.currency,
+      status: product.status
+    });
+    setShowEditModal(true);
   };
 
-  const handleDuplicateProduct = (product: Product) => {
-    showToast('info', `Duplicating ${product.name} - feature coming soon!`);
-    // TODO: Duplicate product logic
+  const handleDuplicateProduct = async (product: Product) => {
+    try {
+      const duplicatedProduct = {
+        ...formData,
+        name: `${product.name} (Copy)`,
+        description: '',
+        price: product.price,
+        currency: product.currency,
+        status: 'draft' as const
+      };
+
+      setFormData(duplicatedProduct);
+      setShowCreateModal(true);
+      showToast('info', `Duplicating ${product.name}...`);
+    } catch (error: any) {
+      console.error('Failed to duplicate product:', error);
+      showToast('error', 'Failed to duplicate product');
+    }
   };
 
   const handlePaymentIntegration = () => {
-    showToast('info', 'Payment integration setup coming soon! Will support Stripe and PayPal.');
-    // TODO: Open payment settings
+    setShowPaymentModal(true);
   };
 
   const handleManageCustomers = () => {
-    showToast('info', 'Customer management coming soon!');
-    // TODO: Navigate to customers page
-    // router.push('/selling/customers');
+    showToast('info', 'Customer management feature coming soon! This will connect to your customer database.');
+    // Future: router.push('/selling/customers');
   };
 
   const handleViewOrders = () => {
-    showToast('info', 'Orders management coming soon!');
-    // TODO: Navigate to orders page
-    // router.push('/selling/orders');
+    showToast('info', 'Orders management feature coming soon! This will show all customer orders.');
+    // Future: router.push('/selling/orders');
   };
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -129,16 +235,33 @@ export default function SellingPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center text-white/40">
-        Loading selling data...
-      </div>
-    );
-  }
-
   return (
+    <>
+      <PageLoadingBar loading={loading && products.length === 0 && !metrics} />
     <div className="h-full overflow-y-auto p-4 space-y-4">
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-md p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="text-red-400">⚠️</div>
+            <div className="text-sm text-red-300">{error}</div>
+          </div>
+          <button
+            onClick={loadSellingData}
+            className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded text-xs text-red-300 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      
+      {/* Loading State - Show inside page */}
+      {loading && products.length === 0 && !metrics ? (
+        <Panel>
+          <LoadingState text="Loading selling data..." />
+        </Panel>
+      ) : (
+        <>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -202,16 +325,31 @@ export default function SellingPage() {
       {/* Products Table */}
       <div className="grid grid-cols-[1fr_400px] gap-4">
         <Panel title="Products & Services">
-          <DataTable
-            columns={[
-              { key: 'id', label: 'Product ID' },
-              { key: 'name', label: 'Name' },
-              { key: 'price', label: 'Price' },
-              { key: 'sales', label: 'Sales' },
-              { key: 'revenue', label: 'Revenue' },
-              { key: 'status', label: 'Status' },
-            ]}
-            data={products.map(p => ({
+          {products.length === 0 ? (
+            <div className="text-center py-12 space-y-4">
+              <div className="text-lg text-white/60">No products configured yet</div>
+              <div className="text-sm text-white/40 max-w-md mx-auto">
+                Create your first product to start tracking sales and revenue. Products will appear here once created.
+              </div>
+              <button
+                onClick={handleCreateProduct}
+                className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-sm text-sm transition-colors flex items-center gap-2 mx-auto"
+              >
+                <Package className="h-4 w-4" />
+                Create Your First Product
+              </button>
+            </div>
+          ) : (
+            <DataTable
+              columns={[
+                { key: 'id', label: 'Product ID' },
+                { key: 'name', label: 'Name' },
+                { key: 'price', label: 'Price' },
+                { key: 'sales', label: 'Sales' },
+                { key: 'revenue', label: 'Revenue' },
+                { key: 'status', label: 'Status' },
+              ]}
+              data={products.map(p => ({
               id: (
                 <button
                   onClick={() => setSelectedProduct(p)}
@@ -226,7 +364,8 @@ export default function SellingPage() {
               revenue: <span className="text-emerald-400">{formatCurrency(p.revenue, p.currency)}</span>,
               status: <span className={getStatusColor(p.status)}>{p.status.toUpperCase()}</span>,
             }))}
-          />
+            />
+          )}
         </Panel>
 
         <div className="space-y-4">
@@ -321,7 +460,163 @@ export default function SellingPage() {
           </Panel>
         </div>
       </div>
-    </div>
+
+      {/* Create/Edit Product Modal */}
+      <Modal
+        open={showCreateModal || showEditModal}
+        onClose={() => { setShowCreateModal(false); setShowEditModal(false); }}
+        title={showEditModal ? 'Edit Product' : 'Create Product'}
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => { setShowCreateModal(false); setShowEditModal(false); }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveProduct}
+              disabled={saving || !formData.name.trim()}
+              loading={saving}
+              icon={<Save className="h-4 w-4" />}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="sc-title block mb-1">Product Name *</label>
+            <Input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Enter product name"
+            />
+          </div>
+          <div>
+            <label className="sc-title block mb-1">Description</label>
+            <Textarea
+              value={formData.description || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Enter product description"
+              rows={3}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="sc-title block mb-1">Price</label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.price.toString()}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                placeholder="0.00"
+              />
+            </div>
+            <div>
+              <label className="sc-title block mb-1">Currency</label>
+              <Select
+                options={[
+                  { value: 'USD', label: 'USD' },
+                  { value: 'EUR', label: 'EUR' },
+                  { value: 'GBP', label: 'GBP' },
+                  { value: 'JPY', label: 'JPY' },
+                ]}
+                value={formData.currency}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="sc-title block mb-1">Status</label>
+            <Select
+              options={[
+                { value: 'draft', label: 'Draft' },
+                { value: 'active', label: 'Active' },
+                { value: 'archived', label: 'Archived' },
+              ]}
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Payment Integration Modal */}
+      <Modal
+        open={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        title="Payment Integration"
+        size="sm"
+        footer={
+          <Button variant="ghost" onClick={() => setShowPaymentModal(false)}>
+            Close
+          </Button>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-white/60">
+            Connect your payment providers to start accepting payments. This feature will be available soon.
+          </p>
+          <div className="space-y-2">
+            <div className="p-3 bg-white/5 border border-white/10 rounded flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-blue-400" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-white">Stripe</div>
+                <div className="text-xs text-white/60">Credit cards, Apple Pay, Google Pay</div>
+              </div>
+              <Button variant="primary" size="sm" disabled>
+                Coming Soon
+              </Button>
+            </div>
+            <div className="p-3 bg-white/5 border border-white/10 rounded flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-yellow-400" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-white">PayPal</div>
+                <div className="text-xs text-white/60">PayPal accounts and credit cards</div>
+              </div>
+              <Button variant="warning" size="sm" disabled>
+                Coming Soon
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Analytics Modal */}
+      <Modal
+        open={showAnalyticsModal}
+        onClose={() => setShowAnalyticsModal(false)}
+        title="Sales Analytics"
+        size="lg"
+        footer={
+          <Button variant="ghost" onClick={() => setShowAnalyticsModal(false)}>
+            Close
+          </Button>
+        }
+      >
+        <div>
+          <p className="text-sm text-white/60 mb-4">
+            Sales analytics dashboard coming soon! This will include:
+          </p>
+          <ul className="space-y-2 text-sm text-white/60">
+            <li>• Revenue trends and forecasting</li>
+            <li>• Product performance metrics</li>
+            <li>• Customer acquisition and retention</li>
+            <li>• Conversion funnel analysis</li>
+            <li>• Geographic sales distribution</li>
+            <li>• Time-based sales patterns</li>
+          </ul>
+        </div>
+      </Modal>
+        </>
+      )}
+      </div>
+    </>
   );
 }
 

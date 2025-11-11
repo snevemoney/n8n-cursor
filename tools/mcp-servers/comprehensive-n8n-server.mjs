@@ -592,6 +592,28 @@ const tools = [
         workflowJson: { type: 'object', description: 'Workflow JSON to validate' }
       }
     }
+  },
+
+  // Progressive Disclosure Tool
+  {
+    name: 'search_tools',
+    description: 'Search available tools by keyword (progressive disclosure) - enables discovering tools without loading all definitions upfront',
+    inputSchema: {
+      type: 'object',
+      required: ['query'],
+      properties: {
+        query: { 
+          type: 'string', 
+          description: 'Search query to find relevant tools' 
+        },
+        detailLevel: { 
+          type: 'string', 
+          enum: ['name', 'description', 'full'],
+          description: 'Level of detail: name (fastest), description (balanced), full (complete schemas)',
+          default: 'description'
+        }
+      }
+    }
   }
 ];
 
@@ -1299,6 +1321,31 @@ const toolImplementations = {
       valid: errors.length === 0,
       errors: errors
     };
+  },
+
+  async 'search_tools'(args) {
+    const { query, detailLevel = 'description' } = args;
+    const searchLower = query.toLowerCase();
+    
+    // Filter tools by query
+    const matches = tools.filter(tool => {
+      const searchText = `${tool.name} ${tool.description}`.toLowerCase();
+      return searchText.includes(searchLower);
+    });
+    
+    // Return based on detail level
+    if (detailLevel === 'name') {
+      return matches.map(t => ({ name: t.name }));
+    }
+    if (detailLevel === 'description') {
+      return matches.map(t => ({ 
+        name: t.name, 
+        description: t.description 
+      }));
+    }
+    
+    // Full detail
+    return matches;
   }
 };
 

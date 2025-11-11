@@ -25,6 +25,7 @@ services:
       - api
       - n8n
       - dozzle
+      - scorpion
 
   landing:
     <<: *dflt
@@ -111,6 +112,25 @@ services:
     ports: ["127.0.0.1:7000:8080"]
     healthcheck: { test: ["CMD","wget","-qO-","http://localhost:8080"], interval: 10s, timeout: 3s, retries: 10 }
 
+  scorpion:
+    <<: *dflt
+    build:
+      context: ../..
+      dockerfile: apps/scorpion/Dockerfile
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - SCORPION_STORAGE_AUTO_DETECT=false
+      - SCORPION_SSD_PATH=/app/data/scorpion
+      - N8N_API_URL=http://n8n:5678
+    ports: ["127.0.0.1:3003:3003"]
+    volumes:
+      - ../../apps/scorpion/data/scorpion:/app/data/scorpion
+      - ../../apps/scorpion/backups:/app/backups/scorpion
+    depends_on:
+      - redis
+      - n8n
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 10s, timeout: 2s, retries: 10 }
 
 volumes:
   n8n-data:

@@ -17,8 +17,11 @@ export const POST = withRateLimit(
     const metrics = getMetricsCollector();
     
     try {
+      // Extract request body first to use in trace tags
+      const body = await request.json();
+      const { message, useRAG = true, model } = body;
+      
       return await trace('chat.request', async (spanId) => {
-        const { message, useRAG = true, model } = await request.json(); // Default to true
 
         if (!message) {
           return NextResponse.json(
@@ -125,6 +128,7 @@ export const POST = withRateLimit(
 
 /**
  * Check model availability and list models
+ * Used as fallback when Ollama is unavailable
  */
 export async function GET() {
   try {
@@ -133,15 +137,25 @@ export async function GET() {
     const source = process.env.SCORPION_MODEL_SOURCE || 'ollama';
     
     return NextResponse.json({
+      success: true,
       available,
       source,
-      models
+      models: models || [],
+      fallbackAvailable: source === 'openai' ? !!process.env.OPENAI_API_KEY : false
     });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message, available: false, models: [] },
-      { status: 500 }
-    );
+    // If model source is unavailable, return 200 with available: false
+    // This is an expected condition, not an error
+    const source = process.env.SCORPION_MODEL_SOURCE || 'ollama';
+    console.warn(`Model source ${source} unavailable:`, error.message);
+    return NextResponse.json({
+      success: false,
+      available: false,
+      source,
+      models: [],
+      error: error.message || 'Model source unavailable',
+      fallbackAvailable: false
+    });
   }
 }
 

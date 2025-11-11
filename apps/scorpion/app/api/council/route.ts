@@ -3,6 +3,9 @@ import { runCouncilDeliberationStreaming, computeConsensus } from '@/lib/chat/co
 import { createSSEMessage } from '@/lib/chat/events';
 import type { Plan } from '@/lib/chat/types';
 import { detectLightweightMode } from '@/lib/utils/systemResources';
+import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
+import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { z } from 'zod';
 
 // Default council members (matching council.ts)
 const defaultCouncilMembers = [
@@ -14,30 +17,24 @@ const defaultCouncilMembers = [
   { id: 'S-006', name: 'Sentinel', weight: 1.2, role: 'Security & Performance' },
   { id: 'C-007', name: 'Catalyst', weight: 0.9, role: 'Innovation Advisor' },
   { id: 'O-008', name: 'Oracle', weight: 1.1, role: 'Data & Analytics' },
+  { id: 'M-009', name: 'Mentor', weight: 1.2, role: 'LLM Training & Evaluation' },
 ];
 
 /**
  * GET /api/council - Get council members info
  */
-export async function GET() {
-  try {
-    return NextResponse.json({
-      members: defaultCouncilMembers.map(m => ({
-        name: m.name,
-        role: m.role,
-        specialty: m.role,
-        weight: m.weight,
-        goal: `Provide expert ${m.role.toLowerCase()} perspective`,
-      })),
-      count: defaultCouncilMembers.length
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Failed to load council members' },
-      { status: 500 }
-    );
-  }
-}
+export const GET = withErrorHandling(async () => {
+  return createSuccessResponse({
+    members: defaultCouncilMembers.map(m => ({
+      name: m.name,
+      role: m.role,
+      specialty: m.role,
+      weight: m.weight,
+      goal: `Provide expert ${m.role.toLowerCase()} perspective`,
+    })),
+    count: defaultCouncilMembers.length
+  });
+});
 
 /**
  * POST /api/council - Run a council meeting with SSE streaming
@@ -65,16 +62,17 @@ export async function POST(req: NextRequest) {
   
   // Create a simple plan from the topic
   const plan: Plan = {
-    summary: topic,
+    objective: topic,
+    assumptions: [],
     plan: [
       {
         id: '1',
-        step: 1,
-        description: `Deliberate on: ${topic}`,
+        title: `Deliberate on: ${topic}`,
         tool: 'none',
         args: {},
       }
     ],
+    done_when: [`Council deliberation on "${topic}" is complete`],
   };
   
   // Create readable stream
@@ -96,7 +94,7 @@ export async function POST(req: NextRequest) {
         
         // Get model config: Auto-detect lightweight mode based on system RAM
         const lightweightMode = detectLightweightMode();
-        const defaultModel = 'llama3.2:1b';
+        const defaultModel = process.env.OLLAMA_MODEL || getRecommendedModelForRAM();
         // Increased tokens to allow full responses (was 100-150, now 500-800)
         const councilMaxTokens = lightweightMode ? 500 : 800;
         const councilTemp = lightweightMode ? 0.3 : 0.5;

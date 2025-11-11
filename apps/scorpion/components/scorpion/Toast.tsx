@@ -8,6 +8,7 @@ interface Toast {
   type: 'success' | 'error' | 'warning' | 'info';
   message: string;
   duration?: number;
+  isExiting?: boolean;
 }
 
 interface ToastContextType {
@@ -43,7 +44,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts(prev => prev.map(toast => 
+      toast.id === id ? { ...toast, isExiting: true } : toast
+    ));
+    
+    // Remove from DOM after animation completes (reduced delay for faster cleanup)
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 100);
   }, []);
 
   return (
@@ -59,14 +67,19 @@ function ToastContainer({ toasts, removeToast }: { toasts: Toast[]; removeToast:
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
-      {toasts.map(toast => (
-        <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
+      {toasts.map((toast, index) => (
+        <ToastItem 
+          key={toast.id} 
+          toast={toast} 
+          onRemove={removeToast}
+          index={index}
+        />
       ))}
     </div>
   );
 }
 
-function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
+function ToastItem({ toast, onRemove, index }: { toast: Toast; onRemove: (id: string) => void; index: number }) {
   const icons = {
     success: <CheckCircle className="w-5 h-5 text-emerald-400" />,
     error: <XCircle className="w-5 h-5 text-red-400" />,
@@ -81,16 +94,28 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
     info: 'border-blue-400/30 bg-blue-900/20'
   };
 
+  const handleRemove = () => {
+    onRemove(toast.id);
+  };
+
   return (
     <div 
-      className={`sc-panel ${colors[toast.type]} flex items-start gap-3 p-4 animate-in slide-in-from-right`}
+      className={`sc-panel ${colors[toast.type]} flex items-start gap-3 p-4 ${
+        toast.isExiting 
+          ? 'animate-slide-out-to-right' 
+          : 'animate-slide-in-from-right'
+      }`}
+      style={{ 
+        animationDelay: toast.isExiting ? '0ms' : `${index * 50}ms` 
+      }}
       role="alert"
     >
       {icons[toast.type]}
       <div className="flex-1 text-sm">{toast.message}</div>
       <button
-        onClick={() => onRemove(toast.id)}
-        className="text-white/60 hover:text-white transition-colors"
+        onClick={handleRemove}
+        className="text-white/60 hover:text-white transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-transparent rounded"
+        aria-label="Close notification"
       >
         <X className="w-4 h-4" />
       </button>

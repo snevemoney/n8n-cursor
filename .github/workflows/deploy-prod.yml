@@ -15,12 +15,15 @@ jobs:
           for s in landing web ops api worker; do
             docker build -t ghcr.io/${{ github.repository }}/lfai-$s:prod apps/$s
           done
+          # Build Scorpion (different Dockerfile path - builds from workspace root)
+          docker build -t ghcr.io/${{ github.repository }}/scorpion:prod -f apps/scorpion/Dockerfile .
       - name: Push
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
           for s in landing web ops api worker; do
             docker push ghcr.io/${{ github.repository }}/lfai-$s:prod
           done
+          docker push ghcr.io/${{ github.repository }}/scorpion:prod
 
   deploy-green:
     needs: build-push
@@ -39,6 +42,7 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}/lfai-ops:prod
             docker pull ghcr.io/${{ github.repository }}/lfai-api:prod
             docker pull ghcr.io/${{ github.repository }}/lfai-worker:prod
+            docker pull ghcr.io/${{ github.repository }}/scorpion:prod
             docker compose -f infra/docker/docker-compose.prod.yml up -d
             bash scripts/green_smoke_local.sh
 

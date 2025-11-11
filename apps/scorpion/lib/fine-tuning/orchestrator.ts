@@ -6,6 +6,7 @@
 import { getTrainingDataCollector } from './collector';
 import { getOllamaFineTuner, FineTuneConfig } from './ollama-tuner';
 import { getOntologyStore } from '../shared-stores';
+import { getExperimentTracker } from '../llm/experiment-tracker';
 
 interface FineTuneSchedule {
   enabled: boolean;
@@ -18,6 +19,7 @@ interface FineTuneSchedule {
 class AutoFineTuningOrchestrator {
   private collector = getTrainingDataCollector();
   private tuner = getOllamaFineTuner();
+  private experimentTracker = getExperimentTracker();
   private schedule: FineTuneSchedule = {
     enabled: true,
     minExamples: 100,
@@ -80,12 +82,43 @@ class AutoFineTuningOrchestrator {
         batchSize: 4
       };
 
+      // Create experiment tracking entry
+      const experiment = await this.experimentTracker.createExperiment({
+        name: `Auto Fine-Tune ${this.schedule.baseModel}`,
+        description: `Automatic fine-tuning run with ${dataset.size} examples`,
+        baseModel: config.baseModel,
+        strategy: 'qlora', // Default for Ollama
+        hyperparameters: {
+          learningRate: config.learningRate || 0.0001,
+          batchSize: config.batchSize || 4,
+          epochs: config.epochs || 3
+        },
+        dataset: {
+          id: dataset.id,
+          name: dataset.name,
+          size: dataset.size,
+          qualityScore: dataset.qualityScore
+        }
+      });
+
+      // Update experiment status to running
+      await this.experimentTracker.updateExperiment(experiment.id, { status: 'running' });
+      await this.experimentTracker.addLog(experiment.id, 'Starting fine-tuning process');
+
       const result = await this.tuner.fineTune(config);
 
       if (result.success) {
         console.log(`✅ Fine-tuning successful: ${result.modelName}`);
         
-        // Store fine-tuning result
+        // Update experiment with results
+        await this.experimentTracker.updateExperiment(experiment.id, {
+          status: 'completed',
+          trainedModelName: result.modelName,
+          metrics: result.metrics
+        });
+        await this.experimentTracker.addLog(experiment.id, `Fine-tuning completed successfully. Model: ${result.modelName}`);
+        
+        // Store fine-tuning result in ontology (for backward compatibility)
         const ontologyStore = await getOntologyStore();
         await ontologyStore.store({
           id: `finetune-${Date.now()}`,
@@ -98,6 +131,7 @@ class AutoFineTuningOrchestrator {
             datasetId: dataset.id,
             metrics: result.metrics,
             trainingTime: result.trainingTime,
+            experimentId: experiment.id,
             createdAt: new Date().toISOString()
           }
         });
@@ -109,6 +143,13 @@ class AutoFineTuningOrchestrator {
         await this.considerModelSwitch(result.modelName);
       } else {
         console.error(`❌ Fine-tuning failed: ${result.error}`);
+        
+        // Update experiment with error
+        await this.experimentTracker.updateExperiment(experiment.id, {
+          status: 'failed',
+          error: result.error
+        });
+        await this.experimentTracker.addLog(experiment.id, `Fine-tuning failed: ${result.error}`);
       }
     } catch (error) {
       console.error('❌ Auto fine-tuning check failed:', error);

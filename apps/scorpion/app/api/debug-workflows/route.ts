@@ -1,54 +1,77 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
+import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
-export async function GET() {
+export const GET = withErrorHandling(async () => {
   const debug: any = {
     step1_env_check: {
-      N8N_BASE_URL: process.env.N8N_BASE_URL || 'NOT SET',
+      // Standardize on N8N_API_URL (N8N_BASE_URL kept for backward compatibility)
+      N8N_API_URL: process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'NOT SET',
+      N8N_BASE_URL_DEPRECATED: process.env.N8N_BASE_URL || 'NOT SET (use N8N_API_URL instead)',
       N8N_API_KEY_LENGTH: process.env.N8N_API_KEY?.length || 0,
-      HAS_KEY: !!process.env.N8N_API_KEY
+      HAS_KEY: !!process.env.N8N_API_KEY,
+      API_KEY_PREVIEW: process.env.N8N_API_KEY ? 
+        `${process.env.N8N_API_KEY.substring(0, 10)}...${process.env.N8N_API_KEY.substring(process.env.N8N_API_KEY.length - 5)}` : 
+        'NOT SET'
     },
     step2_client_init: null,
-    step3_api_call: null,
-    step4_result: null,
+    step3_client_config: null,
+    step4_api_call: null,
+    step5_result: null,
     error: null
   };
 
-  try {
-    // Step 2: Initialize client
+  // Step 2: Initialize client
+  const client = getMCPn8nClient();
+  debug.step2_client_init = 'SUCCESS - Client created';
+  
+  // Step 3: Check client configuration
+  debug.step3_client_config = {
+    isConfigured: client.isConfigured(),
+    baseUrl: (client as any).baseUrl,
+    hasApiKey: !!(client as any).apiKey,
+    apiKeyLength: (client as any).apiKey?.length || 0,
+    circuitBreaker: client.getCircuitBreakerStatus()
+  };
+
+  // Step 4: Make API call
+  debug.step4_api_call = 'Calling listWorkflows()...';
+  const workflows = await client.listWorkflows({ limit: 5 });
+  
+  // Step 5: Result
+  debug.step5_result = {
+    workflows_count: workflows?.length || 0,
+    is_array: Array.isArray(workflows),
+    first_workflow: workflows?.[0] ? {
+      id: workflows[0].id,
+      name: workflows[0].name,
+      active: workflows[0].active
+    } : null
+  };
+
+  return createSuccessResponse({
+    debug,
+    workflows: workflows?.slice(0, 3)
+  });
+});
+
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const { action } = await request.json().catch(() => ({}));
+  
+  if (action === 'reset-circuit-breaker') {
     const client = getMCPn8nClient();
-    debug.step2_client_init = 'SUCCESS - Client created';
-
-    // Step 3: Make API call
-    debug.step3_api_call = 'Calling listWorkflows()...';
-    const workflows = await client.listWorkflows({ limit: 5 });
-    
-    // Step 4: Result
-    debug.step4_result = {
-      workflows_count: workflows?.length || 0,
-      is_array: Array.isArray(workflows),
-      first_workflow: workflows?.[0] ? {
-        id: workflows[0].id,
-        name: workflows[0].name
-      } : null
-    };
-
-    return NextResponse.json({
-      success: true,
-      debug,
-      workflows: workflows?.slice(0, 3)
+    client.resetCircuitBreaker();
+    return createSuccessResponse({
+      message: 'Circuit breaker reset'
     });
-  } catch (error: any) {
-    debug.error = {
-      message: error.message,
-      stack: error.stack?.split('\n').slice(0, 5)
-    };
-    
-    return NextResponse.json({
-      success: false,
-      debug
-    }, { status: 500 });
   }
-}
+
+  return createErrorResponse(
+    ApiErrorCode.INVALID_REQUEST,
+    'Invalid action. Valid actions: reset-circuit-breaker',
+    undefined,
+    400
+  );
+});
 
 

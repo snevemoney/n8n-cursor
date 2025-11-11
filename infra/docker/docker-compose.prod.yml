@@ -81,5 +81,27 @@ services:
     volumes:
       - ${PROD_DATA_ROOT:-./data}/n8n_data:/home/node/.n8n
 
+  scorpion:
+    <<: *dflt
+    image: ghcr.io/yourorg/scorpion:prod
+    env_file: [../../.env.production]
+    ports: ["127.0.0.1:3003:3003"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "2"; mem_limit: "2g"; pids_limit: 400
+    volumes:
+      # Persistent storage for Scorpion data (RAG, Ontology, backups)
+      - ${PROD_DATA_ROOT:-./data}/scorpion:/app/data/scorpion
+      # Optional: Mount backups directory
+      - ${PROD_DATA_ROOT:-./data}/scorpion-backups:/app/backups/scorpion
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      # Storage configuration
+      - SCORPION_STORAGE_AUTO_DETECT=false
+      - SCORPION_SSD_PATH=/app/data/scorpion
+    depends_on:
+      redis: { condition: service_healthy }
+      n8n: { condition: service_healthy }
+
 networks:
   private: { driver: bridge, internal: true }

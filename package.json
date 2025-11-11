@@ -34,7 +34,9 @@
     "schema:validate": "node scripts/migrate/update-schema.js validate",
     "schema:status": "node scripts/migrate/update-schema.js status",
     "consistency:check": "node scripts/consistency-check.js",
-    "consistency:validate": "node scripts/consistency-validate.js"
+    "consistency:validate": "node scripts/consistency-validate.js",
+    "backup": "bash scripts/backup-scorpion.sh",
+    "restore": "bash scripts/restore-scorpion.sh"
   },
   "keywords": [
     "lightning",

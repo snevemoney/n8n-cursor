@@ -3,8 +3,18 @@
 import { useEffect, useState } from 'react';
 import { Panel } from '@/components/scorpion/Panel';
 import { Metric } from '@/components/scorpion/Metric';
+import { LoadingState, ErrorState, EmptyState, PageLoadingBar } from '@/components/scorpion';
 import { CheckCircle, XCircle, AlertTriangle, Activity, Database, Workflow, Brain, Shield, TrendingUp, Zap, Radio } from 'lucide-react';
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import dynamic from 'next/dynamic';
+
+// Lazy load recharts - heavy library that slows initial render
+const AreaChart = dynamic(() => import('recharts').then(mod => mod.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then(mod => mod.Area), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
 
 interface SystemHealth {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -31,45 +41,77 @@ interface MetricPoint {
 
 export default function DashboardPage() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start false so page renders immediately
+  const [error, setError] = useState<Error | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [metricHistory, setMetricHistory] = useState<MetricPoint[]>([]);
 
   useEffect(() => {
     setMounted(true);
-    loadHealth();
+    // Defer data fetch aggressively so page renders instantly
+    const loadData = () => {
+      loadHealth();
+    };
+    
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(loadData, { timeout: 0 }); // Immediate - no delay
+    } else {
+      setTimeout(loadData, 0); // Immediate fallback
+    }
+    
     if (autoRefresh) {
-      const interval = setInterval(loadHealth, 10000); // Refresh every 10 seconds
+      // Only refresh when tab is visible to avoid unnecessary requests
+      const interval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          loadHealth();
+        }
+      }, 15000); // 15 seconds - health check has 15s cache, so no need to poll more frequently
       return () => clearInterval(interval);
     }
   }, [autoRefresh]);
 
   const loadHealth = async () => {
     try {
-      const response = await fetch('/api/health');
+      setError(null);
+      // Only show loading spinner on initial load, not on refresh
+      if (!health) {
+        setLoading(true);
+      }
+      const response = await fetch('/api/health', {
+        // Add cache headers for faster subsequent loads
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      });
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        const data = result.success && result.data ? result.data : result;
         setHealth(data);
         
         // Add to metric history for charts
-        if (mounted) {
+        if (mounted && data.summary) {
           const now = new Date();
           const timeStr = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
           setMetricHistory(prev => {
             const updated = [...prev, {
               time: timeStr,
-              healthy: data.summary.healthy,
-              warnings: data.summary.warnings,
-              errors: data.summary.errors,
+              healthy: data.summary?.healthy ?? 0,
+              warnings: data.summary?.warnings ?? 0,
+              errors: data.summary?.errors ?? 0,
             }];
             // Keep last 20 data points
             return updated.slice(-20);
           });
         }
+      } else {
+        throw new Error(`Failed to load health status: ${response.statusText}`);
       }
-    } catch (error) {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to load health status');
       console.error('Failed to load health:', error);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -112,60 +154,46 @@ export default function DashboardPage() {
     return icons[name] || <Activity className="h-4 w-4" />;
   };
 
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400 mx-auto mb-4"></div>
-          <div className="sc-mono text-sm text-white/60">Loading system status...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!health) {
-    return (
-      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
-        <div className="text-center">
-          <XCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <div className="sc-mono text-sm text-red-400">Failed to load health status</div>
-        </div>
-      </div>
-    );
-  }
-
+  // Show page structure immediately, only show loading for content areas
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
-      <div className="p-6 space-y-6">
+      <PageLoadingBar loading={loading && !health} />
+      <div className="p-3 md:p-6 space-y-4 md:space-y-6 min-w-0">
         {/* Header with Live Indicator */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="sc-title text-3xl font-bold">System Dashboard</h1>
-              {autoRefresh && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+              <h1 className="sc-title text-xl md:text-2xl lg:text-3xl font-bold">System Dashboard</h1>
+              {autoRefresh && health && (
+                <div className="flex items-center gap-2 px-2 md:px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
                   <Radio className="h-3 w-3 text-emerald-400 animate-pulse" />
-                  <span className="sc-mono text-xs text-emerald-400">LIVE</span>
+                  <span className="sc-mono text-[10px] md:text-xs text-emerald-400">LIVE</span>
                 </div>
               )}
             </div>
-            <p className="sc-mono text-sm text-gray-400">
-              Last updated: {mounted ? new Date(health.timestamp).toLocaleString() : '...'}
+            <p className="sc-mono text-xs md:text-sm text-gray-400 truncate">
+              {loading && !health ? (
+                <span className="animate-pulse">Loading...</span>
+              ) : error && !health ? (
+                <span className="text-yellow-400">Failed to load</span>
+              ) : (
+                `Last updated: ${mounted && health?.timestamp ? new Date(health.timestamp).toLocaleString() : '...'}`
+              )}
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
+            <label className="flex items-center gap-1.5 md:gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
                 className="rounded accent-emerald-500"
               />
-              <span className="sc-mono text-sm text-white/60">Auto-refresh</span>
+              <span className="sc-mono text-xs md:text-sm text-white/60 whitespace-nowrap">Auto-refresh</span>
             </label>
             <button
               onClick={loadHealth}
-              className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 rounded-lg sc-mono text-sm hover:bg-emerald-500/30 transition-all hover:scale-105"
+              className="px-3 md:px-4 py-1.5 md:py-2 bg-emerald-500/20 border border-emerald-500/50 rounded-lg sc-mono text-xs md:text-sm hover:bg-emerald-500/30 transition-all hover:scale-105 whitespace-nowrap"
             >
               Refresh
             </button>
@@ -173,45 +201,59 @@ export default function DashboardPage() {
         </div>
 
         {/* Overall Status - Large Visual Card */}
-        <Panel className="border-2 border-emerald-400/30 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className={`p-4 rounded-2xl ${
-                health.status === 'healthy' ? 'bg-emerald-500/20' :
-                health.status === 'degraded' ? 'bg-yellow-500/20' :
-                'bg-red-500/20'
-              }`}>
-                {health.status === 'healthy' ? <CheckCircle className="h-12 w-12 text-emerald-400" /> :
-                 health.status === 'degraded' ? <AlertTriangle className="h-12 w-12 text-yellow-400" /> :
-                 <XCircle className="h-12 w-12 text-red-400" />}
-              </div>
-              <div>
-                <div className="sc-title text-lg mb-1">Overall Status</div>
-                <div className={`text-4xl font-bold ${
-                  health.status === 'healthy' ? 'text-emerald-400' :
-                  health.status === 'degraded' ? 'text-yellow-400' :
-                  'text-red-400'
+        {loading && !health ? (
+          <Panel className="border-2 border-emerald-400/30 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5">
+            <LoadingState variant="skeleton" skeletonLines={3} text="Loading system status..." />
+          </Panel>
+        ) : error && !health ? (
+          <Panel className="border-2 border-yellow-400/30">
+            <ErrorState
+              error={error instanceof Error ? error : new Error(error)}
+              onRetry={loadHealth}
+              title="Failed to load health status"
+            />
+          </Panel>
+        ) : health ? (
+          <Panel className="border-2 border-emerald-400/30 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl shrink-0 ${
+                  health.status === 'healthy' ? 'bg-emerald-500/20' :
+                  health.status === 'degraded' ? 'bg-yellow-500/20' :
+                  'bg-red-500/20'
                 }`}>
-                  {health.status.toUpperCase()}
+                  {health.status === 'healthy' ? <CheckCircle className="h-8 w-8 md:h-12 md:w-12 text-emerald-400" /> :
+                   health.status === 'degraded' ? <AlertTriangle className="h-8 w-8 md:h-12 md:w-12 text-yellow-400" /> :
+                   <XCircle className="h-8 w-8 md:h-12 md:w-12 text-red-400" />}
+                </div>
+                <div className="min-w-0">
+                  <div className="sc-title text-sm md:text-lg mb-1">Overall Status</div>
+                  <div className={`text-2xl md:text-3xl lg:text-4xl font-bold truncate ${
+                    health.status === 'healthy' ? 'text-emerald-400' :
+                    health.status === 'degraded' ? 'text-yellow-400' :
+                    'text-red-400'
+                  }`}>
+                    {health.status?.toUpperCase() ?? 'UNKNOWN'}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3 md:gap-6 shrink-0">
+                <div className="text-center">
+                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-emerald-400 mb-1">{health.summary?.healthy ?? 0}</div>
+                  <div className="sc-mono text-[10px] md:text-xs text-white/50">Healthy</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 mb-1">{health.summary?.warnings ?? 0}</div>
+                  <div className="sc-mono text-[10px] md:text-xs text-white/50">Warnings</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-red-400 mb-1">{health.summary?.errors ?? 0}</div>
+                  <div className="sc-mono text-[10px] md:text-xs text-white/50">Errors</div>
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-emerald-400 mb-1">{health.summary.healthy}</div>
-                <div className="sc-mono text-xs text-white/50">Healthy</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400 mb-1">{health.summary.warnings}</div>
-                <div className="sc-mono text-xs text-white/50">Warnings</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-400 mb-1">{health.summary.errors}</div>
-                <div className="sc-mono text-xs text-white/50">Errors</div>
-              </div>
-            </div>
-          </div>
-        </Panel>
+          </Panel>
+        ) : null}
 
         {/* Live Metrics Chart */}
         {metricHistory.length > 0 && (
@@ -254,16 +296,17 @@ export default function DashboardPage() {
         )}
 
         {/* System Status Grid - Enhanced Visual Cards */}
-        <div>
-          <h2 className="sc-title text-xl mb-4 flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            System Components
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(health.systems).map(([name, system]) => (
+        {health && (
+          <div>
+            <h2 className="sc-title text-base md:text-xl mb-3 md:mb-4 flex items-center gap-2">
+              <Activity className="h-4 w-4 md:h-5 md:w-5" />
+              System Components
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              {Object.entries(health.systems || {}).map(([name, system]) => (
               <Panel 
                 key={name} 
-                className={`p-5 transition-all hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/10 border-2 ${
+                className={`p-5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-500/10 border-2 ${
                   system.status === 'ok' ? 'border-emerald-400/20' :
                   system.status === 'warning' ? 'border-yellow-400/20' :
                   'border-red-400/20'
@@ -323,9 +366,10 @@ export default function DashboardPage() {
                   </div>
                 )}
               </Panel>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Metrics Link */}
         <Panel className="bg-gradient-to-r from-emerald-500/10 to-emerald-600/5 border-emerald-400/20">

@@ -80,6 +80,7 @@ class SystemAutomation {
   private workspaceRoot: string;
   private errorLog: ErrorReport[] = [];
   private healthCheckInterval: NodeJS.Timeout | null = null;
+  private serviceHealthInterval: NodeJS.Timeout | null = null;
   private backupInterval: NodeJS.Timeout | null = null;
   private databaseSyncInterval: NodeJS.Timeout | null = null;
   private mcpCheckInterval: NodeJS.Timeout | null = null;
@@ -96,10 +97,31 @@ class SystemAutomation {
   async initialize() {
     console.log('🦂 Initializing system-wide automation...');
 
+    // Emit startup log event
+    try {
+      const { emitEvent } = require('./telemetry/emitter');
+      emitEvent({
+        type: 'system.log',
+        source: 'system-automation',
+        level: 'info',
+        message: 'System automation initialized - starting monitoring and health checks',
+        severity: 'info'
+      });
+    } catch (err) {
+      // Silent fail
+    }
+
     // Error detection (every 30 seconds)
     this.healthCheckInterval = setInterval(() => {
       this.detectErrors();
     }, 30 * 1000);
+
+    // Service health checks (every 60 seconds) - emits telemetry events
+    this.serviceHealthInterval = setInterval(() => {
+      this.checkServiceHealth().catch(err => {
+        console.error('❌ Service health check failed:', err);
+      });
+    }, 60 * 1000);
 
     // Auto backups (every 6 hours)
     this.backupInterval = setInterval(() => {
@@ -130,6 +152,20 @@ class SystemAutomation {
     ]);
 
     console.log('✅ System-wide automation initialized');
+    
+    // Emit completion log
+    try {
+      const { emitEvent } = require('./telemetry/emitter');
+      emitEvent({
+        type: 'system.log',
+        source: 'system-automation',
+        level: 'info',
+        message: 'System automation initialization complete - all monitoring systems active',
+        severity: 'info'
+      });
+    } catch (err) {
+      // Silent fail
+    }
   }
 
   /**
@@ -160,6 +196,21 @@ class SystemAutomation {
       // Check service health
       const health = await this.checkServiceHealth();
       
+      // Emit health check log
+      try {
+        const { emitEvent } = require('./telemetry/emitter');
+        const overallHealth = this.calculateOverallHealth(health.services);
+        emitEvent({
+          type: 'system.log',
+          source: 'system-automation',
+          level: overallHealth === 'critical' ? 'error' : overallHealth === 'degraded' ? 'warn' : 'info',
+          message: `Health check completed - Overall status: ${overallHealth}`,
+          severity: overallHealth === 'critical' ? 'error' : overallHealth === 'degraded' ? 'warn' : 'info'
+        });
+      } catch (err) {
+        // Silent fail
+      }
+      
       // Check logs for errors
       await this.scanLogsForErrors();
       
@@ -188,7 +239,7 @@ class SystemAutomation {
    */
   async checkServiceHealth(): Promise<StackStatus> {
     const services = [
-      { name: 'n8n', url: process.env.N8N_API_URL || process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678', healthPath: '/healthz' },
+      { name: 'n8n', url: (process.env.N8N_API_URL || process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678'), healthPath: '/healthz' },
       { name: 'Ollama', url: process.env.OLLAMA_URL || 'http://localhost:11434', healthPath: '/api/version' },
       { name: 'PostgreSQL', port: 5432 },
       { name: 'Redis', port: 6379 },
@@ -204,23 +255,42 @@ class SystemAutomation {
               const mcpClient = getMCPn8nClient();
               if (!mcpClient.isConfigured()) {
                 // n8n not configured - don't report error, just mark as offline
-                return {
+                const status = {
                   name: service.name,
                   status: 'offline' as const,
                   health: 0,
                   lastCheck: new Date().toISOString()
                 };
+                // Emit health event
+                try {
+                  const { telemetry } = require('./telemetry/emitter');
+                  telemetry.systemHealth(service.name, 'down');
+                } catch (err) {
+                  // Silent fail
+                }
+                return status;
               }
             } catch (clientError) {
               // Client initialization failed - skip health check
-              return {
+              const status = {
                 name: service.name,
                 status: 'offline' as const,
                 health: 0,
                 lastCheck: new Date().toISOString()
               };
+              // Emit health event
+              try {
+                const { telemetry } = require('./telemetry/emitter');
+                telemetry.systemHealth(service.name, 'down');
+              } catch (err) {
+                // Silent fail
+              }
+              return status;
             }
           }
+
+          let serviceStatus: 'healthy' | 'degraded' | 'down' = 'down';
+          let healthValue = 0;
 
           if ('url' in service) {
             const healthPath = 'healthPath' in service ? service.healthPath : '/healthz';
@@ -231,30 +301,33 @@ class SystemAutomation {
             // Check for auth errors (401/403) - don't report these as errors
             if (!response.ok && (response.status === 401 || response.status === 403)) {
               // Auth error - don't report, just mark as offline
-              return {
-                name: service.name,
-                status: 'offline' as const,
-                health: 0,
-                lastCheck: new Date().toISOString()
-              };
+              serviceStatus = 'down';
+              healthValue = 0;
+            } else {
+              serviceStatus = response.ok ? 'healthy' : 'down';
+              healthValue = response.ok ? 100 : 0;
             }
-            
-            return {
-              name: service.name,
-              status: response.ok ? 'online' as const : 'offline' as const,
-              health: response.ok ? 100 : 0,
-              lastCheck: new Date().toISOString()
-            };
           } else {
             // TCP port check
             const isOpen = await this.checkPort(service.port);
-            return {
-              name: service.name,
-              status: isOpen ? 'online' as const : 'offline' as const,
-              health: isOpen ? 100 : 0,
-              lastCheck: new Date().toISOString()
-            };
+            serviceStatus = isOpen ? 'healthy' : 'down';
+            healthValue = isOpen ? 100 : 0;
           }
+
+          // Emit health event
+          try {
+            const { telemetry } = require('./telemetry/emitter');
+            telemetry.systemHealth(service.name, serviceStatus);
+          } catch (err) {
+            // Silent fail
+          }
+
+          return {
+            name: service.name,
+            status: serviceStatus === 'healthy' ? 'online' as const : 'offline' as const,
+            health: healthValue,
+            lastCheck: new Date().toISOString()
+          };
         } catch (error: any) {
           // Only report errors if they're not auth-related and not throttled
           const errorMessage = error.message || String(error);
@@ -278,6 +351,14 @@ class SystemAutomation {
               });
               this.lastHealthErrorTimes.set(service.name, now);
             }
+          }
+          
+          // Emit health event for failed check
+          try {
+            const { telemetry } = require('./telemetry/emitter');
+            telemetry.systemHealth(service.name, 'down');
+          } catch (err) {
+            // Silent fail
           }
           
           return {
@@ -518,6 +599,49 @@ class SystemAutomation {
     }
     
     console.error(`❌ [${error.severity.toUpperCase()}] ${error.source}: ${error.message}`);
+    
+    // Emit telemetry event for the log
+    try {
+      const { emitEvent } = require('./telemetry/emitter');
+      // Map error severity to valid schema values
+      const severityMap: Record<string, 'info' | 'warn' | 'error' | 'critical'> = {
+        'critical': 'critical',
+        'high': 'error',
+        'medium': 'warn',
+        'low': 'info',
+        'info': 'info',
+        'warn': 'warn',
+        'warning': 'warn',
+        'error': 'error'
+      };
+      const mappedSeverity = severityMap[error.severity] || 'info';
+      const mappedLevel = mappedSeverity === 'critical' ? 'critical' : mappedSeverity;
+      
+      emitEvent({
+        type: 'system.log',
+        source: error.source || 'system-automation',
+        level: mappedLevel,
+        message: error.message,
+        severity: mappedSeverity,
+        context: error.context
+      });
+      
+      // Create notification for critical/high severity errors
+      if (error.severity === 'critical' || error.severity === 'high') {
+        const { getNotificationManager } = require('./notification-manager');
+        const notificationManager = getNotificationManager();
+        notificationManager.notify(
+          error.severity === 'critical' ? 'danger' : 'warning',
+          error.severity,
+          `System Error: ${error.source}`,
+          error.message,
+          error.severity === 'critical'
+        );
+      }
+    } catch (err) {
+      // Silent fail - telemetry/notifications not critical for error reporting
+      console.debug('Failed to emit telemetry/notification for error:', err);
+    }
   }
 
   private async scanLogsForErrors(): Promise<void> {
@@ -652,6 +776,7 @@ class SystemAutomation {
    */
   stop() {
     if (this.healthCheckInterval) clearInterval(this.healthCheckInterval);
+    if (this.serviceHealthInterval) clearInterval(this.serviceHealthInterval);
     if (this.backupInterval) clearInterval(this.backupInterval);
     if (this.databaseSyncInterval) clearInterval(this.databaseSyncInterval);
     if (this.mcpCheckInterval) clearInterval(this.mcpCheckInterval);

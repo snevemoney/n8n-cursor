@@ -20,5 +20,8 @@ export interface ExtractedKnowledge {
   useCases: string[]; // When to use this knowledge
   tags: string[];
   extractedAt: string;
+  // File path information for project files
+  filePath?: string; // Primary file path (from first codeSnippet if available)
+  contentUrl?: string; // URL or path to content file
 }
 

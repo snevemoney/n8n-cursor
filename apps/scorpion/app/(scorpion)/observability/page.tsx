@@ -1,13 +1,29 @@
 'use client';
 
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { connectTelemetryStream, disconnectTelemetryStream } from '@/lib/telemetry';
 import { TimeScrubber } from '@/components/observability/TimeScrubber';
 import { LivePill } from '@/components/observability/LivePill';
 import { BackpressureDial } from '@/components/observability/BackpressureDial';
 import { LogStream } from '@/components/observability/LogStream';
 import { HealthCards } from '@/components/observability/HealthCards';
-import { Panel } from '@/components/scorpion';
+import { AgentSmallMultiples } from '@/components/observability/AgentSmallMultiples';
+import { QueueStatistics } from '@/components/observability/QueueStatistics';
+import { Panel, PageLoadingBar } from '@/components/scorpion';
+
+// Lazy load EventRateChart - likely uses recharts or similar heavy library
+const EventRateChart = dynamic(
+  () => import('@/components/observability/EventRateChart').then(mod => ({ default: mod.EventRateChart })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-64 flex items-center justify-center">
+        <div className="text-sm text-white/40">Loading chart...</div>
+      </div>
+    )
+  }
+);
 
 /**
  * Observability Dashboard
@@ -15,16 +31,44 @@ import { Panel } from '@/components/scorpion';
  */
 export default function ObservabilityPage() {
   useEffect(() => {
-    // Connect to telemetry stream
+    // Connect to telemetry stream FIRST
     connectTelemetryStream();
     
+    // Function to populate dashboard with REAL system data
+    // Telemetry stream handles real-time updates, so we only need periodic population
+    const populateRealData = async () => {
+      try {
+        // Use the populate endpoint which generates real telemetry from actual system state
+        await fetch('/api/telemetry/populate', { method: 'POST' });
+      } catch (err) {
+        console.error('[Observability] Failed to populate real data:', err);
+      }
+    };
+    
+    // Defer initial populate to allow page to render first
+    // Telemetry stream provides real-time updates, so we don't need frequent polling
+    const populateTimeout = setTimeout(() => {
+      populateRealData();
+    }, 500); // Single initial populate after render
+    
+    // Populate real data periodically (less frequent since telemetry stream handles real-time)
+    // Only when tab is visible to avoid unnecessary work
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        populateRealData();
+      }
+    }, 30000); // 30 seconds - telemetry stream handles real-time updates
+    
     return () => {
+      clearTimeout(populateTimeout);
+      clearInterval(interval);
       disconnectTelemetryStream();
     };
   }, []);
   
   return (
     <div className="h-full flex flex-col">
+      <PageLoadingBar loading={false} /> {/* This page loads via stream, but add for consistency */}
       {/* Time scrubber toolbar */}
       <div className="flex-shrink-0">
         <TimeScrubber />
@@ -53,8 +97,8 @@ export default function ObservabilityPage() {
           </Panel>
           
           <Panel title="Event Rate" className="col-span-2">
-            <div className="h-full flex items-center justify-center text-white/40">
-              Event rate chart placeholder (use Recharts)
+            <div className="h-64">
+              <EventRateChart />
             </div>
           </Panel>
         </div>
@@ -64,18 +108,14 @@ export default function ObservabilityPage() {
           <LogStream />
         </Panel>
         
-        {/* Placeholder for additional visualizations */}
+        {/* Agent Activity and Queue Statistics */}
         <div className="grid grid-cols-2 gap-4">
           <Panel title="Agent Activity">
-            <div className="h-48 flex items-center justify-center text-white/40">
-              Agent small multiples placeholder
-            </div>
+            <AgentSmallMultiples />
           </Panel>
           
           <Panel title="Queue Statistics">
-            <div className="h-48 flex items-center justify-center text-white/40">
-              Queue table with barcodes placeholder
-            </div>
+            <QueueStatistics />
           </Panel>
         </div>
       </div>

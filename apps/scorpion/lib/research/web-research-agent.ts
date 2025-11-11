@@ -110,14 +110,51 @@ Depth: ${query.depth}
 
 Return JSON: { "queries": ["query1", "query2", ...] }`;
 
-    const response = await this.llm.generate({
-      system: 'You are a search query optimizer. Generate diverse, specific queries that cover different angles of the topic.',
-      user: prompt,
-      jsonOutput: true
-    });
+    try {
+      const response = await this.llm.generate({
+        system: 'You are a search query optimizer. Generate diverse, specific queries that cover different angles of the topic.',
+        user: prompt,
+        jsonOutput: true
+      });
 
-    const parsed = JSON.parse(response);
-    return parsed.queries || [query.query];
+      // Try to parse JSON response
+      let parsed;
+      try {
+        parsed = JSON.parse(response);
+      } catch (parseError) {
+        // If JSON parsing fails, try to extract JSON from markdown code blocks
+        const jsonMatch = response.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/) || 
+                         response.match(/(\{[\s\S]*"queries"[\s\S]*\})/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[1]);
+        } else {
+          // Fallback: use the original query
+          console.warn('Failed to parse LLM response as JSON, using original query');
+          return [query.query];
+        }
+      }
+
+      const queries = parsed.queries || parsed.query || [];
+      if (Array.isArray(queries) && queries.length > 0) {
+        return queries;
+      }
+      
+      // Fallback to original query if no valid queries found
+      return [query.query];
+    } catch (error: any) {
+      console.error('Failed to generate search queries:', error);
+      
+      // Provide helpful error context
+      const errorMsg = error.message || 'Unknown error';
+      if (errorMsg.includes('Ollama') || errorMsg.includes('ECONNREFUSED') || errorMsg.includes('fetch failed')) {
+        const { getRecommendedModelForRAM } = await import('@/lib/utils/modelSelector');
+        throw new Error(`Cannot connect to LLM service. Please ensure Ollama is running and the model '${process.env.OLLAMA_MODEL || getRecommendedModelForRAM()}' is available. Error: ${errorMsg}`);
+      }
+      
+      // For other errors, use fallback
+      console.warn('Using fallback query due to LLM error');
+      return [query.query];
+    }
   }
 
   private async executeSearch(

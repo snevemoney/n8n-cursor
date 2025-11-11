@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, useMemo } from 'react';
 import { useTelemetryStore } from '@/lib/telemetry/store';
 import { computeAgentKPIs } from '@/lib/telemetry/derived';
 import { Activity } from 'lucide-react';
@@ -9,24 +9,12 @@ import { Activity } from 'lucide-react';
  * AgentSmallMultiples - Tiny charts per agent with KPIs
  * Click to focus agent across all panels
  */
-export function AgentSmallMultiples() {
+export const AgentSmallMultiples = memo(function AgentSmallMultiples() {
   const events = useTelemetryStore(state => state.events);
   const setFocus = useTelemetryStore(state => state.setFocus);
   const focus = useTelemetryStore(state => state.focus);
-  const [agents, setAgents] = useState<any[]>([]);
   
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const kpis = computeAgentKPIs(events);
-      setAgents(kpis);
-    }, 2000);
-    
-    // Initial load
-    const kpis = computeAgentKPIs(events);
-    setAgents(kpis);
-    
-    return () => clearInterval(interval);
-  }, [events]);
+  const agents = useMemo(() => computeAgentKPIs(events), [events]);
   
   if (agents.length === 0) {
     return (
@@ -99,5 +87,5 @@ export function AgentSmallMultiples() {
       })}
     </div>
   );
-}
+});
 

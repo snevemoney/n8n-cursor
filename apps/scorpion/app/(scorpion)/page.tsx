@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { ASCIILogo } from '@/components/scorpion';
-import { Panel, Metric } from '@/components/scorpion';
-import { NotificationBadge } from '@/components/scorpion/NotificationBadge';
+import { Panel, Metric, LoadingState, ErrorState, EmptyState, PageLoadingBar } from '@/components/scorpion';
+import { Activity } from 'lucide-react';
 import Link from 'next/link';
+import { usePageData } from '@/hooks/usePageData';
+
+// Lazy load NotificationBadge to improve initial page load
+const NotificationBadge = dynamic(
+  () => import('@/components/scorpion/NotificationBadge').then(mod => ({ default: mod.NotificationBadge })),
+  { ssr: false }
+);
 
 interface SystemStats {
   projects: { total: number; active: number };
@@ -12,48 +20,43 @@ interface SystemStats {
   workflows: { total: number; active: number };
   knowledge: { total: number };
   operations: { total: number; running: number; completed: number; failed: number };
+  llmExperiments?: { total: number; running: number; completed: number; failed: number; pending: number };
   system: { health: string };
   recentActivity: Array<{ type: string; message: string; timestamp: string }>;
 }
 
 export default function ScorpionHomePage() {
-  const [stats, setStats] = useState<SystemStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadStats();
-    // Refresh every 30 seconds
-    const interval = setInterval(loadStats, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadStats = async () => {
-    try {
+  const { data: stats, loading, error, refetch } = usePageData({
+    fetchFn: async () => {
       const response = await fetch('/api/stats');
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!response.ok) throw new Error(`Failed: ${response.statusText}`);
+      const result = await response.json();
+      return result.success && result.data ? result.data : result;
+    },
+    cacheKey: 'scorpion-stats-cache',
+    cacheMaxAge: 30000,
+    timeout: 10000,
+    retry: 2,
+    pollInterval: 60000, // 60 seconds
+  });
 
-  const getHealthColor = (health?: string) => {
+  // Rest of component - stats, loading, error are all consistent
+
+  const getHealthColor = useCallback((health?: string) => {
     switch (health) {
       case 'healthy': return 'text-emerald-400';
       case 'degraded': return 'text-yellow-400';
       case 'critical': return 'text-red-400';
       default: return 'text-white/40';
     }
-  };
+  }, []);
 
+  // Render page structure immediately, don't block on data
   return (
-    <div className="min-h-full flex items-center justify-center sc-grid-bg relative py-8">
+    <div className="min-h-full flex items-center justify-center sc-grid-bg relative py-4 md:py-6 lg:py-8 px-4 md:px-6 lg:px-8">
+      <PageLoadingBar loading={loading && !stats} />
       <NotificationBadge />
-      <div className="max-w-2xl w-full space-y-8 p-8">
+      <div className="max-w-2xl w-full space-y-4 md:space-y-6 lg:space-y-8 min-w-0">
         {/* ASCII Logo */}
         <div className="flex justify-center">
           <ASCIILogo />
@@ -63,95 +66,187 @@ export default function ScorpionHomePage() {
         <Panel>
           <div className="text-center space-y-4">
             <div className="sc-title">System Status</div>
-            <div className="flex items-center justify-center gap-2">
-              <div className={`w-3 h-3 rounded-full animate-pulse ${
-                stats?.system.health === 'healthy' ? 'bg-emerald-400' : 'bg-yellow-400'
-              }`}></div>
-              <div className="text-lg font-semibold">SCORPION // SYSTEM ONLINE</div>
-            </div>
-            {stats && (
-              <div className={`text-sm sc-mono ${getHealthColor(stats.system.health)}`}>
-                System Status: {stats.system.health.toUpperCase()}
+            {loading && !stats ? (
+              <LoadingState variant="skeleton" skeletonLines={2} text="Loading system status..." />
+            ) : error && !stats ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
+                  <div className="text-lg font-semibold">SCORPION // SYSTEM ONLINE</div>
+                </div>
+                <div className="text-sm sc-mono text-yellow-400">
+                  System Status: DEGRADED
+                </div>
+                <div className="text-xs text-white/60 max-w-md mx-auto pt-2 border-t border-white/10">
+                  {error}
+                  {/* retryCount is not directly available from usePageData, so this part is removed */}
+                </div>
+                <button
+                  onClick={() => {
+                    refetch(true);
+                  }}
+                  disabled={loading}
+                  className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 rounded-lg text-sm hover:bg-emerald-500/30 transition-all hover:scale-105 flex items-center gap-2 sc-mono text-emerald-400 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Loading...' : 'Try Again'}
+                </button>
               </div>
-            )}
-            {loading && !stats && (
-              <div className="text-sm text-white/40">Loading...</div>
+            ) : stats ? (
+              <>
+                <div className="flex items-center justify-center gap-2">
+                  <div className={`w-3 h-3 rounded-full animate-pulse ${
+                    stats?.system?.health === 'healthy' ? 'bg-emerald-400' : 'bg-yellow-400'
+                  }`}></div>
+                  <div className="text-lg font-semibold">SCORPION // SYSTEM ONLINE</div>
+                </div>
+                {stats?.system?.health && (
+                  <div className={`text-sm sc-mono ${getHealthColor(stats.system.health)}`}>
+                    System Status: {stats.system.health.toUpperCase()}
+                  </div>
+                )}
+              </>
+            ) : (
+              <EmptyState
+                icon={Activity}
+                title="No system data available"
+                message="System statistics could not be loaded. Please try refreshing."
+                action={{ label: "Refresh", onClick: refetch }}
+              />
             )}
           </div>
         </Panel>
 
         {/* Quick Stats */}
-        {stats && (
+        {loading && !stats ? (
           <Panel title="System Overview">
-            <div className="grid grid-cols-4 gap-4">
+            <LoadingState variant="skeleton" text="Loading system statistics..." skeletonLines={8} />
+          </Panel>
+        ) : stats ? (
+          <Panel title="System Overview">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               <Metric 
                 label="Projects" 
-                value={stats.projects.active.toString()} 
+                value={stats.projects?.active?.toString() ?? '0'} 
                 valueColor="text-emerald-400"
               />
               <Metric 
                 label="Active Agents" 
-                value={`${stats.agents.active}/${stats.agents.total}`} 
+                value={`${stats.agents?.active ?? 0}/${stats.agents?.total ?? 0}`} 
                 valueColor="text-cyan-400"
               />
               <Metric 
                 label="Workflows" 
-                value={stats.workflows.total.toString()} 
+                value={stats.workflows?.total?.toString() ?? '0'} 
                 valueColor="text-blue-400"
               />
               <Metric 
                 label="Knowledge Items" 
-                value={stats.knowledge.total.toString()} 
+                value={stats.knowledge?.total?.toString() ?? '0'} 
                 valueColor="text-purple-400"
               />
             </div>
-            <div className="grid grid-cols-4 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-3 md:mt-4">
               <Metric 
                 label="Total Ops" 
-                value={stats.operations.total.toString()} 
+                value={stats.operations?.total?.toString() ?? '0'} 
               />
               <Metric 
                 label="Running" 
-                value={stats.operations.running.toString()} 
+                value={stats.operations?.running?.toString() ?? '0'} 
                 valueColor="text-yellow-400"
               />
               <Metric 
                 label="Completed" 
-                value={stats.operations.completed.toString()} 
+                value={stats.operations?.completed?.toString() ?? '0'} 
                 valueColor="text-emerald-400"
               />
               <Metric 
                 label="Failed" 
-                value={stats.operations.failed.toString()} 
+                value={stats.operations?.failed?.toString() ?? '0'} 
                 valueColor="text-red-400"
               />
             </div>
+            {stats.llmExperiments && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mt-3 md:mt-4">
+                <Metric 
+                  label="LLM Experiments" 
+                  value={stats.llmExperiments.total.toString()} 
+                  valueColor="text-purple-400"
+                />
+                <Metric 
+                  label="Running" 
+                  value={stats.llmExperiments.running.toString()} 
+                  valueColor="text-cyan-400"
+                />
+                <Metric 
+                  label="Completed" 
+                  value={stats.llmExperiments.completed.toString()} 
+                  valueColor="text-emerald-400"
+                />
+                <Metric 
+                  label="Failed" 
+                  value={stats.llmExperiments.failed.toString()} 
+                  valueColor="text-red-400"
+                />
+                <Metric 
+                  label="Pending" 
+                  value={stats.llmExperiments.pending.toString()} 
+                  valueColor="text-yellow-400"
+                />
+              </div>
+            )}
           </Panel>
-        )}
-        
-        {loading && !stats && (
-          <Panel title="System Overview">
-            <div className="text-center py-8 text-white/40">Loading system statistics...</div>
-          </Panel>
-        )}
+        ) : null}
 
-        {/* Quick Access */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/project" className="sc-panel p-4 hover:bg-white/5 transition-colors block">
+        {/* Quick Access - Always visible for instant navigation */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Link 
+            href="/project" 
+            prefetch={true}
+            className="sc-panel p-3 md:p-4 hover:bg-white/5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] block min-w-0"
+          >
             <div className="sc-title mb-2">Project</div>
-            <div className="text-sm text-white/70">Complete project dashboard</div>
+            <div className="text-xs md:text-sm text-white/70">Complete project dashboard</div>
           </Link>
-          <Link href="/ops" className="sc-panel p-4 hover:bg-white/5 transition-colors block">
+          <Link 
+            href="/ops" 
+            prefetch={true}
+            className="sc-panel p-3 md:p-4 hover:bg-white/5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] block min-w-0"
+          >
             <div className="sc-title mb-2">Operations</div>
-            <div className="text-sm text-white/70">Monitor agents & workflows</div>
+            <div className="text-xs md:text-sm text-white/70">Monitor agents & workflows</div>
           </Link>
-          <Link href="/workflows" className="sc-panel p-4 hover:bg-white/5 transition-colors block">
+          <Link 
+            href="/workflows" 
+            prefetch={true}
+            className="sc-panel p-3 md:p-4 hover:bg-white/5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] block min-w-0"
+          >
             <div className="sc-title mb-2">Workflows</div>
-            <div className="text-sm text-white/70">Manage n8n workflows</div>
+            <div className="text-xs md:text-sm text-white/70">Manage n8n workflows</div>
           </Link>
-          <Link href="/council" className="sc-panel p-4 hover:bg-white/5 transition-colors block">
+          <Link 
+            href="/council" 
+            prefetch={true}
+            className="sc-panel p-3 md:p-4 hover:bg-white/5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] block min-w-0"
+          >
             <div className="sc-title mb-2">Council</div>
-            <div className="text-sm text-white/70">Multi-agent deliberation</div>
+            <div className="text-xs md:text-sm text-white/70">Multi-agent deliberation</div>
+          </Link>
+          <Link 
+            href="/llm/experiments" 
+            prefetch={true}
+            className="sc-panel p-3 md:p-4 hover:bg-white/5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] block min-w-0"
+          >
+            <div className="sc-title mb-2">LLM Experiments</div>
+            <div className="text-xs md:text-sm text-white/70">Track training runs & models</div>
+          </Link>
+          <Link 
+            href="/agents/specialized" 
+            prefetch={true}
+            className="sc-panel p-3 md:p-4 hover:bg-white/5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] block min-w-0"
+          >
+            <div className="sc-title mb-2">Specialized Agents</div>
+            <div className="text-xs md:text-sm text-white/70">AI expert agents including LLM training</div>
           </Link>
         </div>
       </div>

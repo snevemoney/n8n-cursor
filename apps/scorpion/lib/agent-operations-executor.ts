@@ -1,6 +1,7 @@
 /**
  * Agent Operations Executor
  * Manages execution of safe operations by agents
+ * Persists execution history to disk
  */
 
 import { 
@@ -11,6 +12,9 @@ import {
 } from './agent-operations';
 import { getNotificationManager } from './notification-manager';
 import { emitEvent } from './telemetry/emitter';
+import fs from 'fs/promises';
+import path from 'path';
+import { writeFileWithFallback, validateAndRefreshStorage, isStorageError } from './storage/storage-error-handler';
 
 interface OperationExecution {
   operationId: string;
@@ -21,6 +25,12 @@ interface OperationExecution {
   status: 'running' | 'completed' | 'failed';
   executionLogs?: string[]; // Store execution logs
   actualDuration?: number; // Actual execution time (not including min duration)
+  executionKey?: string; // Unique key for this execution instance
+}
+
+interface PersistedData {
+  executions: Array<{ key: string; execution: OperationExecution }>;
+  lastExecuted: Array<[string, number]>;
 }
 
 class AgentOperationsExecutor {
@@ -28,6 +38,138 @@ class AgentOperationsExecutor {
   private lastExecuted: Map<string, number> = new Map();
   private activeExecutions: Set<string> = new Set();
   private recentCompletions: Map<string, number> = new Map();
+  private dataDir: string;
+  private operationsFile: string;
+  private autoSaveInterval: NodeJS.Timeout | null = null;
+  private initialized: boolean = false;
+
+  constructor() {
+    // Will be initialized with SSD-aware directory
+    this.dataDir = path.join(process.cwd(), 'data', 'scorpion');
+    this.operationsFile = path.join(this.dataDir, 'operations-executions.json');
+  }
+
+  /**
+   * Initialize and load persisted data from disk
+   */
+  async initialize(): Promise<void> {
+    if (this.initialized) return;
+    
+    try {
+      // Use SSD-aware data directory
+      const { getDataDir } = await import('./storage/storage-config');
+      this.dataDir = await getDataDir();
+      this.operationsFile = path.join(this.dataDir, 'operations-executions.json');
+      
+      // Ensure data directory exists with fallback support
+      const { ensureDirWithFallback } = await import('./storage/storage-error-handler');
+      const dirResult = await ensureDirWithFallback(this.dataDir);
+      if (!dirResult.success) {
+        throw new Error(`Failed to create data directory: ${this.dataDir}`);
+      }
+      if (dirResult.usedFallback) {
+        this.dataDir = dirResult.path;
+        this.operationsFile = path.join(this.dataDir, 'operations-executions.json');
+        console.warn(`⚠️ Using fallback data directory: ${this.dataDir}`);
+      }
+      
+      // Load persisted executions
+      try {
+        const content = await fs.readFile(this.operationsFile, 'utf-8');
+        const data: PersistedData = JSON.parse(content);
+        
+        // Restore executions (only completed/failed, not running)
+        if (data.executions) {
+          for (const { key, execution } of data.executions) {
+            // Only restore completed/failed executions (running ones are lost on restart)
+            if (execution.status === 'completed' || execution.status === 'failed') {
+              this.executions.set(key, execution);
+            }
+          }
+          console.log(`✅ Loaded ${this.executions.size} persisted operations from disk`);
+        }
+        
+        // Restore last executed times
+        if (data.lastExecuted) {
+          this.lastExecuted = new Map(data.lastExecuted);
+        }
+      } catch (error: any) {
+        // File doesn't exist yet, that's okay
+        if (error.code !== 'ENOENT') {
+          console.warn('Failed to load persisted operations:', error.message);
+        }
+      }
+      
+      // Auto-save every 30 seconds (like RAGStore)
+      this.autoSaveInterval = setInterval(() => {
+        this.save().catch(err => {
+          console.error('Failed to auto-save operations:', err);
+        });
+      }, 30 * 1000);
+      
+      this.initialized = true;
+    } catch (error: any) {
+      console.error('Failed to initialize operations executor:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save executions to disk with robust error handling
+   */
+  private async save(): Promise<void> {
+    try {
+      // Validate storage before saving
+      const validation = await validateAndRefreshStorage();
+      if (!validation.isValid) {
+        console.warn('⚠️ Storage validation failed, operations may not be persisted');
+      }
+      
+      // Update paths if storage was refreshed
+      if (validation.wasRefreshed) {
+        const { getDataDir } = await import('./storage/storage-config');
+        this.dataDir = await getDataDir();
+        this.operationsFile = path.join(this.dataDir, 'operations-executions.json');
+        console.log(`🔄 Storage refreshed, using new path: ${this.dataDir}`);
+      }
+      
+      // Only save completed/failed executions (not running ones)
+      const executionsToSave = Array.from(this.executions.entries())
+        .filter(([_, exec]) => exec.status === 'completed' || exec.status === 'failed')
+        .map(([key, exec]) => ({ key, execution: exec }));
+      
+      // Keep only last 1000 executions to prevent file from growing too large
+      const sortedExecutions = executionsToSave
+        .sort((a, b) => (b.execution.startedAt || 0) - (a.execution.startedAt || 0))
+        .slice(0, 1000);
+      
+      const data: PersistedData = {
+        executions: sortedExecutions,
+        lastExecuted: Array.from(this.lastExecuted.entries())
+      };
+      
+      // Use robust write with fallback
+      const result = await writeFileWithFallback(
+        this.operationsFile,
+        JSON.stringify(data, null, 2),
+        { ensureDir: true, maxRetries: 3 }
+      );
+      
+      if (!result.success) {
+        console.error(`❌ Failed to save operations after retries: ${result.error}`);
+        if (result.usedFallback) {
+          console.log(`   Fallback path used: ${result.path}`);
+        }
+      } else if (result.usedFallback) {
+        console.warn(`⚠️ Operations saved to fallback location: ${result.path}`);
+      }
+    } catch (error: any) {
+      console.error('Failed to save operations:', error);
+      if (isStorageError(error)) {
+        console.warn('   This appears to be a storage disconnection issue');
+      }
+    }
+  }
   
   /**
    * Execute a safe operation
@@ -62,28 +204,37 @@ class AgentOperationsExecutor {
     
     // Mark as running
     this.activeExecutions.add(operationId);
+    
+    // Create unique execution key (operationId + agentId + timestamp)
+    const executionKey = `${operationId}-${agentId}-${Date.now()}`;
+    
     const execution: OperationExecution = {
       operationId,
       agentId,
       startedAt: Date.now(),
       status: 'running',
-      executionLogs: []
+      executionLogs: [],
+      executionKey
     };
-    this.executions.set(operationId, execution);
+    this.executions.set(executionKey, execution);
     
     // Log execution start
     const startLog = `[${new Date().toISOString()}] 🦂 Agent ${agentId} starting operation: ${operation.name} (${operationId})`;
     console.log(startLog);
     execution.executionLogs?.push(startLog);
     
-    // Emit telemetry event
+    // Emit telemetry event - use system.log since agent.operation.started doesn't exist in schema
     emitEvent({
-      type: 'agent.operation.started',
+      type: 'system.log',
       source: 'agent-operations-executor',
-      agentId,
-      operationId,
-      operationName: operation.name,
+      level: 'info',
+      message: `Agent ${agentId} starting operation: ${operation.name}`,
       severity: 'info',
+      context: {
+        agentId,
+        operationId,
+        operationName: operation.name
+      }
     });
     
     try {
@@ -128,17 +279,43 @@ class AgentOperationsExecutor {
       // Update last executed time
       this.lastExecuted.set(operationId, Date.now());
       
+      // Save to disk after completion
+      await this.save();
+      
       // Emit telemetry event for completion
-      emitEvent({
-        type: result.success ? 'agent.operation.completed' : 'agent.operation.failed',
-        source: 'agent-operations-executor',
-        agentId,
-        operationId,
-        operationName: operation.name,
-        duration: actualDuration,
-        error: result.success ? undefined : result.message,
-        severity: result.success ? 'info' : 'error',
-      });
+      if (result.success) {
+        emitEvent({
+          type: 'agent.operation.completed',
+          source: 'agent-operations-executor',
+          agentId,
+          operationId,
+          operationName: operation.name,
+          duration: actualDuration,
+          severity: 'info',
+        });
+      } else {
+        emitEvent({
+          type: 'agent.operation.failed',
+          source: 'agent-operations-executor',
+          agentId,
+          operationId,
+          operationName: operation.name,
+          duration: actualDuration,
+          error: result.message,
+          severity: 'error',
+        });
+      }
+      
+      // Emit log event for the operation
+      if (!result.success) {
+        emitEvent({
+          type: 'system.log',
+          source: `agent-${agentId}`,
+          level: 'error',
+          message: `Operation ${operation.name} failed: ${result.message}`,
+          severity: 'error',
+        });
+      }
       
       // Handle approval requirement
       if (result.requiresApproval && result.approvalId) {
@@ -180,6 +357,18 @@ class AgentOperationsExecutor {
         severity: 'error',
       });
       
+      // Emit log event for the error
+      emitEvent({
+        type: 'system.log',
+        source: `agent-${agentId}`,
+        level: 'error',
+        message: `Operation ${operation.name} threw error: ${error.message || 'Unknown error'}`,
+        severity: 'error',
+      });
+      
+      // Save to disk after failure
+      await this.save();
+      
       return execution.result;
     } finally {
       this.activeExecutions.delete(operationId);
@@ -203,10 +392,13 @@ class AgentOperationsExecutor {
   }
   
   /**
-   * Get current execution status
+   * Get current execution status (by operationId - returns most recent)
    */
   getExecutionStatus(operationId: string): OperationExecution | undefined {
-    return this.executions.get(operationId);
+    const matchingExecutions = Array.from(this.executions.values())
+      .filter(exec => exec.operationId === operationId)
+      .sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+    return matchingExecutions[0];
   }
   
   /**
@@ -250,10 +442,18 @@ class AgentOperationsExecutor {
   }
 
   /**
-   * Get execution details including logs
+   * Get execution details including logs (by executionKey or operationId)
    */
-  getExecutionDetails(operationId: string): OperationExecution | undefined {
-    return this.executions.get(operationId);
+  getExecutionDetails(operationIdOrKey: string): OperationExecution | undefined {
+    // First try as execution key
+    const byKey = this.executions.get(operationIdOrKey);
+    if (byKey) return byKey;
+    
+    // Then try as operationId (return most recent)
+    const matchingExecutions = Array.from(this.executions.values())
+      .filter(exec => exec.operationId === operationIdOrKey)
+      .sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+    return matchingExecutions[0];
   }
   
   /**
@@ -276,6 +476,10 @@ let executor: AgentOperationsExecutor | null = null;
 export function getAgentOperationsExecutor(): AgentOperationsExecutor {
   if (!executor) {
     executor = new AgentOperationsExecutor();
+    // Initialize asynchronously (don't block)
+    executor.initialize().catch(err => {
+      console.error('Failed to initialize operations executor:', err);
+    });
   }
   return executor;
 }

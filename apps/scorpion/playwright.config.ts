@@ -4,18 +4,18 @@ import { defineConfig, devices } from '@playwright/test';
  * Playwright configuration for Scorpion UI audits
  */
 export default defineConfig({
-  testDir: './audit',
+  testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
   reporter: [
     ['list'],
-    ['html', { outputFolder: 'audit/out/playwright-report' }]
+    ['html', { outputFolder: 'tests/e2e/playwright-report' }]
   ],
   
   use: {
-    baseURL: process.env.AUDIT_BASE_URL || 'http://localhost:3003',
+    baseURL: process.env.BASE_URL || process.env.AUDIT_BASE_URL || 'http://localhost:3003',
     trace: 'on',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -24,6 +24,12 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    // Keep audit tests in separate project
+    {
+      name: 'audit',
+      testDir: './audit',
       use: { ...devices['Desktop Chrome'] },
     },
   ],

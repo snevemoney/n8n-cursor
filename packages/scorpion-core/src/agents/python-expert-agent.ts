@@ -43,11 +43,11 @@ export class PythonExpertAgent {
     console.log(`🐍 PythonExpertAgent generating code for: ${task}`);
 
     const knowledge = await this.ragStore.search(
-      `Python programming ${task} best practices`,
-      { filter: { type: 'knowledge', domain: 'python' } }
+      `python Python programming ${task} best practices`,
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Generate production-quality Python code:
 
@@ -78,11 +78,11 @@ Return JSON: { code, explanation, dependencies }`;
    */
   async reviewCode(code: string): Promise<CodeReview> {
     const knowledge = await this.ragStore.search(
-      'Python best practices code review style security performance',
-      { filter: { type: 'knowledge', domain: 'python' } }
+      'python Python best practices code review style security performance',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Review this Python code and provide detailed feedback:
 
@@ -116,10 +116,10 @@ Return JSON matching CodeReview interface.`;
   async recommendLibraries(useCase: string): Promise<LibraryRecommendation[]> {
     const knowledge = await this.ragStore.search(
       `Python libraries ${useCase} NumPy Pandas requests`,
-      { filter: { type: 'knowledge', domain: 'python' } }
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Recommend Python libraries for this use case:
 
@@ -152,10 +152,10 @@ Return JSON array of LibraryRecommendation objects.`;
   async optimizeCode(code: string, goal: string): Promise<any> {
     const knowledge = await this.ragStore.search(
       'Python performance optimization caching vectorization async',
-      { filter: { type: 'knowledge', domain: 'python' } }
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Optimize this Python code:
 
@@ -192,10 +192,10 @@ Return JSON.`;
   async convertToAsync(code: string): Promise<any> {
     const knowledge = await this.ragStore.search(
       'Python async await asyncio coroutines',
-      { filter: { type: 'knowledge', domain: 'python' } }
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Convert this synchronous code to async/await:
 
@@ -230,10 +230,10 @@ Return JSON.`;
   async designProjectStructure(projectType: string, requirements: string[]): Promise<any> {
     const knowledge = await this.ragStore.search(
       'Python project structure best practices packaging testing',
-      { filter: { type: 'knowledge', domain: 'python' } }
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a Python project structure:
 
@@ -268,10 +268,10 @@ Return JSON.`;
   async generateTests(code: string, framework: 'pytest' | 'unittest' = 'pytest'): Promise<any> {
     const knowledge = await this.ragStore.search(
       'Python testing pytest unittest fixtures mocking',
-      { filter: { type: 'knowledge', domain: 'python' } }
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Generate comprehensive test cases:
 
@@ -309,10 +309,10 @@ Return JSON.`;
   async debugCode(code: string, error: string): Promise<any> {
     const knowledge = await this.ragStore.search(
       'Python debugging error handling exceptions',
-      { filter: { type: 'knowledge', domain: 'python' } }
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Debug this Python code:
 

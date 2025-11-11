@@ -4,11 +4,12 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { runModelUnified, parseModelJSON } from '@/lib/chat/modelRunner';
 import { runCouncilDeliberationStreaming, computeConsensus } from '@/lib/chat/council';
-import { executeTool } from '@/lib/chat/tools';
+import { executeTool, detectUserTool, getUserToolBySlashCommand, isUserTool } from '@/lib/chat/tools';
 import { remember } from '@/lib/chat/memory';
 import { createSSEMessage } from '@/lib/chat/events';
 import type { Message, Plan } from '@/lib/chat/types';
 import { detectLightweightMode } from '@/lib/utils/systemResources';
+import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
 
 /**
  * Resolve prompt file path correctly regardless of cwd
@@ -75,6 +76,7 @@ function setCachedResponse(message: string, response: string): void {
  * Phases: PLANNER → COUNCIL → EXECUTOR → SUMMARIZER
  */
 export async function POST(req: NextRequest) {
+  try {
   const encoder = new TextEncoder();
   
   let requestData;
@@ -131,180 +133,312 @@ export async function POST(req: NextRequest) {
         checkAbort();
         send({ type: 'connected', data: { message: 'Chat stream connected' } });
         
-        // Extract user message
+        // Extract user message (last message is the new one)
         const userMessage = messages[messages.length - 1]?.content || '';
         const messageId = uuidv4();
         
-        // Resource optimization: Auto-detect lightweight mode based on system RAM
-        const lightweightMode = detectLightweightMode();
-        const defaultModel = model || 'llama3.2:1b';
-        
-        // SIMPLE CHAT MODE - Bypass planner for basic messages
-        // Questions about capabilities don't need planning
-        // BUT: Council-related queries should always use full planner mode
-        // AND: Knowledge-seeking questions should use planner to search KB
-        const isQuestion = userMessage.toLowerCase().match(/^(can you|what|how|do you|are you|will you)/);
-        const mentionsCouncil = userMessage.toLowerCase().includes('council') || 
-                               userMessage.toLowerCase().includes('deliberat');
-        
-        // Detect knowledge-seeking questions that need KB search
-        const knowledgeSeekingPatterns = [
-          /what (do you know|is|are|was|were) (about|of)?/i,
-          /tell me (about|more about)/i,
-          /explain (what|who|how|why|when|where)/i,
-          /who (is|are|was|were)/i,
-          /describe (what|who|how)/i,
-          /(what|who) (is|are|was|were) .+/i, // "what is X" or "who is Y"
-          /(what|who) do you know about/i,
-        ];
-        const isKnowledgeSeeking = knowledgeSeekingPatterns.some(pattern => pattern.test(userMessage));
-        
-        const isSimpleMessage = (!userMessage.startsWith('/') && 
-                                userMessage.length < 200 && 
-                                !userMessage.includes('research') &&
-                                !userMessage.includes('workflow') &&
-                                !userMessage.includes('plan') &&
-                                !mentionsCouncil &&
-                                !isKnowledgeSeeking) || // Exclude knowledge-seeking questions
-                                (isQuestion && userMessage.length < 150 && !mentionsCouncil && !isKnowledgeSeeking); // Exclude knowledge-seeking from simple questions
-        
-        if (isSimpleMessage) {
-          console.log('[Chat Stream] Using simple chat mode for:', userMessage.substring(0, 50));
-          
-          // Check cache first
-          const cachedResponse = getCachedResponse(userMessage);
-          if (cachedResponse) {
-            console.log('[Chat Stream] Using cached response');
-            send({ type: 'delta', data: { content: cachedResponse } });
-            send({ type: 'done', data: { messageId } });
-            closed = true;
-            controller.close();
-            return;
-          }
-          
-          send({ type: 'status', data: { message: 'Thinking...', phase: 'planning' } });
-          
-          const startTime = Date.now();
-          try {
-            // Optimized concise system prompt (reduced from ~2000 to ~300 tokens)
-            const systemPrompt = `You are Scorpion Chat-AGI with backend access.
-
-CAPABILITIES: kb.search, code.readFile, research.run, workflows.trigger (162+ workflows), system.health, logs.tail, project.analyze, agent.deploy, backup.create, notifications.post.
-
-ACCESS: API endpoints, databases, file system, n8n cloud, Ollama models, RAG store.
-
-RESPONSE: Be confident, mention tools when relevant, keep concise. For complex tasks, suggest /commands or planner mode.
-
-When asked about capabilities, mention: "I can search knowledge base, read code files with AST parsing, trigger workflows, run research, check system health, access APIs and databases."`;
-
-            // Use lightweight mode settings
-            const defaultMaxTokens = lightweightMode ? 80 : 100;
-            const defaultTemp = lightweightMode ? 0.3 : 0.5;
-            
-            // For simple questions that might benefit from context, try RAG search
-            // (Note: Knowledge-seeking questions are now excluded from simple mode)
-            let enhancedPrompt = userMessage;
-            let hasRAGContext = false;
-            
-            // Only do RAG search for questions that might need context
-            if (isQuestion && userMessage.length > 20) {
-              try {
-                const { getRAGStore } = await import('@/lib/shared-stores');
-                const store = await getRAGStore();
-                const relevantKnowledge = await store.search(userMessage, 3); // Smaller limit for simple mode
-                
-                if (relevantKnowledge.length > 0) {
-                  const ragContext = relevantKnowledge.map(k => `${k.title}: ${k.description}`).join('\n');
-                  enhancedPrompt = `Context from knowledge base:\n${ragContext}\n\nUser question: ${userMessage}`;
-                  hasRAGContext = true;
-                  
-                  // Emit knowledge event for frontend (even in simple mode)
-                  send({
-                    type: 'knowledge',
-                    data: {
-                      hits: relevantKnowledge.map(r => ({
-                        id: r.id,
-                        title: r.title,
-                        url: `/knowledge?id=${r.id}`,
-                        spans: [{ text: r.description.slice(0, 200) }],
-                        relevance: r.similarity,
-                      })),
-                    },
-                  });
-                }
-              } catch (error) {
-                console.warn('[Chat Stream] RAG search failed in simple mode:', error);
-                // Continue without RAG context
-              }
-            }
-            
-            checkAbort(); // Check before LLM call
-            
-            const simpleResponse = await runModelUnified(
-              systemPrompt,
-              enhancedPrompt, // Use enhanced prompt with RAG context if available
-              { 
-                provider: provider || 'ollama', 
-                model: defaultModel,
-                maxTokens: defaultMaxTokens, // Reduced for faster generation
-                temperature: defaultTemp // Lower for faster, more deterministic responses
-              }
-            );
-            
-            checkAbort(); // Check after LLM call
-            
-            const duration = Date.now() - startTime;
-            console.log(`[Chat Stream] LLM response time: ${duration}ms`);
-            
-            // Cache the response
-            setCachedResponse(userMessage, simpleResponse);
-            
-            // Stream response in chunks (5 words at a time) for better performance
-            const words = simpleResponse.split(' ');
-            const chunkSize = 5;
-            for (let i = 0; i < words.length; i += chunkSize) {
-              checkAbort(); // Check before each chunk
-              const chunk = words.slice(i, i + chunkSize).join(' ');
-              send({ type: 'delta', data: { content: (i > 0 ? ' ' : '') + chunk } });
-              // Minimal delay for smooth streaming (5ms instead of 50ms)
-              if (i + chunkSize < words.length) {
-                await new Promise(resolve => setTimeout(resolve, 5));
-              }
-            }
-            
-            send({ type: 'done', data: { messageId } });
-            closed = true;
-            controller.close();
-            return;
-          } catch (error: any) {
-            console.error('[Chat Stream] Simple mode error:', error);
-            send({ type: 'error', data: { message: error.message, details: error.stack } });
-            closed = true;
-            controller.close();
-            return;
-          }
+        // Check if this is a user tool command (slash command OR natural language)
+        let detectedTool = null;
+        try {
+          detectedTool = detectUserTool(userMessage);
+        } catch (error: any) {
+          console.error('[Chat Stream] Error detecting user tool:', error);
+          // Continue with normal flow if detection fails
         }
         
-        // PHASE 1: PLANNER (for complex queries)
+        if (detectedTool) {
+          const { tool: userTool, argsText } = detectedTool;
+          
+            // This is a user tool - execute directly without planner
+          console.log('[Chat Stream] User tool detected:', userTool.name);
+            
+            send({ type: 'status', data: { message: `Executing ${userTool.label}...`, phase: 'executing' } });
+            send({ type: 'progress', data: { phase: 'executing', progress: 10, message: `Executing ${userTool.label}...` } });
+            
+            let toolArgs: any = {};
+            
+            // Try to parse JSON if provided, otherwise use as text input
+            if (argsText) {
+              try {
+                toolArgs = JSON.parse(argsText);
+              } catch {
+                // Not JSON, treat as text input
+                // Map common fields based on tool schema
+                if (userTool.schema && typeof userTool.schema === 'object' && 'parse' in userTool.schema) {
+                  const schemaShape = (userTool.schema as any)._def || {};
+                  // Try to infer field names
+                  if (schemaShape.shape) {
+                    const fields = Object.keys(schemaShape.shape);
+                    const fieldDefs = schemaShape.shape;
+                    
+                    // Check for common text input fields first (in priority order)
+                    const commonTextFields = ['text', 'query', 'content', 'prompt', 'input', 'message', 'question', 'description', 'topic', 'offer', 'productBrief'];
+                    const foundField = commonTextFields.find(f => fields.includes(f));
+                    
+                    if (foundField) {
+                      toolArgs[foundField] = argsText;
+                    } else {
+                      // For tools with required fields, try to infer from field names
+                      // Check if there's a field that looks like it should contain the text
+                      const textLikeFields = fields.filter(f => {
+                        const fLower = f.toLowerCase();
+                        return ['text', 'query', 'content', 'input', 'prompt', 'message', 'question', 'description', 'topic', 'offer', 'brief', 'subject', 'title'].some(pattern => fLower.includes(pattern));
+                      });
+                      if (textLikeFields.length > 0) {
+                        // Prefer required fields over optional ones
+                        const requiredField = textLikeFields.find(f => {
+                          const fieldDef = fieldDefs[f];
+                          return fieldDef && fieldDef._def?.typeName === 'ZodString' && !fieldDef._def?.typeName?.includes('Optional');
+                        });
+                        toolArgs[requiredField || textLikeFields[0]] = argsText;
+                      } else {
+                        // Default: use first required string field, or first optional string field, or just 'text'
+                        const firstRequiredStringField = fields.find(f => {
+                          const fieldDef = fieldDefs[f];
+                          return fieldDef && fieldDef._def?.typeName === 'ZodString' && !fieldDef._def?.typeName?.includes('Optional');
+                        });
+                        const firstOptionalStringField = fields.find(f => {
+                          const fieldDef = fieldDefs[f];
+                          return fieldDef && (
+                            fieldDef._def?.typeName === 'ZodOptional' ||
+                            (fieldDef._def?.typeName === 'ZodString' && fieldDef._def?.checks?.some((c: any) => c.kind === 'min' && c.value === 0))
+                          );
+                        });
+                        if (firstRequiredStringField) {
+                          toolArgs[firstRequiredStringField] = argsText;
+                        } else if (firstOptionalStringField) {
+                          toolArgs[firstOptionalStringField] = argsText;
+                        } else {
+                          toolArgs.text = argsText;
+                        }
+                      }
+                    }
+                  } else {
+                    toolArgs.text = argsText;
+                  }
+                } else {
+                  toolArgs.text = argsText;
+                }
+              }
+            }
+            
+            // Special handling for array fields: if tool has a 'commands' field and we have text input,
+            // wrap the text in an array
+            if (argsText && !toolArgs.commands && userTool.schema) {
+              const schemaShape = (userTool.schema as any)._def || {};
+              if (schemaShape.shape && schemaShape.shape.commands) {
+                const commandsDef = schemaShape.shape.commands;
+                // Check if commands is an array type (handle ZodDefault wrapping)
+                const innerDef = commandsDef._def?.innerType?._def || commandsDef._def;
+                if (innerDef?.typeName === 'ZodArray' || commandsDef._def?.typeName === 'ZodArray') {
+                  // If we have text input but no commands, wrap text in array
+                  if (toolArgs.text || toolArgs.query || toolArgs.content) {
+                    const textValue = toolArgs.text || toolArgs.query || toolArgs.content;
+                    toolArgs.commands = [textValue];
+                    // Remove the text field to avoid conflicts
+                    delete toolArgs.text;
+                    delete toolArgs.query;
+                    delete toolArgs.content;
+                  }
+                }
+              }
+            }
+            
+            // Validate required fields before executing
+            if (userTool.schema && typeof userTool.schema === 'object' && 'parse' in userTool.schema) {
+              try {
+                // Try to parse/validate - this will throw if required fields are missing
+                userTool.schema.parse(toolArgs);
+              } catch (validationError: any) {
+                // Extract missing required fields
+                const missingFields: string[] = [];
+                if (validationError.errors) {
+                  validationError.errors.forEach((err: any) => {
+                    if (err.code === 'invalid_type' && err.received === 'undefined') {
+                      missingFields.push(err.path.join('.'));
+                    }
+                  });
+                }
+                
+                if (missingFields.length > 0) {
+                  const slashCmd = userMessage.startsWith('/') ? userMessage.split(' ')[0] : `/${userTool.name.replace('user.', '')}`;
+                  const errorMessage = `Missing required ${missingFields.length === 1 ? 'field' : 'fields'}: ${missingFields.join(', ')}.\n\nUsage: ${slashCmd} <${missingFields[0]}>\nExample: ${slashCmd} your description here`;
+                  
+                  send({
+                    type: 'error',
+                    data: {
+                      message: errorMessage,
+                      phase: 'validation',
+                    },
+                  });
+                  
+                  send({
+                    type: 'tool',
+                    data: {
+                      tool: userTool.name,
+                      callId: uuidv4(),
+                      args: toolArgs,
+                      status: 'error',
+                      error: errorMessage,
+                    },
+                  });
+                  
+                  // Send final message
+                  send({
+                    type: 'message',
+                    data: {
+                      id: messageId,
+                      role: 'assistant',
+                      content: `**Error executing ${userTool.label}**\n\n${errorMessage}`,
+                    },
+                  });
+                  
+                  controller.close();
+                  return;
+                }
+              }
+            }
+            
+            const callId = uuidv4();
+            
+            // Send tool start event
+            send({
+              type: 'tool',
+              data: {
+                tool: userTool.name,
+                callId,
+                args: toolArgs,
+                status: 'running',
+              },
+            });
+            
+            send({ type: 'progress', data: { phase: 'executing', progress: 30, message: `Running ${userTool.label}...` } });
+            
+            try {
+              // Execute user tool
+              const result = await executeTool(userTool.name, toolArgs);
+              
+              send({ type: 'progress', data: { phase: 'executing', progress: 90, message: `${userTool.label} completed` } });
+              
+              // Send tool completion event
+              send({
+                type: 'tool',
+                data: {
+                  tool: userTool.name,
+                  callId,
+                  args: toolArgs,
+                  status: 'completed',
+                  result,
+                },
+              });
+              
+              // Format result as assistant message
+              let resultContent = `**${userTool.label}**\n\n`;
+              if (result.ok) {
+                if (result.message) {
+                  resultContent += `${result.message}\n\n`;
+                }
+                if (result.response || result.translated || result.summary || result.content) {
+                  resultContent += `${result.response || result.translated || result.summary || result.content}`;
+                } else if (typeof result === 'object') {
+                  resultContent += `\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``;
+                }
+              } else {
+                resultContent += `Error: ${result.error || 'Unknown error'}`;
+              }
+              
+              send({ type: 'delta', data: { content: resultContent } });
+              send({ type: 'progress', data: { phase: 'executing', progress: 100, message: 'Complete' } });
+              send({ type: 'done', data: { messageId } });
+              
+              closed = true;
+              controller.close();
+              return;
+            } catch (error: any) {
+              console.error('[Chat Stream] User tool execution error:', error);
+              
+              send({
+                type: 'tool',
+                data: {
+                  tool: userTool.name,
+                  callId,
+                  args: toolArgs,
+                  status: 'failed',
+                  error: error.message,
+                },
+              });
+              
+              send({ type: 'delta', data: { content: `**Error executing ${userTool.label}**: ${error.message}` } });
+              send({ type: 'done', data: { messageId } });
+              
+              closed = true;
+              controller.close();
+              return;
+            }
+        }
+        
+        // Build conversation history from previous messages (exclude the last one which is the current message)
+        const conversationHistory = messages.slice(0, -1)
+          .filter((msg: any) => msg.role === 'user' || msg.role === 'assistant')
+          .map((msg: any) => ({
+            role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
+            content: msg.content
+          }));
+        
+        // Resource optimization: Auto-detect lightweight mode based on system RAM
+        const lightweightMode = detectLightweightMode();
+        // Use RAM-based model recommendation as fallback instead of scorpion:latest
+        const defaultModel = model || process.env.OLLAMA_MODEL || getRecommendedModelForRAM();
+        
+        // Check cache first (before planning)
+        const cachedResponse = getCachedResponse(userMessage);
+        if (cachedResponse) {
+          console.log('[Chat Stream] Using cached response');
+          send({ type: 'delta', data: { content: cachedResponse } });
+          send({ type: 'done', data: { messageId } });
+          closed = true;
+          controller.close();
+          return;
+        }
+        
+        // PHASE 1: PLANNER (ALWAYS USED - analyzes intent and determines if council is needed)
         checkAbort(); // Check before planner
-        console.log('[Chat Stream] Using full planner mode');
-        send({ type: 'status', data: { message: 'Planning...', phase: 'planning' } });
+        console.log('[Chat Stream] Using planner mode - analyzing intent');
+        send({ type: 'status', data: { message: 'Analyzing request...', phase: 'planning' } });
+        send({ type: 'progress', data: { phase: 'planning', progress: 10, message: 'Analyzing request...' } });
         
         // Use lighter model by default for better resource efficiency
         const defaultMaxTokens = lightweightMode ? 200 : 300;
         const defaultTemp = lightweightMode ? 0.1 : 0.2;
         
-        const plannerPrompt = readFileSync(getPromptPath('planner.system.txt'), 'utf-8');
+        send({ type: 'status', data: { message: 'Generating plan...', phase: 'planning' } });
+        send({ type: 'progress', data: { phase: 'planning', progress: 30, message: 'Generating plan...' } });
+        
+        let plannerPrompt = readFileSync(getPromptPath('planner.system.txt'), 'utf-8');
+        
+        // Add explicit enforcement message for codebase questions
+        // Only trigger if it mentions codebase keywords
+        const codebaseKeywords = /(lightningflow|lightning flow|scorpion|n8n|workflow|codebase|project|app|code|implementation|repository|repo|package|module)/i;
+        const isCodebaseQuestionCheck = codebaseKeywords.test(userMessage);
+        if (isCodebaseQuestionCheck) {
+          plannerPrompt += `\n\n⚠️ CRITICAL: This is a CODEBASE QUESTION. You MUST include code.readFile steps in your plan. DO NOT create a plan with only kb.search. Reading actual code files is REQUIRED.`;
+        }
+        
         const planResponse = await runModelUnified(
           plannerPrompt,
           userMessage,
           { 
             provider: provider || 'ollama', 
             model: defaultModel,
-            maxTokens: defaultMaxTokens, // Reduced for faster plan generation
-            temperature: defaultTemp // Lower for more deterministic planning
-          }
+            maxTokens: defaultMaxTokens,
+            temperature: defaultTemp
+          },
+          undefined, // No streaming for planner
+          conversationHistory // Pass conversation history
         );
+        
+        send({ type: 'status', data: { message: 'Parsing plan...', phase: 'planning' } });
+        send({ type: 'progress', data: { phase: 'planning', progress: 60, message: 'Parsing plan...' } });
         
         let plan: Plan;
         try {
@@ -314,20 +448,68 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
           console.error('[Chat Stream] Plan response:', planResponse.substring(0, 500));
           
           // Fallback: Create a simple plan that uses knowledge search
+          // Improved detection for fallback
+          const messageLower = userMessage.toLowerCase();
+          
+          // Expanded technical patterns
+          const isTechnicalFallback = /(implement|deploy|integrate|build|create|develop|design|architecture|system|api|database|workflow|security|performance|optimize|refactor|migrate|configure|setup|install|how to|how do|how can|error|bug|issue|problem|fix|debug)/i.test(messageLower);
+          
+          // Expanded casual patterns
+          const isCasualFallback = /^(what is|who is|what are|who are|tell me about|more details|more analysis|define|explain what|explain who|what|who|which|when|where)\s+(is|are|was|were|about)/i.test(messageLower) ||
+                                   /^(can you|could you|would you)\s+(tell|explain|describe|define)/i.test(messageLower);
+          
+          // Check if it's a codebase question
+          const isCodebaseQuestion = /(lightningflow|lightning flow|scorpion|n8n|workflow|codebase|project|app|code|implementation)/i.test(messageLower);
+          
+          // Build plan steps
+          const planSteps: any[] = [
+            {
+              id: 's1',
+              title: 'Search knowledge base for relevant information',
+              tool: 'kb.search',
+              args: { query: userMessage, limit: 5 },
+              success: 'Found relevant knowledge entries'
+            }
+          ];
+          
+          // For codebase questions, add code.readFile steps
+          if (isCodebaseQuestion) {
+            let appPath = 'apps/lightningflow';
+            if (messageLower.includes('scorpion')) {
+              appPath = 'apps/scorpion';
+            } else if (messageLower.includes('n8n')) {
+              appPath = 'apps/n8n-cursor';
+            }
+            
+            planSteps.push(
+              {
+                id: 's2',
+                title: `Read main README to understand ${appPath.includes('lightningflow') ? 'LightningFlow' : appPath.includes('scorpion') ? 'Scorpion' : 'the codebase'}`,
+                tool: 'code.readFile',
+                args: { path: `${appPath}/README.md`, includeDependencies: true },
+                dependsOn: ['s1'],
+                success: 'README file read successfully'
+              },
+              {
+                id: 's3',
+                title: 'Read package.json to understand dependencies and purpose',
+                tool: 'code.readFile',
+                args: { path: `${appPath}/package.json` },
+                dependsOn: ['s1'],
+                success: 'package.json read successfully'
+              }
+            );
+          }
+          
           plan = {
             objective: userMessage,
             assumptions: ['User wants information or to perform a simple action'],
-            plan: [
-              {
-                id: 's1',
-                title: 'Search knowledge base for relevant information',
-                tool: 'kb.search',
-                args: { query: userMessage, limit: 5 },
-                success: 'Found relevant knowledge entries'
-              }
-            ],
+            plan: planSteps,
             done_when: ['Information retrieved and presented'],
-            fallbacks: []
+            fallbacks: [],
+            needsCouncil: isTechnicalFallback && !isCasualFallback, // Only technical questions need council
+            questionType: isCasualFallback ? 'casual' : (isTechnicalFallback ? 'technical' : 'conversational'),
+            councilRationale: isTechnicalFallback ? 'Technical question requires expert review' : 'Casual/conversational question can be answered directly'
           };
           
           send({ 
@@ -336,8 +518,124 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
           });
         }
         
-        // Send plan steps
-        plan.plan.forEach(step => {
+        // Detect if this is a codebase question and enforce code.readFile steps
+        // Improved detection: Check for codebase-related keywords or questions about projects/apps
+        const userMessageLower = userMessage.toLowerCase();
+        // Codebase question if it mentions codebase keywords (reuse codebaseKeywords from line 361)
+        const isCodebaseQuestion = codebaseKeywords.test(userMessage);
+        const hasCodeReadSteps = plan.plan.some(step => step.tool === 'code.readFile');
+        
+        // If codebase question but no code.readFile steps, inject them
+        if (isCodebaseQuestion && !hasCodeReadSteps) {
+          console.log('[Chat Stream] Codebase question detected but no code.readFile steps - injecting them');
+          
+          // Extract the subject (e.g., "LightningFlow" from various question patterns)
+          const subjectPatterns = [
+            /(?:what is|who is|tell me about|more details about|detailed analysis of|even more|even more detailed)\s+(?:about\s+)?([A-Za-z]+(?:\s+[A-Za-z]+)?)/i,
+            /(?:about|on|regarding)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i
+          ];
+          
+          let subject = null;
+          for (const pattern of subjectPatterns) {
+            const match = userMessage.match(pattern);
+            if (match && match[1]) {
+              subject = match[1].trim();
+              break;
+            }
+          }
+          
+          const subjectLower = subject ? subject.toLowerCase() : userMessageLower;
+          
+          // Determine which app/package to read based on subject or message content
+          let appPath = 'apps/lightningflow'; // Default to LightningFlow
+          if (userMessageLower.includes('scorpion') || subjectLower.includes('scorpion')) {
+            appPath = 'apps/scorpion';
+          } else if (userMessageLower.includes('n8n') || subjectLower.includes('n8n')) {
+            appPath = 'apps/n8n-cursor';
+          } else if (userMessageLower.includes('lightningflow') || userMessageLower.includes('lightning flow') || subjectLower.includes('lightningflow') || subjectLower.includes('lightning')) {
+            appPath = 'apps/lightningflow';
+          }
+          
+          // Find kb.search step to insert after it
+          const kbSearchStep = plan.plan.find(s => s.tool === 'kb.search');
+          const kbSearchIndex = kbSearchStep ? plan.plan.indexOf(kbSearchStep) : -1;
+          
+          // Create code.readFile steps - always read README and package.json
+          const codeReadSteps = [];
+          let stepCounter = plan.plan.length + 1;
+          
+          // Step 1: Read main README
+          codeReadSteps.push({
+            id: `s${stepCounter++}`,
+            title: `Read main README to understand ${appPath.includes('lightningflow') ? 'LightningFlow' : appPath.includes('scorpion') ? 'Scorpion' : 'the codebase'}`,
+            tool: 'code.readFile',
+            args: { path: `${appPath}/README.md`, includeDependencies: true },
+            dependsOn: kbSearchStep ? [kbSearchStep.id] : undefined,
+            success: 'README file read successfully'
+          });
+          
+          // Step 2: Read package.json
+          codeReadSteps.push({
+            id: `s${stepCounter++}`,
+            title: `Read package.json to understand dependencies and purpose`,
+            tool: 'code.readFile',
+            args: { path: `${appPath}/package.json` },
+            dependsOn: kbSearchStep ? [kbSearchStep.id] : undefined,
+            success: 'package.json read successfully'
+          });
+          
+          // Step 3: Read main entry point (try multiple possible locations)
+          const possibleEntryPoints = [
+            `${appPath}/src/index.ts`,
+            `${appPath}/src/main.ts`,
+            `${appPath}/src/app.ts`,
+            `${appPath}/index.ts`,
+            `${appPath}/main.ts`,
+            `${appPath}/app/index.ts`,
+            `${appPath}/app/main.ts`
+          ];
+          
+          codeReadSteps.push({
+            id: `s${stepCounter++}`,
+            title: `Read main entry point to understand architecture`,
+            tool: 'code.readFile',
+            args: { path: possibleEntryPoints[0], includeAST: true, includeDependencies: true },
+            dependsOn: kbSearchStep ? [kbSearchStep.id] : undefined,
+            success: 'Main entry point read successfully'
+          });
+          
+          // For LightningFlow, also read key documentation files
+          if (appPath === 'apps/lightningflow') {
+            // Read main UI README if it exists
+            codeReadSteps.push({
+              id: `s${stepCounter++}`,
+              title: `Read LightningFlow UI README for detailed information`,
+              tool: 'code.readFile',
+              args: { path: `${appPath}/lightning-ui/README.md`, includeDependencies: true },
+              dependsOn: kbSearchStep ? [kbSearchStep.id] : undefined,
+              success: 'UI README read successfully'
+            });
+          }
+          
+          // Insert code.readFile steps after kb.search
+          if (kbSearchIndex >= 0) {
+            plan.plan.splice(kbSearchIndex + 1, 0, ...codeReadSteps);
+          } else {
+            // If no kb.search, prepend code.readFile steps
+            plan.plan.unshift(...codeReadSteps);
+          }
+          
+          send({ 
+            type: 'status', 
+            data: { message: 'Injected code.readFile steps for codebase question', phase: 'planning' } 
+          });
+        }
+        
+        // Stream plan steps incrementally with progress updates
+        send({ type: 'status', data: { message: `Creating ${plan.plan.length} plan steps...`, phase: 'planning' } });
+        send({ type: 'progress', data: { phase: 'planning', progress: 80, message: `Creating ${plan.plan.length} plan steps...` } });
+        
+        plan.plan.forEach((step, index) => {
           send({
             type: 'plan_step',
             data: {
@@ -345,41 +643,334 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
               status: 'pending',
             },
           });
+          
+          // Send progress update for each step
+          send({ 
+            type: 'progress', 
+            data: { 
+              phase: 'planning', 
+              step: step.id,
+              progress: 80 + Math.floor((index + 1) / plan.plan.length * 20),
+              message: `Plan step ${index + 1}/${plan.plan.length}: ${step.title}` 
+            } 
+          });
         });
         
-        // PHASE 2: COUNCIL - Stream deliberation process
-        checkAbort(); // Check before council
-        send({ type: 'status', data: { message: 'Council review...', phase: 'council' } });
+        send({ type: 'progress', data: { phase: 'planning', progress: 100, message: 'Plan created successfully' } });
         
-        const councilMaxTokens = lightweightMode ? 100 : 150;
-        const councilTemp = lightweightMode ? 0.2 : 0.4;
+        // Determine if council is needed based on plan's needsCouncil field or fallback analysis
+        // Planner should set needsCouncil, but we have fallback detection for robustness
+        const needsCouncil = plan.needsCouncil !== undefined 
+          ? plan.needsCouncil 
+          : (() => {
+              // Fallback: analyze plan to determine if council is needed
+              const planTextForConsensus = (plan.objective || userMessage).toLowerCase();
+              const technicalPatterns = [
+                /(implement|deploy|integrate|build|create|develop|design|architecture|system|api|database|workflow|security|performance|optimize)/,
+                /create (a|an) plan/,
+                /make (a|an) plan/,
+                /plan (to|for|how)/,
+                /how (to|do|can|should)/,
+              ];
+              return technicalPatterns.some(pattern => pattern.test(planTextForConsensus));
+            })();
         
-        // Run council deliberation (consensus is streamed internally)
-        const votes = await runCouncilDeliberationStreaming(plan, { 
-          provider: provider || 'ollama', 
-          model: defaultModel,
-          maxTokens: councilMaxTokens,
-          temperature: councilTemp
-        }, (event) => {
-          // Stream all council events (including consensus)
-          send(event);
-        });
+        // Determine question type for summarizer - improved detection
+        const questionType = plan.questionType || (() => {
+          const planText = (plan.objective || userMessage).toLowerCase();
+          const messageText = userMessage.toLowerCase();
+          
+          // Expanded casual patterns
+          const casualPatterns = [
+            /^(what is|who is|what are|who are|tell me about|more details|more analysis|define|explain what|explain who)/i,
+            /^(what|who|which|when|where)\s+(is|are|was|were)/i,
+            /^(can you|could you|would you)\s+(tell|explain|describe|define)/i,
+            /^(give me|show me|provide)\s+(info|information|details|an explanation)/i,
+          ];
+          
+          // Expanded technical patterns
+          const technicalPatterns = [
+            /(implement|deploy|integrate|build|create|develop|design|architecture|system|api|database|workflow|security|performance|optimize|refactor|migrate|configure|setup|install)/i,
+            /(how to|how do|how can|how should|how would)/i,
+            /(error|bug|issue|problem|fix|debug|troubleshoot|resolve)/i,
+            /(plan|strategy|approach|solution|method|technique|best practice)/i,
+            /(code|script|function|class|module|component|service)/i,
+          ];
+          
+          // Check technical patterns first (higher priority)
+          if (technicalPatterns.some(pattern => pattern.test(planText) || pattern.test(messageText))) {
+            return 'technical';
+          }
+          
+          // Check casual patterns
+          if (casualPatterns.some(pattern => pattern.test(planText) || pattern.test(messageText))) {
+            return 'casual';
+          }
+          
+          // Default to conversational for unclear cases
+          return 'conversational';
+        })();
         
-        // Compute consensus for summarizer (detect if casual)
-        const planText = plan.objective?.toLowerCase() || '';
-        const isCasual = planText.match(/^(movie|film|show|book|game|food|drink|color|weather|which|what.*better|prefer|favorite)/) !== null &&
-                        !planText.match(/(implement|deploy|integrate|build|create|develop|design|architecture|system|api|database|workflow)/);
-        const consensus = computeConsensus(votes, isCasual);
+        const isCasual = questionType === 'casual' || questionType === 'conversational';
+        
+        // For casual questions, execute knowledge base search FIRST before council deliberation
+        let knowledgeHitsForCouncil: any[] = [];
+        let earlyKbSearchCompleted = false;
+        if (isCasual) {
+          const kbSearchStep = plan.plan.find(step => step.tool === 'kb.search');
+          if (kbSearchStep) {
+            try {
+              send({ type: 'status', data: { message: 'Searching knowledge base...', phase: 'searching' } });
+              send({ type: 'progress', data: { phase: 'searching', progress: 0, message: 'Searching knowledge base...' } });
+              
+              // Mark step as running
+              send({
+                type: 'plan_step',
+                data: {
+                  ...kbSearchStep,
+                  status: 'running',
+                },
+              });
+              
+              send({
+                type: 'tool_progress',
+                data: {
+                  tool: 'kb.search',
+                  callId: kbSearchStep.id,
+                  progress: 'Searching knowledge base...',
+                  status: 'running',
+                },
+              });
+              
+              // Send intermediate progress updates
+              send({ type: 'progress', data: { phase: 'searching', progress: 25, message: 'Querying knowledge base...' } });
+              
+              const kbResult = await executeTool('kb.search', kbSearchStep.args || {});
+              
+              send({ type: 'progress', data: { phase: 'searching', progress: 75, message: 'Processing results...' } });
+              send({ type: 'progress', data: { phase: 'searching', progress: 100, message: 'Knowledge search completed' } });
+              
+              if (kbResult?.ok && kbResult?.hits) {
+                knowledgeHitsForCouncil = kbResult.hits;
+                earlyKbSearchCompleted = true;
+                
+                // Mark step as completed
+                send({
+                  type: 'plan_step',
+                  data: {
+                    ...kbSearchStep,
+                    status: 'completed',
+                    result: kbResult,
+                  },
+                });
+                
+                send({
+                  type: 'tool_progress',
+                  data: {
+                    tool: 'kb.search',
+                    callId: kbSearchStep.id,
+                    progress: `Found ${kbResult.hits.length} results`,
+                    status: 'completed',
+                  },
+                });
+                
+                // Emit knowledge event
+                send({
+                  type: 'knowledge',
+                  data: {
+                    hits: kbResult.hits,
+                    query: kbSearchStep.args?.query || userMessage, // Include query for Knowledge tab
+                  },
+                });
+                
+                // Send tool event for Tools tab
+                send({
+                  type: 'tool',
+                  data: {
+                    tool: 'kb.search',
+                    callId: kbSearchStep.id,
+                    args: kbSearchStep.args || {},
+                    status: 'completed',
+                    result: kbResult,
+                  },
+                });
+              } else {
+                // Mark step as completed even if no hits
+                send({
+                  type: 'plan_step',
+                  data: {
+                    ...kbSearchStep,
+                    status: 'completed',
+                    result: kbResult,
+                  },
+                });
+                
+                send({
+                  type: 'tool_progress',
+                  data: {
+                    tool: 'kb.search',
+                    callId: kbSearchStep.id,
+                    progress: 'No results found',
+                    status: 'completed',
+                  },
+                });
+              }
+            } catch (error: any) {
+              console.warn('[Chat Stream] KB search before council failed:', error);
+              // Mark step as failed
+              send({
+                type: 'plan_step',
+                data: {
+                  ...kbSearchStep,
+                  status: 'failed',
+                  error: error.message,
+                },
+              });
+              
+              send({
+                type: 'tool_progress',
+                data: {
+                  tool: 'kb.search',
+                  callId: kbSearchStep.id,
+                  progress: `Failed: ${error.message}`,
+                  status: 'failed',
+                },
+              });
+            }
+          }
+        }
+        
+        // PHASE 2: COUNCIL - Conditional based on plan.needsCouncil
+        let votes: any[] = [];
+        let consensus: any = null;
+        
+        if (needsCouncil) {
+          // Council is needed for technical/complex questions
+          checkAbort(); // Check before council
+          send({ type: 'status', data: { message: 'Council review starting...', phase: 'council' } });
+          send({ type: 'progress', data: { phase: 'council', progress: 0, message: 'Council review starting...' } });
+          
+          const councilMaxTokens = lightweightMode ? 100 : 150;
+          const councilTemp = lightweightMode ? 0.2 : 0.4;
+          
+          // Track council progress
+          let councilVoteCount = 0;
+          
+          // Run council deliberation with knowledge base results (if available)
+          votes = await runCouncilDeliberationStreaming(
+            plan, 
+            { 
+              provider: provider || 'ollama', 
+              model: defaultModel,
+              maxTokens: councilMaxTokens,
+              temperature: councilTemp
+            },
+            (event) => {
+              // Stream all council events (including consensus)
+              send(event);
+              
+              // Send progress updates for council events
+              if (event.type === 'council_start') {
+                send({ type: 'progress', data: { phase: 'council', progress: 10, message: 'Council members analyzing...' } });
+              } else if (event.type === 'council_thinking') {
+                // Update progress based on status
+                if (event.data.status === 'analyzing') {
+                  send({ type: 'progress', data: { phase: 'council', progress: 20, message: `${event.data.memberName} analyzing...` } });
+                } else if (event.data.status === 'formulating') {
+                  send({ type: 'progress', data: { phase: 'council', progress: 30, message: `${event.data.memberName} formulating response...` } });
+                } else if (event.data.status === 'completed') {
+                  send({ type: 'progress', data: { phase: 'council', progress: 40, message: `${event.data.memberName} completed analysis` } });
+                }
+              } else if (event.type === 'council_thinking_delta') {
+                // Send incremental progress updates during thinking (throttled)
+                // Estimate progress based on accumulated content length
+                // Use a simple heuristic: assume ~500 chars = 15% progress per member
+                const contentLength = event.data.accumulated?.length || 0;
+                const estimatedProgress = Math.min(35, 20 + Math.floor((contentLength / 500) * 15));
+                
+                // Only send progress update every ~100 chars to avoid spam
+                if (contentLength % 100 < 50) { // Rough throttling
+                  send({ 
+                    type: 'progress', 
+                    data: { 
+                      phase: 'council', 
+                      progress: estimatedProgress, 
+                      message: `${event.data.memberName} thinking...` 
+                    } 
+                  });
+                }
+              } else if (event.type === 'council_vote') {
+                councilVoteCount++;
+                const progress = Math.min(90, 50 + (councilVoteCount * 5));
+                send({ type: 'progress', data: { phase: 'council', progress, message: `Vote ${councilVoteCount} received...` } });
+              } else if (event.type === 'council_consensus') {
+                send({ type: 'progress', data: { phase: 'council', progress: 100, message: 'Consensus reached' } });
+              }
+            },
+            knowledgeHitsForCouncil // Pass knowledge base results
+          );
+          
+          // Compute consensus for summarizer
+          consensus = computeConsensus(votes, isCasual);
+        } else {
+          // Skip council for casual/conversational questions
+          console.log('[Chat Stream] Skipping council - casual/conversational question');
+          send({ type: 'status', data: { message: 'Proceeding directly to execution...', phase: 'executing' } });
+          // Create a simple approval consensus for summarizer
+          consensus = {
+            approved: true,
+            score: 10,
+            summary: plan.objective || userMessage
+          };
+        }
         
         // PHASE 3: EXECUTOR
         checkAbort(); // Check before executor
         send({ type: 'status', data: { message: 'Executing plan...', phase: 'executing' } });
+        send({ type: 'progress', data: { phase: 'executing', progress: 0, message: 'Starting execution...' } });
         
         const results: any[] = [];
+        const totalSteps = plan.plan.filter(s => s.tool !== 'none').length;
+        let completedSteps = 0;
         
         for (const step of plan.plan) {
           checkAbort(); // Check before each step
           if (step.tool === 'none') continue;
+          
+          // Skip kb.search if it was already executed early for casual questions
+          if (isCasual && step.tool === 'kb.search' && earlyKbSearchCompleted) {
+            // Reuse the result from early execution
+            const earlyResult = knowledgeHitsForCouncil.length > 0 
+              ? { ok: true, hits: knowledgeHitsForCouncil }
+              : { ok: true, hits: [] };
+            
+            results.push({ step: step.id, result: earlyResult });
+            completedSteps++;
+            
+            // Send tool event for skipped step (already executed early) so Tools tab shows it
+            send({
+              type: 'tool',
+              data: {
+                tool: step.tool,
+                callId: step.id,
+                args: step.args || {},
+                status: 'completed',
+                result: earlyResult,
+              },
+            });
+            
+            continue;
+          }
+          
+          // Send status update before executing step
+          send({ 
+            type: 'status', 
+            data: { 
+              message: `Executing: ${step.title}...`, 
+              phase: 'executing',
+              stepId: step.id 
+            } 
+          });
           
           send({
             type: 'plan_step',
@@ -396,10 +987,61 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
             },
           });
           
+          // Send tool progress event
+          send({
+            type: 'tool_progress',
+            data: {
+              tool: step.tool,
+              callId: step.id,
+              progress: `Starting ${step.tool}...`,
+              status: 'starting',
+            },
+          });
+          
+          // Update progress - calculate based on step position
+          const stepProgress = Math.floor((completedSteps / totalSteps) * 100);
+          const stepStartProgress = Math.floor((completedSteps / totalSteps) * 100);
+          const stepEndProgress = Math.floor(((completedSteps + 1) / totalSteps) * 100);
+          
+          send({ 
+            type: 'progress', 
+            data: { 
+              phase: 'executing', 
+              step: step.id,
+              progress: stepStartProgress, 
+              message: `Starting step ${completedSteps + 1}/${totalSteps}: ${step.title}` 
+            } 
+          });
+          
           try {
             checkAbort(); // Check before tool execution
+            
+            // Send tool progress update
+            send({
+              type: 'tool_progress',
+              data: {
+                tool: step.tool,
+                callId: step.id,
+                progress: `Running ${step.tool}...`,
+                status: 'running',
+              },
+            });
+            
+            // Send intermediate progress during execution
+            const midProgress = Math.floor((stepStartProgress + stepEndProgress) / 2);
+            send({ 
+              type: 'progress', 
+              data: { 
+                phase: 'executing', 
+                step: step.id,
+                progress: midProgress, 
+                message: `Executing ${step.tool}...` 
+              } 
+            });
+            
             const result = await executeTool(step.tool, step.args || {});
             results.push({ step: step.id, result });
+            completedSteps++;
             
             send({
               type: 'tool',
@@ -412,14 +1054,98 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
               },
             });
             
+            // Send completion progress
+            send({
+              type: 'tool_progress',
+              data: {
+                tool: step.tool,
+                callId: step.id,
+                progress: `Completed ${step.tool}`,
+                status: 'completed',
+              },
+            });
+            
+            // Update overall progress
+            const stepProgress = Math.floor((completedSteps / totalSteps) * 100);
+            send({ 
+              type: 'progress', 
+              data: { 
+                phase: 'executing', 
+                step: step.id,
+                progress: stepProgress, 
+                message: `Completed step ${completedSteps}/${totalSteps}: ${step.title}` 
+              } 
+            });
+            
             // Emit dedicated knowledge event when kb.search completes successfully
             if (step.tool === 'kb.search' && result?.ok && result?.hits) {
               send({
                 type: 'knowledge',
                 data: {
                   hits: result.hits,
+                  query: step.args?.query || userMessage, // Include query for Knowledge tab
                 },
               });
+            }
+            
+            // If kb.search returned empty results and this is a general question, trigger web research
+            if (step.tool === 'kb.search' && result?.ok && result?.hits?.length === 0) {
+              const query = step.args?.query || userMessage;
+              const codebaseKeywordsPattern = /(lightningflow|lightning flow|scorpion|n8n|workflow|codebase|project|app|code|implementation|repository|repo|package|module)/i;
+              const isCodebaseQuestion = codebaseKeywordsPattern.test(query);
+              const isGeneralQuestion = /^(what|who|how|why|when|where|tell me|explain|describe)/i.test(query);
+              
+              if (!isCodebaseQuestion && isGeneralQuestion) {
+                // This is a general knowledge question - add research step
+                send({
+                  type: 'status',
+                  data: { message: 'No local knowledge found. Searching web...', phase: 'researching' }
+                });
+                
+                try {
+                  const researchResult = await executeTool('research.run', {
+                    query: query,
+                    depth: 'medium',
+                    category: 'general',
+                    maxSites: 5
+                  });
+                  
+                  if (researchResult?.ok) {
+                    results.push({ step: 'research_fallback', result: researchResult });
+                    
+                    send({
+                      type: 'tool',
+                      data: {
+                        tool: 'research.run',
+                        callId: 'research_fallback',
+                        args: { query },
+                        status: 'completed',
+                        result: researchResult,
+                      },
+                    });
+                    
+                    send({
+                      type: 'research',
+                      data: {
+                        sessionId: researchResult.sessionId,
+                        viewUrl: researchResult.viewUrl,
+                      },
+                    });
+                  }
+                } catch (researchError: any) {
+                  console.warn('[Chat Stream] Web research fallback failed:', researchError);
+                }
+              } else if (isCodebaseQuestion) {
+                // Codebase question but no results - trigger knowledge extraction
+                send({
+                  type: 'status',
+                  data: { message: 'Triggering knowledge extraction...', phase: 'extracting' }
+                });
+                
+                fetch('/api/project/knowledge', { method: 'POST' }).catch(err => 
+                  console.warn('[Chat Stream] Knowledge extraction trigger failed:', err)
+                );
+              }
             }
             
             send({
@@ -439,21 +1165,194 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
             });
             
             send({
+              type: 'tool_progress',
+              data: {
+                tool: step.tool,
+                callId: step.id,
+                progress: `Failed: ${error.message}`,
+                status: 'failed',
+              },
+            });
+            
+            send({
               type: 'plan_step',
               data: { ...step, status: 'failed' },
             });
+            
+            completedSteps++; // Count failed steps too
           }
         }
         
         // PHASE 4: SUMMARIZER
         checkAbort(); // Check before summarizer
-        send({ type: 'status', data: { message: 'Summarizing...', phase: 'summarizing' } });
+        send({ type: 'status', data: { message: 'Summarizing results...', phase: 'summarizing' } });
+        send({ type: 'progress', data: { phase: 'summarizing', progress: 0, message: 'Preparing summary...' } });
+        
+        send({ type: 'progress', data: { phase: 'summarizing', progress: 20, message: 'Gathering results...' } });
         
         const summarizerPrompt = readFileSync(getPromptPath('summarizer.system.txt'), 'utf-8');
-        const summaryContext = `Plan: ${JSON.stringify(plan)}\n\nResults: ${JSON.stringify(results)}\n\nConsensus: ${consensus.summary}`;
         
-        const summaryMaxTokens = lightweightMode ? 150 : 200;
+        // Extract code.readFile results from tool results
+        const codeReadResults = results
+          .filter(r => {
+            const step = plan.plan.find(s => s.id === r.step);
+            return step?.tool === 'code.readFile' && r.result?.ok;
+          })
+          .map(r => {
+            const step = plan.plan.find(s => s.id === r.step);
+            return {
+              path: step?.args?.path || 'unknown',
+              content: r.result?.content || '',
+              ast: r.result?.ast,
+              dependencies: r.result?.dependencies || [],
+              language: r.result?.language
+            };
+          });
+        
+        // Extract knowledge hits and research results from tool results - improved extraction
+        const knowledgeHits = results
+          .filter(r => {
+            const step = plan.plan.find(s => s.id === r.step);
+            return step?.tool === 'kb.search' && r.result?.hits;
+          })
+          .flatMap(r => r.result.hits || []);
+        
+        // Prioritize README files and main documentation for "what is" questions - improved detection
+        const messageLower = userMessage.toLowerCase();
+        const isWhatIsQuestion = /^(what is|who is|what are|who are|define|tell me about|explain what|explain who|more details|more analysis)/i.test(messageLower) ||
+                                 /^(what|who|which)\s+(is|are|was|were)/i.test(messageLower);
+        let prioritizedKnowledgeHits = knowledgeHits;
+        
+        if (isWhatIsQuestion && knowledgeHits.length > 0) {
+          // Sort: README files first, then filter out internal system docs
+          prioritizedKnowledgeHits = knowledgeHits
+            .map((h: any) => ({
+              ...h,
+              isReadme: h.title?.toLowerCase().includes('readme') || 
+                       h.id?.toLowerCase().includes('readme') ||
+                       h.source?.toLowerCase().includes('readme') ||
+                       h.url?.toLowerCase().includes('readme'),
+              isInternalSystem: h.title?.toLowerCase().includes('consistency system') ||
+                               h.title?.toLowerCase().includes('global consistency') ||
+                               h.title?.toLowerCase().includes('implementation status') ||
+                               h.title?.toLowerCase().includes('system status')
+            }))
+            .filter((h: any) => !h.isInternalSystem) // Remove internal system docs
+            .sort((a: any, b: any) => {
+              // README files first
+              if (a.isReadme && !b.isReadme) return -1;
+              if (!a.isReadme && b.isReadme) return 1;
+              return 0;
+            });
+        }
+        
+        const researchResults = results
+          .filter(r => r.step === 'research_fallback' || r.result?.sessionId)
+          .map(r => r.result);
+        
+        // Build comprehensive context with actual results
+        const hasKnowledge = prioritizedKnowledgeHits.length > 0;
+        const hasResearch = researchResults.length > 0;
+        const hasResults = hasKnowledge || hasResearch;
+        
+        // Use questionType from plan for adaptive summarizer output
+        const finalQuestionType = questionType; // Use the determined question type
+        let summaryContext = '';
+        
+        // Add question type context for summarizer at the start
+        summaryContext += `QUESTION TYPE: ${finalQuestionType}\n`;
+        summaryContext += `COUNCIL USED: ${needsCouncil ? 'yes' : 'no'}\n`;
+        summaryContext += `USER QUESTION: ${userMessage}\n\n`;
+        
+        // Build comprehensive context with code.readFile results (HIGHEST PRIORITY)
+        if (codeReadResults.length > 0) {
+          summaryContext += `=== CODE FILES READ (PRIMARY SOURCE - USE THESE) ===\n`;
+          codeReadResults.forEach((file, idx) => {
+            summaryContext += `\n--- File ${idx + 1}: ${file.path} ---\n`;
+            summaryContext += `Language: ${file.language || 'unknown'}\n`;
+            summaryContext += `Content:\n${file.content}\n`;
+            if (file.dependencies && file.dependencies.length > 0) {
+              summaryContext += `\nDependencies: ${file.dependencies.join(', ')}\n`;
+            }
+            if (file.ast) {
+              summaryContext += `\nStructure: ${file.ast.classes?.length || 0} classes, ${file.ast.functions?.length || 0} functions\n`;
+            }
+          });
+          summaryContext += `\n\nCRITICAL INSTRUCTIONS:\n`;
+          summaryContext += `- Use the ACTUAL CODE CONTENT above to provide comprehensive answers\n`;
+          summaryContext += `- Explain what the code actually does, not just what files exist\n`;
+          summaryContext += `- Understand relationships between files using dependency information\n`;
+          summaryContext += `- Build comprehensive understanding from multiple code files\n`;
+          summaryContext += `- For "what is X": Explain based on actual code content, architecture, and structure\n`;
+          summaryContext += `- For "more details": Provide deeper analysis based on code structure and relationships\n`;
+          summaryContext += `- DO NOT just reference file names - explain what the code does\n\n`;
+        }
+        
+        if (isCasual) {
+          // For casual questions, prioritize knowledge base results over council consensus
+          summaryContext += `User Question: ${userMessage}\n\n`;
+          
+          if (hasKnowledge) {
+            // Highlight README files prominently
+            const readmeHits = prioritizedKnowledgeHits.filter((h: any) => h.isReadme);
+            const otherHits = prioritizedKnowledgeHits.filter((h: any) => !h.isReadme);
+            
+            if (readmeHits.length > 0) {
+              summaryContext += `PRIMARY SOURCE - README Files (USE THESE FIRST):\n${readmeHits.map((h: any) => 
+                `- ${h.title}${h.spans?.[0]?.text ? ': ' + h.spans[0].text.substring(0, 400) : ''}`
+              ).join('\n')}\n\n`;
+            }
+            
+            if (otherHits.length > 0) {
+              summaryContext += `Additional Knowledge Base Results:\n${otherHits.map((h: any) => 
+                `- ${h.title}: ${h.spans?.[0]?.text || 'No description'}`
+              ).join('\n')}\n\n`;
+            }
+          }
+          
+          if (hasResearch) {
+            summaryContext += `Web Research: Research session started. Check ${researchResults[0]?.viewUrl || 'research page'} for detailed findings.\n\n`;
+          }
+          
+          // For "what is" questions, prioritize knowledge base over council consensus
+          if (isWhatIsQuestion && hasKnowledge) {
+            summaryContext += `Council Consensus (for reference only - prioritize README files above):\n${consensus.summary}\n\n`;
+            summaryContext += `CRITICAL INSTRUCTIONS FOR "WHAT IS" QUESTIONS:
+- The README FILES above are the PRIMARY SOURCE - use them FIRST and MOST IMPORTANTLY
+- LightningFlow AI is a "Sovereign financial operating system built on Bitcoin Lightning Network with AI-powered automation" (from README)
+- LightningFlow is a PRODUCT/PLATFORM, not just a "concept" or "architecture"
+- If README files are provided, use their exact definition
+- Documents about "Global Consistency System", "Implementation Status", etc. are about INTERNAL SYSTEMS within the product, NOT what the product IS
+- Only use council consensus if README files don't have the answer
+- If README files conflict with council consensus, TRUST THE README FILES
+- DO NOT confuse internal systems documentation with product definitions
+- OUTPUT FORMAT: Use a natural, conversational format. Write like explaining to a friend. NO technical jargon. Start with: "LightningFlow AI is..." based on the README definition.`;
+          } else {
+            summaryContext += `Council Consensus:\n${consensus.summary}\n\n`;
+            summaryContext += `IMPORTANT: 
+- Use ONLY the information provided above (knowledge base results, research, council consensus)
+- If no knowledge base results were found, state that clearly
+- If web research was started, mention that research is available
+- Base your answer on the council's collective understanding
+- DO NOT make up information that isn't in the sources above
+- If you don't have enough information, say so clearly
+- OUTPUT FORMAT: Use a natural, conversational format. Keep it simple and friendly. NO technical jargon.`;
+          }
+        } else {
+          // Technical questions - use existing format
+          summaryContext = `Plan: ${JSON.stringify(plan)}\n\nResults: ${JSON.stringify(results)}\n\nConsensus: ${consensus.summary}`;
+          
+          if (hasKnowledge) {
+            summaryContext += `\n\nKnowledge Base Citations:\n${prioritizedKnowledgeHits.map((h: any) => `- ${h.title} (${h.url || 'N/A'})`).join('\n')}`;
+          }
+        }
+        
+        send({ type: 'progress', data: { phase: 'summarizing', progress: 40, message: 'Building context...' } });
+        
+        const summaryMaxTokens = lightweightMode ? 400 : 600;
         const summaryTemp = lightweightMode ? 0.3 : 0.5;
+        
+        send({ type: 'progress', data: { phase: 'summarizing', progress: 60, message: 'Generating summary...' } });
         
         const summary = await runModelUnified(
           summarizerPrompt,
@@ -461,16 +1360,42 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
           { 
             provider: provider || 'ollama', 
             model: defaultModel,
-            maxTokens: summaryMaxTokens, // Reduced for faster summaries
-            temperature: summaryTemp // Lower for faster generation
-          }
+            maxTokens: summaryMaxTokens,
+            temperature: summaryTemp
+          },
+          undefined, // No streaming for summarizer
+          conversationHistory // Pass conversation history
         );
         
-        // Stream summary
-        send({ type: 'delta', data: { content: summary } });
+        send({ type: 'progress', data: { phase: 'summarizing', progress: 90, message: 'Finalizing response...' } });
+        
+        // Validate summary doesn't contain obvious false information
+        // Check if summary mentions things not in the sources
+        let finalSummary = summary;
+        if (isCasual && !hasResults && !summary.toLowerCase().includes('not found') && !summary.toLowerCase().includes('no information')) {
+          // If no results but summary doesn't acknowledge it, append a note
+          finalSummary = summary + '\n\n*Note: No specific information was found in the knowledge base. The answer above is based on general knowledge.';
+        }
+        
+        // Stream summary in chunks to ensure all content is sent
+        // Split into chunks to avoid any potential truncation issues
+        const summaryWords = finalSummary.split(' ');
+        const summaryChunkSize = 10; // Larger chunks for summary
+        for (let i = 0; i < summaryWords.length; i += summaryChunkSize) {
+          checkAbort(); // Check before each chunk
+          const chunk = summaryWords.slice(i, i + summaryChunkSize).join(' ');
+          send({ type: 'delta', data: { content: (i > 0 ? ' ' : '') + chunk } });
+          // Small delay for smooth streaming
+          if (i + summaryChunkSize < summaryWords.length) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+        }
         
         // Remember in memory
         remember(conversationId, `User: ${userMessage}\nAssistant: ${summary}`);
+        
+        // Final progress update
+        send({ type: 'progress', data: { phase: 'summarizing', progress: 100, message: 'Complete' } });
         
         // Done
         send({ type: 'done', data: { messageId } });
@@ -482,11 +1407,38 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
         } else {
           console.error('[Chat Stream] Fatal error:', error);
           console.error('[Chat Stream] Stack:', error.stack);
+          
+          // Clean up error message - remove stack traces and format nicely
+          let cleanMessage = error.message || 'Unknown error occurred';
+          
+          // Remove stack trace if present
+          if (cleanMessage.includes('at runOllama') || cleanMessage.includes('at process')) {
+            const lines = cleanMessage.split('\n');
+            cleanMessage = lines.filter((line: string) => 
+              !line.includes('at ') && 
+              !line.includes('webpack-internal') &&
+              !line.includes('node:internal')
+            ).join('\n');
+          }
+          
+          // Remove duplicate troubleshooting sections
+          if (cleanMessage.includes('Troubleshooting:')) {
+            const parts = cleanMessage.split('Troubleshooting:');
+            cleanMessage = parts[0] + '\n\n**Troubleshooting:**\n' + parts.slice(1).join('\n');
+            // Remove duplicates
+            const troubleshootingMatch = cleanMessage.match(/\*\*Troubleshooting:\*\*[\s\S]*?(?=\n\n|\n$|$)/);
+            if (troubleshootingMatch) {
+              const troubleshooting = troubleshootingMatch[0];
+              cleanMessage = cleanMessage.replace(/\*\*Troubleshooting:\*\*[\s\S]*?(?=\n\n|\n$|$)/g, '');
+              cleanMessage = cleanMessage.trim() + '\n\n' + troubleshooting;
+            }
+          }
+          
           send({ 
             type: 'error', 
             data: { 
-              message: error.message || 'Unknown error occurred',
-              details: error.stack || String(error)
+              message: cleanMessage,
+              // Don't send stack trace to frontend
             } 
           });
         }
@@ -506,5 +1458,19 @@ When asked about capabilities, mention: "I can search knowledge base, read code 
       'Connection': 'keep-alive',
     },
   });
+  } catch (error: any) {
+    console.error('[Chat Stream] Fatal error in POST handler:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }),
+      { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json' } 
+      }
+    );
+  }
 }
 

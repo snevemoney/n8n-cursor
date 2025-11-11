@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Panel, Metric } from '@/components/scorpion';
+import { Panel, Metric, useToast, PageLoadingBar } from '@/components/scorpion';
 
 interface BuildPlan {
   target: string;
@@ -14,6 +14,7 @@ interface BuildPlan {
 }
 
 export default function BuildPage() {
+  const { showToast } = useToast();
   const [selectedProject, setSelectedProject] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
   const [features, setFeatures] = useState<string[]>([]);
@@ -21,6 +22,7 @@ export default function BuildPage() {
   const [generating, setGenerating] = useState(false);
   const [plan, setPlan] = useState<BuildPlan | null>(null);
   const [knowledgeStats, setKnowledgeStats] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadKnowledgeStats();
@@ -28,13 +30,21 @@ export default function BuildPage() {
 
   const loadKnowledgeStats = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/build');
       if (response.ok) {
-        const data = await response.json();
-        setKnowledgeStats(data);
+        const result = await response.json();
+        if (result.success && result.data) {
+          setKnowledgeStats(result.data);
+        } else {
+          // Fallback for old API format
+          setKnowledgeStats(result);
+        }
       }
     } catch (error) {
       console.error('Failed to load knowledge stats:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,12 +61,12 @@ export default function BuildPage() {
 
   const handleGeneratePlan = async () => {
     if (!selectedProject) {
-      alert('Please enter a project name');
+      showToast('warning', 'Please enter a project name');
       return;
     }
     
     if (features.length === 0) {
-      alert('Please add at least one feature');
+      showToast('warning', 'Please add at least one feature');
       return;
     }
     
@@ -73,14 +83,17 @@ export default function BuildPage() {
       });
       
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        const data = result.success && result.data ? result.data : result;
         setPlan(data.plan);
+        showToast('success', 'Build plan generated successfully!');
       } else {
-        throw new Error('Failed to generate plan');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to generate plan');
       }
     } catch (error) {
-      console.error('Generate error:', error);
-      alert('Failed to generate plan');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate plan';
+      showToast('error', errorMessage);
     } finally {
       setGenerating(false);
     }
@@ -88,48 +101,40 @@ export default function BuildPage() {
 
   const handleSendToN8n = async () => {
     if (!plan) {
-      alert('Please generate a plan first');
+      showToast('warning', 'Please generate a plan first');
       return;
     }
 
-    alert('Send to n8n coming soon! Will create workflow from build plan.');
-    // TODO: Implement workflow creation endpoint
-    // try {
-    //   const response = await fetch('/api/workflows/create', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({
-    //       name: `Build: ${selectedProject}`,
-    //       nodes: [
-    //         {
-    //           name: 'Start',
-    //           type: 'n8n-nodes-base.start',
-    //           position: [250, 300]
-    //         },
-    //         {
-    //           name: 'Build Plan',
-    //           type: 'n8n-nodes-base.code',
-    //           parameters: {
-    //             code: `// Generated Build Plan\n${JSON.stringify(plan, null, 2)}`
-    //           },
-    //           position: [450, 300]
-    //         }
-    //       ]
-    //     })
-    //   });
-    //   
-    //   if (response.ok) {
-    //     alert('Build plan sent to n8n successfully!');
-    //   } else {
-    //     throw new Error('Failed to create workflow');
-    //   }
-    // } catch (error) {
-    //   console.error('Send error:', error);
-    //   alert('Failed to send to n8n');
-    // }
+    try {
+      showToast('info', 'Creating workflow in n8n...');
+      
+      const response = await fetch('/api/build/workflow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `Build: ${selectedProject}`,
+          plan: plan,
+          description: `Build plan for ${selectedProject} with ${plan.features?.length || 0} features`
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const data = result.success && result.data ? result.data : result;
+        showToast('success', `Workflow "${data.workflowName}" created successfully in n8n!`);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to create workflow');
+      }
+    } catch (error: any) {
+      console.error('Send error:', error);
+      showToast('error', `Failed to send to n8n: ${error.message || 'Unknown error'}`);
+    }
   };
 
   return (
+    <>
+      <PageLoadingBar loading={loading && !knowledgeStats} />
     <div className="h-full grid grid-cols-[320px_1fr] gap-4 p-4">
       <div className="space-y-4">
         <Panel title="Knowledge Base">
@@ -208,6 +213,8 @@ export default function BuildPage() {
                 <button
                   onClick={handleAddFeature}
                   className="px-4 py-2 bg-blue-600 text-white rounded-sm text-sm hover:bg-blue-700 transition-colors"
+                  aria-label="Add feature"
+                  title="Add feature to the list"
                 >
                   Add
                 </button>
@@ -219,6 +226,8 @@ export default function BuildPage() {
                     <button
                       onClick={() => handleRemoveFeature(idx)}
                       className="text-red-400 hover:text-red-300 text-xs"
+                      aria-label={`Remove feature: ${feature}`}
+                      title={`Remove "${feature}" from the list`}
                     >
                       Remove
                     </button>
@@ -252,6 +261,8 @@ export default function BuildPage() {
             onClick={handleGeneratePlan}
             disabled={!selectedProject || features.length === 0 || generating}
             className="px-4 py-2 bg-blue-600 text-white rounded-sm text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Generate build plan"
+            title={!selectedProject ? 'Enter a project name first' : features.length === 0 ? 'Add at least one feature first' : 'Generate build plan from project configuration'}
           >
             {generating ? 'Generating...' : 'Generate Plan'}
           </button>
@@ -259,12 +270,15 @@ export default function BuildPage() {
             onClick={handleSendToN8n}
             disabled={!plan}
             className="px-4 py-2 bg-emerald-500/20 border border-emerald-400/50 rounded-sm text-sm hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Send plan to n8n"
+            title={!plan ? 'Generate a plan first' : 'Send build plan to n8n workflow (coming soon)'}
           >
             Send to n8n
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 }
 

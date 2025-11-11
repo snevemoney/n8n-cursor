@@ -79,5 +79,25 @@ services:
     ports: ["127.0.0.1:9999:8080"]
     cpus: "0.25"; mem_limit: "128m"; pids_limit: 100
 
+  scorpion:
+    <<: *dflt
+    image: ghcr.io/yourorg/scorpion:int
+    env_file: [../../.env.int]
+    ports: ["127.0.0.1:3003:3003"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1.5"; mem_limit: "1.5g"; pids_limit: 300
+    volumes:
+      - ${PROD_DATA_ROOT:-./data}/scorpion-int:/app/data/scorpion
+      - ${PROD_DATA_ROOT:-./data}/scorpion-backups-int:/app/backups/scorpion
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - SCORPION_STORAGE_AUTO_DETECT=false
+      - SCORPION_SSD_PATH=/app/data/scorpion
+      - N8N_API_URL=http://n8n:5678
+    depends_on:
+      redis: { condition: service_healthy }
+      n8n: { condition: service_healthy }
+
 networks:
   private: { driver: bridge, internal: true }

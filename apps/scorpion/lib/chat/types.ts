@@ -68,9 +68,21 @@ export const MessageSchema = z.object({
 export type Message = z.infer<typeof MessageSchema>;
 
 // Conversation
+export const FolderSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  parentId: z.string().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+export type Folder = z.infer<typeof FolderSchema>;
+
+// Update ConversationSchema to include folderId
 export const ConversationSchema = z.object({
   id: z.string(),
   title: z.string(),
+  folderId: z.string().optional(), // NEW
   createdAt: z.number(),
   updatedAt: z.number(),
   meta: z.object({
@@ -129,6 +141,9 @@ export const PlanSchema = z.object({
     if: z.string(),
     then: z.string(),
   })).optional(),
+  needsCouncil: z.boolean().optional(), // Whether this plan needs council review
+  questionType: z.enum(['casual', 'technical', 'conversational']).optional(), // Type of question for adaptive output
+  councilRationale: z.string().optional(), // Why council is/isn't needed
 });
 
 export type Plan = z.infer<typeof PlanSchema>;

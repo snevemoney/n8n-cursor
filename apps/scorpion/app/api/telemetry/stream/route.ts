@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getTelemetryBus } from '@/lib/telemetry/bus';
-import type { DomainEvent, MetricsPoint } from '@/lib/telemetry/schema';
+import { DomainEventSchema, MetricsPointSchema, type DomainEvent, type MetricsPoint } from '@/lib/telemetry/schema';
 
 /**
  * GET /api/telemetry/stream
@@ -30,14 +30,32 @@ export async function GET(req: NextRequest) {
       
       sendMessage('connected', { message: 'Telemetry stream connected' });
       
-      // Event handler
+      // Event handler with validation
       const eventHandler = (event: DomainEvent) => {
-        sendMessage('event', event);
+        // Validate event before sending to prevent client-side errors
+        const validation = DomainEventSchema.safeParse(event);
+        if (validation.success) {
+          sendMessage('event', validation.data);
+        } else {
+          console.warn('[Telemetry Stream] Invalid event format, skipping:', {
+            error: validation.error.errors,
+            event: event
+          });
+        }
       };
       
-      // Metrics handler
+      // Metrics handler with validation
       const metricsHandler = (metrics: MetricsPoint) => {
-        sendMessage('metrics', metrics);
+        // Validate metrics before sending
+        const validation = MetricsPointSchema.safeParse(metrics);
+        if (validation.success) {
+          sendMessage('metrics', validation.data);
+        } else {
+          console.warn('[Telemetry Stream] Invalid metrics format, skipping:', {
+            error: validation.error.errors,
+            metrics: metrics
+          });
+        }
       };
       
       // Subscribe to telemetry bus

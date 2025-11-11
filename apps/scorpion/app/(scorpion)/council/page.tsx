@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Panel, Metric, LogRow } from '@/components/scorpion';
+import { Panel, Metric, LogRow, LoadingState, ErrorState, EmptyState, PageLoadingBar } from '@/components/scorpion';
+import { Users } from 'lucide-react';
 
 interface CouncilMember {
   name: string;
@@ -36,7 +37,10 @@ export default function CouncilPage() {
   const [topic, setTopic] = useState('How should we integrate the local model?');
   const [result, setResult] = useState<CouncilResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [councilError, setCouncilError] = useState<Error | null>(null);
   const [members, setMembers] = useState<CouncilMember[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false); // Start false so page renders immediately
+  const [membersError, setMembersError] = useState<Error | null>(null);
   const [liveResponses, setLiveResponses] = useState<CouncilMember[]>([]);
   const [currentSpeaker, setCurrentSpeaker] = useState<string | null>(null);
   const [councilThinking, setCouncilThinking] = useState<CouncilThinking>({});
@@ -44,15 +48,50 @@ export default function CouncilPage() {
   const [consensus, setConsensus] = useState<{ score: number; summary: string } | null>(null);
 
   useEffect(() => {
-    fetch('/api/council')
-      .then(res => res.json())
-      .then(data => setMembers(data.members || []))
-      .catch(err => console.error('Failed to load members:', err));
+    // Defer data fetch aggressively so page renders instantly
+    const loadMembers = async () => {
+      try {
+        setMembersError(null);
+        // Only show loading spinner on initial load
+        if (members.length === 0) {
+          setMembersLoading(true);
+        }
+        const response = await fetch('/api/council');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            setMembers(result.data.members || []);
+          } else {
+            // Fallback for old API format
+            setMembers(result.members || []);
+          }
+        } else {
+          throw new Error(`Failed to load council members: ${response.statusText}`);
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to load council members');
+        console.error('Failed to load members:', error);
+        setMembersError(error);
+      } finally {
+        setMembersLoading(false);
+      }
+    };
+    
+    const loadData = () => {
+      loadMembers();
+    };
+    
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(loadData, { timeout: 0 }); // Immediate - no delay
+    } else {
+      setTimeout(loadData, 0); // Immediate fallback
+    }
   }, []);
 
   async function runCouncil() {
     if (!topic.trim() || loading) return;
     setLoading(true);
+    setCouncilError(null);
     setResult(null);
     setLiveResponses([]);
     setCurrentSpeaker(null);
@@ -185,7 +224,8 @@ export default function CouncilPage() {
                 
               case 'error':
                 console.error('[Council] Error:', event.data);
-                alert(`Council error: ${event.data.message}`);
+                const errorMessage = event.data?.message || 'Council deliberation failed';
+                setCouncilError(new Error(errorMessage));
                 setLoading(false);
                 break;
             }
@@ -196,17 +236,37 @@ export default function CouncilPage() {
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to run council meeting. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to run council meeting. Please try again.';
+      setCouncilError(new Error(errorMessage));
       setLoading(false);
       setCurrentSpeaker(null);
     }
   }
 
   return (
+    <>
+      <PageLoadingBar loading={membersLoading && members.length === 0} />
     <div className="h-full grid grid-cols-[280px_1.1fr_0.7fr] gap-4 p-4 overflow-y-auto">
       <Panel title="Council Members">
-        <div className="space-y-2">
-          {members.map((member) => (
+        {membersLoading ? (
+          <LoadingState text="Loading members..." />
+        ) : membersError ? (
+          <ErrorState
+            error={membersError}
+            onRetry={() => window.location.reload()}
+            title="Failed to load members"
+            fullPage={false}
+          />
+        ) : members.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="No council members"
+            message="Council members could not be loaded"
+            fullPage={false}
+          />
+        ) : (
+          <div className="space-y-2">
+            {members.map((member) => (
             <div key={member.name} className="border border-white/5 rounded-sm p-2 bg-white/0 hover:bg-white/5 transition-colors">
               <div className="flex items-center justify-between mb-1">
                 <div className="text-sm font-semibold">{member.name}</div>
@@ -216,11 +276,25 @@ export default function CouncilPage() {
               <div className="text-[10px] text-white/30 mt-1">Weight: {member.weight}x</div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </Panel>
 
       <div className="space-y-4">
         <Panel title="Hold Council Meeting">
+          {councilError && (
+            <div className="mb-4">
+              <ErrorState
+                error={councilError}
+                onRetry={() => {
+                  setCouncilError(null);
+                  runCouncil();
+                }}
+                title="Council deliberation failed"
+                fullPage={false}
+              />
+            </div>
+          )}
           <textarea
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
@@ -359,5 +433,6 @@ export default function CouncilPage() {
         </div>
       </Panel>
     </div>
+    </>
   );
 }

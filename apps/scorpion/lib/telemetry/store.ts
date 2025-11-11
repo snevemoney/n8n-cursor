@@ -48,6 +48,7 @@ interface TelemetryState {
   
   // Connection state
   liveConnected: boolean;
+  lastHeartbeat: number;
   
   // Actions
   setTimeRange: (range: Partial<TimeRange>) => void;
@@ -55,6 +56,7 @@ interface TelemetryState {
   addEvents: (events: DomainEvent[]) => void;
   setFocus: (focus: Focus) => void;
   setLiveConnected: (connected: boolean) => void;
+  setLastHeartbeat: (timestamp: number) => void;
 }
 
 const MAX_EVENTS = 1000;
@@ -74,6 +76,7 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
   health: {},
   focus: {},
   liveConnected: false,
+  lastHeartbeat: 0,
   
   // Actions
   setTimeRange: (range) => {
@@ -137,6 +140,10 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
   
   setLiveConnected: (connected) => {
     set({ liveConnected: connected });
+  },
+  
+  setLastHeartbeat: (timestamp) => {
+    set({ lastHeartbeat: timestamp });
   },
 }));
 

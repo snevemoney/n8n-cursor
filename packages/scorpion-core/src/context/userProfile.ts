@@ -45,11 +45,15 @@ export function loadUserProfile(): UserProfile {
 
 /**
  * Get system prompt with user context
+ * Optionally includes grounding context for memory, assets, actions, and prompts
  */
-export function getUserContextPrompt(): string {
+export function getUserContextPrompt(options?: {
+  includeGrounding?: boolean;
+  grounding?: import('./grounding').GroundingOptions;
+}): string {
   const profile = loadUserProfile();
   
-  return `You are Scorpion, an AI assistant helping ${profile.name}.
+  let prompt = `You are Scorpion, an AI assistant helping ${profile.name}.
 
 Goals:
 ${profile.goals.map(g => `- ${g}`).join('\n')}
@@ -61,5 +65,16 @@ ${profile.preferences.focusAreas ? `- Focus areas: ${profile.preferences.focusAr
 ` : ''}
 
 Keep answers structured, actionable, and aligned with these goals.`;
+
+  // Add grounding context if requested
+  if (options?.includeGrounding) {
+    const { generateGroundedSystemPrompt } = require('./grounding');
+    prompt = generateGroundedSystemPrompt({
+      basePrompt: prompt,
+      ...options.grounding
+    });
+  }
+
+  return prompt;
 }
 

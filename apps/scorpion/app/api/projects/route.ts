@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getOrchestrator } from '@/lib/shared-stores';
+import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
 /**
  * GET /api/projects - Get project details and statistics
  */
-export async function GET() {
-  try {
+export const GET = withErrorHandling(async () => {
     const orchestrator = await getOrchestrator();
     
     // Get comprehensive project knowledge (uses 30s cache)
@@ -33,14 +33,14 @@ export async function GET() {
       description: 'Central Orchestration & Intelligence Platform',
       status: 'active',
       created: '2025-01-01',
-      lastUpdated: summary.lastUpdated || new Date().toISOString(),
+      lastUpdated: summary.status?.lastIngestion || new Date().toISOString(),
       
       // Workspace stats - count apps and packages
       workspace: {
         totalFiles: packagesCount, // Packages count
         totalDirectories: appsCount, // Apps count (frontend maps totalDirectories -> apps)
-        languages: summary.workspace?.languages || [],
-        frameworks: summary.workspace?.frameworks || []
+        languages: [], // Not available in summary type
+        frameworks: [] // Not available in summary type
       },
       
       // Database stats - map database array
@@ -61,35 +61,25 @@ export async function GET() {
         }, {})
       },
       
-      // Documentation stats
+      // Documentation stats - not available in summary type, use defaults
       documentation: {
-        totalFiles: summary.documentation?.totalFiles || 0,
-        totalSize: summary.documentation?.totalSize || 0,
-        categories: summary.documentation?.categories || []
+        totalFiles: 0,
+        totalSize: 0,
+        categories: []
       },
       
-      // Infrastructure - services come from summary.status or summary.services
+      // Infrastructure - services come from summary.services array
       infrastructure: {
-        services: Array.isArray(summary.status?.services) 
-          ? summary.status.services 
-          : Array.isArray(summary.services)
-          ? summary.services
-          : Array.isArray(summary.infrastructure?.services) 
-          ? summary.infrastructure.services 
-          : [],
-        containers: Array.isArray(summary.infrastructure?.containers)
-          ? summary.infrastructure.containers
-          : [],
-        networks: Array.isArray(summary.infrastructure?.networks)
-          ? summary.infrastructure.networks
-          : []
+        services: Array.isArray(summary.services) ? summary.services : [],
+        containers: [],
+        networks: []
       },
       
-      // Knowledge stats
+      // Knowledge stats - use totalKnowledge from summary
       knowledge: {
-        totalItems: summary.knowledge?.totalItems || summary.totalKnowledge || 0,
-        entities: summary.entities?.length || 0,
-        relationships: summary.relationships?.length || 0
+        totalItems: summary.totalKnowledge || 0,
+        entities: 0, // Not available in summary type
+        relationships: 0 // Not available in summary type
       },
       
       // Conversation stats
@@ -101,44 +91,38 @@ export async function GET() {
       
       // Health (based on summary data)
       health: {
-        status: summary.status?.overallHealth || summary.projectHealth?.overallStatus || 'healthy',
-        message: summary.projectHealth?.message || 'System operational',
-        issues: summary.projectHealth?.issues || [],
+        status: summary.status?.overallHealth || 'healthy',
+        message: 'System operational',
+        issues: [],
         lastCheck: new Date().toISOString()
       },
       
       // Tech Debt and Missing Features from status
-      techDebt: summary.status?.techDebt || {
-        total: 0,
-        critical: 0,
-        high: 0,
-        medium: 0,
-        low: 0
-      },
-      missingFeatures: summary.status?.missingFeatures || {
-        p0: 0,
-        p1: 0,
-        p2: 0
-      },
+      techDebt: (() => {
+        const td = summary.status?.techDebt;
+        console.log(`[GET /api/projects] Tech debt from status:`, JSON.stringify(td));
+        return td || {
+          total: 0,
+          critical: 0,
+          high: 0,
+          medium: 0,
+          low: 0
+        };
+      })(),
+      missingFeatures: (() => {
+        const mf = summary.status?.missingFeatures;
+        console.log(`[GET /api/projects] Missing features from status:`, JSON.stringify(mf));
+        return mf || {
+          p0: 0,
+          p1: 0,
+          p2: 0
+        };
+      })(),
       
       // Use lastIngestion from status if available
       lastIngestion: summary.status?.lastIngestion || new Date().toISOString()
     };
     
-    return NextResponse.json(projectData);
-    
-  } catch (error: any) {
-    console.error('Error getting project data:', error);
-    console.error('Error stack:', error.stack);
-    
-    // Return a minimal response on error
-    return NextResponse.json(
-      { 
-        error: error.message || 'Failed to get project data',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
-      { status: 500 }
-    );
-  }
-}
+    return createSuccessResponse(projectData);
+});
 

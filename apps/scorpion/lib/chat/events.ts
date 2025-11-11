@@ -44,7 +44,8 @@ export const ChatEventSchema = z.discriminatedUnion('type', [
     type: z.literal('status'),
     data: z.object({
       message: z.string(),
-      phase: z.enum(['planning', 'council', 'executing', 'summarizing']).optional(),
+      phase: z.enum(['planning', 'council', 'executing', 'summarizing', 'searching', 'researching', 'extracting']).optional(),
+      stepId: z.string().optional(),
     }),
   }),
   
@@ -159,6 +160,27 @@ export const ChatEventSchema = z.discriminatedUnion('type', [
         spans: z.array(z.object({ text: z.string() })),
         relevance: z.number().optional(),
       })),
+    }),
+  }),
+
+  // Add new event types
+  z.object({
+    type: z.literal('progress'),
+    data: z.object({
+      phase: z.string(),
+      step: z.string().optional(),
+      progress: z.number().optional(), // 0-100
+      message: z.string(),
+    }),
+  }),
+
+  z.object({
+    type: z.literal('tool_progress'),
+    data: z.object({
+      tool: z.string(),
+      callId: z.string(),
+      progress: z.string(),
+      status: z.enum(['starting', 'running', 'completed', 'failed']),
     }),
   }),
 ]);

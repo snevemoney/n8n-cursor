@@ -5,28 +5,48 @@
 
 import { RAGStore, OntologyStore, ProjectKnowledgeOrchestrator } from '@scorpion/core';
 import { getMCPn8nClient } from './mcp-n8n-client';
+import { getDataDir, initializeStorageConfig } from './storage/storage-config';
 import path from 'path';
 
 let ragStore: RAGStore | null = null;
 let ontologyStore: OntologyStore | null = null;
 let orchestrator: ProjectKnowledgeOrchestrator | null = null;
 let initialized = false;
-
-const dataDir = path.join(process.cwd(), 'data', 'scorpion');
+let dataDir: string | null = null;
+let initializationPromise: Promise<void> | null = null;
 
 export async function getRAGStore(): Promise<RAGStore> {
-  if (!ragStore) {
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-    ragStore = new RAGStore(ollamaUrl, dataDir);
-    await ragStore.initialize(); // Load from disk
+  // If already initialized, return immediately
+  if (ragStore) return ragStore;
+  
+  // If initializing, wait for it
+  if (initializationPromise) {
+    await initializationPromise;
+    return ragStore!;
   }
-  return ragStore;
+  
+  // Start initialization (non-blocking for other calls)
+  initializationPromise = (async () => {
+    if (!dataDir) {
+      await initializeStorageConfig();
+      dataDir = await getDataDir();
+    }
+    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    ragStore = new RAGStore(ollamaUrl, dataDir!);
+    await ragStore.initialize();
+  })();
+  
+  await initializationPromise;
+  return ragStore!;
 }
 
 export async function getOntologyStore(): Promise<OntologyStore> {
   if (!ontologyStore) {
     const ragStore = await getRAGStore();
-    ontologyStore = new OntologyStore(ragStore, dataDir);
+    if (!dataDir) {
+      dataDir = await getDataDir();
+    }
+    ontologyStore = new OntologyStore(ragStore, dataDir!);
     await ontologyStore.initialize(); // Load from disk
   }
   return ontologyStore;
@@ -53,11 +73,30 @@ export async function getOrchestrator(): Promise<ProjectKnowledgeOrchestrator> {
   return orchestrator;
 }
 
+// Alias for compatibility with auto-sync
+export const getOrchestratorAsync = getOrchestrator;
+
 /**
  * Initialize all stores (call on startup)
  */
 export async function initializeStores(): Promise<void> {
   if (initialized) return;
+  
+  // Initialize storage configuration first
+  const config = await initializeStorageConfig();
+  dataDir = await getDataDir();
+  
+  if (config.isSSD) {
+    console.log(`⚡⚡⚡ SUPER POWERS ACTIVATED ⚡⚡⚡`);
+    console.log(`🚀 SSD MODE - Using ${dataDir}`);
+    console.log(`   ✨ Performance optimizations enabled`);
+    console.log(`   🚀 4x batch sizes, 3.3x concurrency, 5x file capacity`);
+    console.log(`   💾 All data automatically migrated to SSD`);
+    console.log(`   ⚡ Backups, cache, and logs optimized for SSD`);
+  } else {
+    console.log(`💾 Using default storage: ${dataDir}`);
+    console.log(`   💡 Connect an external SSD to unlock super powers!`);
+  }
   
   await getRAGStore();
   await getOntologyStore();
@@ -65,5 +104,26 @@ export async function initializeStores(): Promise<void> {
   
   initialized = true;
   console.log('✅ All stores initialized and loaded from disk');
+  
+  // Start storage reconnect monitoring in background (non-blocking)
+  // Defer slightly to allow server to start faster
+  Promise.resolve().then(async () => {
+    try {
+      // Minimal delay - just enough to let stores initialize
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced from 3s to 1s
+      
+      const { startReconnectMonitoring } = await import('./storage/storage-reconnect-monitor');
+      await startReconnectMonitoring({
+        checkInterval: 10000, // Check every 10 seconds
+        autoMigrate: true, // Automatically migrate data back to SSD
+        enabled: true,
+      });
+      console.log('📡 Storage reconnect monitoring started');
+    } catch (error) {
+      console.debug('Storage reconnect monitoring not available:', error);
+    }
+  }).catch(() => {
+    // Silent fail - monitoring is optional
+  });
 }
 

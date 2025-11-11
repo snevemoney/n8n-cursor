@@ -27,6 +27,34 @@ export function detectLightweightMode(): boolean {
 }
 
 /**
+ * Get lightweight mode configuration with aggressive optimizations for 8GB systems
+ */
+export function getLightweightConfig() {
+  const isLightweight = detectLightweightMode();
+  
+  if (!isLightweight) {
+    return {
+      ragContextChunks: 5,
+      batchSize: 5,
+      concurrency: 3,
+      cacheTTL: 30 * 60 * 1000, // 30 minutes
+      enablePrefetch: true,
+      fileWatcherDebounce: 2000,
+    };
+  }
+  
+  // Aggressive optimizations for 8GB systems
+  return {
+    ragContextChunks: 3, // Reduced from 5
+    batchSize: 2, // Reduced from 5
+    concurrency: 1, // Reduced from 3
+    cacheTTL: 10 * 60 * 1000, // 10 minutes (reduced from 30)
+    enablePrefetch: false, // Disabled for memory savings
+    fileWatcherDebounce: 5000, // Increased debounce to reduce CPU
+  };
+}
+
+/**
  * Get system RAM information for debugging
  */
 export function getSystemRAMInfo(): { totalGB: number; totalBytes: number } {

@@ -15,11 +15,16 @@ Scorpion now automatically syncs everything - no manual intervention needed. Kno
 
 ### 1. **Auto-Ingestion on Startup**
 - Runs automatically when Scorpion starts
-- Ingests all project knowledge if none exists
-- Checks for existing knowledge before ingesting
+- **Always runs full ingestion** including:
+  - All project knowledge (workspace, code, docs, workflows, infrastructure)
+  - **Tech debt analysis** - Analyzes codebase for technical debt and missing features
+  - **Recommendations** - Generates intelligent recommendations for improvements
+- Ensures recommendations and tech debt analysis are always up-to-date
 
 ### 2. **Periodic Sync (Every 5 Minutes)**
-- Automatically re-ingests project knowledge
+- Automatically re-ingests **all project knowledge** including:
+  - **Tech debt analysis** - Re-analyzes codebase for changes
+  - **Recommendations** - Regenerates recommendations based on latest codebase state
 - Catches any changes to workspace, database, docs, etc.
 - Syncs workflows to n8n
 
@@ -70,8 +75,8 @@ experimental: {
 
 | Event | Frequency | Action |
 |-------|-----------|--------|
-| **Server Startup** | Once | Initial knowledge ingestion |
-| **Periodic Sync** | Every 5 minutes | Re-ingest all knowledge + sync workflows |
+| **Server Startup** | Once | Full knowledge ingestion (including recommendations & tech debt) |
+| **Periodic Sync** | Every 5 minutes | Full re-ingest (recommendations & tech debt) + sync workflows |
 | **Workflow File Change** | On file change | Sync workflows to n8n (debounced 2s) |
 
 ---
@@ -102,9 +107,9 @@ pnpm dev
 **What happens automatically**:
 1. ✅ Server starts
 2. ✅ Auto-sync initializes
-3. ✅ Knowledge ingestion runs (if needed)
-4. ✅ File watcher starts
-5. ✅ Periodic sync begins
+3. ✅ **Full knowledge ingestion runs** (including recommendations & tech debt analysis)
+4. ✅ File watcher starts monitoring workflows
+5. ✅ Periodic sync begins (every 5 minutes, includes recommendations & tech debt)
 
 ### No Manual Steps Required
 
@@ -121,13 +126,19 @@ pnpm dev
 Watch for these log messages:
 
 ```
-🦂 Scorpion auto-sync initialized
-🦂 Performing initial knowledge ingestion...
-✅ Knowledge already exists: 150 items
+🦂 Automatic syncing enabled (bidirectional)
+🦂 Performing initial knowledge ingestion (including recommendations)...
+🦂 Running full ingestion (this may take a few minutes)...
+💻 Ingesting source code...
+🔍 Analyzing codebase for tech debt and missing features...
+✅ Found 45 tech debt/missing feature items
+🧠 Generating intelligent recommendations...
+✅ Generated 23 recommendations
+✅ Initial ingestion complete: 150 knowledge items (including recommendations and tech debt analysis)
 🦂 Watching workflow files in /path/to/workflows...
 ✅ Workflow file watcher started
-🦂 Performing periodic sync...
-✅ Periodic sync completed: 150 knowledge items
+🦂 Performing periodic sync (including recommendations and tech debt analysis)...
+✅ Periodic sync completed: 150 knowledge items (recommendations and tech debt updated)
 📥 Workflow file added: workflow_new.json
 🔄 Found 1 unsynced workflows, triggering sync...
 ✅ Workflow sync completed
@@ -184,13 +195,37 @@ Body: { "action": "sync" }
 
 ---
 
+## 🧠 Recommendations & Tech Debt Analysis
+
+### Automatic Analysis
+- **Tech Debt Detection**: Automatically analyzes codebase for technical debt issues
+- **Missing Features**: Identifies missing features based on codebase patterns
+- **Intelligent Recommendations**: Generates actionable recommendations for improvements
+- **Always Current**: Both analyses run on every sync (startup + every 5 minutes)
+
+### What Gets Analyzed
+- Code structure and architecture
+- Security vulnerabilities
+- Performance issues
+- Testing gaps
+- Documentation needs
+- Error handling patterns
+- Type safety issues
+- Missing features based on patterns
+
+### Accessing Results
+- View recommendations in the Project Dashboard
+- Tech debt items appear in knowledge base searches
+- Both are automatically included in RAG store for AI queries
+
 ## ✅ Benefits
 
 1. **Zero Manual Work** - Everything syncs automatically
-2. **Always Up-to-Date** - Knowledge stays current
-3. **Real-time Workflow Sync** - Changes sync immediately
-4. **Background Processing** - No impact on UI performance
-5. **Self-Healing** - Automatically detects and syncs missing items
+2. **Always Up-to-Date** - Knowledge, recommendations, and tech debt analysis stay current
+3. **Automatic Insights** - Recommendations and tech debt analysis run automatically
+4. **Real-time Workflow Sync** - Changes sync immediately
+5. **Background Processing** - No impact on UI performance
+6. **Self-Healing** - Automatically detects and syncs missing items
 
 ---
 

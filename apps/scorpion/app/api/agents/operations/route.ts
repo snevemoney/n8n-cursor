@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAgentOperationsExecutor } from '@/lib/agent-operations-executor';
 import { getAgentOperations, getAllSafeOperations } from '@/lib/agent-operations';
+import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { z } from 'zod';
 
 /**
  * GET /api/agents/operations - Get available operations and status
  */
-export async function GET(request: NextRequest) {
-  try {
+export const GET = withErrorHandling(async (request: NextRequest) => {
     const { searchParams } = new URL(request.url);
     const agentId = searchParams.get('agentId');
     
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
         };
       });
       
-      return NextResponse.json({
+      return createSuccessResponse({
         agentId,
         operations: operationsWithStatus,
         nextOperation,
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      return NextResponse.json({
+      return createSuccessResponse({
         totalOperations: allOperations.length,
         activeExecutions: activeExecutions.length,
         operations: allOperations,
@@ -67,41 +68,29 @@ export async function GET(request: NextRequest) {
         recentCompletions: recentCompletions
       });
     }
-  } catch (error: any) {
-    console.error('Error getting agent operations:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get operations' },
-      { status: 500 }
-    );
-  }
-}
+});
+
+const executeOperationSchema = z.object({
+  operationId: z.string().min(1),
+  agentId: z.string().min(1)
+});
 
 /**
  * POST /api/agents/operations - Execute an operation
  */
-export async function POST(request: NextRequest) {
-  try {
-    const { operationId, agentId } = await request.json();
-    
-    if (!operationId || !agentId) {
-      return NextResponse.json(
-        { error: 'operationId and agentId are required' },
-        { status: 400 }
-      );
-    }
-    
-    const executor = getAgentOperationsExecutor();
-    const result = await executor.executeOperation(operationId, agentId);
-    
-    return NextResponse.json({
-      success: result.success,
-      result
-    });
-  } catch (error: any) {
-    console.error('Error executing operation:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to execute operation' },
-      { status: 500 }
-    );
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const validation = await validateRequest(request, executeOperationSchema);
+  if (!validation.success) {
+    return validation.error;
   }
-}
+  
+  const { operationId, agentId } = validation.data;
+  
+  const executor = getAgentOperationsExecutor();
+  const result = await executor.executeOperation(operationId, agentId);
+  
+  return createSuccessResponse({
+    success: result.success,
+    result
+  });
+});

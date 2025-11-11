@@ -2,20 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ScorpionAgent, KnowledgeExtractor } from '@scorpion/core';
 import { getRAGStore, getOrchestrator } from '@/lib/shared-stores';
 import path from 'path';
+import { withErrorHandling, createSuccessResponse, validateRequest } from '@/lib/api-error-handler';
+import { z } from 'zod';
+
+const buildSchema = z.object({
+  target: z.string().min(1),
+  features: z.array(z.string()).min(1),
+  requirements: z.string().optional(),
+});
 
 /**
  * Build a new side hustle using accumulated knowledge
  */
-export async function POST(request: NextRequest) {
-  try {
-    const { target, features, requirements } = await request.json();
-
-    if (!target || !features || !Array.isArray(features)) {
-      return NextResponse.json(
-        { error: 'Missing required fields: target, features' },
-        { status: 400 }
-      );
-    }
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const validation = await validateRequest(request, buildSchema);
+  if (!validation.success) {
+    return validation.error;
+  }
+  
+  const { target, features, requirements } = validation.data;
 
     const store = await getRAGStore();
     
@@ -40,29 +45,24 @@ export async function POST(request: NextRequest) {
       requirements: requirements || ''
     });
 
-    return NextResponse.json({ plan });
-  } catch (error: any) {
-    console.error('Error building side hustle:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to build side hustle' },
-      { status: 500 }
-    );
-  }
-}
+    return createSuccessResponse({ plan });
+});
+
+const extractSchema = z.object({
+  sideHustleId: z.string().min(1),
+  codebasePath: z.string().min(1),
+});
 
 /**
  * Extract knowledge from a side hustle codebase
  */
-export async function PUT(request: NextRequest) {
-  try {
-    const { sideHustleId, codebasePath } = await request.json();
-
-    if (!sideHustleId || !codebasePath) {
-      return NextResponse.json(
-        { error: 'Missing required fields: sideHustleId, codebasePath' },
-        { status: 400 }
-      );
-    }
+export const PUT = withErrorHandling(async (request: NextRequest) => {
+  const validation = await validateRequest(request, extractSchema);
+  if (!validation.success) {
+    return validation.error;
+  }
+  
+  const { sideHustleId, codebasePath } = validation.data;
 
     // Resolve path relative to workspace root
     const workspaceRoot = process.cwd();
@@ -78,7 +78,7 @@ export async function PUT(request: NextRequest) {
       await store.addKnowledge(k);
     }
 
-    return NextResponse.json({ 
+    return createSuccessResponse({ 
       extracted: knowledge.length,
       knowledge: knowledge.map(k => ({
         id: k.id,
@@ -87,40 +87,25 @@ export async function PUT(request: NextRequest) {
         type: k.type
       }))
     });
-  } catch (error: any) {
-    console.error('Error extracting knowledge:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to extract knowledge' },
-      { status: 500 }
-    );
-  }
-}
+});
 
 /**
  * Get all stored knowledge
  */
-export async function GET() {
-  try {
-    const store = await getRAGStore();
-    const knowledge = store.getAllKnowledge();
-    
-    return NextResponse.json({ 
-      count: knowledge.length,
-      knowledge: knowledge.map(k => ({
-        id: k.id,
-        source: k.source,
-        title: k.title,
-        category: k.category,
-        type: k.type,
-        tags: k.tags
-      }))
-    });
-  } catch (error: any) {
-    console.error('Error getting knowledge:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get knowledge' },
-      { status: 500 }
-    );
-  }
-}
+export const GET = withErrorHandling(async () => {
+  const store = await getRAGStore();
+  const knowledge = store.getAllKnowledge();
+  
+  return createSuccessResponse({ 
+    count: knowledge.length,
+    knowledge: knowledge.map(k => ({
+      id: k.id,
+      source: k.source,
+      title: k.title,
+      category: k.category,
+      type: k.type,
+      tags: k.tags
+    }))
+  });
+});
 

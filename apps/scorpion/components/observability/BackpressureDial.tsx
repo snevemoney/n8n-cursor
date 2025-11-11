@@ -15,28 +15,31 @@ export function BackpressureDial() {
   const [history, setHistory] = useState<number[]>([]);
   
   useEffect(() => {
+    // Only update when tab is visible, reduce frequency to 3 seconds
     const interval = setInterval(() => {
-      const bp = computeBackpressure(events, 60000);
-      setBackpressure(bp);
-      
-      // Update history
-      setHistory(prev => {
-        const newHistory = [...prev, bp.ratio].slice(-10);
+      if (document.visibilityState === 'visible') {
+        const bp = computeBackpressure(events);
+        setBackpressure(bp);
         
-        // Detect trend
-        if (newHistory.length >= 3) {
-          const recent = newHistory.slice(-3);
-          const avg = recent.reduce((a, b) => a + b) / recent.length;
-          const prevAvg = newHistory.slice(-6, -3).reduce((a, b) => a + b, 0) / 3;
+        // Update history
+        setHistory(prev => {
+          const newHistory = [...prev, bp.ratio].slice(-10);
           
-          if (avg > prevAvg * 1.1) setTrend('up');
-          else if (avg < prevAvg * 0.9) setTrend('down');
-          else setTrend('stable');
-        }
-        
-        return newHistory;
-      });
-    }, 2000);
+          // Detect trend
+          if (newHistory.length >= 3) {
+            const recent = newHistory.slice(-3);
+            const avg = recent.reduce((a, b) => a + b) / recent.length;
+            const prevAvg = newHistory.slice(-6, -3).reduce((a, b) => a + b, 0) / 3;
+            
+            if (avg > prevAvg * 1.1) setTrend('up');
+            else if (avg < prevAvg * 0.9) setTrend('down');
+            else setTrend('stable');
+          }
+          
+          return newHistory;
+        });
+      }
+    }, 3000);
     
     return () => clearInterval(interval);
   }, [events]);

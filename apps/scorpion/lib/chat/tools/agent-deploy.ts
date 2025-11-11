@@ -7,9 +7,12 @@ export const description = 'Deploy a new agent or update existing agent configur
 export const schema = z.object({
   agentId: z.string().optional(),
   codename: z.string().min(1),
-  role: z.enum(['analyst', 'executor', 'monitor', 'researcher', 'coordinator']),
-  capabilities: z.array(z.string()),
-  priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
+  role: z.string().min(1), // Accept any role string
+  specialty: z.string().optional(),
+  weight: z.number().min(0).max(2).optional(),
+  goal: z.string().optional(),
+  capabilities: z.array(z.string()).optional(),
+  priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
 });
 
 export async function handler(args: z.infer<typeof schema>) {
@@ -20,6 +23,9 @@ export async function handler(args: z.infer<typeof schema>) {
       body: JSON.stringify({
         codename: args.codename,
         role: args.role,
+        specialty: args.specialty,
+        weight: args.weight,
+        goal: args.goal,
         status: 'active',
         capabilities: args.capabilities,
         priority: args.priority,
@@ -27,17 +33,20 @@ export async function handler(args: z.infer<typeof schema>) {
     });
     
     if (!response.ok) {
-      throw new Error(`Agent API returned ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Agent API returned ${response.status}`);
     }
     
     const data = await response.json();
+    const agentData = data.success ? data.data : data;
     
     return {
       ok: true,
-      agentId: data.id || `agent-${Date.now()}`,
+      agentId: agentData.id || `agent-${Date.now()}`,
       codename: args.codename,
       status: 'deployed',
-      message: `Agent "${args.codename}" deployed successfully`,
+      operationsCreated: agentData.operationsCreated || 0,
+      message: agentData.message || `Agent "${args.codename}" deployed successfully and integrated into council, radar, and mission control.`,
     };
   } catch (error: any) {
     return {

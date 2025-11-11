@@ -1,0 +1,20 @@
+{
+  "name": "mcp-code-execution",
+  "version": "1.0.0",
+  "description": "Code execution wrapper for MCP tools to reduce token consumption",
+  "type": "module",
+  "main": "client.ts",
+  "scripts": {
+    "generate": "node generator.mjs --server n8n-automation",
+    "generate:all": "node generator.mjs --server n8n-automation && node generator.mjs --server tavily-remote"
+  },
+  "keywords": [
+    "mcp",
+    "code-execution",
+    "n8n",
+    "token-optimization"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

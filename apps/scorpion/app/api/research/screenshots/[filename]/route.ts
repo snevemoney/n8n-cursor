@@ -24,7 +24,10 @@ export async function GET(
     // Read and return file
     const fileBuffer = await fs.readFile(screenshotPath);
     
-    return new NextResponse(fileBuffer, {
+    // Convert Buffer to Uint8Array for NextResponse (which accepts BodyInit)
+    const uint8Array = new Uint8Array(fileBuffer);
+    
+    return new NextResponse(uint8Array, {
       headers: {
         'Content-Type': 'image/png',
         'Cache-Control': 'public, max-age=3600'

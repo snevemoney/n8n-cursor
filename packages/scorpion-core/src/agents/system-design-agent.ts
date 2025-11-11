@@ -68,11 +68,11 @@ export class SystemDesignAgent {
 
     // Get relevant system design knowledge
     const knowledge = await this.ragStore.search(
-      `system design ${requirements.type} architecture patterns scalability`,
-      { filter: { type: 'knowledge', domain: 'system-design' } }
+      `system-design system design ${requirements.type} architecture patterns scalability`,
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a production-ready system architecture:
 
@@ -113,11 +113,11 @@ Return structured JSON matching the SystemDesign interface.`;
     problem: string
   ): Promise<any> {
     const knowledge = await this.ragStore.search(
-      `${category} patterns ${problem}`,
-      { filter: { type: 'knowledge', domain: 'system-design' } }
+      `system-design ${category} patterns ${problem}`,
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Recommend the best design pattern for this problem:
 
@@ -151,11 +151,11 @@ Return JSON.`;
    */
   async analyzeScalability(systemDescription: string): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'scalability patterns horizontal vertical sharding caching',
-      { filter: { type: 'knowledge', domain: 'system-design' } }
+      'system-design scalability patterns horizontal vertical sharding caching',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Analyze the scalability of this system:
 
@@ -192,11 +192,11 @@ Return JSON.`;
     consistency: 'strong' | 'eventual';
   }): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'database design SQL NoSQL sharding indexing',
-      { filter: { type: 'knowledge', domain: 'system-design' } }
+      'system-design database design SQL NoSQL sharding indexing',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a database architecture:
 
@@ -235,11 +235,11 @@ Return JSON.`;
     rateLimit: boolean;
   }): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'API design REST GraphQL gateway authentication rate limiting',
-      { filter: { type: 'knowledge', domain: 'system-design' } }
+      'system-design API design REST GraphQL gateway authentication rate limiting',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a production-ready API:
 
@@ -274,11 +274,11 @@ Return JSON with OpenAPI-style specification.`;
    */
   async designObservability(systemType: string): Promise<any> {
     const knowledge = await this.ragStore.search(
-      'observability metrics logging tracing monitoring alerting',
-      { filter: { type: 'knowledge', domain: 'system-design' } }
+      'system-design observability metrics logging tracing monitoring alerting',
+      10
     );
 
-    const context = knowledge.map(k => k.content).join('\n\n');
+    const context = knowledge.map(k => `${k.title}\n${k.description}`).join('\n\n');
 
     const prompt = `Design a comprehensive observability strategy:
 

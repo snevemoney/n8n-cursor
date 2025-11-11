@@ -16,10 +16,14 @@ export function emitEvent(event: Omit<DomainEvent, 'id' | 'ts'>): void {
   try {
     const validated = DomainEventSchema.parse(fullEvent);
     const bus = getTelemetryBus();
+    const listenerCount = bus.listenerCount('event');
+    if (listenerCount === 0) {
+      console.warn(`[TelemetryEmitter] No listeners for event: ${event.type}. Event will be lost.`);
+    }
     bus.emitEvent(validated);
   } catch (error) {
     console.error('[TelemetryEmitter] Invalid event:', error);
-    console.error('[TelemetryEmitter] Event was:', fullEvent);
+    console.error('[TelemetryEmitter] Event was:', JSON.stringify(fullEvent, null, 2));
   }
 }
 
@@ -194,6 +198,42 @@ export const telemetry = {
       version,
       environment,
       severity: 'info',
+    });
+  },
+  
+  systemLog(level: 'info' | 'warn' | 'error' | 'critical', message: string, source: string = 'system', context?: Record<string, any>): void {
+    emitEvent({
+      type: 'system.log',
+      source,
+      level,
+      message,
+      context,
+      severity: level,
+    });
+  },
+  
+  agentOperationCompleted(agentId: string, operationId: string, operationName: string, duration: number): void {
+    emitEvent({
+      type: 'agent.operation.completed',
+      source: 'scorpion-core',
+      agentId,
+      operationId,
+      operationName,
+      duration,
+      severity: 'info',
+    });
+  },
+  
+  agentOperationFailed(agentId: string, operationId: string, operationName: string, error: string, duration?: number): void {
+    emitEvent({
+      type: 'agent.operation.failed',
+      source: 'scorpion-core',
+      agentId,
+      operationId,
+      operationName,
+      error,
+      duration,
+      severity: 'error',
     });
   },
 };

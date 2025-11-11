@@ -9,21 +9,27 @@ import { CompanyResearchAgent } from '@/lib/research/company-research-agent';
 import { getRAGStore } from '@/lib/shared-stores';
 import { LLMAdapter } from '@scorpion/core';
 import { v4 as uuidv4 } from 'uuid';
+import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
+import { withErrorHandling, createSuccessResponse, createErrorResponse, validateRequest, ApiErrorCode } from '@/lib/api-error-handler';
+import { z } from 'zod';
 
 // Store active sessions
 const activeSessions = new Map<string, any>();
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { query, category = 'general', depth = 'medium', maxSites = 10 } = body;
+const researchStartSchema = z.object({
+  query: z.string().min(1),
+  category: z.enum(['general', 'company-research']).optional(),
+  depth: z.enum(['shallow', 'medium', 'deep']).optional(),
+  maxSites: z.number().min(1).max(50).optional(),
+});
 
-    if (!query) {
-      return NextResponse.json(
-        { error: 'Query is required' },
-        { status: 400 }
-      );
-    }
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const validation = await validateRequest(request, researchStartSchema);
+  if (!validation.success) {
+    return validation.error;
+  }
+  
+  const { query, category = 'general', depth = 'medium', maxSites = 10 } = validation.data;
 
     // Create session ID
     const sessionId = uuidv4();
@@ -34,7 +40,7 @@ export async function POST(request: NextRequest) {
     const ragStore = await getRAGStore();
     const llm = new LLMAdapter({
       provider: 'ollama',
-      model: process.env.OLLAMA_MODEL || 'llama3.2:3b-instruct-q4_K_M'
+      model: process.env.OLLAMA_MODEL || getRecommendedModelForRAM()
     });
 
     // Start research in background
@@ -68,9 +74,16 @@ export async function POST(request: NextRequest) {
 
       } catch (error: any) {
         console.error(`Research session ${sessionId} failed:`, error);
+        const errorMessage = error.message || 'Unknown error occurred';
         activeSessions.set(sessionId, {
           status: 'failed',
-          error: error.message
+          error: errorMessage
+        });
+        
+        // Emit failure event so SSE stream can notify client
+        browserPool.emit('research-failed', sessionId, {
+          error: errorMessage,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
       } finally {
         // Clean up browser session
@@ -81,50 +94,37 @@ export async function POST(request: NextRequest) {
       }
     })();
 
-    return NextResponse.json({
+    return createSuccessResponse({
       sessionId,
       message: 'Research started',
       status: 'in_progress'
     });
+});
 
-  } catch (error: any) {
-    console.error('Failed to start research:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to start research' },
-      { status: 500 }
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
+  const sessionId = searchParams.get('sessionId');
+
+  if (!sessionId) {
+    return createErrorResponse(
+      ApiErrorCode.MISSING_PARAMETER,
+      'Session ID is required',
+      undefined,
+      400
     );
   }
-}
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get('sessionId');
-
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const session = activeSessions.get(sessionId);
-    
-    if (!session) {
-      return NextResponse.json(
-        { status: 'not_found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(session);
-
-  } catch (error: any) {
-    console.error('Failed to get research status:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to get research status' },
-      { status: 500 }
+  const session = activeSessions.get(sessionId);
+  
+  if (!session) {
+    return createErrorResponse(
+      ApiErrorCode.NOT_FOUND,
+      'Research session not found',
+      { sessionId },
+      404
     );
   }
-}
+
+  return createSuccessResponse(session);
+});
 

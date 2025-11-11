@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { z } from 'zod';
 
 /**
  * POST /api/conversations - Save conversation to shared storage
@@ -45,118 +47,101 @@ async function saveConversations(conversations: any[]): Promise<void> {
   );
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { conversation, messages } = await request.json();
-    
-    if (!conversation || !conversation.id) {
-      return NextResponse.json(
-        { error: 'Missing conversation or conversation.id' },
-        { status: 400 }
+const conversationSchema = z.object({
+  conversation: z.object({
+    id: z.string().min(1)
+  }),
+  messages: z.array(z.any()).optional()
+});
+
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const validation = await validateRequest(request, conversationSchema);
+  if (!validation.success) {
+    return validation.error;
+  }
+  
+  const { conversation, messages } = validation.data;
+  
+  // Load existing conversations
+  const conversations = await loadConversations();
+  
+  // Update or add conversation
+  const conversationData = {
+    ...conversation,
+    messages: messages || [],
+    syncedAt: Date.now(),
+  };
+  
+  const index = conversations.findIndex((c: any) => c.id === conversation.id);
+  if (index >= 0) {
+    conversations[index] = conversationData;
+  } else {
+    conversations.unshift(conversationData);
+  }
+  
+  // Keep last 100 conversations
+  const trimmed = conversations.slice(0, 100);
+  
+  // Save to file
+  await saveConversations(trimmed);
+  
+  return createSuccessResponse({
+    conversationId: conversation.id,
+    syncedAt: Date.now(),
+  });
+});
+
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  
+  const conversations = await loadConversations();
+  
+  if (id) {
+    // Get specific conversation
+    const conversation = conversations.find((c: any) => c.id === id);
+    if (!conversation) {
+      return createErrorResponse(
+        ApiErrorCode.NOT_FOUND,
+        'Conversation not found',
+        { conversationId: id },
+        404
       );
     }
     
-    // Load existing conversations
-    const conversations = await loadConversations();
-    
-    // Update or add conversation
-    const conversationData = {
-      ...conversation,
-      messages: messages || [],
-      syncedAt: Date.now(),
-    };
-    
-    const index = conversations.findIndex((c: any) => c.id === conversation.id);
-    if (index >= 0) {
-      conversations[index] = conversationData;
-    } else {
-      conversations.unshift(conversationData);
-    }
-    
-    // Keep last 100 conversations
-    const trimmed = conversations.slice(0, 100);
-    
-    // Save to file
-    await saveConversations(trimmed);
-    
-    return NextResponse.json({
-      success: true,
-      conversationId: conversation.id,
-      syncedAt: Date.now(),
-    });
-  } catch (error: any) {
-    console.error('[Conversations API] Error:', error);
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    return createSuccessResponse(conversation);
   }
-}
+  
+  // List all conversations (exclude messages from list)
+  const conversationList = conversations
+    .map(({ messages, ...conv }) => conv)
+    .sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  
+  return createSuccessResponse({
+    conversations: conversationList,
+    total: conversationList.length,
+  });
+});
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    const conversations = await loadConversations();
-    
-    if (id) {
-      // Get specific conversation
-      const conversation = conversations.find((c: any) => c.id === id);
-      if (!conversation) {
-        return NextResponse.json(
-          { error: 'Conversation not found' },
-          { status: 404 }
-        );
-      }
-      
-      return NextResponse.json(conversation);
-    }
-    
-    // List all conversations (exclude messages from list)
-    const conversationList = conversations
-      .map(({ messages, ...conv }) => conv)
-      .sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
-    
-    return NextResponse.json({
-      conversations: conversationList,
-      total: conversationList.length,
-    });
-  } catch (error: any) {
-    console.error('[Conversations API] Error:', error);
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
+export const DELETE = withErrorHandling(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  
+  if (!id) {
+    return createErrorResponse(
+      ApiErrorCode.MISSING_PARAMETER,
+      'Missing conversation id',
+      undefined,
+      400
     );
   }
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Missing conversation id' },
-        { status: 400 }
-      );
-    }
-    
-    const conversations = await loadConversations();
-    const filtered = conversations.filter((c: any) => c.id !== id);
-    await saveConversations(filtered);
-    
-    return NextResponse.json({
-      success: true,
-      deleted: id,
-    });
-  } catch (error: any) {
-    console.error('[Conversations API] Error:', error);
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
-  }
-}
+  
+  const conversations = await loadConversations();
+  const filtered = conversations.filter((c: any) => c.id !== id);
+  await saveConversations(filtered);
+  
+  return createSuccessResponse({
+    deleted: id,
+  });
+});
 

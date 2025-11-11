@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Panel, DataTable } from '@/components/scorpion';
+import { Panel, DataTable, LoadingState, ErrorState, EmptyState, PageLoadingBar } from '@/components/scorpion';
 import { Bell, AlertTriangle, CheckCircle, XCircle, Info, Check, X } from 'lucide-react';
 
 interface Notification {
@@ -27,25 +27,50 @@ interface PendingApproval {
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start false so page renders immediately
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    loadNotifications();
-    // Refresh every 30 seconds
-    const interval = setInterval(loadNotifications, 30 * 1000);
+    // Defer data fetch aggressively so page renders instantly
+    const loadData = () => {
+      loadNotifications();
+    };
+    
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(loadData, { timeout: 0 }); // Immediate - no delay
+    } else {
+      setTimeout(loadData, 0); // Immediate fallback
+    }
+    
+    // Refresh every 30 seconds, but only when tab is visible
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadNotifications();
+      }
+    }, 30 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   const loadNotifications = async () => {
     try {
+      setError(null);
+      // Only show loading spinner on initial load, not on refresh
+      if (notifications.length === 0 && pendingApprovals.length === 0) {
+        setLoading(true);
+      }
       const response = await fetch('/api/notifications');
       if (response.ok) {
-        const data = await response.json();
+        const result = await response.json();
+        const data = result.success && result.data ? result.data : result;
         setNotifications(data.unread || []);
         setPendingApprovals(data.pending || []);
+      } else {
+        throw new Error(`Failed to load notifications: ${response.statusText}`);
       }
-    } catch (error) {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to load notifications');
       console.error('Failed to load notifications:', error);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -100,15 +125,32 @@ export default function NotificationsPage() {
     }
   };
 
-  if (loading) {
+  if (loading && notifications.length === 0 && pendingApprovals.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-sm text-white/40">Loading notifications...</div>
-      </div>
+      <>
+        <PageLoadingBar loading={true} />
+        <LoadingState fullPage text="Loading notifications..." />
+      </>
+    );
+  }
+
+  if (error && notifications.length === 0 && pendingApprovals.length === 0) {
+    return (
+      <>
+        <PageLoadingBar loading={false} />
+      <ErrorState
+        error={error}
+        onRetry={loadNotifications}
+        title="Failed to load notifications"
+        fullPage
+      />
+      </>
     );
   }
 
   return (
+    <>
+      <PageLoadingBar loading={loading && notifications.length === 0 && pendingApprovals.length === 0} />
     <div className="h-full overflow-y-auto p-4 space-y-4">
       {/* Header */}
       <div>
@@ -165,12 +207,26 @@ export default function NotificationsPage() {
         </Panel>
       )}
 
+      {error && (
+        <ErrorState
+          error={error}
+          onRetry={loadNotifications}
+          title="Error loading notifications"
+          fullPage={false}
+        />
+      )}
+
       {/* All Notifications */}
       <Panel title={`All Notifications (${notifications.length})`}>
-        {notifications.length === 0 ? (
-          <div className="text-center py-8 text-white/40">
-            No unread notifications
-          </div>
+        {loading ? (
+          <LoadingState text="Loading notifications..." />
+        ) : notifications.length === 0 ? (
+          <EmptyState
+            icon={Bell}
+            title="No unread notifications"
+            message="All caught up! No unread notifications to display."
+            fullPage={false}
+          />
         ) : (
           <DataTable
             columns={[
@@ -214,6 +270,7 @@ export default function NotificationsPage() {
         )}
       </Panel>
     </div>
+    </>
   );
 }
 
