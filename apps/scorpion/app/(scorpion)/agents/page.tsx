@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Panel, DataTable, LogRow, Metric, Tabs, TabsList, TabsTrigger, TabsContent, LoadingState, ErrorState, EmptyState, useToast, PageLoadingBar } from '@/components/scorpion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Play, Pause, Edit, Trash2, Copy, Search, Plus, MoreVertical, Users } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 
@@ -25,6 +26,7 @@ interface AgentLog {
 }
 
 export default function AgentsPage() {
+  const router = useRouter();
   const { showToast } = useToast();
   const [agentLogs, setAgentLogs] = useState<AgentLog[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -290,6 +292,7 @@ export default function AgentsPage() {
         <h1 className="sc-title text-2xl">Agent Fleet</h1>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => router.push('/agents/create')}
             className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/30 hover:bg-cyan-500/30 transition-colors text-sm"
             title="Create new agent"
           >
@@ -352,7 +355,7 @@ export default function AgentsPage() {
                     icon={Users}
                     title={searchQuery ? 'No agents match your search' : 'No agents yet'}
                     message={searchQuery ? 'Try adjusting your search criteria' : 'Create your first agent to get started'}
-                    action={!searchQuery ? { label: "Create Agent", onClick: () => {/* TODO: Navigate to create */} } : undefined}
+                    action={!searchQuery ? { label: "Create Agent", onClick: () => router.push('/agents/create') } : undefined}
                   />
                 ) : (
                   <DataTable
