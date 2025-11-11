@@ -605,11 +605,16 @@ export default function OpsPage() {
       if (response.ok) {
         const result = await response.json();
         const data = result.success && result.data ? result.data : result;
-        setSystemStatus(data.status.status);
-        setAcceptingNew(data.status.acceptingNew);
-        if (data.status.runtime) {
-          setRuntime({ hours: data.status.runtime.hours, minutes: data.status.runtime.minutes });
+        if (data.status) {
+          setSystemStatus(data.status.status);
+          setAcceptingNew(data.status.acceptingNew);
+          if (data.status.runtime) {
+            setRuntime({ hours: data.status.runtime.hours, minutes: data.status.runtime.minutes });
+          }
         }
+        // Refresh system control state to ensure UI is in sync
+        await loadSystemControl();
+        showToast('success', 'System resumed successfully');
       } else {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error?.message || 'Failed to resume system');
@@ -628,10 +633,16 @@ export default function OpsPage() {
         body: JSON.stringify({ action: 'pause' })
       });
       if (response.ok) {
-        const data = await response.json();
-        setSystemStatus(data.status.status);
-        setAcceptingNew(data.status.acceptingNew);
-        setRuntime(null);
+        const result = await response.json();
+        const data = result.success && result.data ? result.data : result;
+        if (data.status) {
+          setSystemStatus(data.status.status);
+          setAcceptingNew(data.status.acceptingNew);
+          setRuntime(null);
+        }
+        // Refresh system control state to ensure UI is in sync
+        await loadSystemControl();
+        showToast('success', 'System paused successfully');
       } else {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error?.message || 'Failed to pause system');
@@ -650,15 +661,57 @@ export default function OpsPage() {
         body: JSON.stringify({ action: 'toggle_new' })
       });
       if (response.ok) {
-        const data = await response.json();
-        setSystemStatus(data.status.status);
-        setAcceptingNew(data.status.acceptingNew);
+        const result = await response.json();
+        const data = result.success && result.data ? result.data : result;
+        if (data.status) {
+          setSystemStatus(data.status.status);
+          setAcceptingNew(data.status.acceptingNew);
+        }
+        // Refresh system control state to ensure UI is in sync
+        await loadSystemControl();
+        const newAcceptingState = data.status?.acceptingNew ?? !acceptingNew;
+        showToast('success', newAcceptingState ? 'Resumed accepting new tasks' : 'Stopped accepting new tasks');
       } else {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error?.message || 'Failed to toggle new task acceptance');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to toggle new task acceptance';
+      showToast('error', errorMessage);
+    }
+  };
+
+  const handleStop = async () => {
+    try {
+      const response = await fetch('/api/operations/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop' })
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const data = result.success && result.data ? result.data : result;
+        
+        // Check if approval is required
+        if (data.requiresApproval) {
+          showToast('info', 'Stop action requires approval. Please check notifications.');
+          return;
+        }
+        
+        if (data.status) {
+          setSystemStatus(data.status.status);
+          setAcceptingNew(data.status.acceptingNew);
+          setRuntime(null);
+        }
+        // Refresh system control state to ensure UI is in sync
+        await loadSystemControl();
+        showToast('success', 'System stopped successfully');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to stop system');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to stop system';
       showToast('error', errorMessage);
     }
   };
@@ -1103,6 +1156,16 @@ export default function OpsPage() {
                 title={systemStatus === 'paused' ? 'System is already paused' : 'Pause the system'}
               >
                 PAUSE
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleStop}
+                disabled={systemStatus === 'stopped'}
+                aria-label="Stop system"
+                title={systemStatus === 'stopped' ? 'System is already stopped' : 'Stop all system operations (requires approval)'}
+              >
+                STOP
               </Button>
               <Button
                 variant={acceptingNew ? 'secondary' : 'danger'}

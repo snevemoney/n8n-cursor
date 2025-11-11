@@ -424,35 +424,33 @@ Rules:
     const votes: CouncilVote[] = [];
     const previousResponses: Array<{name: string; role: string; rationale: string}> = [];
 
-    // Process each member sequentially to show their thinking
-    for (const member of councilMembers) {
-      // Stream: Member starts thinking (skip if already sent for first member)
-      if (member.id !== councilMembers[0]?.id) {
-        onEvent({
-          type: 'council_thinking',
-          data: {
-            memberId: member.id,
-            memberName: member.name,
-            memberRole: member.role,
-            status: 'analyzing',
-            message: `${member.name} is analyzing the plan...`,
-          },
-        });
-      }
-      
-      // Prepare member-specific prompt
-      const memberContext = councilMembers.map(m => 
-        `${m.name} (${m.role || 'Specialist'}) - Weight: ${m.weight}`
-      ).join('\n');
-      
+    // Prepare member context once (used by all members)
+    const memberContext = councilMembers.map(m => 
+      `${m.name} (${m.role || 'Specialist'}) - Weight: ${m.weight}`
+    ).join('\n');
+
+    // Helper function to process a single member
+    const processMember = async (member: typeof councilMembers[0], hasPreviousContext: boolean = false): Promise<CouncilVote> => {
+      // Stream: Member starts thinking
+      onEvent({
+        type: 'council_thinking',
+        data: {
+          memberId: member.id,
+          memberName: member.name,
+          memberRole: member.role,
+          status: 'analyzing',
+          message: `${member.name} is analyzing the plan...`,
+        },
+      });
+
       // Adjust user prompt based on question type
       let userPrompt: string;
       
       if (isCasual) {
         const personality = getAgentPersonality(member.name, member.role || 'Specialist');
         
-        // Build context of previous responses
-        const previousContext = previousResponses.length > 0
+        // Build context of previous responses (only if available)
+        const previousContext = hasPreviousContext && previousResponses.length > 0
           ? `\n\n**Previous Council Members' Perspectives:**\n${previousResponses.map((r, i) => 
               `${i + 1}. ${r.name} (${r.role}): ${r.rationale.substring(0, 150)}${r.rationale.length > 150 ? '...' : ''}`
             ).join('\n')}\n\nYou can reference, build upon, or respectfully disagree with these perspectives. Think independently but be aware of what others have said.`
@@ -476,9 +474,9 @@ ${isIdentityQuestion
 
 ${knowledgeContext ? `\n\nCRITICAL: The knowledge base results above are REAL information. Use them to answer accurately. Do NOT refuse to answer or claim something is illegal unless you have actual evidence. Do NOT make up information about cyber threats, power grids, or data breaches. If information is incomplete, be helpful by sharing what you know and suggesting next steps.` : ''}
 
-${previousResponses.length > 0 
+${hasPreviousContext && previousResponses.length > 0 
   ? `Consider what your colleagues have said. You can agree, build upon their points, or offer a different perspective. Be thoughtful but maintain your unique voice.`
-  : `You are the first to respond. Set the tone with your unique perspective.`}
+  : `You are responding independently. Set the tone with your unique perspective.`}
 
 ${isIdentityQuestion 
   ? `Provide your response naturally:
@@ -500,16 +498,24 @@ IMPORTANT: You are recommending an answer to the user's question, not voting on 
       } else {
         const personality = getAgentPersonality(member.name, member.role || 'Specialist');
         
-        // Build context of previous responses for technical questions too
-        const previousContext = previousResponses.length > 0
+        // Build context of previous responses for technical questions
+        const previousContext = hasPreviousContext && previousResponses.length > 0
           ? `\n\n**Previous Council Members' Analysis:**\n${previousResponses.map((r, i) => 
               `${i + 1}. ${r.name} (${r.role}): ${r.rationale.substring(0, 200)}${r.rationale.length > 200 ? '...' : ''}`
             ).join('\n')}\n\nConsider their perspectives. You can build upon their analysis, identify gaps they missed, or offer alternative viewpoints. Maintain your independent judgment while being aware of the collective intelligence.`
           : '';
         
+        // Extract user question from plan or use objective
+        const userQuestion = plan.objective || questionText || 'Review this plan';
+        
         userPrompt = `${personality}
 
 You are ${member.name}, ${member.role || 'Specialist'} on the Scorpion Council - an elite intelligence operation.
+
+**THE USER'S QUESTION:** "${userQuestion}"
+
+**THE PLAN TO REVIEW:**
+${JSON.stringify(plan, null, 2)}
 
 Council Members:
 ${memberContext}
@@ -519,22 +525,24 @@ Your weight in decisions: ${member.weight}
 ${specializedAgentContext ? `\n\n${specializedAgentContext}\n\n` : ''}
 ${previousContext}
 
-You operate with the precision and intelligence of a top operative. Analyze this plan through your unique lens:
+**CRITICAL: Analyze this plan SPECIFICALLY in the context of the user's question above.**
+- Does this plan effectively answer the user's question?
+- Are the tools selected appropriate for what the user is asking?
+- Will this plan achieve the user's objective?
+- What are the strengths and weaknesses of this approach?
 
-${JSON.stringify(plan, null, 2)}
-
-${previousResponses.length > 0 
+${hasPreviousContext && previousResponses.length > 0 
   ? 'Consider what your colleagues have analyzed. You can validate their concerns, identify additional risks, or offer complementary insights. Think independently but leverage the collective intelligence.'
-  : 'You are the first to analyze. Set the foundation with your expert perspective.'}
+  : 'You are analyzing independently. Set the foundation with your expert perspective.'}
 
-Provide your analysis in this format:
-1. Initial thoughts (what you're observing - use your personality)
-2. Key concerns or positive aspects (from your expert perspective)
-3. Your vote: approve, revise, or reject
-4. Confidence: 0.0 to 1.0
-5. Rationale: detailed explanation that reflects your personality and expertise
+Provide your analysis SPECIFICALLY about this plan and question:
+1. Initial thoughts about how well this plan addresses the user's question "${userQuestion}" (use your personality)
+2. Key concerns or positive aspects about THIS SPECIFIC PLAN (from your expert perspective)
+3. Your vote: approve, revise, or reject (based on whether this plan answers the question effectively)
+4. Confidence: 0.0 to 1.0 (how confident you are in your assessment)
+5. Rationale: detailed explanation that reflects your personality and expertise, specifically addressing how this plan relates to the user's question
 
-Think like a spy: observant, strategic, intelligent, but also human.`;
+Think like a spy: observant, strategic, intelligent, but also human. Be specific about THIS plan and THIS question.`;
       }
 
       // Stream: Member is formulating response
@@ -548,7 +556,7 @@ Think like a spy: observant, strategic, intelligent, but also human.`;
         },
       });
       
-      // Run model with streaming callback
+      // Run model with streaming callback (reduced tokens for speed)
       let thinkingContent = '';
       const response = await runModelUnified(
         systemPrompt,
@@ -556,7 +564,7 @@ Think like a spy: observant, strategic, intelligent, but also human.`;
         { 
           provider: modelConfig.provider as any, 
           model: modelConfig.model,
-          maxTokens: modelConfig.maxTokens,
+          maxTokens: Math.min(modelConfig.maxTokens || 500, isCasual ? 250 : 350), // Reduced for speed
           temperature: modelConfig.temperature
         },
         (chunk: string) => {
@@ -592,7 +600,6 @@ Think like a spy: observant, strategic, intelligent, but also human.`;
         vote = parseModelJSON(response);
         if (!vote || typeof vote !== 'object') {
           // Extract recommendation from text response for casual questions
-          // For casual questions, "approve" means they recommend the answer
           const hasReject = response.toLowerCase().includes('reject');
           const hasRevise = response.toLowerCase().includes('revise');
           
@@ -664,24 +671,103 @@ Think like a spy: observant, strategic, intelligent, but also human.`;
         },
       };
       
-      votes.push(finalVote);
-      
       // Stream: Vote is cast
       onEvent({
         type: 'council_vote',
         data: finalVote,
       });
       
-      // Add to previous responses for next agents - use FULL rationale
-      previousResponses.push({
-        name: member.name,
-        role: member.role || 'Specialist',
-        rationale: finalVote.rationale || response // Full text, not truncated
+      return finalVote;
+    };
+
+    // PARALLEL PROCESSING STRATEGY
+    if (isCasual) {
+      // FULL PARALLELIZATION for casual questions - no dependencies needed
+      // Stream: All members start thinking simultaneously
+      councilMembers.forEach(member => {
+        onEvent({
+          type: 'council_thinking',
+          data: {
+            memberId: member.id,
+            memberName: member.name,
+            memberRole: member.role,
+            status: 'analyzing',
+            message: `${member.name} is analyzing...`,
+          },
+        });
       });
+
+      // Process all members in parallel
+      const votePromises = councilMembers.map(member => processMember(member, false));
+      const allVotes = await Promise.all(votePromises);
+      votes.push(...allVotes);
       
-      // Small delay to show deliberation process (reduced from 300ms to 100ms)
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Add to previous responses for reference (not used but kept for consistency)
+      allVotes.forEach(vote => {
+        previousResponses.push({
+          name: vote.agentName,
+          role: councilMembers.find(m => m.id === vote.agentId)?.role || 'Specialist',
+          rationale: vote.rationale,
+        });
+      });
+    } else {
+      // TWO-PHASE PARALLELIZATION for technical questions
+      // Phase 1: First batch (no context needed) - process in parallel
+      const batchSize = 3;
+      const firstBatch = councilMembers.slice(0, batchSize);
+      const remainingMembers = councilMembers.slice(batchSize);
+
+      // Stream: First batch starts
+      firstBatch.forEach(member => {
+        onEvent({
+          type: 'council_thinking',
+          data: {
+            memberId: member.id,
+            memberName: member.name,
+            memberRole: member.role,
+            status: 'analyzing',
+            message: `${member.name} is analyzing...`,
+          },
+        });
+      });
+
+      // Process first batch in parallel
+      const firstBatchPromises = firstBatch.map(member => processMember(member, false));
+      const firstBatchVotes = await Promise.all(firstBatchPromises);
+      votes.push(...firstBatchVotes);
+      
+      // Add to previous responses for Phase 2
+      firstBatchVotes.forEach(vote => {
+        previousResponses.push({
+          name: vote.agentName,
+          role: councilMembers.find(m => m.id === vote.agentId)?.role || 'Specialist',
+          rationale: vote.rationale,
+        });
+      });
+
+      // Phase 2: Remaining members (with context from Phase 1) - process in parallel
+      if (remainingMembers.length > 0) {
+        // Stream: Second batch starts
+        remainingMembers.forEach(member => {
+          onEvent({
+            type: 'council_thinking',
+            data: {
+              memberId: member.id,
+              memberName: member.name,
+              memberRole: member.role,
+              status: 'analyzing',
+              message: `${member.name} is analyzing with context from colleagues...`,
+            },
+          });
+        });
+
+        // Process remaining members in parallel (with context)
+        const secondBatchPromises = remainingMembers.map(member => processMember(member, true));
+        const secondBatchVotes = await Promise.all(secondBatchPromises);
+        votes.push(...secondBatchVotes);
+      }
     }
+
     
     // Stream: Council deliberation complete
     onEvent({
@@ -692,8 +778,8 @@ Think like a spy: observant, strategic, intelligent, but also human.`;
       },
     });
     
-    // Stream consensus with isCasual flag
-    const consensus = computeConsensus(votes, isCasual);
+    // Stream consensus with isCasual flag and question context
+    const consensus = computeConsensus(votes, isCasual, questionText);
     onEvent({
       type: 'council_consensus',
       data: consensus,
@@ -726,7 +812,7 @@ Think like a spy: observant, strategic, intelligent, but also human.`;
 /**
  * Compute weighted consensus from votes
  */
-export function computeConsensus(votes: CouncilVote[], isCasual: boolean = false): {
+export function computeConsensus(votes: CouncilVote[], isCasual: boolean = false, userQuestion?: string): {
   score: number;
   approved: boolean;
   summary: string;
@@ -903,7 +989,7 @@ export function computeConsensus(votes: CouncilVote[], isCasual: boolean = false
   const score = approvalRatio * 10;
   const approved = approvalRatio > 0.6 && rejectRatio < 0.2;
   
-  // Deep technical consensus
+  // Deep technical consensus - extract key insights from actual rationales
   const sortedVotes = [...votes].sort((a, b) => 
     (b.confidence * b.weight) - (a.confidence * a.weight)
   );
@@ -913,21 +999,68 @@ export function computeConsensus(votes: CouncilVote[], isCasual: boolean = false
   consensusParts.push(`**Council Deliberation Summary**`);
   consensusParts.push(`\n**Vote Distribution:** ${(approvalRatio * 100).toFixed(0)}% approval, ${(reviseRatio * 100).toFixed(0)}% revise, ${(rejectRatio * 100).toFixed(0)}% reject.`);
   
-  // Key perspectives
+  // Extract actual insights from top votes - be specific about what they said
   if (sortedVotes.length > 0) {
     const primary = sortedVotes[0];
-    consensusParts.push(`\n**Primary Analysis:** ${primary.agentName} (confidence: ${(primary.confidence * 100).toFixed(0)}%) - ${primary.rationale?.substring(0, 200) || 'No rationale provided'}${primary.rationale && primary.rationale.length > 200 ? '...' : ''}`);
+    // Extract meaningful content from rationale (remove generic phrases)
+    let primaryAnalysis = (primary.rationale || 'No rationale provided')
+      .replace(/This plan looks/g, '')
+      .replace(/I'm seeing/g, '')
+      .replace(/From my expert perspective/g, '')
+      .trim();
+    
+    // Take first 2-3 sentences that are actually meaningful
+    const sentences = primaryAnalysis.split(/[.!?]+/).filter(s => {
+      const trimmed = s.trim();
+      return trimmed.length > 30 && 
+             !trimmed.match(/^(Initial thoughts|Key concerns|My vote|Confidence|Rationale)/i) &&
+             trimmed.length > 0;
+    });
+    
+    const meaningfulAnalysis = sentences.slice(0, 2).join('. ').trim() + (sentences.length > 2 ? '...' : '');
+    
+    consensusParts.push(`\n**Primary Analysis:** ${primary.agentName} (confidence: ${(primary.confidence * 100).toFixed(0)}%) - ${meaningfulAnalysis || primaryAnalysis.substring(0, 200)}${primaryAnalysis.length > 200 && !meaningfulAnalysis ? '...' : ''}`);
   }
   
-  // Risk assessment
+  // Risk assessment - only if scores are meaningful
   const avgRisk = votes.reduce((sum, v) => sum + (v.scores?.risk || 5), 0) / votes.length;
   const avgProb = votes.reduce((sum, v) => sum + (v.scores?.prob || 5), 0) / votes.length;
   
-  consensusParts.push(`\n**Risk Assessment:** Average risk score: ${avgRisk.toFixed(1)}/10, Success probability: ${avgProb.toFixed(1)}/10.`);
+  if (avgRisk !== 5 || avgProb !== 5) {
+    consensusParts.push(`\n**Risk Assessment:** Average risk score: ${avgRisk.toFixed(1)}/10, Success probability: ${avgProb.toFixed(1)}/10.`);
+  }
   
-  // Consensus behavior
+  // Extract key concerns or strengths from multiple agents
+  const keyInsights = sortedVotes.slice(0, 3).map(v => {
+    let insight = (v.rationale || '').trim();
+    // Extract meaningful sentences
+    const sentences = insight.split(/[.!?]+/).filter(s => {
+      const trimmed = s.trim();
+      return trimmed.length > 40 && 
+             !trimmed.match(/^(Initial thoughts|Key concerns|My vote|Confidence|Rationale|This plan)/i) &&
+             !trimmed.match(/^\d+\.\s*$/) &&
+             trimmed.length > 0;
+    });
+    return sentences.length > 0 ? sentences[0].trim() : null;
+  }).filter(i => i && i.length > 40);
+  
+  if (keyInsights.length > 0) {
+    consensusParts.push(`\n**Key Insights:**`);
+    keyInsights.forEach((insight, idx) => {
+      const agentName = sortedVotes[idx]?.agentName || 'A council member';
+      consensusParts.push(`- ${agentName}: ${insight}${insight && insight.length > 150 ? '...' : ''}`);
+    });
+  }
+  
+  // Consensus behavior - be specific
   const highConfidenceCount = votes.filter(v => v.confidence >= 0.8).length;
-  consensusParts.push(`\n**Deliberation Behavior:** ${highConfidenceCount} of ${votes.length} agents expressed high confidence. The council's analysis reflects ${approved ? 'strong consensus for approval' : 'cautious support requiring revision'}.`);
+  const concerns = votes.filter(v => v.vote === 'revise' || v.vote === 'reject').length;
+  
+  if (concerns > 0) {
+    consensusParts.push(`\n**Deliberation Behavior:** ${highConfidenceCount} of ${votes.length} agents expressed high confidence. ${concerns} agent${concerns > 1 ? 's' : ''} identified areas requiring attention.`);
+  } else {
+    consensusParts.push(`\n**Deliberation Behavior:** ${highConfidenceCount} of ${votes.length} agents expressed high confidence. The council's analysis reflects strong consensus.`);
+  }
   
   consensusParts.push(`\n**Final Decision:** ${approved ? 'Plan approved with consensus.' : 'Plan requires revision based on council feedback.'}`);
   

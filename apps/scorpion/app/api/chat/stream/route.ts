@@ -1014,7 +1014,7 @@ export async function POST(req: NextRequest) {
           );
           
           // Compute consensus for summarizer
-          consensus = computeConsensus(votes, isCasual);
+          consensus = computeConsensus(votes, isCasual, userMessage);
         } else {
           // Skip council for casual/conversational questions
           console.log('[Chat Stream] Skipping council - casual/conversational question');

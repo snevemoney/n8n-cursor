@@ -89,6 +89,7 @@ export default function ChatPage() {
     setActivePanel,
     setProgress,
     setToolProgress,
+    setShowRightPanel,
     activePanel,
   });
 

@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Panel, DataTable, useToast, PageLoadingBar } from '@/components/scorpion';
 import { LoadingState } from '@/components/scorpion/LoadingState';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// @ts-ignore - ESM import path
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface KnowledgeItem {
   id: string;
@@ -31,10 +34,14 @@ export default function KnowledgePage() {
   const [error, setError] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [autoIngesting, setAutoIngesting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [pdfPage, setPdfPage] = useState(1);
   const [pdfTotalPages, setPdfTotalPages] = useState(0);
   const [contentType, setContentType] = useState<string>('text');
   const [contentData, setContentData] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   
   // Filter states
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -235,11 +242,15 @@ export default function KnowledgePage() {
         console.error('Failed to load PDF:', error);
       }
     }
-    // Check for images
+    // Check for images (including data URLs for uploaded images)
     else if (url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || 
-             description.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+             description.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) ||
+             url.startsWith('data:image/') ||
+             item.contentUrl?.startsWith('data:image/')) {
       detectedType = 'image';
-      data = { url, alt: item.title };
+      // Use contentUrl if it's a data URL, otherwise use url
+      const imageUrl = item.contentUrl?.startsWith('data:image/') ? item.contentUrl : url;
+      data = { url: imageUrl, alt: item.title };
     }
     // Check for videos
     else if (url.match(/\.(mp4|webm|ogg|mov|avi)$/i) ||
@@ -248,6 +259,46 @@ export default function KnowledgePage() {
              url.includes('vimeo.com')) {
       detectedType = 'video';
       data = { url, title: item.title };
+    }
+    // Check for code files
+    else if (url.match(/\.(js|jsx|ts|tsx|py|java|cpp|c|cc|h|hpp|cs|php|rb|go|rs|swift|kt|scala|sh|bash|zsh|fish|ps1|sql|html|css|scss|sass|less|json|xml|yaml|yml|toml|ini|conf|md|markdown|vue|svelte|dart|r|m|mm|pl|pm|ex|exs|elm|clj|cljs|hs|lua|vim|diff|patch)$/i) ||
+             description.match(/\.(js|jsx|ts|tsx|py|java|cpp|c|cc|h|hpp|cs|php|rb|go|rs|swift|kt|scala|sh|bash|zsh|fish|ps1|sql|html|css|scss|sass|less|json|xml|yaml|yml|toml|ini|conf|md|markdown|vue|svelte|dart|r|m|mm|pl|pm|ex|exs|elm|clj|cljs|hs|lua|vim|diff|patch)$/i) ||
+             item.codeSnippets && item.codeSnippets.length > 0) {
+      detectedType = 'code';
+      // Extract language from file extension
+      const getLanguageFromExtension = (filePath: string): string => {
+        const ext = filePath.split('.').pop()?.toLowerCase() || '';
+        const langMap: Record<string, string> = {
+          'js': 'javascript', 'jsx': 'javascript', 'ts': 'typescript', 'tsx': 'typescript',
+          'py': 'python', 'java': 'java', 'cpp': 'cpp', 'c': 'c', 'cc': 'cpp', 'h': 'c', 'hpp': 'cpp',
+          'cs': 'csharp', 'php': 'php', 'rb': 'ruby', 'go': 'go', 'rs': 'rust', 'swift': 'swift',
+          'kt': 'kotlin', 'scala': 'scala', 'sh': 'bash', 'bash': 'bash', 'zsh': 'bash', 'fish': 'bash',
+          'ps1': 'powershell', 'sql': 'sql', 'html': 'html', 'css': 'css', 'scss': 'scss', 'sass': 'sass',
+          'less': 'less', 'json': 'json', 'xml': 'xml', 'yaml': 'yaml', 'yml': 'yaml', 'toml': 'toml',
+          'ini': 'ini', 'conf': 'ini', 'md': 'markdown', 'markdown': 'markdown', 'vue': 'vue',
+          'svelte': 'javascript', 'dart': 'dart', 'r': 'r', 'm': 'objectivec', 'mm': 'objectivec',
+          'pl': 'perl', 'pm': 'perl', 'ex': 'elixir', 'exs': 'elixir', 'elm': 'elm', 'clj': 'clojure',
+          'cljs': 'clojure', 'hs': 'haskell', 'lua': 'lua', 'vim': 'vim', 'diff': 'diff', 'patch': 'diff'
+        };
+        return langMap[ext] || 'text';
+      };
+      
+      const language = getLanguageFromExtension(url);
+      const content = description || extracted || '';
+      
+      // If we have code snippets from the item, use those
+      if (item.codeSnippets && item.codeSnippets.length > 0) {
+        data = { 
+          snippets: item.codeSnippets,
+          language: item.codeSnippets[0]?.language || language 
+        };
+      } else {
+        data = { 
+          content: content || 'No code content available',
+          language: language,
+          filePath: url
+        };
+      }
     }
     // Check for sheets/CSV
     else if (url.toLowerCase().endsWith('.csv') || 
@@ -446,6 +497,87 @@ export default function KnowledgePage() {
       handleExport(selected);
     }
   }, [selected, handleExport]);
+
+  // File upload handler
+  const handleFileUpload = useCallback(async (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      fileArray.forEach((file) => {
+        formData.append('files', file);
+      });
+
+      const response = await fetch('/api/project/knowledge/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const uploadedCount = result.data?.uploaded || result.uploaded || 0;
+        const errorCount = result.data?.errors?.length || result.errors?.length || 0;
+        
+        if (errorCount > 0) {
+          showToast('warning', `Uploaded ${uploadedCount} file(s), ${errorCount} failed`);
+        } else {
+          showToast('success', `Successfully uploaded ${uploadedCount} file(s)!`);
+        }
+        
+        // Refresh knowledge list
+        await loadKnowledge(true); // Prevent auto-ingest
+      } else {
+        const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(error.error || 'Upload failed');
+      }
+    } catch (error: any) {
+      console.error('File upload error:', error);
+      showToast('error', error.message || 'Failed to upload files');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [loadKnowledge, showToast]);
+
+  // Handle file input change
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      handleFileUpload(e.target.files);
+    }
+  }, [handleFileUpload]);
+
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files);
+    }
+  }, [handleFileUpload]);
 
   useEffect(() => {
     setMounted(true);
@@ -668,8 +800,34 @@ export default function KnowledgePage() {
   const activeFiltersCount = (sourceFilter !== 'all' ? 1 : 0) + (typeFilter !== 'all' ? 1 : 0) + (categoryFilter !== 'all' ? 1 : 0);
 
   return (
-    <div className="h-full max-w-[1000px] mx-auto flex flex-col md:grid md:grid-cols-[1fr_240px] gap-2 md:gap-2 p-3 overflow-y-auto min-w-0">
+    <div 
+      ref={dropZoneRef}
+      className="h-full max-w-[1000px] mx-auto flex flex-col md:grid md:grid-cols-[1fr_240px] gap-2 md:gap-2 p-3 overflow-y-auto min-w-0"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <PageLoadingBar loading={loading && knowledge.length === 0} />
+      {/* Drag and drop overlay */}
+      {isDragging && (
+        <div className="fixed inset-0 bg-blue-500/20 border-4 border-dashed border-blue-400 z-50 flex items-center justify-center">
+          <div className="bg-black/90 rounded-lg p-8 text-center">
+            <div className="text-4xl mb-4">📁</div>
+            <div className="text-xl font-semibold text-white mb-2">Drop files here to upload</div>
+            <div className="text-sm text-white/70">Supported: PDF, images, code files, text documents</div>
+          </div>
+        </div>
+      )}
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.txt,.md,.json,.yaml,.yml,.js,.ts,.jsx,.tsx,.py,.java,.cpp,.c,.h,.hpp,.cs,.php,.rb,.go,.rs,.swift,.kt,.scala,.sh,.bash,.zsh,.fish,.ps1,.sql,.html,.css,.scss,.sass,.less,.xml,.toml,.ini,.conf,.vue,.svelte,.dart,.r,.m,.mm,.pl,.pm,.ex,.exs,.elm,.clj,.cljs,.hs,.lua,.vim,.diff,.patch,.csv,.jpg,.jpeg,.png,.gif,.webp,.svg"
+        onChange={handleFileInputChange}
+        className="hidden"
+      />
       <div className="flex flex-col gap-2 min-w-0">
         {/* Error Banner */}
         {showErrorBanner && (
@@ -745,14 +903,25 @@ export default function KnowledgePage() {
           )}
           
           {!autoIngesting && !loading && (
-            <button
-              onClick={handleIngestAndRefresh}
-              className="ml-auto flex items-center gap-1.5 px-2 py-1 text-xs bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 rounded transition-colors"
-              title="Manually re-ingest all knowledge"
-            >
-              <span>🔄</span>
-              <span>Refresh</span>
-            </button>
+            <>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="ml-auto flex items-center gap-1.5 px-2 py-1 text-xs bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-300 rounded transition-colors disabled:opacity-50"
+                title="Upload files from your computer"
+              >
+                <span>{uploading ? '⏳' : '📁'}</span>
+                <span>{uploading ? 'Uploading...' : 'Upload'}</span>
+              </button>
+              <button
+                onClick={handleIngestAndRefresh}
+                className="flex items-center gap-1.5 px-2 py-1 text-xs bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 rounded transition-colors"
+                title="Manually re-ingest all knowledge"
+              >
+                <span>🔄</span>
+                <span>Refresh</span>
+              </button>
+            </>
           )}
           
           {/* Quick filter chips */}
@@ -918,22 +1087,107 @@ export default function KnowledgePage() {
                         src={`${contentData.url}#page=${pdfPage}`}
                         className="w-full h-[600px] border-0"
                         title={`PDF Page ${pdfPage}`}
+                        onError={(e) => {
+                          console.error('PDF iframe failed to load');
+                        }}
                       />
                     </div>
                     <div className="text-xs text-white/50 text-center">
                       {pdfTotalPages - pdfPage} pages remaining
                     </div>
+                    <div className="text-xs text-white/40 text-center mt-2">
+                      <a 
+                        href={contentData.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Open PDF in new tab
+                      </a>
+                    </div>
                   </div>
                 ) : contentType === 'image' && contentData ? (
-                  <div className="flex flex-col items-center">
-                    <img
-                      src={contentData.url}
-                      alt={contentData.alt || selected.title}
-                      className="max-w-full max-h-[500px] object-contain rounded"
-                      onError={(e) => {
-                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative group">
+                      <img
+                        src={contentData.url}
+                        alt={contentData.alt || selected.title}
+                        className="max-w-full max-h-[500px] object-contain rounded cursor-zoom-in transition-transform hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
+                        }}
+                        onClick={() => {
+                          window.open(contentData.url, '_blank');
+                        }}
+                      />
+                    </div>
+                    <div className="text-xs text-white/40 text-center">
+                      <a 
+                        href={contentData.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Open image in new tab
+                      </a>
+                    </div>
+                  </div>
+                ) : contentType === 'code' && contentData ? (
+                  <div className="space-y-3">
+                    {contentData.snippets && contentData.snippets.length > 0 ? (
+                      contentData.snippets.map((snippet: any, idx: number) => (
+                        <div key={idx} className="space-y-2">
+                          {snippet.file && (
+                            <div className="text-xs text-white/60 font-mono">
+                              📄 {snippet.file}
+                            </div>
+                          )}
+                          {snippet.explanation && (
+                            <div className="text-xs text-white/50 italic mb-2">
+                              {snippet.explanation}
+                            </div>
+                          )}
+                          <div className="rounded-lg overflow-hidden border border-white/10">
+                            <SyntaxHighlighter
+                              language={snippet.language || contentData.language || 'text'}
+                              style={vscDarkPlus}
+                              PreTag="div"
+                              className="!m-0 !bg-black/40"
+                              customStyle={{
+                                margin: 0,
+                                padding: '1rem',
+                                background: 'rgba(0, 0, 0, 0.4)',
+                                borderRadius: '0.5rem',
+                              }}
+                            >
+                              {snippet.code || ''}
+                            </SyntaxHighlighter>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-lg overflow-hidden border border-white/10">
+                        <SyntaxHighlighter
+                          language={contentData.language || 'text'}
+                          style={vscDarkPlus}
+                          PreTag="div"
+                          className="!m-0 !bg-black/40"
+                          customStyle={{
+                            margin: 0,
+                            padding: '1rem',
+                            background: 'rgba(0, 0, 0, 0.4)',
+                            borderRadius: '0.5rem',
+                          }}
+                        >
+                          {contentData.content || 'No code content available'}
+                        </SyntaxHighlighter>
+                      </div>
+                    )}
+                    {contentData.filePath && (
+                      <div className="text-xs text-white/40 text-center mt-2">
+                        <span className="font-mono">{contentData.filePath}</span>
+                      </div>
+                    )}
                   </div>
                 ) : contentType === 'video' && contentData ? (
                   <div className="flex flex-col items-center">

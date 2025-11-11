@@ -31,13 +31,13 @@ import * as imageGen from './image-gen';
  */
 export const userTools: Record<string, ToolSpec & { handler: (args: any) => Promise<any>; userTool: true; implemented?: boolean }> = {
   'user.tutorial': { ...tutorial, userTool: true, implemented: true },
-  'user.translate': { ...translate, userTool: true, implemented: false }, // TODO: Implement translation
+  'user.translate': { ...translate, userTool: true, implemented: true }, // ✅ Implemented with AI translation
   'user.content': { ...contentAssistant, userTool: true, implemented: true },
   'user.search': { ...searchAssistant, userTool: true, implemented: true },
   'user.summarize': { ...summarize, userTool: true, implemented: true },
-  'user.grammar': { ...grammar, userTool: true, implemented: false }, // TODO: Parse suggestions from response
+  'user.grammar': { ...grammar, userTool: true, implemented: true }, // ✅ Implemented with structured suggestions parsing
   'user.design': { ...design, userTool: true, implemented: true },
-  'user.simplify': { ...simplify, userTool: true, implemented: false }, // TODO: Extract changes from response
+  'user.simplify': { ...simplify, userTool: true, implemented: true }, // ✅ Implemented with structured changes extraction
   'user.transcribe': { ...transcribe, userTool: true, implemented: true }, // ✅ Implemented with OpenAI Whisper
   'user.presentation': { ...presentation, userTool: true, implemented: false }, // TODO: Parse into structured JSON
   'user.workflow': { ...workflowAuto, userTool: true, implemented: false }, // TODO: Parse and validate JSON

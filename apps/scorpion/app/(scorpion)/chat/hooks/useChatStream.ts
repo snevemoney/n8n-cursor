@@ -20,6 +20,7 @@ interface UseChatStreamProps {
   setActivePanel: React.Dispatch<React.SetStateAction<'plan' | 'council' | 'tools' | 'knowledge' | 'user-tools'>>;
   setProgress: React.Dispatch<React.SetStateAction<Record<string, { phase: string; progress: number; message: string; step?: string }>>>;
   setToolProgress: React.Dispatch<React.SetStateAction<Record<string, Record<string, { tool: string; progress: string; status: string }>>>>;
+  setShowRightPanel: React.Dispatch<React.SetStateAction<boolean>>;
   activePanel: 'plan' | 'council' | 'tools' | 'knowledge' | 'user-tools';
 }
 
@@ -41,6 +42,7 @@ export function useChatStream({
   setActivePanel,
   setProgress,
   setToolProgress,
+  setShowRightPanel,
   activePanel,
 }: UseChatStreamProps) {
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -253,8 +255,9 @@ export function useChatStream({
                       return [...(prev[targetConversationId] || []), event.data];
                     })(),
                   }));
-                  if (targetConversationId === currentConversation && !activePanel) {
+                  if (targetConversationId === currentConversation) {
                     setActivePanel('plan');
+                    setShowRightPanel(true);
                   }
                   break;
                 
@@ -265,6 +268,7 @@ export function useChatStream({
                   setCouncilConsensus(prev => ({ ...prev, [targetConversationId]: null }));
                   if (targetConversationId === currentConversation) {
                     setActivePanel('council');
+                    setShowRightPanel(true);
                   }
                   break;
                 
@@ -311,6 +315,7 @@ export function useChatStream({
                   }));
                   if (targetConversationId === currentConversation) {
                     setActivePanel('council');
+                    setShowRightPanel(true);
                   }
                   break;
                 
@@ -330,21 +335,24 @@ export function useChatStream({
                     })(),
                   }));
                   
-                  if (event.data.tool === 'kb.search' && event.data.status === 'completed') {
-                    setKnowledgeHits(prev => ({
-                      ...prev,
-                      [targetConversationId]: event.data.result?.hits || [],
-                    }));
+                  if (targetConversationId === currentConversation) {
+                    setShowRightPanel(true);
+                    // Always show tools panel when any tool is called
+                    setActivePanel('tools');
                     
-                    if (event.data.args?.query) {
-                      setKnowledgeSearchQuery(prev => ({
+                    // Also update knowledge hits if it's kb.search, but don't switch panel
+                    if (event.data.tool === 'kb.search' && event.data.status === 'completed') {
+                      setKnowledgeHits(prev => ({
                         ...prev,
-                        [targetConversationId]: event.data.args.query,
+                        [targetConversationId]: event.data.result?.hits || [],
                       }));
-                    }
-                    
-                    if (targetConversationId === currentConversation) {
-                      setActivePanel('knowledge');
+                      
+                      if (event.data.args?.query) {
+                        setKnowledgeSearchQuery(prev => ({
+                          ...prev,
+                          [targetConversationId]: event.data.args.query,
+                        }));
+                      }
                     }
                   }
                   break;
@@ -364,11 +372,13 @@ export function useChatStream({
                   
                   if (targetConversationId === currentConversation) {
                     setActivePanel('knowledge');
+                    setShowRightPanel(true);
                   }
                   break;
                 
                 case 'status':
                   if (targetConversationId === currentConversation) {
+                    setShowRightPanel(true);
                     if (event.data.phase === 'planning') {
                       setActivePanel('plan');
                     } else if (event.data.phase === 'council') {
@@ -391,6 +401,7 @@ export function useChatStream({
                   }));
                   
                   if (targetConversationId === currentConversation) {
+                    setShowRightPanel(true);
                     if (event.data.phase === 'planning') {
                       setActivePanel('plan');
                     } else if (event.data.phase === 'council') {
@@ -416,6 +427,7 @@ export function useChatStream({
                   
                   if (targetConversationId === currentConversation && event.data.status === 'starting') {
                     setActivePanel('tools');
+                    setShowRightPanel(true);
                   }
                   break;
                 

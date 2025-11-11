@@ -16,17 +16,62 @@ export const schema = z.object({
 
 export async function handler(args: z.infer<typeof schema>) {
   try {
-    // TODO: Implement translation using AI models or translation API
-    // 1. Detect source language if not provided
-    // 2. Translate text or file content
-    // 3. Return translated content
+    const { runModelUnified } = await import('@/lib/chat/modelRunner');
     
-    // For now, return a placeholder response
+    // Get text content (for now, only text is supported - file handling can be added later)
+    const textToTranslate = args.text || '';
+    if (!textToTranslate) {
+      return {
+        ok: false,
+        error: 'Text content is required for translation',
+      };
+    }
+    
+    // Build translation prompt
+    let translationPrompt: string;
+    if (args.sourceLang) {
+      translationPrompt = `Translate the following text from ${args.sourceLang} to ${args.targetLang}. Provide only the translated text without any explanations or additional text:\n\n${textToTranslate}`;
+    } else {
+      // Auto-detect language
+      translationPrompt = `Detect the language of the following text, then translate it to ${args.targetLang}. First, identify the source language, then provide the translation. Format your response as:\n\nSource Language: [detected language]\nTranslation: [translated text]\n\nText to translate:\n\n${textToTranslate}`;
+    }
+    
+    const systemPrompt = 'You are a professional translator. Provide accurate translations that preserve the meaning, tone, and style of the original text.';
+    
+    const response = await runModelUnified(
+      systemPrompt,
+      translationPrompt,
+      {
+        provider: 'ollama',
+        model: 'scorpion:latest', // Use available model
+        temperature: 0.3, // Lower temperature for more consistent translations
+      }
+    );
+    
+    // Parse response to extract source language and translation
+    let sourceLang = args.sourceLang || 'auto-detected';
+    let translated = response;
+    
+    if (!args.sourceLang) {
+      // Try to extract source language from response
+      const sourceLangMatch = response.match(/Source Language:\s*(.+)/i);
+      if (sourceLangMatch) {
+        sourceLang = sourceLangMatch[1].trim();
+      }
+      
+      // Extract translation (everything after "Translation:")
+      const translationMatch = response.match(/Translation:\s*([\s\S]+)/i);
+      if (translationMatch) {
+        translated = translationMatch[1].trim();
+      }
+    }
+    
     return {
       ok: true,
-      translated: args.text || 'Translated content will appear here',
-      sourceLang: args.sourceLang || 'auto-detected',
+      translated: translated,
+      sourceLang: sourceLang,
       targetLang: args.targetLang,
+      original: textToTranslate,
       message: 'Translation completed',
     };
   } catch (error: any) {

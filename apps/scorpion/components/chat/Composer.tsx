@@ -216,6 +216,28 @@ export function Composer({ onSend, onStop }: ComposerProps) {
     }
   };
   
+  // Sync textarea DOM value with React state (handles direct DOM manipulation from browser automation)
+  // This is needed because browser automation tools type directly into the DOM, bypassing React's onChange
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    
+    const textarea = textareaRef.current;
+    
+    // Check periodically for direct DOM manipulation (browser automation)
+    // Only sync if DOM value differs significantly to avoid interfering with normal typing
+    const syncInterval = setInterval(() => {
+      if (textarea && document.activeElement === textarea) {
+        // Only sync when textarea is focused (user/browser automation is typing)
+        const domValue = textarea.value;
+        if (domValue !== inputValue) {
+          setInputValue(domValue);
+        }
+      }
+    }, 300); // Check every 300ms (less frequent to avoid performance issues)
+    
+    return () => clearInterval(syncInterval);
+  }, [inputValue, setInputValue]);
+  
   return (
     <div className="relative border-t border-white/10 bg-gradient-to-b from-[#0c1014]/90 to-[#0a0d10] backdrop-blur-xl">
       {/* Command palette */}

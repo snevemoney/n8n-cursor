@@ -208,13 +208,13 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
               <span className="text-sm font-semibold text-white">SCORPION</span>
             </div>
             {mounted && (
-              <button
-                onClick={toggleSidebar}
-                className="md:hidden p-1.5 hover:bg-white/10 rounded transition-colors"
-                aria-label="Toggle sidebar"
-              >
-                <ChevronLeft className="w-4 h-4 text-white/70" />
-              </button>
+            <button
+              onClick={toggleSidebar}
+              className="md:hidden p-1.5 hover:bg-white/10 rounded transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <ChevronLeft className="w-4 h-4 text-white/70" />
+            </button>
             )}
           </div>
 
@@ -253,13 +253,13 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
           {/* Top bar with toggle button */}
           <div className="flex items-center gap-2 p-2 border-b border-white/10 bg-[#0f1318]">
             {mounted && (
-              <button
-                onClick={toggleSidebar}
-                className="md:hidden p-2 hover:bg-white/10 rounded transition-colors"
-                aria-label="Toggle sidebar"
-              >
-                <ChevronRight className="w-5 h-5 text-white/70" />
-              </button>
+            <button
+              onClick={toggleSidebar}
+              className="md:hidden p-2 hover:bg-white/10 rounded transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <ChevronRight className="w-5 h-5 text-white/70" />
+            </button>
             )}
             <BreadcrumbNav />
           </div>
