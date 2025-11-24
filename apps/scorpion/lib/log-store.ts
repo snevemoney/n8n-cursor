@@ -124,18 +124,16 @@ class LogStore {
     if (!this.logFile || this.logs.length === 0) return;
     
     try {
-      // Validate storage before saving
-      const validation = await validateAndRefreshStorage();
-      if (!validation.isValid) {
-        console.debug('[LogStore] Storage validation failed, logs may not be persisted');
-      }
+      // FRONTIER-LEVEL: Use cached storage config instead of re-validating
+      // Storage is initialized once at startup, no need to re-detect on every save
+      const { getStorageConfig } = await import('./storage/storage-config');
+      const config = await getStorageConfig();
       
-      // Update paths if storage was refreshed
-      if (validation.wasRefreshed && this.logDir) {
+      // Only update paths if they're not already set correctly
+      if (this.logDir !== config.cacheDir && config.cacheDir) {
         const fileName = path.basename(this.logFile);
-        this.logDir = validation.config.cacheDir || validation.config.dataDir;
+        this.logDir = config.cacheDir;
         this.logFile = path.join(this.logDir, fileName);
-        console.warn(`🔄 LogStore storage refreshed, using new path: ${this.logFile}`);
       }
       
       // Save last MAX_LOGS entries as JSONL

@@ -124,7 +124,14 @@ function getAllActiveAgents(registry?: AgentRegistry | null): AgentConfig[] {
 // Helper to get prompt templates (with fallbacks)
 function getAssetManagementPrompt(businessName: string = '{{businessName}}'): string {
   try {
-    const prompts = require('../../../scripts/tools/enhanced_chatbot_prompts');
+    // Enhanced chatbot prompts - optional, gracefully handle if missing
+    let prompts: any = {};
+    try {
+      prompts = require('../../../scripts/tools/enhanced_chatbot_prompts');
+    } catch (e) {
+      // Module not found - use empty prompts object
+      prompts = {};
+    }
     return prompts.assetManagementChatbotPrompt 
       ? prompts.assetManagementChatbotPrompt(businessName)
       : `You are an expert asset management assistant for ${businessName}.`;
@@ -135,7 +142,14 @@ function getAssetManagementPrompt(businessName: string = '{{businessName}}'): st
 
 function getSystemMessageEnhanced(): string {
   try {
-    const prompts = require('../../../scripts/tools/enhanced_chatbot_prompts');
+    // Enhanced chatbot prompts - optional, gracefully handle if missing
+    let prompts: any = {};
+    try {
+      prompts = require('../../../scripts/tools/enhanced_chatbot_prompts');
+    } catch (e) {
+      // Module not found - use empty prompts object
+      prompts = {};
+    }
     return prompts.systemMessageEnhanced || 
       'You are an expert assistant with access to asset management, maintenance, sustainability, compliance, and financial data.';
   } catch {

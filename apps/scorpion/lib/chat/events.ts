@@ -33,7 +33,7 @@ export const ChatEventSchema = z.discriminatedUnion('type', [
       tool: z.string(),
       callId: z.string(),
       args: z.record(z.any()),
-      status: z.enum(['started', 'completed', 'failed']),
+      status: z.enum(['pending', 'running', 'completed', 'failed']),
       result: z.any().optional(),
       error: z.string().optional(),
     }),
@@ -181,6 +181,54 @@ export const ChatEventSchema = z.discriminatedUnion('type', [
       callId: z.string(),
       progress: z.string(),
       status: z.enum(['starting', 'running', 'completed', 'failed']),
+    }),
+  }),
+
+  // New event types for thinking overlay
+  z.object({
+    type: z.literal('thought'),
+    data: z.object({
+      phase: z.enum(['planning', 'council', 'executing', 'summarizing', 'researching']),
+      message: z.string(), // Sanitized, 1 sentence reason
+      timestamp: z.number().optional(),
+    }),
+  }),
+
+  z.object({
+    type: z.literal('search_query'),
+    data: z.object({
+      query: z.string(),
+      provider: z.string().optional(), // 'tavily', 'brave', 'serpapi', etc.
+      timestamp: z.number().optional(),
+    }),
+  }),
+
+  z.object({
+    type: z.literal('citation'),
+    data: z.object({
+      title: z.string(),
+      url: z.string(),
+      rank: z.number().optional(),
+      reason: z.string().optional(), // Why this source was chosen
+      score: z.number().optional(),
+      timestamp: z.number().optional(),
+    }),
+  }),
+
+  // Knowledge hit event (already exists but ensure it's in schema)
+  z.object({
+    type: z.literal('knowledge_hit'),
+    data: z.object({
+      title: z.string(),
+      url: z.string(),
+      score: z.number().optional(),
+      excerpt: z.string().optional(),
+      snippet: z.string().optional(),
+      provider: z.string().optional(),
+      publishedAt: z.string().optional(),
+      query: z.string().optional(),
+      category: z.string().optional(),
+      conversationId: z.string().optional(),
     }),
   }),
 ]);

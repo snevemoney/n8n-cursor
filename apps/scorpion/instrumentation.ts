@@ -1,24 +1,25 @@
-/**
- * Next.js Instrumentation
- * Runs on server startup to initialize all Scorpion systems
- * Now with parallelized initialization for faster startup
- */
+// apps/scorpion/instrumentation.ts
+
+// Next.js instrumentation hook - runs on server startup
+// Initialize event-driven architecture components here
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    // Don't initialize stores here - let them initialize lazily
-    // Only initialize critical systems
-    console.log('🦂 Scorpion starting...');
-
-    // Initialize shutdown handlers only
+    // Initialize event handlers for event-driven architecture
     try {
-      const { initializeShutdownHandlers } = await import('./lib/shutdown-handler');
-      initializeShutdownHandlers();
-    } catch (error: any) {
-      console.warn('⚠️  Shutdown handler skipped:', error.message);
+      const { initializeEventHandlers } = await import('./lib/events/handlers');
+      initializeEventHandlers();
+      console.log('✅ Event handlers initialized');
+    } catch (error) {
+      console.error('Failed to initialize event handlers:', error);
     }
-
-    // Everything else initializes lazily on first use
-    console.log('✅ Scorpion ready - stores will initialize on first use');
+    
+    // Initialize cost automation (auto-register resources and budgets)
+    try {
+      const { initializeCostAutomation } = await import('./lib/cost/automation');
+      await initializeCostAutomation();
+    } catch (error) {
+      console.error('Failed to initialize cost automation:', error);
+    }
   }
 }

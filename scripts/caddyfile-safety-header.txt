@@ -1,0 +1,22 @@
+# ============================================================================
+# 🛡️  CADDYFILE SAFETY ZONES
+# ============================================================================
+#
+# ⚠️  DO NOT EDIT BLOCKS BELOW THIS LINE (n8n/production services)
+# ✅  SAFE TO ADD NEW BLOCKS BELOW (new services like LLM)
+#
+# ============================================================================
+# PRODUCTION SERVICES (DO NOT MODIFY)
+# ============================================================================
+#
+# These blocks are for production services. DO NOT:
+#   - Remove or comment out these blocks
+#   - Change ports or reverse_proxy targets
+#   - Modify domain names
+#   - Change any settings without understanding impact
+#
+# If you need to modify these, create a backup first:
+#   sudo cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.backup
+#
+# ============================================================================
+

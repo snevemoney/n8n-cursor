@@ -106,11 +106,15 @@ export async function initializeStores(): Promise<void> {
   console.log('✅ All stores initialized and loaded from disk');
   
   // Start storage reconnect monitoring in background (non-blocking)
-  // Defer slightly to allow server to start faster
-  Promise.resolve().then(async () => {
+  // Defer to allow server to start faster
+  // Power of 10 Rule 4: Explicit void prefix for ignored promises
+  void Promise.resolve().then(async () => {
     try {
-      // Minimal delay - just enough to let stores initialize
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced from 3s to 1s
+      // Increased delay for better startup performance (configurable via env)
+      const reconnectDelayMs = process.env.STORAGE_RECONNECT_DELAY_MS
+        ? parseInt(process.env.STORAGE_RECONNECT_DELAY_MS, 10)
+        : 3000; // 3 seconds (increased from 1s for better startup performance)
+      await new Promise(resolve => setTimeout(resolve, reconnectDelayMs));
       
       const { startReconnectMonitoring } = await import('./storage/storage-reconnect-monitor');
       await startReconnectMonitoring({

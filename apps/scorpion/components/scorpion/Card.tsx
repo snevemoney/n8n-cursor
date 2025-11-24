@@ -29,7 +29,7 @@ export const Card = memo(function Card({
   const paddingStyle = title ? (padding === 'md' ? 'p-4 pt-3' : paddingStyles[padding]) : paddingStyles[padding];
   
   return (
-    <div className={`${baseStyles} ${hoverStyles} ${className}`}>
+    <div className={`${baseStyles} ${hoverStyles} ${className}`} suppressHydrationWarning>
       {title && (
         <div className="px-4 py-2.5 sc-title border-b border-white/5">
           {title}

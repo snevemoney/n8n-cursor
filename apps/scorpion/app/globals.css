@@ -18,18 +18,53 @@
 body {
   background: var(--sc-bg);
   color: var(--sc-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  /* Force system font stack to fix character rendering issues - prioritize system fonts */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   margin: 0;
   padding: 0;
   overflow: hidden;
   /* Optimize rendering performance */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Use optimizeLegibility for better character rendering */
   text-rendering: optimizeLegibility;
+  /* Disable all font features that might cause character issues */
+  font-feature-settings: normal;
+  -webkit-font-feature-settings: normal;
+  /* Explicitly enable all characters */
+  font-variant: normal;
+  font-variant-ligatures: normal;
   /* Prevent layout shifts */
   contain: layout style paint;
   /* Optimize scrolling */
   overscroll-behavior: none;
+}
+
+/* Force proper character rendering for all text elements */
+* {
+  font-variant: normal !important;
+  font-variant-ligatures: normal !important;
+  font-feature-settings: normal !important;
+  -webkit-font-feature-settings: normal !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* CSS class for hidden sidebar buttons - using CSS for better performance */
+.sidebar-button-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
 }
 
 #__next {
@@ -55,20 +90,10 @@ body {
   background: var(--sc-surface);
   border: 1px solid var(--sc-border);
   border-radius: 6px;
-  transition: border-color 0.1s ease, background-color 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
-  will-change: border-color, background-color, transform;
-  transform: translateZ(0); /* Force GPU acceleration */
 }
 
 .sc-panel:hover {
   border-color: var(--sc-border-strong);
-  transform: scale(1.01) translateZ(0);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.sc-panel:active {
-  transform: scale(0.98) translateZ(0);
-  transition: transform 0.1s ease;
 }
 
 /* Title styling */
@@ -524,4 +549,52 @@ aside a {
     padding-left: 2rem;
     padding-right: 2rem;
   }
+}
+
+/* Hide all buttons in sidebar except the header collapse button - Multiple selectors for maximum coverage */
+aside button:not([aria-label*="Collapse"]):not([aria-label*="Expand"]):not([aria-label*="Toggle"]):not([aria-label*="sidebar"]),
+aside[class*="fixed"] button:not([aria-label*="Collapse"]):not([aria-label*="Expand"]):not([aria-label*="Toggle"]):not([aria-label*="sidebar"]),
+aside nav button,
+aside nav [role="button"],
+aside[class*="fixed"] nav button,
+aside[class*="fixed"] nav [role="button"],
+aside > div:last-child button:not([aria-label*="Collapse"]):not([aria-label*="Expand"]):not([aria-label*="Toggle"]):not([aria-label*="sidebar"]),
+aside[class*="fixed"] > div:last-child button:not([aria-label*="Collapse"]):not([aria-label*="Expand"]):not([aria-label*="Toggle"]):not([aria-label*="sidebar"]),
+/* Hide any button containing "sync" text in sidebar */
+aside button[aria-label*="sync"],
+aside button[aria-label*="Sync"],
+aside[class*="fixed"] button[aria-label*="sync"],
+aside[class*="fixed"] button[aria-label*="Sync"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Hide buttons with the sidebar-button-hidden class */
+.sidebar-button-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
 }

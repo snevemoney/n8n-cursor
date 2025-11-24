@@ -20,46 +20,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Generate types from OpenAPI
-        run: |
-          cd packages/contracts
-          npm run generate:openapi
+        run: pnpm --filter contracts run generate:openapi
 
       - name: Generate types from events
-        run: |
-          cd packages/contracts
-          npm run generate:events
+        run: pnpm --filter contracts run generate:events
 
       - name: Generate types from flags
-        run: |
-          cd packages/contracts
-          npm run generate:flags
+        run: pnpm --filter contracts run generate:flags
 
       - name: Generate types from errors
-        run: |
-          cd packages/contracts
-          npm run generate:errors
+        run: pnpm --filter contracts run generate:errors
 
       - name: Generate types from telemetry
-        run: |
-          cd packages/contracts
-          npm run generate:telemetry
+        run: pnpm --filter contracts run generate:telemetry
 
       - name: Build contracts package
-        run: |
-          cd packages/contracts
-          npm run build
+        run: pnpm --filter contracts run build
 
       - name: Typecheck monorepo
-        run: |
-          npm run typecheck
+        run: pnpm run typecheck
 
   flags-validate:
     name: Validate Feature Flags
@@ -72,17 +60,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Validate flags schema
-        run: |
-          cd packages/contracts
-          npm run validate:flags
+        run: pnpm --filter contracts run validate:flags
 
       - name: Check for unknown flags
         run: |
@@ -109,17 +96,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Validate error catalog
-        run: |
-          cd packages/contracts
-          npm run validate:errors
+        run: pnpm --filter contracts run validate:errors
 
       - name: Check for unknown error codes
         run: |
@@ -146,17 +132,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Validate OpenAPI spec
-        run: |
-          cd packages/contracts
-          npm run validate:openapi
+        run: pnpm --filter contracts run validate:openapi
 
       - name: Check OpenAPI consistency
         run: |
@@ -182,17 +167,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Validate event schemas
-        run: |
-          cd packages/contracts
-          npm run validate:events
+        run: pnpm --filter contracts run validate:events
 
       - name: Check event consistency
         run: |
@@ -218,17 +202,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Validate telemetry spec
-        run: |
-          cd packages/contracts
-          npm run validate:telemetry
+        run: pnpm --filter contracts run validate:telemetry
 
       - name: Check telemetry consistency
         run: |
@@ -254,17 +237,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run consistency checks
-        run: |
-          cd packages/contracts
-          npm run validate
+        run: pnpm --filter contracts run validate
 
       - name: Check for hardcoded values
         run: |

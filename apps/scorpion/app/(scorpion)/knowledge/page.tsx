@@ -339,7 +339,20 @@ export default function KnowledgePage() {
     detectAndLoadContent(item);
   }, [detectAndLoadContent]);
 
-  const handleExport = useCallback((item: KnowledgeItem) => {
+  const handleExport = useCallback(async (item: KnowledgeItem) => {
+    // Check governance before export
+    const { checkAccess } = await import('@/lib/governance/client');
+    const accessCheck = await checkAccess({
+      action: 'export',
+      resourceType: 'rag_document',
+      resourceId: item.id,
+    });
+
+    if (!accessCheck.allowed) {
+      showToast('error', 'Export denied by governance policy');
+      return;
+    }
+
     // Export as JSON
     const dataStr = JSON.stringify(item, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -913,14 +926,14 @@ export default function KnowledgePage() {
                 <span>{uploading ? '⏳' : '📁'}</span>
                 <span>{uploading ? 'Uploading...' : 'Upload'}</span>
               </button>
-              <button
-                onClick={handleIngestAndRefresh}
+            <button
+              onClick={handleIngestAndRefresh}
                 className="flex items-center gap-1.5 px-2 py-1 text-xs bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 rounded transition-colors"
-                title="Manually re-ingest all knowledge"
-              >
-                <span>🔄</span>
-                <span>Refresh</span>
-              </button>
+              title="Manually re-ingest all knowledge"
+            >
+              <span>🔄</span>
+              <span>Refresh</span>
+            </button>
             </>
           )}
           
@@ -1109,13 +1122,13 @@ export default function KnowledgePage() {
                 ) : contentType === 'image' && contentData ? (
                   <div className="flex flex-col items-center gap-2">
                     <div className="relative group">
-                      <img
-                        src={contentData.url}
-                        alt={contentData.alt || selected.title}
+                    <img
+                      src={contentData.url}
+                      alt={contentData.alt || selected.title}
                         className="max-w-full max-h-[500px] object-contain rounded cursor-zoom-in transition-transform hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
-                        }}
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
+                      }}
                         onClick={() => {
                           window.open(contentData.url, '_blank');
                         }}

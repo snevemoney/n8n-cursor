@@ -3,24 +3,64 @@
 import React from 'react';
 
 export function ASCIILogo() {
-  const logo = `═══════════════════════════════════════
-                  🦂
-      █▀ █▀▀ █▀█ █▀█ █▀█ █ █▀█ █▄ █
-      ▄█ █▄▄ █▄█ █▀▄ █▀▀ █ █▄█ █ ▀█
-═══════════════════════════════════════
+  const topSection = '═══════════════════════════════════════\n' +
+    '█▀ █▀▀ █▀█ █▀█ █▀█ █ █▀█ █▄ █\n' +
+    '▄█ █▄▄ █▄█ █▀▄ █▀▀ █ █▄█ █ ▀█\n' +
+    '═══════════════════════════════════════';
 
-    [ CLASSIFIED ACCESS ONLY ]
-    Tactical Operations Network
-    Security Level: OMEGA
+  const decorativeArt = "   .'..-'` `    ' `. . `-'. ```...`'-  '`` .--. .`'.  .'.. '-  - `''  - `- ''. -.-\n" +
+    " --'-- .. ```..'.  ` -.' -`- .  -.'-'-'`` -.`.- -  `- `'.' `-`  '''`- '.-``` '.'..\n" +
+    " - -'-. -..  `'`. ``''-`- `- ` ``.- '` `-``.. `'`-..` .''``.  ' - ''. .` `- ` '.  \n" +
+    "   .' `   ``  ' -. `. `'. ..-`--. - `'`'-'  '.   '.``. `' ..   . '  ''`..-  `'`  .\n" +
+    " -'.' `-- '-'    '-'` '  -.   . .'.'`  ` ''--```-.    . `.`  ..` '''`.  ` -. `--  \n" +
+    "`  ` - ``.  `..    `.`'.-- '.` -.'-'--    '-  `'  . '-'` '- -'` '-`.-''  '--`` -  \n" +
+    "'.`. .'.--`'...-'`.'..-   ,_,>+^+\"+!.'   .. ' '. `- -.`''`'-` ''' ....-.'  '`.''.`\n" +
+    "`.` '`' .-.``  .```'  _coVj1}cSI]{Yj#+ ``'.-''-'  ``'.'-  .` `  - .` .'  . ` '' '.\n" +
+    "-.`.     `-. '.` `  \\$qO@OG0ODM8Pn5NO0Y]= . -.'`.  ' -'.`. `. ' ` -` `- '  `'``  .\n" +
+    "-` ..`.- -.. '.'``<#XMM&NOm5JPw&QgPAY|vTxT)''- ..--`'  ` - `  ---  '.-   '.` ' `  \n" +
+    " ' `.'.-``- .  .'(S#gRNyzmfY]+`-.$ZMsv/\"u/f1  ' '. `- ' .'.'-  . .-'.`-' `'---''  \n" +
+    "'-'.`-. `- ` .  `akMR&sv3?- ' .  3EgD37i$yis(.. - ''.' ..`  '-' '.` `- .-.-`    ` \n" +
+    "'''' ' ' - ````` 1UON94v, . `. .`<UOHD2v$94LY . .   .`-    -''`.`` -`  ` '`-  ``` \n" +
+    "  .   `..  '``  (M@WJ;k>'-''`'-` ->tMN815MDIY.  -  -- '`  `-.'.-  . .- . '.   .'' \n" +
+    "-' '..    `''. 'i@gHIrC|--   ' . --':=azX<Km\\'`     .'. -- '.``'.`'--  .   ''`.--.- \n" +
+    "-.. -'  .-`-' -./ONNZL6(-  . '  `.-'-_Eh\">MT `. `.-```  - -`-.'. -'--. ` -  .`.  -\n" +
+    " ``. ..-` `. ````0OgOoTo, `'` `'`'.`-xy> x/. -` `- ` .` `. `-- -`'' .--. .` ' .   \n" +
+    "'`  '. ..-` - ` `0gBMuT1ZYY(_---'..- ..`'' '.  `''  -'  .'. .`'-  -.''. `  '   `  \n" +
+    "   - ''  ' ``.-`'GUMON$j1sJzk#vv! `;<~ '` `' .  .'-..` '` ` ' --` `'` `'    ``  -.-\n" +
+    ".  - ' `.`'-- -'-[&KRNM%X3FsFtVhaC5$Mm2zr `<v*' `.    '''  .'` `'..--  -`-'-.``.'`\n" +
+    "-`. -` '-- --- -_TA%M&BN@O6k#Jzz1jf459Xjq/\"4YJF>- .`>T>'-'.  .'-- ' -'  ' -  '  ' \n" +
+    "'--`-' .-    `~zo1Ym61hQg&DO0Odk2Fts1u34k%8GMuxC.\"F2XT' -.^+<<' '.- `. -...`---'  \n" +
+    ".-  .'.'`' '^TGAborY&hC0@DHNgHNNNp8$$%SVYc|\\vznm194E;'\"7TtT7fMw2uli* .-- ```' ' '`\n" +
+    " `. '`-..' \"0OGT!,izoo#2ewONHMBHOB@OMhhYi#koYvlo249$$JJI5MM3Yu21}vv[1ty+- .'. `.'-\n" +
+    " '. . '`.-?#4j, rZ3a]upO90$Xkh&M@BGQMOgM4I3#FIVt1#Ay8OONN@&@NOMnC#ZIs]CSF|`'  ` .-\n" +
+    ".'. ' ' -`IX}''Y@RX;`^uIy8MmS3FkpOZ#4#4$O@ND425OD@M6@@UZsr\"n@OWBQW@IO53a9UJ. -` - \n" +
+    " . ' ' if6a7' =hex-'-I9#l;JU4uJ4#S9fzuqMDOgHDXu6wNKaax^  ''.i9MDg&%eM@w4XmG(   `  \n" +
+    "-  '-.`,! -`.>YMs~- iKG\\!Xv)Ye0NO9%CJ4ZMM@RBQ@4M$z~Ja\"-  '```'!;}1EFGkD&epOM/  ` --\n" +
+    "`'' ` ``-- \\awT>  - \"qM)fO#Z@SY\")\\|/[yznoY7TTvl\\<!1y=.'..' `'   .tI*=qPK&Mh< ` '' \n" +
+    "-.-'.-.`' -'`- -'`+}XZv-rP@gW&MUJ7vvv73ORN8Md3V$z+ '  '.'-`'+123#VXDBH@Ua7~  '  `'\n" +
+    ".'- -  - - ..``' -<\"!`  -`qMDWN&NGwVjnyaHNDO0V}=!<...-.`'-   '^r\\}Tc?;<`..-  --.`.\n" +
+    " . . '' .''.'-'-`'.'. `.- :18H&WggRRH@&0bOYvixn2V#t7:  -. ..-` -' ''`.``- ' -`'' ' \n" +
+    "'. ` ``'`.- '  ' .  - . `` `.vkbGM@HHQHggN@d#of17LYFnzi... - . -.-. -' ` '.` '..- \n" +
+    ".... ..  '' `.  -'`  ``.- ```''>YsaaUO@DDM&HWWBWD0IT+'-  `  ''   `'.`'-.`.`` -.' - '\n" +
+    ".. '.-` - `-' ..'  '`.'-  .`'`  ''. '+i=r(ivi|+~~ `-`  -.`-'`..  .- -  ` .'-`-- `.\n" +
+    " -``     ''-.-  --. -`- ..-.`.'  ..-.` `.-' '-  - -` - -.`''.'- .'---    -  -'` - \n" +
+    ". '. .....`.'-- -``.  .. '.. `''  .- `  '. - ` .   ` -- ''`'..`'  . '.'- .-.` ``. \n" +
+    " -...`'--' '  '  ' . -  -'  `. `` ... -`  .`-''`''`.-. - - -    '-'`. -'` .- .--- \n" +
+    " '`'  '--. '```.  .  `' .-. -`` `' `-`'''  '-'.  - '  ''``-  ' -'- ' `- `   ` -`.`";
 
-═══════════════════════════════════════`.trim();
+  const bottomSection = '═══════════════════════════════════════\n' +
+    '\n' +
+    '    [ CLASSIFIED ACCESS ONLY ]\n' +
+    '    Tactical Operations Network\n' +
+    '    Security Level: OMEGA\n' +
+    '\n' +
+    '═══════════════════════════════════════';
 
   return (
-    <div 
-      className="sc-mono text-xs leading-snug text-emerald-400/80 whitespace-pre"
-      suppressHydrationWarning
-    >
-      {logo}
+    <div className="sc-mono text-emerald-400/80 whitespace-pre" suppressHydrationWarning>
+      <div className="text-xs leading-snug text-center">{topSection}</div>
+      <div className="text-[10px] leading-tight opacity-60 tracking-wide">{decorativeArt}</div>
+      <div className="text-xs leading-snug text-center">{bottomSection}</div>
     </div>
   );
 }

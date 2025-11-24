@@ -165,10 +165,22 @@ export class RAGStore {
     };
 
     // Generate embedding (using Ollama)
+    // For images, ensure we generate embeddings even if content is mostly OCR text
     try {
-      doc.embedding = await this.generateEmbedding(content);
+      // For images, use the full content including OCR text for better searchability
+      const embeddingContent = knowledge.category === 'media' && knowledge.description
+        ? knowledge.description // Use full description for images (includes OCR text)
+        : content;
+      doc.embedding = await this.generateEmbedding(embeddingContent);
+      if (knowledge.category === 'media') {
+        console.log(`✅ Generated embedding for image: ${knowledge.id} (${doc.embedding.length} dimensions)`);
+      }
     } catch (error) {
-      console.warn('Failed to generate embedding, storing without embedding:', error);
+      console.warn(`Failed to generate embedding for ${knowledge.id}, storing without embedding:`, error);
+      // For images, this is critical - log as error
+      if (knowledge.category === 'media') {
+        console.error(`❌ CRITICAL: Image ${knowledge.id} will not be searchable without embedding!`);
+      }
     }
     
     this.documents.set(knowledge.id, doc);
@@ -178,6 +190,34 @@ export class RAGStore {
     
     // Save immediately
     await this.save();
+  }
+
+  /**
+   * Add a document to RAG store (simplified interface)
+   * Converts a simple document format to ExtractedKnowledge
+   */
+  async addDocument(doc: {
+    content: string;
+    metadata: Record<string, any>;
+  }): Promise<void> {
+    const knowledge: ExtractedKnowledge = {
+      id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      source: doc.metadata.source || 'research',
+      type: doc.metadata.type || 'feature',
+      category: doc.metadata.category || 'general',
+      title: doc.metadata.title || doc.content.substring(0, 100),
+      description: doc.content,
+      codeSnippets: [],
+      patterns: [],
+      dependencies: [],
+      useCases: [],
+      tags: doc.metadata.tags || [],
+      extractedAt: doc.metadata.timestamp || new Date().toISOString(),
+      filePath: doc.metadata.filePath,
+      contentUrl: doc.metadata.contentUrl
+    };
+    
+    await this.addKnowledge(knowledge);
   }
 
   /**
@@ -437,13 +477,37 @@ export class RAGStore {
       const isWhatIsQuery = this.queryPatterns.whatIs.test(query);
       const isHowToQuery = this.queryPatterns.howTo.test(query);
       
+      // Detect if this is an image/OCR search
+      const isImageSearch = /(jpeg|jpg|png|image|picture|photo|ocr|extracted text)/i.test(query);
+      
       // Get adaptive similarity threshold based on query type
-      const minSimilarity = this.getAdaptiveThreshold(query, isWhatIsQuery, isHowToQuery);
+      // Lower threshold for image searches to be more inclusive
+      let minSimilarity = this.getAdaptiveThreshold(query, isWhatIsQuery, isHowToQuery);
+      if (isImageSearch) {
+        minSimilarity = Math.min(minSimilarity, 0.25); // Much lower threshold for images (0.25)
+      }
       
       // EARLY FILTERING: Filter BEFORE expensive similarity computation (Phase 1 optimization: Shape the query)
       const candidateDocs = Array.from(this.documents.values())
         .filter(doc => {
-          // Early exit: must have embedding
+          // For image searches, be more permissive - allow docs without embeddings if they're images
+          if (isImageSearch) {
+            const isImage = doc.metadata.category === 'media' || 
+                           doc.metadata.tags?.includes('image') ||
+                           doc.metadata.tags?.includes('jpeg') ||
+                           doc.metadata.tags?.includes('jpg') ||
+                           doc.metadata.tags?.includes('png') ||
+                           doc.content.toLowerCase().includes('extracted text (ocr)');
+            
+            // For images, allow even without embeddings (will use keyword matching)
+            if (isImage) {
+              // Still filter test files
+              if (doc.metadata.isTestFile) return false;
+              return true; // Include images even without embeddings
+            }
+          }
+          
+          // For non-image searches, require embedding
           if (!doc.embedding || doc.embedding.length === 0) return false;
           
           // Early exit: filter test files using pre-computed flag (Phase 1 optimization: Denormalize selectively)
@@ -459,10 +523,38 @@ export class RAGStore {
 
       // Compute similarity only for filtered candidates (Phase 1 optimization: Less IO)
       const results = candidateDocs
-        .map(doc => ({
-          doc,
-          similarity: this.cosineSimilarity(queryEmbedding, doc.embedding!)
-        }))
+        .map(doc => {
+          // For images without embeddings in image searches, use keyword matching score
+          if (isImageSearch && (!doc.embedding || doc.embedding.length === 0)) {
+            const isImage = doc.metadata.category === 'media' || 
+                           doc.metadata.tags?.includes('image') ||
+                           doc.metadata.tags?.includes('jpeg') ||
+                           doc.metadata.tags?.includes('jpg') ||
+                           doc.metadata.tags?.includes('png');
+            if (isImage) {
+              // Use keyword matching for images without embeddings
+              const queryLower = query.toLowerCase();
+              const keywords = queryLower.split(/\s+/);
+              const contentLower = doc.content.toLowerCase();
+              const matches = keywords.filter(kw => contentLower.includes(kw)).length;
+              const keywordScore = matches / keywords.length; // Normalize to 0-1
+              return {
+                doc,
+                similarity: Math.max(0.3, keywordScore) // Minimum 0.3 for images found via keyword
+              };
+            }
+          }
+          
+          // For documents with embeddings, use cosine similarity
+          if (!doc.embedding || doc.embedding.length === 0) {
+            return { doc, similarity: 0 }; // Skip if no embedding and not an image
+          }
+          
+          return {
+            doc,
+            similarity: this.cosineSimilarity(queryEmbedding, doc.embedding!)
+          };
+        })
         // Strategy-aware boosting using pre-computed flags (Phase 1 optimization: Denormalize)
         .map(r => {
           const strategy = r.doc.metadata.indexingStrategy || 'chunk';
@@ -488,6 +580,21 @@ export class RAGStore {
               boost = 0.15; // Boost for sub-chunks (more granular)
             } else if (strategy === 'chunk' && r.doc.metadata.isReadme) {
               boost = 0.2; // README files are good for "how to" too
+            }
+          } else if (isImageSearch) {
+            // For image searches, boost images significantly
+            const isImage = r.doc.metadata.category === 'media' || 
+                           r.doc.metadata.tags?.includes('image') ||
+                           r.doc.metadata.tags?.includes('jpeg') ||
+                           r.doc.metadata.tags?.includes('jpg') ||
+                           r.doc.metadata.tags?.includes('png') ||
+                           r.doc.content.toLowerCase().includes('extracted text (ocr)');
+            if (isImage) {
+              boost = 0.5; // Strong boost for images in image searches
+              // Extra boost if it has OCR text
+              if (r.doc.content.toLowerCase().includes('extracted text (ocr)')) {
+                boost += 0.2; // Additional boost for images with OCR
+              }
             }
           } else {
             // For other queries, prefer summaries and sub-chunks
@@ -583,9 +690,19 @@ export class RAGStore {
    * Find knowledge by category/tags
    */
   async findByCategory(category: string): Promise<ExtractedKnowledge[]> {
-    return Array.from(this.documents.values())
+    const results = Array.from(this.documents.values())
       .filter(doc => doc.metadata.category === category)
       .map(doc => this.documentToKnowledge(doc));
+    
+    // Log for debugging
+    if (category === 'media') {
+      console.log(`📸 Found ${results.length} media documents in RAG store`);
+      results.forEach(r => {
+        console.log(`  - ${r.id}: ${r.title} (tags: ${r.tags?.join(', ') || 'none'})`);
+      });
+    }
+    
+    return results;
   }
 
   /**
@@ -605,7 +722,7 @@ export class RAGStore {
 
   private knowledgeToText(knowledge: ExtractedKnowledge): string {
     // Include full file content in code examples (not truncated)
-    const codeExamples = knowledge.codeSnippets.map(s => {
+    const codeExamples = (knowledge.codeSnippets || []).map(s => {
       // For full file content, include it all (up to reasonable limit)
       // For very large files, we still truncate but at a higher limit
       const maxSnippetSize = 50000; // 50KB per snippet
@@ -617,22 +734,22 @@ export class RAGStore {
     }).join('\n\n');
 
     return `
-Title: ${knowledge.title}
-Description: ${knowledge.description}
-Category: ${knowledge.category}
-Type: ${knowledge.type}
-Source: ${knowledge.source}
+Title: ${knowledge.title || 'Untitled'}
+Description: ${knowledge.description || ''}
+Category: ${knowledge.category || 'uncategorized'}
+Type: ${knowledge.type || 'unknown'}
+Source: ${knowledge.source || 'unknown'}
 
 Patterns:
-${knowledge.patterns.map(p => `- ${p}`).join('\n')}
+${(knowledge.patterns || []).map(p => `- ${p}`).join('\n')}
 
 Use Cases:
-${knowledge.useCases.map(u => `- ${u}`).join('\n')}
+${(knowledge.useCases || []).map(u => `- ${u}`).join('\n')}
 
 Code Examples:
-${codeExamples}
+${codeExamples || '(none)'}
 
-Tags: ${knowledge.tags.join(', ')}
+Tags: ${(knowledge.tags || []).join(', ') || '(none)'}
     `.trim();
   }
 
@@ -679,7 +796,32 @@ Tags: ${knowledge.tags.join(', ')}
     // This is simplified - in production would need proper parsing
     const lines = doc.content.split('\n');
     const title = lines.find(l => l.startsWith('Title:'))?.replace('Title:', '').trim() || doc.id;
-    const description = lines.find(l => l.startsWith('Description:'))?.replace('Description:', '').trim() || '';
+    
+    // Extract full description (multi-line) - everything from "Description:" until next section
+    let description = '';
+    const descStartIdx = lines.findIndex(l => l.startsWith('Description:'));
+    if (descStartIdx >= 0) {
+      const descLine = lines[descStartIdx].replace('Description:', '').trim();
+      const descLines: string[] = descLine ? [descLine] : [];
+      
+      // Collect all lines until we hit the next section
+      for (let i = descStartIdx + 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith('Category:') || line.startsWith('Type:') || 
+            line.startsWith('Source:') || line.startsWith('Patterns:') || 
+            line.startsWith('Use Cases:') || line.startsWith('Code Examples:') ||
+            line.startsWith('Tags:')) {
+          break;
+        }
+        descLines.push(line);
+      }
+      description = descLines.join('\n').trim();
+    }
+    
+    // Fallback: if no Description found, use content directly (for backwards compatibility)
+    if (!description && doc.content) {
+      description = doc.content;
+    }
     
     const patternsMatch = doc.content.match(/Patterns:\n((?:- .+\n?)+)/);
     const patterns = patternsMatch 

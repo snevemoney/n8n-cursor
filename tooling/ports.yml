@@ -16,6 +16,9 @@ traefik_http:   80
 traefik_https:  443
 vector_sink:    8686
 
+# Portfolio Services
+portfolio:      4010
+
 # Node.js Versions (not actual ports, but referenced in compose)
 node_20:        20
 node_16:        16

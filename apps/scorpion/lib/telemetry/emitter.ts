@@ -16,10 +16,8 @@ export function emitEvent(event: Omit<DomainEvent, 'id' | 'ts'>): void {
   try {
     const validated = DomainEventSchema.parse(fullEvent);
     const bus = getTelemetryBus();
-    const listenerCount = bus.listenerCount('event');
-    if (listenerCount === 0) {
-      console.warn(`[TelemetryEmitter] No listeners for event: ${event.type}. Event will be lost.`);
-    }
+    // Events are buffered and will be replayed to new subscribers, so no need to warn
+    // Only log in verbose mode if needed for debugging
     bus.emitEvent(validated);
   } catch (error) {
     console.error('[TelemetryEmitter] Invalid event:', error);

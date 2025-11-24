@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
+import { N8nClient } from '@/lib/n8n-client';
 import { WorkflowIngester } from '@scorpion/core';
 import path from 'path';
 import fs from 'fs/promises';
@@ -10,11 +10,11 @@ export const GET = withErrorHandling(async (
   { params }: { params: { id: string } }
 ) => {
   const workflowId = params.id;
-  const mcpClient = getMCPn8nClient();
+  const n8nClient = new N8nClient();
   
   // Try to get from n8n first (most recent update)
   try {
-    const n8nWorkflow = await mcpClient.getWorkflow(workflowId);
+    const n8nWorkflow = await n8nClient.getWorkflow(workflowId);
     if (n8nWorkflow) {
       return createSuccessResponse({
         workflow: {

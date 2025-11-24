@@ -60,9 +60,35 @@ export const MessageList = memo(function MessageList({ messages, streamingConten
   
   // Memoize rendered messages for performance
   const renderedMessages = useMemo(() => {
-    return messages.map((message, index) => (
+    return messages.map((message, index) => {
+      // Filter out PLAN_STRUCTURE HTML comments from displayed content
+      let displayContent = message.content || '';
+      displayContent = displayContent.replace(/<!-- PLAN_STRUCTURE:[\s\S]*?-->/g, '').trim();
+      
+      // Strip HTML tags from error messages to prevent rendering glitches
+      if (displayContent.includes('<!DOCTYPE') || displayContent.includes('<html') || displayContent.includes('<meta')) {
+        displayContent = displayContent
+          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/&[^;]+;/g, '') // Remove HTML entities
+          .replace(/<!DOCTYPE[^>]*>/gi, '') // Remove DOCTYPE
+          .replace(/<html[^>]*>/gi, '') // Remove HTML tag
+          .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '') // Remove head section
+          .replace(/<body[^>]*>/gi, '') // Remove body tag
+          .replace(/<\/body>/gi, '') // Remove closing body tag
+          .replace(/<\/html>/gi, '') // Remove closing html tag
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
+        
+        // If content is mostly HTML structure, provide a cleaner message
+        if (displayContent.length < 20 || displayContent.toLowerCase().includes('doctype') || displayContent.toLowerCase().includes('data-critters')) {
+          displayContent = 'Server error occurred. Please try again or check server logs.';
+        }
+      }
+      
+      return (
       <div
         key={message.id}
+        data-testid={`chat-message message-${message.role}-${index}`}
         className={`flex gap-4 items-start animate-fade-in-up ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
         style={{ animationDelay: `${index * 30}ms` }}
       >
@@ -73,16 +99,18 @@ export const MessageList = memo(function MessageList({ messages, streamingConten
         )}
         
         <div
-          className={`max-w-2xl px-6 py-4 rounded-3xl shadow-xl backdrop-blur-sm transition-all duration-100 hover:shadow-2xl break-words ${
+          data-testid={`message-content-${message.role}-${index}`}
+          className={`w-full max-w-2xl px-4 md:px-5 lg:px-6 py-4 rounded-3xl shadow-xl backdrop-blur-sm transition-all duration-100 hover:shadow-2xl break-words ${
             message.role === 'user'
               ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-500/30 hover:shadow-blue-500/40'
               : 'bg-white/10 border border-white/20 text-white hover:bg-white/15 hover:border-white/30'
           }`}
-          style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+          style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}
         >
           {/* Enhanced markdown rendering */}
-          <div className="text-[15px] leading-relaxed font-[450] prose prose-invert prose-headings:text-white prose-p:text-white prose-strong:text-white prose-code:text-emerald-400 prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 max-w-none overflow-visible">
+          <div className="text-[15px] leading-relaxed font-medium prose prose-invert prose-headings:text-white prose-p:text-white prose-strong:text-white prose-code:text-emerald-400 prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 max-w-none overflow-visible" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', textRendering: 'optimizeLegibility', fontVariant: 'normal', fontFeatureSettings: 'normal' }}>
             <ReactMarkdown
+              key={message.id}
               components={{
                 code({ node, inline, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '');
@@ -140,7 +168,7 @@ export const MessageList = memo(function MessageList({ messages, streamingConten
                 },
               }}
             >
-              {message.content}
+              {displayContent}
             </ReactMarkdown>
           </div>
           
@@ -174,13 +202,21 @@ export const MessageList = memo(function MessageList({ messages, streamingConten
           </div>
         )}
       </div>
-    ));
+      );
+    });
   }, [messages]);
   
   return (
     <div 
       ref={containerRef}
-      className="flex-1 overflow-y-auto px-8 py-10 space-y-8 bg-gradient-to-b from-[#0a0d10] via-[#0c1014] to-[#0a0d10]"
+      data-testid="message-list-container"
+      className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-8 py-10 space-y-8 bg-gradient-to-b from-[#0a0d10] via-[#0c1014] to-[#0a0d10] max-w-full"
+      style={{ 
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(16, 185, 129, 0.3) transparent',
+        zIndex: 1,
+        position: 'relative'
+      }}
     >
       {messages.length === 0 && !streamingContent && (
         <div className="h-full flex flex-col items-center justify-center text-center px-6 animate-fade-in">
@@ -202,30 +238,32 @@ export const MessageList = memo(function MessageList({ messages, streamingConten
             Powered by Council Deliberation • 162+ Workflows • RAG Knowledge Base
           </p>
           
-          <div className="mt-8 grid grid-cols-2 gap-4 max-w-2xl animate-slide-up delay-300">
-            {[
-              { title: 'List n8n Workflows', cmd: 'list all n8n workflows', icon: '📋', color: 'emerald' },
-              { title: 'Create AI Agent', cmd: 'create an AI agent workflow that processes webhooks', icon: '🤖', color: 'blue' },
-              { title: 'Search n8n Nodes', cmd: 'search for n8n nodes that handle HTTP requests', icon: '🔍', color: 'yellow' },
-              { title: 'Validate Workflow', cmd: 'validate my n8n workflow configuration', icon: '✅', color: 'purple' },
-            ].map((suggestion, i) => (
-              <button
-                key={i}
-                onClick={() => setInputValue(suggestion.cmd)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setInputValue(suggestion.cmd);
-                  }
-                }}
-                className="group relative p-5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-400/30 rounded-2xl text-left transition-all duration-100 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/10 backdrop-blur-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
-                aria-label={`Use suggestion: ${suggestion.title}`}
-              >
-                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-100">{suggestion.icon}</div>
-                <div className="text-sm font-semibold text-white mb-1.5">{suggestion.title}</div>
-                <div className="text-xs text-white/50 font-mono">{suggestion.cmd}</div>
-              </button>
-            ))}
+          <div className="mt-8 w-full max-w-2xl mx-auto animate-slide-up delay-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+              {[
+                { title: 'List n8n Workflows', cmd: 'list all n8n workflows', icon: '📋', color: 'emerald' },
+                { title: 'Create AI Agent', cmd: 'create an AI agent workflow that processes webhooks', icon: '🤖', color: 'blue' },
+                { title: 'Search n8n Nodes', cmd: 'search for n8n nodes that handle HTTP requests', icon: '🔍', color: 'yellow' },
+                { title: 'Validate Workflow', cmd: 'validate my n8n workflow configuration', icon: '✅', color: 'purple' },
+              ].map((suggestion, i) => (
+                <button
+                  key={i}
+                  onClick={() => setInputValue(suggestion.cmd)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setInputValue(suggestion.cmd);
+                    }
+                  }}
+                  className="group relative p-5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-400/30 rounded-2xl text-left transition-all duration-100 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/10 backdrop-blur-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
+                  aria-label={`Use suggestion: ${suggestion.title}`}
+                >
+                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-100">{suggestion.icon}</div>
+                  <div className="text-sm font-semibold text-white mb-1.5">{suggestion.title}</div>
+                  <div className="text-xs text-white/50 font-mono">{suggestion.cmd}</div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -233,14 +271,17 @@ export const MessageList = memo(function MessageList({ messages, streamingConten
       {renderedMessages}
       
       {/* Streaming message */}
-      {streamingContent && (
-        <div className="flex gap-4 items-start justify-start animate-fade-in">
+      {streamingContent && (() => {
+        // Filter out PLAN_STRUCTURE HTML comments from streaming content
+        const filteredStreamingContent = streamingContent.replace(/<!-- PLAN_STRUCTURE:[\s\S]*?-->/g, '').trim();
+        return (
+        <div data-testid="streaming-message" className="flex gap-4 items-start justify-start animate-fade-in">
           <div className="flex-shrink-0 w-11 h-11 bg-gradient-to-br from-emerald-400/20 via-emerald-500/20 to-emerald-600/20 border border-emerald-400/30 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 backdrop-blur-sm animate-pulse" aria-hidden="true">
             <Sparkles className="h-6 w-6 text-emerald-400" aria-hidden="true" />
           </div>
           
           <div className="max-w-2xl px-6 py-4 rounded-3xl bg-white/10 border border-white/20 text-white shadow-xl backdrop-blur-sm">
-            <div className="text-[15px] leading-relaxed whitespace-pre-wrap font-[450]">{streamingContent}</div>
+            <div className="text-[15px] leading-relaxed whitespace-pre-wrap font-medium" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', textRendering: 'optimizeLegibility', fontVariant: 'normal', fontFeatureSettings: 'normal' }}>{filteredStreamingContent}</div>
             <div className="mt-4 flex items-center gap-2 pt-3 border-t border-white/10">
               <div className="flex gap-1.5">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -251,7 +292,8 @@ export const MessageList = memo(function MessageList({ messages, streamingConten
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
       
       <div ref={bottomRef} />
     </div>

@@ -1,77 +1,63 @@
-# Build stage - Build from workspace root to handle monorepo dependencies
-FROM node:20-alpine AS build
+# Multi-stage build for Scorpion
+FROM node:20-alpine AS base
 
-# Install pnpm (use specific version to match lockfile)
-RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-WORKDIR /workspace
+# Set working directory
+WORKDIR /app
 
-# Copy workspace configuration files
+# Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-# Copy workspace tsconfig (required for Scorpion build)
-COPY tsconfig.base.json ./tsconfig.base.json
+COPY apps/scorpion/package.json ./apps/scorpion/
+COPY packages/*/package.json ./packages/*/
 
-# Copy package.json files for workspace dependencies
-# Copy each package directory structure properly
-COPY packages/scorpion-core/package.json ./packages/scorpion-core/
-COPY packages/lightning-core/package.json ./packages/lightning-core/
-COPY packages/agent-factory/package.json ./packages/agent-factory/
-COPY packages/shared-config/package.json ./packages/shared-config/
-
-# Copy Scorpion app files
-COPY apps/scorpion/package.json ./apps/scorpion/package.json
-
-# Install all dependencies (workspace-aware)
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source code for all packages
-COPY packages/scorpion-core ./packages/scorpion-core
-COPY packages/lightning-core ./packages/lightning-core
-COPY packages/agent-factory ./packages/agent-factory
-COPY packages/shared-config ./packages/shared-config
+# Build stage
+FROM base AS build
 
-# Copy Scorpion source (includes all config files)
-COPY apps/scorpion ./apps/scorpion
+# Copy source code
+COPY . .
 
-# Build Scorpion
-WORKDIR /workspace/apps/scorpion
-RUN pnpm build
+# Build the application
+RUN pnpm --filter scorpion build
 
 # Production stage
-FROM node:20-alpine
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV PORT=3003
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Install curl for healthchecks
-RUN apk add --no-cache curl
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/scorpion/package.json ./apps/scorpion/
+COPY packages/*/package.json ./packages/*/
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
 
 # Copy built application
-COPY --from=build /workspace/apps/scorpion/.next ./.next
-COPY --from=build /workspace/apps/scorpion/public ./public
-COPY --from=build /workspace/apps/scorpion/package.json ./package.json
-COPY --from=build /workspace/apps/scorpion/next.config.js ./next.config.js
-COPY --from=build /workspace/apps/scorpion/instrumentation.ts ./instrumentation.ts
-COPY --from=build /workspace/apps/scorpion/middleware.ts ./middleware.ts
-COPY --from=build /workspace/apps/scorpion/tsconfig.json ./tsconfig.json
+COPY --from=build /app/apps/scorpion/.next ./apps/scorpion/.next
+COPY --from=build /app/apps/scorpion/public ./apps/scorpion/public
+COPY --from=build /app/apps/scorpion/next.config.js ./apps/scorpion/
+COPY --from=build /app/packages ./packages
+COPY --from=build /app/apps/scorpion ./apps/scorpion
 
-# Copy workspace dependencies (runtime)
-COPY --from=build /workspace/node_modules/.pnpm ./node_modules/.pnpm
-COPY --from=build /workspace/apps/scorpion/node_modules ./node_modules
-COPY --from=build /workspace/packages ./packages
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3003
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create data directory for Scorpion storage
-RUN mkdir -p /app/data/scorpion && chown -R node:node /app
-
-# Switch to non-root user
-USER node
-
+# Expose port
 EXPOSE 3003
 
-HEALTHCHECK --interval=15s --timeout=3s --retries=10 --start-period=40s \
-  CMD curl -f http://localhost:3003/healthz || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3003/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-CMD ["node", "node_modules/next/dist/bin/next", "start", "-p", "3003"]
-
+# Start the application
+CMD ["pnpm", "--filter", "scorpion", "start"]

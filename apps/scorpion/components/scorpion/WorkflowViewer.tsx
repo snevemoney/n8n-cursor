@@ -6,7 +6,8 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { X, ExternalLink, Play, Pause, Code, Zap, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, ExternalLink, Play, Pause, Code, Zap, CheckCircle2, XCircle, Clock, ArrowDown, ArrowUp, ChevronRight } from 'lucide-react';
 import ReactFlow, {
   Node,
   Edge,
@@ -17,6 +18,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Panel,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -60,12 +62,23 @@ interface NodeExecutionState {
 
 export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
+  const [detailedNode, setDetailedNode] = useState<WorkflowNode | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [fullWorkflow, setFullWorkflow] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [simulationMode, setSimulationMode] = useState(false);
   const [executionStates, setExecutionStates] = useState<Record<string, NodeExecutionState>>({});
   const [isSimulating, setIsSimulating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle mounting and body overflow
+  useEffect(() => {
+    setMounted(true);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   // Fetch full workflow details from n8n when component mounts
   useEffect(() => {
@@ -76,32 +89,39 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
         return;
       }
 
-      // If nodes is just a number (count), fetch full details from n8n
-      if (workflow.n8nId || workflow.id) {
+      // If nodes is just a number (count) or not an array, fetch full details from n8n
+      const workflowId = workflow.n8nId || workflow.id;
+      if (workflowId) {
         setLoading(true);
         try {
-          const workflowId = workflow.n8nId || workflow.id;
+          console.log('🔄 Fetching workflow details for:', workflowId);
           const response = await fetch(`/api/workflows/${workflowId}`);
           if (response.ok) {
             const data = await response.json();
-            if (data.success && data.workflow) {
-              setFullWorkflow(data.workflow);
+            console.log('✅ Workflow fetch response:', { 
+              success: data.success, 
+              hasWorkflow: !!data.data?.workflow,
+              nodesCount: data.data?.workflow?.nodes?.length || 0 
+            });
+            if (data.success && data.data?.workflow) {
+              setFullWorkflow(data.data.workflow);
             } else {
-              // Fallback to original workflow if fetch fails
+              console.warn('⚠️ Workflow fetch returned no data, using original workflow');
               setFullWorkflow(workflow);
             }
           } else {
-            // Fallback to original workflow if fetch fails
+            const errorText = await response.text();
+            console.error('❌ Workflow fetch failed:', response.status, errorText);
             setFullWorkflow(workflow);
           }
         } catch (error) {
-          console.error('Error fetching workflow details:', error);
-          // Fallback to original workflow if fetch fails
+          console.error('❌ Error fetching workflow details:', error);
           setFullWorkflow(workflow);
         } finally {
           setLoading(false);
         }
       } else {
+        console.warn('⚠️ No workflow ID available, using original workflow');
         setFullWorkflow(workflow);
       }
     };
@@ -427,10 +447,10 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
               edge.type = 'smoothstep';
               // Force bottom-to-top routing by updating source/target positions if needed
               if (sourceNode) {
-                sourceNode.sourcePosition = 'bottom';
+                sourceNode.sourcePosition = Position.Bottom;
               }
               if (targetNode) {
-                targetNode.targetPosition = 'top';
+                targetNode.targetPosition = Position.Top;
               }
             }
 
@@ -468,17 +488,102 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
     });
   }, []);
 
+  const onNodeDoubleClick = useCallback((event: React.MouseEvent, node: Node) => {
+    event.stopPropagation();
+    const originalNode = node.data.originalNode;
+    setDetailedNode({
+      id: node.id,
+      name: node.data.nodeName,
+      type: node.data.nodeType,
+      position: [node.position.x, node.position.y],
+      parameters: node.data.parameters,
+    });
+  }, []);
+
   const onPaneClick = useCallback(() => {
     setSelectedNode(null);
   }, []);
+
+  // Get input/output information for a node
+  const getNodeInputOutput = useCallback((nodeId: string, nodeName: string) => {
+    if (!displayWorkflow.connections) return { inputs: [], outputs: [] };
+
+    const connections = displayWorkflow.connections;
+    const inputs: Array<{ node: string; connectionType: string }> = [];
+    const outputs: Array<{ node: string; connectionType: string }> = [];
+
+    // Find nodes that connect TO this node (inputs)
+    Object.entries(connections).forEach(([sourceNodeName, nodeConnections]: [string, any]) => {
+      if (!nodeConnections || typeof nodeConnections !== 'object') return;
+      
+      Object.entries(nodeConnections).forEach(([connectionType, connectionGroups]: [string, any]) => {
+        if (!Array.isArray(connectionGroups)) return;
+        
+        connectionGroups.forEach((connectionGroup: any) => {
+          if (!Array.isArray(connectionGroup)) return;
+          
+          connectionGroup.forEach((conn: any) => {
+            if (conn?.node === nodeName) {
+              inputs.push({ node: sourceNodeName, connectionType });
+            }
+          });
+        });
+      });
+    });
+
+    // Find nodes that this node connects TO (outputs)
+    const nodeConnections = connections[nodeName];
+    if (nodeConnections && typeof nodeConnections === 'object') {
+      Object.entries(nodeConnections).forEach(([connectionType, connectionGroups]: [string, any]) => {
+        if (!Array.isArray(connectionGroups)) return;
+        
+        connectionGroups.forEach((connectionGroup: any) => {
+          if (!Array.isArray(connectionGroup)) return;
+          
+          connectionGroup.forEach((conn: any) => {
+            if (conn?.node) {
+              outputs.push({ node: conn.node, connectionType });
+            }
+          });
+        });
+      });
+    }
+
+    return { inputs, outputs };
+  }, [displayWorkflow]);
 
   const n8nUrl = displayWorkflow.n8nId || workflow.n8nId
     ? `https://n8ncloud.tech/workflow/${displayWorkflow.n8nId || workflow.n8nId}`
     : null;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-[#0a0a0a] border border-white/10 rounded-lg w-full max-w-6xl h-[80vh] flex flex-col">
+  const modalContent = (
+    <div 
+      className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={(e) => {
+        // Close modal when clicking on backdrop
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      style={{ 
+        zIndex: 999999,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        pointerEvents: 'auto'
+      }}
+    >
+      <div 
+        className="bg-[#0a0a0a] border border-white/10 rounded-lg w-full max-w-6xl h-[80vh] flex flex-col relative"
+        onClick={(e) => e.stopPropagation()}
+        style={{ 
+          zIndex: 1000000,
+          pointerEvents: 'auto',
+          position: 'relative'
+        }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -580,6 +685,7 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onNodeClick={onNodeClick}
+                onNodeDoubleClick={onNodeDoubleClick}
                 onPaneClick={onPaneClick}
                 fitView
                 className="bg-[#0a0a0a]"
@@ -662,10 +768,195 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
 
         {/* Footer */}
         <div className="p-4 border-t border-white/10 text-xs text-white/40">
-          💡 This is a read-only visualization. Edit in n8n to make changes.
+          💡 This is a read-only visualization. Edit in n8n to make changes. Double-click a node to see detailed parameters, inputs, and outputs.
         </div>
       </div>
+
+      {/* Detailed Node Modal */}
+      {detailedNode && (
+        <div 
+          className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setDetailedNode(null);
+            }
+          }}
+          style={{ 
+            zIndex: 1000001,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            pointerEvents: 'auto'
+          }}
+        >
+          <div 
+            className="bg-[#0a0a0a] border border-white/20 rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              zIndex: 1000002,
+              pointerEvents: 'auto',
+              position: 'relative'
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <h3 className="text-lg font-semibold">{detailedNode.name}</h3>
+                <span className="text-xs text-white/40 px-2 py-1 bg-white/5 rounded">
+                  {detailedNode.type.replace('n8n-nodes-base.', '').replace('@n8n/n8n-nodes-langchain.', '')}
+                </span>
+              </div>
+              <button
+                onClick={() => setDetailedNode(null)}
+                className="p-2 hover:bg-white/5 rounded transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6 space-y-6">
+              {/* Parameters Section */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Code className="w-4 h-4 text-white/60" />
+                  <h4 className="text-sm font-semibold text-white/90">Parameters</h4>
+                </div>
+                {Object.keys(detailedNode.parameters || {}).length > 0 ? (
+                  <div className="space-y-3">
+                    {Object.entries(detailedNode.parameters).map(([key, value]) => (
+                      <div key={key} className="bg-black/40 p-3 rounded border border-white/10">
+                        <div className="text-xs text-white/50 mb-2 font-medium">{key}</div>
+                        <div className="text-sm text-white/80 font-mono break-all whitespace-pre-wrap">
+                          {typeof value === 'object' && value !== null
+                            ? JSON.stringify(value, null, 2)
+                            : String(value)
+                          }
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-white/40 bg-black/40 p-3 rounded border border-white/10">
+                    No parameters configured
+                  </div>
+                )}
+              </div>
+
+              {/* Inputs Section */}
+              {(() => {
+                const { inputs } = getNodeInputOutput(detailedNode.id, detailedNode.name);
+                return (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <ArrowDown className="w-4 h-4 text-blue-400" />
+                      <h4 className="text-sm font-semibold text-white/90">Inputs</h4>
+                      <span className="text-xs text-white/40">({inputs.length})</span>
+                    </div>
+                    {inputs.length > 0 ? (
+                      <div className="space-y-2">
+                        {inputs.map((input, idx) => (
+                          <div key={idx} className="bg-blue-500/10 border border-blue-500/20 p-3 rounded">
+                            <div className="flex items-center gap-2 mb-1">
+                              <ChevronRight className="w-3 h-3 text-blue-400" />
+                              <span className="text-sm font-medium text-blue-300">{input.node}</span>
+                              <span className="text-xs text-white/40 px-1.5 py-0.5 bg-blue-500/20 rounded">
+                                {input.connectionType === 'main' ? 'main' : input.connectionType.replace('ai_', '')}
+                              </span>
+                            </div>
+                            <div className="text-xs text-white/50 ml-5">
+                              Connection type: <span className="font-mono">{input.connectionType}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-white/40 bg-black/40 p-3 rounded border border-white/10">
+                        No inputs (this is likely a trigger node)
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Outputs Section */}
+              {(() => {
+                const { outputs } = getNodeInputOutput(detailedNode.id, detailedNode.name);
+                return (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <ArrowUp className="w-4 h-4 text-emerald-400" />
+                      <h4 className="text-sm font-semibold text-white/90">Outputs</h4>
+                      <span className="text-xs text-white/40">({outputs.length})</span>
+                    </div>
+                    {outputs.length > 0 ? (
+                      <div className="space-y-2">
+                        {outputs.map((output, idx) => (
+                          <div key={idx} className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded">
+                            <div className="flex items-center gap-2 mb-1">
+                              <ChevronRight className="w-3 h-3 text-emerald-400" />
+                              <span className="text-sm font-medium text-emerald-300">{output.node}</span>
+                              <span className="text-xs text-white/40 px-1.5 py-0.5 bg-emerald-500/20 rounded">
+                                {output.connectionType === 'main' ? 'main' : output.connectionType.replace('ai_', '')}
+                              </span>
+                            </div>
+                            <div className="text-xs text-white/50 ml-5">
+                              Connection type: <span className="font-mono">{output.connectionType}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-white/40 bg-black/40 p-3 rounded border border-white/10">
+                        No outputs (this node doesn't connect to other nodes)
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Node Metadata */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Code className="w-4 h-4 text-white/60" />
+                  <h4 className="text-sm font-semibold text-white/90">Node Information</h4>
+                </div>
+                <div className="bg-black/40 p-3 rounded border border-white/10 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-xs text-white/50">Node ID:</span>
+                    <span className="text-xs text-white/80 font-mono">{detailedNode.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-white/50">Type:</span>
+                    <span className="text-xs text-white/80 font-mono">{detailedNode.type}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-white/50">Position:</span>
+                    <span className="text-xs text-white/80 font-mono">
+                      ({detailedNode.position?.[0] || 0}, {detailedNode.position?.[1] || 0})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-white/10 text-xs text-white/40">
+              💡 Double-click any node to view its details. This view shows parameters, inputs, and outputs.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+
+  // Render via portal to escape parent stacking context
+  if (!mounted || typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(modalContent, document.body);
 }
 

@@ -1,0 +1,131 @@
+# SCORPION PRIMER – COPY-PASTE VERSION
+
+**This is the exact text to paste into a new AI chat. Save this for quick access.**
+
+---
+
+Copy everything below (after this line) into your new AI chat. No modifications needed.
+
+---
+
+```
+SCORPION PRIMER – CONTEXT FOR THIS AI
+
+You are helping me work on Scorpion, my personal AI operating system and agent orchestration platform.
+
+HIGH-LEVEL VISION
+  • Scorpion is my central AI brain (Next.js local app + KVM2 remote services)
+  • It orchestrates: Agents, tools, n8n workflows, RAG (Supabase/Pinecone), MCP tools
+  • Long-term: Powers SaaS products (AgentPilot, BitBrain, LightningFlow), but focus now is Scorpion itself
+
+REPO / TECH STACK
+  • Monorepo: Turborepo + pnpm
+  • Main app: apps/scorpion (Next.js App Router, TypeScript + React)
+  • Remote: n8n on KVM2 (workflows, LLMs, automation)
+  • Packages: scorpion-core/, agent-factory/, shared-types/, shared-helpers/
+
+CORE SCORPION CONCEPTS – THE PIPELINE
+  The heart of Scorpion is Plan → Council → Tools → Result:
+  
+  1. PLANNER: Takes user request, breaks into steps
+  2. COUNCIL: Multiple expert agents discuss/critique the plan
+  3. TOOLS: Execute tools, n8n workflows, RAG queries
+  4. KNOWLEDGE: Retrieve context from RAG (vector store)
+  5. RESULT: LLM integrates all results into summary
+  
+  Flow: Request → Plan breakdown → Council votes → Tool execution → Knowledge enrichment → Final summary
+
+WHEN YOU SEE FILE PATHS
+  • apps/scorpion/app/api/chat/stream/route.ts — Main chat endpoint
+  • apps/scorpion/lib/orchestrator/run-pipeline.ts — Core pipeline (Plan→Council→Tools→Result)
+  • apps/scorpion/lib/tools/*.ts — Individual tool implementations
+  • apps/scorpion/lib/agents/*.ts — Agent definitions (Planner, Council, Executor)
+  • apps/scorpion/lib/knowledge/*.ts — RAG, vector store, knowledge retrieval
+  • apps/scorpion/lib/ai-ml/*.ts — LLM integrations (OpenAI, Ollama, Gemini, etc.)
+  • apps/scorpion/components/* — React UI components
+  • packages/* — Shared types, helpers, utils
+
+ARCHITECTURAL GOALS
+  ✓ Keep Scorpion modular (avoid monolithic files)
+  ✓ Prefer lib/, packages/, utils/ helpers over inline logic
+  ✓ Respect existing flows (don't remove MCP/n8n/RAG hooks)
+  ✓ Move toward: Clean event-driven architecture
+  ✓ TypeScript-first, strong typing
+
+HOW TO WORK WITH ME
+  1. Ask for or find the relevant file(s)
+  2. Summarize what it currently does
+  3. Identify improvements (structure, typing, responsibility split)
+  4. Keep behavior consistent (don't change business logic silently)
+  5. Show full functions/components you modify (not tiny line patches)
+  6. Explain important invariants (e.g., "Plan always has X shape")
+
+YOUR JOB
+  Help evolve Scorpion into a clean, modular, multi-agent AI OS that orchestrates tools/workflows (n8n, MCP, RAG) without breaking current structure.
+
+I will now send specific files, errors, or tasks.
+```
+
+---
+
+## How to Use This File
+
+1. **Copy** the text between the triple backticks (above)
+2. **Open** a new chat with any AI (Google Antigravity, Gemini, Claude, etc.)
+3. **Paste** the entire text as your first message
+4. **Immediately follow** with: "Here's the file I'm working on:" + code snippet
+5. **Done!** The AI now understands Scorpion
+
+---
+
+## What to Paste Next (Examples)
+
+After pasting the primer, follow with one of these patterns:
+
+### Pattern 1: Share a file you're working on
+```
+Here's the file I'm working on:
+
+apps/scorpion/lib/orchestrator/run-pipeline.ts
+[paste file contents]
+
+I need to [describe what you want to do]
+```
+
+### Pattern 2: Share an error you're seeing
+```
+I'm getting this error:
+
+[error message/stack trace]
+
+In this file:
+
+apps/scorpion/lib/orchestrator/run-pipeline.ts
+[paste relevant file section]
+
+What's wrong and how do I fix it?
+```
+
+### Pattern 3: Ask for a feature
+```
+I want to add a new Council agent called "Pragmatist" that critiques feasibility.
+
+Can you help me implement this? Here's the current council file:
+
+apps/scorpion/lib/agents/council-voices.ts
+[paste file]
+```
+
+---
+
+## Reference for Later
+
+For more detailed info, reference:
+- **Master Primer**: `docs/SCORPION_PRIMER.md` (3000+ words, architecture deep dive)
+- **Debugging**: `docs/SCORPION_DEBUGGING_PRIMER.md` (troubleshooting guide)
+- **Architecture**: `docs/SCORPION_ARCHITECTS_PRIMER.md` (design patterns, refactoring)
+- **Quick Ref**: `docs/SCORPION_QUICK_REFERENCE.md` (file paths, commands, types)
+
+---
+
+**Last Updated**: 2025-01-27

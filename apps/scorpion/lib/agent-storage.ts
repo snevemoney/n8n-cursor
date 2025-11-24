@@ -130,3 +130,20 @@ export async function removeAgent(id: string): Promise<void> {
   await saveAgents();
 }
 
+/**
+ * Update agent status
+ */
+export async function updateAgentStatus(id: string, status: 'active' | 'standby' | 'offline'): Promise<StoredAgent | null> {
+  await initializeAgentStorage();
+  
+  if (!agentStorage) return null;
+  
+  const agent = agentStorage.agents.find(a => a.id === id);
+  if (!agent) return null;
+  
+  agent.status = status;
+  await saveAgents();
+  
+  return agent;
+}
+

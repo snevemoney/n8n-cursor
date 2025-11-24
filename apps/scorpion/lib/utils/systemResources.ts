@@ -11,13 +11,13 @@ export function detectLightweightMode(): boolean {
     return process.env.CHAT_LIGHTWEIGHT_MODE === 'true';
   }
   
-  // Auto-detect: Enable lightweight mode for systems with <= 8GB RAM
+  // Auto-detect: Enable lightweight mode for systems with <= 12GB RAM (more aggressive)
   const totalRAMBytes = totalmem();
   const totalRAMGB = totalRAMBytes / (1024 * 1024 * 1024);
-  const EIGHT_GB = 8;
+  const LIGHTWEIGHT_THRESHOLD = 12; // Increased threshold for better resource management
   
-  // Enable lightweight mode if system has 8GB or less RAM
-  const shouldUseLightweight = totalRAMGB <= EIGHT_GB;
+  // Enable lightweight mode if system has <= 12GB RAM (more systems benefit)
+  const shouldUseLightweight = totalRAMGB <= LIGHTWEIGHT_THRESHOLD;
   
   if (shouldUseLightweight) {
     console.log(`[System] Auto-detected ${totalRAMGB.toFixed(1)}GB RAM, enabling lightweight mode`);
@@ -43,14 +43,14 @@ export function getLightweightConfig() {
     };
   }
   
-  // Aggressive optimizations for 8GB systems
+  // Aggressive optimizations for lightweight systems
   return {
-    ragContextChunks: 3, // Reduced from 5
-    batchSize: 2, // Reduced from 5
-    concurrency: 1, // Reduced from 3
-    cacheTTL: 10 * 60 * 1000, // 10 minutes (reduced from 30)
+    ragContextChunks: 2, // Further reduced for lower memory usage
+    batchSize: 1, // Sequential processing to reduce memory spikes
+    concurrency: 1, // No parallel operations
+    cacheTTL: 60 * 60 * 1000, // 60 minutes (increased cache to reduce model calls)
     enablePrefetch: false, // Disabled for memory savings
-    fileWatcherDebounce: 5000, // Increased debounce to reduce CPU
+    fileWatcherDebounce: 10000, // Increased debounce to reduce CPU usage
   };
 }
 

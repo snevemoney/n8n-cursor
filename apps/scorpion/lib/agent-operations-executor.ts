@@ -11,7 +11,9 @@ import {
   OperationResult 
 } from './agent-operations';
 import { getNotificationManager } from './notification-manager';
-import { emitEvent } from './telemetry/emitter';
+import { emitEvent as emitTelemetryEvent } from './telemetry/emitter';
+import { emitEvent } from './events/event-bus';
+import { randomUUID } from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
 import { writeFileWithFallback, validateAndRefreshStorage, isStorageError } from './storage/storage-error-handler';
@@ -42,6 +44,7 @@ class AgentOperationsExecutor {
   private operationsFile: string;
   private autoSaveInterval: NodeJS.Timeout | null = null;
   private initialized: boolean = false;
+  private fallbackWarningLogged: boolean = false; // Track if we've already logged fallback warning
 
   constructor() {
     // Will be initialized with SSD-aware directory
@@ -119,18 +122,15 @@ class AgentOperationsExecutor {
    */
   private async save(): Promise<void> {
     try {
-      // Validate storage before saving
-      const validation = await validateAndRefreshStorage();
-      if (!validation.isValid) {
-        console.warn('⚠️ Storage validation failed, operations may not be persisted');
-      }
+      // FRONTIER-LEVEL: Use cached storage config instead of re-validating
+      // Storage is initialized once at startup, no need to re-detect on every save
+      const { getStorageConfig } = await import('./storage/storage-config');
+      const config = await getStorageConfig();
       
-      // Update paths if storage was refreshed
-      if (validation.wasRefreshed) {
-        const { getDataDir } = await import('./storage/storage-config');
-        this.dataDir = await getDataDir();
+      // Only update paths if they're not already set correctly
+      if (this.dataDir !== config.dataDir) {
+        this.dataDir = config.dataDir;
         this.operationsFile = path.join(this.dataDir, 'operations-executions.json');
-        console.log(`🔄 Storage refreshed, using new path: ${this.dataDir}`);
       }
       
       // Only save completed/failed executions (not running ones)
@@ -160,8 +160,11 @@ class AgentOperationsExecutor {
         if (result.usedFallback) {
           console.log(`   Fallback path used: ${result.path}`);
         }
-      } else if (result.usedFallback) {
-        console.warn(`⚠️ Operations saved to fallback location: ${result.path}`);
+      } else if (result.usedFallback && !this.fallbackWarningLogged) {
+        // Only log fallback warning once per session to reduce noise
+        console.warn(`⚠️ Storage fallback active: Using fallback location: ${result.path}`);
+        console.warn(`   (This is normal if primary storage is unavailable. Future saves will use this location silently.)`);
+        this.fallbackWarningLogged = true;
       }
     } catch (error: any) {
       console.error('Failed to save operations:', error);
@@ -223,8 +226,24 @@ class AgentOperationsExecutor {
     console.log(startLog);
     execution.executionLogs?.push(startLog);
     
+    // Emit agent.run.started event
+    await emitEvent({
+      id: randomUUID(),
+      type: 'agent.run.started',
+      severity: 'info',
+      timestamp: new Date().toISOString(),
+      source: 'agent-operations-executor',
+      environment: 'dev',
+      data: {
+        agentId,
+        agentName: operation.name,
+        operationId,
+        input: {},
+      },
+    });
+    
     // Emit telemetry event - use system.log since agent.operation.started doesn't exist in schema
-    emitEvent({
+    emitTelemetryEvent({
       type: 'system.log',
       source: 'agent-operations-executor',
       level: 'info',
@@ -256,6 +275,40 @@ class AgentOperationsExecutor {
       execution.result = result;
       execution.status = result.success ? 'completed' : 'failed';
       
+      // Emit agent.run.completed or agent.run.failed event
+      if (result.success) {
+        await emitEvent({
+          id: randomUUID(),
+          type: 'agent.run.completed',
+          severity: 'info',
+          timestamp: new Date().toISOString(),
+          source: 'agent-operations-executor',
+          environment: 'dev',
+          data: {
+            agentId,
+            agentName: operation.name,
+            duration: actualDuration,
+            success: true,
+            output: result.data || {},
+          },
+        });
+      } else {
+        await emitEvent({
+          id: randomUUID(),
+          type: 'agent.run.failed',
+          severity: 'error',
+          timestamp: new Date().toISOString(),
+          source: 'agent-operations-executor',
+          environment: 'dev',
+          data: {
+            agentId,
+            agentName: operation.name,
+            error: result.message || 'Operation failed',
+            duration: actualDuration,
+          },
+        });
+      }
+      
       // Log execution result
       const resultLog = `[${new Date().toISOString()}] ${result.success ? '✅' : '❌'} Operation ${operation.name} ${result.success ? 'completed' : 'failed'}: ${result.message} (Duration: ${actualDuration}ms)`;
       console.log(resultLog);
@@ -282,9 +335,9 @@ class AgentOperationsExecutor {
       // Save to disk after completion
       await this.save();
       
-      // Emit telemetry event for completion
+      // Emit telemetry event for completion (legacy telemetry system)
       if (result.success) {
-        emitEvent({
+        emitTelemetryEvent({
           type: 'agent.operation.completed',
           source: 'agent-operations-executor',
           agentId,
@@ -294,7 +347,7 @@ class AgentOperationsExecutor {
           severity: 'info',
         });
       } else {
-        emitEvent({
+        emitTelemetryEvent({
           type: 'agent.operation.failed',
           source: 'agent-operations-executor',
           agentId,
@@ -340,13 +393,29 @@ class AgentOperationsExecutor {
         message: error.message || 'Operation failed'
       };
       
+      // Emit agent.run.failed event for exception
+      await emitEvent({
+        id: randomUUID(),
+        type: 'agent.run.failed',
+        severity: 'error',
+        timestamp: new Date().toISOString(),
+        source: 'agent-operations-executor',
+        environment: 'dev',
+        data: {
+          agentId,
+          agentName: operation.name,
+          error: error.message || 'Operation failed with exception',
+          duration: actualDuration,
+        },
+      });
+      
       // Log error
       const errorLog = `[${new Date().toISOString()}] ❌ Operation ${operation.name} threw error: ${error.message || 'Unknown error'}`;
       console.error(errorLog);
       execution.executionLogs?.push(errorLog);
       
-      // Emit telemetry event for failure
-      emitEvent({
+      // Emit telemetry event for failure (legacy telemetry system)
+      emitTelemetryEvent({
         type: 'agent.operation.failed',
         source: 'agent-operations-executor',
         agentId,
@@ -357,8 +426,8 @@ class AgentOperationsExecutor {
         severity: 'error',
       });
       
-      // Emit log event for the error
-      emitEvent({
+      // Emit log event for the error (legacy telemetry system)
+      emitTelemetryEvent({
         type: 'system.log',
         source: `agent-${agentId}`,
         level: 'error',

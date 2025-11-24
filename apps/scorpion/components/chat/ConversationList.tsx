@@ -9,6 +9,7 @@ import { MessageSquare, Plus, Loader2, Trash2, X } from 'lucide-react';
 import type { Conversation } from '@/lib/chat/types';
 import { useChatStore } from '@/lib/chat/chatStore';
 import { Modal, Button } from '@/components/scorpion';
+import { safeFocus, safeQuerySelector, safeQuerySelectorAll } from '@/lib/utils/dom-safe';
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -53,24 +54,32 @@ export const ConversationList = memo(function ConversationList({
   // Focus trap for modal
   useEffect(() => {
     if (confirmingDelete && modalRef.current) {
-      // Store the previously focused element
-      previousFocusRef.current = document.activeElement as HTMLElement;
+      // Store the previously focused element (safely)
+      try {
+        if (document.activeElement && document.activeElement instanceof HTMLElement) {
+          previousFocusRef.current = document.activeElement;
+        }
+      } catch (error) {
+        console.debug('[ConversationList] Could not store previous focus:', error);
+      }
       
-      // Focus the modal
-      const firstFocusable = modalRef.current.querySelector(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      ) as HTMLElement;
-      firstFocusable?.focus();
+      // Focus the modal (safely)
+      const firstFocusable = safeQuerySelector(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        modalRef.current || undefined
+      );
+      safeFocus(firstFocusable);
       
       // Handle Tab key to trap focus
       const handleTab = (e: KeyboardEvent) => {
         if (e.key !== 'Tab') return;
         
-        const focusableElements = modalRef.current?.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        ) as NodeListOf<HTMLElement>;
+        const focusableElements = safeQuerySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          modalRef.current || undefined
+        );
         
-        if (!focusableElements || focusableElements.length === 0) return;
+        if (focusableElements.length === 0) return;
         
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
@@ -79,13 +88,13 @@ export const ConversationList = memo(function ConversationList({
           // Shift + Tab
           if (document.activeElement === firstElement) {
             e.preventDefault();
-            lastElement.focus();
+            safeFocus(lastElement);
           }
         } else {
           // Tab
           if (document.activeElement === lastElement) {
             e.preventDefault();
-            firstElement.focus();
+            safeFocus(firstElement);
           }
         }
       };
@@ -103,8 +112,8 @@ export const ConversationList = memo(function ConversationList({
       return () => {
         document.removeEventListener('keydown', handleTab);
         document.removeEventListener('keydown', handleEscape);
-        // Restore focus to previously focused element
-        previousFocusRef.current?.focus();
+        // Restore focus to previously focused element (safely)
+        safeFocus(previousFocusRef.current);
       };
     }
   }, [confirmingDelete]);
@@ -147,54 +156,56 @@ export const ConversationList = memo(function ConversationList({
             return (
               <div
                 key={conv.id}
-                onClick={() => onSelect(conv.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelect(conv.id);
-                  }
-                }}
-                className={`w-full group flex items-center gap-3 p-3 rounded-2xl text-left transition-all duration-100 hover:scale-[1.02] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2 ${
+                className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all duration-100 ${
                   isActive
                     ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-400/30 shadow-lg shadow-emerald-500/10'
                     : 'hover:bg-white/5 border border-transparent hover:border-white/10'
                 } backdrop-blur-sm animate-fade-in-up`}
                 style={{ animationDelay: `${index * 30}ms` }}
               >
-                <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all relative ${
-                  isActive
-                    ? 'bg-emerald-500/20 border border-emerald-400/30'
-                    : 'bg-white/5 border border-white/10 group-hover:bg-white/10'
-                }`}>
-                  {isStreaming ? (
-                    <Loader2 className={`h-5 w-5 animate-spin ${
-                      isActive ? 'text-emerald-400' : 'text-white/60'
-                    }`} aria-label="Streaming conversation" aria-hidden="true" />
-                  ) : (
-                    <MessageSquare className={`h-5 w-5 ${
-                      isActive ? 'text-emerald-400' : 'text-white/40'
-                    }`} aria-hidden="true" />
-                  )}
-                  {isStreaming && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#0c1014] animate-pulse shadow-lg shadow-emerald-400/50" />
-                  )}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className={`text-sm font-medium truncate flex items-center gap-2 ${
-                    isActive ? 'text-white' : 'text-white/80'
+                <button
+                  onClick={() => onSelect(conv.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelect(conv.id);
+                    }
+                  }}
+                  className="flex-1 flex items-center gap-3 text-left cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
+                >
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all relative ${
+                    isActive
+                      ? 'bg-emerald-500/20 border border-emerald-400/30'
+                      : 'bg-white/5 border border-white/10 group-hover:bg-white/10'
                   }`}>
-                    {conv.title}
-                    {isStreaming && !isActive && (
-                      <span className="text-xs text-emerald-400 font-normal">(streaming...)</span>
+                    {isStreaming ? (
+                      <Loader2 className={`h-5 w-5 animate-spin ${
+                        isActive ? 'text-emerald-400' : 'text-white/60'
+                      }`} aria-label="Streaming conversation" aria-hidden="true" />
+                    ) : (
+                      <MessageSquare className={`h-5 w-5 ${
+                        isActive ? 'text-emerald-400' : 'text-white/40'
+                      }`} aria-hidden="true" />
+                    )}
+                    {isStreaming && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#0c1014] animate-pulse shadow-lg shadow-emerald-400/50" />
                     )}
                   </div>
-                  <div className="text-xs text-white/40 mt-0.5">
-                    {new Date(conv.updatedAt).toLocaleDateString()}
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm font-medium truncate flex items-center gap-2 ${
+                      isActive ? 'text-white' : 'text-white/80'
+                    }`}>
+                      {conv.title}
+                      {isStreaming && !isActive && (
+                        <span className="text-xs text-emerald-400 font-normal">(streaming...)</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-white/40 mt-0.5">
+                      {new Date(conv.updatedAt).toLocaleDateString()}
+                    </div>
                   </div>
-                </div>
+                </button>
                 
                 {onDelete && (
                   <button

@@ -130,11 +130,13 @@ export const PlanStepSchema = z.object({
   args: z.record(z.any()).optional(),
   dependsOn: z.array(z.string()).optional(),
   success: z.string().optional(),
+  status: z.enum(['pending', 'running', 'completed', 'failed']).optional(), // Execution status
 });
 
 export const PlanSchema = z.object({
   objective: z.string(),
   assumptions: z.array(z.string()),
+  reasoning: z.string().optional(), // Deep reasoning explanation (Claude Sonnet 4.5 level)
   plan: z.array(PlanStepSchema),
   done_when: z.array(z.string()),
   fallbacks: z.array(z.object({
@@ -144,8 +146,19 @@ export const PlanSchema = z.object({
   needsCouncil: z.boolean().optional(), // Whether this plan needs council review
   questionType: z.enum(['casual', 'technical', 'conversational']).optional(), // Type of question for adaptive output
   councilRationale: z.string().optional(), // Why council is/isn't needed
+  intent: z.enum(['small_talk', 'general_question', 'project_help', 'system_debug', 'other']).optional(), // Intent classification
 });
 
 export type Plan = z.infer<typeof PlanSchema>;
 export type PlanStep = z.infer<typeof PlanStepSchema>;
+
+// Intent classification
+export type ScorpionIntent =
+  | 'identity'         // "What is Scorpion?", "Who are you?" - identity questions
+  | 'small_talk'       // hi, hello, thanks, how are you, etc.
+  | 'general_question' // generic knowledge, explanation, etc.
+  | 'project_help'     // about Scorpion, the repo, code, workflows
+  | 'system_debug'     // "why is Scorpion doing X?", "fix the agent itself"
+  | 'web_research'     // "research bitcoin news", "latest crypto updates" - web research queries
+  | 'other';
 

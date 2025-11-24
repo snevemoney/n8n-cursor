@@ -36,7 +36,8 @@
     "consistency:check": "node scripts/consistency-check.js",
     "consistency:validate": "node scripts/consistency-validate.js",
     "backup": "bash scripts/backup-scorpion.sh",
-    "restore": "bash scripts/restore-scorpion.sh"
+    "restore": "bash scripts/restore-scorpion.sh",
+    "diag:tools": "tsx apps/scorpion/scripts/run-tool-matrix.ts"
   },
   "keywords": [
     "lightning",

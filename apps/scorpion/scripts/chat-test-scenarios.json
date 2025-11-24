@@ -1,0 +1,55 @@
+[
+  {
+    "id": "simple_hi",
+    "prompt": "hi",
+    "tags": ["small_talk"],
+    "expectedIntent": "small_talk"
+  },
+  {
+    "id": "scorpion_arch",
+    "prompt": "Explain the architecture",
+    "tags": ["project_help"],
+    "expectedIntent": "project_help",
+    "expectedTools": ["code.readFile"]
+  },
+  {
+    "id": "scorpion_what",
+    "prompt": "What is Scorpion?",
+    "tags": ["project_help"],
+    "expectedIntent": "project_help",
+    "expectedTools": ["code.readFile"]
+  },
+  {
+    "id": "btc_news",
+    "prompt": "Research Bitcoin news",
+    "tags": ["research"],
+    "expectedIntent": "project_help",
+    "expectedTools": ["research.run"]
+  },
+  {
+    "id": "health",
+    "prompt": "Check system health",
+    "tags": ["operational"],
+    "expectedIntent": "system_debug",
+    "expectedTools": ["system.health"]
+  },
+  {
+    "id": "recent_files",
+    "prompt": "Show me recent files",
+    "tags": ["operational"],
+    "expectedIntent": "project_help",
+    "expectedTools": ["files.recent"]
+  }
+]
+
+
+
+
+
+
+
+
+
+
+
+

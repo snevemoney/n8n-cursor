@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 interface Agent {
   id: string;
   angle: number;
@@ -17,6 +19,16 @@ interface RadarProps {
 
 export function Radar({ agents, size = 420 }: RadarProps) {
   const center = size / 2;
+  const [animationFrame, setAnimationFrame] = useState(0);
+  
+  // Animate active agents with smooth movement
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimationFrame(prev => prev + 1);
+    }, 50); // Update every 50ms for smooth animation
+    
+    return () => clearInterval(interval);
+  }, []);
   
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -55,13 +67,22 @@ export function Radar({ agents, size = 420 }: RadarProps) {
       
       {/* Agents */}
       {agents.map((agent) => {
-        const rad = (agent.angle * Math.PI) / 180;
-        // When active, move closer to center and add slight rotation
         const baseRadius = agent.dist * 2;
-        const activeRadius = agent.isActive ? baseRadius * 0.7 : baseRadius;
-        const activeAngle = agent.isActive ? agent.angle + 5 : agent.angle; // Slight rotation when active
-        const activeRad = (activeAngle * Math.PI) / 180;
         
+        // Enhanced animation for active agents
+        let activeRadius = baseRadius;
+        let activeAngle = agent.angle;
+        let orbitOffset = 0;
+        
+        if (agent.isActive) {
+          // Move closer to center (70% of original distance)
+          activeRadius = baseRadius * 0.7;
+          // Add orbital motion - slow rotation around center
+          orbitOffset = Math.sin(animationFrame * 0.1) * 8; // 8 degree oscillation
+          activeAngle = agent.angle + orbitOffset;
+        }
+        
+        const activeRad = (activeAngle * Math.PI) / 180;
         const x = center + Math.cos(activeRad) * activeRadius;
         const y = center + Math.sin(activeRad) * activeRadius;
         const color = agent.status === 'ok' ? '#13c6a8' : agent.status === 'warn' ? '#f4c95d' : '#ff5f5f';
@@ -69,27 +90,34 @@ export function Radar({ agents, size = 420 }: RadarProps) {
         return (
           <div 
             key={agent.id} 
-            className="absolute transition-all duration-150 ease-in-out" 
+            className="absolute transition-all duration-300 ease-out" 
             style={{ 
               left: x - 6, 
               top: y - 6,
-              transform: agent.isActive ? 'scale(1.2)' : 'scale(1)'
+              transform: agent.isActive ? 'scale(1.3)' : 'scale(1)',
+              transition: agent.isActive ? 'transform 0.3s ease-out' : 'all 0.3s ease-out'
             }}
           >
-            {/* Agent marker with pulse animation when active */}
+            {/* Agent marker with enhanced pulse animation when active */}
             <div 
-              className={`w-3 h-3 rotate-45 transition-all duration-100 ${
+              className={`w-3 h-3 rotate-45 ${
                 agent.isActive ? 'animate-pulse' : ''
               }`}
               style={{ 
                 background: color,
-                boxShadow: agent.isActive ? `0 0 12px ${color}, 0 0 24px ${color}40` : 'none'
+                boxShadow: agent.isActive 
+                  ? `0 0 16px ${color}, 0 0 32px ${color}60, 0 0 48px ${color}40` 
+                  : 'none',
+                transition: 'all 0.3s ease-out'
               }}
             ></div>
             
-            {/* Active operation indicator */}
+            {/* Active operation indicator with enhanced animation */}
             {agent.isActive && (
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+              <>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full"></div>
+              </>
             )}
             
             <div className="text-[9px] text-white/60 -ml-2 mt-1 sc-mono">{agent.id}</div>
@@ -100,7 +128,7 @@ export function Radar({ agents, size = 420 }: RadarProps) {
                 {agent.currentOperation}
               </div>
             ) : agent.currentOperation === 'Completed' ? (
-              <div className="text-[7px] text-emerald-400 -ml-2 mt-0 sc-mono truncate w-16">
+              <div className="text-[7px] text-emerald-400 -ml-2 mt-0 sc-mono truncate w-16 animate-pulse">
                 ✓ Completed
               </div>
             ) : (

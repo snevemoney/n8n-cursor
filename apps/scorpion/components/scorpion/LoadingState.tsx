@@ -20,7 +20,7 @@ export function LoadingState({
 }: LoadingStateProps) {
   if (variant === 'skeleton') {
     const content = (
-      <div className={`space-y-3 ${className}`}>
+      <div className={`space-y-3 ${className}`} suppressHydrationWarning>
         {Array.from({ length: skeletonLines }).map((_, i) => (
           <div
             key={i}
@@ -39,7 +39,7 @@ export function LoadingState({
 
     if (fullPage) {
       return (
-        <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
+        <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]" suppressHydrationWarning>
           <div className="max-w-md w-full p-6">{content}</div>
         </div>
       );
@@ -50,7 +50,7 @@ export function LoadingState({
 
   // Spinner variant
   const content = (
-    <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
+    <div className={`flex flex-col items-center justify-center gap-3 ${className}`} suppressHydrationWarning>
       <Loader2 className="h-8 w-8 text-emerald-400 animate-spin" />
       {text && (
         <div className="text-sm text-white/60 sc-mono">{text}</div>
@@ -60,14 +60,14 @@ export function LoadingState({
 
   if (fullPage) {
     return (
-      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
+      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]" suppressHydrationWarning>
         {content}
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center py-8">
+    <div className="flex items-center justify-center py-8" suppressHydrationWarning>
       {content}
     </div>
   );

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Panel, DataTable, LogRow, Metric, Tabs, TabsList, TabsTrigger, TabsContent, LoadingState, ErrorState, EmptyState, useToast, PageLoadingBar } from '@/components/scorpion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Play, Pause, Edit, Trash2, Copy, Search, Plus, MoreVertical, Users } from 'lucide-react';
+import { Play, Pause, Edit, Trash2, Copy, Search, Plus, Users } from 'lucide-react';
 import { usePageData } from '@/hooks/usePageData';
 
 interface AgentSummary {
@@ -38,7 +38,7 @@ export default function AgentsPage() {
     fetchFn: async () => {
       const response = await fetch('/api/agents');
       if (!response.ok) throw new Error(`Failed: ${response.statusText}`);
-        const result = await response.json();
+      const result = await response.json();
       return result.success && result.data ? result.data : result;
     },
     cacheKey: 'scorpion-agents-cache',
@@ -46,8 +46,34 @@ export default function AgentsPage() {
     retry: 1,
   });
 
-  const agents = agentsData?.agents || [];
-  const summary = agentsData?.summary || { total: 0, active: 0, standby: 0, offline: 0 };
+  // Extract agents and summary from API response
+  // API returns: { success: true, data: { agents: [...], summary: {...} } }
+  // fetchFn extracts: result.data, so agentsData = { agents: [...], summary: {...} }
+  const agents: AgentSummary[] = useMemo(() => {
+    return (agentsData?.agents || []) as AgentSummary[];
+  }, [agentsData?.agents]);
+
+  // Calculate summary from agents array as source of truth
+  // This ensures the UI always reflects the actual agents array, even if API summary is missing
+  const summary = useMemo(() => {
+    // First, try to use API summary if available and valid
+    if (agentsData?.summary && typeof agentsData.summary === 'object' && 'total' in agentsData.summary) {
+      const apiSummary = agentsData.summary as { total: number; active: number; standby: number; offline: number };
+      if (apiSummary.total > 0) {
+        return apiSummary;
+      }
+    }
+    // Otherwise, calculate from agents array
+    if (agents.length > 0) {
+      return {
+        total: agents.length,
+        active: agents.filter(a => a.status === 'active').length,
+        standby: agents.filter(a => a.status === 'standby').length,
+        offline: agents.filter(a => a.status === 'offline').length,
+      };
+    }
+    return { total: 0, active: 0, standby: 0, offline: 0 };
+  }, [agents, agentsData?.summary]);
 
   const loadAgentLogs = useCallback(async () => {
     try {
@@ -75,7 +101,7 @@ export default function AgentsPage() {
   useEffect(() => {
     // Load agent logs on mount
     loadAgentLogs();
-    
+
     // Refresh logs every 30 seconds (less frequent to avoid unnecessary requests)
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
@@ -117,7 +143,7 @@ export default function AgentsPage() {
       showToast('warning', `Click delete again to confirm deletion of "${codename}"`);
       return;
     }
-    
+
     setActionLoading(prev => ({ ...prev, [agentId]: true }));
     setDeleteConfirm(null);
     try {
@@ -161,10 +187,10 @@ export default function AgentsPage() {
 
   const filteredAgents = useMemo(() => {
     if (!agents.length) return [];
-    
+
     // Pre-compute lowercase search query once
     const query = searchQuery ? searchQuery.toLowerCase() : '';
-    
+
     return agents.filter(agent => {
       // Status filter
       if (statusFilter !== 'all' && agent.status !== statusFilter) {
@@ -251,15 +277,15 @@ export default function AgentsPage() {
 
   // Memoize status-filtered arrays to avoid repeated filtering on every render
   // Must be declared BEFORE table data that uses them
-  const activeAgents = useMemo(() => 
+  const activeAgents = useMemo(() =>
     filteredAgents.filter(a => a.status === 'active'),
     [filteredAgents]
   );
-  const standbyAgents = useMemo(() => 
+  const standbyAgents = useMemo(() =>
     filteredAgents.filter(a => a.status === 'standby'),
     [filteredAgents]
   );
-  const offlineAgents = useMemo(() => 
+  const offlineAgents = useMemo(() =>
     filteredAgents.filter(a => a.status === 'offline'),
     [filteredAgents]
   );
@@ -286,234 +312,234 @@ export default function AgentsPage() {
   return (
     <>
       <PageLoadingBar loading={dataLoading && agents.length === 0} />
-    <div className="h-full flex flex-col gap-4 p-4 overflow-y-auto">
-      {/* Header with Actions */}
-      <div className="flex items-center justify-between">
-        <h1 className="sc-title text-2xl">Agent Fleet</h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => router.push('/agents/create')}
-            className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/30 hover:bg-cyan-500/30 transition-colors text-sm"
-            title="Create new agent"
-          >
-            <Plus className="w-4 h-4" />
-            Create Agent
-          </button>
+      <div className="h-full flex flex-col gap-4 p-4 overflow-y-auto" suppressHydrationWarning>
+        {/* Header with Actions */}
+        <div className="flex items-center justify-between">
+          <h1 className="sc-title text-2xl">Agent Fleet</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push('/agents/create')}
+              className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded border border-cyan-500/30 hover:bg-cyan-500/30 transition-colors text-sm"
+              title="Create new agent"
+            >
+              <Plus className="w-4 h-4" />
+              Create Agent
+            </button>
+          </div>
         </div>
-      </div>
 
-      {dataError && (
-        <ErrorState
-          error={dataError}
-          onRetry={refetch}
-          title="Error loading agents"
-          fullPage={false}
-        />
-      )}
+        {dataError && (
+          <ErrorState
+            error={dataError}
+            onRetry={refetch}
+            title="Error loading agents"
+            fullPage={false}
+          />
+        )}
 
-      {/* Agent Summary Stats */}
-      <Panel title="Agent Fleet Overview">
-        <div className="grid grid-cols-4 gap-4">
-          <Metric label="Total Agents" value={(summary?.total ?? 0).toString()} />
-          <Metric label="Active" value={(summary?.active ?? 0).toString()} valueColor="text-emerald-400" />
-          <Metric label="Standby" value={(summary?.standby ?? 0).toString()} valueColor="text-yellow-400" />
-          <Metric label="Offline" value={(summary?.offline ?? 0).toString()} valueColor="text-red-400" />
-        </div>
-      </Panel>
+        {/* Agent Summary Stats */}
+        <Panel title="Agent Fleet Overview">
+          <div className="grid grid-cols-4 gap-4">
+            <Metric label="Total Agents" value={(summary?.total ?? 0).toString()} />
+            <Metric label="Active" value={(summary?.active ?? 0).toString()} valueColor="text-emerald-400" />
+            <Metric label="Standby" value={(summary?.standby ?? 0).toString()} valueColor="text-yellow-400" />
+            <Metric label="Offline" value={(summary?.offline ?? 0).toString()} valueColor="text-red-400" />
+          </div>
+        </Panel>
 
-      {/* Tabs and Search */}
-      <Panel>
-        <Tabs defaultValue="all" value={statusFilter} onChange={(value) => setStatusFilter(value as typeof statusFilter)}>
-          <div className="flex items-center justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="all">All ({summary?.total ?? 0})</TabsTrigger>
-              <TabsTrigger value="active">Active ({summary?.active ?? 0})</TabsTrigger>
-              <TabsTrigger value="standby">Standby ({summary?.standby ?? 0})</TabsTrigger>
-              <TabsTrigger value="offline">Offline ({summary?.offline ?? 0})</TabsTrigger>
-            </TabsList>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
-                <input
-                  type="text"
-                  placeholder="Search agents..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded text-sm text-white placeholder-white/40 focus:outline-none focus:border-cyan-400/50"
-                />
+        {/* Tabs and Search */}
+        <Panel>
+          <Tabs defaultValue="all" value={statusFilter} onChange={(value) => setStatusFilter(value as typeof statusFilter)}>
+            <div className="flex items-center justify-between mb-4">
+              <TabsList>
+                <TabsTrigger value="all">All ({summary?.total ?? 0})</TabsTrigger>
+                <TabsTrigger value="active">Active ({summary?.active ?? 0})</TabsTrigger>
+                <TabsTrigger value="standby">Standby ({summary?.standby ?? 0})</TabsTrigger>
+                <TabsTrigger value="offline">Offline ({summary?.offline ?? 0})</TabsTrigger>
+              </TabsList>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <input
+                    type="text"
+                    placeholder="Search agents..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded text-sm text-white placeholder-white/40 focus:outline-none focus:border-cyan-400/50"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <TabsContent value="all">
-            <div className="grid grid-cols-[1fr_1fr] gap-4">
-              <Panel title="Agent Roster">
-                {dataLoading && agents.length === 0 ? (
-                  <LoadingState variant="skeleton" skeletonLines={5} text="Loading agents..." />
-                ) : filteredAgents.length === 0 ? (
-                  <EmptyState
-                    icon={Users}
-                    title={searchQuery ? 'No agents match your search' : 'No agents yet'}
-                    message={searchQuery ? 'Try adjusting your search criteria' : 'Create your first agent to get started'}
-                    action={!searchQuery ? { label: "Create Agent", onClick: () => router.push('/agents/create') } : undefined}
-                  />
-                ) : (
-                  <DataTable
-                    columns={[
-                      { key: 'id', label: 'Agent ID' },
-                      { key: 'codename', label: 'Codename' },
-                      { key: 'role', label: 'Role' },
-                      { key: 'success', label: 'Success' },
-                      { key: 'failed', label: 'Failed' },
-                      { key: 'status', label: 'Status' },
-                      { key: 'actions', label: 'Actions' },
-                    ]}
-                    data={tableData}
-                  />
-                )}
-              </Panel>
-
-              <Panel title="Agent Activity Feed">
-                <div className="space-y-0">
-                  {agentLogs.length > 0 ? (
-                    agentLogs.map((log, idx) => (
-                      <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
-                    ))
+            <TabsContent value="all">
+              <div className="grid grid-cols-[1fr_1fr] gap-4">
+                <Panel title="Agent Roster">
+                  {dataLoading && agents.length === 0 ? (
+                    <LoadingState variant="skeleton" skeletonLines={5} text="Loading agents..." />
+                  ) : filteredAgents.length === 0 ? (
+                    <EmptyState
+                      icon={Users}
+                      title={searchQuery ? 'No agents match your search' : 'No agents yet'}
+                      message={searchQuery ? 'Try adjusting your search criteria' : 'Create your first agent to get started'}
+                      action={!searchQuery ? { label: "Create Agent", onClick: () => router.push('/agents/create') } : undefined}
+                    />
                   ) : (
-                    <div className="text-center py-4 text-white/40 text-sm">
-                      No recent agent activity
-                    </div>
+                    <DataTable
+                      columns={[
+                        { key: 'id', label: 'Agent ID' },
+                        { key: 'codename', label: 'Codename' },
+                        { key: 'role', label: 'Role' },
+                        { key: 'success', label: 'Success' },
+                        { key: 'failed', label: 'Failed' },
+                        { key: 'status', label: 'Status' },
+                        { key: 'actions', label: 'Actions' },
+                      ]}
+                      data={tableData}
+                    />
                   )}
-                </div>
-              </Panel>
-            </div>
-          </TabsContent>
+                </Panel>
 
-          <TabsContent value="active">
-            <div className="grid grid-cols-[1fr_1fr] gap-4">
-              <Panel title="Active Agents">
-                {dataLoading ? (
-                  <LoadingState text="Loading agents..." />
-                ) : activeAgents.length === 0 ? (
-                  <EmptyState
-                    icon={Users}
-                    title="No active agents"
-                    message="No agents are currently active"
-                  />
-                ) : (
-                  <DataTable
-                    columns={[
-                      { key: 'id', label: 'Agent ID' },
-                      { key: 'codename', label: 'Codename' },
-                      { key: 'role', label: 'Role' },
-                      { key: 'success', label: 'Success' },
-                      { key: 'failed', label: 'Failed' },
-                      { key: 'actions', label: 'Actions' },
-                    ]}
-                    data={activeTableData}
-                  />
-                )}
-              </Panel>
-              <Panel title="Activity Feed">
-                <div className="space-y-0">
-                  {agentLogs.length > 0 ? (
-                    agentLogs.map((log, idx) => (
-                      <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-white/40 text-sm">
-                      No recent agent activity
-                    </div>
-                  )}
-                </div>
-              </Panel>
-            </div>
-          </TabsContent>
+                <Panel title="Agent Activity Feed">
+                  <div className="space-y-0">
+                    {agentLogs.length > 0 ? (
+                      agentLogs.map((log, idx) => (
+                        <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-white/40 text-sm">
+                        No recent agent activity
+                      </div>
+                    )}
+                  </div>
+                </Panel>
+              </div>
+            </TabsContent>
 
-          <TabsContent value="standby">
-            <div className="grid grid-cols-[1fr_1fr] gap-4">
-              <Panel title="Standby Agents">
-                {dataLoading ? (
-                  <LoadingState text="Loading agents..." />
-                ) : standbyAgents.length === 0 ? (
-                  <EmptyState
-                    icon={Users}
-                    title="No standby agents"
-                    message="No agents are currently on standby"
-                  />
-                ) : (
-                  <DataTable
-                    columns={[
-                      { key: 'id', label: 'Agent ID' },
-                      { key: 'codename', label: 'Codename' },
-                      { key: 'role', label: 'Role' },
-                      { key: 'success', label: 'Success' },
-                      { key: 'failed', label: 'Failed' },
-                      { key: 'actions', label: 'Actions' },
-                    ]}
-                    data={standbyTableData}
-                  />
-                )}
-              </Panel>
-              <Panel title="Activity Feed">
-                <div className="space-y-0">
-                  {agentLogs.length > 0 ? (
-                    agentLogs.map((log, idx) => (
-                      <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
-                    ))
+            <TabsContent value="active">
+              <div className="grid grid-cols-[1fr_1fr] gap-4">
+                <Panel title="Active Agents">
+                  {dataLoading ? (
+                    <LoadingState text="Loading agents..." />
+                  ) : activeAgents.length === 0 ? (
+                    <EmptyState
+                      icon={Users}
+                      title="No active agents"
+                      message="No agents are currently active"
+                    />
                   ) : (
-                    <div className="text-center py-4 text-white/40 text-sm">
-                      No recent agent activity
-                    </div>
+                    <DataTable
+                      columns={[
+                        { key: 'id', label: 'Agent ID' },
+                        { key: 'codename', label: 'Codename' },
+                        { key: 'role', label: 'Role' },
+                        { key: 'success', label: 'Success' },
+                        { key: 'failed', label: 'Failed' },
+                        { key: 'actions', label: 'Actions' },
+                      ]}
+                      data={activeTableData}
+                    />
                   )}
-                </div>
-              </Panel>
-            </div>
-          </TabsContent>
+                </Panel>
+                <Panel title="Activity Feed">
+                  <div className="space-y-0">
+                    {agentLogs.length > 0 ? (
+                      agentLogs.map((log, idx) => (
+                        <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-white/40 text-sm">
+                        No recent agent activity
+                      </div>
+                    )}
+                  </div>
+                </Panel>
+              </div>
+            </TabsContent>
 
-          <TabsContent value="offline">
-            <div className="grid grid-cols-[1fr_1fr] gap-4">
-              <Panel title="Offline Agents">
-                {dataLoading ? (
-                  <LoadingState text="Loading agents..." />
-                ) : offlineAgents.length === 0 ? (
-                  <EmptyState
-                    icon={Users}
-                    title="No offline agents"
-                    message="All agents are online"
-                  />
-                ) : (
-                  <DataTable
-                    columns={[
-                      { key: 'id', label: 'Agent ID' },
-                      { key: 'codename', label: 'Codename' },
-                      { key: 'role', label: 'Role' },
-                      { key: 'success', label: 'Success' },
-                      { key: 'failed', label: 'Failed' },
-                      { key: 'actions', label: 'Actions' },
-                    ]}
-                    data={offlineTableData}
-                  />
-                )}
-              </Panel>
-              <Panel title="Activity Feed">
-                <div className="space-y-0">
-                  {agentLogs.length > 0 ? (
-                    agentLogs.map((log, idx) => (
-                      <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
-                    ))
+            <TabsContent value="standby">
+              <div className="grid grid-cols-[1fr_1fr] gap-4">
+                <Panel title="Standby Agents">
+                  {dataLoading ? (
+                    <LoadingState text="Loading agents..." />
+                  ) : standbyAgents.length === 0 ? (
+                    <EmptyState
+                      icon={Users}
+                      title="No standby agents"
+                      message="No agents are currently on standby"
+                    />
                   ) : (
-                    <div className="text-center py-4 text-white/40 text-sm">
-                      No recent agent activity
-                    </div>
+                    <DataTable
+                      columns={[
+                        { key: 'id', label: 'Agent ID' },
+                        { key: 'codename', label: 'Codename' },
+                        { key: 'role', label: 'Role' },
+                        { key: 'success', label: 'Success' },
+                        { key: 'failed', label: 'Failed' },
+                        { key: 'actions', label: 'Actions' },
+                      ]}
+                      data={standbyTableData}
+                    />
                   )}
-                </div>
-              </Panel>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </Panel>
-    </div>
+                </Panel>
+                <Panel title="Activity Feed">
+                  <div className="space-y-0">
+                    {agentLogs.length > 0 ? (
+                      agentLogs.map((log, idx) => (
+                        <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-white/40 text-sm">
+                        No recent agent activity
+                      </div>
+                    )}
+                  </div>
+                </Panel>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="offline">
+              <div className="grid grid-cols-[1fr_1fr] gap-4">
+                <Panel title="Offline Agents">
+                  {dataLoading ? (
+                    <LoadingState text="Loading agents..." />
+                  ) : offlineAgents.length === 0 ? (
+                    <EmptyState
+                      icon={Users}
+                      title="No offline agents"
+                      message="All agents are online"
+                    />
+                  ) : (
+                    <DataTable
+                      columns={[
+                        { key: 'id', label: 'Agent ID' },
+                        { key: 'codename', label: 'Codename' },
+                        { key: 'role', label: 'Role' },
+                        { key: 'success', label: 'Success' },
+                        { key: 'failed', label: 'Failed' },
+                        { key: 'actions', label: 'Actions' },
+                      ]}
+                      data={offlineTableData}
+                    />
+                  )}
+                </Panel>
+                <Panel title="Activity Feed">
+                  <div className="space-y-0">
+                    {agentLogs.length > 0 ? (
+                      agentLogs.map((log, idx) => (
+                        <LogRow key={idx} time={log.time} text={log.text} level={log.level} />
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-white/40 text-sm">
+                        No recent agent activity
+                      </div>
+                    )}
+                  </div>
+                </Panel>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </Panel>
+      </div>
     </>
   );
 }

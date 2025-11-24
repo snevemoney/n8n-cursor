@@ -66,7 +66,7 @@ function ToastContainer({ toasts, removeToast }: { toasts: Toast[]; removeToast:
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm" suppressHydrationWarning>
       {toasts.map((toast, index) => (
         <ToastItem 
           key={toast.id} 
@@ -109,6 +109,7 @@ function ToastItem({ toast, onRemove, index }: { toast: Toast; onRemove: (id: st
         animationDelay: toast.isExiting ? '0ms' : `${index * 50}ms` 
       }}
       role="alert"
+      suppressHydrationWarning
     >
       {icons[toast.type]}
       <div className="flex-1 text-sm">{toast.message}</div>

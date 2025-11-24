@@ -48,9 +48,10 @@ class TelemetryBus extends EventEmitter {
       this.eventBuffer.shift(); // Remove oldest
     }
     
-    const listenerCount = this.listenerCount('event');
-    if (listenerCount === 0) {
-      console.warn(`[TelemetryBus] No listeners for event: ${event.type} (buffered for replay)`);
+    // Events are buffered and will be replayed to new subscribers
+    // Only log in verbose/debug mode to reduce noise
+    if (process.env.VERBOSE_TELEMETRY === 'true' && this.listenerCount('event') === 0) {
+      console.debug(`[TelemetryBus] No active listeners for event: ${event.type} (buffered for replay)`);
     }
     this.emit('event', event);
     this.emit(event.type, event);

@@ -11,6 +11,13 @@ export const schema = z.object({
   maxSites: z.number().min(1).max(20).default(10),
 });
 
+// Optional event emitter for browser actions (passed from orchestrator)
+export let browserActionEmitter: ((action: any) => void) | null = null;
+
+export function setBrowserActionEmitter(emitter: ((action: any) => void) | null) {
+  browserActionEmitter = emitter;
+}
+
 export async function handler(args: z.infer<typeof schema>) {
   try {
     // Call existing research API to start research
@@ -31,31 +38,72 @@ export async function handler(args: z.infer<typeof schema>) {
       throw new Error('Failed to get session ID from research API');
     }
 
-    // CHECK 9: Timeout handling (10-15s recommended, but using 60s for reliability)
-    const maxWaitTime = process.env.RESEARCH_MAX_WAIT_MS ? parseInt(process.env.RESEARCH_MAX_WAIT_MS) : 15000; // Default 15s
-    const pollInterval = 2000; // 2 seconds
+    // No timeout - poll until research completes or fails
+    // Return incremental results as soon as any sources are found
+    const pollInterval = 500; // Poll every 500ms for faster updates
     const startTime = Date.now();
     let pollCount = 0;
     let consecutiveErrors = 0;
-    const maxConsecutiveErrors = 3;
+    const maxConsecutiveErrors = 5; // Allow more retries for long research
 
-    console.log(`[research.run] Starting to poll for session ${sessionId}, max wait: ${maxWaitTime}ms`);
+    console.log(`[research.run] Starting to poll for session ${sessionId} (no timeout, will wait for completion)`);
 
-    while (Date.now() - startTime < maxWaitTime) {
+    // Connect to browser events stream if emitter is available
+    let eventsAbortController: AbortController | null = null;
+    if (browserActionEmitter) {
+      eventsAbortController = new AbortController();
+      fetch(`http://localhost:3003/api/research/events?sessionId=${sessionId}`, {
+        signal: eventsAbortController.signal,
+      })
+        .then(async (eventsResponse) => {
+          if (!eventsResponse.ok || !eventsResponse.body) return;
+          const reader = eventsResponse.body.getReader();
+          const decoder = new TextDecoder();
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              const chunk = decoder.decode(value, { stream: true });
+              const lines = chunk.split('\n');
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.type === 'browser_action' && browserActionEmitter) {
+                      browserActionEmitter(data.action);
+                    }
+                  } catch (e) {
+                    // Ignore parse errors
+                  }
+                }
+              }
+            }
+          } catch (err) {
+            // Stream closed or aborted
+          }
+        })
+        .catch(() => {
+          // Ignore connection errors
+        });
+    }
+
+    // Poll indefinitely until completion or failure
+    while (true) {
       pollCount++;
       const elapsed = Date.now() - startTime;
-      const progressPercent = Math.min(100, Math.round((elapsed / maxWaitTime) * 100));
 
-      // Log progress every 5 polls (10 seconds)
-      if (pollCount % 5 === 0) {
-        console.log(`[research.run] Polling... ${progressPercent}% (${Math.round(elapsed / 1000)}s elapsed)`);
+      // Log progress every 10 polls (5 seconds at 500ms interval)
+      if (pollCount % 10 === 0) {
+        console.log(`[research.run] Polling... ${Math.round(elapsed / 1000)}s elapsed`);
       }
 
       try {
-        const pollResponse = await fetch('http://localhost:3003/api/research/start', { // Updated URL to match original start endpoint
-          method: 'GET', // Changed to GET for polling status
+        const pollResponse = await fetch(`http://localhost:3003/api/research/start?sessionId=${sessionId}`, {
+          method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          // body: JSON.stringify({ action: 'get_results', id: sessionId }) // Not needed for GET with query param
         });
 
         if (!pollResponse.ok) {
@@ -194,42 +242,15 @@ export async function handler(args: z.infer<typeof schema>) {
       }
     }
 
-    // Timeout - check if we can get partial results
-    console.log(`[research.run] Timeout reached, checking for partial results...`);
-    try {
-      const finalResponse = await fetch(`http://localhost:3003/api/research/start?sessionId=${sessionId}`);
-      if (finalResponse.ok) {
-        const finalData = await finalResponse.json();
-        const finalSession = finalData.success && finalData.data ? finalData.data : finalData;
-        if (finalSession.result && finalSession.result.sources && finalSession.result.sources.length > 0) {
-          // Return partial results even if status isn't 'completed'
-          const result = finalSession.result;
-          const rawSources = result.sources || [];
-          const topSources = rawSources.slice(0, 3).map((source: any, idx: number) => ({
-            rank: idx + 1,
-            title: source.title || source.url || 'Untitled',
-            url: source.url || '',
-            snippet: source.content?.slice(0, 300) || source.snippet || '',
-          }));
-
-          return {
-            ok: true,
-            query: args.query,
-            summary: result.summary || 'Research in progress - partial results',
-            sources: topSources,
-            top3: topSources,
-            message: `Research partially completed. Found ${rawSources.length} sources. Showing top ${topSources.length} results.`,
-            sessionId,
-          };
-        }
-      }
-    } catch (e) {
-      console.error('[research.run] Error checking for partial results:', e);
+    // This code should never be reached since the loop only exits on completion/failure
+    // Cleanup browser events stream
+    if (eventsAbortController) {
+      eventsAbortController.abort();
     }
 
     return {
       ok: false,
-      error: 'Research timed out. The research may still be processing in the background.',
+      error: 'Research ended unexpectedly without completion or failure status.',
       query: args.query,
     };
 

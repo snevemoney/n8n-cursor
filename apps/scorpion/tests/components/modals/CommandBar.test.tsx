@@ -40,8 +40,10 @@ describe('CommandBar', () => {
     const openButton = screen.getByRole('button', { name: /commands/i });
     await user.click(openButton);
 
-    // Click dangerous command (restart)
-    const restartButton = screen.getByRole('button', { name: /restart worker/i });
+    // Click dangerous command (restart) - find by text label, then find Run button
+    expect(screen.getByText('Restart Worker')).toBeInTheDocument();
+    const restartButtons = screen.getAllByRole('button', { name: /run/i });
+    const restartButton = restartButtons[0]; // First Run button is for Restart Worker
     await user.click(restartButton);
 
     // Should show confirmation buttons
@@ -59,8 +61,10 @@ describe('CommandBar', () => {
     const openButton = screen.getByRole('button', { name: /commands/i });
     await user.click(openButton);
 
-    // Click non-dangerous command (replay)
-    const replayButton = screen.getByRole('button', { name: /replay run/i });
+    // Click non-dangerous command (replay) - find by text label, then find Run button
+    expect(screen.getByText('Replay Run')).toBeInTheDocument();
+    const replayButtons = screen.getAllByRole('button', { name: /run/i });
+    const replayButton = replayButtons[2]; // Third Run button is for Replay Run
     await user.click(replayButton);
 
     // Should execute immediately without confirmation
@@ -79,8 +83,10 @@ describe('CommandBar', () => {
     const openButton = screen.getByRole('button', { name: /commands/i });
     await user.click(openButton);
 
-    // Click dangerous command
-    const restartButton = screen.getByRole('button', { name: /restart worker/i });
+    // Click dangerous command - find by text label, then find Run button
+    expect(screen.getByText('Restart Worker')).toBeInTheDocument();
+    const restartButtons = screen.getAllByRole('button', { name: /run/i });
+    const restartButton = restartButtons[0];
     await user.click(restartButton);
 
     // Confirm
@@ -100,8 +106,10 @@ describe('CommandBar', () => {
     const openButton = screen.getByRole('button', { name: /commands/i });
     await user.click(openButton);
 
-    // Click dangerous command
-    const restartButton = screen.getByRole('button', { name: /restart worker/i });
+    // Click dangerous command - find by text label, then find Run button
+    expect(screen.getByText('Restart Worker')).toBeInTheDocument();
+    const restartButtons = screen.getAllByRole('button', { name: /run/i });
+    const restartButton = restartButtons[0];
     await user.click(restartButton);
 
     // Cancel
@@ -109,8 +117,10 @@ describe('CommandBar', () => {
     await user.click(cancelButton);
 
     // Should go back to normal state
-    expect(screen.queryByRole('button', { name: /confirm/i })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /restart worker/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /confirm/i })).not.toBeInTheDocument();
+    });
+    expect(screen.getByText('Restart Worker')).toBeInTheDocument();
   });
 
   it('handles command execution errors', async () => {
@@ -123,8 +133,10 @@ describe('CommandBar', () => {
     const openButton = screen.getByRole('button', { name: /commands/i });
     await user.click(openButton);
 
-    // Execute command
-    const replayButton = screen.getByRole('button', { name: /replay run/i });
+    // Execute command - find by text label, then find Run button
+    expect(screen.getByText('Replay Run')).toBeInTheDocument();
+    const replayButtons = screen.getAllByRole('button', { name: /run/i });
+    const replayButton = replayButtons[2]; // Third Run button is for Replay Run
     await user.click(replayButton);
 
     await waitFor(() => {
@@ -148,8 +160,10 @@ describe('CommandBar', () => {
     const openButton = screen.getByRole('button', { name: /commands/i });
     await user.click(openButton);
 
-    // Execute command
-    const replayButton = screen.getByRole('button', { name: /replay run/i });
+    // Execute command - find by text label, then find Run button
+    expect(screen.getByText('Replay Run')).toBeInTheDocument();
+    const replayButtons = screen.getAllByRole('button', { name: /run/i });
+    const replayButton = replayButtons[2]; // Third Run button is for Replay Run
     await user.click(replayButton);
 
     // Buttons should be disabled during execution

@@ -20,7 +20,20 @@ export type CouncilIssueTag =
   | 'tools'
   | 'correctness'
   | 'safety'
-  | 'human-context';
+  | 'human-context'
+  | 'prompt'
+  | 'data-privacy'
+  | 'data-verification'
+  | 'data-analytics'
+  | 'workflow-design'
+  | 'efficiency'
+  | 'performance'
+  | 'security'
+  | 'simplicity'
+  | 'generative-models'
+  | 'ai-foundations'
+  | 'prompt-quality'
+  | 'data-ops';
 
 export interface CouncilIssue {
   severity: 1 | 2 | 3 | 4 | 5;
@@ -42,6 +55,7 @@ export interface CouncilMember {
   id: string; // 'ethics', 'simplicity', 'tools', etc.
   name?: string; // Optional display name
   description?: string; // Optional description of what this councillor does
+  weight?: number; // Optional weight for voting (used in chat council system)
   run(input: CouncilInput): Promise<CouncilOutput> | CouncilOutput;
 }
 

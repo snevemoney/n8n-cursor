@@ -13,6 +13,7 @@ export function mockApiResponse(url: string, response: any, status = 200) {
     status,
     json: async () => response,
     text: async () => JSON.stringify(response),
+    headers: new Headers(),
   });
 }
 
@@ -43,8 +44,8 @@ export const apiMocks = {
     error: () => mockApiError('/api/agents', 'Failed to fetch agents', 500),
   },
   settings: {
-    get: (settings: any) => mockApiResponse('/api/settings', settings),
-    save: (settings: any) => mockApiResponse('/api/settings', { success: true, settings }, 200),
+    get: (settings: any) => mockApiResponse('/api/settings', settings, 200),
+    save: (result: any) => mockApiResponse('/api/settings', result || { success: true }, 200),
     error: () => mockApiError('/api/settings', 'Failed to save settings', 500),
   },
   workflows: {

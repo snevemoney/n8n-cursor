@@ -6,7 +6,18 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "incremental": true,
+    "tsBuildInfoFile": ".next/.tsbuildinfo",
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "include": [
     "next-env.d.ts",

@@ -5,7 +5,7 @@
 
 import { getOrchestrator as getOrchestratorAsync, getRAGStore } from './shared-stores';
 import { WorkflowIngester } from '@scorpion/core';
-import { getMCPn8nClient } from './mcp-n8n-client';
+import { N8nClient } from './n8n-client';
 import { responseCache } from './cache';
 import { getOptimizedBatchSize, getOptimizedBatchDelay } from './storage/performance-optimizer';
 import path from 'path';
@@ -31,29 +31,45 @@ export function initializeAutoSync() {
     return;
   }
 
+  // Check if auto-sync is disabled via environment variable
+  if (process.env.DISABLE_AUTO_SYNC === 'true') {
+    console.log('🦂 Auto-sync disabled via DISABLE_AUTO_SYNC environment variable');
+    return;
+  }
+
   isInitialized = true;
 
   // Initial sync on startup (don't await - let it run in background)
+  // Increased delay to allow server to fully initialize
   performInitialSync().catch(err => {
     console.error('❌ Failed to perform initial sync:', err);
   });
 
-  // Periodic sync every 5 minutes
+  // Periodic sync interval (configurable via env, default 15 minutes for better performance)
+  const syncIntervalMs = process.env.AUTO_SYNC_INTERVAL_MS 
+    ? parseInt(process.env.AUTO_SYNC_INTERVAL_MS, 10) 
+    : 15 * 60 * 1000; // 15 minutes (increased from 5 minutes)
+  
   syncInterval = setInterval(() => {
     performPeriodicSync().catch(err => {
       console.error('❌ Failed to perform periodic sync:', err);
     });
-  }, 5 * 60 * 1000); // 5 minutes
+  }, syncIntervalMs);
 
   // Watch workflow files for changes (filesystem → n8n)
+  // Can be disabled via environment variable
+  if (process.env.DISABLE_FILE_WATCHER !== 'true') {
   watchWorkflowFiles().catch(err => {
     console.error('Failed to initialize workflow watcher:', err);
   });
+  } else {
+    console.log('🦂 File watcher disabled via DISABLE_FILE_WATCHER environment variable');
+  }
 
   // Watch n8n workflows for changes (n8n → filesystem)
   watchN8nWorkflows();
 
-  console.log('🦂 Automatic syncing enabled (bidirectional)');
+  console.log(`🦂 Automatic syncing enabled (bidirectional, sync interval: ${syncIntervalMs / 1000 / 60} minutes)`);
 }
 
 /**
@@ -63,22 +79,25 @@ export function initializeAutoSync() {
  */
 async function performInitialSync() {
   try {
-    // Defer heavy ingestion slightly to allow server to start faster
-    // Minimal delay - just enough to let server initialize
-    await new Promise(resolve => setTimeout(resolve, 500)); // Reduced from 2s to 500ms
+    // Defer heavy ingestion to allow server to start faster
+    // Increased delay for better performance (configurable via env)
+    const initialDelayMs = process.env.AUTO_SYNC_INITIAL_DELAY_MS
+      ? parseInt(process.env.AUTO_SYNC_INITIAL_DELAY_MS, 10)
+      : 3000; // 3 seconds (increased from 500ms for better startup performance)
+    await new Promise(resolve => setTimeout(resolve, initialDelayMs));
     
     console.log('🦂 Performing initial knowledge ingestion (including recommendations)...');
     console.log('🦂 Getting orchestrator...');
     const orchestrator = await getOrchestratorAsync();
     console.log('🦂 Orchestrator ready, starting ingestion...');
     
-    // Run lightweight essential ingestion (tech debt + recommendations only)
-    // This is faster and focuses on what the dashboard needs
-    console.log('🦂 Running essential ingestion (tech debt + recommendations only)...');
+    // Run lightweight essential ingestion (tech debt + recommendations + key docs)
+    // This is faster and focuses on what the dashboard needs and common queries
+    console.log('🦂 Running essential ingestion (tech debt + recommendations + key docs)...');
     const result = await orchestrator.ingestEssential();
     
-    const totalItems = result.techDebt.length + result.recommendations.length;
-    console.log(`🦂 Essential ingestion returned ${totalItems} items (${result.techDebt.length} tech debt + ${result.recommendations.length} recommendations)`);
+    const totalItems = result.techDebt.length + result.recommendations.length + result.documentation.length;
+    console.log(`🦂 Essential ingestion returned ${totalItems} items (${result.techDebt.length} tech debt + ${result.recommendations.length} recommendations + ${result.documentation.length} key docs)`);
     
     // Invalidate caches to ensure fresh data
     orchestrator.invalidateCache();
@@ -92,12 +111,14 @@ async function performInitialSync() {
     const techDebtStored = storedKnowledge.filter(k => k.category === 'tech-debt').length;
     const missingFeaturesStored = storedKnowledge.filter(k => k.category === 'missing-features').length;
     const recommendationsStored = storedKnowledge.filter(k => k.source === 'recommendation-engine').length;
+    const documentationStored = storedKnowledge.filter(k => k.category === 'documentation' || k.source === 'docs').length;
     
     console.log(`✅ Essential ingestion complete: ${totalItems} items processed`);
     console.log(`   Stored in RAG: ${storedKnowledge.length} total`);
     console.log(`   Tech Debt items: ${techDebtStored}`);
     console.log(`   Missing Features items: ${missingFeaturesStored}`);
     console.log(`   Recommendations: ${recommendationsStored}`);
+    console.log(`   Documentation: ${documentationStored}`);
   } catch (error) {
     console.error('❌ Error during initial sync:', error);
     if (error instanceof Error) {
@@ -208,18 +229,21 @@ async function syncWorkflows() {
   try {
     // Find workspace root (go up from apps/scorpion/lib)
     const workspaceRoot = path.resolve(process.cwd(), '../..');
-    const mcpClient = getMCPn8nClient();
+    const n8nClient = new N8nClient();
     
-    // Check if client is configured before attempting API calls
-    if (!mcpClient.isConfigured()) {
+    // Check if API key is configured
+    if (!process.env.N8N_API_KEY) {
       // Silently skip if not configured (no need to log every time)
       return;
     }
     
     const compatClient = {
-      listWorkflows: () => mcpClient.listWorkflows(),
-      getWorkflow: (id: string) => mcpClient.getWorkflow(id),
-      exportWorkflow: (id: string) => mcpClient.exportWorkflow(id)
+      listWorkflows: () => n8nClient.listWorkflows(),
+      getWorkflow: (id: string) => n8nClient.getWorkflow(id),
+      exportWorkflow: async (id: string) => {
+        const workflow = await n8nClient.getWorkflow(id);
+        return workflow ? true : false;
+      }
     } as any;
     const workflowIngester = new WorkflowIngester(workspaceRoot, compatClient);
     
@@ -270,19 +294,34 @@ async function syncWorkflows() {
  * Watch n8n workflows for changes
  */
 function watchN8nWorkflows() {
-  // Poll n8n for workflow changes every 5 minutes (reduced from 30s to avoid API hammering)
+  // Poll n8n for workflow changes (configurable via env, default 15 minutes for better performance)
+  const pollIntervalMs = process.env.N8N_POLL_INTERVAL_MS
+    ? parseInt(process.env.N8N_POLL_INTERVAL_MS, 10)
+    : 15 * 60 * 1000; // 15 minutes (increased from 5 minutes)
+  
   n8nPollInterval = setInterval(() => {
     checkN8nWorkflowChanges();
-  }, 5 * 60 * 1000); // 5 minutes
+  }, pollIntervalMs);
 
-  // Initial check
+  // Initial check (deferred to avoid blocking startup)
+  setTimeout(() => {
   checkN8nWorkflowChanges();
+  }, 5000); // Wait 5 seconds before first check
+}
+
+/**
+ * Force sync all workflows from n8n (for manual sync trigger)
+ */
+export async function forceSyncN8nWorkflows() {
+  // Reset hashes to force sync of all workflows
+  lastN8nWorkflowHashes.clear();
+  return checkN8nWorkflowChanges(true); // Pass force=true
 }
 
 /**
  * Check for workflow changes in n8n
  */
-async function checkN8nWorkflowChanges() {
+async function checkN8nWorkflowChanges(forceSync: boolean = false) {
   // Skip if already syncing (prevent thundering herd)
   if (isSyncing) {
     console.log('⏭️ Sync already in progress, skipping...');
@@ -304,10 +343,10 @@ async function checkN8nWorkflowChanges() {
       await fs.mkdir(workflowsDir, { recursive: true });
     }
     
-    const mcpClient = getMCPn8nClient();
+    const n8nClient = new N8nClient();
     
-    // Check if client is configured before attempting API calls
-    if (!mcpClient.isConfigured()) {
+    // Check if API key is configured
+    if (!process.env.N8N_API_KEY) {
       const now = Date.now();
       if (now - lastAuthErrorTime > AUTH_ERROR_THROTTLE) {
         console.warn('⚠️ n8n client not configured - skipping workflow sync. Set N8N_API_KEY to enable.');
@@ -316,10 +355,10 @@ async function checkN8nWorkflowChanges() {
       return;
     }
     
-    // Get workflows from n8n using MCP
+    // Get workflows from n8n using direct API
     let n8nWorkflows;
     try {
-      n8nWorkflows = await mcpClient.listWorkflows();
+      n8nWorkflows = await n8nClient.listWorkflows();
     } catch (error: any) {
       // Handle authentication errors gracefully
       if (error.message?.includes('401') || error.message?.includes('403') || error.message?.includes('authentication')) {
@@ -343,6 +382,12 @@ async function checkN8nWorkflowChanges() {
       const hash = `${workflow.id}-${(workflow as any).updatedAt || Date.now()}-${workflow.nodes?.length || 0}`;
       currentHashes.set(workflow.id, hash);
       
+      // If force sync, export all workflows
+      if (forceSync) {
+        console.log(`📥 Force syncing workflow: ${workflow.name}`);
+        workflowsToExport.push(workflow);
+        hasChanges = true;
+      } else {
       // Check if workflow changed
       const lastHash = lastN8nWorkflowHashes.get(workflow.id);
       if (lastHash && lastHash !== hash) {
@@ -354,6 +399,7 @@ async function checkN8nWorkflowChanges() {
         console.log(`📥 New workflow in n8n: ${workflow.name}`);
         workflowsToExport.push(workflow);
         hasChanges = true;
+        }
       }
     }
     
@@ -414,12 +460,12 @@ async function checkN8nWorkflowChanges() {
 async function exportWorkflowFromN8n(workflow: any, workflowsDir: string) {
   try {
     const fs = await import('fs/promises');
-    const mcpClient = getMCPn8nClient();
+    const n8nClient = new N8nClient();
     
-    // Get full workflow data using MCP
+    // Get full workflow data using direct API
     let fullWorkflow;
     try {
-      fullWorkflow = await mcpClient.getWorkflow(workflow.id);
+      fullWorkflow = await n8nClient.getWorkflow(workflow.id);
     } catch (error: any) {
       // Handle auth errors gracefully - silently skip this workflow
       if (error.message?.includes('401') || error.message?.includes('403') || error.message?.includes('authentication')) {

@@ -294,9 +294,16 @@ class SystemAutomation {
 
           if ('url' in service) {
             const healthPath = 'healthPath' in service ? service.healthPath : '/healthz';
-            const response = await fetch(`${service.url}${healthPath}`, {
-              signal: AbortSignal.timeout(5000)
-            });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            let response: Response;
+            try {
+              response = await fetch(`${service.url}${healthPath}`, {
+                signal: controller.signal
+              });
+            } finally {
+              clearTimeout(timeoutId);
+            }
             
             // Check for auth errors (401/403) - don't report these as errors
             if (!response.ok && (response.status === 401 || response.status === 403)) {

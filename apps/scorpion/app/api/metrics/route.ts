@@ -1,21 +1,30 @@
-import { NextResponse } from 'next/server';
-import { getMetricsCollector } from '@/lib/metrics';
-import { withErrorHandling, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
+/**
+ * Prometheus Metrics Endpoint
+ * GET /api/metrics - Returns metrics in Prometheus format
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { getMetricsCollector } from '@/lib/monitoring/metrics';
 
 /**
  * GET /api/metrics - Prometheus metrics endpoint
- * Exposes all Scorpion metrics in Prometheus format
  */
-export const GET = withErrorHandling(async () => {
-  const collector = getMetricsCollector();
-  const metrics = collector.exportPrometheus();
-
-  return new NextResponse(metrics, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
-      'Cache-Control': 'no-cache, no-store, must-revalidate'
-    }
-  });
-});
-
+export async function GET(request: NextRequest) {
+  try {
+    const metrics = getMetricsCollector();
+    const prometheusFormat = metrics.getPrometheusFormat();
+    
+    return new NextResponse(prometheusFormat, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; version=0.0.4',
+      },
+    });
+  } catch (error: any) {
+    console.error('[Metrics] Failed to export metrics:', error);
+    return NextResponse.json(
+      { error: 'Failed to export metrics' },
+      { status: 500 }
+    );
+  }
+}

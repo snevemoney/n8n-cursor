@@ -143,6 +143,61 @@ const envVarConfigs: EnvVarConfig[] = [
       return valid.includes(value.toLowerCase()) || 'Must be true/false or 1/0';
     }
   },
+  // Voice Mode Configuration
+  {
+    name: 'WHISPER_URL',
+    required: false,
+    description: 'Whisper STT service URL (for voice mode local profile)',
+    defaultValue: 'http://localhost:8000',
+    validator: (value) => {
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return 'Must be a valid URL';
+      }
+    }
+  },
+  {
+    name: 'TTS_URL',
+    required: false,
+    description: 'TTS service URL (for voice mode local profile)',
+    defaultValue: 'http://localhost:5000',
+    validator: (value) => {
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return 'Must be a valid URL';
+      }
+    }
+  },
+  {
+    name: 'TTS_PROVIDER',
+    required: false,
+    description: 'TTS provider for hybrid profile (kokoro, openai, elevenlabs)',
+    defaultValue: 'kokoro',
+  },
+  {
+    name: 'TTS_VOICE',
+    required: false,
+    description: 'TTS voice name/ID',
+    defaultValue: 'default',
+  },
+  {
+    name: 'CHAT_API_URL',
+    required: false,
+    description: 'Chat API endpoint URL (for voice mode)',
+    defaultValue: 'http://localhost:3003/api/chat/stream',
+    validator: (value) => {
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return 'Must be a valid URL';
+      }
+    }
+  },
 ];
 
 interface ValidationResult {
@@ -193,8 +248,8 @@ export function validateEnvironment(): ValidationResult {
   }
 
   // Check for N8N URL inconsistency
-  const n8nApiUrl = process.env.N8N_API_URL;
-  const n8nBaseUrl = process.env.N8N_BASE_URL;
+  const n8nApiUrl = process.env['N8N_API_URL'];
+  const n8nBaseUrl = process.env['N8N_BASE_URL'];
   if (n8nApiUrl && n8nBaseUrl) {
     warnings.push({
       name: 'N8N_URL',

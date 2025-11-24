@@ -151,9 +151,9 @@ export function CouncilPanel({ votes, thinking = {}, communications = [], consen
   };
   
   return (
-    <div className="space-y-4">
+    <div data-testid="council-panel" className="space-y-4">
       {/* Header - More general description */}
-      <div className="p-4 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-400/20 rounded-lg">
+      <div data-testid="council-header" className="p-4 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-400/20 rounded-lg">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center border border-emerald-400/30">
             <Users className="h-5 w-5 text-emerald-400" />
@@ -238,7 +238,7 @@ export function CouncilPanel({ votes, thinking = {}, communications = [], consen
       )}
       
       {/* Individual Votes - Enhanced with Member Info */}
-      <div className="space-y-3">
+      <div data-testid="council-votes-list" className="space-y-3">
         <h4 className="text-xs font-semibold text-white/60 uppercase tracking-wide px-1">
           Council Members
         </h4>
@@ -248,8 +248,9 @@ export function CouncilPanel({ votes, thinking = {}, communications = [], consen
           const MemberIcon = memberInfo.icon;
           
           return (
-            <div key={vote.agentId} className="border border-white/10 rounded-lg overflow-hidden bg-[#0f1318]/50 hover:bg-[#0f1318]/70 transition-colors">
+            <div key={vote.agentId} data-testid={`council-vote-${vote.agentId}`} className="border border-white/10 rounded-lg overflow-hidden bg-[#0f1318]/50 hover:bg-[#0f1318]/70 transition-colors">
               <button
+                data-testid={`council-vote-button-${vote.agentId}`}
                 onClick={() => setExpandedVote(expandedVote === vote.agentId ? null : vote.agentId)}
                 className="w-full flex items-center gap-3 p-3 hover:bg-white/5 transition-colors"
               >

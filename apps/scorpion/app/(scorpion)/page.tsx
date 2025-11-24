@@ -53,7 +53,7 @@ export default function ScorpionHomePage() {
 
   // Render page structure immediately, don't block on data
   return (
-    <div className="min-h-full flex items-center justify-center sc-grid-bg relative py-4 md:py-6 lg:py-8 px-4 md:px-6 lg:px-8">
+    <div className="min-h-full flex items-center justify-center sc-grid-bg relative py-4 md:py-6 lg:py-8 px-4 md:px-6 lg:px-8" suppressHydrationWarning>
       <PageLoadingBar loading={loading && !stats} />
       <NotificationBadge />
       <div className="max-w-2xl w-full space-y-4 md:space-y-6 lg:space-y-8 min-w-0">

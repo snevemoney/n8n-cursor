@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { emitEvent } from '@/lib/events/event-bus';
+import type { WorkflowStartedEvent, WorkflowFailedEvent } from '@/lib/events/types';
 
 export const name = 'workflows.trigger';
 export const label = 'Trigger Workflow';
@@ -10,7 +12,25 @@ export const schema = z.object({
 });
 
 export async function handler(args: z.infer<typeof schema>) {
+  const startTime = Date.now();
+  const workflowName = args.workflowId; // Could be enhanced to fetch actual name
+  
   try {
+    // Emit workflow started event
+    await emitEvent({
+      id: crypto.randomUUID(),
+      type: 'workflow.started',
+      severity: 'info',
+      timestamp: new Date().toISOString(),
+      source: 'workflows.trigger',
+      environment: (process.env.NODE_ENV as 'dev' | 'staging' | 'prod') || 'prod',
+      data: {
+        workflowId: args.workflowId,
+        workflowName,
+        trigger: 'tool',
+      },
+    });
+
     // Use environment variables for production n8n
     const n8nUrl = process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL || 'https://n8ncloud.tech';
     const n8nApiKey = process.env.N8N_API_KEY;
@@ -39,6 +59,26 @@ export async function handler(args: z.infer<typeof schema>) {
       data = await response.text();
     }
     
+    const duration = Date.now() - startTime;
+    
+    // Emit workflow failed event if response is not ok
+    if (!response.ok) {
+      await emitEvent({
+        id: crypto.randomUUID(),
+        type: 'workflow.failed',
+        severity: 'error',
+        timestamp: new Date().toISOString(),
+        source: 'workflows.trigger',
+        environment: (process.env.NODE_ENV as 'dev' | 'staging' | 'prod') || 'prod',
+        data: {
+          workflowId: args.workflowId,
+          workflowName,
+          error: `HTTP ${response.status}: ${typeof data === 'string' ? data : JSON.stringify(data)}`,
+          errorCode: `HTTP_${response.status}`,
+        },
+      });
+    }
+    
     return {
       ok: response.ok,
       status: response.status,
@@ -48,6 +88,24 @@ export async function handler(args: z.infer<typeof schema>) {
       data: typeof data === 'string' ? data : JSON.stringify(data),
     };
   } catch (error: any) {
+    const duration = Date.now() - startTime;
+    
+    // Emit workflow failed event
+    await emitEvent({
+      id: crypto.randomUUID(),
+      type: 'workflow.failed',
+      severity: 'error',
+      timestamp: new Date().toISOString(),
+      source: 'workflows.trigger',
+      environment: (process.env.NODE_ENV as 'dev' | 'staging' | 'prod') || 'prod',
+      data: {
+        workflowId: args.workflowId,
+        workflowName,
+        error: error.message || 'Unknown error',
+        errorCode: 'EXCEPTION',
+      },
+    });
+    
     return {
       ok: false,
       error: error.message,

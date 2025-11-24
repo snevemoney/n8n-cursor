@@ -3,7 +3,7 @@
  * Monitors for SSD reconnection and automatically switches back to SSD mode
  */
 
-import { detectStorage, validateDetectedSSD } from './storage-detector';
+import { detectStorage, validateDetectedSSD, clearDetectionCache } from './storage-detector';
 import { getStorageConfig, resetStorageConfig } from './storage-config';
 import { validateAndRefreshStorage } from './storage-error-handler';
 
@@ -125,16 +125,23 @@ class StorageReconnectMonitor {
         return;
       }
 
-      // Clear caches and refresh storage detection
-      console.log('🔄 Refreshing storage configuration...');
-      const validation = await validateAndRefreshStorage();
+      // Clear caches and refresh storage detection (only on actual reconnection)
+      console.log('🔄 Refreshing storage configuration after SSD reconnection...');
+      // Force re-initialization since SSD was reconnected
+      clearDetectionCache();
+      resetStorageConfig();
       
-      if (!validation.isValid) {
+      const { initializeStorageConfig } = await import('./storage-config');
+      const newConfig = await initializeStorageConfig();
+      
+      // Validate the new config is accessible
+      const { isStorageAccessible } = await import('./storage-error-handler');
+      const isAccessible = await isStorageAccessible(newConfig.dataDir);
+      
+      if (!isAccessible) {
         console.warn('⚠️ Storage validation failed after reconnection');
         return;
       }
-
-      const newConfig = validation.config;
       
       if (newConfig.isSSD && newConfig.storageInfo.detectedSSDPath) {
         console.log(`✅ Switched back to SSD mode: ${newConfig.dataDir}`);
@@ -148,17 +155,10 @@ class StorageReconnectMonitor {
 
         // Emit reconnection event (if telemetry is available)
         try {
-          const { emitEvent } = await import('../telemetry/emitter');
-          emitEvent({
-            type: 'system.log',
-            source: 'storage-reconnect-monitor',
-            level: 'info',
-            message: 'SSD reconnected and system switched back to SSD mode',
-            severity: 'info',
-            context: {
+          const { telemetry } = await import('../telemetry/emitter');
+          telemetry.systemLog('info', 'SSD reconnected and system switched back to SSD mode', 'storage-reconnect-monitor', {
               ssdPath: newConfig.storageInfo.detectedSSDPath,
               dataDir: newConfig.dataDir,
-            },
           });
         } catch {
           // Telemetry not available, skip

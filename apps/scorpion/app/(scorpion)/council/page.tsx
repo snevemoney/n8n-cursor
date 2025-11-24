@@ -246,7 +246,7 @@ export default function CouncilPage() {
   return (
     <>
       <PageLoadingBar loading={membersLoading && members.length === 0} />
-    <div className="h-full grid grid-cols-[280px_1.1fr_0.7fr] gap-4 p-4 overflow-y-auto">
+    <div className="h-full grid grid-cols-[280px_1.1fr_0.7fr] gap-4 p-4 overflow-y-auto" suppressHydrationWarning>
       <Panel title="Council Members">
         {membersLoading ? (
           <LoadingState text="Loading members..." />

@@ -24,7 +24,7 @@ export function EmptyState({
   fullPage = false,
 }: EmptyStateProps) {
   const content = (
-    <div className={`flex flex-col items-center justify-center text-center space-y-4 ${className}`}>
+    <div className={`flex flex-col items-center justify-center text-center space-y-4 ${className}`} suppressHydrationWarning>
       {Icon && (
         <div className="p-4 rounded-full bg-white/5 border border-white/10">
           <Icon className="h-8 w-8 text-white/40" />
@@ -40,6 +40,7 @@ export function EmptyState({
         <button
           onClick={action.onClick}
           className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 rounded-lg text-sm hover:bg-emerald-500/30 transition-all hover:scale-105 sc-mono text-emerald-400"
+          suppressHydrationWarning
         >
           {action.label}
         </button>
@@ -49,14 +50,14 @@ export function EmptyState({
 
   if (fullPage) {
     return (
-      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
+      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]" suppressHydrationWarning>
         <div className="max-w-md w-full p-6">{content}</div>
       </div>
     );
   }
 
   return (
-    <div className="py-12 px-4">
+    <div className="py-12 px-4" suppressHydrationWarning>
       {content}
     </div>
   );

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '../utils/test-utils';
-import CreateAgentPage from '@/app/agents/create/page';
+import CreateAgentPage from '@/app/(scorpion)/agents/create/page';
 import SpecializedAgentsPage from '@/app/(scorpion)/agents/specialized/page';
 import userEvent from '@testing-library/user-event';
 import { apiMocks, resetApiMocks } from '../utils/api-mocks';

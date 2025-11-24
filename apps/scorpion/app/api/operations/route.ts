@@ -55,7 +55,9 @@ export const GET = withErrorHandling(async () => {
       // Get operation details
       const operations = getAgentOperations(exec.agentId);
       const operation = operations.find(op => op.id === exec.operationId);
-      const startedAtTimestamp = Date.parse(exec.startedAt); // Pre-compute for sorting
+      const startedAtTimestamp = typeof exec.startedAt === 'string' 
+        ? Date.parse(exec.startedAt) || 0 
+        : (typeof exec.startedAt === 'number' ? exec.startedAt : 0); // Pre-compute for sorting
       
       // Get execution details including logs (use executionKey if available, otherwise operationId)
       const executionKey = exec.executionKey || exec.operationId;

@@ -42,7 +42,7 @@ export default function SettingsPage() {
   const loadStorageStatus = async () => {
     try {
       const response = await fetch('/api/storage/status');
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
         setStorageStatus(data);
       }
@@ -54,7 +54,7 @@ export default function SettingsPage() {
   const loadSystemInfo = async () => {
     try {
       const response = await fetch('/api/system/info');
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
         setSystemInfo(data);
       }
@@ -68,7 +68,7 @@ export default function SettingsPage() {
       // Only show loading spinner on initial load
       setLoading(true);
       const response = await fetch('/api/settings');
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
         // Update state with loaded settings
         if (data.ragIndexing !== undefined) setRagIndexing(data.ragIndexing);
@@ -115,7 +115,7 @@ export default function SettingsPage() {
         body: JSON.stringify(settings)
       });
       
-      if (response.ok) {
+      if (response && response.ok) {
         showToast('success', 'Settings saved successfully!');
       } else {
         throw new Error('Failed to save');
@@ -385,22 +385,22 @@ export default function SettingsPage() {
                 <div className="text-xs text-white/40">Current storage device</div>
               </div>
               <Badge
-                variant={storageStatus.isSSD ? 'success' : 'default'}
+                variant={storageStatus?.isSSD ? 'success' : 'default'}
                 size="md"
               >
-                {storageStatus.storageType.toUpperCase()}
+                {storageStatus?.storageType?.toUpperCase() || 'UNKNOWN'}
               </Badge>
             </div>
             
             <div>
               <div className="text-sm font-medium mb-1">Data Path</div>
-              <div className="text-xs sc-mono text-white/60 break-all">{storageStatus.dataPath}</div>
-              {storageStatus.isSSD && (
+              <div className="text-xs sc-mono text-white/60 break-all">{storageStatus?.dataPath || 'Loading...'}</div>
+              {storageStatus?.isSSD && (
                 <div className="text-[10px] text-emerald-400 mt-1">✅ Data stored on SSD</div>
               )}
             </div>
 
-            {storageStatus.performance && (
+            {storageStatus?.performance && (
               <div>
                 <div className="text-sm font-medium mb-2">Performance Benchmarks</div>
                 <div className="space-y-2 text-xs">
@@ -420,7 +420,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {storageStatus.performanceConfig && (
+            {storageStatus?.performanceConfig && (
               <div>
                 <div className="text-sm font-medium mb-2">Performance Configuration</div>
                 <div className="space-y-1.5 text-xs">
@@ -428,35 +428,35 @@ export default function SettingsPage() {
                     <span className="text-white/60">Workflow Batch Size:</span>
                     <span className="sc-mono text-white">
                       {storageStatus.performanceConfig.workflowSyncBatchSize}
-                      {storageStatus.isSSD && <span className="text-emerald-400 ml-1">(4x HDD)</span>}
+                      {storageStatus?.isSSD && <span className="text-emerald-400 ml-1">(4x HDD)</span>}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Concurrency:</span>
                     <span className="sc-mono text-white">
                       {storageStatus.performanceConfig.workflowSyncConcurrency}
-                      {storageStatus.isSSD && <span className="text-emerald-400 ml-1">(3.3x HDD)</span>}
+                      {storageStatus?.isSSD && <span className="text-emerald-400 ml-1">(3.3x HDD)</span>}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Media Concurrency:</span>
                     <span className="sc-mono text-white">
                       {storageStatus.performanceConfig.mediaProcessingConcurrency}
-                      {storageStatus.isSSD && <span className="text-emerald-400 ml-1">(3x HDD)</span>}
+                      {storageStatus?.isSSD && <span className="text-emerald-400 ml-1">(3x HDD)</span>}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Max File Size:</span>
                     <span className="sc-mono text-white">
                       {storageStatus.performanceConfig.mediaProcessingMaxFileSizeMB}MB
-                      {storageStatus.isSSD && <span className="text-emerald-400 ml-1">(5x HDD)</span>}
+                      {storageStatus?.isSSD && <span className="text-emerald-400 ml-1">(5x HDD)</span>}
                     </span>
                   </div>
                 </div>
               </div>
             )}
 
-            {storageStatus.optimizationsActive && storageStatus.optimizationsActive.length > 0 && (
+            {storageStatus?.optimizationsActive && storageStatus.optimizationsActive.length > 0 && (
               <div>
                 <div className="text-sm font-medium mb-2">Active Optimizations</div>
                 <div className="flex flex-wrap gap-2">
@@ -472,14 +472,14 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {storageStatus.detectedSSDPath && (
+            {storageStatus?.detectedSSDPath && (
               <div>
                 <div className="text-sm font-medium mb-1">Detected SSD</div>
                 <div className="text-xs sc-mono text-white/60">{storageStatus.detectedSSDPath}</div>
               </div>
             )}
 
-            {storageStatus.isSSD && (
+            {storageStatus?.isSSD && (
               <div className="pt-2 border-t border-white/10">
                 <div className="text-xs text-emerald-400 font-medium mb-1">🚀 SSD Mode Benefits</div>
                 <div className="text-[10px] text-white/60 space-y-0.5">

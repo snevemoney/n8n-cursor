@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Panel, Metric, useToast, PageLoadingBar } from '@/components/scorpion';
+import { Panel, useToast, PageLoadingBar } from '@/components/scorpion';
 
 interface BuildPlan {
   target: string;

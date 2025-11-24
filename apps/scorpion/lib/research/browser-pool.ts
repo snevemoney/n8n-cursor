@@ -27,20 +27,31 @@ export class BrowserPool extends EventEmitter {
   async initialize() {
     console.log('🌐 Initializing browser pool...');
     
+    try {
     // Create directories
     await fs.mkdir(this.screenshotDir, { recursive: true });
     await fs.mkdir(this.videoDir, { recursive: true });
 
     // Launch browsers
     for (let i = 0; i < this.maxBrowsers; i++) {
+        try {
       const browser = await chromium.launch({
         headless: process.env.PLAYWRIGHT_HEADLESS !== 'false',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
       this.browsers.push(browser);
-    }
+          console.log(`✅ Browser ${i + 1}/${this.maxBrowsers} launched`);
+        } catch (error: any) {
+          console.error(`❌ Failed to launch browser ${i + 1}:`, error.message);
+          throw new Error(`Browser pool initialization failed: ${error.message}. Make sure Playwright is installed: npx playwright install chromium`);
+        }
+      }
 
-    console.log(`✅ Browser pool initialized with ${this.maxBrowsers} browsers`);
+      console.log(`✅ Browser pool initialized with ${this.browsers.length} browsers`);
+    } catch (error: any) {
+      console.error('❌ Browser pool initialization failed:', error);
+      throw error;
+    }
   }
 
   async createResearchSession(sessionId: string): Promise<ResearchBrowser> {
@@ -106,6 +117,11 @@ export class ResearchBrowser {
     if (!this.page) {
       this.page = await this.context.newPage();
       
+      // Set a realistic user agent via extra HTTP headers to avoid bot detection
+      await this.page.setExtraHTTPHeaders({
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      });
+      
       // Intercept network requests for logging
       this.page.on('request', (request) => {
         if (request.resourceType() === 'document') {
@@ -119,9 +135,12 @@ export class ResearchBrowser {
     }
 
     await this.page.goto(url, { 
-      waitUntil: 'domcontentloaded',
+      waitUntil: 'networkidle', // Wait for network to be idle (better for JS-rendered content)
       timeout: 30000 
     });
+    
+    // Wait a bit more for JavaScript to render content
+    await this.page.waitForTimeout(2000);
     
     // Capture screenshot
     const screenshotPath = await this.captureScreenshot();
@@ -138,30 +157,76 @@ export class ResearchBrowser {
     if (!this.page) throw new Error('No active page');
 
     try {
-      await this.page.waitForSelector(selector, { timeout: 5000 });
-    } catch (error) {
-      console.warn(`Selector ${selector} not found, returning empty array`);
+      // Try to wait for selector, but don't fail if it doesn't exist
+      await this.page.waitForSelector(selector, { timeout: 3000 }).catch(() => {
+        // Selector not found, will return empty array
+      });
+
+      const data = await this.page.$$eval(selector, (elements) => {
+        return elements.map(el => {
+          // Get href from various possible attributes
+          let href = el.getAttribute('href');
+          if (!href) {
+            href = el.getAttribute('data-href') || el.getAttribute('data-url') || el.getAttribute('data-uddg');
+          }
+          
+          // For DuckDuckGo redirect URLs (/l/?uddg=...), extract the actual URL
+          if (href && (href.startsWith('/l/') || href.includes('uddg='))) {
+            // Try to extract from query params
+            try {
+              const urlMatch = href.match(/[?&](?:uddg|u)=([^&]+)/);
+              if (urlMatch) {
+                href = decodeURIComponent(urlMatch[1]);
+              } else if (href.startsWith('/l/')) {
+                // Keep /l/ URLs for now, we'll resolve them later
+                href = href;
+              }
+            } catch (e) {
+              // If parsing fails, try data attributes
+              const actualUrl = el.getAttribute('data-uddg') || el.getAttribute('data-url');
+              if (actualUrl) {
+                href = actualUrl;
+              }
+            }
+          }
+          
+          // Get text content - try multiple methods
+          const text = el.textContent?.trim() || el.innerText?.trim() || el.getAttribute('aria-label') || '';
+          
+          return {
+            text: text,
+            html: el.innerHTML || '',
+            href: href || null,
+            src: el.getAttribute('src') || null,
+            title: el.getAttribute('title') || el.getAttribute('aria-label') || null,
+            // Get all data attributes for debugging
+            dataAttrs: Array.from(el.attributes)
+              .filter(attr => attr.name.startsWith('data-'))
+              .reduce((acc, attr) => {
+                acc[attr.name] = attr.value;
+                return acc;
+              }, {} as Record<string, string>)
+          };
+        }).filter(item => {
+          // Keep items that have either text or href (or both)
+          // But skip if both are empty
+          return (item.text && item.text.length > 0) || (item.href && item.href.length > 0);
+        });
+      });
+      
+      this.onAction({
+        type: 'extract',
+        timestamp: Date.now(),
+        url: this.page.url(),
+        selector,
+        data: { count: data.length }
+      });
+
+      return data;
+    } catch (error: any) {
+      console.warn(`Failed to extract with selector ${selector}:`, error.message);
       return [];
     }
-
-    const data = await this.page.$$eval(selector, (elements) => {
-      return elements.map(el => ({
-        text: el.textContent?.trim(),
-        html: el.innerHTML,
-        href: el.getAttribute('href'),
-        src: el.getAttribute('src')
-      }));
-    });
-
-    this.onAction({
-      type: 'extract',
-      timestamp: Date.now(),
-      url: this.page.url(),
-      selector,
-      data: { count: data.length }
-    });
-
-    return data;
   }
 
   async click(selector: string): Promise<void> {
@@ -238,9 +303,9 @@ export class ResearchBrowser {
     return await this.page.evaluate(() => document.body.innerText);
   }
 
-  async evaluateScript(script: string): Promise<any> {
+  async evaluateScript(script: string | Function): Promise<any> {
     if (!this.page) throw new Error('No active page');
-    return await this.page.evaluate(script);
+    return await this.page.evaluate(script as any);
   }
 
   private async captureScreenshot(): Promise<string> {

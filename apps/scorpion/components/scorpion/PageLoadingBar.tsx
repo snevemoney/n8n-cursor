@@ -44,6 +44,7 @@ export function PageLoadingBar({ loading = false, className = '' }: PageLoadingB
     <div
       className={`fixed top-0 left-0 right-0 h-[3px] bg-transparent pointer-events-none ${className}`}
       aria-hidden="true"
+      suppressHydrationWarning
       style={{ 
         position: 'fixed',
         top: 0,

@@ -38,6 +38,27 @@ export class MCPn8nClient {
     // Trim whitespace that can cause auth failures
     this.apiKey = (process.env.N8N_API_KEY || '').trim();
     
+    // If API key seems truncated (< 100 chars for JWT), try reading from .env.local directly
+    if (this.apiKey && this.apiKey.length < 100) {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const envPath = path.join(process.cwd(), '.env.local');
+        if (fs.existsSync(envPath)) {
+          const envContent = fs.readFileSync(envPath, 'utf-8');
+          const match = envContent.match(/^N8N_API_KEY=(.+)$/m);
+          if (match && match[1]) {
+            const fileApiKey = match[1].trim();
+            if (fileApiKey.length > this.apiKey.length) {
+              this.apiKey = fileApiKey;
+            }
+          }
+        }
+      } catch (e) {
+        // Silently fail - use what we have from process.env
+      }
+    }
+    
     // VALIDATE API KEY - Detect placeholder values
     const placeholderPatterns = [
       'your-api-key',
@@ -204,7 +225,12 @@ export class MCPn8nClient {
             'Content-Type': 'application/json',
             ...options.headers
           },
-          signal: AbortSignal.timeout(30000)
+          cache: 'no-store', // Prevent Next.js from trying to cache >2MB responses
+          signal: (() => {
+            const controller = new AbortController();
+            setTimeout(() => controller.abort(), 30000);
+            return controller.signal;
+          })()
         });
 
         if (!response.ok) {

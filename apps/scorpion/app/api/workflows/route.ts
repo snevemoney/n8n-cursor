@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WorkflowIngester } from '@scorpion/core';
-import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
+import { N8nClient } from '@/lib/n8n-client';
 import { responseCache } from '@/lib/cache';
+import { forceSyncN8nWorkflows } from '@/lib/auto-sync';
 import path from 'path';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
@@ -16,10 +17,14 @@ function getWorkflowIngester(): WorkflowIngester {
     const workspaceRoot = path.resolve(process.cwd(), '../..');
     // Create a compatibility wrapper for WorkflowIngester
     // Pass null to prevent WorkflowIngester from calling n8n (we handle it separately)
+    const n8nClient = new N8nClient();
     const compatClient = {
       listWorkflows: () => Promise.resolve([]), // Return empty to skip n8n call in ingester
-      getWorkflow: (id: string) => getMCPn8nClient().getWorkflow(id),
-      exportWorkflow: (id: string) => getMCPn8nClient().exportWorkflow(id)
+      getWorkflow: (id: string) => n8nClient.getWorkflow(id),
+      exportWorkflow: async (id: string) => {
+        const workflow = await n8nClient.getWorkflow(id);
+        return workflow ? true : false;
+      }
     } as any;
     workflowIngester = new WorkflowIngester(workspaceRoot, compatClient);
   }
@@ -45,7 +50,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     }
 
     const ingester = getWorkflowIngester();
-    const n8nClient = getMCPn8nClient();
+    const n8nClient = new N8nClient();
     
     // PROGRESSIVE LOADING: Use cached filesystem workflows immediately
     // Start background refresh if needed, but don't wait
@@ -123,7 +128,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         Promise.race([
           n8nClient.listWorkflows(),
           new Promise<any[]>((_, reject) => 
-            setTimeout(() => reject(new Error('timeout')), 2000)
+            setTimeout(() => reject(new Error('timeout')), 30000)
           )
         ]).catch(() => [])
       ]).then(([fsWorkflows, n8nWorkflows]) => {
@@ -148,7 +153,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         const n8nWorkflows = await Promise.race([
           n8nClient.listWorkflows(),
           new Promise<any[]>((_, reject) => 
-            setTimeout(() => reject(new Error('n8n API timeout')), 2000)
+            setTimeout(() => reject(new Error('n8n API timeout')), 30000)
           )
         ]).catch(() => []);
         
@@ -182,16 +187,45 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       }
     }
     
-    // Start n8n call in background (don't wait for it)
-    // Use cached n8n data if available, otherwise start fresh fetch
-    // Reuse cachedN8n from above - it's still in scope
+    // Try to get n8n workflows - wait up to 10 seconds for fresh data if cache is empty
+    // Use cached n8n data if available, otherwise wait for fresh fetch
     let n8nWorkflows: any[] = cachedN8n || [];
     
-    // Start background fetch for n8n workflows (non-blocking)
+    // If no cached data, wait for n8n fetch (up to 30 seconds for pagination)
+    if (!cachedN8n || cachedN8n.length === 0) {
+      try {
+        console.log('🔄 Fetching workflows from n8n API...');
+        console.log('🔑 API Key configured:', !!process.env.N8N_API_KEY);
+        console.log('🌐 API URL:', process.env.N8N_API_URL || 'using default');
+        n8nWorkflows = await Promise.race([
+          n8nClient.listWorkflows(),
+          new Promise<any[]>((_, reject) => 
+            setTimeout(() => reject(new Error('n8n API timeout')), 30000)
+          )
+        ]);
+        // Cache successful n8n fetch for 30 seconds
+        if (Array.isArray(n8nWorkflows)) {
+          responseCache.set('n8n-workflows-list', n8nWorkflows, 30000);
+          console.log(`✅ Fetched ${n8nWorkflows.length} workflows from n8n API`);
+        } else {
+          console.warn('⚠️ n8n API returned non-array:', typeof n8nWorkflows);
+          n8nWorkflows = [];
+        }
+      } catch (error) {
+        const errorMessage = error?.message || String(error);
+        console.error('❌ n8n fetch failed:', errorMessage);
+        console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
+        console.error('❌ Error type:', error instanceof Error ? error.constructor.name : typeof error);
+        console.error('❌ Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        // Continue with empty array if fetch fails
+        n8nWorkflows = [];
+      }
+    } else {
+      // Start background refresh for next time (non-blocking)
     Promise.race([
       n8nClient.listWorkflows(),
       new Promise<any[]>((_, reject) => 
-        setTimeout(() => reject(new Error('n8n API timeout')), 2000)
+          setTimeout(() => reject(new Error('n8n API timeout')), 30000)
       )
     ]).then((workflows) => {
       // Cache successful n8n fetch for 30 seconds
@@ -199,44 +233,25 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         responseCache.set('n8n-workflows-list', workflows, 30000);
       }
     }).catch((error) => {
-      // Silently handle errors - we already have filesystem data
+        // Silently handle errors - we already have cached data
       const errorMessage = error?.message || String(error);
       if (!errorMessage.includes('timeout') && !errorMessage.includes('Circuit breaker')) {
         console.error('❌ Background n8n fetch failed:', errorMessage);
       }
     });
+    }
 
-    // Merge filesystem workflows with cached n8n data (if available)
-    const n8nWorkflowMap = new Map(n8nWorkflows.map((w: any) => [w.id, w]));
+    // PRIORITIZE CLOUD WORKFLOWS: Start with cloud workflows, then add local-only (deduplicated)
+    // Create maps for quick lookup by ID and name
+    const n8nWorkflowMapById = new Map(n8nWorkflows.map((w: any) => [w.id, w]));
+    const n8nWorkflowMapByName = new Map(n8nWorkflows.map((w: any) => [w.name.toLowerCase().trim(), w]));
     
-    // Merge: Start with filesystem workflows
-    const mergedWorkflows = filesystemWorkflows.map(w => {
-      // If workflow has n8nId, get updatedAt from matching n8n workflow
-      const n8nWf = w.n8nId ? n8nWorkflowMap.get(w.n8nId) : null;
-      const updatedAt = n8nWf 
-        ? ((n8nWf as any).updatedAt || (n8nWf as any).updated_at || undefined)
-        : (w.lastSync || undefined);
-      
-      return {
-        id: w.id,
-        name: w.name,
-        path: w.path,
-        trigger: w.trigger,
-        nodes: w.nodes,
-        active: w.active,
-        syncedToN8n: w.syncedToN8n,
-        n8nId: w.n8nId,
-        lastSync: w.lastSync,
-        updatedAt,
-        source: 'filesystem' as const
-      };
-    });
-
-    // Add n8n-only workflows (workflows in n8n but not in filesystem)
+    // Create sets for deduplication
     const filesystemN8nIds = new Set(filesystemWorkflows.map(fsWf => fsWf.n8nId).filter(Boolean));
-    const n8nOnlyWorkflows = n8nWorkflows
-      .filter((n8nWf: any) => !filesystemN8nIds.has(n8nWf.id))
-      .map((n8nWf: any) => {
+    const cloudWorkflowNames = new Set(n8nWorkflows.map((w: any) => w.name.toLowerCase().trim()));
+    
+    // Start with ALL cloud workflows (prioritize cloud)
+    const cloudWorkflows = n8nWorkflows.map((n8nWf: any) => {
         let trigger = 'Manual';
         if (n8nWf.nodes?.length > 0) {
           const triggerNode = n8nWf.nodes.find((n: any) => 
@@ -246,33 +261,72 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
             trigger = triggerNode.type.replace('n8n-nodes-base.', '').replace('Trigger', '');
           }
         }
+      
+      // Check if this cloud workflow has a local file (by ID or name)
+      const hasLocalFileById = filesystemN8nIds.has(n8nWf.id);
+      const hasLocalFileByName = filesystemWorkflows.some(fsWf => 
+        fsWf.name.toLowerCase().trim() === n8nWf.name.toLowerCase().trim()
+      );
+      const hasLocalFile = hasLocalFileById || hasLocalFileByName;
         
         return {
           id: n8nWf.id,
           name: n8nWf.name,
-          path: 'n8n-only',
+        path: hasLocalFile ? 'cloud-and-local' : 'n8n-only',
           trigger,
           nodes: n8nWf.nodes?.length || 0,
-          active: n8nWf.active || false,
+        active: n8nWf.active || false, // Only cloud active status matters
           syncedToN8n: true,
           n8nId: n8nWf.id,
           lastSync: undefined,
           updatedAt: n8nWf.updatedAt || n8nWf.updated_at || undefined,
-          source: 'n8n' as const
+        source: hasLocalFile ? 'both' as const : 'n8n' as const
         };
       });
 
-    const allWorkflows = [...mergedWorkflows, ...n8nOnlyWorkflows];
+    // Add ONLY local workflows that don't exist in cloud (deduplicate by ID or name)
+    const localOnlyWorkflows = filesystemWorkflows
+      .filter(w => {
+        // Exclude if it has an n8nId that matches a cloud workflow
+        if (w.n8nId && n8nWorkflowMapById.has(w.n8nId)) {
+          return false;
+        }
+        // Exclude if the name matches a cloud workflow (case-insensitive)
+        const normalizedName = w.name.toLowerCase().trim();
+        if (cloudWorkflowNames.has(normalizedName)) {
+          return false;
+        }
+        return true; // This is a unique local workflow
+      })
+      .map(w => ({
+        id: w.id,
+        name: w.name,
+        path: w.path,
+        trigger: w.trigger,
+        nodes: w.nodes,
+        active: false, // Local workflows don't count as active (only cloud matters)
+        syncedToN8n: false,
+        n8nId: w.n8nId,
+        lastSync: w.lastSync,
+        updatedAt: w.lastSync || undefined,
+        source: 'filesystem' as const
+      }));
 
-    // Calculate metrics
+    // Combine: cloud workflows first (prioritized), then local-only (unique only)
+    const allWorkflows = [...cloudWorkflows, ...localOnlyWorkflows];
+
+    // Calculate metrics - prioritize cloud workflows
     const n8nWorkflowIds = new Set(n8nWorkflows.map((w: any) => w.id));
-    const localFilesWithN8nId = mergedWorkflows.filter(w => 
+    const localFilesWithN8nId = filesystemWorkflows.filter(w => 
       w.n8nId && n8nWorkflowIds.has(w.n8nId)
     ).length;
     const uniqueN8nIdsInLocal = new Set(
-      mergedWorkflows.filter(w => w.n8nId && n8nWorkflowIds.has(w.n8nId)).map(w => w.n8nId)
+      filesystemWorkflows.filter(w => w.n8nId && n8nWorkflowIds.has(w.n8nId)).map(w => w.n8nId)
     ).size;
-    const localOnly = mergedWorkflows.filter(w => !w.n8nId).length;
+    const localOnly = localOnlyWorkflows.length;
+    
+    // Only count active workflows from cloud (local workflows don't count as active)
+    const activeCloudWorkflows = cloudWorkflows.filter(w => w.active).length;
     
     const result = {
       workflows: allWorkflows,
@@ -282,8 +336,8 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         localFilesLinkedToN8n: localFilesWithN8nId,
         uniqueLinkedWorkflows: uniqueN8nIdsInLocal,
         localOnly,
-        n8nOnly: n8nOnlyWorkflows.length,
-        active: allWorkflows.filter(w => w.active).length,
+        n8nOnly: cloudWorkflows.filter(w => w.source === 'n8n').length,
+        active: activeCloudWorkflows, // Only cloud active workflows
         synced: localFilesWithN8nId,
         localSyncedToN8n: localFilesWithN8nId,
         filesystemOnly: localOnly
@@ -317,12 +371,17 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     // Invalidate caches since workflows are being synced
     responseCache.invalidate('workflows-list');
     responseCache.invalidate('project-status');
+    responseCache.invalidate('n8n-workflows-list');
+    responseCache.invalidate('filesystem-workflows-list');
     
-    // This would trigger the sync script
-    // For now, just return success
+    // Trigger the sync in the background (don't wait for it)
+    forceSyncN8nWorkflows().catch((error) => {
+      console.error('❌ Error during force sync:', error);
+    });
+    
     return createSuccessResponse({
-      message: 'Workflow sync initiated. Use the sync script for actual syncing.',
-      note: 'Run: pnpm run workflows:sync'
+      message: 'Workflow sync initiated',
+      note: 'Syncing workflows from n8ncloud.tech. This may take a few moments.'
     });
   }
 

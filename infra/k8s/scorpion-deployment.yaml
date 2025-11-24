@@ -1,0 +1,129 @@
+---
+# Scorpion Deployment for Kubernetes
+# Optional: Only deploy if K8S_ENABLED=true
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scorpion
+  labels:
+    app: scorpion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scorpion
+  template:
+    metadata:
+      labels:
+        app: scorpion
+    spec:
+      containers:
+      - name: scorpion
+        image: ghcr.io/yourorg/scorpion:prod
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3003
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3003"
+        - name: SCORPION_STORAGE_AUTO_DETECT
+          value: "false"
+        - name: SCORPION_SSD_PATH
+          value: "/app/data/scorpion"
+        # Optional: VLLM configuration
+        - name: VLLM_ENABLED
+          value: "true"
+        - name: VLLM_API_URL
+          value: "http://vllm-service:8000"
+        - name: VLLM_MODEL
+          valueFrom:
+            configMapKeyRef:
+              name: scorpion-config
+              key: vllm-model
+              optional: true
+        - name: LLM_PROVIDER_PRIORITY
+          value: "ollama,vllm,openai"
+        - name: N8N_API_URL
+          value: "http://n8n-service:5678"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: scorpion-data
+          mountPath: /app/data/scorpion
+        - name: scorpion-backups
+          mountPath: /app/backups/scorpion
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 3003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 3003
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+      volumes:
+      - name: scorpion-data
+        persistentVolumeClaim:
+          claimName: scorpion-data-pvc
+      - name: scorpion-backups
+        persistentVolumeClaim:
+          claimName: scorpion-backups-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scorpion-service
+  labels:
+    app: scorpion
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3003
+    targetPort: 3003
+    protocol: TCP
+    name: http
+  selector:
+    app: scorpion
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scorpion-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scorpion-backups-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scorpion-config
+data:
+  vllm-model: "mistralai/Mistral-7B-Instruct-v0.2"
+

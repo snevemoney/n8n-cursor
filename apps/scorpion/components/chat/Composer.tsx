@@ -1,62 +1,106 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { isElementSafe, safeFocus, safeSetSelectionRange } from '@/lib/utils/dom-safe';
 import { useChatStore } from '@/lib/chat/chatStore';
 import { Send, Square, Sparkles, ChevronDown, Check } from 'lucide-react';
 import { listUserTools } from '@/lib/chat/tools/user-tools/client';
 import { Button, Input, Textarea } from '@/components/scorpion';
+import { VoiceButton } from './VoiceButton';
 
 interface ComposerProps {
   onSend: (message: string) => void;
   onStop?: () => void;
+  availableModels?: string[];
+  conversationId?: string;
 }
 
 /**
  * Composer - Message input with slash commands
  */
-export function Composer({ onSend, onStop }: ComposerProps) {
+export function Composer({ onSend, onStop, availableModels: propAvailableModels = [], conversationId }: ComposerProps) {
   const { inputValue, setInputValue, isStreaming, provider, model, setProvider, setModel } = useChatStore();
+  const [localValue, setLocalValue] = useState(''); // Local state for immediate button updates
+  const [domValue, setDomValue] = useState(''); // Track DOM value for button disabled state
   const [showCommands, setShowCommands] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [modelSearch, setModelSearch] = useState('');
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [availableModels, setAvailableModels] = useState<string[]>(propAvailableModels);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const localValueRef = useRef(localValue);
+  
+  // Keep ref in sync
+  useEffect(() => {
+    localValueRef.current = localValue;
+  }, [localValue]);
+  
+  // Sync store value to local on mount/external changes
+  useEffect(() => {
+    setLocalValue(inputValue);
+  }, [inputValue]);
+  
+  // Sync DOM value for browser automation (fallback if onChange doesn't fire)
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    const handleInput = () => {
+      const value = textarea.value;
+      console.log('[Composer] DOM input event', { value, currentLocalValue: localValueRef.current });
+      setDomValue(value); // Always update domValue to trigger button re-render
+      if (value !== localValueRef.current) {
+        localValueRef.current = value;
+        setLocalValue(value);
+        setInputValue(value);
+        console.log('[Composer] Synced DOM value to state', { value });
+      }
+    };
+    
+    // Poll to check DOM value periodically (for browser automation that doesn't trigger events)
+    const checkInterval = setInterval(() => {
+      const currentValue = textarea.value;
+      // Always update domValue state to trigger button re-render
+      setDomValue(currentValue);
+      if (currentValue !== localValueRef.current) {
+        console.log('[Composer] Poll detected DOM change', { currentValue, localValueRef: localValueRef.current });
+        localValueRef.current = currentValue;
+        setLocalValue(currentValue);
+        setInputValue(currentValue);
+      }
+    }, 100);
+    
+    // Listen to input events (catches browser automation)
+    textarea.addEventListener('input', handleInput);
+    
+    return () => {
+      textarea.removeEventListener('input', handleInput);
+      clearInterval(checkInterval);
+    };
+  }, [setInputValue]);
   
   // Get user tools for slash commands
   const userTools = useMemo(() => listUserTools(), []);
   
-  // Fetch models based on provider
+  // Sync availableModels from prop (fetched by useChatState to avoid duplicate requests)
   useEffect(() => {
-    const fetchModels = async () => {
-      if (provider === 'ollama') {
-        try {
-          const response = await fetch('/api/ollama/models');
-          const data = await response.json();
-          if (data.success && data.available && data.models?.length > 0) {
-            const modelNames = data.models.map((m: any) => m.name);
-            setAvailableModels(modelNames);
-            if (modelNames.length > 0 && !modelNames.includes(model)) {
-              setModel(modelNames[0]);
-            }
-          } else {
-            setAvailableModels([]);
-          }
-        } catch (error) {
-          console.error('Failed to fetch Ollama models:', error);
-          setAvailableModels([]);
-        }
-      } else if (provider === 'openai') {
-        const openaiModels = ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'];
-        setAvailableModels(openaiModels);
-        if (!openaiModels.includes(model)) {
-          setModel('gpt-4o-mini');
-        }
+    setAvailableModels(propAvailableModels);
+    // Auto-select first model if current model is not in the list
+    if (propAvailableModels.length > 0 && !propAvailableModels.includes(model)) {
+      setModel(propAvailableModels[0]);
+    }
+  }, [propAvailableModels, model, setModel]);
+  
+  // Handle OpenAI models (static list, no fetch needed)
+  useEffect(() => {
+    if (provider === 'openai') {
+      const openaiModels = ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+      setAvailableModels(openaiModels);
+      if (!openaiModels.includes(model)) {
+        setModel('gpt-4o-mini');
       }
-    };
-    
-    fetchModels();
+    }
   }, [provider, model, setModel]);
   
   // Close dropdown when clicking outside
@@ -133,29 +177,66 @@ export function Composer({ onSend, onStop }: ComposerProps) {
   
   // Auto-focus logic: only when value changes externally (not during typing)
   useEffect(() => {
-    if (inputValue && textareaRef.current && !isStreaming && document.activeElement !== textareaRef.current) {
-      // Use requestAnimationFrame for immediate focus without delay
-      const timer = requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          textareaRef.current?.focus();
-          const length = inputValue.length;
-          textareaRef.current?.setSelectionRange(length, length);
+    if (inputValue && !isStreaming) {
+      const textarea = textareaRef.current;
+      if (textarea && document.activeElement !== textarea) {
+        // Use requestAnimationFrame for immediate focus without delay
+        const timer = requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (safeFocus(textarea)) {
+              safeSetSelectionRange(textarea, inputValue.length, inputValue.length);
+            }
+          });
         });
-      });
-      return () => cancelAnimationFrame(timer);
+        return () => cancelAnimationFrame(timer);
+      }
     }
   }, [inputValue, isStreaming]);
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isStreaming) return;
+  const handleSubmit = (e: React.FormEvent | React.KeyboardEvent) => {
+    console.log('[Composer] handleSubmit called', {
+      event: e.type,
+      localValue,
+      inputValue,
+      domValue: textareaRef.current?.value,
+      isStreaming,
+      timestamp: Date.now()
+    });
     
-    onSend(inputValue.trim());
+    e.preventDefault();
+    e.stopPropagation(); // Prevent event bubbling
+    
+    // Check all sources: localValue, inputValue, and DOM value
+    const domValue = textareaRef.current?.value?.trim() || '';
+    const valueToSend = localValue.trim() || inputValue.trim() || domValue;
+    
+    console.log('[Composer] Value check', {
+      domValue,
+      localValue: localValue.trim(),
+      inputValue: inputValue.trim(),
+      valueToSend,
+      isStreaming,
+      willSend: !!(valueToSend && !isStreaming)
+    });
+    
+    if (!valueToSend || isStreaming) {
+      console.log('[Composer] Submission blocked', { valueToSend, isStreaming });
+      return;
+    }
+    
+    console.log('[Composer] Calling onSend', { valueToSend });
+    // Send the message
+    onSend(valueToSend);
+    
+    // Clear all state and DOM
+    setLocalValue('');
+    setDomValue(''); // Clear DOM value state
     setInputValue('');
-    // Reset textarea height after submit
     if (textareaRef.current) {
+      textareaRef.current.value = '';
       textareaRef.current.style.height = 'auto';
     }
+    console.log('[Composer] Form cleared after submission');
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -195,48 +276,34 @@ export function Composer({ onSend, onStop }: ComposerProps) {
   };
   
   const insertCommand = (cmd: string) => {
-    setInputValue(cmd + ' ');
+    const cmdWithSpace = cmd + ' ';
+    setLocalValue(cmdWithSpace);
+    setInputValue(cmdWithSpace);
     setShowCommands(false);
     // Focus immediately after state update using requestAnimationFrame
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        textareaRef.current?.focus();
-        const length = (cmd + ' ').length;
-        textareaRef.current?.setSelectionRange(length, length);
+        const textarea = textareaRef.current;
+        if (safeFocus(textarea)) {
+          safeSetSelectionRange(textarea, cmdWithSpace.length, cmdWithSpace.length);
+        }
       });
     });
   };
   
-  // Auto-resize textarea
+  // Auto-resize textarea and update both local and store state
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
+    const value = e.target.value;
+    console.log('[Composer] handleInputChange', { value, length: value.length });
+    localValueRef.current = value;
+    setLocalValue(value); // Update local immediately for button
+    setDomValue(value); // Update DOM value state
+    setInputValue(value); // Update store
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
     }
   };
-  
-  // Sync textarea DOM value with React state (handles direct DOM manipulation from browser automation)
-  // This is needed because browser automation tools type directly into the DOM, bypassing React's onChange
-  useEffect(() => {
-    if (!textareaRef.current) return;
-    
-    const textarea = textareaRef.current;
-    
-    // Check periodically for direct DOM manipulation (browser automation)
-    // Only sync if DOM value differs significantly to avoid interfering with normal typing
-    const syncInterval = setInterval(() => {
-      if (textarea && document.activeElement === textarea) {
-        // Only sync when textarea is focused (user/browser automation is typing)
-        const domValue = textarea.value;
-        if (domValue !== inputValue) {
-          setInputValue(domValue);
-        }
-      }
-    }, 300); // Check every 300ms (less frequent to avoid performance issues)
-    
-    return () => clearInterval(syncInterval);
-  }, [inputValue, setInputValue]);
   
   return (
     <div className="relative border-t border-white/10 bg-gradient-to-b from-[#0c1014]/90 to-[#0a0d10] backdrop-blur-xl">
@@ -289,10 +356,10 @@ export function Composer({ onSend, onStop }: ComposerProps) {
       )}
       
       {/* Input form */}
-      <form onSubmit={handleSubmit} className="px-6 py-4 sm:px-8 sm:py-6">
+      <form onSubmit={handleSubmit} className="px-6 py-4 sm:px-8 sm:py-6 relative z-10">
         <div className="flex items-end gap-4 sm:gap-5 max-w-5xl mx-auto">
           {/* Model Selector Dropdown - Minimal, secondary priority */}
-          <div className="relative flex-shrink-0 hidden sm:block" ref={dropdownRef}>
+          <div className="relative flex-shrink-0 hidden sm:block z-20" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setShowModelDropdown(!showModelDropdown)}
@@ -414,7 +481,9 @@ export function Composer({ onSend, onStop }: ComposerProps) {
           <div className="flex-1 relative min-w-0">
             <Textarea
               ref={textareaRef}
-              value={inputValue}
+              data-testid="message-input"
+              data-streaming={isStreaming ? 'true' : 'false'}
+              value={localValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder="Message Scorpion..."
@@ -424,8 +493,38 @@ export function Composer({ onSend, onStop }: ComposerProps) {
               style={{ 
                 minHeight: '56px',
                 maxHeight: '200px',
+                pointerEvents: 'auto',
+                zIndex: 9999,
               }}
               aria-label="Message input"
+            />
+          </div>
+          
+          {/* Voice Button */}
+          <div className="flex-shrink-0">
+            <VoiceButton
+              onTranscriptionReceived={(text) => {
+                // LIVE TRANSCRIPTION: Update text box in real-time as user speaks
+                console.log('[Composer] 📝 Live transcription received:', text);
+                
+                if (!text || text.trim().length === 0) {
+                  return; // Ignore empty transcriptions
+                }
+                
+                // For live transcription, we want to APPEND new words as they come in
+                // Whisper returns full sentences, so we'll replace/update the text
+                // The text box will update every 2 seconds with the latest transcription
+                setLocalValue(text);
+                setInputValue(text);
+                
+                // Don't auto-send - let user review and send manually when done
+              }}
+              onTextReceived={(text) => {
+                // Assistant response text (optional - for display)
+                console.log('[Composer] Assistant text received:', text);
+              }}
+              conversationId={conversationId}
+              profile="cloud"
             />
           </div>
           
@@ -433,12 +532,14 @@ export function Composer({ onSend, onStop }: ComposerProps) {
           <div className="flex-shrink-0">
             {isStreaming ? (
               <Button
+                data-testid="chat-stop-button"
                 variant="danger"
                 size="lg"
                 type="button"
                 onClick={onStop}
                 icon={<Square className="h-5 w-5" />}
-                className="px-5 py-4 sm:px-6 sm:py-4 rounded-2xl shadow-lg shadow-red-500/10 backdrop-blur-sm hover:scale-105"
+                className="px-5 py-4 sm:px-6 sm:py-4 rounded-2xl shadow-lg shadow-red-500/10 backdrop-blur-sm hover:scale-105 pointer-events-auto"
+                style={{ zIndex: 9999 }}
                 title="Stop generation"
                 aria-label="Stop message generation"
               >
@@ -446,12 +547,46 @@ export function Composer({ onSend, onStop }: ComposerProps) {
               </Button>
             ) : (
               <Button
+                data-testid="chat-send-button"
                 variant="primary"
                 size="lg"
                 type="submit"
-                disabled={!inputValue.trim()}
+                disabled={isStreaming || (!localValue.trim() && !domValue.trim())}
+                onClick={(e) => {
+                  // Direct onClick handler as fallback if form submission is blocked
+                  console.log('[Composer] Button onClick fired', {
+                    type: e.type,
+                    buttonType: (e.target as HTMLButtonElement).type,
+                    isStreaming,
+                    localValue,
+                    domValue,
+                    disabled: isStreaming || (!localValue.trim() && !domValue.trim())
+                  });
+                  
+                  // If button is disabled, don't do anything
+                  if (isStreaming || (!localValue.trim() && !domValue.trim())) {
+                    e.preventDefault();
+                    return;
+                  }
+                  
+                  // Create a synthetic form event and call handleSubmit directly
+                  // This ensures submission works even if form onSubmit is blocked
+                  const form = (e.target as HTMLElement).closest('form');
+                  if (form) {
+                    const syntheticEvent = {
+                      ...e,
+                      type: 'submit',
+                      target: form,
+                      currentTarget: form,
+                      preventDefault: () => e.preventDefault(),
+                      stopPropagation: () => e.stopPropagation(),
+                    } as unknown as React.FormEvent;
+                    handleSubmit(syntheticEvent);
+                  }
+                }}
                 icon={<Send className="h-5 w-5" />}
-                className="px-5 py-4 sm:px-6 sm:py-4 rounded-2xl shadow-lg shadow-emerald-500/30 backdrop-blur-sm hover:scale-105"
+                className="px-5 py-4 sm:px-6 sm:py-4 rounded-2xl shadow-lg shadow-emerald-500/30 backdrop-blur-sm hover:scale-105 pointer-events-auto"
+                style={{ zIndex: 9999 }}
                 title="Send message (Enter)"
                 aria-label="Send message"
               >

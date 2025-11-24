@@ -1,0 +1,67 @@
+[
+  {
+    "id": "insurance-risk-ml-correct",
+    "description": "Properly using ML for insurance risk prediction.",
+    "goalDescription": "I want to build a model that predicts insurance pricing and risk based on historical claims.",
+    "planSummary": "Use machine learning on structured claims data to predict risk scores and prices.",
+    "draftAnswer": "",
+    "expectedIssueTags": []
+  },
+  {
+    "id": "confuse-genai-with-prediction",
+    "description": "User confuses generative AI with predictive modeling.",
+    "goalDescription": "I want to generate synthetic risk scores for each client using generative AI instead of classic machine learning.",
+    "planSummary": "Use a text generator or image generator to create risk scores and then use that as pricing.",
+    "draftAnswer": "",
+    "expectedIssueTags": ["correctness"]
+  },
+  {
+    "id": "mix-cv-and-nlp",
+    "description": "User mixes computer vision and NLP incorrectly.",
+    "goalDescription": "I want to use an NLP model to read images of damaged cars and classify the damage level.",
+    "planSummary": "Feed car crash photos into a language model and ask it to describe the damage.",
+    "draftAnswer": "",
+    "expectedIssueTags": ["correctness"]
+  },
+  {
+    "id": "simple-nlp-chatbot",
+    "description": "Plain NLP / LLM use – no issue.",
+    "goalDescription": "I want a chatbot that explains our insurance products to clients in natural language.",
+    "planSummary": "Use an LLM fine-tuned or prompted with our product documentation.",
+    "draftAnswer": "",
+    "expectedIssueTags": []
+  },
+  {
+    "id": "youtube-recommendation-ml",
+    "description": "Recommendation system correctly framed as ML.",
+    "goalDescription": "Like YouTube, I want to recommend videos based on what users watched before.",
+    "planSummary": "Train a collaborative filtering or ML model using watch history.",
+    "draftAnswer": "",
+    "expectedIssueTags": []
+  },
+  {
+    "id": "llm-for-structured-prediction",
+    "description": "Using LLM for structured data prediction when ML is better.",
+    "goalDescription": "I want to predict customer churn using our database of customer records.",
+    "planSummary": "Use ChatGPT to analyze the CSV file and predict which customers will leave.",
+    "draftAnswer": "",
+    "expectedIssueTags": ["correctness"]
+  },
+  {
+    "id": "cv-task-correct",
+    "description": "Correctly using Computer Vision for image tasks.",
+    "goalDescription": "I need to detect faces in photos for our security system.",
+    "planSummary": "Use a computer vision model with face detection capabilities.",
+    "draftAnswer": "",
+    "expectedIssueTags": []
+  },
+  {
+    "id": "dl-for-simple-task",
+    "description": "Using deep learning for a simple rule-based task.",
+    "goalDescription": "I want a simple if-then rule system to approve or deny loan applications.",
+    "planSummary": "Build a deep neural network with multiple layers to learn the approval rules.",
+    "draftAnswer": "",
+    "expectedIssueTags": ["complexity"]
+  }
+]
+

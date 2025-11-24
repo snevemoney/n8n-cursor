@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Panel, Metric, PageLoadingBar, LoadingState } from '@/components/scorpion';
+import { useState, useEffect, useMemo } from 'react';
+import { Panel, PageLoadingBar } from '@/components/scorpion';
+import { SpeakButton } from '@/components/voice/SpeakButton';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -37,22 +38,23 @@ export default function ExperimentDetailPage({ params }: { params: { id: string 
   const id = params.id;
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [loading, setLoading] = useState(false); // Start false so page renders immediately
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id) {
+    if (!id) return;
+    
       // Defer data fetch so page renders first
       setTimeout(() => {
         loadExperiment();
       }, 0);
+    
       // Refresh if running
       const interval = setInterval(() => {
         if (experiment?.status === 'running') {
           loadExperiment();
         }
       }, 5000);
+    
       return () => clearInterval(interval);
-    }
   }, [id, experiment?.status]);
 
   const loadExperiment = async () => {
@@ -67,14 +69,13 @@ export default function ExperimentDetailPage({ params }: { params: { id: string 
         if (result.success && result.data) {
           setExperiment(result.data);
         } else {
-          setError('Experiment not found');
+          console.error('Experiment not found');
         }
       } else {
-        setError('Experiment not found');
+        console.error('Experiment not found');
       }
     } catch (err) {
       console.error('Failed to load experiment:', err);
-      setError('Failed to load experiment');
     } finally {
       setLoading(false);
     }
@@ -95,15 +96,55 @@ export default function ExperimentDetailPage({ params }: { params: { id: string 
     return new Date(dateString).toLocaleString();
   };
 
+  // Generate summary text for voice - Power of 10 Rule 3: Small function
+  const experimentSummary = useMemo(() => {
+    if (!experiment) return '';
+    
+    const parts: string[] = [];
+    parts.push(`Experiment: ${experiment.name}`);
+    if (experiment.description) {
+      parts.push(`Description: ${experiment.description}`);
+    }
+    parts.push(`Status: ${experiment.status}`);
+    parts.push(`Base Model: ${experiment.baseModel}`);
+    parts.push(`Strategy: ${experiment.strategy}`);
+    
+    if (experiment.metrics) {
+      const metricParts: string[] = [];
+      if (experiment.metrics['loss'] !== undefined) {
+        const loss = experiment.metrics['loss'];
+        if (typeof loss === 'number') {
+          metricParts.push(`Loss: ${loss.toFixed(4)}`);
+        }
+      }
+      if (experiment.metrics['accuracy'] !== undefined) {
+        const accuracy = experiment.metrics['accuracy'];
+        if (typeof accuracy === 'number') {
+          metricParts.push(`Accuracy: ${(accuracy * 100).toFixed(1)}%`);
+        }
+      }
+      if (metricParts.length > 0) {
+        parts.push(`Metrics: ${metricParts.join(', ')}`);
+      }
+    }
+    
+    return parts.join('. ');
+  }, [experiment]);
+
   return (
     <>
       <PageLoadingBar loading={loading && !experiment} />
       <div className="h-full flex flex-col gap-4 p-4 overflow-y-auto">
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
         <Link href="/llm/experiments" className="text-cyan-400 hover:text-cyan-300 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="sc-title text-2xl">{experiment?.name || 'Loading...'}</h1>
+          </div>
+          {experimentSummary && (
+            <SpeakButton text={experimentSummary} />
+          )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

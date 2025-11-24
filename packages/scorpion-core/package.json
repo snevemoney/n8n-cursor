@@ -14,17 +14,27 @@
     "./council": "./src/council/index.ts",
     "./ontology": "./src/ontology/index.ts",
     "./storage/persistent-store": "./src/storage/persistent-store.ts",
-    "./code": "./src/code/index.ts"
+    "./code": "./src/code/index.ts",
+    "./devtools": "./src/devtools/index.ts",
+    "./devtools/tool-spy": "./src/devtools/tool-spy.ts",
+    "./devtools/scenarios": "./src/devtools/scenarios.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsup src/index.ts --format esm,cjs --dts --outDir dist",
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@lightningflow/shared-config": "workspace:*",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "rimraf": "^5.0.0"
+  },
+  "optionalDependencies": {
+    "jsonrepair": "^3.13.1"
   }
 }
-

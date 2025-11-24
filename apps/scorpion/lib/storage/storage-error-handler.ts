@@ -50,6 +50,8 @@ export function isStorageError(error: any): boolean {
       error.message.includes('EACCES') ||
       error.message.includes('disconnected') ||
       error.message.includes('not found') ||
+      error.message.includes('not accessible') ||
+      error.message.includes('Storage not accessible') ||
       error.message.includes('permission denied')
     ))
   );
@@ -143,7 +145,11 @@ export async function writeFileWithFallback(
       // Check if storage is accessible before writing
       const dir = path.dirname(currentPath);
       if (!(await isStorageAccessible(dir))) {
-        throw new Error(`Storage not accessible: ${dir}`);
+        // Create a storage error that will trigger fallback
+        const error: any = new Error(`Storage not accessible: ${dir}`);
+        error.code = 'ENOENT';
+        error.isStorageError = true;
+        throw error;
       }
       
       // Write file
@@ -170,6 +176,24 @@ export async function writeFileWithFallback(
         usedFallback = true;
         
         console.warn(`⚠️ Storage error on attempt ${attempt + 1}, switching to fallback: ${currentPath}`);
+        
+        // Verify fallback path is accessible before continuing
+        try {
+          await fs.mkdir(path.dirname(currentPath), { recursive: true });
+          const testAccess = await isStorageAccessible(path.dirname(currentPath));
+          if (!testAccess) {
+            console.warn(`⚠️ Fallback path also not accessible, will try default location`);
+            // Use default location as ultimate fallback
+            const defaultDir = path.join(process.cwd(), 'data', 'scorpion');
+            await fs.mkdir(defaultDir, { recursive: true });
+            currentPath = path.join(defaultDir, fileName);
+          }
+        } catch (fallbackError) {
+          // If fallback setup fails, use default location
+          const defaultDir = path.join(process.cwd(), 'data', 'scorpion');
+          await fs.mkdir(defaultDir, { recursive: true });
+          currentPath = path.join(defaultDir, fileName);
+        }
         
         // Wait before retry
         await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
@@ -274,7 +298,11 @@ export async function ensureDirWithFallback(
           usedFallback
         };
       } else {
-        throw new Error('Storage not accessible');
+        // Create a storage error that will trigger fallback
+        const error: any = new Error('Storage not accessible');
+        error.code = 'ENOENT';
+        error.isStorageError = true;
+        throw error;
       }
     } catch (error: any) {
       if (isStorageError(error) && attempt < maxRetries - 1) {
@@ -313,37 +341,57 @@ export async function ensureDirWithFallback(
 
 /**
  * Validate storage configuration and refresh if needed
+ * Only refreshes if storage is actually inaccessible (not just on every call)
  */
+let lastValidationTime = 0;
+let lastValidationResult: { isValid: boolean; wasRefreshed: boolean; config: StorageConfig } | null = null;
+const VALIDATION_CACHE_MS = 5000; // Cache validation results for 5 seconds
+
 export async function validateAndRefreshStorage(): Promise<{
   isValid: boolean;
   wasRefreshed: boolean;
   config: StorageConfig;
 }> {
+  // Use cached result if recent (prevents repeated checks)
+  const now = Date.now();
+  if (lastValidationResult && (now - lastValidationTime) < VALIDATION_CACHE_MS) {
+    return lastValidationResult;
+  }
+
   const currentConfig = await getStorageConfig();
   
   // Check if current storage is accessible
   const isAccessible = await isStorageAccessible(currentConfig.dataDir);
   
   if (isAccessible) {
-    return {
+    lastValidationResult = {
       isValid: true,
       wasRefreshed: false,
       config: currentConfig
     };
+    lastValidationTime = now;
+    return lastValidationResult;
   }
   
-  // Storage is not accessible, refresh detection
-  console.warn('⚠️ Current storage not accessible, refreshing detection...');
+  // Storage is not accessible, refresh detection (but only log once per refresh cycle)
+  // Don't spam logs - only log if this is a new failure
+  if (!lastValidationResult || lastValidationResult.isValid) {
+    console.warn('⚠️ Storage not accessible, refreshing detection (one-time check)...');
+  }
   clearDetectionCache();
   resetStorageConfig();
   
   const { initializeStorageConfig } = await import('./storage-config');
   const refreshedConfig = await initializeStorageConfig();
   
-  return {
-    isValid: await isStorageAccessible(refreshedConfig.dataDir),
+  const refreshedIsAccessible = await isStorageAccessible(refreshedConfig.dataDir);
+  lastValidationResult = {
+    isValid: refreshedIsAccessible,
     wasRefreshed: true,
     config: refreshedConfig
   };
+  lastValidationTime = now;
+  
+  return lastValidationResult;
 }
 

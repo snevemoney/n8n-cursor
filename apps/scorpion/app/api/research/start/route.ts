@@ -11,6 +11,7 @@ import { LLMAdapter } from '@scorpion/core';
 import { v4 as uuidv4 } from 'uuid';
 import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, validateRequest, ApiErrorCode } from '@/lib/api-error-handler';
+import { saveResearchSession, type ResearchSession } from '@/lib/research/research-storage';
 import { z } from 'zod';
 
 // Store active sessions
@@ -33,6 +34,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
     // Create session ID
     const sessionId = uuidv4();
+    const startedAt = new Date().toISOString();
     
     // Initialize browser and agents
     const browserPool = await getBrowserPool();
@@ -43,8 +45,31 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       model: process.env.OLLAMA_MODEL || getRecommendedModelForRAM()
     });
 
+    // Create initial session record
+    const sessionRecord: ResearchSession = {
+      sessionId,
+      query,
+      category,
+      depth,
+      maxSites,
+      status: 'in_progress',
+      startedAt,
+    };
+    
+    // Persist initial session
+    await saveResearchSession(sessionRecord).catch(err => {
+      console.warn('[Research] Failed to persist session:', err);
+    });
+
+    // Add to active sessions immediately so polling can find it
+    activeSessions.set(sessionId, {
+      status: 'in_progress',
+      result: undefined,
+    });
+
     // Start research in background
     (async () => {
+      const startTime = Date.now();
       try {
         let result;
         
@@ -63,21 +88,52 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
           );
         }
 
-        // Store result
+        const duration = Date.now() - startTime;
+        const completedAt = new Date().toISOString();
+
+        // Store result in memory
         activeSessions.set(sessionId, {
           status: 'completed',
           result
+        });
+
+        // Persist completed session
+        await saveResearchSession({
+          ...sessionRecord,
+          status: 'completed',
+          completedAt,
+          duration,
+          result,
+          sourcesCount: result?.sources?.length || 0,
+        }).catch(err => {
+          console.warn('[Research] Failed to persist completed session:', err);
         });
 
         // Emit completion event
         browserPool.emit('research-complete', sessionId, result);
 
       } catch (error: any) {
+        const duration = Date.now() - startTime;
+        const completedAt = new Date().toISOString();
         console.error(`Research session ${sessionId} failed:`, error);
         const errorMessage = error.message || 'Unknown error occurred';
+        
+        // Store error in memory
         activeSessions.set(sessionId, {
           status: 'failed',
           error: errorMessage
+        });
+        
+        // Persist failed session
+        await saveResearchSession({
+          ...sessionRecord,
+          status: 'failed',
+          completedAt,
+          duration,
+          error: errorMessage,
+          errorStack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        }).catch(err => {
+          console.warn('[Research] Failed to persist failed session:', err);
         });
         
         // Emit failure event so SSE stream can notify client
@@ -114,7 +170,22 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
-  const session = activeSessions.get(sessionId);
+  // Check active sessions first
+  let session = activeSessions.get(sessionId);
+  
+  // If not in memory, check persisted storage
+  if (!session) {
+    const { getResearchSession } = await import('@/lib/research/research-storage');
+    const persistedSession = await getResearchSession(sessionId);
+    if (persistedSession) {
+      // Convert persisted session to API format
+      session = {
+        status: persistedSession.status,
+        result: persistedSession.result,
+        error: persistedSession.error,
+      };
+    }
+  }
   
   if (!session) {
     return createErrorResponse(

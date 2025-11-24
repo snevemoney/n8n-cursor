@@ -84,11 +84,17 @@ export function createErrorResponse(
   };
 
   // Log error with context
-  const metrics = getMetricsCollector();
-  metrics.increment('api.errors', {
-    code,
-    statusCode: statusCode.toString(),
-  });
+  try {
+    const metrics = getMetricsCollector();
+    if (metrics && typeof metrics.incrementCounter === 'function') {
+      metrics.incrementCounter('scorpion_errors_total', {
+        code,
+        statusCode: statusCode.toString(),
+      });
+    }
+  } catch (e) {
+    // Metrics collector not available or error - continue without metrics
+  }
 
   console.error(`[API Error] ${code}: ${message}`, {
     code,

@@ -88,21 +88,23 @@ export function BreadcrumbNav() {
       className="flex items-center gap-1 text-xs text-white/60 max-md:text-[10px] pointer-events-auto"
       style={{ pointerEvents: 'auto' }}
       aria-label="Breadcrumb"
+      suppressHydrationWarning
     >
       {breadcrumbs.map((item, index) => {
         const isLast = index === breadcrumbs.length - 1;
         
         return (
-          <div key={item.href} className="flex items-center gap-1">
+          <div key={item.href} className="flex items-center gap-1" suppressHydrationWarning>
             {index === 0 ? (
               <Link
                 href={item.href}
                 prefetch={true}
                 onClick={() => startTransition(() => {})}
+                suppressHydrationWarning
                 className={`flex items-center gap-1 hover:text-white transition-colors duration-100 pointer-events-auto active:scale-[0.98] ${isPending ? 'opacity-70' : ''}`}
                 style={{ pointerEvents: 'auto' }}
               >
-                <Home className="max-md:w-3 max-md:h-3 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5" />
+                <Home className="max-md:w-3 max-md:h-3 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5" suppressHydrationWarning />
                 <span className="max-md:hidden md:inline">{item.label}</span>
               </Link>
             ) : (
@@ -117,6 +119,7 @@ export function BreadcrumbNav() {
                     href={item.href}
                     prefetch={true}
                     onClick={() => startTransition(() => {})}
+                    suppressHydrationWarning
                     className={`hover:text-white transition-colors duration-100 max-md:truncate md:truncate pointer-events-auto active:scale-[0.98] ${isPending ? 'opacity-70' : ''}`}
                     style={{ pointerEvents: 'auto' }}
                   >

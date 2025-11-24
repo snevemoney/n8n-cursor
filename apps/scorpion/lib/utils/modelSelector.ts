@@ -18,21 +18,13 @@ export interface ModelRecommendation {
 
 /**
  * Get recommended model based on available system RAM
- * Auto-selects smaller quantized models for 8GB systems
+ * Prefers scorpion:latest (personal training AI) when available
+ * Falls back to smaller models for low-RAM systems
  */
 export function getRecommendedModelForRAM(): string {
-  const ramGB = totalmem() / (1024 * 1024 * 1024);
-  
-  if (ramGB <= 8) {
-    // 8GB: Use smallest quantized model (1B q4)
-    return 'llama3.2:1b-instruct-q4_K_M';
-  } else if (ramGB <= 16) {
-    // 16GB: Can handle 3B quantized comfortably
-    return 'llama3.2:3b-instruct-q4_K_M';
-  } else {
-    // 16GB+: Can use larger models
-    return 'llama3.2:3b';
-  }
+  // Always prefer scorpion:latest as the default (personal training AI)
+  // It's a 3.2B quantized model (Q4_K_M) that works well on 8GB+ systems
+  return 'scorpion:latest';
 }
 
 /**

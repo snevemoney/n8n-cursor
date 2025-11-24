@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scorpion-config
+  namespace: scorpion
+data:
+  NODE_ENV: "production"
+  PORT: "3003"
+  NEXT_TELEMETRY_DISABLED: "1"
+  # Add other non-sensitive config here
+

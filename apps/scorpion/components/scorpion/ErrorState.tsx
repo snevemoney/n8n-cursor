@@ -26,7 +26,7 @@ export function ErrorState({
   const errorStack = error instanceof Error ? error.stack : undefined;
 
   const content = (
-    <div className={`flex flex-col items-center justify-center text-center space-y-4 ${className}`}>
+    <div className={`flex flex-col items-center justify-center text-center space-y-4 ${className}`} suppressHydrationWarning>
       <div className="p-4 rounded-full bg-red-500/10 border border-red-500/20">
         <XCircle className="h-8 w-8 text-red-400" />
       </div>
@@ -38,6 +38,7 @@ export function ErrorState({
         <button
           onClick={onRetry}
           className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 rounded-lg text-sm hover:bg-emerald-500/30 transition-all hover:scale-105 flex items-center gap-2 sc-mono text-emerald-400"
+          suppressHydrationWarning
         >
           <RefreshCw className="h-4 w-4" />
           Try Again
@@ -48,6 +49,7 @@ export function ErrorState({
           <button
             onClick={() => setShowErrorDetails(!showErrorDetails)}
             className="flex items-center gap-2 text-xs text-white/40 hover:text-white/60 transition-colors sc-mono"
+            suppressHydrationWarning
           >
             {showErrorDetails ? (
               <>
@@ -73,14 +75,14 @@ export function ErrorState({
 
   if (fullPage) {
     return (
-      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
+      <div className="h-full flex items-center justify-center bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]" suppressHydrationWarning>
         <div className="max-w-md w-full p-6">{content}</div>
       </div>
     );
   }
 
   return (
-    <div className="py-12 px-4">
+    <div className="py-12 px-4" suppressHydrationWarning>
       {content}
     </div>
   );

@@ -34,11 +34,14 @@ export const GET = withErrorHandling(async () => {
     circuitBreaker: client.getCircuitBreakerStatus()
   };
 
-  // Step 4: Make API call
+  // Step 4: Make API call (with error handling)
   debug.step4_api_call = 'Calling listWorkflows()...';
-  const workflows = await client.listWorkflows({ limit: 5 });
+  let workflows: any[] = [];
+  let apiError: any = null;
   
-  // Step 5: Result
+  try {
+    if (client.isConfigured()) {
+      workflows = await client.listWorkflows({ limit: 5 });
   debug.step5_result = {
     workflows_count: workflows?.length || 0,
     is_array: Array.isArray(workflows),
@@ -48,10 +51,30 @@ export const GET = withErrorHandling(async () => {
       active: workflows[0].active
     } : null
   };
+    } else {
+      debug.step5_result = {
+        workflows_count: 0,
+        is_array: true,
+        first_workflow: null,
+        error: 'n8n client not configured'
+      };
+    }
+  } catch (error: any) {
+    apiError = error.message || String(error);
+    debug.error = apiError;
+    debug.step5_result = {
+      workflows_count: 0,
+      is_array: true,
+      first_workflow: null,
+      error: apiError
+    };
+  }
 
   return createSuccessResponse({
     debug,
-    workflows: workflows?.slice(0, 3)
+    workflows: workflows?.slice(0, 3) || [],
+    configured: client.isConfigured(),
+    error: apiError || null
   });
 });
 

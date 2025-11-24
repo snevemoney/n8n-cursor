@@ -4,6 +4,15 @@ import { ConversationList } from '@/components/chat/ConversationList';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useChatStore } from '@/lib/chat/chatStore';
 
+// Helper to defer non-critical operations
+const defer = (fn: () => void) => {
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    requestIdleCallback(fn, { timeout: 100 });
+  } else {
+    setTimeout(fn, 0);
+  }
+};
+
 interface ChatSidebarProps {
   showConversationList: boolean;
   isMobile: boolean;
@@ -37,12 +46,16 @@ export function ChatSidebar({ showConversationList, isMobile, onToggle, onNewCon
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 onToggle();
+                // Defer localStorage to avoid blocking UI update
                 if (typeof window !== 'undefined' && window.innerWidth >= 1280) {
-                  localStorage.setItem('chat-conversation-list-open', 'false');
+                  defer(() => {
+                    localStorage.setItem('chat-conversation-list-open', 'false');
+                  });
                 }
               }}
-              className="p-1 hover:bg-white/10 rounded transition-colors pointer-events-auto"
+              className="p-1 hover:bg-white/10 rounded transition-colors duration-75 pointer-events-auto"
               aria-label="Hide conversation list"
               title="Hide conversations"
             >
@@ -76,12 +89,16 @@ export function ChatSidebar({ showConversationList, isMobile, onToggle, onNewCon
         <button
           onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             onToggle();
+            // Defer localStorage to avoid blocking UI update
             if (typeof window !== 'undefined' && window.innerWidth >= 1280) {
-              localStorage.setItem('chat-conversation-list-open', 'true');
+              defer(() => {
+                localStorage.setItem('chat-conversation-list-open', 'true');
+              });
             }
           }}
-          className="fixed left-0 top-1/2 -translate-y-1/2 z-[70] bg-[#0c1014]/95 backdrop-blur-xl border-r-2 border-t border-b border-emerald-400/30 rounded-r-lg hover:bg-emerald-400/10 hover:border-emerald-400/50 transition-all duration-150 shadow-lg max-md:px-2 max-md:py-3 md:px-2 md:py-3 lg:px-3 lg:py-4 pointer-events-auto"
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-[70] bg-[#0c1014]/95 backdrop-blur-xl border-r-2 border-t border-b border-emerald-400/30 rounded-r-lg hover:bg-emerald-400/10 hover:border-emerald-400/50 transition-colors duration-75 shadow-lg max-md:px-2 max-md:py-3 md:px-2 md:py-3 lg:px-3 lg:py-4 pointer-events-auto"
           aria-label="Show conversation list"
           title="Show conversations"
         >

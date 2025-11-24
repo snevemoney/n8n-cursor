@@ -209,6 +209,23 @@ export function WorkflowsClient() {
     }
   }, [activeTab]);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedWorkflow) {
+      // Save scrollbar width before hiding it
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Hide body scroll and compensate for scrollbar to prevent layout shift
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      };
+    }
+  }, [selectedWorkflow]);
+
   const handleSync = useCallback(async () => {
     try {
       const response = await fetch('/api/workflows', {
@@ -238,7 +255,9 @@ export function WorkflowsClient() {
   }, []);
 
   const createWorkflowSelectHandler = useCallback((workflow: Workflow) => {
-    return () => {
+    return (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
       setSelectedWorkflow(workflow);
     };
   }, []);
@@ -376,8 +395,9 @@ export function WorkflowsClient() {
         <div className="flex items-center gap-2">
           <button
             onClick={createWorkflowSelectHandler(w)}
-            className="text-left hover:text-blue-400 transition-colors duration-100 cursor-pointer hover:underline"
+            className="text-left cursor-pointer"
             title="Click to view workflow"
+            type="button"
           >
             {w.name}
           </button>
@@ -419,8 +439,9 @@ export function WorkflowsClient() {
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={createWorkflowSelectHandler(w)}
-            className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded hover:bg-blue-500/30 transition-colors duration-100 whitespace-nowrap"
+            className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded whitespace-nowrap cursor-pointer"
             title="View workflow"
+            type="button"
           >
             <Eye className="w-3 h-3" />
             View
@@ -753,14 +774,6 @@ export function WorkflowsClient() {
           </>
         )}
       </Panel>
-
-          {/* Workflow Viewer Modal */}
-          {selectedWorkflow && (
-            <WorkflowViewer
-              workflow={selectedWorkflow}
-              onClose={() => setSelectedWorkflow(null)}
-            />
-          )}
         </TabsContent>
 
         {/* Monitoring Tab */}
@@ -828,6 +841,14 @@ export function WorkflowsClient() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Workflow Viewer Modal - Outside Tabs for proper z-index */}
+      {selectedWorkflow && (
+        <WorkflowViewer
+          workflow={selectedWorkflow}
+          onClose={() => setSelectedWorkflow(null)}
+        />
+      )}
     </div>
     </>
   );

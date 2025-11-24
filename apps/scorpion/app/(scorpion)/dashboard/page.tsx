@@ -7,14 +7,29 @@ import { LoadingState, ErrorState, EmptyState, PageLoadingBar } from '@/componen
 import { CheckCircle, XCircle, AlertTriangle, Activity, Database, Workflow, Brain, Shield, TrendingUp, Zap, Radio } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
+interface MetricPoint {
+  time: string;
+  healthy: number;
+  warnings: number;
+  errors: number;
+}
+
 // Lazy load recharts - heavy library that slows initial render
-const AreaChart = dynamic(() => import('recharts').then(mod => mod.AreaChart), { ssr: false });
-const Area = dynamic(() => import('recharts').then(mod => mod.Area), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
-const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
+// Use a separate component file to avoid chunk path resolution issues
+const LiveMetricsChart = dynamic(
+  () => import('./LiveMetricsChart').then(mod => ({ default: mod.LiveMetricsChart })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-64 w-full flex items-center justify-center text-white/40 sc-mono text-sm">
+        <div className="flex flex-col items-center gap-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-400"></div>
+          <span>Loading chart...</span>
+        </div>
+      </div>
+    ),
+  }
+);
 
 interface SystemHealth {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -30,13 +45,6 @@ interface SystemHealth {
     warnings: number;
     errors: number;
   };
-}
-
-interface MetricPoint {
-  time: string;
-  healthy: number;
-  warnings: number;
-  errors: number;
 }
 
 export default function DashboardPage() {
@@ -87,23 +95,97 @@ export default function DashboardPage() {
       });
       if (response.ok) {
         const result = await response.json();
-        const data = result.success && result.data ? result.data : result;
+        const rawData = result.success && result.data ? result.data : result;
+        
+        // Transform API response to match dashboard expected format
+        // API returns: { status, timestamp, services: {...}, latency: {...} }
+        // Dashboard expects: { status, timestamp, systems: {...}, summary: {...} }
+        const services = rawData.services || {};
+        const systems: Record<string, {
+          status: 'ok' | 'warning' | 'error';
+          message?: string;
+          details?: any;
+        }> = {};
+        
+        let healthyCount = 0;
+        let warningsCount = 0;
+        let errorsCount = 0;
+        
+        // Transform services to systems format
+        Object.entries(services).forEach(([name, service]: [string, any]) => {
+          const systemStatus = service.status === 'up' ? 'ok' : 
+                              service.error ? 'error' : 'warning';
+          
+          systems[name] = {
+            status: systemStatus,
+            message: service.error,
+            details: {
+              model: service.model,
+              latency: rawData.latency?.[name],
+            }
+          };
+          
+          // Count by status
+          if (systemStatus === 'ok') {
+            healthyCount++;
+          } else if (systemStatus === 'warning') {
+            warningsCount++;
+          } else {
+            errorsCount++;
+          }
+        });
+        
+        const data: SystemHealth = {
+          status: rawData.status || 'healthy',
+          timestamp: rawData.timestamp || new Date().toISOString(),
+          systems,
+          summary: {
+            total: Object.keys(services).length,
+            healthy: healthyCount,
+            warnings: warningsCount,
+            errors: errorsCount,
+          }
+        };
+        
+        // Debug: Log transformation result
+        console.log('[Dashboard] Health data transformed:', {
+          status: data.status,
+          systemsCount: Object.keys(data.systems).length,
+          summary: data.summary
+        });
+        
         setHealth(data);
         
-        // Add to metric history for charts
-        if (mounted && data.summary) {
+        // Add to metric history for charts (always populate)
+        if (data.summary) {
           const now = new Date();
-          const timeStr = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+          const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+          const newPoint = {
+            time: timeStr,
+            healthy: data.summary?.healthy ?? 0,
+            warnings: data.summary?.warnings ?? 0,
+            errors: data.summary?.errors ?? 0,
+          };
+          
           setMetricHistory(prev => {
-            const updated = [...prev, {
-              time: timeStr,
-              healthy: data.summary?.healthy ?? 0,
-              warnings: data.summary?.warnings ?? 0,
-              errors: data.summary?.errors ?? 0,
-            }];
+            // Avoid duplicates - check if last entry has same timestamp
+            const lastEntry = prev[prev.length - 1];
+            if (lastEntry && lastEntry.time === timeStr) {
+              // Update existing entry instead of adding duplicate
+              const updated = [...prev];
+              updated[updated.length - 1] = newPoint;
+              console.log('[Dashboard] Updated existing metric point:', newPoint, 'Total:', updated.length);
+              return updated;
+            }
+            // Add new entry
+            const updated = [...prev, newPoint];
             // Keep last 20 data points
-            return updated.slice(-20);
+            const final = updated.slice(-20);
+            console.log('[Dashboard] Added new metric point:', newPoint, 'Total:', final.length);
+            return final;
           });
+        } else {
+          console.warn('[Dashboard] No summary data available for metrics');
         }
       } else {
         throw new Error(`Failed to load health status: ${response.statusText}`);
@@ -156,7 +238,7 @@ export default function DashboardPage() {
 
   // Show page structure immediately, only show loading for content areas
   return (
-    <div className="h-full overflow-y-auto bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]">
+    <div className="h-full overflow-y-auto bg-gradient-to-br from-[#0a0d10] via-[#0c1014] to-[#0a0d10]" suppressHydrationWarning>
       <PageLoadingBar loading={loading && !health} />
       <div className="p-3 md:p-6 space-y-4 md:space-y-6 min-w-0">
         {/* Header with Live Indicator */}
@@ -256,42 +338,18 @@ export default function DashboardPage() {
         ) : null}
 
         {/* Live Metrics Chart */}
-        {metricHistory.length > 0 && (
+        {health && (
           <Panel title="Live Metrics Trend" className="border-emerald-400/20">
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={metricHistory}>
-                  <defs>
-                    <linearGradient id="colorHealthy" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorWarnings" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorErrors" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                  <XAxis dataKey="time" stroke="#ffffff40" style={{ fontSize: '10px' }} />
-                  <YAxis stroke="#ffffff40" style={{ fontSize: '10px' }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#0f1318', 
-                      border: '1px solid #ffffff20',
-                      borderRadius: '8px',
-                      color: '#ffffff'
-                    }} 
-                  />
-                  <Area type="monotone" dataKey="healthy" stroke="#10b981" fillOpacity={1} fill="url(#colorHealthy)" />
-                  <Area type="monotone" dataKey="warnings" stroke="#f59e0b" fillOpacity={1} fill="url(#colorWarnings)" />
-                  <Area type="monotone" dataKey="errors" stroke="#ef4444" fillOpacity={1} fill="url(#colorErrors)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            {typeof window !== 'undefined' && mounted && metricHistory.length > 0 ? (
+              <LiveMetricsChart data={metricHistory} />
+            ) : (
+              <div className="h-64 w-full flex items-center justify-center text-white/40 sc-mono text-sm" style={{ minHeight: '256px' }}>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-400"></div>
+                  <span>Collecting metrics... ({metricHistory.length} points)</span>
+                </div>
+              </div>
+            )}
           </Panel>
         )}
 

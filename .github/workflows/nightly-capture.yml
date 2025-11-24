@@ -14,9 +14,13 @@ jobs:
       - uses: actions/setup-node@v4
         with: 
           node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
           
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Refresh diagrams and screenshots
         env:
@@ -25,9 +29,9 @@ jobs:
           N8N_PASSWORD: ${{ secrets.N8N_PASSWORD }}
         run: |
           echo "🔄 Generating Mermaid diagrams..."
-          npm run gen
+          pnpm run gen
           echo "📸 Capturing n8n UI screenshots..."
-          npm run capture || echo "⚠️ Screenshot capture failed, continuing..."
+          pnpm run capture || echo "⚠️ Screenshot capture failed, continuing..."
 
       - name: Commit results
         run: |

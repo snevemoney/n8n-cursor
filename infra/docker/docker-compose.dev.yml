@@ -123,6 +123,11 @@ services:
       - SCORPION_STORAGE_AUTO_DETECT=false
       - SCORPION_SSD_PATH=/app/data/scorpion
       - N8N_API_URL=http://n8n:5678
+      # Optional: VLLM configuration (uncomment to enable)
+      # - VLLM_ENABLED=true
+      # - VLLM_API_URL=http://vllm:8000
+      # - VLLM_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+      # - LLM_PROVIDER_PRIORITY=ollama,vllm,openai
     ports: ["127.0.0.1:3003:3003"]
     volumes:
       - ../../apps/scorpion/data/scorpion:/app/data/scorpion
@@ -131,6 +136,33 @@ services:
       - redis
       - n8n
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 10s, timeout: 2s, retries: 10 }
+
+  # Optional: VLLM service for GPU inference (only starts with --profile gpu)
+  # Usage: docker compose --profile gpu up vllm
+  vllm:
+    <<: *dflt
+    image: vllm/vllm-openai:latest
+    profiles: ["gpu"]  # Only starts with --profile gpu flag
+    environment:
+      - MODEL=${VLLM_MODEL:-mistralai/Mistral-7B-Instruct-v0.2}
+      - HOST=0.0.0.0
+      - PORT=8000
+      - TENSOR_PARALLEL_SIZE=${VLLM_TENSOR_PARALLEL_SIZE:-1}
+      - GPU_MEMORY_UTILIZATION=${VLLM_GPU_MEMORY_UTILIZATION:-0.9}
+    ports: ["127.0.0.1:8000:8000"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${VLLM_GPU_COUNT:-1}
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s  # Give VLLM time to load model
 
 volumes:
   n8n-data:

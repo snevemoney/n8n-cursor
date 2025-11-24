@@ -38,6 +38,7 @@ export const NotificationBadge = memo(function NotificationBadge() {
 
   useEffect(() => {
     // Defer data fetch to avoid blocking render
+    // Don't include callbacks in deps to prevent re-render loops
     const loadData = () => {
       loadNotifications();
     };
@@ -67,7 +68,8 @@ export const NotificationBadge = memo(function NotificationBadge() {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [loadNotifications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - callback is stable, don't recreate effect
 
   const handleApprove = useCallback(async (id: string) => {
     try {
@@ -120,7 +122,7 @@ export const NotificationBadge = memo(function NotificationBadge() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md" suppressHydrationWarning>
       {critical.slice(0, 3).map((notif) => (
         <Alert
           key={notif.id}

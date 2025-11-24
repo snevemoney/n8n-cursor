@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Panel, DataTable, Metric, PageLoadingBar } from '@/components/scorpion';
+import { SpeakButton } from '@/components/voice/SpeakButton';
 import Link from 'next/link';
 
 interface Experiment {
@@ -89,7 +90,14 @@ export default function ExperimentsPage() {
     <>
       <PageLoadingBar loading={loading && experiments.length === 0} />
       <div className="h-full flex flex-col gap-4 p-4 overflow-y-auto">
-        <Panel title="LLM Training Experiments">
+        <Panel 
+          title="LLM Training Experiments"
+          actions={
+            <SpeakButton 
+              text={`LLM Experiments Summary: ${summary.total} total, ${summary.running} running, ${summary.completed} completed, ${summary.failed} failed.`}
+            />
+          }
+        >
         <div className="grid grid-cols-4 gap-4 mb-6">
           <Metric label="Total" value={summary.total.toString()} />
           <Metric label="Running" value={summary.running.toString()} valueColor="text-cyan-400" />

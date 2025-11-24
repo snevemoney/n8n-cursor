@@ -15,12 +15,12 @@ export const POST = withRateLimit(
     const req = request as NextRequest;
     const startTime = Date.now();
     const metrics = getMetricsCollector();
-    
+
     try {
       // Extract request body first to use in trace tags
       const body = await request.json();
       const { message, useRAG = true, model } = body;
-      
+
       return await trace('chat.request', async (spanId) => {
 
         if (!message) {
@@ -36,16 +36,16 @@ export const POST = withRateLimit(
         // Always inject RAG context (unless explicitly disabled)
         let enhancedPrompt = message;
         let ragContext: string[] = [];
-        
+
         if (useRAG) {
           try {
             const store = await getRAGStore();
             const relevantKnowledge = await store.search(message, 5); // Get more context
-            
+
             if (relevantKnowledge.length > 0) {
               ragContext = relevantKnowledge.map(k => `${k.title}: ${k.description}`);
               const context = ragContext.join('\n');
-              
+
               enhancedPrompt = `Context from knowledge base:\n${context}\n\nUser question: ${message}`;
             }
           } catch (error) {
@@ -114,12 +114,19 @@ export const POST = withRateLimit(
       });
       metrics.incrementCounter('scorpion_errors_total', {
         severity: 'high',
-        source: 'chat-api'
+        source: 'chat-api',
+        errorCode: code
       });
-      console.error('Chat error:', error);
+
+      // Return safe, structured error
       return NextResponse.json(
-        { error: error.message || 'Failed to get response from model' },
-        { status: 500 }
+        {
+          error: message,
+          code,
+          id: errorId,
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        },
+        { status }
       );
     }
   },
@@ -135,7 +142,7 @@ export async function GET() {
     const available = await checkModelAvailability();
     const models = await listModels();
     const source = process.env.SCORPION_MODEL_SOURCE || 'ollama';
-    
+
     return NextResponse.json({
       success: true,
       available,

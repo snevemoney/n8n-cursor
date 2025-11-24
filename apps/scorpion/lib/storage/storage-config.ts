@@ -22,8 +22,15 @@ let config: StorageConfig | null = null;
 
 /**
  * Get the optimal data directory path
+ * Uses initialized config if available, otherwise falls back to detection
  */
 async function getOptimalDataDir(): Promise<string> {
+  // If config is already initialized, use it (prevents repeated detection)
+  if (config) {
+    return config.dataDir;
+  }
+
+  // Only detect if config not initialized (should only happen during startup)
   const detection = await detectStorage();
 
   // Use detected SSD path if available
@@ -49,8 +56,15 @@ async function getOptimalDataDir(): Promise<string> {
 
 /**
  * Get the optimal temp directory for media processing
+ * Uses initialized config if available, otherwise falls back to detection
  */
 async function getOptimalTempDir(): Promise<string> {
+  // If config is already initialized, use it (prevents repeated detection)
+  if (config) {
+    return config.mediaTempDir;
+  }
+
+  // Only detect if config not initialized (should only happen during startup)
   const detection = await detectStorage();
 
   // Use SSD temp directory if SSD is available
@@ -194,9 +208,56 @@ export async function initializeStorageConfig(): Promise<StorageConfig> {
     return config;
   }
 
+  // Single detection call - getOptimalDataDir/getOptimalTempDir will use cached config after this
   const detection = await detectStorage();
-  const dataDir = await getOptimalDataDir();
-  const mediaTempDir = await getOptimalTempDir();
+  
+  // Calculate paths directly to avoid repeated detection calls
+  // (getOptimalDataDir/getOptimalTempDir check config first, but config is null here)
+  let dataDir: string;
+  if (detection.detectedSSDPath) {
+    const ssdDataDir = path.join(detection.detectedSSDPath, 'scorpion-data');
+    if (await isStorageAccessible(ssdDataDir)) {
+      const dirResult = await ensureDirWithFallback(ssdDataDir);
+      if (dirResult.success) {
+        dataDir = dirResult.path;
+      } else {
+        const defaultDir = path.join(process.cwd(), 'data', 'scorpion');
+        const defaultResult = await ensureDirWithFallback(defaultDir);
+        dataDir = defaultResult.path;
+      }
+    } else {
+      const defaultDir = path.join(process.cwd(), 'data', 'scorpion');
+      const defaultResult = await ensureDirWithFallback(defaultDir);
+      dataDir = defaultResult.path;
+    }
+  } else {
+    const defaultDir = path.join(process.cwd(), 'data', 'scorpion');
+    const defaultResult = await ensureDirWithFallback(defaultDir);
+    dataDir = defaultResult.path;
+  }
+  
+  let mediaTempDir: string;
+  if (detection.detectedSSDPath && detection.isSSD) {
+    const ssdTempDir = path.join(detection.detectedSSDPath, 'scorpion-temp');
+    if (await isStorageAccessible(ssdTempDir)) {
+      const dirResult = await ensureDirWithFallback(ssdTempDir);
+      if (dirResult.success) {
+        mediaTempDir = dirResult.path;
+      } else {
+        const systemTempDir = path.join(os.tmpdir(), 'scorpion-media');
+        const tempResult = await ensureDirWithFallback(systemTempDir);
+        mediaTempDir = tempResult.path;
+      }
+    } else {
+      const systemTempDir = path.join(os.tmpdir(), 'scorpion-media');
+      const tempResult = await ensureDirWithFallback(systemTempDir);
+      mediaTempDir = tempResult.path;
+    }
+  } else {
+    const systemTempDir = path.join(os.tmpdir(), 'scorpion-media');
+    const tempResult = await ensureDirWithFallback(systemTempDir);
+    mediaTempDir = tempResult.path;
+  }
   
   // Get optimal backup and cache directories (SSD if available)
   // Use inline logic to avoid circular dependency

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { HardDrive, Zap, RefreshCw, Sparkles } from 'lucide-react';
+import { HardDrive, Zap, RefreshCw, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
 
 interface StorageStatus {
   storageType: 'ssd' | 'hdd';
@@ -14,6 +14,21 @@ interface StorageStatus {
     writeSpeed: string;
     latency: string;
   };
+  integrations?: {
+    ssdDetected: boolean;
+    ssdPath: string | null;
+    integrations: Array<{
+      name: string;
+      description: string;
+      currentPath: string;
+      ssdPath: string | null;
+      isOnSSD: boolean;
+      canMigrate: boolean;
+      migrationStatus: string;
+      sizeGB?: string | null;
+      recommendation?: string;
+    }>;
+  };
 }
 
 export function StorageModeIndicator() {
@@ -22,6 +37,8 @@ export function StorageModeIndicator() {
   const [refreshing, setRefreshing] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+  const [migrationResult, setMigrationResult] = useState<any>(null);
 
   const loadStorageStatus = useCallback(async (forceRefresh = false) => {
     try {
@@ -129,6 +146,32 @@ export function StorageModeIndicator() {
     loadStorageStatus(true);
   }, [loadStorageStatus]);
 
+  const handleMigrateToSSD = useCallback(async () => {
+    if (migrating) return;
+    
+    setMigrating(true);
+    setMigrationResult(null);
+    
+    try {
+      const response = await fetch('/api/storage/migrate', { method: 'POST' });
+      const data = await response.json();
+      
+      if (data.success) {
+        setMigrationResult(data.report);
+        // Refresh storage status after migration
+        setTimeout(() => {
+          loadStorageStatus(true);
+        }, 2000);
+      } else {
+        setMigrationResult({ error: data.error || 'Migration failed' });
+      }
+    } catch (error: any) {
+      setMigrationResult({ error: error.message || 'Migration failed' });
+    } finally {
+      setMigrating(false);
+    }
+  }, [migrating, loadStorageStatus]);
+
   // Render immediately with placeholder - don't block on loading state
   // Show skeleton state while loading, but allow component to render
   if (!storageStatus) {
@@ -143,6 +186,8 @@ export function StorageModeIndicator() {
 
   const isSSD = storageStatus.isSSD;
   const Icon = isSSD ? Zap : HardDrive;
+  const ssdDetected = storageStatus.detectedSSDPath && !isSSD;
+  const canMigrate = ssdDetected && storageStatus.integrations?.integrations.some(i => i.canMigrate);
 
   const performanceInfo = storageStatus.performance ? (
     <div className="text-[10px] space-y-0.5 mt-1">
@@ -166,6 +211,8 @@ export function StorageModeIndicator() {
     ? `${optimizationsCount} optimization${optimizationsCount !== 1 ? 's' : ''} active`
     : 'Standard mode';
 
+  const migratableServices = storageStatus.integrations?.integrations.filter(i => i.canMigrate) || [];
+
   return (
     <>
       <div className="flex items-center gap-2 shrink-0 relative group">
@@ -174,17 +221,28 @@ export function StorageModeIndicator() {
             if (isSSD) {
               e.stopPropagation();
               setShowPanel(!showPanel);
+            } else if (canMigrate) {
+              e.stopPropagation();
+              setShowPanel(!showPanel);
             } else {
               handleManualRefresh();
             }
           }}
-          disabled={refreshing}
+          disabled={refreshing || migrating}
           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 ${
             isSSD
               ? 'bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 border-yellow-400/50 text-yellow-300 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/30'
+              : canMigrate
+              ? 'bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border-blue-400/50 text-blue-300 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30'
               : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
           }`}
-          title={isSSD ? 'Click to toggle super powers panel' : `Storage: HDD - Click to refresh`}
+          title={
+            isSSD 
+              ? 'Click to toggle super powers panel' 
+              : canMigrate
+              ? 'SSD detected! Click to migrate to SSD'
+              : `Storage: HDD - Click to refresh`
+          }
         >
           {isSSD ? (
             <>
@@ -194,6 +252,16 @@ export function StorageModeIndicator() {
               </div>
               <span className="text-[10px] md:text-[11px] lg:text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-yellow-300 via-orange-300 to-red-300 bg-clip-text text-transparent">
                 POWER
+              </span>
+            </>
+          ) : canMigrate ? (
+            <>
+              <div className="relative">
+                <ArrowRight className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+                <Sparkles className="w-2 h-2 text-blue-300 absolute -top-0.5 -right-0.5 animate-ping" />
+              </div>
+              <span className="text-[10px] md:text-[11px] lg:text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                UPGRADE
               </span>
             </>
           ) : (
@@ -207,8 +275,14 @@ export function StorageModeIndicator() {
           {refreshing && (
             <RefreshCw className="w-2.5 h-2.5 animate-spin" />
           )}
+          {migrating && (
+            <Loader2 className="w-2.5 h-2.5 animate-spin" />
+          )}
           {isSSD && optimizationsCount > 0 && !refreshing && (
             <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse shadow-sm shadow-yellow-400/50" />
+          )}
+          {canMigrate && !migrating && (
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shadow-sm shadow-blue-400/50" />
           )}
         </button>
       </div>

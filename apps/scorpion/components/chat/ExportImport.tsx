@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Download, Upload, Check, X } from 'lucide-react';
 import { exportConversations, importConversations } from '@/lib/chat/persistence';
 import { useChatStore } from '@/lib/chat/chatStore';
+import { safeClick, safeContains } from '@/lib/utils/dom-safe';
 
 export function ExportImport() {
   const [showImport, setShowImport] = useState(false);
@@ -11,8 +12,20 @@ export function ExportImport() {
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { loadPersistedData, conversations } = useChatStore();
   
-  const handleExport = () => {
+  const handleExport = async () => {
     try {
+      // Check governance before export
+      const { checkAccess } = await import('@/lib/governance/client');
+      const accessCheck = await checkAccess({
+        action: 'export',
+        resourceType: 'conversation',
+      });
+
+      if (!accessCheck.allowed) {
+        alert('Export denied by governance policy');
+        return;
+      }
+
       const data = exportConversations();
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -20,9 +33,21 @@ export function ExportImport() {
       a.href = url;
       a.download = `scorpion-conversations-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      
+      // Use safe click to prevent "Element not found" errors
+      if (safeClick(a)) {
+        // Only remove if click succeeded
+        setTimeout(() => {
+          if (safeContains(a)) {
+            document.body.removeChild(a);
+          }
+          URL.revokeObjectURL(url);
+        }, 100);
+      } else {
+        // Fallback: remove immediately if click failed
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error('[Export] Error:', error);
       alert('Failed to export conversations');

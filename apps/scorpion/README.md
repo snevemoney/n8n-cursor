@@ -11,8 +11,10 @@ Scorpion is the central AI orchestration system for the n8n-cursor workspace. It
 - **Persistent Memory**: All knowledge persisted to disk, never lost
 
 ### 🔄 Automated Syncing
-- **Bidirectional Workflow Sync**: Filesystem ↔ n8n automatic synchronization
-- **Knowledge Auto-Sync**: Continuous knowledge extraction and updates
+- **Bidirectional-ish Workflow Sync**:
+  - **Pull (Auto)**: Automatically pulls workflow changes from n8n to your local filesystem to keep your repo up to date.
+  - **Push (Manual)**: Run `pnpm run workflows:sync` to push local changes to n8n. This prevents accidental overwrites of active workflows.
+- **Knowledge Ingestion**: Drop markdown files into `docs/knowledge` and they are automatically ingested into the RAG system.
 - **Database Schema Sync**: Automatic migration and schema updates
 
 ### 🎓 Continuous Learning
@@ -63,10 +65,36 @@ pnpm dev
 
 **All services are optional - Scorpion runs fully locally by default!**
 
-Key variables:
+#### LLM Provider Configuration
+
+Scorpion supports multiple LLM providers with automatic fallback:
+
+**Provider Priority (Cascading Fallback):**
+- `LLM_PROVIDER_PRIORITY`: Comma-separated list of providers in priority order (default: `ollama,llamacpp,vllm,openai`)
+  - Example: `LLM_PROVIDER_PRIORITY=ollama,llamacpp,vllm,openai` (tries Ollama first, then llama.cpp, then VLLM, then OpenAI)
+
+**Ollama (Local CPU - Default):**
 - `OLLAMA_URL`: Local Ollama service URL (default: http://localhost:11434) - Install locally: https://ollama.ai
 - `OLLAMA_MODEL`: Model to use (default: llama3.2:3b)
 - `SCORPION_MODEL_SOURCE`: Model source (ollama, openai, local, custom)
+
+**llama.cpp (Local CPU/GPU - Optional):**
+- `LLAMACPP_ENABLED`: Set to `true` to enable llama.cpp provider (default: `false`)
+- `LLAMACPP_BASE_URL`: llama.cpp server URL (default: http://localhost:8033)
+- `LLAMACPP_MODEL`: Model name if using multi-model support (optional)
+- **Note**: llama.cpp supports concurrent requests and includes a Web UI. See `docs/LLAMACPP_SETUP.md` for setup.
+
+**VLLM (GPU Inference - Optional):**
+- `VLLM_ENABLED`: Set to `true` to enable VLLM provider (default: `false`)
+- `VLLM_API_URL`: VLLM service URL (default: http://localhost:8000)
+- `VLLM_MODEL`: Model to use with VLLM (default: mistralai/Mistral-7B-Instruct-v0.2)
+- **Note**: VLLM requires GPU. See Docker Compose or Kubernetes setup below.
+
+**OpenAI (Cloud Fallback):**
+- `OPENAI_API_KEY`: Your OpenAI API key (optional, for fallback)
+- `OPENAI_MODEL`: Model to use (default: gpt-4o-mini)
+
+**Other:**
 - `N8N_API_KEY`: Your n8n API key (optional, for workflow integration)
 - `N8N_API_URL`: n8n API URL (optional, for workflow integration)
 
@@ -90,6 +118,54 @@ Scorpion automatically detects and uses external SSDs for optimal performance:
 - **Without SSD**: `apps/scorpion/data/scorpion/` (default)
 
 **Note**: Supabase and Redis are not used - all data is stored locally. With SSD detection, your data automatically moves to the fastest available storage.
+
+## Hybrid AI Compute Stack
+
+Scorpion now supports a hybrid AI compute stack with progressive enhancement:
+
+### Layer 1: Training & Inference
+- **Ollama** (Default): Local CPU inference - works out of the box
+- **VLLM** (Optional): GPU-accelerated inference for production workloads
+- **OpenAI** (Optional): Cloud fallback for reliability
+
+### Layer 2: Distributed Computing (Future)
+- **Ray** (Planned): Distributed AI workloads across clusters
+
+### Layer 3: Cluster Orchestration (Optional)
+- **Docker Compose** (Default): Local development and simple deployments
+- **Kubernetes** (Optional): Production orchestration with auto-scaling
+
+### Provider Selection
+
+Scorpion automatically selects the best available provider:
+
+1. **Automatic Fallback**: Tries providers in priority order (ollama → vllm → openai)
+2. **Health Checks**: Verifies provider availability before use
+3. **Smart Selection**: Uses `providerSelector.ts` to choose optimal provider
+4. **Zero Configuration**: Works with defaults, no setup required
+
+### Enabling VLLM (GPU Inference)
+
+**Docker Compose:**
+```bash
+# Start VLLM with GPU profile
+docker compose --profile gpu up vllm
+
+# Enable in Scorpion environment
+export VLLM_ENABLED=true
+export VLLM_API_URL=http://localhost:8000
+```
+
+**Kubernetes:**
+```bash
+# Deploy VLLM (requires GPU nodes)
+kubectl apply -f infra/k8s/vllm-deployment.yaml
+
+# Deploy Scorpion
+kubectl apply -f infra/k8s/scorpion-deployment.yaml
+```
+
+See `infra/k8s/README.md` for detailed Kubernetes setup.
 
 ## Architecture
 

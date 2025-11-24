@@ -22,9 +22,19 @@ export async function handler(args: z.infer<typeof schema>) {
         id: r.id,
         title: r.title,
         url: `/knowledge?id=${r.id}`,
-        spans: [{ text: r.description.slice(0, 200) }],
+        description: r.description || r.content?.substring(0, 500) || '', // Include full description or content preview
+        content: r.content?.substring(0, 1000) || r.description?.substring(0, 1000) || '', // Include more content for better context
+        spans: [{ 
+          text: (r.content || r.description || '').slice(0, 500) // Increased from 200 to 500 for more detail
+        }],
         relevance: (r as any).similarity || 0.5, // Use actual similarity score from RAG store
+        source: r.source || 'knowledge-base', // Include source information
+        category: r.category || r.metadata?.category, // Include category
+        tags: r.tags || r.metadata?.tags || [], // Include tags
+        metadata: r.metadata || {}, // Include any additional metadata
       })),
+      query: args.query, // Include query for context
+      totalResults: results.length, // Include count for precision
     };
   } catch (error: any) {
     return {

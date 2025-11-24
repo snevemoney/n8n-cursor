@@ -56,7 +56,7 @@ export async function getPerformanceConfig(): Promise<PerformanceConfig> {
       fileWatcherDebounce: 500, // Reduced debounce (was 2000ms)
     };
   } else {
-    // HDD Mode: Conservative settings
+    // HDD Mode: Conservative settings (optimized for performance)
     cachedConfig = {
       workflowSyncBatchSize: 5,
       workflowSyncConcurrency: 3,
@@ -65,7 +65,7 @@ export async function getPerformanceConfig(): Promise<PerformanceConfig> {
       mediaProcessingMaxFileSize: 100 * 1024 * 1024, // 100MB
       cacheTTLMultiplier: 1,
       enableAggressivePrefetch: false,
-      fileWatcherDebounce: 2000,
+      fileWatcherDebounce: 3000, // Increased from 2000ms for better performance
     };
   }
 

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import path from 'path';
 import { getFileCache, getASTParser } from '@scorpion/core';
+import { getFileTracker } from '../file-tracker';
 
 export const name = 'code.readFile';
 export const label = 'Read Code File';
@@ -15,13 +16,25 @@ export const schema = z.object({
 
 export async function handler(args: z.infer<typeof schema>) {
   try {
-    const workspaceRoot = process.cwd();
-    const filePath = path.isAbsolute(args.path) 
-      ? args.path 
-      : path.join(workspaceRoot, args.path);
+    // Get workspace root - if we're in apps/scorpion, go up two levels
+    const cwd = process.cwd();
+    let workspaceRoot = cwd;
+    
+    // Check if we're running from apps/scorpion directory
+    if (cwd.includes('/apps/scorpion') || cwd.endsWith('apps/scorpion')) {
+      workspaceRoot = path.resolve(cwd, '../..');
+    }
+    
+    // Resolve file path
+    let filePath: string;
+    if (path.isAbsolute(args.path)) {
+      filePath = args.path;
+    } else {
+      filePath = path.join(workspaceRoot, args.path);
+    }
 
-    // Normalize path
-    const normalizedPath = path.normalize(filePath);
+    // Normalize path and make it absolute
+    const normalizedPath = path.resolve(path.normalize(filePath));
 
     // Get file from cache (or read from disk)
     const fileCache = getFileCache();
@@ -34,6 +47,17 @@ export async function handler(args: z.infer<typeof schema>) {
         path: args.path
       };
     }
+
+    // Track file access
+    const tracker = getFileTracker();
+    tracker.trackFile({
+      path: args.path,
+      timestamp: Date.now(),
+      source: 'read',
+      contentType: fileContent.language,
+      size: fileContent.content.length,
+      contentPreview: fileContent.content.substring(0, 200),
+    });
 
     // Apply line limit if specified
     let content = fileContent.content;
@@ -50,7 +74,10 @@ export async function handler(args: z.infer<typeof schema>) {
       language: fileContent.language,
       content,
       lines: content.split('\n').length,
-      lastModified: new Date(fileContent.lastModified).toISOString()
+      totalLines: fileContent.content.split('\n').length, // Include total lines even if truncated
+      lastModified: new Date(fileContent.lastModified).toISOString(),
+      size: fileContent.content.length, // Include file size for precision
+      truncated: args.maxLines && content.split('\n').length < fileContent.content.split('\n').length, // Indicate if truncated
     };
 
     // Include AST if requested

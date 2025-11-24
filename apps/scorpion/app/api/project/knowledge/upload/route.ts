@@ -3,8 +3,16 @@ import { getRAGStore } from '@/lib/shared-stores';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 import { ExtractedKnowledge } from '@scorpion/core';
 import { createWorker } from 'tesseract.js';
-// @ts-ignore - pdf-parse uses CommonJS export
-import pdfParse from 'pdf-parse';
+import { getFileTracker } from '@/lib/chat/file-tracker';
+
+// Dynamic import for pdf-parse to avoid build errors if dependency is incompatible
+let pdfParse: any = null;
+try {
+  // @ts-ignore - pdf-parse uses CommonJS export
+  pdfParse = require('pdf-parse');
+} catch (error) {
+  console.warn('[Upload] pdf-parse not available, PDF text extraction will be skipped');
+}
 
 export const maxDuration = 300; // 5 minutes for large files
 
@@ -89,27 +97,37 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         contentType = 'pdf';
         category = 'document';
         
-        // Extract text from PDF
+        // Extract text from PDF (if pdf-parse is available)
         try {
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
-          const pdfData = await pdfParse(buffer);
           
-          // Store extracted text for RAG searchability
-          const extractedText = pdfData.text.trim();
-          const pdfMetadata = `PDF Document: ${fileName}\nPages: ${pdfData.numpages}\nSize: ${(fileSize / 1024).toFixed(2)} KB\n\nExtracted Text:\n${extractedText}`;
-          
-          content = extractedText.length > 0 
-            ? pdfMetadata 
-            : `PDF Document: ${fileName}\n\nNote: No text content could be extracted from this PDF. It may be a scanned image-based PDF. Consider using OCR for image-based PDFs.`;
-          
-          // Store PDF buffer for frontend display (optional - can be used for iframe rendering)
-          contentData = { 
-            url: `data:application/pdf;base64,${buffer.toString('base64')}`, 
-            type: 'application/pdf',
-            pages: pdfData.numpages,
-            text: extractedText
-          };
+          if (pdfParse) {
+            const pdfData = await pdfParse(buffer);
+            
+            // Store extracted text for RAG searchability
+            const extractedText = pdfData.text.trim();
+            const pdfMetadata = `PDF Document: ${fileName}\nPages: ${pdfData.numpages}\nSize: ${(fileSize / 1024).toFixed(2)} KB\n\nExtracted Text:\n${extractedText}`;
+            
+            content = extractedText.length > 0 
+              ? pdfMetadata 
+              : `PDF Document: ${fileName}\n\nNote: No text content could be extracted from this PDF. It may be a scanned image-based PDF. Consider using OCR for image-based PDFs.`;
+            
+            // Store PDF buffer for frontend display (optional - can be used for iframe rendering)
+            contentData = { 
+              url: `data:application/pdf;base64,${buffer.toString('base64')}`, 
+              type: 'application/pdf',
+              pages: pdfData.numpages,
+              text: extractedText
+            };
+          } else {
+            // pdf-parse not available, store PDF without text extraction
+            content = `PDF Document: ${fileName}\n\nFile uploaded to knowledge base.\nSize: ${(fileSize / 1024).toFixed(2)} KB\n\nNote: PDF text extraction is not available.`;
+            contentData = { 
+              url: `data:application/pdf;base64,${buffer.toString('base64')}`, 
+              type: 'application/pdf'
+            };
+          }
         } catch (error: any) {
           console.warn(`Failed to extract text from PDF ${fileName}:`, error.message);
           content = `PDF Document: ${fileName}\n\nFile uploaded to knowledge base.\nSize: ${(fileSize / 1024).toFixed(2)} KB\n\nNote: Text extraction failed: ${error.message}`;
@@ -219,6 +237,18 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       // Add to RAG store
       await ragStore.addKnowledge(knowledge);
       uploaded.push(fileName);
+      
+      // Track file upload with knowledge base ID
+      const tracker = getFileTracker();
+      tracker.trackFile({
+        path: fileName,
+        timestamp: Date.now(),
+        source: 'upload',
+        contentType: contentType,
+        size: fileSize,
+        contentPreview: content.substring(0, 200),
+        knowledgeBaseId: id, // Store knowledge base ID for uploaded files
+      });
       
       console.log(`✅ Uploaded: ${fileName} (${contentType}, ${category})`);
     } catch (error: any) {

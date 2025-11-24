@@ -238,7 +238,7 @@ export default function SellingPage() {
   return (
     <>
       <PageLoadingBar loading={loading && products.length === 0 && !metrics} />
-    <div className="h-full overflow-y-auto p-4 space-y-4">
+    <div className="h-full overflow-y-auto p-4 space-y-4" suppressHydrationWarning>
       {/* Error State */}
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-md p-4 flex items-center justify-between">

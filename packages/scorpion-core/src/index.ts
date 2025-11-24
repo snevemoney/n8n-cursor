@@ -9,4 +9,6 @@ export * from './storage/persistent-store';
 export * from './agents';
 export * from './utils/error-handler';
 export * from './code';
+export * from './orchestration';
+export * from './devtools';
 

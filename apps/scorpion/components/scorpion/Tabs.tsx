@@ -32,7 +32,7 @@ export function Tabs({ defaultValue, value, onChange, children, className = '' }
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
-      <div className={className}>{children}</div>
+      <div className={className} suppressHydrationWarning>{children}</div>
     </TabsContext.Provider>
   );
 }
@@ -44,7 +44,7 @@ interface TabsListProps {
 
 export function TabsList({ children, className = '' }: TabsListProps) {
   return (
-    <div className={`flex items-center gap-1 border-b border-white/10 ${className}`}>
+    <div className={`flex items-center gap-1 border-b border-white/10 ${className}`} suppressHydrationWarning>
       {children}
     </div>
   );
@@ -90,6 +90,6 @@ export function TabsContent({ value, children, className = '' }: TabsContentProp
   const { activeTab } = context;
   if (activeTab !== value) return null;
 
-  return <div className={className}>{children}</div>;
+  return <div className={className} suppressHydrationWarning>{children}</div>;
 }
 

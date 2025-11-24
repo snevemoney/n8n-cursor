@@ -70,14 +70,15 @@ export class ProjectKnowledgeOrchestrator {
   }
 
   /**
-   * Lightweight ingestion - only tech debt and recommendations
-   * Fast and focused on what's needed for the dashboard
+   * Lightweight ingestion - tech debt, recommendations, and key documentation
+   * Fast and focused on what's needed for the dashboard and common queries
    */
-  async ingestEssential(): Promise<{ techDebt: ExtractedKnowledge[]; recommendations: ExtractedKnowledge[] }> {
-    console.log('🦂 Starting essential ingestion (tech debt + recommendations only)...');
+  async ingestEssential(): Promise<{ techDebt: ExtractedKnowledge[]; recommendations: ExtractedKnowledge[]; documentation: ExtractedKnowledge[] }> {
+    console.log('🦂 Starting essential ingestion (tech debt + recommendations + key docs)...');
     
     const techDebtKnowledge: ExtractedKnowledge[] = [];
     const recommendations: ExtractedKnowledge[] = [];
+    const documentation: ExtractedKnowledge[] = [];
 
     // Analyze codebase for tech debt and missing features
     console.log('🔍 Analyzing codebase for tech debt and missing features...');
@@ -99,18 +100,86 @@ export class ProjectKnowledgeOrchestrator {
       console.error('❌ Error generating recommendations:', error.message);
     }
 
+    // Ingest key documentation files (commonly queried docs)
+    console.log('📚 Ingesting key documentation files...');
+    try {
+      const allDocs = await this.docsIngester.extractDocumentationKnowledge();
+      // Filter for key documentation files that are commonly queried
+      const keyDocPatterns = [
+        /macro.*micro.*pattern/i,
+        /performance.*optimization/i,
+        /orchestrator.*architecture/i,
+        /system.*architecture/i,
+        /workflow.*overview/i,
+        /n8n.*integration/i,
+        /quick.*start/i,
+        /setup/i,
+        /guide/i
+      ];
+      
+      const keyDocs = allDocs.filter(doc => {
+        const searchText = `${doc.title} ${doc.description} ${doc.id}`.toLowerCase();
+        const filePath = doc.codeSnippets?.[0]?.file || doc.filePath || '';
+        return keyDocPatterns.some(pattern => 
+          pattern.test(searchText) || pattern.test(filePath.toLowerCase())
+        );
+      });
+      
+      documentation.push(...keyDocs);
+      console.log(`✅ Ingested ${keyDocs.length} key documentation files (out of ${allDocs.length} total)`);
+    } catch (error: any) {
+      console.error('❌ Error ingesting documentation:', error.message);
+    }
+
     // Store in RAG
     console.log('💾 Storing essential knowledge in RAG...');
-    for (const k of [...techDebtKnowledge, ...recommendations]) {
-      await this.ragStore.addKnowledge(k);
+    console.log(`   Preparing to store: ${techDebtKnowledge.length} tech debt + ${recommendations.length} recommendations + ${documentation.length} docs = ${techDebtKnowledge.length + recommendations.length + documentation.length} total`);
+    
+    const allToStore = [...techDebtKnowledge, ...recommendations, ...documentation];
+    console.log(`   Total items to store: ${allToStore.length}`);
+    
+    // Check categories before storing
+    const techDebtToStore = allToStore.filter(k => k.category === 'tech-debt');
+    const missingFeaturesToStore = allToStore.filter(k => k.category === 'missing-features');
+    console.log(`   Breakdown: ${techDebtToStore.length} tech-debt, ${missingFeaturesToStore.length} missing-features in input`);
+    
+    let storedCount = 0;
+    let errorCount = 0;
+    for (const k of allToStore) {
+      try {
+        await this.ragStore.addKnowledge(k);
+        storedCount++;
+        if (storedCount % 100 === 0) {
+          console.log(`   Stored ${storedCount}/${allToStore.length} items...`);
+        }
+      } catch (error: any) {
+        errorCount++;
+        console.error(`   ❌ Failed to store ${k.id} (${k.category}):`, error.message);
+        if (errorCount <= 5) {
+          console.error(`      Stack:`, error.stack);
+        }
+      }
+    }
+    console.log(`✅ Stored ${storedCount} items, ${errorCount} errors`);
+    
+    // Verify storage immediately after
+    const allStored = this.ragStore.getAllKnowledge();
+    const techDebtStored = allStored.filter(k => k.category === 'tech-debt');
+    const missingFeaturesStored = allStored.filter(k => k.category === 'missing-features');
+    console.log(`📊 Verification: ${allStored.length} total items in store`);
+    console.log(`   - ${techDebtStored.length} tech-debt items (expected: ${techDebtToStore.length})`);
+    console.log(`   - ${missingFeaturesStored.length} missing-features items (expected: ${missingFeaturesToStore.length})`);
+    
+    if (techDebtStored.length !== techDebtToStore.length) {
+      console.warn(`⚠️  MISMATCH: Expected ${techDebtToStore.length} tech-debt items but found ${techDebtStored.length} in store!`);
     }
 
     // Invalidate cache
     this.invalidateCache();
 
-    console.log(`✅ Essential ingestion complete: ${techDebtKnowledge.length} tech debt + ${recommendations.length} recommendations`);
+    console.log(`✅ Essential ingestion complete: ${techDebtKnowledge.length} tech debt + ${recommendations.length} recommendations + ${documentation.length} key docs`);
 
-    return { techDebt: techDebtKnowledge, recommendations };
+    return { techDebt: techDebtKnowledge, recommendations, documentation };
   }
 
   /**
@@ -244,9 +313,29 @@ export class ProjectKnowledgeOrchestrator {
 
     // Store all knowledge in RAG
     console.log('💾 Storing knowledge in RAG...');
+    let storedCount = 0;
+    let errorCount = 0;
     for (const k of knowledge) {
-      await this.ragStore.addKnowledge(k);
+      try {
+        await this.ragStore.addKnowledge(k);
+        storedCount++;
+        if (storedCount % 100 === 0) {
+          console.log(`   Stored ${storedCount}/${knowledge.length} items...`);
+        }
+      } catch (error: any) {
+        errorCount++;
+        console.error(`   ❌ Failed to store ${k.id} (${k.category}):`, error.message);
+      }
     }
+    console.log(`✅ Stored ${storedCount} items, ${errorCount} errors`);
+    
+    // Verify storage
+    const allStored = this.ragStore.getAllKnowledge();
+    const techDebtStored = allStored.filter(k => k.category === 'tech-debt');
+    const missingFeaturesStored = allStored.filter(k => k.category === 'missing-features');
+    console.log(`📊 Verification: ${allStored.length} total items in store`);
+    console.log(`   - ${techDebtStored.length} tech-debt items`);
+    console.log(`   - ${missingFeaturesStored.length} missing-features items`);
     
     // Invalidate summary cache so next getSummary() call gets fresh data
     this.invalidateCache();
@@ -360,41 +449,86 @@ export class ProjectKnowledgeOrchestrator {
 
   /**
    * Calculate project status
+   * Now includes project items from structured JSON file
    */
   private async calculateProjectStatus(
     knowledge: ExtractedKnowledge[],
     workflows: WorkflowInfo[],
     services: ServiceStatus[]
   ): Promise<ProjectStatus> {
-    // Debug: Log knowledge breakdown
-    console.log(`[calculateProjectStatus] Total knowledge items: ${knowledge.length}`);
+    // Load project items from structured JSON file
+    let projectItemsCounts = { techDebt: { total: 0, critical: 0, high: 0, medium: 0, low: 0 }, missingFeatures: { p0: 0, p1: 0, p2: 0 } };
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      // Resolve path relative to workspace root (where orchestrator is initialized)
+      const projectItemsPath = path.join(this.workspaceRoot, 'apps', 'scorpion', 'data', 'project-items.json');
+      const data = await fs.readFile(projectItemsPath, 'utf-8');
+      const projectItems = JSON.parse(data) as Array<{
+        id: string;
+        type: 'tech_debt' | 'missing_feature';
+        severity?: 'critical' | 'high' | 'medium' | 'low';
+        priority?: 'p0' | 'p1' | 'p2';
+        status: 'open' | 'in_progress' | 'done';
+      }>;
+      
+      // Calculate counts from project items (only open items)
+      const openItems = projectItems.filter(item => item.status !== 'done');
+      const techDebtItems = openItems.filter(item => item.type === 'tech_debt');
+      const missingFeatureItems = openItems.filter(item => item.type === 'missing_feature');
+      
+      projectItemsCounts = {
+        techDebt: {
+          total: techDebtItems.length,
+          critical: techDebtItems.filter(item => item.severity === 'critical').length,
+          high: techDebtItems.filter(item => item.severity === 'high').length,
+          medium: techDebtItems.filter(item => item.severity === 'medium').length,
+          low: techDebtItems.filter(item => item.severity === 'low').length,
+        },
+        missingFeatures: {
+          p0: missingFeatureItems.filter(item => item.priority === 'p0').length,
+          p1: missingFeatureItems.filter(item => item.priority === 'p1').length,
+          p2: missingFeatureItems.filter(item => item.priority === 'p2').length,
+        },
+      };
+    } catch (error) {
+      // File doesn't exist or can't be read - use knowledge-based counts only
+      // This is fine, we'll fall back to knowledge items
+    }
     
-    // Count tech debt
+    // Count tech debt from knowledge items (legacy support)
     const techDebtKnowledge = knowledge.filter(k => k.category === 'tech-debt');
-    console.log(`[calculateProjectStatus] Tech debt items: ${techDebtKnowledge.length}`);
-    if (techDebtKnowledge.length > 0) {
-      console.log(`[calculateProjectStatus] Sample tech debt tags:`, techDebtKnowledge[0].tags);
-    }
+    const criticalFromKnowledge = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('critical') || t.includes('p0'))).length;
+    const highFromKnowledge = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('high') || t.includes('p1'))).length;
+    const mediumFromKnowledge = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('medium') || t.includes('p2'))).length;
+    const lowFromKnowledge = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('low'))).length;
     
-    const critical = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('critical') || t.includes('p0'))).length;
-    const high = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('high') || t.includes('p1'))).length;
-    const medium = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('medium') || t.includes('p2'))).length;
-    const low = techDebtKnowledge.filter(k => k.tags?.some(t => t.includes('low'))).length;
-    
-    console.log(`[calculateProjectStatus] Tech debt counts - Critical: ${critical}, High: ${high}, Medium: ${medium}, Low: ${low}`);
-
-    // Count missing features
+    // Count missing features from knowledge items (legacy support)
     const missingFeaturesKnowledge = knowledge.filter(k => k.category === 'missing-features');
-    console.log(`[calculateProjectStatus] Missing features items: ${missingFeaturesKnowledge.length}`);
-    if (missingFeaturesKnowledge.length > 0) {
-      console.log(`[calculateProjectStatus] Sample missing feature tags:`, missingFeaturesKnowledge[0].tags);
-    }
+    const p0FromKnowledge = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p0'))).length;
+    const p1FromKnowledge = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p1'))).length;
+    const p2FromKnowledge = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p2'))).length;
+
+    // Merge counts: prefer project items, but add knowledge items as fallback
+    const critical = projectItemsCounts.techDebt.critical + criticalFromKnowledge;
+    const high = projectItemsCounts.techDebt.high + highFromKnowledge;
+    const medium = projectItemsCounts.techDebt.medium + mediumFromKnowledge;
+    const low = projectItemsCounts.techDebt.low + lowFromKnowledge;
+    const totalTechDebt = projectItemsCounts.techDebt.total + techDebtKnowledge.length;
     
-    const p0 = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p0'))).length;
-    const p1 = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p1'))).length;
-    const p2 = missingFeaturesKnowledge.filter(k => k.tags?.some(t => t.includes('p2'))).length;
-    
+    const p0 = projectItemsCounts.missingFeatures.p0 + p0FromKnowledge;
+    const p1 = projectItemsCounts.missingFeatures.p1 + p1FromKnowledge;
+    const p2 = projectItemsCounts.missingFeatures.p2 + p2FromKnowledge;
+
+    // Log once per dev boot (using static flag)
+    if (!(global as any).__hasLoggedProjectStatus) {
+      console.log(`[calculateProjectStatus] Total knowledge items: ${knowledge.length}`);
+      console.log(`[calculateProjectStatus] Tech debt items: ${totalTechDebt} (${projectItemsCounts.techDebt.total} from project-items.json, ${techDebtKnowledge.length} from knowledge)`);
+      console.log(`[calculateProjectStatus] Tech debt counts - Critical: ${critical}, High: ${high}, Medium: ${medium}, Low: ${low}`);
+      console.log(`[calculateProjectStatus] Missing features items: ${projectItemsCounts.missingFeatures.p0 + projectItemsCounts.missingFeatures.p1 + projectItemsCounts.missingFeatures.p2 + missingFeaturesKnowledge.length} (${projectItemsCounts.missingFeatures.p0 + projectItemsCounts.missingFeatures.p1 + projectItemsCounts.missingFeatures.p2} from project-items.json, ${missingFeaturesKnowledge.length} from knowledge)`);
     console.log(`[calculateProjectStatus] Missing features counts - P0: ${p0}, P1: ${p1}, P2: ${p2}`);
+      (global as any).__hasLoggedProjectStatus = true;
+    }
 
     // Calculate overall health
     let overallHealth: 'healthy' | 'degraded' | 'critical' = 'healthy';
@@ -407,7 +541,7 @@ export class ProjectKnowledgeOrchestrator {
     return {
       overallHealth,
       techDebt: {
-        total: techDebtKnowledge.length,
+        total: totalTechDebt,
         critical,
         high,
         medium,
@@ -461,19 +595,13 @@ export class ProjectKnowledgeOrchestrator {
     
     const allKnowledge = this.ragStore.getAllKnowledge();
     
-    // Debug: Log knowledge breakdown by category
+    // Log once per dev boot (using static flag - same as calculateProjectStatus)
+    // The detailed logging is now handled in calculateProjectStatus
+    if (!(global as any).__hasLoggedGetSummary) {
     const techDebtItems = allKnowledge.filter(k => k.category === 'tech-debt');
     const missingFeatureItems = allKnowledge.filter(k => k.category === 'missing-features');
     console.log(`[getSummary] Total knowledge: ${allKnowledge.length}, Tech Debt: ${techDebtItems.length}, Missing Features: ${missingFeatureItems.length}`);
-    
-    // Debug: Check if knowledge items have tags
-    if (techDebtItems.length > 0) {
-      const sample = techDebtItems[0];
-      console.log(`[getSummary] Sample tech debt item - ID: ${sample.id}, Category: ${sample.category}, Tags: ${JSON.stringify(sample.tags)}`);
-    }
-    if (missingFeatureItems.length > 0) {
-      const sample = missingFeatureItems[0];
-      console.log(`[getSummary] Sample missing feature item - ID: ${sample.id}, Category: ${sample.category}, Tags: ${JSON.stringify(sample.tags)}`);
+      (global as any).__hasLoggedGetSummary = true;
     }
     
     const status = await this.calculateProjectStatus(allKnowledge, workflows, services);

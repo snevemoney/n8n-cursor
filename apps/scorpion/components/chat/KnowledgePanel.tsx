@@ -3,6 +3,7 @@
 import { Book, ExternalLink, RefreshCw, AlertTriangle, ArrowRight, Clock, Folder, FileText, Tag, Layers, Link as LinkIcon, Code, Package, Download } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { safeClick, safeContains } from '@/lib/utils/dom-safe';
 
 interface KnowledgeHit {
   id: string;
@@ -10,6 +11,11 @@ interface KnowledgeHit {
   url: string;
   spans: Array<{ text: string }>;
   relevance?: number;
+  ocrText?: string;
+  isImage?: boolean;
+  fullDescription?: string;
+  category?: string;
+  tags?: string[];
 }
 
 interface KnowledgeCard {
@@ -132,6 +138,21 @@ export function KnowledgePanel({ hits, onSelect, searchQuery }: KnowledgePanelPr
     try {
       setIsExtracting(true);
       
+      // Check governance before export
+      const { checkAccess } = await import('@/lib/governance/client');
+      const accessCheck = await checkAccess({
+        action: 'export',
+        resourceType: 'rag_document',
+        resourceId: bundle.id,
+      });
+
+      if (!accessCheck.allowed) {
+        // Use a simple alert since we don't have toast context here
+        alert('Export denied by governance policy');
+        setIsExtracting(false);
+        return;
+      }
+      
       // Generate bundle from API
       const response = await fetch('/api/knowledge/bundle', {
         method: 'POST',
@@ -154,9 +175,21 @@ export function KnowledgePanel({ hits, onSelect, searchQuery }: KnowledgePanelPr
         a.href = url;
         a.download = `${bundle.title.replace(/[^a-z0-9]/gi, '_')}.html`;
         document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        
+        // Use safe click to prevent "Element not found" errors
+        if (safeClick(a)) {
+          // Only remove if click succeeded
+          setTimeout(() => {
+            if (safeContains(a)) {
+              document.body.removeChild(a);
+            }
+            URL.revokeObjectURL(url);
+          }, 100);
+        } else {
+          // Fallback: remove immediately if click failed
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
         
         // Also open in new window for print-to-PDF
         const printWindow = window.open('', '_blank');
@@ -404,8 +437,8 @@ export function KnowledgePanel({ hits, onSelect, searchQuery }: KnowledgePanelPr
   }
   
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between mb-3">
+    <div data-testid="knowledge-panel" className="space-y-2">
+      <div data-testid="knowledge-panel-header" className="flex items-center justify-between mb-3">
         <div className="text-sm font-medium text-white/60">
           Knowledge Base ({hits.length})
         </div>
@@ -416,33 +449,79 @@ export function KnowledgePanel({ hits, onSelect, searchQuery }: KnowledgePanelPr
         )}
       </div>
       
-      {hits.map((hit) => (
-        <button
-          key={hit.id}
-          onClick={() => onSelect?.(hit)}
-          className="w-full p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-400/30 rounded-lg text-left transition-colors"
-        >
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="flex-1">
-              <div className="text-sm font-medium text-white mb-1">{hit.title}</div>
-              <div className="text-xs text-white/60 line-clamp-2">
-                {hit.spans[0]?.text || 'No description'}
+      {hits.map((hit) => {
+        // Check if this is an image with OCR text
+        const hasOcrText = hit.ocrText || hit.spans?.some(s => s.text?.toLowerCase().includes('ocr'));
+        const isImage = hit.isImage || hit.category === 'media' || hit.tags?.includes('image');
+        
+        return (
+          <button
+            key={hit.id}
+            data-testid={`knowledge-hit-${hit.id}`}
+            onClick={() => onSelect?.(hit)}
+            className={`w-full p-3 bg-white/5 hover:bg-white/10 border rounded-lg text-left transition-colors ${
+              isImage && hasOcrText 
+                ? 'border-emerald-400/30 hover:border-emerald-400/50 bg-emerald-500/5' 
+                : 'border-white/10 hover:border-emerald-400/30'
+            }`}
+          >
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="text-sm font-medium text-white">{hit.title}</div>
+                  {isImage && (
+                    <span className="px-1.5 py-0.5 bg-emerald-500/20 border border-emerald-400/30 rounded text-[10px] text-emerald-400 uppercase">
+                      Image
+                    </span>
+                  )}
+                  {hasOcrText && (
+                    <span className="px-1.5 py-0.5 bg-blue-500/20 border border-blue-400/30 rounded text-[10px] text-blue-400 uppercase">
+                      OCR
+                    </span>
+                  )}
+                </div>
+                
+                {/* Show OCR text prominently if available */}
+                {hasOcrText && hit.ocrText && (
+                  <div className="mb-2 p-2 bg-emerald-500/10 border border-emerald-400/20 rounded text-xs text-emerald-100 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
+                    {hit.ocrText.substring(0, 500)}
+                    {hit.ocrText.length > 500 && '...'}
+                  </div>
+                )}
+                
+                {/* Show spans (which may contain OCR text) */}
+                {hit.spans && hit.spans.length > 0 && (
+                  <div className="text-xs text-white/60 space-y-1">
+                    {hit.spans.map((span, idx) => (
+                      <div key={idx} className={span.text?.toLowerCase().includes('ocr') ? 'text-emerald-300/80' : ''}>
+                        {span.text?.substring(0, 300)}
+                        {span.text && span.text.length > 300 && '...'}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {(!hit.spans || hit.spans.length === 0) && !hasOcrText && (
+                  <div className="text-xs text-white/60 line-clamp-2">
+                    {hit.fullDescription?.substring(0, 200) || 'No description'}
+                  </div>
+                )}
               </div>
+              
+              {hit.relevance !== undefined && (
+                <div className="flex-shrink-0 px-2 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded text-xs text-emerald-400">
+                  {(hit.relevance * 100).toFixed(0)}%
+                </div>
+              )}
             </div>
             
-            {hit.relevance !== undefined && (
-              <div className="flex-shrink-0 px-2 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded text-xs text-emerald-400">
-                {(hit.relevance * 100).toFixed(0)}%
-              </div>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-2 text-xs text-white/40">
-            <ExternalLink className="h-3 w-3" />
-            <span className="font-mono truncate">{hit.url}</span>
-          </div>
-        </button>
-      ))}
+            <div className="flex items-center gap-2 text-xs text-white/40">
+              <ExternalLink className="h-3 w-3" />
+              <span className="font-mono truncate">{hit.url}</span>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }

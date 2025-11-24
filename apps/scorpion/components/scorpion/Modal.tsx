@@ -59,10 +59,12 @@ export const Modal = memo(function Modal({
     <div
       className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
+      suppressHydrationWarning
     >
       <div
         className={`bg-[#0f1318] border border-white/10 rounded-xl w-full ${sizeStyles[size]} max-h-[90vh] flex flex-col shadow-xl animate-scale-in ${className}`}
         onClick={(e) => e.stopPropagation()}
+        suppressHydrationWarning
       >
         {(title || onClose) && (
           <div className="flex items-center justify-between p-4 border-b border-white/10">

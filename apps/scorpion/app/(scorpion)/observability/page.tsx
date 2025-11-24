@@ -10,6 +10,7 @@ import { LogStream } from '@/components/observability/LogStream';
 import { HealthCards } from '@/components/observability/HealthCards';
 import { AgentSmallMultiples } from '@/components/observability/AgentSmallMultiples';
 import { QueueStatistics } from '@/components/observability/QueueStatistics';
+import { CostDashboard } from '@/components/scorpion/CostDashboard';
 import { Panel, PageLoadingBar } from '@/components/scorpion';
 
 // Lazy load EventRateChart - likely uses recharts or similar heavy library
@@ -118,6 +119,11 @@ export default function ObservabilityPage() {
             <QueueStatistics />
           </Panel>
         </div>
+        
+        {/* Cost Tracking */}
+        <Panel title="Cost Management">
+          <CostDashboard />
+        </Panel>
       </div>
     </div>
   );

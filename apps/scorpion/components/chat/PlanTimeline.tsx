@@ -5,13 +5,14 @@ import type { PlanStep } from '@/lib/chat/types';
 
 interface PlanTimelineProps {
   steps: Array<PlanStep & { status?: 'pending' | 'running' | 'completed' | 'failed' }>;
+  plan?: { reasoning?: string; objective?: string; assumptions?: string[] } | null;
   onStepClick?: (stepId: string) => void;
 }
 
 /**
  * PlanTimeline - Visual timeline of plan execution
  */
-export function PlanTimeline({ steps, onStepClick }: PlanTimelineProps) {
+export function PlanTimeline({ steps, plan, onStepClick }: PlanTimelineProps) {
   if (steps.length === 0) {
     return (
       <div className="text-sm text-white/40 text-center py-8">
@@ -21,7 +22,38 @@ export function PlanTimeline({ steps, onStepClick }: PlanTimelineProps) {
   }
   
   return (
-    <div className="space-y-2">
+    <div data-testid="plan-timeline" className="space-y-2">
+      {/* Display plan reasoning if available */}
+      {plan?.reasoning && (
+        <div className="mb-4 p-3 rounded-lg border border-emerald-400/20 bg-emerald-400/5">
+          <div className="text-xs font-semibold text-emerald-400 mb-1.5 uppercase tracking-wider">Reasoning</div>
+          <div className="text-sm text-white/80 leading-relaxed whitespace-pre-wrap">{plan.reasoning}</div>
+        </div>
+      )}
+      
+      {/* Display objective if available */}
+      {plan?.objective && (
+        <div className="mb-3 p-2 rounded-lg border border-white/10 bg-white/5">
+          <div className="text-xs font-semibold text-white/60 mb-1 uppercase tracking-wider">Objective</div>
+          <div className="text-sm text-white/90">{plan.objective}</div>
+        </div>
+      )}
+      
+      {/* Display assumptions if available */}
+      {plan?.assumptions && plan.assumptions.length > 0 && (
+        <div className="mb-3 p-2 rounded-lg border border-white/10 bg-white/5">
+          <div className="text-xs font-semibold text-white/60 mb-1 uppercase tracking-wider">Assumptions</div>
+          <ul className="text-sm text-white/80 space-y-1">
+            {plan.assumptions.map((assumption, idx) => (
+              <li key={idx} className="flex items-start">
+                <span className="text-white/40 mr-2">•</span>
+                <span>{assumption}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
       {steps.map((step, index) => {
         const status = step.status || 'pending';
         
@@ -50,6 +82,7 @@ export function PlanTimeline({ steps, onStepClick }: PlanTimelineProps) {
         return (
           <button
             key={step.id}
+            data-testid={`plan-step-${step.id}`}
             onClick={() => onStepClick?.(step.id)}
             className={`w-full flex items-start gap-3 p-3 rounded-lg border ${getColor()} hover:bg-white/5 transition-colors text-left`}
           >

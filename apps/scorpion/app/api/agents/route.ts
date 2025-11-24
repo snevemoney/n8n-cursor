@@ -4,8 +4,26 @@ import { getAgentOperationsExecutor } from '@/lib/agent-operations-executor';
 import { getAgentOperations, generateDefaultOperations, addAgentOperations } from '@/lib/agent-operations';
 import { getSystemAutomation } from '@/lib/system-automation';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
-import { getStoredAgents, addAgent, getAgentById } from '@/lib/agent-storage';
+import { getStoredAgents, addAgent, getAgentById, updateAgentStatus } from '@/lib/agent-storage';
 import { z } from 'zod';
+
+// In-memory status cache for council members (static agents)
+// In production, this could be persisted to a database
+const councilMemberStatusCache = new Map<string, 'active' | 'standby' | 'offline'>();
+
+/**
+ * Get status for a council member (with caching)
+ */
+function getCouncilMemberStatus(agentId: string): 'active' | 'standby' | 'offline' {
+  return councilMemberStatusCache.get(agentId) || 'active';
+}
+
+/**
+ * Set status for a council member
+ */
+function setCouncilMemberStatus(agentId: string, status: 'active' | 'standby' | 'offline'): void {
+  councilMemberStatusCache.set(agentId, status);
+}
 
 export interface AgentActivity {
   id: string;
@@ -176,6 +194,9 @@ async function councilMembersToAgentDossiers(): Promise<AgentDossier[]> {
     // Calculate creation date (stagger by 30 days each)
     const createdAt = new Date(Date.now() - (index * 30 * 24 * 60 * 60 * 1000)).toISOString();
 
+    // Get status from cache (defaults to 'active')
+    const status = getCouncilMemberStatus(agentId);
+
     dossiers.push({
       id: agentId,
       codename: member.name,
@@ -184,7 +205,7 @@ async function councilMembersToAgentDossiers(): Promise<AgentDossier[]> {
       expertise: member.specialty,
       age: null, // AI agents don't have biological age
       createdAt,
-      status: 'active' as const,
+      status,
       stats: {
         totalActivities: activities.length,
         successCount,

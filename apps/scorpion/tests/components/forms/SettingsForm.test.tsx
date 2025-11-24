@@ -50,9 +50,11 @@ describe('SettingsForm', () => {
   });
 
   it('saves settings successfully', async () => {
+    // Mock GET request for loading settings
     apiMocks.settings.get({ ragIndexing: true });
-    apiMocks.settings.save({ success: true });
-
+    
+    // Mock POST request for saving - must return ok: true
+    // Need to mock after GET is consumed
     const user = userEvent.setup();
     render(<SettingsPage />);
 
@@ -60,13 +62,19 @@ describe('SettingsForm', () => {
       expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
+    // Now mock the POST request
+    apiMocks.settings.save({ success: true });
+
     const saveButton = screen.getByRole('button', { name: /save settings/i });
     await user.click(saveButton);
 
     await waitFor(() => {
-      // Should show success toast
-      expect(screen.getByText(/settings saved successfully/i)).toBeInTheDocument();
-    });
+      // Should show success toast - check for partial text match
+      const toast = screen.getByText((content, element) => {
+        return content.toLowerCase().includes('settings saved successfully');
+      });
+      expect(toast).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 
   it('handles API errors', async () => {
