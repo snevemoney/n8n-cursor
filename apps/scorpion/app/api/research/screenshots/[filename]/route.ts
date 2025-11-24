@@ -6,13 +6,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
+/**
+ * Validate filename to prevent directory traversal attacks
+ */
+function validateFilename(filename: string): boolean {
+  // Only allow alphanumeric, dots, hyphens, underscores
+  // Must end with .png, .jpg, .jpeg, .gif, .webp
+  const validPattern = /^[a-zA-Z0-9._-]+\.(png|jpg|jpeg|gif|webp)$/;
+  return validPattern.test(filename);
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { filename: string } }
 ) {
   try {
     const filename = params.filename;
-    const screenshotPath = path.join(process.cwd(), 'data/research-screenshots', filename);
+
+    // Validate filename to prevent directory traversal
+    if (!validateFilename(filename)) {
+      return new NextResponse('Invalid filename', { status: 400 });
+    }
+
+    const rootDir = path.resolve(process.cwd(), 'data/research-screenshots');
+    const screenshotPath = path.resolve(rootDir, filename);
+
+    // Verify the resolved path is still within the screenshots directory
+    if (!screenshotPath.startsWith(rootDir)) {
+      return new NextResponse('Invalid path', { status: 400 });
+    }
 
     // Check if file exists
     try {

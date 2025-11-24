@@ -59,9 +59,9 @@ ${fileContext || "(no files provided)"}
 
 (async () => {
   try {
-    console.error("[claude-dev] Calling Anthropic (model=claude-sonnet-4-5)...");
+    console.error("[claude-dev] Calling Anthropic (model=claude-opus-4-5)...");
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: "claude-opus-4-5",
       max_tokens: 1400,
       temperature: 0.2,
       system: systemPrompt,

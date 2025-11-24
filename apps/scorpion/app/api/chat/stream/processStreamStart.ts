@@ -2,6 +2,12 @@
 // This reduces file size and fixes TypeScript parser limitations
 // File: processStreamStart.ts
 // Original location: route.ts lines 156-5984
+//
+// ARCHITECTURE DOCUMENTATION:
+// - High-level system architecture: apps/scorpion/ARCHITECTURE.md
+// - Refactoring phases 1-3 complete: apps/scorpion/PHASE_1_2_3_REFACTORING_REPORT.md
+// - Chat pipeline deep dive: apps/scorpion/CHAT_PIPELINE_ARCHITECTURE.md
+// - Current refactoring status: apps/scorpion/REFACTORING_STATUS.md
 
 import { NextRequest } from 'next/server';
 import type { ReadableStreamDefaultController } from 'stream/web';
@@ -17,7 +23,9 @@ import { detectLightweightMode } from '@/lib/utils/systemResources';
 import { buildStreamContext } from './helpers/streamContext';
 import { handleStreamError } from './helpers/streamErrorHandler';
 import { validateRequest } from './helpers/requestValidation';
-import { handleIdentityIntent, handleSmallTalkIntent, isSimpleGreeting } from './helpers/intentHandlers';
+import { tryHandleIdentityIntent } from './handlers/identityHandler';
+import { tryHandleSmallTalk } from './handlers/smallTalkHandler';
+import { detectMlQueryIntent, tryHandleMlQueryIntent } from './handlers/mlQueryHandler';
 // handleUserTool is defined inline below
 import { createOrchestrator } from './helpers/orchestratorSetup';
 import {
@@ -45,7 +53,9 @@ import {
 } from '@/lib/chat/tools';
 import { streamFinalAnswer } from './helpers/deltaStreaming';
 import { getCachedResponse } from './helpers/responseCache';
-import { performEarlyRagSearch, extractKnowledgeHits, extractResearchResults, formatResearchSources, prioritizeKnowledgeHits } from './helpers/ragIntegration';
+import { performEarlyRagSearch, prioritizeKnowledgeHits } from './helpers/ragIntegration';
+import { processExecutionResults } from './helpers/resultProcessor';
+import { buildSummarizerContext } from './helpers/summarizerContext';
 import {
   runPromptWithKillSwitch,
   SafetyGuardSchema,
@@ -57,13 +67,14 @@ import {
 } from '@scorpion/core';
 import { executeTool } from '@/lib/chat/tools';
 import { emitEvent } from '@/lib/events/event-bus';
-import { getHelperConfig, getHelperDefaults } from '@/lib/chat/helper-config';
+import { getHelperConfig } from '@/lib/chat/helper-config'; // Still needed for POST-FLIGHT checks
 import { shouldSelfCorrect, isToolSafeForSelfCorrection, type SelfCorrectionContext } from '@/lib/chat/self-correction';
 import { getSummarizerPrompt } from '@/lib/chat/summarizer-config';
 import { analyzeConversationHistory } from './helpers/historyAnalysis';
 import { isToolAllowedForIntent, shouldUseKnowledgeBase } from '@/lib/chat/intent';
 // parsePlannerResponse, enforcePlanRules, createFallbackPlan don't exist - using enforcePlan instead
 import { applyPlanEnforcement } from './helpers/planEnforcement';
+import { validateAndNormalizePlan } from './helpers/planValidator';
 import { handleSummarizerPhase } from './phases/summarizerPhase';
 import { handlePlannerPhase } from './phases/plannerPhase';
 import type { Plan, PlanStep } from '@/lib/chat/types';
@@ -78,6 +89,38 @@ import { remember } from '@/lib/chat/memory';
 import { serializeProtocol } from './helpers/protocolSerialization';
 import { fallbackRoute } from './helpers/toolRouter';
 import { learnFromInteraction, enhancePlanWithPatterns, determineExecutionSuccess } from './helpers/patternLearningHelpers';
+import { runPreflightChecks } from './preflightChecks';
+
+// Configuration imports
+import {
+  QUERY_PATTERNS,
+  LIMITS,
+  DEFAULT_USER_ID,
+  DEFAULT_CLIENT_MODE,
+  RISK_MODES,
+  FEATURE_FLAGS,
+  getModelConfig,
+} from './config/pipelineConfig';
+import {
+  shouldEnableSafetyGuard,
+  shouldEnableToolRouter,
+  shouldEnableBudgetGovernor,
+  shouldEnableDispatcher,
+  TOOL_ROUTER_RETRY_CONFIG,
+  HELPER_CONTEXT_LIMITS,
+  getRequiredToolsForIntent,
+  getToolRoutingRationale,
+  logHelperStatus,
+  logHelperConfigSummary,
+} from './config/helperOrchestrationConfig';
+
+// Core pipeline imports
+import type { IngestedRequest, QueryClassification, RouteResult, HelperOrchestratorInput, HelperOrchestratorResult } from './core/types';
+import { ingestAndClassifyRequest, classifyQueryType } from './core/requestIngestion';
+import { routeRequest } from './core/intentRouter';
+
+// Orchestration imports
+import { orchestrateHelpers } from './orchestration/helperOrchestrator';
 
 /**
  * Main stream processing handler
@@ -134,35 +177,70 @@ export async function processStreamStart(
     checkAbort();
     send({ type: 'connected', data: { message: 'Chat stream connected' } });
 
-    // Power of 10 Rule 3: Extract request validation to focused function
-    const validatedRequest = await validateRequest(messages, send, controller);
-    if (!validatedRequest) {
+    // ========================================================================
+    // REQUEST INGESTION: Validate, extract, and classify request
+    // ========================================================================
+    const ingestedRequest = await ingestAndClassifyRequest(
+      messages,
+      conversationId,
+      send,
+      controller,
+      provider,
+      model
+    );
+
+    if (!ingestedRequest) {
       return; // Validation failed, error already sent
     }
 
-    const { userMessage, messageId, filteredHistory, conversationHistory } = validatedRequest;
+    // Extract ingested data for easier access
+    const {
+      userMessage,
+      messageId,
+      filteredHistory,
+      conversationHistory,
+      userId,
+      lightweightMode,
+    } = ingestedRequest;
+    // Intent needs to be mutable as it may be refined by planner phase
+    let intent = ingestedRequest.intent;
 
-    // Power of 10 Rule 4: Define query classification variables close to usage
-    const codebaseKeywords = /(lightningflow|lightning flow|scorpion|n8n|workflow|codebase|project|app|code|implementation|repository|repo|package|module)/i;
-    const isCodebaseQuestionCheck = codebaseKeywords.test(userMessage);
+    // Compute query classification flags (used throughout pipeline)
+    const queryClassification = classifyQueryType(ingestedRequest);
+    const {
+      isCodebaseQuestion: isCodebaseQuestionCheck,
+      isOperationalQuestion,
+      isWorkflowQuestion,
+      isAnalysisQuestion,
+      isFileQuery,
+    } = queryClassification;
 
-    const isOperationalQuestion = /(system health|check system|system status|show logs|recent errors|system metrics|uptime|health check)/i.test(userMessage);
-    const isWorkflowQuestion = /(trigger workflow|run workflow|workflow status|execute workflow|workflow id)/i.test(userMessage);
-    const isAnalysisQuestion = /(analyze|analysis|investigate|debug|why|how|explain|trace|track|monitor)/i.test(userMessage);
-    const isFileQuery = /(file|read|show|content|code|implementation|function|class)/i.test(userMessage) &&
-      /(recent|latest|last|new|modified|updated|created|change)/i.test(userMessage);
+    // ========================================================================
+    // EARLY ML QUERY DETECTION: Check for ML-related questions before routing
+    // ========================================================================
+    const mlIntent = detectMlQueryIntent(userMessage);
+    if (mlIntent) {
+      console.log(`[Chat Stream] ML query intent detected: ${mlIntent}`);
+      const mlHandled = await tryHandleMlQueryIntent({
+        intent: mlIntent,
+        userMessage,
+        send,
+        streamState,
+        controller,
+        messageId,
+      });
+      if (mlHandled) {
+        return; // ML query handled, stream closed
+      }
+    }
 
-    // Extract userId from request or use default
-    const userId = 'evens'; // TODO: Extract from request if needed
+    // ========================================================================
+    // ROUTING DECISION: Determine which execution path to take
+    // ========================================================================
+    const routeResult = await routeRequest(ingestedRequest);
 
-    // Resource optimization: Auto-detect lightweight mode early (needed for transformer orchestrator)
-    const lightweightMode = detectLightweightMode();
-
-    // TRANSFORMER ORCHESTRATOR: Check if we should use transformer architecture
-    // Check if transformer orchestrator is enabled
-    const USE_TRANSFORMER = process.env.USE_TRANSFORMER_ORCHESTRATOR === 'true';
-
-    if (USE_TRANSFORMER) {
+    // Handle transformer orchestrator route
+    if (routeResult.type === 'transformer') {
       const { runTransformerOrchestration } = await import('@/lib/transformer/chat-integration');
       console.log('[Chat Stream] Using Transformer Orchestrator');
       send({
@@ -236,78 +314,64 @@ export async function processStreamStart(
       // Continue without job tracking if it fails
     }
 
-    // INTENT CLASSIFICATION: Classify user intent BEFORE planning
-    let intent: ScorpionIntent = classifyIntent(userMessage);
-    console.log('[Intent]', userMessage, '→', intent);
-    console.log('[Chat Stream] Classified intent:', intent, 'for message:', userMessage.substring(0, 50));
+    // ========================================================================
+    // SHORT-CIRCUIT ROUTES: Handle direct responses without full pipeline
+    // ========================================================================
+    if (routeResult.type === 'short-circuit') {
+      switch (routeResult.handler) {
+        case 'identity': {
+          console.log('[Chat Stream] Identity intent detected - using direct answer path (no tools, no planner)');
+          send({
+            type: 'status',
+            data: { message: 'Answering as Scorpion...', phase: 'identity' }
+          });
 
-    // Send intent to debug tab
-    send({
-      type: 'debug',
-      data: { intent, message: userMessage.substring(0, 100) }
-    });
+          const handled = await tryHandleIdentityIntent({
+            userMessage,
+            conversationId,
+            model,
+            provider,
+            send,
+            streamState,
+            controller,
+            messageId,
+          });
+          if (handled) {
+            return; // Identity intent handled, stream closed
+          }
+          break;
+        }
 
-    // SHORT-CIRCUIT: Handle identity intent directly (no tools, no planner, no council)
-    // Power of 10 Rule 3: Extract intent handling to focused function
-    if (intent === 'identity') {
-      console.log('[Chat Stream] Identity intent detected - using direct answer path (no tools, no planner)');
-      send({
-        type: 'status',
-        data: { message: 'Answering as Scorpion...', phase: 'identity' }
-      });
+        case 'small_talk': {
+          console.log('[Chat Stream] Small talk intent detected - using direct conversational response (no tools, no planner)');
+          send({
+            type: 'status',
+            data: { message: 'Responding...', phase: 'small_talk' }
+          });
 
-      const handled = await handleIdentityIntent(
-        userMessage,
-        conversationId,
-        model,
-        provider,
-        send,
-        streamState,
-        controller,
-        messageId
-      );
-      if (handled) {
-        return; // Identity intent handled, stream closed
-      }
-    }
+          const handled = await tryHandleSmallTalk({
+            userMessage,
+            conversationHistory,
+            model,
+            provider,
+            send,
+            streamState,
+            controller,
+            messageId,
+          });
+          if (handled) {
+            return; // Small talk handled, stream closed
+          }
+          break;
+        }
 
-    // SHORT-CIRCUIT: Handle small_talk intent and simple greetings directly (no tools, no planner, no council)
-    // Power of 10 Rule 7: Guard simple queries - bypass expensive operations for trivial messages
-    // Power of 10 Rule 3: Extract greeting check to focused function
-    if (intent === 'small_talk' || isSimpleGreeting(userMessage)) {
-      console.log('[Chat Stream] Small talk intent detected - using direct conversational response (no tools, no planner)');
-      send({
-        type: 'status',
-        data: { message: 'Responding...', phase: 'small_talk' }
-      });
-
-      // Power of 10 Rule 3: Extract small talk handling to focused function
-      const handled = await handleSmallTalkIntent(
-        userMessage,
-        conversationHistory,
-        model,
-        provider,
-        send,
-        streamState,
-        controller,
-        messageId
-      );
-      if (handled) {
-        return; // Small talk handled, stream closed
-      }
-    }
-
-    // Continue with normal flow if small talk wasn't handled
-    // Check if this is a user tool command (slash command OR natural language) or AI-callable tool with slash
-    let detectedTool = null;
-    try {
-      detectedTool = detectUserTool(userMessage);
-    } catch (error: any) {
-      console.error('[Chat Stream] Error detecting user tool:', error);
-      // Continue with normal flow if detection fails
-    }
-
-    if (detectedTool && !detectedTool.isAiTool) {
+        case 'user_tool': {
+          // Extract detected tool from route result
+          const detectedTool = routeResult.detectedTool;
+          if (!detectedTool) {
+            console.error('[Chat Stream] user_tool route without detectedTool');
+            break; // Fall through to standard pipeline
+          }
       // PROACTIVE VALIDATION: Validate detectedTool structure before destructuring
       if (!detectedTool || typeof detectedTool !== 'object' || !detectedTool.tool) {
         console.error('[Chat Stream] Invalid detectedTool structure:', detectedTool);
@@ -322,11 +386,13 @@ export async function processStreamStart(
         return;
       }
 
-      const { tool: userTool, argsText } = detectedTool;
+      // Check if this is a regular user tool (not AI-callable)
+      if (!detectedTool.isAiTool) {
+        const { tool: userTool, argsText } = detectedTool;
 
-      // PROACTIVE VALIDATION: Validate userTool properties before use
-      if (!userTool || typeof userTool !== 'object') {
-        console.error('[Chat Stream] Invalid userTool:', userTool);
+        // PROACTIVE VALIDATION: Validate userTool properties before use
+        if (!userTool || typeof userTool !== 'object') {
+          console.error('[Chat Stream] Invalid userTool:', userTool);
         send({
           type: 'error',
           data: {
@@ -810,8 +876,8 @@ export async function processStreamStart(
         controller.close();
         return;
       }
-    } else if (detectedTool && detectedTool.isAiTool) {
-      // AI-callable tool detected via slash command - execute directly
+      } else {
+        // AI-callable tool detected via slash command - execute directly
       const { tool: aiTool, argsText } = detectedTool;
       const toolName = aiTool.name || 'unknown';
       const toolLabel = aiTool.label || toolName;
@@ -959,11 +1025,19 @@ export async function processStreamStart(
         controller.close();
         return;
       }
+      }
+      break; // End of user_tool case
+        }
+      }
     }
 
-    // conversationHistory is already defined above (line 651) - reuse it here
+    // If we reach here after short-circuit handling, either:
+    // 1. Route type was 'standard-pipeline' (no short-circuit)
+    // 2. Short-circuit handler didn't return (fell through - shouldn't happen normally)
+    // Continue to standard pipeline
 
-    // lightweightMode is already defined earlier (line 115) - reuse it here
+    // conversationHistory is already defined above - reuse it here
+    // lightweightMode is already defined earlier - reuse it here
     // Prefer scorpion:latest (personal training AI) as default
     // Fallback chain: user model → env var → scorpion:latest → safe fallback
     let defaultModel = model || process.env['OLLAMA_MODEL'] || 'scorpion:latest';
@@ -1026,229 +1100,60 @@ export async function processStreamStart(
       lightweightMode,
     };
 
-    // Get intent-aware helper configuration
+    // Run preflight checks (Safety Guard, Tool Router, Budget Governor)
+    // Power of 10 Rule 3: Extracted to preflightChecks/ modules
+    const preflightResult = await runPreflightChecks({
+      userMessage,
+      conversationHistory,
+      intent,
+      lightweightMode,
+      clientMode: context.clientMode,
+      modelConfig,
+      runModelForPrompt,
+      send,
+    });
+
+    // If preflight checks block the request, return early
+    if (preflightResult.blocked) {
+      const { safety } = preflightResult;
+      send({
+        type: 'error',
+        data: {
+          message: safety.safeAlternative || 'Request blocked by safety checks',
+          phase: 'safety',
+        },
+      });
+      send({
+        type: 'message',
+        data: {
+          id: messageId,
+          role: 'assistant',
+          content: safety.safeAlternative || 'I cannot fulfill this request due to safety concerns.',
+        },
+      });
+      send({ type: 'done', data: { messageId } });
+      streamState.closed = true;
+      controller.close();
+      return;
+    }
+
+    // Extract results from preflight checks
+    const { routing, budget } = preflightResult;
+    let finalIntent = preflightResult.finalIntent;
+
+    // Update intent if tool router refined it
+    if (finalIntent !== intent) {
+      console.log(`[Preflight] Intent refined: ${intent} → ${finalIntent}`);
+      intent = finalIntent;
+    }
+
+    // Log preflight results for debugging
+    console.log(`[Preflight] Complete - Intent: ${intent}, Tools: ${routing.tools.length}, Budget: ${budget.budget || 'default'}`);
+
+    // Get helper config for post-flight checks (Style Enforcer, Memory Manager)
     const helperConfig = getHelperConfig(intent, lightweightMode);
-    const helperDefaults = getHelperDefaults();
 
-    // Log helper configuration for debugging
-    console.log(`[Helper Config] Intent: ${intent}, Lightweight: ${lightweightMode}, ClientMode: ${context.clientMode}`);
-    console.log(`[Helper Config] Safety: ${helperConfig.useSafetyGuard}, Budget: ${helperConfig.useBudgetGovernor}, Memory: ${helperConfig.useMemoryManager}, Style: ${helperConfig.useStyleEnforcer}`);
-
-    // 1. Safety Guard (intent-aware, strictly non-blocking with tolerant parsing, mode-aware)
-    const safetyGuardEnabled = helperConfig.useSafetyGuard && process.env['SCORPION_ENABLE_SAFETY_GUARD'] !== '0';
-    console.log('[Safety Guard] System status:', {
-      enabled: safetyGuardEnabled,
-      envFlag: process.env['SCORPION_ENABLE_SAFETY_GUARD'],
-      configFlag: helperConfig.useSafetyGuard,
-      system: safetyGuardEnabled ? 'ACTIVE' : 'DISABLED',
-    });
-    // Note: Tolerant parsing is now handled in runPromptWithKillSwitch via registered helpers
-    let safetyCheck: any = null;
-    if (helperConfig.useSafetyGuard && process.env['SCORPION_ENABLE_SAFETY_GUARD'] !== '0') {
-      try {
-        // JARVIS MODE: Single-user system - use standard safety guard prompt
-        // No need to customize based on clientMode since we're always owner
-        const rawResponse = await runPromptWithKillSwitch(
-          'safety-guard.system.txt',
-          { question: userMessage, draft: '', clientMode: context.clientMode },
-          SafetyGuardSchema,
-          modelConfig,
-          runModelForPrompt
-        );
-
-        // If kill-switch activated (rawResponse is null), use safe defaults immediately
-        if (rawResponse) {
-          safetyCheck = rawResponse;
-        } else {
-          // Kill-switch activated - use safe defaults (non-blocking)
-          console.warn('[Chat Stream] Safety guard kill-switch activated, using safe defaults');
-          safetyCheck = helperDefaults.safetyGuard;
-        }
-
-        if (safetyCheck && !safetyCheck.allowed) {
-          send({
-            type: 'error',
-            data: {
-              message: safetyCheck.safeAlternative || 'Request blocked by safety guard',
-              phase: 'safety',
-            },
-          });
-          send({
-            type: 'message',
-            data: {
-              id: messageId,
-              role: 'assistant',
-              content: safetyCheck.safeAlternative || 'I cannot fulfill this request due to safety concerns.',
-            },
-          });
-          send({ type: 'done', data: { messageId } });
-          streamState.closed = true;
-          controller.close();
-          return;
-        }
-      } catch (error: any) {
-        // Network/model errors - use safe defaults immediately
-        console.warn('[Chat Stream] Safety guard failed, using defaults:', error.message);
-        safetyCheck = helperDefaults.safetyGuard; // Use default: allowed=true
-      }
-    } else if (helperConfig.useSafetyGuard === false) {
-      // Skip safety guard for this intent, use default
-      console.log(`[Helper Config] Skipping safety-guard for intent: ${intent}`);
-      safetyCheck = helperDefaults.safetyGuard;
-    }
-
-    // Deterministic fallback routing for critical intents (before LLM-based router)
-    // Power of 10 Rule 3: Extracted to helpers/toolRouter.ts
-
-    // 2. Tool Router (skip for identity/small_talk - they have no tools)
-    const toolRouterEnabled = (intent as string) !== 'identity' && (intent as string) !== 'small_talk' && process.env['SCORPION_ENABLE_TOOL_ROUTER'] !== '0';
-    console.log('[Tool Router] System status:', {
-      enabled: toolRouterEnabled,
-      intent: intent,
-      envFlag: process.env['SCORPION_ENABLE_TOOL_ROUTER'],
-      system: toolRouterEnabled ? 'ACTIVE' : 'DISABLED',
-    });
-
-    let routing: any = null;
-    // Type assertion: intent can be 'identity' from local classifyIntent, but we handle it separately
-    if (toolRouterEnabled) {
-      // Check fallback first for critical queries
-      const fallback = fallbackRoute(userMessage);
-      if (fallback) {
-        console.log('[Tool Router] Using deterministic fallback for:', userMessage);
-        routing = {
-          intent: fallback.intent,
-          tools: fallback.tools.map((tool: string) => ({
-            tool,
-            reason: `Deterministic routing for ${fallback.intent}`,
-            priority: 5
-          })),
-          notes: 'Deterministic fallback routing'
-        };
-      } else {
-        // Try LLM-based router with retry and fallback
-        // Power of 10 Rule 2: Bounded loop - explicit max retries
-        const MAX_RETRIES = 2;
-        let retries = MAX_RETRIES;
-        let lastError: any = null;
-        let iterationCount = 0;
-        const MAX_ITERATIONS = 10; // Safety limit for while loop
-
-        while (retries > 0 && iterationCount < MAX_ITERATIONS) {
-          iterationCount++;
-          try {
-            routing = await runPromptWithKillSwitch(
-              'tool-router.system.txt',
-              { question: userMessage, history: conversationHistory.slice(-5) },
-              ToolRouterSchema,
-              modelConfig,
-              runModelForPrompt
-            );
-
-            if (routing) {
-              console.log('[Tool Router] Intent:', routing.intent, 'Tools:', routing.tools.map((t: any) => t.tool).join(', '));
-              // Tool router can override intent classification
-              if (routing.intent && routing.intent !== intent) {
-                console.log(`[Tool Router] Overriding intent: ${intent} → ${routing.intent}`);
-              }
-              break; // Success, exit retry loop
-            }
-          } catch (error: any) {
-            lastError = error;
-            console.warn(`[Tool Router] Attempt ${MAX_RETRIES - retries + 1} failed:`, error.message);
-            retries--;
-
-            if (retries === 0) {
-              // Final fallback: use deterministic routing if available, otherwise use default
-              const finalFallback = fallbackRoute(userMessage);
-              if (finalFallback) {
-                console.log('[Tool Router] Using fallback after LLM failures');
-                routing = {
-                  intent: finalFallback.intent,
-                  tools: finalFallback.tools.map((tool: string) => ({
-                    tool,
-                    reason: `Fallback routing after LLM failure`,
-                    priority: 5
-                  })),
-                  notes: 'Fallback after JSON parsing failures'
-                };
-              } else {
-                console.warn('[Chat Stream] Tool router failed after retries, using default intent:', lastError?.message);
-              }
-            }
-          }
-        }
-
-        // Power of 10 Rule 2: Safety check
-        if (iterationCount >= MAX_ITERATIONS) {
-          console.warn('[Tool Router] Reached MAX_ITERATIONS limit, exiting retry loop');
-        }
-      }
-    }
-
-    // SPECIAL HANDLING: For web_research intent, force research.run tool to be included
-    // The tool-router LLM may not suggest tools correctly for research queries
-    if (intent === 'web_research') {
-      console.log('[Tool Router] web_research intent detected - forcing research.run tool');
-      if (!routing || !routing.tools || routing.tools.length === 0) {
-        routing = {
-          intent: 'web_research',
-          tools: [
-            {
-              tool: 'research.run',
-              why: 'Web research query requires the research.run tool for searching and analyzing web content',
-              priority: 10
-            }
-          ],
-          notes: 'Auto-configured for web_research intent'
-        };
-        console.log('[Tool Router] Created routing for web_research:', routing);
-      } else if (!routing.tools.some((t: any) => t.tool === 'research.run')) {
-        // Add research.run if not already present
-        routing.tools.push({
-          tool: 'research.run',
-          why: 'Web research query requires the research.run tool',
-          priority: 10
-        });
-        console.log('[Tool Router] Added research.run to existing routing');
-      }
-    }
-
-    // 3. Budget Governor (intent-aware, strictly non-blocking)
-    const budgetGovernorEnabled = helperConfig.useBudgetGovernor && process.env['SCORPION_ENABLE_BUDGET_GOVERNOR'] !== '0';
-    console.log('[Budget Governor] System status:', {
-      enabled: budgetGovernorEnabled,
-      envFlag: process.env['SCORPION_ENABLE_BUDGET_GOVERNOR'],
-      configFlag: helperConfig.useBudgetGovernor,
-      system: budgetGovernorEnabled ? 'ACTIVE' : 'DISABLED',
-    });
-
-    let budget: any = null;
-    if (budgetGovernorEnabled) {
-      try {
-        budget = await runPromptWithKillSwitch(
-          'budget-governor.system.txt',
-          { routing: routing || { intent, tools: [] } },
-          BudgetGovernorSchema,
-          modelConfig,
-          runModelForPrompt
-        );
-
-        if (budget) {
-          console.log('[Budget Governor] Budget:', budget.budget, 'Model choices:', budget.modelChoices);
-          // Could override model selection based on budget recommendations
-        }
-      } catch (error: any) {
-        console.warn('[Chat Stream] Budget governor failed, using defaults:', error.message);
-        budget = helperDefaults.budgetGovernor; // Use default budget
-      }
-    } else if (helperConfig.useBudgetGovernor === false) {
-      // Skip budget governor for this intent, use default
-      console.log(`[Helper Config] Skipping budget-governor for intent: ${intent}`);
-      budget = helperDefaults.budgetGovernor;
-    }
-
-    // 4. Dispatcher (optional, only if multi-machine setup)
+    // 4. Dispatcher (optional, only if multi-machine setup) - NOT YET EXTRACTED
     const dispatcherEnabled = process.env['SCORPION_ENABLE_DISPATCHER'] !== '0' && process.env['SCORPION_MULTI_MACHINE'] === '1';
     console.log('[Dispatcher] System status:', {
       enabled: dispatcherEnabled,
@@ -1364,7 +1269,6 @@ export async function processStreamStart(
     });
 
     let plan: Plan;
-    let finalIntent: ScorpionIntent = intent;
     try {
       // Power of 10 Rule 3: Extract planner phase to focused module
       const plannerResult = await handlePlannerPhase({
@@ -1380,9 +1284,11 @@ export async function processStreamStart(
       });
 
       plan = plannerResult.plan;
-      finalIntent = plannerResult.intent;
-      // Update intent to use the final intent from planner (may have been refined)
-      intent = finalIntent;
+      // Planner may further refine intent from preflight result
+      if (plannerResult.intent && plannerResult.intent !== intent) {
+        console.log(`[Planner] Intent further refined: ${intent} → ${plannerResult.intent}`);
+        intent = plannerResult.intent;
+      }
 
       // Log PLAN phase completion
       if (chatJob && plan) {
@@ -1552,58 +1458,25 @@ export async function processStreamStart(
           updateJobWithPhaseResult(chatJob.id, 'PLAN', plan);
         }
 
-        // Power of 10 Rule 3: Use helper functions for plan validation and normalization
-        // The plannerPhase module already returns a normalized plan, but we validate it here for safety
-        if (!plan || typeof plan !== 'object' || !plan.plan || !Array.isArray(plan.plan)) {
-          console.warn('[Planner] Plan structure invalid from plannerPhase, attempting tolerant parse...');
-          // If plan is a string (raw response), try parsing it
-          if (typeof plan === 'string') {
-            const parsed = parsePlannerResponse(plan);
-            if (parsed) {
-              plan = parsed;
-              console.log('[Planner] Successfully parsed plan from raw string');
-            } else {
-              throw new Error('Failed to parse plan JSON even with tolerant parser');
-            }
-          } else {
-            throw new Error('Plan structure invalid and not parseable');
-          }
+        // Phase 4.1: Validate and normalize plan using extracted helper
+        // This orchestrates all plan validation, normalization, and enforcement
+        const planValidation = validateAndNormalizePlan(plan, {
+          intent: finalIntent,
+          userMessage,
+          isFileQuery,
+          historyAnalysis,
+          conversationHistory,
+        });
+
+        if (!planValidation.isValid) {
+          throw new Error(`Plan validation failed: ${planValidation.issues.join(', ')}`);
         }
 
-        // Log if reasoning is missing (for debugging)
-        if (!plan.reasoning) {
-          console.warn('[Planner] Plan generated without reasoning field. LLM may not be following instructions.');
-        } else {
-          console.log('[Planner] Plan includes reasoning:', plan.reasoning.substring(0, 100) + '...');
-        }
+        plan = planValidation.plan;
 
-        // Power of 10 Rule 3: Use helper function for step normalization
-        // Normalize plan steps to ensure all required fields are present
-        const { normalizePlanSteps } = await import('./helpers/planHelpers');
-        const normalizedSteps = normalizePlanSteps(plan.plan);
-        plan.plan = normalizedSteps;
-
-        // FRONTIER-LEVEL: Enforce plan rules (system health, tool validation, etc.)
-        plan = enforcePlanRules(plan, finalIntent, userMessage);
-
-        // Ensure plan has at least one step (even if it's a no-op)
-        if (plan.plan.length === 0) {
-          console.warn('[Chat Stream] Plan has no steps, using fallback plan');
-          plan = createFallbackPlan(intent, userMessage);
-        }
-
-        // Power of 10 Rule 3: Use helper function for enhanced plan enforcement
-        // Note: isWhatIsQuestion is declared in the fallback plan section below, so we skip duplicate declaration here
-
-        if (plan.plan && plan.plan.length > 0) {
-          // Power of 10 Rule 3: Use helper function for plan enforcement
-          plan = applyPlanEnforcement({
-            plan,
-            userMessage,
-            intent: finalIntent,
-            historyAnalysis,
-            isFileQuery,
-          });
+        // Log any warnings from validation
+        if (planValidation.warnings && planValidation.warnings.length > 0) {
+          console.warn('[Chat Stream] Plan validation warnings:', planValidation.warnings);
         }
       } catch (error: any) {
         console.error('[Chat Stream] Failed to generate plan:', error);
@@ -2023,570 +1896,6 @@ export async function processStreamStart(
         return;
       }
 
-      // Plan validation: Detect and fix kb.search-heavy plans
-      // BUT ONLY for intents that allow project tools - skip for small_talk AND file queries
-      // CRITICAL: Skip this validation for file queries - they should use files.recent, not project.analyze/research.run
-      if ((intent as string) !== 'small_talk' && !isFileQuery) {
-        const kbSearchSteps = plan.plan.filter(step => step.tool === 'kb.search');
-        const hasOnlyKbSearch = plan.plan.length === kbSearchSteps.length && kbSearchSteps.length > 0;
-        const hasMultipleKbSearch = kbSearchSteps.length > 1;
-
-        // If plan has only kb.search or multiple kb.search steps, inject appropriate tools
-        if (hasOnlyKbSearch || hasMultipleKbSearch) {
-          console.log('[Chat Stream] Plan validation: Detected kb.search-heavy plan, injecting appropriate tools');
-
-          // Determine what tool to add based on question type AND intent
-          if (isOperationalQuestion && (intent === 'project_help' || intent === 'system_debug')) {
-            // Replace kb.search with system.health (only for project/system intents)
-            plan.plan = plan.plan.map(step =>
-              step.tool === 'kb.search'
-                ? { ...step, tool: 'system.health', title: 'Check system health', args: { includeMetrics: true, includeAlerts: true } }
-                : step
-            );
-          } else if (isWorkflowQuestion && (intent === 'project_help' || intent === 'system_debug')) {
-            // Replace kb.search with project.analyze (only for project/system intents)
-            plan.plan = plan.plan.map(step =>
-              step.tool === 'kb.search'
-                ? { ...step, tool: 'project.analyze', title: 'Analyze project and workflows', args: { includeFiles: true, includeDependencies: true } }
-                : step
-            );
-          } else if (isAnalysisQuestion && (intent === 'project_help' || intent === 'system_debug')) {
-            // Replace kb.search with project.analyze (only for project/system intents)
-            plan.plan = plan.plan.map(step =>
-              step.tool === 'kb.search'
-                ? { ...step, tool: 'project.analyze', title: 'Analyze project structure', args: { includeFiles: true, includeDependencies: true } }
-                : step
-            );
-          } else if (intent === 'general_question' || !isCodebaseQuestionCheck) {
-            // For general questions, add research.run as follow-up (allowed for general_question)
-            const lastKbSearch = kbSearchSteps[kbSearchSteps.length - 1];
-            // Power of 10 Rule 7: Guard undefined
-            if (lastKbSearch && lastKbSearch.id) {
-              const lastKbSearchIndex = plan.plan.indexOf(lastKbSearch);
-              if (lastKbSearchIndex >= 0) {
-                plan.plan.splice(lastKbSearchIndex + 1, 0, {
-                  id: `s${plan.plan.length + 1}`,
-                  title: 'Research online if knowledge base insufficient',
-                  tool: 'research.run',
-                  args: { query: userMessage, depth: 'medium', category: 'general', maxSites: 5 },
-                  dependsOn: [lastKbSearch.id],
-                  success: 'Research completed'
-                });
-              }
-            }
-          }
-        }
-      }
-
-      // Detect if this is a codebase question and enforce code.readFile steps
-      // BUT ONLY for project_help/system_debug intents - skip for small_talk/general_question
-      // Improved detection: Check for codebase-related keywords or questions about projects/apps
-      const userMessageLower = userMessage.toLowerCase();
-      // Codebase question if it mentions codebase keywords (reuse codebaseKeywords from line 361)
-      const isCodebaseQuestion = codebaseKeywords.test(userMessage);
-      const hasCodeReadSteps = plan.plan.some(step => step.tool === 'code.readFile');
-
-      // If codebase question but no code.readFile steps, inject them
-      // BUT ONLY if intent allows project/repo tools
-      if (isCodebaseQuestion && !hasCodeReadSteps && (intent === 'project_help' || intent === 'system_debug')) {
-        console.log('[Chat Stream] Codebase question detected but no code.readFile steps - injecting them');
-
-        // Extract the subject (e.g., "LightningFlow" from various question patterns)
-        const subjectPatterns = [
-          /(?:what is|who is|tell me about|more details about|detailed analysis of|even more|even more detailed)\s+(?:about\s+)?([A-Za-z]+(?:\s+[A-Za-z]+)?)/i,
-          /(?:about|on|regarding)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i
-        ];
-
-        let subject = null;
-        for (const pattern of subjectPatterns) {
-          const match = userMessage.match(pattern);
-          if (match && match[1]) {
-            subject = match[1].trim();
-            break;
-          }
-        }
-
-        const subjectLower = subject ? subject.toLowerCase() : userMessageLower;
-
-        // Determine which app/package to read based on subject or message content
-        // IMPORTANT: Check for workflow-related questions FIRST (before defaulting)
-        const isWorkflowQuestion = /(workflow|n8n|execution|orchestration|automation|trigger workflow|run workflow)/i.test(userMessageLower) ||
-          /(workflow|n8n|execution|orchestration)/i.test(subjectLower);
-
-        let appPath = 'apps/scorpion'; // Default to Scorpion (the chat system itself)
-        if (isWorkflowQuestion) {
-          appPath = 'apps/n8n-cursor';
-        } else if (userMessageLower.includes('scorpion') || subjectLower.includes('scorpion')) {
-          appPath = 'apps/scorpion';
-        } else if (userMessageLower.includes('n8n') || subjectLower.includes('n8n')) {
-          appPath = 'apps/n8n-cursor';
-        } else if (userMessageLower.includes('lightningflow') || userMessageLower.includes('lightning flow') || subjectLower.includes('lightningflow') || subjectLower.includes('lightning')) {
-          appPath = 'apps/lightningflow';
-        }
-
-        // Find kb.search step to insert after it
-        const kbSearchStep = plan.plan.find(s => s.tool === 'kb.search');
-        const kbSearchIndex = kbSearchStep ? plan.plan.indexOf(kbSearchStep) : -1;
-
-        // Analyze conversation history to see what files were read before
-        const previouslyReadFiles = new Set<string>();
-        if (conversationHistory && conversationHistory.length > 0) {
-          const assistantMessages = conversationHistory
-            .filter((msg: any) => msg.role === 'assistant')
-            .map((msg: any) => msg.content)
-            .join('\n');
-
-          // Detect previously read files
-          const filePatterns = [
-            /README\.md/gi,
-            /package\.json/gi,
-            /src\/index\.ts/gi,
-            /app\/page\.tsx/gi,
-            /tsconfig\.json/gi,
-          ];
-
-          filePatterns.forEach(pattern => {
-            if (pattern.test(assistantMessages)) {
-              const fileName = pattern.source.replace(/[\\^$.*+?()[\]{}|]/g, '');
-              previouslyReadFiles.add(fileName.toLowerCase());
-            }
-          });
-        }
-
-        // Create code.readFile steps with VARIED file selection to avoid repetition
-        const codeReadSteps: PlanStep[] = [];
-        let stepCounter = plan.plan.length + 1;
-
-        // Define available file options for different apps
-        const fileOptions: Record<string, Array<{ path: string, title: string, includeAST?: boolean, includeDependencies?: boolean }>> = {
-          'apps/scorpion': [
-            { path: `${appPath}/README.md`, title: 'Read main README', includeDependencies: true },
-            { path: `${appPath}/package.json`, title: 'Read package.json' },
-            { path: `${appPath}/app/page.tsx`, title: 'Read main page component', includeAST: true },
-            { path: `${appPath}/tsconfig.json`, title: 'Read TypeScript configuration' },
-            { path: `${appPath}/next.config.js`, title: 'Read Next.js configuration' },
-            { path: `${appPath}/app/layout.tsx`, title: 'Read root layout', includeAST: true },
-            { path: `${appPath}/lib/chat/types.ts`, title: 'Read type definitions' },
-            { path: `${appPath}/tailwind.config.ts`, title: 'Read Tailwind configuration' },
-          ],
-          'apps/lightningflow': [
-            { path: `${appPath}/README.md`, title: 'Read main README', includeDependencies: true },
-            { path: `${appPath}/package.json`, title: 'Read package.json' },
-            { path: `${appPath}/src/index.ts`, title: 'Read main entry point', includeAST: true, includeDependencies: true },
-            { path: `${appPath}/tsconfig.json`, title: 'Read TypeScript configuration' },
-            { path: `${appPath}/lightning-ui/README.md`, title: 'Read UI README', includeDependencies: true },
-            { path: `${appPath}/lightning-ui/package.json`, title: 'Read UI package.json' },
-            { path: `${appPath}/.env.example`, title: 'Read environment configuration' },
-          ],
-          'apps/n8n-cursor': [
-            { path: `${appPath}/backend/README.md`, title: 'Read backend README', includeDependencies: true },
-            { path: `${appPath}/backend/src/workers/workflow-worker.ts`, title: 'Read workflow worker implementation', includeAST: true },
-            { path: `${appPath}/backend/src/index.ts`, title: 'Read backend entry point', includeAST: true },
-            { path: `${appPath}/backend/package.json`, title: 'Read backend package.json' },
-            { path: `docs/workflows/master-orchestration-guide.md`, title: 'Read workflow orchestration guide' },
-            { path: `docs/workflows/workflow-overview.md`, title: 'Read workflow overview documentation' },
-          ],
-        };
-
-        // Get file options for this app, or use default
-        const availableFiles = fileOptions[appPath] || fileOptions['apps/scorpion'];
-
-        // Power of 10 Rule 7: Guard undefined
-        if (!availableFiles || availableFiles.length === 0) {
-          console.warn('[Chat Stream] No available files for codebase question');
-          return;
-        }
-
-        // Filter out files that were read before (to avoid repetition)
-        const unusedFiles = availableFiles.filter(file => {
-          const fileName = file.path.split('/').pop() || '';
-          return !previouslyReadFiles.has(fileName.toLowerCase());
-        });
-
-        // Use unused files if available, otherwise use all files but shuffle
-        const filesToRead = unusedFiles.length > 0
-          ? unusedFiles.slice(0, Math.min(3, unusedFiles.length)) // Read up to 3 different files
-          : availableFiles.slice(0, Math.min(3, availableFiles.length)); // Fallback: read first 3
-
-        // If we still don't have enough variety, shuffle and pick different ones
-        if (filesToRead.length < 2 && availableFiles.length > 2) {
-          const shuffled = [...availableFiles].sort(() => Math.random() - 0.5);
-          filesToRead.push(...shuffled.slice(0, 2 - filesToRead.length));
-        }
-
-        // Create steps for selected files
-        filesToRead.forEach((file, index) => {
-          codeReadSteps.push({
-            id: `s${stepCounter++}`,
-            title: (file.title || 'Read file') + ` to understand ${appPath.includes('lightningflow') ? 'LightningFlow' : appPath.includes('scorpion') ? 'Scorpion' : 'the codebase'}`,
-            tool: 'code.readFile',
-            args: {
-              path: file.path || '',
-              includeAST: file.includeAST || false,
-              includeDependencies: file.includeDependencies || false
-            },
-            dependsOn: kbSearchStep?.id ? [kbSearchStep.id] : (index > 0 && codeReadSteps[index - 1] && codeReadSteps[index - 1]!.id ? [codeReadSteps[index - 1]!.id] : undefined),
-            success: `${file.path.split('/').pop()} read successfully`
-          });
-        });
-
-        // Insert code.readFile steps after kb.search
-        if (kbSearchIndex >= 0) {
-          plan.plan.splice(kbSearchIndex + 1, 0, ...codeReadSteps);
-        } else {
-          // If no kb.search, prepend code.readFile steps
-          plan.plan.unshift(...codeReadSteps);
-        }
-
-        send({
-          type: 'status',
-          data: { message: 'Injected code.readFile steps for codebase question', phase: 'planning' }
-        });
-      }
-
-      // ENFORCE INTENT-BASED TOOL GATING: Remove disallowed tools based on intent
-      if (plan.plan && plan.plan.length > 0) {
-        // For small_talk, remove ALL tools
-        if ((intent as string) === 'small_talk') {
-          console.log('[Chat Stream] Intent: small_talk - Removing all tools from plan');
-          plan.plan = plan.plan.map(step => ({
-            ...step,
-            tool: 'none',
-            title: step.title.replace(/analyze|search|read|trigger|check/i, 'respond'),
-          }));
-        } else {
-          // For other intents, filter out disallowed tools (only for identity/small_talk)
-          // FRONTIER MODEL APPROACH: All other intents allow all tools
-          plan.plan = plan.plan.map(step => {
-            if (!isToolAllowedForIntent(step.tool, intent as string, userMessage)) {
-              console.log(`[Chat Stream] Intent: ${intent} - Removing disallowed tool: ${step.tool}`);
-              // Replace with 'none' or remove the step
-              return {
-                ...step,
-                tool: 'none',
-                title: step.title.replace(/project\.analyze|code\.readFile|system\.health/i, 'general inquiry'),
-              };
-            }
-            return step;
-          });
-        }
-      }
-
-      // ENFORCE ANTI-REPETITION AGAIN: Double-check before sending (in case enforcement above didn't work)
-      // BUT ONLY for project_help/system_debug intents - skip for small_talk/general_question
-      if (plan.plan && plan.plan.length > 0 && conversationHistory && conversationHistory.length > 0 &&
-        (intent === 'project_help' || intent === 'system_debug')) {
-        const firstStep = plan.plan[0];
-        // Power of 10 Rule 7: Guard undefined
-        if (!firstStep) return;
-        if (firstStep.tool === 'kb.search') {
-          console.debug('[Chat Stream] Final enforcement: Replacing kb.search before sending plan');
-          const messageLower = userMessage.toLowerCase();
-
-          // CRITICAL: Research queries MUST use research.run, NOT project.analyze
-          const isResearchQuery = /(research|find.*latest|latest.*news|current.*news|recent.*news|bitcoin|ethereum|crypto|stock|market|macro.*economic|give.*top.*with.*links)/i.test(messageLower);
-          if (isResearchQuery) {
-            console.log('[Chat Stream] Research query detected - enforcing research.run instead of kb.search');
-            plan.plan[0] = {
-              ...firstStep,
-              tool: 'research.run',
-              args: {
-                query: userMessage,
-                depth: 'medium',
-                maxSites: 5
-              },
-              title: 'Research latest news and information',
-            };
-          } else {
-            const isCodebaseQuestion = /(lightningflow|lightning flow|scorpion|n8n|workflow|codebase|project|app|code|implementation|architecture|structure|components)/i.test(messageLower);
-
-            if (isCodebaseQuestion) {
-              plan.plan[0] = {
-                ...firstStep,
-                tool: 'project.analyze',
-                args: { path: 'apps/scorpion', includeAST: true, includeDependencies: true },
-                title: 'Analyze project structure and components',
-              };
-            } else {
-              plan.plan[0] = {
-                ...firstStep,
-                tool: 'project.analyze',
-                args: { path: 'apps/scorpion' },
-                title: 'Analyze project structure',
-              };
-            }
-          }
-        }
-      }
-
-      // ABSOLUTE FINAL ENFORCEMENT: Research queries MUST use research.run
-      // This runs right before executor to ensure research queries use the right tool
-      const isResearchQueryFinal = /(research|find.*latest|latest.*news|current.*news|recent.*news|bitcoin|ethereum|crypto|stock|market|macro.*economic|give.*top.*with.*links)/i.test(userMessage.toLowerCase());
-
-      // Check if research tools are available
-      const hasResearchKeys = !!(process.env['TAVILY_API_KEY'] || process.env['NEWS_API_KEY'] || process.env['SERPAPI_KEY']);
-
-      console.log('[Chat Stream] Research query enforcement check:', {
-        isResearchQueryFinal,
-        hasResearchKeys,
-        intent,
-        planLength: plan?.plan?.length,
-        firstStepTool: plan?.plan?.[0]?.tool,
-        allTools: plan?.plan?.map((s: any) => s.tool).join(', ')
-      });
-
-      // Enforce research.run for research queries across ALL intents (not just project_help/system_debug)
-      if (isResearchQueryFinal && plan && plan.plan && plan.plan.length > 0) {
-
-        // Check if research tools are available OR if DuckDuckGo is available (no API key needed)
-        // DuckDuckGo is built into research.run and doesn't require API keys
-        const hasResearchCapability = hasResearchKeys || true; // DuckDuckGo is always available
-
-        if (hasResearchCapability) {
-          // Check ALL steps, not just first
-          const hasResearchTool = plan.plan.some((step: any) => step.tool === 'research.run' || step.tool === 'research.start');
-          const hasProjectAnalyze = plan.plan.some((step: any) => step.tool === 'project.analyze');
-          const hasCodeReadFile = plan.plan.some((step: any) => step.tool === 'code.readFile');
-
-          // If plan doesn't use research.run OR has project.analyze OR has code.readFile, force research.run
-          if (!hasResearchTool || hasProjectAnalyze || hasCodeReadFile) {
-            console.log('[Chat Stream] 🚨 ABSOLUTE FINAL Enforcement: Research query detected - FORCING research.run');
-            console.log('[Chat Stream] Current plan tools:', plan.plan.map((s: any) => s.tool).join(', '));
-            console.log('[Chat Stream] Has research tool:', hasResearchTool, 'Has project.analyze:', hasProjectAnalyze, 'Has code.readFile:', hasCodeReadFile);
-
-            // Replace first step with research.run if it's not already a research tool - Power of 10 Rule 7: Guard undefined
-            if (plan.plan[0] && plan.plan[0].tool !== 'research.run' && plan.plan[0].tool !== 'research.start') {
-              console.log('[Chat Stream] Replacing first step tool from', plan.plan[0].tool, 'to research.run');
-
-              // Extract number from query if present (e.g., "latest 3 bitcoin news" → maxSites: 3)
-              const numberMatch = userMessage.match(/(?:latest|last|top|first)\s+(\d+)/i);
-              const maxSites = numberMatch ? parseInt(numberMatch[1], 10) : 5;
-
-              plan.plan[0] = {
-                ...plan.plan[0],
-                id: plan.plan[0]?.id || 's1',
-                tool: 'research.run',
-                args: {
-                  query: userMessage,
-                  depth: 'medium',
-                  maxSites: maxSites
-                },
-                title: `Research latest news and information (${maxSites} sources)`,
-              };
-            }
-
-            // Remove ALL project.analyze steps for research queries
-            const beforeFilter = plan.plan.length;
-            plan.plan = plan.plan.filter((step: any) => {
-              return step.tool !== 'project.analyze';
-            });
-            if (plan.plan.length < beforeFilter) {
-              console.log('[Chat Stream] Removed', beforeFilter - plan.plan.length, 'project.analyze steps');
-            }
-
-            // Also remove code.readFile steps for research queries (not needed)
-            const beforeCodeFilter = plan.plan.length;
-            plan.plan = plan.plan.filter((step: any) => {
-              return step.tool !== 'code.readFile';
-            });
-            if (plan.plan.length < beforeCodeFilter) {
-              console.log('[Chat Stream] Removed', beforeCodeFilter - plan.plan.length, 'code.readFile steps');
-            }
-
-            console.log('[Chat Stream] ✅ ABSOLUTE FINAL: Enforced research.run. Final plan steps:', plan.plan.map((s: any) => s.tool).join(', '));
-          } else {
-            console.log('[Chat Stream] ✅ Research query already uses research.run correctly');
-          }
-        } else {
-          // Research tools not available - inform user and use kb.search as fallback
-          console.log('[Chat Stream] ⚠️ Research query detected but research tools are disabled (no API keys). Using kb.search fallback.');
-
-          // Replace research.run with kb.search if present
-          const hasResearchTool = plan.plan.some((step: any) => step.tool === 'research.run' || step.tool === 'research.start');
-          if (hasResearchTool) {
-            plan.plan = plan.plan.map((step: any) => {
-              if (step.tool === 'research.run' || step.tool === 'research.start') {
-                return {
-                  ...step,
-                  tool: 'kb.search',
-                  args: { query: userMessage },
-                  title: 'Search knowledge base for information',
-                };
-              }
-              return step;
-            });
-            console.log('[Chat Stream] Replaced research.run with kb.search (research tools unavailable)');
-          }
-        }
-      } else if (isResearchQueryFinal) {
-        console.log('[Chat Stream] ⚠️ Research query detected but enforcement skipped:', {
-          hasPlan: !!plan,
-          planLength: plan?.plan?.length,
-          intent,
-          condition: intent === 'project_help' || intent === 'system_debug'
-        });
-      }
-
-      // ABSOLUTE FINAL ENFORCEMENT: File queries MUST use files.recent - run right before executor
-      // This is the last chance to fix the plan before execution
-      if (isFileQuery && plan.plan && plan.plan.length > 0) {
-        const firstStepTool = plan.plan[0]?.tool;
-        if (firstStepTool !== 'files.recent') {
-          console.log('[Chat Stream] ABSOLUTE FINAL Enforcement: File query detected but plan uses', firstStepTool, '- forcing files.recent');
-
-          // Replace first step with files.recent - Power of 10 Rule 7: Guard undefined
-          const currentStep = plan.plan[0];
-          if (currentStep) {
-            plan.plan[0] = {
-              ...currentStep,
-              id: currentStep.id || 's1',
-              tool: 'files.recent',
-              args: { limit: 10, source: 'upload' },
-              title: 'Get recently uploaded files',
-            };
-          }
-
-          // Remove ALL non-file-related steps
-          plan.plan = plan.plan.filter((step: any, index: number) => {
-            if (index === 0) return true; // Keep first step (files.recent)
-            // Keep only file-related or image processing steps
-            const allowedTools = ['knowledge.get', 'ocr.extract', 'files.recent'];
-            return allowedTools.includes(step.tool);
-          });
-
-          console.log('[Chat Stream] ABSOLUTE FINAL: Enforced files.recent. Final plan steps:', plan.plan.map((s: any) => s.tool).join(', '));
-        }
-      }
-
-      // ABSOLUTE FINAL ENFORCEMENT: System health queries MUST use system.health
-      const isSystemHealthQuery = /(check system health|system health|health check|test system health|system.*health|analyze.*system.*health)/i.test(userMessage.toLowerCase());
-      const isLogsQuery = /(check.*logs|recent.*logs|show.*logs|tail.*logs|get.*logs|analyze.*logs)/i.test(userMessage.toLowerCase());
-      const isCombinedQuery = isSystemHealthQuery && isLogsQuery;
-
-      if (isSystemHealthQuery && plan.plan) {
-        const hasSystemHealth = plan.plan.some((step: any) => step.tool === 'system.health');
-        const hasStatsGet = plan.plan.some((step: any) => step.tool === 'stats.get');
-        const hasLogsTail = plan.plan.some((step: any) => step.tool === 'logs.tail');
-
-        if (!hasSystemHealth) {
-          console.log('[Chat Stream] 🚨 ABSOLUTE FINAL Enforcement: System health query detected - FORCING system.health');
-
-          // Replace first step with system.health if it's not already a system health tool - Power of 10 Rule 7: Guard undefined
-          if (plan.plan[0] && plan.plan[0].tool !== 'system.health' && plan.plan[0].tool !== 'stats.get' && plan.plan[0].tool !== 'logs.tail') {
-            console.log('[Chat Stream] Replacing first step tool from', plan.plan[0].tool, 'to system.health');
-            plan.plan[0] = {
-              ...plan.plan[0],
-              id: plan.plan[0]?.id || 's1',
-              tool: 'system.health',
-              title: 'Check system health and status',
-              args: { includeMetrics: true, includeAlerts: true },
-            };
-          }
-
-          // Add stats.get as second step if not present - Power of 10 Rule 7: Guard undefined
-          if (!hasStatsGet && plan.plan.length > 0 && plan.plan[0]) {
-            plan.plan.splice(1, 0, {
-              id: 's2',
-              title: 'Get system statistics',
-              tool: 'stats.get',
-              args: {},
-              dependsOn: [plan.plan[0].id],
-              success: 'System statistics retrieved'
-            });
-          }
-
-          // For combined queries, also add logs.tail
-          if (isCombinedQuery && !hasLogsTail) {
-            console.log('[Chat Stream] 🚨 Combined query detected - FORCING logs.tail');
-            const lastStep = plan.plan[plan.plan.length - 1];
-            // Power of 10 Rule 7: Guard undefined
-            if (lastStep && lastStep.id) {
-              plan.plan.push({
-                id: `s${plan.plan.length + 1}`,
-                title: 'Get recent system logs',
-                tool: 'logs.tail',
-                args: { window: 300000, level: 'error' }, // Last 5 minutes, error level
-                dependsOn: [lastStep.id],
-                success: 'Recent logs retrieved'
-              });
-            }
-          }
-
-          console.log('[Chat Stream] ✅ ABSOLUTE FINAL: Enforced system.health. Final plan steps:', plan.plan.map((s: any) => s.tool).join(', '));
-        } else {
-          console.log('[Chat Stream] ✅ System health query already uses system.health correctly');
-
-          // Still check for logs in combined queries
-          if (isCombinedQuery && !hasLogsTail) {
-            console.log('[Chat Stream] 🚨 Combined query - adding logs.tail');
-            const lastStep = plan.plan[plan.plan.length - 1];
-            // Power of 10 Rule 7: Guard undefined
-            if (lastStep && lastStep.id) {
-              plan.plan.push({
-                id: `s${plan.plan.length + 1}`,
-                title: 'Get recent system logs',
-                tool: 'logs.tail',
-                args: { window: 300000, level: 'error' },
-                dependsOn: [lastStep.id],
-                success: 'Recent logs retrieved'
-              });
-            }
-          }
-        }
-      }
-
-      // Also enforce logs.tail for standalone logs queries
-      if (isLogsQuery && !isSystemHealthQuery && plan.plan) {
-        const hasLogsTail = plan.plan.some((step: any) => step.tool === 'logs.tail');
-        if (!hasLogsTail) {
-          console.log('[Chat Stream] 🚨 Logs query detected - FORCING logs.tail');
-          const firstStep = plan.plan[0];
-          // Power of 10 Rule 7: Guard undefined
-          if (firstStep && firstStep.tool !== 'logs.tail') {
-            plan.plan[0] = {
-              ...firstStep,
-              id: firstStep.id || 's1',
-              tool: 'logs.tail',
-              title: 'Get recent system logs',
-              args: { window: 300000, level: 'error' },
-            };
-          }
-        }
-      }
-
-      // FIX INCORRECT FILE PATHS: Correct paths based on question type
-      // Reuse messageLower from above (line 1241) - don't redeclare
-      const isWorkflowQuestionForPathFix = /(workflow|n8n|execution|orchestration|automation|trigger workflow|run workflow)/i.test(userMessage.toLowerCase());
-
-      if (isWorkflowQuestionForPathFix && plan.plan) {
-        console.debug('[Chat Stream] Fixing file paths for workflow question');
-        plan.plan.forEach((step: any) => {
-          if (step.tool === 'code.readFile' && step.args && step.args.path) {
-            // If step is trying to read lightningflow files for a workflow question, fix it
-            // Power of 10 Rule 8: Limit pointer dereferencing - use intermediate variable
-            const stepPath = step.args?.['path'];
-            if (stepPath && typeof stepPath === 'string' && stepPath.includes('apps/lightningflow')) {
-              const fileName = stepPath.split('/').pop();
-              // Map to correct n8n-cursor paths
-              if (fileName === 'tsconfig.json') {
-                step.args.path = 'apps/n8n-cursor/backend/tsconfig.json';
-                step.title = 'Read n8n-cursor backend TypeScript configuration';
-              } else if (fileName === 'README.md' && stepPath.includes('lightning-ui')) {
-                step.args.path = 'apps/n8n-cursor/backend/README.md';
-                step.title = 'Read n8n-cursor backend README';
-              } else if (fileName === 'README.md') {
-                step.args.path = 'apps/n8n-cursor/backend/README.md';
-                step.title = 'Read n8n-cursor backend README';
-              } else {
-                // Default to workflow worker
-                step.args.path = 'apps/n8n-cursor/backend/src/workers/workflow-worker.ts';
-                step.title = 'Read workflow worker implementation';
-              }
-              console.debug(`[Chat Stream] Fixed path: ${step.args.path}`);
-            }
-          }
-        });
-      }
 
       // Add intent to plan object for frontend display
       const planWithIntent = {
@@ -3114,84 +2423,23 @@ export async function processStreamStart(
         results = [];
       }
 
-      // Extract code.readFile results from tool results
-      // CRITICAL: Log what results we have before filtering
-      console.log('[Chat Stream] Total results collected:', results.length);
-      console.log('[Chat Stream] Results summary:', results.map(r => ({
-        step: r.step,
-        tool: plan.plan.find(s => s && s.id === r.step)?.tool,
-        ok: r.result?.ok,
-        hasContent: !!r.result?.content,
-        hasHits: !!r.result?.hits,
-        error: r.result?.error
-      })));
-
-      const codeReadResults = results
-        .filter(r => {
-          if (!r || !r.step || !r.result) {
-            console.warn('[Chat Stream] Filtering out invalid result:', { step: r?.step, hasResult: !!r?.result });
-            return false;
-          }
-          const step = plan.plan.find(s => s && s.id === r.step);
-          const isCodeRead = step?.tool === 'code.readFile';
-          const isOk = r.result?.ok === true;
-          if (isCodeRead && !isOk) {
-            console.warn('[Chat Stream] code.readFile step failed:', { step: r.step, error: r.result?.error });
-          }
-          return isCodeRead && isOk;
-        })
-        .map(r => {
-          const step = plan.plan.find(s => s && s.id === r.step);
-          const fileResult = {
-            path: step?.args?.['path'] || 'unknown',
-            content: r.result?.content || '',
-            ast: r.result?.ast,
-            dependencies: Array.isArray(r.result?.dependencies) ? r.result.dependencies : [],
-            language: r.result?.language || 'unknown'
-          };
-          console.log('[Chat Stream] Extracted code.readFile result:', {
-            path: fileResult.path,
-            contentLength: fileResult.content.length,
-            hasContent: fileResult.content.length > 0
-          });
-          return fileResult;
-        });
-
-      console.log('[Chat Stream] codeReadResults count:', codeReadResults.length);
-      console.log('[Chat Stream] codeReadResults paths:', codeReadResults.map(f => f.path));
-
-      // Extract knowledge hits and research results from tool results - improved extraction
-      const knowledgeHits = extractKnowledgeHits(results);
-
-      // Extract research.run results and their sources (merged logic)
-      const researchResults = extractResearchResults(results, plan);
-
-      console.log(`[Chat Stream] Research extraction:`, {
-        researchResultsCount: researchResults.length,
-        hasResults: researchResults.length > 0,
-        firstResult: researchResults[0] ? {
-          ok: researchResults[0].ok,
-          hasSources: !!(researchResults[0].sources && Array.isArray(researchResults[0].sources)),
-          sourcesCount: researchResults[0].sources?.length || 0,
-          hasTop3: !!(researchResults[0].top3 && Array.isArray(researchResults[0].top3)),
-        } : null,
+      // Phase 4.2: Process execution results using extracted helper
+      const processedResults = processExecutionResults({
+        results,
+        plan,
       });
 
-      // Collect all research sources for summarizer context
-      // CRITICAL: Handle multiple possible locations for sources
-      const researchSources = formatResearchSources(researchResults);
-
-      console.log(`[Chat Stream] Research sources extracted:`, {
-        researchResultsCount: researchResults.length,
-        researchSourcesCount: researchSources.length,
-        hasValidSources: researchSources.length > 0,
-        sampleSource: researchSources[0] ? {
-          title: researchSources[0].title,
-          url: researchSources[0].url,
-          hasSnippet: !!researchSources[0].snippet,
-        } : null,
-        allResultsOk: researchResults.map(r => ({ ok: r.ok, hasSources: !!(r.sources || r.data?.sources), sourcesCount: (r.sources || r.data?.sources || []).length })),
-      });
+      // Destructure processed results
+      const {
+        codeReadResults,
+        knowledgeHits,
+        researchResults,
+        researchSources,
+        systemHealthResults,
+        logsResults,
+        projectAnalyzeResults,
+        filesRecentResults,
+      } = processedResults;
 
       // Extract knowledge search query from plan steps
       const knowledgeSearchStep = plan.plan.find((s: any) => s.tool === 'kb.search');
@@ -3204,62 +2452,6 @@ export async function processStreamStart(
 
       // Prioritize README files and main documentation for "what is" questions - improved detection
       let prioritizedKnowledgeHits = prioritizeKnowledgeHits(knowledgeHits, userMessage);
-
-      // Extract tool results for better summarization with validation
-      const systemHealthResults = results
-        .filter(r => {
-          if (!r || !r.step || !r.result) return false;
-          const step = plan.plan.find(s => s && s.id === r.step);
-          return step?.tool === 'system.health' && r.result?.ok === true;
-        })
-        .map(r => {
-          // Handle both formats: ToolResult v2 ({ ok, data, ... }) and legacy ({ ok, status, ... })
-          const result = r.result;
-          if (result.data && typeof result.data === 'object') {
-            // ToolResult v2 format: extract data
-            return { ...result.data, ok: result.ok };
-          }
-          // Legacy format or direct format: use result as-is
-          return result;
-        })
-        .filter(r => r && typeof r === 'object');
-
-      const logsResults = results
-        .filter(r => {
-          if (!r || !r.step || !r.result) return false;
-          const step = plan.plan.find(s => s && s.id === r.step);
-          return step?.tool === 'logs.tail' && r.result?.ok === true;
-        })
-        .map(r => {
-          // Handle both formats: ToolResult v2 ({ ok, data, ... }) and legacy ({ ok, logs, ... })
-          const result = r.result;
-          if (result.data && typeof result.data === 'object') {
-            // ToolResult v2 format: extract data
-            return { ...result.data, ok: result.ok };
-          }
-          // Legacy format or direct format: use result as-is
-          return result;
-        })
-        .filter(r => r && typeof r === 'object');
-
-      const projectAnalyzeResults = results
-        .filter(r => {
-          if (!r || !r.step || !r.result) return false;
-          const step = plan.plan.find(s => s && s.id === r.step);
-          return step?.tool === 'project.analyze' && r.result?.ok === true;
-        })
-        .map(r => r.result)
-        .filter(r => r && typeof r === 'object');
-
-      // Extract files.recent results
-      const filesRecentResults = results
-        .filter(r => {
-          if (!r || !r.step || !r.result) return false;
-          const step = plan.plan.find(s => s && s.id === r.step);
-          return step?.tool === 'files.recent' && r.result?.ok === true && r.result?.files;
-        })
-        .map(r => r.result)
-        .filter(r => r && typeof r === 'object' && Array.isArray(r.files));
 
       // Debug logging for file query results
       if (isFileQuery) {
@@ -3274,718 +2466,38 @@ export async function processStreamStart(
         });
       }
 
-      // Build comprehensive context with actual results
-      const hasKnowledge = prioritizedKnowledgeHits.length > 0;
-      const hasResearch = researchResults.length > 0;
-      const hasSystemHealth = systemHealthResults.length > 0;
-      const hasLogs = logsResults.length > 0;
-      const hasProjectAnalyze = projectAnalyzeResults.length > 0;
-      // hasFilesRecent: true if files.recent was executed (even if it returned empty array)
-      const hasFilesRecent = filesRecentResults.length > 0;
-      // hasActualFiles: true only if files.recent returned actual files
-      const hasActualFiles = hasFilesRecent && filesRecentResults.some(r => r.files && Array.isArray(r.files) && r.files.length > 0);
-      const hasResults = hasKnowledge || hasResearch || hasSystemHealth || hasLogs || hasProjectAnalyze || codeReadResults.length > 0 || hasActualFiles;
+      // Phase 4.3: Build summarizer context using extracted helper
+      // Check if research API keys are available
+      const hasResearchKeys = !!(process.env['TAVILY_API_KEY'] || process.env['NEWS_API_KEY'] || process.env['SERPAPI_KEY']);
 
-      // Use questionType from plan for adaptive summarizer output
-      const finalQuestionType = questionType; // Use the determined question type
-      let summaryContext = '';
-
-      // For tool testing requests, add comprehensive tool result summary
-      const isToolTestingRequest = /(test.*all.*tool|test.*your.*tool|test.*every.*tool|test.*each.*tool|verify.*all.*tool|check.*all.*tool)/i.test(userMessage);
-      if (isToolTestingRequest && results && results.length > 0) {
-        summaryContext += `TOOL TESTING RESULTS:\n\n`;
-
-        const successfulTools: string[] = [];
-        const failedTools: Array<{ tool: string; error: string }> = [];
-
-        results.forEach((r: any) => {
-          const step = plan.plan.find((s: any) => s && s.id === r.step);
-          const toolName = step?.tool || r.step;
-
-          if (r.result?.ok === true) {
-            successfulTools.push(toolName);
-          } else {
-            const errorMsg = r.result?.error?.message || r.result?.error || 'Unknown error';
-            failedTools.push({ tool: toolName, error: errorMsg });
-          }
-        });
-
-        summaryContext += `✅ SUCCESSFUL TOOLS (${successfulTools.length}):\n`;
-        successfulTools.forEach(tool => {
-          summaryContext += `- ${tool}\n`;
-        });
-
-        if (failedTools.length > 0) {
-          summaryContext += `\n❌ FAILED TOOLS (${failedTools.length}):\n`;
-          failedTools.forEach(({ tool, error }) => {
-            summaryContext += `- ${tool}: ${error}\n`;
-          });
-        }
-
-        summaryContext += `\nSUMMARY: Tested ${results.length} tools. ${successfulTools.length} succeeded, ${failedTools.length} failed.\n\n`;
-        summaryContext += `CRITICAL: Report the exact results above. List which tools succeeded and which failed with their error messages. Do not make up results or use generic language.\n\n`;
-      }
-
-      // Add question context in natural format
-      summaryContext += `User Question: ${userMessage}\n`;
-      summaryContext += `Question Type: ${finalQuestionType}\n`;
-      if (needsCouncil) {
-        summaryContext += `Expert review was consulted\n`;
-      }
-
-      // Add note if research was requested but tools are unavailable
-      // Reuse hasResearchKeys from earlier enforcement check (line 3104)
-      const isResearchQueryForSummary = /(research|find.*latest|latest.*news|current.*news|recent.*news|bitcoin|ethereum|crypto|stock|market|macro.*economic|give.*top.*with.*links)/i.test(userMessage.toLowerCase());
-      if (isResearchQueryForSummary && !hasResearchKeys) {
-        summaryContext += `\n⚠️ NOTE: This appears to be a research query, but research tools are currently unavailable (no API keys configured: TAVILY_API_KEY, NEWS_API_KEY, or SERPAPI_KEY). I've searched the knowledge base instead, but for real-time news and information, please configure a research API key.\n`;
-      }
-
-      summaryContext += `\n`;
-
-      // Add plan details in natural language
-      summaryContext += `To answer this question, I:\n`;
-      plan.plan.forEach((step: any) => {
-        const stepResult = results.find((r: any) => r.step === step.id);
-        const toolName = step.tool.replace(/\./g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-        const status = stepResult?.result?.ok ? 'successfully completed' : stepResult ? 'encountered an issue' : 'was not executed';
-        summaryContext += `- ${toolName}: ${status}`;
-        if (step.title) {
-          summaryContext += ` (${step.title})`;
-        }
-        summaryContext += `\n`;
+      const summarizerContextResult = buildSummarizerContext({
+        userMessage,
+        questionType,
+        intent,
+        plan,
+        results,
+        processedResults,
+        prioritizedKnowledgeHits,
+        knowledgeSearchQuery,
+        isCasual,
+        isWhatIsQuestion,
+        isFileQuery,
+        needsCouncil,
+        votes,
+        consensus,
+        hasResearchKeys,
+        executorResult,
       });
-      summaryContext += `\n`;
 
-      // Build comprehensive context with code.readFile results (HIGHEST PRIORITY)
-      if (codeReadResults.length > 0) {
-        console.log('[Chat Stream] Adding code.readFile results to summarizer context');
-        summaryContext += `Code files reviewed (${codeReadResults.length} file${codeReadResults.length > 1 ? 's' : ''}):\n`;
-        codeReadResults.forEach((file, idx) => {
-          console.log(`[Chat Stream] Adding file ${idx + 1}/${codeReadResults.length}: ${file.path} (${file.content.length} chars)`);
-          summaryContext += `\nFile: ${file.path}`;
-          if (file.language) {
-            summaryContext += ` (${file.language})`;
-          }
-          summaryContext += `\n`;
-          // CRITICAL: Include actual content, not empty string
-          if (file.content && file.content.length > 0) {
-            summaryContext += `${file.content}\n`;
-          } else {
-            console.warn(`[Chat Stream] File ${file.path} has no content!`);
-            summaryContext += `[File content not available]\n`;
-          }
-          if (file.dependencies && file.dependencies.length > 0) {
-            summaryContext += `Dependencies: ${file.dependencies.join(', ')}\n`;
-          }
-          if (file.ast) {
-            const classes = file.ast.classes?.length || 0;
-            const functions = file.ast.functions?.length || 0;
-            if (classes > 0 || functions > 0) {
-              summaryContext += `Structure: ${classes} class${classes !== 1 ? 'es' : ''}, ${functions} function${functions !== 1 ? 's' : ''}\n`;
-            }
-          }
-        });
-        summaryContext += `\nIMPORTANT: Use the actual code content above to provide specific, detailed answers. Reference actual function names, endpoints, and file paths from the code. Explain what the code does with concrete examples, not generic descriptions.\n\n`;
-      }
-
-      if (isCasual) {
-        // For casual questions, prioritize knowledge base results over council consensus
-        summaryContext += `User Question: ${userMessage}\n\n`;
-
-        // Add system health results if available
-        if (hasSystemHealth) {
-          summaryContext += `System status:\n`;
-          systemHealthResults.forEach((result) => {
-            // Extract health data (handle both nested and flat formats)
-            const health = result.data || result;
-
-            summaryContext += `Status: ${health.status || 'unknown'}\n`;
-            if (health.uptime) {
-              const hours = Math.floor(health.uptime / 3600);
-              const minutes = Math.floor((health.uptime % 3600) / 60);
-              summaryContext += `Uptime: ${hours}h ${minutes}m\n`;
-            }
-            if (health.services) {
-              const serviceNames = Object.keys(health.services);
-              if (serviceNames.length > 0) {
-                summaryContext += `Services: ${serviceNames.join(', ')}\n`;
-              }
-            }
-            if (health.agents) {
-              summaryContext += `Agents: ${health.agents.active || 0} active out of ${health.agents.total || 0} total\n`;
-            }
-            if (health.workflows) {
-              summaryContext += `Workflows: ${health.workflows.active || 0} active out of ${health.workflows.total || 0} total\n`;
-            }
-            if (health.alerts && Array.isArray(health.alerts) && health.alerts.length > 0) {
-              summaryContext += `Alerts: ${health.alerts.length} alert${health.alerts.length > 1 ? 's' : ''} found\n`;
-              health.alerts.slice(0, 3).forEach((alert: any) => {
-                summaryContext += `- ${alert.message || alert.type || 'Alert'}\n`;
-              });
-            }
-          });
-          summaryContext += `\n`;
-        }
-
-        // Add logs results if available
-        if (hasLogs) {
-          summaryContext += `Recent logs (${logsResults.reduce((sum, r) => {
-            const logs = r.logs || r.data?.logs || [];
-            return sum + (r.count || r.data?.count || logs.length || 0);
-          }, 0)} entries):\n`;
-          logsResults.forEach((result) => {
-            // Extract logs data (handle both nested and flat formats)
-            const logs = result.logs || result.data?.logs || [];
-            if (Array.isArray(logs) && logs.length > 0) {
-              logs.slice(0, 10).forEach((log: any) => {
-                const level = log.level || 'info';
-                const message = log.message || log.content || 'Log entry';
-                const timestamp = log.timestamp || log.time || '';
-                summaryContext += `${timestamp ? `[${timestamp}] ` : ''}[${level}] ${message}\n`;
-              });
-            } else {
-              summaryContext += `No log entries found.\n`;
-            }
-          });
-          summaryContext += `\nCRITICAL: Summarize key errors, warnings, and patterns from the logs above. Don't just list them - explain what they mean.\n\n`;
-        } else if (intent === 'system_debug' && userMessage.toLowerCase().includes('log')) {
-          // If logs were requested but not found, explain why
-          summaryContext += `\n⚠️ Logs query detected but no logs.tail tool results found. The logs.tail tool may not have been executed or may have failed.\n\n`;
-        }
-
-        // Add project analysis results if available
-        if (hasProjectAnalyze) {
-          summaryContext += `Project analysis:\n`;
-          projectAnalyzeResults.forEach((result) => {
-            if (result.summary) {
-              const summary = typeof result.summary === 'string' ? result.summary : JSON.stringify(result.summary);
-              summaryContext += `${summary}\n`;
-            }
-            // Power of 10 Rule 8: Limit pointer dereferencing - use intermediate variable
-            const health = result.health;
-            if (health) {
-              const healthScore = health.score;
-              summaryContext += `Health score: ${healthScore || 'N/A'}/10\n`;
-
-              // Power of 10 Rule 8: Limit pointer dereferencing
-              const healthIssues = health.issues;
-              if (healthIssues && Array.isArray(healthIssues) && healthIssues.length > 0) {
-                summaryContext += `Issues found: ${healthIssues.length}\n`;
-                healthIssues.slice(0, 3).forEach((issue: any) => {
-                  const issueText = typeof issue === 'string' ? issue : issue.message || issue.type || 'Issue';
-                  summaryContext += `- ${issueText}\n`;
-                });
-              }
-
-              // Power of 10 Rule 8: Limit pointer dereferencing
-              const healthRecommendations = health.recommendations;
-              if (healthRecommendations && Array.isArray(healthRecommendations) && healthRecommendations.length > 0) {
-                summaryContext += `Recommendations:\n`;
-                healthRecommendations.slice(0, 3).forEach((rec: any) => {
-                  const recText = typeof rec === 'string' ? rec : rec.message || rec.text || 'Recommendation';
-                  summaryContext += `- ${recText}\n`;
-                });
-              }
-            }
-          });
-          summaryContext += `\n`;
-        }
-
-        // Add files.recent results if available (CRITICAL for file queries)
-        if (hasFilesRecent) {
-          summaryContext += `Recently uploaded/accessed files:\n`;
-          filesRecentResults.forEach((result) => {
-            if (result.files && Array.isArray(result.files) && result.files.length > 0) {
-              summaryContext += `Found ${result.files.length} file${result.files.length > 1 ? 's' : ''}:\n`;
-              result.files.forEach((file: any, index: number) => {
-                summaryContext += `${index + 1}. ${file.path || 'Unknown file'}`;
-                if (file.ageMinutes !== undefined) {
-                  const hours = Math.floor(file.ageMinutes / 60);
-                  const minutes = file.ageMinutes % 60;
-                  if (hours > 0) {
-                    summaryContext += ` (${hours}h ${minutes}m ago)`;
-                  } else {
-                    summaryContext += ` (${minutes}m ago)`;
-                  }
-                }
-                if (file.size) {
-                  const sizeKB = Math.round(file.size / 1024);
-                  summaryContext += ` - ${sizeKB}KB`;
-                }
-                if (file.isImage) {
-                  summaryContext += ` [IMAGE]`;
-                }
-                if (file.contentType) {
-                  summaryContext += ` (${file.contentType})`;
-                }
-                summaryContext += `\n`;
-                if (file.contentPreview && file.contentPreview.length > 0) {
-                  summaryContext += `   Preview: ${file.contentPreview.substring(0, 200)}${file.contentPreview.length > 200 ? '...' : ''}\n`;
-                }
-              });
-              summaryContext += `\n`;
-            } else {
-              summaryContext += `No recent files found.\n\n`;
-            }
-          });
-
-          // Add special instructions for file queries
-          if (isFileQuery) {
-            const hasActualFiles = filesRecentResults.some(r => r.files && Array.isArray(r.files) && r.files.length > 0);
-            if (hasActualFiles) {
-              const totalFiles = filesRecentResults.reduce((sum, r) => sum + (r.files?.length || 0), 0);
-              summaryContext += `\n🚨 CRITICAL FILE QUERY INSTRUCTIONS - FILES FOUND (${totalFiles} file${totalFiles > 1 ? 's' : ''}):\n`;
-              summaryContext += `YOU MUST RESPOND WITH THE EXACT FILE LIST FROM ABOVE.\n`;
-              summaryContext += `RESPONSE FORMAT (MANDATORY):\n`;
-              summaryContext += `1. Start with: "Here are the ${totalFiles} recent file${totalFiles > 1 ? 's' : ''}:"\n`;
-              summaryContext += `2. List each file EXACTLY as shown above with:\n`;
-              summaryContext += `   - File number (1, 2, 3...)\n`;
-              summaryContext += `   - Full file path\n`;
-              summaryContext += `   - Timestamp (Xh Ym ago)\n`;
-              summaryContext += `   - File size if available\n`;
-              summaryContext += `   - File type if available\n`;
-              summaryContext += `3. DO NOT use vague language like "looks like", "seems like", "appears"\n`;
-              summaryContext += `4. DO NOT generalize - list the EXACT files\n`;
-              summaryContext += `5. DO NOT say "we don't have files" - you HAVE ${totalFiles} file${totalFiles > 1 ? 's' : ''} listed above\n`;
-              summaryContext += `EXAMPLE: "Here are the 2 recent files:\n1. /path/to/file1.txt (5m ago) - 2KB\n2. /path/to/file2.jpg (10m ago) [IMAGE]"\n\n`;
-            } else {
-              summaryContext += `\n🚨🚨🚨 CRITICAL FILE QUERY INSTRUCTIONS - NO FILES FOUND 🚨🚨🚨\n`;
-              summaryContext += `The files.recent tool executed successfully but returned an EMPTY files array (files.length = 0, total = 0).\n`;
-              summaryContext += `THIS MEANS THERE ARE ZERO FILES - NOT "looks like" or "seems like" - ZERO FILES.\n\n`;
-              summaryContext += `YOUR RESPONSE MUST START WITH EXACTLY ONE OF THESE:\n`;
-              summaryContext += `1. "No recent files were found."\n`;
-              summaryContext += `2. "There are no recently uploaded files."\n`;
-              summaryContext += `3. "No files have been uploaded recently."\n\n`;
-              summaryContext += `FORBIDDEN PHRASES (DO NOT USE):\n`;
-              summaryContext += `- "looks like we don't have any files"\n`;
-              summaryContext += `- "it seems there are no files"\n`;
-              summaryContext += `- "we don't have any files to share"\n`;
-              summaryContext += `- "looks like we don't have any recently uploaded files"\n`;
-              summaryContext += `- "it appears there are no files"\n`;
-              summaryContext += `- Any phrase with "looks like", "seems like", "appears", "might be"\n\n`;
-              summaryContext += `REQUIRED: State the fact directly. Be concise. One sentence is enough.\n\n`;
-            }
-          }
-        } else if (isFileQuery) {
-          // File query but no files found
-          summaryContext += `No recent files were found.\n\n`;
-          summaryContext += `CRITICAL: The user asked about recent files, but no files were found. Clearly state that no recent files are available.\n\n`;
-        }
-
-        if (hasKnowledge) {
-          // Highlight README files prominently
-          const readmeHits = prioritizedKnowledgeHits.filter((h: any) => h.isReadme);
-          const otherHits = prioritizedKnowledgeHits.filter((h: any) => !h.isReadme);
-
-          summaryContext += `Found ${prioritizedKnowledgeHits.length} relevant document${prioritizedKnowledgeHits.length > 1 ? 's' : ''}:\n\n`;
-
-          if (readmeHits.length > 0) {
-            summaryContext += `README files (primary source - use these first):\n`;
-            readmeHits.forEach((h: any) => {
-              summaryContext += `- ${h.title || 'Untitled'}`;
-              if (h.url) {
-                summaryContext += ` (${h.url})`;
-              }
-              summaryContext += `\n`;
-              if (h.spans?.[0]?.text) {
-                summaryContext += `  ${h.spans[0].text.substring(0, 300)}${h.spans[0].text.length > 300 ? '...' : ''}\n`;
-              }
-            });
-            summaryContext += `\n`;
-          }
-
-          if (otherHits.length > 0) {
-            summaryContext += `Additional documents:\n`;
-            otherHits.forEach((h: any) => {
-              summaryContext += `- ${h.title || 'Untitled'}`;
-              if (h.url) {
-                summaryContext += ` (${h.url})`;
-              }
-              summaryContext += `\n`;
-              if (h.spans?.[0]?.text) {
-                summaryContext += `  ${h.spans[0].text.substring(0, 200)}${h.spans[0].text.length > 200 ? '...' : ''}\n`;
-              }
-            });
-            summaryContext += `\n`;
-          }
-        } else {
-          // Only mention KB search failure if we don't have research sources (research is primary for research queries)
-          if (researchSources.length === 0) {
-            summaryContext += `Knowledge base search: No results found for "${knowledgeSearchQuery || 'the query'}"\n\n`;
-          } else {
-            // If we have research sources, don't emphasize KB failure - research is the primary source
-            summaryContext += `Knowledge base search: No results found (using web research instead)\n\n`;
-          }
-        }
-
-        // Add research sources to context (CRITICAL for research queries)
-        if (researchSources.length > 0) {
-          console.log(`[Chat Stream] ✅ Adding ${researchSources.length} research sources to summarizer context`);
-
-          // Also add sources from executor result if available
-          if (executorResult && executorResult.scratchpad?.knowledge?.length > 0) {
-            const executorSources = executorResult.scratchpad.knowledge;
-            console.log(`[Chat Stream] ✅ Also injecting ${executorSources.length} knowledge hits from executor`);
-            // Merge with researchSources (dedupe by URL)
-            const existingUrls = new Set(researchSources.map((s: any) => s.url));
-            executorSources.forEach((hit: KnowledgeHit) => {
-              if (!existingUrls.has(hit.url)) {
-                researchSources.push({
-                  title: hit.title,
-                  url: hit.url,
-                  snippet: hit.snippet,
-                  score: hit.score,
-                  publishedAt: hit.publishedAt,
-                  source: hit.source,
-                });
-              }
-            });
-          }
-
-          // CRITICAL: Put research sources FIRST and make them prominent
-          summaryContext += `\n🚨🚨🚨 PRIMARY SOURCE: WEB RESEARCH RESULTS 🚨🚨🚨\n`;
-          summaryContext += `RESEARCH COMPLETED SUCCESSFULLY - ${researchSources.length} SOURCES FOUND\n`;
-          summaryContext += `YOU HAVE CONCRETE RESEARCH RESULTS BELOW - USE THEM AS YOUR PRIMARY ANSWER\n\n`;
-
-          summaryContext += `Web Research Sources (${researchSources.length}):\n\n`;
-          researchSources.slice(0, 10).forEach((source: any, idx: number) => {
-            const title = source.title || 'Untitled';
-            const url = source.url || '';
-            const snippet = source.snippet || '';
-
-            // Format as markdown link for easy reference
-            summaryContext += `${idx + 1}. [${title}](${url})\n`;
-            if (snippet) {
-              summaryContext += `   ${snippet.substring(0, 200)}${snippet.length > 200 ? '...' : ''}\n`;
-            }
-            if (source.score) {
-              summaryContext += `   Relevance: ${(source.score * 100).toFixed(0)}%\n`;
-            }
-            summaryContext += `\n`;
-          });
-          if (researchSources.length > 10) {
-            summaryContext += `\n*Showing top 10 of ${researchSources.length} research sources.*\n\n`;
-          }
-
-          // CRITICAL: Explicitly instruct summarizer to include links in response
-          summaryContext += `\n🚨🚨🚨 CRITICAL RESEARCH QUERY INSTRUCTIONS 🚨🚨🚨\n`;
-          summaryContext += `YOU HAVE ${researchSources.length} RESEARCH SOURCES ABOVE - THEY ARE YOUR PRIMARY ANSWER\n`;
-          summaryContext += `\nMANDATORY RESPONSE REQUIREMENTS:\n`;
-          summaryContext += `1. START your answer with a confident synthesis based on the research sources above\n`;
-          summaryContext += `2. You MUST include at least 2-3 source links formatted as markdown: [Title](URL)\n`;
-          summaryContext += `3. Use the actual titles and URLs from the sources listed above\n`;
-          summaryContext += `4. Include the top ${Math.min(3, researchSources.length)} most relevant sources\n`;
-          summaryContext += `5. Synthesize the information from the snippets/summaries provided\n\n`;
-          summaryContext += `FORBIDDEN PHRASES (DO NOT USE):\n`;
-          summaryContext += `- "I couldn't find sources" - YOU HAVE ${researchSources.length} SOURCES ABOVE\n`;
-          summaryContext += `- "no results were found" - YOU HAVE RESULTS ABOVE\n`;
-          summaryContext += `- "unfortunately, I couldn't find" - YOU HAVE SOURCES\n`;
-          summaryContext += `- "I don't have access to" - YOU HAVE RESEARCH RESULTS\n`;
-          summaryContext += `- Any phrase suggesting sources weren't found\n\n`;
-          summaryContext += `CORRECT APPROACH:\n`;
-          summaryContext += `- Start confidently: "Based on recent research, here's what I found..."\n`;
-          summaryContext += `- Synthesize the key findings from the snippets above\n`;
-          summaryContext += `- List sources as: "Here are the top sources:\n  1. [Title](URL)\n  2. [Title](URL)\n  3. [Title](URL)"\n\n`;
-        } else {
-          // CRITICAL: This block executes when researchSources.length === 0
-          // Only add web research failure instructions if:
-          // 1. Research was actually attempted (hasResearch is true)
-          // 2. Intent is NOT system_debug (system queries don't use web research)
-          const researchWasAttempted = hasResearch && researchResults.length > 0;
-          const isResearchQuery = intent === 'general_question' || intent === 'project_help';
-
-          // Note: isResearchQuery already excludes 'system_debug', so no need to check again
-          if (researchWasAttempted && isResearchQuery) {
-            // Research was attempted but returned no sources - add anti-hallucination instructions
-            console.warn(`[Chat Stream] ⚠️ NO research sources to add to summarizer context!`);
-            console.warn(`[Chat Stream] Research results analysis:`, {
-              researchResultsCount: researchResults.length,
-              researchResults: researchResults.map(r => ({
-                ok: r.ok,
-                hasSources: !!(r.sources && Array.isArray(r.sources)),
-                sourcesCount: (r.sources || []).length,
-                hasDataSources: !!(r.data?.sources && Array.isArray(r.data.sources)),
-                dataSourcesCount: (r.data?.sources || []).length,
-                error: r.error,
-                sessionId: r.sessionId,
-              })),
-              finalResearchSourcesCount: researchSources.length,
-            });
-
-            // CRITICAL: Add explicit NO HALLUCINATION instructions when research fails
-            summaryContext += `\n🚨🚨🚨🚨🚨 CRITICAL: WEB RESEARCH FAILED OR RETURNED NO RESULTS 🚨🚨🚨🚨🚨\n`;
-            summaryContext += `\nTHE WEB RESEARCH TOOL WAS EXECUTED BUT RETURNED ZERO VALID SOURCES.\n`;
-            summaryContext += `THIS MEANS YOU HAVE ABSOLUTELY NO WEB RESEARCH RESULTS AVAILABLE.\n`;
-            summaryContext += `YOU CANNOT AND MUST NOT INVENT OR HALLUCINATE SOURCES.\n\n`;
-
-            summaryContext += `🚨 STRICT RESPONSE REQUIREMENTS (MANDATORY):\n`;
-            summaryContext += `1. You MUST start your response with: "I was unable to find web sources for this query" or "Web research returned no results"\n`;
-            summaryContext += `2. You MUST NOT invent, fabricate, or hallucinate ANY source URLs\n`;
-            summaryContext += `3. You MUST NOT cite Bloomberg, Reuters, IMF, NYT, WSJ, or ANY publication without a real URL provided above\n`;
-            summaryContext += `4. You MUST NOT create fake links like "https://www.bloomberg.com/..." or any other domain\n`;
-            summaryContext += `5. You MUST NOT pretend you found sources when you didn't\n`;
-            summaryContext += `6. Instead, you MUST offer to help refine the search or suggest alternative approaches\n\n`;
-
-            summaryContext += `🚨 FORBIDDEN BEHAVIORS (DO NOT DO THESE):\n`;
-            summaryContext += `- Creating fake URLs of any kind\n`;
-            summaryContext += `- Inventing article titles or publication names\n`;
-            summaryContext += `- Using phrases like "According to Bloomberg" or "A report by Reuters" without real sources\n`;
-            summaryContext += `- Saying "I found some interesting articles" when you have no sources\n`;
-            summaryContext += `- Providing any markdown links [Title](URL) unless the URL was provided above\n`;
-            summaryContext += `- Making up citations or references\n\n`;
-
-            summaryContext += `✅ CORRECT RESPONSE FORMAT:\n`;
-            summaryContext += `"I attempted to search for web sources on this topic, but the search didn't return any results. This could be due to:\n`;
-            summaryContext += `- Search service connectivity issues\n`;
-            summaryContext += `- The query might need refinement\n`;
-            summaryContext += `- The topic might be too specific or recent\n\n`;
-            summaryContext += `Would you like me to help refine the search query, or would you like to ask a different question?"\n\n`;
-
-            summaryContext += `🚨 FINAL REMINDER: If you don't have real sources in the context above, you HAVE NO SOURCES. Do not invent them.\n\n`;
-          } else if (intent === 'system_debug') {
-            // For system_debug queries, provide specialized instructions for system status responses
-            summaryContext += `\n📊 SYSTEM STATUS QUERY INSTRUCTIONS:\n`;
-            summaryContext += `This is a system health/status query. Use ONLY the system tool results provided above.\n\n`;
-            summaryContext += `🚨 CRITICAL RULES FOR SYSTEM_DEBUG QUERIES:\n`;
-            summaryContext += `- DO NOT mention "knowledge base search" or "we didn't find any results in search"\n`;
-            summaryContext += `- DO NOT mention "web sources" or "research" - this is an internal system query\n`;
-            summaryContext += `- DO NOT reference external websites or publications\n`;
-            summaryContext += `- DO NOT suggest searching online or using web-based resources\n`;
-            summaryContext += `- DO NOT say "we didn't find any results" - instead explain what the tools returned\n`;
-            summaryContext += `- This query uses system.health and logs.tail tools, NOT knowledge base search\n\n`;
-
-            // Check if we have actual tool results
-            if (!hasSystemHealth && !hasLogs) {
-              summaryContext += `⚠️ CRITICAL: NO TOOL RESULTS FOUND\n`;
-              summaryContext += `The system.health and logs.tail tools did not return any results.\n`;
-              summaryContext += `DO NOT invent or guess system status. Instead, state:\n`;
-              summaryContext += `"I attempted to check the system health and retrieve recent logs, but the tools did not return any data. This could indicate:\n`;
-              summaryContext += `- The tools failed to execute\n`;
-              summaryContext += `- The system health API is unavailable\n`;
-              summaryContext += `- There was an error retrieving system status or logs\n\n`;
-              summaryContext += `Please check the server logs or try again."\n\n`;
-            } else {
-              summaryContext += `✅ TOOL RESULTS AVAILABLE - USE THEM:\n`;
-              summaryContext += `- If system health data is above, use the EXACT status, uptime, services, and metrics shown\n`;
-              summaryContext += `- If logs are above, summarize the actual log entries shown\n`;
-              summaryContext += `- DO NOT invent status values like "Urgent" or "Critical" unless they appear in the tool results\n`;
-              summaryContext += `- DO NOT mention knowledge base search - this query uses system tools, not KB search\n`;
-              summaryContext += `- If tool results show "healthy", say "healthy" - don't change it to "urgent" or other values\n\n`;
-            }
-          }
-        }
-
-        if (hasResearch) {
-          summaryContext += `Web Research: Research session started. Check ${researchResults[0]?.viewUrl || 'research page'} for detailed findings.\n\n`;
-        }
-
-        // For "what is" questions, prioritize code files and README over everything else
-        if (isWhatIsQuestion) {
-          if (codeReadResults.length > 0) {
-            // Check if this is a workflow question
-            const isWorkflowQuestionInContext = /(workflow|n8n|execution|orchestration)/i.test(userMessage);
-            const hasN8nCursorFiles = codeReadResults.some((f: any) => f.path.includes('n8n-cursor'));
-            const hasLightningFlowFiles = codeReadResults.some((f: any) => f.path.includes('lightningflow'));
-
-            summaryContext += `🚨 CRITICAL INSTRUCTIONS FOR "WHAT IS SCORPION" QUESTIONS 🚨
-- The README.md file above is the ABSOLUTE PRIMARY SOURCE - use it EXACTLY as written
-- DO NOT invent features, CLI tools, or capabilities that are NOT in the README.md
-- DO NOT say Scorpion is "built on top of LightningFlow" - README.md says LightningFlow is a SIDE HUSTLE managed BY Scorpion
-- DO NOT invent a "Scorpion CLI tool" - only mention tools/features that are EXPLICITLY in the README
-- DO NOT make up workflow examples or code snippets - only use what's in the provided files
-- Use the EXACT language from README.md: "Scorpion is the Central Operations Orchestrator"
-- Follow the EXACT structure from README.md: Architecture section, Features, etc.
-- OUTPUT FORMAT: Start with "Here is a detailed answer based on the provided code:" then provide comprehensive answer
-- Include sections: What is Scorpion, Key Features, Architecture, How it Works (all from README.md)
-- Quote directly from README.md when possible - preserve the exact meaning
-- If README.md says "Scorpion (scorpion.local / port 3003) - Main operations console and orchestrator", use that EXACTLY
-- NEVER confuse Scorpion with LightningFlow - Scorpion is the CENTRAL SYSTEM, LightningFlow is a SIDE HUSTLE it manages`;
-
-            // Add workflow-specific context if needed
-            if (isWorkflowQuestionInContext) {
-              if (hasN8nCursorFiles) {
-                summaryContext += `\n\n🎯 WORKFLOW QUESTION CONTEXT - BE SPECIFIC:
-- You have n8n-cursor backend files - these are CORRECT for workflow execution questions
-- Use SPECIFIC DETAILS from workflow-worker.ts: function names, workflow types, queue processing logic
-- Use SPECIFIC DETAILS from backend README.md: actual endpoints (POST /api/workflows/0/run), architecture flow, dependencies
-- Use SPECIFIC DETAILS from package.json: actual dependency versions (bullmq@4.15.0, express@4.18.2, etc.)
-- Use SPECIFIC DETAILS from index.ts: actual API routes, middleware, error handling
-- This is the n8n workflow automation system, NOT LightningFlow or Salesforce
-- QUOTE ACTUAL CODE: "processWorkflow() function", "5 workflow types: ai-saas, research, content, support, analytics", "BullMQ queue", "Redis status storage"
-- USE ACTUAL PATHS: "apps/n8n-cursor/backend/src/workers/workflow-worker.ts", not "the worker file"`;
-              } else if (hasLightningFlowFiles) {
-                summaryContext += `\n\n⚠️ ERROR DETECTED:
-- This is a workflow question but you received LightningFlow files instead of n8n-cursor files
-- Acknowledge this error: "The plan attempted to read incorrect files. Based on available information..."
-- Do NOT confuse LightningFlow with the workflow execution system
-- Work with what's available but note the mismatch`;
-              }
-            }
-          } else if (hasKnowledge) {
-            // Add specific council details if council was used - natural format
-            if (needsCouncil && votes.length > 0) {
-              summaryContext += `Expert review by ${votes.length} specialist${votes.length > 1 ? 's' : ''}:\n`;
-              votes.forEach((vote: any) => {
-                const agentName = vote.agentName || vote.agentId || 'Expert';
-                const confidence = Math.round((vote.confidence || 0.7) * 100);
-                summaryContext += `- ${agentName} (${confidence}% confident): ${vote.rationale || 'No specific comment'}\n`;
-              });
-              summaryContext += `\nOverall consensus: ${consensus.summary}\n\n`;
-            } else if (consensus.summary) {
-              summaryContext += `Expert consensus (for reference - prioritize README files above): ${consensus.summary}\n\n`;
-            }
-            summaryContext += `CRITICAL INSTRUCTIONS FOR "WHAT IS" QUESTIONS:
-- The README FILES above are the PRIMARY SOURCE - use them FIRST and MOST IMPORTANTLY
-- If README files are provided, use their exact definition
-- Documents about "Global Consistency System", "Implementation Status", etc. are about INTERNAL SYSTEMS within the product, NOT what the product IS
-- Only use council consensus if README files don't have the answer
-- If README files conflict with council consensus, TRUST THE README FILES
-- DO NOT confuse internal systems documentation with product definitions
-- DO NOT ask for clarification - answer based on what you have
-- OUTPUT FORMAT: Use a natural, conversational format. Write like explaining to a friend. NO technical jargon. Start with: "Scorpion is..." or "LightningFlow is..." based on the README definition.`;
-          } else {
-            // Add specific council details if council was used - natural format
-            if (needsCouncil && votes.length > 0) {
-              summaryContext += `Expert review by ${votes.length} specialist${votes.length > 1 ? 's' : ''}:\n`;
-              votes.forEach((vote: any) => {
-                const agentName = vote.agentName || vote.agentId || 'Expert';
-                const confidence = Math.round((vote.confidence || 0.7) * 100);
-                summaryContext += `- ${agentName} (${confidence}% confident): ${vote.rationale || 'No specific comment'}\n`;
-              });
-              summaryContext += `\nOverall consensus: ${consensus.summary}\n\n`;
-            } else if (consensus.summary) {
-              summaryContext += `Expert consensus: ${consensus.summary}\n\n`;
-            }
-            summaryContext += `IMPORTANT: Answer the question directly and naturally based on the information above. Use a conversational tone.`;
-          }
-        } else {
-          // Add specific council details if council was used - natural format
-          if (needsCouncil && votes.length > 0) {
-            summaryContext += `Expert review by ${votes.length} specialist${votes.length > 1 ? 's' : ''}:\n`;
-            votes.forEach((vote: any) => {
-              const agentName = vote.agentName || vote.agentId || 'Expert';
-              const confidence = Math.round((vote.confidence || 0.7) * 100);
-              summaryContext += `- ${agentName} (${confidence}% confident): ${vote.rationale || 'No specific comment'}\n`;
-            });
-            summaryContext += `\nOverall consensus: ${consensus.summary}\n\n`;
-          } else if (consensus.summary) {
-            summaryContext += `Expert consensus: ${consensus.summary}\n\n`;
-          }
-          summaryContext += `IMPORTANT: 
-- Use ONLY the information provided above (code files, knowledge base results, research, council consensus)
-- If code files are available, they are the PRIMARY SOURCE - use them first
-- If no knowledge base results were found, state that clearly
-- If web research was started, mention that research is available
-- Base your answer on the available sources
-- DO NOT make up information that isn't in the sources above
-- DO NOT ask for clarification - answer based on what you have
-- If you don't have enough information, say so clearly but still provide what you can
-- OUTPUT FORMAT: Use a natural, conversational format. Keep it simple and friendly. NO technical jargon.`;
-        }
-      } else {
-        // Technical questions - use natural, conversational format
-        summaryContext = `User Question: ${plan.objective || userMessage}\n\n`;
-
-        // Describe what was done in natural language
-        summaryContext += `To answer this question, I:\n`;
-        plan.plan.forEach((step: any, idx: number) => {
-          const stepResult = results.find((r: any) => r.step === step.id);
-          const status = stepResult?.result?.ok ? 'successfully completed' : stepResult ? 'encountered an issue' : 'was not executed';
-          const toolName = step.tool.replace(/\./g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-          summaryContext += `- ${toolName}: ${status}\n`;
-        });
-        summaryContext += `\n`;
-
-        // Add results in natural format - extract key information, don't dump JSON
-        const successfulResults = results.filter((r: any) => r.result?.ok);
-        if (successfulResults.length > 0) {
-          summaryContext += `Key findings:\n`;
-          successfulResults.forEach((result: any) => {
-            const step = plan.plan.find((s: any) => s.id === result.step);
-            if (step) {
-              const toolName = step.tool.replace(/\./g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-              // Power of 10 Rule 8: Limit pointer dereferencing - use intermediate variable
-              const resultData = result.result;
-              if (resultData) {
-                const resultDataValue = resultData.data;
-                if (resultDataValue) {
-                  const dataText = typeof resultDataValue === 'string' ? resultDataValue.substring(0, 200) : 'Results available';
-                  summaryContext += `- ${toolName} found: ${dataText}\n`;
-                } else {
-                  const resultMessage = resultData.message;
-                  if (resultMessage) {
-                    summaryContext += `- ${toolName}: ${resultMessage}\n`;
-                  }
-                }
-              }
-            }
-          });
-          summaryContext += `\n`;
-        }
-
-        // Council deliberation in natural format
-        if (needsCouncil && votes.length > 0) {
-          summaryContext += `Expert review:\n`;
-          votes.forEach((vote: any) => {
-            const agentName = vote.agentName || vote.agentId || 'Expert';
-            const confidence = Math.round((vote.confidence || 0.7) * 100);
-            summaryContext += `- ${agentName} (${confidence}% confident): ${vote.rationale || 'No specific comment'}\n`;
-          });
-          summaryContext += `\nOverall consensus: ${consensus.summary}\n\n`;
-        } else if (consensus.summary) {
-          summaryContext += `Expert consensus: ${consensus.summary}\n\n`;
-        }
-
-        // Knowledge base results in natural format
-        if (hasKnowledge && prioritizedKnowledgeHits.length > 0) {
-          summaryContext += `Found ${prioritizedKnowledgeHits.length} relevant document${prioritizedKnowledgeHits.length > 1 ? 's' : ''}:\n`;
-          prioritizedKnowledgeHits.forEach((h: any) => {
-            summaryContext += `- ${h.title}${h.url ? ` (${h.url})` : ''}\n`;
-          });
-          summaryContext += `\n`;
-        }
-
-        // Add files.recent results for technical questions too
-        if (hasFilesRecent) {
-          summaryContext += `Recently uploaded/accessed files:\n`;
-          filesRecentResults.forEach((result) => {
-            if (result.files && Array.isArray(result.files) && result.files.length > 0) {
-              summaryContext += `Found ${result.files.length} file${result.files.length > 1 ? 's' : ''}:\n`;
-              result.files.forEach((file: any, index: number) => {
-                summaryContext += `${index + 1}. ${file.path || 'Unknown file'}`;
-                if (file.ageMinutes !== undefined) {
-                  const hours = Math.floor(file.ageMinutes / 60);
-                  const minutes = file.ageMinutes % 60;
-                  if (hours > 0) {
-                    summaryContext += ` (${hours}h ${minutes}m ago)`;
-                  } else {
-                    summaryContext += ` (${minutes}m ago)`;
-                  }
-                }
-                if (file.size) {
-                  const sizeKB = Math.round(file.size / 1024);
-                  summaryContext += ` - ${sizeKB}KB`;
-                }
-                if (file.isImage) {
-                  summaryContext += ` [IMAGE]`;
-                }
-                summaryContext += `\n`;
-              });
-              summaryContext += `\n`;
-            } else {
-              summaryContext += `No recent files found.\n\n`;
-            }
-          });
-        }
-
-        summaryContext += `IMPORTANT: 
-- Answer the question in a natural, conversational way
-- Use the information above to provide a clear, helpful answer
-- Be specific about what was found, but explain it simply
-- NO technical jargon or raw data dumps
-- Write like you're explaining to a colleague, not writing a technical report
-- Keep it simple and friendly`;
-      }
+      let summaryContext = summarizerContextResult.summaryContext;
+      const hasKnowledge = summarizerContextResult.hasKnowledge;
+      const hasResearch = summarizerContextResult.hasResearch;
+      const hasSystemHealth = summarizerContextResult.hasSystemHealth;
+      const hasLogs = summarizerContextResult.hasLogs;
+      const hasProjectAnalyze = summarizerContextResult.hasProjectAnalyze;
+      const hasFilesRecent = summarizerContextResult.hasFilesRecent;
+      const hasActualFiles = summarizerContextResult.hasActualFiles;
+      const hasResults = summarizerContextResult.hasResults;
 
       send({ type: 'progress', data: { phase: 'summarizing', progress: 40, message: 'Building context...' } });
 

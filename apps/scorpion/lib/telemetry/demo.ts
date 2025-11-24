@@ -203,6 +203,124 @@ export function stopDemoEvents(): void {
   }
 }
 
+/**
+ * Generate a batch of demo events (for neural network training)
+ */
+export function generateDemoEvents(count: number): Array<any> {
+  const events: Array<any> = [];
+  const now = Date.now();
+
+  const agents = [
+    { id: 'E-001', name: 'Architectus' },
+    { id: 'A-002', name: 'Analytica' },
+    { id: 'P-003', name: 'Pragmaton' },
+  ];
+
+  const queues = ['research', 'workflows', 'knowledge'];
+
+  for (let i = 0; i < count; i++) {
+    const ts = now - (count - i) * 5000; // Spread events over time
+    const eventType = Math.random();
+
+    if (eventType < 0.3) {
+      // Agent events
+      const agent = agents[Math.floor(Math.random() * agents.length)];
+      const isSuccess = Math.random() < 0.8; // 80% success rate
+
+      if (isSuccess) {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'agent.operation.completed',
+          source: 'demo',
+          agentId: agent.id,
+          operationId: `op-${i}`,
+          operationName: 'process',
+          duration: 500 + Math.random() * 2000,
+        });
+      } else {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'agent.operation.failed',
+          source: 'demo',
+          severity: 'error',
+          agentId: agent.id,
+          operationId: `op-${i}`,
+          operationName: 'process',
+          error: 'Operation failed',
+        });
+      }
+    } else if (eventType < 0.6) {
+      // Job events
+      const queue = queues[Math.floor(Math.random() * queues.length)];
+      const isSuccess = Math.random() < 0.9; // 90% success rate
+
+      if (isSuccess) {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'job.completed',
+          source: 'demo',
+          jobId: `job-${i}`,
+          queue,
+          worker: 'worker-1',
+          duration: 1000 + Math.random() * 3000,
+        });
+      } else {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'job.failed',
+          source: 'demo',
+          severity: 'error',
+          jobId: `job-${i}`,
+          queue,
+          worker: 'worker-1',
+          error: 'Job failed',
+        });
+      }
+    } else if (eventType < 0.8) {
+      // Queue depth
+      const queue = queues[Math.floor(Math.random() * queues.length)];
+      events.push({
+        id: `evt-${i}`,
+        ts,
+        type: 'queue.depth',
+        source: 'demo',
+        queue,
+        depth: Math.floor(Math.random() * 100),
+      });
+    } else {
+      // HTTP errors (occasional)
+      if (Math.random() < 0.2) {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'http.error',
+          source: 'demo',
+          severity: 'error',
+          method: 'GET',
+          url: '/api/test',
+          status: 500,
+          error: 'Internal server error',
+        });
+      } else {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'system.log',
+          source: 'demo',
+          level: 'info',
+          message: 'System operating normally',
+        });
+      }
+    }
+  }
+
+  return events;
+}
+
 // Auto-start disabled - only real system data is shown
 // if (process.env.SCORPION_DEMO === '1') {
 //   console.log('[Demo] SCORPION_DEMO=1 detected, starting demo events...');

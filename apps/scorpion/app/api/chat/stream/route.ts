@@ -55,6 +55,8 @@ import { serializeProtocol } from './helpers/protocolSerialization';
 import { fallbackRoute } from './helpers/toolRouter';
 import { emitToolResult, emitKnowledgeHits, createExecutorEventEmitter } from './helpers/eventEmitters';
 import { assertDefined, assertArray, assertString } from './helpers/assertions';
+// Configuration imports
+import { getCachedResponse } from './config/promptConfig';
 
 // CHECK 1: Runtime configuration - CRITICAL for external HTTP calls
 export const runtime = 'nodejs';
@@ -76,73 +78,6 @@ function logApiKeysStatus() {
 
 // Log API keys status once at module load
 logApiKeysStatus();
-
-/**
- * Resolve prompt file path correctly regardless of cwd
- */
-function getPromptPath(filename: string): string {
-  const cwd = process.cwd();
-  
-  // If we're already in apps/scorpion, use relative path
-  if (cwd.endsWith('apps/scorpion') || cwd.includes('/apps/scorpion/')) {
-    const relativePath = join(cwd, 'lib/prompts', filename);
-    if (existsSync(relativePath)) {
-      return relativePath;
-    }
-  }
-  
-  // Try project root path
-  const rootPath = join(cwd, 'apps/scorpion/lib/prompts', filename);
-  if (existsSync(rootPath)) {
-    return rootPath;
-  }
-  
-  // Fallback: remove duplicate apps/scorpion if present
-  const cleanCwd = cwd.replace(/\/apps\/scorpion.*$/, '');
-  const fallbackPath = join(cleanCwd, 'apps/scorpion/lib/prompts', filename);
-  
-  return fallbackPath;
-}
-
-/**
- * Enhanced response cache for lightweight resource usage
- * Longer TTL and larger cache to reduce model calls
- */
-const responseCache = new Map<string, { response: string; timestamp: number }>();
-const CACHE_TTL = 30 * 60 * 1000; // 30 minutes (increased to reduce model calls)
-
-function getCacheKey(message: string): string {
-  return message.toLowerCase().trim().substring(0, 150); // Longer key for better cache hits
-}
-
-function getCachedResponse(message: string): string | null {
-  const key = getCacheKey(message);
-  const cached = responseCache.get(key);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log('[Cache] Hit for query');
-    return cached.response;
-  }
-  return null;
-}
-
-function setCachedResponse(message: string, response: string): void {
-  const key = getCacheKey(message);
-  responseCache.set(key, { response, timestamp: Date.now() });
-  
-  // Clean old cache entries (keep cache under 200 entries for better hit rate)
-  if (responseCache.size > 200) {
-    const oldest = Array.from(responseCache.entries())
-      .sort((a, b) => a[1].timestamp - b[1].timestamp);
-    // Remove oldest 10% of entries - Power of 10 Rule 7: Guard undefined
-    const toRemove = Math.floor(responseCache.size * 0.1);
-    for (let i = 0; i < toRemove; i++) {
-      const entry = oldest[i];
-      if (entry) {
-    responseCache.delete(entry[0]);
-      }
-    }
-  }
-}
 
 /**
  * POST /api/chat/stream

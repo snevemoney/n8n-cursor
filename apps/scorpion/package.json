@@ -40,6 +40,7 @@
     "test:coverage": "vitest run --coverage",
     "test:storage": "tsx scripts/test-storage-error-handling.ts",
     "test:rag": "tsx scripts/test-rag-system.ts",
+    "test:rag:pipeline": "tsx scripts/test-rag-pipeline.ts",
     "test:workflows": "tsx scripts/test-workflow-ingestion.ts",
     "test:providers": "tsx scripts/test-providers.ts",
     "test:council": "tsx server/council/council.test.ts",

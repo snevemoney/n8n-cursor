@@ -11,6 +11,8 @@ import { BrainGraphView } from './BrainGraphView';
 import { NodeInspector } from './NodeInspector';
 import { LayerFilter } from './LayerFilter';
 import { TransformerLens } from './TransformerLens';
+import { NeuralNetworkPanel } from './NeuralNetworkPanel';
+import { NeuralNetworkGraph } from './NeuralNetworkGraph';
 
 // Power of 10 Rule 2: Bounded polling
 const POLL_INTERVAL_MS = 30000; // 30 seconds
@@ -39,6 +41,8 @@ export default function ObservatoryPage() {
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [transformerLensEnabled, setTransformerLensEnabled] = useState(false);
+  const [showNeuralNetworkPanel, setShowNeuralNetworkPanel] = useState(true); // Auto-open neural network panel
+  const [showNeuralNetworkGraph, setShowNeuralNetworkGraph] = useState(false); // Toggle for live NN graph
 
   // Fetch brain graph - Power of 10 Rule 2: Bounded retries
   const fetchBrainGraph = useCallback(async () => {
@@ -90,20 +94,48 @@ export default function ObservatoryPage() {
 
   return (
     <div className="relative h-screen bg-gray-900 text-white">
-      {/* Center - Brain Graph (Main Focus) */}
+      {/* Center - Dual Graph View */}
       <div className="absolute inset-0 p-4 overflow-auto">
-        {error ? (
-          <div className="text-red-400">Error: {error}</div>
-        ) : graph ? (
-          <BrainGraphView
-            graph={graph}
-            layerFilters={layerFilters}
-            selectedNodeId={selectedNodeId}
-            onNodeClick={setSelectedNodeId}
-            transformerLens={transformerLensEnabled}
-          />
+        {showNeuralNetworkGraph ? (
+          // Live Neural Network Graph
+          <div className="h-full flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">🧠 Live Neural Network</h2>
+              <button
+                onClick={() => setShowNeuralNetworkGraph(false)}
+                className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded text-sm"
+              >
+                ← Back to Brain Map
+              </button>
+            </div>
+            <div className="flex-1 bg-gray-800 rounded-lg p-4">
+              <NeuralNetworkGraph
+                architecture={{
+                  inputSize: 11,
+                  hiddenLayers: [64, 32, 16],
+                  outputSize: 2,
+                }}
+                isTraining={false}
+              />
+            </div>
+          </div>
         ) : (
-          <div>Loading brain graph...</div>
+          // Brain Map View
+          <>
+            {error ? (
+              <div className="text-red-400">Error: {error}</div>
+            ) : graph ? (
+              <BrainGraphView
+                graph={graph}
+                layerFilters={layerFilters}
+                selectedNodeId={selectedNodeId}
+                onNodeClick={setSelectedNodeId}
+                transformerLens={transformerLensEnabled}
+              />
+            ) : (
+              <div>Loading brain graph...</div>
+            )}
+          </>
         )}
       </div>
 
@@ -120,6 +152,30 @@ export default function ObservatoryPage() {
       >
         {showRightSidebar ? '→' : 'ℹ'}
       </button>
+      <div className="absolute bottom-4 right-4 z-30 flex gap-2">
+        <button
+          onClick={() => setShowNeuralNetworkGraph(!showNeuralNetworkGraph)}
+          className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md text-sm transition-colors group"
+          title="Toggle Live Neural Network Graph"
+        >
+          {showNeuralNetworkGraph ? '🗺️' : '🔬'}
+          <span className="absolute bottom-full right-12 mb-2 px-3 py-2 bg-purple-500 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            {showNeuralNetworkGraph ? 'Show Brain Map' : 'Show Live Neural Network'}
+          </span>
+        </button>
+        <button
+          onClick={() => setShowNeuralNetworkPanel(!showNeuralNetworkPanel)}
+          className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md text-sm transition-colors group"
+          title={showNeuralNetworkPanel ? 'Hide Neural Network' : 'Show Neural Network - AI-powered anomaly detection'}
+        >
+          {showNeuralNetworkPanel ? '↓' : '🧠'}
+          {!showNeuralNetworkPanel && (
+            <span className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-blue-500 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Neural Network Controls
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* Left Sidebar - Layers & Filters (Overlay) */}
       {showLeftSidebar && (
@@ -191,6 +247,12 @@ export default function ObservatoryPage() {
           )}
       </div>
       )}
+
+      {/* Bottom - Neural Network Panel */}
+      <NeuralNetworkPanel
+        isVisible={showNeuralNetworkPanel}
+        onToggle={setShowNeuralNetworkPanel}
+      />
     </div>
   );
 }
