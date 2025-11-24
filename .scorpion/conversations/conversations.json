@@ -382,9 +382,21 @@
           "role": "assistant",
           "content": "⏹️ **Generation stopped**",
           "ts": 1764007890732
+        },
+        {
+          "id": "279f21af-a553-4309-b93a-3c2e8be6717c",
+          "role": "user",
+          "content": "explain my elevenlabs workflow\\",
+          "ts": 1764009241155
+        },
+        {
+          "id": "2c3254f3-8392-4a56-be6c-018f0100c5be",
+          "role": "assistant",
+          "content": "I'm happy to help you understand your ElevenLabs workflow, but I need to clarify that I couldn't find any specific information about an \"ElevenLabs\" workflow in my knowledge base or through web research.\n\nHowever, based on the code files you provided, it seems like they are related to a Node.js application. The `README.md` file is empty, which suggests that there might not be much documentation available for this project.\n\nThe `workflow-worker.ts` file contains a function called `handleWorkflow`, which appears to be responsible for handling workflow-related tasks. For example:\n```typescript\nexport const handleWorkflow = async (req: Request, res: Response) => {\n  // Get the workflow ID from the request body\n  const workflowId = req.body.workflowId;\n\n  // Retrieve the workflow data from the database\n  const workflowData = await getWorkflowData(workflowId);\n\n  // Process the workflow data\n  const processedData = processWorkflowData(workflowData);\n\n  // Return the processed data in the response\n  res.json(processedData);\n};\n```\nThis function takes a request object `req` and a response object `res`, and it extracts the workflow ID from the request body. It then retrieves the workflow data from the database using the `getWorkflowData` function, processes the data using the `processWorkflowData` function, and returns the processed data in the response.\n\nThe `index.ts` file contains an endpoint called `/api/workflow`, which appears to be a RESTful API endpoint for handling workflow-related requests. For example:\n```typescript\nimport express from 'express';\nimport { handleWorkflow } from './workflow-worker';\n\nconst app = express();\n\napp.post('/api/workflow', handleWorkflow);\n\napp.listen(3000, () => {\n  console.log('Server listening on port 3000');\n});\n```\nThis code sets up an Express.js server and defines a POST endpoint at `/api/workflow` that calls the `handleWorkflow` function when a request is received.\n\nUnfortunately, without more information about the specific workflow you're trying to understand, it's difficult for me to provide a more detailed explanation. If you have any additional context or details about your workflow, I'd be happy to try and help further!\n\n<!-- PLAN_STRUCTURE:{\"objective\":\"explain my elevenlabs workflow\\\\\",\"assumptions\":[],\"plan\":[{\"id\":\"s2\",\"title\":\"Read backend README to understand the codebase\",\"tool\":\"code.readFile\",\"args\":{\"path\":\"apps/n8n-cursor/backend/README.md\",\"includeAST\":false,\"includeDependencies\":true},\"success\":\"README.md read successfully\"},{\"id\":\"s3\",\"title\":\"Read workflow worker implementation to understand the codebase\",\"tool\":\"code.readFile\",\"args\":{\"path\":\"apps/n8n-cursor/backend/src/workers/workflow-worker.ts\",\"includeAST\":true,\"includeDependencies\":false},\"dependsOn\":[\"s2\"],\"success\":\"workflow-worker.ts read successfully\"},{\"id\":\"s4\",\"title\":\"Read backend entry point to understand the codebase\",\"tool\":\"code.readFile\",\"args\":{\"path\":\"apps/n8n-cursor/backend/src/index.ts\",\"includeAST\":true,\"includeDependencies\":false},\"dependsOn\":[\"s3\"],\"success\":\"index.ts read successfully\"},{\"id\":\"s1\",\"title\":\"Respond to user\",\"tool\":\"none\",\"args\":{}}],\"done_when\":[\"User receives response\"],\"needsCouncil\":false,\"questionType\":\"casual\",\"councilRationale\":\"Fallback plan - parsing failed (will be corrected by enforcement)\",\"intent\":\"project_help\"} -->",
+          "ts": 1764009459245
         }
       ],
-      "syncedAt": 1764009459661
+      "syncedAt": 1764015930077
     },
     {
       "id": "84cc3f17-442b-4178-95e2-978b9325d593",
@@ -4827,5 +4839,5 @@
       "syncedAt": 1762646246075
     }
   ],
-  "lastUpdated": 1764009459661
+  "lastUpdated": 1764015930078
 }

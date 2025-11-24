@@ -77,6 +77,7 @@ import { logImprovementSignal } from '@/server/orchestrator/selfImprovement';
 import { remember } from '@/lib/chat/memory';
 import { serializeProtocol } from './helpers/protocolSerialization';
 import { fallbackRoute } from './helpers/toolRouter';
+import { learnFromInteraction, enhancePlanWithPatterns, determineExecutionSuccess } from './helpers/patternLearningHelpers';
 
 /**
  * Main stream processing handler
@@ -1487,6 +1488,21 @@ export async function processStreamStart(
         }
       } catch (error) {
         console.debug('[Chat Stream] File tracker not available:', error);
+      }
+
+      // Pattern Learning: Retrieve relevant patterns from past successes
+      try {
+        const { learningContext } = await enhancePlanWithPatterns({
+          userMessage,
+          basePlan: { plan: [], objective: userMessage }, // Minimal plan for retrieval
+        });
+
+        if (learningContext) {
+          plannerPrompt += learningContext;
+          console.log('[Pattern Learning] Added learned patterns context to planner prompt');
+        }
+      } catch (error) {
+        console.debug('[Pattern Learning] Failed to retrieve patterns:', error);
       }
 
       // Power of 10 Rule 3: Question type hints are now handled by addQuestionTypeHints helper (called above)
@@ -4692,6 +4708,28 @@ Provide the refined response. If the original is already excellent, you may retu
         send({ type: 'delta', data: { content: 'I processed your request but did not generate a response. Please try again.' } });
       } else {
         console.log('[Chat Stream] Final summary already streamed, length:', sanitizedSummary.length);
+      }
+
+      // Pattern Learning: Learn from this successful interaction
+      try {
+        const executionSuccess = determineExecutionSuccess(plan, results, councilResult);
+
+        if (executionSuccess) {
+          await learnFromInteraction({
+            userMessage,
+            plan,
+            councilResult,
+            executionSuccess: true,
+            conversationLength: messages.length,
+            userIntent: intent as string,
+          });
+          console.log('[Pattern Learning] Stored success pattern for future queries');
+        } else {
+          console.log('[Pattern Learning] Skipping pattern storage (execution not successful)');
+        }
+      } catch (learningError) {
+        // Don't fail the request if learning fails
+        console.warn('[Pattern Learning] Failed to store pattern:', learningError);
       }
 
       // Done
