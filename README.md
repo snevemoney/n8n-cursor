@@ -12,8 +12,11 @@ This repository contains enterprise-grade n8n workflows that showcase how AI can
 n8n-cursor/
 ├── workflows/           # Complete n8n workflow JSON files
 ├── docs/               # Documentation and guides
-├── scripts/            # Utility scripts and helpers
 ├── examples/           # Test payloads and examples
+├── .github/            # CI/CD workflows and automation
+├── .env.example        # Environment variable template
+├── LICENSE             # MIT License
+├── SECURITY.md         # Security policy and best practices
 └── README.md          # This file
 ```
 

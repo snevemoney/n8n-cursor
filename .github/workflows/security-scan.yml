@@ -1,0 +1,199 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [main, develop, 'claude/**']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better detection
+
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: Gitleaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # Optional
+
+  workflow-validation:
+    name: Validate n8n Workflows
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate JSON syntax
+        run: |
+          echo "Validating JSON syntax for all workflow files..."
+          for file in workflows/*.json examples/*.json; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+              if ! jq empty "$file" 2>/dev/null; then
+                echo "❌ ERROR: Invalid JSON in $file"
+                exit 1
+              else
+                echo "✅ Valid JSON: $file"
+              fi
+            fi
+          done
+          echo "All JSON files are valid!"
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for potential hardcoded secrets..."
+          ISSUES_FOUND=0
+
+          # Common patterns to detect (intentionally broad for safety)
+          PATTERNS=(
+            "sk-[a-zA-Z0-9]{32,}"  # OpenAI keys
+            "[a-zA-Z0-9._%+-]+@gmail\.com"  # Gmail addresses
+            "ghp_[a-zA-Z0-9]{36,}"  # GitHub tokens
+            "xox[baprs]-[0-9]{10,13}-[a-zA-Z0-9-]+"  # Slack tokens
+            "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"  # UUIDs (potential user IDs)
+          )
+
+          for pattern in "${PATTERNS[@]}"; do
+            echo "Checking pattern: $pattern"
+            if grep -rE "$pattern" workflows/ --color=never | grep -v "your-" | grep -v "example" | grep -v "placeholder" | grep -v "00000000-0000"; then
+              echo "⚠️ WARNING: Potential secret found matching pattern: $pattern"
+              ISSUES_FOUND=$((ISSUES_FOUND + 1))
+            fi
+          done
+
+          if [ $ISSUES_FOUND -gt 0 ]; then
+            echo "❌ Found $ISSUES_FOUND potential secret(s). Please review!"
+            exit 1
+          else
+            echo "✅ No hardcoded secrets detected"
+          fi
+
+      - name: Check for personal information
+        run: |
+          echo "Scanning for personal information..."
+
+          # Check for real email addresses (excluding examples)
+          if grep -rE '[a-zA-Z0-9._%+-]+@(?!example\.com)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' workflows/; then
+            echo "❌ ERROR: Real email addresses found in workflows!"
+            exit 1
+          fi
+
+          # Check for realistic UUIDs (not all zeros)
+          if grep -rE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' workflows/ | grep -v "00000000-0000-0000-0000-000000000000"; then
+            echo "❌ ERROR: Potential user/project IDs found!"
+            exit 1
+          fi
+
+          echo "✅ No personal information detected"
+
+      - name: Validate n8n workflow structure
+        run: |
+          echo "Validating n8n workflow structure..."
+
+          for file in workflows/*.json; do
+            if [ -f "$file" ]; then
+              echo "Validating structure of $file..."
+
+              # Check required fields
+              if ! jq -e '.name' "$file" > /dev/null; then
+                echo "❌ ERROR: Missing 'name' field in $file"
+                exit 1
+              fi
+
+              if ! jq -e '.nodes' "$file" > /dev/null; then
+                echo "❌ ERROR: Missing 'nodes' field in $file"
+                exit 1
+              fi
+
+              if ! jq -e '.connections' "$file" > /dev/null; then
+                echo "❌ ERROR: Missing 'connections' field in $file"
+                exit 1
+              fi
+
+              echo "✅ Valid n8n structure: $file"
+            fi
+          done
+
+          echo "All workflows have valid structure!"
+
+  markdown-lint:
+    name: Lint Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Markdown Lint
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: '**/*.md'
+          config: |
+            {
+              "default": true,
+              "MD013": false,
+              "MD033": false,
+              "MD041": false
+            }
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [secret-scan, workflow-validation, markdown-lint]
+    if: always()
+
+    steps:
+      - name: Check job statuses
+        run: |
+          echo "## Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Secret Scan: ${{ needs.secret-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow Validation: ${{ needs.workflow-validation.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Markdown Lint: ${{ needs.markdown-lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.secret-scan.result }}" == "failure" ] || [ "${{ needs.workflow-validation.result }}" == "failure" ]; then
+            echo "⚠️ **Security issues detected!** Please review the logs above." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ All security checks passed!" >> $GITHUB_STEP_SUMMARY
+          fi

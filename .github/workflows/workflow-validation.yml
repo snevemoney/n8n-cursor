@@ -1,0 +1,165 @@
+name: Workflow Validation
+
+on:
+  push:
+    branches: [main, develop, 'claude/**']
+    paths:
+      - 'workflows/**/*.json'
+      - 'examples/**/*.json'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'workflows/**/*.json'
+      - 'examples/**/*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Validate n8n Workflows
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Validate JSON syntax
+        id: json_validation
+        run: |
+          echo "# JSON Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          TOTAL=0
+          VALID=0
+          INVALID=0
+
+          for file in workflows/*.json examples/*.json; do
+            if [ -f "$file" ]; then
+              TOTAL=$((TOTAL + 1))
+              echo "Validating $file..."
+
+              if jq empty "$file" 2>/dev/null; then
+                echo "✅ $file" >> $GITHUB_STEP_SUMMARY
+                VALID=$((VALID + 1))
+              else
+                echo "❌ $file - INVALID JSON" >> $GITHUB_STEP_SUMMARY
+                INVALID=$((INVALID + 1))
+              fi
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Summary:** $VALID/$TOTAL files valid" >> $GITHUB_STEP_SUMMARY
+
+          if [ $INVALID -gt 0 ]; then
+            echo "::error::$INVALID JSON files are invalid"
+            exit 1
+          fi
+
+      - name: Validate n8n structure
+        id: structure_validation
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# n8n Structure Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for file in workflows/*.json; do
+            if [ -f "$file" ]; then
+              echo "Checking structure of $file..."
+
+              NAME=$(jq -r '.name // "MISSING"' "$file")
+              NODES=$(jq '.nodes | length' "$file")
+              CONNECTIONS=$(jq '.connections | length' "$file")
+              ACTIVE=$(jq -r '.active // false' "$file")
+
+              echo "### $(basename $file)" >> $GITHUB_STEP_SUMMARY
+              echo "- **Name:** $NAME" >> $GITHUB_STEP_SUMMARY
+              echo "- **Nodes:** $NODES" >> $GITHUB_STEP_SUMMARY
+              echo "- **Connections:** $CONNECTIONS" >> $GITHUB_STEP_SUMMARY
+              echo "- **Active:** $ACTIVE" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+
+              # Validate required fields
+              if [ "$NAME" == "MISSING" ]; then
+                echo "::error file=$file::Missing 'name' field"
+                exit 1
+              fi
+
+              if [ -z "$NODES" ] || [ "$NODES" == "null" ]; then
+                echo "::error file=$file::Missing or invalid 'nodes' field"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Check for placeholder credentials
+        id: credential_check
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Credential Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          WARNINGS=0
+
+          # Check for common placeholder patterns
+          if grep -rn "sk-your-openai-key-here" workflows/; then
+            echo "✅ OpenAI placeholders found (expected)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if grep -rn "your-project.supabase.co" workflows/; then
+            echo "✅ Supabase placeholders found (expected)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Check for real credentials (should not exist)
+          if grep -rE "sk-[a-zA-Z0-9]{32,}" workflows/ | grep -v "sk-your-openai-key-here"; then
+            echo "⚠️ Potential real OpenAI key detected!" >> $GITHUB_STEP_SUMMARY
+            WARNINGS=$((WARNINGS + 1))
+          fi
+
+          if [ $WARNINGS -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Found $WARNINGS potential security issues"
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ No credential issues detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generate workflow report
+        if: always()
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Workflow Inventory" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Workflow | Nodes | Active | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          for file in workflows/*.json; do
+            if [ -f "$file" ]; then
+              NAME=$(jq -r '.name' "$file")
+              NODES=$(jq '.nodes | length' "$file")
+              ACTIVE=$(jq -r '.active' "$file")
+
+              if [ "$ACTIVE" == "true" ]; then
+                STATUS="🟢 Active"
+              else
+                STATUS="⚪ Inactive"
+              fi
+
+              echo "| $NAME | $NODES | $ACTIVE | $STATUS |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Validation completed at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*" >> $GITHUB_STEP_SUMMARY
