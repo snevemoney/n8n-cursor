@@ -57,7 +57,7 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@types/node": "^20.0.0",
-    "@types/uuid": "^10.0.0",
+    "@types/uuid": "^11.0.0",
     "dotenv": "^16.0.3",
     "husky": "^9.1.7",
     "typescript": "^5.0.0"
