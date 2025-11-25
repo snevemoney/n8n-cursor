@@ -54,7 +54,7 @@
     "pnpm": ">=8.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
+    "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^19.8.1",
     "@types/node": "^20.0.0",
     "@types/uuid": "^10.0.0",
