@@ -16,13 +16,15 @@ console.log('🧪 Testing Comprehensive n8n MCP Server...\n');
 // Test the MCP server
 const testMCP = () => {
   return new Promise((resolve, reject) => {
+    const n8nHost = process.env.N8N_HOST || 'localhost';
+    const n8nPort = process.env.N8N_PORT || '5678';
     const mcpServer = spawn('node', [join(__dirname, 'tools/mcp-servers/comprehensive-n8n-server.mjs')], {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: {
         ...process.env,
-        N8N_BASE_URL: 'http://localhost:5678',
-        N8N_API_KEY: 'test-key',
-        N8N_PORT: '5678'
+        N8N_BASE_URL: `http://${n8nHost}:${n8nPort}`,
+        N8N_API_KEY: process.env.N8N_API_KEY || 'test-key',
+        N8N_PORT: n8nPort
       }
     });
 
@@ -64,7 +66,10 @@ const testMCP = () => {
 // Test n8n connectivity
 const testN8nConnection = async () => {
   try {
-    const response = await fetch('http://localhost:5678/api/v1/health');
+    const n8nHost = process.env.N8N_HOST || 'localhost';
+    const n8nPort = process.env.N8N_PORT || '5678';
+    const n8nUrl = `http://${n8nHost}:${n8nPort}/api/v1/health`;
+    const response = await fetch(n8nUrl);
     if (response.ok) {
       return { success: true, status: response.status };
     } else {
@@ -79,8 +84,10 @@ const testN8nConnection = async () => {
 const runTests = async () => {
   console.log('1️⃣ Testing n8n connectivity...');
   const n8nTest = await testN8nConnection();
+  const n8nHost = process.env.N8N_HOST || 'localhost';
+  const n8nPort = process.env.N8N_PORT || '5678';
   if (n8nTest.success) {
-    console.log('✅ n8n is accessible at http://localhost:5678');
+    console.log(`✅ n8n is accessible at http://${n8nHost}:${n8nPort}`);
   } else {
     console.log('❌ n8n connection failed:', n8nTest.error || n8nTest.status);
   }
@@ -105,11 +112,13 @@ const runTests = async () => {
   console.log('   • MCP server:', '✅ Created with 39 tools');
   console.log('   • Configuration:', '✅ Updated in config/mcp/cursor-mcp-settings.json');
   
+  const n8nHost = process.env.N8N_HOST || 'localhost';
+  const n8nPort = process.env.N8N_PORT || '5678';
   console.log('\n🚀 Next Steps:');
   console.log('   1. Restart Cursor to load the new MCP configuration');
   console.log('   2. Look for "comprehensive-n8n" in MCP Tools');
   console.log('   3. All 39 n8n tools will be available!');
-  console.log('\n🌐 n8n URL: http://localhost:5678');
+  console.log(`\n🌐 n8n URL: http://${n8nHost}:${n8nPort}`);
   console.log('🔑 Login: admin / yourStrongPassword123');
 };
 

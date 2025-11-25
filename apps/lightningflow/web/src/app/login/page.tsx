@@ -11,8 +11,14 @@ const supabase = createBrowserClient(
 
 // Check if we're in dev mode
 const isDevMode = () => {
+  // Check via NODE_ENV first
+  const isDev = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEV_MODE === 'true';
+  if (isDev) return true;
+
+  // Fallback: Check hostname against configured dev hosts
   if (typeof window === 'undefined') return false;
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const devHosts = process.env.NEXT_PUBLIC_DEV_HOSTS?.split(',') || [];
+  return devHosts.includes(window.location.hostname);
 };
 
 export default function LoginPage() {

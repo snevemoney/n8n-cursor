@@ -7,10 +7,12 @@
 
 import fetch from 'node-fetch';
 
-const { N8N_BASE_URL = 'http://localhost:5678', N8N_API_KEY } = process.env;
+const N8N_BASE_URL = process.env.N8N_BASE_URL || process.env.N8N_URL || `http://${process.env.N8N_HOST || 'localhost'}:${process.env.N8N_PORT || '5678'}`;
+const N8N_API_KEY = process.env.N8N_API_KEY;
 
 if (!N8N_API_KEY) {
-  console.error('N8N_API_KEY environment variable is required');
+  const envVarName = 'N8N_API_KEY';
+  console.error(`${envVarName} environment variable is required`);
   process.exit(1);
 }
 

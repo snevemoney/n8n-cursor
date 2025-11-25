@@ -21,9 +21,16 @@ interface UserWithRole {
 // Check dev bypass from environment
 const getDevBypassStatus = () => {
   try {
-    // Check if we're in development and bypass is enabled
-    return typeof window !== 'undefined' && 
-           (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    // Check if we're in development via NODE_ENV or hostname check
+    const isDev = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEV_MODE === 'true';
+    if (isDev) return true;
+
+    // Fallback: Check hostname against configured dev hosts
+    if (typeof window !== 'undefined') {
+      const devHosts = process.env.NEXT_PUBLIC_DEV_HOSTS?.split(',') || [];
+      return devHosts.includes(window.location.hostname);
+    }
+    return false;
   } catch {
     return false
   }

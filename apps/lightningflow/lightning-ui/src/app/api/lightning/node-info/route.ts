@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
   try {
     // Return mock response if Supabase not configured
     if (!supabase) {
+      const mockNodeUri = process.env.NEXT_PUBLIC_MOCK_NODE_URI || 'mock-node@mock-host:9735';
       return NextResponse.json({
         success: true,
         node_info: {
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
           synced_to_chain: true,
           testnet: true,
           chains: ['bitcoin'],
-          uris: ['mock-node@127.0.0.1:9735']
+          uris: [mockNodeUri]
         },
         mode: 'mock'
       });
@@ -84,7 +85,7 @@ export async function GET(req: NextRequest) {
         'option_payment_metadata': true
       },
       uris: [
-        `mock_node_02a1b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789ab@127.0.0.1:9735`
+        process.env.NEXT_PUBLIC_MOCK_NODE_URI || `mock_node_02a1b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789ab@mock-host:9735`
       ],
       best_header_timestamp: Math.floor(Date.now() / 1000),
       chains: [

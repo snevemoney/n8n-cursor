@@ -15,9 +15,10 @@ export function makeRateLimiter(prefix: string, limit = 60, windowSec = 60) {
 
 export function extractClientIP(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
+  const fallbackIP = process.env['FALLBACK_IP'] || "unknown";
   if (forwarded) {
     const firstIp = forwarded.split(",")[0];
-    return firstIp ? firstIp.trim() : "0.0.0.0";
+    return firstIp ? firstIp.trim() : fallbackIP;
   }
-  return "0.0.0.0";
+  return fallbackIP;
 }

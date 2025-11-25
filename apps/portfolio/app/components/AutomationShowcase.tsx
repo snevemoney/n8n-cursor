@@ -51,7 +51,7 @@ const workflows: Workflow[] = [
     title: "Email Notification System",
     category: "Data & Operations",
     description:
-      "Routes incoming emails by type and sends automated responses. Handles welcome emails, verification, password resets, work orders, compliance alerts, and monthly reports.",
+      "Routes incoming emails by type and sends automated responses. Handles welcome emails, verification, credential recovery, work orders, compliance alerts, and monthly reports.",
     tech: ["n8n", "Email", "Routing", "Automation"],
     screenshot: "/workflows/email-notifications.png",
   },
