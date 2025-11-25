@@ -1,5 +1,5 @@
 # Multi-stage build for Scorpion
-FROM node:20-alpine AS base
+FROM node:25-alpine AS base
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -25,7 +25,7 @@ COPY . .
 RUN pnpm --filter scorpion build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:25-alpine AS production
 
 WORKDIR /app
 
