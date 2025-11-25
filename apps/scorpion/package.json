@@ -67,7 +67,7 @@
     "critters": "^0.0.25",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.358.0",
-    "next": "14.0.0",
+    "next": "14.2.33",
     "pdf-parse": "^2.4.5",
     "pg": "^8.16.3",
     "react": "^18.2.0",
