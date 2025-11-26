@@ -38,7 +38,7 @@ function getPromptPath(filename: string): string {
 export interface PlannerPromptInput {
   intent: ScorpionIntent;
   userMessage: string;
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
+  conversationHistory: Array<{ role: string; content: string }>;
   conversationId: string | undefined;
   tools: typeof tools;
   userTools: Record<string, unknown>;

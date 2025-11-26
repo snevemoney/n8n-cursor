@@ -10,7 +10,7 @@ import { runLegacyExecutor } from './legacyExecutor';
 export interface PlanExecutionInput {
   plan: Plan;
   userMessage: string;
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
+  conversationHistory: Array<{ role: string; content: string }>;
   conversationId: string | undefined;
   defaultModel: string;
   executor: Executor;

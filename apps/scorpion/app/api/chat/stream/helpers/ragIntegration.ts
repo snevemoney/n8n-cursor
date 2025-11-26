@@ -9,7 +9,7 @@ export interface EarlyRagSearchInput {
     plan: Plan;
     intent: string;
     userMessage: string;
-    conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
+    conversationHistory: Array<{ role: string; content: string }>;
     conversationId: string | undefined;
     send: (event: { type: string; data: Record<string, unknown> }) => void;
     modelConfig: {

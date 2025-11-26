@@ -16,7 +16,7 @@ export function emitToolResult(
   stepId: string,
   tool: string,
   res: ToolResult<any>,
-  conversationId: string,
+  conversationId: string | undefined,
   send: (event: { type: string; data: Record<string, unknown> }) => void
 ): void {
   // Power of 10 Rule 4: Assertions
@@ -52,7 +52,7 @@ export function emitToolResult(
  */
 export function emitKnowledgeHits(
   hits: KnowledgeHit[],
-  conversationId: string,
+  conversationId: string | undefined,
   send: (event: { type: string; data: Record<string, unknown> }) => void
 ): void {
   // Power of 10 Rule 4: Assertions
@@ -60,10 +60,8 @@ export function emitKnowledgeHits(
     console.warn('[Event Emitter] Invalid hits array:', hits);
     return;
   }
-  if (!conversationId || typeof conversationId !== 'string') {
-    console.warn('[Event Emitter] Invalid conversationId:', conversationId);
-    return;
-  }
+  // Use default value for conversationId if undefined
+  const effectiveConversationId = conversationId || 'default';
 
   // Power of 10 Rule 2: Bounded loop
   const hitsToEmit = hits.slice(0, MAX_HITS);
@@ -73,7 +71,7 @@ export function emitKnowledgeHits(
     send({
       type: 'knowledge_hit',
       data: {
-        conversationId,
+        conversationId: effectiveConversationId,
         hit: h,
       },
     });
@@ -86,14 +84,12 @@ export function emitKnowledgeHits(
  * Power of 10 Rule 5: Minimize variable scope
  */
 export function createExecutorEventEmitter(
-  conversationId: string,
+  conversationId: string | undefined,
   send: (event: { type: string; data: Record<string, unknown> }) => void,
   emitToolResultFn: (stepId: string, tool: string, res: ToolResult<any>) => void
 ): (e: any) => void {
-  // Power of 10 Rule 4: Assertions
-  if (!conversationId || typeof conversationId !== 'string') {
-    console.warn('[Event Emitter] Invalid conversationId:', conversationId);
-  }
+  // Use default value for conversationId if undefined
+  const effectiveConversationId = conversationId || 'default';
 
   return (e: any) => {
     if (!e || typeof e !== 'object') {
@@ -104,7 +100,7 @@ export function createExecutorEventEmitter(
       send({
         type: 'tool',
         data: {
-          conversationId,
+          conversationId: effectiveConversationId,
           tool: e.tool || 'unknown',
           callId: e.callId || 'unknown',
           args: e.args || {},

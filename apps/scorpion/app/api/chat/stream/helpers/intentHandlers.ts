@@ -111,7 +111,7 @@ export function isSimpleGreeting(message: string): boolean {
  */
 export async function handleSmallTalkIntent(
   userMessage: string,
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
+  conversationHistory: Array<{ role: string; content: string }>,
   model: string | undefined,
   provider: string | undefined,
   send: (event: { type: string; data: Record<string, unknown> }) => void,

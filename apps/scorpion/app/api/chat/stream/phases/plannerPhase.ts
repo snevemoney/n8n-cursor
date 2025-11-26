@@ -9,7 +9,7 @@ import { generateSimplePlan } from '@/server/orchestrator/planner';
 
 export interface PlannerPhaseInput {
   userMessage: string;
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
+  conversationHistory: Array<{ role: string; content: string }>;
   intent: ScorpionIntent;
   tools: Record<string, unknown>;
   plannerPrompt: string;

@@ -6,8 +6,8 @@ import { assertArray, assertDefined, assertString } from './assertions';
 export interface ValidatedRequest {
   userMessage: string;
   messageId: string;
-  filteredHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
+  filteredHistory: Array<{ role: string; content: string }>;
+  conversationHistory: Array<{ role: string; content: string }>;
 }
 
 /**

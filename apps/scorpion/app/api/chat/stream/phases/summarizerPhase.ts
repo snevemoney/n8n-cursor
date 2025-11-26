@@ -8,7 +8,7 @@ import { assertDefined } from '../helpers/assertions';
 export interface SummarizerPhaseInput {
   plan: Plan;
   userMessage: string;
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>;
+  conversationHistory: Array<{ role: string; content: string }>;
   results: Array<{ step: string; result: unknown }>;
   consensus: {
     approved: boolean;
