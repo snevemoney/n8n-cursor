@@ -10,8 +10,9 @@
  */
 export function getN8nBaseUrl(): string {
   // Check for explicit env var first (works in both client and server)
-  if (process.env.NEXT_PUBLIC_N8N_BASE_URL) {
-    return process.env.NEXT_PUBLIC_N8N_BASE_URL;
+  const publicUrl = process.env['NEXT_PUBLIC_N8N_BASE_URL'];
+  if (publicUrl) {
+    return publicUrl;
   }
 
   // Client-side detection
@@ -32,12 +33,14 @@ export function getN8nBaseUrl(): string {
 
   // Server-side detection
   // Check NODE_ENV for development
-  if (process.env.NODE_ENV === 'development') {
+  const nodeEnv = process.env['NODE_ENV'];
+  if (nodeEnv === 'development') {
     return 'http://n8n.local/webhook';
   }
 
   // Server-side production or fallback
-  return process.env.N8N_BASE_URL || 'https://n8ncloud.tech/webhook';
+  const baseUrl = process.env['N8N_BASE_URL'];
+  return baseUrl || 'https://n8ncloud.tech/webhook';
 }
 
 /**

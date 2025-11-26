@@ -32,7 +32,7 @@ export function initializeAutoSync() {
   }
 
   // Check if auto-sync is disabled via environment variable
-  if (process.env.DISABLE_AUTO_SYNC === 'true') {
+  if (process.env['DISABLE_AUTO_SYNC'] === 'true') {
     console.log('🦂 Auto-sync disabled via DISABLE_AUTO_SYNC environment variable');
     return;
   }
@@ -46,8 +46,8 @@ export function initializeAutoSync() {
   });
 
   // Periodic sync interval (configurable via env, default 15 minutes for better performance)
-  const syncIntervalMs = process.env.AUTO_SYNC_INTERVAL_MS 
-    ? parseInt(process.env.AUTO_SYNC_INTERVAL_MS, 10) 
+  const syncIntervalMs = process.env['AUTO_SYNC_INTERVAL_MS'] 
+    ? parseInt(process.env['AUTO_SYNC_INTERVAL_MS'], 10) 
     : 15 * 60 * 1000; // 15 minutes (increased from 5 minutes)
   
   syncInterval = setInterval(() => {
@@ -58,7 +58,7 @@ export function initializeAutoSync() {
 
   // Watch workflow files for changes (filesystem → n8n)
   // Can be disabled via environment variable
-  if (process.env.DISABLE_FILE_WATCHER !== 'true') {
+  if (process.env['DISABLE_FILE_WATCHER'] !== 'true') {
   watchWorkflowFiles().catch(err => {
     console.error('Failed to initialize workflow watcher:', err);
   });
@@ -81,8 +81,8 @@ async function performInitialSync() {
   try {
     // Defer heavy ingestion to allow server to start faster
     // Increased delay for better performance (configurable via env)
-    const initialDelayMs = process.env.AUTO_SYNC_INITIAL_DELAY_MS
-      ? parseInt(process.env.AUTO_SYNC_INITIAL_DELAY_MS, 10)
+    const initialDelayMs = process.env['AUTO_SYNC_INITIAL_DELAY_MS']
+      ? parseInt(process.env['AUTO_SYNC_INITIAL_DELAY_MS'], 10)
       : 3000; // 3 seconds (increased from 500ms for better startup performance)
     await new Promise(resolve => setTimeout(resolve, initialDelayMs));
     
@@ -232,7 +232,7 @@ async function syncWorkflows() {
     const n8nClient = new N8nClient();
     
     // Check if API key is configured
-    if (!process.env.N8N_API_KEY) {
+    if (!process.env['N8N_API_KEY']) {
       // Silently skip if not configured (no need to log every time)
       return;
     }
@@ -295,8 +295,8 @@ async function syncWorkflows() {
  */
 function watchN8nWorkflows() {
   // Poll n8n for workflow changes (configurable via env, default 15 minutes for better performance)
-  const pollIntervalMs = process.env.N8N_POLL_INTERVAL_MS
-    ? parseInt(process.env.N8N_POLL_INTERVAL_MS, 10)
+  const pollIntervalMs = process.env['N8N_POLL_INTERVAL_MS']
+    ? parseInt(process.env['N8N_POLL_INTERVAL_MS'], 10)
     : 15 * 60 * 1000; // 15 minutes (increased from 5 minutes)
   
   n8nPollInterval = setInterval(() => {
@@ -346,7 +346,7 @@ async function checkN8nWorkflowChanges(forceSync: boolean = false) {
     const n8nClient = new N8nClient();
     
     // Check if API key is configured
-    if (!process.env.N8N_API_KEY) {
+    if (!process.env['N8N_API_KEY']) {
       const now = Date.now();
       if (now - lastAuthErrorTime > AUTH_ERROR_THROTTLE) {
         console.warn('⚠️ n8n client not configured - skipping workflow sync. Set N8N_API_KEY to enable.');

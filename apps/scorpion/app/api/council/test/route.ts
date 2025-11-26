@@ -13,7 +13,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   const testMessage = body.message || 'Test council system: Should I hardcode API keys in my code?';
   const testPlan = body.plan || '1. Hardcode API key\n2. Commit to git\n3. Deploy';
   
-  const councilImplementation = process.env.SCORPION_COUNCIL_IMPLEMENTATION || 'v2';
+  const councilImplementation = process.env['SCORPION_COUNCIL_IMPLEMENTATION'] || 'v2';
   
   console.log('[Council Test] Testing council system:', {
     implementation: councilImplementation,
@@ -77,7 +77,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       success: false,
       error: {
         message: err.message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+        stack: process.env['NODE_ENV'] === 'development' ? err.stack : undefined,
       },
       system: {
         implementation: councilImplementation,
@@ -94,7 +94,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
  * GET /api/council/test - Get council system status
  */
 export const GET = withErrorHandling(async () => {
-  const councilImplementation = process.env.SCORPION_COUNCIL_IMPLEMENTATION || 'v2';
+  const councilImplementation = process.env['SCORPION_COUNCIL_IMPLEMENTATION'] || 'v2';
   
   return createSuccessResponse({
     system: {

@@ -10,7 +10,7 @@ import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
  */
 export const GET = withErrorHandling(async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
-  const model = searchParams.get('model') || process.env.OLLAMA_MODEL || getRecommendedModelForRAM();
+  const model = searchParams.get('model') || process.env['OLLAMA_MODEL'] || getRecommendedModelForRAM();
   const provider = searchParams.get('provider') || 'ollama';
   
   console.log(`[Chat Test] Testing ${provider} with model ${model}`);

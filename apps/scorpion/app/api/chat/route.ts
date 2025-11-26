@@ -141,19 +141,19 @@ export async function GET() {
   try {
     const available = await checkModelAvailability();
     const models = await listModels();
-    const source = process.env.SCORPION_MODEL_SOURCE || 'ollama';
+    const source = process.env['SCORPION_MODEL_SOURCE'] || 'ollama';
 
     return NextResponse.json({
       success: true,
       available,
       source,
       models: models || [],
-      fallbackAvailable: source === 'openai' ? !!process.env.OPENAI_API_KEY : false
+      fallbackAvailable: source === 'openai' ? !!process.env['OPENAI_API_KEY'] : false
     });
   } catch (error: any) {
     // If model source is unavailable, return 200 with available: false
     // This is an expected condition, not an error
-    const source = process.env.SCORPION_MODEL_SOURCE || 'ollama';
+    const source = process.env['SCORPION_MODEL_SOURCE'] || 'ollama';
     console.warn(`Model source ${source} unavailable:`, error.message);
     return NextResponse.json({
       success: false,

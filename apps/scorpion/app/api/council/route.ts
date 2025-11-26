@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         
         // Get model config: Auto-detect lightweight mode based on system RAM
         const lightweightMode = detectLightweightMode();
-        const defaultModel = process.env.OLLAMA_MODEL || getRecommendedModelForRAM();
+        const defaultModel = process.env['OLLAMA_MODEL'] || getRecommendedModelForRAM();
         // Increased tokens to allow full responses (was 100-150, now 500-800)
         const councilMaxTokens = lightweightMode ? 500 : 800;
         const councilTemp = lightweightMode ? 0.3 : 0.5;
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
           type: 'error',
           data: {
             message: error.message || 'Unknown error occurred',
-            details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+            details: process.env['NODE_ENV'] === 'development' ? error.stack : undefined,
           },
         });
       } finally {

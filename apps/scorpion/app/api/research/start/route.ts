@@ -42,7 +42,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     const ragStore = await getRAGStore();
     const llm = new LLMAdapter({
       provider: 'ollama',
-      model: process.env.OLLAMA_MODEL || getRecommendedModelForRAM()
+      model: process.env['OLLAMA_MODEL'] || getRecommendedModelForRAM()
     });
 
     // Create initial session record
@@ -131,7 +131,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
           completedAt,
           duration,
           error: errorMessage,
-          errorStack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+          errorStack: process.env['NODE_ENV'] === 'development' ? error.stack : undefined,
         }).catch(err => {
           console.warn('[Research] Failed to persist failed session:', err);
         });
@@ -139,7 +139,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         // Emit failure event so SSE stream can notify client
         browserPool.emit('research-failed', sessionId, {
           error: errorMessage,
-          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+          stack: process.env['NODE_ENV'] === 'development' ? error.stack : undefined
         });
       } finally {
         // Clean up browser session

@@ -104,12 +104,12 @@ async function tryProvider(
   if (provider === 'ollama') {
     return await runOllama(systemPrompt, userPrompt, typedConfig, onChunk, conversationHistory);
   } else if (provider === 'llamacpp') {
-    if (process.env.LLAMACPP_ENABLED === 'true' || process.env.LLAMACPP_BASE_URL) {
+    if (process.env['LLAMACPP_ENABLED'] === 'true' || process.env['LLAMACPP_BASE_URL']) {
       return await runLlamaCpp(systemPrompt, userPrompt, typedConfig, onChunk, conversationHistory);
     }
     throw new Error('llamacpp not enabled');
   } else if (provider === 'vllm') {
-    if (process.env.VLLM_ENABLED === 'true' || process.env.VLLM_API_URL) {
+    if (process.env['VLLM_ENABLED'] === 'true' || process.env['VLLM_API_URL']) {
       return await runVLLM(systemPrompt, userPrompt, typedConfig, onChunk, conversationHistory);
     }
     throw new Error('vllm not enabled');
@@ -165,9 +165,9 @@ async function runOllama(
   onChunk?: (chunk: string) => void,
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
 ): Promise<string> {
-  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+  const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
   // Prefer scorpion:latest (personal training AI) as default
-  const model = config.model || process.env.OLLAMA_MODEL || 'scorpion:latest';
+  const model = config.model || process.env['OLLAMA_MODEL'] || 'scorpion:latest';
 
   // Ensure Ollama is running before making requests
   try {
@@ -394,8 +394,8 @@ async function runLlamaCpp(
   onChunk?: (chunk: string) => void,
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
 ): Promise<string> {
-  const llamacppUrl = process.env.LLAMACPP_BASE_URL || 'http://localhost:8033';
-  const model = config.model || process.env.LLAMACPP_MODEL || '';
+  const llamacppUrl = process.env['LLAMACPP_BASE_URL'] || 'http://localhost:8033';
+  const model = config.model || process.env['LLAMACPP_MODEL'] || '';
 
   try {
     // Check llama.cpp health before making request
@@ -661,8 +661,8 @@ async function runVLLM(
   onChunk?: (chunk: string) => void,
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
 ): Promise<string> {
-  const vllmUrl = process.env.VLLM_API_URL || 'http://localhost:8000';
-  const model = config.model || process.env.VLLM_MODEL || 'mistralai/Mistral-7B-Instruct-v0.2';
+  const vllmUrl = process.env['VLLM_API_URL'] || 'http://localhost:8000';
+  const model = config.model || process.env['VLLM_MODEL'] || 'mistralai/Mistral-7B-Instruct-v0.2';
 
   try {
     // Check VLLM health before making request
@@ -845,12 +845,12 @@ async function runOpenAI(
   onChunk?: (chunk: string) => void,
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
 ): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env['OPENAI_API_KEY'];
   if (!apiKey) {
     throw new Error('OPENAI_API_KEY not set. Please set it in your environment variables.');
   }
 
-  const model = config.model || process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const model = config.model || process.env['OPENAI_MODEL'] || 'gpt-4o-mini';
 
   try {
     // Build messages array with conversation history

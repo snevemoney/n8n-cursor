@@ -6,27 +6,27 @@
 
 export const llmConfig = {
   ollama: {
-    url: process.env.OLLAMA_URL || 'http://localhost:11434',
-    model: process.env.OLLAMA_MODEL || 'scorpion:latest',
+    url: process.env['OLLAMA_URL'] || 'http://localhost:11434',
+    model: process.env['OLLAMA_MODEL'] || 'scorpion:latest',
     enabled: true, // Ollama is always enabled by default
   },
   llamacpp: {
-    url: process.env.LLAMACPP_BASE_URL || 'http://localhost:8033',
-    model: process.env.LLAMACPP_MODEL || '',
-    enabled: process.env.LLAMACPP_ENABLED === 'true' || !!process.env.LLAMACPP_BASE_URL,
+    url: process.env['LLAMACPP_BASE_URL'] || 'http://localhost:8033',
+    model: process.env['LLAMACPP_MODEL'] || '',
+    enabled: process.env['LLAMACPP_ENABLED'] === 'true' || !!process.env['LLAMACPP_BASE_URL'],
   },
   vllm: {
-    url: process.env.VLLM_API_URL || 'http://localhost:8000',
-    model: process.env.VLLM_MODEL || 'mistralai/Mistral-7B-Instruct-v0.2',
-    enabled: process.env.VLLM_ENABLED === 'true' || !!process.env.VLLM_API_URL,
+    url: process.env['VLLM_API_URL'] || 'http://localhost:8000',
+    model: process.env['VLLM_MODEL'] || 'mistralai/Mistral-7B-Instruct-v0.2',
+    enabled: process.env['VLLM_ENABLED'] === 'true' || !!process.env['VLLM_API_URL'],
   },
   openai: {
-    apiKey: process.env.OPENAI_API_KEY || '',
-    model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-    enabled: !!process.env.OPENAI_API_KEY,
+    apiKey: process.env['OPENAI_API_KEY'] || '',
+    model: process.env['OPENAI_MODEL'] || 'gpt-4o-mini',
+    enabled: !!process.env['OPENAI_API_KEY'],
   },
-  providerPriority: process.env.LLM_PROVIDER_PRIORITY
-    ? process.env.LLM_PROVIDER_PRIORITY.split(',').map(p => p.trim().toLowerCase())
+  providerPriority: process.env['LLM_PROVIDER_PRIORITY']
+    ? process.env['LLM_PROVIDER_PRIORITY'].split(',').map(p => p.trim().toLowerCase())
     : ['ollama', 'llamacpp', 'vllm', 'openai'],
 } as const;
 

@@ -59,7 +59,7 @@ export class CostTracker {
 
     try {
       // Check if DATABASE_URL is configured
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         // Fallback: just emit event
         await emitEvent({
           id: randomUUID(),
@@ -166,7 +166,7 @@ export class CostTracker {
     }
   ): Promise<void> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         console.log('[CostTracker] Usage recorded (no DB):', { resourceId, usage });
         return;
       }
@@ -219,7 +219,7 @@ export class CostTracker {
    */
   async setBudget(budget: BudgetDefinition): Promise<void> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         console.log('[CostTracker] Budget set (no DB):', budget);
         return;
       }
@@ -264,7 +264,7 @@ export class CostTracker {
    */
   async checkBudgets(): Promise<void> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return;
       }
 
@@ -362,7 +362,7 @@ export class CostTracker {
    */
   async setQuota(quota: QuotaDefinition): Promise<void> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         console.log('[CostTracker] Quota set (no DB):', quota);
         return;
       }
@@ -406,7 +406,7 @@ export class CostTracker {
     requestedAmount: number
   ): Promise<{ allowed: boolean; currentUsage: number; limit: number }> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return { allowed: true, currentUsage: 0, limit: 0 };
       }
 
@@ -453,7 +453,7 @@ export class CostTracker {
     resourceCount: number;
   }[]> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return [];
       }
 
@@ -503,7 +503,7 @@ export class CostTracker {
     status: 'ok' | 'warning' | 'exceeded';
   }[]> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return [];
       }
 

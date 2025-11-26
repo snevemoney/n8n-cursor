@@ -6,12 +6,12 @@ export const GET = withErrorHandling(async () => {
   const debug: any = {
     step1_env_check: {
       // Standardize on N8N_API_URL (N8N_BASE_URL kept for backward compatibility)
-      N8N_API_URL: process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'NOT SET',
-      N8N_BASE_URL_DEPRECATED: process.env.N8N_BASE_URL || 'NOT SET (use N8N_API_URL instead)',
-      N8N_API_KEY_LENGTH: process.env.N8N_API_KEY?.length || 0,
-      HAS_KEY: !!process.env.N8N_API_KEY,
-      API_KEY_PREVIEW: process.env.N8N_API_KEY ? 
-        `${process.env.N8N_API_KEY.substring(0, 10)}...${process.env.N8N_API_KEY.substring(process.env.N8N_API_KEY.length - 5)}` : 
+      N8N_API_URL: process.env['N8N_API_URL'] || process.env['N8N_BASE_URL'] || 'NOT SET',
+      N8N_BASE_URL_DEPRECATED: process.env['N8N_BASE_URL'] || 'NOT SET (use N8N_API_URL instead)',
+      N8N_API_KEY_LENGTH: process.env['N8N_API_KEY']?.length || 0,
+      HAS_KEY: !!process.env['N8N_API_KEY'],
+      API_KEY_PREVIEW: process.env['N8N_API_KEY'] ? 
+        `${process.env['N8N_API_KEY'].substring(0, 10)}...${process.env['N8N_API_KEY'].substring(process.env['N8N_API_KEY'].length - 5)}` : 
         'NOT SET'
     },
     step2_client_init: null,

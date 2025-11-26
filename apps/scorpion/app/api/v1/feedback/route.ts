@@ -30,7 +30,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const { conversationId, messageId, rating, tags = [], comment } = validation.data;
 
   try {
-    if (!process.env.DATABASE_URL) {
+    if (!process.env['DATABASE_URL']) {
       // Fallback: just emit event
       await emitEvent({
         id: randomUUID(),
@@ -106,7 +106,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
   try {
-    if (!process.env.DATABASE_URL) {
+    if (!process.env['DATABASE_URL']) {
       return createSuccessResponse({
         message: 'Database not configured',
         summary: {},

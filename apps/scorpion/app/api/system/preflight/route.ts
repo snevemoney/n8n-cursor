@@ -66,21 +66,21 @@ export async function GET(req: NextRequest) {
     const plannerPreflight = await checkPlannerPreflight();
     
     // Check services
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
     const ollamaReachability = await checkServiceReachability('Ollama', `${ollamaUrl}/api/tags`);
     
-    const openaiConfigured = !!(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim().length > 0);
+    const openaiConfigured = !!(process.env['OPENAI_API_KEY'] && process.env['OPENAI_API_KEY'].trim().length > 0);
     
-    const tavilyConfigured = !!(process.env.TAVILY_API_KEY && process.env.TAVILY_API_KEY.trim().length > 0);
-    const braveConfigured = !!(process.env.BRAVE_API_KEY && process.env.BRAVE_API_KEY.trim().length > 0);
-    const serpapiConfigured = !!(process.env.SERPAPI_KEY && process.env.SERPAPI_KEY.trim().length > 0);
+    const tavilyConfigured = !!(process.env['TAVILY_API_KEY'] && process.env['TAVILY_API_KEY'].trim().length > 0);
+    const braveConfigured = !!(process.env['BRAVE_API_KEY'] && process.env['BRAVE_API_KEY'].trim().length > 0);
+    const serpapiConfigured = !!(process.env['SERPAPI_KEY'] && process.env['SERPAPI_KEY'].trim().length > 0);
     
     // Check n8n
     let n8nConfigured = false;
     let n8nReachable: boolean | undefined;
     try {
-      const n8nUrl = process.env.N8N_API_URL || process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678';
-      n8nConfigured = !!(process.env.N8N_API_KEY || process.env.N8N_BASE_URL);
+      const n8nUrl = process.env['N8N_API_URL'] || process.env['N8N_BASE_URL']?.replace('/webhook', '') || 'http://localhost:5678';
+      n8nConfigured = !!(process.env['N8N_API_KEY'] || process.env['N8N_BASE_URL']);
       if (n8nConfigured) {
         const n8nReachability = await checkServiceReachability('n8n', `${n8nUrl}/healthz`);
         n8nReachable = n8nReachability.reachable;

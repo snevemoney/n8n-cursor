@@ -103,13 +103,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   
   // Sync OpenAI settings to environment variables (if API key provided)
   if (settings.openaiKey) {
-    process.env.OPENAI_API_KEY = settings.openaiKey;
+    process.env['OPENAI_API_KEY'] = settings.openaiKey;
   }
   if (settings.useOpenAIEmbeddings !== undefined) {
-    process.env.USE_OPENAI_EMBEDDINGS = settings.useOpenAIEmbeddings ? 'true' : 'false';
+    process.env['USE_OPENAI_EMBEDDINGS'] = settings.useOpenAIEmbeddings ? 'true' : 'false';
   }
   if (settings.useOpenAIFunctionCalling !== undefined) {
-    process.env.USE_OPENAI_FUNCTION_CALLING = settings.useOpenAIFunctionCalling ? 'true' : 'false';
+    process.env['USE_OPENAI_FUNCTION_CALLING'] = settings.useOpenAIFunctionCalling ? 'true' : 'false';
   }
   
   return createSuccessResponse({

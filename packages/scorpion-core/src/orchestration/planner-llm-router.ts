@@ -26,7 +26,7 @@ export interface PlannerLLMResult {
  */
 async function checkOllamaModelExists(model: string): Promise<boolean> {
   try {
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
     const response = await fetch(`${ollamaUrl}/api/tags`);
     if (!response.ok) return false;
     
@@ -43,7 +43,7 @@ async function checkOllamaModelExists(model: string): Promise<boolean> {
  */
 async function checkOllamaReachable(): Promise<boolean> {
   try {
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
     const response = await fetch(`${ollamaUrl}/api/tags`, { 
       method: 'HEAD',
       signal: AbortSignal.timeout(3000)
@@ -58,7 +58,7 @@ async function checkOllamaReachable(): Promise<boolean> {
  * Check if OpenAI is configured
  */
 function checkOpenAIConfigured(): boolean {
-  return !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim().length > 0;
+  return !!process.env['OPENAI_API_KEY'] && process.env['OPENAI_API_KEY'].trim().length > 0;
 }
 
 /**
@@ -69,16 +69,16 @@ export async function routePlannerLLM(
   request: LLMRequest,
   config: PlannerLLMConfig = {}
 ): Promise<PlannerLLMResult> {
-  const provider = config.provider || (process.env.PLANNER_LLM_PROVIDER as 'ollama' | 'openai' | 'auto') || 'auto';
+  const provider = config.provider || (process.env['PLANNER_LLM_PROVIDER'] as 'ollama' | 'openai' | 'auto') || 'auto';
   const fallbackProvider = config.fallbackProvider || 'openai';
-  const model = config.model || request.model || process.env.PLANNER_LLM_MODEL || 'llama3.1:8b';
-  const fallbackModel = config.fallbackModel || process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const model = config.model || request.model || process.env['PLANNER_LLM_MODEL'] || 'llama3.1:8b';
+  const fallbackModel = config.fallbackModel || process.env['OPENAI_MODEL'] || 'gpt-4o-mini';
   const checkModelExists = config.checkOllamaModelExists !== false;
 
   // Helper to run with specific source
   const runWithSource = async (source: 'ollama' | 'openai', modelName: string): Promise<LLMResponse> => {
-    const originalSource = process.env.SCORPION_MODEL_SOURCE;
-    process.env.SCORPION_MODEL_SOURCE = source;
+    const originalSource = process.env['SCORPION_MODEL_SOURCE'];
+    process.env['SCORPION_MODEL_SOURCE'] = source;
     try {
       return await runModel({
         ...request,
@@ -86,9 +86,9 @@ export async function routePlannerLLM(
       });
     } finally {
       if (originalSource) {
-        process.env.SCORPION_MODEL_SOURCE = originalSource;
+        process.env['SCORPION_MODEL_SOURCE'] = originalSource;
       } else {
-        delete process.env.SCORPION_MODEL_SOURCE;
+        delete process.env['SCORPION_MODEL_SOURCE'];
       }
     }
   };
@@ -217,7 +217,7 @@ export async function checkPlannerPreflight(): Promise<PlannerPreflightResult> {
   const openaiConfigured = checkOpenAIConfigured();
   if (openaiConfigured) {
     provider = 'openai';
-    model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+    model = process.env['OPENAI_MODEL'] || 'gpt-4o-mini';
   } else {
     warnings.push('OPENAI_API_KEY not configured - planner will rely on Ollama');
   }
@@ -225,7 +225,7 @@ export async function checkPlannerPreflight(): Promise<PlannerPreflightResult> {
   // Check Ollama
   const ollamaReachable = await checkOllamaReachable();
   if (ollamaReachable) {
-    const plannerModel = process.env.PLANNER_LLM_MODEL || 'llama3.1:8b';
+    const plannerModel = process.env['PLANNER_LLM_MODEL'] || 'llama3.1:8b';
     const modelExists = await checkOllamaModelExists(plannerModel);
     if (modelExists) {
       if (provider === 'none') {

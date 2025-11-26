@@ -21,7 +21,7 @@ export async function GET() {
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to get provider status',
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: process.env['NODE_ENV'] === 'development' ? error.stack : undefined
     }, { 
       status: 500,
       headers: {

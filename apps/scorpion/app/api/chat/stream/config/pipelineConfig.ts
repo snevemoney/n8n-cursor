@@ -80,21 +80,21 @@ export const CACHE_CONFIG = {
  */
 export const FEATURE_FLAGS = {
   /** Enable transformer orchestrator architecture */
-  USE_TRANSFORMER: () => process.env.USE_TRANSFORMER_ORCHESTRATOR === 'true',
+  USE_TRANSFORMER: () => process.env['USE_TRANSFORMER_ORCHESTRATOR'] === 'true',
   /** Enable transformer debug mode */
-  TRANSFORMER_DEBUG: () => process.env.TRANSFORMER_DEBUG === 'true',
+  TRANSFORMER_DEBUG: () => process.env['TRANSFORMER_DEBUG'] === 'true',
   /** Enable safety guard helper */
-  ENABLE_SAFETY_GUARD: () => process.env.SCORPION_ENABLE_SAFETY_GUARD !== '0',
+  ENABLE_SAFETY_GUARD: () => process.env['SCORPION_ENABLE_SAFETY_GUARD'] !== '0',
   /** Enable tool router helper */
-  ENABLE_TOOL_ROUTER: () => process.env.SCORPION_ENABLE_TOOL_ROUTER !== '0',
+  ENABLE_TOOL_ROUTER: () => process.env['SCORPION_ENABLE_TOOL_ROUTER'] !== '0',
   /** Enable budget governor helper */
-  ENABLE_BUDGET_GOVERNOR: () => process.env.SCORPION_ENABLE_BUDGET_GOVERNOR !== '0',
+  ENABLE_BUDGET_GOVERNOR: () => process.env['SCORPION_ENABLE_BUDGET_GOVERNOR'] !== '0',
   /** Enable dispatcher helper */
-  ENABLE_DISPATCHER: () => process.env.SCORPION_ENABLE_DISPATCHER !== '0',
+  ENABLE_DISPATCHER: () => process.env['SCORPION_ENABLE_DISPATCHER'] !== '0',
   /** Multi-machine mode (required for dispatcher) */
-  MULTI_MACHINE: () => process.env.SCORPION_MULTI_MACHINE === '1',
+  MULTI_MACHINE: () => process.env['SCORPION_MULTI_MACHINE'] === '1',
   /** Enable RAG retriever query rewriting */
-  ENABLE_RAG_RETRIEVER: () => process.env.SCORPION_ENABLE_RAG_RETRIEVER !== '0',
+  ENABLE_RAG_RETRIEVER: () => process.env['SCORPION_ENABLE_RAG_RETRIEVER'] !== '0',
 } as const;
 
 // ============================================================================

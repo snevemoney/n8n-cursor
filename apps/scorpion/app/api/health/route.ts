@@ -108,14 +108,14 @@ export async function GET(req: NextRequest) {
 
   // Check Ollama
   try {
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
     const ollamaHealth = await checkOllamaHealth(ollamaUrl);
     const ollamaLatency = Date.now() - startTime;
     
     if (ollamaHealth.healthy) {
       health.services.ollama = {
         status: 'up',
-        model: ollamaHealth.model || process.env.OLLAMA_MODEL || 'default',
+        model: ollamaHealth.model || process.env['OLLAMA_MODEL'] || 'default',
       };
       health.latency.ollama = ollamaLatency;
     } else {
@@ -135,7 +135,7 @@ export async function GET(req: NextRequest) {
 
   // Check llama.cpp
   try {
-    const llamacppUrl = process.env.LLAMACPP_BASE_URL || 'http://localhost:8033';
+    const llamacppUrl = process.env['LLAMACPP_BASE_URL'] || 'http://localhost:8033';
     const llamacppStartTime = Date.now();
     const llamacppHealth = await checkLlamaCppHealth(llamacppUrl);
     const llamacppLatency = Date.now() - llamacppStartTime;
@@ -143,12 +143,12 @@ export async function GET(req: NextRequest) {
     if (llamacppHealth.healthy) {
       health.services.llamacpp = {
         status: 'up',
-        model: llamacppHealth.model || process.env.LLAMACPP_MODEL || 'default',
+        model: llamacppHealth.model || process.env['LLAMACPP_MODEL'] || 'default',
       };
       health.latency.llamacpp = llamacppLatency;
     } else {
       // Only mark as degraded if llama.cpp is explicitly enabled
-      if (process.env.LLAMACPP_ENABLED === 'true') {
+      if (process.env['LLAMACPP_ENABLED'] === 'true') {
         health.services.llamacpp = {
           status: 'down',
           error: llamacppHealth.error || 'Unknown error',
@@ -164,7 +164,7 @@ export async function GET(req: NextRequest) {
     }
   } catch (error: any) {
     // Only mark as degraded if llama.cpp is explicitly enabled
-    if (process.env.LLAMACPP_ENABLED === 'true') {
+    if (process.env['LLAMACPP_ENABLED'] === 'true') {
       health.services.llamacpp = {
         status: 'down',
         error: error.message || 'Connection failed',
@@ -180,7 +180,7 @@ export async function GET(req: NextRequest) {
 
   // Check OpenAI (lightweight check - just verify API key exists)
   try {
-    const openaiKey = process.env.OPENAI_API_KEY;
+    const openaiKey = process.env['OPENAI_API_KEY'];
     if (openaiKey && openaiKey.length > 20) {
       health.services.openai = { status: 'up' };
     } else {
@@ -204,7 +204,7 @@ export async function GET(req: NextRequest) {
 
   // Check Redis
   try {
-    const redisUrl = process.env.REDIS_URL;
+    const redisUrl = process.env['REDIS_URL'];
     if (redisUrl) {
       // Verify URL format first
       const urlPattern = /^redis(s)?:\/\//;
@@ -240,7 +240,7 @@ export async function GET(req: NextRequest) {
 
   // Check Database
   try {
-    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    const dbUrl = process.env['DATABASE_URL'] || process.env['POSTGRES_URL'];
     if (dbUrl) {
       // Verify URL format first
       const urlPattern = /^postgres(ql)?:\/\//;
@@ -276,7 +276,7 @@ export async function GET(req: NextRequest) {
 
   // Check MLX (Apple Silicon ML acceleration - optional)
   try {
-    const mlxEnabled = process.env.MLX_ENABLED === 'true';
+    const mlxEnabled = process.env['MLX_ENABLED'] === 'true';
     if (mlxEnabled) {
       // Check if we're on Apple Silicon
       const isAppleSilicon = process.platform === 'darwin' && process.arch === 'arm64';

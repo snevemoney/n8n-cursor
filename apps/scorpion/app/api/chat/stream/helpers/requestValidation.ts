@@ -110,7 +110,7 @@ export function validateRequestData(requestData: unknown): {
   const data = requestData as Record<string, unknown>;
 
   // Messages is required
-  if (!data.messages || !Array.isArray(data.messages)) {
+  if (!data['messages'] || !Array.isArray(data['messages'])) {
     return {
       valid: false,
       error: 'Request must include a messages array',
@@ -120,13 +120,13 @@ export function validateRequestData(requestData: unknown): {
   return {
     valid: true,
     data: {
-      conversationId: typeof data.conversationId === 'string' ? data.conversationId : undefined,
-      messages: data.messages,
-      mode: typeof data.mode === 'string' ? data.mode : undefined,
-      tools: data.tools,
-      provider: typeof data.provider === 'string' ? data.provider : undefined,
-      model: typeof data.model === 'string' ? data.model : undefined,
-      clientMode: typeof data.clientMode === 'string' ? data.clientMode : undefined,
+      conversationId: typeof data['conversationId'] === 'string' ? data['conversationId'] : undefined,
+      messages: data['messages'],
+      mode: typeof data['mode'] === 'string' ? data['mode'] : undefined,
+      tools: data['tools'],
+      provider: typeof data['provider'] === 'string' ? data['provider'] : undefined,
+      model: typeof data['model'] === 'string' ? data['model'] : undefined,
+      clientMode: typeof data['clientMode'] === 'string' ? data['clientMode'] : undefined,
     },
   };
 }

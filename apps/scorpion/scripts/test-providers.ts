@@ -11,7 +11,7 @@ import { runModelUnified } from '../lib/chat/modelRunner';
 
 async function testVLLMHealth() {
   console.log('\n🧪 Testing VLLM Health...');
-  const vllmUrl = process.env.VLLM_API_URL || 'http://localhost:8000';
+  const vllmUrl = process.env['VLLM_API_URL'] || 'http://localhost:8000';
   
   try {
     const health = await checkVLLMHealth(vllmUrl);
@@ -35,7 +35,7 @@ async function testVLLMHealth() {
 
 async function testOllamaHealth() {
   console.log('\n🧪 Testing Ollama Health...');
-  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+  const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
   
   try {
     const health = await checkOllamaHealth(ollamaUrl);
@@ -100,13 +100,13 @@ async function testBackwardCompatibility() {
   console.log('\n🧪 Testing Backward Compatibility...');
   
   // Test that old environment variables still work
-  const oldLLMPrimary = process.env.LLM_PRIMARY;
-  const oldLLMFallback = process.env.LLM_FALLBACK;
+  const oldLLMPrimary = process.env['LLM_PRIMARY'];
+  const oldLLMFallback = process.env['LLM_FALLBACK'];
   
   try {
     // Test with old-style config (should still work)
-    process.env.LLM_PRIMARY = 'ollama';
-    process.env.LLM_FALLBACK = 'openai';
+    process.env['LLM_PRIMARY'] = 'ollama';
+    process.env['LLM_FALLBACK'] = 'openai';
     
     const testPrompt = 'Say "backward compatibility test" and nothing else.';
     const result = await runModelUnified(
@@ -120,15 +120,15 @@ async function testBackwardCompatibility() {
     console.log(`  ✅ Old config still works! Response: ${result.substring(0, 50)}...`);
     
     // Restore
-    if (oldLLMPrimary) process.env.LLM_PRIMARY = oldLLMPrimary;
-    if (oldLLMFallback) process.env.LLM_FALLBACK = oldLLMFallback;
+    if (oldLLMPrimary) process.env['LLM_PRIMARY'] = oldLLMPrimary;
+    if (oldLLMFallback) process.env['LLM_FALLBACK'] = oldLLMFallback;
     
     return true;
   } catch (error: any) {
     console.log(`  ⚠️  Warning: ${error.message}`);
     // Restore even on error
-    if (oldLLMPrimary) process.env.LLM_PRIMARY = oldLLMPrimary;
-    if (oldLLMFallback) process.env.LLM_FALLBACK = oldLLMFallback;
+    if (oldLLMPrimary) process.env['LLM_PRIMARY'] = oldLLMPrimary;
+    if (oldLLMFallback) process.env['LLM_FALLBACK'] = oldLLMFallback;
     return false;
   }
 }

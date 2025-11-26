@@ -190,14 +190,14 @@ export async function feedForwardPhase(
     if (step.type === 'tool_call' && step.tool) {
       try {
         // Log tool execution
-        if (process.env.TRANSFORMER_DEBUG === 'true') {
+        if (process.env['TRANSFORMER_DEBUG'] === 'true') {
           console.log('[Transformer] Executing tool:', step.tool, 'with params:', Object.keys(step.params || {}));
         }
         
         const output = await executor.execute(step.tool, step.params || {});
         
         // Log success
-        if (process.env.TRANSFORMER_DEBUG === 'true') {
+        if (process.env['TRANSFORMER_DEBUG'] === 'true') {
           logToolExecution(step.tool, step.params || {}, { success: true, output });
         }
         
@@ -210,7 +210,7 @@ export async function feedForwardPhase(
         const errorMessage = error instanceof Error ? error.message : String(error);
         
         // Log failure
-        if (process.env.TRANSFORMER_DEBUG === 'true') {
+        if (process.env['TRANSFORMER_DEBUG'] === 'true') {
           logToolExecution(step.tool, step.params || {}, { success: false, error: errorMessage });
         }
         
@@ -322,7 +322,7 @@ export async function runDecoderBlock(
     ];
     
     // Log attention query
-    if (process.env.TRANSFORMER_DEBUG === 'true') {
+    if (process.env['TRANSFORMER_DEBUG'] === 'true') {
       logAttentionQuery(normalizedContext.userQuery || '', attentionResults);
     }
     
@@ -330,7 +330,7 @@ export async function runDecoderBlock(
   }
   
   // Log head outputs
-  if (process.env.TRANSFORMER_DEBUG === 'true') {
+  if (process.env['TRANSFORMER_DEBUG'] === 'true') {
     logHeadOutputs(headOutputs);
   }
   
@@ -346,7 +346,7 @@ export async function runDecoderBlock(
   const executionResults = await feedForwardPhase(plan, normalizedContext, options?.toolExecutor);
   
   // Log decoder block
-  if (process.env.TRANSFORMER_DEBUG === 'true') {
+  if (process.env['TRANSFORMER_DEBUG'] === 'true') {
     logDecoderBlock(
       normalizedContext.stepNumber || 0,
       normalizedContext,

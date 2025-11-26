@@ -121,8 +121,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
     const ragStore = await getRAGStore();
     const llm = new LLMAdapter({
-      provider: process.env.SCORPION_MODEL_SOURCE === 'openai' ? 'openai' : 'ollama',
-      model: process.env.OLLAMA_MODEL || getRecommendedModelForRAM()
+      provider: process.env['SCORPION_MODEL_SOURCE'] === 'openai' ? 'openai' : 'ollama',
+      model: process.env['OLLAMA_MODEL'] || getRecommendedModelForRAM()
     });
 
     const agent = new AgentClass(llm, ragStore);

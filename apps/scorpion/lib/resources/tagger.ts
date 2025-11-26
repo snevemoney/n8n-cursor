@@ -32,10 +32,10 @@ export function parseResourceHierarchy(
   defaults?: Partial<ResourceHierarchy>
 ): ResourceHierarchy {
   return {
-    organization: tags?.organization || defaults?.organization || 'scorpion-systems',
-    product: tags?.product || defaults?.product || 'scorpion-core',
-    environment: (tags?.environment as 'dev' | 'staging' | 'prod') || defaults?.environment || 'prod',
-    service: tags?.service || defaults?.service || 'unknown',
+    organization: tags?.['organization'] || defaults?.organization || 'scorpion-systems',
+    product: tags?.['product'] || defaults?.product || 'scorpion-core',
+    environment: (tags?.['environment'] as 'dev' | 'staging' | 'prod') || defaults?.environment || 'prod',
+    service: tags?.['service'] || defaults?.service || 'unknown',
   };
 }
 
@@ -90,23 +90,23 @@ export function createResourceTags(
  * Extract resource hierarchy from tags
  */
 export function extractResourceHierarchy(tags: ResourceTags): ResourceHierarchy | null {
-  if (!tags.organization || !tags.product || !tags.environment || !tags.service) {
+  if (!tags['organization'] || !tags['product'] || !tags['environment'] || !tags['service']) {
     return null;
   }
 
   const validation = validateResourceHierarchy({
-    organization: tags.organization,
-    product: tags.product,
-    environment: tags.environment as 'dev' | 'staging' | 'prod',
-    service: tags.service,
+    organization: tags['organization'],
+    product: tags['product'],
+    environment: tags['environment'] as 'dev' | 'staging' | 'prod',
+    service: tags['service'],
   });
 
   return validation.valid
     ? {
-        organization: tags.organization,
-        product: tags.product,
-        environment: tags.environment as 'dev' | 'staging' | 'prod',
-        service: tags.service,
+        organization: tags['organization'],
+        product: tags['product'],
+        environment: tags['environment'] as 'dev' | 'staging' | 'prod',
+        service: tags['service'],
       }
     : null;
 }

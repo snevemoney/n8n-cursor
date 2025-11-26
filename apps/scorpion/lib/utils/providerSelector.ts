@@ -24,14 +24,14 @@ export interface ProviderStatus {
  * Check if OpenAI is configured
  */
 function checkOpenAIConfigured(): boolean {
-  return !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim().length > 0;
+  return !!process.env['OPENAI_API_KEY'] && process.env['OPENAI_API_KEY'].trim().length > 0;
 }
 
 /**
  * Get provider priority from environment or use default
  */
 function getProviderPriority(): Provider[] {
-  const priorityEnv = process.env.LLM_PROVIDER_PRIORITY;
+  const priorityEnv = process.env['LLM_PROVIDER_PRIORITY'];
   
   if (priorityEnv) {
     const providers = priorityEnv.split(',').map(p => p.trim().toLowerCase()) as Provider[];
@@ -70,7 +70,7 @@ export async function checkAllProviders(): Promise<ProviderStatus[]> {
           
         case 'llamacpp':
           // Only check if llama.cpp is enabled
-          if (process.env.LLAMACPP_ENABLED === 'true' || process.env.LLAMACPP_BASE_URL) {
+          if (process.env['LLAMACPP_ENABLED'] === 'true' || process.env['LLAMACPP_BASE_URL']) {
             const llamacppHealth = await checkLlamaCppHealth();
             available = llamacppHealth.available;
             healthy = llamacppHealth.healthy;
@@ -84,7 +84,7 @@ export async function checkAllProviders(): Promise<ProviderStatus[]> {
           
         case 'vllm':
           // Only check if VLLM is enabled
-          if (process.env.VLLM_ENABLED === 'true' || process.env.VLLM_API_URL) {
+          if (process.env['VLLM_ENABLED'] === 'true' || process.env['VLLM_API_URL']) {
             const vllmHealth = await checkVLLMHealth();
             available = vllmHealth.available;
             healthy = vllmHealth.healthy;
