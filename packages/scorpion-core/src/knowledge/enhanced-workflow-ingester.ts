@@ -211,23 +211,23 @@ export class EnhancedWorkflowIngester {
 
     // Extract important parameters based on node type
     if (nodeType.includes('httpRequest')) {
-      keyParams.method = params.method;
-      keyParams.url = params.url;
-      keyParams.authentication = params.authentication;
+      keyParams['method'] = params['method'];
+      keyParams['url'] = params['url'];
+      keyParams['authentication'] = params['authentication'];
     } else if (nodeType.includes('set')) {
-      keyParams.values = params.values;
+      keyParams['values'] = params['values'];
     } else if (nodeType.includes('if')) {
-      keyParams.conditions = params.conditions;
-      keyParams.combinator = params.combinator;
+      keyParams['conditions'] = params['conditions'];
+      keyParams['combinator'] = params['combinator'];
     } else if (nodeType.includes('code') || nodeType.includes('function')) {
-      keyParams.jsCode = params.jsCode?.substring(0, 200); // First 200 chars
+      keyParams['jsCode'] = params['jsCode']?.substring(0, 200); // First 200 chars
     } else if (nodeType.includes('openai') || nodeType.includes('ai')) {
-      keyParams.model = params.model;
-      keyParams.resource = params.resource;
-      keyParams.operation = params.operation;
+      keyParams['model'] = params['model'];
+      keyParams['resource'] = params['resource'];
+      keyParams['operation'] = params['operation'];
     } else if (nodeType.includes('postgres') || nodeType.includes('database')) {
-      keyParams.operation = params.operation;
-      keyParams.table = params.table;
+      keyParams['operation'] = params['operation'];
+      keyParams['table'] = params['table'];
     }
 
     return keyParams;

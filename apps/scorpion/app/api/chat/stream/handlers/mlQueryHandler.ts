@@ -18,8 +18,8 @@ import type { ReadableStreamDefaultController } from 'stream/web';
 import type { StreamState } from '../phases';
 
 const ML_BASE_URL =
-  process.env.APP_BASE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env['APP_BASE_URL'] ||
+  process.env['NEXT_PUBLIC_APP_URL'] ||
   'http://127.0.0.1:3000';
 
 type MlIntent = 'health' | 'anomalies' | 'confidence';
