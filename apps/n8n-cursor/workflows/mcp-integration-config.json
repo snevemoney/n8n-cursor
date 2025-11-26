@@ -1,0 +1,79 @@
+{
+  "name": "MCP Integration Configuration",
+  "description": "Configuration for working MCP servers (Tavily and n8n) to be used with n8n MCP Client Tool",
+  "mcpServers": {
+    "tavily-remote": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.tavily.com/mcp/?tavilyApiKey=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"
+      ],
+      "env": {},
+      "tools": [
+        "tavily-search",
+        "tavily-extract", 
+        "tavily-map",
+        "tavily-crawl"
+      ]
+    },
+    "n8n-automation": {
+      "command": "node",
+      "args": [
+        "/home/evens/n8n-cursor/tools/mcp-servers/comprehensive-n8n-server.mjs"
+      ],
+      "env": {
+        "N8N_BASE_URL": "https://n8ncloud.tech",
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NjQxNzY0fQ.i23-xVHsClrhfdHisuZnB7YTHYoYkowveDEt9xC_dPU"
+      },
+      "tools": [
+        "workflows.list",
+        "workflows.create",
+        "workflows.update",
+        "workflows.delete",
+        "workflows.activate",
+        "workflows.deactivate",
+        "executions.list",
+        "executions.get",
+        "executions.retry",
+        "executions.stop",
+        "executions.delete",
+        "executions.trigger",
+        "webhooks.list",
+        "webhooks.create",
+        "webhooks.delete",
+        "webhooks.trigger",
+        "credentials.list",
+        "credentials.types",
+        "credentials.matchForNode",
+        "credentials.applyToWorkflow",
+        "credentials.canaryTest",
+        "credentials.create",
+        "credentials.update",
+        "credentials.delete",
+        "nodes.list",
+        "nodes.validate",
+        "nodes.test",
+        "connections.add",
+        "connections.remove",
+        "connections.list",
+        "connections.validate",
+        "validate_workflow",
+        "validate_connections",
+        "validate_expressions"
+      ]
+    }
+  },
+  "n8nIntegration": {
+    "mcpClientTool": {
+      "serverName": "tavily-remote",
+      "toolName": "tavily-search",
+      "description": "Search the web using Tavily AI",
+      "parameters": {
+        "query": "string",
+        "max_results": "number",
+        "search_depth": "string"
+      }
+    }
+  }
+}

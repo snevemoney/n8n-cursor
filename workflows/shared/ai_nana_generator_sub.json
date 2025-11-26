@@ -1,0 +1,589 @@
+{
+  "createdAt": "2025-09-14T02:42:16.746Z",
+  "updatedAt": "2025-09-14T06:25:45.000Z",
+  "id": "6weqeueKKaHHeQOV",
+  "name": "ai nana generator sub",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/veo3/fast/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.output.video_prompt.type }}\",\n  \"image_url\": \"{{ $('Start').item.json.webContentLink }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -288,
+        496
+      ],
+      "id": "2d84b556-c16a-49fb-ac64-bfb252b8903f",
+      "name": "Create Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xvpDtEBHjVdANmIn",
+          "name": "video"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/veo3/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        144,
+        496
+      ],
+      "id": "1eb22499-796f-4e97-aaf9-4d58cbefc155",
+      "name": "Get Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xvpDtEBHjVdANmIn",
+          "name": "video"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1.5,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        496
+      ],
+      "id": "deed9f5c-5520-4170-8c3d-9a862db20748",
+      "name": "Wait1",
+      "webhookId": "fe5141c8-e1f5-453b-bc3c-a13f0561dd28"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "-1002609390628",
+        "file": "={{ $json.video.url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        432
+      ],
+      "id": "34b9f3ba-0102-4313-8a2b-d5ae094f7ab2",
+      "name": "Send a video",
+      "webhookId": "20f216ee-ddf2-4fd6-8c59-b972b61a0ab3",
+      "credentials": {
+        "telegramApi": {
+          "id": "eAcEc3E2Ay8R0NiG",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"video_prompt\": {\n      \"type\": \"string\"\n    }\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        384
+      ],
+      "id": "357a2b49-d0cd-4254-93a9-3ef07463dac8",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        368
+      ],
+      "id": "73bc78cb-f13a-4257-8e7b-cd0b2f4fe773",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        208
+      ],
+      "id": "26b08157-3a7f-4665-be7c-d72c04f054ad",
+      "name": "Wait",
+      "webhookId": "05d513b0-1c3e-4433-8b6c-b687c349c20e"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/nano-banana/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.output.Image_prompt }}\",\n  \"image_urls\": [\n    \"{{ $('Start').item.json.webContentLink }}\"\n  ]\n}",
+        "options": {
+          "lowercaseHeaders": false
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -288,
+        208
+      ],
+      "id": "bce10dbc-4d65-4daf-8f08-6e8c282a9f77",
+      "name": "Create Image",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Fu075JqkIa9nlRqq",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Create Image').item.json.response_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        144,
+        208
+      ],
+      "id": "b09c20eb-813c-4d05-81ff-9cde9aa44c58",
+      "name": "Get Image",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Fu075JqkIa9nlRqq",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create authentic user-generated content (UGC) style video prompts based on reference images and user descriptions, maintaining visual fidelity while achieving natural, realistic results.\n\n## INPUT SOURCES\n- **User Description**: `{{ $('Start').item.json.[\"image description\"] }}`\n- **Reference Analysis**: `{{ $('Describe Img').item.json.choices[0].message.content }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "# UGC Video Prompt Builder - No Examples Version\n\n## ROLE: UGC Video Prompt Builder\n\n### Primary Task\nCreate a UGC-style video prompt from reference image and user description. Output must be clean JSON with no formatting examples that could confuse parsers.\n\n## Critical Output Requirements\n\n### JSON Format Rules\n- Return only: video_prompt and model properties\n- Use double quotes around all property names and values\n- Keep video_prompt as single line text under 130 words\n- No line breaks, no special formatting, no code blocks\n- Format: property name in quotes, colon, value in quotes\n\n## UGC Authenticity Principles\n- Phone-video aesthetic: handheld framing, natural motion, mixed lighting\n- Realistic imperfections: slight grain, casual composition, lived-in spaces  \n- Preserve product text exactly as shown - never fabricate claims\n- Conversational tone, avoid studio or advertising language\n- Embrace flaws: wrinkles, stray hairs, cluttered backgrounds\n\n## Essential Camera Cues (Include 2-3)\n- handheld phone footage\n- natural camera shake\n- off-center framing  \n- mixed indoor lighting\n- slight motion blur\n- auto exposure\n- casual composition\n- soft natural light\n- unpolished look\n- mild grain\n\n## Content Structure Guidelines\nYour video_prompt should include:\n- Subject and primary action\n- Setting description (real-world spaces preferred)\n- Mood and atmosphere  \n- 2-3 camera technique descriptors\n- Color notes if relevant\n- Text accuracy notes if product has visible text\n\n## Parsing Safety Checklist\n- No example JSON in system prompt\n- No code blocks or markdown formatting\n- No unescaped quotes within strings\n- No trailing commas\n- No comments or extra properties\n- Single line string for video_prompt\n- Exactly two properties total\n\n## Common Scenarios\n- Product unboxing in kitchen or living space\n- Lifestyle usage in real environments (street, office, gym)\n- Casual product demonstration with natural reactions\n- Everyday moments with authentic lighting and backgrounds\n\n## Text Accuracy Requirements\n- Keep visible packaging text exactly as shown\n- Never invent claims, certifications, or numbers\n- Mention text preservation only when product text is clearly visible\n- Do not fabricate brand names or product features\n\n## Final Instructions\nReturn clean JSON object only. No explanatory text before or after. No formatting examples. No code blocks. Just the raw JSON response that parsers can read without confusion."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        208
+      ],
+      "id": "49282ab3-a492-4d0a-8db6-6ce220c359f9",
+      "name": "Video Prompt Generator"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "-1002609390628",
+        "file": "={{ $json.images[0].url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        112
+      ],
+      "id": "35ec1d5a-0386-4001-9753-38f0df0eab71",
+      "name": "Send a photo message",
+      "webhookId": "eed289d4-e4a5-4f91-bd37-9836583b3b13",
+      "credentials": {
+        "telegramApi": {
+          "id": "eAcEc3E2Ay8R0NiG",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        64
+      ],
+      "id": "6d0cc704-9b23-4b4e-aaf8-a107f005f42c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Image_prompt\": \"string\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        64
+      ],
+      "id": "f9a32be6-eb0c-4ec2-9987-2c63dcdd1398",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "text": "# Image Analysis Prompt\n\nAnalyze the provided image and classify it as containing a **PRODUCT**, **CHARACTER**, or **BOTH**. Return your analysis exclusively in YAML format with no additional commentary.\n\n## For PRODUCT Analysis:\n```yaml\ntype: product\nbrand_name: [Brand name if visible/inferable, or \"unknown\" if not determinable]\ncolor_scheme:\n  - hex: \"#HEXCODE\"\n    name: \"Color name\"\n  - hex: \"#HEXCODE\" \n    name: \"Color name\"\nfont_style: [Detailed description of typography: serif/sans-serif, weight (bold/light/medium), style characteristics]\nvisual_description: [2-3 complete sentences describing the product's appearance, materials, form factor, and key visual elements, excluding background]\n```\n\n## For CHARACTER Analysis:\n```yaml\ntype: character\ncharacter_name: [Character name if identifiable, or \"unknown character\" if not determinable]\ncolor_scheme:\n  - hex: \"#HEXCODE\"\n    name: \"Color name\"\n  - hex: \"#HEXCODE\"\n    name: \"Color name\"\noutfit_style: [Detailed description of clothing, accessories, style period, and distinctive features]\nvisual_description: [2-3 complete sentences describing the character's physical appearance, pose, expression, and notable characteristics, excluding background]\n```\n\n## For BOTH (Product + Character):\n```yaml\ntype: both\nproduct:\n  brand_name: [Brand name or \"unknown\"]\n  color_scheme:\n    - hex: \"#HEXCODE\"\n      name: \"Color name\"\n  font_style: [Typography description]\n  visual_description: [Product description]\ncharacter:\n  character_name: [Character name or \"unknown character\"]\n  color_scheme:\n    - hex: \"#HEXCODE\"\n      name: \"Color name\"\n  outfit_style: [Clothing/style description]\n  visual_description: [Character description]\n```\n\n## Analysis Guidelines:\n- **Color Scheme**: Identify 2-4 most prominent/dominant colors, provide accurate hex codes\n- **Font Style**: Be specific about typography characteristics (e.g., \"Bold sans-serif with rounded corners\" vs just \"bold\")\n- **Visual Descriptions**: Focus on objective, detailed observations; ignore backgrounds completely\n- **Brand/Character Names**: Only include if clearly visible or confidently inferable from context\n- **Output**: Return YAML only, no explanatory text before or after",
+        "inputType": "base64",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        144,
+        -112
+      ],
+      "id": "3560eb5b-cb8e-4e83-abee-ee32bea573f2",
+      "name": "Describe Img",
+      "alwaysOutputData": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a detailed image generation prompt that will produce results matching the reference image with maximum fidelity, particularly ensuring perfect text reproduction.\n\nThese are the user's description:\n {{ $('Start').item.json.[\"image description\"] }}\n\n\n\nDescription of the reference image:{{ $('Describe Img').first().json.choices[0].message.content }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "# UGC Image Prompt Builder\n\n## ROLE & PURPOSE\nGiven a product or reference image, create a short, natural description for AI image/video generation that captures authentic user-generated content (UGC) aesthetics.\n\n## DEFAULT ASSUMPTIONS\n- **Setting**: Place products in everyday environments that naturally suit the item\n- **Style**: Casual UGC realism unless specified otherwise\n- **Demographics**: When people aren't specified, vary gender and ethnicity naturally (default age: 21-38)\n- **Locations**: Prefer real-world spaces (home, street, store, gym, office) unless told otherwise\n\n## UGC REALISM PRINCIPLES\n**Overall Feel**: Unposed and lived-in\n- **Phone-photo aesthetic**: Off-center framing, light motion blur, mixed lighting, slight grain\n- **Embrace imperfections**: Wrinkles, stray hairs, skin texture, cluttered backgrounds\n- **Text accuracy**: Keep all visible packaging text exactly as shown - never invent claims, numbers, or badges\n\n## REQUIRED CAMERA CUES (Use 2-3 minimum)\n- \"phone snapshot\"\n- \"handheld framing\" \n- \"natural indoor light\"\n- \"soft shadows\"\n- \"slight motion blur\"\n- \"auto exposure\"\n- \"unpolished look\"\n- \"mild grain\"\n- \"off-center composition\"\n- \"mixed lighting\"\n\n## SAFETY & SCOPE\n- No copyrighted character names\n- Output image prompts only (no dialogue or scripts)\n\n## OUTPUT FORMAT\nReturn only this JSON structure:\n```json\n{\n  \"image_prompt\": \"[120 words maximum] Plain prose covering: subject, action, mood, setting, style/camera cues, color notes, and text accuracy requirements\"\n}\n```\n\n## EXAMPLES\n\n**Good Example 1:**\n```json\n{\n  \"image_prompt\": \"young adult casually holding a skincare tube near a bathroom mirror; action: dabs a small amount on the back of the hand; mood: easy morning routine; setting: small apartment bathroom with towel on rack and toothbrush cup; style/camera: phone snapshot, handheld framing, off-center composition, natural window light, slight motion blur, mild grain; colors: soft whites and mint green label; text accuracy: keep every word on the tube exactly as visible, no added claims\"\n}\n```\n\n**Good Example 2:**\n```json\n{\n  \"image_prompt\": \"commuter wearing wireless earbuds while opening the charging case; action: steps out of subway exit; mood: in-the-moment; setting: busy sidewalk with passersby and glass reflections; style/camera: unpolished phone photo, auto exposure, mixed daylight and neon glow, gentle lens smudge; colors: charcoal and silver product stands out; text accuracy: preserve logo and model name precisely\"\n}\n```\n\n## AVOID (Bad Examples)\n- Fabricating certifications or numbers on packaging\n- Studio-perfect lighting or ad-speak like \"cinematic masterpiece\"\n- Returning anything other than the required JSON format\n\n## PRE-SEND CHECKLIST\n- ✓ Natural, handheld tone?\n- ✓ At least 2 camera cues included?\n- ✓ Product text preserved exactly?\n- ✓ Only JSON with image_prompt returned?"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        -112
+      ],
+      "id": "d146ac19-ae32-4959-8246-5d1bbe09ef97",
+      "name": "Image Prompt Generator"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "8a310c6c-ab41-4e99-aa3a-086e14b3d466",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -128,
+        -112
+      ]
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Image Prompt Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Image Prompt Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe Img": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Prompt Generator": {
+      "main": [
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image": {
+      "main": [
+        [
+          {
+            "node": "Video Prompt Generator",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Video Prompt Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Prompt Generator": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Video Prompt Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a video": {
+      "main": [
+        []
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Describe Img",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "2dc96994-f3bc-4fa0-9c0f-8ab27a35e7d2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-14T02:42:16.749Z",
+      "updatedAt": "2025-09-14T02:42:16.749Z",
+      "role": "workflow:owner",
+      "workflowId": "6weqeueKKaHHeQOV",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

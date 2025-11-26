@@ -1,0 +1,447 @@
+{
+  "createdAt": "2025-09-14T15:12:50.804Z",
+  "updatedAt": "2025-09-16T17:40:35.000Z",
+  "id": "HqXeSz4mRXC4PNOt",
+  "name": "Extract Instagram Profile Data with Apify and Store in Google Sheets",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=apify_api_Lb527sCnsEJIdzwX8l2Td6yfawp4Du0qTfQV",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"usernames\": [\"{{ $json.username }}\"],\n  \"resultsLimit\": 1\n}\n",
+        "options": {}
+      },
+      "id": "cd6ea4f9-45dc-4193-954a-798a04716c5c",
+      "name": "Scrape Instagram Profile via Apify",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2432,
+        2032
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5dc90212-ac40-4351-a15a-ef9f35ffd389",
+              "name": "username",
+              "type": "string",
+              "value": "={{ $json.username }}"
+            },
+            {
+              "id": "02339555-2d6b-4d20-a59c-2e8dfa63361c",
+              "name": "fullName",
+              "type": "string",
+              "value": "={{ $json.fullName }}"
+            },
+            {
+              "id": "f5a95d72-443d-468a-a1a6-8cc394b93fa4",
+              "name": "followersCount",
+              "type": "number",
+              "value": "={{ $json.followersCount }}"
+            },
+            {
+              "id": "826fe0c8-4fbe-44e7-abf3-8a73022151f2",
+              "name": "followsCount",
+              "type": "number",
+              "value": "={{ $json.followsCount }}"
+            },
+            {
+              "id": "dac8d9cc-5fa8-47d8-859d-d9f164ec20bd",
+              "name": "biography",
+              "type": "string",
+              "value": "={{ $json.biography }}"
+            },
+            {
+              "id": "4c775459-f8f5-43d1-8b1a-aa122413cd12",
+              "name": "profilePicUrl",
+              "type": "string",
+              "value": "={{ $json.profilePicUrlHD }}"
+            },
+            {
+              "id": "238cb88f-8f7e-4a3d-a34e-ff17a13ccdc0",
+              "name": "businessCategory",
+              "value": "={{ $json.businessCategoryName }}",
+              "type": "string"
+            },
+            {
+              "id": "4b7dfe38-cb01-41fc-94d8-66289fff4611",
+              "name": "website",
+              "value": "={{ $json.externalUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "b3abcecf-b2eb-47d1-9127-c1b4d437dbd9",
+              "name": "instagramlink",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e140ffbf-0ca4-4415-8cff-a78dfc6c040b",
+      "name": "Format Instagram Profile Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2832,
+        1968
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1sOoavCvrf0fqJ69JGcPEbepob7zEMSDz581fJ7ZS0DM",
+          "mode": "list",
+          "cachedResultName": "Scraped_Influencer_Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sOoavCvrf0fqJ69JGcPEbepob7zEMSDz581fJ7ZS0DM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1655162993,
+          "mode": "list",
+          "cachedResultName": "instagram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sOoavCvrf0fqJ69JGcPEbepob7zEMSDz581fJ7ZS0DM/edit#gid=1655162993"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Username": "={{ $json.username }}",
+            "Full Name": "={{ $json.fullName }}",
+            "Followers": "={{ $json.followersCount }}",
+            "Following": "={{ $json.followsCount }}",
+            "Bio": "={{ $json.biography }}",
+            "Profile Pic URL": "={{ $json.profilePicUrl }}",
+            "Website": "={{ $json.website }}",
+            "Business Category": "={{ $json.businessCategory }}",
+            "Instagram link ": "={{ $json.instagramlink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Followers",
+              "displayName": "Followers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Following",
+              "displayName": "Following",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Bio",
+              "displayName": "Bio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Profile Pic URL",
+              "displayName": "Profile Pic URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Business Category",
+              "displayName": "Business Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Instagram link ",
+              "displayName": "Instagram link ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "9c4f528b-c5c9-4f0b-92c4-1f9d75532fc4",
+      "name": "Append Profile to Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3072,
+        1968
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### 🔹 **1. `Trigger: On Form Submission`**\n\n* **Node Type:** Manual Trigger (or Webhook if embedded in a real form)\n* **Purpose:** Starts the workflow when a user submits a form with an Instagram username\n* **Expected Input:**\n\n  ```json\n  {\n    \"username\": \"influencer_1\"\n  }\n  ```\n\n---\n\n### 🔹 **2. `Scrape Instagram Profile via Apify`**\n\n* **Node Type:** HTTP Request\n\n* **Method:** `POST`\n\n* **URL:**\n\n  ```plaintext\n  https://api.apify.com/v2/actor-tasks/<TASK_ID>/run-sync-get-dataset-items?token=<API_TOKEN>\n  ```\n\n* **Headers:**\n\n  ```json\n  {\n    \"Content-Type\": \"application/json\"\n  }\n  ```\n\n* **Body Parameters:**\n\n  ```json\n  {\n    \"input\": {\n      \"usernames\": [\"={{ $json.username }}\"]\n    }\n  }\n  ```\n\n* **Sample Output from Apify:**\n\n  ```json\n  [\n    {\n      \"username\": \"influencer_1\",\n      \"fullName\": \"Jane Doe\",\n      \"followersCount\": 12500,\n      \"followsCount\": 320,\n      \"biography\": \"Travel | Lifestyle 🌍\",\n      \"profilePicUrl\": \"https://instagram.com/path/to/pic.jpg\",\n      \"isPrivate\": false,\n      \"isVerified\": true,\n      \"externalUrl\": \"https://janedoe.com\"\n    }\n  ]\n  ```\n\n✅ **Result:** The username submitted from the form is scraped in real time using Apify’s Instagram actor, and the result is passed to the next step.",
+        "height": 2172,
+        "width": 500,
+        "color": 3
+      },
+      "id": "1980e973-f240-4b55-a4b8-4faa36f78c42",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2048,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ✨ SECTION 2: 🛠 Format Data + 📊 Append to Google Sheets\n\n### 🔹 **3. `Format Instagram Profile Data`**\n\n* **Node Type:** Set\n* **Purpose:** Clean and organize the Apify response to match your Google Sheets schema\n* **Fields to Set:**\n\n  | Field Name        | Value                      |\n  | ----------------- | -------------------------- |\n  | `Username`        | `{{$json.username}}`       |\n  | `Full Name`       | `{{$json.fullName}}`       |\n  | `Followers`       | `{{$json.followersCount}}` |\n  | `Following`       | `{{$json.followsCount}}`   |\n  | `Bio`             | `{{$json.biography}}`      |\n  | `Profile Pic URL` | `{{$json.profilePicUrl}}`  |\n  | `Website`         | `{{$json.externalUrl}}`    |\n\n✅ **Result:** The data is transformed into a clean format suitable for logging or outreach tracking.\n\n---\n\n### 🔹 **4. `Append Profile to Google Sheet`**\n\n* **Node Type:** Google Sheets (Append Row)\n* **Setup:**\n\n  * **Sheet Name:** `Scraped_Influencer_Data`\n  * **Columns:** Username, Full Name, Followers, Following, Bio, Profile Pic URL, Website\n* **Purpose:** Stores the formatted data into a centralized Google Sheet for future reference or outreach\n\n✅ **Result:** Your influencer data is persistently stored and ready to be used for marketing, analytics, or CRM integration.\n\n---\n\n## ✅ Final Workflow Summary\n\n```plaintext\n[Form Trigger] \n   ⬇️\n[Apify HTTP Request] \n   ⬇️\n[Format Fields]\n   ⬇️\n[Google Sheet Append]\n```",
+        "height": 1856,
+        "width": 500,
+        "color": 6
+      },
+      "id": "9c341b28-0385-4691-904b-8fa8d8e0b213",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2768,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "=======================================\n            WORKFLOW ASSISTANCE\n=======================================\nFor any questions or support, please contact:\n    Yaron@nofluff.online\n\nExplore more tips and tutorials here:\n   - YouTube: https://www.youtube.com/@YaronBeen/videos\n   - LinkedIn: https://www.linkedin.com/in/yaronbeen/\n=======================================\n",
+        "height": 320,
+        "width": 1300,
+        "color": 4
+      },
+      "id": "1552dfc6-f98c-45e1-bb18-071fbb69a159",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# 🧠 **Workflow Overview: Instagram Profile Scraper using Apify & Google Sheets in n8n**\n\n## 🔍 **Purpose**\n\nThis n8n automation workflow allows you to **scrape Instagram profile data** using the **Apify Instagram Scraper** and **store the results in Google Sheets** for marketing, outreach, or analytics. It's designed to be simple, efficient, and extendable — ideal for influencer marketers, social analysts, or growth teams who want actionable Instagram data without writing code.\n\n---\n\n## 🧩 **Core Workflow Logic**\n\n### 💡 What It Does\n\n1. **Receives an Instagram username** (via form or manual trigger)\n2. **Sends the username to Apify** to scrape public profile data\n3. **Extracts key details** (followers, bio, profile pic, etc.)\n4. **Appends the cleaned data** to a structured Google Sheet\n\n---\n\n## 🏗️ **Workflow Structure & Components**\n\n## 📊 **Data Flow Example**\n\n### 🔸 **Input (Submitted via Form or Manual Trigger):**\n\n```json\n{\n  \"username\": \"influencer_1\"\n}\n```\n\n### 🔹 **Output (Saved to Google Sheets):**\n\n| Username      | Full Name | Followers | Following | Bio    | Profile Pic URL | Website                                                        |                                            |\n| ------------- | --------- | --------- | --------- | ------ | --------------- | -------------------------------------------------------------- | ------------------------------------------ |\n| influencer\\_1 | Jane Doe  | 12,500    | 320       | Travel | Lifestyle 🌍    | [https://instagram.com/pic.jpg](https://instagram.com/pic.jpg) | [https://janedoe.com](https://janedoe.com) |\n\n---\n\n## 🛠️ **Built With**\n\n* [n8n](https://n8n.io/) – Open-source workflow automation\n* [Apify](https://apify.com/) – Instagram Profile Scraper actor\n* Google Sheets (native integration via n8n)\n\n---\n\n## 🔐 **Authentication & API Notes**\n\n* **Apify Token**: Required in the HTTP Request URL\n* **Google Sheets Access**: OAuth2 credentials configured in n8n\n* **Security Tip**: Store secrets as [n8n environment variables](https://docs.n8n.io/hosting/environment-variables/)\n\n---\n\n## 💼 **Real-World Use Cases**\n\n| Use Case                  | Description                                                   |\n| ------------------------- | ------------------------------------------------------------- |\n| 👩‍💼 Influencer Outreach | Automatically collect Instagram metrics for campaign planning |\n| 📊 Competitor Analysis    | Track follower growth and bio updates for competitors         |\n| 📋 CRM Enrichment         | Enrich influencer records with live Instagram data            |\n\n---\n\n## 🚀 **Enhancements & Ideas**\n\n* 🔁 **Loop from Google Sheets:** Read a batch of usernames and scrape in loop\n* 🚫 **Avoid Duplicates:** Add an `IF` node to skip usernames already scraped\n* 📩 **Send Slack/Email Alerts** when new data is added\n* 🧠 **Filter Low Engagement Accounts** (e.g., if followers < 1,000)\n\n---\n\n## 📸 **Visual Workflow Map**\n\n```plaintext\n[Trigger: On Form Submission]\n          ⬇️\n[Scrape Instagram Profile via Apify]\n          ⬇️\n[Format Instagram Profile Data]\n          ⬇️\n[Append Profile to Google Sheet]\n```\n\n---\n\n## 🧾 **Conclusion**\n\nThis workflow is a **powerful no-code solution** to streamline the process of gathering Instagram profile data. It integrates the flexibility of n8n, the scraping power of Apify, and the accessibility of Google Sheets to form a seamless automation — perfect for creators, marketers, and analysts.\n\n",
+        "height": 2514,
+        "width": 1289,
+        "color": 4
+      },
+      "id": "91ca76cf-d9dd-489c-a9de-357c876d00e2",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1888,
+        2064
+      ],
+      "id": "21e2b0bf-2482-4e62-9c1f-231587448a5d",
+      "name": "When Executed by Another Workflow",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Helpers\nconst coalesce = (...xs) => {\n  for (const x of xs) {\n    if (x !== undefined && x !== null && String(x).trim() !== \"\") return x;\n  }\n  return \"\";\n};\nconst num = (v) => {\n  if (v === undefined || v === null || v === \"\") return 0;\n  const n = Number(String(v).replace(/[, ]+/g, \"\"));\n  return Number.isFinite(n) ? n : 0;\n};\n\n// Source\nconst src = $json;              // current item (Apify output mapped into n8n)\n\n// Pull values with sensible fallbacks\nconst username         = coalesce(src.Username, src.username, src.handle);\nconst fullName         = coalesce(src[\"Full Name\"], src.fullName, src.name);\nconst followers        = num(coalesce(src.Followers, src.followers, src.followersCount));\nconst following        = num(coalesce(src.Following, src.following, src.followsCount));\nconst bio              = coalesce(src.Bio, src.biography, src.bio);\nconst profilePicUrl    = coalesce(src[\"Profile Pic URL\"], src.profilePicUrl, src.avatar, src.photoUrl);\nconst website          = coalesce(src.Website, src.website, src.externalUrl, src.url);\nconst businessCategory = coalesce(src[\"Business Category\"], src.businessCategory, src.category);\nconst igLink           = coalesce(src[\"Instagram link \"], src[\"Instagram link\"], src.instagramLink,\n                                  username ? `https://www.instagram.com/${String(username).replace(/^@/, \"\")}/` : \"\");\n\n// Return EXACT shape required\nreturn [\n  {\n    json: {\n      \"Username\": username || \"\",\n      \"Full Name\": fullName || \"\",\n      \"Followers\": followers,\n      \"Following\": following,\n      \"Bio\": bio || \"\",\n      \"Profile Pic URL\": profilePicUrl || \"\",\n      \"Website\": website || \"\",\n      \"Business Category\": businessCategory || \"\",\n      \"Instagram link \": igLink || \"\"\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3280,
+        2000
+      ],
+      "id": "1efbe8fc-f415-4d6b-b5ce-40fb20266a80",
+      "name": "Code"
+    }
+  ],
+  "connections": {
+    "Format Instagram Profile Data": {
+      "main": [
+        [
+          {
+            "node": "Append Profile to Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Instagram Profile via Apify": {
+      "main": [
+        [
+          {
+            "node": "Format Instagram Profile Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Scrape Instagram Profile via Apify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Profile to Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": {
+    "templateId": "4587",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "aae33484-32ab-4be0-83ac-cf6a04a60398",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-14T15:12:50.810Z",
+      "updatedAt": "2025-09-14T15:12:50.810Z",
+      "role": "workflow:owner",
+      "workflowId": "HqXeSz4mRXC4PNOt",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

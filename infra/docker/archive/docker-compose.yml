@@ -1,0 +1,92 @@
+name: meta
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+    ports:
+      - "${TRAEFIK_HTTP:-80}:80"
+      - "${TRAEFIK_HTTPS:-443}:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [edge]
+    profiles: ["proxy"]
+
+  lfa-web:
+    image: node:20
+    working_dir: /app
+    command: ["bash","-lc","pnpm i && pnpm start"]
+    volumes: ["./apps/lightningflow:/app"]
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lfa-web.rule=Host(`${LFA_HOST:-localhost}`)"
+      - "traefik.http.services.lfa-web.loadbalancer.server.port=3000"
+    networks: [edge, lfa]
+    profiles: ["lfa"]
+    healthcheck:
+      test: ["CMD","curl","-fsS","http://localhost:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 8
+
+  lfa-api:
+    image: node:20
+    working_dir: /app
+    command: ["bash","-lc","pnpm i && pnpm run api"]
+    volumes: ["./apps/lightningflow:/app"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lfa-api.rule=Host(`${LFA_API_HOST:-api.localhost}`)"
+      - "traefik.http.services.lfa-api.loadbalancer.server.port=4000"
+    networks: [edge, lfa]
+    profiles: ["lfa"]
+
+  n8n-ui:
+    image: n8nio/n8n:1.69.0
+    environment:
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_WEBHOOK_HOST:-hooks.localhost}/
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-your-encryption-key}
+      - N8N_PORT=5678
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./apps/n8n-cursor/workflows:/workflows:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`${N8N_HOST:-localhost}`)"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+    networks: [edge, n8n]
+    profiles: ["n8n"]
+
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=${PGUSER:-postgres}
+      - POSTGRES_PASSWORD=${PGPASSWORD:-password}
+      - POSTGRES_DB=${PGDATABASE:-lightningflow}
+    volumes: [pg_data:/var/lib/postgresql/data]
+    ports: ["${PG_MAIN:-5432}:5432"]
+    networks: [core]
+    profiles: ["lfa","n8n"]
+
+  redis:
+    image: redis:7
+    command: ["redis-server","--appendonly","yes"]
+    ports: ["${REDIS_MAIN:-6380}:6379"]
+    networks: [core]
+    profiles: ["lfa"]
+
+networks:
+  edge: { driver: bridge }
+  core: { driver: bridge }
+  lfa:  { driver: bridge }
+  n8n:  { driver: bridge }
+
+volumes:
+  n8n_data:
+  pg_data:

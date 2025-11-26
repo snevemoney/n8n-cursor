@@ -1,0 +1,30 @@
+
+
+services:
+  caddy-prod:
+    image: caddy:2-alpine
+    container_name: lightningflow-caddy-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile.prod.tpl:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - PRIMARY_DOMAIN=lightningflow.online
+      - API_UPSTREAM=127.0.0.1:4000
+      - LOGS_UPSTREAM=127.0.0.1:9001
+      - IDE_UPSTREAM=127.0.0.1:8443
+    networks:
+      - caddy-prod
+    # Simplified for immediate functionality
+
+networks:
+  caddy-prod:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

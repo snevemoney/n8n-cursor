@@ -1,0 +1,18 @@
+[Unit]
+Description=n8n Original Service (Protected from Docker)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=n8n
+Group=n8n
+WorkingDirectory=/home/n8n
+Environment=N8N_USER_FOLDER=/home/n8n/.n8n
+Environment=N8N_PORT=5678
+ExecStart=/usr/bin/n8n
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

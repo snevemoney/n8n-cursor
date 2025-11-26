@@ -1,0 +1,259 @@
+{
+  "name": "A. Classifier (bins-classify)",
+  "nodes": [
+    {
+      "id": "Google_Drive_Trigger",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {
+        "folderId": "GOOGLE_DRIVE_INTAKE_FOLDER_ID",
+        "options": {
+          "includeSubfolders": false
+        }
+      }
+    },
+    {
+      "id": "Switch_File_Type",
+      "name": "Switch by file type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [460, 200],
+      "parameters": {
+        "propertyName": "mimeType",
+        "rules": {
+          "values": [
+            {
+              "operation": "contains",
+              "value": "image/"
+            },
+            {
+              "operation": "contains",
+              "value": "application/pdf"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Drive_Download_PNG",
+      "name": "Google Drive: Download PNG",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [700, 120],
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{$json.id}}",
+        "options": {
+          "download": true
+        }
+      }
+    },
+    {
+      "id": "Drive_Download_PDF",
+      "name": "Google Drive: Download PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [700, 280],
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{$json.id}}",
+        "options": {
+          "download": true
+        }
+      }
+    },
+    {
+      "id": "Tesseract_OCR_PNG",
+      "name": "Tesseract OCR → text (PNG)",
+      "type": "n8n-nodes-base.tesseractOcr",
+      "typeVersion": 1,
+      "position": [940, 120],
+      "parameters": {
+        "operation": "ocr",
+        "imagePropertyName": "data",
+        "options": {
+          "preserveInterwordSpaces": true,
+          "splitPages": false
+        }
+      }
+    },
+    {
+      "id": "LlamaIndex_PDF",
+      "name": "LlamaIndex API (PDF)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [940, 280],
+      "parameters": {
+        "url": "https://api.llamaindex.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_LLAMAINDEX_API_KEY"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "llama-3.1-8b-instruct"
+            },
+            {
+              "name": "messages",
+              "value": "[{\"role\": \"user\", \"content\": \"Extract all text from this PDF document: {{$json.data}}\"}]"
+            },
+            {
+              "name": "max_tokens",
+              "value": "4000"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "Wait_Poll_Logic",
+      "name": "Wait/Poll Logic",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1180, 200],
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "Code_Classify",
+      "name": "Code: classify + id_number",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1420, 200],
+      "parameters": {
+        "functionCode": "// Heuristic classification + id_number\nconst text = ($json.text || $json.choices?.[0]?.message?.content || '').toLowerCase();\nconst job_id = $json.job_id || (\"jb_\" + Date.now());\nconst bins = [\n  {bin:'CONTRACT',   kw:['loan agreement','governing law','borrower','lender']},\n  {bin:'BANKING',    kw:['void cheque','transit','institution','account number','bank statement']},\n  {bin:'CARFAX',     kw:['carfax','vehicle history','odometer','accident']},\n  {bin:'DEALER BOS', kw:['bill of sale','sale price','dealer','purchase price']},\n  {bin:'INSURANCE',  kw:['policy','binder','coverage','deductible','insured']},\n  {bin:'PPSA',       kw:['ppsa','financing statement','registration']},\n  {bin:'UCC',        kw:['ucc','filing number','secured party']},\n  {bin:'OWNERSHIP',  kw:['certificate of title','plate','owner']} \n];\nlet best='MISC', score=0;\nfor (const b of bins){ const s=b.kw.reduce((c,k)=>c+(text.includes(k)?1:0),0); if(s>score){score=s;best=b.bin;} }\nconst idnum = ( ($json.text||'').match(/\\b(?:agreement|contract)\\s*(?:no\\.?|number|#)\\s*[:\\-]?\\s*([A-Z0-9\\-\\/]+)/i)?.[1] || '' ).trim();\nreturn [{ json: { job_id, bin: score?best:'UNASGD FAX', confidence: score? Math.min(1, 0.3 + score*0.15):0.1, id_number:idnum, file_url: `https://drive.google.com/uc?id=${$items(1)[0].json.id}` } }];"
+      }
+    },
+    {
+      "id": "Code_Response",
+      "name": "Code: build response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1660, 200],
+      "parameters": {
+        "functionCode": "// Build response with file_url\nconst fileId = $items(1)[0].json.id; // from Google Drive Trigger\nconst fileUrl = `https://drive.google.com/uc?id=${fileId}`;\nconst out = { ...$json, file_url: fileUrl };\nreturn [{ json: out }];"
+      }
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch by file type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch by file type": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Download PNG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Drive: Download PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Download PNG": {
+      "main": [
+        [
+          {
+            "node": "Tesseract OCR → text (PNG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Download PDF": {
+      "main": [
+        [
+          {
+            "node": "LlamaIndex API (PDF)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tesseract OCR → text (PNG)": {
+      "main": [
+        [
+          {
+            "node": "Wait/Poll Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LlamaIndex API (PDF)": {
+      "main": [
+        [
+          {
+            "node": "Wait/Poll Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait/Poll Logic": {
+      "main": [
+        [
+          {
+            "node": "Code: classify + id_number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: classify + id_number": {
+      "main": [
+        [
+          {
+            "node": "Code: build response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

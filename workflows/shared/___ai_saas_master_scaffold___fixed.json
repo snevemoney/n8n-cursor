@@ -1,0 +1,398 @@
+{
+  "createdAt": "2025-08-18T23:05:00.081Z",
+  "updatedAt": "2025-09-13T20:09:10.000Z",
+  "id": "ZstAlMepeID4WSED",
+  "name": "🚀 AI SaaS Master Scaffold - Fixed",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-saas-hook",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "🌐 Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        400
+      ],
+      "webhookId": "ai-saas-master-fixed",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "action-field",
+              "name": "action",
+              "value": "={{ $json.action || $('🌐 Webhook Trigger').first().query.action || 'default' }}",
+              "type": "string"
+            },
+            {
+              "id": "prompt-field",
+              "name": "prompt",
+              "value": "={{ $json.prompt || 'Hello from Enhanced n8n Workflow!' }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp-field",
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "request-id-field",
+              "name": "requestId",
+              "value": "={{ $runIndex + '_' + Date.now() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "prep-payload",
+      "name": "📦 Prepare Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "router",
+      "name": "🔀 API Router",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.7
+        }
+      },
+      "id": "openai-request",
+      "name": "🤖 OpenAI Chat",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        880,
+        208
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "OpenAI account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "workflow_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "request_id",
+              "fieldValue": "={{ $json.requestId }}"
+            },
+            {
+              "fieldId": "action",
+              "fieldValue": "={{ $json.action }}"
+            },
+            {
+              "fieldId": "prompt",
+              "fieldValue": "={{ $json.prompt }}"
+            },
+            {
+              "fieldId": "timestamp",
+              "fieldValue": "={{ $json.timestamp }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            }
+          ]
+        }
+      },
+      "id": "supabase-request",
+      "name": "🗄️ Supabase Insert",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        944,
+        400
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "supabaseApi": {
+          "id": "np29Ffzvm2iBlvRQ",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {}
+      },
+      "id": "discord-request",
+      "name": "💬 Discord Notify",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        944,
+        592
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "webhookId": "9f702864-913d-4788-a9e7-9ff4cb7062a6",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "input2"
+      },
+      "id": "merge-results",
+      "name": "🔄 Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1232,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced response assembly with error handling\ntry {\n  const items = $input.all();\n  const originalData = items[0]?.json || {};\n  \n  const response = {\n    success: true,\n    requestId: originalData.requestId,\n    action: originalData.action || 'unknown',\n    timestamp: originalData.timestamp || new Date().toISOString(),\n    results: {},\n    errors: []\n  };\n  \n  // Process OpenAI response\n  const openaiResults = $('🤖 OpenAI Chat').all();\n  if (openaiResults.length > 0) {\n    const openaiData = openaiResults[0];\n    if (openaiData.json?.message) {\n      response.results.openai = {\n        success: true,\n        message: openaiData.json.message,\n        model: openaiData.json.model || 'gpt-4o-mini'\n      };\n    } else if (openaiData.error) {\n      response.errors.push({\n        service: 'openai',\n        error: openaiData.error.message || 'Unknown OpenAI error'\n      });\n    }\n  }\n  \n  // Process Supabase response\n  const supabaseResults = $('🗄️ Supabase Insert').all();\n  if (supabaseResults.length > 0) {\n    const supabaseData = supabaseResults[0];\n    if (supabaseData.json && !supabaseData.error) {\n      response.results.supabase = {\n        success: true,\n        status: 'inserted',\n        recordId: supabaseData.json.id || 'unknown'\n      };\n    } else if (supabaseData.error) {\n      response.errors.push({\n        service: 'supabase',\n        error: supabaseData.error.message || 'Unknown Supabase error'\n      });\n    }\n  }\n  \n  // Process Discord response\n  const discordResults = $('💬 Discord Notify').all();\n  if (discordResults.length > 0) {\n    const discordData = discordResults[0];\n    if (discordData.json && !discordData.error) {\n      response.results.discord = {\n        success: true,\n        status: 'notified',\n        messageId: discordData.json.id || 'sent'\n      };\n    } else if (discordData.error) {\n      response.errors.push({\n        service: 'discord',\n        error: discordData.error.message || 'Unknown Discord error'\n      });\n    }\n  }\n  \n  // Set overall success based on errors\n  response.success = response.errors.length === 0;\n  response.totalServices = Object.keys(response.results).length;\n  response.executionTime = Date.now() - new Date(response.timestamp).getTime();\n  \n  return [{ json: response }];\n  \n} catch (error) {\n  return [{\n    json: {\n      success: false,\n      error: 'Response assembly failed: ' + error.message,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "assemble-response",
+      "name": "📋 Assemble Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "✅ Respond JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1680,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "🌐 Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "📦 Prepare Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📦 Prepare Payload": {
+      "main": [
+        [
+          {
+            "node": "🔀 API Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 API Router": {
+      "main": [
+        [
+          {
+            "node": "🤖 OpenAI Chat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🗄️ Supabase Insert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "💬 Discord Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 OpenAI Chat": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗄️ Supabase Insert": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "💬 Discord Notify": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Results",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "🔄 Merge Results": {
+      "main": [
+        [
+          {
+            "node": "📋 Assemble Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Assemble Response": {
+      "main": [
+        [
+          {
+            "node": "✅ Respond JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "31c31850-3e16-4e0c-a766-b16ddf40bbcc",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-18T23:05:00.091Z",
+      "updatedAt": "2025-08-18T23:05:00.091Z",
+      "role": "workflow:owner",
+      "workflowId": "ZstAlMepeID4WSED",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

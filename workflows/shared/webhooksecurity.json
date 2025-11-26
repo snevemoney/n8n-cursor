@@ -1,0 +1,809 @@
+{
+  "createdAt": "2025-10-17T15:59:37.022Z",
+  "updatedAt": "2025-10-17T18:45:52.000Z",
+  "id": "g4dFy2xBn0kHMOMF",
+  "name": "webhookSecurity",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        896,
+        320
+      ],
+      "id": "f0acf05e-a262-4971-ae47-226c9b869521",
+      "name": "New Ticket"
+    },
+    {
+      "parameters": {
+        "content": "## Development\n",
+        "height": 192,
+        "width": 176,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        624
+      ],
+      "typeVersion": 1,
+      "id": "62b68587-6ec9-4485-a0b4-dd32dbf24420",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Production\n",
+        "height": 192,
+        "width": 176,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        848
+      ],
+      "typeVersion": 1,
+      "id": "3c5e54df-29a4-4855-bd54-fb4eca2d62c0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ $json[\"headers\"][\"x-zendesk-webhook-signature-timestamp\"] + $json[\"rawBody\"] }}",
+        "encoding": "base64"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        176,
+        672
+      ],
+      "id": "757a4d1a-4d7e-4b10-911e-0848d5a8b060",
+      "name": "Crypto",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Sender Signature\n",
+        "height": 192,
+        "width": 512,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        624
+      ],
+      "typeVersion": 1,
+      "id": "f5c8dbd9-88fb-4ac7-8491-ea1ab200035f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Payload\n",
+        "height": 192,
+        "width": 176,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "cc01483a-18d1-4b82-bce4-0905de56c637",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fbc272b2-9749-4faf-9898-f72e27367b9c",
+              "leftValue": "={{$json[\"data\"]}}",
+              "rightValue": "={{ $('Dev Webhook').item.json.headers[\"x-zendesk-webhook-signature\"] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        672
+      ],
+      "id": "1abd610c-1283-4631-9fd5-42c2e0306a48",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c46ec335-bbfb-4a08-9d2f-c1ce655e3305",
+              "leftValue": "={{ $('Dev Webhook').item.json.body.type }}",
+              "rightValue": "=zen:event-type:ticket.created",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        496
+      ],
+      "id": "458ecd5f-f5b7-44dc-9c94-692e7ae2afed",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the binary section from the current item\nconst binary = items[0].binary.data;\n\n// Decode the base64 string into raw JSON text\nconst rawBody = Buffer.from(binary.data, 'base64').toString();\n\nreturn {\n  json: {\n    rawBody,                 // exact raw JSON Zendesk signed\n    headers: items[0].json.headers // keep headers for signature compare\n  }\n};\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        672
+      ],
+      "id": "cd179787-1351-4e51-854f-aa521259b989",
+      "name": "Code"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        592,
+        832
+      ],
+      "id": "713e4510-29b3-42d4-b548-a1c84a32ae93",
+      "name": "Fail Signature"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        896,
+        624
+      ],
+      "id": "8631085d-aa32-48d2-935d-74cd97274024",
+      "name": "Fail Data"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        800,
+        832
+      ],
+      "id": "fa5a86ff-01a8-44fa-bcdd-09bbb35312b6",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9ab97d04-f4aa-4b5c-b46a-fc4d24199fbb",
+        "authentication": "headerAuth",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        912
+      ],
+      "id": "b2a8fedb-f1fd-4e56-9428-343ea5da8914",
+      "name": "Prod Webhook",
+      "webhookId": "9ab97d04-f4aa-4b5c-b46a-fc4d24199fbb",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xvpDtEBHjVdANmIn",
+          "name": "video"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9ab97d04-f4aa-4b5c-b46a-fc4d24199fbb",
+        "authentication": "headerAuth",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        672
+      ],
+      "id": "7aa9fcb5-4cdc-4a23-95ee-2af9170259ca",
+      "name": "Dev Webhook",
+      "webhookId": "9ab97d04-f4aa-4b5c-b46a-fc4d24199fbb",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "iI3txd1gBkkRDJWR",
+          "name": "evens"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Environment\n- Supabase\n- Customer Data",
+        "height": 128,
+        "width": 176,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        1056
+      ],
+      "typeVersion": 1,
+      "id": "2f361958-41b3-442e-87d2-19c4db03156a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Environment\n- Google Sheets\n- Dummy data",
+        "height": 128,
+        "width": 176,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "eb6948fe-e5b1-4e02-9b73-317b78ebdf45",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## What we will cover\n- Server Security\n- Webhook Security\n- Workflow Security",
+        "height": 192,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -528,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "6c69349d-a6bc-4861-bcfc-2a19a5befc0d",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Purpose\n- Format\n- API Costs\n- Customer Issues\n- DB Integrity\n",
+        "width": 176,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        272
+      ],
+      "typeVersion": 1,
+      "id": "c7ae5436-9b0d-461b-b54a-e9b67e1770c3",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1072,
+        624
+      ],
+      "id": "8ae0d83e-1023-425e-982c-86254d937387",
+      "name": "Append row in sheet",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        320
+      ],
+      "id": "bc4eb4a6-f48d-4d21-afd6-fcd7b44c034d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        480
+      ],
+      "id": "9dbe39cf-7b92-4ad2-99e0-709964f2b8ee",
+      "name": "OpenAI Chat Model",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1424,
+        320
+      ],
+      "id": "278f6251-90a3-46d5-8abe-dea9ba6a0576",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Risk Mitigation\n- Who is it\n- Change URL\n- Change Auth\n",
+        "height": 176,
+        "width": 192,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        768,
+        992
+      ],
+      "typeVersion": 1,
+      "id": "de3a201b-86cf-45f7-95da-3ae73800274e",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## HMAC Signature\nHMAC = Hash-based Message Authentication Code\nExamples: Stripe, GitHub, Twilio use HMAC.\n\nIt’s a way to prove:\n- The message hasn’t been tampered with (integrity).\n- The message really came from who you think (authenticity).",
+        "height": 208,
+        "width": 512,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "4f617667-d473-4d9f-b4fc-2bcccbb59a77",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "## Timestamp\n",
+        "height": 192,
+        "width": 176,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "bb9a0f0b-5db5-48b5-aa6e-eb39610c0aaa",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c46ec335-bbfb-4a08-9d2f-c1ce655e3305",
+              "leftValue": "={{ $('Dev Webhook').item.json.body.type }}",
+              "rightValue": "=zen:event-type:ticket.created",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        224
+      ],
+      "id": "9583652e-4815-4cc7-86e7-e8ad4da3bc6b",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "content": "## Purpose\n- Only handle within a certain window",
+        "height": 144,
+        "width": 176,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "badb8a69-4c5a-4f5f-a048-fafe81c16b3a",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "## Event ID\n",
+        "height": 192,
+        "width": 176,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "5f78db1b-b52f-481d-9b62-e366e174795b",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## Purpose\n- Don't process duplicate Calls\n- Eg log event ID and check",
+        "height": 144,
+        "width": 176,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "5d52be86-8ff2-497b-9f83-047bfd714f61",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c46ec335-bbfb-4a08-9d2f-c1ce655e3305",
+              "leftValue": "={{ $('Dev Webhook').item.json.body.type }}",
+              "rightValue": "=zen:event-type:ticket.created",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        224
+      ],
+      "id": "01c8098b-3929-4ed0-9dd6-2a8cc4a4d429",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "path": "3702d1cc-f548-4a32-8e33-0cb4e353f50d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        1696
+      ],
+      "id": "4267bab0-90ac-470a-b730-9f6da3ac0759",
+      "name": "Webhook",
+      "webhookId": "3702d1cc-f548-4a32-8e33-0cb4e353f50d"
+    }
+  ],
+  "connections": {
+    "Crypto": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fail Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "New Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fail Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fail Signature": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dev Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fail Data": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Ticket": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "6cc1187b-f12b-4559-960c-69e715a68bef",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-17T15:59:37.030Z",
+      "updatedAt": "2025-10-17T15:59:37.030Z",
+      "role": "workflow:owner",
+      "workflowId": "g4dFy2xBn0kHMOMF",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

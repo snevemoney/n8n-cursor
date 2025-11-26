@@ -1,0 +1,234 @@
+{
+  "name": "Backup & Restore System",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/backup",
+        "httpMethod": "POST"
+      },
+      "id": "backup-webhook-entry",
+      "name": "Backup Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different backup operations\nconst backupAction = $input.item.json.body?.action || 'schedule-daily';\n\nreturn {\n  json: {\n    action: backupAction,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "route-backup-action",
+      "name": "Route Backup Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "schedule-daily-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "schedule-daily",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "restore-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "restore",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "list-backups-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "list-backups",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "if-backup-action",
+      "name": "Route by Backup Action",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Schedule daily automated backup\nconst cronExpression = '0 2 * * *'; // 2 AM daily\nconst targetDirectory = '/backups/postgres';\n\nreturn {\n  json: {\n    schedule: {\n      cron: cronExpression,\n      description: 'Daily backup at 2 AM'\n    },\n    targetDirectory,\n    retentionDays: 30\n  }\n};"
+      },
+      "id": "schedule-daily-backup",
+      "name": "Schedule Daily Backup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  bs.backup_id,\n  bs.created_at,\n  bs.file_path,\n  bs.size_mb\nFROM backup_schedules bs\nWHERE bs.tenant_id = $1\nORDER BY bs.created_at DESC\nLIMIT 10;",
+        "additionalFields": {
+          "queryParameters": "={{ `{\"$1\": $json.data.tenantId}` }}"
+        }
+      },
+      "id": "list-backups",
+      "name": "List Backups",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        900,
+        150
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Restore from backup\nconst backupId = $json.data.backupId;\nconst database = 'postgres';\n\nreturn {\n  json: {\n    action: 'restore',\n    backupId,\n    database,\n    status: 'initiating',\n    estimatedTime: '5-10 minutes'\n  }\n};"
+      },
+      "id": "restore-backup",
+      "name": "Restore from Backup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-backup",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Backup Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Route Backup Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Backup Action": {
+      "main": [
+        [
+          {
+            "node": "Route by Backup Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Backup Action": {
+      "main": [
+        [
+          {
+            "node": "Schedule Daily Backup",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Backups",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Restore from Backup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Daily Backup": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Backups": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore from Backup": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-20T10:00:00.000Z",
+      "updatedAt": "2024-01-20T10:00:00.000Z",
+      "id": "backup",
+      "name": "Backup"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-20T10:00:00.000Z",
+  "versionId": "1"
+}
+

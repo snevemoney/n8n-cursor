@@ -1,0 +1,428 @@
+{
+  "createdAt": "2025-08-21T14:52:06.232Z",
+  "updatedAt": "2025-08-21T14:52:06.232Z",
+  "id": "6cpzujFinlhLis52",
+  "name": "Custom AI Model Monetization API",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-model-prediction",
+      "name": "Model Prediction Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "predict/{{ $parameter[\"model_id\"] }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "validate-api-access",
+      "name": "Validate API Access",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const request = $input.first().json;\nconst headers = $input.first().headers;\n\n// Extract API key\nconst apiKey = headers['x-api-key'] || headers['authorization']?.replace('Bearer ', '');\n\nif (!apiKey) {\n  throw new Error('API key required');\n}\n\n// Extract model ID from URL parameters\nconst modelId = $input.first().params.model_id;\n\nif (!modelId) {\n  throw new Error('Model ID required');\n}\n\nreturn {\n  api_key: apiKey,\n  model_id: modelId,\n  input_data: request,\n  timestamp: new Date().toISOString()\n};"
+      }
+    },
+    {
+      "id": "check-model-access",
+      "name": "Check Model Access Rights",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT m.*, u.id as user_id, u.plan_type, u.api_calls_remaining FROM model_marketplace m JOIN api_keys ak ON m.owner_id = ak.user_id OR ak.user_id IN (SELECT customer_id FROM model_purchases WHERE model_id = m.id) JOIN users u ON ak.user_id = u.id WHERE ak.api_key = '{{ $json.api_key }}' AND m.model_id = '{{ $json.model_id }}' AND m.status = 'active'"
+      }
+    },
+    {
+      "id": "validate-usage-limits",
+      "name": "Validate Usage Limits",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const accessData = $input.first().json;\n\nif (!accessData || accessData.length === 0) {\n  throw new Error('No access to this model or invalid API key');\n}\n\nconst modelData = accessData[0];\n\n// Check if user has remaining API calls\nif (modelData.api_calls_remaining <= 0) {\n  throw new Error('API call limit exceeded. Please upgrade your plan.');\n}\n\n// Check model availability\nif (modelData.status !== 'active') {\n  throw new Error('Model is currently unavailable');\n}\n\nreturn {\n  user_id: modelData.user_id,\n  model_id: modelData.model_id,\n  model_url: modelData.model_url,\n  model_type: modelData.model_type,\n  price_per_call: modelData.price_per_call || 0.05,\n  input_data: $node['Validate API Access'].json.input_data,\n  api_calls_remaining: modelData.api_calls_remaining\n};"
+      }
+    },
+    {
+      "id": "call-replicate-model",
+      "name": "Call Replicate Model",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $json.model_url }}/predictions",
+        "headers": {
+          "Authorization": "Token {{ $credentials.replicate.api_token }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "input": "={{ $json.input_data }}"
+        }
+      }
+    },
+    {
+      "id": "track-usage",
+      "name": "Track API Usage",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO api_usage_log (user_id, model_id, request_data, response_data, cost, timestamp) VALUES ('{{ $node[\"Validate Usage Limits\"].json[\"user_id\"] }}', '{{ $node[\"Validate Usage Limits\"].json[\"model_id\"] }}', '{{ JSON.stringify($node[\"Validate Usage Limits\"].json[\"input_data\"]) }}', '{{ JSON.stringify($json) }}', {{ $node[\"Validate Usage Limits\"].json[\"price_per_call\"] }}, NOW())"
+      }
+    },
+    {
+      "id": "update-usage-counter",
+      "name": "Update Usage Counter",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "operation": "update",
+        "query": "UPDATE users SET api_calls_remaining = api_calls_remaining - 1, total_spent = total_spent + {{ $node[\"Validate Usage Limits\"].json[\"price_per_call\"] }} WHERE id = '{{ $node[\"Validate Usage Limits\"].json[\"user_id\"] }}'"
+      }
+    },
+    {
+      "id": "format-api-response",
+      "name": "Format API Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const replicateResponse = $node['Call Replicate Model'].json;\nconst usageData = $node['Validate Usage Limits'].json;\n\nreturn {\n  success: true,\n  model_id: usageData.model_id,\n  prediction_id: replicateResponse.id,\n  status: replicateResponse.status,\n  output: replicateResponse.output,\n  created_at: replicateResponse.created_at,\n  completed_at: replicateResponse.completed_at,\n  cost: usageData.price_per_call,\n  remaining_calls: usageData.api_calls_remaining - 1,\n  processing_time: replicateResponse.metrics?.predict_time\n};"
+      }
+    },
+    {
+      "id": "webhook-batch-prediction",
+      "name": "Batch Prediction Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        400
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "batch-predict/{{ $parameter[\"model_id\"] }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "validate-batch-request",
+      "name": "Validate Batch Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        300,
+        400
+      ],
+      "parameters": {
+        "functionCode": "const request = $input.first().json;\nconst headers = $input.first().headers;\n\n// Validate batch size\nif (!request.batch_inputs || !Array.isArray(request.batch_inputs)) {\n  throw new Error('batch_inputs array is required');\n}\n\nif (request.batch_inputs.length > 50) {\n  throw new Error('Maximum 50 predictions per batch');\n}\n\nif (request.batch_inputs.length === 0) {\n  throw new Error('At least 1 prediction required');\n}\n\nconst apiKey = headers['x-api-key'] || headers['authorization']?.replace('Bearer ', '');\nconst modelId = $input.first().params.model_id;\n\nreturn {\n  api_key: apiKey,\n  model_id: modelId,\n  batch_inputs: request.batch_inputs,\n  batch_size: request.batch_inputs.length,\n  callback_url: request.callback_url,\n  timestamp: new Date().toISOString()\n};"
+      }
+    },
+    {
+      "id": "process-batch-predictions",
+      "name": "Process Batch Predictions",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        400
+      ],
+      "parameters": {
+        "functionCode": "const batchData = $input.first().json;\nconst predictions = [];\n\n// Create individual prediction requests\nfor (let i = 0; i < batchData.batch_inputs.length; i++) {\n  predictions.push({\n    batch_id: `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n    prediction_index: i,\n    input_data: batchData.batch_inputs[i],\n    model_id: batchData.model_id,\n    api_key: batchData.api_key,\n    callback_url: batchData.callback_url\n  });\n}\n\nreturn predictions;"
+      }
+    },
+    {
+      "id": "store-batch-job",
+      "name": "Store Batch Job",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        700,
+        400
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO batch_jobs (batch_id, user_id, model_id, total_predictions, status, callback_url, created_at) VALUES ('{{ $json[0].batch_id }}', (SELECT user_id FROM api_keys WHERE api_key = '{{ $json[0].api_key }}'), '{{ $json[0].model_id }}', {{ $json.length }}, 'processing', '{{ $json[0].callback_url }}', NOW()) RETURNING id"
+      }
+    },
+    {
+      "id": "webhook-revenue-analytics",
+      "name": "Revenue Analytics Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        600
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "analytics/revenue",
+        "options": {}
+      }
+    },
+    {
+      "id": "calculate-revenue-metrics",
+      "name": "Calculate Revenue Metrics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        300,
+        600
+      ],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT DATE_TRUNC('day', timestamp) as date, model_id, COUNT(*) as total_calls, SUM(cost) as total_revenue, AVG(cost) as avg_cost_per_call FROM api_usage_log WHERE timestamp >= NOW() - INTERVAL '30 days' GROUP BY DATE_TRUNC('day', timestamp), model_id ORDER BY date DESC"
+      }
+    },
+    {
+      "id": "format-analytics-response",
+      "name": "Format Analytics Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        600
+      ],
+      "parameters": {
+        "functionCode": "const analyticsData = $input.first().json;\n\n// Group by date and calculate totals\nconst dailyRevenue = {};\nlet totalRevenue = 0;\nlet totalCalls = 0;\n\nanalyticsData.forEach(row => {\n  const date = row.date.split('T')[0];\n  \n  if (!dailyRevenue[date]) {\n    dailyRevenue[date] = {\n      date: date,\n      revenue: 0,\n      calls: 0,\n      models: {}\n    };\n  }\n  \n  dailyRevenue[date].revenue += parseFloat(row.total_revenue);\n  dailyRevenue[date].calls += parseInt(row.total_calls);\n  dailyRevenue[date].models[row.model_id] = {\n    revenue: parseFloat(row.total_revenue),\n    calls: parseInt(row.total_calls),\n    avg_cost: parseFloat(row.avg_cost_per_call)\n  };\n  \n  totalRevenue += parseFloat(row.total_revenue);\n  totalCalls += parseInt(row.total_calls);\n});\n\nreturn {\n  summary: {\n    total_revenue_30d: totalRevenue,\n    total_calls_30d: totalCalls,\n    avg_revenue_per_call: totalRevenue / totalCalls,\n    avg_calls_per_day: totalCalls / 30\n  },\n  daily_breakdown: Object.values(dailyRevenue),\n  period: '30_days',\n  generated_at: new Date().toISOString()\n};"
+      }
+    }
+  ],
+  "connections": {
+    "Model Prediction Request": {
+      "main": [
+        [
+          {
+            "node": "Validate API Access",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate API Access": {
+      "main": [
+        [
+          {
+            "node": "Check Model Access Rights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Model Access Rights": {
+      "main": [
+        [
+          {
+            "node": "Validate Usage Limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Usage Limits": {
+      "main": [
+        [
+          {
+            "node": "Call Replicate Model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Replicate Model": {
+      "main": [
+        [
+          {
+            "node": "Track API Usage",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Usage Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Track API Usage": {
+      "main": [
+        [
+          {
+            "node": "Format API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Usage Counter": {
+      "main": [
+        [
+          {
+            "node": "Format API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Prediction Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Batch Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Batch Request": {
+      "main": [
+        [
+          {
+            "node": "Process Batch Predictions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Batch Predictions": {
+      "main": [
+        [
+          {
+            "node": "Store Batch Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revenue Analytics Trigger": {
+      "main": [
+        [
+          {
+            "node": "Calculate Revenue Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Revenue Metrics": {
+      "main": [
+        [
+          {
+            "node": "Format Analytics Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "53d4f4e4-90de-4a54-9206-ae963647f2f4",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T14:52:06.234Z",
+      "updatedAt": "2025-08-21T14:52:06.234Z",
+      "role": "workflow:owner",
+      "workflowId": "6cpzujFinlhLis52",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

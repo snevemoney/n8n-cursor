@@ -1,0 +1,277 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set File ID').item.json.file_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "platform_admin",
+          "mode": "name"
+        },
+        "options": {
+          "range": "A:J"
+        }
+      },
+      "id": "google-sheets-reader",
+      "name": "Read Google Sheets Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1200, 400],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "admin-id",
+              "name": "adminId",
+              "value": "={{ $json.adminId }}",
+              "type": "string"
+            },
+            {
+              "id": "admin-name",
+              "name": "adminName", 
+              "value": "={{ $json.adminName }}",
+              "type": "string"
+            },
+            {
+              "id": "admin-email",
+              "name": "adminEmail",
+              "value": "={{ $json.adminEmail }}",
+              "type": "string"
+            },
+            {
+              "id": "role",
+              "name": "role",
+              "value": "={{ $json.role }}",
+              "type": "string"
+            },
+            {
+              "id": "permissions",
+              "name": "permissions",
+              "value": "={{ $json.permissions }}",
+              "type": "string"
+            },
+            {
+              "id": "last-login",
+              "name": "lastLogin",
+              "value": "={{ $json.lastLogin }}",
+              "type": "dateTime"
+            },
+            {
+              "id": "login-count",
+              "name": "loginCount",
+              "value": "={{ $json.loginCount }}",
+              "type": "number"
+            },
+            {
+              "id": "is-active",
+              "name": "isActive",
+              "value": "={{ $json.isActive }}",
+              "type": "boolean"
+            },
+            {
+              "id": "created-at",
+              "name": "createdAt",
+              "value": "={{ $json.createdAt }}",
+              "type": "dateTime"
+            },
+            {
+              "id": "notes",
+              "name": "notes",
+              "value": "={{ $json.notes }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-admin-data",
+      "name": "Prepare Admin Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 400]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "platform_admins",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "admin_id": "={{ $json.adminId }}",
+            "admin_name": "={{ $json.adminName }}",
+            "admin_email": "={{ $json.adminEmail }}",
+            "role": "={{ $json.role }}",
+            "permissions": "={{ $json.permissions }}",
+            "last_login": "={{ $json.lastLogin }}",
+            "login_count": "={{ $json.loginCount }}",
+            "is_active": "={{ $json.isActive }}",
+            "created_at": "={{ $json.createdAt }}",
+            "notes": "={{ $json.notes }}"
+          },
+          "matchingColumns": ["admin_id"],
+          "schema": [
+            {
+              "id": "admin_id",
+              "displayName": "admin_id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "admin_name",
+              "displayName": "admin_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "admin_email",
+              "displayName": "admin_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "permissions",
+              "displayName": "permissions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "last_login",
+              "displayName": "last_login",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "login_count",
+              "displayName": "login_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "is_active",
+              "displayName": "is_active",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "insert-platform-admins",
+      "name": "Insert Platform Admins",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1600, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Set File ID": {
+      "main": [
+        [
+          {
+            "node": "Read Google Sheets Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Google Sheets Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare Admin Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Admin Data": {
+      "main": [
+        [
+          {
+            "node": "Insert Platform Admins",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

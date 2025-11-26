@@ -1,0 +1,42 @@
+name: Global Guards
+on: [pull_request]
+
+jobs:
+  no-env-in-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git diff --name-only origin/${{ github.base_ref }}... | grep -E '\.env(\.|$)' \
+          && { echo "❌ Env files must not change in PRs"; exit 1; } || true
+
+  api-contract-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          A=$(git diff --name-only origin/${{ github.base_ref }}... apps/api | wc -l)
+          C=$(git diff --name-only origin/${{ github.base_ref }}... contracts/openapi.yaml | wc -l)
+          if [ $A -gt 0 ] && [ $C -eq 0 ]; then
+            echo "❌ API changed without openapi.yaml update"
+            exit 1
+          fi
+
+  trivy-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          exit-code: '1'
+          ignore-unfixed: true
+
+  no-cross-family:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          L=$(git diff --name-only origin/${{ github.base_ref }}... | grep -E '^apps/lfai/|^workflows/lfai/' || true)
+          S=$(git diff --name-only origin/${{ github.base_ref }}... | grep -E '^apps/side/|^workflows/side/' || true)
+          [ -n "$L" ] && [ -n "$S" ] && { echo "❌ PR touches LFAI & SIDE. Split PRs."; exit 1; } || true

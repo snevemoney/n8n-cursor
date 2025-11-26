@@ -1,0 +1,747 @@
+# LightningFlow AI - Event Schemas
+# All webhook and queue message schemas
+
+$schema: "http://json-schema.org/draft-07/schema#"
+title: LightningFlow AI Events
+description: Event schemas for webhooks and queue messages
+version: 1.0.0
+
+definitions:
+  BaseEvent:
+    type: object
+    properties:
+      eventId:
+        type: string
+        format: uuid
+        description: Unique event identifier
+      eventType:
+        type: string
+        description: Event type identifier
+      version:
+        type: string
+        pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        description: Event schema version
+      timestamp:
+        type: string
+        format: date-time
+        description: Event timestamp in UTC
+      source:
+        type: string
+        description: Event source system
+      correlationId:
+        type: string
+        format: uuid
+        description: Correlation ID for tracing
+    required:
+      - eventId
+      - eventType
+      - version
+      - timestamp
+      - source
+
+  # LNbits Events
+  LNbitsPaymentReceived:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["lnbits.payment.received"]
+          data:
+            type: object
+            properties:
+              paymentHash:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+                description: Lightning payment hash
+              amount:
+                type: integer
+                minimum: 1
+                description: Amount in satoshis
+              currency:
+                type: string
+                enum: ["sats"]
+                description: Currency unit
+              description:
+                type: string
+                description: Payment description
+              payer:
+                type: string
+                description: Payer identifier
+              invoice:
+                type: string
+                description: Invoice string
+              preimage:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+                description: Payment preimage
+            required:
+              - paymentHash
+              - amount
+              - currency
+              - description
+        required:
+          - data
+
+  LNbitsPaymentSent:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["lnbits.payment.sent"]
+          data:
+            type: object
+            properties:
+              paymentHash:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+                description: Lightning payment hash
+              amount:
+                type: integer
+                minimum: 1
+                description: Amount in satoshis
+              currency:
+                type: string
+                enum: ["sats"]
+                description: Currency unit
+              description:
+                type: string
+                description: Payment description
+              payee:
+                type: string
+                description: Payee identifier
+              invoice:
+                type: string
+                description: Invoice string
+              fee:
+                type: integer
+                minimum: 0
+                description: Routing fee in satoshis
+            required:
+              - paymentHash
+              - amount
+              - currency
+              - description
+              - payee
+        required:
+          - data
+
+  LNbitsInvoiceCreated:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["lnbits.invoice.created"]
+          data:
+            type: object
+            properties:
+              invoiceId:
+                type: string
+                description: Invoice ID
+              invoice:
+                type: string
+                description: Invoice string
+              amount:
+                type: integer
+                minimum: 1
+                description: Amount in satoshis
+              currency:
+                type: string
+                enum: ["sats"]
+                description: Currency unit
+              description:
+                type: string
+                description: Invoice description
+              expiresAt:
+                type: string
+                format: date-time
+                description: Invoice expiration time
+              webhookUrl:
+                type: string
+                format: uri
+                description: Webhook URL for payment notifications
+            required:
+              - invoiceId
+              - invoice
+              - amount
+              - currency
+              - description
+              - expiresAt
+        required:
+          - data
+
+  LNbitsInvoicePaid:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["lnbits.invoice.paid"]
+          data:
+            type: object
+            properties:
+              invoiceId:
+                type: string
+                description: Invoice ID
+              paymentHash:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+                description: Lightning payment hash
+              amount:
+                type: integer
+                minimum: 1
+                description: Amount in satoshis
+              currency:
+                type: string
+                enum: ["sats"]
+                description: Currency unit
+              paidAt:
+                type: string
+                format: date-time
+                description: Payment timestamp
+              preimage:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+                description: Payment preimage
+            required:
+              - invoiceId
+              - paymentHash
+              - amount
+              - currency
+              - paidAt
+        required:
+          - data
+
+  # Lightning Network Events
+  LightningChannelOpened:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["lightning.channel.opened"]
+          data:
+            type: object
+            properties:
+              channelId:
+                type: string
+                description: Channel ID
+              nodeId:
+                type: string
+                description: Remote node ID
+              capacity:
+                type: integer
+                minimum: 1
+                description: Channel capacity in satoshis
+              localBalance:
+                type: integer
+                minimum: 0
+                description: Local balance in satoshis
+              remoteBalance:
+                type: integer
+                minimum: 0
+                description: Remote balance in satoshis
+              feeRate:
+                type: integer
+                minimum: 0
+                description: Fee rate in parts per million
+            required:
+              - channelId
+              - nodeId
+              - capacity
+              - localBalance
+              - remoteBalance
+        required:
+          - data
+
+  LightningChannelClosed:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["lightning.channel.closed"]
+          data:
+            type: object
+            properties:
+              channelId:
+                type: string
+                description: Channel ID
+              nodeId:
+                type: string
+                description: Remote node ID
+              reason:
+                type: string
+                enum: ["cooperative", "force", "breach", "unknown"]
+                description: Channel closure reason
+              finalBalance:
+                type: integer
+                minimum: 0
+                description: Final balance in satoshis
+              closedAt:
+                type: string
+                format: date-time
+                description: Channel closure timestamp
+            required:
+              - channelId
+              - nodeId
+              - reason
+              - closedAt
+        required:
+          - data
+
+  # Workflow Events
+  WorkflowRunCreated:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["workflow.run.created"]
+          data:
+            type: object
+            properties:
+              workflowRunId:
+                type: string
+                format: uuid
+                description: Workflow run ID
+              workflowId:
+                type: string
+                description: Workflow ID
+              tenantId:
+                type: string
+                description: Tenant ID
+              status:
+                type: string
+                enum: [created, queued, running, completed, failed]
+                description: Workflow run status
+              payload:
+                type: object
+                description: Workflow payload
+              metadata:
+                type: object
+                description: Additional metadata
+            required:
+              - workflowRunId
+              - workflowId
+              - tenantId
+              - status
+              - payload
+        required:
+          - data
+
+  WorkflowRunStarted:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["workflow.run.started"]
+          data:
+            type: object
+            properties:
+              workflowRunId:
+                type: string
+                format: uuid
+                description: Workflow run ID
+              workflowId:
+                type: string
+                description: Workflow ID
+              tenantId:
+                type: string
+                description: Tenant ID
+              status:
+                type: string
+                const: "running"
+                description: Workflow run status
+            required:
+              - workflowRunId
+              - workflowId
+              - tenantId
+              - status
+        required:
+          - data
+
+  WorkflowRunProgress:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["workflow.run.progress"]
+          data:
+            type: object
+            properties:
+              workflowRunId:
+                type: string
+                format: uuid
+                description: Workflow run ID
+              workflowId:
+                type: string
+                description: Workflow ID
+              tenantId:
+                type: string
+                description: Tenant ID
+              progress:
+                type: number
+                minimum: 0
+                maximum: 100
+                description: Overall progress percentage
+              currentStep:
+                type: string
+                description: Current step identifier
+              stepProgress:
+                type: number
+                minimum: 0
+                maximum: 100
+                description: Current step progress percentage
+            required:
+              - workflowRunId
+              - workflowId
+              - tenantId
+              - progress
+              - currentStep
+        required:
+          - data
+
+  WorkflowRunCompleted:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["workflow.run.completed"]
+          data:
+            type: object
+            properties:
+              workflowRunId:
+                type: string
+                format: uuid
+                description: Workflow run ID
+              workflowId:
+                type: string
+                description: Workflow ID
+              tenantId:
+                type: string
+                description: Tenant ID
+              status:
+                type: string
+                const: "completed"
+                description: Workflow run status
+              duration:
+                type: integer
+                minimum: 0
+                description: Total execution time in milliseconds
+              result:
+                type: object
+                description: Workflow execution result
+            required:
+              - workflowRunId
+              - workflowId
+              - tenantId
+              - status
+              - duration
+        required:
+          - data
+
+  WorkflowRunFailed:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["workflow.run.failed"]
+          data:
+            type: object
+            properties:
+              workflowRunId:
+                type: string
+                format: uuid
+                description: Workflow run ID
+              workflowId:
+                type: string
+                description: Workflow ID
+              tenantId:
+                type: string
+                description: Tenant ID
+              status:
+                type: string
+                const: "failed"
+                description: Workflow run status
+              error:
+                type: object
+                description: Error details
+                properties:
+                  code:
+                    type: string
+                    description: Error code
+                  message:
+                    type: string
+                    description: Error message
+                  step:
+                    type: string
+                    description: Failed step identifier
+                  stack:
+                    type: string
+                    description: Error stack trace
+                required:
+                  - code
+                  - message
+              duration:
+                type: integer
+                minimum: 0
+                description: Execution time before failure in milliseconds
+            required:
+              - workflowRunId
+              - workflowId
+              - tenantId
+              - status
+              - error
+              - duration
+        required:
+          - data
+
+  # Agent Events
+  AgentExecuted:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["agent.executed"]
+          data:
+            type: object
+            properties:
+              agentId:
+                type: string
+                format: uuid
+                description: Agent ID
+              agentName:
+                type: string
+                description: Agent name
+              agentType:
+                type: string
+                enum: [bitcoin, lightning, trading, analytics, webhook]
+                description: Agent type
+              executionId:
+                type: string
+                format: uuid
+                description: Execution ID
+              status:
+                type: string
+                enum: [success, error, timeout]
+                description: Execution status
+              executionTime:
+                type: integer
+                minimum: 0
+                description: Execution time in milliseconds
+              result:
+                type: object
+                description: Execution result
+              error:
+                type: object
+                description: Error details if execution failed
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: string
+                  stack:
+                    type: string
+            required:
+              - agentId
+              - agentName
+              - agentType
+              - executionId
+              - status
+              - executionTime
+        required:
+          - data
+
+  AgentStatusChanged:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["agent.status.changed"]
+          data:
+            type: object
+            properties:
+              agentId:
+                type: string
+                format: uuid
+                description: Agent ID
+              agentName:
+                type: string
+                description: Agent name
+              oldStatus:
+                type: string
+                enum: [active, inactive, error]
+                description: Previous status
+              newStatus:
+                type: string
+                enum: [active, inactive, error]
+                description: New status
+              reason:
+                type: string
+                description: Status change reason
+            required:
+              - agentId
+              - agentName
+              - oldStatus
+              - newStatus
+        required:
+          - data
+
+  # System Events
+  SystemAlert:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["system.alert"]
+          data:
+            type: object
+            properties:
+              alertType:
+                type: string
+                enum: [error, warning, info]
+                description: Alert type
+              severity:
+                type: string
+                enum: [low, medium, high, critical]
+                description: Alert severity
+              message:
+                type: string
+                description: Alert message
+              service:
+                type: string
+                description: Affected service
+              metrics:
+                type: object
+                description: Related metrics
+            required:
+              - alertType
+              - severity
+              - message
+              - service
+        required:
+          - data
+
+  SystemHealthCheck:
+    allOf:
+      - $ref: "#/definitions/BaseEvent"
+      - type: object
+        properties:
+          eventType:
+            type: string
+            enum: ["system.health.check"]
+          data:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [healthy, unhealthy]
+                description: Overall system status
+              services:
+                type: object
+                properties:
+                  database:
+                    type: string
+                    enum: [healthy, unhealthy]
+                  redis:
+                    type: string
+                    enum: [healthy, unhealthy]
+                  external:
+                    type: string
+                    enum: [healthy, unhealthy]
+                required:
+                  - database
+                  - redis
+                  - external
+              metrics:
+                type: object
+                properties:
+                  cpu:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                  memory:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                  disk:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                required:
+                  - cpu
+                  - memory
+                  - disk
+            required:
+              - status
+              - services
+              - metrics
+        required:
+          - data
+
+# Event type registry
+eventTypes:
+  lnbits:
+    - lnbits.payment.received
+    - lnbits.payment.sent
+    - lnbits.invoice.created
+    - lnbits.invoice.paid
+  lightning:
+    - lightning.channel.opened
+    - lightning.channel.closed
+  workflow:
+    - workflow.run.created
+    - workflow.run.started
+    - workflow.run.progress
+    - workflow.run.completed
+    - workflow.run.failed
+  agent:
+    - agent.executed
+    - agent.status.changed
+  system:
+    - system.alert
+    - system.health.check
+
+# Validation rules
+validation:
+  requiredFields:
+    - eventId
+    - eventType
+    - version
+    - timestamp
+    - source
+  timestampFormat: "ISO-8601 UTC"
+  currencyUnit: "sats (integer)"
+  amountValidation: "minimum 1 satoshi"
+  hashValidation: "64 character hex string"
+  uuidValidation: "RFC 4122 format"
+
+
+
+
+
+

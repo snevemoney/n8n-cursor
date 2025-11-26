@@ -1,0 +1,21 @@
+{
+  "name": "Extractor – CONTRACT",
+  "nodes": [
+    {
+      "id": "webhook-extractor",
+      "name": "Webhook: /webhook/extract-contract",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "extract-contract",
+        "responseMode": "lastNode"
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

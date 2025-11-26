@@ -1,0 +1,45 @@
+# Staging Environment Caddyfile
+# All services bind to 127.0.0.1 - Caddy is the only public listener
+
+(common) {
+  encode gzip zstd
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Frame-Options "DENY"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+  }
+}
+
+# Staging domains (pre-production testing)
+staging.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  handle_path /api/* { reverse_proxy 127.0.0.1:4100 }   # API (staging)
+  handle_path /      { reverse_proxy 127.0.0.1:3100 }   # landing (staging)
+}
+
+app.staging.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  basicauth /* { {$STAGING_USER} {$STAGING_PASS} }  # optional gate
+  handle_path / { reverse_proxy 127.0.0.1:3101 }     # web (staging)
+}
+
+ops.staging.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  basicauth /* { {$OPS_STAGING_USER} {$OPS_STAGING_PASS} }
+  handle_path / { reverse_proxy 127.0.0.1:3102 }     # ops (staging)
+}
+
+staging.n8ncloud.tech {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  basicauth /* { {$N8N_STAGING_USER} {$N8N_STAGING_PASS} }
+  handle_path / { reverse_proxy 127.0.0.1:5688 }     # n8n (staging)
+}

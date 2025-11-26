@@ -1,0 +1,479 @@
+{
+  "createdAt": "2025-08-22T23:13:58.026Z",
+  "updatedAt": "2025-11-01T22:06:08.000Z",
+  "id": "7GkfpweJWvHmzSQ0",
+  "name": "elevenlabs post call workflow",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cb151ce6-4393-47c1-a724-60a3491e206b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d3cb4d93-35ea-407e-ab15-8bd761dab87f",
+      "name": "Webhook",
+      "webhookId": "cb151ce6-4393-47c1-a724-60a3491e206b"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * n8n Code node (JavaScript)\n * Input: items[0].json = full payload (array or object)\n * Output:\n *  - json.transcript_text (plain text)\n *  - json.message_count\n *  - binary.transcript.csv (CSV file for Google Sheets)\n */\n\nfunction toISO(ts) {\n  if (ts == null || ts === '') return '';\n  // Numeric seconds/ms/µs\n  if (typeof ts === 'number') {\n    // Heuristics: s vs ms vs µs\n    if (ts < 1e11) {               // probably seconds\n      return new Date(ts * 1000).toISOString();\n    } else if (ts < 1e15) {        // probably milliseconds\n      return new Date(ts).toISOString();\n    } else {                       // probably microseconds\n      return new Date(Math.floor(ts / 1000)).toISOString();\n    }\n  }\n  // String that might be ISO or numeric\n  if (typeof ts === 'string') {\n    const num = Number(ts);\n    if (!Number.isNaN(num)) return toISO(num);\n    const d = new Date(ts);\n    if (!isNaN(d.getTime())) return d.toISOString();\n  }\n  return '';\n}\n\nfunction safeJoin(x) {\n  if (x == null) return '';\n  if (Array.isArray(x)) return x.map(safeJoin).filter(Boolean).join(' ');\n  if (typeof x === 'object') return '';\n  return String(x).trim();\n}\n\nfunction normalizeRole(v) {\n  if (!v) return 'unknown';\n  const s = String(v).toLowerCase();\n  if (/(^|_|-)user|client|customer|speaker_?1|caller/.test(s)) return 'user';\n  if (/assistant|agent|ai|bot|system|speaker_?2|ivr|voicebot/.test(s)) return 'agent';\n  return s === 'human' ? 'user' : s === 'computer' ? 'agent' : 'unknown';\n}\n\nfunction pickText(obj) {\n  // Common text fields\n  const candidates = [\n    'content','text','message','transcript','utterance','value','body','msg','data',\n  ];\n  for (const k of candidates) {\n    if (obj[k] != null) {\n      const val = safeJoin(obj[k]);\n      // Avoid attaching giant base64/audio blobs as \"text\"\n      if (val && val.length < 20000 && !/^[A-Za-z0-9+/=\\s]+$/.test(val) /* avoid big base64 */) {\n        return val;\n      }\n    }\n  }\n  return '';\n}\n\nfunction pickRole(obj) {\n  const candidates = ['role','speaker','from','author','participant','sender','type'];\n  for (const k of candidates) {\n    if (obj[k] != null) return normalizeRole(obj[k]);\n  }\n  // ElevenLabs webhooks sometimes mark bot/user via nested keys; fallback later.\n  return 'unknown';\n}\n\nfunction pickTs(obj) {\n  const candidates = [\n    'timestamp','event_timestamp','created_at','time','ts','start','end','offset_ms','started_at','ended_at',\n  ];\n  for (const k of candidates) {\n    if (obj[k] != null && obj[k] !== '') return obj[k];\n  }\n  return undefined;\n}\n\n// Recursively traverse and collect message-like records.\nfunction collectMessages(node, bucket, path = []) {\n  if (node == null) return;\n\n  if (Array.isArray(node)) {\n    node.forEach((v, i) => collectMessages(v, bucket, path.concat([`[${i}]`])));\n    return;\n  }\n\n  if (typeof node === 'object') {\n    // Heuristic: object looks like a message if it has either a text-like field or a role + text\n    const txt = pickText(node);\n    let role = pickRole(node);\n    const ts = pickTs(node);\n\n    // Some payloads nest messages under known array keys\n    const likelyArrays = ['messages','turns','segments','alternatives','entries','conversation','events','results','logs'];\n    for (const k of likelyArrays) {\n      if (Array.isArray(node[k])) collectMessages(node[k], bucket, path.concat([k]));\n    }\n\n    // If we found text, accept it as a message; role may be unknown\n    if (txt) {\n      bucket.push({\n        ts,\n        role,\n        text: txt,\n        // Keep a weak path order to stabilize sorting when timestamps are missing\n        orderKey: path.join('.') + '|' + (bucket.length + 1),\n      });\n    } else {\n      // Keep digging\n      for (const [k, v] of Object.entries(node)) {\n        if (v && typeof v === 'object') collectMessages(v, bucket, path.concat([k]));\n      }\n    }\n  }\n}\n\n// Convert collected messages into sorted transcript\nfunction buildTranscript(messages) {\n  // Normalize timestamps (for sort) and roles\n  const augmented = messages.map((m, i) => {\n    const iso = toISO(m.ts);\n    let sortTs;\n    if (iso) sortTs = Date.parse(iso);\n    return {\n      ...m,\n      role: normalizeRole(m.role),\n      iso: iso || '',\n      sortTs: typeof sortTs === 'number' && !Number.isNaN(sortTs) ? sortTs : Number.MAX_SAFE_INTEGER - (messages.length - i), // stable fallback\n      orderIdx: i,\n    };\n  });\n\n  augmented.sort((a, b) => {\n    if (a.sortTs !== b.sortTs) return a.sortTs - b.sortTs;\n    // Tie-breaker: stable by discovery order\n    return a.orderIdx - b.orderIdx;\n  });\n\n  // Plain text transcript lines\n  const lines = augmented.map(m => {\n    const ts = m.iso ? `[${m.iso}] ` : '';\n    const role = (m.role === 'user' || m.role === 'agent') ? m.role.toUpperCase() : 'UNKNOWN';\n    return `${ts}${role}: ${m.text}`;\n  });\n\n  // CSV (timestamp_iso,role,text) — Escape quotes for Sheets\n  const esc = (s) => `\"${String(s ?? '').replace(/\"/g, '\"\"')}\"`;\n  const csvRows = [['timestamp_iso', 'role', 'text']]\n    .concat(augmented.map(m => [m.iso, m.role, m.text]))\n    .map(cols => cols.map(esc).join(','));\n\n  return {\n    text: lines.join('\\n'),\n    csv: csvRows.join('\\n'),\n    count: augmented.length,\n  };\n}\n\n// ==== Main ====\nconst input = items[0]?.json ?? {};\nconst root = Array.isArray(input) && input.length === 1 ? input[0] : input;\n\nconst bucket = [];\ncollectMessages(root, bucket);\n\n// If nothing found, try some common ElevenLabs locations\nif (bucket.length === 0) {\n  // Sometimes webhook wraps in { body: {...} }\n  if (root.body) collectMessages(root.body, bucket);\n  if (root.data) collectMessages(root.data, bucket);\n}\n\nconst { text, csv, count } = buildTranscript(bucket);\n\n// Attach CSV as binary for easy Google Sheets import (File → Import)\nconst binary = {};\nbinary['transcript'] = await this.helpers.prepareBinaryData(\n  Buffer.from(csv, 'utf8'),\n  'transcript.csv',\n  'text/csv'\n);\n\nreturn [\n  {\n    json: {\n      message_count: count,\n      transcript_text: text, // plain text output\n    },\n    binary,\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9f593392-07be-4111-9707-45a05220318e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1t6f-XUngpB6E9BiKH_qanea7NwuYtFT1UtNSVrOa2dc",
+          "mode": "list",
+          "cachedResultName": "11labs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1t6f-XUngpB6E9BiKH_qanea7NwuYtFT1UtNSVrOa2dc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1t6f-XUngpB6E9BiKH_qanea7NwuYtFT1UtNSVrOa2dc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{\n  (() => {\n    const ts = $('Webhook').item.json.body.event_timestamp;\n    const d = new Date(Number(ts) * 1000);\n    const parts = new Intl.DateTimeFormat('en-CA', {\n      timeZone: 'America/Toronto',\n      year: '2-digit', month: '2-digit', day: '2-digit',\n      hour: '2-digit', minute: '2-digit', hour12: false,\n    }).formatToParts(d);\n    const get = t => parts.find(p => p.type === t)?.value.padStart(2,'0');\n    return `${get('day')}.${get('month')}.${get('year')} ${get('hour')}:${get('minute')}`;\n  })()\n}}\n\n",
+            "direction": "={{ $('Webhook').item.json.body.data.metadata.phone_call.direction }}",
+            "from number": "={{ $('Webhook').item.json.body.data.metadata.phone_call.external_number }}",
+            "to number": "={{ $('Webhook').item.json.body.data.metadata.phone_call.agent_number }}",
+            "summary": "={{ $('Webhook').item.json.body.data.analysis.transcript_summary }}",
+            "transcript": "={{ $json.transcript_text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "direction",
+              "displayName": "direction",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "to number",
+              "displayName": "to number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "from number",
+              "displayName": "from number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1dd691b5-4384-4196-be1c-1fcf1ea950a8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "dcd280ba-6c4c-4bf0-ac50-e7f21008c1f2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        240
+      ],
+      "id": "a442c699-0baa-474f-b2e9-d0f27c0aae60",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        320
+      ],
+      "id": "50f57d6d-9882-4384-b05b-c8f7776247e8",
+      "name": "AI Agent Tool"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "aakodir833@gmail.com",
+          "mode": "list",
+          "cachedResultName": "aakodir833@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1248,
+        528
+      ],
+      "id": "d7f0eae2-108f-4e88-9bfc-0fdfdfb84916",
+      "name": "checkAvailability"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "aakodir833@gmail.com",
+          "mode": "list",
+          "cachedResultName": "aakodir833@gmail.com"
+        },
+        "start": "={{$fromAI(\"startTime\", \"start time in YYYY-MM-DDTHH:mm format\")}}",
+        "end": "={{$fromAI(\"endTime\", \"start time in YYYY-MM-DDTHH:mm plus 30 minutes\")}}",
+        "additionalFields": {
+          "description": "={{ $fromAI(\"description\", \"why the appointment is being booked and important caller details\") }}",
+          "summary": "={{ $fromAI(\"title\", \"title of booking in the format [Caller Name]—Therapist Appointment\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1392,
+        528
+      ],
+      "id": "7926c36e-4b28-416e-92a2-6792bf068475",
+      "name": "bookCalendar"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this to check the availability of calls and book them",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "# Role\n- You are **Soma**, Solacium’s non-conversational backend booking agent.\n- You check event availability and process bookings using structured requests.\n- You never produce conversational output; your responses are strictly structured for backend use.\n\n# Specifics\n## Identification Flow\n1. Receive structured input: preferredTime for checking availability or requestedTime, name, and other details for booking\n2. Use **checkAvailability** to determine if the event slot is open.\n3. If available and bookingConfirmed = true, call **bookCalendar** with provided details.\n4. Return availability status and, if booked, booking confirmation code.\n5. If unavailable, return alternative available slots.\n\n## Core Tasks\n- Deterministic availability checking.\n- Secure and consistent booking execution.\n- Returning structured responses only, never free text.\n\n# Context\n- Organization: **Solacium** — mental health & social wellbeing support platform.\n- Purpose: provide backend services for confirming and reserving event participation.\n- Output is consumed by Solacium’s frontend or other backend services, never shown directly to the user.\n\n# Tools\n- **checkAvailability** — Checks available spots/times for a given event.\n- **bookCalendar** — Reserves an event or activity at a specific date/time.\n\n# Examples\n**Example – Booking Flow**  \nInput: structured booking request for a cooking class with 2 attendees.  \nOutput: structured availability result and booking confirmation code.\n\n# Tone & Style\n- Non-conversational.\n- Output is strictly structured data.\n- Deterministic and consistent format.\n- No filler or human-facing language.\n\n# Notes\n- No natural language output.\n- Stateless between requests.\n- Must validate and sanitize all inputs.\n- Adhere to Solacium’s GDPR/HIPAA data handling policies.\n\n# Compliance\n- **GDPR**: Only collect and store data necessary for booking; allow for deletion upon request.\n- **HIPAA**: Treat all user data as protected; do not expose PHI in any unintended way.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        320
+      ],
+      "id": "2c9d8fcf-36e8-4c34-9091-449edb5338e9",
+      "name": "calendar"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        528
+      ],
+      "id": "264d8695-a1d1-4f45-a35a-e880f8aca704",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+18254501273",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilioTool",
+      "typeVersion": 1,
+      "position": [
+        944,
+        528
+      ],
+      "id": "a5eed415-7785-4375-86eb-c649369d7a29",
+      "name": "Send an SMS/MMS/WhatsApp message in Twilio",
+      "credentials": {
+        "twilioApi": {
+          "id": "Sa77ieHhuOcIa3TP",
+          "name": "Twilio account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "checkAvailability": {
+      "ai_tool": [
+        [
+          {
+            "node": "calendar",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bookCalendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "calendar",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "calendar",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message in Twilio": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Tool",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "5ec610d5-cc2a-4c31-8573-2927ec185367",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-08-22T23:13:58.031Z",
+      "updatedAt": "2025-08-22T23:13:58.031Z",
+      "role": "workflow:owner",
+      "workflowId": "7GkfpweJWvHmzSQ0",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -1,0 +1,379 @@
+{
+  "createdAt": "2025-08-21T20:00:48.523Z",
+  "updatedAt": "2025-08-21T20:00:48.523Z",
+  "id": "gPedWLPDnSYC2AEg",
+  "name": "🤖 AI Workflow Fixer - MCP Powered",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-workflow-fixer",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "🚀 Trigger AI Workflow Fixer",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        200,
+        400
+      ],
+      "webhookId": "ai-workflow-fixer"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "api_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1Nzk3MDk3fQ.OaBAfzzTz6Y7AmAp5t_7_ZvBgujYXwDlJIV3F4WIjX8"
+            },
+            {
+              "name": "base_url",
+              "value": "https://n8ncloud.tech"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "setup-config",
+      "name": "⚙️ Setup Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        400,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.base_url }}/api/v1/workflows",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "={{ $json.api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-workflows",
+      "name": "📋 Get All Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI-powered workflow analysis using MCP approach\nconst items = $input.all();\nconst workflowAnalysis = [];\n\nfor (const item of items) {\n  if (item.json && item.json.data) {\n    for (const workflow of item.json.data) {\n      const workflowJson = JSON.stringify(workflow);\n      \n      // AI analysis of workflow health\n      const analysis = {\n        id: workflow.id,\n        name: workflow.name,\n        hasAIExpressions: workflowJson.includes('$fromAI'),\n        hasMCPFeatures: workflowJson.includes('mcp') || workflowJson.includes('MCP'),\n        isAgentic: workflowJson.includes('agent') || workflowJson.includes('Agent'),\n        healthScore: 0,\n        recommendations: []\n      };\n      \n      // Calculate health score\n      if (analysis.hasAIExpressions) {\n        analysis.healthScore -= 30;\n        analysis.recommendations.push('Replace $fromAI with MCP Client Tool nodes');\n      }\n      \n      if (analysis.hasMCPFeatures) {\n        analysis.healthScore += 20;\n        analysis.recommendations.push('Already has MCP integration');\n      }\n      \n      if (analysis.isAgentic) {\n        analysis.healthScore += 15;\n        analysis.recommendations.push('Agentic workflow detected');\n      }\n      \n      // Base score\n      analysis.healthScore += 50;\n      \n      workflowAnalysis.push(analysis);\n    }\n  }\n}\n\n// Sort by health score (worst first)\nworkflowAnalysis.sort((a, b) => a.healthScore - b.healthScore);\n\nreturn workflowAnalysis.map(workflow => ({ json: workflow }));"
+      },
+      "id": "ai-workflow-analyzer",
+      "name": "🤖 AI Workflow Analyzer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "needs-fixing",
+              "leftValue": "={{ $json.healthScore }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "smaller"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-broken-workflows",
+      "name": "🔍 Filter Workflows Needing Fixes",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('⚙️ Setup Configuration').item.json.base_url }}/api/v1/workflows/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "={{ $('⚙️ Setup Configuration').item.json.api_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-workflow-details",
+      "name": "📥 Get Workflow Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1200,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI-powered workflow transformation using MCP approach\nconst workflow = $input.first().json;\nconst originalWorkflow = $('🔍 Filter Workflows Needing Fixes').item.json;\n\n// Create MCP-powered version\nconst mcpWorkflow = {\n  name: `${workflow.name} - MCP Enhanced`,\n  nodes: [],\n  connections: {},\n  settings: workflow.settings || { executionOrder: 'v1' },\n  staticData: workflow.staticData\n};\n\n// Transform nodes to use MCP tools\nif (workflow.nodes) {\n  mcpWorkflow.nodes = workflow.nodes.map(node => {\n    const transformedNode = { ...node };\n    \n    // Replace AI expressions with MCP Client Tool nodes\n    if (node.parameters) {\n      const paramsStr = JSON.stringify(node.parameters);\n      if (paramsStr.includes('$fromAI')) {\n        // Transform to MCP Client Tool\n        transformedNode.type = 'n8n-nodes-base.mcpClientTool';\n        transformedNode.parameters = {\n          toolName: 'workflow_fixer',\n          input: '{{ $json.default_value }}',\n          options: {}\n        };\n        \n        // Add MCP-specific configuration\n        transformedNode.parameters.mcpServer = 'n8n-mcp';\n        transformedNode.parameters.toolDescription = 'AI-powered workflow parameter generator';\n      }\n    }\n    \n    return transformedNode;\n  });\n}\n\n// Add MCP Client Tool nodes for AI functionality\nconst mcpNodes = [\n  {\n    id: 'mcp-ai-analyzer',\n    name: '🤖 MCP AI Analyzer',\n    type: 'n8n-nodes-base.mcpClientTool',\n    typeVersion: 1,\n    position: [0, 0],\n    parameters: {\n      toolName: 'workflow_analyzer',\n      input: '{{ $json }}',\n      options: {}\n    }\n  },\n  {\n    id: 'mcp-workflow-fixer',\n    name: '🔧 MCP Workflow Fixer',\n    type: 'n8n-nodes-base.mcpClientTool',\n    typeVersion: 1,\n    position: [200, 0],\n    parameters: {\n      toolName: 'workflow_fixer',\n      input: '{{ $json }}',\n      options: {}\n    }\n  }\n];\n\nmcpWorkflow.nodes = [...mcpNodes, ...mcpWorkflow.nodes];\n\n// Update connections\nmcpWorkflow.connections = {\n  '🤖 MCP AI Analyzer': {\n    main: [[{ node: '🔧 MCP Workflow Fixer', type: 'main', index: 0 }]]\n  },\n  '🔧 MCP Workflow Fixer': {\n    main: [[{ node: '📤 Import Fixed Workflow', type: 'main', index: 0 }]]\n  }\n};\n\nreturn [{ json: mcpWorkflow }];"
+      },
+      "id": "transform-to-mcp",
+      "name": "🔄 Transform to MCP Workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('⚙️ Setup Configuration').item.json.base_url }}/api/v1/workflows",
+        "sendMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "={{ $('⚙️ Setup Configuration').item.json.api_key }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ $('🔄 Transform to MCP Workflow').item.json }}",
+        "options": {}
+      },
+      "id": "import-fixed-workflow",
+      "name": "📤 Import Fixed Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI-powered result analysis\nconst importResult = $input.first().json;\nconst originalWorkflow = $('🔍 Filter Workflows Needing Fixes').item.json;\n\nconst result = {\n  status: importResult.id ? 'success' : 'error',\n  message: importResult.id ? \n    `✅ Successfully created MCP-powered workflow: ${originalWorkflow.name}` : \n    `❌ Failed to create MCP workflow: ${originalWorkflow.name}`,\n  newId: importResult.id || null,\n  originalId: originalWorkflow.id,\n  workflowName: originalWorkflow.name,\n  transformation: 'AI-powered MCP transformation',\n  recommendations: originalWorkflow.recommendations,\n  nextSteps: [\n    'Configure MCP Client Tool credentials',\n    'Test AI agent functionality',\n    'Validate MCP tool integration'\n  ]\n};\n\nreturn [{ json: result }];"
+      },
+      "id": "ai-result-analyzer",
+      "name": "🤖 AI Result Analyzer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $('🤖 AI Result Analyzer').item.json }}",
+        "responseCode": 200
+      },
+      "id": "respond-webhook",
+      "name": "📤 Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "🚀 Trigger AI Workflow Fixer": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Setup Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Setup Configuration": {
+      "main": [
+        [
+          {
+            "node": "📋 Get All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "🤖 AI Workflow Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 AI Workflow Analyzer": {
+      "main": [
+        [
+          {
+            "node": "🔍 Filter Workflows Needing Fixes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Filter Workflows Needing Fixes": {
+      "main": [
+        [
+          {
+            "node": "📥 Get Workflow Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Get Workflow Details": {
+      "main": [
+        [
+          {
+            "node": "🔄 Transform to MCP Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Transform to MCP Workflow": {
+      "main": [
+        [
+          {
+            "node": "📤 Import Fixed Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📤 Import Fixed Workflow": {
+      "main": [
+        [
+          {
+            "node": "🤖 AI Result Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 AI Result Analyzer": {
+      "main": [
+        [
+          {
+            "node": "📤 Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "1c8616fc-54a5-417e-a45b-0727b3dc0351",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T20:00:48.620Z",
+      "updatedAt": "2025-08-21T20:00:48.620Z",
+      "role": "workflow:owner",
+      "workflowId": "gPedWLPDnSYC2AEg",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

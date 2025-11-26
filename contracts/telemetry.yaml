@@ -1,0 +1,633 @@
+# LightningFlow AI - Telemetry Specification
+# OpenTelemetry spans, metrics, and attributes
+
+version: "1.0.0"
+description: "Telemetry specification for LightningFlow AI platform"
+
+# Span names and attributes
+spans:
+  # API spans
+  api.request:
+    description: "HTTP API request processing"
+    attributes:
+      required:
+        - http.method
+        - http.url
+        - http.status_code
+        - http.user_agent
+        - http.request_id
+      optional:
+        - http.route
+        - http.client_ip
+        - user.id
+        - tenant.id
+        - request.size
+        - response.size
+
+  api.middleware:
+    description: "API middleware processing"
+    attributes:
+      required:
+        - middleware.name
+        - http.request_id
+      optional:
+        - middleware.duration_ms
+        - middleware.status
+
+  # Workflow spans
+  workflow.execute:
+    description: "Workflow execution"
+    attributes:
+      required:
+        - workflow.id
+        - workflow.run_id
+        - workflow.tenant_id
+        - execution.status
+      optional:
+        - execution.duration_ms
+        - execution.progress_percent
+        - execution.current_step
+        - execution.error_message
+        - execution.retry_count
+
+  workflow.step:
+    description: "Workflow step execution"
+    attributes:
+      required:
+        - workflow.id
+        - workflow.run_id
+        - step.id
+        - step.name
+        - step.status
+      optional:
+        - step.duration_ms
+        - step.progress_percent
+        - step.error_message
+        - step.retry_count
+
+  # Agent spans
+  agent.execute:
+    description: "Agent execution"
+    attributes:
+      required:
+        - agent.id
+        - agent.name
+        - agent.type
+        - execution.id
+        - execution.status
+      optional:
+        - execution.duration_ms
+        - execution.result_size
+        - execution.error_message
+        - execution.retry_count
+
+  agent.health_check:
+    description: "Agent health check"
+    attributes:
+      required:
+        - agent.id
+        - agent.name
+        - health.status
+      optional:
+        - health.duration_ms
+        - health.error_message
+        - health.metrics
+
+  # Webhook spans
+  webhook.process:
+    description: "Webhook processing"
+    attributes:
+      required:
+        - webhook.type
+        - webhook.event
+        - webhook.source
+        - processing.status
+      optional:
+        - processing.duration_ms
+        - processing.retry_count
+        - processing.error_message
+        - webhook.payload_size
+
+  webhook.validate:
+    description: "Webhook validation"
+    attributes:
+      required:
+        - webhook.type
+        - validation.status
+      optional:
+        - validation.duration_ms
+        - validation.error_message
+        - validation.signature_valid
+
+  # Database spans
+  database.query:
+    description: "Database query execution"
+    attributes:
+      required:
+        - db.system
+        - db.operation
+        - db.sql.table
+        - query.status
+      optional:
+        - query.duration_ms
+        - query.rows_affected
+        - query.rows_returned
+        - query.error_message
+        - db.connection_pool.size
+
+  database.transaction:
+    description: "Database transaction"
+    attributes:
+      required:
+        - db.system
+        - transaction.status
+      optional:
+        - transaction.duration_ms
+        - transaction.operations_count
+        - transaction.error_message
+
+  # External service spans
+  external.service:
+    description: "External service call"
+    attributes:
+      required:
+        - service.name
+        - service.operation
+        - http.method
+        - http.url
+        - http.status_code
+      optional:
+        - service.duration_ms
+        - service.retry_count
+        - service.error_message
+        - service.response_size
+
+  # Bitcoin/Lightning spans
+  bitcoin.transaction:
+    description: "Bitcoin transaction processing"
+    attributes:
+      required:
+        - bitcoin.operation
+        - transaction.status
+      optional:
+        - transaction.duration_ms
+        - transaction.amount_sats
+        - transaction.fee_sats
+        - transaction.error_message
+
+  lightning.payment:
+    description: "Lightning payment processing"
+    attributes:
+      required:
+        - lightning.operation
+        - payment.status
+      optional:
+        - payment.duration_ms
+        - payment.amount_sats
+        - payment.fee_sats
+        - payment.error_message
+        - payment.invoice_hash
+
+  lightning.channel:
+    description: "Lightning channel operation"
+    attributes:
+      required:
+        - lightning.operation
+        - channel.status
+      optional:
+        - channel.duration_ms
+        - channel.capacity_sats
+        - channel.error_message
+
+  # System spans
+  system.startup:
+    description: "System startup"
+    attributes:
+      required:
+        - system.component
+        - startup.status
+      optional:
+        - startup.duration_ms
+        - startup.error_message
+
+  system.shutdown:
+    description: "System shutdown"
+    attributes:
+      required:
+        - system.component
+        - shutdown.status
+      optional:
+        - shutdown.duration_ms
+        - shutdown.error_message
+
+# Metrics
+metrics:
+  # API metrics
+  api.requests.total:
+    type: "counter"
+    description: "Total number of API requests"
+    labels:
+      - method
+      - route
+      - status_code
+      - user_agent
+
+  api.request.duration.ms:
+    type: "histogram"
+    description: "API request duration in milliseconds"
+    labels:
+      - method
+      - route
+      - status_code
+    buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+
+  api.request.size.bytes:
+    type: "histogram"
+    description: "API request size in bytes"
+    labels:
+      - method
+      - route
+    buckets: [100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
+
+  api.response.size.bytes:
+    type: "histogram"
+    description: "API response size in bytes"
+    labels:
+      - method
+      - route
+      - status_code
+    buckets: [100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
+
+  # Workflow metrics
+  workflow.executions.total:
+    type: "counter"
+    description: "Total number of workflow executions"
+    labels:
+      - workflow_id
+      - tenant_id
+      - status
+
+  workflow.execution.duration.ms:
+    type: "histogram"
+    description: "Workflow execution duration in milliseconds"
+    labels:
+      - workflow_id
+      - tenant_id
+    buckets: [100, 500, 1000, 5000, 10000, 30000, 60000, 300000, 600000]
+
+  workflow.steps.total:
+    type: "counter"
+    description: "Total number of workflow steps executed"
+    labels:
+      - workflow_id
+      - step_id
+      - status
+
+  workflow.step.duration.ms:
+    type: "histogram"
+    description: "Workflow step duration in milliseconds"
+    labels:
+      - workflow_id
+      - step_id
+    buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+
+  workflow.queue.size:
+    type: "gauge"
+    description: "Workflow queue size"
+    labels:
+      - queue_name
+
+  workflow.queue.waiting:
+    type: "gauge"
+    description: "Workflow queue waiting count"
+    labels:
+      - queue_name
+
+  workflow.active.count:
+    type: "gauge"
+    description: "Number of active workflow executions"
+    labels:
+      - workflow_id
+
+  # Agent metrics
+  agent.executions.total:
+    type: "counter"
+    description: "Total number of agent executions"
+    labels:
+      - agent_id
+      - agent_name
+      - agent_type
+      - status
+
+  agent.execution.duration.ms:
+    type: "histogram"
+    description: "Agent execution duration in milliseconds"
+    labels:
+      - agent_id
+      - agent_name
+      - agent_type
+    buckets: [100, 500, 1000, 5000, 10000, 30000, 60000, 300000, 600000]
+
+  agent.active.count:
+    type: "gauge"
+    description: "Number of active agents"
+    labels:
+      - agent_type
+
+  agent.health.status:
+    type: "gauge"
+    description: "Agent health status (1=healthy, 0=unhealthy)"
+    labels:
+      - agent_id
+      - agent_name
+
+  # Webhook metrics
+  webhook.events.total:
+    type: "counter"
+    description: "Total number of webhook events"
+    labels:
+      - webhook_type
+      - event_type
+      - status
+
+  webhook.processing.duration.ms:
+    type: "histogram"
+    description: "Webhook processing duration in milliseconds"
+    labels:
+      - webhook_type
+      - event_type
+    buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+
+  webhook.retries.total:
+    type: "counter"
+    description: "Total number of webhook retries"
+    labels:
+      - webhook_type
+      - event_type
+      - retry_count
+
+  # Database metrics
+  database.connections.active:
+    type: "gauge"
+    description: "Number of active database connections"
+    labels:
+      - db_system
+      - pool_name
+
+  database.connections.idle:
+    type: "gauge"
+    description: "Number of idle database connections"
+    labels:
+      - db_system
+      - pool_name
+
+  database.queries.total:
+    type: "counter"
+    description: "Total number of database queries"
+    labels:
+      - db_system
+      - operation
+      - table
+      - status
+
+  database.query.duration.ms:
+    type: "histogram"
+    description: "Database query duration in milliseconds"
+    labels:
+      - db_system
+      - operation
+      - table
+    buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+
+  database.transactions.total:
+    type: "counter"
+    description: "Total number of database transactions"
+    labels:
+      - db_system
+      - status
+
+  database.transaction.duration.ms:
+    type: "histogram"
+    description: "Database transaction duration in milliseconds"
+    labels:
+      - db_system
+    buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+
+  # External service metrics
+  external.service.calls.total:
+    type: "counter"
+    description: "Total number of external service calls"
+    labels:
+      - service_name
+      - operation
+      - status_code
+
+  external.service.duration.ms:
+    type: "histogram"
+    description: "External service call duration in milliseconds"
+    labels:
+      - service_name
+      - operation
+    buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+
+  external.service.retries.total:
+    type: "counter"
+    description: "Total number of external service retries"
+    labels:
+      - service_name
+      - operation
+      - retry_count
+
+  # Bitcoin/Lightning metrics
+  bitcoin.transactions.total:
+    type: "counter"
+    description: "Total number of Bitcoin transactions"
+    labels:
+      - operation
+      - status
+
+  bitcoin.transaction.duration.ms:
+    type: "histogram"
+    description: "Bitcoin transaction duration in milliseconds"
+    labels:
+      - operation
+    buckets: [100, 500, 1000, 5000, 10000, 30000, 60000, 300000, 600000]
+
+  lightning.payments.total:
+    type: "counter"
+    description: "Total number of Lightning payments"
+    labels:
+      - operation
+      - status
+
+  lightning.payment.duration.ms:
+    type: "histogram"
+    description: "Lightning payment duration in milliseconds"
+    labels:
+      - operation
+    buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+
+  lightning.payment.amount.sats:
+    type: "histogram"
+    description: "Lightning payment amounts in satoshis"
+    labels:
+      - operation
+    buckets: [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000]
+
+  lightning.channels.total:
+    type: "counter"
+    description: "Total number of Lightning channel operations"
+    labels:
+      - operation
+      - status
+
+  lightning.channel.capacity.sats:
+    type: "histogram"
+    description: "Lightning channel capacities in satoshis"
+    labels:
+      - operation
+    buckets: [1000, 10000, 100000, 1000000, 10000000, 100000000]
+
+  # System metrics
+  system.cpu.usage.percent:
+    type: "gauge"
+    description: "CPU usage percentage"
+    labels:
+      - component
+
+  system.memory.usage.bytes:
+    type: "gauge"
+    description: "Memory usage in bytes"
+    labels:
+      - component
+      - type
+
+  system.disk.usage.bytes:
+    type: "gauge"
+    description: "Disk usage in bytes"
+    labels:
+      - component
+      - mount_point
+
+  system.uptime.seconds:
+    type: "gauge"
+    description: "System uptime in seconds"
+    labels:
+      - component
+
+  # Business metrics
+  business.users.active:
+    type: "gauge"
+    description: "Number of active users"
+    labels:
+      - period
+
+  business.agents.active:
+    type: "gauge"
+    description: "Number of active agents"
+    labels:
+      - agent_type
+
+  business.payments.total:
+    type: "counter"
+    description: "Total number of payments processed"
+    labels:
+      - payment_type
+      - status
+
+  business.payment.volume.sats:
+    type: "counter"
+    description: "Total payment volume in satoshis"
+    labels:
+      - payment_type
+      - status
+
+# Logging
+logging:
+  format: "json"
+  level: "info"
+  fields:
+    required:
+      - timestamp
+      - level
+      - message
+      - service
+      - request_id
+    optional:
+      - user_id
+      - tenant_id
+      - workflow_id
+      - workflow_run_id
+      - step_id
+      - agent_id
+      - execution_id
+      - webhook_type
+      - error_code
+      - duration_ms
+      - status_code
+
+  levels:
+    trace: 0
+    debug: 1
+    info: 2
+    warn: 3
+    error: 4
+    fatal: 5
+
+# Resource attributes
+resource:
+  service:
+    name: "lightningflow-ai"
+    version: "1.0.0"
+    namespace: "lightningflow"
+  deployment:
+    environment: "production"
+    region: "us-east-1"
+  host:
+    name: "lightningflow-api"
+    type: "container"
+  container:
+    name: "lightningflow-api"
+    image: "lightningflow/ai:latest"
+
+# Sampling configuration
+sampling:
+  traces:
+    default: 0.1
+    rules:
+      - service: "lightningflow-ai"
+        operation: "api.request"
+        rate: 0.5
+      - service: "lightningflow-ai"
+        operation: "workflow.execute"
+        rate: 1.0
+      - service: "lightningflow-ai"
+        operation: "workflow.step"
+        rate: 1.0
+      - service: "lightningflow-ai"
+        operation: "agent.execute"
+        rate: 1.0
+      - service: "lightningflow-ai"
+        operation: "webhook.process"
+        rate: 1.0
+
+# Export configuration
+export:
+  traces:
+    endpoint: "http://jaeger:14268/api/traces"
+    batch_size: 512
+    export_timeout: 30000
+  metrics:
+    endpoint: "http://prometheus:9090/api/v1/write"
+    batch_size: 1000
+    export_timeout: 30000
+  logs:
+    endpoint: "http://loki:3100/loki/api/v1/push"
+    batch_size: 100
+    export_timeout: 30000
+
+
+
+
+
+

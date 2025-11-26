@@ -1,0 +1,357 @@
+{
+  "createdAt": "2025-10-27T05:45:32.848Z",
+  "updatedAt": "2025-10-27T14:07:35.000Z",
+  "id": "42iMxuGIEAtueC6J",
+  "name": "API Key Management System",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/api-keys",
+        "options": {}
+      },
+      "id": "718b79e6-a5f2-46a0-b2fc-478cfc9e9657",
+      "name": "API Key Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        496
+      ],
+      "webhookId": "6c77b21d-673f-4a57-b71d-39fb0f11ce94"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different API key operations\nconst apiKeyAction = $input.item.json.body?.action || 'create';\n\nreturn {\n  json: {\n    action: apiKeyAction,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "c4ca1c07-beec-4aa6-9281-dc4015dff05a",
+      "name": "Route API Key Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "create-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "create",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "revoke-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "revoke",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "validate-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "validate",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "throttle-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "throttle",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "8ed7b025-44e5-47fc-9a77-55fa976f8945",
+      "name": "Route by API Key Action",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate and create API key\nconst crypto = require('crypto');\nconst apiKey = crypto.randomBytes(32).toString('hex');\nconst hashedKey = crypto.createHash('sha256').update(apiKey).digest('hex');\n\nreturn {\n  json: {\n    apiKey,\n    hashedKey,\n    tenantId: $json.data.tenantId,\n    permissions: $json.data.permissions || ['read', 'write']\n  }\n};"
+      },
+      "id": "8a2c429e-dc98-4522-bccf-858e0ad19d13",
+      "name": "Create API Key",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE api_keys SET revoked = true, revoked_at = NOW() WHERE id = $1;",
+        "options": {}
+      },
+      "id": "c7e959b8-61bb-4b1a-b08f-5158e48fba69",
+      "name": "Revoke API Key",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        208,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM api_keys WHERE hashed_key = $1 AND revoked = false;",
+        "options": {}
+      },
+      "id": "32e7dbd4-089e-4b7a-b70a-69709263d096",
+      "name": "Validate API Key",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        208,
+        592
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as request_count FROM rate_limits WHERE api_key_id = $1 AND created_at > NOW() - INTERVAL '1 minute';",
+        "options": {}
+      },
+      "id": "b37c79c2-7742-47ab-ba5d-11e760eb60d5",
+      "name": "Check Throttling",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        208,
+        784
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "41ef3c80-1a42-4c83-8dc4-5bc5d6912a42",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        432,
+        496
+      ]
+    }
+  ],
+  "connections": {
+    "API Key Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Route API Key Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route API Key Action": {
+      "main": [
+        [
+          {
+            "node": "Route by API Key Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by API Key Action": {
+      "main": [
+        [
+          {
+            "node": "Create API Key",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Revoke API Key",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Validate API Key",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Throttling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create API Key": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revoke API Key": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate API Key": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Throttling": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "4d5487ab-ea26-437a-b502-bb135127a96b",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T05:45:32.850Z",
+      "updatedAt": "2025-10-27T05:45:32.850Z",
+      "role": "workflow:owner",
+      "workflowId": "42iMxuGIEAtueC6J",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T05:45:28.693Z",
+      "updatedAt": "2025-10-27T05:45:28.693Z",
+      "id": "xMwSpQxbUtg6s7Q2",
+      "name": "API Keys"
+    }
+  ]
+}

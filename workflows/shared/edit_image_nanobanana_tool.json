@@ -1,0 +1,503 @@
+{
+  "createdAt": "2025-10-16T12:58:30.443Z",
+  "updatedAt": "2025-10-17T05:13:52.000Z",
+  "id": "6NMrOq1sSDLblNid",
+  "name": "Edit Image Nanobanana Tool",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "imageTitle"
+            },
+            {
+              "name": "imagePrompt"
+            },
+            {
+              "name": "imageID"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -416,
+        16
+      ],
+      "id": "82ba53d8-e4e1-4570-954c-e4d195f1b6f5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        16
+      ],
+      "id": "3e66f2e2-4bcf-40cd-b05c-6b911eb4555e",
+      "name": "Get URL",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "lxNsYw9VfBFAjF05",
+          "name": "imgbb"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.imageID }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -240,
+        16
+      ],
+      "id": "f369ee3e-fecd-4a46-a2e6-b7a9e1ed08e5",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/nano-banana/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ \n  $('When Executed by Another Workflow').item.json.imagePrompt.replace(/\\\"/g, '\\\\\\\"').replace(/(\\r\\n|\\n|\\r)/g, '\\\\n') }}}}\",\n  \"image_urls\": [\n    \"{{ $json.data.url }}\"\n  ],\n  \"num_images\": 1,\n  \"output_format\": \"jpeg\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        16
+      ],
+      "id": "e9a8fde2-29d3-42ca-986a-aba778b24bbe",
+      "name": "Create Image",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Fu075JqkIa9nlRqq",
+          "name": "image"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/nano-banana/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        336,
+        16
+      ],
+      "id": "4bd28eed-b4e9-4423-88e2-b8c5d094e10c",
+      "name": "Get Result",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Fu075JqkIa9nlRqq",
+          "name": "image"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c66c7c13-57ca-4191-9af3-5ab306dfedfc",
+              "name": "Response",
+              "value": "=The image was created and named \"{{ $json.name }}\". \n\nHere is the link to the image in Google Drive: {{ $json.webViewLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        16
+      ],
+      "id": "15ea226d-8c8e-42ae-abb4-99b55a4dffdf",
+      "name": "Result"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[0].url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        544,
+        16
+      ],
+      "id": "6f00cbb4-6551-42c2-b8ec-35d674ce00fd",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        16
+      ],
+      "id": "0d9596d4-3ec9-4201-8037-dce9da99f415",
+      "name": "10 Seconds",
+      "webhookId": "caad73e3-58d8-4fbd-a3e9-c42424f2d1ee"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('When Executed by Another Workflow').item.json.imageTitle }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1hGHGecrUVHqG1UiFl1vw9tSLIWl020ed",
+          "mode": "list",
+          "cachedResultName": "n8n images",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1hGHGecrUVHqG1UiFl1vw9tSLIWl020ed"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        688,
+        16
+      ],
+      "id": "c541dcb6-318c-4993-832f-331cd256b682",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Input",
+        "height": 224,
+        "width": 176,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -48
+      ],
+      "id": "77d24a60-d721-42f0-933f-5dcc280d1afc",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Download File URL",
+        "height": 224,
+        "width": 288,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -48
+      ],
+      "id": "1bd1b5d9-7c78-42bc-b428-bc6f38126b71",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Create AI Image",
+        "height": 224,
+        "width": 432,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "9240f7d4-7ed6-468c-8a44-2316fcf362b2",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Polling",
+        "height": 224,
+        "width": 192,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        288,
+        192
+      ],
+      "id": "7676d114-b7a0-4997-ab6f-0fa71a5a83ea",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Output",
+        "height": 224,
+        "width": 464,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        496,
+        -48
+      ],
+      "id": "c9deed69-b797-422a-a889-e49ac6fa25c8",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        272
+      ],
+      "id": "518249dc-8999-470b-b224-63d85e7d796b",
+      "name": "5 Seconds",
+      "webhookId": "5f6bbd1e-a155-48de-b737-a225c6fd7a84"
+    }
+  ],
+  "connections": {
+    "Get URL": {
+      "main": [
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Get URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "10 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Result": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "5 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Get Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Get Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "imageTitle": "Dog eating ice cream - meme option 2",
+          "imagePrompt": "Add meme-style captions to the photorealistic composite of a dog eating ice cream. Keep the image realistic and unchanged except for the text. Top caption in all caps: I'LL HAVE JUST ONE BITE. Bottom caption in all caps: ALSO ME:. Use Impact-like bold sans serif white text with a thick solid black outline (stroke) so it's legible on any background. Center both captions horizontally. Place the top caption near the top edge with a small margin, slightly arched if needed. Place the bottom caption near the bottom edge with a small margin, ensuring text does not cover the dog's face or the ice cream cone. Use large readable font size and high-resolution output. Do not add additional elements, captions, logos, or watermarks. Keep color grading and lighting consistent with the original.",
+          "imageID": "15Q7yfXGpLG_5PHJnsc6TXc0Z_i2hT-l5"
+        }
+      }
+    ]
+  },
+  "versionId": "48c519a1-666c-4f03-81b7-47dedf09fd5e",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T12:58:30.448Z",
+      "updatedAt": "2025-10-16T12:58:30.448Z",
+      "role": "workflow:owner",
+      "workflowId": "6NMrOq1sSDLblNid",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

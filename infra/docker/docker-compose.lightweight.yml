@@ -1,0 +1,77 @@
+# Lightweight Docker Compose configuration for 8GB RAM systems
+# Optimized memory limits and resource constraints for constrained hardware
+# Usage: docker compose -f infra/docker/docker-compose.lightweight.yml up
+
+version: '3.8'
+
+x-dflt: &dflt
+  restart: unless-stopped
+  networks: [private]
+  security_opt: ["no-new-privileges:true"]
+  read_only: true
+  tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]  # Reduced tmpfs size
+
+services:
+  # Minimal Redis for lightweight mode
+  redis:
+    <<: *dflt
+    image: redis:7.2-alpine
+    command: ["redis-server","--save","","--appendonly","no","--maxmemory","128mb","--maxmemory-policy","allkeys-lru"]
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck: { test: ["CMD","redis-cli","ping"], interval: 5s, timeout: 2s, retries: 20 }
+    cpus: "0.25"; mem_limit: "128m"; pids_limit: 100  # Reduced limits
+
+  # Minimal n8n for lightweight mode
+  n8n:
+    <<: *dflt
+    image: n8nio/n8n:1.55.1
+    env_file: [../../.env.local]
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - WEBHOOK_URL=http://localhost:5678/
+      - N8N_PROTOCOL=http
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-your-encryption-key}
+      - N8N_EDITOR_BASE_URL=http://localhost:5678
+      - N8N_PUBLIC_URL=http://localhost:5678
+    ports: ["127.0.0.1:5678:5678"]
+    volumes:
+      - ${DEV_DATA_ROOT:-./data}/n8n_data:/home/node/.n8n
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "0.5"; mem_limit: "512m"; pids_limit: 150  # Reduced limits
+
+  # Lightweight Scorpion with aggressive memory limits
+  scorpion:
+    <<: *dflt
+    build:
+      context: ../..
+      dockerfile: apps/scorpion/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - SCORPION_STORAGE_AUTO_DETECT=false
+      - SCORPION_SSD_PATH=/app/data/scorpion
+      - N8N_API_URL=http://n8n:5678
+      # Enable lightweight mode and use small model
+      - CHAT_LIGHTWEIGHT_MODE=true
+      - OLLAMA_MODEL=llama3.2:1b-instruct-q4_K_M
+      # Node.js memory optimizations
+      - NODE_OPTIONS=--max-old-space-size=384
+    ports: ["127.0.0.1:3003:3003"]
+    volumes:
+      - ${DEV_DATA_ROOT:-./data}/scorpion:/app/data/scorpion
+      - ${DEV_DATA_ROOT:-./data}/scorpion-backups:/app/backups/scorpion
+    depends_on:
+      redis: { condition: service_healthy }
+      n8n: { condition: service_healthy }
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1"; mem_limit: "512m"; pids_limit: 200  # Aggressive limits for 8GB systems
+    # Memory reservation to prevent OOM kills
+    mem_reservation: "256m"
+
+volumes:
+  n8n-data:
+
+networks:
+  private: { driver: bridge, internal: false }
+

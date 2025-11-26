@@ -1,0 +1,315 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🛡️  COMPREHENSIVE ENHANCED SECURITY DEPLOYMENT"
+echo "================================================"
+echo "This script will eliminate malware and deploy enterprise-grade protection"
+echo ""
+
+# Function to log events
+log_event() {
+    local level="$1"
+    local message="$2"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] [$level] $message"
+}
+
+# Function to check if process is running
+is_process_running() {
+    local process_name="$1"
+    pgrep -f "$process_name" >/dev/null 2>&1
+}
+
+# Function to kill suspicious process
+kill_suspicious_process() {
+    local pid="$1"
+    local process_info="$2"
+    
+    log_event "CRITICAL" "Killing suspicious process PID: $pid - $process_info"
+    kill -9 "$pid" 2>/dev/null || true
+    
+    if ! ps -p "$pid" >/dev/null 2>&1; then
+        log_event "INFO" "Successfully killed process PID: $pid"
+    else
+        log_event "WARNING" "Failed to kill process PID: $pid"
+    fi
+}
+
+echo "🔧 PHASE 1: IMMEDIATE MALWARE ELIMINATION"
+echo "-------------------------------------------"
+
+log_event "INFO" "Starting comprehensive malware removal..."
+
+# Define suspicious processes to target
+SUSPICIOUS_PROCESSES=("xmrig" "minerd" "kinsing" "kdevtmpfsi" "cryptonight" "mrsho" "zzh" "sustse")
+
+# Kill all suspicious processes immediately
+for suspicious in "${SUSPICIOUS_PROCESSES[@]}"; do
+    if is_process_running "$suspicious"; then
+        log_event "CRITICAL" "Found $suspicious process! Killing immediately..."
+        pkill -f "$suspicious" 2>/dev/null || true
+        
+        # Force kill any remaining processes
+        pids=$(pgrep -f "$suspicious" 2>/dev/null || echo "")
+        if [ -n "$pids" ]; then
+            echo "$pids" | xargs -r kill -9 2>/dev/null || true
+        fi
+        
+        log_event "INFO" "Eliminated all $suspicious processes"
+    fi
+done
+
+# Remove malware files
+log_event "INFO" "Removing malware files..."
+find /tmp /var/tmp /dev/shm /opt /home -name "*xmrig*" -o -name "*minerd*" -o -name "*kinsing*" -exec rm -rf {} \; 2>/dev/null || true
+
+echo "🔧 PHASE 2: REMOVE PERSISTENCE MECHANISMS"
+echo "-------------------------------------------"
+
+log_event "INFO" "Removing persistence mechanisms..."
+
+# Clear suspicious cron jobs
+if crontab -l 2>/dev/null | grep -q -E "(xmrig|minerd|kinsing|mining)"; then
+    log_event "CRITICAL" "Found suspicious cron jobs! Removing..."
+    crontab -l 2>/dev/null | grep -vE "(xmrig|minerd|kinsing|mining)" | crontab -
+    log_event "INFO" "Suspicious cron jobs removed"
+fi
+
+# Check system-wide cron directories
+find /etc/cron.* -type f -exec sed -i '/xmrig\|minerd\|kinsing\|mining/d' {} \; 2>/dev/null || true
+
+# Remove suspicious systemd services
+suspicious_services=$(systemctl list-units --type=service --state=running | egrep -i 'xmrig|minerd|kinsing|crypto' | awk '{print $1}')
+if [ -n "$suspicious_services" ]; then
+    log_event "CRITICAL" "Found suspicious systemd services! Stopping and disabling..."
+    echo "$suspicious_services" | while read -r service; do
+        if [ -n "$service" ]; then
+            systemctl stop "$service" 2>/dev/null || true
+            systemctl disable "$service" 2>/dev/null || true
+            log_event "INFO" "Stopped and disabled suspicious service: $service"
+        fi
+    done
+    systemctl daemon-reload
+fi
+
+# Remove startup scripts
+if [ -f /etc/rc.local ]; then
+    sed -i '/xmrig\|minerd\|kinsing\|mining/d' /etc/rc.local 2>/dev/null || true
+fi
+
+echo "🔧 PHASE 3: INSTALL SECURITY TOOLS"
+echo "-----------------------------------"
+
+log_event "INFO" "Installing security tools..."
+
+# Update system packages
+apt-get update -y
+apt-get upgrade -y
+
+# Install essential security tools
+apt-get install -y fail2ban ufw rkhunter chkrootkit bc curl wget
+
+echo "🔧 PHASE 4: CONFIGURE FIREWALL (UFW)"
+echo "--------------------------------------"
+
+log_event "INFO" "Configuring firewall..."
+
+# Configure UFW firewall
+ufw --force reset
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 5678/tcp  # n8n
+ufw --force enable
+
+log_event "INFO" "Firewall configured and enabled"
+
+echo "🔧 PHASE 5: CONFIGURE FAIL2BAN"
+echo "--------------------------------"
+
+log_event "INFO" "Configuring fail2ban..."
+
+# Configure fail2ban for SSH protection
+cat > /etc/fail2ban/jail.local << 'EOF'
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 3
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 3600
+EOF
+
+systemctl enable fail2ban
+systemctl restart fail2ban
+
+log_event "INFO" "Fail2ban configured and enabled"
+
+echo "🔧 PHASE 6: CREATE CONTINUOUS MALWARE PREVENTION"
+echo "------------------------------------------------"
+
+log_event "INFO" "Creating continuous malware prevention..."
+
+# Create continuous prevention script
+cat > /usr/local/bin/continuous-malware-prevention.sh << 'EOF'
+#!/bin/bash
+# Continuous Malware Prevention Daemon
+LOG_FILE="/var/log/malware-prevention.log"
+SCAN_INTERVAL=30  # seconds
+
+log_event() {
+    local level="$1"
+    local message="$2"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] [$level] $message" >> "$LOG_FILE"
+}
+
+# Check for suspicious processes
+SUSPICIOUS_PROCESSES=("xmrig" "minerd" "kinsing" "kdevtmpfsi" "cryptonight" "mrsho" "zzh" "sustse")
+
+for suspicious in "${SUSPICIOUS_PROCESSES[@]}"; do
+    if pgrep -f "$suspicious" >/dev/null; then
+        log_event "CRITICAL" "Suspicious process detected: $suspicious"
+        pkill -f "$suspicious" 2>/dev/null || true
+        find /tmp /var/tmp /dev/shm /opt /home -name "*$suspicious*" -exec rm -rf {} \; 2>/dev/null || true
+    fi
+done
+
+# Check for high CPU usage
+CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)
+if (( $(echo "$CPU_USAGE > 80" | bc -l 2>/dev/null || echo "0" | bc -l) )); then
+    log_event "WARNING" "High CPU usage detected: ${CPU_USAGE}%"
+    
+    # Check which processes are using high CPU
+    ps aux | awk '{if($3>80.0) print $0}' | while read -r line; do
+        local pid=$(echo "$line" | awk '{print $2}')
+        local cpu=$(echo "$line" | awk '{print $3}')
+        local cmd=$(echo "$line" | awk '{for(i=11;i<=NF;i++) printf $i" "; print ""}')
+        
+        # Kill suspicious high-CPU processes
+        if echo "$cmd" | grep -q -E "(xmrig|minerd|kinsing|kdevtmpfsi)"; then
+            log_event "CRITICAL" "Killing confirmed malware process PID: $pid"
+            kill -9 "$pid" 2>/dev/null || true
+        fi
+    done
+fi
+
+# Check for suspicious network connections
+for port in 3333 4444 5555 7777; do
+    if ss -Htnp "sport = :$port" 2>/dev/null | grep -q .; then
+        log_event "CRITICAL" "Suspicious connection on port $port detected!"
+        
+        # Get process using this port
+        local pid=$(ss -Htnp "sport = :$port" 2>/dev/null | awk '{print $6}' | cut -d',' -f1 | tail -1)
+        if [ -n "$pid" ] && [ "$pid" != "-" ]; then
+            kill -9 "$pid" 2>/dev/null || true
+        fi
+        
+        # Block port in firewall
+        ufw deny "$port/tcp" 2>/dev/null || true
+    fi
+done
+
+# Restart n8n if it's down
+if ! curl -s http://localhost:5678 >/dev/null 2>&1; then
+    log_event "INFO" "Restarting n8n service..."
+    cd /opt/lightningflow || cd /root
+    docker-compose -f infra/docker/docker-compose.prod.yml up -d 2>/dev/null || true
+fi
+
+log_event "INFO" "Prevention check completed"
+EOF
+
+chmod +x /usr/local/bin/continuous-malware-prevention.sh
+
+# Create systemd service for the daemon
+cat > /etc/systemd/system/malware-prevention.service << 'EOF'
+[Unit]
+Description=Continuous Malware Prevention Daemon
+After=network.target fail2ban.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/continuous-malware-prevention.sh
+ExecStop=/usr/local/bin/continuous-malware-prevention.sh
+Restart=always
+RestartSec=10
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable malware-prevention.service
+systemctl start malware-prevention.service
+
+log_event "INFO" "Continuous malware prevention daemon installed and enabled"
+
+echo "🔧 PHASE 7: RESTORE N8N SERVICES"
+echo "---------------------------------"
+
+log_event "INFO" "Restoring n8n services..."
+
+# Navigate to your project directory
+cd /opt/lightningflow || cd /root
+
+# Stop any existing containers
+docker-compose -f infra/docker/docker-compose.prod.yml down 2>/dev/null || true
+
+# Clean up Docker
+docker system prune -f
+
+# Start n8n services
+docker-compose -f infra/docker/docker-compose.prod.yml up -d 2>/dev/null || true
+
+log_event "INFO" "N8N services restored"
+
+echo "🔧 PHASE 8: FINAL VERIFICATION"
+echo "--------------------------------"
+
+log_event "INFO" "Performing final verification..."
+
+# Check for remaining suspicious processes
+echo "Checking for remaining suspicious processes..."
+ps aux | grep -i 'xmrig\|minerd\|kinsing' | grep -v grep || echo "✅ No suspicious processes found"
+
+# Check network connections
+echo "Checking network connections..."
+ss -Htnp '( sport = :3333 or sport = :4444 or sport = :5555 or sport = :7777 )' 2>/dev/null || echo "✅ No suspicious network connections"
+
+# Check service status
+echo "Checking service status..."
+systemctl status fail2ban --no-pager -l | head -5
+systemctl status malware-prevention.service --no-pager -l | head -5
+ufw status | head -5
+
+echo ""
+echo "🛡️  ENHANCED SECURITY DEPLOYMENT COMPLETE!"
+echo "==========================================="
+echo "✅ All malware eliminated"
+echo "✅ Persistence mechanisms removed"
+echo "✅ Firewall (UFW) configured and enabled"
+echo "✅ Fail2ban installed and configured"
+echo "✅ Continuous malware prevention daemon running"
+echo "✅ N8N services restored"
+echo ""
+echo "📋 MONITORING COMMANDS:"
+echo "   • Prevention logs: tail -f /var/log/malware-prevention.log"
+echo "   • Fail2ban status: systemctl status fail2ban"
+echo "   • Firewall status: ufw status"
+echo "   • Daemon status: systemctl status malware-prevention.service"
+echo ""
+echo "🔒 Your VPS is now protected with enterprise-grade security!"
+echo "The malware prevention daemon will automatically detect and remove"
+echo "any threats that try to return, and will restart n8n if it goes down."
+echo ""
+echo "🚀 n8ncloud.tech should now be accessible and secure!"

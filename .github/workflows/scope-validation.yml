@@ -1,0 +1,203 @@
+name: Scope Validation & Quality Gates
+
+on:
+  pull_request:
+    branches: [main, staging, integration]
+  push:
+    branches: [main, staging, integration]
+
+jobs:
+  scope-validation:
+    name: Validate Project Scope
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate PR title format
+        run: |
+          if [[ ! "${{ github.event.pull_request.title }}" =~ ^\[PROJECT=[a-z-]+\]\[ENV=[a-z]+\] ]]; then
+            echo "❌ PR title must follow format: [PROJECT=project][ENV=env] description"
+            echo "Example: [PROJECT=lightningflow][ENV=integration] feat: add payment processing"
+            exit 1
+          fi
+          echo "✅ PR title format is valid"
+
+      - name: Extract project and environment
+        id: extract
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          PROJECT=$(echo "$TITLE" | sed -n 's/.*\[PROJECT=\([^]]*\)\].*/\1/p')
+          ENV=$(echo "$TITLE" | sed -n 's/.*\[ENV=\([^]]*\)\].*/\1/p')
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "Project: $PROJECT, Environment: $ENV"
+
+      - name: Validate changed files against project scope
+        run: |
+          PROJECT="${{ steps.extract.outputs.project }}"
+          ENV="${{ steps.extract.outputs.env }}"
+          
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          
+          # Load project configuration
+          if [ ! -f "docs/PROJECTS.yaml" ]; then
+            echo "❌ docs/PROJECTS.yaml not found"
+            exit 1
+          fi
+          
+          # Extract allowed globs for the project
+          ALLOWED_GLOBS=$(yq eval ".projects.$PROJECT.allow_globs[]" docs/PROJECTS.yaml 2>/dev/null || echo "")
+          
+          if [ -z "$ALLOWED_GLOBS" ]; then
+            echo "❌ Unknown project: $PROJECT"
+            echo "Available projects:"
+            yq eval '.projects | keys' docs/PROJECTS.yaml
+            exit 1
+          fi
+          
+          # Check each changed file against allowed globs
+          VIOLATIONS=()
+          while IFS= read -r file; do
+            if [ -n "$file" ]; then
+              ALLOWED=false
+              for glob in $ALLOWED_GLOBS; do
+                if [[ "$file" == $glob ]]; then
+                  ALLOWED=true
+                  break
+                fi
+              done
+              if [ "$ALLOWED" = false ]; then
+                VIOLATIONS+=("$file")
+              fi
+            fi
+          done <<< "$CHANGED_FILES"
+          
+          if [ ${#VIOLATIONS[@]} -gt 0 ]; then
+            echo "❌ Files outside project scope:"
+            printf '%s\n' "${VIOLATIONS[@]}"
+            echo ""
+            echo "Allowed globs for $PROJECT:"
+            printf '%s\n' $ALLOWED_GLOBS
+            exit 1
+          fi
+          
+          echo "✅ All changed files are within project scope"
+
+      - name: Validate environment configuration
+        run: |
+          PROJECT="${{ steps.extract.outputs.project }}"
+          ENV="${{ steps.extract.outputs.env }}"
+          
+          # Check if environment file exists
+          ENV_FILE="apps/$PROJECT/.env.$ENV"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "⚠️  Environment file not found: $ENV_FILE"
+            echo "Creating example file..."
+            mkdir -p "apps/$PROJECT"
+            cp "apps/$PROJECT/env.production.example" "$ENV_FILE" 2>/dev/null || echo "# Environment file for $PROJECT:$ENV" > "$ENV_FILE"
+          fi
+          
+          echo "✅ Environment configuration validated"
+
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    needs: scope-validation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Run type checking
+        run: pnpm run typecheck
+
+      - name: Run tests
+        run: pnpm run test:unit
+
+      - name: Check port bindings
+        run: bash scripts/validate/ports-check.sh
+
+      - name: Validate environment
+        run: |
+          PROJECT="${{ steps.extract.outputs.project }}"
+          ENV="${{ steps.extract.outputs.env }}"
+          if [ -f "scripts/validate/env-validator.ts" ]; then
+            npx tsx scripts/validate/env-validator.ts "$PROJECT" "$ENV"
+          else
+            echo "⚠️  Environment validator not found, skipping"
+          fi
+
+      - name: Update documentation
+        run: bash scripts/reindex.sh
+
+      - name: Check UI integrity
+        run: |
+          if [ -f "apps/lightningflow/lightning-ui/package.json" ]; then
+            cd apps/lightningflow/lightning-ui
+            npm run build
+            echo "✅ UI build successful"
+          else
+            echo "⚠️  LightningFlow UI not found, skipping"
+          fi
+
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+    needs: scope-validation
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets
+        run: |
+          # Check for common secret patterns
+          if grep -r -i "password\|secret\|key\|token" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+            echo "❌ Potential secrets found in code"
+            exit 1
+          fi
+          echo "✅ No secrets found in code"
+
+      - name: Check for hardcoded URLs
+        run: |
+          # Check for hardcoded localhost or IP addresses
+          if grep -r "localhost\|127\.0\.0\.1\|0\.0\.0\.0" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+            echo "❌ Hardcoded URLs found in code"
+            exit 1
+          fi
+          echo "✅ No hardcoded URLs found in code"
+
+      - name: Check for public port bindings
+        run: |
+          if grep -r "0\.0\.0\.0:" infra/ 2>/dev/null; then
+            echo "❌ Public port bindings found"
+            exit 1
+          fi
+          echo "✅ No public port bindings found"

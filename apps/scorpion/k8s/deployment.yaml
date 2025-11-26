@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scorpion
+  namespace: scorpion
+  labels:
+    app: scorpion
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: scorpion
+  template:
+    metadata:
+      labels:
+        app: scorpion
+    spec:
+      containers:
+      - name: scorpion
+        image: scorpion:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3003
+          name: http
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: scorpion-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: scorpion-config
+              key: PORT
+        - name: NEXT_TELEMETRY_DISABLED
+          valueFrom:
+            configMapKeyRef:
+              name: scorpion-config
+              key: NEXT_TELEMETRY_DISABLED
+        envFrom:
+        - secretRef:
+            name: scorpion-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3003
+          initialDelaySeconds: 40
+          periodSeconds: 30
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3003
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 3003
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 12
+      restartPolicy: Always
+

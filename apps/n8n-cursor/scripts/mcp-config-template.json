@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "n8n-mcp": {
+      "command": "npx",
+      "args": [
+        "n8n-mcp"
+      ],
+      "env": {
+        "MCP_MODE": "stdio",
+        "LOG_LEVEL": "error",
+        "DISABLE_CONSOLE_OUTPUT": "true",
+        "N8N_API_URL": "https://n8ncloud.tech/api/v1",
+        "N8N_API_KEY": "YOUR_NEW_API_KEY_HERE"
+      }
+    },
+    "supabase-mcp": {
+      "command": "npx",
+      "args": [
+        "@supabase/mcp-server"
+      ],
+      "env": {
+        "SUPABASE_URL": "YOUR_SUPABASE_PROJECT_URL",
+        "SUPABASE_ANON_KEY": "YOUR_SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+      }
+    },
+    "huggingface-mcp": {
+      "type": "http",
+      "url": "https://huggingface.co/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_ACTUAL_HF_TOKEN",
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}

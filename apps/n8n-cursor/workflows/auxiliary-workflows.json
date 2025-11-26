@@ -1,0 +1,254 @@
+{
+  "name": "Auxiliary Workflows - n8n-cursor Backend Integration",
+  "nodes": [
+    {
+      "id": "aux-notify-webhook",
+      "name": "Aux Notify Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aux-notify",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "aux-analytics-webhook",
+      "name": "Aux Analytics Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 400],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aux-analytics",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "aux-crm-webhook",
+      "name": "Aux CRM Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 600],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aux-crm",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "verify-signature",
+      "name": "Verify Signature",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 400],
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\n\n// Get the signature from headers\nconst signature = $input.first().headers['x-workflow-signature'];\nconst workflowRunId = $input.first().headers['x-workflow-run-id'];\nconst secret = $vars.N8N_WEBHOOK_SECRET || 'default-secret';\n\n// Get the raw body\nconst body = JSON.stringify($input.first().json);\n\n// Verify signature\nconst expectedSignature = crypto\n  .createHmac('sha256', secret)\n  .update(body)\n  .digest('hex');\n\nconst isValid = crypto.timingSafeEqual(\n  Buffer.from(signature, 'hex'),\n  Buffer.from(expectedSignature, 'hex')\n);\n\nif (!isValid) {\n  throw new Error('Invalid webhook signature');\n}\n\nreturn {\n  workflowRunId,\n  action: $input.first().json.action,\n  data: $input.first().json.data,\n  timestamp: new Date().toISOString(),\n  verified: true\n};"
+      }
+    },
+    {
+      "id": "process-notification",
+      "name": "Process Notification",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 200],
+      "parameters": {
+        "functionCode": "const { workflowRunId, action, data } = $input.first().json;\n\n// Process notification based on action\nlet notification = {\n  workflowRunId,\n  action,\n  timestamp: new Date().toISOString(),\n  processed: true\n};\n\nswitch (action) {\n  case 'workflow_completed':\n    notification = {\n      ...notification,\n      type: 'success',\n      message: `Workflow ${workflowRunId} completed successfully`,\n      details: {\n        service: data.service,\n        status: data.status,\n        result: data.result\n      }\n    };\n    break;\n    \n  case 'workflow_failed':\n    notification = {\n      ...notification,\n      type: 'error',\n      message: `Workflow ${workflowRunId} failed`,\n      details: {\n        service: data.service,\n        error: data.error\n      }\n    };\n    break;\n    \n  default:\n    notification = {\n      ...notification,\n      type: 'info',\n      message: `Workflow ${workflowRunId}: ${action}`,\n      details: data\n    };\n}\n\nreturn notification;"
+      }
+    },
+    {
+      "id": "process-analytics",
+      "name": "Process Analytics",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 400],
+      "parameters": {
+        "functionCode": "const { workflowRunId, action, data } = $input.first().json;\n\n// Process analytics data\nconst analytics = {\n  workflowRunId,\n  action,\n  timestamp: new Date().toISOString(),\n  metrics: {\n    processingTime: data.processingTime,\n    tokensUsed: data.tokensUsed,\n    confidence: data.confidence,\n    service: data.service\n  },\n  insights: []\n};\n\n// Generate insights based on metrics\nif (data.processingTime) {\n  const timeMs = parseFloat(data.processingTime.replace('s', '')) * 1000;\n  if (timeMs > 5000) {\n    analytics.insights.push('High processing time detected - consider optimization');\n  }\n}\n\nif (data.tokensUsed && data.tokensUsed > 2000) {\n  analytics.insights.push('High token usage - monitor costs');\n}\n\nif (data.confidence && data.confidence < 0.8) {\n  analytics.insights.push('Low confidence score - review results');\n}\n\nreturn analytics;"
+      }
+    },
+    {
+      "id": "process-crm",
+      "name": "Process CRM",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 600],
+      "parameters": {
+        "functionCode": "const { workflowRunId, action, data } = $input.first().json;\n\n// Process CRM update\nconst crmUpdate = {\n  workflowRunId,\n  action,\n  timestamp: new Date().toISOString(),\n  lead: {\n    id: workflowRunId,\n    service: data.service,\n    value: data.value,\n    status: data.status,\n    lastActivity: new Date().toISOString()\n  },\n  actions: []\n};\n\n// Determine CRM actions based on data\nif (data.status === 'qualified') {\n  crmUpdate.actions.push({\n    type: 'update_lead_status',\n    status: 'qualified',\n    priority: 'high'\n  });\n  \n  if (data.value && data.value > 10000) {\n    crmUpdate.actions.push({\n      type: 'assign_to_sales',\n      team: 'enterprise'\n    });\n  }\n}\n\nreturn crmUpdate;"
+      }
+    },
+    {
+      "id": "send-email-notification",
+      "name": "Send Email Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [700, 200],
+      "parameters": {
+        "fromEmail": "{{ $vars.NOTIFICATION_EMAIL }}",
+        "toEmail": "{{ $vars.ADMIN_EMAIL }}",
+        "subject": "Workflow Notification: {{ $json.message }}",
+        "message": "Workflow: {{ $json.workflowRunId }}\\n\\nAction: {{ $json.action }}\\n\\nDetails: {{ JSON.stringify($json.details, null, 2) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "store-analytics",
+      "name": "Store Analytics",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 400],
+      "parameters": {
+        "functionCode": "// Store analytics data (in a real implementation, this would save to a database)\nconst analytics = $input.first().json;\n\n// Log analytics for now\nconsole.log('Analytics stored:', {\n  workflowRunId: analytics.workflowRunId,\n  metrics: analytics.metrics,\n  insights: analytics.insights,\n  timestamp: analytics.timestamp\n});\n\nreturn {\n  stored: true,\n  analyticsId: `analytics_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  ...analytics\n};"
+      }
+    },
+    {
+      "id": "update-crm-system",
+      "name": "Update CRM System",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 600],
+      "parameters": {
+        "functionCode": "// Update CRM system (in a real implementation, this would integrate with Salesforce, HubSpot, etc.)\nconst crmUpdate = $input.first().json;\n\n// Log CRM update for now\nconsole.log('CRM updated:', {\n  workflowRunId: crmUpdate.workflowRunId,\n  lead: crmUpdate.lead,\n  actions: crmUpdate.actions,\n  timestamp: crmUpdate.timestamp\n});\n\nreturn {\n  updated: true,\n  crmId: `crm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  ...crmUpdate\n};"
+      }
+    },
+    {
+      "id": "response-assembler",
+      "name": "Response Assembler",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 400],
+      "parameters": {
+        "functionCode": "// Assemble final response\nconst input = $input.first().json;\n\nreturn {\n  success: true,\n  processed: true,\n  timestamp: new Date().toISOString(),\n  result: input\n};"
+      }
+    }
+  ],
+  "connections": {
+    "Aux Notify Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aux Analytics Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aux CRM Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Signature": {
+      "main": [
+        [
+          {
+            "node": "Process Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Process Analytics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Process CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Notification": {
+      "main": [
+        [
+          {
+            "node": "Send Email Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Analytics": {
+      "main": [
+        [
+          {
+            "node": "Store Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process CRM": {
+      "main": [
+        [
+          {
+            "node": "Update CRM System",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Notification": {
+      "main": [
+        [
+          {
+            "node": "Response Assembler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Analytics": {
+      "main": [
+        [
+          {
+            "node": "Response Assembler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update CRM System": {
+      "main": [
+        [
+          {
+            "node": "Response Assembler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["auxiliary", "webhook", "backend-integration", "workflow-0"]
+}

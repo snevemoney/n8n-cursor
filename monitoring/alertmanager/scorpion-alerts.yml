@@ -1,0 +1,123 @@
+groups:
+  - name: scorpion_alerts
+    interval: 30s
+    rules:
+      # Service availability
+      - alert: ScorpionDown
+        expr: up{job="scorpion"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: scorpion
+        annotations:
+          summary: "Scorpion service is down"
+          description: "Scorpion has been down for more than 1 minute"
+      
+      # Health check failures
+      - alert: ScorpionHealthCheckFailing
+        expr: scorpion_system_health == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: scorpion
+        annotations:
+          summary: "Scorpion health check is failing"
+          description: "Scorpion health check has been failing for more than 2 minutes"
+      
+      # High error rate
+      - alert: ScorpionHighErrorRate
+        expr: rate(scorpion_errors_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: scorpion
+        annotations:
+          summary: "High error rate in Scorpion"
+          description: "Scorpion error rate is {{ $value }} errors/second"
+      
+      # API request failures
+      - alert: ScorpionAPIHighFailureRate
+        expr: |
+          sum(rate(scorpion_api_requests_total{status=~"5.."}[5m])) 
+          / 
+          sum(rate(scorpion_api_requests_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: scorpion
+        annotations:
+          summary: "High API failure rate in Scorpion"
+          description: "{{ $value | humanizePercentage }} of API requests are failing"
+      
+      # Slow API responses
+      - alert: ScorpionSlowAPI
+        expr: |
+          histogram_quantile(0.95, rate(scorpion_api_request_duration_seconds_bucket[5m])) > 5
+        for: 10m
+        labels:
+          severity: warning
+          service: scorpion
+        annotations:
+          summary: "Slow API responses in Scorpion"
+          description: "95th percentile API response time is {{ $value }}s"
+      
+      # Memory usage
+      - alert: ScorpionHighMemoryUsage
+        expr: |
+          (container_memory_usage_bytes{name="scorpion"} 
+          / container_spec_memory_limit_bytes{name="scorpion"}) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: scorpion
+        annotations:
+          summary: "High memory usage in Scorpion"
+          description: "Scorpion is using {{ $value | humanizePercentage }} of available memory"
+      
+      # CPU usage
+      - alert: ScorpionHighCPUUsage
+        expr: |
+          rate(container_cpu_usage_seconds_total{name="scorpion"}[5m]) > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: scorpion
+        annotations:
+          summary: "High CPU usage in Scorpion"
+          description: "Scorpion CPU usage is {{ $value }} cores"
+      
+      # Circuit breaker open
+      - alert: ScorpionCircuitBreakerOpen
+        expr: scorpion_circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: scorpion
+        annotations:
+          summary: "Circuit breaker is open in Scorpion"
+          description: "Circuit breaker has been open for more than 1 minute"
+      
+      # Backup failures
+      - alert: ScorpionBackupFailed
+        expr: |
+          time() - scorpion_backup_age_seconds > 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: scorpion
+        annotations:
+          summary: "Scorpion backup is stale"
+          description: "Last backup is more than 24 hours old"
+      
+      # Navigation errors
+      - alert: ScorpionNavigationErrors
+        expr: |
+          rate(scorpion_navigation_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: scorpion
+        annotations:
+          summary: "High navigation error rate in Scorpion"
+          description: "Navigation error rate is {{ $value }} errors/second"
+

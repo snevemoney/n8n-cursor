@@ -1,0 +1,236 @@
+# ENV_MATRIX.yaml - Environment Configuration Matrix
+# Defines how each environment should be configured and deployed
+
+environments:
+  int:
+    name: "Integration"
+    description: "Development and testing environment"
+    compose_file: "infra/docker/docker-compose.int.yml"
+    domain: "dev.lightningflow.online"
+    data_root: "/opt/lfai/int"
+    log_level: "debug"
+    debug: true
+    ssl: false
+    monitoring: true
+    backup: false
+    auto_deploy: true
+    resource_limits:
+      cpu: "0.5"
+      memory: "256M"
+    services:
+      api:
+        image: "lfai/api:latest"
+        port: 5678
+        replicas: 1
+        health_check: "http://localhost:5678/healthz"
+      n8n:
+        image: "n8nio/n8n:latest"
+        port: 5679
+        replicas: 1
+        health_check: "http://localhost:5679/healthz"
+      dozzle:
+        image: "amir20/dozzle:latest"
+        port: 9001
+        replicas: 1
+        health_check: "http://localhost:9001/healthz"
+      code_server:
+        image: "lscr.io/linuxserver/code-server:latest"
+        port: 8443
+        replicas: 1
+        health_check: "http://localhost:8443/healthz"
+
+  staging:
+    name: "Staging"
+    description: "Pre-production testing environment"
+    compose_file: "infra/docker/docker-compose.staging.yml"
+    domain: "staging.lightningflow.online"
+    data_root: "/opt/lfai/staging"
+    log_level: "info"
+    debug: false
+    ssl: true
+    monitoring: true
+    backup: true
+    auto_deploy: false
+    resource_limits:
+      cpu: "1.0"
+      memory: "512M"
+    services:
+      api:
+        image: "lfai/api:staging"
+        port: 5678
+        replicas: 2
+        health_check: "http://localhost:5678/healthz"
+      n8n:
+        image: "n8nio/n8n:latest"
+        port: 5679
+        replicas: 1
+        health_check: "http://localhost:5679/healthz"
+      dozzle:
+        image: "amir20/dozzle:latest"
+        port: 9001
+        replicas: 1
+        health_check: "http://localhost:9001/healthz"
+      code_server:
+        image: "lscr.io/linuxserver/code-server:latest"
+        port: 8443
+        replicas: 1
+        health_check: "http://localhost:8443/healthz"
+
+  prod:
+    name: "Production"
+    description: "Live production environment"
+    compose_file: "infra/docker/docker-compose.prod.yml"
+    domain: "lightningflow.online"
+    data_root: "/opt/lfai/prod"
+    log_level: "warn"
+    debug: false
+    ssl: true
+    monitoring: true
+    backup: true
+    auto_deploy: false
+    resource_limits:
+      cpu: "2.0"
+      memory: "1G"
+    services:
+      api:
+        image: "lfai/api:prod"
+        port: 5678
+        replicas: 3
+        health_check: "http://localhost:5678/healthz"
+      n8n:
+        image: "n8nio/n8n:latest"
+        port: 5679
+        replicas: 2
+        health_check: "http://localhost:5679/healthz"
+      dozzle:
+        image: "amir20/dozzle:latest"
+        port: 9001
+        replicas: 1
+        health_check: "http://localhost:9001/healthz"
+      code_server:
+        image: "lscr.io/linuxserver/code-server:latest"
+        port: 8443
+        replicas: 1
+        health_check: "http://localhost:8443/healthz"
+
+# Environment-specific configurations
+configurations:
+  database:
+    int:
+      host: "localhost"
+      port: 5432
+      database: "lfai_int"
+      ssl: false
+      pool_size: 5
+    staging:
+      host: "localhost"
+      port: 5432
+      database: "lfai_staging"
+      ssl: true
+      pool_size: 10
+    prod:
+      host: "localhost"
+      port: 5432
+      database: "lfai_prod"
+      ssl: true
+      pool_size: 20
+
+  redis:
+    int:
+      host: "localhost"
+      port: 6379
+      database: 0
+      ssl: false
+    staging:
+      host: "localhost"
+      port: 6379
+      database: 1
+      ssl: true
+    prod:
+      host: "localhost"
+      port: 6379
+      database: 2
+      ssl: true
+
+  monitoring:
+    int:
+      grafana_url: "http://localhost:3000"
+      prometheus_url: "http://localhost:9090"
+      loki_url: "http://localhost:3100"
+      retention: "7d"
+    staging:
+      grafana_url: "https://staging.lightningflow.online/grafana"
+      prometheus_url: "https://staging.lightningflow.online/prometheus"
+      loki_url: "https://staging.lightningflow.online/loki"
+      retention: "30d"
+    prod:
+      grafana_url: "https://lightningflow.online/grafana"
+      prometheus_url: "https://lightningflow.online/prometheus"
+      loki_url: "https://lightningflow.online/loki"
+      retention: "90d"
+
+# Deployment rules
+deployment:
+  int:
+    strategy: "rolling"
+    max_unavailable: 1
+    max_surge: 1
+    timeout: "5m"
+    rollback_on_failure: true
+  staging:
+    strategy: "rolling"
+    max_unavailable: 1
+    max_surge: 1
+    timeout: "10m"
+    rollback_on_failure: true
+  prod:
+    strategy: "blue-green"
+    max_unavailable: 0
+    max_surge: 2
+    timeout: "15m"
+    rollback_on_failure: true
+
+# Health check configurations
+health_checks:
+  default:
+    interval: "30s"
+    timeout: "10s"
+    retries: 3
+    start_period: "40s"
+  critical:
+    interval: "15s"
+    timeout: "5s"
+    retries: 5
+    start_period: "60s"
+  non_critical:
+    interval: "60s"
+    timeout: "15s"
+    retries: 2
+    start_period: "30s"
+
+# Resource limits by service type
+resource_limits:
+  api:
+    cpu: "1.0"
+    memory: "512M"
+    pids: 100
+  n8n:
+    cpu: "2.0"
+    memory: "1G"
+    pids: 200
+  dozzle:
+    cpu: "0.5"
+    memory: "256M"
+    pids: 50
+  code_server:
+    cpu: "1.0"
+    memory: "512M"
+    pids: 100
+  database:
+    cpu: "2.0"
+    memory: "2G"
+    pids: 500
+  redis:
+    cpu: "0.5"
+    memory: "256M"
+    pids: 50

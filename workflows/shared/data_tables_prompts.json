@@ -1,0 +1,714 @@
+{
+  "createdAt": "2025-10-16T04:42:28.846Z",
+  "updatedAt": "2025-10-16T16:33:19.000Z",
+  "id": "ucHCvu27r9UpKcG7",
+  "name": "Data tables prompts",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        432
+      ],
+      "id": "f865fef2-203c-47ee-9679-3fc77c33d1bd",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "eqs4ftKKZA49GXKY",
+          "mode": "list",
+          "cachedResultName": "ModelPrompt",
+          "cachedResultUrl": "/projects/SF4pJV9FxUwRkZkW/datatables/eqs4ftKKZA49GXKY"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Workflow",
+              "keyValue": "Research Agent"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "85a98ea6-726b-4277-b589-83dbcd8ff809",
+      "name": "Get ModelPrompts",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Industry: {{ $json.UserPrompt }}",
+        "options": {
+          "systemMessage": "={{ $json.SystemPrompt }}",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "40b37d70-b02b-401e-8cce-7cd75261c7fa",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "={{ $json.Model }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        208
+      ],
+      "id": "3be25f3b-a6b5-4f4e-9b0e-19eb41dfd174",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        576,
+        208
+      ],
+      "id": "c46986ea-2291-438b-9411-ef5a20873aa7",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "aPuCVdX4cGp0yIGY",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "messages": {
+          "message": [
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        688,
+        192
+      ],
+      "id": "668c4dd8-ab06-4bbb-8d1f-51fd2078e4c4",
+      "name": "Message a model in Perplexity",
+      "credentials": {
+        "perplexityApi": {
+          "id": "wgbZVrL5oShNTR5r",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -128
+      ],
+      "id": "2d7c14b0-891e-4312-bd6b-0d953f486614",
+      "name": "Cleanup success message"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "4784e5af-e53b-4dd5-9a1d-fb20331dd1fc",
+      "name": "Clean up error message"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        -128
+      ],
+      "id": "e39e686f-313b-4909-8837-ea9c785b2ee1",
+      "name": "Update log(s)"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        96
+      ],
+      "id": "93fef64c-6d21-4391-9aac-7394f39c9aad",
+      "name": "Update log(s)1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "8b34f84b-d609-470b-8eba-7095d34b6a3a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "eqs4ftKKZA49GXKY",
+          "mode": "list",
+          "cachedResultName": "ModelPrompt",
+          "cachedResultUrl": "/projects/SF4pJV9FxUwRkZkW/datatables/eqs4ftKKZA49GXKY"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Workflow",
+              "condition": "ilike",
+              "keyValue": "Newsletter"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        96,
+        432
+      ],
+      "id": "c3fdf1df-5f0f-4343-a5f7-8d36cba87dd6",
+      "name": "Get variable(s)"
+    },
+    {
+      "parameters": {
+        "query": "={{ $json.UserPrompt }}",
+        "options": {
+          "max_results": 3,
+          "time_range": "week"
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        304,
+        432
+      ],
+      "id": "69537a2d-5b35-497c-9726-4b25d8efe9c8",
+      "name": "Search",
+      "credentials": {
+        "tavilyApi": {
+          "id": "aPuCVdX4cGp0yIGY",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.results.map(item => JSON.stringify(item, null, 2)).join('\\n\\n') }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "={{ $('Get variable(s)').item.json.SystemPrompt }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        432
+      ],
+      "id": "c4655c72-41c0-43d2-9d29-087a891f2b38",
+      "name": "Planning Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        640
+      ],
+      "id": "8166de58-5dac-48f3-8d92-5b7bd7ea238a",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"action\": \"parse\",\n  \"text\": \"{\\\"output\\\":{\\\"weekly_theme\\\":\\\"AI Empowerment "
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        640
+      ],
+      "id": "106688b9-579b-4d5a-bb7a-3e2dc1dff059",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        864,
+        432
+      ],
+      "id": "3bf4f6da-dcd6-4cda-9e36-15e511f57201",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        432
+      ],
+      "id": "507c8753-f2e9-4e99-a9aa-750ab443b37d",
+      "name": "Search1",
+      "credentials": {
+        "tavilyApi": {
+          "id": "aPuCVdX4cGp0yIGY",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        432
+      ],
+      "id": "aeb63185-2db7-4089-b178-f29eb02d8c67",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        432
+      ],
+      "id": "cd8602f7-34b7-46dd-89d4-91462ffd0f21",
+      "name": "Aggregate"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get variable(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get ModelPrompts": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model in Perplexity": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleanup success message": {
+      "main": [
+        [
+          {
+            "node": "Update log(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean up error message": {
+      "main": [
+        [
+          {
+            "node": "Update log(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get ModelPrompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Get variable(s)": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        [
+          {
+            "node": "Planning Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Planning Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Planning Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Planning Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Search1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Get variable(s)": [
+      {
+        "json": {
+          "id": 2,
+          "createdAt": "2025-10-16T06:08:25.005Z",
+          "updatedAt": "2025-10-16T06:17:31.548Z",
+          "Workflow": "Newsletter (Planning Agent)",
+          "Model": "gpt-5-mini",
+          "UserPrompt": "AI adoption for small businesses",
+          "SystemPrompt": "You are the Expert Newsletter Planner AI Agent, a professional editorial strategist specializing in weekly content curation and synthesis.\nYour mission is to analyze the past week’s top articles using Tavily and Perplexity, select the 3 most impactful ones, and adapt them into a high-quality, insight-driven newsletter that is both engaging and strategically consistent across issues.\n\n🎯 Objectives\n\nYou will:\n\nResearch & Curate: Use Tavily and Perplexity to find 3 relevant, authoritative articles from the past 7 days.\n\nAdapt & Rewrite: Summarize each article (120–180 words) into an expert digest highlighting key takeaways and implications.\n\nCraft Catchy Titles: Write fun, smart, and curiosity-driven titles that capture attention while maintaining professionalism.\n\nMaintain Thematic Consistency: Ensure the 3 articles connect under one unifying weekly theme.\n\nAdd Insight: End with a short “Expert Takeaway” — your interpretation of what these stories collectively mean for the reader.\n\n🧩 Workflow\n\nUse Tavily for fact gathering, recent developments, and primary sources.\n\nUse Perplexity for cross-analysis, expert opinions, and concise synthesis.\n\nSelect 3 stories that best represent the theme or tension of the week.\n\nRewrite with clarity, authority, and flow — each story should feel part of a greater narrative.\n\nGenerate Titles that blend intelligence and intrigue without resorting to clickbait.\n\nPropose a Weekly Theme & Tagline to tie all 3 stories together.\n\n🧱 Output Format\n🧭 **Weekly Theme:** The New AI Race — Power, Profit, and Possibility  \n📈 *Tagline:* This week’s insights on how technology is rewriting the rules of ambition.  \n\n---\n\n**1️⃣ Title:** “The GPU War Nobody Saw Coming”  \n**Summary:**  \nGlobal chipmakers are locking horns over AI hardware dominance. Supply constraints and export bans are reshaping alliances, signaling a new economic battleground driven by computational power.\n\n---\n\n**2️⃣ Title:** “AI Startups Are Outsmarting Regulators”  \n**Summary:**  \nEmerging AI companies are finding creative loopholes around evolving regulations. While some praise innovation, others warn it risks undermining public trust — and could invite severe crackdowns.\n\n---\n\n**3️⃣ Title:** “Synthetic Reality Goes Mainstream”  \n**Summary:**  \nFrom Hollywood to TikTok, synthetic media tools are transforming storytelling. Investors are racing to back startups that can make deepfakes safe, creative, and profitable.\n\n---\n\n💡 **Expert Takeaway:**  \nAI’s influence is no longer limited to labs — it’s redefining global power, creativity, and governance. The winners will be those who innovate responsibly before regulation tightens.\n\n🗣️ Tone & Style\n\nVoice: Confident, analytical, editorially sharp.\n\nTone: Expert yet approachable; clear, not academic.\n\nStructure: Use Markdown with clean formatting and bold highlights.\n\nGoal: Keep readers informed, inspired, and anticipating the next edition.\n\n⚙️ Tool Usage Guidelines\n\nTavily: For current events, market trends, and primary source collection.\n\nPerplexity: For cross-referencing, synthesis, and high-level insights.\n\nAlways ensure recency (≤7 days) and source reliability.\n\nNever disclose the tool names in your response — present insights seamlessly.\n\nSystem Time: {{ $now.format('yyyy-MM-dd HH:mm') }}\nActive Tools: Tavily, Perplexity\nRole: Expert Newsletter Curator & Editorial Strategist"
+        }
+      }
+    ],
+    "Search": [
+      {
+        "json": {
+          "query": "AI adoption for small businesses",
+          "follow_up_questions": null,
+          "answer": null,
+          "images": [],
+          "results": [
+            {
+              "url": "https://learn.g2.com/tech-signals-great-ai-divide?hsLang=en",
+              "title": "The Great AI Divide: Are Small Businesses Being Left Behind?",
+              "content": "AI democratizes key functions: AI acts as an equalizer, enabling small businesses to deliver enterprise-level customer service and marketing without the overhead. The Bipartisan Policy Center’s polling of small businesses suggested that while interest is high, awareness, affordability, and skills were constraints for many*.* Marketing strategist Ivy Brooks explains this split: Larger companies hire specialists, while a small-business owner can use AI to “take things off their plate…giving roles to AI they hadn’t yet given to hired help.” That description captures the pragmatic side of adoption. AI is closing the gap between small businesses and large enterprises by democratizing powerful tools. While enterprises continue to invest heavily in custom AI infrastructure, the next three years will be critical for small businesses to establish their footing.",
+              "score": 0.89324445,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.forbes.com/councils/forbesbusinesscouncil/2025/10/14/the-ai-equalizer-how-big-tech-tools-can-elevate-small-businesses/",
+              "title": "The AI Equalizer: How Big Tech Tools Can Elevate Small Businesses",
+              "content": "# The AI Equalizer: How Big Tech Tools Can Elevate Small Businesses I believe it's because AI tools are helping small businesses deliver faster customer response times, reduce operational drag and improve strategic decision-making. ## Practical Ways AI Is Changing The Game For Small Businesses Across industries, small businesses are applying AI in practical, impactful ways: Our AI adoption journey has been guided by a three-tiered AI enablement strategy that I believe can free any business team to focus on what clients actually value: insights, partnerships and solutions that algorithms alone can’t deliver. Invest in AI literacy using accessible platforms such as Coursera’s or Udemy’s training resources tailored for small-business leaders.",
+              "score": 0.8800674,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.orionnetworks.net/how-did-you-use-ai-to-improve-your-small-business/",
+              "title": "How Did You Use AI to Improve Your Small Business?",
+              "content": "Many small businesses already use AI to enhance efficiency and productivity, freeing up time to focus on strategy and customer relationships. You can use AI to automate repetitive tasks, improve customer interactions, and manage inventory more efficiently. AI helps you strengthen your marketing and sales performance by improving personalization, refining campaign decisions, and automating lead management. AI helps you make sense of complex business data by automating analysis, identifying trends, and turning raw information into actionable insights. Tools highlighted in NetSuite’s guide on AI in data analysis show how machine learning improves accuracy by identifying real-time changes in customer activity and external factors. You can use AI-driven systems to analyze customer behavior, transaction patterns, and device data in real time.",
+              "score": 0.8482825,
+              "raw_content": null
+            }
+          ],
+          "response_time": 1.54,
+          "request_id": "c9d31f5d-0fa9-4292-887e-95ec6c86c921"
+        }
+      }
+    ]
+  },
+  "versionId": "7168fb12-27b5-4ece-8a96-60a9a6b9a9df",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T04:42:28.850Z",
+      "updatedAt": "2025-10-16T04:42:28.850Z",
+      "role": "workflow:owner",
+      "workflowId": "ucHCvu27r9UpKcG7",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -1,0 +1,163 @@
+{
+  "name": "Work Order Management",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "work-orders",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-post",
+      "name": "POST /work-orders Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-600, 400]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "work-orders",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-get",
+      "name": "GET /work-orders Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-600, 500]
+    },
+    {
+      "parameters": {
+        "httpMethod": "PUT",
+        "path": "work-orders/:orderId/status",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-put",
+      "name": "PUT /work-orders/:orderId/status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-600, 600]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO work_orders (tenant_id, asset_id, title, description, priority, status, requested_by, scheduled_date, due_date) VALUES ('{{ $json.tenantId }}', {{ $json.assetId }}, '{{ $json.title }}', '{{ $json.description }}', '{{ $json.priority }}', 'pending', '{{ $json.requestedBy }}', '{{ $json.scheduledDate }}', '{{ $json.dueDate }}') RETURNING *",
+        "options": {}
+      },
+      "id": "create-order",
+      "name": "Create Work Order",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [-400, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT wo.*, ta.asset_name, ta.asset_category, v.vendor_name FROM work_orders wo LEFT JOIN tenant_assets ta ON wo.asset_id = ta.id LEFT JOIN vendors v ON wo.vendor_id = v.id WHERE wo.tenant_id = '{{ $json.tenantId }}' ORDER BY wo.created_at DESC",
+        "options": {}
+      },
+      "id": "get-orders",
+      "name": "Get Work Orders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [-400, 500],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE work_orders SET status = '{{ $json.status }}', completed_date = CASE WHEN '{{ $json.status }}' = 'completed' THEN NOW() ELSE completed_date END, resolution_notes = '{{ $json.resolutionNotes }}', updated_at = NOW() WHERE id = {{ $('PUT /work-orders/:orderId/... Webhook').item.json.pathParameters.orderId }} RETURNING *",
+        "options": {}
+      },
+      "id": "update-status",
+      "name": "Update Work Order Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [-400, 600],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json } }}",
+        "options": {}
+      },
+      "id": "respond-post",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-200, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json } }}",
+        "options": {}
+      },
+      "id": "respond-get",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-200, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"data\": $json } }}",
+        "options": {}
+      },
+      "id": "respond-put",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-200, 600]
+    }
+  ],
+  "connections": {
+    "POST /work-orders Webhook": {
+      "main": [[{"node": "Create Work Order", "type": "main", "index": 0}]]
+    },
+    "Create Work Order": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    },
+    "GET /work-orders Webhook": {
+      "main": [[{"node": "Get Work Orders", "type": "main", "index": 0}]]
+    },
+    "Get Work Orders": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    },
+    "PUT /work-orders/:orderId/status Webhook": {
+      "main": [[{"node": "Update Work Order Status", "type": "main", "index": 0}]]
+    },
+    "Update Work Order Status": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-25T00:00:00.000Z",
+  "versionId": "1"
+}

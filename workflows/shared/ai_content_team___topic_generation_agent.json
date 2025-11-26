@@ -1,0 +1,478 @@
+{
+  "createdAt": "2025-08-21T14:47:30.629Z",
+  "updatedAt": "2025-08-21T14:47:30.629Z",
+  "id": "IPrFgtJhmC7QdOSF",
+  "name": "AI Content Team - Topic Generation Agent",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-topic-request",
+      "name": "Topic Generation Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-topics",
+        "options": {}
+      }
+    },
+    {
+      "id": "analyze-business-context",
+      "name": "Analyze Business Context",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const request = $input.first().json;\n\n// Extract and validate business context\nconst context = {\n  industry: request.industry || 'AI/Automation',\n  target_audience: request.target_audience || 'Business owners and entrepreneurs',\n  content_goals: request.content_goals || ['Lead generation', 'Thought leadership', 'Education'],\n  brand_voice: request.brand_voice || 'Professional, approachable, innovative',\n  content_types: request.content_types || ['Blog posts', 'Social media', 'Case studies'],\n  competitors: request.competitors || [],\n  trending_keywords: request.trending_keywords || [],\n  content_pillars: request.content_pillars || ['AI automation', 'Business efficiency', 'Digital transformation'],\n  urgency: request.urgency || 'normal',\n  quantity: request.quantity || 10\n};\n\nreturn {\n  ...context,\n  request_id: `topics_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  timestamp: new Date().toISOString()\n};"
+      }
+    },
+    {
+      "id": "research-trending-topics",
+      "name": "Research Trending Topics",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        50
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a trend research AI that identifies current topics, industry discussions, and emerging themes. Research trending topics in the specified industry and return structured insights about what audiences are talking about right now."
+            },
+            {
+              "role": "user",
+              "content": "Industry: {{ $json.industry }}\nTarget Audience: {{ $json.target_audience }}\nContent Pillars: {{ $json.content_pillars.join(', ') }}\n\nFind 15-20 trending topics, emerging discussions, and content opportunities. Include:\n1. Current industry challenges\n2. Emerging technologies/trends\n3. Common questions/pain points\n4. Viral discussion topics\n5. Seasonal/timely opportunities\n\nReturn as structured JSON with topic, trend_score (1-10), audience_interest, and content_angle for each."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "analyze-competitor-content",
+      "name": "Analyze Competitor Content",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        150
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a competitive analysis AI. Analyze competitor content strategies and identify content gaps and opportunities. Focus on finding underserved topics and unique angles."
+            },
+            {
+              "role": "user",
+              "content": "Industry: {{ $json.industry }}\nCompetitors: {{ $json.competitors.join(', ') }}\nOur Content Pillars: {{ $json.content_pillars.join(', ') }}\n\nAnalyze typical competitor content and identify:\n1. Overserved topics (saturated)\n2. Underserved topics (opportunities)\n3. Unique angles we could take\n4. Content gaps in the market\n5. Differentiation opportunities\n\nReturn structured analysis with topics, competition_level, opportunity_score, and suggested_approach."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "generate-topic-ideas",
+      "name": "Generate Strategic Topic Ideas",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a strategic content ideation AI that creates compelling, audience-focused content topics. Generate topics that balance trending relevance with business goals, ensuring each topic has clear value for the target audience and supports the brand's content strategy."
+            },
+            {
+              "role": "user",
+              "content": "Business Context:\n- Industry: {{ $node['Analyze Business Context'].json['industry'] }}\n- Target Audience: {{ $node['Analyze Business Context'].json['target_audience'] }}\n- Content Goals: {{ $node['Analyze Business Context'].json['content_goals'].join(', ') }}\n- Brand Voice: {{ $node['Analyze Business Context'].json['brand_voice'] }}\n- Content Types: {{ $node['Analyze Business Context'].json['content_types'].join(', ') }}\n- Content Pillars: {{ $node['Analyze Business Context'].json['content_pillars'].join(', ') }}\n\nTrending Research:\n{{ $node['Research Trending Topics'].json['choices'][0]['message']['content'] }}\n\nCompetitor Analysis:\n{{ $node['Analyze Competitor Content'].json['choices'][0]['message']['content'] }}\n\nGenerate {{ $node['Analyze Business Context'].json['quantity'] }} strategic content topic ideas. For each topic, provide:\n1. topic_title: Compelling, specific title\n2. topic_description: 2-3 sentence description\n3. content_type: Best format (blog, social, video, etc.)\n4. target_audience_segment: Specific audience subset\n5. content_pillar: Which pillar it supports\n6. business_value: How it supports business goals\n7. trending_relevance: Why it's timely (1-10)\n8. competition_level: How saturated the topic is (1-10)\n9. potential_reach: Estimated audience interest (1-10)\n10. content_angle: Unique perspective/approach\n11. key_points: 3-5 main points to cover\n12. call_to_action: Suggested CTA\n13. seo_keywords: 5-8 relevant keywords\n14. estimated_effort: Time/complexity (low/medium/high)\n15. publication_priority: Urgency (1-10)\n\nReturn as valid JSON array."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "score-and-prioritize",
+      "name": "Score & Prioritize Topics",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const topicData = JSON.parse($node['Generate Strategic Topic Ideas'].json.choices[0].message.content);\nconst context = $node['Analyze Business Context'].json;\n\n// Scoring algorithm\nconst scoreTopics = (topics) => {\n  return topics.map(topic => {\n    // Calculate weighted score\n    const scores = {\n      trending: (topic.trending_relevance || 5) * 0.25,\n      reach: (topic.potential_reach || 5) * 0.20,\n      competition: (11 - (topic.competition_level || 5)) * 0.15, // Lower competition = higher score\n      priority: (topic.publication_priority || 5) * 0.20,\n      effort: topic.estimated_effort === 'low' ? 10 : topic.estimated_effort === 'medium' ? 7 : 4,\n      effortWeight: 0.10,\n      business: topic.business_value ? 8 : 5,\n      businessWeight: 0.10\n    };\n    \n    const totalScore = \n      scores.trending + \n      scores.reach + \n      scores.competition + \n      scores.priority + \n      (scores.effort * scores.effortWeight) + \n      (scores.business * scores.businessWeight);\n    \n    return {\n      ...topic,\n      composite_score: Math.round(totalScore * 10) / 10,\n      score_breakdown: {\n        trending_score: scores.trending,\n        reach_score: scores.reach,\n        competition_score: scores.competition,\n        priority_score: scores.priority,\n        effort_score: scores.effort * scores.effortWeight,\n        business_score: scores.business * scores.businessWeight\n      }\n    };\n  }).sort((a, b) => b.composite_score - a.composite_score);\n};\n\nconst scoredTopics = scoreTopics(topicData);\n\n// Categorize by priority\nconst categorized = {\n  high_priority: scoredTopics.filter(t => t.composite_score >= 8),\n  medium_priority: scoredTopics.filter(t => t.composite_score >= 6 && t.composite_score < 8),\n  low_priority: scoredTopics.filter(t => t.composite_score < 6),\n  quick_wins: scoredTopics.filter(t => t.estimated_effort === 'low' && t.composite_score >= 7),\n  evergreen: scoredTopics.filter(t => t.trending_relevance <= 6 && t.potential_reach >= 7)\n};\n\nreturn {\n  request_id: context.request_id,\n  total_topics: scoredTopics.length,\n  all_topics: scoredTopics,\n  categorized_topics: categorized,\n  recommendations: {\n    start_with: categorized.quick_wins.slice(0, 3).map(t => t.topic_title),\n    high_impact: categorized.high_priority.slice(0, 5).map(t => t.topic_title),\n    content_calendar_mix: {\n      weekly_high_priority: 2,\n      weekly_medium_priority: 3,\n      weekly_quick_wins: 2,\n      monthly_evergreen: 4\n    }\n  },\n  analysis_summary: {\n    avg_score: Math.round((scoredTopics.reduce((sum, t) => sum + t.composite_score, 0) / scoredTopics.length) * 10) / 10,\n    high_scoring_count: categorized.high_priority.length,\n    quick_win_count: categorized.quick_wins.length,\n    top_content_pillars: [...new Set(scoredTopics.slice(0, 10).map(t => t.content_pillar))]\n  },\n  generated_at: new Date().toISOString()\n};"
+      }
+    },
+    {
+      "id": "store-topic-batch",
+      "name": "Store Topic Batch",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO content_topics (request_id, topics_data, categorized_topics, recommendations, analysis_summary, status, created_at) VALUES ('{{ $json.request_id }}', '{{ JSON.stringify($json.all_topics) }}', '{{ JSON.stringify($json.categorized_topics) }}', '{{ JSON.stringify($json.recommendations) }}', '{{ JSON.stringify($json.analysis_summary) }}', 'generated', NOW()) RETURNING id"
+      }
+    },
+    {
+      "id": "create-content-calendar",
+      "name": "Create Content Calendar",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const topicData = $node['Score & Prioritize Topics'].json;\nconst recommendations = topicData.recommendations;\n\n// Generate 4-week content calendar\nconst calendar = [];\nconst startDate = new Date();\nconst topics = topicData.all_topics;\n\nlet topicIndex = 0;\nfor (let week = 0; week < 4; week++) {\n  const weekStart = new Date(startDate);\n  weekStart.setDate(startDate.getDate() + (week * 7));\n  \n  const weekTopics = [];\n  \n  // Add high priority topics (2 per week)\n  for (let i = 0; i < 2 && topicIndex < topics.length; i++) {\n    if (topics[topicIndex].composite_score >= 8) {\n      weekTopics.push({\n        ...topics[topicIndex],\n        scheduled_date: new Date(weekStart.getTime() + (i * 2 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],\n        calendar_type: 'high_priority'\n      });\n      topicIndex++;\n    }\n  }\n  \n  // Add medium priority topics (3 per week)\n  for (let i = 0; i < 3 && topicIndex < topics.length; i++) {\n    if (topics[topicIndex].composite_score >= 6 && topics[topicIndex].composite_score < 8) {\n      weekTopics.push({\n        ...topics[topicIndex],\n        scheduled_date: new Date(weekStart.getTime() + ((i + 2) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],\n        calendar_type: 'medium_priority'\n      });\n      topicIndex++;\n    }\n  }\n  \n  // Add quick wins (2 per week)\n  const quickWins = topics.filter(t => t.estimated_effort === 'low' && t.composite_score >= 7);\n  for (let i = 0; i < 2 && i < quickWins.length; i++) {\n    weekTopics.push({\n      ...quickWins[i],\n      scheduled_date: new Date(weekStart.getTime() + ((i + 5) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],\n      calendar_type: 'quick_win'\n    });\n  }\n  \n  calendar.push({\n    week_number: week + 1,\n    week_start: weekStart.toISOString().split('T')[0],\n    week_end: new Date(weekStart.getTime() + (6 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],\n    topics: weekTopics,\n    week_theme: weekTopics.length > 0 ? weekTopics[0].content_pillar : 'Mixed content'\n  });\n}\n\nreturn {\n  request_id: topicData.request_id,\n  calendar_period: '4_weeks',\n  content_calendar: calendar,\n  calendar_summary: {\n    total_planned_content: calendar.reduce((sum, week) => sum + week.topics.length, 0),\n    weekly_average: Math.round(calendar.reduce((sum, week) => sum + week.topics.length, 0) / 4),\n    content_distribution: {\n      high_priority: calendar.reduce((sum, week) => sum + week.topics.filter(t => t.calendar_type === 'high_priority').length, 0),\n      medium_priority: calendar.reduce((sum, week) => sum + week.topics.filter(t => t.calendar_type === 'medium_priority').length, 0),\n      quick_wins: calendar.reduce((sum, week) => sum + week.topics.filter(t => t.calendar_type === 'quick_win').length, 0)\n    }\n  },\n  next_steps: [\n    'Review and approve topic priorities',\n    'Assign topics to research agent',\n    'Begin content production pipeline',\n    'Set up content calendar tracking'\n  ]\n};"
+      }
+    },
+    {
+      "id": "trigger-next-agent",
+      "name": "Trigger Research Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1500,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $node['Topic Generation Request'].json['$webhook_url'] }}/start-research",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "topic_batch_id": "={{ $node['Store Topic Batch'].json[0]['id'] }}",
+          "priority_topics": "={{ $node['Score & Prioritize Topics'].json['categorized_topics']['high_priority'].slice(0, 5) }}",
+          "content_calendar": "={{ $node['Create Content Calendar'].json['content_calendar'] }}",
+          "auto_start": true
+        }
+      }
+    },
+    {
+      "id": "webhook-manual-topic",
+      "name": "Manual Topic Submission",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "submit-manual-topic",
+        "options": {}
+      }
+    },
+    {
+      "id": "validate-manual-topic",
+      "name": "Validate & Enhance Manual Topic",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a content strategist AI that validates and enhances manually submitted content topics. Take the basic topic idea and expand it into a full content strategy with targeting, angles, and optimization recommendations."
+            },
+            {
+              "role": "user",
+              "content": "Manual Topic Submission:\nTitle: {{ $json.topic_title }}\nDescription: {{ $json.topic_description }}\nRequested by: {{ $json.submitted_by }}\nUrgency: {{ $json.urgency || 'normal' }}\nTarget Audience: {{ $json.target_audience || 'general' }}\n\nEnhance this topic with:\n1. Improved title options (3 variations)\n2. Content angle recommendations\n3. Target audience refinement\n4. SEO keyword suggestions\n5. Content format recommendations\n6. Potential reach assessment\n7. Competitive landscape analysis\n8. Business value alignment\n9. Content pillar categorization\n10. Production effort estimate\n\nReturn as structured JSON matching our topic schema."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fast-track-manual-topic",
+      "name": "Fast-track to Research",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "functionCode": "const enhancedTopic = JSON.parse($node['Validate & Enhance Manual Topic'].json.choices[0].message.content);\nconst originalRequest = $node['Manual Topic Submission'].json;\n\n// Format as single high-priority topic\nconst fastTrackTopic = {\n  ...enhancedTopic,\n  submission_type: 'manual',\n  submitted_by: originalRequest.submitted_by,\n  original_request: originalRequest,\n  fast_track: true,\n  priority_override: true,\n  composite_score: 9.5, // High score for manual submissions\n  calendar_type: 'fast_track'\n};\n\nreturn {\n  request_id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  fast_track_topic: fastTrackTopic,\n  next_action: 'immediate_research',\n  bypass_calendar: true\n};"
+      }
+    },
+    {
+      "id": "store-manual-topic",
+      "name": "Store Manual Topic",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO content_topics (request_id, topics_data, status, submission_type, submitted_by, fast_track, created_at) VALUES ('{{ $json.request_id }}', '{{ JSON.stringify([$json.fast_track_topic]) }}', 'fast_track', 'manual', '{{ $node[\"Manual Topic Submission\"].json[\"submitted_by\"] }}', true, NOW()) RETURNING id"
+      }
+    },
+    {
+      "id": "immediate-research-trigger",
+      "name": "Immediate Research Trigger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $node['Manual Topic Submission'].json['$webhook_url'] }}/start-research",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "topic_batch_id": "={{ $node['Store Manual Topic'].json[0]['id'] }}",
+          "priority_topics": "={{ [$node['Fast-track to Research'].json['fast_track_topic']] }}",
+          "fast_track": true,
+          "auto_start": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Topic Generation Request": {
+      "main": [
+        [
+          {
+            "node": "Analyze Business Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Business Context": {
+      "main": [
+        [
+          {
+            "node": "Research Trending Topics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analyze Competitor Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Trending Topics": {
+      "main": [
+        [
+          {
+            "node": "Generate Strategic Topic Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Competitor Content": {
+      "main": [
+        [
+          {
+            "node": "Generate Strategic Topic Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Strategic Topic Ideas": {
+      "main": [
+        [
+          {
+            "node": "Score & Prioritize Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score & Prioritize Topics": {
+      "main": [
+        [
+          {
+            "node": "Store Topic Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Topic Batch": {
+      "main": [
+        [
+          {
+            "node": "Create Content Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Content Calendar": {
+      "main": [
+        [
+          {
+            "node": "Trigger Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Topic Submission": {
+      "main": [
+        [
+          {
+            "node": "Validate & Enhance Manual Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Enhance Manual Topic": {
+      "main": [
+        [
+          {
+            "node": "Fast-track to Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fast-track to Research": {
+      "main": [
+        [
+          {
+            "node": "Store Manual Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Manual Topic": {
+      "main": [
+        [
+          {
+            "node": "Immediate Research Trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "7b5171e7-389c-4a7d-a988-e5c4e77fc6c4",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T14:47:30.632Z",
+      "updatedAt": "2025-08-21T14:47:30.632Z",
+      "role": "workflow:owner",
+      "workflowId": "IPrFgtJhmC7QdOSF",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

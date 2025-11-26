@@ -1,0 +1,105 @@
+{
+  "name": "B. Processor (bins-process)",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bins-process",
+        "responseMode": "lastNode"
+      }
+    },
+    {
+      "id": "switch-bin",
+      "name": "Switch by bin",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [400, 200],
+      "parameters": {
+        "propertyName": "bin",
+        "rules": {
+          "values": [
+            {
+              "operation": "equal",
+              "value": "CONTRACT"
+            },
+            {
+              "operation": "equal",
+              "value": "BANKING"
+            },
+            {
+              "operation": "equal",
+              "value": "CARFAX"
+            },
+            {
+              "operation": "equal",
+              "value": "INSURANCE"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "code-process",
+      "name": "Code: Process Result",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [600, 200],
+      "parameters": {
+        "functionCode": "// Process the classified document\nconst bin = $json.bin || 'UNKNOWN';\nconst job_id = $json.job_id || 'unknown';\n\nreturn [{ json: { \n  job_id: job_id,\n  bin: bin,\n  status: 'processed',\n  processed_at: new Date().toISOString()\n} }];"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch by bin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch by bin": {
+      "main": [
+        [
+          {
+            "node": "Code: Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

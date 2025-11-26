@@ -1,0 +1,97 @@
+name: Automated Backup & Verification
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      verify_only:
+        description: 'Only verify backups, do not create new ones'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  backup:
+    if: github.event.inputs.verify_only != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create backup
+        env:
+          BACKUP_DEST: ${{ secrets.BACKUP_DEST }}
+        run: |
+          echo "📦 Creating Scorpion backup..."
+          cd apps/scorpion
+          pnpm backup || echo "Backup script failed, but continuing..."
+      
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorpion-backup-${{ github.run_number }}
+          path: apps/scorpion/backups/scorpion/
+          retention-days: 30
+          if-no-files-found: warn
+
+  verify-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Verify backup integrity
+        run: |
+          echo "🔍 Verifying backup integrity..."
+          cd apps/scorpion
+          
+          # Check if backup directory exists
+          if [ ! -d "backups/scorpion" ]; then
+            echo "❌ Backup directory not found"
+            exit 1
+          fi
+          
+          # Find latest backup
+          LATEST_BACKUP=$(ls -td backups/scorpion/scorpion-backup-* | head -1)
+          
+          if [ -z "$LATEST_BACKUP" ]; then
+            echo "❌ No backups found"
+            exit 1
+          fi
+          
+          echo "✅ Latest backup: $LATEST_BACKUP"
+          
+          # Verify backup files exist
+          REQUIRED_FILES=("rag-store.json" "ontology-store.json" "operations-executions.json")
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$LATEST_BACKUP/$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            fi
+          done
+          
+          # Check backup age (should be less than 25 hours old)
+          BACKUP_AGE=$(find "$LATEST_BACKUP" -type f -name "*.json" -printf '%T@\n' | sort -n | tail -1)
+          CURRENT_TIME=$(date +%s)
+          AGE_HOURS=$(( (CURRENT_TIME - ${BACKUP_AGE%.*}) / 3600 ))
+          
+          if [ $AGE_HOURS -gt 25 ]; then
+            echo "⚠️ Backup is $AGE_HOURS hours old (should be < 25 hours)"
+            exit 1
+          fi
+          
+          echo "✅ Backup verification passed (age: $AGE_HOURS hours)"
+      
+      - name: Report backup status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Backup Status: ${{ job.status }}
+            Run: ${{ github.run_number }}
+          channel: '#scorpion-ops'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+

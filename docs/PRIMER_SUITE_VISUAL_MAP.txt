@@ -1,0 +1,244 @@
+🦂 SCORPION PRIMER SUITE – VISUAL MAP
+================================================================================
+
+YOUR COMPLETE AI ONBOARDING SYSTEM
+(Everything needed to bring any new AI up to speed on Scorpion)
+
+================================================================================
+
+📊 PRIMER ECOSYSTEM
+
+                    ┌─────────────────────────────────────────────┐
+                    │   PRIMER SUITE ENTRY POINT                  │
+                    │   (Start: README_PRIMERS.md)                │
+                    └─────────┬───────────────────────────────────┘
+                              │
+                ┌─────────────┼─────────────┬──────────────┐
+                │             │             │              │
+                ▼             ▼             ▼              ▼
+         ┌──────────┐   ┌──────────┐  ┌─────────┐   ┌─────────┐
+         │ QUICK    │   │ SHORT    │  │ MASTER  │   │ DEBUG   │
+         │ REF      │   │ PRIMER   │  │ PRIMER  │   │ PRIMER  │
+         │ (1 page) │   │(2 min)   │  │(20 min) │   │(10 min) │
+         └──────────┘   └──────────┘  └─────────┘   └─────────┘
+              │              │            │             │
+        Bookmark         PASTE INTO    For deep    When broken
+        THIS!           NEW CHAT      context
+
+                              │
+                    ┌─────────┴──────────┐
+                    │                    │
+                    ▼                    ▼
+            ┌──────────────┐   ┌──────────────┐
+            │ ARCHITECT'S  │   │ COPY-PASTE   │
+            │ PRIMER       │   │ READY        │
+            │(Design)      │   │(Instant)     │
+            └──────────────┘   └──────────────┘
+
+
+================================================================================
+
+🎯 CHOOSE YOUR PATH
+
+SITUATION                          USE THIS
+───────────────────────────────────────────────────────────────────────────
+1. Starting a NEW AI CHAT          → SCORPION_PRIMER_SHORT.md
+   (Google Antigravity, etc.)         (Copy text, paste into chat)
+
+2. Need COMPREHENSIVE UNDERSTANDING → SCORPION_PRIMER.md
+                                      (Full architecture deep dive)
+
+3. Something is BROKEN              → SCORPION_DEBUGGING_PRIMER.md
+                                      (Step-by-step troubleshooting)
+
+4. DESIGNING / REFACTORING          → SCORPION_ARCHITECTS_PRIMER.md
+                                      (Design patterns & principles)
+
+5. Need to QUICKLY FIND something   → SCORPION_QUICK_REFERENCE.md
+   (file path, command, type)         (Ctrl+F and find in 30 sec)
+
+6. Want INSTANT COPY-PASTE          → SCORPION_PRIMER_COPYPASTE.txt
+                                      (Ready to go, no formatting)
+
+
+================================================================================
+
+📚 DOCUMENT BREAKDOWN
+
+Document                           Lines  Size    Purpose
+────────────────────────────────────────────────────────────────────────────
+00_PRIMER_SUITE_COMPLETE.md        ~250   9.2K   Summary (you are here)
+README_PRIMERS.md                  ~350   11K    Navigation & maintenance guide
+SCORPION_PRIMER_SHORT.md           ~80    4.4K   Paste into new chats ⭐
+SCORPION_PRIMER.md                 ~1000  24K    Master reference
+SCORPION_DEBUGGING_PRIMER.md       ~750   20K    Troubleshooting guide
+SCORPION_ARCHITECTS_PRIMER.md      ~850   22K    Design & patterns
+SCORPION_QUICK_REFERENCE.md        ~350   12K    Fast lookups
+SCORPION_PRIMER_COPYPASTE.txt      ~80    3.7K   Copy-paste ready
+────────────────────────────────────────────────────────────────────────────
+TOTAL                              ~3,700 ~105K   Complete knowledge vault
+
+
+================================================================================
+
+🔄 THE WORKFLOW
+
+Start Fresh Chat
+    │
+    ├─→ Open SCORPION_PRIMER_SHORT.md
+    │
+    ├─→ Copy section between triple backticks
+    │
+    ├─→ Paste into new AI chat as FIRST message
+    │
+    ├─→ Immediately follow with:
+    │   "Here's the file I'm working on:" + code snippet
+    │
+    └─→ AI now understands Scorpion and helps effectively ✅
+
+
+Workflow Time:
+  Copy primer:     30 seconds
+  Paste:           30 seconds
+  AI reads it:     30 seconds
+  Describe problem: 2 minutes
+  Get help:        10-30 minutes
+  ────────────────────────
+  Total:           ~15 minutes to productive solution
+
+
+================================================================================
+
+💡 QUICK REFERENCE BY NEED
+
+Need...                              Look in...
+───────────────────────────────────────────────────────────────────────────
+File path (chat endpoint, tools)     QUICK_REFERENCE.md (table)
+What the pipeline does               SHORT_PRIMER.md (5 min read)
+How agents work                       MASTER_PRIMER.md (section)
+Chat doesn't stream                  DEBUGGING_PRIMER.md (section)
+Council votes missing                DEBUGGING_PRIMER.md (section)
+Tools don't run                       DEBUGGING_PRIMER.md (section)
+RAG returns nothing                   DEBUGGING_PRIMER.md (section)
+Type definitions                      QUICK_REFERENCE.md (Key Types)
+Commands to run                       QUICK_REFERENCE.md (Commands)
+Environment variables                QUICK_REFERENCE.md (Env Vars)
+Design principles                     ARCHITECTS_PRIMER.md (section)
+Refactoring guidance                  ARCHITECTS_PRIMER.md (patterns)
+Add a new tool                        ARCHITECTS_PRIMER.md (patterns)
+Scaling patterns                      ARCHITECTS_PRIMER.md (section)
+Which primer to use                   README_PRIMERS.md (navigation)
+
+
+================================================================================
+
+🎓 LEARNING PATHS
+
+Path 1: QUICK START (5 minutes)
+  1. Read SCORPION_QUICK_REFERENCE.md (skim)
+  2. Keep it bookmarked
+  3. Done!
+
+Path 2: PRODUCTIVE IMMEDIATELY (10 minutes)
+  1. Skim SHORT_PRIMER.md
+  2. Copy the text (between triple backticks)
+  3. Save to clipboard/note app
+  4. Next AI chat → paste immediately
+  5. Done!
+
+Path 3: DEEP UNDERSTANDING (45 minutes)
+  1. Read SHORT_PRIMER.md (5 min)
+  2. Read MASTER_PRIMER.md (20 min)
+  3. Skim QUICK_REFERENCE.md (5 min)
+  4. Review ARCHITECTS_PRIMER.md (15 min)
+  5. Bookmark debugging guide
+  6. Done! You're an expert.
+
+Path 4: TROUBLESHOOTING (varies)
+  1. Check QUICK_REFERENCE.md debugging checklist (1 min)
+  2. Find your issue in DEBUGGING_PRIMER.md (2 min)
+  3. Follow step-by-step guide (5-10 min)
+  4. If stuck → new chat + SHORT_PRIMER + describe issue
+  5. Done!
+
+Path 5: ARCHITECTURE / REFACTORING (60 minutes)
+  1. Read MASTER_PRIMER.md section on architecture (10 min)
+  2. Read ARCHITECTS_PRIMER.md (20 min)
+  3. Review relevant design pattern (10 min)
+  4. Discuss with AI / implement (20 min)
+  5. Done!
+
+
+================================================================================
+
+🛠️ MAINTENANCE CHECKLIST
+
+When...                              Update...
+───────────────────────────────────────────────────────────────────────────
+Adding new tool                      MASTER_PRIMER (components section)
+                                     QUICK_REFERENCE (file locations table)
+                                     DEBUGGING_PRIMER (if applicable)
+
+Adding new agent                     MASTER_PRIMER (agent roles section)
+                                     ARCHITECTS_PRIMER (agent patterns)
+
+Refactoring code                     ARCHITECTS_PRIMER (patterns)
+                                     QUICK_REFERENCE (file paths)
+                                     MASTER_PRIMER (structure)
+
+Bug fix                              DEBUGGING_PRIMER (issue section)
+                                     QUICK_REFERENCE (checklist)
+
+New feature                          MASTER_PRIMER (components)
+                                     QUICK_REFERENCE (file paths, types)
+
+Quarterly                            All primers:
+                                     - Verify file paths
+                                     - Update timestamps
+                                     - Add new patterns/agents/tools
+                                     - Verify commands still work
+
+
+================================================================================
+
+📍 LOCATION
+
+All primers live in:  docs/
+
+Files:
+  ├── 00_PRIMER_SUITE_COMPLETE.md        ← You are here (summary)
+  ├── README_PRIMERS.md                  ← Complete navigation guide
+  ├── SCORPION_PRIMER_SHORT.md           ← PASTE THIS INTO NEW CHATS ⭐
+  ├── SCORPION_PRIMER.md                 ← Master reference
+  ├── SCORPION_DEBUGGING_PRIMER.md       ← When broken
+  ├── SCORPION_ARCHITECTS_PRIMER.md      ← Design & patterns
+  ├── SCORPION_QUICK_REFERENCE.md        ← Bookmark THIS ⭐
+  ├── SCORPION_PRIMER_COPYPASTE.txt      ← Ready-to-paste
+  └── PRIMER_SUITE_VISUAL_MAP.txt        ← This file
+
+
+================================================================================
+
+✅ SETUP COMPLETE
+
+You now have everything needed to:
+  ✓ Onboard any new AI in 2 minutes
+  ✓ Get help from AI that understands Scorpion immediately
+  ✓ Debug issues systematically
+  ✓ Make informed architectural decisions
+  ✓ Share context with team members
+  ✓ Maintain knowledge as Scorpion evolves
+
+Next step: Copy SCORPION_PRIMER_SHORT.md and keep it ready!
+
+
+================================================================================
+
+Created:    2025-01-27
+Repository: n8n-cursor (branch: scorpion)
+Main App:   apps/scorpion (Next.js)
+Status:     ✅ READY TO USE
+
+Questions? Check README_PRIMERS.md or start fresh chat with SHORT_PRIMER.md
+
+🦂 Happy coding!

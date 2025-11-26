@@ -1,0 +1,62 @@
+global:
+  resolve_timeout: 5m
+  # Slack webhook for alerts (configure via environment variable)
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+# The root route on which each alert arrives
+route:
+  receiver: 'default-receiver'
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  routes:
+    # Critical alerts go to critical channel
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      continue: true
+    
+    # Scorpion-specific alerts
+    - match:
+        service: scorpion
+      receiver: 'scorpion-alerts'
+      group_wait: 5s
+      repeat_interval: 6h
+
+# Inhibition rules - suppress alerts when others are firing
+inhibit_rules:
+  # Suppress warnings when critical alerts are firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+# Receivers
+receivers:
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook'
+        send_resolved: true
+
+  - name: 'critical-alerts'
+    slack_configs:
+      - channel: '#scorpion-critical'
+        title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook'
+        send_resolved: true
+
+  - name: 'scorpion-alerts'
+    slack_configs:
+      - channel: '#scorpion-alerts'
+        title: '🦂 Scorpion Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook'
+        send_resolved: true
+

@@ -1,0 +1,274 @@
+[
+  {
+    "url": "http://localhost:3003/",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 3727,
+    "timestamp": "2025-11-07T20:55:04.578Z"
+  },
+  {
+    "url": "http://localhost:3003/dashboard",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1990,
+    "timestamp": "2025-11-07T20:55:09.383Z"
+  },
+  {
+    "url": "http://localhost:3003/project",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "location": {
+          "url": "http://localhost:3003/api/projects",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "location": {
+          "url": "http://localhost:3003/api/projects",
+          "lineNumber": 0,
+          "columnNumber": 0
+        }
+      }
+    ],
+    "consoleWarnings": [],
+    "networkFailures": [
+      {
+        "url": "http://localhost:3003/api/projects",
+        "status": 500,
+        "method": "GET"
+      },
+      {
+        "url": "http://localhost:3003/api/projects",
+        "status": 500,
+        "method": "GET"
+      }
+    ],
+    "pageErrors": [],
+    "loadTime": 1649,
+    "timestamp": "2025-11-07T20:55:12.448Z"
+  },
+  {
+    "url": "http://localhost:3003/ops",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1693,
+    "timestamp": "2025-11-07T20:55:15.160Z"
+  },
+  {
+    "url": "http://localhost:3003/workflows",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1969,
+    "timestamp": "2025-11-07T20:55:17.921Z"
+  },
+  {
+    "url": "http://localhost:3003/build",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 2070,
+    "timestamp": "2025-11-07T20:55:20.961Z"
+  },
+  {
+    "url": "http://localhost:3003/knowledge",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 2287,
+    "timestamp": "2025-11-07T20:55:24.088Z"
+  },
+  {
+    "url": "http://localhost:3003/research",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1552,
+    "timestamp": "2025-11-07T20:55:27.505Z"
+  },
+  {
+    "url": "http://localhost:3003/council",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1938,
+    "timestamp": "2025-11-07T20:55:30.120Z"
+  },
+  {
+    "url": "http://localhost:3003/agents",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 2579,
+    "timestamp": "2025-11-07T20:55:33.231Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/E-001",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1326,
+    "timestamp": "2025-11-07T20:55:36.892Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/A-002",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 958,
+    "timestamp": "2025-11-07T20:55:39.268Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/P-003",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1075,
+    "timestamp": "2025-11-07T20:55:41.402Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/S-004",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 933,
+    "timestamp": "2025-11-07T20:55:43.536Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/N-005",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 980,
+    "timestamp": "2025-11-07T20:55:45.547Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/S-006",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 907,
+    "timestamp": "2025-11-07T20:55:47.589Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/C-007",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 916,
+    "timestamp": "2025-11-07T20:55:49.548Z"
+  },
+  {
+    "url": "http://localhost:3003/agents/O-008",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1413,
+    "timestamp": "2025-11-07T20:55:51.529Z"
+  },
+  {
+    "url": "http://localhost:3003/chat",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1754,
+    "timestamp": "2025-11-07T20:55:54.019Z"
+  },
+  {
+    "url": "http://localhost:3003/notifications",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 2296,
+    "timestamp": "2025-11-07T20:55:56.812Z"
+  },
+  {
+    "url": "http://localhost:3003/logs",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1809,
+    "timestamp": "2025-11-07T20:56:00.180Z"
+  },
+  {
+    "url": "http://localhost:3003/settings",
+    "title": "Scorpion - Operations Console",
+    "status": 200,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "networkFailures": [],
+    "pageErrors": [],
+    "loadTime": 1284,
+    "timestamp": "2025-11-07T20:56:03.048Z"
+  }
+]

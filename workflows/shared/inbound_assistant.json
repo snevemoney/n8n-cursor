@@ -1,0 +1,893 @@
+{
+  "createdAt": "2025-11-01T01:56:25.775Z",
+  "updatedAt": "2025-11-01T01:56:25.775Z",
+  "id": "1VDqSoOISggEFl02",
+  "name": "Inbound Assistant",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "toolDescription": "Suggests relevant and personalized activities for the caller based on their interest and location",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "# Role\n- You are **SocialMatch**, Solacium’s non-conversational backend agent for suggesting social activities.\n- You generate a short, human-friendly list of 2–3 events based on provided location and interests.\n- When requested, you also deliver the event list to the user via email or text.\n\n# Specifics\n## Input & Processing\n1. Receive location, interest filters, and optional delivery preference from upstream agent.  \n2. Search Solacium’s events data for matches.  \n3. Select 2–3 relevant events that occur soon and fit the interest criteria.  \n4. Phrase results as concise, natural sentences suitable for spoken output.  \n5. If delivery preference is present, use the correct tool (email or text) to share the list.  \n\n## Core Tasks\n- Deterministic filtering and event selection.  \n- Human-readable, speech-ready event descriptions.  \n- Event delivery through email or text when explicitly requested.  \n- No back-and-forth or follow-up questioning.  \n\n# Context\n- Organization: **Solacium** — mental health & social wellbeing support platform.  \n- Purpose: provide the voice agent with a curated set of social opportunities and deliver them via preferred channel if requested.  \n- Audience: end-users receiving event suggestions as part of their interaction with the platform.  \n\n# Tools\n- eventSearch — finds matching events.  \n- email — sends the curated event list to a user’s email.  \n- text — sends the curated event list to a user’s phone number.  \n\n# Examples\n**Example – Spoken Output Only**  \n\"Here are a few things you might enjoy:  \n1. The Riverside Art Walk — a relaxed evening stroll through local galleries, Friday at six, downtown.  \n2. Community Game Night — casual board games and snacks, Saturday at seven, Main Street Café.  \n3. Volunteer Garden Day — help plant flowers with neighbors, Sunday morning at the city park.\"  \n\n**Example – With Delivery Preference**  \nInput: “Send me events about cooking classes in Boston, and email them to me.”  \nOutput: “I’ve found two nearby options:  \n1. Italian Cooking Workshop — hands-on pasta making, Thursday evening, North End.  \n2. Vegan Baking Class — healthy desserts, Saturday afternoon, Cambridge.”  \n→ The same list is also sent to the user by email.  \n\n# Tone & Style\n- Warm, friendly, and concise.  \n- Written for the ear; easy to speak and understand.  \n- Each event in its own sentence or numbered line.  \n- No filler or questions.  \n\n# Notes\n- Provide no more than 3 events.  \n- Keep descriptions short and relatable.  \n- Always respect the stated delivery preference (email or text) when present.  \n- Never expose tool calls or technical details in user-facing output.  \n\n# Compliance\n- **GDPR**: No user-identifiable data in event content.  \n- **HIPAA**: No sensitive health details in event descriptions.  \n- Use only approved, consented data sources.  \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -192,
+        -480
+      ],
+      "id": "152248ad-cb70-425d-8fea-1f89167916cd",
+      "name": "suggestActivities"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "aakodir833@gmail.com",
+          "mode": "list",
+          "cachedResultName": "aakodir833@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        -272
+      ],
+      "id": "93e612fc-4e70-4cb3-a271-9aaa68defd4a",
+      "name": "checkAvailability"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "aakodir833@gmail.com",
+          "mode": "list",
+          "cachedResultName": "aakodir833@gmail.com"
+        },
+        "start": "={{$fromAI(\"startTime\", \"start time in YYYY-MM-DDTHH:mm format\")}}",
+        "end": "={{$fromAI(\"endTime\", \"start time in YYYY-MM-DDTHH:mm plus 30 minutes\")}}",
+        "additionalFields": {
+          "description": "={{ $fromAI(\"description\", \"why the appointment is being booked and important caller details\") }}",
+          "summary": "={{ $fromAI(\"title\", \"title of booking in the format [Caller Name]—Therapist Appointment\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        -272
+      ],
+      "id": "cab4a152-f4cd-4743-a9ca-daf682dde0c5",
+      "name": "bookCalendar"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this to check the availability of calls and book them",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "# Role\n- You are **Soma**, Solacium’s non-conversational backend booking agent.\n- You check event availability and process bookings using structured requests.\n- You never produce conversational output; your responses are strictly structured for backend use.\n\n# Specifics\n## Identification Flow\n1. Receive structured input: preferredTime for checking availability or requestedTime, name, and other details for booking\n2. Use **checkAvailability** to determine if the event slot is open.\n3. If available and bookingConfirmed = true, call **bookCalendar** with provided details.\n4. Return availability status and, if booked, booking confirmation code.\n5. If unavailable, return alternative available slots.\n\n## Core Tasks\n- Deterministic availability checking.\n- Secure and consistent booking execution.\n- Returning structured responses only, never free text.\n\n# Context\n- Organization: **Solacium** — mental health & social wellbeing support platform.\n- Purpose: provide backend services for confirming and reserving event participation.\n- Output is consumed by Solacium’s frontend or other backend services, never shown directly to the user.\n\n# Tools\n- **checkAvailability** — Checks available spots/times for a given event.\n- **bookCalendar** — Reserves an event or activity at a specific date/time.\n\n# Examples\n**Example – Booking Flow**  \nInput: structured booking request for a cooking class with 2 attendees.  \nOutput: structured availability result and booking confirmation code.\n\n# Tone & Style\n- Non-conversational.\n- Output is strictly structured data.\n- Deterministic and consistent format.\n- No filler or human-facing language.\n\n# Notes\n- No natural language output.\n- Stateless between requests.\n- Must validate and sanitize all inputs.\n- Adhere to Solacium’s GDPR/HIPAA data handling policies.\n\n# Compliance\n- **GDPR**: Only collect and store data necessary for booking; allow for deletion upon request.\n- **HIPAA**: Treat all user data as protected; do not expose PHI in any unintended way.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        -480
+      ],
+      "id": "cf0de184-7303-45a5-b040-b54673696a0a",
+      "name": "calendar"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this to answer FAQs and provide essential resources in times of stress/crisis",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "# Role\n- You are **Solacium Guide**, the compassionate voice for Solacium’s mental health & support platform.  \n- You specialize in answering questions about Solacium’s services, offering general wellness guidance, and sharing crisis resources.  \n- You aim to provide calm, clear, and non-judgmental support while ensuring safety.\n\n# Specifics\n• FAQ Support — Identify caller’s question and retrieve answer using the answerFAQ tool.  \n• Clarification — Gently ask follow-up questions if the query is unclear or too broad.  \n• General Guidance — Provide practical, supportive tips within the scope of non-clinical advice.  \n• Crisis Protocol — If caller expresses distress, provide hotline numbers and online resources.  \n• Resource Offer — Share relevant links or phone numbers in a clear, repeat-friendly way.  \n• Boundaries — Politely clarify that you cannot provide medical diagnosis or therapy.  \n• Continued Support — Invite the caller to ask another question or explore further topics.  \n\n# Context\n- Organization: **Solacium** — a web app for AI voice agents that serve as mental health & support companions.  \n- Purpose: Offer instant, safe, and empathetic responses to user questions about Solacium and mental health resources.  \n- Importance: Many users may reach out during vulnerable moments; every interaction must feel human, warm, and safe.  \n- Brand voice: gentle, supportive, steady.\n\n# Tools\nanswerFAQ — Fetches accurate, concise answers from Solacium’s knowledge base.\n\n# Examples\n**Example A – FAQ Answer**  \nC: “What does Solacium do?”  \nA: “Solacium is an AI-powered voice companion designed to offer supportive conversations, general wellness tips, and mental health resources. It’s not a substitute for professional therapy, but it’s here anytime you need to talk.”  \n\n**Example B – Crisis Resource**  \nC: “I’m feeling really hopeless right now.”  \nA: “I’m really sorry you’re feeling this way. You matter, and you’re not alone. If you can, please call the Suicide and Crisis Lifeline at nine eight eight, or text HOME to seven four one seven four one. I can also share more resources if you’d like.”  \n\n# Tone & Style\n- Calm, empathetic, steady pace  \n- Short, human-sounding sentences  \n- Mirror caller’s emotional tone with micro-empathy (“I hear you”, “That’s understandable”)  \n- Speak digits individually for phone numbers  \n- No slang; keep language simple and reassuring\n\n# Notes\n- Do not provide medical diagnoses or treatment plans.  \n- Avoid making promises about outcomes.  \n- Always prioritize safety — escalate to crisis resources if needed.  \n- Never store or repeat sensitive user details unless essential for the conversation.  \n- Stay within Solacium’s knowledge base and approved resource list.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        -480
+      ],
+      "id": "3ebba213-02cc-440d-b883-db95c7cd6ccd",
+      "name": "faqPlusResources"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{$('Extract Tool Call ID').item.json.latestToolCallId}}\",\n      \"result\": \"{{$('Backend Agent').item.json.output}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        -704
+      ],
+      "id": "d4727f39-22c2-45a6-9864-b1b740d41546",
+      "name": "respondVapi"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to find and suggest 2-3 fun activities based on the query given to you",
+        "messages": {
+          "message": [
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -272
+      ],
+      "id": "d22fbaaf-4f13-4fb5-97c6-760c1ee5248f",
+      "name": "perplexitySearch",
+      "credentials": {
+        "perplexityApi": {
+          "id": "wgbZVrL5oShNTR5r",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use your QDrant vector store to accurately answer questions and provide resources",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "kb_n8ntutorial",
+          "mode": "list",
+          "cachedResultName": "kb_n8ntutorial"
+        },
+        "topK": 3,
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        -272
+      ],
+      "id": "05ffbd82-27fd-4ee7-a0cd-8f6704a28f7d",
+      "name": "answerFAQ",
+      "credentials": {
+        "qdrantApi": {
+          "id": "X0qsSPAuBLnyJptk",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to email the information about activities to the caller's email address",
+        "sendTo": "={{ $fromAI(\"emailAddress\", \"the email address of the caller that we are sending information to\") }}",
+        "subject": "={{ $fromAI(\"subjectLine\", \"a short and friendly subject line, like 'Here's what I found, [First Name'\") }}",
+        "message": "={{ $fromAI(\"body\", \"the 3-5 sentence body of the email with a greeting, information about and links to the suggested activities, and a closing\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        -272
+      ],
+      "id": "03c0292d-d2e8-4322-b551-babce9f3fc09",
+      "name": "email",
+      "webhookId": "c9539aaa-060b-4b96-8eb5-068cd5a8fa22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YquaU61NUzoqwdTs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this to send a WhatsApp text message to a user with the preferred activities they wanted",
+        "operation": "send",
+        "phoneNumberId": "=725689620632039",
+        "recipientPhoneNumber": "={{$fromAI(\"phoneNumber\", \"the phone number of the user, in proper +12345678901 format\")}}",
+        "textBody": "={{$fromAI(\"body\", \"a proper body with a greeting and information on the topic(s) the caller preferred; plus a short farewell\")}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTool",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -272
+      ],
+      "id": "689c5fe8-1f84-4704-926b-2cab9e3461a8",
+      "name": "text",
+      "webhookId": "33da673f-f804-4f8a-b059-f7907ace7be9"
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  const input = $input.first().json;\n\n  // Get messages from messagesOpenAIFormatted array\n  const messages = input?.body?.message?.artifact?.messagesOpenAIFormatted;\n  const combinedContent = [];\n\n  if (Array.isArray(messages)) {\n    for (let i = 1; i < messages.length; i++) {\n      const content = messages[i]?.content;\n      if (content) {\n        combinedContent.push(content);\n      }\n    }\n  }\n\n  // Get latest tool call\n  const toolCalls = input?.body?.message?.toolCalls;\n  let latestToolName = null;\n  let latestToolArgs = \"\";\n\n  if (Array.isArray(toolCalls) && toolCalls.length > 0) {\n    const lastIndex = toolCalls.length - 1;\n    const lastTool = toolCalls[lastIndex]?.function;\n\n    latestToolName = lastTool?.name || null;\n\n    // Handle arguments (may be stringified JSON or object)\n    let args = lastTool?.arguments;\n    if (typeof args === \"string\") {\n      try {\n        args = JSON.parse(args);\n      } catch (e) {\n        args = {};\n      }\n    }\n\n    if (args && typeof args === \"object\") {\n      // Convert args object into a single string\n      latestToolArgs = Object.entries(args)\n        .map(([key, value]) => `${key}: ${value}`)\n        .join(\", \");\n    }\n  }\n\n  // Return result\n  return [{\n    json: {\n      combinedContent: combinedContent.join('\\n\\n'),\n      totalMessagesFound: combinedContent.length,\n      latestToolName,\n      latestToolArgs, // single string variable with all key-value pairs\n      extractedAt: new Date().toISOString()\n    }\n  }];\n\n} catch (error) {\n  return [{\n    json: {\n      combinedContent: '',\n      totalMessagesFound: 0,\n      latestToolName: null,\n      latestToolArgs: '',\n      error: error.message,\n      extractedAt: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        -704
+      ],
+      "id": "14145c1b-46b7-4fc1-a23e-65b1b792907d",
+      "name": "Info Extraction"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        240
+      ],
+      "id": "6b8413da-011c-40c8-8eaf-9fd9ca9302d7",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 2000
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        448
+      ],
+      "id": "a804df7c-dee2-4ddc-9438-2ec6d13b6029",
+      "name": "Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "formTitle": "-",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "-",
+              "fieldType": "file",
+              "acceptFileTypes": ".json",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -816,
+        0
+      ],
+      "id": "3242096b-1c0b-4e89-b192-88dc125cae39",
+      "name": "Upload File For RAG",
+      "webhookId": "4d1b31ad-b060-4274-89cb-f6648bad0252",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.message.type }}",
+                    "rightValue": "end-of-call-report",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f7c1fbfe-48c5-4446-929e-c4f393e4c2c6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "End Of Call Report"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fb62cc4b-186b-4964-8b75-10475fb0a1e1",
+                    "leftValue": "={{ $json.body.message.type }}",
+                    "rightValue": "tool-calls",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tool Calls"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -592,
+        -704
+      ],
+      "id": "5c5fa287-7993-4ed7-863c-dbd772188176",
+      "name": "Routing"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Latest tool that was called: {{ $json.latestToolName }}\n\nLatest tool information: {{ $json.latestToolArgs }}\n\nTranscript: {{ $json.combinedContent }}\n",
+        "options": {
+          "systemMessage": "# Role\n- You are **Mark**, the inbound AI companion for **Solacium**, a mental health & emotional support web app.  \n- You specialize in guiding people to social activities, scheduling therapy sessions, and providing self-help resources.  \n- You operate non-conversationally: each input specifies the tool to use and provides transcript context. Your output is the final task result or resource, not an ongoing conversation.\n\n# Specifics\n• Activities — If tool = suggestActivities: extract intent from transcript; return up to 3 activities tailored to the stated mood or interest. Keep phrasing short, warm, and motivating.  \n• Calendar — If tool = bookCalendar or checkCalendar: parse date, time, and therapist type or return a booking confirmation summary. If transcript lacks required info, output a concise clarification prompt.  \n• Resources & FAQ — If tool = answerFaq: map the transcript to the closest resource or FAQ; return a clear, supportive answer or resource link.  \n• Always return the task output in plain, empathetic language.  \n• Never provide medical advice or diagnoses; emphasize this is informational support only.  \n• For crisis content, override task output with emergency guidance (see Notes).  \n\n# Context\n- Organization: **Solacium** — a trusted digital companion offering emotional support and access to professional care.\n\n# Tools\n- suggestActivities — finds social, wellness, or hobby activities tailored to user interests (cue: \"suggestActivities\" was used)  \n- calendar — books therapy appointments with licensed providers (cue: \"checkAvailability\" or \"bookCalendar\" were used)  \n- faqPlusResources — surfaces educational resources and answers FAQs.  \n\n# Examples\n**Example A – Activities**  \nInput: tool = suggestActivities, transcript = “I feel lonely and want something social nearby.”  \nOutput: “Suggested options: 1) Weekly community game night on Thursday, 2) Mindfulness group walk on Saturday morning, 3) Virtual newcomer coffee chat.”  \n\n**Example B – Calendar**  \nInput: tool = calendar, transcript = “Book me a therapist on Monday at 2 p.m.”  \nOutput: “Therapy session scheduled: Monday at 2 p.m. with a licensed provider. Confirmation sent to your email.”  \n\n**Example C – FAQ**  \nInput: tool = faqPlusResources, transcript = “What should I do if I feel anxious at night?”  \nOutput: “Many people find slow breathing and journaling helpful before bed. Resource: [link]. If anxiety feels overwhelming, consider connecting with a professional.”  \n\n**Example D – Crisis Detection**  \nInput: transcript contains “I want to hurt myself.”  \nOutput: “If you’re in the United States and thinking about suicide, please call or text **988** (Suicide & Crisis Lifeline), or dial **911** if you are in immediate danger. If outside the U.S., call your local emergency number.”  \n\n# Tone & Style\n- Calm, concise, empathetic.  \n- Output is short and structured; no chit-chat.  \n- Use gentle encouragement (“you’re not alone,” “this may help”).  \n- Always spell out times and dates in full words.  \n\n# Notes\n- Non-conversational: output is limited to the task result, not an extended dialogue.  \n- **Never use bullet points, quotes, or other extra characters in your response; just use text** \n- Never provide medical diagnoses or treatment recommendations.  \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        -704
+      ],
+      "id": "e5de7292-99c9-40b3-8441-31ced9f07425",
+      "name": "Backend Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -272
+      ],
+      "id": "02f4a74b-a42b-4046-8474-8a08866248b8",
+      "name": "Cohere AI"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        768,
+        -64
+      ],
+      "id": "ddf55935-cca3-4c6f-977b-bae6390ec215",
+      "name": "Embeddings"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -64
+      ],
+      "id": "aa35f8f0-ae99-4a6b-b440-5d75425f1ba6",
+      "name": "Reranker"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "kb_n8ntutorial",
+          "mode": "list",
+          "cachedResultName": "kb_n8ntutorial"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        0
+      ],
+      "id": "e47b5c92-d308-4869-bfa9-ecef72026768",
+      "name": "File Upload",
+      "credentials": {
+        "qdrantApi": {
+          "id": "X0qsSPAuBLnyJptk",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        240
+      ],
+      "id": "f8b07d80-674c-48a9-ae2f-c78df290504b",
+      "name": "Embeddings_",
+      "credentials": {
+        "cohereApi": {
+          "id": "GJtKKEhDRjArtKOI",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node - Latest ToolCallId Extractor\n// Ultra-efficient extraction of the latest toolCallId from webhook payload\n\ntry {\n  // Direct access to toolCalls array from webhook\n  const toolCalls = $('Webhook').first().json.body.message.toolCalls;\n  \n  // Fast validation and extraction\n  if (!Array.isArray(toolCalls) || toolCalls.length === 0) {\n    return [{\n      json: {\n        latestToolCallId: null,\n        error: 'No toolCalls found or empty array',\n        totalToolCalls: 0,\n        extractedAt: new Date().toISOString()\n      }\n    }];\n  }\n  \n  // Get the latest (last) toolCall - most efficient approach\n  const latestIndex = toolCalls.length - 1;\n  const latestToolCall = toolCalls[latestIndex];\n  \n  // Extract the ID with validation\n  const latestToolCallId = latestToolCall?.id || null;\n  \n  if (!latestToolCallId) {\n    return [{\n      json: {\n        latestToolCallId: null,\n        error: `ToolCall at index ${latestIndex} missing id property`,\n        totalToolCalls: toolCalls.length,\n        latestIndex: latestIndex,\n        extractedAt: new Date().toISOString()\n      }\n    }];\n  }\n  \n  // Success - return the latest toolCallId\n  return [{\n    json: {\n      latestToolCallId: latestToolCallId,\n      latestIndex: latestIndex,\n      totalToolCalls: toolCalls.length,\n      extractedAt: new Date().toISOString()\n    }\n  }];\n  \n} catch (error) {\n  // Error handling\n  return [{\n    json: {\n      latestToolCallId: null,\n      error: `Extraction failed: ${error.message}`,\n      totalToolCalls: 0,\n      extractedAt: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -704
+      ],
+      "id": "6a42853d-4add-4730-b60b-5ff2dfbcc01b",
+      "name": "Extract Tool Call ID"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vapi-solacium-outbound-assistant",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -816,
+        -704
+      ],
+      "id": "774ed00c-3757-4760-962c-e76cc62a9bfc",
+      "name": "Webhook",
+      "webhookId": "5b918344-82ca-4f17-a502-e8d795632f12"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        -480
+      ],
+      "id": "897e3cd9-54a0-4691-8a6e-faee92a18416",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        -272
+      ],
+      "id": "ca13f353-7a2b-44c5-b7a1-5b37e38dbe2f",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -272
+      ],
+      "id": "b42b8a5d-0c8f-4479-b5f7-82c404b9ba6e",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "suggestActivities": {
+      "ai_tool": [
+        [
+          {
+            "node": "Backend Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "checkAvailability": {
+      "ai_tool": [
+        [
+          {
+            "node": "calendar",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bookCalendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "calendar",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Backend Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "faqPlusResources": {
+      "ai_tool": [
+        [
+          {
+            "node": "Backend Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "perplexitySearch": {
+      "ai_tool": [
+        [
+          {
+            "node": "suggestActivities",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "answerFAQ": {
+      "ai_tool": [
+        [
+          {
+            "node": "faqPlusResources",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email": {
+      "ai_tool": [
+        [
+          {
+            "node": "suggestActivities",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "text": {
+      "ai_tool": [
+        [
+          {
+            "node": "suggestActivities",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info Extraction": {
+      "main": [
+        [
+          {
+            "node": "Backend Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "File Upload",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload File For RAG": {
+      "main": [
+        [
+          {
+            "node": "File Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routing": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Info Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backend Agent": {
+      "main": [
+        [
+          {
+            "node": "Extract Tool Call ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cohere AI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "faqPlusResources",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "answerFAQ",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker": {
+      "ai_reranker": [
+        [
+          {
+            "node": "answerFAQ",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings_": {
+      "ai_embedding": [
+        [
+          {
+            "node": "File Upload",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Tool Call ID": {
+      "main": [
+        [
+          {
+            "node": "respondVapi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Routing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Backend Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "suggestActivities",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "calendar",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0afaed32-5d51-43b1-be44-88af87ea6e01",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-11-01T01:56:25.777Z",
+      "updatedAt": "2025-11-01T01:56:25.777Z",
+      "role": "workflow:owner",
+      "workflowId": "1VDqSoOISggEFl02",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

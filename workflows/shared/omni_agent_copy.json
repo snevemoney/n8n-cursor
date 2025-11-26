@@ -1,0 +1,1367 @@
+{
+  "createdAt": "2025-10-16T03:00:28.570Z",
+  "updatedAt": "2025-10-16T03:37:05.000Z",
+  "id": "yPQWpOgAWuqwpxtN",
+  "name": "Omni Agent copy",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7ff80ee2-24f0-47d1-9cb9-72f9208ccad1",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        112,
+        288
+      ],
+      "id": "df1594c9-41bf-4f9e-86b8-039376bd66c1",
+      "name": "Webhook",
+      "webhookId": "7ff80ee2-24f0-47d1-9cb9-72f9208ccad1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2992,
+        112
+      ],
+      "id": "372e0b3d-3692-42bc-9572-89dc0a377244",
+      "name": "Respond to Webhook",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1pPpYk2bAV_jhDfIPrmfXRdce-NNEFyWV",
+          "mode": "list",
+          "cachedResultName": "AI Automation Isn’t Hard, It’s Misunderstood.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1pPpYk2bAV_jhDfIPrmfXRdce-NNEFyWV/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4112,
+        640
+      ],
+      "id": "e27aa0a6-2494-4f4f-a1cf-d2b0fa40c6fc",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        4320,
+        640
+      ],
+      "id": "46903746-f9d2-45e2-aa6e-86f9efb742b8",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "np29Ffzvm2iBlvRQ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        4304,
+        864
+      ],
+      "id": "b98d087b-4510-4331-a424-8d14f4eda9c6",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        4464,
+        864
+      ],
+      "id": "61a3ca6d-1d6e-43d9-8a01-f5c422cc656a",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        4544,
+        1040
+      ],
+      "id": "30284b3e-a496-42d5-a86a-441ffe9a8dcb",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        3200,
+        848
+      ],
+      "id": "ec426196-6bd7-4d5e-869c-ea2bfe1d3735",
+      "name": "Knowledgebase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "np29Ffzvm2iBlvRQ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "companyInformation",
+        "description": "Run this tool when you need to get information about our company or services."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        3248,
+        640
+      ],
+      "id": "09e03da7-b14b-4614-87df-86786982c773",
+      "name": "Knowledgebase Tool"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        3280,
+        1008
+      ],
+      "id": "5068b3d7-8001-435d-8d59-43fd8e7b9ea8",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=## GOAL:\nAct as Alex, the AI security expert assistant for Night Owl SP. Your primary tasks are to answer questions based on the knowledgebase, help users find the right security solutions, and assist with appointment booking and management.\n\n## BOT PERSONA: SECUREOWL-Alex\n\nHey there! I'm Alex, your friendly security expert at Night Owl SP. I'm here to help you find the perfect security solution for your home or business.\n\n### MY STYLE\n- Casual and approachable\n- Tech-savvy but easy to understand\n- Patient with questions\n- Enthusiastic about security\n- Solutions-oriented\n- Reassuring and trustworthy\n\n### HOW I TALK\n- Natural phrases like:\n  * \"What's up?\"\n  * \"Let's find the right fit for you\"\n  * \"Great question!\"\n  * \"Here's the cool thing about this system...\"\n  * \"You know what would work great for that?\"\n  * \"By the way, have you considered...\"\n  * \"Just to make sure we're on the same page\"\n  * \"Check this out\"\n  * \"Let me break it down for you\"\n  * \"Hope this helps protect your property!\"\n\n### MY APPROACH\n- Simplify security technology\n- Explain features in relatable terms\n- Focus on practical benefits for users\n- Quickly identify customer needs\n- Stay positive and supportive\n- Keep explanations clear and concise\n- Guide to the right security solution\n\n### KEY POINTS\n- Security technology specialist\n- Expert in home and business protection\n- Here to make security easy and accessible\n- Focus on wired, Wi-Fi, and wire-free systems\n- Guide customers to the right protection level\n- Make security decisions stress-free\n- Help with product selection and setup\n\n### PRODUCT KNOWLEDGE\n- Wired systems for larger properties\n- Wi-Fi systems for easy installation\n- Wire-free systems for flexibility\n- Add-on cameras and accessories\n- Indoor Wi-Fi cameras\n- Video doorbells\n- Night vision technology\n- Two-way audio features\n- HD and 4K resolution options\n\n### ADDITIONAL SERVICES\n- Explain Night Owl Protect Cloud options\n- Discuss privacy features and data control\n- Offer support with installation and setup\n- Guide through the upgrade program\n- Assist with order status and shipping queries\n\n## AVAILABLE TOOLS:\n\n### 1. getTimezone\n- **Purpose:** Convert user location to proper timezone\n- **Usage:** Use this tool when you need to determine the correct timezone for scheduling - this is the first thing that you need to do - to ask for the user location, before booking or checking anything.\n\n### 2. getContact\n- **Purpose:** Check if user exists in our system\n- **Usage:** Always use this tool first to verify if the user is already in our database\n- **Note:** If user doesn't exist, proceed to create a new contact\n\n### 3. createContact\n- **Purpose:** Create a new user in our system\n- **Usage:** Use this when getContact returns no results\n- **Important:** To create a contact, you MUST have:\n  * User's name (full name or first name)\n  * EITHER phone number OR email address\n\n### 4. getContactAppointments\n- **Purpose:** Retrieve all appointments for a specific contact\n- **Usage:** Use this to view, update, or cancel existing appointments\n\n### 5. getAvailableSlots\n- **Purpose:** Check for available appointment slots on a given date\n- **Usage:** Always use this before booking to ensure the requested slot is available\n\n### 6. bookAppointment\n- **Purpose:** Schedule a new appointment\n- **Usage:** Use after confirming slot availability and ensuring the user exists in the system\n- **Prerequisite:** Must have existing user or create a new one before booking and also you must know the user timezone so you need to ask for a location.\n\n### 7. cancelAppointment\n- **Purpose:** Cancel an existing appointment\n- **Usage:** Use when a user requests to cancel a specific appointment\n- **Prerequisite:** Verify the appointment exists using getContactAppointments\n\n### 8. updateAppointment\n- **Purpose:** Modify details of an existing appointment\n- **Usage:** Use when a user wants to change the date, time, or other details of an appointment\n- **Prerequisite:** Confirm the appointment exists and the new slot is available\n\n## INSTRUCTIONS:\n\n1. Always start by greeting the user in a friendly, casual manner and asking how you can assist them.\n2. For any inquiry, first try to answer using your product knowledge and additional services information.\n3. If the user requests to book, update, or cancel an appointment:\n   - Use getContact to check if the user exists in our system.\n   - If the user doesn't exist, use createContact to add them before proceeding.\n   - For booking:\n     * Use getTimezone to ensure correct time conversion\n     * Use getAvailableSlots to check slot availability\n     * Use bookAppointment only after confirming availability\n   - For cancellation or updates:\n     * Use getContactAppointments to verify the appointment exists\n     * Use cancelAppointment or updateAppointment as appropriate\n4. Always confirm actions with the user before executing them.\n5. Provide clear, concise responses and ask for clarification when needed.\n6. Maintain your casual, friendly tone throughout the conversation.\n7. Ask only one question at a time to keep the conversation natural and human-like.\n8. When creating a contact, ensure you have the user's name (full name or first name) and EITHER their phone number OR email address.\n9. Today is {{ $now }}\n\n## USER PERSONAL DETAILS (if available you can use them instead of asking the user)\n\n\n## USER LAST UTTERANCE\n\n<utterance>\n{{ $('When chat message received').item.json.chatInput }}\n</utterance>",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1968,
+        112
+      ],
+      "id": "0e6ccd8d-647e-4883-aaa9-504086ecfbf2",
+      "name": "Engage with User"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        928,
+        784
+      ],
+      "id": "ad295246-45d4-4bec-ad03-991add4e6a87",
+      "name": "ChatGPT2",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        3552,
+        848
+      ],
+      "id": "70c6a16b-6f08-4192-bca8-f4bdf0267633",
+      "name": "ChatGPT1",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=## PRIMARY GOAL\nAnalyze the given AI response and output it in JSON format with appropriate message splitting (1-5 messages) based on content complexity.\n\n## JSON OUTPUT FORMAT\nYour entire response must be a valid JSON object with numbered message keys. Only include the exact number of messages needed - no more.\n\n## MESSAGE COUNT VARIATION\nYou **MUST** vary your message count (1-5) based on these guidelines:\n- For brief, simple responses: Use 1 message\n- For answers to basic questions: Use 1-2 messages\n- For medium-length responses: Use 2-3 messages\n- For complex responses: Use 3-5 messages\n- It is **ESSENTIAL** that you don't default to 3 messages\n- Short interactions should use FEWER messages (1-2)\n- The number of messages should match content complexity\n- NEVER split unnecessarily - prefer fewer messages when possible\n\n## MESSAGE SPLITTING GUIDELINES\nOnly split messages when absolutely necessary for these reasons:\n- Clear topic changes\n- Natural conversational breaks\n- Distinct thought separation\n- Question following information\n- When a single message would be too dense\n\n## EXAMPLE FORMATS\n\n### ONE message (prefer for simple responses):\n{\n\"message1\": \"Your casual response here\"\n}\n\n### TWO messages:\n{\n\"message1\": \"First part of your response\",\n\"message2\": \"Second part of your response\"\n}\n\n### THREE messages (only for more complex responses):\n{\n\"message1\": \"First part of your response\",\n\"message2\": \"Second part of your response\",\n\"message3\": \"Third part of your response\"\n}\n\n## RESPONSE GUIDELINES\n- Analyze the given reply and determine the appropriate number of messages\n- Ensure the JSON structure is valid\n- Use the appropriate number of messages based on content complexity\n- Maintain the casual, conversational tone in each message\n- Include all necessary information within the JSON structure\n\n## REPLY TO ANALYZE AND CHUNK\n\n{{ $json.output }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.7,
+      "position": [
+        2624,
+        112
+      ],
+      "id": "7c1c5143-7c13-4f6f-b853-3122bed9a89c",
+      "name": "Split Reply to JSON",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        112
+      ],
+      "id": "c7b03bc9-c8a9-4b31-a148-e412f086b3bf",
+      "name": "When chat message received",
+      "webhookId": "408c73ff-e433-44e2-a983-bc19e52b7da9"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1600,
+        784
+      ],
+      "id": "bdbe3f0f-f4a5-454f-94c1-35577a85f9f1",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "content": "## Edit Knowledgebase",
+        "height": 660,
+        "width": 1140,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3888,
+        544
+      ],
+      "id": "a73cdc3e-bb1e-41ea-8028-250473909eab",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Knowledgebase",
+        "height": 620,
+        "width": 700,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        544
+      ],
+      "id": "90990e00-ffb1-4721-8fcf-4b042f5114c4",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Reply Post Processing and Sending",
+        "height": 300,
+        "width": 800,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        0
+      ],
+      "id": "9221f5f6-05b6-43ca-9ea4-8e88edd64b61",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## User Engagement",
+        "height": 300,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        0
+      ],
+      "id": "ccfe2ee1-78c8-4968-91b3-a27a7cba1f99",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Opt-In",
+        "height": 460,
+        "width": 320,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "20be6d7b-6f97-482d-a480-798e4aa6b93f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Long Term Memory",
+        "height": 300,
+        "width": 460,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        672
+      ],
+      "id": "d4124ec7-11aa-4fc4-856e-c7214ea10fb6",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Main LLM",
+        "height": 300,
+        "width": 360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        672
+      ],
+      "id": "2c5dc3c1-0f4e-4ec0-91d5-071385d56577",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## 1Prompt Data Functions",
+        "height": 340,
+        "width": 1420,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        1168
+      ],
+      "id": "4f3c252f-9386-4b46-be15-91400af55df0",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "text": "=User Last Input: {{ $('When chat message received').item.json.chatInput }}\n\nUser Chat History: {{ JSON.stringify($json.messages, null, 2) }}\n\n\nKeep more focus on User last Input",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"start_date\": {\n      \"type\": \"string\",\n      \"description\": \"Formatted start date in 'YYYY-MM-DD HH:mm:ss' format. This should be midnight (00:00:00) of the day the user wants to book. Always assume the year is 2025. Adjust using the user's IANA timezone (e.g., 'America/New_York'). If no valid date is mentioned, return an empty string.\"\n    },\n    \"end_date\": {\n      \"type\": \"string\",\n      \"description\": \"Formatted end date in 'YYYY-MM-DD HH:mm:ss' format. This should be midnight (00:00:00) of the day after the user wants to book. Always assume the year is 2025. Adjust using the user's IANA timezone (e.g., 'America/New_York'). If no valid date is mentioned, return an empty string.\"\n    }\n  },\n  \"required\": [\"start_date\", \"end_date\"]\n}",
+        "options": {
+          "systemPromptTemplate": "=Extract the date from the user's input and return a start and end datetime string in 'YYYY-MM-DD HH:mm:ss' format, adjusted for the user's IANA timezone (e.g., \"America/New_York\").\n\nAlways assume the year is 2025, even if not mentioned.\n\nIgnore the specific time in the input (e.g., \"12pm\", \"2:30pm\").\n\nSet:\n\nstart_date to midnight (00:00:00) of the mentioned date\n\nend_date to midnight of the following day (00:00:00)\n\nIf the date is missing, return an empty string."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        880,
+        112
+      ],
+      "id": "471596ff-9d6e-4317-9a0c-0ecbe05b7832",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        992,
+        304
+      ],
+      "id": "6779262f-e7d0-4e7a-83fa-268e92833ddf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        112
+      ],
+      "id": "7ead5dd1-536c-4f28-8ae7-315c2c58e8d1",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        384
+      ],
+      "id": "46bdd570-3556-40d7-88a1-fd7b43715ff0",
+      "name": "Window Buffer Memory1"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.output.start_date }}",
+        "format": "x",
+        "outputFieldName": "startDate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        112
+      ],
+      "id": "75983217-e9e2-4044-879f-5d4a27320786",
+      "name": "Start_Date"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $('Information Extractor').item.json.output.end_date }}",
+        "format": "x",
+        "outputFieldName": "endDate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        112
+      ],
+      "id": "479ab895-8d1f-4139-9da6-8d4f06fada27",
+      "name": "End_Date"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this module to get the current timezone latest time ",
+        "url": "https://timeapi.io/api/time/current/zone",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "timeZone",
+              "valueProvider": "fieldValue",
+              "value": "{userTimeZone}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1632,
+        1280
+      ],
+      "id": "277d71f6-7e4b-4592-aad4-ab34fc4792d2",
+      "name": "getTimezone"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this function to search contact in the system",
+        "url": "https://services.leadconnectorhq.com/contacts/",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "query",
+              "valueProvider": "fieldValue",
+              "value": "{query}"
+            },
+            {
+              "name": "locationId",
+              "valueProvider": "fieldValue",
+              "value": "dzTOfajR3YuQKAqE1myz"
+            },
+            {
+              "name": "limit",
+              "valueProvider": "fieldValue",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue"
+            },
+            {
+              "name": "Version",
+              "valueProvider": "fieldValue",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "{query}",
+              "description": "Input {query}  provided by the user, always use  encodeURIComponent(query) "
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1792,
+        1280
+      ],
+      "id": "9b4505cb-bbbe-4154-b831-031454c4f91b",
+      "name": "getContact"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this function to create contact. If \"Get Contact\"  could not find the contact Id, use this function to create the new contact. If user wants to create new account or contact use this function to create the contact.",
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/contacts",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue"
+            },
+            {
+              "name": "Version",
+              "valueProvider": "fieldValue",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"{name}\",\n  \"email\": \"{email}\",\n  \"phone\": \"{phone}\",\n  \"locationId\": \"dzTOfajR3YuQKAqE1myz\",\n  \"assignedTo\": \"SCd2lRQJ7yWNRtmpLqfl\"\n}\n",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "{name}",
+              "description": "Input {name} provided by user if not provided make is blank or null value",
+              "type": "string"
+            },
+            {
+              "name": "{phone}",
+              "description": "Input {phone} provided by the user, must be a valid phone number. If phone is not valid return error. If user does not provide phone leave it blank value or null"
+            },
+            {
+              "name": "{email}",
+              "description": "Input {email} provided by the user. Must be a valid email. If email is not valid return error. If user does not provide email leave it blank value or null"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1952,
+        1280
+      ],
+      "id": "f6ee24f8-4be4-44d6-821a-4c8046ed8b57",
+      "name": "createContact"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this function to get the list of user booked appointments ",
+        "url": "https://services.leadconnectorhq.com/contacts/{contactId}/appointments",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue"
+            },
+            {
+              "name": "Version",
+              "valueProvider": "fieldValue",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "{contactId}",
+              "description": "Input {contactId} provided by the \"Get Contact\" or \"Create Contact\"  module",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2112,
+        1280
+      ],
+      "id": "eebecdb0-2127-447d-90fd-c804fe65ddc7",
+      "name": "getContactAppointments"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this function to get the list of the available appointments or slots.",
+        "url": "https://services.leadconnectorhq.com/calendars/ysJh1cA93ICDJQs6IsoL/free-slots/",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "startDate",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Start_Date').item.json.startDate }}"
+            },
+            {
+              "name": "endDate",
+              "valueProvider": "fieldValue",
+              "value": "={{ $json.endDate }}"
+            },
+            {
+              "name": "timezone",
+              "valueProvider": "fieldValue",
+              "value": "{userTimeZone}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue"
+            },
+            {
+              "name": "Version",
+              "valueProvider": "fieldValue",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "{userTimeZone}",
+              "description": "Input {userTimeZone} provided by the \"Get Timezone\" module",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2272,
+        1280
+      ],
+      "id": "c6c71372-2a0e-4aa4-810b-87c3bf5c008a",
+      "name": "getAvailableSlots"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this function to create the appointment",
+        "method": "POST",
+        "url": "https://services.leadconnectorhq.com/calendars/events/appointments",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue"
+            },
+            {
+              "name": "Version",
+              "valueProvider": "fieldValue",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"calendarId\": \"ysJh1cA93ICDJQs6IsoL\",\n  \"locationId\": \"dzTOfajR3YuQKAqE1myz\",\n  \"contactId\": \"{contactId}\",\n  \"startTime\": \"{startDateTime}\",\n  \"title\": \"Meeting with Night Owl\",\n  \"meetingLocationType\": \"default\",\n  \"appointmentStatus\": \"confirmed\",\n  \"assignedUserId\": \"SCd2lRQJ7yWNRtmpLqfl\",\n  \"ignoreDateRange\": false,\n  \"toNotify\": false,\n  \"ignoreFreeSlotValidation\": false\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "contactId",
+              "description": "get the contact id of the user {contactId}"
+            },
+            {
+              "name": "startDateTime",
+              "description": "put the start date time in this format \"2025-04-16T11:00:00-04:00\""
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2448,
+        1280
+      ],
+      "id": "2f69c8b2-5617-4d25-aa2c-ee25957e28ca",
+      "name": "bookAppointment"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Run this function when user ask to cancel an event or booking or appointment ",
+        "method": "PUT",
+        "url": "https://services.leadconnectorhq.com/calendars/events/appointments/{eventId}",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue"
+            },
+            {
+              "name": "Version",
+              "valueProvider": "fieldValue",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=var payload = {\n  \"calendarId\": \"ysJh1cA93ICDJQs6IsoL\",\n  \"locationId\": \"dzTOfajR3YuQKAqE1myz\",\n  \"contactId\": {contactId},\n  \"startTime\": {startDateTime},\n  \"title\": \"Meeting with Night Owl\",\n  \"meetingLocationType\": \"default\",\n  \"appointmentStatus\": \"confirmed\",\n  \"assignedUserId\": \"SCd2lRQJ7yWNRtmpLqfl\",\n  //\"address\": \"Zoom\",\n  \"ignoreDateRange\": false,\n  \"toNotify\": false,\n  \"ignoreFreeSlotValidation\": false\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "{eventId}",
+              "description": "Input {eventId} provided by running the function \"Get  Contact appointment. After showing user the appointment, which event user select. Use its event Id",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2624,
+        1280
+      ],
+      "id": "2024ef5d-6fb9-4c5e-820e-7b6a1f88b660",
+      "name": "cancelAppointment"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this function to update the appointment",
+        "method": "PUT",
+        "url": "https://services.leadconnectorhq.com/calendars/events/appointments/{eventId}",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue"
+            },
+            {
+              "name": "Version",
+              "valueProvider": "fieldValue",
+              "value": "2021-04-15"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"calendarId\": \"ysJh1cA93ICDJQs6IsoL\",\n  \"locationId\": \"dzTOfajR3YuQKAqE1myz\",\n  \"startTime\": \"{startDateTime}\",\n   \"appointmentStatus\": \"confirmed\"\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "{eventId}",
+              "description": "Input {eventId} provided by running the function \"Get  Contact appointment. After showing user the appointment, which event user select. Use its event Id",
+              "type": "string"
+            },
+            {
+              "name": "{startDateTime}",
+              "description": "Input {startDateTime} provided by the user, always convert it into the ISO format using user timezone",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2800,
+        1280
+      ],
+      "id": "a081a7fa-5810-4abd-b117-c9c298dfa90c",
+      "name": "updateAppointment"
+    },
+    {
+      "parameters": {
+        "content": "## Work with Date/Time Conversion",
+        "height": 460,
+        "width": 1160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        0
+      ],
+      "id": "5d35a8ca-ffe4-4953-b599-90e26584dfd8",
+      "name": "Sticky Note8"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledgebase": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Knowledgebase Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledgebase Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Knowledgebase",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Engage with User": {
+      "main": [
+        [
+          {
+            "node": "Split Reply to JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ChatGPT2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ChatGPT1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Knowledgebase Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Reply to JSON": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Start_Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory Manager": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start_Date": {
+      "main": [
+        [
+          {
+            "node": "End_Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "End_Date": {
+      "main": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getTimezone": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getContact": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "createContact": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getContactAppointments": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getAvailableSlots": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bookAppointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cancelAppointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "updateAppointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Engage with User",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "quimple.app.n8n.cloud",
+            "user-agent": "axios/1.7.7",
+            "content-length": "192",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "34.28.102.62",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "930a7609933db680-ORD",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "34.28.102.62, 172.70.127.57",
+            "x-forwarded-host": "quimple.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-10-6888ffdd77-2fzcd",
+            "x-is-trusted": "yes",
+            "x-real-ip": "34.28.102.62"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "action": {
+              "type": "text",
+              "payload": "null",
+              "userID": "xEZdwVcuLD9Ro2kbopKk",
+              "userPhone": "+12766639275"
+            },
+            "state": {
+              "variables": {
+                "callHistory1": "null",
+                "callHistory2": "null",
+                "callHistory3": "null"
+              }
+            }
+          },
+          "webhookUrl": "https://quimple.app.n8n.cloud/webhook/65214014-4282-4d66-990d-8ef5449371f8",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "b02aa012-18d3-4ed8-baa7-04d8fbee33e9",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T03:00:28.575Z",
+      "updatedAt": "2025-10-16T03:00:28.575Z",
+      "role": "workflow:owner",
+      "workflowId": "yPQWpOgAWuqwpxtN",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

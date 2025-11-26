@@ -1,0 +1,314 @@
+{
+  "name": "AI Workflow-as-a-Service API",
+  "nodes": [
+    {
+      "id": "webhook-api-trigger",
+      "name": "API Endpoint",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 100],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "run-workflow/{{ $parameter[\"workflow_id\"] }}",
+        "options": {
+          "noResponseBody": false
+        }
+      }
+    },
+    {
+      "id": "validate-api-key",
+      "name": "Validate API Key",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 100],
+      "parameters": {
+        "functionCode": "// Extract API key from headers\nconst apiKey = $input.first().headers['x-api-key'];\n\nif (!apiKey) {\n  throw new Error('API key is required');\n}\n\n// In production, validate against your database\n// For now, we'll use a simple validation\nconst validApiKeys = [\n  'sk_live_1234567890',\n  'sk_test_1234567890'\n];\n\nif (!validApiKeys.includes(apiKey)) {\n  throw new Error('Invalid API key');\n}\n\n// Add API key info to the data\nreturn {\n  ...($input.first().json),\n  api_key: apiKey,\n  workflow_id: $input.first().params.workflow_id\n};"
+      }
+    },
+    {
+      "id": "check-usage-limits",
+      "name": "Check Usage Limits",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [500, 100],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT u.*, p.plan_name, p.monthly_calls_limit FROM users u JOIN plans p ON u.plan_id = p.id WHERE u.api_key = '{{ $json.api_key }}'"
+      }
+    },
+    {
+      "id": "validate-limits",
+      "name": "Validate Call Limits",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 100],
+      "parameters": {
+        "functionCode": "const userData = $input.first().json;\nconst currentDate = new Date();\nconst startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);\n\n// Check if user has exceeded monthly limits\nif (userData.calls_this_month >= userData.monthly_calls_limit) {\n  throw new Error('Monthly API call limit exceeded');\n}\n\n// Check if workflow is accessible to user's plan\nif (!userData.accessible_workflows.includes($json.workflow_id)) {\n  throw new Error('Workflow not accessible with current plan');\n}\n\nreturn {\n  user_id: userData.id,\n  workflow_id: $json.workflow_id,\n  input_data: $json,\n  plan: userData.plan_name\n};"
+      }
+    },
+    {
+      "id": "execute-workflow",
+      "name": "Execute Requested Workflow",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [900, 100],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.workflow_id }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "equal",
+              "value2": "lead-generation",
+              "output": 0
+            },
+            {
+              "operation": "equal",
+              "value2": "content-optimization",
+              "output": 1
+            },
+            {
+              "operation": "equal",
+              "value2": "email-automation",
+              "output": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lead-generation-workflow",
+      "name": "Lead Generation AI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1100, 50],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a lead generation AI that analyzes company data and generates qualified leads. Return structured JSON with lead information."
+            },
+            {
+              "role": "user",
+              "content": "Generate leads for: {{ $json.input_data.company_name }} in {{ $json.input_data.industry }} industry. Target: {{ $json.input_data.target_criteria }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "content-optimization-workflow",
+      "name": "Content Optimization AI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1100, 150],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a content optimization AI that improves marketing content for better engagement and conversion. Return optimized content with suggestions."
+            },
+            {
+              "role": "user",
+              "content": "Optimize this content: {{ $json.input_data.content }}. Target audience: {{ $json.input_data.audience }}. Goal: {{ $json.input_data.goal }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "email-automation-workflow",
+      "name": "Email Automation AI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1100, 250],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an email automation AI that creates personalized email sequences. Return structured email campaigns with subject lines and content."
+            },
+            {
+              "role": "user",
+              "content": "Create email sequence for: {{ $json.input_data.campaign_type }}. Audience: {{ $json.input_data.audience }}. Product: {{ $json.input_data.product }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "log-usage",
+      "name": "Log API Usage",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1300, 150],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO api_usage (user_id, workflow_id, timestamp, tokens_used, cost) VALUES ('{{ $node[\"Validate Call Limits\"].json[\"user_id\"] }}', '{{ $node[\"Validate Call Limits\"].json[\"workflow_id\"] }}', NOW(), {{ $json.usage.total_tokens || 0 }}, {{ ($json.usage.total_tokens || 0) * 0.002 }})"
+      }
+    },
+    {
+      "id": "update-monthly-count",
+      "name": "Update Monthly Counter",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1300, 250],
+      "parameters": {
+        "operation": "update",
+        "query": "UPDATE users SET calls_this_month = calls_this_month + 1 WHERE id = '{{ $node[\"Validate Call Limits\"].json[\"user_id\"] }}'"
+      }
+    },
+    {
+      "id": "format-response",
+      "name": "Format API Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1500, 150],
+      "parameters": {
+        "functionCode": "// Format the response for the API consumer\nconst workflowResult = $input.first().json;\n\nreturn {\n  success: true,\n  workflow_id: $node[\"Validate Call Limits\"].json[\"workflow_id\"],\n  timestamp: new Date().toISOString(),\n  result: workflowResult,\n  tokens_used: workflowResult.usage?.total_tokens || 0,\n  cost: (workflowResult.usage?.total_tokens || 0) * 0.002\n};"
+      }
+    }
+  ],
+  "connections": {
+    "API Endpoint": {
+      "main": [
+        [
+          {
+            "node": "Validate API Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate API Key": {
+      "main": [
+        [
+          {
+            "node": "Check Usage Limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Usage Limits": {
+      "main": [
+        [
+          {
+            "node": "Validate Call Limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Call Limits": {
+      "main": [
+        [
+          {
+            "node": "Execute Requested Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Requested Workflow": {
+      "main": [
+        [
+          {
+            "node": "Lead Generation AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Content Optimization AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Automation AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Generation AI": {
+      "main": [
+        [
+          {
+            "node": "Log API Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Optimization AI": {
+      "main": [
+        [
+          {
+            "node": "Log API Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Automation AI": {
+      "main": [
+        [
+          {
+            "node": "Log API Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log API Usage": {
+      "main": [
+        [
+          {
+            "node": "Update Monthly Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Monthly Counter": {
+      "main": [
+        [
+          {
+            "node": "Format API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["marketplace", "api", "workflow-as-service", "monetization"]
+}

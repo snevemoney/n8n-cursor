@@ -1,0 +1,65 @@
+apiVersion: 1
+
+datasources:
+  # Prometheus for metrics
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+
+  # Loki for logs
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: true
+
+  # Supabase (Production Database)
+  - name: Supabase
+    type: postgres
+    access: proxy
+    url: xlrxpfptulcugoqjccyf.supabase.co:5432
+    database: postgres
+    user: postgres
+    secureJsonData:
+      password: sb_secret_9aSbJTovjd0XFH5hz1qB2A_AS5wmDpx
+    jsonData:
+      sslmode: require
+      maxOpenConns: 100
+      maxIdleConns: 100
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+
+  # Local Postgres for demo data (monitoring instance)
+  - name: Postgres Local
+    type: postgres
+    access: proxy
+    url: postgres-monitoring:5432
+    database: lightningflow_monitoring
+    user: lightningflow
+    secureJsonData:
+      password: lightningflow2024
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 100
+      maxIdleConns: 100
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+
+  # MinIO S3 for object storage metrics
+  - name: MinIO
+    type: prometheus
+    access: proxy
+    url: http://minio:9000
+    editable: true
+
+  # n8n metrics (if exposed)
+  - name: n8n
+    type: prometheus
+    access: proxy
+    url: http://n8n:5678
+    editable: true

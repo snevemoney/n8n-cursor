@@ -1,0 +1,342 @@
+<testsuites id="" name="" tests="6" failures="6" skipped="0" errors="0" time="6.32676">
+<testsuite name="bots/broken-button.spec.ts" timestamp="2025-05-30T02:54:31.190Z" hostname="bots" tests="3" failures="3" skipped="0" time="0.046" errors="0">
+<testcase name="Self-Healing Demo Test › Broken button should trigger self-heal" classname="bots/broken-button.spec.ts" time="0.008">
+<failure message="broken-button.spec.ts:12:7 Broken button should trigger self-heal" type="FAILURE">
+<![CDATA[  [bots] › bots/broken-button.spec.ts:12:7 › Self-Healing Demo Test › Broken button should trigger self-heal 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots-retry1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[📝 Created test session: broken-button-demo-1748573671815
+
+[[ATTACHMENT|bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots/trace.zip]]
+📝 Created test session: broken-button-demo-1748573675408
+
+[[ATTACHMENT|bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots-retry1/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-bots-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Self-Healing Demo Test › Another broken selector to test pattern detection" classname="bots/broken-button.spec.ts" time="0.027">
+<failure message="broken-button.spec.ts:37:7 Another broken selector to test pattern detection" type="FAILURE">
+<![CDATA[  [bots] › bots/broken-button.spec.ts:37:7 › Self-Healing Demo Test › Another broken selector to test pattern detection 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots-retry1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[📝 Created test session: broken-button-demo-1748573671812
+
+[[ATTACHMENT|bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots/trace.zip]]
+📝 Created test session: broken-button-demo-1748573675409
+
+[[ATTACHMENT|bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots-retry1/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-bots-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Self-Healing Demo Test › Timeout failure simulation" classname="bots/broken-button.spec.ts" time="0.011">
+<failure message="broken-button.spec.ts:57:7 Timeout failure simulation" type="FAILURE">
+<![CDATA[  [bots] › bots/broken-button.spec.ts:57:7 › Self-Healing Demo Test › Timeout failure simulation ───
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/chromium_headless_shell-1169/chrome-mac/headless_shell
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots-retry1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[📝 Created test session: broken-button-demo-1748573671789
+
+[[ATTACHMENT|bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots/trace.zip]]
+📝 Created test session: broken-button-demo-1748573675439
+
+[[ATTACHMENT|bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots-retry1/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-89376--Timeout-failure-simulation-bots-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="bots/broken-button.spec.ts" timestamp="2025-05-30T02:54:31.190Z" hostname="mobile-bots" tests="3" failures="3" skipped="0" time="0.025" errors="0">
+<testcase name="Self-Healing Demo Test › Broken button should trigger self-heal" classname="bots/broken-button.spec.ts" time="0.007">
+<failure message="broken-button.spec.ts:12:7 Broken button should trigger self-heal" type="FAILURE">
+<![CDATA[  [mobile-bots] › bots/broken-button.spec.ts:12:7 › Self-Healing Demo Test › Broken button should trigger self-heal 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots-retry1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[📝 Created test session: broken-button-demo-1748573671809
+
+[[ATTACHMENT|bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots/error-context.md]]
+📝 Created test session: broken-button-demo-1748573675422
+
+[[ATTACHMENT|bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots-retry1/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-f9fd4-on-should-trigger-self-heal-mobile-bots-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Self-Healing Demo Test › Another broken selector to test pattern detection" classname="bots/broken-button.spec.ts" time="0.01">
+<failure message="broken-button.spec.ts:37:7 Another broken selector to test pattern detection" type="FAILURE">
+<![CDATA[  [mobile-bots] › bots/broken-button.spec.ts:37:7 › Self-Healing Demo Test › Another broken selector to test pattern detection 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots-retry1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[📝 Created test session: broken-button-demo-1748573676584
+
+[[ATTACHMENT|bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots/error-context.md]]
+📝 Created test session: broken-button-demo-1748573677157
+
+[[ATTACHMENT|bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots-retry1/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-63cc1-r-to-test-pattern-detection-mobile-bots-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Self-Healing Demo Test › Timeout failure simulation" classname="bots/broken-button.spec.ts" time="0.008">
+<failure message="broken-button.spec.ts:57:7 Timeout failure simulation" type="FAILURE">
+<![CDATA[  [mobile-bots] › bots/broken-button.spec.ts:57:7 › Self-Healing Demo Test › Timeout failure simulation 
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: browserType.launch: Executable doesn't exist at /Users/evenslouis/Library/Caches/ms-playwright/webkit-2158/pw_run.sh
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     npx playwright install                                              ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots-retry1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[📝 Created test session: broken-button-demo-1748573676584
+
+[[ATTACHMENT|bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots/error-context.md]]
+📝 Created test session: broken-button-demo-1748573677158
+
+[[ATTACHMENT|bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots-retry1/error-context.md]]
+
+[[ATTACHMENT|bots-broken-button-Self-He-89376--Timeout-failure-simulation-mobile-bots-retry1/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

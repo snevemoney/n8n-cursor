@@ -1,0 +1,9 @@
+[Unit]
+Description=N8N Backup Verifier Timer
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+
+[Install]
+WantedBy=timers.target

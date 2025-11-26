@@ -1,0 +1,78 @@
+{
+  "name": "MCP Code Execution Example",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/mcp-code-exec",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [240, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Example: Use MCP tools via code execution pattern\n// This reduces token consumption by loading tools on-demand\n\n// Instead of loading all 39 tool definitions, we:\n// 1. Search for relevant tools first (progressive disclosure)\n// 2. Load only what we need\n// 3. Process data before returning to model\n\nconst mcp = require('@n8n/mcp-client');\n\n// Progressive disclosure: search for workflow tools\nconst workflowTools = await mcp.callTool('n8n-automation', 'search_tools', {\n  query: 'workflow',\n  detailLevel: 'description'\n});\n\nconsole.log(`Found ${workflowTools.length} workflow-related tools`);\n\n// Use the tools we found\nconst workflows = await mcp.callTool('n8n-automation', 'workflows.list', {\n  limit: 100\n});\n\n// Process data in code (not in model context)\nconst activeWorkflows = workflows.filter(w => w.active === true);\nconst brokenWorkflows = workflows.filter(w => w.errorCount > 0);\n\n// Only return summary, not all data\nreturn {\n  total: workflows.length,\n  active: activeWorkflows.length,\n  broken: brokenWorkflows.length,\n  brokenNames: brokenWorkflows.slice(0, 5).map(w => w.name)\n};"
+      },
+      "id": "code-exec",
+      "name": "Code Execution (MCP)",
+      "type": "n8n-nodes-base.code",
+      "position": [460, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "summary",
+              "name": "summary",
+              "type": "object",
+              "value": "={{ $json }}"
+            }
+          ]
+        }
+      },
+      "id": "format",
+      "name": "Format Results",
+      "type": "n8n-nodes-base.set",
+      "position": [680, 300],
+      "typeVersion": 3
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code Execution (MCP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Execution (MCP)": {
+      "main": [
+        [
+          {
+            "node": "Format Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": null
+}
+

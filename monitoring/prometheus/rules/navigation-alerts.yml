@@ -1,0 +1,102 @@
+groups:
+  - name: navigation_alerts
+    interval: 30s
+    rules:
+      # Navigation failure rate alert
+      - alert: HighNavigationFailureRate
+        expr: |
+          rate(scorpion_navigation_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High navigation failure rate detected"
+          description: "Navigation error rate is {{ $value }} errors/second for route {{ $labels.route }}"
+
+      # Route unavailable alert
+      - alert: RouteUnavailable
+        expr: |
+          scorpion_route_availability == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Route {{ $labels.route }} is unavailable"
+          description: "Route {{ $labels.route }} has been unavailable for more than 2 minutes"
+
+      # Slow navigation alert
+      - alert: SlowNavigation
+        expr: |
+          histogram_quantile(0.95, rate(scorpion_navigation_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow navigation detected"
+          description: "95th percentile navigation time is {{ $value }}s for route {{ $labels.route }}"
+
+      # Navigation success rate alert
+      - alert: LowNavigationSuccessRate
+        expr: |
+          (
+            sum(rate(scorpion_navigation_requests_total{status="200"}[5m])) by (route)
+            /
+            sum(rate(scorpion_navigation_requests_total[5m])) by (route)
+          ) < 0.95
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low navigation success rate"
+          description: "Navigation success rate is {{ $value | humanizePercentage }} for route {{ $labels.route }}"
+
+      # Critical route down alert
+      - alert: CriticalRouteDown
+        expr: |
+          scorpion_route_availability{route=~"/|/dashboard|/healthz"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical route {{ $labels.route }} is down"
+          description: "Critical route {{ $labels.route }} has been down for more than 1 minute"
+
+      # High error rate by route
+      - alert: HighErrorRateByRoute
+        expr: |
+          (
+            sum(rate(scorpion_navigation_errors_total[5m])) by (route)
+            /
+            sum(rate(scorpion_navigation_requests_total[5m])) by (route)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate for route {{ $labels.route }}"
+          description: "Error rate is {{ $value | humanizePercentage }} for route {{ $labels.route }}"
+
+  - name: dependency_alerts
+    interval: 30s
+    rules:
+      # Dependency health check alert
+      - alert: DependencyUnhealthy
+        expr: |
+          dependency_health == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Dependency {{ $labels.dependency }} is unhealthy"
+          description: "Dependency {{ $labels.dependency }} has been unhealthy for more than 2 minutes"
+
+      # Health check endpoint down
+      - alert: HealthCheckDown
+        expr: |
+          up{job="scorpion"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Scorpion health check endpoint is down"
+          description: "Scorpion health check endpoint has been down for more than 1 minute"

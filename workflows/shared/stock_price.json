@@ -1,0 +1,131 @@
+{
+  "createdAt": "2025-10-02T23:06:19.936Z",
+  "updatedAt": "2025-10-03T05:28:01.000Z",
+  "id": "gKwlIqOq8fQSnag1",
+  "name": "Stock price",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.twelvedata.com/price",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ $json.chatInput }}"
+            },
+            {
+              "name": "apikey",
+              "value": "49b9820f82ae4a2eaa58fc14a0fc0ee1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1e90daf3-8568-43ea-9496-724058e7eaeb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e1680388-5eba-4361-b711-f502b7eea8df",
+      "name": "When chat message received",
+      "webhookId": "ad9ced6c-ae7e-463c-b139-0ea6e07aa51e"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0376e03d-a3f0-428e-bf6c-3da5b34bbaa2",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-02T23:06:19.939Z",
+      "updatedAt": "2025-10-02T23:06:19.939Z",
+      "role": "workflow:owner",
+      "workflowId": "gKwlIqOq8fQSnag1",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

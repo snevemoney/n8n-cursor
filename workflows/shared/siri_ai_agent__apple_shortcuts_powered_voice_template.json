@@ -1,0 +1,532 @@
+{
+  "createdAt": "2025-09-15T05:55:08.778Z",
+  "updatedAt": "2025-09-30T21:19:31.000Z",
+  "id": "XhFh97SBmRt8YczS",
+  "name": "Siri AI Agent: Apple Shortcuts powered voice template",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b24c6e28-3c9e-4069-9e87-49b2efd47257",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1376,
+        688
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "id": "a4ec93c3-eefa-4006-b02c-f995fb7bc410",
+      "name": "Respond to Apple Shortcut",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1840,
+        464
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "### Set up steps\n1. Add an OpenAI API credential in `OpenAI Chat Model` node, or replace it with another model. Try `Groq` if you want a free alternative (can be used with free Groq account, no CC).\n2. Copy the \"Production URL\" from `When called by Apple Shortcut` node, you'll need this when setting up the shortcut.\n3. Save and activate this n8n workflow.\n4. Download the [Apple Shortcut here](https://uploads.n8n.io/devrel/ask-agent.shortcut), open it on macOS or iOS. This adds the shortcut to your device.\n5. Open the shortcut and swap URL in `Get contents of\" step to the \"Production URL\" you copied from `When called by Apple Shortcut`.\n6. Test it by saying \"Hey Siri, AI Agent\", then ask a question.",
+        "height": 631,
+        "width": 280,
+        "color": 7
+      },
+      "id": "942b284e-e26a-4534-8f33-eb92b0a88fdb",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### ... or watch set up video [5 min]\n[![Siri Template Thumbnail](https://uploads.n8n.io/devrel/thumb-siri.png#full-width)](https://youtu.be/dewsB-4iGA8)\n",
+        "height": 240.6839895136402,
+        "width": 330.5152611046425,
+        "color": 7
+      },
+      "id": "ebb9e886-546a-429c-b4b5-35c0a7b6370e",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is my request: {{ $json.headers.query }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "## Role\nYou are a personal tool-using assistant. Keep replies concise for voice playback on mobile. Prefer calling tools over guessing.\n\n## Context\n- Today: {{ $now.format('dd LLL yy') }}\n- Time: {{ $now.format('h:mm a') }} (Berlin, Germany)\n- When asked, you are an AI Agent running as an n8n workflow.\n- Answer questions using Google Sheets ONLY via the tool below. Be precise and conservative\n\n## Capabilities & Tools\n- calculator: finance/math as needed.\n- google_sheets tools: retrieve, update, edit transactions. Use only exposed fields; never change document or sheet names.\n- Primary lookup tool: find_transactions\n- Ask at most one short clarification if a required input is missing.\n- If a tool returns nothing, say “No matching transactions found.”\n- Respect bank/credit card, amount, category exactly as in the sheet.\n- Optimize for voice: one sentence, no “\\n”. Don’t hallucinate.\n\n## Extraction\nExtract from the user’s request:\n- bank ∈ {BMO, KOHO, Shakepay, Wealthsimple}\n- merchant (optional)\n- category (optional)\n\nThen call the best tool(s). For lookups, call google sheet with the extracted fields.\n\n### Interaction\n- Never ask follow-up questions. If an input is missing, use defaults and proceed.\n- Defaults:\n  - bank: ANY (do not filter by bank)\n  - merchant/category/amount/date: ignore if missing\n- If nothing matches, return “No matching transactions found.”\n- Keep one-line summaries, no \\n.\n\n### Output\nReturn only:\n{ \"data\": <tool result or {}>, \"summary\": \"<one short sentence>\" }\n"
+        }
+      },
+      "id": "5a842fa9-be8c-4ba8-996b-a26a53273b3f",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1440,
+        464
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assistant",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "598d22d5-7472-44c5-ab2e-69c8bbb23ddd",
+      "name": "When called by Apple Shortcut",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        1152,
+        464
+      ],
+      "webhookId": "f0224b4b-1644-4d3d-9f12-01a9c04879e4",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        896
+      ],
+      "id": "65618d39-3cf2-422b-8668-fb95b51b245b",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1B-JtxlK2KQr8CyYcHssr1nwkEqwnGxE5MJRr6BrfnMk",
+          "mode": "list",
+          "cachedResultName": "Transactions_apple_pay",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1B-JtxlK2KQr8CyYcHssr1nwkEqwnGxE5MJRr6BrfnMk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1288455940,
+          "mode": "list",
+          "cachedResultName": "Transactions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1B-JtxlK2KQr8CyYcHssr1nwkEqwnGxE5MJRr6BrfnMk/edit#gid=1288455940"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Idempotency Key"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Card Brand",
+              "displayName": "Card Brand",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Card Label/Last4",
+              "displayName": "Card Label/Last4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Merchant",
+              "displayName": "Merchant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " Amount ",
+              "displayName": " Amount ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Method",
+              "displayName": "Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Idempotency Key",
+              "displayName": "Idempotency Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Raw JSON",
+              "displayName": "Raw JSON",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1888,
+        720
+      ],
+      "id": "ff2ea3e0-5ccc-4bdf-a4ff-0db19fc07f0b",
+      "name": "update transactions",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "### Deliberation\n- You may call the tool **think** to plan multi-step actions or summarize findings so far.\n- Think notes are private and must NOT be read back to the user.\n- Use think at most 1–2 times per request, then proceed to real tools (e.g., find_transactions).\n- Do not loop on think; every think must be followed by a concrete tool call or a final answer.\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        1456,
+        880
+      ],
+      "id": "e8cc5894-7cec-44b2-822b-ab70ee6be16c",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1B-JtxlK2KQr8CyYcHssr1nwkEqwnGxE5MJRr6BrfnMk",
+          "mode": "list",
+          "cachedResultName": "Transactions_apple_pay",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1B-JtxlK2KQr8CyYcHssr1nwkEqwnGxE5MJRr6BrfnMk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1288455940,
+          "mode": "list",
+          "cachedResultName": "Transactions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1B-JtxlK2KQr8CyYcHssr1nwkEqwnGxE5MJRr6BrfnMk/edit#gid=1288455940"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Timestamp",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', ``, 'string') }}"
+            },
+            {
+              "lookupColumn": "Card Brand",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values1_Value', ``, 'string') }}"
+            },
+            {
+              "lookupColumn": "Category",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values2_Value', ``, 'string') }}"
+            },
+            {
+              "lookupColumn": "Currency",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values3_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8d1f5e7b-5967-49e7-882d-847d67509bd6",
+      "name": "Analyze Data",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        1728,
+        704
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsJoVtLHBHj107nl",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Apple Shortcut",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When called by Apple Shortcut": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update transactions": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": {
+    "templateId": "2436",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When called by Apple Shortcut": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8ncloud.tech",
+            "x-real-ip": "173.206.229.223",
+            "x-forwarded-for": "173.206.229.223",
+            "x-forwarded-proto": "https",
+            "connection": "upgrade",
+            "query": "Look at all my transactions",
+            "accept": "*/*",
+            "key": "Value",
+            "user-agent": "BackgroundShortcutRunner/4033.0.3.5 CFNetwork/3860.100.1 Darwin/25.0.0",
+            "accept-language": "en-CA,en-US;q=0.9,en;q=0.8",
+            "accept-encoding": "gzip, deflate, br"
+          },
+          "params": {},
+          "query": {},
+          "body": {},
+          "webhookUrl": "https://n8ncloud.tech/webhook-test/assistant",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "versionId": "f532ed8d-19b4-4939-b246-3624a989ec1f",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-15T05:55:08.781Z",
+      "updatedAt": "2025-09-15T05:55:08.781Z",
+      "role": "workflow:owner",
+      "workflowId": "XhFh97SBmRt8YczS",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

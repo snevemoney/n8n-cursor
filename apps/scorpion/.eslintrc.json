@@ -1,0 +1,41 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "max-lines-per-function": [
+      "warn",
+      {
+        "max": 60,
+        "skipComments": true,
+        "skipBlankLines": true,
+        "IIFEs": true
+      }
+    ],
+    "@typescript-eslint/no-floating-promises": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "overrides": [
+    {
+      "files": [
+        "server/orchestrator/**/*.ts",
+        "server/council/**/*.ts",
+        "server/tools/**/*.ts",
+        "lib/orchestrator/**/*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-explicit-any": "error",
+        "max-lines-per-function": [
+          "error",
+          {
+            "max": 60,
+            "skipComments": true,
+            "skipBlankLines": true
+          }
+        ]
+      }
+    }
+  ]
+}
+

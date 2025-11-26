@@ -1,0 +1,105 @@
+name: lfa-staging
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+    ports:
+      - "${TRAEFIK_HTTP:-80}:80"
+      - "${TRAEFIK_HTTPS:-443}:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [edge]
+    profiles: ["proxy"]
+
+  lfa-web:
+    image: node:20
+    working_dir: /app
+    command: ["bash","-lc","pnpm i && pnpm run build && pnpm start"]
+    volumes: ["./apps/lightningflow:/app"]
+    environment:
+      - NODE_ENV=staging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lfa-web.rule=Host(`${LFA_HOST:-staging.lfa.example.com}`)"
+      - "traefik.http.services.lfa-web.loadbalancer.server.port=3000"
+    networks: [edge, lfa]
+    profiles: ["lfa"]
+    healthcheck:
+      test: ["CMD","curl","-fsS","http://localhost:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 8
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 4g
+        reservations:
+          cpus: "2.0"
+          memory: 2g
+
+  lfa-api:
+    image: node:20
+    working_dir: /app
+    command: ["bash","-lc","pnpm i && pnpm run build && pnpm run api"]
+    volumes: ["./apps/lightningflow:/app"]
+    environment:
+      - NODE_ENV=staging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lfa-api.rule=Host(`${LFA_API_HOST:-api-staging.lfa.example.com}`)"
+      - "traefik.http.services.lfa-api.loadbalancer.server.port=4000"
+    networks: [edge, lfa]
+    profiles: ["lfa"]
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2g
+
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=${PGUSER:-postgres}
+      - POSTGRES_PASSWORD=${PGPASSWORD:-password}
+      - POSTGRES_DB=${PGDATABASE:-lightningflow_stg}
+    volumes: [pg_data:/var/lib/postgresql/data]
+    networks: [core]
+    profiles: ["lfa"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2g
+
+  redis:
+    image: redis:7
+    command: ["redis-server","--appendonly","yes"]
+    networks: [core]
+    profiles: ["lfa"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+
+networks:
+  edge: { driver: bridge }
+  core: { driver: bridge }
+  lfa:  { driver: bridge }
+
+volumes:
+  pg_data:

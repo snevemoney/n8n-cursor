@@ -1,0 +1,93 @@
+name: Deploy - Prod (Blue/Green)
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable && pnpm i --frozen-lockfile
+      - run: pnpm -w lint && pnpm -w typecheck && pnpm -w test
+      - name: Build :prod
+        run: |
+          for s in landing web ops api worker; do
+            docker build -t ghcr.io/${{ github.repository }}/lfai-$s:prod apps/$s
+          done
+          # Build Scorpion (different Dockerfile path - builds from workspace root)
+          docker build -t ghcr.io/${{ github.repository }}/scorpion:prod -f apps/scorpion/Dockerfile .
+      - name: Push
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          for s in landing web ops api worker; do
+            docker push ghcr.io/${{ github.repository }}/lfai-$s:prod
+          done
+          docker push ghcr.io/${{ github.repository }}/scorpion:prod
+
+  deploy-green:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy GREEN
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER_PROD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            docker pull ghcr.io/${{ github.repository }}/lfai-landing:prod
+            docker pull ghcr.io/${{ github.repository }}/lfai-web:prod
+            docker pull ghcr.io/${{ github.repository }}/lfai-ops:prod
+            docker pull ghcr.io/${{ github.repository }}/lfai-api:prod
+            docker pull ghcr.io/${{ github.repository }}/lfai-worker:prod
+            docker pull ghcr.io/${{ github.repository }}/scorpion:prod
+            docker compose -f infra/docker/docker-compose.prod.yml up -d
+            bash scripts/green_smoke_local.sh
+
+  import-workflows-green:
+    needs: deploy-green
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import (inactive) to prod n8n
+        env:
+          N8N_URL: https://n8ncloud.tech
+          N8N_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
+        run: |
+          for f in workflows/lfai/*.json; do
+            jq 'del(.id) | .active=false' "$f" > /tmp/wf.json
+            curl -fsS -X POST -H "X-N8N-API-KEY: $N8N_API_KEY" -H "Content-Type: application/json" \
+              -d @/tmp/wf.json "$N8N_URL/rest/workflows" >/dev/null
+          done
+
+  flip-to-green:
+    needs: import-workflows-green
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH flip Caddy to GREEN (health-gated)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER_PROD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            bash scripts/flip_green.sh   # validates ports, edits Caddy upstreams, reloads caddy
+            bash scripts/smoke.sh
+
+  activate-prod-workflows:
+    needs: flip-to-green
+    runs-on: ubuntu-latest
+    steps:
+      - name: Activate workflows in prod
+        env:
+          N8N_URL: https://n8ncloud.tech
+          N8N_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
+        run: |
+          ids=$(curl -fsS -H "X-N8N-API-KEY: $N8N_API_KEY" "$N8N_URL/rest/workflows" | jq -r '.data[].id')
+          for id in $ids; do
+            curl -fsS -X PATCH -H "X-N8N-API-KEY: $N8N_API_KEY" \
+              -H "Content-Type: application/json" -d '{"active":true}' "$N8N_URL/rest/workflows/$id" >/dev/null
+          done

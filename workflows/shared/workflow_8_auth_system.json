@@ -1,0 +1,325 @@
+{
+  "name": "Authentication & User Management System",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/auth",
+        "httpMethod": "POST"
+      },
+      "id": "webhook-auth-entry",
+      "name": "Auth Entry Point",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "ALL"
+      },
+      "id": "split-branch-auth",
+      "name": "Split Auth Routes",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different auth operations based on body.action\nconst action = $input.item.json.body?.action || 'unknown';\n\n// Map actions to routes\nconst routeMap = {\n  'signup': '/auth/signup',\n  'login': '/auth/login',\n  'logout': '/auth/logout',\n  'refresh': '/auth/refresh',\n  'verify-email': '/auth/verify-email',\n  'reset-password-request': '/password/reset-request',\n  'reset-password-complete': '/password/reset-complete',\n  'change-password': '/password/change'\n};\n\nreturn {\n  json: {\n    action,\n    route: routeMap[action] || '/auth/login',\n    payload: $input.item.json.body\n  }\n};"
+      },
+      "id": "route-auth-action",
+      "name": "Route Auth Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "signup-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "signup",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "login-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "login",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "logout-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "logout",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "refresh-condition",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "refresh",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "if-auth-type",
+      "name": "Route by Auth Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO users (user_id, user_name, google_drive_folder_id, tenant_id, is_active) VALUES ('{{ $json.payload.email }}', '{{ $json.payload.name }}', '{{ $json.payload.googleFolderId }}', '{{ $json.payload.tenantId }}', true) RETURNING *",
+        "options": {}
+      },
+      "id": "handle-signup",
+      "name": "Handle Signup",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1120,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM users WHERE user_id = '{{ $json.payload.email }}' AND tenant_id = '{{ $json.payload.tenantId }}'",
+        "options": {}
+      },
+      "id": "handle-login",
+      "name": "Handle Login",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1120,
+        250
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE sessions SET is_active = false WHERE user_id = '{{ $json.payload.userId }}' AND session_token = '{{ $json.payload.token }}' RETURNING *",
+        "options": {}
+      },
+      "id": "handle-logout",
+      "name": "Handle Logout",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1120,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM sessions WHERE session_token = '{{ $json.payload.refreshToken }}' AND is_active = true",
+        "options": {}
+      },
+      "id": "handle-refresh",
+      "name": "Handle Refresh",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1120,
+        350
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-auth",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Auth Entry Point": {
+      "main": [
+        [
+          {
+            "node": "Split Auth Routes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Auth Routes": {
+      "main": [
+        [
+          {
+            "node": "Route Auth Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Auth Action": {
+      "main": [
+        [
+          {
+            "node": "Route by Auth Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Auth Type": {
+      "main": [
+        [
+          {
+            "node": "Handle Signup",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Handle Login",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Handle Logout",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Handle Refresh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Signup": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Login": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Logout": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Refresh": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-20T10:00:00.000Z",
+      "updatedAt": "2024-01-20T10:00:00.000Z",
+      "id": "auth",
+      "name": "Authentication"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-20T10:00:00.000Z",
+  "versionId": "1"
+}
+

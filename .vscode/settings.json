@@ -1,0 +1,52 @@
+{
+  "files.maxMemoryForLargeFilesMB": 32,
+  "search.followSymlinks": false,
+  "editor.largeFileOptimizations": true,
+  "workbench.editor.restoreViewState": false,
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/tooling/backups/**": true,
+    "**/PROTECTED_BACKUP/**": true,
+    "**/docker_data/**": true,
+    "**/*.log": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/dist/**": true,
+    "**/build/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/tooling/backups": true,
+    "**/PROTECTED_BACKUP": true,
+    "**/docker_data": true,
+    "**/*.log": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/tooling/backups": true,
+    "**/PROTECTED_BACKUP": true,
+    "**/docker_data": true
+  },
+  "editor.maxTokenizationLineLength": 20000,
+  "workbench.startupEditor": "none",
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "git.ignoreLimitWarning": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.suggest.maxVisibleSuggestions": 12,
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  "editor.suggestSelection": "first",
+  "editor.wordBasedSuggestions": "off",
+  "editor.semanticHighlighting.enabled": false,
+  "workbench.editor.enablePreview": true,
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 10,
+  "workbench.editor.limit.perEditorGroup": true,
+  "typescript.tsserver.maxTsServerMemory": 2048,
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "javascript.preferences.includePackageJsonAutoImports": "off"
+}

@@ -1,0 +1,455 @@
+{
+  "timestamp": "2025-11-12T03:01:39.602Z",
+  "nodeVersion": "v22.15.1",
+  "env": {},
+  "coverage": {
+    "totalTools": 29,
+    "toolsAttempted": 22,
+    "toolsSucceeded": 22,
+    "toolsFailed": 0,
+    "coveragePercent": 75.86206896551724
+  },
+  "tools": {
+    "research.run": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 226,
+      "avgMs": 226
+    },
+    "workflows.list": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 56,
+      "avgMs": 56
+    },
+    "workflows.get": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 373,
+      "avgMs": 373
+    },
+    "files.recent": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 1,
+      "avgMs": 1
+    },
+    "knowledge.list": {
+      "calls": 2,
+      "ok": 2,
+      "failed": 0,
+      "msTotal": 35,
+      "avgMs": 17.5
+    },
+    "ontology.search": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 134,
+      "avgMs": 134
+    },
+    "system.health": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 209,
+      "avgMs": 209
+    },
+    "project.status": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 192,
+      "avgMs": 192
+    },
+    "stats.get": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 43,
+      "avgMs": 43
+    },
+    "operations.list": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 55,
+      "avgMs": 55
+    },
+    "code.readFile": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 1,
+      "avgMs": 1
+    },
+    "project.analyze": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 167,
+      "avgMs": 167
+    },
+    "logs.tail": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 263,
+      "avgMs": 263
+    },
+    "agents.list": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 242,
+      "avgMs": 242
+    },
+    "agents.get": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 355,
+      "avgMs": 355
+    },
+    "notifications.post": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 86,
+      "avgMs": 86
+    },
+    "notifications.list": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 53,
+      "avgMs": 53
+    },
+    "settings.get": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 57,
+      "avgMs": 57
+    },
+    "llm.models.compare": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 59,
+      "avgMs": 59
+    },
+    "llm.experiments.list": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 71,
+      "avgMs": 71
+    },
+    "research.start": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 37,
+      "avgMs": 37
+    },
+    "workflows.trigger": {
+      "calls": 1,
+      "ok": 1,
+      "failed": 0,
+      "msTotal": 24,
+      "avgMs": 24
+    }
+  },
+  "scenarios": [
+    {
+      "id": "latest-news",
+      "label": "Latest news (Bitcoin/global)",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "research.run"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: research.run executed"
+      ]
+    },
+    {
+      "id": "explain-workflow",
+      "label": "Explain my ElevenLabs workflow on n8ncloud.tech",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "workflows.list",
+        "workflows.get"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: workflows.list executed",
+        "Forced: workflows.get executed"
+      ]
+    },
+    {
+      "id": "pull-file-rag",
+      "label": "Pull my last uploaded file and add it to RAG",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "files.recent",
+        "knowledge.list"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: files.recent executed",
+        "Forced: knowledge.list executed"
+      ]
+    },
+    {
+      "id": "list-side-hustles",
+      "label": "List all my side-hustles",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "knowledge.list",
+        "ontology.search"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: ontology.search executed"
+      ]
+    },
+    {
+      "id": "system-health",
+      "label": "How healthy is the system right now?",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "system.health",
+        "project.status",
+        "stats.get"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: system.health executed",
+        "Forced: project.status executed",
+        "Forced: stats.get executed"
+      ]
+    },
+    {
+      "id": "recent-operations",
+      "label": "Show me recent operations",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "operations.list"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: operations.list executed"
+      ]
+    },
+    {
+      "id": "skim-orchestrator",
+      "label": "Skim the orchestrator route",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "code.readFile"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: code.readFile executed"
+      ]
+    },
+    {
+      "id": "project-overview",
+      "label": "High-level project overview",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "project.analyze"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: project.analyze executed"
+      ]
+    },
+    {
+      "id": "check-logs",
+      "label": "Check recent API logs",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "logs.tail"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: logs.tail executed"
+      ]
+    },
+    {
+      "id": "list-agents",
+      "label": "List my agents and inspect one",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "agents.list",
+        "agents.get"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: agents.list executed",
+        "Forced: agents.get executed"
+      ]
+    },
+    {
+      "id": "deploy-agent",
+      "label": "Try deploying a sample agent (dry run)",
+      "status": "skipped",
+      "plannerOk": false,
+      "forcedOk": false,
+      "toolsSeen": [],
+      "notes": [
+        "Gated by ALLOW_DEPLOY_TESTS"
+      ]
+    },
+    {
+      "id": "notify-diagnostics",
+      "label": "Notify me that diagnostics ran",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "notifications.post",
+        "notifications.list"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: notifications.post executed",
+        "Forced: notifications.list executed"
+      ]
+    },
+    {
+      "id": "list-knowledge",
+      "label": "List knowledge items",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "knowledge.list"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: knowledge.list executed"
+      ]
+    },
+    {
+      "id": "settings-snapshot",
+      "label": "Settings snapshot",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "settings.get"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: settings.get executed"
+      ]
+    },
+    {
+      "id": "compare-models",
+      "label": "Compare LLM models (safe)",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "llm.models.compare"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: llm.models.compare executed"
+      ]
+    },
+    {
+      "id": "list-experiments",
+      "label": "List LLM experiments",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "llm.experiments.list"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: llm.experiments.list executed"
+      ]
+    },
+    {
+      "id": "evaluate-prompt",
+      "label": "Evaluate a tiny prompt (if enabled)",
+      "status": "skipped",
+      "plannerOk": false,
+      "forcedOk": false,
+      "toolsSeen": [],
+      "notes": [
+        "Gated by ALLOW_LLM_EVAL"
+      ]
+    },
+    {
+      "id": "start-research",
+      "label": "Start a research job",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "research.start"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: research.start executed"
+      ]
+    },
+    {
+      "id": "trigger-workflow",
+      "label": "Trigger a workflow (if exists)",
+      "status": "passed",
+      "plannerOk": false,
+      "forcedOk": true,
+      "toolsSeen": [
+        "workflows.trigger"
+      ],
+      "notes": [
+        "Planner error: Planner failed: Ollama error: Ollama request failed: Ollama API error: 404 - {\"error\":\"model \\\"llama3.1:8b\\\" not found, try pulling it first\"}\n\nOllama URL: http://localhost:11434\nModel: llama3.1:8b\n\nTroubleshooting:\n1. Check Ollama is running: `ollama serve`\n2. Verify model exists: `ollama list`\n3. Test connection: `curl http://localhost:11434/api/tags`",
+        "Forced: workflows.trigger executed"
+      ]
+    },
+    {
+      "id": "backup-create",
+      "label": "Backup (destructive, gated)",
+      "status": "skipped",
+      "plannerOk": false,
+      "forcedOk": false,
+      "toolsSeen": [],
+      "notes": [
+        "Gated by ALLOW_DESTRUCTIVE_TESTS"
+      ]
+    }
+  ],
+  "errors": []
+}

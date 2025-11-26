@@ -1,0 +1,81 @@
+name: Scorpion Performance Testing
+
+on:
+  schedule:
+    # Run weekly on Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: 'Test duration in seconds'
+        required: false
+        default: '60'
+        type: string
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install autocannon
+        run: npm install -g autocannon
+      
+      - name: Start Scorpion (if local)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Note: Performance testing requires running Scorpion instance"
+          echo "Configure SCORPION_URL secret for remote testing"
+      
+      - name: Run load test
+        env:
+          SCORPION_URL: ${{ secrets.SCORPION_URL || 'http://localhost:3003' }}
+          DURATION: ${{ github.event.inputs.duration || '60' }}
+        run: |
+          echo "🚀 Running performance test against $SCORPION_URL"
+          
+          # Health check endpoint
+          autocannon -c 10 -d $DURATION "$SCORPION_URL/healthz" > healthz-results.txt || true
+          
+          # API health endpoint
+          autocannon -c 10 -d $DURATION "$SCORPION_URL/api/health" > api-health-results.txt || true
+          
+          # Metrics endpoint
+          autocannon -c 5 -d $DURATION "$SCORPION_URL/api/metrics" > metrics-results.txt || true
+          
+          echo "📊 Performance test results:"
+          cat healthz-results.txt
+          echo ""
+          cat api-health-results.txt
+      
+      - name: Upload performance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results-${{ github.run_number }}
+          path: |
+            healthz-results.txt
+            api-health-results.txt
+            metrics-results.txt
+          retention-days: 90
+      
+      - name: Performance summary
+        if: always()
+        run: |
+          echo "## Performance Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Healthz Endpoint" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat healthz-results.txt >> $GITHUB_STEP_SUMMARY || echo "No results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### API Health Endpoint" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat api-health-results.txt >> $GITHUB_STEP_SUMMARY || echo "No results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+

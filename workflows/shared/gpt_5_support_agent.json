@@ -1,0 +1,333 @@
+{
+  "createdAt": "2025-08-21T19:27:47.419Z",
+  "updatedAt": "2025-08-21T19:27:47.419Z",
+  "id": "8WpHnlUO8nHHW4Yn",
+  "name": "GPT-5 Support Agent",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "gmail-trigger",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        120,
+        300
+      ],
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {}
+      }
+    },
+    {
+      "id": "check-sender",
+      "name": "When missing a sender name",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        320,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.payload.headers.from }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "support-agent",
+      "name": "Support Agent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// GPT-5 Support Agent Logic\nconst emailContent = $json.payload.snippet || $json.payload.body;\nconst sender = $json.payload.headers.from || 'Unknown Sender';\n\n// Extract key information\nconst supportTicket = {\n  sender: sender,\n  subject: $json.payload.subject || 'No Subject',\n  content: emailContent,\n  priority: emailContent.toLowerCase().includes('urgent') ? 'high' : 'normal',\n  category: 'general_inquiry',\n  timestamp: new Date().toISOString()\n};\n\nreturn { \n  json: { \n    supportTicket,\n    needsResponse: true,\n    confidence: 0.85 \n  } \n};"
+      }
+    },
+    {
+      "id": "content-database",
+      "name": "Content Database",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        520,
+        480
+      ],
+      "parameters": {
+        "application": "app_placeholder",
+        "table": "support_responses",
+        "operation": "list"
+      }
+    },
+    {
+      "id": "punctuation",
+      "name": "Punctuation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Clean and format text\nlet text = $json.supportTicket?.content || $json.content || '';\n\n// Basic punctuation cleanup\ntext = text.replace(/\\s+/g, ' ').trim();\ntext = text.replace(/([.!?])([A-Z])/g, '$1 $2');\n\nreturn { \n  json: { \n    ...($json.supportTicket ? { supportTicket: { ...$json.supportTicket, content: text } } : {}),\n    cleanedText: text \n  } \n};"
+      }
+    },
+    {
+      "id": "set-output",
+      "name": "Set Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        920,
+        300
+      ],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "responseType",
+              "value": "automated_support"
+            },
+            {
+              "name": "agentVersion",
+              "value": "GPT-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "n8n-nodes-base.openAiChat",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ],
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "content": "You are a helpful customer support agent. \n\nCustomer inquiry: {{ $json.supportTicket.content || $json.cleanedText }}\n\nProvide a professional, helpful response that addresses their concern.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 500
+        }
+      }
+    },
+    {
+      "id": "score",
+      "name": "Score",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        300
+      ],
+      "parameters": {
+        "functionCode": "// Calculate confidence score for the response\nconst responseLength = items[0].json.choices?.[0]?.message?.content?.length || 0;\nconst hasKeywords = /thank|help|assist|resolve|solution/i.test(\n  items[0].json.choices?.[0]?.message?.content || ''\n);\n\nconst score = Math.min(0.95, 0.6 + (responseLength > 100 ? 0.2 : 0) + (hasKeywords ? 0.15 : 0));\n\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    confidenceScore: score,\n    readyToSend: score > 0.7\n  }\n}));"
+      }
+    },
+    {
+      "id": "send-message",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "message": {
+          "to": "={{ $json.supportTicket?.sender || 'customer@example.com' }}",
+          "subject": "Re: {{ $json.supportTicket?.subject || 'Your Support Request' }}",
+          "body": "={{ $json.choices?.[0]?.message?.content || 'Thank you for contacting us.' }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "When missing a sender name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When missing a sender name": {
+      "main": [
+        [
+          {
+            "node": "Support Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Agent": {
+      "main": [
+        [
+          {
+            "node": "Punctuation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Content Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Punctuation": {
+      "main": [
+        [
+          {
+            "node": "Set Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Output": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "8c2626e4-c88b-4547-9988-98e4f470f615",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T19:27:47.423Z",
+      "updatedAt": "2025-08-21T19:27:47.423Z",
+      "role": "workflow:owner",
+      "workflowId": "8WpHnlUO8nHHW4Yn",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

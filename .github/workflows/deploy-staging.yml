@@ -1,0 +1,93 @@
+name: Deploy - Staging
+on:
+  push:
+    branches: [staging]
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable && pnpm i --frozen-lockfile
+      - run: pnpm -w lint && pnpm -w typecheck && pnpm -w test
+      - name: Build :staging
+        run: |
+          for s in landing web ops api worker; do
+            docker build -t ghcr.io/${{ github.repository }}/lfai-$s:staging apps/$s
+          done
+          # Build Scorpion (different Dockerfile path - builds from workspace root)
+          docker build -t ghcr.io/${{ github.repository }}/scorpion:staging -f apps/scorpion/Dockerfile .
+      - name: Push
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          for s in landing web ops api worker; do
+            docker push ghcr.io/${{ github.repository }}/lfai-$s:staging
+          done
+          docker push ghcr.io/${{ github.repository }}/scorpion:staging
+
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy compose + images
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER_STAGING }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            docker pull ghcr.io/${{ github.repository }}/lfai-landing:staging
+            docker pull ghcr.io/${{ github.repository }}/lfai-web:staging
+            docker pull ghcr.io/${{ github.repository }}/lfai-ops:staging
+            docker pull ghcr.io/${{ github.repository }}/lfai-api:staging
+            docker pull ghcr.io/${{ github.repository }}/lfai-worker:staging
+            docker pull ghcr.io/${{ github.repository }}/scorpion:staging
+            docker compose -f infra/docker/docker-compose.staging.yml up -d
+            sudo cp infra/caddy/Caddyfile.staging /etc/caddy/Caddyfile
+            sudo systemctl reload caddy
+            bash scripts/smoke-staging.sh
+
+  import-workflows:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import (inactive) to staging n8n
+        env:
+          N8N_URL: https://staging.n8ncloud.tech
+          N8N_API_KEY: ${{ secrets.N8N_STAGING_API_KEY }}
+        run: |
+          for f in workflows/lfai/*.json; do
+            jq 'del(.id) | .active=false' "$f" > /tmp/wf.json
+            curl -fsS -X POST -H "X-N8N-API-KEY: $N8N_API_KEY" -H "Content-Type: application/json" \
+              -d @/tmp/wf.json "$N8N_URL/rest/workflows" >/dev/null
+          done
+
+  e2e-perf:
+    needs: import-workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable && pnpm i --frozen-lockfile
+      - name: Playwright E2E (staging)
+        env: { WEB_BASE: https://app.staging.lightningflow.online }
+        run: pnpm --filter apps/web playwright test
+      - name: Perf smoke
+        run: npx autocannon -c 20 -d 15 https://staging.lightningflow.online/api/healthz
+
+  activate-workflows:
+    needs: e2e-perf
+    runs-on: ubuntu-latest
+    steps:
+      - name: Activate all staging workflows
+        env:
+          N8N_URL: https://staging.n8ncloud.tech
+          N8N_API_KEY: ${{ secrets.N8N_STAGING_API_KEY }}
+        run: |
+          ids=$(curl -fsS -H "X-N8N-API-KEY: $N8N_API_KEY" "$N8N_URL/rest/workflows" | jq -r '.data[].id')
+          for id in $ids; do
+            curl -fsS -X PATCH -H "X-N8N-API-KEY: $N8N_API_KEY" \
+              -H "Content-Type: application/json" -d '{"active":true}' \
+              "$N8N_URL/rest/workflows/$id" >/dev/null
+          done

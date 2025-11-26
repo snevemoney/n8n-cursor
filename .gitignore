@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+.next/
+*.pack.gz
+*.tsbuildinfo
+
+# Test outputs
+bot-test-results/
+playwright-report/
+
+# Large files
+*.tar.gz
+*.sqlite
+*.db
+# docs/ROUTES.md - tracked with Git LFS
+
+# Logs
+*.log
+logs/
+
+# Environment files (keep examples in env-templates/)
+.env
+.env.local
+.env.*.local
+.env.backup
+.env.monitoring
+
+# Deployment artifacts
+*.zip
+
+# IDE workspace files (optional - keep if needed)
+# *.code-workspace
+
+# Temporary directories
+~/
+
+# Scorpion persistent data
+apps/scorpion/data/
+**/data/scorpion/*.json
+
+# Scorpion backups (large files)
+apps/scorpion/backups/
+**/backups/
+
+# Audit outputs (large files)
+apps/scorpion/audit/out/
+*.har
+.env.bak
+apps/scorpion/.env.local.bak

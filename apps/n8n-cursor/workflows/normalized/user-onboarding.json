@@ -1,0 +1,231 @@
+{
+  "name": "User Onboarding Flow",
+  "version": "1.0.0",
+  "owner": "evenslouis",
+  "description": "Complete user onboarding workflow triggered by user.created event",
+  "meta": {
+    "name": "User Onboarding Flow",
+    "version": "1.0.0",
+    "owner": "evenslouis",
+    "description": "Complete user onboarding workflow triggered by user.created event",
+    "tags": ["onboarding", "user", "automation"],
+    "estimated_duration": "5-10 minutes",
+    "failure_handling": "retry with exponential backoff, dead letter after 3 attempts"
+  },
+  "nodes": [
+    {
+      "id": "webhook_trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "user-onboarding",
+        "options": {
+          "responseMode": "responseNode"
+        }
+      }
+    },
+    {
+      "id": "validate_event",
+      "name": "Validate Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "parameters": {
+        "jsCode": "// Validate incoming event\nconst event = $input.first().json;\n\n// Check required fields\nif (!event.id || !event.type || !event.data) {\n  throw new Error('Invalid event format');\n}\n\n// Verify event type\nif (event.type !== 'user.created') {\n  throw new Error(`Expected user.created, got ${event.type}`);\n}\n\n// Extract user data\nconst userData = event.data;\nif (!userData.user_id || !userData.email) {\n  throw new Error('Missing required user data');\n}\n\n// Set variables for downstream nodes\n$vars.set('eventId', event.id);\n$vars.set('userId', userData.user_id);\n$vars.set('userEmail', userData.email);\n$vars.set('businessName', userData.business_name || '');\n$vars.set('correlationId', event.correlation_id || event.id);\n\nreturn [{\n  json: {\n    event_id: event.id,\n    user_id: userData.user_id,\n    email: userData.email,\n    business_name: userData.business_name,\n    correlation_id: event.correlation_id\n  }\n}];"
+      }
+    },
+    {
+      "id": "enrich_user_data",
+      "name": "Enrich User Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "jsCode": "// Enrich user data with additional information\nconst userData = $input.first().json;\n\n// Generate welcome message\nconst welcomeMessage = userData.business_name \n  ? `Welcome to LightningFlow AI, ${userData.business_name}!`\n  : `Welcome to LightningFlow AI!`;\n\n// Set default preferences\nconst preferences = {\n  notifications_enabled: true,\n  theme: 'light',\n  language: 'en',\n  timezone: 'UTC'\n};\n\n// Generate onboarding checklist\nconst checklist = [\n  'Complete profile setup',\n  'Connect Lightning wallet',\n  'Choose AI agents',\n  'Set up payment methods',\n  'Explore dashboard'\n];\n\nreturn [{\n  json: {\n    ...userData,\n    welcome_message: welcomeMessage,\n    preferences,\n    onboarding_checklist: checklist,\n    enriched_at: new Date().toISOString()\n  }\n}];"
+      }
+    },
+    {
+      "id": "create_lnbits_account",
+      "name": "Create LNbits Account",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 200],
+      "parameters": {
+        "url": "https://lnbits.example.com/api/v1/accounts",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "nodeCredentialType": "lnbitsApi",
+        "options": {
+          "timeout": 10000
+        },
+        "jsonParameters": true,
+        "bodyParametersJson": "{\n  \"user_id\": \"{{ $vars.userId }}\",\n  \"wallet_name\": \"{{ $vars.userEmail }}\",\n  \"admin_id\": \"{{ $env.LNBITS_ADMIN_ID }}\"\n}"
+      }
+    },
+    {
+      "id": "send_welcome_email",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 400],
+      "parameters": {
+        "url": "{{ $env.LFA_BASE_URL }}/api/internal/commands",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "nodeCredentialType": "lfaServiceToken",
+        "options": {
+          "timeout": 10000
+        },
+        "jsonParameters": true,
+        "bodyParametersJson": "{\n  \"idempotencyKey\": \"{{ $vars.correlationId }}:welcome-email\",\n  \"action\": \"notify.send\",\n  \"payload\": {\n    \"user_id\": \"{{ $vars.userId }}\",\n    \"channel\": \"email\",\n    \"template\": \"welcome\",\n    \"data\": {\n      \"welcome_message\": \"{{ $('Enrich User Data').item.json.welcome_message }}\",\n      \"onboarding_checklist\": \"{{ $('Enrich User Data').item.json.onboarding_checklist }}\",\n      \"login_url\": \"{{ $env.LFA_BASE_URL }}/login\"\n    }\n  },\n  \"source\": \"n8n\",\n  \"workflow_id\": \"user-onboarding\",\n  \"execution_id\": \"{{ $execution.id }}\",\n  \"correlation_id\": \"{{ $vars.correlationId }}\",\n  \"timestamp\": \"{{ new Date().toISOString() }}\",\n  \"version\": \"1\"\n}"
+      }
+    },
+    {
+      "id": "seed_demo_data",
+      "name": "Seed Demo Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 600],
+      "parameters": {
+        "url": "{{ $env.LFA_BASE_URL }}/api/internal/commands",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "nodeCredentialType": "lfaServiceToken",
+        "options": {
+          "timeout": 10000
+        },
+        "jsonParameters": true,
+        "bodyParametersJson": "{\n  \"idempotencyKey\": \"{{ $vars.correlationId }}:seed-demo\",\n  \"action\": \"content.enqueue\",\n  \"payload\": {\n    \"user_id\": \"{{ $vars.userId }}\",\n    \"type\": \"article\",\n    \"title\": \"Getting Started with LightningFlow AI\",\n    \"prompt\": \"Create a comprehensive guide for new users to get started with LightningFlow AI, including Lightning payments, AI agents, and portfolio management.\"\n  },\n  \"source\": \"n8n\",\n  \"workflow_id\": \"user-onboarding\",\n  \"execution_id\": \"{{ $execution.id }}\",\n  \"correlation_id\": \"{{ $vars.correlationId }}\",\n  \"timestamp\": \"{{ new Date().toISOString() }}\",\n  \"version\": \"1\"\n}"
+      }
+    },
+    {
+      "id": "notify_slack",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1120, 400],
+      "parameters": {
+        "authentication": "slackApi",
+        "channel": "{{ $env.SLACK_CHANNEL_ONBOARDING }}",
+        "text": "🎉 New user onboarded!\n\n*User:* {{ $vars.userEmail }}\n*Business:* {{ $vars.businessName || 'N/A' }}\n*Workflow:* User Onboarding\n*Status:* Completed\n\nWelcome to the LightningFlow AI family! ⚡"
+      }
+    },
+    {
+      "id": "success_response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 400],
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"User onboarding completed successfully\",\n  \"user_id\": \"{{ $vars.userId }}\",\n  \"correlation_id\": \"{{ $vars.correlationId }}\",\n  \"completed_at\": \"{{ new Date().toISOString() }}\"\n}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Event": {
+      "main": [
+        [
+          {
+            "node": "Enrich User Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich User Data": {
+      "main": [
+        [
+          {
+            "node": "Create LNbits Account",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Seed Demo Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create LNbits Account": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seed Demo Data": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Slack": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,311 @@
+{
+  "name": "File Upload Sync - Knowledge Base",
+  "nodes": [
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "value": "1-d97m246pdoolSetiOJ7ifWc0-uTAblx",
+          "mode": "id"
+        },
+        "changeTypes": ["file"],
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute",
+              "minutesInterval": 15
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "google-drive-trigger",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3.3,
+      "position": [-600, 400],
+      "credentials": {
+        "googleDrive": {
+          "id": "google-drive-cred",
+          "name": "Google Drive Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "file-id",
+              "name": "fileId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "file-name",
+              "name": "fileName",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "file-type",
+              "name": "fileType",
+              "value": "={{ $json.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "file-url",
+              "name": "fileUrl",
+              "value": "={{ $json.webViewLink }}",
+              "type": "string"
+            },
+            {
+              "id": "parent-id",
+              "name": "parentId",
+              "value": "={{ $json.parents[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "extract-file-data",
+      "name": "Extract File Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-400, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT tenant_id FROM user_folder_mapping WHERE google_drive_folder_id = '{{ $json.parentId }}'",
+        "options": {}
+      },
+      "id": "get-tenant-from-folder",
+      "name": "Get Tenant from Folder",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [-200, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "tenant-exists",
+              "leftValue": "={{ $json.tenant_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-tenant",
+      "name": "Tenant Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [0, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document_metadata (id, title, url, schema, tenant_id, user_id, created_at) VALUES ('{{ $('Extract File Data').item.json.fileId }}', '{{ $('Extract File Data').item.json.fileName }}', '{{ $('Extract File Data').item.json.fileUrl }}', '{{ $('Extract File Data').item.json.fileType }}', '{{ $('Get Tenant from Folder').item.json.tenant_id }}', 'system', NOW()) ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, url = EXCLUDED.url, updated_at = NOW() RETURNING *",
+        "options": {}
+      },
+      "id": "insert-metadata",
+      "name": "Insert Document Metadata",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [200, 400],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Extract File Data').item.json.fileId }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "download-file",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3.3,
+      "position": [400, 400],
+      "credentials": {
+        "googleDrive": {
+          "id": "google-drive-cred",
+          "name": "Google Drive Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-spreadsheet",
+              "leftValue": "={{ $('Extract File Data').item.json.fileType }}",
+              "rightValue": "spreadsheet",
+              "operator": {
+                "type": "string",
+                "operation": "contains",
+                "singleValue": false
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-file-type",
+      "name": "Is Spreadsheet?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [600, 400]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "extract-from-xlsx",
+      "name": "Extract from Excel",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document_rows (dataset_id, row_data, tenant_id, user_id) VALUES ('{{ $('Extract File Data').item.json.fileId }}', '{{ $json }}'::jsonb, '{{ $('Get Tenant from Folder').item.json.tenant_id }}', 'system')",
+        "options": {}
+      },
+      "id": "insert-rows",
+      "name": "Insert Document Rows",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1000, 300],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "success",
+              "name": "success",
+              "value": "File synced successfully",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "success-node",
+      "name": "Success",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error",
+              "name": "error",
+              "value": "Failed to sync file",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "error-node",
+      "name": "Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1200, 500]
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [[{"node": "Extract File Data", "type": "main", "index": 0}]]
+    },
+    "Extract File Data": {
+      "main": [[{"node": "Get Tenant from Folder", "type": "main", "index": 0}]]
+    },
+    "Get Tenant from Folder": {
+      "main": [[{"node": "Tenant Exists?", "type": "main", "index": 0}]]
+    },
+    "Tenant Exists?": {
+      "main": [
+        [{"node": "Insert Document Metadata", "type": "main", "index": 0}],
+        [{"node": "Error", "type": "main", "index": 0}]
+      ]
+    },
+    "Insert Document Metadata": {
+      "main": [[{"node": "Download File", "type": "main", "index": 0}]]
+    },
+    "Download File": {
+      "main": [[{"node": "Is Spreadsheet?", "type": "main", "index": 0}]]
+    },
+    "Is Spreadsheet?": {
+      "main": [
+        [{"node": "Extract from Excel", "type": "main", "index": 0}],
+        [{"node": "Success", "type": "main", "index": 0}]
+      ]
+    },
+    "Extract from Excel": {
+      "main": [[{"node": "Insert Document Rows", "type": "main", "index": 0}]]
+    },
+    "Insert Document Rows": {
+      "main": [[{"node": "Success", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-25T00:00:00.000Z",
+  "versionId": "1"
+}

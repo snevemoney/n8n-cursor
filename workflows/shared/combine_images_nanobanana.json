@@ -1,0 +1,597 @@
+{
+  "createdAt": "2025-10-16T12:58:53.789Z",
+  "updatedAt": "2025-10-17T05:00:22.000Z",
+  "id": "gzva8mJf879d0KDG",
+  "name": "Combine Images Nanobanana",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -224,
+        16
+      ],
+      "id": "76cbf179-af04-42f7-992c-0b3fa492df17",
+      "name": "Get URL",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "lxNsYw9VfBFAjF05",
+          "name": "imgbb"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "prompt"
+            },
+            {
+              "name": "image1"
+            },
+            {
+              "name": "image2"
+            },
+            {
+              "name": "imageTitle"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        16
+      ],
+      "id": "790bbde3-b01b-404e-934f-fa4db3c849c4",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6831d021-c2d0-42a4-b625-aabfed3d170b",
+              "name": "images",
+              "value": "=['{{ $json.image1 }}','{{ $json.image2 }}']",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -656,
+        16
+      ],
+      "id": "411c4a9c-a29e-4242-8a16-a6bc55369b2b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        16
+      ],
+      "id": "e82f1138-9f61-4135-a9a6-f0493b5137cb",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.images }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        16
+      ],
+      "id": "2dbe965f-35eb-4f69-8d6b-245ef7fe1bfd",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        16
+      ],
+      "id": "abe7633c-e192-4d9d-9132-96f41c1304ca",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/nano-banana/edit",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ \n  $('When Executed by Another Workflow').item.json.prompt.replace(/\\\"/g, '\\\\\\\"').replace(/(\\r\\n|\\n|\\r)/g, '\\\\n') }}}}\",\n  \"image_urls\": [\n    \"{{ $json.data[0].url }}\",\n    \"{{ $json.data[1].url }}\"\n  ],\n  \"num_images\": 1,\n  \"output_format\": \"jpeg\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        16
+      ],
+      "id": "9ebdb9ca-b7a0-445e-b987-4063ea2f7218",
+      "name": "Create Image",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Fu075JqkIa9nlRqq",
+          "name": "image"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/nano-banana/requests/{{ $json.request_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        368,
+        16
+      ],
+      "id": "9c411048-9604-4303-8106-c0fc0ae8daf4",
+      "name": "Get Result",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Fu075JqkIa9nlRqq",
+          "name": "image"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c66c7c13-57ca-4191-9af3-5ab306dfedfc",
+              "name": "Response",
+              "value": "=The image was created and named \"{{ $json.name }}\". \n\nHere is the link to the image in Google Drive: {{ $json.webViewLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        16
+      ],
+      "id": "d9bb35b6-c6e4-4d67-a6a2-c773389e65d0",
+      "name": "Result"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[0].url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        16
+      ],
+      "id": "ef933074-9669-4df2-b59d-de0bdbab3841",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        16
+      ],
+      "id": "0284e534-2002-463c-87f2-54c227750c2f",
+      "name": "10 Seconds",
+      "webhookId": "caad73e3-58d8-4fbd-a3e9-c42424f2d1ee"
+    },
+    {
+      "parameters": {
+        "content": "## Input",
+        "height": 224,
+        "width": 320,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        -48
+      ],
+      "id": "3524dbab-4a88-42a4-b33b-68a9303e3379",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Download File URLs",
+        "height": 224,
+        "width": 544,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        -48
+      ],
+      "id": "34bcc656-c2f7-4393-b547-3bfc7fbccbfe",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Create AI Image",
+        "height": 224,
+        "width": 448,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        64,
+        -48
+      ],
+      "id": "da4855eb-ffc0-407e-a4c3-51eb52cac883",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Polling",
+        "height": 224,
+        "width": 192,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        192
+      ],
+      "id": "1cae8ce7-1c38-4365-a70e-fdf12c831a61",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Output",
+        "height": 224,
+        "width": 432,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -48
+      ],
+      "id": "9d97092f-4588-4cb8-9025-4c5bb1a37bd7",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('When Executed by Another Workflow').item.json.imageTitle }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1hGHGecrUVHqG1UiFl1vw9tSLIWl020ed",
+          "mode": "list",
+          "cachedResultName": "n8n images",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1hGHGecrUVHqG1UiFl1vw9tSLIWl020ed"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        688,
+        16
+      ],
+      "id": "612f4e5b-29c5-4272-a59e-11febc30781a",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        256
+      ],
+      "id": "8f5c36a5-c63b-4033-bddb-d08a009ac33a",
+      "name": "5 Seconds",
+      "webhookId": "5f6bbd1e-a155-48de-b737-a225c6fd7a84"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Get URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get URL": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Result": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "5 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "10 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Get Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Get Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "prompt": "Seamlessly blend image1 and image2 into a single photorealistic composite where the person from either image is seated on a beach chair drinking a beverage on a sandy beach with the ocean and sky in the background. Prioritize retaining original faces and identities. If image1 is the beach use image2 for the person; if image1 is the person use image2 for the beach—determine the best arrangement automatically. Match lighting, shadows, perspective and color grading for realism: warm golden-hour sunlight, soft rim light, correct cast shadow on the sand consistent with sun direction, natural skin tones, accurate reflections and contact shadows where the chair meets the sand. Smoothly remove original backgrounds as needed, preserve or realistically recreate a wooden beach chair if absent, and ensure the person holds a drink naturally. Match camera depth of field and grain, avoid harsh cutouts, blend edges seamlessly, and apply subtle vignette and unified color grading. Do not add extra people, logos, or text. Deliver a high-resolution realistic composite.",
+          "image1": "1QSxBb0mJdVdjP7dWqxbA6w7Qeg-xQQmI",
+          "image2": "16meSnKsBjgJx6qU5ldWgzMSzdcMsWkTw",
+          "imageTitle": "Blended_Beach_Drinking"
+        }
+      }
+    ]
+  },
+  "versionId": "f76bbde6-247c-4e69-92bf-33852a9e3e4a",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T12:58:53.791Z",
+      "updatedAt": "2025-10-16T12:58:53.791Z",
+      "role": "workflow:owner",
+      "workflowId": "gzva8mJf879d0KDG",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

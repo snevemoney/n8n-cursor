@@ -1,0 +1,329 @@
+import { telemetry } from './emitter';
+
+/**
+ * Synthetic event generator for SCORPION_DEMO=1 mode
+ * Generates realistic events to demo the observability features
+ */
+class DemoEventGenerator {
+  private interval: NodeJS.Timeout | null = null;
+  private running = false;
+  
+  private agents = [
+    { id: 'E-001', name: 'Architectus' },
+    { id: 'A-002', name: 'Analytica' },
+    { id: 'P-003', name: 'Pragmaton' },
+    { id: 'S-004', name: 'Satori' },
+    { id: 'N-005', name: 'Nexus' },
+  ];
+  
+  private queues = ['research', 'workflows', 'knowledge', 'analysis'];
+  private workflows = ['WF-001', 'WF-002', 'WF-003'];
+  
+  start(): void {
+    if (this.running) return;
+    
+    this.running = true;
+    console.log('[DemoEventGenerator] Starting synthetic events...');
+    
+    // Emit immediate startup event
+    try {
+      telemetry.systemLog('info', 'Demo event generator started', 'demo-generator');
+      console.log('[DemoEventGenerator] Emitted startup event');
+    } catch (error) {
+      console.error('[DemoEventGenerator] Failed to emit startup event:', error);
+    }
+    
+    // Generate initial burst
+    this.generateBurst();
+    
+    // Then generate events every 2-5 seconds
+    this.interval = setInterval(() => {
+      this.generateRandomEvent();
+    }, 2000 + Math.random() * 3000);
+  }
+  
+  stop(): void {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+    this.running = false;
+    console.log('[DemoEventGenerator] Stopped synthetic events');
+  }
+  
+  private generateBurst(): void {
+    // Initial burst of events to populate the UI
+    for (let i = 0; i < 10; i++) {
+      setTimeout(() => this.generateRandomEvent(), i * 200);
+    }
+  }
+  
+  private generateRandomEvent(): void {
+    const eventType = Math.random();
+    
+    if (eventType < 0.25) {
+      // Agent events
+      this.generateAgentEvent();
+    } else if (eventType < 0.5) {
+      // Job events
+      this.generateJobEvent();
+    } else if (eventType < 0.75) {
+      // Workflow events
+      this.generateWorkflowEvent();
+    } else {
+      // System events
+      this.generateSystemEvent();
+    }
+  }
+  
+  private generateAgentEvent(): void {
+    const agent = this.randomAgent();
+    const eventType = Math.random();
+    
+    if (eventType < 0.4) {
+      telemetry.agentStarted(agent.id, agent.name);
+    } else if (eventType < 0.7) {
+      telemetry.agentStopped(agent.id, agent.name);
+    } else if (eventType < 0.9) {
+      // Agent operation completed
+      const operationId = `op-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const operations = ['analyze', 'process', 'execute', 'evaluate', 'generate'];
+      const operationName = operations[Math.floor(Math.random() * operations.length)];
+      const duration = 200 + Math.random() * 1500;
+      telemetry.agentOperationCompleted(agent.id, operationId, operationName, duration);
+    } else {
+      // Agent operation failed
+      const operationId = `op-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const operations = ['analyze', 'process', 'execute', 'evaluate', 'generate'];
+      const operationName = operations[Math.floor(Math.random() * operations.length)];
+      telemetry.agentOperationFailed(agent.id, operationId, operationName, 'Simulated operation failure');
+    }
+  }
+  
+  private generateJobEvent(): void {
+    const queue = this.randomQueue();
+    const jobId = `JOB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const worker = `worker-${Math.floor(Math.random() * 3) + 1}`;
+    
+    // Simulate job lifecycle
+    telemetry.jobQueued(jobId, queue);
+    
+    setTimeout(() => {
+      telemetry.jobStarted(jobId, queue, worker);
+      
+      const duration = 500 + Math.random() * 2000;
+      setTimeout(() => {
+        if (Math.random() < 0.9) {
+          // 90% success rate
+          telemetry.jobCompleted(jobId, queue, worker, duration);
+        } else {
+          telemetry.jobFailed(jobId, queue, worker, 'Simulated job failure');
+        }
+      }, duration);
+    }, 100 + Math.random() * 500);
+  }
+  
+  private generateWorkflowEvent(): void {
+    const workflowId = this.randomWorkflow();
+    const executionId = `exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    telemetry.workflowRunStarted(workflowId, executionId);
+    
+    const duration = 1000 + Math.random() * 3000;
+    setTimeout(() => {
+      if (Math.random() < 0.85) {
+        // 85% success rate
+        telemetry.workflowRunCompleted(workflowId, executionId, duration);
+      } else {
+        telemetry.workflowRunFailed(workflowId, executionId, 'Workflow execution failed');
+      }
+    }, duration);
+  }
+  
+  private generateSystemEvent(): void {
+    const services = ['ollama', 'n8n', 'postgres', 'api'];
+    const service = services[Math.floor(Math.random() * services.length)];
+    
+    const eventType = Math.random();
+    
+    if (eventType < 0.1) {
+      // Occasional errors
+      telemetry.httpError('GET', `/api/${service}/check`, 500, 'Service unavailable');
+      telemetry.systemLog('error', `Service ${service} returned 500 error`, service);
+    } else if (eventType < 0.3) {
+      // System logs
+      const levels: Array<'info' | 'warn' | 'error' | 'critical'> = ['info', 'warn', 'error', 'critical'];
+      const level = levels[Math.floor(Math.random() * levels.length)];
+      const messages = [
+        `Processing request for ${service}`,
+        `Cache hit rate: ${Math.floor(Math.random() * 100)}%`,
+        `Memory usage: ${Math.floor(Math.random() * 80)}%`,
+        `Connection pool: ${Math.floor(Math.random() * 50)} active`,
+        `Request latency: ${Math.floor(Math.random() * 500)}ms`,
+      ];
+      telemetry.systemLog(level, messages[Math.floor(Math.random() * messages.length)], service);
+    } else {
+      // Mostly healthy
+      const status = Math.random() < 0.95 ? 'healthy' : 'degraded';
+      telemetry.systemHealth(service, status, Math.random() * 86400);
+      telemetry.systemLog('info', `Health check: ${service} is ${status}`, service);
+    }
+    
+    // Queue depth updates
+    const queue = this.randomQueue();
+    telemetry.queueDepth(queue, Math.floor(Math.random() * 50));
+  }
+  
+  private randomAgent() {
+    return this.agents[Math.floor(Math.random() * this.agents.length)];
+  }
+  
+  private randomQueue() {
+    return this.queues[Math.floor(Math.random() * this.queues.length)];
+  }
+  
+  private randomWorkflow() {
+    return this.workflows[Math.floor(Math.random() * this.workflows.length)];
+  }
+}
+
+// Singleton
+let demoGenerator: DemoEventGenerator | null = null;
+
+export function startDemoEvents(): void {
+  if (!demoGenerator) {
+    demoGenerator = new DemoEventGenerator();
+  }
+  demoGenerator.start();
+}
+
+export function stopDemoEvents(): void {
+  if (demoGenerator) {
+    demoGenerator.stop();
+  }
+}
+
+/**
+ * Generate a batch of demo events (for neural network training)
+ */
+export function generateDemoEvents(count: number): Array<any> {
+  const events: Array<any> = [];
+  const now = Date.now();
+
+  const agents = [
+    { id: 'E-001', name: 'Architectus' },
+    { id: 'A-002', name: 'Analytica' },
+    { id: 'P-003', name: 'Pragmaton' },
+  ];
+
+  const queues = ['research', 'workflows', 'knowledge'];
+
+  for (let i = 0; i < count; i++) {
+    const ts = now - (count - i) * 5000; // Spread events over time
+    const eventType = Math.random();
+
+    if (eventType < 0.3) {
+      // Agent events
+      const agent = agents[Math.floor(Math.random() * agents.length)];
+      const isSuccess = Math.random() < 0.8; // 80% success rate
+
+      if (isSuccess) {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'agent.operation.completed',
+          source: 'demo',
+          agentId: agent.id,
+          operationId: `op-${i}`,
+          operationName: 'process',
+          duration: 500 + Math.random() * 2000,
+        });
+      } else {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'agent.operation.failed',
+          source: 'demo',
+          severity: 'error',
+          agentId: agent.id,
+          operationId: `op-${i}`,
+          operationName: 'process',
+          error: 'Operation failed',
+        });
+      }
+    } else if (eventType < 0.6) {
+      // Job events
+      const queue = queues[Math.floor(Math.random() * queues.length)];
+      const isSuccess = Math.random() < 0.9; // 90% success rate
+
+      if (isSuccess) {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'job.completed',
+          source: 'demo',
+          jobId: `job-${i}`,
+          queue,
+          worker: 'worker-1',
+          duration: 1000 + Math.random() * 3000,
+        });
+      } else {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'job.failed',
+          source: 'demo',
+          severity: 'error',
+          jobId: `job-${i}`,
+          queue,
+          worker: 'worker-1',
+          error: 'Job failed',
+        });
+      }
+    } else if (eventType < 0.8) {
+      // Queue depth
+      const queue = queues[Math.floor(Math.random() * queues.length)];
+      events.push({
+        id: `evt-${i}`,
+        ts,
+        type: 'queue.depth',
+        source: 'demo',
+        queue,
+        depth: Math.floor(Math.random() * 100),
+      });
+    } else {
+      // HTTP errors (occasional)
+      if (Math.random() < 0.2) {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'http.error',
+          source: 'demo',
+          severity: 'error',
+          method: 'GET',
+          url: '/api/test',
+          status: 500,
+          error: 'Internal server error',
+        });
+      } else {
+        events.push({
+          id: `evt-${i}`,
+          ts,
+          type: 'system.log',
+          source: 'demo',
+          level: 'info',
+          message: 'System operating normally',
+        });
+      }
+    }
+  }
+
+  return events;
+}
+
+// Auto-start disabled - only real system data is shown
+// if (process.env.SCORPION_DEMO === '1') {
+//   console.log('[Demo] SCORPION_DEMO=1 detected, starting demo events...');
+//   startDemoEvents();
+// }
+

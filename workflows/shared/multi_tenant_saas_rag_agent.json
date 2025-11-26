@@ -1,0 +1,3138 @@
+{
+  "createdAt": "2025-10-22T00:36:26.064Z",
+  "updatedAt": "2025-10-25T00:36:26.000Z",
+  "id": "LqpCRhJijICOooA4",
+  "name": "Multi-Tenant-SaaS-RAG-Agent",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "11c1a0e7-2198-410d-a437-9be3eed2db40",
+      "name": "Chat Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1664,
+        368
+      ],
+      "webhookId": "multi-tenant-chat-webhook",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tenant-id",
+              "name": "tenantId",
+              "value": "={{ $json.body.tenantId }}{{ $json.tenantId }}",
+              "type": "string"
+            },
+            {
+              "id": "user-email",
+              "name": "userEmail",
+              "value": "={{ $json.body.userEmail }}{{ $json.payload.email }}",
+              "type": "string"
+            },
+            {
+              "id": "session-id",
+              "name": "sessionId",
+              "value": "={{ $json.body.sessionId }}{{ $json.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-input",
+              "name": "chatInput",
+              "value": "={{ $json.body.chatInput }}{{ $json.payload.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "password-hash",
+              "name": "passwordHash",
+              "value": "={{ $json.body.passwordHash }}{{ $json.payload.passwordHash }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5f8ff68d-3a2b-4d72-9ade-49e561525f6e",
+      "name": "Extract Request Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1136,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Create the get_tenant_config function in your Supabase database\nCREATE OR REPLACE FUNCTION get_tenant_config(p_tenant_id TEXT)\nRETURNS TABLE(\n    tenant_id TEXT,\n    business_name TEXT,\n    admin_email TEXT,\n    prompt TEXT,\n    plan_type TEXT,\n    model INTEGER,\n    welcome_message TEXT,\n    suggested_prompt1 TEXT,\n    suggested_prompt2 TEXT,\n    suggested_prompt3 TEXT,\n    is_active BOOLEAN\n) AS $$\nBEGIN\n    RETURN QUERY\n    SELECT \n        t.tenant_id, t.business_name, t.admin_email, t.prompt, \n        t.plan_type, t.model, t.welcome_message, t.suggested_prompt1,\n        t.suggested_prompt2, t.suggested_prompt3, t.is_active\n    FROM tenants t\n    WHERE t.tenant_id = p_tenant_id AND t.is_active = true;\nEND;\n$$ LANGUAGE plpgsql;;",
+        "options": {}
+      },
+      "id": "cfa6c1e0-6ee7-472d-9886-9212a8d2db18",
+      "name": "Validate Tenant",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1280,
+        352
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "tenant-exists",
+              "leftValue": "={{ $json.tenant_id }}{{ $('Extract Request Data').item.json.tenantId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c753c3f5-4da1-41c7-9392-ab62b4f3f28d",
+      "name": "Tenant Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT set_tenant_context('{{ $('Extract Request Data').item.json.tenantId }}', '{{ $('Extract Request Data').item.json.userEmail }}');",
+        "options": {}
+      },
+      "id": "d8538692-cfb4-4934-aa9d-093fb0ffd17f",
+      "name": "Set Tenant Context",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -928,
+        368
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a helpful document assistant for {{ $('Validate Tenant').item.json.business_name }}. {{ $('Validate Tenant').item.json.prompt }}\n\nWhen users ask questions:\n1. Be friendly and helpful\n2. Use the available tools to find information\n3. If you can't find something, suggest alternatives\n4. Always respond in the same language the user is using\n\nAvailable tools:\n- List Documents: See what documents are available for this tenant\n- Get File Contents: Read document content\n- Query Document Rows: Search spreadsheet data\n- search_memory_nodes: Search knowledge graph\n- Postgres PGVector Store: Find similar content\n\nIMPORTANT: All document queries are automatically filtered to show only documents for {{ $('Validate Tenant').item.json.business_name }}. You don't need to worry about tenant isolation - it's handled automatically.\n\nIf you encounter any issues:\n- Try a different approach\n- Suggest rephrasing the question\n- Offer to help with something else",
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "b15a9792-a289-4b31-93dd-30b7898aa8ea",
+      "name": "RAG AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        -192,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to fetch all available documents for this tenant, including the table schema if the file is a CSV or Excel file.",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "name"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tenant_document_metadata",
+          "mode": "name"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "e8a285d0-3997-4705-bb90-3e18e982659f",
+      "name": "List Documents",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        1056
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Given a file ID, fetches the text from the document for this tenant.",
+        "operation": "executeQuery",
+        "query": "SELECT string_agg(text, ' ') as document_text FROM tenant_documents_pg WHERE metadata->>'file_id' = $1 GROUP BY metadata->>'file_id'",
+        "options": {
+          "queryReplacement": "={{ $fromAI('Query_Parameters', ``, 'string') }}"
+        }
+      },
+      "id": "c2d044f0-d210-4a58-8bcc-095db842b9fb",
+      "name": "Get File Contents",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        336,
+        912
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Run SQL queries on document_rows table for this tenant. IMPORTANT: Use 'title' column in tenant_document_metadata, NOT 'file_name'. For JSONB data, use ->'column_name' syntax. Example: SELECT row_data->>'Unit Price' FROM tenant_document_rows WHERE dataset_id = (SELECT id FROM tenant_document_metadata WHERE title = 'filename.xlsx')",
+        "operation": "executeQuery",
+        "query": "{{ $fromAI('sql_query') }}",
+        "options": {}
+      },
+      "id": "f00fcc71-0bd4-452a-b576-7a0f613be378",
+      "name": "Query Document Rows",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        528,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://zep-graphiti-mcp:8000/sse",
+        "serverTransport": "sse",
+        "authentication": "bearerAuth",
+        "options": {}
+      },
+      "id": "a7ccb75c-3c68-4c64-9e19-11d573c15ec8",
+      "name": "search_memory_nodes",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        768
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "PYldH5UexeiCcaVQ",
+          "name": "zep grafiti"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use RAG to look up information in the tenant's knowledgebase.",
+        "tableName": "tenant_documents_pg",
+        "topK": 25,
+        "useReranker": true,
+        "options": {}
+      },
+      "id": "ea5a082b-cdc4-42d4-ac54-ba0c431cdd9b",
+      "name": "Postgres PGVector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "43f6a46d-4d38-4d91-ade3-afec6406395e",
+      "name": "Embeddings Model",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        128
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "topN": 4
+      },
+      "id": "4ef52988-a03e-4236-a138-d947e314f0d0",
+      "name": "Reranker",
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        416,
+        32
+      ],
+      "credentials": {
+        "cohereApi": {
+          "id": "GJtKKEhDRjArtKOI",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT track_usage('{{ $json.tenantId }}', '{{ $json.sessionId }}', 'chat_message', 1.0, '{\"tokens_used\": {{ $json.tokensUsed || 100 }}, \"response_time\": {{ $json.responseTime || 2.0 }}}'::jsonb)",
+        "options": {}
+      },
+      "id": "89de872a-c45b-423d-be28-a3a7d0793083",
+      "name": "Track Usage",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        848,
+        352
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"response\": \"{{ $('RAG AI Agent').item.json.output }}\",\n  \"tenantId\": \"{{ $json.tenantId }}\",\n  \"sessionId\": \"{{ $json.sessionId }}\",\n  \"businessName\": \"{{ $('Validate Tenant').item.json.business_name }}\",\n  \"timestamp\": \"{{ $now }}\"\n}",
+        "options": {}
+      },
+      "id": "f45db024-9dec-4bc2-8347-0b569f1b7e3f",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1088,
+        352
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2400,
+        496
+      ],
+      "id": "0ef14eb6-c0f2-4850-88a9-2c1c6b1846c5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        528
+      ],
+      "id": "3740d470-643b-4dd6-b223-0fd02fde81db",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        304
+      ],
+      "id": "87bab55f-a26b-4c72-9dea-ac3d18361c04",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude 4 Sonnet"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -144,
+        480
+      ],
+      "id": "a58f4da4-046f-44fe-b692-cac905f58de3",
+      "name": "Anthropic",
+      "credentials": {
+        "anthropicApi": {
+          "id": "4dKOtg31LDPtI9fK",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        656
+      ],
+      "id": "aec5dbc8-c70c-4451-84a9-4cab6d134d53",
+      "name": "Google",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tPMol64tgeU3EGug",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('pre-chat').item.json.body.message }}{{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "={{ $json.prompt }}",
+          "returnIntermediateSteps": true,
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        352
+      ],
+      "id": "a6c3708a-0b21-41eb-ba20-ba24f2fed619",
+      "name": "AI chatbot"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3,
+        "rules": {
+          "rule": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6762acdc-f189-4e72-8b81-8dce19b1945a",
+                    "leftValue": "={{ $json.model }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "modelIndex": 2,
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "04e81081-b96d-4121-adb1-291c6ad51557",
+                    "leftValue": "={{ $json.model }}",
+                    "rightValue": 2,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "modelIndex": 3,
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "be395c4f-bf36-4696-bfde-d2cbeae786dd",
+                    "leftValue": "={{ $json.model }}",
+                    "rightValue": 3,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.modelSelector",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        144
+      ],
+      "id": "94f18ace-6c45-48cc-b2f1-1202f9c28490",
+      "name": "Model Selector1"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.content || $json.data || $json.text || $json.concatenated_data }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "=file_id",
+                "value": "={{ $('Set File ID').first().json.file_id }}1kECyA3YRzlEx45dzj0PyAS0UyubzArbi"
+              },
+              {
+                "name": "file_title",
+                "value": "={{ $('Set File ID').first().json.file_title }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "8b858889-b652-419c-a113-5b4ef785be84",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "id": "d99170b6-5120-4869-8e9d-9a852d64f94e",
+      "name": "Embeddings OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        -256
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Tool to Add a Google Drive File to Vector DB",
+        "height": 867,
+        "width": 3441,
+        "color": 5
+      },
+      "id": "dded9d0e-72fd-46d6-8d01-2fa34f56154e",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3872,
+        -848
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Set File ID').item.json.file_id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "421f240f-9dba-4dbb-b965-35aa15f26a79",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2592,
+        -576
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1-d97m246pdoolSetiOJ7ifWc0-uTAblx",
+          "mode": "list",
+          "cachedResultName": "n8n rag",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-d97m246pdoolSetiOJ7ifWc0-uTAblx"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "77b80688-8787-471d-b03c-33983521380b",
+      "name": "File Created",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3856,
+        -736
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1-d97m246pdoolSetiOJ7ifWc0-uTAblx",
+          "mode": "list",
+          "cachedResultName": "n8n rag",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-d97m246pdoolSetiOJ7ifWc0-uTAblx"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "id": "c7ffa3ad-c513-45d6-8b30-80b223b339fb",
+      "name": "File Updated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3840,
+        -544
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "38fb493b-329e-4a61-b761-aa0c5908fd9f",
+      "name": "Extract Document Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -144
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10646eae-ae46-4327-a4dc-9987c2d76173",
+              "name": "file_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "f4536df5-d0b1-4392-bf17-b8137fb31a44",
+              "name": "file_type",
+              "value": "={{ $json.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "77d782de-169d-4a46-8a8e-a3831c04d90f",
+              "name": "file_title",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9bde4d7f-e4f3-4ebd-9338-dce1350f9eab",
+              "name": "file_url",
+              "value": "={{ $json.webViewLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f9b733e-63fc-477c-b136-da088dc897d2",
+      "name": "Set File ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3456,
+        -608
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "70661c4c-0f26-4a2a-be8a-c105800f0708",
+      "name": "Extract PDF Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "f74bc56c-a623-407e-9213-d6025ef3b232",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1472,
+        -768
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d9c6c40-7e0e-467e-8714-42779ca20bde",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        -1264,
+        -688
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "2ae7faa7-a936-4621-a680-60c512163034",
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "fc193b06-363b-4699-a97d-e5a850138b0e",
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "=application/vnd.google-apps.spreadsheet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "5fe78f9b-2ff3-4adc-954e-53bfce35c142"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "b69f5605-0179-4b02-9a32-e34bb085f82d",
+                    "leftValue": "={{ $('Set File ID').item.json.file_type }}",
+                    "rightValue": "application/vnd.google-apps.document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "63be34ba-3a76-498a-9b0e-02a8f6e7c212",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -2400,
+        -608
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "id": "07633ec9-4613-4c09-8777-e1853cc7fbd0",
+      "name": "Extract from Excel",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -768
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f422e2e0-381c-46ea-8f38-3f58c501d8b9",
+              "name": "schema",
+              "value": "={{ $('Extract from Excel').isExecuted ? $('Extract from Excel').first().json.keys().toJsonString() : $('Extract from CSV').first().json.keys().toJsonString() }}",
+              "type": "string"
+            },
+            {
+              "id": "bb07c71e-5b60-4795-864c-cc3845b6bc46",
+              "name": "data",
+              "value": "={{ $json.concatenated_data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -848,
+        -752
+      ],
+      "id": "a0a324e8-dc36-4c45-9be2-e72a4b6eb5f6",
+      "name": "Set Schema"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -592
+      ],
+      "id": "08b2ff52-0835-47c2-8c36-a30783a9800d",
+      "name": "Extract from CSV"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3648,
+        -736
+      ],
+      "id": "3058d894-ba78-480e-af5c-84c7ee1dc1aa",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "document_metadata",
+          "mode": "list",
+          "cachedResultName": "document_metadata"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Set File ID').item.json.file_id }}",
+            "title": "={{ $('Set File ID').item.json.file_title }}",
+            "url": "={{ $('Set File ID').item.json.file_url }}",
+            "created_at": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "schema",
+              "displayName": "schema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "tenant_id",
+              "displayName": "tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -2800,
+        -720
+      ],
+      "id": "55d8fb23-50d1-4091-98f2-36ed82b88144",
+      "name": "Insert Document Metadata",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document_metadata (id, title, url, created_at, schema, user_id)\nVALUES (\n    '{{ $json.file_id }}', \n    '{{ $json.file_title }}', \n    '{{ $json.file_url }}', \n    '{{ $now }}', \n    '{{ $json.schema }}', \n    '{{ $json.user_id }}'\n)\nON CONFLICT (id) \nDO UPDATE SET \n    title = EXCLUDED.title,\n    url = EXCLUDED.url,\n    created_at = EXCLUDED.created_at,\n    schema = EXCLUDED.schema,\n    user_id = EXCLUDED.user_id;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1360,
+        -592
+      ],
+      "id": "78b8a539-0240-4a12-9680-05efaf05fad8",
+      "name": "Insert Table Rows",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "document_metadata",
+          "mode": "list",
+          "cachedResultName": "document_metadata"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Set File ID').item.json.file_id }}",
+            "schema": "={{ $json.schema }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "schema",
+              "displayName": "schema",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "tenant_id",
+              "displayName": "tenant_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -624,
+        -752
+      ],
+      "id": "5953667d-cb34-4223-8cb5-db659d92300e",
+      "name": "Update Schema for Document Metadata",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": "documents_pg",
+        "embeddingBatchSize": 2000,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        -848,
+        -560
+      ],
+      "id": "7e14d058-2323-4751-bf97-2c0ab28824c9",
+      "name": "Postgres PGVector Store1",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DO $$\nBEGIN\n    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'documents_pg') THEN\n        EXECUTE 'DELETE FROM documents_pg WHERE metadata->>''file_id'' LIKE ''%' || $1 || '%''';\n    END IF;\nEND\n$$;",
+        "options": {
+          "queryReplacement": "={{ $json.file_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -3104,
+        -672
+      ],
+      "id": "fab1d037-e317-4d43-91b7-a5c9523ee0b5",
+      "name": "Delete Old Data Rows",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM document_rows\nWHERE dataset_id LIKE '%' || $1 || '%';",
+        "options": {
+          "queryReplacement": "={{ $('Set File ID').item.json.file_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2928,
+        -736
+      ],
+      "id": "b8424377-1fc7-48d2-940d-583255cb270a",
+      "name": "Delete Old Doc Rows",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/drive/v3/files",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=trashed=true"
+            },
+            {
+              "name": "fields",
+              "value": "=files(id,name,mimeType,webViewLink,trashed,trashedTime)"
+            },
+            {
+              "name": "pageSize",
+              "value": "1000"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a69151b6-d0c7-42b0-9fb5-3fda1b84bc26",
+      "name": "Get Trashed Files via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -3584,
+        160
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the response from Google Drive API\nconst response = $input.first().json;\nconst trashedFiles = response.files || [];\n\nif (trashedFiles.length === 0) {\n  return [{ message: 'No trashed files found', count: 0 }];\n}\n\n// Return each file as a separate item for processing\nreturn trashedFiles.map(file => ({\n  file_id: file.id,\n  file_name: file.name,\n  file_type: file.mimeType,\n  file_url: file.webViewLink,\n  trashed_time: file.trashedTime\n}));"
+      },
+      "id": "343d4441-2cee-4e72-aa91-6e3153c69572",
+      "name": "Parse Trashed Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3392,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "a7ccb99f-5119-41c1-ab46-9f3e7be17821",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4ddea885-dd4c-4cd4-bdc2-05fcc9cdd5c8",
+      "name": "Has Files to Delete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -3200,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM document_metadata\n  WHERE id = '{{ $json.file_id }}'",
+        "options": {}
+      },
+      "id": "a499afc7-baa6-4584-bdc4-118d864adb57",
+      "name": "Check If Exists in DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -2976,
+        144
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "992a20a8-5b6a-4ea4-b021-7458435e131a",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "b8198170-8548-477b-b1d8-5cf9038ce686",
+      "name": "Exists in DB?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2800,
+        144
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "content": "## Vector Store Cleanup (Periodically)\nScan the Google Drive Folder regularely and deletes non existent documents from the vector store as well.",
+        "height": 305,
+        "width": 1976,
+        "color": 6
+      },
+      "id": "39598f9c-e649-4583-b5dd-a455021d4079",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3888,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM document_metadata WHERE id = '{{ $('Parse Trashed Files').first().json.file_id }}'",
+        "options": {}
+      },
+      "id": "942b8993-7681-4732-bdd5-8909d9a0e6a1",
+      "name": "Delete Metadata",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -2176,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "ed9c9ba8-3946-4e29-a285-1742721c98ef",
+      "name": "Check Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3792,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DO $$\nBEGIN\n    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'documents_pg') THEN\n        EXECUTE 'DELETE FROM documents_pg WHERE metadata->>''file_id'' LIKE ''%' || $1 || '%''';\n    END IF;\nEND\n$$;",
+        "options": {
+          "queryReplacement": "={{ $('Parse Trashed Files').item.json.file_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2560,
+        144
+      ],
+      "id": "29915c4c-8b3d-4328-90d6-e021f84f8832",
+      "name": "Delete Old Data Rows1",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM document_rows\nWHERE dataset_id LIKE '%' || $1 || '%';",
+        "options": {
+          "queryReplacement": "={{ $('Parse Trashed Files').first().json.file_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2368,
+        160
+      ],
+      "id": "d9de9a0a-bcec-41d6-a531-89b77bca5de2",
+      "name": "Delete Old Doc Rows1",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -128
+      ],
+      "id": "2f54a601-bdb8-49cf-a7d6-4f8a0a8fa31e",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "code": {
+          "execute": {
+            "code": "const { PromptTemplate } = require('@langchain/core/prompts');\n\nconst documentContent = $input.item.json?.data || $input.item.json?.text;\nconst maxChunkSize = 2000;\nconst minChunkSize = 400;\n\nif (!documentContent) {\n    throw new Error('No document found in input');\n}\n\nlet llm; // Declare llm outside try block\ntry {\n    llm = await this.getInputConnectionData('ai_languageModel', 0);\n} catch (error) {\n    throw new Error(`Failed to get language model: ${error.message}`);\n}\n\nfunction cleanText(text) {\n    return text.replace(/\\s+/g, ' ').trim();\n}\n\nconst chunks = [];\nlet remainingText = cleanText(documentContent);\nlet chunkNumber = 1;\n\nif (remainingText.length <= maxChunkSize) {\n    chunks.push({\n        content: remainingText,\n        chunk: chunkNumber,\n        chunk_size: remainingText.length\n    });\n} else {\n    while (remainingText) {\n        const textToAnalyze = remainingText.substring(0, maxChunkSize);\n        \n        const promptText = `You are analyzing a document to find the best transition point to split it into meaningful sections.\n\nYour goal: Keep related content together and split where topics naturally transition.\n\nRead this text carefully and identify where one topic/section ends and another begins:\n\n{textToAnalyze}\n\nFind the best transition point that occurs BEFORE character position {maxChunkSize}.\n\nLook for:\n- Section headings or topic changes\n- Paragraph boundaries where the subject shifts\n- Complete conclusions before new ideas start\n- Natural breaks between different aspects of the content\n\nOutput the LAST WORD that appears right before your chosen split point.\nJust the single word itself, nothing else.\nExample: If you want to split after \"The company was founded in 2022.\" then output: \"2022\"`;\n        \n        const prompt = PromptTemplate.fromTemplate(promptText);\n        const chain = prompt.pipe(llm);\n        \n        let breakPoint = maxChunkSize;\n        \n        try {\n            const response = await chain.invoke({\n                textToAnalyze: textToAnalyze,\n                maxChunkSize: maxChunkSize\n            });\n            const responseText = response.content || response.text || response.toString();\n            const breakWord = responseText.trim();\n            \n            if (breakWord) {\n                // Find the last occurrence of this word in the text to analyze\n                const wordIndex = textToAnalyze.lastIndexOf(breakWord);\n                if (wordIndex !== -1) {\n                    // Split after the word (including any punctuation that follows)\n                    breakPoint = wordIndex + breakWord.length;\n                    // Move past any punctuation or single space after the word\n                    while (breakPoint < textToAnalyze.length && \n                           (textToAnalyze[breakPoint] === '.' || \n                            textToAnalyze[breakPoint] === '!' || \n                            textToAnalyze[breakPoint] === '?' || \n                            textToAnalyze[breakPoint] === ',' || \n                            textToAnalyze[breakPoint] === ';' || \n                            textToAnalyze[breakPoint] === ':' || \n                            textToAnalyze[breakPoint] === ' ')) {\n                        breakPoint++;\n                        // Stop after moving past one space\n                        if (textToAnalyze[breakPoint - 1] === ' ') break;\n                    }\n                    breakPoint = Math.min(breakPoint, maxChunkSize);\n                }\n            }\n        } catch (error) {\n            console.log('LLM failed to determine breakpoint, using max size:', error.message);\n            breakPoint = maxChunkSize;\n        }\n        \n        const chunk = remainingText.substring(0, breakPoint).trim();\n        \n        if (chunk) {\n            chunks.push({\n                content: chunk,\n                chunk: chunkNumber,\n                chunk_size: chunk.length\n            });\n            chunkNumber++;\n        }\n        \n        remainingText = remainingText.substring(breakPoint).trim();\n        \n        if (!remainingText) {\n            break;\n        }\n    }\n}\n\n// Merge chunks that are below minimum size with adjacent chunks if possible\nlet i = 0;\nwhile (i < chunks.length) {\n    if (chunks[i].chunk_size < minChunkSize) {\n        // Try to merge with next chunk first if it exists and won't exceed max\n        if (i + 1 < chunks.length && \n            chunks[i].chunk_size + chunks[i + 1].chunk_size <= maxChunkSize) {\n            // Merge current with next\n            chunks[i].content += ' ' + chunks[i + 1].content;\n            chunks[i].chunk_size = chunks[i].content.length;\n            chunks.splice(i + 1, 1);\n            // Don't increment i, check this chunk again in case it's still small\n        } \n        // Otherwise try to merge with previous chunk if it exists and won't exceed max\n        else if (i > 0 && \n                 chunks[i - 1].chunk_size + chunks[i].chunk_size <= maxChunkSize) {\n            // Merge current into previous\n            chunks[i - 1].content += ' ' + chunks[i].content;\n            chunks[i - 1].chunk_size = chunks[i - 1].content.length;\n            chunks.splice(i, 1);\n            // Don't increment i, we removed current chunk\n        } else {\n            // Can't merge without exceeding max, move on\n            i++;\n        }\n    } else {\n        i++;\n    }\n}\n\nconst returnData = chunks.map(chunk => ({\n    json: chunk\n}));\n\nreturn returnData;"
+          }
+        },
+        "inputs": {
+          "input": [
+            {
+              "type": "ai_languageModel",
+              "maxConnections": 1,
+              "required": true
+            },
+            {
+              "type": "main",
+              "required": true
+            }
+          ]
+        },
+        "outputs": {
+          "output": [
+            {
+              "type": "main"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.code",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        -432
+      ],
+      "id": "eccae648-7842-433c-92cd-4f27537117a8",
+      "name": "LangChain Code"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1488,
+        -192
+      ],
+      "id": "c5805087-6bbb-410d-9317-37a8a4ddfdae",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "connectionType": "sse",
+        "operation": "executeTool",
+        "toolName": "add_memory",
+        "toolParameters": "{\n  \"name\": \"{{ $('Download File').item.json.title }}\",\n  \"episode_body\": \"{{ $input.item.json?.data || $input.item.json?.text }}\"\n}"
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        -208
+      ],
+      "id": "eb0eb798-2b8c-4ccd-9770-b5c27ba23415",
+      "name": "MCP Client - Add to Knowledge Graph",
+      "retryOnFail": false,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "mcpClientSseApi": {
+          "id": "QYKe6HAcxfBfdkNK",
+          "name": "MCP Client (STDIO) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error.node.name }} \n\n{{ $json.message }}\n\n{{ $json.error.description }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -544
+      ],
+      "id": "00c6c8b8-0ef5-40ae-98c9-924b46c87329",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -3616,
+        -352
+      ],
+      "id": "d2ed31d0-98f1-4b82-8a0a-ef61266cdee4",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1-d97m246pdoolSetiOJ7ifWc0-uTAblx",
+          "mode": "list",
+          "cachedResultName": "n8n rag",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-d97m246pdoolSetiOJ7ifWc0-uTAblx"
+        },
+        "event": "folderUpdated"
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3840,
+        -352
+      ],
+      "id": "4f1394ee-1e0c-4831-affb-f60589b3c93c",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "height": 1216,
+        "width": 3040
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1472,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "80755c62-1c5a-4fcb-bcf5-b68e0b0ba7a8",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "text": "=Name:{{ $json.firstName }} {{ $json.lastName }}\nBusiness:{{ $json.businessName }}\nEmail:{{ $json.email }}\nWebpage:{{ $json.websiteUrl }}\n{{ $json.businessType }}\n{{ $json.industry }}\n{{ $json.numberOfEmployees }} Employees\nNeeds:{{ $json.goals }}\nComes from:{{ $json.action }}\nDate:{{ $json.timestamp }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "=name",
+              "description": "First name and last name of the person (separately )",
+              "required": true
+            },
+            {
+              "name": "=email",
+              "description": "email of the person",
+              "required": true
+            },
+            {
+              "name": "=business",
+              "description": "business name",
+              "required": true
+            },
+            {
+              "name": "comes from",
+              "description": "action",
+              "required": true
+            },
+            {
+              "name": "Webpage",
+              "description": "website url",
+              "required": true
+            },
+            {
+              "name": "business info",
+              "description": "business type, industry, number of employees",
+              "required": true
+            },
+            {
+              "name": "needs",
+              "description": "goals",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -1296,
+        1440
+      ],
+      "id": "2fc1ae76-a649-4bd3-a4ea-e45e1423ff5f",
+      "name": "Extract User Information"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "tenant-id",
+              "name": "tenantId",
+              "value": "={{ $json.tenantId || $json.firstName.toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + Date.now() }}",
+              "type": "string"
+            },
+            {
+              "id": "lead-capture",
+              "name": "leadCapture",
+              "value": "=TRUE",
+              "type": "boolean"
+            },
+            {
+              "id": "password-hash",
+              "name": "passwordHash",
+              "value": "={{ $json.passwordHash || 'temp_password_' + Date.now() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1136,
+        1584
+      ],
+      "id": "e8602271-23c0-46b5-9b15-39afcced8d29",
+      "name": "Prepare Tenant Data"
+    },
+    {
+      "parameters": {
+        "sendTo": "snevemoney12@gmail.com",
+        "subject": "New Multi-Tenant SaaS Signup",
+        "message": "=Hi Boss, you have a new tenant signup!\n\nCustomer Name: {{ $json.output.name }}\nEmail: {{ $json.output.email }}\nBusiness: {{ $json.output.business }}\nWebsite: {{ $json.output.Webpage }}\nBusiness Info: {{ $json.output['business info'] }}\nNeeds: {{ $json.output.needs }}\nSource: {{ $json.output['comes from'] }}\nTenant ID: {{ $('Prepare Tenant Data').item.json.tenantId }}\n\nNew tenant account registered in PostgreSQL database.",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Multi-Tenant SaaS"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1296,
+        1584
+      ],
+      "id": "f1ad9bf7-19f9-472c-90c5-3c340180ced4",
+      "name": "Send Admin Notification",
+      "webhookId": "0f5c269d-dee0-4eda-9c27-8a199e1b9a8e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YquaU61NUzoqwdTs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT add_tenant(\n    '{{ $('Prepare Tenant Data').item.json.tenantId }}',\n    '{{ $json.output.business }}',\n    '{{ $json.output.email }}',\n    'You are a helpful assistant for {{ $json.output.business }}. Help customers with their questions and provide excellent service.',\n    'starter',\n    1,\n    'Welcome to {{ $json.output.business }}! How can I help you today?',\n    'What services do you offer?',\n    'How can I contact support?',\n    'What are your business hours?',\n    '{{ $('Prepare Tenant Data').item.json.passwordHash }}'\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1296,
+        1808
+      ],
+      "id": "203d2519-c880-4162-9755-c79ea491ad20",
+      "name": "Create Tenant in PostgreSQL",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO domains (tenant_id, domain_name, is_primary, status)\nVALUES (\n    '{{ $('Prepare Tenant Data').item.json.tenantId }}',\n    '{{ $json.output.Webpage }}',\n    true,\n    'pending'\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1120,
+        1808
+      ],
+      "id": "afe0a400-59c6-4357-8ba1-ed991b1daf10",
+      "name": "Create Domain Record",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO tenant_contacts (\n    tenant_id,\n    contact_type,\n    first_name,\n    last_name,\n    email,\n    business_type,\n    industry,\n    website_url,\n    goals,\n    status\n)\nVALUES (\n    '{{ $('Prepare Tenant Data').item.json.tenantId }}',\n    'lead',\n    '{{ $json.firstName }}',\n    '{{ $json.lastName }}',\n    '{{ $json.email }}',\n    '{{ $json.businessType }}',\n    '{{ $json.industry }}',\n    '{{ $json.websiteUrl }}',\n    '{{ $json.goals }}',\n    'new'\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1296,
+        2032
+      ],
+      "id": "8f40ac0b-b761-4dfd-a0b5-c6b631af0cbe",
+      "name": "Create Contact Record",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO users (\n    tenant_id,\n    user_id,\n    user_name,\n    email,\n    role,\n    is_active\n)\nVALUES (\n    '{{ $('Prepare Tenant Data').item.json.tenantId }}',\n    '{{ $json.email }}',\n    '{{ $json.firstName }} {{ $json.lastName }}',\n    '{{ $json.email }}',\n    'admin',\n    true\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1104,
+        2032
+      ],
+      "id": "2dcffded-b82f-459b-a673-352b137448ad",
+      "name": "Create User Account",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO client_overview (\n    tenant_id,\n    total_sessions,\n    total_messages,\n    total_documents,\n    monthly_usage,\n    plan_limits\n)\nVALUES (\n    '{{ $('Prepare Tenant Data').item.json.tenantId }}',\n    0,\n    0,\n    0,\n    0,\n    '{\"daily_limit\": 100, \"monthly_limit\": 3000, \"storage_limit\": \"1GB\"}'::jsonb\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1296,
+        2256
+      ],
+      "id": "5bdb4e2d-acc7-42cb-8a3b-9a2c44a9d082",
+      "name": "Create Client Overview",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT track_usage(\n    '{{ $('Prepare Tenant Data').item.json.tenantId }}',\n    'signup_session',\n    'tenant_signup',\n    1.0,\n    '{\"source\": \"{{ $json.action }}\", \"business_type\": \"{{ $json.businessType }}\", \"industry\": \"{{ $json.industry }}\"}'::jsonb\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1104,
+        2256
+      ],
+      "id": "54215bed-ee97-47e1-aa77-a923078e54f2",
+      "name": "Track Signup Analytics",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Tenant account created successfully\",\n  \"tenantId\": \"{{ $('Prepare Tenant Data').item.json.tenantId }}\",\n  \"businessName\": \"{{ $json.output.business }}\",\n  \"adminEmail\": \"{{ $json.output.email }}\",\n  \"nextSteps\": \"You can now start using your AI chatbot. Upload documents to get started.\",\n  \"timestamp\": \"{{ $now }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -896,
+        2160
+      ],
+      "id": "a7ced835-4ede-41d6-b4cc-a9f031d7f118",
+      "name": "Respond Success"
+    },
+    {
+      "parameters": {
+        "height": 1200,
+        "width": 640,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1472,
+        1264
+      ],
+      "typeVersion": 1,
+      "id": "254562cb-44ac-4d5c-b688-18d20e32e547",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "height": 1872,
+        "width": 416,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1888,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "de4cfc78-8f29-4835-b516-ada606a05160",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pre-chat",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1664,
+        592
+      ],
+      "id": "176aaadf-46f1-433f-8996-d1d758add57d",
+      "name": "pre-chat",
+      "webhookId": "7ae327a6-0f6b-41b2-af1f-aa854cb19bb0"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "knowledge-upload",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1680,
+        1040
+      ],
+      "id": "cfd5dc13-76bf-4437-a94a-e80488d9e0cf",
+      "name": "Knowledge-upload",
+      "webhookId": "7ae327a6-0f6b-41b2-af1f-aa854cb19bb0"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "availability-settings",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1664,
+        1264
+      ],
+      "id": "0a2b816f-b67e-4080-a6e8-8b1e574f2b79",
+      "name": "availability-settings",
+      "webhookId": "7ae327a6-0f6b-41b2-af1f-aa854cb19bb0"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analytics",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1664,
+        1488
+      ],
+      "id": "4b2a8030-b84b-4bf8-b020-3c97f4f77094",
+      "name": "analytics",
+      "webhookId": "7ae327a6-0f6b-41b2-af1f-aa854cb19bb0"
+    },
+    {
+      "parameters": {
+        "path": "tenant-config",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1664,
+        816
+      ],
+      "id": "4ef78588-0fb0-4b88-8d96-4974bbf23f76",
+      "name": "tenant-config",
+      "webhookId": "7ae327a6-0f6b-41b2-af1f-aa854cb19bb0"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "admin-dashboard",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1664,
+        1728
+      ],
+      "id": "3c2b194c-241c-420f-a568-d8dd1b83fbb6",
+      "name": "admin-dashboard",
+      "webhookId": "7ae327a6-0f6b-41b2-af1f-aa854cb19bb0"
+    },
+    {
+      "parameters": {
+        "height": 1536,
+        "width": 640,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2528,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "c04a69e4-cc76-4975-b5b1-b24ee2cdb29d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"ACME_INC\",\n  \"userEmail\": \"test@acme.com\",\n  \"sessionId\": \"test-session-123\",\n  \"chatInput\": \"Hello, how can you help me?\",\n  \"passwordHash\": \"test_hash_2024\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        368
+      ],
+      "id": "ca073555-f80a-45a3-85fd-2d659ea416f2",
+      "name": "Test Chat Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"ACME_INC\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"consent\": true,\n  \"sessionId\": \"session_abc123\",\n  \"sourcePage\": \"https://acme.com/products\",\n  \"timestamp\": \"2025-01-21T12:00:00Z\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        592
+      ],
+      "id": "bbe9111a-6a16-48f0-9b9c-afe472639c3b",
+      "name": "Pre-Chat Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"ACME_INC\",\n  \"businessName\": \"ACME Corporation\",\n  \"adminEmail\": \"admin@acme.com\",\n  \"primaryColor\": \"#3B82F6\",\n  \"secondaryColor\": \"#1E40AF\",\n  \"logoUrl\": \"https://drive.google.com/file/d/acme_logo_id/view\",\n  \"avatarUrl\": \"https://drive.google.com/file/d/acme_avatar_id/view\",\n  \"welcomeMessage\": \"Welcome to ACME Corporation! How can I help you today?\",\n  \"suggestedPrompts\": [\n    \"What products do you offer?\",\n    \"How can I contact support?\",\n    \"What are your business hours?\"\n  ],\n  \"webhookMain\": \"https://n8ncloud.tech/webhook/e08f3b85-be73-4786-936a-a56f079e2e60\",\n  \"availability\": {\n    \"workingDays\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n    \"workingHours\": {\"start\": \"09:00\", \"end\": \"17:00\"},\n    \"slotDuration\": 30,\n    \"breakTimes\": {\"lunch_start\": \"12:00\", \"lunch_end\": \"13:00\"},\n    \"timezone\": \"America/New_York\",\n    \"minAdvanceMinutes\": 120,\n    \"maxAdvanceDays\": 30\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2096,
+        816
+      ],
+      "id": "d8fe120f-20dc-41f5-815c-4a09fb7ebac8",
+      "name": "Tenant Config Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"ACME_INC\",\n  \"topicId\": 1,\n  \"topicName\": \"Product Information\",\n  \"fileName\": \"acme-product-catalog.pdf\",\n  \"fileData\": \"JVBERi0xLjQKJcfsj6IKNSAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDMgMCBSCi9SZXNvdXJjZXMgPDwKL0ZvbnQgPDwKL0YxIDIgMCBSCj4+Cj4+Ci9NZWRpYUJveCBbMCAwIDU5NSA4NDJdCi9Db250ZW50cyA2IDAgUgo+PgplbmRvYmoKNiAwIG9iago8PAovTGVuZ3RoIDc5Cj4+CnN0cmVhbQpCVApxCjU5NSA4NDIgVEQKL0YxIDEyIFRmCihIZWxsbyBXb3JsZCkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoyIDAgb2JqCjw8Ci9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovQmFzZUZvbnQgL0hlbHZldGljYQo+PgplbmRvYmoKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMyAwIFIKPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFs1IDAgUl0KL0NvdW50IDEKL01lZGlhQm94IFswIDAgNTk1IDg0Ml0KPj4KZW5kb2JqCnhyZWYKMCA3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMDE1IDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDEyMyAwMDAwMCBuIAowMDAwMDAwMjQ4IDAwMDAwIG4gCjAwMDAwMDAzMjcgMDAwMDAgbiAKdHJhaWxlcgo8PAovU2l6ZSA3Ci9Sb290IDEgMCBSCj4+CnN0YXJ0eHJlZgo0MjEKJSVFT0YK\",\n  \"fileSize\": 1024000,\n  \"mimeType\": \"application/pdf\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        1040
+      ],
+      "id": "5b5577b1-7d62-48b7-9e20-12df7fc56a6e",
+      "name": "Knowledge Upload Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"ACME_INC\",\n  \"userEmail\": \"test@acme.com\",\n  \"sessionId\": \"test-session-123\",\n  \"chatInput\": \"Hello, how can you help me?\",\n  \"passwordHash\": \"test_hash_2024\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        1264
+      ],
+      "id": "89d650cd-8c46-4b86-a2a9-45fdf921b26f",
+      "name": "Availability Settings Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"ACME_INC\",\n  \"websiteDomain\": \"acme.com\",\n  \"pageUrl\": \"/products\",\n  \"referrer\": \"https://google.com/search?q=acme+products\",\n  \"userAgent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\",\n  \"sessionId\": \"session_analytics_123\",\n  \"eventType\": \"page_view\",\n  \"eventData\": {\n    \"product_id\": \"123\",\n    \"category\": \"electronics\",\n    \"page_load_time\": 1.2,\n    \"scroll_depth\": 75\n  },\n  \"timestamp\": \"2025-01-21T12:00:00Z\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        1488
+      ],
+      "id": "2b745764-9acb-40c3-adb5-308c80645412",
+      "name": "Analytics Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"ACME_INC\",\n  \"action\": \"update_branding\",\n  \"actor\": \"admin\",\n  \"timestamp\": \"2025-01-21T12:00:00Z\",\n  \"data\": {\n    \"primaryColor\": \"#3B82F6\",\n    \"secondaryColor\": \"#1E40AF\",\n    \"logoUrl\": \"https://drive.google.com/file/d/new_logo_id/view\",\n    \"avatarUrl\": \"https://drive.google.com/file/d/new_avatar_id/view\",\n    \"welcomeMessage\": \"Welcome to ACME Corporation! How can I help you today?\",\n    \"suggestedPrompts\": [\n      \"What products do you offer?\",\n      \"How can I contact support?\",\n      \"What are your business hours?\",\n      \"Can I schedule a demo?\"\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        1728
+      ],
+      "id": "d0f22963-9306-4478-bd00-9cc38ae54f29",
+      "name": "Admin Dashboard Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM user_sessions \nWHERE session_id = '{{ $json.sessionId }}' \nAND expires_at > NOW();",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -592,
+        368
+      ],
+      "id": "0e13f9ad-a0ea-454d-b906-c3ac85e03c64",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document_metadata (id, title, url, created_at, schema)\nVALUES ('{{ $json.file_id }}', '{{ $json.file_title }}', '{{ $json.file_url }}', NOW(), 'spreadsheet');",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -3232,
+        -944
+      ],
+      "id": "8817c432-8a62-4552-9315-5a4f57ff1b7e",
+      "name": "Create Document Metadata Table",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document_rows (dataset_id, row_data)\nVALUES ('{{ $json.file_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -2944,
+        -944
+      ],
+      "id": "fb3a14af-c303-447a-b598-ad7a5c9a8eb1",
+      "name": "Create Document Rows Table (for Tabular Data)",
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Chat Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Extract Request Data": {
+      "main": [
+        []
+      ]
+    },
+    "Validate Tenant": {
+      "main": [
+        [
+          {
+            "node": "Set Tenant Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tenant Exists?": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "RAG AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "List Documents": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Contents": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Document Rows": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_memory_nodes": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Model": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Track Usage": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Test Chat Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Tenant Context": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Model Selector1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Extract User Information",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Model Selector1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Model Selector1",
+            "type": "ai_languageModel",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Model Selector1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI chatbot": {
+      "main": [
+        [
+          {
+            "node": "Track Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Created": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Updated": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Document Text": {
+      "main": [
+        [
+          {
+            "node": "MCP Client - Add to Knowledge Graph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set File ID": {
+      "main": [
+        [
+          {
+            "node": "Create Document Rows Table (for Tabular Data)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Text": {
+      "main": [
+        [
+          {
+            "node": "MCP Client - Add to Knowledge Graph",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LangChain Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Set Schema",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MCP Client - Add to Knowledge Graph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Extract from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from CSV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Document Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from Excel": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert Table Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Schema": {
+      "main": [
+        [
+          {
+            "node": "Update Schema for Document Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from CSV": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert Table Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set File ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Document Metadata": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Table Rows": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Data Rows": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Doc Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Doc Rows": {
+      "main": [
+        [
+          {
+            "node": "Insert Document Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Trashed Files via API": {
+      "main": [
+        [
+          {
+            "node": "Parse Trashed Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Trashed Files": {
+      "main": [
+        [
+          {
+            "node": "Has Files to Delete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Files to Delete?": {
+      "main": [
+        [
+          {
+            "node": "Check If Exists in DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Exists in DB": {
+      "main": [
+        [
+          {
+            "node": "Exists in DB?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exists in DB?": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Data Rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Trashed Files via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Data Rows1": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Doc Rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Doc Rows1": {
+      "main": [
+        [
+          {
+            "node": "Delete Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LangChain Code": {
+      "main": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LangChain Code",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract User Information": {
+      "main": [
+        [
+          {
+            "node": "Send Admin Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Tenant Data": {
+      "main": [
+        [
+          {
+            "node": "Create Tenant in PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Admin Notification": {
+      "main": [
+        [
+          {
+            "node": "Prepare Tenant Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Tenant in PostgreSQL": {
+      "main": [
+        [
+          {
+            "node": "Create Domain Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Domain Record": {
+      "main": [
+        [
+          {
+            "node": "Create Contact Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact Record": {
+      "main": [
+        [
+          {
+            "node": "Create User Account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create User Account": {
+      "main": [
+        [
+          {
+            "node": "Create Client Overview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Client Overview": {
+      "main": [
+        [
+          {
+            "node": "Track Signup Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Track Signup Analytics": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Chat Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "AI chatbot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Document Metadata Table": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f4d4aeb4-6ee2-498b-ad61-a11485b7df78",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-22T00:36:26.069Z",
+      "updatedAt": "2025-10-22T00:36:26.069Z",
+      "role": "workflow:owner",
+      "workflowId": "LqpCRhJijICOooA4",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

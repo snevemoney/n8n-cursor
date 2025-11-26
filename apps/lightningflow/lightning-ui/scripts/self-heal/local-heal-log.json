@@ -1,0 +1,19 @@
+{
+  "attempts": [
+    {
+      "testId": "test-1748574172423",
+      "patch": "console.log(\"test patch\")",
+      "timestamp": "2025-05-30T03:02:52.423Z",
+      "botName": "testBot",
+      "testRoute": "/test",
+      "patchType": "test_fix",
+      "confidence": 85,
+      "success": true
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0
+  }
+}

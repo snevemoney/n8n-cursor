@@ -1,0 +1,497 @@
+{
+  "createdAt": "2025-10-27T00:24:02.753Z",
+  "updatedAt": "2025-10-29T02:53:51.000Z",
+  "id": "Adu0BUG3gd9OXWWR",
+  "name": "Chat AI Agent - Asset Management",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat-assets",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f6a094c8-b38a-4642-9c1c-fb94b729e560",
+      "name": "Chat Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -32
+      ],
+      "webhookId": "cb7ed543-4fb9-409e-a011-3b9a280231d5"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenantId\": \"test-tenant-webhook-validation\",\n  \"userEmail\": \"test@example.com\",\n  \"chatInput\": \"Test chat message\"\n}\n",
+        "options": {}
+      },
+      "id": "31affa79-556e-4226-9e63-3d004de4b0c9",
+      "name": "Extract Request Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_tenant_config('{{ $json.tenantId }}');",
+        "options": {}
+      },
+      "id": "f1361239-dc3e-493f-a0e2-a8108d3ff575",
+      "name": "Validate Tenant",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        352,
+        -32
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT set_tenant_context('{{ $('Extract Request Data').item.json.tenantId }}', '{{ $('Extract Request Data').item.json.userEmail }}')",
+        "options": {}
+      },
+      "id": "4690985e-777c-46c1-97d7-3fa33043f3bf",
+      "name": "Set Tenant Context",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        768,
+        -32
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.set_tenant_context }}",
+        "options": {
+          "systemMessage": "You are an expert asset management assistant for {{ $('Validate Tenant').item.json.business_name }}.\n\nYour capabilities include:\n- Asset Management: Track equipment, buildings, and digital assets\n- Maintenance Scheduling: Create and track work orders\n- Sustainability: Monitor energy, water, waste metrics\n- Compliance: Track permits, licenses, and regulatory requirements\n- Financial Reporting: Budget tracking and expense analysis\n- IoT Monitoring: Smart building sensors and devices\n\nWhen users ask questions:\n1. Use available tools to find current data\n2. Provide specific numbers, dates, and actionable insights\n3. Alert about upcoming maintenance, expiring permits, or budget variances\n4. Suggest solutions, not just report problems\n5. Reference source data or documentation\n\nAvailable tools:\n- Query Asset Registry: Get asset inventory and details\n- Check Maintenance Schedule: Find upcoming and overdue maintenance\n- Get Sustainability Metrics: Access energy, water, waste data\n- Check Compliance Status: View permits, licenses, certifications\n- Get Work Orders: Track maintenance requests and status\n\nAlways provide data-driven responses with actionable recommendations.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "4115204d-e359-4441-9dbd-5a55cdca97fc",
+      "name": "Asset Management AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        960,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Query the asset registry to get information about equipment, buildings, and other assets. Returns asset details including name, type, location, condition status, and maintenance schedule.",
+        "operation": "executeQuery",
+        "query": "SELECT * FROM tenant_assets WHERE tenant_id = '{{ $('Extract Request Data').item.json.tenantId }}' ORDER BY asset_name",
+        "options": {}
+      },
+      "id": "48d80ce2-5073-4518-8d17-013f6fa1ea81",
+      "name": "Query Asset Registry",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        1168,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get the maintenance schedule for assets, including upcoming and overdue maintenance. Shows work orders, due dates, and asset condition status.",
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_asset_maintenance_schedule('{{ $('Extract Request Data').item.json.tenantId }}', 90)",
+        "options": {}
+      },
+      "id": "62ba5785-0391-4c36-b2ed-c83e30698cae",
+      "name": "Check Maintenance Schedule",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        1296,
+        336
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get sustainability metrics including energy consumption, water usage, waste data, and carbon emissions. Provides current values vs. baselines and targets.",
+        "operation": "executeQuery",
+        "query": "SELECT * FROM sustainability_metrics WHERE tenant_id = '{{ $('Extract Request Data').item.json.tenantId }}' AND measurement_date >= NOW() - INTERVAL '30 days' ORDER BY metric_type, measurement_date DESC",
+        "options": {}
+      },
+      "id": "338eb59a-ac59-4eea-b91c-b5f53ca30edd",
+      "name": "Get Sustainability Metrics",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        800,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Check compliance status including permits, licenses, certifications, and their expiration dates. Alerts about upcoming expirations.",
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_expiring_compliance('{{ $('Extract Request Data').item.json.tenantId }}', 90)",
+        "options": {}
+      },
+      "id": "88b94517-7c9e-406f-8307-0f61e7426cc3",
+      "name": "Check Compliance Status",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        1008,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get work orders including pending, in-progress, and completed maintenance requests. Shows priority, status, and assigned personnel.",
+        "operation": "executeQuery",
+        "query": "SELECT * FROM work_orders WHERE tenant_id = '{{ $('Extract Request Data').item.json.tenantId }}' ORDER BY created_at DESC LIMIT 20",
+        "options": {}
+      },
+      "id": "ab0b2cda-a149-4a70-9882-0a8b2f98e8d3",
+      "name": "Get Work Orders",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        928,
+        352
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "qKFQKlLBm0LkPAxq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"response\": $json.output,\n  \"tenant\": $('Validate Tenant').item.json.business_name\n} }}",
+        "options": {}
+      },
+      "id": "72cefcdb-bd1e-4263-949b-3cf799c03e9b",
+      "name": "Respond to Chat",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        192
+      ],
+      "id": "2877f55e-6092-4c9d-b9ba-bbd33d8a95f9",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Chat Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Request Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Request Data": {
+      "main": [
+        [
+          {
+            "node": "Validate Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Tenant": {
+      "main": [
+        [
+          {
+            "node": "Set Tenant Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Tenant Context": {
+      "main": [
+        [
+          {
+            "node": "Asset Management AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asset Management AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Sustainability Metrics": {
+      "ai_tool": [
+        [
+          {
+            "node": "Asset Management AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Compliance Status": {
+      "ai_tool": [
+        [
+          {
+            "node": "Asset Management AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Work Orders": {
+      "ai_tool": [
+        [
+          {
+            "node": "Asset Management AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Asset Registry": {
+      "ai_tool": [
+        [
+          {
+            "node": "Asset Management AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Maintenance Schedule": {
+      "ai_tool": [
+        [
+          {
+            "node": "Asset Management AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Asset Management AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Chat Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8ncloud.tech",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+            "content-length": "391",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "fr,en;q=0.9,ja;q=0.8",
+            "content-type": "application/json",
+            "dnt": "1",
+            "origin": "https://7e480c0f-c6ed-4750-a6ec-94e775985e83.lovableproject.com",
+            "priority": "u=1, i",
+            "referer": "https://7e480c0f-c6ed-4750-a6ec-94e775985e83.lovableproject.com/",
+            "sec-ch-ua": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "via": "2.0 Caddy",
+            "x-forwarded-for": "173.206.229.196",
+            "x-forwarded-host": "n8ncloud.tech",
+            "x-forwarded-proto": "https",
+            "x-request-id": "d2fd3add-20ff-4168-91a1-98aa9203552a",
+            "x-session-id": "003b9e25-12b1-497b-aa5a-ef5a25deaed8",
+            "x-tenant-id": "test-tenant-webhook-validation"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "action": "chat",
+            "test": true,
+            "timestamp": "2025-10-28T22:22:09.043Z",
+            "chatInput": "Test chat message",
+            "userEmail": "test@example.com",
+            "tenantId": "test-tenant-webhook-validation",
+            "actor": "system",
+            "request_id": "d2fd3add-20ff-4168-91a1-98aa9203552a",
+            "session_id": "003b9e25-12b1-497b-aa5a-ef5a25deaed8",
+            "origin": "https://7e480c0f-c6ed-4750-a6ec-94e775985e83.lovableproject.com",
+            "env": "development"
+          },
+          "webhookUrl": "https://n8ncloud.tech/webhook/chat-assets",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "13f2440d-701d-473e-a8bd-d00cdc9ae000",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T00:24:02.761Z",
+      "updatedAt": "2025-10-27T00:24:02.761Z",
+      "role": "workflow:owner",
+      "workflowId": "Adu0BUG3gd9OXWWR",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

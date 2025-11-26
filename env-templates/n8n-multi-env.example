@@ -1,0 +1,135 @@
+# n8n Multi-Environment Configuration Template
+# Copy this to .env and fill in your actual values
+
+# =============================================================================
+# ENABLE FLAGS - Control which MCP servers start in each environment
+# =============================================================================
+
+# Local Development
+N8N_LOCAL_ENABLED=1
+
+# Integration/Development
+N8N_INT_ENABLED=0
+
+# Testing
+N8N_TEST_ENABLED=0
+
+# Staging
+N8N_STG_ENABLED=0
+
+# Production
+N8N_PRD_ENABLED=0
+
+# Other MCPs
+BRAVE_ENABLED=1
+N8N_ASSISTANT_ENABLED=1
+
+# =============================================================================
+# LOCAL ENVIRONMENT (http://localhost:5678)
+# =============================================================================
+
+N8N_LOCAL_BASE_URL=http://localhost:5678
+N8N_LOCAL_API_KEY=your_local_api_key_here
+
+# =============================================================================
+# INTEGRATION ENVIRONMENT
+# =============================================================================
+
+N8N_INT_BASE_URL=https://n8n-integration.yourdomain.com
+N8N_INT_API_KEY=your_integration_api_key_here
+
+# =============================================================================
+# TESTING ENVIRONMENT
+# =============================================================================
+
+N8N_TEST_BASE_URL=https://n8n-testing.yourdomain.com
+N8N_TEST_API_KEY=your_testing_api_key_here
+
+# =============================================================================
+# STAGING ENVIRONMENT
+# =============================================================================
+
+N8N_STG_BASE_URL=https://n8n-staging.yourdomain.com
+N8N_STG_API_KEY=your_staging_api_key_here
+
+# =============================================================================
+# PRODUCTION ENVIRONMENT
+# =============================================================================
+
+N8N_PRD_BASE_URL=https://n8ncloud.tech
+N8N_PRD_API_KEY=your_production_api_key_here
+
+# =============================================================================
+# OTHER MCP SERVICES
+# =============================================================================
+
+BRAVE_API_KEY=your_brave_search_api_key_here
+SMITHERY_ASSISTANT_KEY=your_smithery_assistant_key_here
+
+# =============================================================================
+# PROMOTION CONFIGURATION (Optional)
+# =============================================================================
+
+# Webhook path prefixes for different environments
+PROMOTE_PRODUCTION_WEBHOOK_PREFIX=prod-
+PROMOTE_STAGING_WEBHOOK_PREFIX=stg-
+PROMOTE_TESTING_WEBHOOK_PREFIX=test-
+PROMOTE_INTEGRATION_WEBHOOK_PREFIX=int-
+PROMOTE_LOCAL_WEBHOOK_PREFIX=local-
+
+# Base URL replacements for HTTP Request nodes
+PROMOTE_PRODUCTION_REPLACE_BASE=http://localhost:3000
+PROMOTE_PRODUCTION_WITH_BASE=https://api.yourdomain.com
+
+PROMOTE_STAGING_REPLACE_BASE=http://localhost:3000
+PROMOTE_STAGING_WITH_BASE=https://api-staging.yourdomain.com
+
+# =============================================================================
+# SYNC CONFIGURATION (Optional)
+# =============================================================================
+
+# Webhook path prefixes for sync operations
+SYNC_LOCAL_WEBHOOK_PREFIX=local-
+SYNC_INTEGRATION_WEBHOOK_PREFIX=int-
+SYNC_TESTING_WEBHOOK_PREFIX=test-
+SYNC_STAGING_WEBHOOK_PREFIX=stg-
+SYNC_PRODUCTION_WEBHOOK_PREFIX=prod-
+
+# Base URL replacements for sync operations
+SYNC_LOCAL_REPLACE_BASE=https://api.yourdomain.com
+SYNC_LOCAL_WITH_BASE=http://localhost:3000
+
+# =============================================================================
+# USAGE EXAMPLES
+# =============================================================================
+
+# Enable only local n8n for development:
+# N8N_LOCAL_ENABLED=1
+# N8N_PRD_ENABLED=0
+
+# Enable both local and production for testing:
+# N8N_LOCAL_ENABLED=1
+# N8N_PRD_ENABLED=1
+
+# Enable all environments for full testing:
+# N8N_LOCAL_ENABLED=1
+# N8N_INT_ENABLED=1
+# N8N_TEST_ENABLED=1
+# N8N_STG_ENABLED=1
+# N8N_PRD_ENABLED=1
+
+# =============================================================================
+# COMMAND EXAMPLES
+# =============================================================================
+
+# Promote a workflow from local to production:
+# npm run promote -- --from local --to production --name "My Workflow"
+
+# Promote and activate:
+# npm run promote:activate -- --from local --to production --name "My Workflow"
+
+# Sync all workflows from production to local:
+# npm run sync:down -- --from production --to local
+
+# Sync with overwrite:
+# npm run sync:down -- --from production --to local --overwrite

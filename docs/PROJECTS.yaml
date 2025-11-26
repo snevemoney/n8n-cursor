@@ -1,0 +1,137 @@
+# PROJECTS.yaml - Project Boundaries and Allowed Paths
+# This file defines the contract for what Cursor can and cannot touch
+
+projects:
+  lfai:
+    name: "LightningFlow AI"
+    description: "Main LightningFlow AI application and services"
+    allowed_paths:
+      - "apps/lightningflow/**"
+      - "packages/lf-sdk/**"
+      - "packages/shared-*/**"
+      - "infra/docker/docker-compose.*.yml"
+      - "infra/caddy/**"
+      - "infra/systemd/**"
+      - "sql/lightningflow.sql"
+      - "docs/lightningflow/**"
+    excluded_paths:
+      - "apps/n8n-cursor/**"  # Keep separate from side hustle workflows
+      - "workflows/**"         # n8n workflows are separate
+      - "mcp/side-hustle/**"   # Side hustle MCP server
+    ports:
+      - 5678  # API
+      - 5679  # n8n
+      - 9001  # dozzle
+      - 8443  # code-server
+    health_endpoints:
+      - "http://localhost:5678/healthz"
+      - "http://localhost:5679/healthz"
+      - "http://localhost:9001/healthz"
+      - "http://localhost:8443/healthz"
+
+  n8n-cursor:
+    name: "n8n Cursor Side Hustle"
+    description: "n8n workflows and automation for side hustle projects"
+    allowed_paths:
+      - "apps/n8n-cursor/**"
+      - "workflows/**"
+      - "mcp/side-hustle/**"
+      - "tools/mcp-servers/**"
+      - "scripts/n8n-*.sh"
+      - "docs/workflows/**"
+    excluded_paths:
+      - "apps/lightningflow/**"  # Keep separate from main app
+      - "packages/lf-sdk/**"     # Main app SDK
+      - "infra/**"               # Infrastructure is shared
+    ports:
+      - 5670  # n8n side hustle
+    health_endpoints:
+      - "http://localhost:5670/healthz"
+
+  shared:
+    name: "Shared Infrastructure"
+    description: "Shared infrastructure, monitoring, and tooling"
+    allowed_paths:
+      - "infra/**"
+      - "monitoring/**"
+      - "scripts/validate/**"
+      - "tooling/**"
+      - "docs/setup/**"
+      - "env-templates/**"
+    excluded_paths:
+      - "apps/**"      # App-specific code
+      - "packages/**"  # App-specific packages
+      - "workflows/**" # n8n workflows
+    ports:
+      - 80    # Caddy HTTP
+      - 443   # Caddy HTTPS
+      - 3000  # Grafana
+      - 9090  # Prometheus
+      - 3100  # Loki
+    health_endpoints:
+      - "http://localhost:3000/healthz"
+      - "http://localhost:9090/healthz"
+      - "http://localhost:3100/healthz"
+
+# Global Rules
+global_rules:
+  port_binding:
+    rule: "All container ports MUST bind to 127.0.0.1:PORT:PORT"
+    exception: "Only Caddy can bind to 0.0.0.0 for public ingress"
+  
+  health_checks:
+    rule: "All services MUST have /healthz endpoints"
+    timeout: "10s"
+    interval: "30s"
+    retries: 3
+  
+  resource_limits:
+    rule: "All services MUST have CPU and memory limits"
+    default_cpu: "1.0"
+    default_memory: "512M"
+  
+  security:
+    rule: "No real secrets in code - only .env.*.example files"
+    validation: "All inputs must be validated and sanitized"
+  
+  rollback:
+    rule: "Every change MUST include complete rollback instructions"
+    components: ["docker", "git", "database", "caddy", "environment"]
+
+# Environment Matrix
+environments:
+  int:
+    compose_file: "infra/docker/docker-compose.int.yml"
+    domain: "dev.lightningflow.online"
+    data_root: "/opt/lfai/int"
+    log_level: "debug"
+  
+  staging:
+    compose_file: "infra/docker/docker-compose.staging.yml"
+    domain: "staging.lightningflow.online"
+    data_root: "/opt/lfai/staging"
+    log_level: "info"
+  
+  prod:
+    compose_file: "infra/docker/docker-compose.prod.yml"
+    domain: "lightningflow.online"
+    data_root: "/opt/lfai/prod"
+    log_level: "warn"
+
+# Validation Rules
+validation:
+  scope_check:
+    rule: "All file changes must be within declared AFFECTED_PATHS"
+    tool: "scripts/validate/scope-check.sh"
+  
+  port_check:
+    rule: "No public port bindings allowed"
+    tool: "scripts/validate/ports-check.sh"
+  
+  health_check:
+    rule: "All services must have health endpoints"
+    tool: "scripts/validate/health-check.sh"
+  
+  security_check:
+    rule: "No secrets, proper validation, secure defaults"
+    tool: "scripts/validate/security-check.sh"

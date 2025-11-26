@@ -1,0 +1,319 @@
+name: Global Consistency Contract Enforcement
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  contracts-build:
+    name: Generate Types from Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate types from OpenAPI
+        run: pnpm --filter contracts run generate:openapi
+
+      - name: Generate types from events
+        run: pnpm --filter contracts run generate:events
+
+      - name: Generate types from flags
+        run: pnpm --filter contracts run generate:flags
+
+      - name: Generate types from errors
+        run: pnpm --filter contracts run generate:errors
+
+      - name: Generate types from telemetry
+        run: pnpm --filter contracts run generate:telemetry
+
+      - name: Build contracts package
+        run: pnpm --filter contracts run build
+
+      - name: Typecheck monorepo
+        run: pnpm run typecheck
+
+  flags-validate:
+    name: Validate Feature Flags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate flags schema
+        run: pnpm --filter contracts run validate:flags
+
+      - name: Check for unknown flags
+        run: |
+          # Extract known flags from schema
+          KNOWN_FLAGS=$(jq -r '.properties | keys[]' contracts/flags.schema.json | tr '\n' '|' | sed 's/|$//')
+          
+          # Check for unknown flags in code
+          if rg -n "FF_[A-Z_]+" apps packages --type ts --type js | grep -v "(${KNOWN_FLAGS})"; then
+            echo "❌ Found unknown feature flags in code"
+            echo "Known flags: ${KNOWN_FLAGS}"
+            exit 1
+          fi
+          
+          echo "✅ All feature flags are known and documented"
+
+  error-catalog:
+    name: Validate Error Catalog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate error catalog
+        run: pnpm --filter contracts run validate:errors
+
+      - name: Check for unknown error codes
+        run: |
+          # Extract known error codes from catalog
+          KNOWN_CODES=$(grep -o "LFAI-[0-9]\{4\}" contracts/errors.yaml | sort -u | tr '\n' '|' | sed 's/|$//')
+          
+          # Check for unknown error codes in code
+          if rg -n "LFAI-[0-9]\{4\}" apps packages --type ts --type js | grep -v "(${KNOWN_CODES})"; then
+            echo "❌ Found unknown error codes in code"
+            echo "Known codes: ${KNOWN_CODES}"
+            exit 1
+          fi
+          
+          echo "✅ All error codes are documented in catalog"
+
+  openapi-lint:
+    name: Validate OpenAPI Specification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate OpenAPI spec
+        run: pnpm --filter contracts run validate:openapi
+
+      - name: Check OpenAPI consistency
+        run: |
+          # Check that all API routes are documented
+          API_ROUTES=$(find apps -name "route.ts" -o -name "*.ts" | xargs grep -l "export.*POST\|export.*GET\|export.*PUT\|export.*DELETE" | wc -l)
+          OPENAPI_PATHS=$(grep -c "paths:" contracts/openapi.yaml)
+          
+          if [ "$API_ROUTES" -gt 0 ] && [ "$OPENAPI_PATHS" -eq 0 ]; then
+            echo "❌ API routes found but no OpenAPI paths documented"
+            exit 1
+          fi
+          
+          echo "✅ OpenAPI specification is consistent with code"
+
+  events-validate:
+    name: Validate Event Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate event schemas
+        run: pnpm --filter contracts run validate:events
+
+      - name: Check event consistency
+        run: |
+          # Check that all webhook handlers use documented events
+          WEBHOOK_HANDLERS=$(find apps -name "*.ts" | xargs grep -l "webhook\|event" | wc -l)
+          EVENT_TYPES=$(grep -c "eventType:" contracts/events.yaml)
+          
+          if [ "$WEBHOOK_HANDLERS" -gt 0 ] && [ "$EVENT_TYPES" -eq 0 ]; then
+            echo "❌ Webhook handlers found but no event types documented"
+            exit 1
+          fi
+          
+          echo "✅ Event schemas are consistent with code"
+
+  telemetry-validate:
+    name: Validate Telemetry Specification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate telemetry spec
+        run: pnpm --filter contracts run validate:telemetry
+
+      - name: Check telemetry consistency
+        run: |
+          # Check that all telemetry names are documented
+          TELEMETRY_USAGE=$(find apps packages -name "*.ts" | xargs grep -l "span\|metric\|trace" | wc -l)
+          TELEMETRY_DEFINITIONS=$(grep -c "spans:\|metrics:" contracts/telemetry.yaml)
+          
+          if [ "$TELEMETRY_USAGE" -gt 0 ] && [ "$TELEMETRY_DEFINITIONS" -eq 0 ]; then
+            echo "❌ Telemetry usage found but no telemetry definitions documented"
+            exit 1
+          fi
+          
+          echo "✅ Telemetry specification is consistent with code"
+
+  consistency-check:
+    name: Global Consistency Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run consistency checks
+        run: pnpm --filter contracts run validate
+
+      - name: Check for hardcoded values
+        run: |
+          # Check for hardcoded error codes
+          if rg -n "LFAI-[0-9]\{4\}" apps packages --type ts --type js | grep -v "errorCatalog\|errorCatalog"; then
+            echo "❌ Found hardcoded error codes. Use error helpers instead."
+            exit 1
+          fi
+          
+          # Check for hardcoded flag names
+          if rg -n "FF_[A-Z_]+" apps packages --type ts --type js | grep -v "getBooleanFlag\|getNumberFlag\|getStringFlag"; then
+            echo "❌ Found hardcoded flag names. Use flag loader instead."
+            exit 1
+          fi
+          
+          # Check for hardcoded telemetry names
+          if rg -n "api\.request\|agent\.execute\|webhook\.process" apps packages --type ts --type js | grep -v "telemetry\|Spans\|Metrics"; then
+            echo "❌ Found hardcoded telemetry names. Use telemetry helpers instead."
+            exit 1
+          fi
+          
+          echo "✅ No hardcoded values found"
+
+  no-new-files:
+    name: No New Files Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for unexpected new files
+        run: |
+          # Allowed new files (edit this list for your repo)
+          ALLOW_RE='^(migrations/|supabase/migrations/|apps/.+__tests__/.+|docs/ADR/|scripts/.+\.sh|packages/.+/__generated__/|contracts/|packages/contracts/)'
+          
+          git fetch origin ${{ github.base_ref }}
+          ADDED=$(git diff --name-status origin/${{ github.base_ref }}...HEAD | awk '$1=="A"{print $2}')
+          VIOLATIONS=0
+          
+          while read -r f; do
+            [ -z "$f" ] && continue
+            if [[ ! "$f" =~ $ALLOW_RE ]]; then
+              echo "❌ New file not allowed: $f"
+              echo "Allowed patterns: $ALLOW_RE"
+              VIOLATIONS=1
+            fi
+          done <<< "$ADDED"
+          
+          if [ $VIOLATIONS -eq 1 ]; then
+            echo "❌ New files detected outside allowed patterns"
+            echo "Please edit existing files instead of creating new ones"
+            echo "If a new file is necessary, add it to the ALLOW_RE pattern in .github/workflows/consistency.yml"
+            exit 1
+          fi
+          
+          echo "✅ No unexpected new files found"
+
+  all-checks:
+    name: All Consistency Checks Passed
+    runs-on: ubuntu-latest
+    needs: [contracts-build, flags-validate, error-catalog, openapi-lint, events-validate, telemetry-validate, consistency-check, no-new-files]
+    steps:
+      - name: All consistency checks passed
+        run: echo "✅ All Global Consistency Contract checks passed"
+
+
+
+
+
+

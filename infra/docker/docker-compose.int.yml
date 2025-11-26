@@ -1,0 +1,103 @@
+name: lfai_int
+x:dflt: &dflt
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 15s
+  networks: [private]
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "5" } }
+  security_opt: ["no-new-privileges:true"]
+  ulimits: { nofile: 65535 }
+
+services:
+  landing:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-landing:int
+    env_file: [../../.env.int]
+    ports: ["127.0.0.1:3000:3000"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3000/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1"; mem_limit: "512m"; pids_limit: 200
+
+  web:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-web:int
+    env_file: [../../.env.int]
+    ports: ["127.0.0.1:3001:3001"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3001/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1.5"; mem_limit: "1024m"; pids_limit: 300
+
+  ops:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-ops:int
+    env_file: [../../.env.int]
+    ports: ["127.0.0.1:3002:3002"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3002/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1"; mem_limit: "768m"; pids_limit: 250
+
+  api:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-api:int
+    env_file: [../../.env.int]
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on: { redis: { condition: service_healthy } }
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:4000/health"], interval: 10s, timeout: 2s, retries: 10 }
+    cpus: "1.5"; mem_limit: "1024m"; pids_limit: 300
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+
+  worker:
+    <<: *dflt
+    image: ghcr.io/yourorg/lfai-worker:int
+    env_file: [../../.env.int]
+    depends_on: 
+      redis: { condition: service_healthy }
+      api: { condition: service_healthy }
+    healthcheck: { test: ["CMD","node","-e","process.exit(0)"], interval: 15s, timeout: 3s, retries: 20 }
+    cpus: "1.5"; mem_limit: "1024m"; pids_limit: 300
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+
+  redis:
+    <<: *dflt
+    image: redis:7.2-alpine
+    command: ["redis-server","--save","","--appendonly","no","--maxmemory","256mb","--maxmemory-policy","allkeys-lru"]
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck: { test: ["CMD","redis-cli","ping"], interval: 5s, timeout: 2s, retries: 20 }
+    cpus: "0.5"; mem_limit: "384m"; pids_limit: 150
+
+  n8n:
+    <<: *dflt
+    image: n8nio/n8n:1.55.1
+    env_file: [../../.env.int]
+    ports: ["127.0.0.1:5678:5678"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1"; mem_limit: "768m"; pids_limit: 200
+
+  dozzle:
+    <<: *dflt
+    image: amir20/dozzle:latest
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+    ports: ["127.0.0.1:9999:8080"]
+    cpus: "0.25"; mem_limit: "128m"; pids_limit: 100
+
+  scorpion:
+    <<: *dflt
+    image: ghcr.io/yourorg/scorpion:int
+    env_file: [../../.env.int]
+    ports: ["127.0.0.1:3003:3003"]
+    healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 15s, timeout: 3s, retries: 10 }
+    cpus: "1.5"; mem_limit: "1.5g"; pids_limit: 300
+    volumes:
+      - ${PROD_DATA_ROOT:-./data}/scorpion-int:/app/data/scorpion
+      - ${PROD_DATA_ROOT:-./data}/scorpion-backups-int:/app/backups/scorpion
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - SCORPION_STORAGE_AUTO_DETECT=false
+      - SCORPION_SSD_PATH=/app/data/scorpion
+      - N8N_API_URL=http://n8n:5678
+    depends_on:
+      redis: { condition: service_healthy }
+      n8n: { condition: service_healthy }
+
+networks:
+  private: { driver: bridge, internal: true }

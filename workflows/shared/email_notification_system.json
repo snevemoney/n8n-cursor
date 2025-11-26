@@ -1,0 +1,493 @@
+{
+  "createdAt": "2025-10-27T02:50:58.072Z",
+  "updatedAt": "2025-10-27T18:08:07.000Z",
+  "id": "e1jbcBalJzkqtbIl",
+  "name": "Email Notification System",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/notifications/email",
+        "options": {}
+      },
+      "id": "74cdcd4c-534a-490d-a96f-75afe78d205e",
+      "name": "Email Notification Entry",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        592
+      ],
+      "webhookId": "44b351fd-53b1-4e2e-aaba-73bc78988ec8"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "cca90956-76f2-4fed-b914-e940c826fbb0",
+      "name": "Split Notifications",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Route to different email types based on body.type\nconst emailType = $input.item.json.body?.type || 'generic';\n\n// Map email types to templates\nconst templateMap = {\n  'welcome': 'welcome_email',\n  'verification': 'verification_email',\n  'password-reset': 'password_reset_email',\n  'work-order': 'work_order_notification',\n  'compliance-alert': 'compliance_alert_email',\n  'monthly-report': 'monthly_report_email'\n};\n\nreturn {\n  json: {\n    emailType,\n    template: templateMap[emailType] || 'generic_email',\n    recipient: $input.item.json.body?.recipient,\n    data: $input.item.json.body?.data || {}\n  }\n};"
+      },
+      "id": "cb0fbe9f-1a4c-4686-b1ce-7e35400f5d0d",
+      "name": "Route Email Type",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -704,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "welcome-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "welcome",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "verification-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "verification",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "password-reset-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "password-reset",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "work-order-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "work-order",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "compliance-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "compliance-alert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "monthly-report-condition",
+              "leftValue": "={{ $json.emailType }}",
+              "rightValue": "monthly-report",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "465b34cb-102e-48ff-a559-c216fcfccc27",
+      "name": "Route by Email Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@saas-chatbot.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Welcome to Your SaaS Platform!",
+        "options": {}
+      },
+      "id": "84df364c-4042-4b3f-b8dc-f002564ca4ca",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        112
+      ],
+      "webhookId": "7ebd7ca4-2e57-4233-a936-af52846e304f",
+      "credentials": {
+        "smtp": {
+          "id": "jrkHhxtwSNpvYw1D",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@saas-chatbot.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Verify Your Email",
+        "options": {}
+      },
+      "id": "ab2403ba-b869-4d40-928c-8f755b4c4e6b",
+      "name": "Send Verification Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        304
+      ],
+      "webhookId": "b44c2d6d-c49d-48bd-bf76-5ad039de6cff",
+      "credentials": {
+        "smtp": {
+          "id": "jrkHhxtwSNpvYw1D",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@saas-chatbot.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Password Reset Request",
+        "options": {}
+      },
+      "id": "d377f646-22e9-41b7-abbc-04a28fe523de",
+      "name": "Send Password Reset",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        496
+      ],
+      "webhookId": "5c0eba05-c32f-41ed-b24f-b2a402786b16",
+      "credentials": {
+        "smtp": {
+          "id": "jrkHhxtwSNpvYw1D",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@saas-chatbot.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Work Order Update",
+        "options": {}
+      },
+      "id": "41b89f3d-9b96-4f80-befa-dbf75c256754",
+      "name": "Send Work Order Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        688
+      ],
+      "webhookId": "934b3fc7-62d7-47d7-afde-5c58288a4da3",
+      "credentials": {
+        "smtp": {
+          "id": "jrkHhxtwSNpvYw1D",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@saas-chatbot.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Compliance Alert",
+        "options": {}
+      },
+      "id": "58062418-7d97-423e-a624-b1ad8153af0a",
+      "name": "Send Compliance Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        880
+      ],
+      "webhookId": "6d2fcbcc-b65a-4d4f-8930-f9572ebffec4",
+      "credentials": {
+        "smtp": {
+          "id": "jrkHhxtwSNpvYw1D",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@saas-chatbot.com",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "Monthly Report",
+        "options": {}
+      },
+      "id": "2c18c528-80ff-473b-95cd-b9dd1da7d664",
+      "name": "Send Monthly Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        1072
+      ],
+      "webhookId": "6bcce901-b02e-4acb-9401-cee56f47562a",
+      "credentials": {
+        "smtp": {
+          "id": "jrkHhxtwSNpvYw1D",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Email sent successfully\" } }}",
+        "options": {}
+      },
+      "id": "d32a42ac-7f5d-463d-b4e3-1e3137a7da23",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        592
+      ]
+    }
+  ],
+  "connections": {
+    "Email Notification Entry": {
+      "main": [
+        [
+          {
+            "node": "Split Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Notifications": {
+      "main": [
+        [
+          {
+            "node": "Route Email Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Email Type": {
+      "main": [
+        [
+          {
+            "node": "Route by Email Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Email Type": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Verification Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Password Reset",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Work Order Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Compliance Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Monthly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Verification Email": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Password Reset": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Work Order Notification": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Compliance Alert": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Monthly Report": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "71fe1608-e10d-46e5-82bf-e08cd31e3e36",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-27T02:50:58.075Z",
+      "updatedAt": "2025-10-27T02:50:58.075Z",
+      "role": "workflow:owner",
+      "workflowId": "e1jbcBalJzkqtbIl",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-27T02:50:54.146Z",
+      "updatedAt": "2025-10-27T02:50:54.146Z",
+      "id": "WQGz8W7lEmOwdeXe",
+      "name": "Email"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "createdAt": "2025-08-21T19:27:43.721Z",
+  "updatedAt": "2025-08-21T19:27:43.721Z",
+  "id": "mJtgqWT3btjdoieW",
+  "name": "AI Research Agent Demo",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/research-agent",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Research Question Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "demo-research-agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simple demo response\nconst question = $input.first().json.body.question || 'No question provided';\n\nreturn [{\n  json: {\n    question: question,\n    answer: `Based on your question: \"${question}\", here's a comprehensive research summary. This is a demo showing how n8n-MCP can automatically build complex workflows with AI integration, multiple data sources, and intelligent processing.`,\n    timestamp: new Date().toISOString(),\n    source: 'n8n-MCP Demo Agent'\n  }\n}];"
+      },
+      "id": "demo-response",
+      "name": "Demo Research Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Research Question Input": {
+      "main": [
+        [
+          {
+            "node": "Demo Research Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "1fe890e8-c990-47bb-8ba3-59cd5a533ac5",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T19:27:43.726Z",
+      "updatedAt": "2025-08-21T19:27:43.726Z",
+      "role": "workflow:owner",
+      "workflowId": "mJtgqWT3btjdoieW",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -1,0 +1,77 @@
+{
+  "apps": {
+    "lightningflow": {
+      "role": "product",
+      "isSideHustle": true,
+      "description": "Side hustle: Lightning Network SaaS platform with 3-UI architecture",
+      "importsAllowedFrom": ["packages/*"],
+      "importsDeniedFrom": ["apps/n8n-cursor/*"],
+      "framework": "nextjs+n8n",
+      "entry": "apps/lightningflow/src/app",
+      "envFile": "apps/lightningflow/.env.example",
+      "doc": "apps/lightningflow/README.md",
+      "subApps": {
+        "landing": {
+          "entry": "apps/lightningflow/landing/app",
+          "port": 3000,
+          "description": "Public marketing landing page"
+        },
+        "ops": {
+          "entry": "apps/lightningflow/ops/app",
+          "port": 3002,
+          "description": "Internal operations dashboard"
+        },
+        "web": {
+          "entry": "apps/lightningflow/web/src/app",
+          "port": 3001,
+          "description": "Customer dashboard"
+        }
+      }
+    },
+    "n8n-cursor": {
+      "role": "dev",
+      "importsAllowedFrom": ["packages/*"],
+      "importsDeniedFrom": ["apps/lightningflow/*"],
+      "framework": "node",
+      "entry": "apps/n8n-cursor/scripts",
+      "doc": "apps/n8n-cursor/README.md"
+    },
+    "lovable-frontend": {
+      "role": "product",
+      "importsAllowedFrom": ["packages/*"],
+      "importsDeniedFrom": ["apps/n8n-cursor/*", "apps/lightningflow/*"],
+      "framework": "nextjs",
+      "entry": "apps/lovable-frontend/src/app",
+      "envFile": "apps/lovable-frontend/.env.local",
+      "doc": "apps/lovable-frontend/README.md"
+    },
+    "scorpion": {
+      "role": "product",
+      "isCentral": true,
+      "description": "Central operations orchestrator - manages all operations, workflows, side hustles, and agents",
+      "importsAllowedFrom": ["packages/*"],
+      "importsDeniedFrom": ["apps/n8n-cursor/*"],
+      "framework": "nextjs",
+      "entry": "apps/scorpion/app",
+      "envFile": "apps/scorpion/.env.local",
+      "doc": "apps/scorpion/README.md"
+    }
+  },
+  "packages": [
+    {"name": "shared-types", "path": "packages/shared-types"},
+    {"name": "shared-helpers", "path": "packages/shared-helpers"},
+    {"name": "shared-config", "path": "packages/shared-config"},
+    {"name": "lightning-core", "path": "packages/lightning-core"},
+    {"name": "agent-factory", "path": "packages/agent-factory"},
+    {"name": "scorpion-core", "path": "packages/scorpion-core"}
+  ],
+  "policies": {
+    "naming": {
+      "folders": "kebab-case",
+      "components": "PascalCase",
+      "testsSuffix": ".test.ts"
+    },
+    "commits": "conventional",
+    "testingMinimum": ["services unit tests", "1 e2e happy path"]
+  }
+}

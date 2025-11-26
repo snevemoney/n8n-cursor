@@ -1,0 +1,47 @@
+# CODEOWNERS - Required Reviewers by Path
+# This file ensures proper review coverage and prevents unauthorized changes
+
+# LightningFlow Project - Core Business Platform
+/apps/lightningflow/**              @evenslouis
+/docs/lightningflow/**              @evenslouis
+/infra/lightningflow/**             @evenslouis
+/scripts/lightningflow/**           @evenslouis
+
+# n8n-Cursor Project - Automation Workflows
+/apps/n8n-cursor/**                 @evenslouis
+/docs/n8n-cursor/**                 @evenslouis
+/scripts/n8n-cursor/**              @evenslouis
+
+# Shared Packages - Cross-Project Dependencies
+/packages/shared-*/**               @evenslouis
+/packages/ui/**                     @evenslouis
+/packages/types/**                  @evenslouis
+/packages/utils/**                  @evenslouis
+
+# Infrastructure & DevOps
+/infra/docker/**                    @evenslouis
+/infra/caddy/**                     @evenslouis
+/infra/cloudflare/**                @evenslouis
+/scripts/deploy/**                  @evenslouis
+/scripts/validate/**                @evenslouis
+
+# Documentation & Configuration
+/docs/**                            @evenslouis
+/.github/**                         @evenslouis
+/package.json                       @evenslouis
+/pnpm-lock.yaml                     @evenslouis
+/workspace.manifest.json            @evenslouis
+
+# Environment & Security
+/.env*                              @evenslouis
+/env/**                             @evenslouis
+/scripts/security/**                @evenslouis
+
+# Project Registry (Critical)
+/docs/PROJECTS.yaml                 @evenslouis
+/docs/ENV_MATRIX.yaml              @evenslouis
+/.github/CODEOWNERS                @evenslouis
+/.github/pull_request_template.md  @evenslouis
+
+# Global fallback - all other files
+*                                 @evenslouis

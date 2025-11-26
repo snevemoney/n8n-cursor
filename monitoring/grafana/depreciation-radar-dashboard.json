@@ -1,0 +1,296 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "LightningFlow AI - Depreciation Radar",
+    "tags": ["lightningflow", "radar", "depreciation", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Depreciation Score Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "SELECT depreciation_score FROM v_depreciation_score",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 25},
+                {"color": "red", "value": 50}
+              ]
+            },
+            "unit": "short",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Stale Workflows",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "SELECT name, active, last_run_at, age FROM v_stale_workflows ORDER BY age DESC LIMIT 20",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 14},
+                {"color": "red", "value": 30}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Credential Issues",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "SELECT name, type, issue_type, age, uses_30d FROM v_credential_issues ORDER BY age DESC, uses_30d ASC LIMIT 20",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 30},
+                {"color": "red", "value": 90}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Dead Letters by Environment",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "SELECT env, dl_count, oldest_age FROM v_deadletters_backlog ORDER BY dl_count DESC",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 50},
+                {"color": "red", "value": 100}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Jobs & Results Bloat",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "SELECT old_jobs, old_results, severity FROM v_jobs_bloat",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 500},
+                {"color": "red", "value": 1000}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Stale Invoices",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "SELECT count(*) as count FROM v_invoices_stale",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 20}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Memory Bloat (>90 days)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "SELECT entries_90d_plus, severity FROM v_memory_bloat",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 500},
+                {"color": "red", "value": 1000}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Depreciation Trend (Last 30 Days)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "SELECT taken_at, stale_workflows, credential_issues, deadletters, invoices_stale FROM radar_snapshots WHERE taken_at > now() - interval '30 days' ORDER BY taken_at",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 10
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32}
+      },
+      {
+        "id": 9,
+        "title": "Tenant Throttling Issues",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "SELECT tenant_name, rate_per_min, throttle_violations_7d, severity FROM v_tenant_throttle_hit ORDER BY throttle_violations_7d DESC LIMIT 15",
+            "refId": "A",
+            "datasource": {
+              "type": "postgres",
+              "uid": "postgres"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40}
+      }
+    ],
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "refresh": "5m",
+    "schemaVersion": 38,
+    "version": 1,
+    "links": [],
+    "annotations": {
+      "list": []
+    }
+  }
+}

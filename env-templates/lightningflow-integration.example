@@ -1,0 +1,37 @@
+# LightningFlow AI - Integration Environment
+# Copy this to apps/lightningflow/.env.integration and fill in your values
+
+# Environment
+NODE_ENV=integration
+NEXT_PUBLIC_APP_MODE=integration
+NEXT_PUBLIC_MOCK_MODE=false
+
+# Lightning Network (Integration)
+NEXT_PUBLIC_LIGHTNING_NETWORK=testnet
+
+# API Configuration
+NEXT_PUBLIC_API_BASE_URL=https://api-integration.lfa.example.com
+
+# Feature Flags
+NEXT_PUBLIC_ENABLE_AI_ASSISTANT=true
+NEXT_PUBLIC_ENABLE_TRUST_TILES=true
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+
+# Supabase (Integration)
+SUPABASE_URL=https://your-integration-project.supabase.co
+SUPABASE_ANON_KEY=your-integration-anon-key
+SUPABASE_SERVICE_KEY=your-integration-service-role-key
+
+# OpenAI (Integration)
+OPENAI_API_KEY=sk-your-openai-api-key
+
+# Lightning Network (Integration)
+LIGHTNING_NETWORK=testnet
+LNBITS_URL=https://integration-lnbits.example.com
+LNBITS_ADMIN_KEY=your-integration-admin-key
+
+# Redis (Integration)
+REDIS_URL=redis://integration-redis:6379
+
+# Database (Integration)
+DATABASE_URL=postgresql://postgres:password@integration-postgres:5432/lightningflow_int

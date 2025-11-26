@@ -1,0 +1,56 @@
+# LightningFlow AI Monitoring Stack
+# Caddy automatically handles HTTPS certificates
+
+# Grafana Dashboard
+grafana.lightningflow.local {
+    reverse_proxy grafana:3000
+    log {
+        output file /var/log/caddy/grafana.log
+        format json
+    }
+}
+
+# Prometheus Metrics
+prometheus.lightningflow.local {
+    reverse_proxy prometheus:9090
+    log {
+        output file /var/log/caddy/prometheus.log
+        format json
+    }
+}
+
+# Uptime Kuma
+uptime.lightningflow.local {
+    reverse_proxy uptime-kuma:3001
+    log {
+        output file /var/log/caddy/uptime.log
+        format json
+    }
+}
+
+# MinIO Console
+minio.lightningflow.local {
+    reverse_proxy minio:9001
+    log {
+        output file /var/log/caddy/minio.log
+        format json
+    }
+}
+
+# n8n Workflows
+n8n.lightningflow.local {
+    reverse_proxy n8n:5678
+    log {
+        output file /var/log/caddy/n8n.log
+        format json
+    }
+}
+
+# Health Check Endpoint
+health.lightningflow.local {
+    respond "OK" 200
+    log {
+        output file /var/log/caddy/health.log
+        format json
+    }
+}

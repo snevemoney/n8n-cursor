@@ -1,0 +1,325 @@
+name: Reliability Guards
+
+on:
+  push:
+    branches: [main, staging, integration]
+  pull_request:
+    branches: [main, staging, integration]
+
+jobs:
+  test-build:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Run type checking
+        run: pnpm run typecheck
+
+      - name: Run unit tests
+        run: pnpm run test:unit
+
+      - name: Build LightningFlow UI
+        run: |
+          cd apps/lightningflow/lightning-ui
+          npm run build
+
+      - name: Build LightningFlow API
+        run: |
+          cd apps/lightningflow/api
+          npm run build
+
+      - name: Test Docker builds
+        run: |
+          docker build -t test/web -f apps/lightningflow/lightning-ui/Dockerfile apps/lightningflow/lightning-ui/
+          docker build -t test/api -f apps/lightningflow/api/Dockerfile apps/lightningflow/api/
+
+  ports-check:
+    name: Port Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for public port bindings
+        run: |
+          if grep -r "0\.0\.0\.0:[0-9]" infra/docker/ 2>/dev/null | grep -v "#"; then
+            echo "❌ Public port bindings detected. Use 127.0.0.1 for internal services."
+            exit 1
+          fi
+          echo "✅ No public port bindings found"
+
+      - name: Validate Caddy configuration
+        run: |
+          if [ -f "infra/caddy/Caddyfile" ]; then
+            echo "✅ Caddyfile exists"
+            # Basic syntax check
+            if grep -q "lightningflow.online\|n8ncloud.tech" infra/caddy/Caddyfile; then
+              echo "✅ Domain configuration found"
+            else
+              echo "❌ Domain configuration missing"
+              exit 1
+            fi
+          else
+            echo "❌ Caddyfile not found"
+            exit 1
+          fi
+
+  health-contract:
+    name: Health Endpoint Contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check health endpoints exist
+        run: |
+          # Check UI health endpoint
+          if [ -f "apps/lightningflow/lightning-ui/src/app/healthz/route.ts" ]; then
+            echo "✅ LightningFlow UI health endpoint exists"
+          else
+            echo "❌ LightningFlow UI health endpoint missing"
+            exit 1
+          fi
+          
+          # Check API health endpoint
+          if [ -f "apps/lightningflow/api/src/app/api/healthz/route.ts" ]; then
+            echo "✅ LightningFlow API health endpoint exists"
+          else
+            echo "❌ LightningFlow API health endpoint missing"
+            exit 1
+          fi
+          
+          # Count total health endpoints
+          HEALTH_COUNT=$(find apps/ -name "*healthz*" -type f | wc -l)
+          if [ "$HEALTH_COUNT" -ge 2 ]; then
+            echo "✅ Found $HEALTH_COUNT health endpoints"
+          else
+            echo "❌ Insufficient health endpoints: $HEALTH_COUNT"
+            exit 1
+          fi
+
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets in code
+        run: |
+          # Check for common secret patterns
+          if grep -r -i "password\|secret\|key\|token" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+            echo "❌ Potential secrets found in code"
+            exit 1
+          fi
+          echo "✅ No secrets found in code"
+
+      - name: Check for hardcoded URLs
+        run: |
+          # Check for hardcoded localhost or IP addresses
+          if grep -r "localhost\|127\.0\.0\.1\|0\.0\.0\.0" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_\|healthcheck\|127.0.0.1:3000\|127.0.0.1:4000\|127.0.0.1:5678"; then
+            echo "❌ Hardcoded URLs found in code"
+            exit 1
+          fi
+          echo "✅ No hardcoded URLs found in code"
+
+      - name: Check Docker security
+        run: |
+          # Check for security best practices in Docker files
+          if [ -f "infra/docker/docker-compose.int.yml" ]; then
+            if grep -q "no-new-privileges:true" infra/docker/docker-compose.int.yml; then
+              echo "✅ Security options found in Docker Compose"
+            else
+              echo "❌ Security options missing in Docker Compose"
+              exit 1
+            fi
+            
+            if grep -q "read_only: true" infra/docker/docker-compose.int.yml; then
+              echo "✅ Read-only filesystem found in Docker Compose"
+            else
+              echo "❌ Read-only filesystem missing in Docker Compose"
+              exit 1
+            fi
+          else
+            echo "❌ Docker Compose file not found"
+            exit 1
+          fi
+
+  reliability-check:
+    name: Reliability Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for healthchecks in Docker Compose
+        run: |
+          if [ -f "infra/docker/docker-compose.int.yml" ]; then
+            HEALTHCHECK_COUNT=$(grep -c "healthcheck:" infra/docker/docker-compose.int.yml || true)
+            if [ "$HEALTHCHECK_COUNT" -ge 3 ]; then
+              echo "✅ Found $HEALTHCHECK_COUNT healthchecks in Docker Compose"
+            else
+              echo "❌ Insufficient healthchecks: $HEALTHCHECK_COUNT"
+              exit 1
+            fi
+          else
+            echo "❌ Docker Compose file not found"
+            exit 1
+          fi
+
+      - name: Check for resource limits
+        run: |
+          if [ -f "infra/docker/docker-compose.int.yml" ]; then
+            if grep -q "mem_limit:" infra/docker/docker-compose.int.yml; then
+              echo "✅ Memory limits found in Docker Compose"
+            else
+              echo "❌ Memory limits missing in Docker Compose"
+              exit 1
+            fi
+            
+            if grep -q "cpus:" infra/docker/docker-compose.int.yml; then
+              echo "✅ CPU limits found in Docker Compose"
+            else
+              echo "❌ CPU limits missing in Docker Compose"
+              exit 1
+            fi
+          else
+            echo "❌ Docker Compose file not found"
+            exit 1
+          fi
+
+      - name: Check for rollback procedures
+        run: |
+          if [ -f "scripts/blue-green-deploy.sh" ]; then
+            echo "✅ Blue-green deployment script exists"
+          else
+            echo "❌ Blue-green deployment script missing"
+            exit 1
+          fi
+          
+          if [ -f "scripts/doctor.sh" ]; then
+            echo "✅ Doctor script exists"
+          else
+            echo "❌ Doctor script missing"
+            exit 1
+          fi
+
+  ui-integrity:
+    name: UI Integrity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check UI self-check endpoint
+        run: |
+          if [ -f "apps/lightningflow/lightning-ui/src/app/__selfcheck/route.ts" ]; then
+            echo "✅ UI self-check endpoint exists"
+          else
+            echo "❌ UI self-check endpoint missing"
+            exit 1
+          fi
+
+      - name: Check UI layout structure
+        run: |
+          if [ -f "apps/lightningflow/lightning-ui/src/components/layout/client-layout.tsx" ]; then
+            echo "✅ ClientLayout component exists"
+          else
+            echo "❌ ClientLayout component missing"
+            exit 1
+          fi
+          
+          if [ -f "apps/lightningflow/lightning-ui/src/components/layout/business-sidebar.tsx" ]; then
+            echo "✅ BusinessSidebar component exists"
+          else
+            echo "❌ BusinessSidebar component missing"
+            exit 1
+          fi
+
+      - name: Check for UI rollback documentation
+        run: |
+          if [ -f "apps/lightningflow/lightning-ui/ROLLBACK.md" ]; then
+            echo "✅ UI rollback documentation exists"
+          else
+            echo "❌ UI rollback documentation missing"
+            exit 1
+          fi
+
+  migration-system:
+    name: Migration System Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check migration system integrity
+        run: |
+          # Check if migration scripts exist
+          if [ -f "scripts/migrate/migrate.js" ]; then
+            echo "✅ Migration runner exists"
+          else
+            echo "❌ Migration runner missing"
+            exit 1
+          fi
+          
+          if [ -f "scripts/migrate/create-migration.js" ]; then
+            echo "✅ Migration creator exists"
+          else
+            echo "❌ Migration creator missing"
+            exit 1
+          fi
+          
+          if [ -f "scripts/migrate/migration-health-check.js" ]; then
+            echo "✅ Migration health check exists"
+          else
+            echo "❌ Migration health check missing"
+            exit 1
+          fi
+
+      - name: Validate migration structure
+        run: |
+          # Check if migrations directory exists
+          if [ -d "migrations" ]; then
+            echo "✅ Migrations directory exists"
+          else
+            echo "⚠️  Migrations directory not found (will be created on first migration)"
+          fi
+          
+          # Check for migration files if directory exists
+          if [ -d "migrations" ]; then
+            MIGRATION_COUNT=$(find migrations -name "*.sql" 2>/dev/null | wc -l)
+            if [ "$MIGRATION_COUNT" -gt 0 ]; then
+              echo "✅ Found $MIGRATION_COUNT migration files"
+            else
+              echo "⚠️  No migration files found"
+            fi
+          fi

@@ -1,0 +1,150 @@
+{
+  "createdAt": "2025-08-21T18:17:45.421Z",
+  "updatedAt": "2025-08-21T18:18:42.000Z",
+  "id": "u0zCCupli5YboI42",
+  "name": "start browser tool",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a0680af-39bd-4bc7-b9cd-84c1766c79a1",
+              "name": "sessionId",
+              "type": "string",
+              "value": "={{ $('Start').item.json.sessionId }}"
+            },
+            {
+              "id": "13940ee8-c1d4-4718-a7b4-176c44c097b7",
+              "name": "windowId",
+              "type": "string",
+              "value": "={{ $('Start').item.json.data_windowId }}"
+            },
+            {
+              "id": "a0f2005c-2cd2-4a8d-891b-a4759b72a124",
+              "name": "output",
+              "type": "string",
+              "value": "Session and window created successfully"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "9e310e8c-910e-431f-9919-94a06eb2eca0",
+      "name": "Return IDs",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        144,
+        704
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "id": "a2044af5-fa24-4648-9a3d-a5779b215865",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -64,
+        704
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "sessionId",
+              "type": "any"
+            },
+            {
+              "name": "data_windowId",
+              "type": "any"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Return IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "c3e795cd-2028-46f2-a245-d6224ce174b4",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T18:17:45.434Z",
+      "updatedAt": "2025-08-21T18:17:45.434Z",
+      "role": "workflow:owner",
+      "workflowId": "u0zCCupli5YboI42",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

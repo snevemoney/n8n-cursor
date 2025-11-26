@@ -1,0 +1,387 @@
+{
+  "createdAt": "2025-08-21T19:28:15.328Z",
+  "updatedAt": "2025-08-21T19:28:15.328Z",
+  "id": "WZhrKkOVNmNNmKmC",
+  "name": "Knowledge Base Content Ingestion",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-content-upload",
+      "name": "Content Upload Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-content",
+        "options": {}
+      }
+    },
+    {
+      "id": "content-type-switch",
+      "name": "Determine Content Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.content_type }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "equal",
+              "value2": "pdf",
+              "output": 0
+            },
+            {
+              "operation": "equal",
+              "value2": "website",
+              "output": 1
+            },
+            {
+              "operation": "equal",
+              "value2": "youtube",
+              "output": 2
+            },
+            {
+              "operation": "equal",
+              "value2": "text",
+              "output": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "process-pdf",
+      "name": "Extract PDF Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        50
+      ],
+      "parameters": {
+        "functionCode": "// PDF processing logic\nconst pdfUrl = $json.pdf_url;\nconst fileName = $json.file_name;\n\n// In production, use a PDF parsing service\n// For demo purposes, we'll simulate extraction\nreturn {\n  content_type: 'pdf',\n  source: fileName,\n  extracted_text: 'Extracted PDF content would go here...',\n  chunks: [\n    {\n      text: 'Chapter 1: Introduction to AI...',\n      page: 1,\n      chunk_id: 'pdf_chunk_1'\n    },\n    {\n      text: 'Chapter 2: Machine Learning Basics...',\n      page: 2,\n      chunk_id: 'pdf_chunk_2'\n    }\n  ],\n  metadata: {\n    pages: 10,\n    words: 5000,\n    processed_at: new Date().toISOString()\n  }\n};"
+      }
+    },
+    {
+      "id": "scrape-website",
+      "name": "Scrape Website Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        500,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.scrapfly.io/scrape",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.scrapfly.api_key }}"
+        },
+        "body": {
+          "url": "={{ $json.website_url }}",
+          "render_js": true,
+          "extract": {
+            "content": "body"
+          }
+        }
+      }
+    },
+    {
+      "id": "process-youtube",
+      "name": "Extract YouTube Transcript",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        500,
+        250
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "headers": {
+          "Authorization": "Bearer {{ $credentials.openai.api_key }}"
+        },
+        "body": {
+          "model": "whisper-1",
+          "file": "={{ $json.youtube_url }}"
+        }
+      }
+    },
+    {
+      "id": "process-text",
+      "name": "Process Direct Text",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        350
+      ],
+      "parameters": {
+        "functionCode": "// Process direct text input\nconst text = $json.text_content;\nconst title = $json.title || 'Direct Text Input';\n\n// Split text into chunks for better processing\nconst words = text.split(' ');\nconst chunkSize = 500; // words per chunk\nconst chunks = [];\n\nfor (let i = 0; i < words.length; i += chunkSize) {\n  const chunk = words.slice(i, i + chunkSize).join(' ');\n  chunks.push({\n    text: chunk,\n    chunk_id: `text_chunk_${i / chunkSize + 1}`,\n    position: i / chunkSize + 1\n  });\n}\n\nreturn {\n  content_type: 'text',\n  source: title,\n  extracted_text: text,\n  chunks: chunks,\n  metadata: {\n    words: words.length,\n    chunks_count: chunks.length,\n    processed_at: new Date().toISOString()\n  }\n};"
+      }
+    },
+    {
+      "id": "create-embeddings",
+      "name": "Generate Content Embeddings",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        200
+      ],
+      "parameters": {
+        "resource": "embedding",
+        "operation": "create",
+        "model": "text-embedding-ada-002",
+        "input": "={{ $json.extracted_text }}"
+      }
+    },
+    {
+      "id": "store-in-vector-db",
+      "name": "Store in Vector Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pinecone.io/vectors/upsert",
+        "headers": {
+          "Api-Key": "{{ $credentials.pinecone.api_key }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "vectors": "={{ $json.chunks.map(chunk => ({ id: chunk.chunk_id, values: $node['Generate Content Embeddings'].json.data[0].embedding, metadata: { text: chunk.text, source: $json.source, content_type: $json.content_type } })) }}"
+        }
+      }
+    },
+    {
+      "id": "update-knowledge-base",
+      "name": "Update Knowledge Base Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO knowledge_base (chatbot_id, content_type, source, content_hash, chunks_count, words_count, created_at) VALUES ('{{ $node[\"Content Upload Trigger\"].json[\"chatbot_id\"] }}', '{{ $json.content_type }}', '{{ $json.source }}', MD5('{{ $json.extracted_text }}'), {{ $json.chunks.length }}, {{ $json.metadata.words }}, NOW())"
+      }
+    },
+    {
+      "id": "send-processing-complete",
+      "name": "Notify Processing Complete",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        200
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Content Upload Trigger": {
+      "main": [
+        [
+          {
+            "node": "Determine Content Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Content Type": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Scrape Website Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract YouTube Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process Direct Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Content": {
+      "main": [
+        [
+          {
+            "node": "Generate Content Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Website Content": {
+      "main": [
+        [
+          {
+            "node": "Generate Content Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract YouTube Transcript": {
+      "main": [
+        [
+          {
+            "node": "Generate Content Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Direct Text": {
+      "main": [
+        [
+          {
+            "node": "Generate Content Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Store in Vector Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store in Vector Database": {
+      "main": [
+        [
+          {
+            "node": "Update Knowledge Base Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Knowledge Base Record": {
+      "main": [
+        [
+          {
+            "node": "Notify Processing Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d04a3380-2ff9-4377-ad6c-30751206c64e",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-08-21T19:28:15.520Z",
+      "updatedAt": "2025-08-21T19:28:15.520Z",
+      "role": "workflow:owner",
+      "workflowId": "WZhrKkOVNmNNmKmC",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

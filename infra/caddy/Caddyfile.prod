@@ -1,0 +1,47 @@
+# Production Caddyfile for LightningFlow AI
+# All services bind to 127.0.0.1 - Caddy is the only public listener
+
+(common) {
+  encode gzip zstd
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Frame-Options "DENY"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none';"
+  }
+}
+
+# Landing page (public marketing)
+lightningflow.online, www.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  handle_path /api/* { reverse_proxy 127.0.0.1:4000 }   # API (prod)
+  handle_path /      { reverse_proxy 127.0.0.1:3000 }   # landing (prod)
+}
+
+# Customer dashboard (authenticated users)
+app.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  handle_path / { reverse_proxy 127.0.0.1:3001 }        # customer app (prod)
+}
+
+# Internal ops dashboard (admin only)
+ops.lightningflow.online {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  basicauth /* { {$OPS_USER} {$OPS_PASS} }              # swap to SSO when ready
+  handle_path / { reverse_proxy 127.0.0.1:3002 }        # internal ops (prod)
+}
+
+# n8n instance
+n8ncloud.tech, www.n8ncloud.tech {
+  import common
+  @health path /healthz
+  handle @health { respond 200 }
+  handle_path / { reverse_proxy 127.0.0.1:5678 }        # n8n (prod)
+}

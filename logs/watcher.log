@@ -1,0 +1,631 @@
+nohup: ignoring input
+
+> n8n-workflow-visualizer@1.0.0 watch
+> node tools/watch.js
+
+👀 Starting workflow file watcher...
+📁 Watching: /home/evens/n8n-cursor/workflows
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T14-27 (3 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 3 workflow diagrams
+✅ Watcher active! Press Ctrl+C to stop.
+🔄 Detected change on ai-content-empire.json
+🔄 Detected change on ai-research-agent.json
+🔄 Detected change on ai-saas-master-scaffold.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T14-32 (3 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 3 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on simple_slack_notifier.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T14-48 (4 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 4 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on gpt5-support-agent.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T15-26 (5 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on gpt5-support-agent.json
+🔄 Detected change on simple_slack_notifier.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-44 (5 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 01-marketplace/payment-processing.json
+🔄 Detected change on 01-marketplace/payment-processing.json
+🔄 Detected change on 01-marketplace/payment-processing.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-48 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T14-27
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 01-marketplace/workflow-as-service.json
+🔄 Detected change on 01-marketplace/workflow-as-service.json
+🔄 Detected change on 01-marketplace/workflow-as-service.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-49 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T14-32
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 02-knowledge-chatbots/knowledge-ingestion.json
+🔄 Detected change on 02-knowledge-chatbots/knowledge-ingestion.json
+🔄 Detected change on 02-knowledge-chatbots/knowledge-ingestion.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-50 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T14-48
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 02-knowledge-chatbots/chatbot-interaction.json
+🔄 Detected change on 02-knowledge-chatbots/chatbot-interaction.json
+🔄 Detected change on 02-knowledge-chatbots/chatbot-interaction.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-51 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T14-49
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 03-custom-models/model-training-pipeline.json
+🔄 Detected change on 03-custom-models/model-training-pipeline.json
+🔄 Detected change on 03-custom-models/model-training-pipeline.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-52 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T15-04
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 03-custom-models/model-monetization-api.json
+🔄 Detected change on 03-custom-models/model-monetization-api.json
+🔄 Detected change on 03-custom-models/model-monetization-api.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-53 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T15-05
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 04-vibe-coding/idea-validation-pipeline.json
+🔄 Detected change on 04-vibe-coding/idea-validation-pipeline.json
+🔄 Detected change on 04-vibe-coding/idea-validation-pipeline.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-55 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T15-06
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 05-agency-operations/client-onboarding.json
+🔄 Detected change on 05-agency-operations/client-onboarding.json
+🔄 Detected change on 05-agency-operations/client-onboarding.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-56 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T15-26
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 05-agency-operations/project-delivery.json
+🔄 Detected change on 05-agency-operations/project-delivery.json
+🔄 Detected change on 05-agency-operations/project-delivery.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T16-58 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-22
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on 01-marketplace/payment-processing.json
+🔄 Detected change on 01-marketplace/payment-processing.json
+🔄 Detected change on 01-marketplace/workflow-as-service.json
+🔄 Detected change on 02-knowledge-chatbots/knowledge-ingestion.json
+🔄 Detected change on 02-knowledge-chatbots/chatbot-interaction.json
+🔄 Detected change on 03-custom-models/model-training-pipeline.json
+🔄 Detected change on 03-custom-models/model-monetization-api.json
+🔄 Detected change on 05-agency-operations/client-onboarding.json
+🔄 Detected change on 05-agency-operations/project-delivery.json
+🔄 Detected change on 01-marketplace/workflow-as-service.json
+🔄 Detected change on 02-knowledge-chatbots/knowledge-ingestion.json
+🔄 Detected change on 02-knowledge-chatbots/chatbot-interaction.json
+🔄 Detected change on 04-vibe-coding/idea-validation-pipeline.json
+🔄 Detected change on 03-custom-models/model-training-pipeline.json
+🔄 Detected change on 03-custom-models/model-monetization-api.json
+🔄 Detected change on 05-agency-operations/client-onboarding.json
+🔄 Detected change on 05-agency-operations/project-delivery.json
+🔄 Detected change on 04-vibe-coding/idea-validation-pipeline.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T17-07 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-44
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 06-content-team/01-topic-generation-agent.json
+🔄 Detected change on 06-content-team/01-topic-generation-agent.json
+🔄 Detected change on 06-content-team/01-topic-generation-agent.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T17-58 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-48
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 06-content-team/02-research-knowledge-agent.json
+🔄 Detected change on 06-content-team/02-research-knowledge-agent.json
+🔄 Detected change on 06-content-team/02-research-knowledge-agent.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T18-00 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-49
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 06-content-team/03-writing-agent.json
+🔄 Detected change on 06-content-team/03-writing-agent.json
+🔄 Detected change on 06-content-team/03-writing-agent.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T18-03 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-50
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on 06-content-team/04-publishing-distribution-agent.json
+🔄 Detected change on 06-content-team/04-publishing-distribution-agent.json
+🔄 Detected change on 06-content-team/04-publishing-distribution-agent.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T18-06 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-51
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on 06-content-team/01-topic-generation-agent.json
+🔄 Detected change on 06-content-team/02-research-knowledge-agent.json
+🔄 Detected change on 06-content-team/03-writing-agent.json
+🔄 Detected change on 06-content-team/04-publishing-distribution-agent.json
+🔄 Detected change on 06-content-team/01-topic-generation-agent.json
+🔄 Detected change on 06-content-team/02-research-knowledge-agent.json
+🔄 Detected change on 06-content-team/04-publishing-distribution-agent.json
+🔄 Detected change on 06-content-team/03-writing-agent.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T18-14 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-52
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on 05-agency-operations/project-delivery.json
+🔄 Detected change on 05-agency-operations/client-onboarding.json
+🔄 Detected change on 02-knowledge-chatbots/knowledge-ingestion.json
+🔄 Detected change on 02-knowledge-chatbots/chatbot-interaction.json
+🔄 Detected change on 04-vibe-coding/idea-validation-pipeline.json
+🔄 Detected change on 06-content-team/04-publishing-distribution-agent.json
+🔄 Detected change on 06-content-team/02-research-knowledge-agent.json
+🔄 Detected change on 06-content-team/01-topic-generation-agent.json
+🔄 Detected change on 06-content-team/03-writing-agent.json
+🔄 Detected change on 03-custom-models/model-monetization-api.json
+🔄 Detected change on 03-custom-models/model-training-pipeline.json
+🔄 Detected change on 01-marketplace/payment-processing.json
+🔄 Detected change on 01-marketplace/workflow-as-service.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T18-59 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-53
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on enhanced/ai-research-agent-enhanced.json
+🔄 Detected change on enhanced/ai-research-agent-enhanced.json
+🔄 Detected change on enhanced/ai-research-agent-enhanced.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-10 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-55
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on enhanced/ai-saas-master-scaffold-enhanced.json
+🔄 Detected change on enhanced/ai-saas-master-scaffold-enhanced.json
+🔄 Detected change on enhanced/ai-saas-master-scaffold-enhanced.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-12 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-56
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on enhanced/ai-research-agent-enhanced.json
+🔄 Detected change on enhanced/ai-saas-master-scaffold-enhanced.json
+🔄 Detected change on enhanced/ai-saas-master-scaffold-enhanced.json
+🔄 Detected change on enhanced/ai-research-agent-enhanced.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-14 (5 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T16-58
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on master-orchestration-system.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-28 (6 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T17-07
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+Error parsing /home/evens/n8n-cursor/workflows/master-orchestration-system.json: Unexpected end of JSON input
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 5 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on master-orchestration-system.json
+🔄 Detected change on master-orchestration-system.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-28 (6 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/master-orchestration-system.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 6 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on webhooks/content-creation-webhook.json
+🔄 Detected change on webhooks/content-creation-webhook.json
+🔄 Detected change on webhooks/content-creation-webhook.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-29 (6 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T17-58
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/master-orchestration-system.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 6 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected rename on webhooks/support-agent-webhook.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-42 (6 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T18-00
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/master-orchestration-system.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 6 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on webhooks/support-agent-webhook.json
+🔄 Detected change on webhooks/support-agent-webhook.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-42 (6 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/master-orchestration-system.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 6 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on webhooks/support-agent-webhook.json
+🔄 Detected change on webhooks/support-agent-webhook.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-42 (6 workflows)
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/master-orchestration-system.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 6 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on master-orchestration-system.json
+🔄 Detected change on webhooks/content-creation-webhook.json
+🔄 Detected change on webhooks/support-agent-webhook.json
+🔄 Detected change on master-orchestration-system.json
+🔄 Detected change on webhooks/content-creation-webhook.json
+🔄 Detected change on webhooks/support-agent-webhook.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T19-44 (6 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T18-03
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/master-orchestration-system.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 6 workflow diagrams
+✨ Diagrams updated!
+🔄 Detected change on master-orchestration-system.json
+🔄 Detected change on master-orchestration-system.json
+🚀 Starting workflow visualization generation...
+✅ Backup created: /home/evens/n8n-cursor/backups/2025-08-18T20-11 (6 workflows)
+🗑️ Cleaned up old backup: 2025-08-18T18-06
+📊 Processing: ai-content-empire.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-content-empire.md
+📊 Processing: ai-research-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-research-agent.md
+📊 Processing: ai-saas-master-scaffold.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/ai-saas-master-scaffold.md
+📊 Processing: gpt5-support-agent.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/gpt5-support-agent.md
+📊 Processing: master-orchestration-system.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/master-orchestration-system.md
+📊 Processing: simple_slack_notifier.json
+✅ Generated: /home/evens/n8n-cursor/visualizations/simple_slack_notifier.md
+📄 Generated index: /home/evens/n8n-cursor/visualizations/index.md
+🎉 Generated 6 workflow diagrams
+✨ Diagrams updated!

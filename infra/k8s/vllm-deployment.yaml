@@ -1,0 +1,102 @@
+---
+# VLLM Deployment for Kubernetes (Optional - GPU required)
+# Only deploy if GPU nodes are available
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+  labels:
+    app: vllm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels:
+        app: vllm
+    spec:
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: MODEL
+          valueFrom:
+            configMapKeyRef:
+              name: vllm-config
+              key: model
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PORT
+          value: "8000"
+        - name: TENSOR_PARALLEL_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: vllm-config
+              key: tensor-parallel-size
+              optional: true
+        - name: GPU_MEMORY_UTILIZATION
+          valueFrom:
+            configMapKeyRef:
+              name: vllm-config
+              key: gpu-memory-utilization
+              optional: true
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: "8Gi"
+            cpu: "2"
+          limits:
+            nvidia.com/gpu: 1
+            memory: "16Gi"
+            cpu: "4"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 120  # Give VLLM time to load model
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          timeoutSeconds: 5
+      nodeSelector:
+        accelerator: nvidia-tesla-t4  # Adjust based on your GPU nodes
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-service
+  labels:
+    app: vllm
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: vllm
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vllm-config
+data:
+  model: "mistralai/Mistral-7B-Instruct-v0.2"
+  tensor-parallel-size: "1"
+  gpu-memory-utilization: "0.9"
+

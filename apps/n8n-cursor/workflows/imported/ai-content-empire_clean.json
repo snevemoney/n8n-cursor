@@ -1,0 +1,454 @@
+{
+  "name": "🚀 AI Content Empire - Multi-Platform Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Content Discovery Engine",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/TechCrunch",
+        "options": {}
+      },
+      "id": "rss-feed-1",
+      "name": "TechCrunch RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://hnrss.org/frontpage",
+        "options": {}
+      },
+      "id": "rss-feed-2",
+      "name": "Hacker News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/index",
+        "options": {}
+      },
+      "id": "rss-feed-3",
+      "name": "Ars Technica",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        300,
+        500
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "merge-feeds",
+      "name": "Content Aggregator",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        500,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "content-filter",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "AI|automation|tech|innovation|startup|software|digital|cloud|data|machine learning|neural|algorithm|blockchain|cybersecurity",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "content-filter",
+      "name": "Smart Content Filter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        700,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Analyze this tech article and provide a comprehensive assessment:\n\nTitle: {{ $json.title }}\nContent: {{ $json.contentSnippet || $json.description }}\nSource: {{ $json.creator || 'Unknown' }}\nLink: {{ $json.link }}\n\nProvide a JSON response with:\n{\n  \"engagement_score\": (0-100),\n  \"sentiment\": \"positive/neutral/negative\",\n  \"key_topics\": [\"topic1\", \"topic2\", \"topic3\"],\n  \"target_audience\": \"description\",\n  \"viral_potential\": (0-100),\n  \"twitter_post\": \"optimized tweet with hashtags\",\n  \"linkedin_post\": \"professional LinkedIn post\",\n  \"youtube_script_outline\": \"3-5 bullet points for video\",\n  \"summary\": \"2-sentence summary\",\n  \"trending_score\": (0-100)\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "openai-analysis",
+      "name": "🤖 AI Content Analyzer",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [
+        900,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse OpenAI response and enhance with metadata\nconst items = $input.all();\nconst enhancedContent = [];\n\nfor (const item of items) {\n  let aiAnalysis;\n  try {\n    // Parse the AI response\n    const aiResponse = item.json.choices[0].message.content;\n    aiAnalysis = JSON.parse(aiResponse);\n  } catch (error) {\n    // Fallback if parsing fails\n    aiAnalysis = {\n      engagement_score: 50,\n      sentiment: 'neutral',\n      key_topics: ['technology'],\n      target_audience: 'tech professionals',\n      viral_potential: 30,\n      twitter_post: `🚀 ${item.json.title.substring(0, 200)}... #tech #innovation`,\n      linkedin_post: `Industry insight: ${item.json.title}`,\n      youtube_script_outline: ['Introduction', 'Key points', 'Conclusion'],\n      summary: 'Interesting tech development worth sharing.',\n      trending_score: 40\n    };\n  }\n\n  // Get original content data\n  const originalData = $('Content Aggregator').all().find(orig => \n    orig.json.title === item.json.title || \n    orig.json.link === item.json.link\n  );\n\n  if (originalData) {\n    enhancedContent.push({\n      json: {\n        // Original content\n        title: originalData.json.title,\n        link: originalData.json.link,\n        source: originalData.json.creator || originalData.json.author || 'Unknown',\n        published_date: originalData.json.pubDate || originalData.json.isoDate,\n        description: originalData.json.contentSnippet || originalData.json.description,\n        \n        // AI Analysis\n        ai_analysis: aiAnalysis,\n        \n        // Enhanced metadata\n        processed_at: new Date().toISOString(),\n        quality_score: aiAnalysis.engagement_score,\n        should_publish: aiAnalysis.engagement_score >= 60,\n        platforms_ready: {\n          twitter: aiAnalysis.twitter_post,\n          linkedin: aiAnalysis.linkedin_post,\n          youtube_outline: aiAnalysis.youtube_script_outline\n        },\n        \n        // Scheduling logic\n        optimal_times: {\n          twitter: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours\n          linkedin: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(), // 8 hours\n          youtube: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours\n        }\n      }\n    });\n  }\n}\n\n// Sort by quality score\nenhancedContent.sort((a, b) => b.json.quality_score - a.json.quality_score);\n\nreturn enhancedContent;"
+      },
+      "id": "content-enhancer",
+      "name": "Content Intelligence Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "high-quality",
+              "leftValue": "={{ $json.should_publish }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "quality-gate",
+      "name": "Quality Gate (60+)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "airtable-base-id",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "content-tracker",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $json.title }}",
+            "Source": "={{ $json.source }}",
+            "Quality_Score": "={{ $json.quality_score }}",
+            "Sentiment": "={{ $json.ai_analysis.sentiment }}",
+            "Key_Topics": "={{ $json.ai_analysis.key_topics.join(', ') }}",
+            "Published_Date": "={{ $json.published_date }}",
+            "Link": "={{ $json.link }}",
+            "Twitter_Ready": "={{ $json.platforms_ready.twitter }}",
+            "LinkedIn_Ready": "={{ $json.platforms_ready.linkedin }}",
+            "Processed_At": "={{ $json.processed_at }}",
+            "Status": "Ready for Publishing"
+          }
+        }
+      },
+      "id": "airtable-tracker",
+      "name": "📊 Content Database",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        300
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "airtable-credentials",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.platforms_ready.twitter }}",
+        "additionalFields": {}
+      },
+      "id": "twitter-post",
+      "name": "🐦 Auto-Tweet",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        400
+      ],
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "qtWq0gXRVmN4YB4Y",
+          "name": "X account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "postToChannel",
+        "channel": {
+          "__rl": true,
+          "value": "general",
+          "mode": "name"
+        },
+        "text": "=🚀 **CONTENT PUBLISHED SUCCESSFULLY!**\\n\\n📰 **{{ $json.title }}**\\n📊 Quality Score: {{ $json.quality_score }}/100\\n🎯 Sentiment: {{ $json.ai_analysis.sentiment }}\\n🔖 Topics: {{ $json.ai_analysis.key_topics.join(', ') }}\\n\\n✅ **Published to:**\\n• Twitter: Posted automatically\\n• Airtable: Tracked for analytics\\n• LinkedIn: Ready for manual review\\n\\n🔗 **Source:** {{ $json.link }}\\n\\n#ContentAutomation #AI #TechNews",
+        "otherOptions": {}
+      },
+      "id": "slack-success",
+      "name": "📢 Team Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [
+        1500,
+        500
+      ],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "oXn05d4Qih4MiZfg",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "google-sheet-id",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Content Analytics",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.processed_at }}",
+            "Title": "={{ $json.title }}",
+            "Source": "={{ $json.source }}",
+            "Quality_Score": "={{ $json.quality_score }}",
+            "Sentiment": "={{ $json.ai_analysis.sentiment }}",
+            "Viral_Potential": "={{ $json.ai_analysis.viral_potential }}",
+            "Key_Topics": "={{ $json.ai_analysis.key_topics.join(', ') }}",
+            "Twitter_Posted": "Yes",
+            "Link": "={{ $json.link }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "google-sheets",
+      "name": "📈 Analytics Tracker",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        1700,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-credentials",
+          "name": "Google account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Content Discovery Engine": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Hacker News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ars Technica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch RSS": {
+      "main": [
+        [
+          {
+            "node": "Content Aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hacker News": {
+      "main": [
+        [
+          {
+            "node": "Content Aggregator",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Ars Technica": {
+      "main": [
+        [
+          {
+            "node": "Content Aggregator",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Content Aggregator": {
+      "main": [
+        [
+          {
+            "node": "Smart Content Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Smart Content Filter": {
+      "main": [
+        [
+          {
+            "node": "🤖 AI Content Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 AI Content Analyzer": {
+      "main": [
+        [
+          {
+            "node": "Content Intelligence Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Intelligence Engine": {
+      "main": [
+        [
+          {
+            "node": "Quality Gate (60+)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Gate (60+)": {
+      "main": [
+        [
+          {
+            "node": "📊 Content Database",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "�� Auto-Tweet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📢 Team Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🐦 Auto-Tweet": {
+      "main": [
+        [
+          {
+            "node": "📈 Analytics Tracker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

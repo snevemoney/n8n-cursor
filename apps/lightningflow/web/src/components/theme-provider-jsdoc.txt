@@ -1,0 +1,40 @@
+"use client"
+
+import * as React from "react"
+import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { type ThemeProviderProps } from "next-themes/dist/types"
+
+/**
+ * @component
+ * @description A client component that provides theme context for the application.
+ * Wraps next-themes' ThemeProvider to handle theme switching (light/dark/system).
+ * 
+ * @example
+ * // Direct usage (though typically used via the Providers component)
+ * import { ThemeProvider } from "./theme-provider"
+ * 
+ * export default function App({ children }) {
+ *   return (
+ *     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+ *       {children}
+ *     </ThemeProvider>
+ *   )
+ * }
+ * 
+ * @param {ThemeProviderProps} props - Props for the ThemeProvider component
+ * @param {React.ReactNode} props.children - Child components to be wrapped with the theme context
+ * @param {object} props.props - Additional props to be passed to the underlying next-themes ThemeProvider
+ * @returns {JSX.Element} The children wrapped with theme context
+ */
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  )
+} 

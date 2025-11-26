@@ -1,0 +1,13 @@
+[
+  {
+    "type": "info",
+    "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+    "location": {
+      "url": "webpack-internal:///(app-pages-browser)/../../node_modules/.pnpm/next@14.0.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js",
+      "lineNumber": 38246,
+      "columnNumber": 16
+    },
+    "url": "http://localhost:3003/",
+    "timestamp": "2025-11-07T19:59:51.649Z"
+  }
+]

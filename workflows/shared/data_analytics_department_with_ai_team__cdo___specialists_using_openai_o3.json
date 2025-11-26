@@ -1,0 +1,571 @@
+{
+  "createdAt": "2025-09-15T22:09:36.044Z",
+  "updatedAt": "2025-09-15T22:09:36.044Z",
+  "id": "Aq7LRiLfcCqwgljX",
+  "name": "Data Analytics Department with AI Team: CDO & Specialists Using OpenAI O3",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "analytics-chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        1312,
+        544
+      ],
+      "webhookId": "analytics-webhook-id",
+      "parameters": {
+        "options": {}
+      },
+      "typeVersion": 1.1
+    },
+    {
+      "id": "cdo-agent",
+      "name": "CDO Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1536,
+        304
+      ],
+      "parameters": {
+        "options": {}
+      },
+      "typeVersion": 2.1
+    },
+    {
+      "id": "analytics-think",
+      "name": "Think",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        1664,
+        624
+      ],
+      "parameters": {},
+      "typeVersion": 1.1
+    },
+    {
+      "id": "data-scientist-agent",
+      "name": "Data Scientist Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        1936,
+        1024
+      ],
+      "parameters": {
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {},
+        "toolDescription": "call this AI Agent that specializes in statistical analysis, predictive modeling, machine learning algorithms, and data insights extraction"
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "bi-analyst-agent",
+      "name": "Business Intelligence Analyst Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2896,
+        416
+      ],
+      "parameters": {
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {},
+        "toolDescription": "call this AI Agent that specializes in business metrics analysis, KPI tracking, performance dashboards, and strategic insights"
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "data-engineer-agent",
+      "name": "Data Engineer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2336,
+        816
+      ],
+      "parameters": {
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {},
+        "toolDescription": "call this AI Agent that specializes in data pipelines, ETL processes, data warehousing, and data infrastructure management"
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "ml-engineer-agent",
+      "name": "Machine Learning Engineer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2848,
+        1040
+      ],
+      "parameters": {
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {},
+        "toolDescription": "call this AI Agent that specializes in ML model deployment, MLOps, model monitoring, and production machine learning systems"
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "data-viz-agent",
+      "name": "Data Visualization Specialist Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2432,
+        96
+      ],
+      "parameters": {
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {},
+        "toolDescription": "call this AI Agent that specializes in interactive dashboards, data storytelling, visual analytics, and business intelligence reporting"
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "data-governance-agent",
+      "name": "Data Governance Specialist Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2832,
+        -144
+      ],
+      "parameters": {
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {},
+        "toolDescription": "call this AI Agent that specializes in data quality assurance, compliance frameworks, data privacy, and governance policies"
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "cdo-model",
+      "name": "OpenAI Chat Model CDO",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1504,
+        624
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "o3",
+          "cachedResultName": "o3"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "data-scientist-model",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1968,
+        1488
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "bi-analyst-model",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2864,
+        624
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "data-engineer-model",
+      "name": "OpenAI Chat Model3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2352,
+        976
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "ml-engineer-model",
+      "name": "OpenAI Chat Model4",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2848,
+        1216
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "data-viz-model",
+      "name": "OpenAI Chat Model5",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2400,
+        352
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "data-governance-model",
+      "name": "OpenAI Chat Model6",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2864,
+        176
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "header-sticky",
+      "name": "Sticky Note Header",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        240
+      ],
+      "parameters": {
+        "color": 5,
+        "width": 580,
+        "height": 320,
+        "content": "=======================================\n       CDO AGENT WITH DATA ANALYTICS TEAM\n=======================================\nFor any questions or support, please contact:\n    Yaron@nofluff.online\n\nExplore more tips and tutorials here:\n   - YouTube: https://www.youtube.com/@YaronBeen/videos\n   - LinkedIn: https://www.linkedin.com/in/yaronbeen/\n======================================="
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "main-sticky",
+      "name": "Sticky Note Main",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        576
+      ],
+      "parameters": {
+        "color": 5,
+        "width": 740,
+        "height": 2500,
+        "content": "## 🧠 **CDO AGENT WITH DATA ANALYTICS TEAM - AI WORKFLOW**\n\n**🔥 Powered by OpenAI O3 & GPT-4.1-mini Multi-Agent System**\n\n#DataAnalytics #DataScience #BusinessIntelligence #n8nWorkflows #OpenAI #DataDriven\n\n---\n\n### 📝 **Overview**\n\nThis multi-agent n8n automation simulates a complete data analytics department. A strategic CDO (Chief Data Officer) agent receives your data requests, analyzes analytics needs, and delegates to specialized agents for data science, business intelligence, data engineering, machine learning, visualization, and governance—delivering comprehensive data insights instantly.\n\n---\n\n### ⚙️ **How It Works**\n\n1. **Chat trigger** receives analytics requests (e.g., \"Analyze customer churn patterns and predict retention\")\n2. **CDO Agent** (O3) analyzes request and determines required data functions\n3. Delegates to specialist agents:\n   - Data Scientist Agent\n   - Business Intelligence Analyst Agent\n   - Data Engineer Agent\n   - Machine Learning Engineer Agent\n   - Data Visualization Specialist Agent\n   - Data Governance Specialist Agent\n4. Each agent uses **GPT-4.1-mini** for fast, focused execution\n5. Results compiled and returned via chat or integrated with analytics platforms\n\n---\n\n### 👥 **Meet Your AI Data Analytics Team**\n\n| Agent | Purpose | Model | Output |\n|-------|---------|-------|--------|\n| 🧠 **CDO Agent** | Data strategy & team delegation | O3 | Central command |\n| 📊 **Data Scientist** | Statistical analysis, ML algorithms, insights | GPT-4.1-mini | Predictive models |\n| 📈 **BI Analyst** | Business metrics, KPIs, dashboards | GPT-4.1-mini | Strategic insights |\n| 🔧 **Data Engineer** | ETL pipelines, data infrastructure | GPT-4.1-mini | Data architecture |\n| 🤖 **ML Engineer** | Model deployment, MLOps, monitoring | GPT-4.1-mini | Production ML |\n| 🎨 **Data Viz Specialist** | Interactive dashboards, storytelling | GPT-4.1-mini | Visual analytics |\n| 🛡️ **Data Governance** | Quality, compliance, privacy policies | GPT-4.1-mini | Governance frameworks |\n\n---\n\n### 💡 **Use Cases**\n\n- **Predictive Analytics**: Customer behavior, sales forecasting, risk assessment\n- **Business Intelligence**: KPI tracking, performance analysis, strategic insights\n- **Data Engineering**: Pipeline automation, data warehousing, real-time processing\n- **Machine Learning**: Model development, deployment, and monitoring\n- **Data Visualization**: Interactive dashboards, executive reporting, data storytelling\n- **Data Governance**: Quality assurance, compliance frameworks, privacy protection\n\n---\n\n### 💸 **Cost Optimization**\n\n- **O3 for CDO**: Strategic data decisions only\n- **GPT-4.1-mini for specialists**: 90% cost reduction\n- **Parallel processing**: All agents work simultaneously\n- **Template libraries**: Reusable analytics frameworks\n\n---\n\n### 🏷️ **Tags**\n\n#DataAnalytics #DataScience #BusinessIntelligence #MachineLearning #DataEngineering\n#DataVisualization #DataGovernance #PredictiveAnalytics #BigData #DataDriven\n#OpenAI #MultiAgentSystem #AnalyticsAutomation #DataStrategy #n8n"
+      },
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Data Scientist Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Business Intelligence Analyst Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Data Engineer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Machine Learning Engineer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Data Visualization Specialist Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Data Governance Specialist Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Engineer Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Scientist Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model CDO": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Machine Learning Engineer Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Governance Specialist Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Intelligence Analyst Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Visualization Specialist Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CDO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": null,
+  "staticData": null,
+  "meta": {
+    "templateId": "6912"
+  },
+  "pinData": null,
+  "versionId": "b112dc56-1d22-4616-a8b5-6ec257866c91",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-15T22:09:36.051Z",
+      "updatedAt": "2025-09-15T22:09:36.051Z",
+      "role": "workflow:owner",
+      "workflowId": "Aq7LRiLfcCqwgljX",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

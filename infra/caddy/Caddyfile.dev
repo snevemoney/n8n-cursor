@@ -1,0 +1,63 @@
+# Local reverse proxy to hide ports behind friendly hostnames
+# All domains use HTTP only (no HTTPS redirects)
+# Using Docker service names since Caddy runs inside Docker
+
+{
+	auto_https off
+}
+
+http://n8n.local {
+	@health path /healthz
+	handle @health {
+		respond 200
+	}
+	reverse_proxy n8n:5678
+}
+
+http://lightningflow.local {
+	@health path /healthz
+	handle @health {
+		respond 200
+	}
+	reverse_proxy host.docker.internal:3000
+}
+
+http://app.lightningflow.local {
+	@health path /healthz
+	handle @health {
+		respond 200
+	}
+	reverse_proxy host.docker.internal:3001
+}
+
+http://ops.lightningflow.local {
+	@health path /healthz
+	handle @health {
+		respond 200
+	}
+	reverse_proxy host.docker.internal:3002
+}
+
+http://api.lightningflow.local {
+	@health path /healthz
+	handle @health {
+		respond 200
+	}
+	reverse_proxy host.docker.internal:4000
+}
+
+http://logs.local {
+	reverse_proxy dozzle:8080
+}
+
+http://mail.local {
+	reverse_proxy mailhog:8025
+}
+
+http://scorpion.local {
+	@health path /healthz
+	handle @health {
+		respond 200
+	}
+	reverse_proxy host.docker.internal:3003
+}

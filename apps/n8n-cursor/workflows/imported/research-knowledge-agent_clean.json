@@ -1,0 +1,560 @@
+{
+  "name": "AI Content Team - Research & Knowledge Agent",
+  "nodes": [
+    {
+      "id": "webhook-research-trigger",
+      "name": "Research Request Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "start-research",
+        "options": {}
+      }
+    },
+    {
+      "id": "load-topic-data",
+      "name": "Load Topic Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT * FROM content_topics WHERE id = {{ $json.topic_batch_id }}"
+      }
+    },
+    {
+      "id": "select-research-topic",
+      "name": "Select Next Research Topic",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const topicBatch = $node['Load Topic Data'].json[0];\nconst request = $node['Research Request Trigger'].json;\n\nlet selectedTopic;\n\nif (request.fast_track && request.priority_topics && request.priority_topics.length > 0) {\n  // Fast track mode - use the specific topic\n  selectedTopic = request.priority_topics[0];\n} else {\n  // Normal mode - select highest priority unresearched topic\n  const topics = JSON.parse(topicBatch.topics_data);\n  selectedTopic = topics.find(t => !t.research_status || t.research_status === 'pending') || topics[0];\n}\n\nreturn {\n  batch_id: topicBatch.id,\n  selected_topic: selectedTopic,\n  research_id: `research_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  fast_track: request.fast_track || false,\n  research_depth: request.research_depth || 'comprehensive'\n};"
+      }
+    },
+    {
+      "id": "web-research",
+      "name": "Conduct Web Research",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        50
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a research AI that conducts comprehensive web research on content topics. You find credible sources, statistics, expert opinions, case studies, and supporting evidence. Focus on accuracy, relevance, and credibility."
+            },
+            {
+              "role": "user",
+              "content": "Topic: {{ $json.selected_topic.topic_title }}\nDescription: {{ $json.selected_topic.topic_description }}\nTarget Audience: {{ $json.selected_topic.target_audience_segment }}\nContent Angle: {{ $json.selected_topic.content_angle }}\nKey Points to Cover: {{ $json.selected_topic.key_points.join(', ') }}\n\nConduct comprehensive research and provide:\n\n1. **Current Statistics & Data**\n   - Recent industry statistics\n   - Market size and growth data\n   - User behavior metrics\n   - Performance benchmarks\n\n2. **Expert Insights & Quotes**\n   - Industry leader opinions\n   - Expert predictions\n   - Thought leader perspectives\n   - Academic research findings\n\n3. **Case Studies & Examples**\n   - Success stories\n   - Implementation examples\n   - Before/after scenarios\n   - Real-world applications\n\n4. **Supporting Evidence**\n   - Scientific studies\n   - Survey results\n   - Market research\n   - White papers\n\n5. **Current Trends & Developments**\n   - Latest industry developments\n   - Emerging technologies\n   - Regulatory changes\n   - Future predictions\n\n6. **Credible Sources**\n   - List all source URLs\n   - Publication dates\n   - Author credentials\n   - Source reliability ratings\n\nReturn structured JSON with organized research findings."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "industry-analysis",
+      "name": "Industry Context Analysis",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        150
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an industry analysis AI that provides deep context about market conditions, competitive landscape, and industry dynamics. Focus on strategic insights that inform content positioning."
+            },
+            {
+              "role": "user",
+              "content": "Topic: {{ $node['Select Next Research Topic'].json['selected_topic']['topic_title'] }}\nIndustry Context: {{ $node['Select Next Research Topic'].json['selected_topic']['content_pillar'] }}\nBusiness Value: {{ $node['Select Next Research Topic'].json['selected_topic']['business_value'] }}\n\nProvide industry analysis covering:\n\n1. **Market Landscape**\n   - Market size and segments\n   - Key players and positioning\n   - Market maturity stage\n   - Growth drivers and barriers\n\n2. **Competitive Analysis**\n   - Direct and indirect competitors\n   - Content saturation levels\n   - Differentiation opportunities\n   - Competitive content gaps\n\n3. **Audience Insights**\n   - Target persona characteristics\n   - Pain points and challenges\n   - Information consumption preferences\n   - Decision-making factors\n\n4. **Technology & Innovation**\n   - Emerging technologies\n   - Innovation trends\n   - Disruption potential\n   - Implementation challenges\n\n5. **Regulatory & Compliance**\n   - Industry regulations\n   - Compliance requirements\n   - Policy changes\n   - Legal considerations\n\n6. **Strategic Recommendations**\n   - Content positioning advice\n   - Messaging recommendations\n   - Timing considerations\n   - Risk factors\n\nReturn as structured JSON."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "internal-knowledge-search",
+      "name": "Search Internal Knowledge Base",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        700,
+        250
+      ],
+      "parameters": {
+        "resource": "embedding",
+        "operation": "create",
+        "model": "text-embedding-ada-002",
+        "input": "{{ $node['Select Next Research Topic'].json['selected_topic']['topic_title'] }} {{ $node['Select Next Research Topic'].json['selected_topic']['topic_description'] }}"
+      }
+    },
+    {
+      "id": "query-knowledge-base",
+      "name": "Query Internal Knowledge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        900,
+        250
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pinecone.io/query",
+        "headers": {
+          "Api-Key": "{{ $credentials.pinecone.api_key }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "vector": "={{ $node['Search Internal Knowledge Base'].json.data[0].embedding }}",
+          "topK": 10,
+          "includeMetadata": true,
+          "filter": {
+            "content_type": "internal_knowledge"
+          }
+        }
+      }
+    },
+    {
+      "id": "compile-research-findings",
+      "name": "Compile Research Findings",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        150
+      ],
+      "parameters": {
+        "functionCode": "const topic = $node['Select Next Research Topic'].json.selected_topic;\nconst webResearch = JSON.parse($node['Conduct Web Research'].json.choices[0].message.content);\nconst industryAnalysis = JSON.parse($node['Industry Context Analysis'].json.choices[0].message.content);\nconst internalKnowledge = $node['Query Internal Knowledge'].json.matches || [];\n\n// Compile comprehensive research\nconst researchFindings = {\n  topic_info: {\n    title: topic.topic_title,\n    description: topic.topic_description,\n    content_angle: topic.content_angle,\n    target_audience: topic.target_audience_segment\n  },\n  \n  web_research: {\n    statistics: webResearch.statistics || [],\n    expert_insights: webResearch.expert_insights || [],\n    case_studies: webResearch.case_studies || [],\n    supporting_evidence: webResearch.supporting_evidence || [],\n    trends: webResearch.trends || [],\n    sources: webResearch.sources || []\n  },\n  \n  industry_context: {\n    market_landscape: industryAnalysis.market_landscape || {},\n    competitive_analysis: industryAnalysis.competitive_analysis || {},\n    audience_insights: industryAnalysis.audience_insights || {},\n    technology_trends: industryAnalysis.technology_trends || {},\n    strategic_recommendations: industryAnalysis.strategic_recommendations || []\n  },\n  \n  internal_knowledge: {\n    relevant_content: internalKnowledge.slice(0, 5).map(match => ({\n      content: match.metadata.text,\n      source: match.metadata.source,\n      relevance: match.score,\n      content_type: match.metadata.content_type\n    })),\n    knowledge_gaps: [],\n    internal_expertise: []\n  },\n  \n  content_brief: {\n    key_messages: [],\n    supporting_points: [],\n    data_points: [],\n    expert_quotes: [],\n    examples_to_include: [],\n    sources_to_cite: [],\n    content_structure: {\n      introduction: {\n        hook: '',\n        context: '',\n        thesis: ''\n      },\n      main_sections: [],\n      conclusion: {\n        summary: '',\n        call_to_action: topic.call_to_action || '',\n        next_steps: []\n      }\n    }\n  },\n  \n  research_metadata: {\n    research_id: $node['Select Next Research Topic'].json.research_id,\n    research_depth: $node['Select Next Research Topic'].json.research_depth,\n    research_date: new Date().toISOString(),\n    sources_count: (webResearch.sources || []).length,\n    confidence_score: 8.5, // Algorithm could assess source quality\n    completeness_score: 9.0\n  }\n};\n\n// Extract key insights for content brief\nif (webResearch.statistics && webResearch.statistics.length > 0) {\n  researchFindings.content_brief.data_points = webResearch.statistics.slice(0, 5);\n}\n\nif (webResearch.expert_insights && webResearch.expert_insights.length > 0) {\n  researchFindings.content_brief.expert_quotes = webResearch.expert_insights.slice(0, 3);\n}\n\nif (webResearch.case_studies && webResearch.case_studies.length > 0) {\n  researchFindings.content_brief.examples_to_include = webResearch.case_studies.slice(0, 2);\n}\n\n// Generate content structure\nresearchFindings.content_brief.content_structure.main_sections = topic.key_points.map(point => ({\n  section_title: point,\n  key_points: [],\n  supporting_data: [],\n  examples: []\n}));\n\nreturn researchFindings;"
+      }
+    },
+    {
+      "id": "generate-content-brief",
+      "name": "Generate Content Brief",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        150
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a content strategist AI that creates comprehensive content briefs for writers. Use research findings to create detailed, actionable briefs that guide content creation with specific talking points, structure, and supporting evidence."
+            },
+            {
+              "role": "user",
+              "content": "Research Findings:\n{{ JSON.stringify($node['Compile Research Findings'].json, null, 2) }}\n\nCreate a comprehensive content brief including:\n\n1. **Executive Summary**\n   - Content objective\n   - Target audience profile\n   - Key message\n   - Success metrics\n\n2. **Content Strategy**\n   - Unique angle/positioning\n   - Tone and voice guidelines\n   - Content format specifications\n   - Distribution channels\n\n3. **Detailed Outline**\n   - Introduction (hook, context, thesis)\n   - Main sections with key points\n   - Conclusion and CTA\n   - Suggested word count per section\n\n4. **Supporting Materials**\n   - Statistics to include (with sources)\n   - Expert quotes to use\n   - Case studies/examples\n   - Data visualizations needed\n\n5. **SEO & Optimization**\n   - Primary and secondary keywords\n   - Meta description\n   - Headers (H1, H2, H3) structure\n   - Internal linking opportunities\n\n6. **Quality Guidelines**\n   - Fact-checking requirements\n   - Source citation standards\n   - Legal/compliance considerations\n   - Brand voice alignment\n\n7. **Production Notes**\n   - Research gaps to address\n   - Additional sources needed\n   - Expert interviews required\n   - Visual content specifications\n\nReturn as structured JSON ready for the writing agent."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "store-research-results",
+      "name": "Store Research Results",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        150
+      ],
+      "parameters": {
+        "operation": "insert",
+        "query": "INSERT INTO content_research (research_id, topic_batch_id, topic_title, research_findings, content_brief, research_depth, confidence_score, status, created_at) VALUES ('{{ $node[\"Compile Research Findings\"].json[\"research_metadata\"][\"research_id\"] }}', {{ $node[\"Select Next Research Topic\"].json[\"batch_id\"] }}, '{{ $node[\"Select Next Research Topic\"].json[\"selected_topic\"][\"topic_title\"] }}', '{{ JSON.stringify($node[\"Compile Research Findings\"].json) }}', '{{ $node[\"Generate Content Brief\"].json[\"choices\"][0][\"message\"][\"content\"] }}', '{{ $node[\"Select Next Research Topic\"].json[\"research_depth\"] }}', {{ $node[\"Compile Research Findings\"].json[\"research_metadata\"][\"confidence_score\"] }}, 'completed', NOW()) RETURNING id"
+      }
+    },
+    {
+      "id": "trigger-writing-agent",
+      "name": "Trigger Writing Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1700,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $node['Research Request Trigger'].json['$webhook_url'] }}/start-writing",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "research_id": "={{ $node['Store Research Results'].json[0]['id'] }}",
+          "content_brief": "={{ $node['Generate Content Brief'].json['choices'][0]['message']['content'] }}",
+          "research_findings": "={{ $node['Compile Research Findings'].json }}",
+          "priority": "={{ $node['Select Next Research Topic'].json['fast_track'] ? 'high' : 'normal' }}",
+          "auto_start": true
+        }
+      }
+    },
+    {
+      "id": "webhook-research-validation",
+      "name": "Research Validation Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        400
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "validate-research",
+        "options": {}
+      }
+    },
+    {
+      "id": "load-research-for-validation",
+      "name": "Load Research for Validation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        300,
+        400
+      ],
+      "parameters": {
+        "operation": "select",
+        "query": "SELECT * FROM content_research WHERE research_id = '{{ $json.research_id }}'"
+      }
+    },
+    {
+      "id": "fact-check-research",
+      "name": "AI Fact-Check Research",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        400
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a fact-checking AI that validates research findings for accuracy, currency, and reliability. Check statistics, sources, and claims for potential issues."
+            },
+            {
+              "role": "user",
+              "content": "Research to Validate:\n{{ $json[0].research_findings }}\n\nPerform comprehensive fact-checking:\n\n1. **Source Verification**\n   - Check source credibility\n   - Verify publication dates\n   - Assess author expertise\n   - Rate source reliability\n\n2. **Data Accuracy**\n   - Verify statistics and numbers\n   - Check for data currency\n   - Identify potential inaccuracies\n   - Cross-reference multiple sources\n\n3. **Claim Validation**\n   - Assess expert quote accuracy\n   - Verify case study details\n   - Check trend predictions\n   - Validate industry insights\n\n4. **Quality Assessment**\n   - Rate overall research quality\n   - Identify knowledge gaps\n   - Suggest additional verification\n   - Flag potential risks\n\nReturn validation report with confidence scores and recommendations."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "update-research-validation",
+      "name": "Update Research Validation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        700,
+        400
+      ],
+      "parameters": {
+        "operation": "update",
+        "query": "UPDATE content_research SET validation_report = '{{ $node[\"AI Fact-Check Research\"].json[\"choices\"][0][\"message\"][\"content\"] }}', validation_date = NOW(), validation_status = 'validated' WHERE research_id = '{{ $node[\"Research Validation Request\"].json[\"research_id\"] }}'"
+      }
+    },
+    {
+      "id": "webhook-knowledge-update",
+      "name": "Knowledge Base Update",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        600
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "update-knowledge-base",
+        "options": {}
+      }
+    },
+    {
+      "id": "process-new-knowledge",
+      "name": "Process New Knowledge",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        300,
+        600
+      ],
+      "parameters": {
+        "functionCode": "const request = $input.first().json;\n\n// Process different types of knowledge updates\nconst knowledgeTypes = {\n  'research_findings': {\n    source: request.research_id,\n    content: request.research_data,\n    type: 'research'\n  },\n  'industry_report': {\n    source: request.report_url,\n    content: request.report_summary,\n    type: 'industry_data'\n  },\n  'expert_interview': {\n    source: request.expert_name,\n    content: request.interview_transcript,\n    type: 'expert_insight'\n  },\n  'case_study': {\n    source: request.case_study_title,\n    content: request.case_study_data,\n    type: 'case_study'\n  }\n};\n\nconst knowledgeData = knowledgeTypes[request.knowledge_type] || {\n  source: 'manual_entry',\n  content: request.content,\n  type: 'general'\n};\n\nreturn {\n  knowledge_id: `kb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,\n  knowledge_type: request.knowledge_type,\n  source: knowledgeData.source,\n  content: knowledgeData.content,\n  metadata: {\n    added_by: request.added_by || 'research_agent',\n    confidence_level: request.confidence_level || 'high',\n    expiration_date: request.expiration_date,\n    tags: request.tags || [],\n    category: knowledgeData.type\n  },\n  timestamp: new Date().toISOString()\n};"
+      }
+    },
+    {
+      "id": "generate-knowledge-embeddings",
+      "name": "Generate Knowledge Embeddings",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        600
+      ],
+      "parameters": {
+        "resource": "embedding",
+        "operation": "create",
+        "model": "text-embedding-ada-002",
+        "input": "{{ $json.content }}"
+      }
+    },
+    {
+      "id": "store-in-knowledge-base",
+      "name": "Store in Knowledge Base",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        700,
+        600
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pinecone.io/vectors/upsert",
+        "headers": {
+          "Api-Key": "{{ $credentials.pinecone.api_key }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "vectors": [
+            {
+              "id": "={{ $node['Process New Knowledge'].json['knowledge_id'] }}",
+              "values": "={{ $node['Generate Knowledge Embeddings'].json.data[0].embedding }}",
+              "metadata": {
+                "content": "={{ $node['Process New Knowledge'].json['content'] }}",
+                "source": "={{ $node['Process New Knowledge'].json['source'] }}",
+                "type": "={{ $node['Process New Knowledge'].json['knowledge_type'] }}",
+                "content_type": "internal_knowledge",
+                "added_date": "={{ $node['Process New Knowledge'].json['timestamp'] }}",
+                "confidence": "={{ $node['Process New Knowledge'].json['metadata']['confidence_level'] }}"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Research Request Trigger": {
+      "main": [
+        [
+          {
+            "node": "Load Topic Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Topic Data": {
+      "main": [
+        [
+          {
+            "node": "Select Next Research Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Next Research Topic": {
+      "main": [
+        [
+          {
+            "node": "Conduct Web Research",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Industry Context Analysis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Internal Knowledge Base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conduct Web Research": {
+      "main": [
+        [
+          {
+            "node": "Compile Research Findings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Industry Context Analysis": {
+      "main": [
+        [
+          {
+            "node": "Compile Research Findings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Internal Knowledge Base": {
+      "main": [
+        [
+          {
+            "node": "Query Internal Knowledge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Internal Knowledge": {
+      "main": [
+        [
+          {
+            "node": "Compile Research Findings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Research Findings": {
+      "main": [
+        [
+          {
+            "node": "Generate Content Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content Brief": {
+      "main": [
+        [
+          {
+            "node": "Store Research Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Research Results": {
+      "main": [
+        [
+          {
+            "node": "Trigger Writing Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Validation Request": {
+      "main": [
+        [
+          {
+            "node": "Load Research for Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Research for Validation": {
+      "main": [
+        [
+          {
+            "node": "AI Fact-Check Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Fact-Check Research": {
+      "main": [
+        [
+          {
+            "node": "Update Research Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledge Base Update": {
+      "main": [
+        [
+          {
+            "node": "Process New Knowledge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process New Knowledge": {
+      "main": [
+        [
+          {
+            "node": "Generate Knowledge Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Knowledge Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Store in Knowledge Base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

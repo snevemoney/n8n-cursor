@@ -1,0 +1,201 @@
+{
+  "chatAssets": {
+    "name": "Chat AI Agent",
+    "endpoint": "/chat-assets",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "userEmail": "admin@julianna.com",
+      "chatInput": "What assets do we have in the knowledge base?"
+    }
+  },
+  "assets": {
+    "name": "Asset Management",
+    "endpoint": "/assets",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "assetType": "equipment",
+      "assetName": "HVAC System",
+      "assetCategory": "HVAC",
+      "location": {
+        "building": "Main Building",
+        "floor": "2"
+      },
+      "purchaseDate": "2024-01-15",
+      "purchasePrice": 5000,
+      "currentValue": 4500,
+      "conditionStatus": "good",
+      "status": "active",
+      "manufacturer": "LG",
+      "model": "AC-2024",
+      "serialNumber": "SN123456"
+    }
+  },
+  "workOrders": {
+    "name": "Work Orders",
+    "endpoint": "/work-orders",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "assetId": 1,
+      "title": "HVAC Maintenance Required",
+      "description": "AC unit needs servicing",
+      "priority": "high",
+      "requestedBy": "admin@julianna.com",
+      "scheduledDate": "2024-02-01",
+      "dueDate": "2024-02-05"
+    }
+  },
+  "sustainability": {
+    "name": "Sustainability",
+    "endpoint": "/sustainability-metrics",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "metricType": "energy",
+      "measurementDate": "2024-01-15",
+      "value": 1500,
+      "unit": "kWh",
+      "source": "IoT sensor",
+      "baselineValue": 1400,
+      "targetValue": 1200
+    }
+  },
+  "tenantOnboard": {
+    "name": "Tenant Onboarding",
+    "endpoint": "/tenant-onboard",
+    "method": "POST",
+    "payload": {
+      "tenantId": "new-tenant-test",
+      "businessName": "Test Company Inc",
+      "adminEmail": "admin@testcompany.com",
+      "planType": "premium"
+    }
+  },
+  "email": {
+    "name": "Email Notifications",
+    "endpoint": "/notifications/email",
+    "method": "POST",
+    "payload": {
+      "type": "welcome",
+      "recipient": "newuser@example.com",
+      "data": {
+        "name": "John Doe",
+        "verificationLink": "https://app.example.com/verify?token=abc123"
+      }
+    }
+  },
+  "compliance": {
+    "name": "Compliance",
+    "endpoint": "/compliance",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "type": "gdpr",
+      "action": "check_status"
+    }
+  },
+  "auth": {
+    "name": "Authentication",
+    "endpoint": "/auth",
+    "method": "POST",
+    "payload": {
+      "action": "login",
+      "email": "admin@julianna.com",
+      "password": "SecurePass123!",
+      "tenantId": "julianna"
+    }
+  },
+  "security": {
+    "name": "Security Monitoring",
+    "endpoint": "/security",
+    "method": "POST",
+    "payload": {
+      "action": "rate-limit",
+      "tenantId": "julianna",
+      "userId": "admin@julianna.com"
+    }
+  },
+  "analytics": {
+    "name": "Analytics",
+    "endpoint": "/analytics",
+    "method": "GET",
+    "payload": {
+      "query": {
+        "tenantId": "julianna",
+        "type": "response-time",
+        "days": 30
+      }
+    }
+  },
+  "testing": {
+    "name": "Testing Framework",
+    "endpoint": "/testing",
+    "method": "POST",
+    "payload": {
+      "type": "smoke",
+      "tenantId": "julianna"
+    }
+  },
+  "complianceAudit": {
+    "name": "Compliance Audit",
+    "endpoint": "/compliance",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "type": "audit-log",
+      "action": "generate_report"
+    }
+  },
+  "apiKeys": {
+    "name": "API Key Management",
+    "endpoint": "/api-keys",
+    "method": "POST",
+    "payload": {
+      "action": "create",
+      "tenantId": "julianna",
+      "permissions": ["read", "write"]
+    }
+  },
+  "backup": {
+    "name": "Backup & Restore",
+    "endpoint": "/backup",
+    "method": "POST",
+    "payload": {
+      "action": "schedule-daily",
+      "tenantId": "julianna"
+    }
+  },
+  "advanced": {
+    "name": "Advanced Analytics",
+    "endpoint": "/advanced",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "type": "multi-language",
+      "action": "analyze"
+    }
+  },
+  "emergency": {
+    "name": "Emergency Response",
+    "endpoint": "/emergency",
+    "method": "POST",
+    "payload": {
+      "tenantId": "julianna",
+      "type": "escalate",
+      "severity": "high",
+      "message": "Critical system issue"
+    }
+  },
+  "errorRecovery": {
+    "name": "Error Recovery",
+    "endpoint": "/error-recovery",
+    "method": "POST",
+    "payload": {
+      "action": "retry",
+      "tenantId": "julianna",
+      "workflowId": "test-workflow"
+    }
+  }
+}

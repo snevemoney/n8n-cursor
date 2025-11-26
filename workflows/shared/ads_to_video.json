@@ -1,0 +1,648 @@
+{
+  "createdAt": "2025-10-16T01:25:39.758Z",
+  "updatedAt": "2025-10-17T15:10:24.000Z",
+  "id": "v3BnboH9WyczmbSN",
+  "name": "Ads to video",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Brand Video Creator",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Brand Asset",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Campaign Brief",
+              "placeholder": "Describe your brand story or campaign idea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Mood"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4fcd19cf-fa4d-44ad-9ca3-63ba5d9ce3d8",
+      "name": "Brand Asset Input",
+      "webhookId": "13c5342c-00f5-4aee-8ba9-5c0256af6cca"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this brand asset and create a detailed brand profile.\n\nCampaign Brief from user:\n{{ $('Brand Asset Input').item.json['Campaign Brief'] }}\n\nTarget Mood:\n{{ $('Brand Asset Input').item.json['Target Mood'] || 'authentic' }}\n\nYour task: Create a comprehensive brand analysis focusing on marketing potential and visual storytelling opportunities. Make it feel and look like a UGC vlog. ",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "ROLE: Brand Strategist & Visual Analyst\n\nMISSION: Analyze brand assets to extract strategic marketing insights and visual storytelling elements.\n\nANALYSIS FRAMEWORK:\n\n1. BRAND IDENTITY\n- Core visual elements (logos, typography, color psychology)\n- Brand personality indicators\n- Market positioning signals\n- Competitive differentiation factors\n\n2. STORYTELLING POTENTIAL\n- Emotional connection points\n- Narrative hooks and themes\n- Target audience resonance\n- Lifestyle integration opportunities\n\n3. CAMPAIGN OPPORTUNITIES\n- Key messaging angles\n- Visual metaphors and symbols\n- Seasonal/contextual relevance\n- Cross-platform adaptability\n\nOUTPUT REQUIREMENTS:\n- Provide strategic insights in structured format\n- Focus on actionable creative directions\n- Identify unique selling propositions\n- Suggest emotional triggers and story arcs\n- Consider multi-generational appeal\n- Emphasize authenticity and relatability\n\nTONE: Professional yet creative, strategic but accessible, forward-thinking and trend-aware."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        128
+      ],
+      "id": "527806f8-f63b-4bae-9766-ff7ed166856b",
+      "name": "Brand Strategy Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"brand_identity\": {\n\t\t\"visual_elements\": \"string\",\n\t\t\"personality\": \"string\",\n\t\t\"positioning\": \"string\"\n\t},\n\t\"storytelling_potential\": {\n\t\t\"emotional_hooks\": \"string\",\n\t\t\"narrative_themes\": \"string\",\n\t\t\"audience_connection\": \"string\"\n\t},\n\t\"campaign_opportunities\": {\n\t\t\"key_messages\": \"string\",\n\t\t\"visual_metaphors\": \"string\",\n\t\t\"authenticity_factors\": \"string\"\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        336
+      ],
+      "id": "1843f061-d54b-42e8-94cc-46a4fdbe5028",
+      "name": "Brand Strategy Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        336
+      ],
+      "id": "28188734-f81d-40f1-967b-1b828562dff3",
+      "name": "Brand Analysis Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Brand_Asset",
+        "name": "={{ $json[\"Brand Asset\"].filename }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1hGHGecrUVHqG1UiFl1vw9tSLIWl020ed",
+          "mode": "list",
+          "cachedResultName": "n8n images",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1hGHGecrUVHqG1UiFl1vw9tSLIWl020ed"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        192,
+        128
+      ],
+      "id": "86997949-13c7-4b53-aeab-76bf6893cffa",
+      "name": "Store Brand Asset",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a cinematic video concept based on this brand strategy.\n\nBrand Analysis:\n{{ $json.output.brand_identity.visual_elements }}\n{{ $json.output.brand_identity.personality }}\n{{ $json.output.storytelling_potential.emotional_hooks }}\n\nCampaign Brief:\n{{ $('Brand Asset Input').item.json['Campaign Brief'] }}\n\nTarget Mood: {{ $('Brand Asset Input').item.json['Target Mood'] || 'authentic' }}\n\nDevelop a UGC style video concept that brings this brand to life through compelling visual storytelling. Show the character talking, walking through life etc. UGC vlog\n\nIt should look and feel like a vlog. Make sure the video is lip synced to the audio. Make sure there's dialogue in the video too.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "ROLE: Creative Director & Video Conceptualist\n\nOBJECTIVE: Transform brand strategy into compelling video concepts that drive engagement and conversion.\n\nCREATIVE FRAMEWORK:\n\n1. VISUAL STORYTELLING\n- Hero's journey adaptation for brands\n- Emotional arc development\n- Visual metaphor integration\n- Cinematic composition principles\n\n2. ENGAGEMENT MECHANICS\n- Hook creation (first 3 seconds)\n- Tension and resolution cycles\n- Call-to-action integration\n- Platform optimization considerations\n\n3. PRODUCTION APPROACH\n- Achievable with AI video generation\n- Focus on strong composition over complex effects\n- Emphasize lighting and mood\n- Consider aspect ratios and formats\n\n4. BRAND INTEGRATION\n- Subtle product placement\n- Natural brand moment inclusion\n- Authentic lifestyle contexts\n- Emotional brand association building\n\nOUTPUT STYLE:\n- Think like a film director\n- Balance artistic vision with marketing goals\n- Create concepts that feel premium yet accessible\n- Focus on universal human emotions\n- Ensure scalability across multiple assets\n\nAVOID:\n- Overly commercial language\n- Generic stock footage descriptions\n- Complex technical requirements\n- Unrealistic production demands"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        128
+      ],
+      "id": "6ad492c9-f0a6-464e-8d32-bbbb79ba0ffd",
+      "name": "Creative Director"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"video_concept\": {\n\t\t\"opening_hook\": \"string\",\n\t\t\"main_narrative\": \"string\",\n\t\t\"visual_style\": \"string\",\n\t\t\"emotional_arc\": \"string\"\n\t},\n\t\"production_notes\": {\n\t\t\"lighting_mood\": \"string\",\n\t\t\"composition_style\": \"string\",\n\t\t\"pacing_rhythm\": \"string\"\n\t},\n\t\"brand_integration\": {\n\t\t\"product_moments\": \"string\",\n\t\t\"lifestyle_context\": \"string\",\n\t\t\"call_to_action\": \"string\"\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1008,
+        336
+      ],
+      "id": "720c687d-6f16-4617-9ff8-7e836b5011bb",
+      "name": "Creative Concept Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        816,
+        336
+      ],
+      "id": "28d7027f-9818-4756-96d9-0d1706e85617",
+      "name": "Creative Concept Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Transform this creative concept into a precise video generation prompt.\n\nIt should look and feel like a vlog. \nCreative Concept:\n{{ $json.output.video_concept.main_narrative }}\n{{ $json.output.video_concept.visual_style }}\n{{ $json.output.production_notes.lighting_mood }}\n{{ $json.output.brand_integration.lifestyle_context }}\n\nOriginal Asset URL: {{ $('Store Brand Asset').item.json.webContentLink }}\n\nCreate a production-ready prompt that will generate a compelling brand video.\n\nShow the character talking, walking through life etc. UGC vlog",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "ROLE: AI Video Production Specialist\n\nMISSION: Convert creative concepts into precise, actionable video generation prompts optimized for AI video models.\n\nPROMPT ENGINEERING PRINCIPLES:\n\n1. TECHNICAL PRECISION\n- Specific camera movements and angles\n- Lighting setup descriptions\n- Composition and framing details\n- Duration and pacing instructions\n\n2. VISUAL CLARITY\n- Concrete scene descriptions\n- Character actions and expressions\n- Environmental details\n- Product integration moments\n\n3. PRODUCTION REALISM\n- Achievable with current AI video technology\n- Optimized for Veo3 model capabilities\n- Balanced complexity vs. quality\n- Consistent style throughout\n\n4. BRAND AUTHENTICITY\n- Natural product placement\n- Genuine emotional moments\n- Realistic lifestyle integration\n- Professional yet relatable tone\n\nOUTPUT REQUIREMENTS:\n- Single, comprehensive video prompt (max 150 words)\n- Focus on action, emotion, and visual appeal\n- Include specific technical details\n- Maintain brand message clarity\n- Ensure cultural sensitivity and inclusivity\n\nPROMPT STRUCTURE:\n[Setting] → [Character/Action] → [Product Moment] → [Emotional Resolution] → [Technical Details]\n\nAVOID:\n- Abstract concepts without visual representation\n- Overly complex multi-scene narratives\n- Unrealistic production requirements\n- Generic or clichéd descriptions"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        128
+      ],
+      "id": "4bb81b0c-a623-423f-a5a4-a734d7a02f6b",
+      "name": "Production Specialist"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"final_video_prompt\": \"string\",\n\t\"technical_specs\": {\n\t\t\"duration\": \"string\",\n\t\t\"aspect_ratio\": \"string\",\n\t\t\"style_notes\": \"string\"\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1424,
+        336
+      ],
+      "id": "70e7e7c4-ff20-46ed-8f52-9400341bbdf2",
+      "name": "Production Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1216,
+        336
+      ],
+      "id": "6eefa3e7-7ee4-49f5-8762-b1d7baa95ac2",
+      "name": "Production Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lZKgMC5gqvEU7qus",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/veo3/image-to-video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Brand-Campaign",
+              "value": "={{ $('Brand Asset Input').item.json['Campaign Brief'] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n   \"prompt\": \"{{ $json.output.final_video_prompt }}\",\n   \"image_url\": \"{{ $('Store Brand Asset').item.json.webContentLink }}\",\n   \"aspect_ratio\": \"{{ $json.output.technical_specs.aspect_ratio || '16:9' }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1616,
+        128
+      ],
+      "id": "16e3930f-0526-4a3a-8af5-ff630fe894a0",
+      "name": "Generate Brand Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xvpDtEBHjVdANmIn",
+          "name": "video"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1648,
+        576
+      ],
+      "id": "9a3973bc-e02f-46e5-9295-3bc08b4e6701",
+      "name": "Download Brand Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xvpDtEBHjVdANmIn",
+          "name": "video"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "brand_video_{{ $now.format('YYYY-MM-DD_HH-mm') }}.mp4",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "19PbBfwd8zY8u9Kl84SH5pNvDqBF5iOU-",
+          "mode": "list",
+          "cachedResultName": "n8n videos",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/19PbBfwd8zY8u9Kl84SH5pNvDqBF5iOU-"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2256,
+        160
+      ],
+      "id": "c25079ec-2a1f-4782-bb63-cabecd593b5f",
+      "name": "Archive Brand Video",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bzsPi1fjM1mjZNSm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        128
+      ],
+      "id": "f42182f2-f1b1-4959-af62-f95265bbaa99",
+      "name": "Wait",
+      "webhookId": "a84c54ba-59ba-41fb-8369-d5297e69305a"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "-4948046137",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2464,
+        160
+      ],
+      "id": "ae4f4170-c46d-42d6-9857-1ab163914357",
+      "name": "Send a video",
+      "webhookId": "d18e5771-3ed0-4777-9d59-645d04c11116",
+      "credentials": {
+        "telegramApi": {
+          "id": "8qGE4DrwuE1ODYCY",
+          "name": "Marketing ad bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Brand Asset Input": {
+      "main": [
+        [
+          {
+            "node": "Store Brand Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Strategy Agent": {
+      "main": [
+        [
+          {
+            "node": "Creative Director",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Strategy Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Brand Strategy Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Analysis Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Brand Strategy Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creative Director": {
+      "main": [
+        [
+          {
+            "node": "Production Specialist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creative Concept Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Creative Director",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creative Concept Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Creative Director",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Production Specialist": {
+      "main": [
+        [
+          {
+            "node": "Generate Brand Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Production Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Production Specialist",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Production Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Production Specialist",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Brand Video": {
+      "main": [
+        [
+          {
+            "node": "Archive Brand Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Brand Asset": {
+      "main": [
+        [
+          {
+            "node": "Brand Strategy Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Brand Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Download Brand Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archive Brand Video": {
+      "main": [
+        [
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Brand Asset Input": [
+      {
+        "json": {
+          "Brand Asset": {
+            "filename": "removebg.png",
+            "mimetype": "image/png",
+            "size": 153049
+          },
+          "Campaign Brief": "youtuber",
+          "Target Mood": "happy",
+          "submittedAt": "2025-10-17T11:08:46.949-04:00",
+          "formMode": "test"
+        },
+        "binary": {
+          "Brand_Asset": {
+            "mimeType": "image/png",
+            "fileType": "image",
+            "fileExtension": "png",
+            "data": "filesystem-v2",
+            "fileName": "removebg.png",
+            "id": "filesystem-v2:workflows/v3BnboH9WyczmbSN/executions/temp/binary_data/ce00308a-8db0-4536-8714-ea287f339cad",
+            "fileSize": "153 kB"
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "e69ab2f9-dd57-4455-8d88-db629bf59f54",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-16T01:25:39.761Z",
+      "updatedAt": "2025-10-16T01:25:39.761Z",
+      "role": "workflow:owner",
+      "workflowId": "v3BnboH9WyczmbSN",
+      "projectId": "SF4pJV9FxUwRkZkW",
+      "project": {
+        "createdAt": "2025-08-18T02:57:31.947Z",
+        "updatedAt": "2025-08-18T03:00:41.713Z",
+        "id": "SF4pJV9FxUwRkZkW",
+        "name": "evens louis <snevemoney12@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "createdAt": "2025-08-18T02:57:31.947Z",
+            "updatedAt": "2025-08-18T02:57:31.947Z",
+            "userId": "db619a70-c346-4444-89df-3e5181528a34",
+            "projectId": "SF4pJV9FxUwRkZkW",
+            "user": {
+              "createdAt": "2025-08-18T02:57:31.575Z",
+              "updatedAt": "2025-11-16T00:04:00.000Z",
+              "id": "db619a70-c346-4444-89df-3e5181528a34",
+              "email": "snevemoney12@gmail.com",
+              "firstName": "evens",
+              "lastName": "louis",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-08-18T03:00:45.021Z",
+                "personalization_survey_n8n_version": "1.97.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "WAVzRx4WG8XKqt9d",
+                "userActivatedAt": 1755748820636,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1756022673401
+                },
+                "dismissedCallouts": {
+                  "preBuiltAgentsModalCallout": true
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-16",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

@@ -1,0 +1,211 @@
+# Scorpion Security Rules for Cursor/Claude Code
+
+## Core Mandate
+
+**NEVER TRUST INPUT** - All inputs (HTTP, WebSocket, LLM outputs, tool responses, webhooks) are untrusted.
+
+## Security Checklist for All Code
+
+When writing or reviewing Scorpion code, enforce these rules:
+
+### 1. File Operations
+
+```typescript
+// ❌ NEVER DO THIS
+const filename = req.query.file;
+const path = path.join('uploads', filename);
+const data = await fs.readFile(path);
+
+// ✅ ALWAYS DO THIS
+import { validateFilename, resolveSafePath } from '@/lib/security';
+
+if (!validateFilename(filename, { allowedExtensions: ['.pdf'] })) {
+  return res.status(400).json({ error: 'Invalid filename' });
+}
+const rootDir = path.resolve(process.cwd(), 'uploads');
+const safePath = resolveSafePath(rootDir, filename);
+const data = await fs.readFile(safePath);
+
+// ✅ BEST: Use IDs, not paths
+const record = await db.file.findUnique({ where: { id } });
+const data = await fs.readFile(record.absolutePath);
+```
+
+### 2. Database Queries
+
+```typescript
+// ❌ NEVER DO THIS
+const query = `SELECT * FROM users WHERE email = '${email}'`;
+
+// ✅ ALWAYS DO THIS (parameterized)
+const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+
+// ✅ OR USE ORM (Prisma)
+const user = await prisma.user.findFirst({ where: { email } });
+```
+
+### 3. HTML Rendering
+
+```typescript
+// ❌ NEVER DO THIS
+<div dangerouslySetInnerHTML={{ __html: userContent }} />
+
+// ✅ ALWAYS DO THIS (React escapes by default)
+<div>{userContent}</div>
+
+// ✅ OR SANITIZE IF HTML IS NEEDED
+import { sanitizeHtml } from '@/lib/security/sanitize';
+<div dangerouslySetInnerHTML={{
+  __html: sanitizeHtml(userContent, { allowedTags: ['p', 'strong', 'em'] })
+}} />
+```
+
+### 4. API Routes
+
+```typescript
+// ❌ NEVER DO THIS
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  // No validation!
+}
+
+// ✅ ALWAYS DO THIS
+import { withSecurity } from '@/lib/security/middleware';
+import { z } from 'zod';
+
+const schema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+});
+
+export const POST = withSecurity(
+  {
+    bodySchema: schema,
+    rateLimit: { windowMs: 60000, maxRequests: 100 },
+  },
+  async (request: NextRequest) => {
+    const body = await request.json(); // Already validated
+    // ... handler logic
+  }
+);
+```
+
+### 5. Tool Execution (LLM/Agent)
+
+```typescript
+// ❌ NEVER DO THIS
+const result = await exec(agentCommand);
+
+// ✅ ALWAYS DO THIS
+import { validateToolCall } from '@/lib/security';
+
+const validation = validateToolCall({
+  name: 'executeShell',
+  args: { command: agentCommand },
+});
+
+if (!validation.safe) {
+  throw new Error(`Blocked: ${validation.reason}`);
+}
+const result = await exec(agentCommand);
+```
+
+### 6. Chat Messages
+
+```typescript
+// ❌ NEVER DO THIS
+await db.message.create({ data: { content: userMessage } });
+
+// ✅ ALWAYS DO THIS
+import { sanitizeChatMessage } from '@/lib/security/sanitize';
+
+const sanitized = sanitizeChatMessage(userMessage);
+await db.message.create({ data: { content: sanitized } });
+```
+
+## Quick Reference
+
+### Import Paths
+```typescript
+// Core security
+import { validateFilename, resolveSafePath, escapeSqlLike, validateToolCall } from '@/lib/security';
+
+// Sanitization
+import { sanitizeHtml, stripAllHtml, sanitizeChatMessage } from '@/lib/security/sanitize';
+
+// Middleware
+import { withSecurity, withRateLimit, withAuth } from '@/lib/security/middleware';
+```
+
+### Common Schemas
+```typescript
+import { SecuritySchemas } from '@/lib/security';
+
+SecuritySchemas.filename  // Safe filename validation
+SecuritySchemas.uuid      // UUID validation
+SecuritySchemas.safeId    // Alphanumeric + hyphens/underscores
+SecuritySchemas.email     // Email validation
+SecuritySchemas.safeUrl   // HTTP(S) URL validation
+```
+
+## Auto-Checks for Cursor/Claude
+
+When generating code, automatically check for:
+
+1. **File paths from users** → Must validate with `validateFilename()`
+2. **SQL with user input** → Must use parameterized queries
+3. **HTML from users** → Must sanitize with `sanitizeHtml()` or escape
+4. **New API routes** → Must wrap with `withSecurity()`
+5. **Tool executions** → Must validate with `validateToolCall()`
+6. **User messages** → Must sanitize with `sanitizeChatMessage()`
+
+## Dangerous Patterns to Block
+
+```typescript
+// ❌ BLOCK THESE PATTERNS
+path.join(..., userInput, ...)           // Path traversal risk
+`SELECT * FROM ... ${userInput}`         // SQL injection risk
+dangerouslySetInnerHTML={{ __html }}     // XSS risk (unless sanitized)
+exec(userInput)                          // Command injection risk
+new Function(userInput)                  // Code injection risk
+eval(userInput)                          // Code injection risk
+```
+
+## Test Requirements
+
+Every security-sensitive feature must have tests for:
+
+- `../../../etc/passwd` (directory traversal)
+- `<script>alert(1)</script>` (XSS)
+- `'; DROP TABLE users; --` (SQL injection)
+- `rm -rf /` (command injection)
+
+## Documentation Links
+
+- Full guidelines: `SECURITY.md`
+- Examples: `SECURITY_EXAMPLES.md`
+- Test suite: `tests/security/security.test.ts`
+- Summary: `SECURITY_IMPLEMENTATION_SUMMARY.md`
+
+## Enforcement
+
+When reviewing or generating code:
+
+1. **Always validate input** before using it
+2. **Always sanitize output** before rendering it
+3. **Always use parameterized queries** for databases
+4. **Always validate filenames** for file operations
+5. **Always wrap APIs** with security middleware
+6. **Always log** security-sensitive operations
+
+## Remember
+
+> "All code vulnerabilities stem from one core mistake: trusting user input."
+
+This includes:
+- HTTP requests
+- WebSocket messages
+- LLM/Agent outputs ← **Yes, even AI outputs!**
+- Tool responses
+- Webhook payloads
+- Database content (when displaying to users)
