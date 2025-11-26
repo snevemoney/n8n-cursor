@@ -95,11 +95,11 @@ describe('Resource Tagging', () => {
 
       const tags = createResourceTags(hierarchy, { team: 'platform' });
 
-      expect(tags.organization).toBe('test-org');
-      expect(tags.product).toBe('test-product');
-      expect(tags.environment).toBe('prod');
-      expect(tags.service).toBe('test-service');
-      expect(tags.team).toBe('platform');
+      expect(tags['organization']).toBe('test-org');
+      expect(tags['product']).toBe('test-product');
+      expect(tags['environment']).toBe('prod');
+      expect(tags['service']).toBe('test-service');
+      expect(tags['team']).toBe('platform');
     });
   });
 
@@ -155,11 +155,11 @@ describe('Resource Tagging', () => {
         team: 'platform',
       });
 
-      expect(tags.organization).toBe('scorpion-systems');
-      expect(tags.product).toBe('scorpion-core');
-      expect(tags.environment).toBe('prod');
-      expect(tags.service).toBe('api');
-      expect(tags.team).toBe('platform');
+      expect(tags['organization']).toBe('scorpion-systems');
+      expect(tags['product']).toBe('scorpion-core');
+      expect(tags['environment']).toBe('prod');
+      expect(tags['service']).toBe('api');
+      expect(tags['team']).toBe('platform');
       expect(tags['created-by']).toBe('scorpion');
       expect(tags['created-at']).toBeDefined();
     });

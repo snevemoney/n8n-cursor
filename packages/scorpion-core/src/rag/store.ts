@@ -202,19 +202,19 @@ export class RAGStore {
   }): Promise<void> {
     const knowledge: ExtractedKnowledge = {
       id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      source: doc.metadata.source || 'research',
-      type: doc.metadata.type || 'feature',
-      category: doc.metadata.category || 'general',
-      title: doc.metadata.title || doc.content.substring(0, 100),
+      source: doc.metadata['source'] || 'research',
+      type: doc.metadata['type'] || 'feature',
+      category: doc.metadata['category'] || 'general',
+      title: doc.metadata['title'] || doc.content.substring(0, 100),
       description: doc.content,
       codeSnippets: [],
       patterns: [],
       dependencies: [],
       useCases: [],
-      tags: doc.metadata.tags || [],
-      extractedAt: doc.metadata.timestamp || new Date().toISOString(),
-      filePath: doc.metadata.filePath,
-      contentUrl: doc.metadata.contentUrl
+      tags: doc.metadata['tags'] || [],
+      extractedAt: doc.metadata['timestamp'] || new Date().toISOString(),
+      filePath: doc.metadata['filePath'],
+      contentUrl: doc.metadata['contentUrl']
     };
     
     await this.addKnowledge(knowledge);

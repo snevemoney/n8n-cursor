@@ -68,11 +68,11 @@ export class TechDebtAnalyzer {
     // Log breakdown by priority for debugging
     if (techDebtIssues.length > 0) {
       const tdByPriority = this.groupByPriority(techDebtIssues);
-      console.log(`   Tech Debt: Critical=${tdByPriority.critical.length}, High=${tdByPriority.high.length}, Medium=${tdByPriority.medium.length}, Low=${tdByPriority.low.length}`);
+      console.log(`   Tech Debt: Critical=${tdByPriority['critical'].length}, High=${tdByPriority['high'].length}, Medium=${tdByPriority['medium'].length}, Low=${tdByPriority['low'].length}`);
     }
     if (missingFeatureIssues.length > 0) {
       const mfByPriority = this.groupByPriority(missingFeatureIssues);
-      console.log(`   Missing Features: P0=${mfByPriority.critical.length}, P1=${mfByPriority.high.length}, P2=${mfByPriority.medium.length}`);
+      console.log(`   Missing Features: P0=${mfByPriority['critical'].length}, P1=${mfByPriority['high'].length}, P2=${mfByPriority['medium'].length}`);
     }
 
     return knowledge;
