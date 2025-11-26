@@ -12,7 +12,7 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
   try {
-    if (!process.env.DATABASE_URL) {
+    if (!process.env['DATABASE_URL']) {
       return createSuccessResponse({
         message: 'Database not configured. Usage tracking unavailable.',
         usage: [],

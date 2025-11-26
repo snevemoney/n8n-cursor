@@ -75,11 +75,11 @@ async function checkServiceHealthFast(): Promise<Array<{
     {
       name: 'n8n',
       // Standardize on N8N_API_URL, with fallback to N8N_BASE_URL for backward compatibility
-      url: process.env.N8N_API_URL || process.env.N8N_BASE_URL?.replace('/webhook', '') || 'http://localhost:5678'
+      url: process.env['N8N_API_URL'] || process.env['N8N_BASE_URL']?.replace('/webhook', '') || 'http://localhost:5678'
     },
     {
       name: 'Ollama',
-      url: process.env.OLLAMA_URL || 'http://localhost:11434'
+      url: process.env['OLLAMA_URL'] || 'http://localhost:11434'
     }
   ];
 

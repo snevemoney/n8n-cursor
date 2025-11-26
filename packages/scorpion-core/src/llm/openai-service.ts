@@ -877,7 +877,7 @@ let openAIServiceInstance: OpenAIService | null = null;
 export function getOpenAIService(config?: OpenAIConfig): OpenAIService {
   if (!openAIServiceInstance) {
     if (!config) {
-      const apiKey = process.env.OPENAI_API_KEY;
+      const apiKey = process.env['OPENAI_API_KEY'];
       if (!apiKey) {
         throw new Error('OPENAI_API_KEY environment variable is required');
       }
@@ -890,6 +890,6 @@ export function getOpenAIService(config?: OpenAIConfig): OpenAIService {
 
 // Helper to check if OpenAI is available
 export function isOpenAIAvailable(): boolean {
-  return !!process.env.OPENAI_API_KEY;
+  return !!process.env['OPENAI_API_KEY'];
 }
 

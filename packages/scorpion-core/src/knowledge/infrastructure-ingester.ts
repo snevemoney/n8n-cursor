@@ -221,14 +221,14 @@ export class InfrastructureIngester {
           name: 'n8n',
           type: 'n8n',
           status: 'unknown',
-          url: process.env.N8N_BASE_URL || 'http://localhost:5678',
+          url: process.env['N8N_BASE_URL'] || 'http://localhost:5678',
           port: 5678
         },
         {
           name: 'Ollama',
           type: 'ollama',
           status: 'unknown',
-          url: process.env.OLLAMA_URL || 'http://localhost:11434',
+          url: process.env['OLLAMA_URL'] || 'http://localhost:11434',
           port: 11434
         },
         {
@@ -325,14 +325,14 @@ export class InfrastructureIngester {
         name: 'n8n',
         type: 'n8n',
         status: 'unknown',
-        url: process.env.N8N_BASE_URL || 'http://localhost:5678',
+        url: process.env['N8N_BASE_URL'] || 'http://localhost:5678',
         port: 5678
       },
       {
         name: 'Ollama',
         type: 'ollama',
         status: 'unknown',
-        url: process.env.OLLAMA_URL || 'http://localhost:11434',
+        url: process.env['OLLAMA_URL'] || 'http://localhost:11434',
         port: 11434
       }
     ];

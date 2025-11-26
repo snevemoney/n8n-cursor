@@ -40,12 +40,12 @@ export async function planner(objective: string, context: PipelineContext) {
     const userPrompt = `Objective: ${objective}\n\nContext: ${JSON.stringify(context, null, 2)}`;
     
     // Use a model that's more likely to exist - fallback to llama3.1:8b or scorpion:latest
-    const defaultModel = process.env.OLLAMA_MODEL || process.env.PLANNER_MODEL || "llama3.1:8b";
+    const defaultModel = process.env['OLLAMA_MODEL'] || process.env['PLANNER_MODEL'] || "llama3.1:8b";
     const response = await runModelUnified(
       systemPrompt,
       userPrompt,
       {
-        provider: process.env.LLM_PRIMARY || "ollama",
+        provider: process.env['LLM_PRIMARY'] || "ollama",
         model: defaultModel,
         maxTokens: 2000,
         temperature: 0.7
@@ -96,12 +96,12 @@ export async function council(objective: string, plan: any) {
     const userPrompt = `User Question: ${objective}\n\nPlan Steps:\n${planText}`;
     
     // Use a model that's more likely to exist - fallback to llama3.1:8b or scorpion:latest
-    const defaultModel = process.env.OLLAMA_MODEL || process.env.PLANNER_MODEL || "llama3.1:8b";
+    const defaultModel = process.env['OLLAMA_MODEL'] || process.env['PLANNER_MODEL'] || "llama3.1:8b";
     const response = await runModelUnified(
       systemPrompt,
       userPrompt,
       {
-        provider: process.env.LLM_PRIMARY || "ollama",
+        provider: process.env['LLM_PRIMARY'] || "ollama",
         model: defaultModel,
         maxTokens: 3000,
         temperature: 0.8

@@ -908,7 +908,7 @@ Tags: ${(knowledge.tags || []).join(', ') || '(none)'}
 
   private async generateEmbedding(text: string): Promise<number[]> {
     // HYBRID APPROACH: Use OpenAI embeddings if available, fallback to Ollama
-    const useOpenAIEmbeddings = process.env.USE_OPENAI_EMBEDDINGS === 'true' && process.env.OPENAI_API_KEY;
+    const useOpenAIEmbeddings = process.env['USE_OPENAI_EMBEDDINGS'] === 'true' && process.env['OPENAI_API_KEY'];
     
     if (useOpenAIEmbeddings) {
       try {

@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     // Use environment variable if available, otherwise use query param or default
-    const ollamaUrl = searchParams.get('url') || process.env.OLLAMA_URL || 'http://localhost:11434';
-    const timeoutMs = parseInt(process.env.OLLAMA_TIMEOUT_MS || '10000', 10);
+    const ollamaUrl = searchParams.get('url') || process.env['OLLAMA_URL'] || 'http://localhost:11434';
+    const timeoutMs = parseInt(process.env['OLLAMA_TIMEOUT_MS'] || '10000', 10);
 
     // Validate URL format
     try {
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
             details: 'Ollama may not be running or is not accessible. Make sure Ollama is running: `ollama serve`',
             available: false,
             models: [],
-            fallbackAvailable: !!process.env.OPENAI_API_KEY
+            fallbackAvailable: !!process.env['OPENAI_API_KEY']
           },
           { status: 200 } // Return 200 so UI can handle gracefully
         );
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
             details: 'Ollama may not be running. Start it with: `ollama serve`',
             available: false,
             models: [],
-            fallbackAvailable: !!process.env.OPENAI_API_KEY
+            fallbackAvailable: !!process.env['OPENAI_API_KEY']
           },
           { status: 200 } // Return 200 so UI can handle gracefully
         );
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
           status: response.status,
           available: false,
           models: [],
-          fallbackAvailable: !!process.env.OPENAI_API_KEY
+          fallbackAvailable: !!process.env['OPENAI_API_KEY']
         },
         { status: 200 } // Return 200 so UI can handle gracefully
       );
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
           details: parseError instanceof Error ? parseError.message : 'Unknown parsing error',
           available: false,
           models: [],
-          fallbackAvailable: !!process.env.OPENAI_API_KEY
+          fallbackAvailable: !!process.env['OPENAI_API_KEY']
         },
         { status: 200 } // Return 200 so UI can handle gracefully
       );
@@ -160,12 +160,12 @@ export async function GET(request: NextRequest) {
           success: false,
           error: 'Internal server error',
           message: errorMessage,
-          details: process.env.NODE_ENV === 'development' 
+          details: process.env['NODE_ENV'] === 'development' 
             ? (error instanceof Error ? error.stack : String(error))
             : 'An unexpected error occurred while fetching models from Ollama',
           available: false,
           models: [],
-          fallbackAvailable: !!process.env.OPENAI_API_KEY
+          fallbackAvailable: !!process.env['OPENAI_API_KEY']
         },
         { status: 200 } // Return 200 so UI can handle gracefully
       );

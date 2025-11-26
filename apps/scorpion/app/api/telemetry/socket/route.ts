@@ -19,7 +19,7 @@ import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
 
 export async function GET(req: NextRequest) {
   // Check for authorization if AUTH_TOKEN is set
-  const authToken = process.env.AUTH_TOKEN;
+  const authToken = process.env['AUTH_TOKEN'];
   if (authToken) {
     const authorization = req.headers.get('authorization');
     if (!authorization || authorization !== `Bearer ${authToken}`) {
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   // Check for authorization if AUTH_TOKEN is set
-  const authToken = process.env.AUTH_TOKEN;
+  const authToken = process.env['AUTH_TOKEN'];
   if (authToken) {
     const authorization = req.headers.get('authorization');
     if (!authorization || authorization !== `Bearer ${authToken}`) {

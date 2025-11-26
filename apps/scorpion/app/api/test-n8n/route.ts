@@ -6,9 +6,9 @@ import { join } from 'path';
 export async function GET(request: NextRequest) {
   try {
     console.log('🧪 Testing n8n client...');
-    console.log('🔑 N8N_API_KEY exists:', !!process.env.N8N_API_KEY);
-    console.log('🔑 N8N_API_KEY length:', process.env.N8N_API_KEY?.length || 0);
-    console.log('🌐 N8N_API_URL:', process.env.N8N_API_URL);
+    console.log('🔑 N8N_API_KEY exists:', !!process.env['N8N_API_KEY']);
+    console.log('🔑 N8N_API_KEY length:', process.env['N8N_API_KEY']?.length || 0);
+    console.log('🌐 N8N_API_URL:', process.env['N8N_API_URL']);
     
     // Try reading directly from .env.local to see if it's a Next.js issue
     try {
@@ -42,9 +42,9 @@ export async function GET(request: NextRequest) {
       error: error.message,
       stack: error.stack,
       env: {
-        hasApiKey: !!process.env.N8N_API_KEY,
-        apiKeyLength: process.env.N8N_API_KEY?.length || 0,
-        apiUrl: process.env.N8N_API_URL
+        hasApiKey: !!process.env['N8N_API_KEY'],
+        apiKeyLength: process.env['N8N_API_KEY']?.length || 0,
+        apiUrl: process.env['N8N_API_URL']
       }
     }, { status: 500 });
   }

@@ -40,7 +40,7 @@ export class LLMAdapter {
     temperature?: number;
     maxTokens?: number;
   } = {}) {
-    this.provider = config.provider || (process.env.SCORPION_MODEL_SOURCE as ModelSource) || 'ollama';
+    this.provider = config.provider || (process.env['SCORPION_MODEL_SOURCE'] as ModelSource) || 'ollama';
     this.model = config.model;
     this.temperature = config.temperature;
     this.maxTokens = config.maxTokens;
@@ -99,7 +99,7 @@ export async function runModel(req: LLMRequest): Promise<LLMResponse> {
     });
   }
 
-  const source = (process.env.SCORPION_MODEL_SOURCE || 'ollama') as ModelSource;
+  const source = (process.env['SCORPION_MODEL_SOURCE'] || 'ollama') as ModelSource;
   
   switch (source) {
     case 'ollama':
@@ -115,8 +115,8 @@ export async function runModel(req: LLMRequest): Promise<LLMResponse> {
  * Ollama (local) model with retry logic
  */
 async function runOllama(req: LLMRequest, retries: number = 0): Promise<LLMResponse> {
-  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-  const model = req.model || process.env.OLLAMA_MODEL || 'scorpion:latest';
+  const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
+  const model = req.model || process.env['OLLAMA_MODEL'] || 'scorpion:latest';
   const maxRetries = 3;
   const baseDelay = 1000; // 1 second
   
@@ -175,12 +175,12 @@ async function runOllama(req: LLMRequest, retries: number = 0): Promise<LLMRespo
  * OpenAI model with retry logic
  */
 async function runOpenAI(req: LLMRequest, retries: number = 0): Promise<LLMResponse> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env['OPENAI_API_KEY'];
   if (!apiKey) {
     throw new Error('OPENAI_API_KEY not set');
   }
 
-  const model = req.model || process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const model = req.model || process.env['OPENAI_MODEL'] || 'gpt-4o-mini';
   const maxRetries = 3;
   const baseDelay = 1000;
 
@@ -244,11 +244,11 @@ async function runOpenAI(req: LLMRequest, retries: number = 0): Promise<LLMRespo
  * List available models for current source
  */
 export async function listModels(): Promise<string[]> {
-  const source = (process.env.SCORPION_MODEL_SOURCE || 'ollama') as ModelSource;
+  const source = (process.env['SCORPION_MODEL_SOURCE'] || 'ollama') as ModelSource;
   
   if (source === 'ollama') {
     try {
-      const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+      const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
       const response = await fetch(`${ollamaUrl}/api/tags`);
       if (response.ok) {
         const data = await response.json();
@@ -271,18 +271,18 @@ export async function listModels(): Promise<string[]> {
  * Check if model source is available
  */
 export async function checkModelAvailability(): Promise<boolean> {
-  const source = (process.env.SCORPION_MODEL_SOURCE || 'ollama') as ModelSource;
+  const source = (process.env['SCORPION_MODEL_SOURCE'] || 'ollama') as ModelSource;
   
   try {
     if (source === 'ollama') {
-      const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+      const ollamaUrl = process.env['OLLAMA_URL'] || 'http://localhost:11434';
       const response = await fetch(`${ollamaUrl}/api/tags`, { method: 'HEAD' });
       return response.ok;
     }
     
     if (source === 'openai') {
       // Can't really check without making a request, so assume available if key is set
-      return !!process.env.OPENAI_API_KEY;
+      return !!process.env['OPENAI_API_KEY'];
     }
     
     return false;

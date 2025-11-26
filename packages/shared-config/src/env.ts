@@ -47,7 +47,7 @@ export function getN8nBaseUrl(): string {
  * Get the default tenant ID
  */
 export function getDefaultTenantId(): string {
-  return process.env.NEXT_PUBLIC_DEFAULT_TENANT_ID || 'test-tenant-webhook-validation';
+  return process.env['NEXT_PUBLIC_DEFAULT_TENANT_ID'] || 'test-tenant-webhook-validation';
 }
 
 /**
@@ -61,6 +61,6 @@ export function isLocalDevelopment(): boolean {
            hostname.includes('.local');
   }
   
-  return process.env.NODE_ENV === 'development';
+  return process.env['NODE_ENV'] === 'development';
 }
 
