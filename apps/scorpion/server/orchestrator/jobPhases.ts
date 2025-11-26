@@ -56,7 +56,7 @@ export async function runPlanPhaseStep(job: Job): Promise<PhaseResult> {
     const routing = routeExperts({
       phase: 'PLAN',
       goalSummary,
-      intentTags: job.context.intent ? [job.context.intent] : undefined,
+      intentTags: job.context['intent'] ? [job.context['intent']] : undefined,
     });
     
     // Log expert routing for observability
@@ -83,15 +83,15 @@ export async function runPlanPhaseStep(job: Job): Promise<PhaseResult> {
       // Use full planner with LLM - pass expert IDs as metadata
       planResult = await generatePlan({
         objective: input,
-        conversationHistory: job.context.messages || [],
+        conversationHistory: job.context['messages'] || [],
         context: {
-          sessionId: job.context.sessionId,
-          agentId: job.context?.agentId,
+          sessionId: job.context['sessionId'],
+          agentId: job.context?.['agentId'],
           experts: routing.selected.map(e => e.id), // MoE: pass selected experts
         },
-        tools: job.context.availableTools || {},
-        intent: job.context.intent,
-        lightweightMode: job.context.lightweightMode || false,
+        tools: job.context['availableTools'] || {},
+        intent: job.context['intent'],
+        lightweightMode: job.context['lightweightMode'] || false,
       });
       
       appendJobLog(job.id, {
