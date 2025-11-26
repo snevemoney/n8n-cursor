@@ -1,7 +1,0 @@
-[Unit]
-Description=N8N Backup Verifier
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/n8n-backup-verifier
-User=evens

@@ -1,2 +1,0 @@
-GPT-5 Support Agent workflow created locally
-Import workflows/gpt5-support-agent.json to n8n to capture screenshot

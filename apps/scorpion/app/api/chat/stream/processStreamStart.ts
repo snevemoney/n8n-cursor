@@ -11,22 +11,18 @@
 
 import { NextRequest } from 'next/server';
 import type { ReadableStreamDefaultController } from 'stream/web';
-import type { Message, ScorpionIntent } from '@/lib/chat/types';
+import type { Message } from '@/lib/chat/types';
 import type { ToolResult } from '@/server/types/tooling';
 import type { KnowledgeHit } from '@/server/types/events';
 import { v4 as uuidv4 } from 'uuid';
 import { runModelUnified } from '@/lib/chat/modelRunner';
-import { classifyIntent } from '@/lib/chat/intent';
-import { detectLightweightMode } from '@/lib/utils/systemResources';
 
 // Import all helper functions and utilities
 import { buildStreamContext } from './helpers/streamContext';
 import { handleStreamError } from './helpers/streamErrorHandler';
-import { validateRequest } from './helpers/requestValidation';
 import { tryHandleIdentityIntent } from './handlers/identityHandler';
 import { tryHandleSmallTalk } from './handlers/smallTalkHandler';
 import { detectMlQueryIntent, tryHandleMlQueryIntent } from './handlers/mlQueryHandler';
-// handleUserTool is defined inline below
 import { createOrchestrator } from './helpers/orchestratorSetup';
 import {
   emitToolResult,
@@ -45,11 +41,9 @@ import {
 import {
   makeExecutor,
 } from '@/server/orchestrator/executor';
-// handleExecutorPhase and buildSummarizerContext are handled via planExecutor helper
 import {
   tools,
   userTools,
-  detectUserTool,
 } from '@/lib/chat/tools';
 import { streamFinalAnswer } from './helpers/deltaStreaming';
 import { getCachedResponse } from './helpers/responseCache';
@@ -58,26 +52,21 @@ import { processExecutionResults } from './helpers/resultProcessor';
 import { buildSummarizerContext } from './helpers/summarizerContext';
 import {
   runPromptWithKillSwitch,
-  SafetyGuardSchema,
-  ToolRouterSchema,
-  BudgetGovernorSchema,
   DispatcherSchema,
   StyleEnforcerSchema,
   MemoryManagerSchema
 } from '@scorpion/core';
 import { executeTool } from '@/lib/chat/tools';
 import { emitEvent } from '@/lib/events/event-bus';
-import { getHelperConfig } from '@/lib/chat/helper-config'; // Still needed for POST-FLIGHT checks
+import { getHelperConfig } from '@/lib/chat/helper-config';
 import { shouldSelfCorrect, isToolSafeForSelfCorrection, type SelfCorrectionContext } from '@/lib/chat/self-correction';
 import { getSummarizerPrompt } from '@/lib/chat/summarizer-config';
 import { analyzeConversationHistory } from './helpers/historyAnalysis';
-import { isToolAllowedForIntent, shouldUseKnowledgeBase } from '@/lib/chat/intent';
-// parsePlannerResponse, enforcePlanRules, createFallbackPlan don't exist - using enforcePlan instead
-import { applyPlanEnforcement } from './helpers/planEnforcement';
+import { shouldUseKnowledgeBase } from '@/lib/chat/intent';
 import { validateAndNormalizePlan } from './helpers/planValidator';
 import { handleSummarizerPhase } from './phases/summarizerPhase';
 import { handlePlannerPhase } from './phases/plannerPhase';
-import type { Plan, PlanStep } from '@/lib/chat/types';
+import type { Plan } from '@/lib/chat/types';
 import type { CouncilResult } from '@/server/types/council';
 import { handleCouncilPhase } from './phases/councilPhase';
 import { createContextSnapshot } from '@/server/orchestrator/strategyHandler';
@@ -87,40 +76,17 @@ import { extractDomainTags } from '@/server/council';
 import { logImprovementSignal } from '@/server/orchestrator/selfImprovement';
 import { remember } from '@/lib/chat/memory';
 import { serializeProtocol } from './helpers/protocolSerialization';
-import { fallbackRoute } from './helpers/toolRouter';
 import { learnFromInteraction, enhancePlanWithPatterns, determineExecutionSuccess } from './helpers/patternLearningHelpers';
 import { runPreflightChecks } from './preflightChecks';
 
 // Configuration imports
 import {
-  QUERY_PATTERNS,
-  LIMITS,
-  DEFAULT_USER_ID,
-  DEFAULT_CLIENT_MODE,
-  RISK_MODES,
-  FEATURE_FLAGS,
   getModelConfig,
 } from './config/pipelineConfig';
-import {
-  shouldEnableSafetyGuard,
-  shouldEnableToolRouter,
-  shouldEnableBudgetGovernor,
-  shouldEnableDispatcher,
-  TOOL_ROUTER_RETRY_CONFIG,
-  HELPER_CONTEXT_LIMITS,
-  getRequiredToolsForIntent,
-  getToolRoutingRationale,
-  logHelperStatus,
-  logHelperConfigSummary,
-} from './config/helperOrchestrationConfig';
 
 // Core pipeline imports
-import type { IngestedRequest, QueryClassification, RouteResult, HelperOrchestratorInput, HelperOrchestratorResult } from './core/types';
 import { ingestAndClassifyRequest, classifyQueryType } from './core/requestIngestion';
 import { routeRequest } from './core/intentRouter';
-
-// Orchestration imports
-import { orchestrateHelpers } from './orchestration/helperOrchestrator';
 
 /**
  * Main stream processing handler

@@ -1,9 +1,0 @@
-[Unit]
-Description=N8N Auto Backup Timer
-
-[Timer]
-OnCalendar=hourly
-Persistent=true
-
-[Install]
-WantedBy=timers.target

@@ -1,7 +1,0 @@
-nohup: ignoring input
-comprehensive-n8n-server MCP server started with 39 tools
-n8n Base URL: https://n8ncloud.tech
-n8n Port: 5678
-Authentication: API Key
-Username: Not set
-Total Tools: 39 (8 Workflow + 6 Node + 4 Connection + 8 Credential + 6 Execution + 4 Webhook + 3 Validation)
