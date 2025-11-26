@@ -50,8 +50,8 @@ async function runToolMatrix(options?: { conversationId?: string; onEvent?: (eve
   const spiedExecuteTool = withToolSpy(executeTool, onToolEvent);
 
   // Get planner model from env (PLANNER_MODEL takes precedence, fallback to OLLAMA_MODEL)
-  const plannerModel = process.env.PLANNER_MODEL || process.env.OLLAMA_MODEL || 'llama3.1:8b';
-  const plannerProvider = process.env.OLLAMA_PROVIDER || 'ollama';
+  const plannerModel = process.env['PLANNER_MODEL'] || process.env['OLLAMA_MODEL'] || 'llama3.1:8b';
+  const plannerProvider = process.env['OLLAMA_PROVIDER'] || 'ollama';
   
   console.log(`Using planner model: ${plannerModel} (provider: ${plannerProvider})`);
   console.log(`Note: If model not found, set PLANNER_MODEL or OLLAMA_MODEL to an installed model\n`);

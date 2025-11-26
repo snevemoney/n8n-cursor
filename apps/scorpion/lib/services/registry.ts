@@ -17,7 +17,7 @@ export class ServiceRegistry {
     const now = new Date().toISOString();
 
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         // Fallback: just emit event
         await emitEvent({
           id: randomUUID(),
@@ -92,7 +92,7 @@ export class ServiceRegistry {
    */
   async heartbeat(serviceId: string, status?: 'healthy' | 'unhealthy'): Promise<void> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return;
       }
 
@@ -114,7 +114,7 @@ export class ServiceRegistry {
    */
   async discover(serviceName: string, healthyOnly: boolean = true): Promise<ServiceInstance[]> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return [];
       }
 
@@ -175,7 +175,7 @@ export class ServiceRegistry {
    */
   async listServices(): Promise<ServiceInstance[]> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return [];
       }
 
@@ -214,7 +214,7 @@ export class ServiceRegistry {
    */
   async deregister(serviceId: string): Promise<void> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return;
       }
 
@@ -239,7 +239,7 @@ export class ServiceRegistry {
    */
   async recordHealth(health: ServiceHealth): Promise<void> {
     try {
-      if (!process.env.DATABASE_URL) {
+      if (!process.env['DATABASE_URL']) {
         return;
       }
 
