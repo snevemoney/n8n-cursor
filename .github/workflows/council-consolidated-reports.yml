@@ -62,36 +62,40 @@ jobs:
 
       - name: Collect recent workflows
         id: collect-workflows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PERIOD="${{ steps.config.outputs.period }}"
           
-          # Calculate days to look back
+          # Calculate days to look back and limit
           if [ "$PERIOD" = "daily" ]; then
             DAYS=1
+            LIMIT=20
           elif [ "$PERIOD" = "weekly" ]; then
             DAYS=7
+            LIMIT=50
           elif [ "$PERIOD" = "monthly" ]; then
             DAYS=30
+            LIMIT=100
           else
             DAYS=1
+            LIMIT=20
           fi
           
-          # Calculate cutoff timestamp (Unix timestamp)
-          CUTOFF=$(date -u -d "$DAYS days ago" +%s 2>/dev/null || date -u -v-${DAYS}d +%s 2>/dev/null || echo "0")
+          # Get workflow runs from monitored workflows (simplified - just get recent runs)
+          WORKFLOWS=$(gh run list --workflow=CI.yml --limit $LIMIT --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          SECURITY_WORKFLOWS=$(gh run list --workflow="Security Scan" --limit $LIMIT --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          BACKUP_WORKFLOWS=$(gh run list --workflow="Automated Backup & Verification" --limit $LIMIT --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
           
-          # Get workflow runs from monitored workflows
-          WORKFLOWS=$(gh run list --workflow=CI.yml --limit 50 --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
-          SECURITY_WORKFLOWS=$(gh run list --workflow="Security Scan" --limit 50 --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
-          BACKUP_WORKFLOWS=$(gh run list --workflow="Automated Backup & Verification" --limit 50 --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
-          
-          # Combine workflows
+          # Combine workflows and get unique by SHA
           ALL_WORKFLOWS=$(echo "$WORKFLOWS $SECURITY_WORKFLOWS $BACKUP_WORKFLOWS" | jq -s 'flatten | unique_by(.headSha)' 2>/dev/null || echo "[]")
           
+          # Calculate cutoff date (ISO format)
+          CUTOFF_DATE=$(date -u -d "$DAYS days ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${DAYS}d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "1970-01-01T00:00:00Z")
+          
           # Filter workflows within the time period and extract relevant data
-          WORKFLOW_DATA=$(echo "$ALL_WORKFLOWS" | jq --argjson cutoff "$CUTOFF" '
-            map(select(
-              (.createdAt | fromdateiso8601) >= $cutoff
-            )) |
+          WORKFLOW_DATA=$(echo "$ALL_WORKFLOWS" | jq --arg cutoff "$CUTOFF_DATE" '
+            map(select(.createdAt >= $cutoff)) |
             map({
               workflowName: (.name // "Unknown"),
               status: (if .conclusion == "success" then "success" elif .conclusion == "failure" then "failure" else "cancelled" end),
@@ -107,7 +111,8 @@ jobs:
           
           # If no workflows found, create a sample entry
           if [ -z "$WORKFLOW_DATA" ] || [ "$WORKFLOW_DATA" = "[]" ]; then
-            WORKFLOW_DATA='[{"workflowName":"No recent workflows","status":"success","branch":"main","commitSha":"0000000","commitMessage":"No workflows found in this period","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","changedFiles":[],"errorMessages":[]}]'
+            NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            WORKFLOW_DATA="[{\"workflowName\":\"No recent workflows\",\"status\":\"success\",\"branch\":\"main\",\"commitSha\":\"0000000\",\"commitMessage\":\"No workflows found in this period\",\"timestamp\":\"$NOW\",\"changedFiles\":[],\"errorMessages\":[]}]"
           fi
           
           echo "workflows<<EOF" >> $GITHUB_OUTPUT
