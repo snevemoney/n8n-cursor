@@ -1,9 +1,10 @@
 name: Council Build Analysis
 
 on:
-  workflow_run:
-    workflows: ["CI", "Security Scan", "Automated Backup & Verification"]
-    types: [completed]
+  # Disabled automatic triggers - use consolidated reports instead
+  # workflow_run:
+  #   workflows: ["CI", "Security Scan", "Automated Backup & Verification"]
+  #   types: [completed]
   workflow_dispatch:
     inputs:
       workflow_name:

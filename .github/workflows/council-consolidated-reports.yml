@@ -206,16 +206,15 @@ View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Send consolidated email
-        if: always() && steps.prepare-email.outcome == 'success'
+        if: always() && steps.prepare-email.outcome == 'success' && (secrets.SMTP_USER != '' || secrets.N8N_SMTP_USER != '')
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}
           server_port: ${{ secrets.SMTP_PORT || secrets.N8N_SMTP_PORT || 587 }}
           username: ${{ secrets.SMTP_USER || secrets.N8N_SMTP_USER }}
           password: ${{ secrets.SMTP_PASSWORD || secrets.N8N_SMTP_PASS }}
-          subject: |
-            🦂 Council Consolidated Report - ${{ steps.config.outputs.period }} (${{ steps.config.outputs.style }})
-          to: ${{ secrets.EMAIL_RECIPIENT || github.event.pusher.email || github.actor + '@users.noreply.github.com' }}
+          subject: 🦂 Council Consolidated Report - ${{ steps.config.outputs.period }} (${{ steps.config.outputs.style }})
+          to: ${{ secrets.EMAIL_RECIPIENT }}
           from: ${{ secrets.SMTP_FROM || secrets.N8N_SMTP_SENDER || 'Scorpion Council <noreply@scorpion.ai>' }}
           body: ${{ steps.prepare-email.outputs.content }}
           content_type: text/plain
