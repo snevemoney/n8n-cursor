@@ -1,0 +1,211 @@
+name: Council Consolidated Reports
+
+on:
+  schedule:
+    # Daily at 9 AM UTC
+    - cron: '0 9 * * *'
+    # Weekly on Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+    # Monthly on the 1st at 9 AM UTC
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+    inputs:
+      period:
+        description: 'Report period'
+        required: true
+        type: choice
+        options:
+          - daily
+          - weekly
+          - monthly
+      style:
+        description: 'Language style'
+        required: true
+        type: choice
+        options:
+          - dev
+          - gamer
+          - spy
+          - normal
+
+jobs:
+  generate-consolidated-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set period and style
+        id: config
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PERIOD="${{ github.event.inputs.period }}"
+            STYLE="${{ github.event.inputs.style }}"
+          else
+            # Determine period based on schedule
+            CRON="${{ github.event.schedule }}"
+            if [[ "$CRON" == "0 9 * * *" ]]; then
+              PERIOD="daily"
+            elif [[ "$CRON" == "0 9 * * 1" ]]; then
+              PERIOD="weekly"
+            elif [[ "$CRON" == "0 9 1 * *" ]]; then
+              PERIOD="monthly"
+            else
+              PERIOD="daily"
+            fi
+            STYLE="dev"
+          fi
+          echo "period=$PERIOD" >> $GITHUB_OUTPUT
+          echo "style=$STYLE" >> $GITHUB_OUTPUT
+
+      - name: Collect recent workflows
+        id: collect-workflows
+        run: |
+          PERIOD="${{ steps.config.outputs.period }}"
+          
+          # Calculate days to look back
+          if [ "$PERIOD" = "daily" ]; then
+            DAYS=1
+          elif [ "$PERIOD" = "weekly" ]; then
+            DAYS=7
+          elif [ "$PERIOD" = "monthly" ]; then
+            DAYS=30
+          else
+            DAYS=1
+          fi
+          
+          # Calculate cutoff timestamp (Unix timestamp)
+          CUTOFF=$(date -u -d "$DAYS days ago" +%s 2>/dev/null || date -u -v-${DAYS}d +%s 2>/dev/null || echo "0")
+          
+          # Get workflow runs from monitored workflows
+          WORKFLOWS=$(gh run list --workflow=CI.yml --limit 50 --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          SECURITY_WORKFLOWS=$(gh run list --workflow="Security Scan" --limit 50 --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          BACKUP_WORKFLOWS=$(gh run list --workflow="Automated Backup & Verification" --limit 50 --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          
+          # Combine workflows
+          ALL_WORKFLOWS=$(echo "$WORKFLOWS $SECURITY_WORKFLOWS $BACKUP_WORKFLOWS" | jq -s 'flatten | unique_by(.headSha)' 2>/dev/null || echo "[]")
+          
+          # Filter workflows within the time period and extract relevant data
+          WORKFLOW_DATA=$(echo "$ALL_WORKFLOWS" | jq --argjson cutoff "$CUTOFF" '
+            map(select(
+              (.createdAt | fromdateiso8601) >= $cutoff
+            )) |
+            map({
+              workflowName: (.name // "Unknown"),
+              status: (if .conclusion == "success" then "success" elif .conclusion == "failure" then "failure" else "cancelled" end),
+              branch: (.headBranch // "unknown"),
+              commitSha: (.headSha // ""),
+              commitMessage: (.displayTitle // "No message"),
+              timestamp: .createdAt,
+              changedFiles: [],
+              errorMessages: []
+            }) |
+            .[0:20]
+          ' 2>/dev/null || echo "[]")
+          
+          # If no workflows found, create a sample entry
+          if [ -z "$WORKFLOW_DATA" ] || [ "$WORKFLOW_DATA" = "[]" ]; then
+            WORKFLOW_DATA='[{"workflowName":"No recent workflows","status":"success","branch":"main","commitSha":"0000000","commitMessage":"No workflows found in this period","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","changedFiles":[],"errorMessages":[]}]'
+          fi
+          
+          echo "workflows<<EOF" >> $GITHUB_OUTPUT
+          echo "$WORKFLOW_DATA" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          COUNT=$(echo "$WORKFLOW_DATA" | jq 'length' 2>/dev/null || echo "0")
+          echo "workflow_count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Generate consolidated report
+        id: generate-report
+        env:
+          SCORPION_API_URL: ${{ secrets.SCORPION_API_URL || 'http://localhost:3003' }}
+        continue-on-error: true
+        run: |
+          PERIOD="${{ steps.config.outputs.period }}"
+          STYLE="${{ steps.config.outputs.style }}"
+          WORKFLOW_COUNT="${{ steps.collect-workflows.outputs.workflow_count }}"
+          
+          # Save workflows to file for easier handling
+          echo '${{ steps.collect-workflows.outputs.workflows }}' > /tmp/workflows.json
+          
+          PAYLOAD=$(cat <<EOF
+          {
+            "period": "$PERIOD",
+            "style": "$STYLE",
+            "workflows": $(cat /tmp/workflows.json)
+          }
+          EOF
+          )
+          
+          # Try to call API, but don't fail if it's unavailable
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$SCORPION_API_URL/api/council/consolidated-report" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" 2>&1 || echo -e "\n000")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          if [ "$HTTP_CODE" = "200" ] && echo "$BODY" | jq -e '.report' >/dev/null 2>&1; then
+            REPORT=$(echo "$BODY" | jq -r '.report' 2>/dev/null)
+            echo "$REPORT" > /tmp/consolidated-report.txt
+            echo "report_success=true" >> $GITHUB_OUTPUT
+            echo "✅ Successfully generated council report" >&2
+          else
+            # Fallback report if API fails - still useful
+            echo "⚠️ Council API unavailable (HTTP $HTTP_CODE), generating basic report" >&2
+            SUCCESS_COUNT=$(cat /tmp/workflows.json | jq '[.[] | select(.status == "success")] | length' 2>/dev/null || echo "0")
+            FAIL_COUNT=$(cat /tmp/workflows.json | jq '[.[] | select(.status == "failure")] | length' 2>/dev/null || echo "0")
+            
+            cat > /tmp/consolidated-report.txt <<REPORT
+          🦂 Consolidated Build Report - ${PERIOD^^}
+          
+          Status: Basic summary (Council API unavailable)
+          
+          Workflows Analyzed: $WORKFLOW_COUNT
+          ✅ Successful: $SUCCESS_COUNT
+          ❌ Failed: $FAIL_COUNT
+          
+          Note: Full council analysis requires running Scorpion server.
+          Please check SCORPION_API_URL configuration or ensure server is running.
+          
+          View details: ${{ github.server_url }}/${{ github.repository }}/actions
+          REPORT
+            echo "report_success=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "report<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/consolidated-report.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Send consolidated email
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}
+          server_port: ${{ secrets.SMTP_PORT || secrets.N8N_SMTP_PORT || 587 }}
+          username: ${{ secrets.SMTP_USER || secrets.N8N_SMTP_USER }}
+          password: ${{ secrets.SMTP_PASSWORD || secrets.N8N_SMTP_PASS }}
+          subject: |
+            🦂 Council Consolidated Report - ${{ steps.config.outputs.period }} (${{ steps.config.outputs.style }})
+          to: ${{ secrets.EMAIL_RECIPIENT || github.event.pusher.email || github.actor + '@users.noreply.github.com' }}
+          from: ${{ secrets.SMTP_FROM || secrets.N8N_SMTP_SENDER || 'Scorpion Council <noreply@scorpion.ai>' }}
+          body: |
+            ${{ steps.generate-report.outputs.report }}
+            
+            ---
+            View in GitHub: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          content_type: text/plain
+          ignore_cert: true
+        continue-on-error: true
+
+      - name: Upload consolidated report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: consolidated-report-${{ steps.config.outputs.period }}-${{ github.run_number }}
+          path: /tmp/consolidated-report.txt
+          retention-days: 30
+          if-no-files-found: warn
+
