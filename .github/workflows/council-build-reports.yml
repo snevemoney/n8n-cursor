@@ -1,0 +1,232 @@
+name: Council Build Analysis
+
+on:
+  workflow_run:
+    workflows: ["CI", "Security Scan", "Automated Backup & Verification"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      workflow_name:
+        description: 'Workflow name to analyze'
+        required: false
+        type: string
+
+jobs:
+  council-analysis:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'skipped' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get workflow run info
+        id: workflow-info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            WORKFLOW_NAME="${{ github.event.inputs.workflow_name || 'Manual Analysis' }}"
+            WORKFLOW_STATUS="unknown"
+            BRANCH="${{ github.ref_name }}"
+            COMMIT_SHA="${{ github.sha }}"
+          else
+            WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+            WORKFLOW_STATUS="${{ github.event.workflow_run.conclusion }}"
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
+          fi
+          
+          echo "workflow_name=$WORKFLOW_NAME" >> $GITHUB_OUTPUT
+          echo "workflow_status=$WORKFLOW_STATUS" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          
+          COMMIT_MSG=$(git log -1 --pretty=%B "$COMMIT_SHA" 2>/dev/null || echo "No commit message")
+          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | jq -R -s -c 'split("\n")[:-1]' || echo "[]")
+          else
+            CHANGED_FILES=$(git diff --name-only "$COMMIT_SHA~1" "$COMMIT_SHA" 2>/dev/null | jq -R -s -c 'split("\n")[:-1]' || echo "[]")
+          fi
+          echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+      - name: Get workflow logs
+        id: workflow-logs
+        if: github.event_name != 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          gh run view "${{ github.event.workflow_run.id }}" --log > /tmp/workflow-logs.txt 2>&1 || echo "Failed to fetch logs"
+          LOGS=$(cat /tmp/workflow-logs.txt 2>/dev/null | head -c 5000 | jq -Rs . || echo '""')
+          echo "logs=$LOGS" >> $GITHUB_OUTPUT
+
+      - name: Extract errors from logs
+        id: extract-errors
+        if: github.event_name != 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          if [ -f /tmp/workflow-logs.txt ]; then
+            ERRORS=$(grep -i "error\|failed\|failure" /tmp/workflow-logs.txt 2>/dev/null | head -20 | jq -R -s -c 'split("\n")[:-1]' || echo "[]")
+            echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          else
+            echo "errors=[]" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Call Council Build Analysis API
+        id: council-analysis
+        env:
+          SCORPION_API_URL: ${{ secrets.SCORPION_API_URL || 'http://localhost:3003' }}
+        continue-on-error: true
+        run: |
+          PAYLOAD=$(cat <<EOF
+          {
+            "workflowName": "${{ steps.workflow-info.outputs.workflow_name }}",
+            "workflowStatus": "${{ steps.workflow-info.outputs.workflow_status }}",
+            "branch": "${{ steps.workflow-info.outputs.branch }}",
+            "commitSha": "${{ steps.workflow-info.outputs.commit_sha }}",
+            "commitMessage": ${{ steps.workflow-info.outputs.commit_message }},
+            "changedFiles": ${{ steps.workflow-info.outputs.changed_files }},
+            "buildLogs": ${{ steps.workflow-logs.outputs.logs || '""' }},
+            "errorMessages": ${{ steps.extract-errors.outputs.errors || '[]' }},
+            "metadata": {
+              "workflowRunId": "${{ github.event.workflow_run.id || github.run_id }}",
+              "repository": "${{ github.repository }}",
+              "actor": "${{ github.actor }}"
+            }
+          }
+          EOF
+          )
+          
+          RESPONSE=$(curl -s -X POST "$SCORPION_API_URL/api/council/build-analysis" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" || echo '{"error":"Failed to call council API"}')
+          
+          echo "$RESPONSE" | jq '.' > /tmp/council-report.json 2>/dev/null || echo "$RESPONSE" > /tmp/council-report.json
+          echo "report<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESPONSE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate Council Reports by Member
+        if: always()
+        run: |
+          if [ -f /tmp/council-report.json ]; then
+            echo "# 🦂 Council Build Analysis Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Build Information" >> $GITHUB_STEP_SUMMARY
+            echo "- **Workflow**: $(jq -r '.buildInfo.workflowName // "Unknown"' /tmp/council-report.json 2>/dev/null || echo "Unknown")" >> $GITHUB_STEP_SUMMARY
+            echo "- **Status**: $(jq -r '.buildInfo.status // "Unknown"' /tmp/council-report.json 2>/dev/null || echo "Unknown")" >> $GITHUB_STEP_SUMMARY
+            echo "- **Branch**: $(jq -r '.buildInfo.branch // "Unknown"' /tmp/council-report.json 2>/dev/null || echo "Unknown")" >> $GITHUB_STEP_SUMMARY
+            echo "- **Commit**: $(jq -r '.buildInfo.commitSha // "Unknown"' /tmp/council-report.json 2>/dev/null || echo "Unknown")" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            if jq -e '.summary' /tmp/council-report.json >/dev/null 2>&1; then
+              echo "## Summary" >> $GITHUB_STEP_SUMMARY
+              echo "- **Overall Approval**: $(jq -r '.overallApproval // false' /tmp/council-report.json)" >> $GITHUB_STEP_SUMMARY
+              echo "- **Total Issues**: $(jq -r '.summary.totalIssues // 0' /tmp/council-report.json)" >> $GITHUB_STEP_SUMMARY
+              echo "- **Critical (5)**: $(jq -r '.summary.criticalIssues // 0' /tmp/council-report.json)" >> $GITHUB_STEP_SUMMARY
+              echo "- **High (4)**: $(jq -r '.summary.highIssues // 0' /tmp/council-report.json)" >> $GITHUB_STEP_SUMMARY
+              echo "- **Medium (3)**: $(jq -r '.summary.mediumIssues // 0' /tmp/council-report.json)" >> $GITHUB_STEP_SUMMARY
+              echo "- **Low (1-2)**: $(jq -r '.summary.lowIssues // 0' /tmp/council-report.json)" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              # Generate report for each council member
+              echo "## Council Member Reports" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              # Iterate through each council member's report
+              jq -r '.reportsByMember | to_entries[]? | "\(.key)|\(.value.councillorName)|\(.value.description)|\(.value.approved)|\(.value.issues | length)"' /tmp/council-report.json 2>/dev/null | while IFS='|' read -r id name desc approved issue_count; do
+                if [ -n "$id" ] && ([ "$issue_count" != "0" ] || [ "$approved" = "false" ]); then
+                  echo "### $(echo "$name" | sed 's/"/\\"/g')" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "*$(echo "$desc" | sed 's/"/\\"/g')*" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Status**: $([ "$approved" = "true" ] && echo "✅ Approved" || echo "⚠️ Issues Found")" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  
+                  # List issues for this member
+                  jq -r --arg member_id "$id" '.reportsByMember[$member_id].issues[]? | "- **Severity \(.severity)**: \(.message)"' /tmp/council-report.json 2>/dev/null | while read -r issue; do
+                    if [ -n "$issue" ]; then
+                      echo "$issue" >> $GITHUB_STEP_SUMMARY
+                    fi
+                  done
+                  
+                  # Add recommendations
+                  jq -r --arg member_id "$id" '.reportsByMember[$member_id].issues[]? | select(.recommendation != null) | "  - 💡 *\(.recommendation)*"' /tmp/council-report.json 2>/dev/null | head -3 | while read -r rec; do
+                    if [ -n "$rec" ]; then
+                      echo "$rec" >> $GITHUB_STEP_SUMMARY
+                    fi
+                  done
+                  
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                fi
+              done
+            fi
+            
+            echo "## 📊 Full Report" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>View complete council analysis JSON</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/council-report.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# ⚠️ Council Analysis Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Unable to generate council report. Check API connectivity." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Send Council Report Email
+        if: always() && steps.council-analysis.outcome == 'success'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}
+          server_port: ${{ secrets.SMTP_PORT || secrets.N8N_SMTP_PORT || 587 }}
+          username: ${{ secrets.SMTP_USER || secrets.N8N_SMTP_USER }}
+          password: ${{ secrets.SMTP_PASSWORD || secrets.N8N_SMTP_PASS }}
+          subject: |
+            🦂 Council Build Analysis: ${{ steps.workflow-info.outputs.workflow_name }} - ${{ steps.workflow-info.outputs.workflow_status }}
+          to: ${{ secrets.EMAIL_RECIPIENT || github.event.pusher.email || github.actor + '@users.noreply.github.com' }}
+          from: ${{ secrets.SMTP_FROM || secrets.N8N_SMTP_SENDER || 'Scorpion Council <noreply@scorpion.ai>' }}
+          body: |
+            🦂 Council Build Analysis Report
+            
+            Workflow: ${{ steps.workflow-info.outputs.workflow_name }}
+            Status: ${{ steps.workflow-info.outputs.workflow_status }}
+            Branch: ${{ steps.workflow-info.outputs.branch }}
+            Commit: ${{ steps.workflow-info.outputs.commit_sha }}
+            
+            View full report: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            ---
+            
+            $(cat /tmp/council-report.json 2>/dev/null | jq -r '
+              "Summary:\n" +
+              "- Overall Approval: " + (if .overallApproval then "✅ Approved" else "⚠️ Issues Found" end) + "\n" +
+              "- Total Issues: " + (.summary.totalIssues // 0 | tostring) + "\n" +
+              "- Critical (5): " + (.summary.criticalIssues // 0 | tostring) + "\n" +
+              "- High (4): " + (.summary.highIssues // 0 | tostring) + "\n" +
+              "- Medium (3): " + (.summary.mediumIssues // 0 | tostring) + "\n" +
+              "- Low (1-2): " + (.summary.lowIssues // 0 | tostring) + "\n\n" +
+              "Council Member Reports:\n" +
+              (.reportsByMember | to_entries[]? | 
+                "\n\(.value.councillorName):\n" +
+                "  " + (if .value.approved then "✅ Approved" else "⚠️ Issues Found" end) + "\n" +
+                "  Issues: \(.value.issues | length)\n" +
+                (.value.issues[]? | "  - [Severity \(.severity)] \(.message)\n") +
+                (.value.issues[]? | select(.recommendation != null) | "    💡 \(.recommendation)\n")
+              )
+            ' 2>/dev/null || echo "Report generation in progress...")
+          content_type: text/plain
+          ignore_cert: true
+        continue-on-error: true
+
+      - name: Upload Council Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: council-report-${{ github.run_number }}
+          path: /tmp/council-report.json
+          retention-days: 30
+          if-no-files-found: warn
+
