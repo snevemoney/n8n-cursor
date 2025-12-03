@@ -184,8 +184,29 @@ jobs:
           cat /tmp/consolidated-report.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Send consolidated email
+      - name: Prepare email content
+        id: prepare-email
         if: always()
+        run: |
+          if [ -f /tmp/consolidated-report.txt ]; then
+            REPORT_CONTENT=$(cat /tmp/consolidated-report.txt)
+          else
+            REPORT_CONTENT="🦂 Consolidated Build Report
+
+Status: Report generation failed. Please check workflow logs.
+
+View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+          
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$REPORT_CONTENT" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "---" >> $GITHUB_OUTPUT
+          echo "View in GitHub: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Send consolidated email
+        if: always() && steps.prepare-email.outcome == 'success'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}
@@ -196,11 +217,7 @@ jobs:
             🦂 Council Consolidated Report - ${{ steps.config.outputs.period }} (${{ steps.config.outputs.style }})
           to: ${{ secrets.EMAIL_RECIPIENT || github.event.pusher.email || github.actor + '@users.noreply.github.com' }}
           from: ${{ secrets.SMTP_FROM || secrets.N8N_SMTP_SENDER || 'Scorpion Council <noreply@scorpion.ai>' }}
-          body: |
-            ${{ steps.generate-report.outputs.report }}
-            
-            ---
-            View in GitHub: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          body: ${{ steps.prepare-email.outputs.content }}
           content_type: text/plain
           ignore_cert: true
         continue-on-error: true
