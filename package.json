@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.1.53",
-    "@modelcontextprotocol/sdk": "^1.17.4",
+    "@modelcontextprotocol/sdk": "^1.24.3",
     "cytoscape": "^3.33.1",
     "cytoscape-dagre": "^2.5.0",
     "pg": "^8.16.3",
