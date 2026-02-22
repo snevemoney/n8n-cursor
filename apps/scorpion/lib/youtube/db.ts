@@ -5,7 +5,7 @@
  * Every query is parameterized. No raw string interpolation.
  */
 
-import { query, transaction } from '@/lib/db/client';
+import { query } from '@/lib/db/client';
 import type {
   YouTubeSource,
   YouTubeTranscript,
@@ -56,7 +56,7 @@ export async function upsertSource(src: {
       JSON.stringify(src.metadata_json ?? {}),
     ]
   );
-  return rows[0];
+  return rows[0]!;
 }
 
 export async function findSourceByExternalId(
@@ -82,7 +82,7 @@ export async function createIngestJob(job: {
     `INSERT INTO youtube_ingest_jobs (source_type, source_id) VALUES ($1, $2) RETURNING *`,
     [job.source_type, job.source_id]
   );
-  return rows[0];
+  return rows[0]!;
 }
 
 export async function updateIngestJob(
@@ -197,7 +197,7 @@ export async function upsertTranscript(t: {
       JSON.stringify(t.metadata_json ?? {}),
     ]
   );
-  return rows[0];
+  return rows[0]!;
 }
 
 export async function findTranscriptByVideoId(videoId: string): Promise<YouTubeTranscript | null> {
@@ -292,7 +292,7 @@ export async function createLearningProposal(p: {
       p.revenue_link ?? null,
     ]
   );
-  return rows[0];
+  return rows[0]!;
 }
 
 export async function updateProposalStatus(

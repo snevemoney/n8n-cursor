@@ -16,7 +16,7 @@ export const POST = withErrorHandling(async (request: Request) => {
   const validation = await validateRequest(request, RejectSchema);
   if (!validation.success) return validation.error;
 
-  const { proposalId, reviewerNotes, markAsKnowledgeOnly } = validation.data;
+  const { proposalId, reviewerNotes, markAsKnowledgeOnly } = validation.data as z.infer<typeof RejectSchema>;
 
   const status = markAsKnowledgeOnly
     ? LearningProposalStatus.KNOWLEDGE_ONLY

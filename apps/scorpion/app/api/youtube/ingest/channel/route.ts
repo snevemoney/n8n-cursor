@@ -16,7 +16,7 @@ export const POST = withErrorHandling(async (request: Request) => {
   const validation = await validateRequest(request, IngestChannelSchema);
   if (!validation.success) return validation.error;
 
-  const { url, limit } = validation.data;
+  const { url, limit } = validation.data as z.infer<typeof IngestChannelSchema>;
 
   try {
     const result = await ingestChannel(url, limit);

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { ASCIILogo } from '@/components/scorpion';
 import { Panel, Metric, LoadingState, ErrorState, EmptyState, PageLoadingBar } from '@/components/scorpion';
-import { Activity } from 'lucide-react';
+import { Activity, Youtube, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { usePageData } from '@/hooks/usePageData';
 
@@ -198,6 +198,9 @@ export default function ScorpionHomePage() {
           </Panel>
         ) : null}
 
+        {/* YouTube Intelligence Pipeline Card */}
+        <YouTubeIngestCard />
+
         {/* Quick Access - Always visible for instant navigation */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Link 
@@ -248,9 +251,68 @@ export default function ScorpionHomePage() {
             <div className="sc-title mb-2">Specialized Agents</div>
             <div className="text-xs md:text-sm text-white/70">AI expert agents including LLM training</div>
           </Link>
+          <Link 
+            href="/youtube" 
+            prefetch={true}
+            className="sc-panel p-3 md:p-4 hover:bg-white/5 transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] block min-w-0 border-red-500/20"
+          >
+            <div className="sc-title mb-2 flex items-center gap-2"><Youtube className="h-4 w-4 text-red-500" />YouTube Ingest</div>
+            <div className="text-xs md:text-sm text-white/70">Transcript intelligence pipeline</div>
+          </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+function YouTubeIngestCard() {
+  const [stats, setStats] = useState<{ transcripts_this_week: number; failed_jobs: number; pending_review: number; promoted_count: number } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/youtube/stats')
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setStats(d.data); })
+      .catch(() => {});
+  }, []);
+
+  if (!stats) return null;
+
+  const hasAttention = stats.failed_jobs > 0 || stats.pending_review > 0;
+
+  return (
+    <Link href="/youtube" className="block">
+      <Panel>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Youtube className="h-5 w-5 text-red-500" />
+            <span className="sc-title text-sm">YouTube Intelligence</span>
+          </div>
+          {hasAttention && (
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-yellow-500/20 border border-yellow-500/30 rounded-full sc-mono text-[10px] text-yellow-400">
+              <AlertTriangle className="h-3 w-3" /> Needs attention
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          <div className="text-center">
+            <div className="text-lg font-bold text-emerald-400 sc-mono">{stats.transcripts_this_week}</div>
+            <div className="sc-mono text-[10px] text-white/40">Transcribed</div>
+          </div>
+          <div className="text-center">
+            <div className={`text-lg font-bold sc-mono ${stats.failed_jobs > 0 ? 'text-red-400' : 'text-white/30'}`}>{stats.failed_jobs}</div>
+            <div className="sc-mono text-[10px] text-white/40">Failed</div>
+          </div>
+          <div className="text-center">
+            <div className={`text-lg font-bold sc-mono ${stats.pending_review > 0 ? 'text-blue-400' : 'text-white/30'}`}>{stats.pending_review}</div>
+            <div className="sc-mono text-[10px] text-white/40">Review</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-purple-400 sc-mono">{stats.promoted_count}</div>
+            <div className="sc-mono text-[10px] text-white/40">Promoted</div>
+          </div>
+        </div>
+      </Panel>
+    </Link>
   );
 }
 

@@ -17,8 +17,8 @@ import { TranscriptProvider } from '../types';
 
 const execFileAsync = promisify(execFile);
 const PROVIDER = TranscriptProvider.WHISPER;
-const ENABLED = process.env.YOUTUBE_WHISPER_ENABLED === 'true';
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const ENABLED = process.env['YOUTUBE_WHISPER_ENABLED'] === 'true';
+const OPENAI_API_KEY = process.env['OPENAI_API_KEY'];
 const MAX_AUDIO_SIZE_MB = 25;
 
 export async function isAvailable(): Promise<boolean> {
@@ -76,7 +76,7 @@ export async function fetchTranscript(videoId: string): Promise<TranscriptResult
 
 async function transcribeWithWhisper(videoId: string, audioBuffer: Buffer): Promise<TranscriptResult> {
   const formData = new FormData();
-  const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+  const blob = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/mpeg' });
   formData.append('file', blob, 'audio.mp3');
   formData.append('model', 'whisper-1');
   formData.append('response_format', 'verbose_json');

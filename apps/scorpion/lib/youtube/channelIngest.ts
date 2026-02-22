@@ -18,7 +18,6 @@ import {
   IngestJobStatus,
   type YouTubeIngestJob,
   type IngestRunSummary,
-  type ProviderAttempt,
 } from './types';
 
 const DEFAULT_LIMIT = 15;
@@ -103,7 +102,7 @@ export async function ingestChannel(
 
   const chunks = chunkArray(videos, CONCURRENCY);
   for (const chunk of chunks) {
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       chunk.map(async (video) => {
         try {
           const result = await ingestVideo(video.url);
@@ -220,7 +219,7 @@ function parseRssFeed(xml: string): ChannelVideoEntry[] {
 
   let m: RegExpExecArray | null;
   while ((m = entryRe.exec(xml)) !== null) {
-    const block = m[1];
+    const block = m[1] ?? '';
     const videoId = block.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1];
     const title = block.match(/<media:title>([^<]+)<\/media:title>/)?.[1]
       ?? block.match(/<title>([^<]+)<\/title>/)?.[1];

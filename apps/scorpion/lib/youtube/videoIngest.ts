@@ -16,7 +16,6 @@ import { createHash } from 'crypto';
 import { parseYouTubeURL } from './normalize';
 import { resolveTranscript } from './transcriptResolver';
 import { generateLearningProposal } from './learningProposal';
-import { formatErrorForStorage } from './errors';
 import * as db from './db';
 import {
   TranscriptStatus,

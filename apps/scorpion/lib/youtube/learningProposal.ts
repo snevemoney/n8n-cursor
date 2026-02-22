@@ -30,7 +30,6 @@ import type {
   ProducedAssetTypeValue,
   ProposedActionTypeValue,
 } from './types';
-import { LearningProposalStatus } from './types';
 
 // ---------------------------------------------------------------------------
 // Keyword-based classification (runs without LLM, always available)

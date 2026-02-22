@@ -10,7 +10,7 @@ import type { TranscriptResult, TranscriptSegment } from '../types';
 import { TranscriptProvider } from '../types';
 
 const PROVIDER = TranscriptProvider.YOUTUBE_CAPTIONS;
-const ENABLED = process.env.YOUTUBE_CAPTIONS_ENABLED !== 'false';
+const ENABLED = process.env['YOUTUBE_CAPTIONS_ENABLED'] !== 'false';
 
 export async function isAvailable(): Promise<boolean> {
   return ENABLED;
@@ -59,7 +59,7 @@ export async function fetchTranscript(videoId: string): Promise<TranscriptResult
   return parseTimedTextXml(videoId, xml);
 }
 
-function extractCaptionUrl(html: string, videoId: string): string | null {
+function extractCaptionUrl(html: string, _videoId: string): string | null {
   const captionTrackRe = /"captionTracks":\s*\[(.*?)\]/s;
   const match = html.match(captionTrackRe);
   if (!match?.[1]) return null;
@@ -85,9 +85,9 @@ function parseTimedTextXml(videoId: string, xml: string): TranscriptResult {
   let m: RegExpExecArray | null;
   while ((m = segmentRe.exec(xml)) !== null) {
     segments.push({
-      start: parseFloat(m[1]),
-      duration: parseFloat(m[2]),
-      text: decodeXmlEntities(m[3]),
+      start: parseFloat(m[1] ?? '0'),
+      duration: parseFloat(m[2] ?? '0'),
+      text: decodeXmlEntities(m[3] ?? ''),
     });
   }
 

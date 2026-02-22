@@ -97,7 +97,7 @@ export default function YouTubeIngestPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [jobs, setJobs] = useState<IngestJob[]>([]);
-  const [transcripts, setTranscripts] = useState<Transcript[]>([]);
+  const [_transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [proposals, setProposals] = useState<LearningProposal[]>([]);
   const [stats, setStats] = useState<IngestStats | null>(null);
   const [failedJobs, setFailedJobs] = useState<IngestJob[]>([]);

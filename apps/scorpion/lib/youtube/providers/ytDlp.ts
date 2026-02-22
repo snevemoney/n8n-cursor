@@ -16,7 +16,7 @@ import { TranscriptProvider } from '../types';
 
 const execFileAsync = promisify(execFile);
 const PROVIDER = TranscriptProvider.YT_DLP;
-const ENABLED = process.env.YOUTUBE_YTDLP_ENABLED !== 'false';
+const ENABLED = process.env['YOUTUBE_YTDLP_ENABLED'] !== 'false';
 
 let _binaryAvailable: boolean | null = null;
 

@@ -10,8 +10,8 @@ import type { TranscriptResult, TranscriptSegment } from '../types';
 import { TranscriptProvider } from '../types';
 
 const PROVIDER = TranscriptProvider.TRANSCRIPT_API;
-const TRANSCRIPT_API_BASE = process.env.TRANSCRIPT_API_URL || 'https://yt.lemnoslife.com/noKey';
-const ENABLED = process.env.YOUTUBE_TRANSCRIPT_API_ENABLED !== 'false';
+const TRANSCRIPT_API_BASE = process.env['TRANSCRIPT_API_URL'] || 'https://yt.lemnoslife.com/noKey';
+const ENABLED = process.env['YOUTUBE_TRANSCRIPT_API_ENABLED'] !== 'false';
 
 export async function isAvailable(): Promise<boolean> {
   return ENABLED;

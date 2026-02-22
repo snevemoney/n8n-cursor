@@ -26,7 +26,7 @@ export const POST = withErrorHandling(async (request: Request) => {
   const validation = await validateRequest(request, PromoteSchema);
   if (!validation.success) return validation.error;
 
-  const { proposalId, reviewerNotes } = validation.data;
+  const { proposalId, reviewerNotes } = validation.data as z.infer<typeof PromoteSchema>;
 
   const updated = await updateProposalStatus(
     proposalId,
