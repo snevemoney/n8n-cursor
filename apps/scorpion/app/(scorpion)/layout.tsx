@@ -40,6 +40,7 @@ import {
   Activity,
   GitBranch,
   Wrench,
+  Youtube,
   type LucideIcon
 } from 'lucide-react';
 
@@ -84,8 +85,9 @@ const navigationSections: NavSection[] = [
     ],
   },
   {
-    title: 'Research',
+    title: 'Intelligence',
     items: [
+      { href: '/youtube', label: 'YouTube Ingest', icon: Youtube },
       { href: '/knowledge/recommendations', label: 'Recommendations', icon: Sparkles },
       { href: '/ontology', label: 'Ontology', icon: Database },
       { href: '/research', label: 'Research', icon: Search },
