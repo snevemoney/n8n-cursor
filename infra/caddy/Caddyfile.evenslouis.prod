@@ -68,7 +68,9 @@ llm.n8ncloud.tech {
 }
 
 evenslouis.ca {
-	encode gzip
+	# gzip can break MCP streamable-http — exclude MCP/OAuth discovery
+	@gzipEligible not path /n8n/mcp-server/* /n8n/mcp-oauth/* /.well-known/oauth-protected-resource/*
+	encode @gzipEligible gzip
 
 	handle /builder/* {
 		reverse_proxy localhost:3001
@@ -81,6 +83,13 @@ evenslouis.ca {
 	handle /static/base-path.js {
 		header Content-Type text/javascript
 		respond "window.BASE_PATH = '/n8n/';" 200
+	}
+
+	# n8n WWW-Authenticate advertises apex resource metadata for MCP OAuth
+	handle /.well-known/oauth-protected-resource/n8n* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
 	}
 
 	handle_path /n8n/* {
