@@ -40,7 +40,8 @@ services:
   lightningflow-web:
     <<: *defaults
     build:
-      context: ../../apps/lightningflow/web
+      context: ../..
+      dockerfile: apps/lightningflow/web/Dockerfile
       args:
         NEXT_PUBLIC_BASE_PATH: /lightningflow
         NEXT_PUBLIC_APP_URL: https://evenslouis.ca/lightningflow
