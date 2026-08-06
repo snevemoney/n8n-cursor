@@ -1,0 +1,143 @@
+# Log rotation (max-size 10m, max-file 3) prevents container logs from filling disk.
+services:
+  app:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    build:
+      context: .
+      target: runner
+    ports:
+      - "127.0.0.1:3200:3000"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # Isolated path-aware build for the legacy evenslouis.pro product.
+  # The original app on :3200 remains unchanged.
+  pro:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_BASE_PATH: /pro
+    ports:
+      - "127.0.0.1:3204:3000"
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_BASE_PATH: /pro
+      # Do not set AUTH_URL/NEXTAUTH_URL with a path when using Next.js basePath —
+      # Auth.js then mis-parses /api/auth/* actions (UnknownAction). trustHost +
+      # NextAuth basePath + request rewrite handle the public /pro prefix.
+      AUTH_TRUST_HOST: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:3000/pro/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  worker:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    build:
+      context: .
+      target: worker
+    command: node dist/workers/index.js
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  postgres:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: postgres:16-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: engine
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: client_engine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U engine -d client_engine"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+  builder:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    build:
+      context: ./builder
+      args:
+        BUILDER_BASE_PATH: /builder
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - BUILDER_API_KEY=dev-key
+      - BUILDER_PUBLIC_URL=https://evenslouis.ca/builder
+      - BUILDER_PUBLIC_HOSTNAME=evenslouis.ca
+      - BUILDER_BASE_PATH=/builder
+    volumes:
+      - builder-data:/app/prisma
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  builder-data:
