@@ -1,23 +1,25 @@
-# Build stage
+# Build stage (monorepo context required for @lightning-platform/core)
 FROM node:20-alpine AS build
-WORKDIR /app
+RUN corepack enable
+WORKDIR /workspace
 ARG NEXT_PUBLIC_BASE_PATH=""
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
-COPY package.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/lightningflow/ops/package.json ./apps/lightningflow/ops/package.json
+COPY packages/lightning-core/package.json ./packages/lightning-core/package.json
+RUN pnpm install --frozen-lockfile --filter lfai-ops...
+COPY apps/lightningflow/ops ./apps/lightningflow/ops
+COPY packages/lightning-core ./packages/lightning-core
+RUN pnpm --filter lfai-ops build
 
 # Production stage
 FROM node:20-alpine
-WORKDIR /app
+RUN corepack enable
+WORKDIR /workspace
 ENV NODE_ENV=production
 ENV PORT=3002
 ARG NEXT_PUBLIC_BASE_PATH=""
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
-COPY --from=build /app/.next ./.next
-COPY --from=build /app/public ./public
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /workspace ./
 EXPOSE 3002
-CMD ["npm", "start"]
+CMD ["pnpm", "--filter", "lfai-ops", "start"]

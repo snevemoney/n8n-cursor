@@ -1,4 +1,7 @@
 packages:
   - "apps/*"
+  - "apps/lightningflow/landing"
+  - "apps/lightningflow/web"
+  - "apps/lightningflow/ops"
   - "packages/*"
   - "tooling/*"

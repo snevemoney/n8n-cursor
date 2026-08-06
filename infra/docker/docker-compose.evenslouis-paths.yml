@@ -68,7 +68,8 @@ services:
   lightningflow-ops:
     <<: *defaults
     build:
-      context: ../../apps/lightningflow/ops
+      context: ../..
+      dockerfile: apps/lightningflow/ops/Dockerfile
       args:
         NEXT_PUBLIC_BASE_PATH: /lightningflow/ops
     ports:

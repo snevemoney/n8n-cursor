@@ -1,7 +1,7 @@
 'use client';
 import { apiPath } from '@/lib/base-path';
 
-import { useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -56,7 +56,7 @@ interface SupabaseState {
   lastSynced: string | null;
 }
 
-export default function UnifiedAIAssistantPage() {
+function UnifiedAIAssistantPageContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<'universal' | 'node'>('universal');
   const [selectedIndustry, setSelectedIndustry] = useState<Industry>('general');
@@ -704,5 +704,13 @@ export default function UnifiedAIAssistantPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function UnifiedAIAssistantPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-950" />}>
+      <UnifiedAIAssistantPageContent />
+    </Suspense>
   );
 }

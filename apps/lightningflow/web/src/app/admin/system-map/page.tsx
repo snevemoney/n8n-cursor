@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { SystemMapDashboard } from '@/components/admin/SystemMapDashboard';
 import { requireAdminAuth } from '@/lib/auth/admin';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'System Map - Lightning AI Platform',
   description: 'Comprehensive system architecture and health monitoring'

@@ -5,9 +5,6 @@ const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX || undefined
 const nextConfig = {
   basePath,
   assetPrefix,
-  experimental: {
-    appDir: true,
-  },
 }
 
 module.exports = nextConfig
