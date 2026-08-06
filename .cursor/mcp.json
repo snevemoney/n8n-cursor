@@ -1,11 +1,15 @@
 {
   "mcpServers": {
     "n8n": {
-      "type": "streamable-http",
-      "url": "https://evenslouis.ca/n8n/mcp-server/http",
-      "headers": {
-        "Authorization": "Bearer ${N8N_MCP_TOKEN}"
-      }
+      "command": "npx",
+      "args": [
+        "-y",
+        "supergateway",
+        "--streamableHttp",
+        "https://evenslouis.ca/n8n/mcp-server/http",
+        "--header",
+        "Authorization:Bearer ${N8N_MCP_TOKEN}"
+      ]
     },
     "n8n-mcp": {
       "command": "node",
