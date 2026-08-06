@@ -55,3 +55,13 @@ Restore previous `lightningflow.online` Caddy block from `/root/domain-backups/`
 - Never run `docker compose down -v` for these projects during rollback.
 - Never prune named volumes (`n8n_data`, `client-engine_pgdata`, `client-engine_redisdata`).
 - Build-cache prune (`docker builder prune`) is safe; volume prune is not.
+
+## Known restore fixes (keep these)
+
+1. **Apex `/api*` must proxy to Client Engine `:3200`**, not n8n `:5678`.
+   - n8n APIs stay under `/n8n/*` (`handle_path`) and on `n8ncloud.tech` dual-host routes.
+   - If apex login/dashboard auth returns n8n HTML or Auth.js fails, check this first.
+2. **`/pro` `DATABASE_URL` must use the Docker DNS name `postgres`**, never a hardcoded bridge IP.
+   - Hardcoded IPs break after container recreate (Auth.js `Configuration` / Prisma unreachable).
+3. **`/builder` source (`./builder`) is not in the client-engine git repo** (excluded by design).
+   - Restoring `:3001` requires the out-of-repo builder tree or an existing image; do not treat path cutover as the cause if builder was never on disk.

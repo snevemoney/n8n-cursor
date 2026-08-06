@@ -134,10 +134,11 @@ evenslouis.ca {
 			flush_interval -1
 		}
 	}
+	# /api* must reach Client Engine on :3200 (login/dashboard/auth).
+	# n8n API remains available at /n8n/* via handle_path above, and on
+	# n8ncloud.tech dual-host compatibility routes.
 	handle /api* {
-		reverse_proxy localhost:5678 {
-			flush_interval -1
-		}
+		reverse_proxy localhost:3200
 	}
 	handle /webhook* {
 		reverse_proxy localhost:5678 {
