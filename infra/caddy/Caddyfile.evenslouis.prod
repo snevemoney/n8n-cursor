@@ -161,14 +161,11 @@ evenslouis.ca {
 		reverse_proxy localhost:5678
 	}
 
-	# LightningFlow path deployment. Landing assets use a separate prefix so
-	# their Next.js chunks cannot collide with the customer application.
-	@lightningflowRoot path /lightningflow /lightningflow/
-	handle @lightningflowRoot {
-		reverse_proxy localhost:3201
-	}
+	# LightningFlow path deployment.
+	# Root + app traffic go to the customer web app (:3202). Landing (:3201)
+	# keeps a dedicated asset prefix so its Next chunks cannot collide.
 	handle /lightningflow/healthz {
-		reverse_proxy localhost:3201
+		reverse_proxy localhost:3202
 	}
 	handle_path /lightningflow/_landing/* {
 		reverse_proxy localhost:3201

@@ -90,9 +90,7 @@ evenslouis.ca, www.evenslouis.ca {
   handle /webhook-test* { reverse_proxy 127.0.0.1:5678 }
   handle /icon* { reverse_proxy 127.0.0.1:5678 }
   handle /favicon.ico { reverse_proxy 127.0.0.1:5678 }
-  @lightningflowRoot path /lightningflow /lightningflow/
-  handle @lightningflowRoot { reverse_proxy 127.0.0.1:3201 }
-  handle /lightningflow/healthz { reverse_proxy 127.0.0.1:3201 }
+  handle /lightningflow/healthz { reverse_proxy 127.0.0.1:3202 }
   handle_path /lightningflow/_landing/* { reverse_proxy 127.0.0.1:3201 }
   handle /lightningflow/ops* { reverse_proxy 127.0.0.1:3203 }
   handle /lightningflow* { reverse_proxy 127.0.0.1:3202 }

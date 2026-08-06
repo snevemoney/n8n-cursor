@@ -1,12 +1,5 @@
-import { NextResponse } from "next/server";
+export const dynamic = 'force-dynamic'
 
-export const dynamic = "force-static";
-
-export function GET() {
-  return NextResponse.json({ 
-    ok: true, 
-    ts: Date.now(), 
-    app: "landing",
-    environment: "development"
-  });
+export async function GET() {
+  return Response.json({ ok: true, service: 'lightningflow-landing' })
 }
