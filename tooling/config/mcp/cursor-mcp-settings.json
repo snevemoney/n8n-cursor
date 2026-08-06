@@ -2,7 +2,10 @@
   "mcpServers": {
     "n8n": {
       "type": "streamable-http",
-      "url": "https://evenslouis.ca/n8n/mcp-server/http"
+      "url": "https://evenslouis.ca/n8n/mcp-server/http",
+      "headers": {
+        "Authorization": "Bearer ${N8N_MCP_TOKEN}"
+      }
     },
     "comprehensive-n8n": {
       "command": "node",
