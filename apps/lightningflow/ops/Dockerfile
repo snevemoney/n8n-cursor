@@ -1,6 +1,6 @@
 # Build stage (monorepo context required for @lightning-platform/core)
 FROM node:20-alpine AS build
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@10.33.3 --activate
 WORKDIR /workspace
 ARG NEXT_PUBLIC_BASE_PATH=""
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
@@ -14,7 +14,7 @@ RUN pnpm --filter lfai-ops build
 
 # Production stage
 FROM node:20-alpine
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@10.33.3 --activate
 WORKDIR /workspace
 ENV NODE_ENV=production
 ENV PORT=3002
