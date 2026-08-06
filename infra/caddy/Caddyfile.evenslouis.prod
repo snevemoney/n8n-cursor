@@ -1,7 +1,11 @@
 # Live VPS Caddyfile target for n8n domain migration (synced from /etc/caddy/Caddyfile)
 # Public n8n: https://evenslouis.ca/n8n/
-# Strategy: handle_path strips /n8n*; also proxy absolute /assets /static /rest /webhook
-# Dual-host: n8ncloud.tech keeps webhook/api/rest/healthz; browser UI redirects to /n8n
+#
+# n8n 2.x path-prefix quirk:
+# - Do NOT set N8N_PATH (assets then break under /n8n/assets while HTML references them)
+# - Strip /n8n/* to upstream /
+# - Override /static/base-path.js so Vue router base is /n8n/ (avoids SPA 404)
+# Dual-host: n8ncloud.tech keeps webhook/api/rest/healthz; browser UI redirects to /n8n/
 
 lightningflow.online {
 	encode gzip
@@ -49,7 +53,7 @@ n8ncloud.tech {
 		reverse_proxy localhost:5678
 	}
 	handle {
-		redir https://evenslouis.ca/n8n{uri} permanent
+		redir https://evenslouis.ca/n8n/{uri} permanent
 	}
 }
 
@@ -70,14 +74,21 @@ evenslouis.ca {
 		reverse_proxy localhost:3001
 	}
 
-	# Strip /n8n prefix — n8n listens at /
-	handle_path /n8n* {
+	@n8nExact path /n8n
+	redir @n8nExact /n8n/ permanent
+
+	# SPA base path override (required for path-strip hosting on n8n 2.x)
+	handle /static/base-path.js {
+		header Content-Type text/javascript
+		respond "window.BASE_PATH = '/n8n/';" 200
+	}
+
+	handle_path /n8n/* {
 		reverse_proxy localhost:5678 {
 			flush_interval -1
 		}
 	}
 
-	# Editor emits absolute /assets /static when path is stripped
 	handle /assets* {
 		reverse_proxy localhost:5678 {
 			flush_interval -1
@@ -98,6 +109,11 @@ evenslouis.ca {
 			flush_interval -1
 		}
 	}
+	handle /api* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
 	handle /webhook* {
 		reverse_proxy localhost:5678 {
 			flush_interval -1
@@ -114,6 +130,9 @@ evenslouis.ca {
 		}
 	}
 	handle /favicon.ico {
+		reverse_proxy localhost:5678
+	}
+	handle /healthz {
 		reverse_proxy localhost:5678
 	}
 

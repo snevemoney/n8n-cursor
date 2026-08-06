@@ -101,7 +101,13 @@ n8ncloud.tech, www.n8ncloud.tech {
 evenslouis.ca, www.evenslouis.ca {
   import common
   handle /builder/* { reverse_proxy 127.0.0.1:3001 }
-  handle_path /n8n* {
+  @n8nExact path /n8n
+  redir @n8nExact /n8n/ permanent
+  handle /static/base-path.js {
+    header Content-Type text/javascript
+    respond "window.BASE_PATH = '/n8n/';" 200
+  }
+  handle_path /n8n/* {
     reverse_proxy 127.0.0.1:5678 {
       header_up X-Forwarded-Proto {scheme}
       header_up X-Forwarded-Host {host}

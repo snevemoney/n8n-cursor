@@ -7,9 +7,10 @@
 - Data volume (unchanged): `n8n-cursor_n8n_data` → `/home/node/.n8n`
 - Live project path: `/home/evens/n8n-cursor/docker-compose.yml`
 - Caddy strategy (hybrid):
-  - `handle_path /n8n*` → `127.0.0.1:5678` (strip prefix)
-  - also proxy absolute `/assets*`, `/static*`, `/rest*`, `/webhook*`, `/icon*`, `/favicon.ico`
-  - no `N8N_PATH` (path-prefix mode was brittle on 2.x)
+  - `handle_path /n8n/*` → `127.0.0.1:5678` (strip prefix)
+  - override `/static/base-path.js` → `window.BASE_PATH = '/n8n/'` (fixes SPA 404)
+  - also proxy absolute `/assets*`, `/static*`, `/rest*`, `/api*`, `/webhook*`, `/icon*`, `/favicon.ico`
+  - no `N8N_PATH` (n8n 2.x serves assets at `/assets` even when HTML prefixes `/n8n/assets`)
 - Legacy `n8ncloud.tech`: webhooks/api/rest/healthz proxied; UI redirects to `/n8n`
 - Env URLs: `N8N_EDITOR_BASE_URL` / `N8N_PUBLIC_URL` / `WEBHOOK_URL` = `https://evenslouis.ca/n8n(/)`
 
