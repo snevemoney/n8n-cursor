@@ -18,16 +18,18 @@ RUN pnpm --filter lightning-platform-web build
 
 # Production stage
 FROM node:20-alpine
-RUN corepack enable && corepack prepare pnpm@10.33.3 --activate
-WORKDIR /workspace
+WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV HOSTNAME=0.0.0.0
 ARG NEXT_PUBLIC_BASE_PATH=""
 ARG NEXT_PUBLIC_APP_URL=""
 ARG NEXT_PUBLIC_API_URL=""
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-COPY --from=build /workspace ./
+COPY --from=build /workspace/apps/lightningflow/web/.next/standalone ./
+COPY --from=build /workspace/apps/lightningflow/web/.next/static ./apps/lightningflow/web/.next/static
+COPY --from=build /workspace/apps/lightningflow/web/public ./apps/lightningflow/web/public
 EXPOSE 3001
-CMD ["pnpm", "--filter", "lightning-platform-web", "start"]
+CMD ["node", "apps/lightningflow/web/server.js"]

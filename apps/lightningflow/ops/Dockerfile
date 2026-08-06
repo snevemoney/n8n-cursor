@@ -14,12 +14,13 @@ RUN pnpm --filter lfai-ops build
 
 # Production stage
 FROM node:20-alpine
-RUN corepack enable && corepack prepare pnpm@10.33.3 --activate
-WORKDIR /workspace
+WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3002
+ENV HOSTNAME=0.0.0.0
 ARG NEXT_PUBLIC_BASE_PATH=""
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
-COPY --from=build /workspace ./
+COPY --from=build /workspace/apps/lightningflow/ops/.next/standalone ./
+COPY --from=build /workspace/apps/lightningflow/ops/.next/static ./apps/lightningflow/ops/.next/static
 EXPOSE 3002
-CMD ["pnpm", "--filter", "lfai-ops", "start"]
+CMD ["node", "apps/lightningflow/ops/server.js"]
