@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Import (inactive) to prod n8n
         env:
-          N8N_URL: https://n8ncloud.tech
+          N8N_URL: https://evenslouis.ca/n8n
           N8N_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
         run: |
           for f in workflows/lfai/*.json; do
@@ -83,7 +83,7 @@ jobs:
     steps:
       - name: Activate workflows in prod
         env:
-          N8N_URL: https://n8ncloud.tech
+          N8N_URL: https://evenslouis.ca/n8n
           N8N_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
         run: |
           ids=$(curl -fsS -H "X-N8N-API-KEY: $N8N_API_KEY" "$N8N_URL/rest/workflows" | jq -r '.data[].id')

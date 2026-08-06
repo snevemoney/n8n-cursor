@@ -27,7 +27,7 @@ else
     echo "🖥️  Checking production services..."
     
     # Production health check
-    for d in lightningflow.online app.lightningflow.online ops.lightningflow.online n8ncloud.tech; do
+    for d in lightningflow.online app.lightningflow.online ops.lightningflow.online evenslouis.ca/n8n; do
         echo -n "Checking https://$d/healthz... "
         if curl -sS https://$d/healthz >/dev/null 2>&1; then
             echo "✅ OK"

@@ -13,7 +13,7 @@ import fetch from 'node-fetch';
 // Configuration
 const config = {
   port: process.env.N8N_PORT || 5678,
-  baseUrl: process.env.N8N_BASE_URL || 'https://n8ncloud.tech',
+  baseUrl: process.env.N8N_BASE_URL || 'https://evenslouis.ca/n8n',
   apiKey: process.env.N8N_API_KEY || '',
   username: process.env.N8N_USERNAME || '', // For basic auth
   password: process.env.N8N_PASSWORD || '', // For basic auth

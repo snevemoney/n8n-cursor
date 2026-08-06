@@ -448,7 +448,7 @@ export function WorkflowsClient() {
           </button>
           {w.n8nId && (
             <a
-              href={`https://n8ncloud.tech/workflow/${w.n8nId}`}
+              href={`https://evenslouis.ca/n8n/workflow/${w.n8nId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded hover:bg-purple-500/30 transition-colors duration-100 whitespace-nowrap inline-flex"

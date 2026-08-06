@@ -75,10 +75,10 @@ else
 fi
 
 # Test n8n site
-if time curl -fsS https://n8ncloud.tech/ >/dev/null 2>&1; then
-    echo "✅ n8ncloud.tech: OK"
+if time curl -fsS https://evenslouis.ca/n8n/ >/dev/null 2>&1; then
+    echo "✅ evenslouis.ca/n8n: OK"
 else
-    echo "❌ n8ncloud.tech: FAILED"
+    echo "❌ evenslouis.ca/n8n: FAILED"
 fi
 
 echo ""

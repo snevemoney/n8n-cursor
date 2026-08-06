@@ -22,7 +22,7 @@ const nextConfig = {
   // Image optimization
   images: {
     domains: [
-      'n8ncloud.tech',
+      'evenslouis.ca',
       'n8n.local',
       'localhost',
       'lightningflow.local',

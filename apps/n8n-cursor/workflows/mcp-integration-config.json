@@ -23,7 +23,7 @@
         "/home/evens/n8n-cursor/tools/mcp-servers/comprehensive-n8n-server.mjs"
       ],
       "env": {
-        "N8N_BASE_URL": "https://n8ncloud.tech",
+        "N8N_BASE_URL": "https://evenslouis.ca/n8n",
         "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1NjQxNzY0fQ.i23-xVHsClrhfdHisuZnB7YTHYoYkowveDEt9xC_dPU"
       },
       "tools": [

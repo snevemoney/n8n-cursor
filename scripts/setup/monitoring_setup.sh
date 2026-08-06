@@ -287,7 +287,7 @@ EOF
 cat > monitoring/alertmanager.yml << 'EOF'
 global:
   smtp_smarthost: 'localhost:587'
-  smtp_from: 'alerts@n8ncloud.tech'
+  smtp_from: 'alerts@evenslouis.ca'
 
 route:
   group_by: ['alertname', 'tenant_id']
@@ -311,7 +311,7 @@ receivers:
 
   - name: 'critical-alerts'
     email_configs:
-      - to: 'admin@n8ncloud.tech'
+      - to: 'admin@evenslouis.ca'
         subject: 'CRITICAL: {{ .GroupLabels.alertname }}'
         body: |
           {{ range .Alerts }}
@@ -324,7 +324,7 @@ receivers:
 
   - name: 'warning-alerts'
     email_configs:
-      - to: 'admin@n8ncloud.tech'
+      - to: 'admin@evenslouis.ca'
         subject: 'WARNING: {{ .GroupLabels.alertname }}'
         body: |
           {{ range .Alerts }}

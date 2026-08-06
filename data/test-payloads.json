@@ -1,7 +1,7 @@
 {
   "ai_saas_scaffold_tests": {
     "openai_test": {
-      "url": "https://n8ncloud.tech/webhook/ai-saas-hook",
+      "url": "https://evenslouis.ca/n8n/webhook/ai-saas-hook",
       "method": "POST",
       "payload": {
         "action": "openai",
@@ -9,7 +9,7 @@
       }
     },
     "supabase_test": {
-      "url": "https://n8ncloud.tech/webhook/ai-saas-hook", 
+      "url": "https://evenslouis.ca/n8n/webhook/ai-saas-hook", 
       "method": "POST",
       "payload": {
         "action": "supabase",
@@ -19,7 +19,7 @@
       }
     },
     "discord_test": {
-      "url": "https://n8ncloud.tech/webhook/ai-saas-hook",
+      "url": "https://evenslouis.ca/n8n/webhook/ai-saas-hook",
       "method": "POST", 
       "payload": {
         "action": "discord",
@@ -29,14 +29,14 @@
   },
   "research_agent_tests": {
     "basic_question": {
-      "url": "https://n8ncloud.tech/webhook/demo-research-agent",
+      "url": "https://evenslouis.ca/n8n/webhook/demo-research-agent",
       "method": "POST",
       "payload": {
         "question": "What is n8n-MCP and how does it work?"
       }
     },
     "complex_question": {
-      "url": "https://n8ncloud.tech/webhook/demo-research-agent",
+      "url": "https://evenslouis.ca/n8n/webhook/demo-research-agent",
       "method": "POST",
       "payload": {
         "question": "How can AI-powered workflow automation transform business processes?"

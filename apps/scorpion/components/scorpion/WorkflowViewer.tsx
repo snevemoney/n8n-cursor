@@ -553,7 +553,7 @@ export function WorkflowViewer({ workflow, onClose }: WorkflowViewerProps) {
   }, [displayWorkflow]);
 
   const n8nUrl = displayWorkflow.n8nId || workflow.n8nId
-    ? `https://n8ncloud.tech/workflow/${displayWorkflow.n8nId || workflow.n8nId}`
+    ? `https://evenslouis.ca/n8n/workflow/${displayWorkflow.n8nId || workflow.n8nId}`
     : null;
 
   const modalContent = (

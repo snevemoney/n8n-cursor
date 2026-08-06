@@ -116,7 +116,7 @@ check_health_endpoints() {
     fi
     
     # Check n8n health endpoint
-    if curl -fsS -m 5 https://n8ncloud.tech/healthz >/dev/null 2>&1; then
+    if curl -fsS -m 5 https://evenslouis.ca/n8n/healthz >/dev/null 2>&1; then
         pass "n8n health endpoint responding"
     else
         fail "n8n health endpoint not responding"
@@ -147,7 +147,7 @@ check_health_latency() {
     fi
     
     # Check n8n health latency
-    N8N_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://n8ncloud.tech/healthz 2>/dev/null || echo "999")
+    N8N_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://evenslouis.ca/n8n/healthz 2>/dev/null || echo "999")
     if (( $(echo "$N8N_LATENCY < 0.2" | bc -l) )); then
         pass "n8n health endpoint latency: ${N8N_LATENCY}s"
     else

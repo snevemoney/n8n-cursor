@@ -4,7 +4,7 @@
       "command": "node",
       "args": ["tools/mcp-servers/comprehensive-n8n-server.mjs"],
       "env": {
-        "N8N_BASE_URL": "https://n8ncloud.tech",
+        "N8N_BASE_URL": "https://evenslouis.ca/n8n",
         "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2OTQ5NjYwfQ.GaodXlSEJJuKirhnni4hq8XjgTbrZ8Px6DC1znpUn7A",
         "N8N_API_PATH": "/api/v1",
         "N8N_AUTH_HEADER": "X-N8N-API-KEY"

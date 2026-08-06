@@ -26,7 +26,7 @@ export class MCPn8nClient {
 
   constructor() {
     // Standardize on N8N_API_URL, with fallback to N8N_BASE_URL for backward compatibility
-    let baseUrl = process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'https://n8ncloud.tech';
+    let baseUrl = process.env.N8N_API_URL || process.env.N8N_BASE_URL || 'https://evenslouis.ca/n8n';
     
     // Ensure baseUrl includes /api/v1 for n8n API endpoints
     if (!baseUrl.includes('/api/v1')) {
@@ -84,7 +84,7 @@ export class MCPn8nClient {
       console.error('❌❌❌ INVALID N8N_API_KEY DETECTED!');
       console.error(`   Current value looks like a placeholder (length: ${this.apiKey.length})`);
       console.error(`   Preview: ${this.apiKey.substring(0, 20)}...`);
-      console.error('   Update apps/scorpion/.env.local with your real API key from n8ncloud.tech');
+      console.error('   Update apps/scorpion/.env.local with your real API key from evenslouis.ca/n8n');
       console.error('   Then restart the server.');
       // Don't set apiKey to empty - keep it so we can show the error
     }
@@ -240,7 +240,7 @@ export class MCPn8nClient {
             if (now - this.lastAuthError > this.authErrorThrottle) {
               console.error('❌ n8n authentication failed (401/403)');
               console.error('   Check that N8N_API_KEY in apps/scorpion/.env.local is correct');
-              console.error('   Get your API key from: https://n8ncloud.tech/settings/api');
+              console.error('   Get your API key from: https://evenslouis.ca/n8n/settings/api');
               this.lastAuthError = now;
             }
           } else {

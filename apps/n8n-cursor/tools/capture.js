@@ -3,7 +3,7 @@ import path from 'path';
 import puppeteer from 'puppeteer';
 
 // ---- Config ----
-const BASE = process.env.N8N_BASE_URL || 'https://n8ncloud.tech';
+const BASE = process.env.N8N_BASE_URL || 'https://evenslouis.ca/n8n';
 const EMAIL = process.env.N8N_EMAIL;
 const PASSWORD = process.env.N8N_PASSWORD;
 

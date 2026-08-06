@@ -70,7 +70,7 @@ export const sideHustles: SideHustle[] = [
     tenantId: 'n8n-cursor',
     name: 'n8n-cursor',
     description: 'Multi-tenant SaaS platform with n8n workflow automation',
-    domain: 'https://n8ncloud.tech',
+    domain: 'https://evenslouis.ca/n8n',
     localDomain: 'http://n8n.local',
     icon: '🔄',
     status: 'active',

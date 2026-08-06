@@ -24,7 +24,7 @@ declare -A NAVIGATION_FLOWS=(
     ["payments-send"]="https://lightningflow.online/payments|https://lightningflow.online/payments/send|10"
     ["payments-receive"]="https://lightningflow.online/payments|https://lightningflow.online/payments/receive|10"
     ["api-health"]="https://lightningflow.online/api/healthz|200|5"
-    ["n8n-health"]="https://n8ncloud.tech/healthz|200|5"
+    ["n8n-health"]="https://evenslouis.ca/n8n/healthz|200|5"
     ["scorpion-health"]="http://localhost:3003/api/health|200|5"
 )
 
@@ -147,7 +147,7 @@ check_service_dependencies() {
     local services=(
         "lightningflow.online|UI"
         "lightningflow.online/api/healthz|API"
-        "n8ncloud.tech/healthz|n8n"
+        "evenslouis.ca/n8n/healthz|n8n"
     )
     
     local all_healthy=true
@@ -256,7 +256,7 @@ main() {
         if [ "$ALERT_ON_FAILURE" = "--alert" ]; then
             echo -e "${RED}🚨 Alerting on failures...${NC}"
             # Integrate with your alerting system (n8n webhook, PagerDuty, etc.)
-            # Example: curl -X POST "https://n8ncloud.tech/webhook/navigation-alert" \
+            # Example: curl -X POST "https://evenslouis.ca/n8n/webhook/navigation-alert" \
             #   -d "{\"failures\": $(IFS=','; echo "${failures[*]}")}"
         fi
         exit 1

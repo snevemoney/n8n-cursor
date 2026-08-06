@@ -85,27 +85,39 @@ lightningflow.online, www.lightningflow.online {
   }
 }
 
-# n8nCloud Domain - n8n + Integration Tooling
+# Legacy n8n apex (dual-host cutover) — see Caddyfile.evenslouis.prod for live target
 n8ncloud.tech, www.n8ncloud.tech {
   import common
-  
-  # Health endpoint for n8n
+  handle /webhook* { reverse_proxy 127.0.0.1:5678 }
+  handle /webhook-test* { reverse_proxy 127.0.0.1:5678 }
+  handle /rest* { reverse_proxy 127.0.0.1:5678 }
+  handle /api* { reverse_proxy 127.0.0.1:5678 }
   @health path /healthz
-  handle @health {
-    respond 200 {
-      body "OK"
-      header Content-Type "text/plain"
+  handle @health { reverse_proxy 127.0.0.1:5678 }
+  handle { redir https://evenslouis.ca/n8n{uri} permanent }
+}
+
+# Personal site + n8n under /n8n (strip prefix; proxy absolute editor assets)
+evenslouis.ca, www.evenslouis.ca {
+  import common
+  handle /builder/* { reverse_proxy 127.0.0.1:3001 }
+  handle_path /n8n* {
+    reverse_proxy 127.0.0.1:5678 {
+      header_up X-Forwarded-Proto {scheme}
+      header_up X-Forwarded-Host {host}
+      header_up X-Real-IP {remote_host}
     }
   }
-  
-  # n8n UI/API
+  handle /assets* { reverse_proxy 127.0.0.1:5678 }
+  handle /static* { reverse_proxy 127.0.0.1:5678 }
+  handle /types* { reverse_proxy 127.0.0.1:5678 }
+  handle /rest* { reverse_proxy 127.0.0.1:5678 }
+  handle /webhook* { reverse_proxy 127.0.0.1:5678 }
+  handle /webhook-test* { reverse_proxy 127.0.0.1:5678 }
+  handle /icon* { reverse_proxy 127.0.0.1:5678 }
+  handle /favicon.ico { reverse_proxy 127.0.0.1:5678 }
   handle {
-    reverse_proxy 127.0.0.1:5678 {
-      health_uri /
-      health_interval 30s
-      health_timeout 5s
-      
-      # n8n-specific headers
+    reverse_proxy 127.0.0.1:3200 {
       header_up X-Forwarded-Proto {scheme}
       header_up X-Forwarded-Host {host}
       header_up X-Real-IP {remote_host}

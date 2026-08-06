@@ -70,7 +70,7 @@ jobs:
           if [ -f "infra/caddy/Caddyfile" ]; then
             echo "✅ Caddyfile exists"
             # Basic syntax check
-            if grep -q "lightningflow.online\|n8ncloud.tech" infra/caddy/Caddyfile; then
+            if grep -qE "lightningflow\.online|evenslouis\.ca|n8ncloud\.tech" infra/caddy/Caddyfile infra/caddy/Caddyfile.prod infra/caddy/Caddyfile.evenslouis.prod 2>/dev/null; then
               echo "✅ Domain configuration found"
             else
               echo "❌ Domain configuration missing"

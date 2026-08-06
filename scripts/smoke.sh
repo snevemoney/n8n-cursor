@@ -3,7 +3,7 @@ set -e
 urls=(
   "https://lightningflow.online/healthz"
   "https://lightningflow.online/api/healthz"
-  "https://n8ncloud.tech/healthz"
+  "https://evenslouis.ca/n8n/healthz"
 )
 for u in "${urls[@]}"; do
   code=$(curl -sw '%{http_code}' -o /dev/null "$u")

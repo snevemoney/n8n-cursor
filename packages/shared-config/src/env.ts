@@ -26,9 +26,8 @@ export function getN8nBaseUrl(): string {
       return 'http://n8n.local/webhook';
     }
     
-    // Client-side production/cloud - use cloud URL
-    // This ensures n8ncloud.tech and LightningFlow.online still work
-    return 'https://n8ncloud.tech/webhook';
+    // Client-side production/cloud — n8n under evenslouis.ca/n8n
+    return 'https://evenslouis.ca/n8n/webhook';
   }
 
   // Server-side detection
@@ -40,7 +39,7 @@ export function getN8nBaseUrl(): string {
 
   // Server-side production or fallback
   const baseUrl = process.env['N8N_BASE_URL'];
-  return baseUrl || 'https://n8ncloud.tech/webhook';
+  return baseUrl || 'https://evenslouis.ca/n8n/webhook';
 }
 
 /**

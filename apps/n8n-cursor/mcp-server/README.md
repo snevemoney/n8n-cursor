@@ -9,11 +9,11 @@ This is the Model Context Protocol (MCP) server that allows Cursor to interact w
 Copy this entire `mcp-server/` folder to your n8n server:
 
 ```bash
-# On your local machine
-scp -r -P 22222 mcp-server/ evens@n8ncloud.tech:/home/evens/n8n-mcp/
+# On your local machine (SSH Host alias may still be "n8ncloud" — IP-based)
+scp -r -P 22222 mcp-server/ evens@69.62.66.78:/home/evens/n8n-mcp/
 
 # SSH to server and install
-ssh -p 22222 evens@n8ncloud.tech
+ssh -p 22222 evens@69.62.66.78
 cd /home/evens/n8n-mcp
 npm install
 ```
@@ -36,11 +36,11 @@ Add this to your Cursor settings (Settings → MCP):
       "command": "ssh",
       "args": [
         "-p", "22222",
-        "evens@n8ncloud.tech",
+        "evens@69.62.66.78",
         "/home/evens/n8n-mcp/index.js"
       ],
       "env": {
-        "N8N_URL": "https://n8ncloud.tech",
+        "N8N_URL": "https://evenslouis.ca/n8n",
         "N8N_API_KEY": "YOUR_N8N_API_KEY_HERE",
         "N8N_WORKDIR": "/home/evens/n8n-cursor"
       },

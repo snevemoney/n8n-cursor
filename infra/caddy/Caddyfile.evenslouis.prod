@@ -1,0 +1,135 @@
+# Live VPS Caddyfile target for n8n domain migration (synced from /etc/caddy/Caddyfile)
+# Public n8n: https://evenslouis.ca/n8n/
+# Strategy: handle_path strips /n8n*; also proxy absolute /assets /static /rest /webhook
+# Dual-host: n8ncloud.tech keeps webhook/api/rest/healthz; browser UI redirects to /n8n
+
+lightningflow.online {
+	encode gzip
+	root * /var/www/lightningflow
+	file_server
+
+	handle_path /api/* {
+		reverse_proxy localhost:5689
+	}
+	handle_path /logs/* {
+		reverse_proxy localhost:9001
+	}
+	handle_path /ide/* {
+		reverse_proxy localhost:8443
+	}
+}
+
+www.lightningflow.online {
+	redir https://lightningflow.online{uri}
+}
+
+n8ncloud.tech {
+	encode gzip
+	handle /webhook* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /webhook-test* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /rest* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /api* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /healthz {
+		reverse_proxy localhost:5678
+	}
+	handle {
+		redir https://evenslouis.ca/n8n{uri} permanent
+	}
+}
+
+www.n8ncloud.tech {
+	redir https://n8ncloud.tech{uri}
+}
+
+llm.n8ncloud.tech {
+	handle {
+		reverse_proxy 127.0.0.1:11434
+	}
+}
+
+evenslouis.ca {
+	encode gzip
+
+	handle /builder/* {
+		reverse_proxy localhost:3001
+	}
+
+	# Strip /n8n prefix — n8n listens at /
+	handle_path /n8n* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+
+	# Editor emits absolute /assets /static when path is stripped
+	handle /assets* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /static* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /types* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /rest* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /webhook* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /webhook-test* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /icon* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /favicon.ico {
+		reverse_proxy localhost:5678
+	}
+
+	handle {
+		reverse_proxy localhost:3200
+	}
+}
+
+www.evenslouis.ca {
+	redir https://evenslouis.ca{uri} permanent
+}
+
+evenslouis.pro {
+	redir https://evenslouis.ca/dashboard permanent
+}
+
+www.evenslouis.pro {
+	redir https://evenslouis.ca/dashboard permanent
+}

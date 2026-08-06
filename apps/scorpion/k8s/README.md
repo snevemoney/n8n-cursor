@@ -25,7 +25,7 @@ Create a secret with your environment variables:
 ```bash
 kubectl create secret generic scorpion-secrets \
   --from-literal=DATABASE_URL="postgresql://user:password@postgres:5432/scorpion" \
-  --from-literal=N8N_API_URL="https://n8ncloud.tech/api/v1" \
+  --from-literal=N8N_API_URL="https://evenslouis.ca/n8n/api/v1" \
   --from-literal=N8N_API_KEY="your-key" \
   --from-literal=OPENAI_API_KEY="your-key" \
   --from-literal=ANTHROPIC_API_KEY="your-key" \
