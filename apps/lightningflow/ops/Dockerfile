@@ -21,6 +21,6 @@ ENV HOSTNAME=0.0.0.0
 ARG NEXT_PUBLIC_BASE_PATH=""
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 COPY --from=build /workspace/apps/lightningflow/ops/.next/standalone ./
-COPY --from=build /workspace/apps/lightningflow/ops/.next/static ./apps/lightningflow/ops/.next/static
+COPY --from=build /workspace/apps/lightningflow/ops/.next/static ./.next/static
 EXPOSE 3002
-CMD ["node", "apps/lightningflow/ops/server.js"]
+CMD ["node", "server.js"]
