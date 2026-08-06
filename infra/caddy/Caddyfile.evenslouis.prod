@@ -92,8 +92,9 @@ evenslouis.ca {
 		reverse_proxy localhost:3001
 	}
 
-	@n8nExact path /n8n
-	redir @n8nExact /n8n/ permanent
+	# SPA: bare /n8n/ is not a Vue route in n8n 2.x — land on Overview (/home).
+	@n8nRoot path /n8n /n8n/
+	redir @n8nRoot /n8n/home permanent
 
 	# SPA base path override (required for path-strip hosting on n8n 2.x)
 	handle /static/base-path.js {
