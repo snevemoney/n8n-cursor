@@ -1,4 +1,5 @@
 'use client'
+import { apiPath } from '@/lib/base-path';
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
@@ -80,7 +81,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true)
       
-      const response = await fetch('/api/workspace/switch', {
+      const response = await fetch(apiPath('/api/workspace/switch'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workspaceId })

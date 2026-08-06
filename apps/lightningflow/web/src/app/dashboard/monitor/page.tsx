@@ -1,4 +1,5 @@
 "use client";
+import { apiPath } from '@/lib/base-path';
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -142,10 +143,10 @@ const ChannelMonitor: React.FC = () => {
       
       // Fetch all data in parallel
       const [channelsRes, alertsRes, healthRes, historyRes] = await Promise.all([
-        fetch(`/api/channels/monitor?type=channels&include_inactive=${includeInactive}`),
-        fetch('/api/channels/monitor?type=alerts'),
-        fetch('/api/channels/monitor?type=health'),
-        fetch('/api/channels/monitor?type=capacity-history&days=7')
+        fetch(apiPath(`/api/channels/monitor?type=channels&include_inactive=${includeInactive}`)),
+        fetch(apiPath('/api/channels/monitor?type=alerts')),
+        fetch(apiPath('/api/channels/monitor?type=health')),
+        fetch(apiPath('/api/channels/monitor?type=capacity-history&days=7'))
       ]);
 
       const [channelsData, alertsData, healthData, historyData] = await Promise.all([
@@ -170,7 +171,7 @@ const ChannelMonitor: React.FC = () => {
 
   const acknowledgeAlert = async (alertId: string) => {
     try {
-      await fetch('/api/channels/monitor', {
+      await fetch(apiPath('/api/channels/monitor'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'acknowledge_alert', alert_id: alertId })
@@ -188,7 +189,7 @@ const ChannelMonitor: React.FC = () => {
 
   const resolveAlert = async (alertId: string) => {
     try {
-      await fetch('/api/channels/monitor', {
+      await fetch(apiPath('/api/channels/monitor'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'resolve_alert', alert_id: alertId })

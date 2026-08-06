@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
@@ -38,7 +39,7 @@ export default function ConversionChart() {
   useEffect(() => {
     async function fetchConversionData() {
       try {
-        const res = await fetch('/api/admin/conversion-timeline');
+        const res = await fetch(apiPath('/api/admin/conversion-timeline'));
         const data = await res.json();
 
         const labels = data.timeline.map((item: ConversionData) => 

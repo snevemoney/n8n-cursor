@@ -71,7 +71,7 @@ const routes = [
  * Check route availability
  */
 async function checkRouteAvailability(route: string): Promise<boolean> {
-  const baseUrl = process.env.BASE_URL || 'https://lightningflow.online';
+  const baseUrl = process.env.BASE_URL || 'https://evenslouis.ca/lightningflow';
   const url = `${baseUrl}${route}`;
   
   try {

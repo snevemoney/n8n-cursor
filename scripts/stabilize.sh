@@ -110,7 +110,7 @@ echo "🎯 Verification phase"
 echo "Testing public endpoints..."
 
 # Test endpoints (adjust URLs based on your actual setup)
-for url in "https://lightningflow.online/healthz" "https://lightningflow.online/api/healthz" "https://evenslouis.ca/n8n/healthz"; do
+for url in "https://evenslouis.ca/lightningflow/healthz" "https://evenslouis.ca/lightningflow/api/healthz" "https://evenslouis.ca/n8n/healthz"; do
     if curl -fsS -I "$url" >/dev/null 2>&1; then
         echo "✅ $url - OK"
     else

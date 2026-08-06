@@ -1,3 +1,4 @@
+import { apiPath } from '@/lib/base-path';
 /**
  * LNbits Integration Usage Examples
  * 
@@ -145,7 +146,7 @@ export async function sendPaymentViaAPIExample() {
 
     console.log('Sending payment via API...');
     
-    const response = await fetch('/api/sendPayment', {
+    const response = await fetch(apiPath('/api/sendPayment'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -182,7 +183,7 @@ export async function checkPaymentStatusViaAPIExample() {
     
     console.log('Checking payment status via API...');
     
-    const response = await fetch(`/api/sendPayment?payment_id=${paymentId}`, {
+    const response = await fetch(apiPath(`/api/sendPayment?payment_id=${paymentId}`), {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer your_jwt_token'

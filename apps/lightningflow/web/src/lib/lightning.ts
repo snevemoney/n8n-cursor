@@ -1,3 +1,4 @@
+import { apiPath } from '@/lib/base-path';
 import { supabase, getSupabaseAdmin } from './supabase';
 import { encodeLnurl } from './lnurl';
 import { Database } from './database.types';
@@ -57,7 +58,7 @@ export async function createLightningInvoice(
   description: string,
   expirySeconds: number = 3600
 ): Promise<LightningInvoice> {
-  const response = await fetch('/api/lightning/invoice', {
+  const response = await fetch(apiPath('/api/lightning/invoice'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ export async function checkInvoiceStatus(paymentHash: string, tenantId: string):
   paid: boolean;
   preimage?: string;
 }> {
-  const response = await fetch(`/api/lightning/invoice/status?payment_hash=${paymentHash}&tenant_id=${tenantId}`);
+  const response = await fetch(apiPath(`/api/lightning/invoice/status?payment_hash=${paymentHash}&tenant_id=${tenantId}`));
   
   if (!response.ok) {
     const error = await response.json();
@@ -146,7 +147,7 @@ export async function getLightningNodeInfo(tenantId: string): Promise<{
   type: LightningNodeType;
   uri?: string;
 }> {
-  const response = await fetch(`/api/lightning/node-info?tenant_id=${tenantId}`);
+  const response = await fetch(apiPath(`/api/lightning/node-info?tenant_id=${tenantId}`));
   
   if (!response.ok) {
     const error = await response.json();

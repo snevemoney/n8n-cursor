@@ -1,4 +1,5 @@
 'use client'
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect } from 'react'
 import { useWorkspace, useWorkspacePermissions } from '@/lib/workspace-context'
@@ -30,7 +31,7 @@ export function WorkspaceInviteManager() {
 
   const fetchInvites = async () => {
     try {
-      const response = await fetch('/api/workspace/invite')
+      const response = await fetch(apiPath('/api/workspace/invite'))
       if (response.ok) {
         const data = await response.json()
         setInvites(data.invites)
@@ -46,7 +47,7 @@ export function WorkspaceInviteManager() {
 
     setIsLoading(true)
     try {
-      const response = await fetch('/api/workspace/invite', {
+      const response = await fetch(apiPath('/api/workspace/invite'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), role })
@@ -71,7 +72,7 @@ export function WorkspaceInviteManager() {
 
   const cancelInvite = async (inviteId: string) => {
     try {
-      const response = await fetch(`/api/workspace/invite?id=${inviteId}`, {
+      const response = await fetch(apiPath(`/api/workspace/invite?id=${inviteId}`), {
         method: 'DELETE'
       })
 

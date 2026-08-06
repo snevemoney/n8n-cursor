@@ -87,7 +87,10 @@ export class FlagLoader {
       ENABLE_RATE_LIMITING: this.getBooleanFlag('FF_ENABLE_RATE_LIMITING', true),
       RATE_LIMIT_REQUESTS_PER_MINUTE: this.getNumberFlag('FF_RATE_LIMIT_REQUESTS_PER_MINUTE', 100),
       ENABLE_CORS: this.getBooleanFlag('FF_ENABLE_CORS', true),
-      CORS_ORIGINS: this.getArrayFlag('FF_CORS_ORIGINS', ['https://lightningflow.online']),
+      CORS_ORIGINS: this.getArrayFlag('FF_CORS_ORIGINS', [
+        'https://evenslouis.ca',
+        'https://lightningflow.online',
+      ]),
       ENABLE_WEBHOOK_RETRY: this.getBooleanFlag('FF_ENABLE_WEBHOOK_RETRY', true),
       WEBHOOK_MAX_RETRIES: this.getNumberFlag('FF_WEBHOOK_MAX_RETRIES', 3),
       WEBHOOK_RETRY_DELAY_MS: this.getNumberFlag('FF_WEBHOOK_RETRY_DELAY_MS', 5000),

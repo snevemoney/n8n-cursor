@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -29,7 +30,7 @@ export default function AICampaignSummary() {
   const generateSummary = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/ai-campaign-summary', {
+      const res = await fetch(apiPath('/api/admin/ai-campaign-summary'), {
         method: 'POST',
       });
       

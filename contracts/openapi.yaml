@@ -5,14 +5,14 @@ info:
   version: 1.0.0
   contact:
     name: LightningFlow AI Support
-    url: https://lightningflow.online/support
-    email: support@lightningflow.online
+    url: https://evenslouis.ca/lightningflow/support
+    email: support@evenslouis.ca
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://lightningflow.online/api/v1
+  - url: https://evenslouis.ca/lightningflow/api/v1
     description: Production server
   - url: https://staging.lightningflow.online/api/v1
     description: Staging server

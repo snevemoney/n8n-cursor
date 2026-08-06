@@ -1,3 +1,4 @@
+import { apiPath } from '@/lib/base-path';
 import { createClient } from '@supabase/supabase-js';
 
 // Safe Supabase client creation with fallbacks
@@ -276,7 +277,7 @@ export async function createSystemCheckDatabaseObjects() {
 // Client-side version of getSystemCheckResults (uses mock data when API fails)
 export async function getClientSystemCheckResults(limit = 5): Promise<SystemCheckResult[]> {
   try {
-    const response = await fetch('/api/system-check?limit=' + limit, {
+    const response = await fetch(apiPath('/api/system-check?limit=') + limit, {
       headers: {
         'Content-Type': 'application/json',
         'x-system-check-key': localStorage.getItem('system_check_key') || ''

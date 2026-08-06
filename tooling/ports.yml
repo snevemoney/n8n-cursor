@@ -19,6 +19,12 @@ vector_sink:    8686
 # Portfolio Services
 portfolio:      4010
 
+# evenslouis.ca path deployments
+evens_lf_landing: 3201   # /lightningflow
+evens_lf_web:    3202   # /lightningflow/dashboard + /lightningflow/api
+evens_lf_ops:    3203   # /lightningflow/ops
+evens_pro:       3204   # /pro authenticated client dashboard
+
 # Node.js Versions (not actual ports, but referenced in compose)
 node_20:        20
 node_16:        16

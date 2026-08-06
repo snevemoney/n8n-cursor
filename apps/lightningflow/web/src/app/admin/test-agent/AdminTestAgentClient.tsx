@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState } from 'react';
 
@@ -15,7 +16,7 @@ export default function AdminTestAgentClient() {
   const runTest = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/agents/test-agent');
+      const response = await fetch(apiPath('/api/agents/test-agent'));
       const data = await response.json();
       setResult(data);
     } catch (error) {

@@ -1,4 +1,5 @@
 "use client";
+import { apiPath, appPath } from '@/lib/base-path';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,7 +41,7 @@ export function LiquidityStatus() {
 
   const checkLiquidityStatus = async () => {
     try {
-      const response = await fetch('/api/liquidity/check');
+      const response = await fetch(apiPath('/api/liquidity/check'));
       const data = await response.json();
       setStatus(data);
     } catch (error) {
@@ -66,7 +67,7 @@ export function LiquidityStatus() {
           title: "🚀 Ready to Start Earning?",
           message: "You don't have any Lightning channels yet. Open your first channel to start earning Bitcoin!",
           buttonText: "Get Started",
-          buttonAction: () => window.location.href = '/onboarding',
+          buttonAction: () => window.location.href = appPath('/onboarding'),
           color: 'blue',
           priority: 'high'
         };
@@ -75,7 +76,7 @@ export function LiquidityStatus() {
           title: "⚠️ Your Node Stopped Earning",
           message: "You need more inbound liquidity so other people can route payments through your node.",
           buttonText: "Fix This Now",
-          buttonAction: () => window.location.href = '/boost-liquidity',
+          buttonAction: () => window.location.href = appPath('/boost-liquidity'),
           color: 'amber',
           priority: 'high'
         };
@@ -84,7 +85,7 @@ export function LiquidityStatus() {
           title: "⚖️ Channels Need Rebalancing", 
           message: "Your channels are imbalanced. This might reduce your earning potential.",
           buttonText: "Learn How to Fix",
-          buttonAction: () => window.location.href = '/boost-liquidity',
+          buttonAction: () => window.location.href = appPath('/boost-liquidity'),
           color: 'orange',
           priority: 'medium'
         };
@@ -93,7 +94,7 @@ export function LiquidityStatus() {
           title: "💰 Add More Bitcoin",
           message: "You're running low on outbound liquidity. Add more Bitcoin to keep earning.",
           buttonText: "Add Funds",
-          buttonAction: () => window.location.href = '/payments/receive',
+          buttonAction: () => window.location.href = appPath('/payments/receive'),
           color: 'yellow',
           priority: 'medium'
         };

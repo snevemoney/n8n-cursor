@@ -151,12 +151,12 @@
         "type": "string",
         "format": "uri"
       },
-      "default": ["https://lightningflow.online"],
+      "default": ["https://evenslouis.ca"],
       "description": "Allowed CORS origins",
       "environments": {
         "int": ["http://localhost:3000", "http://localhost:3001"],
         "staging": ["https://staging.lightningflow.online"],
-        "prod": ["https://lightningflow.online"]
+        "prod": ["https://evenslouis.ca", "https://lightningflow.online"]
       }
     },
     "ENABLE_WEBHOOK_RETRY": {

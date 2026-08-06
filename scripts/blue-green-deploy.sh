@@ -102,7 +102,7 @@ check_health() {
     log "Checking health of $env environment..."
     
     while [ $attempt -le $max_attempts ]; do
-        if curl -fsS -m 5 "https://lightningflow.online/healthz" >/dev/null 2>&1; then
+        if curl -fsS -m 5 "https://evenslouis.ca/lightningflow/healthz" >/dev/null 2>&1; then
             success "$env environment is healthy"
             return 0
         fi

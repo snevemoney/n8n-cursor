@@ -1,4 +1,5 @@
 "use client";
+import { apiPath } from '@/lib/base-path';
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,7 +66,7 @@ const AutoRebalancerSettings: React.FC = () => {
 
   const fetchRecentActions = async () => {
     try {
-      const response = await fetch('/api/channel/audit?limit=20');
+      const response = await fetch(apiPath('/api/channel/audit?limit=20'));
       const data = await response.json();
       setRecentActions(data.actions || []);
     } catch (error) {

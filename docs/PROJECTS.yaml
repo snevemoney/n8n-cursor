@@ -5,6 +5,8 @@ projects:
   lfai:
     name: "LightningFlow AI"
     description: "Main LightningFlow AI application and services"
+    # Public URL: https://evenslouis.ca/lightningflow
+    # Legacy domain: lightningflow.online (redirect + API compatibility only)
     allowed_paths:
       - "apps/lightningflow/**"
       - "packages/lf-sdk/**"
@@ -19,15 +21,13 @@ projects:
       - "workflows/**"         # n8n workflows are separate
       - "mcp/side-hustle/**"   # Side hustle MCP server
     ports:
-      - 5678  # API
-      - 5679  # n8n
-      - 9001  # dozzle
-      - 8443  # code-server
+      - 3201  # path landing
+      - 3202  # customer web + API
+      - 3203  # ops
     health_endpoints:
-      - "http://localhost:5678/healthz"
-      - "http://localhost:5679/healthz"
-      - "http://localhost:9001/healthz"
-      - "http://localhost:8443/healthz"
+      - "https://evenslouis.ca/lightningflow/healthz"
+      - "https://evenslouis.ca/lightningflow/api/healthz"
+      - "https://evenslouis.ca/lightningflow/ops/healthz"
 
   n8n-cursor:
     name: "n8n Cursor Side Hustle"

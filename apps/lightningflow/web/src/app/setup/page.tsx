@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect } from 'react';
 
@@ -10,8 +11,8 @@ export default function SetupPage() {
   const fetchStatus = async () => {
     try {
       const [statusRes, testRes] = await Promise.all([
-        fetch('/api/setup-status'),
-        fetch('/api/test-system'),
+        fetch(apiPath('/api/setup-status')),
+        fetch(apiPath('/api/test-system')),
       ]);
 
       const statusData = await statusRes.json();

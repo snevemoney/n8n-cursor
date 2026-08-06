@@ -1,4 +1,5 @@
 "use client";
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -116,7 +117,7 @@ export default function LightningSimulator() {
 
     setLoading(prev => ({ ...prev, channel: true }));
     try {
-      const response = await fetch('/api/simulate/open-channel', {
+      const response = await fetch(apiPath('/api/simulate/open-channel'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -172,7 +173,7 @@ export default function LightningSimulator() {
 
     setLoading(prev => ({ ...prev, loop: true }));
     try {
-      const response = await fetch('/api/simulate/loop-out', {
+      const response = await fetch(apiPath('/api/simulate/loop-out'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -231,7 +232,7 @@ export default function LightningSimulator() {
 
     setLoading(prev => ({ ...prev, search: true }));
     try {
-      const response = await fetch('/api/ai/search-loop', {
+      const response = await fetch(apiPath('/api/ai/search-loop'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -277,7 +278,7 @@ export default function LightningSimulator() {
 
     setLoading(prev => ({ ...prev, troubleshoot: true }));
     try {
-      const response = await fetch('/api/ai/loop-troubleshooter', {
+      const response = await fetch(apiPath('/api/ai/loop-troubleshooter'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

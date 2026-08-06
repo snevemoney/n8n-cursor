@@ -16,6 +16,7 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import { appPath } from '@/lib/base-path';
 
 interface Step {
   id: string;
@@ -432,7 +433,7 @@ export function LightningBasics() {
       <div className="mt-8 text-center">
         <p className="text-sm text-muted-foreground">
           Want to dive deeper? Visit our{' '}
-          <a href="/trust" className="text-blue-400 hover:underline">
+          <a href={appPath('/trust')} className="text-blue-400 hover:underline">
             Trust Center
           </a>{' '}
           for technical details and source citations.

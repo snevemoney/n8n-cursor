@@ -34,56 +34,24 @@
   }
 }
 
-# LightningFlow Domain - SaaS UI/API
+# LightningFlow legacy hosts - redirect browser traffic to evenslouis.ca
+# while retaining API/webhook compatibility.
 lightningflow.online, www.lightningflow.online {
   import common
-  
-  # Health endpoints (no rate limiting for monitoring)
-  @health path /healthz
-  handle @health {
-    respond 200 {
-      body "OK"
-      header Content-Type "text/plain"
-    }
+  handle /api/* {
+    rewrite * /lightningflow{uri}
+    reverse_proxy 127.0.0.1:3202
   }
-  
-  @apihealth path /api/healthz
-  handle @apihealth {
-    reverse_proxy 127.0.0.1:4000 {
-      health_uri /api/healthz
-      health_interval 30s
-      health_timeout 5s
-    }
-  }
-  
-  # API routes
-  handle_path /api/* {
-    reverse_proxy 127.0.0.1:4000 {
-      health_uri /api/healthz
-      health_interval 30s
-      health_timeout 5s
-      
-      # API-specific headers
-      header_up X-Forwarded-Proto {scheme}
-      header_up X-Forwarded-Host {host}
-      header_up X-Real-IP {remote_host}
-    }
-  }
-  
-  # Web UI (everything else)
-  handle {
-    reverse_proxy 127.0.0.1:3000 {
-      health_uri /healthz
-      health_interval 30s
-      health_timeout 5s
-      
-      # Web-specific headers
-      header_up X-Forwarded-Proto {scheme}
-      header_up X-Forwarded-Host {host}
-      header_up X-Real-IP {remote_host}
-    }
-  }
+  handle { redir https://evenslouis.ca/lightningflow{uri} permanent }
 }
+
+app.lightningflow.online { redir https://evenslouis.ca/lightningflow/dashboard{uri} permanent }
+ops.lightningflow.online { redir https://evenslouis.ca/lightningflow/ops{uri} permanent }
+api.lightningflow.online {
+  rewrite * /lightningflow/api{uri}
+  reverse_proxy 127.0.0.1:3202
+}
+docs.lightningflow.online { redir https://evenslouis.ca/lightningflow/docs{uri} permanent }
 
 # Legacy n8n apex (dual-host cutover) — see Caddyfile.evenslouis.prod for live target
 n8ncloud.tech, www.n8ncloud.tech {
@@ -122,6 +90,13 @@ evenslouis.ca, www.evenslouis.ca {
   handle /webhook-test* { reverse_proxy 127.0.0.1:5678 }
   handle /icon* { reverse_proxy 127.0.0.1:5678 }
   handle /favicon.ico { reverse_proxy 127.0.0.1:5678 }
+  @lightningflowRoot path /lightningflow /lightningflow/
+  handle @lightningflowRoot { reverse_proxy 127.0.0.1:3201 }
+  handle /lightningflow/healthz { reverse_proxy 127.0.0.1:3201 }
+  handle_path /lightningflow/_landing/* { reverse_proxy 127.0.0.1:3201 }
+  handle /lightningflow/ops* { reverse_proxy 127.0.0.1:3203 }
+  handle /lightningflow* { reverse_proxy 127.0.0.1:3202 }
+  handle /pro* { reverse_proxy 127.0.0.1:3204 }
   handle {
     reverse_proxy 127.0.0.1:3200 {
       header_up X-Forwarded-Proto {scheme}
@@ -129,6 +104,10 @@ evenslouis.ca, www.evenslouis.ca {
       header_up X-Real-IP {remote_host}
     }
   }
+}
+
+evenslouis.pro, www.evenslouis.pro {
+  redir https://evenslouis.ca/pro{uri} permanent
 }
 
 # Portfolio Domain - Personal Portfolio Website

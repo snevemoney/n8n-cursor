@@ -1,0 +1,87 @@
+name: evenslouis_paths
+
+x-defaults: &defaults
+  restart: unless-stopped
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  lightningflow-landing:
+    <<: *defaults
+    build:
+      context: ../../apps/lightningflow/landing
+      args:
+        NEXT_PUBLIC_BASE_PATH: /lightningflow
+        NEXT_PUBLIC_ASSET_PREFIX: /lightningflow/_landing
+        NEXT_PUBLIC_DASHBOARD_URL: /lightningflow/dashboard
+    ports:
+      - "127.0.0.1:3201:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_BASE_PATH: /lightningflow
+      NEXT_PUBLIC_ASSET_PREFIX: /lightningflow/_landing
+      NEXT_PUBLIC_DASHBOARD_URL: /lightningflow/dashboard
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/lightningflow/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "0.5"
+    mem_limit: 384m
+    pids_limit: 150
+
+  lightningflow-web:
+    <<: *defaults
+    build:
+      context: ../../apps/lightningflow/web
+      args:
+        NEXT_PUBLIC_BASE_PATH: /lightningflow
+        NEXT_PUBLIC_APP_URL: https://evenslouis.ca/lightningflow
+        NEXT_PUBLIC_API_URL: https://evenslouis.ca/lightningflow/api
+    ports:
+      - "127.0.0.1:3202:3001"
+    env_file:
+      - path: ../../.env.production
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_BASE_PATH: /lightningflow
+      NEXT_PUBLIC_APP_URL: https://evenslouis.ca/lightningflow
+      NEXT_PUBLIC_API_URL: https://evenslouis.ca/lightningflow/api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/lightningflow/api/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "1.5"
+    mem_limit: 1536m
+    pids_limit: 300
+
+  lightningflow-ops:
+    <<: *defaults
+    build:
+      context: ../../apps/lightningflow/ops
+      args:
+        NEXT_PUBLIC_BASE_PATH: /lightningflow/ops
+    ports:
+      - "127.0.0.1:3203:3002"
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      NEXT_PUBLIC_BASE_PATH: /lightningflow/ops
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3002/lightningflow/ops/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "0.5"
+    mem_limit: 512m
+    pids_limit: 180

@@ -12,15 +12,15 @@ jobs:
       - run: pnpm -w lint && pnpm -w typecheck && pnpm -w test
       - name: Build :prod
         run: |
-          for s in landing web ops api worker; do
-            docker build -t ghcr.io/${{ github.repository }}/lfai-$s:prod apps/$s
+          for s in landing web ops; do
+            docker build -t ghcr.io/${{ github.repository }}/lfai-$s:prod apps/lightningflow/$s
           done
           # Build Scorpion (different Dockerfile path - builds from workspace root)
           docker build -t ghcr.io/${{ github.repository }}/scorpion:prod -f apps/scorpion/Dockerfile .
       - name: Push
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-          for s in landing web ops api worker; do
+          for s in landing web ops; do
             docker push ghcr.io/${{ github.repository }}/lfai-$s:prod
           done
           docker push ghcr.io/${{ github.repository }}/scorpion:prod
@@ -40,10 +40,8 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}/lfai-landing:prod
             docker pull ghcr.io/${{ github.repository }}/lfai-web:prod
             docker pull ghcr.io/${{ github.repository }}/lfai-ops:prod
-            docker pull ghcr.io/${{ github.repository }}/lfai-api:prod
-            docker pull ghcr.io/${{ github.repository }}/lfai-worker:prod
             docker pull ghcr.io/${{ github.repository }}/scorpion:prod
-            docker compose -f infra/docker/docker-compose.prod.yml up -d
+            docker compose -f infra/docker/docker-compose.evenslouis-paths.yml up -d --build
             bash scripts/green_smoke_local.sh
 
   import-workflows-green:

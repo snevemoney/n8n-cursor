@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -113,7 +114,7 @@ export default function UnifiedAIAssistantPage() {
 
   const loadUserTools = async () => {
     try {
-      const response = await fetch(`/api/ai/assistant?userId=${mockUserId}`);
+      const response = await fetch(apiPath(`/api/ai/assistant?userId=${mockUserId}`));
       
       // Check if response is ok and content type is JSON
       if (!response.ok) {

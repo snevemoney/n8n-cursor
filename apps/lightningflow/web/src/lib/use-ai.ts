@@ -1,3 +1,4 @@
+import { apiPath } from '@/lib/base-path';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -39,7 +40,7 @@ export function useAI(options: UseAIOptions = {}) {
       setError(null);
 
       try {
-        const response = await fetch('/api/proxy/openai', {
+        const response = await fetch(apiPath('/api/proxy/openai'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
 import Image from "next/image";
+import { appPath } from '@/lib/base-path';
 
 // Redirect to login first, then users can navigate to dashboard after authentication
 export default function HomePage() {
-  redirect('/login')
+  redirect(appPath('/login'))
 }
 
 /* 

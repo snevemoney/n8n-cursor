@@ -1,4 +1,5 @@
 "use client"
+import { appPath } from '@/lib/base-path';
 
 import { Button } from "../../../components/ui/button"
 import { ArrowLeft, Zap, TrendingUp, Globe, Link, BarChart3, ExternalLink } from "lucide-react"
@@ -96,7 +97,7 @@ export default function EarningsGuidePage() {
           <Button 
             variant="ghost"
             className="mt-2 text-amber-400 hover:text-amber-500 hover:bg-amber-950/30 px-3 py-1 h-auto text-sm"
-            onClick={() => window.location.href = '/ai-assistant?source=earnings-guide'}
+            onClick={() => window.location.href = appPath('/ai-assistant?source=earnings-guide')}
           >
             Talk to the AI Assistant
           </Button>

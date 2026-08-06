@@ -149,7 +149,7 @@ export interface ApiConfig {
 }
 
 export const defaultApiConfig: ApiConfig = {
-  baseUrl: 'https://lightningflow.online/api',
+  baseUrl: 'https://evenslouis.ca/lightningflow/api',
   version: API_VERSION,
   timeout: 30000
 };

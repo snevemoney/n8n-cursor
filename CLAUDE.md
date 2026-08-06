@@ -232,7 +232,7 @@ n8n-cursor/
 
 ### Project Boundaries
 Per `.cursor-rules.md`, this workspace has strict project boundaries:
-- **LightningFlow**: `apps/lightningflow/**`, domains: lightningflow.online
+- **LightningFlow**: `apps/lightningflow/**`, domain: evenslouis.ca/lightningflow (legacy lightningflow.online compatibility)
 - **n8n-Cursor**: `apps/n8n-cursor/**`, domains: evenslouis.ca/n8n (legacy dual-host: n8ncloud.tech)
 - **Shared**: `packages/shared-*/**`
 - **Always verify** PROJECT/ENV/AFFECTED PATHS before making changes
@@ -246,7 +246,7 @@ Per `.cursor-rules.md`, this workspace has strict project boundaries:
 
 ### Reliability Contract
 From `.cursor-rules.md`:
-- **Goal**: lightningflow.online and evenslouis.ca/n8n NEVER break
+- **Goal**: evenslouis.ca/lightningflow, evenslouis.ca/pro, and evenslouis.ca/n8n NEVER break
 - Changes to infra/routes/ports/env/Docker MUST:
   1. Preserve /healthz endpoints
   2. Keep containers on 127.0.0.1; public via Caddy only

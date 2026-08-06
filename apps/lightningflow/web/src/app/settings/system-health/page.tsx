@@ -1,4 +1,5 @@
 "use client"
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../../components/ui/card'
@@ -43,7 +44,7 @@ export default function SystemHealthPage() {
   const runSystemCheck = async () => {
     setRunning(true)
     try {
-      const response = await fetch('/api/system-check', {
+      const response = await fetch(apiPath('/api/system-check'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

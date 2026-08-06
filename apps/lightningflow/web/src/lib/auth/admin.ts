@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { appPath } from '@/lib/base-path';
 
 interface AdminUser {
   id: string;
@@ -117,7 +118,7 @@ export async function requireAdminAuth(): Promise<AdminUser> {
     
     // Redirect to login for browser requests
     if (typeof window !== 'undefined') {
-      redirect('/login?redirect=/admin');
+      redirect(appPath('/login?redirect=/admin'));
     }
     
     // Throw error for API requests

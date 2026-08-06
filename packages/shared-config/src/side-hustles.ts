@@ -43,7 +43,7 @@ export const sideHustles: SideHustle[] = [
     tenantId: 'lightningflow',
     name: 'LightningFlow',
     description: 'Lightning Network platform for businesses',
-    domain: 'https://lightningflow.online',
+    domain: 'https://evenslouis.ca/lightningflow',
     localDomain: 'http://lightningflow.local',
     icon: '⚡',
     status: 'active',

@@ -19,11 +19,11 @@ NC='\033[0m' # No Color
 # Navigation flow definitions - Critical user journeys
 declare -A NAVIGATION_FLOWS=(
     # Format: "flow-name|start-url|expected-end-url|timeout"
-    ["home-to-dashboard"]="https://lightningflow.online/|https://lightningflow.online/dashboard|10"
-    ["dashboard-to-payments"]="https://lightningflow.online/dashboard|https://lightningflow.online/payments|10"
-    ["payments-send"]="https://lightningflow.online/payments|https://lightningflow.online/payments/send|10"
-    ["payments-receive"]="https://lightningflow.online/payments|https://lightningflow.online/payments/receive|10"
-    ["api-health"]="https://lightningflow.online/api/healthz|200|5"
+    ["home-to-dashboard"]="https://evenslouis.ca/lightningflow/|https://evenslouis.ca/lightningflow/dashboard|10"
+    ["dashboard-to-payments"]="https://evenslouis.ca/lightningflow/dashboard|https://evenslouis.ca/lightningflow/payments|10"
+    ["payments-send"]="https://evenslouis.ca/lightningflow/payments|https://evenslouis.ca/lightningflow/payments/send|10"
+    ["payments-receive"]="https://evenslouis.ca/lightningflow/payments|https://evenslouis.ca/lightningflow/payments/receive|10"
+    ["api-health"]="https://evenslouis.ca/lightningflow/api/healthz|200|5"
     ["n8n-health"]="https://evenslouis.ca/n8n/healthz|200|5"
     ["scorpion-health"]="http://localhost:3003/api/health|200|5"
 )

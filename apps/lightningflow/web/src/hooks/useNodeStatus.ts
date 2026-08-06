@@ -1,3 +1,4 @@
+import { apiPath } from '@/lib/base-path';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 
 interface NodeStatus {
@@ -67,7 +68,7 @@ export function useNodeStatus(options: UseNodeStatusOptions = {}): UseNodeStatus
         isLoadingRef.current = true
       }
       
-      const response = await fetch('/api/node/status-check', {
+      const response = await fetch(apiPath('/api/node/status-check'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
