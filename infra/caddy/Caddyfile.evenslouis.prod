@@ -275,6 +275,32 @@ evenslouis.ca {
 	handle {
 		reverse_proxy localhost:4010
 	}
+
+	# Cancelled / missing basic_auth used to render a blank white tab in browsers.
+	# Keep WWW-Authenticate so the login prompt still appears on reload.
+	handle_errors {
+		@auth401 expression `{err.status_code} == 401`
+		handle @auth401 {
+			header Content-Type "text/html; charset=utf-8"
+			header WWW-Authenticate "Basic realm=\"restricted\""
+			respond `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Operator login required</title>
+<style>
+body{margin:0;font-family:ui-sans-serif,system-ui,sans-serif;background:#0a0d10;color:#e4e8ee}
+main{max-width:36rem;margin:4rem auto;padding:0 1.25rem}
+h1{color:#13c6a8;font-size:1.75rem}
+p{line-height:1.55;color:rgba(228,232,238,.8)}
+code{color:#13c6a8}
+a{color:#13c6a8}
+</style></head><body><main>
+<h1>Operator login required</h1>
+<p>This path is gated by Caddy basic_auth. Enter the operator credentials when the browser prompts, or reload and try again.</p>
+<p>Public pages: <a href="/">home</a> · <a href="/work">/work</a></p>
+<p><code>/scorpion</code>, <code>/pro</code>, <code>/n8n</code>, <code>/claw</code>, <code>/builder</code>, and <code>/lightningflow</code> are operator-only.</p>
+</main></body></html>` 401
+		}
+	}
 }
 
 www.evenslouis.ca {
