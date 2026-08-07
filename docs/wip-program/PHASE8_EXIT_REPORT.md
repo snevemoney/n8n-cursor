@@ -1,35 +1,35 @@
 # Phase 8 exit report — 2026-08-07
 
-## Missions (curl / machine path — Telegram tools still pending Outer Heaven deploy)
+## Missions
 
 | # | Playbook | Started | Ended | Outcome ID | Pass? |
 |---|----------|---------|-------|------------|-------|
 | 1 | Ops health digest (CE + Scorpion + OpenClaw) | 15:46Z | 15:47Z | `ops_health_digest` | **pass** |
 | 2 | CE last actions via Scorpion hive | 15:47Z | 15:47Z | `ce/actions` source=ce | **pass** |
 | 3 | CE lead lookup (`q=Sophie`) | 15:47Z | 15:47Z | hits returned | **pass** |
+| 4 | Outer Heaven `scorpion_health` tool | 16:19Z | 16:19Z | `n8nConfigured:true` | **pass** |
+| 5 | Outer Heaven `ce_list_actions` | 16:19Z | 16:19Z | 3 CE actions | **pass** |
+| 6 | Outer Heaven `scorpion_register_outcome` | 16:19Z | 16:19Z | `ph8-smoke-20260807` | **pass** |
 
-Telegram / no-SSH playbook runs still require philanthropic tool wiring on Outer Heaven (Phase 1 leftover). Machine hive path is green.
+Telegram path: tools live on Philanthropy `/api/agent` (OpenClaw → localhost:3002). No SSH required for these hive missions.
 
 ## Evidence
 
-- `GET /scorpion/api/hive/health` → `ceConfigured:true`, machine auth on
-- `GET /scorpion/api/hive/ce/actions?limit=3` → `source:"ce"` with AuditAction rows
-- `GET /scorpion/api/hive/ce/actions?q=Sophie` → lead hits
-- `POST /scorpion/api/hive/register` → `{ ok:true, scorpionLogged:true, ceQueued:true }`
-- `GET/POST https://evenslouis.ca/api/hive/*` via ce-hive-bridge `:3205` (401 without Bearer)
-- CE human login → `/dashboard` shows **Leads** (session cookie issued)
-- OpenClaw `:18789` listens on `127.0.0.1` / `::1` only; staging drill dir under `/root/openclaw-backups/drills/`
-- Builder: stub accepted for Phase 2 exit (real tree still missing)
-- n8n: UI 200; **N8N_API_KEY not on VPS** → catalog table still empty; broker decision already recorded
-
-## Blockers before product launches (Ph9+)
-
-1. Install Outer Heaven tools that call Scorpion hive (Ph1) for true no-SSH Telegram missions  
-2. Provision `N8N_API_KEY` into `.env.hive` and fill [N8N_WORKFLOW_CATALOG.md](./N8N_WORKFLOW_CATALOG.md)  
-3. Optional: restore real CE builder image replacing stub  
-4. Keep disk ≥12G before next heavy builds  
+- VPS `.env.hive` has `N8N_API_KEY` (len 293); Scorpion `GET /scorpion/api/hive/health` → `n8nConfigured:true`
+- Catalog filled: [N8N_WORKFLOW_CATALOG.md](./N8N_WORKFLOW_CATALOG.md) (162 workflows from live API)
+- Outer Heaven: `/opt/philanthropy/app/api/agent/tools/hive.ts` registered; rebuild + `pm2 restart philanthropy --update-env`
+- Tool list includes `ce_list_actions`, `ce_lookup_lead`, `scorpion_health`, `scorpion_register_outcome`, `n8n_get_execution`
+- `HIVE_MACHINE_TOKEN` + `SCORPION_HIVE_BASE` on `/opt/philanthropy/.env` / `.env.local`
+- TOOLS.md append on `/opt/philanthropy` + `workspace-bigboss`
+- Skill: `docs/patches/philanthropic-ai-agent/skills/scorpion-hive/SKILL.md`
+- Builder: **stub remains** — no real `:3001` CE builder tree/image on disk (optional item closed as N/A)
+- OpenClaw `:18789` loopback-only; staging drills under `/root/openclaw-backups/drills/`
 
 ## Gate status
 
 **Hive machine path: GREEN**  
-**Full Ph8 Telegram exit: HOLD** (needs Outer Heaven tool deploy)
+**Outer Heaven hive tools: GREEN** (API smoke)  
+**n8n catalog: GREEN**  
+**Real CE builder on :3001: N/A** (stub kept; source out-of-repo)
+
+Updated: 2026-08-07 16:21 UTC

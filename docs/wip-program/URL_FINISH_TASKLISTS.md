@@ -17,7 +17,7 @@ Excluded hosts (per request): `n8ncloud.tech`, `evenslouis.pro`, `llm.n8ncloud.t
 | Builder stub Ph2 exit | **done** (accepted) |
 | OpenClaw loopback + staging drill | **done** |
 | n8n API catalog | **blocked** (no N8N_API_KEY on VPS) |
-| Telegram Ph8 no-SSH | **hold** (Outer Heaven tools) |
+| Telegram Ph8 no-SSH | **green** (hive tools on Philanthropy) |
 
 **Live vs WIP registry drift:** Product map / Phase 0 still say public portfolio on `/` + `/work`. Live apex is **Client Engine marketing** (`:3200`). Decide deliberately before more path work.
 
@@ -97,7 +97,11 @@ Excluded hosts (per request): `n8ncloud.tech`, `evenslouis.pro`, `llm.n8ncloud.t
 ### Finish tasks
 
 - [ ] Confirm full image stays deployed (not stub): `/scorpion/healthz` has no `"mode":"stub"`.
+- [x] `N8N_API_KEY` on VPS `.env.hive` + catalog filled
+- [x] Outer Heaven `hive.ts` tools + skill
 - [ ] Hive smoke: `GET /scorpion/api/hive/health` with/without `HIVE_MACHINE_TOKEN`.
+- [x] `N8N_API_KEY` on VPS `.env.hive` + catalog filled
+- [x] Outer Heaven `hive.ts` tools + skill
 - [ ] Hive smoke: `POST /scorpion/api/hive/register`, `GET .../ce/actions`, `GET .../n8n/executions?id=`.
 - [ ] Wire philanthropic tools `scorpion_register_outcome` / health tools (Ph1/3).
 - [ ] Chat/council operator smoke (LLM/Ollama optional — degrade cleanly if llm host 503).
