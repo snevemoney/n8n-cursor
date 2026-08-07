@@ -1,0 +1,11 @@
+---
+description: Dexter 4-stage program design before medium/large agent coding
+alwaysApply: true
+---
+
+# Program design gate
+
+For medium or large features: Product → Architecture → Program design → Vertical slices.
+
+Templates: `templates/program-design/`. Guide: `docs/program-design/README.md`.
+Tiny trusted tweaks may skip full docs; still respect hive hard rules.

@@ -351,3 +351,12 @@ Per `.cursor/rules/n8nbuilder.mdc`:
 6. **Use workspace dependencies** - Reference packages with `workspace:*`
 7. **Check port availability** - Use `pnpm ports-check` before starting services
 8. **Follow migration patterns** - Always use migration scripts for DB changes
+
+## Hive mind & program design
+
+Before multi-repo or money-path work, read:
+
+- `docs/hive/README.md` — plain-English hive map
+- `docs/program-design/README.md` — Dexter 4-stage method
+- `AGENTS.md` — agent operating manual
+- `docs/wip-program/HARD_RULES.md` — anti-overlap + HITL

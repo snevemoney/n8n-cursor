@@ -1,3 +1,5 @@
+> For medium+ features, also complete Dexter stages in `docs/program-design/` / `templates/program-design/`.
+
 # TASK_TICKET.md
 
 ## Template for AI Coding Sessions
