@@ -56,17 +56,21 @@ Read-heavy first, then safe-act. Implemented as contracts below; philanthropic r
 
 Telegram message to the right topic + optional screenshot/log artifact (`report_telegram`).
 
-## Machine HTTP contracts (monorepo stubs)
+## Machine HTTP contracts (Scorpion hive)
 
-Operator/machine-facing route shapes for the hive (wire implementations as CE/Scorpion/n8n allow):
+Implemented under `apps/scorpion` (basePath `/scorpion`). Auth: `Authorization: Bearer $HIVE_MACHINE_TOKEN` when set.
 
-- `GET /api/hive/ce/actions?limit=10` — CE last actions (operator/machine auth)
-- `GET /api/hive/n8n/executions/:id` — n8n execution summary
-- `POST /api/hive/register` — `{ target: "ce"|"scorpion"|"both", mission, summary, refs }`
+- `GET /api/hive/ce/actions?limit=10` — CE last actions (bridges `CE_HIVE_BASE_URL`)
+- `GET /api/hive/ce/actions?q=` — CE lead lookup
+- `GET /api/hive/n8n/executions?id=` — n8n execution summary (`N8N_BASE_URL` + `N8N_API_KEY`)
+- `GET /api/hive/health` — ops summary for `scorpion_health`
+- `POST /api/hive/register` — `{ target: "ce"|"scorpion"|"both", missionId, summary, refs }`
+- `GET /api/hive/register` — recent Scorpion-side outcomes
 - OpenClaw hooks: `POST /claw/hooks` — wake/notify agents
 
-Scorpion package stub: `apps/scorpion/server/hive/` (see creative-loop module).  
-Philanthropic patches: `docs/patches/philanthropic-ai-agent/`.
+WIP program: [`docs/wip-program/`](../../wip-program/README.md).  
+Philanthropic patches: `docs/patches/philanthropic-ai-agent/`.  
+MCP broker: **n8n MCP** — [`MCP_BROKER_DECISION.md`](../../wip-program/phases/MCP_BROKER_DECISION.md).
 
 ## Example asks
 

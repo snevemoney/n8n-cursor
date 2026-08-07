@@ -9,6 +9,8 @@ Code registries:
 - OpenClaw workspace contract: [OPENCLAW_WORKSPACE_CONTRACT.md](./OPENCLAW_WORKSPACE_CONTRACT.md)
 - Topic → capability map: [OPENCLAW_TOPIC_CAPABILITY_MAP.md](./OPENCLAW_TOPIC_CAPABILITY_MAP.md)
 - Creative loop: [CREATIVE_ENGINEERING_LOOP.md](./CREATIVE_ENGINEERING_LOOP.md)
+- WIP program (20 phases): [../../wip-program/README.md](../../wip-program/README.md)
+- Hard rules: [../../wip-program/HARD_RULES.md](../../wip-program/HARD_RULES.md)
 
 ## Access model
 

@@ -4,19 +4,22 @@ Cursor App cannot push to `philanthropic-ai-agent`. Apply on VPS or a machine wi
 
 ## Add tools (read-heavy first)
 
-Wire these names into the existing tool registry (`app/api/agent/tools/`):
+Wire these names into the existing tool registry (`app/api/agent/tools/`).
+Contracts: [tools/TOOL_CONTRACTS.md](./tools/TOOL_CONTRACTS.md), sketch [tools/ce_list_actions.ts](./tools/ce_list_actions.ts).
+
+Prefer Scorpion hive bridge + **n8n MCP broker** (not scattered secrets).
 
 | Tool | Backend |
 |------|---------|
-| `ce_list_actions` | CE ops/API last N events |
-| `ce_lookup_lead` | CE CRM search |
-| `ce_create_note` | CE note create |
-| `ce_queue_action` | CE approval queue (HITL) |
-| `n8n_list_workflows` | n8n API |
-| `n8n_get_execution` | n8n execution errors |
-| `n8n_trigger_webhook` | n8n webhook fire |
-| `scorpion_health` | `GET /scorpion/healthz` or `/api/health` |
-| `scorpion_register_outcome` | `POST /scorpion/api/hive/register` (basePath-aware) |
+| `ce_list_actions` | `GET /scorpion/api/hive/ce/actions` |
+| `ce_lookup_lead` | `GET /scorpion/api/hive/ce/actions?q=` |
+| `ce_create_note` | CE `/api/hive/notes` |
+| `ce_queue_action` | CE `/api/hive/actions/queue` (HITL) |
+| `n8n_list_workflows` | n8n API via broker |
+| `n8n_get_execution` | `GET /scorpion/api/hive/n8n/executions?id=` |
+| `n8n_trigger_webhook` | allowlisted webhook only |
+| `scorpion_health` | `GET /scorpion/api/hive/health` |
+| `scorpion_register_outcome` | `POST /scorpion/api/hive/register` |
 | `report_telegram` | existing message tool → topic |
 
 ## SOUL.md / TOOLS.md patch (BigBoss)

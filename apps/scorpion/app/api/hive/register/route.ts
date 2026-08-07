@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+  assertHiveMachineAuth,
   getRecentScorpionOutcomes,
   registerHiveOutcome,
   type HiveRegisterTarget,
@@ -15,6 +16,9 @@ function isTarget(v: unknown): v is HiveRegisterTarget {
 
 /** POST — register a creative-engineering mission outcome into CE and/or Scorpion. */
 export async function POST(req: NextRequest) {
+  const denied = assertHiveMachineAuth(req);
+  if (denied) return denied;
+
   let body: unknown;
   try {
     body = await req.json();
@@ -62,6 +66,9 @@ export async function POST(req: NextRequest) {
 
 /** GET — recent Scorpion-side hive outcomes (ops ledger). */
 export async function GET(req: NextRequest) {
+  const denied = assertHiveMachineAuth(req);
+  if (denied) return denied;
+
   const limitRaw = req.nextUrl.searchParams.get('limit');
   const limit = Math.min(100, Math.max(1, Number(limitRaw) || 20));
   return NextResponse.json({
