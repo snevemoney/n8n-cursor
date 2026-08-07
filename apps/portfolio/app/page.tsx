@@ -22,12 +22,18 @@ export default function PortfolioPage() {
               <p className="text-base text-[rgba(228,232,238,0.7)] max-w-3xl mt-4 leading-relaxed">
                 Below is selected work — systems I run daily, not slide-deck demos.
               </p>
-              <p className="mt-8">
+              <p className="mt-8 flex flex-wrap gap-4">
                 <a
                   href="mailto:evens.louis.dev@gmail.com"
                   className="inline-block bg-[#13c6a8] text-[#0a0d10] font-semibold px-6 py-3 rounded-md hover:opacity-90 transition"
                 >
                   Contact me
+                </a>
+                <a
+                  href="/work"
+                  className="inline-block border border-[rgba(19,198,168,0.45)] text-[#13c6a8] font-semibold px-6 py-3 rounded-md hover:bg-[rgba(19,198,168,0.08)] transition"
+                >
+                  All projects
                 </a>
               </p>
             </div>

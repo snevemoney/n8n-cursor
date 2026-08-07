@@ -2,27 +2,38 @@
 
 Canonical host: `https://evenslouis.ca`
 
+Code registries:
+
+- Surfaces: `packages/shared-config/src/product-registry.ts`
+- All 15 GitHub repos / lanes: `packages/shared-config/src/repo-registry.ts`
+- OpenClaw workspace contract: [OPENCLAW_WORKSPACE_CONTRACT.md](./OPENCLAW_WORKSPACE_CONTRACT.md)
+- Topic → capability map: [OPENCLAW_TOPIC_CAPABILITY_MAP.md](./OPENCLAW_TOPIC_CAPABILITY_MAP.md)
+- Creative loop: [CREATIVE_ENGINEERING_LOOP.md](./CREATIVE_ENGINEERING_LOOP.md)
+
 ## Access model
 
 | Role | Access |
 |------|--------|
-| **Visitor** | `/` portfolio only (work, contact) |
+| **Visitor** | `/` portfolio + `/work` catalog (GitHub links / status only) |
 | **Client** | Not a tool role — contact / deliverables offline. No console login |
-| **Operator** | Only Evens — all tools behind Caddy basic_auth (+ app login) |
-
-Code registry: `packages/shared-config/src/product-registry.ts`
+| **Operator** | Only Evens — tools behind Caddy basic_auth (+ app login) |
+| **Machines** | n8n webhooks + OpenClaw `/claw/hooks*` (no basic_auth) |
 
 ## URL map
 
 | Path | Upstream | Audience | Notes |
 |------|----------|----------|-------|
 | `/` | `127.0.0.1:4010` portfolio | public | Brand front door |
+| `/work` | portfolio | public | Project catalog with lane badges |
 | `/portfolio-healthz` | portfolio `/healthz` | public | Apex health without colliding n8n `/healthz` |
 | `/pro*` | `127.0.0.1:3204` Client Engine | operator | Entire tree gated |
 | `/n8n/*` UI | `127.0.0.1:5678` (strip prefix) | operator | basic_auth + n8n login |
 | `/n8n/webhook*`, `/n8n/webhook-test*` | n8n | machines | **No** basic_auth |
 | `/n8n/healthz` | n8n | public monitor | No basic_auth |
-| `/scorpion*` | `127.0.0.1:3003` | operator | Gated stub live now; full app uses `NEXT_PUBLIC_BASE_PATH=/scorpion` (`Dockerfile.evenslouis`) when build is green |
+| `/scorpion*` | `127.0.0.1:3003` | operator | Gated; prefer full `Dockerfile.evenslouis` when build green |
+| `/claw/hooks*` | OpenClaw gateway (localhost) | machines | **No** basic_auth — same pattern as n8n webhooks |
+| `/claw` / `/claw/*` (non-hooks) | OpenClaw status stub or gateway | operator | basic_auth; no secrets |
+| `/insights*` | reserved | operator | Gated when staged; not live until CE/n8n/OpenClaw stable |
 | `/lightningflow*` | `:3202` / ops `:3203` | parked + operator gate | Keep alive; not featured |
 | `/builder*` | `:3001` | operator | May 502 until image exists |
 | `/api*` | Client Engine `:3200` | operator | Gated; CE path APIs also under `/pro` |
@@ -30,39 +41,28 @@ Code registry: `packages/shared-config/src/product-registry.ts`
 
 Legacy: `n8ncloud.tech` webhooks/api/rest/healthz dual-host; UI redirects to `/n8n`.
 
+## Repo lanes (anti-confusion)
+
+| Lane | Repos |
+|------|--------|
+| **Hive / money core** | `n8n-cursor`, `client-engine`, `philanthropic-ai-agent`, `outer-heaven-backups` |
+| **Product candidates** | SENTINEL (`shield-buddies`), ClipEngine, Trendspotter, ProofCheck QC |
+| **Side WIP** | AutoFlow Finance, Bookflix, QuickMarket |
+| **Hive capability** | Clearfield (feeds SENTINEL), InsightsLM (→ `/insights` later) |
+| **Parked** | Monorepo LightningFlow `/lightningflow` |
+| **Legacy** | GH `lightning-ui`, GH `lightningflow` stub |
+
+Hard anti-overlap: one money OS (CE), one agent face (OpenClaw/Telegram), one Lightning story (monorepo), one emergency brand (SENTINEL), one stream clipper (ClipEngine).
+
 ## Operator password (Caddy basic_auth)
 
-Secrets live **only on the VPS**, never in git.
-
-1. Generate a long random password; store it in your password manager.
-2. On the VPS:
-
-```bash
-caddy hash-password --plaintext 'YOUR_PASSWORD'
-# → $2a$14$....
-```
-
-3. Write `/etc/caddy/ops.env` (mode `600`):
-
-```bash
-OPS_USER=evens
-OPS_PASS_HASH='$2a$14$....'
-```
-
-4. Point Caddy’s systemd unit at that file (`EnvironmentFile=/etc/caddy/ops.env`), then:
-
-```bash
-caddy validate --config /etc/caddy/Caddyfile
-systemctl reload caddy
-```
-
-5. Browser flow: Operator basic_auth prompt → then n8n or Client Engine login.
-
-**Reset if locked out:** SSH/Hostinger console → edit `/etc/caddy/ops.env` with a new hash → `systemctl reload caddy`.
+Secrets live **only on the VPS**, never in git. See [OPERATOR_PASSWORD.md](./OPERATOR_PASSWORD.md).
 
 ## Hard rules
 
 - Never `docker compose down -v` / volume prune on `n8n-cursor_n8n_data`
-- Do not put basic_auth on n8n webhooks
+- Do not put basic_auth on n8n webhooks or `/claw/hooks*`
 - Do not feature LightningFlow or tool URLs on the public portfolio hero
-- Future repos default to **operator** paths until deliberately made public
+- Do not wipe OpenClaw `SOUL.md` / topic IDs / `openclaw.json` without backup + operator OK
+- Future repos default to **side_wip** + **NO_PATH** until promoted in `repo-registry.ts`
+- Product candidates stay off apex until their own domain launch

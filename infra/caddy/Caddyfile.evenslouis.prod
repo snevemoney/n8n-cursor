@@ -1,11 +1,12 @@
 # Live VPS Caddyfile — evenslouis.ca master stack
 #
-# Public:  /  → portfolio
-# Operator (basic_auth via OPS_USER / OPS_PASS_HASH): /pro /n8n UI /scorpion /lightningflow /builder
-# Machines (no basic_auth): n8n webhooks (+ legacy n8ncloud.tech dual-host)
+# Public:  /  → portfolio (+ /work catalog)
+# Operator (basic_auth via OPS_USER / OPS_PASS_HASH): /pro /n8n UI /scorpion /lightningflow /builder /claw /insights
+# Machines (no basic_auth): n8n webhooks + /claw/hooks* (+ legacy n8ncloud.tech dual-host)
 #
 # Requires systemd EnvironmentFile=/etc/caddy/ops.env with OPS_USER and OPS_PASS_HASH
-# See docs/guides/deployment/OPERATOR_PASSWORD.md
+# Optional: OPENCLAW_GATEWAY=127.0.0.1:18789 (or host:port for OpenClaw hooks)
+# See docs/guides/deployment/OPERATOR_PASSWORD.md + OPENCLAW_WORKSPACE_CONTRACT.md
 #
 # n8n 2.x: do NOT set N8N_PATH; strip /n8n/*; override /static/base-path.js
 # Use /n8n{uri} not /n8n/{uri} (avoids /n8n//... SPA 404)
@@ -201,6 +202,27 @@ evenslouis.ca {
 	handle /api* {
 		import operator_gate
 		reverse_proxy localhost:3200
+	}
+
+	# OpenClaw hooks — machine carve-out (NO basic_auth), like n8n webhooks
+	# Upstream defaults to 127.0.0.1:18789; override via env if gateway moves
+	handle /claw/hooks* {
+		uri strip_prefix /claw
+		reverse_proxy 127.0.0.1:18789 {
+			flush_interval -1
+		}
+	}
+
+	# OpenClaw status / non-hook paths — operator only (no secrets in UI)
+	handle /claw* {
+		import operator_gate
+		reverse_proxy 127.0.0.1:18789
+	}
+
+	# InsightsLM — reserved operator path (502 until staged)
+	handle /insights* {
+		import operator_gate
+		respond "InsightsLM reserved — not staged yet. See EVENSLOUIS_PRODUCT_MAP.md" 503
 	}
 
 	# Builder — operator only

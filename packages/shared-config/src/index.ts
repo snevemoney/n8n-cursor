@@ -5,5 +5,6 @@
 
 export * from './env';
 export * from './product-registry';
+export * from './repo-registry';
 export * from './side-hustles';
 

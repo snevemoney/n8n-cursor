@@ -1,9 +1,9 @@
 /**
  * Evens Louis product / path registry
- * Single source of truth for public vs operator vs parked surfaces.
+ * Single source of truth for public vs operator vs parked vs machine surfaces.
  */
 
-export type SurfaceAudience = 'public' | 'operator' | 'parked';
+export type SurfaceAudience = 'public' | 'operator' | 'parked' | 'machine';
 
 export interface ProductSurface {
   id: string;
@@ -25,6 +25,13 @@ export const productSurfaces: ProductSurface[] = [
     port: 4010,
     blurb: 'Public brand: work and contact.',
     healthz: 'https://evenslouis.ca/portfolio-healthz',
+  },
+  {
+    id: 'work',
+    name: 'Work catalog',
+    href: 'https://evenslouis.ca/work',
+    audience: 'public',
+    blurb: 'Public project catalog with lane/status badges (GitHub links only).',
   },
   {
     id: 'client-engine',
@@ -52,6 +59,27 @@ export const productSurfaces: ProductSurface[] = [
     port: 3003,
     blurb: 'Private ops console (council, knowledge, workflow control).',
     healthz: 'https://evenslouis.ca/scorpion/healthz',
+  },
+  {
+    id: 'openclaw',
+    name: 'OpenClaw',
+    href: 'https://evenslouis.ca/claw',
+    audience: 'operator',
+    blurb: 'Telegram-first Outer Heaven status (gated). Human remote control stays in Telegram.',
+  },
+  {
+    id: 'openclaw-hooks',
+    name: 'OpenClaw hooks',
+    href: 'https://evenslouis.ca/claw/hooks',
+    audience: 'machine',
+    blurb: 'Machine ingress for n8n/MCP/CE callbacks — no basic_auth (like n8n webhooks).',
+  },
+  {
+    id: 'insights',
+    name: 'InsightsLM',
+    href: 'https://evenslouis.ca/insights',
+    audience: 'operator',
+    blurb: 'Reserved NotebookLM-style RAG path (gated). Stage after CE/n8n/OpenClaw stable.',
   },
   {
     id: 'lightningflow',
@@ -82,6 +110,10 @@ export function getOperatorSurfaces(): ProductSurface[] {
 
 export function getParkedSurfaces(): ProductSurface[] {
   return productSurfaces.filter((s) => s.audience === 'parked');
+}
+
+export function getMachineSurfaces(): ProductSurface[] {
+  return productSurfaces.filter((s) => s.audience === 'machine');
 }
 
 export function getSurfaceById(id: string): ProductSurface | undefined {
