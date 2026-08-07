@@ -8,10 +8,13 @@
 - Live project path: `/home/evens/n8n-cursor/docker-compose.yml`
 - Caddy strategy (hybrid):
   - `handle_path /n8n/*` → `127.0.0.1:5678` (strip prefix)
-  - override `/static/base-path.js` → `window.BASE_PATH = '/n8n/'` (fixes SPA 404)
-  - also proxy absolute `/assets*`, `/static*`, `/rest*`, `/api*`, `/webhook*`, `/icon*`, `/favicon.ico`
+  - override `/static/base-path.js` → `window.BASE_PATH = '/n8n/'` plus client guards (fixes SPA 404)
+  - redirect bare `/n8n`, `/n8n/`, `/n8n/home` → `/n8n/home/workflows`
+  - collapse `/n8n//...` double-slash paths (legacy `n8n/{uri}` bug)
+  - also proxy absolute `/assets*`, `/static*`, `/rest*`, `/webhook*`, `/icon*`, `/favicon.ico`
+  - apex `/api*` → Client Engine `:3200` (not n8n)
   - no `N8N_PATH` (n8n 2.x serves assets at `/assets` even when HTML prefixes `/n8n/assets`)
-- Legacy `n8ncloud.tech`: webhooks/api/rest/healthz proxied; UI redirects to `/n8n`
+- Legacy `n8ncloud.tech`: webhooks/api/rest/healthz proxied; UI redirects with `https://evenslouis.ca/n8n{uri}` (not `/n8n/{uri}`)
 - Env URLs: `N8N_EDITOR_BASE_URL` / `N8N_PUBLIC_URL` / `WEBHOOK_URL` = `https://evenslouis.ca/n8n(/)`
 
 ## Hostinger snapshot

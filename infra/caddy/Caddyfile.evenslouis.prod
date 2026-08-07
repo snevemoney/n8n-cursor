@@ -6,6 +6,9 @@
 # - Strip /n8n/* to upstream /
 # - Override /static/base-path.js so Vue router base is /n8n/ (avoids SPA 404)
 # Dual-host: n8ncloud.tech keeps webhook/api/rest/healthz; browser UI redirects to /n8n/
+#
+# IMPORTANT: {uri} already includes a leading slash. Use /n8n{uri} not /n8n/{uri}
+# (the latter produces /n8n//... which breaks the Vue router → SPA 404).
 
 # Legacy LightningFlow hosts: retain API/webhook compatibility while
 # browser traffic moves to evenslouis.ca/lightningflow.
@@ -69,12 +72,13 @@ n8ncloud.tech {
 		reverse_proxy localhost:5678
 	}
 	handle {
-		redir https://evenslouis.ca/n8n/{uri} permanent
+		# {uri} includes leading slash → /n8n{uri} (NOT /n8n/{uri})
+		redir https://evenslouis.ca/n8n{uri} permanent
 	}
 }
 
 www.n8ncloud.tech {
-	redir https://n8ncloud.tech{uri}
+	redir https://evenslouis.ca/n8n{uri} permanent
 }
 
 llm.n8ncloud.tech {
@@ -84,6 +88,10 @@ llm.n8ncloud.tech {
 }
 
 evenslouis.ca {
+	# Collapse accidental double /pro/pro prefix (basePath bugs)
+	@doublePro path_regexp double_pro ^/pro/pro(/.*)?$
+	redir @doublePro /pro{re.double_pro.1}
+
 	# gzip can break MCP streamable-http — exclude MCP/OAuth discovery
 	@gzipEligible not path /n8n/mcp-server/* /n8n/mcp-oauth/* /.well-known/oauth-protected-resource/*
 	encode @gzipEligible gzip
@@ -92,14 +100,22 @@ evenslouis.ca {
 		reverse_proxy localhost:3001
 	}
 
-	# SPA: bare /n8n/ is not a Vue route in n8n 2.x — land on Overview (/home).
-	@n8nRoot path /n8n /n8n/
-	redir @n8nRoot /n8n/home permanent
+	# Collapse /n8n//... produced by bad legacy redirects (breaks Vue router base).
+	# Use //+ — avoid {2,} which Caddy treats as a placeholder.
+	@n8nDouble path_regexp n8n_double ^/n8n//+(.*)$
+	redir @n8nDouble /n8n/{re.n8n_double.1} permanent
+
+	# SPA: bare /n8n/ and /n8n/home are not Vue routes in n8n 2.x — Overview is /home/workflows
+	@n8nRoot path /n8n /n8n/ /n8n/home /n8n/home/
+	redir @n8nRoot /n8n/home/workflows permanent
 
 	# SPA base path override (required for path-strip hosting on n8n 2.x)
 	handle /static/base-path.js {
 		header Content-Type text/javascript
-		respond "window.BASE_PATH = '/n8n/';" 200
+		header Cache-Control "no-store"
+		root * /etc/caddy/static-overrides
+		rewrite * /base-path.js
+		file_server
 	}
 
 	# n8n WWW-Authenticate advertises apex resource metadata for MCP OAuth
