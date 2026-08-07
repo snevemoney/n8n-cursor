@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Prepend hygiene headers to all 15 repos and push. Run on a machine with snevemoney write access.
+# Prepend hygiene headers and push. Run with snevemoney write access (e.g. VPS gh auth).
+# Skips n8n-cursor (handled on cursor/n8n-domain-migration-59dd).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -9,7 +10,6 @@ mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 
 REPOS=(
-  n8n-cursor
   client-engine
   philanthropic-ai-agent
   outer-heaven-backups
@@ -30,6 +30,21 @@ git_cfg() {
   git -c user.email="evens.louis.dev@gmail.com" -c user.name="Evens Louis" "$@"
 }
 
+clone_sparse() {
+  local repo="$1"
+  local dest="$2"
+  rm -rf "$dest"
+  mkdir -p "$dest"
+  git -c advice.detachedHead=false clone --depth 1 --filter=blob:none --sparse \
+    "https://github.com/snevemoney/${repo}.git" "$dest"
+  (
+    cd "$dest"
+    git sparse-checkout set README.md || true
+    # ensure README exists even if sparse missed
+    git checkout HEAD -- README.md 2>/dev/null || true
+  )
+}
+
 for repo in "${REPOS[@]}"; do
   header="$HEADERS/$repo.md"
   if [[ ! -f "$header" ]]; then
@@ -37,14 +52,12 @@ for repo in "${REPOS[@]}"; do
     continue
   fi
   echo "==> README $repo"
-  rm -rf "$WORK/$repo"
-  gh repo clone "snevemoney/$repo" "$WORK/$repo" -- --depth 1
+  clone_sparse "$repo" "$WORK/$repo"
   cd "$WORK/$repo"
   branch="cursor/github-hygiene-59dd"
   git checkout -B "$branch"
   if [[ -f README.md ]]; then
-    # Skip if already hygiened
-    if head -n 5 README.md | grep -q 'HYGIENE: paste at top'; then
+    if head -n 8 README.md | grep -q 'HYGIENE: paste at top'; then
       echo "  already has hygiene header"
       continue
     fi
@@ -61,15 +74,14 @@ for repo in "${REPOS[@]}"; do
   fi
   git_cfg commit -m "docs: add lane/status hygiene header (not-the-product disclaimers)"
   git push -u origin "$branch"
-  # Open or update PR into default branch
-  default="$(gh repo view snevemoney/$repo --json defaultBranchRef -q .defaultBranchRef.name)"
-  if gh pr view --head "$branch" >/dev/null 2>&1; then
+  default="$(gh repo view "snevemoney/$repo" --json defaultBranchRef -q .defaultBranchRef.name)"
+  if gh pr list --repo "snevemoney/$repo" --head "$branch" --json number -q '.[0].number' | grep -q '[0-9]'; then
     echo "  PR already exists"
   else
-    gh pr create --base "$default" --head "$branch" \
+    gh pr create --repo "snevemoney/$repo" --base "$default" --head "$branch" \
       --title "docs: repo hygiene header (lane / WIP / not-X)" \
       --body "Adds canonical status/lane/role/not-X header so this repo is not confused with sibling products. Part of Evens Louis hive taxonomy." \
-      || echo "  PR create skipped/failed (may already exist)"
+      || echo "  PR create skipped/failed"
   fi
   cd /
 done
