@@ -1,0 +1,392 @@
+{
+  "crawledAt": "2026-08-07T15:33:07.595Z",
+  "excludedHosts": [
+    "n8ncloud.tech",
+    "evenslouis.pro",
+    "llm.n8ncloud.tech",
+    "lightningflow.online"
+  ],
+  "results": [
+    {
+      "id": "apex",
+      "group": "ce-public",
+      "requested": "https://evenslouis.ca/",
+      "finalUrl": "https://evenslouis.ca/",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "I build software that\nruns your business.",
+      "textSample": "evenslouis Services Work Contact Available for new projects I build software that runs your business. Full-stack development, automation, and AI — shipped fast on infrastructure you own. View my work Start a project WHAT I DO End-to-end development, your way. Full-Stack Development Next.js, React, Node.js, PostgreSQL — modern stacks built for performance and scale. AI Integrations OpenAI, LangChai",
+      "signals": [
+        "marketing-hero",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/apex.png",
+      "ms": 1873
+    },
+    {
+      "id": "work",
+      "group": "portfolio-catalog",
+      "requested": "https://evenslouis.ca/work",
+      "finalUrl": "https://evenslouis.ca/work",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "Work",
+      "textSample": "evenslouis Work Contact Home Proof of execution Work Selected projects and case studies. Want similar outcomes for your business? Request a workflow audit Emmanuelle Vandepitterie — BACKSTAGE & BANKABLE USA-based, French-speaking. Business coach, 22K LinkedIn followers. Needs community management + content. Likely needs web platform. Hourly, intermediate, 6+ months. Founder of coaching agency. Aut",
+      "signals": [
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/work.png",
+      "ms": 1644
+    },
+    {
+      "id": "login",
+      "group": "ce",
+      "requested": "https://evenslouis.ca/login",
+      "finalUrl": "https://evenslouis.ca/login",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "Sign in",
+      "textSample": "Sign in Access the dashboard Email Password Sign in",
+      "signals": [
+        "sign-in",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/login.png",
+      "ms": 1620
+    },
+    {
+      "id": "dashboard",
+      "group": "ce",
+      "requested": "https://evenslouis.ca/dashboard",
+      "finalUrl": "https://evenslouis.ca/login?callbackUrl=%2Fdashboard",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "Sign in",
+      "textSample": "Sign in Access the dashboard Email Password Sign in",
+      "signals": [
+        "sign-in",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/dashboard.png",
+      "ms": 1648
+    },
+    {
+      "id": "ce-shortcut",
+      "group": "ce",
+      "requested": "https://evenslouis.ca/ce",
+      "finalUrl": "https://evenslouis.ca/login?callbackUrl=%2Fdashboard",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "Sign in",
+      "textSample": "Sign in Access the dashboard Email Password Sign in",
+      "signals": [
+        "sign-in",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/ce-shortcut.png",
+      "ms": 1672
+    },
+    {
+      "id": "pro",
+      "group": "ce-pro",
+      "requested": "https://evenslouis.ca/pro/",
+      "finalUrl": "https://evenslouis.ca/pro",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "I build software that\nruns your business.",
+      "textSample": "evenslouis Services Work Contact Available for new projects I build software that runs your business. Full-stack development, automation, and AI — shipped fast on infrastructure you own. View my work Start a project WHAT I DO End-to-end development, your way. Full-Stack Development Next.js, React, Node.js, PostgreSQL — modern stacks built for performance and scale. AI Integrations OpenAI, LangChai",
+      "signals": [
+        "marketing-hero",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/pro.png",
+      "ms": 1733
+    },
+    {
+      "id": "pro-dashboard",
+      "group": "ce-pro",
+      "requested": "https://evenslouis.ca/pro/dashboard",
+      "finalUrl": "https://evenslouis.ca/pro/login?callbackUrl=%2Fdashboard",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "Sign in",
+      "textSample": "Sign in Access the dashboard Email Password Sign in",
+      "signals": [
+        "sign-in",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/pro-dashboard.png",
+      "ms": 1661
+    },
+    {
+      "id": "pro-health",
+      "group": "ce-pro",
+      "requested": "https://evenslouis.ca/pro/api/health",
+      "finalUrl": "https://evenslouis.ca/pro/api/health",
+      "status": 200,
+      "title": "",
+      "h1": null,
+      "textSample": "{\"ok\":true}",
+      "signals": [
+        "json-ok"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/pro-health.png",
+      "ms": 31599
+    },
+    {
+      "id": "api-health",
+      "group": "ce",
+      "requested": "https://evenslouis.ca/api/health",
+      "finalUrl": "https://evenslouis.ca/api/health",
+      "status": 200,
+      "title": "",
+      "h1": null,
+      "textSample": "{\"ok\":true}",
+      "signals": [
+        "json-ok"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/api-health.png",
+      "ms": 31600
+    },
+    {
+      "id": "healthz",
+      "group": "n8n",
+      "requested": "https://evenslouis.ca/healthz",
+      "finalUrl": "https://evenslouis.ca/healthz",
+      "status": 200,
+      "title": "",
+      "h1": null,
+      "textSample": "{\"status\":\"ok\"}",
+      "signals": [],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/healthz.png",
+      "ms": 31599
+    },
+    {
+      "id": "scorpion",
+      "group": "scorpion",
+      "requested": "https://evenslouis.ca/scorpion/",
+      "finalUrl": "https://evenslouis.ca/scorpion",
+      "status": 200,
+      "title": "Scorpion - Operations Console",
+      "h1": null,
+      "textSample": "🦂 SCORPION OVERVIEW Home Dashboard CORE OPERATIONS Planner Council Tools Knowledge PROJECT & OPS Operations Council Analytics AUTOMATION Workflows Build RESEARCH Recommendations Ontology Research ACADEMY AI Foundations Origins of Generative AI Prompting Essentials AI for Excel & Data AI & AGENTS Agents Specialized Create Agent Chat LLM Experiments LLM Models Model Compare LLM Prompts MONITORING &",
+      "signals": [
+        "scorpion-console",
+        "n8n"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/scorpion.png",
+      "ms": 31792
+    },
+    {
+      "id": "scorpion-healthz",
+      "group": "scorpion",
+      "requested": "https://evenslouis.ca/scorpion/healthz",
+      "finalUrl": "https://evenslouis.ca/scorpion/healthz",
+      "status": 200,
+      "title": "",
+      "h1": null,
+      "textSample": "{\"ok\":true,\"service\":\"scorpion\",\"timestamp\":\"2026-08-07T07:20:39.045Z\",\"uptime\":6.504847962,\"version\":\"0.1.0\",\"environment\":\"production\"}",
+      "signals": [
+        "scorpion-console",
+        "json-ok"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/scorpion-healthz.png",
+      "ms": 31673
+    },
+    {
+      "id": "scorpion-chat",
+      "group": "scorpion",
+      "requested": "https://evenslouis.ca/scorpion/chat/",
+      "finalUrl": "https://evenslouis.ca/scorpion/chat",
+      "status": 200,
+      "title": "Scorpion - Operations Console",
+      "h1": "SCORPION",
+      "textSample": "🦂 SCORPION OVERVIEW Home Dashboard CORE OPERATIONS Planner Council Tools Knowledge PROJECT & OPS Operations Council Analytics AUTOMATION Workflows Build RESEARCH Recommendations Ontology Research ACADEMY AI Foundations Origins of Generative AI Prompting Essentials AI for Excel & Data AI & AGENTS Agents Specialized Create Agent Chat LLM Experiments LLM Models Model Compare LLM Prompts MONITORING &",
+      "signals": [
+        "scorpion-console",
+        "n8n"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/scorpion-chat.png",
+      "ms": 1791
+    },
+    {
+      "id": "scorpion-council",
+      "group": "scorpion",
+      "requested": "https://evenslouis.ca/scorpion/council/",
+      "finalUrl": "https://evenslouis.ca/scorpion/council",
+      "status": 200,
+      "title": "Scorpion - Operations Console",
+      "h1": null,
+      "textSample": "🦂 SCORPION OVERVIEW Home Dashboard CORE OPERATIONS Planner Council Tools Knowledge PROJECT & OPS Operations Council Analytics AUTOMATION Workflows Build RESEARCH Recommendations Ontology Research ACADEMY AI Foundations Origins of Generative AI Prompting Essentials AI for Excel & Data AI & AGENTS Agents Specialized Create Agent Chat LLM Experiments LLM Models Model Compare LLM Prompts MONITORING &",
+      "signals": [
+        "scorpion-console"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/scorpion-council.png",
+      "ms": 31692
+    },
+    {
+      "id": "scorpion-ops",
+      "group": "scorpion",
+      "requested": "https://evenslouis.ca/scorpion/ops/",
+      "finalUrl": "https://evenslouis.ca/scorpion/ops",
+      "status": 200,
+      "title": "Scorpion - Operations Console",
+      "h1": null,
+      "textSample": "🦂 SCORPION OVERVIEW Home Dashboard CORE OPERATIONS Planner Council Tools Knowledge PROJECT & OPS Operations Council Analytics AUTOMATION Workflows Build RESEARCH Recommendations Ontology Research ACADEMY AI Foundations Origins of Generative AI Prompting Essentials AI for Excel & Data AI & AGENTS Agents Specialized Create Agent Chat LLM Experiments LLM Models Model Compare LLM Prompts MONITORING &",
+      "signals": [
+        "scorpion-console"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/scorpion-ops.png",
+      "ms": 31700
+    },
+    {
+      "id": "n8n",
+      "group": "n8n",
+      "requested": "https://evenslouis.ca/n8n/",
+      "finalUrl": "https://evenslouis.ca/n8n/home/workflows",
+      "status": 200,
+      "title": "n8n.io - Workflow Automation",
+      "h1": null,
+      "textSample": "Sign in Email Password Sign in Forgot my password",
+      "signals": [
+        "sign-in",
+        "n8n"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/n8n.png",
+      "ms": 33412
+    },
+    {
+      "id": "lightningflow",
+      "group": "lightningflow",
+      "requested": "https://evenslouis.ca/lightningflow",
+      "finalUrl": "https://evenslouis.ca/lightningflow/login",
+      "status": 200,
+      "title": "Unnamed Workspace | Lightning AI Platform",
+      "h1": "LightningAI Flow",
+      "textSample": "Lightning Business Node Active Dashboard Payments Hub The Engine Send Payment Pay anyone instantly Get Paid Create invoices & requests Invoices Manage payment requests Payment History View all transactions Node Income The Value Driver $247 Boost Business The Multiplier Control Center The Defense System Sovereign • Non-custodial • Secure Node Online LightningAI Flow login Your node is running smoot",
+      "signals": [
+        "sign-in",
+        "lightning"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/lightningflow.png",
+      "ms": 1811
+    },
+    {
+      "id": "lightningflow-ops",
+      "group": "lightningflow",
+      "requested": "https://evenslouis.ca/lightningflow/ops",
+      "finalUrl": "https://evenslouis.ca/lightningflow/ops",
+      "status": 200,
+      "title": "LightningFlow Ops",
+      "h1": "LightningFlow Ops",
+      "textSample": "LightningFlow Ops Dashboard Node Health Clients Wallets AI Agents Lightning Analytics System Health Security Settings Dashboard System overview and health monitoring System Health API: Healthy Worker: Running Redis: Connected n8n: Active Quick Actions Check API Health Open n8n View Logs Environment Mode: Development Version: 0.1.0 Last Deploy: Just now Uptime: 100%",
+      "signals": [
+        "n8n",
+        "lightning"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/lightningflow-ops.png",
+      "ms": 1738
+    },
+    {
+      "id": "lightningflow-healthz",
+      "group": "lightningflow",
+      "requested": "https://evenslouis.ca/lightningflow/healthz",
+      "finalUrl": "https://evenslouis.ca/lightningflow/healthz",
+      "status": 200,
+      "title": "",
+      "h1": null,
+      "textSample": "{\"ok\":true,\"ts\":1786040289683,\"app\":\"landing\",\"environment\":\"development\"}",
+      "signals": [
+        "json-ok"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/lightningflow-healthz.png",
+      "ms": 31599
+    },
+    {
+      "id": "builder",
+      "group": "builder",
+      "requested": "https://evenslouis.ca/builder/",
+      "finalUrl": "https://evenslouis.ca/builder/",
+      "status": 200,
+      "title": "Builder unavailable",
+      "h1": "Builder is not deployed",
+      "textSample": "Builder is not deployed Nothing is listening with the real Client Engine builder app on :3001. The builder source is out-of-repo and was not on disk when this stub was started. Restore the builder tree under the Client Engine deploy (or an image that serves it), then replace this stub. CE dashboard · home · scorpion",
+      "signals": [
+        "scorpion-console",
+        "builder-stub"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/builder.png",
+      "ms": 1600
+    },
+    {
+      "id": "claw",
+      "group": "openclaw",
+      "requested": "https://evenslouis.ca/claw/",
+      "finalUrl": "https://evenslouis.ca/claw/chat?session=main",
+      "status": 200,
+      "title": "OpenClaw Control",
+      "h1": null,
+      "textSample": "OpenClaw Gateway Dashboard WebSocket URL Gateway Token Password (not stored) Connect origin not allowed (open the Control UI from the gateway host or allow it in gateway.controlUi.allowedOrigins) How to connect Start the gateway on your host machine: openclaw gateway run Get a tokenized dashboard URL: openclaw dashboard Paste the WebSocket URL and token above, or open the tokenized URL directly. R",
+      "signals": [
+        "openclaw"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/claw.png",
+      "ms": 31752
+    },
+    {
+      "id": "insights",
+      "group": "insights",
+      "requested": "https://evenslouis.ca/insights",
+      "finalUrl": "https://evenslouis.ca/insights",
+      "status": 503,
+      "title": "Insights reserved",
+      "h1": "InsightsLM — not staged yet",
+      "textSample": "InsightsLM — not staged yet Path reserved. See EVENSLOUIS_PRODUCT_MAP.",
+      "signals": [
+        "insights-reserved",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/insights.png",
+      "ms": 1612
+    },
+    {
+      "id": "www",
+      "group": "ce-public",
+      "requested": "https://www.evenslouis.ca/",
+      "finalUrl": "https://evenslouis.ca/",
+      "status": 200,
+      "title": "evenslouis.ca",
+      "h1": "I build software that\nruns your business.",
+      "textSample": "evenslouis Services Work Contact Available for new projects I build software that runs your business. Full-stack development, automation, and AI — shipped fast on infrastructure you own. View my work Start a project WHAT I DO End-to-end development, your way. Full-Stack Development Next.js, React, Node.js, PostgreSQL — modern stacks built for performance and scale. AI Integrations OpenAI, LangChai",
+      "signals": [
+        "marketing-hero",
+        "evens-louis-brand"
+      ],
+      "error": null,
+      "screenshot": "/opt/cursor/artifacts/wip-url-crawl/screenshots/www.png",
+      "ms": 1787
+    }
+  ]
+}
