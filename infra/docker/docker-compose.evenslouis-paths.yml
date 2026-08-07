@@ -46,7 +46,7 @@ services:
       PORT: 3003
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_BASE_PATH: /scorpion
-      CE_HIVE_BASE_URL: ${CE_HIVE_BASE_URL:-http://host.docker.internal:3205}
+      CE_HIVE_BASE_URL: ${CE_HIVE_BASE_URL:-http://ce-hive-bridge:3205}
       CE_HIVE_TOKEN: ${CE_HIVE_TOKEN:-}
       HIVE_MACHINE_TOKEN: ${HIVE_MACHINE_TOKEN:-}
       N8N_BASE_URL: ${N8N_BASE_URL:-http://host.docker.internal:5678}
