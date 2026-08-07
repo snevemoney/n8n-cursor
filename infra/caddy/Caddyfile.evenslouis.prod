@@ -76,8 +76,20 @@ www.n8ncloud.tech {
 }
 
 llm.n8ncloud.tech {
+	# Ollama when up; otherwise clear HTML (not a blank Cloudflare/Caddy 502)
 	handle {
 		reverse_proxy 127.0.0.1:11434
+	}
+	handle_errors {
+		@down expression `{err.status_code} >= 500`
+		handle @down {
+			header Content-Type "text/html; charset=utf-8"
+			respond `<!doctype html><html><head><title>LLM offline</title></head>
+<body style="font-family:system-ui;background:#0a0d10;color:#e4e8ee;padding:2rem">
+<h1>Ollama is not running</h1>
+<p><code>llm.n8ncloud.tech</code> proxies to <code>127.0.0.1:11434</code>. Start Ollama on the VPS, then retry.</p>
+</body></html>` 503
+		}
 	}
 }
 
@@ -90,8 +102,32 @@ evenslouis.ca {
 	@gzipEligible not path /n8n/mcp-server/* /n8n/mcp-oauth/* /.well-known/oauth-protected-resource/*
 	encode @gzipEligible gzip
 
+	# Builder — exact /builder must not fall through to CE 404
+	handle /builder {
+		redir * /builder/ permanent
+	}
 	handle /builder/* {
 		reverse_proxy localhost:3001
+	}
+
+	# OpenClaw gateway (hooks stay machine-reachable; UI at /claw)
+	handle /claw/hooks* {
+		reverse_proxy 127.0.0.1:18789 {
+			flush_interval -1
+		}
+	}
+	handle /claw* {
+		reverse_proxy 127.0.0.1:18789
+	}
+
+	# InsightsLM reserved
+	handle /insights* {
+		header Content-Type "text/html; charset=utf-8"
+		respond `<!doctype html><html><head><title>Insights reserved</title></head>
+<body style="font-family:system-ui;background:#0a0d10;color:#e4e8ee;padding:2rem">
+<h1>InsightsLM — not staged yet</h1>
+<p>Path reserved. See EVENSLOUIS_PRODUCT_MAP.</p>
+</body></html>` 503
 	}
 
 	# Collapse /n8n//... produced by bad legacy redirects (breaks Vue router base).
@@ -176,8 +212,10 @@ evenslouis.ca {
 	# LightningFlow path deployment.
 	# Root + app traffic go to the customer web app (:3202). Landing (:3201)
 	# keeps a dedicated asset prefix so its Next chunks cannot collide.
+	# Web app has no /lightningflow/healthz — use landing /healthz.
 	handle /lightningflow/healthz {
-		reverse_proxy localhost:3202
+		rewrite * /healthz
+		reverse_proxy localhost:3201
 	}
 	handle_path /lightningflow/_landing/* {
 		reverse_proxy localhost:3201
