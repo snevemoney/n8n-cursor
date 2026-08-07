@@ -4,6 +4,21 @@ Playwright crawl: `2026-08-07T15:33Z`
 Artifacts: `/opt/cursor/artifacts/wip-url-crawl/` (`crawl-results.json`, screenshots)  
 Excluded hosts (per request): `n8ncloud.tech`, `evenslouis.pro`, `llm.n8ncloud.tech`, `lightningflow.online`
 
+
+## Execution status (2026-08-07 agent run)
+
+| Item | Status |
+|------|--------|
+| Apex registry = CE-on-apex | **done** |
+| CE hive bridge `:3205` | **done** (actions/leads/notes/queue) |
+| Scorpion → CE hive | **done** |
+| Hive register smoke | **done** |
+| CE human login → Leads | **done** |
+| Builder stub Ph2 exit | **done** (accepted) |
+| OpenClaw loopback + staging drill | **done** |
+| n8n API catalog | **blocked** (no N8N_API_KEY on VPS) |
+| Telegram Ph8 no-SSH | **hold** (Outer Heaven tools) |
+
 **Live vs WIP registry drift:** Product map / Phase 0 still say public portfolio on `/` + `/work`. Live apex is **Client Engine marketing** (`:3200`). Decide deliberately before more path work.
 
 ---
