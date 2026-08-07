@@ -59,3 +59,14 @@ docker compose build app && docker compose up -d app
 ```
 
 Still ops (not in this patch): Meta Ads Graph token, stale scoreboard/jobs/workday.
+
+## AI Brain Sonnet 5 + YouTube transcripts (2026-08-07)
+
+Patch: [`ai-youtube-sonnet5-59dd.diff`](./ai-youtube-sonnet5-59dd.diff)  
+File copies: [`files/ai-youtube/`](./files/ai-youtube/)  
+Report: [`../../wip-program/CE_AI_YOUTUBE_FIX_REPORT.md`](../../wip-program/CE_AI_YOUTUBE_FIX_REPORT.md)
+
+1. **AI Brain** — `claude-sonnet-5` (drop temperature; optional `ANTHROPIC_BRAIN_MODEL`)
+2. **YouTube** — copy transcript npm packages into Docker runner; static imports; Innertube captions fallback; `YOUTUBE_COOKIES`; retry API/UI
+
+Applied live on VPS app image. Remaining failures need operator cookies for YouTube bot check.

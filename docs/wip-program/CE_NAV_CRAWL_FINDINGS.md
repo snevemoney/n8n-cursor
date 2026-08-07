@@ -42,7 +42,7 @@ Script: `scripts/wip-program/ce-nav-playwright-crawl.mjs`
 | Page | Issue |
 |------|--------|
 | **Growth** | Pipeline empty (`new (0)`); no follow-ups in 7d |
-| **YouTube** | Ingest works but **Failures (14)**; multi-provider fallback noise — clear/retry failures |
+| **YouTube** | Failures (14) mostly **YouTube bot check** from VPS IP — set `YOUTUBE_COOKIES` + Retry all (packages + Innertube fix deployed) |
 | **Leads** | **2 NEEDS PIPELINE** — run pipeline action for those leads |
 | **Follow-ups** | Queue empty (ALL 0) while Reminders has overdue — sync follow-up generation from reminders/leads |
 | **Forecast** | Low-confidence warnings — capture snapshot / improve inputs |
@@ -54,7 +54,7 @@ Script: `scripts/wip-program/ce-nav-playwright-crawl.mjs`
 
 Lead Intake, Prospect, Signals, Decisions, Proposals, Handoffs, Build Ops, Deploys, Proof, Campaigns, Reviews, Proof Candidates, Content Posts, Risk, Intelligence, Next Actions, Inbox, Founder OS, Knowledge, Automation, Operator, Settings, Notifications, Channels, Flywheel, Exec Metrics, Job Schedules.
 
-## Dev-side fixes prepared
+## Dev-side fixes prepared / deployed
 
 Patch: [`../patches/client-engine/dashboard-dev-fixes-59dd.diff`](../patches/client-engine/dashboard-dev-fixes-59dd.diff)
 
@@ -64,14 +64,21 @@ Patch: [`../patches/client-engine/dashboard-dev-fixes-59dd.diff`](../patches/cli
 | CSP / fbevents on dashboard | `MetaPixel` skips operator paths; CSP allowlists FB for marketing |
 | Conversion all zeros | API default `range=all` + range selector UI |
 
+AI Brain + YouTube: [`../patches/client-engine/ai-youtube-sonnet5-59dd.diff`](../patches/client-engine/ai-youtube-sonnet5-59dd.diff) · report [`CE_AI_YOUTUBE_FIX_REPORT.md`](./CE_AI_YOUTUBE_FIX_REPORT.md)
+
+| Issue | Fix |
+|-------|-----|
+| Brain on Sonnet 4 | → `claude-sonnet-5` (no temperature) |
+| YouTube transcript missing packages in runner | Dockerfile COPY + static imports |
+| Captions empty / no tracks | Innertube fallback + `YOUTUBE_COOKIES` + Retry all API/UI |
+
 ## Suggested fix order
 
-1. **Apply dashboard-dev patch + rebuild CE app** (items above)  
+1. **Set `YOUTUBE_COOKIES` + Retry all** on YouTube failures (bot check)  
 2. **Meta Ads token** (ops — regenerate Graph/System User token)  
 3. **Workday / Scoreboard / Jobs stale** (ops automation)  
 4. **Reminders overdue + Follow-ups empty** (operator loop)  
-5. **YouTube failure backlog**  
-6. Data empties (Growth/Scorecard) once pipelines run  
+5. Data empties (Growth/Scorecard) once pipelines run  
 
 ## Full severity table
 
