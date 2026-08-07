@@ -1,23 +1,11 @@
-# Live VPS Caddyfile — evenslouis.ca master stack
+# Live VPS Caddyfile — RESTORED ungated routing (2026-08-07)
+# Apex / → Client Engine :3200 (NOT portfolio, NOT basic_auth)
+# /pro → Client Engine pro :3204
+# /scorpion → Scorpion :3003
+# /n8n, /lightningflow, /builder as before path-gate cutover
 #
-# Public:  /  → portfolio (+ /work catalog)
-# Operator (basic_auth via OPS_USER / OPS_PASS_HASH): /pro /n8n UI /scorpion /lightningflow /builder /claw /insights
-# Machines (no basic_auth): n8n webhooks + /claw/hooks* (+ legacy n8ncloud.tech dual-host)
+# Do NOT re-introduce operator_gate/basic_auth without explicit owner approval.
 #
-# Requires systemd EnvironmentFile=/etc/caddy/ops.env with OPS_USER and OPS_PASS_HASH
-# Optional: OPENCLAW_GATEWAY=127.0.0.1:18789 (or host:port for OpenClaw hooks)
-# See docs/guides/deployment/OPERATOR_PASSWORD.md + OPENCLAW_WORKSPACE_CONTRACT.md
-#
-# n8n 2.x: do NOT set N8N_PATH; strip /n8n/*; override /static/base-path.js
-# Use /n8n{uri} not /n8n/{uri} (avoids /n8n//... SPA 404)
-
-(operator_gate) {
-	basic_auth {
-		{$OPS_USER} {$OPS_PASS_HASH}
-	}
-}
-
-# Legacy LightningFlow hosts
 lightningflow.online {
 	encode gzip
 
@@ -78,6 +66,7 @@ n8ncloud.tech {
 		reverse_proxy localhost:5678
 	}
 	handle {
+		# {uri} includes leading slash → /n8n{uri} (NOT /n8n/{uri})
 		redir https://evenslouis.ca/n8n{uri} permanent
 	}
 }
@@ -93,32 +82,74 @@ llm.n8ncloud.tech {
 }
 
 evenslouis.ca {
+	# Collapse accidental double /pro/pro prefix (basePath bugs)
 	@doublePro path_regexp double_pro ^/pro/pro(/.*)?$
 	redir @doublePro /pro{re.double_pro.1}
 
+	# gzip can break MCP streamable-http — exclude MCP/OAuth discovery
 	@gzipEligible not path /n8n/mcp-server/* /n8n/mcp-oauth/* /.well-known/oauth-protected-resource/*
 	encode @gzipEligible gzip
 
-	# Old Client Engine bookmarks → /pro
-	@ceLegacy path /login /login/* /dashboard /dashboard/*
-	redir @ceLegacy /pro{uri} permanent
+	handle /builder/* {
+		reverse_proxy localhost:3001
+	}
 
-	# --- n8n machine paths (NO basic_auth) ---
-	handle /n8n/webhook* {
-		uri strip_prefix /n8n
+	# Collapse /n8n//... produced by bad legacy redirects (breaks Vue router base).
+	# Use //+ — avoid {2,} which Caddy treats as a placeholder.
+	@n8nDouble path_regexp n8n_double ^/n8n//+(.*)$
+	redir @n8nDouble /n8n/{re.n8n_double.1} permanent
+
+	# SPA: bare /n8n/ and /n8n/home are not Vue routes in n8n 2.x — Overview is /home/workflows
+	@n8nRoot path /n8n /n8n/ /n8n/home /n8n/home/
+	redir @n8nRoot /n8n/home/workflows permanent
+
+	# SPA base path override (required for path-strip hosting on n8n 2.x)
+	handle /static/base-path.js {
+		header Content-Type text/javascript
+		header Cache-Control "no-store"
+		root * /etc/caddy/static-overrides
+		rewrite * /base-path.js
+		file_server
+	}
+
+	# n8n WWW-Authenticate advertises apex resource metadata for MCP OAuth
+	handle /.well-known/oauth-protected-resource/n8n* {
 		reverse_proxy localhost:5678 {
 			flush_interval -1
 		}
 	}
-	handle /n8n/webhook-test* {
-		uri strip_prefix /n8n
+
+	handle_path /n8n/* {
 		reverse_proxy localhost:5678 {
 			flush_interval -1
 		}
 	}
-	handle /n8n/healthz {
-		uri strip_prefix /n8n
-		reverse_proxy localhost:5678
+
+	handle /assets* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /static* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /types* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /rest* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	# /api* must reach Client Engine on :3200 (login/dashboard/auth).
+	# n8n API remains available at /n8n/* via handle_path above, and on
+	# n8ncloud.tech dual-host compatibility routes.
+	handle /api* {
+		reverse_proxy localhost:3200
 	}
 	handle /webhook* {
 		reverse_proxy localhost:5678 {
@@ -130,176 +161,47 @@ evenslouis.ca {
 			flush_interval -1
 		}
 	}
-	handle /healthz {
-		reverse_proxy localhost:5678
-	}
-
-	@n8nDouble path_regexp n8n_double ^/n8n//+(.*)$
-	redir @n8nDouble /n8n/{re.n8n_double.1} permanent
-
-	@n8nRoot path /n8n /n8n/ /n8n/home /n8n/home/
-	redir @n8nRoot /n8n/home/workflows permanent
-
-	handle /static/base-path.js {
-		import operator_gate
-		header Content-Type text/javascript
-		header Cache-Control "no-store"
-		root * /etc/caddy/static-overrides
-		rewrite * /base-path.js
-		file_server
-	}
-
-	handle /.well-known/oauth-protected-resource/n8n* {
-		reverse_proxy localhost:5678 {
-			flush_interval -1
-		}
-	}
-
-	# --- Operator-gated n8n UI + related absolute assets ---
-	handle /n8n/* {
-		import operator_gate
-		uri strip_prefix /n8n
-		reverse_proxy localhost:5678 {
-			flush_interval -1
-		}
-	}
-	handle /assets* {
-		import operator_gate
-		reverse_proxy localhost:5678 {
-			flush_interval -1
-		}
-	}
-	handle /static* {
-		import operator_gate
-		reverse_proxy localhost:5678 {
-			flush_interval -1
-		}
-	}
-	handle /types* {
-		import operator_gate
-		reverse_proxy localhost:5678 {
-			flush_interval -1
-		}
-	}
-	handle /rest* {
-		import operator_gate
-		reverse_proxy localhost:5678 {
-			flush_interval -1
-		}
-	}
 	handle /icon* {
-		import operator_gate
 		reverse_proxy localhost:5678 {
 			flush_interval -1
 		}
 	}
 	handle /favicon.ico {
-		import operator_gate
+		reverse_proxy localhost:5678
+	}
+	handle /healthz {
 		reverse_proxy localhost:5678
 	}
 
-	# Client Engine APIs (apex) — operator only
-	handle /api* {
-		import operator_gate
-		reverse_proxy localhost:3200
-	}
-
-	# OpenClaw hooks — machine carve-out (NO basic_auth), like n8n webhooks
-	# Upstream defaults to 127.0.0.1:18789; override via env if gateway moves
-	handle /claw/hooks* {
-		uri strip_prefix /claw
-		reverse_proxy 127.0.0.1:18789 {
-			flush_interval -1
-		}
-	}
-
-	# OpenClaw status / non-hook paths — operator only (no secrets in UI)
-	handle /claw* {
-		import operator_gate
-		reverse_proxy 127.0.0.1:18789
-	}
-
-	# InsightsLM — reserved operator path (502 until staged)
-	handle /insights* {
-		import operator_gate
-		respond "InsightsLM reserved — not staged yet. See EVENSLOUIS_PRODUCT_MAP.md" 503
-	}
-
-	# Builder — operator only (exact /builder must not fall through to portfolio 404)
-	handle /builder {
-		import operator_gate
-		redir * /builder/ permanent
-	}
-	handle /builder/* {
-		import operator_gate
-		reverse_proxy localhost:3001
-	}
-
-	# Scorpion — operator only
-	handle /scorpion* {
-		import operator_gate
-		reverse_proxy localhost:3003
-	}
-
-	# LightningFlow — parked / operator only
+	# LightningFlow path deployment.
+	# Root + app traffic go to the customer web app (:3202). Landing (:3201)
+	# keeps a dedicated asset prefix so its Next chunks cannot collide.
 	handle /lightningflow/healthz {
-		import operator_gate
 		reverse_proxy localhost:3202
 	}
 	handle_path /lightningflow/_landing/* {
-		import operator_gate
 		reverse_proxy localhost:3201
 	}
 	handle /lightningflow/ops* {
-		import operator_gate
 		reverse_proxy localhost:3203
 	}
 	handle /lightningflow* {
-		import operator_gate
 		reverse_proxy localhost:3202
 	}
 
-	# Client Engine — operator only (entire /pro tree)
+	# Existing authenticated client dashboard, built independently with
+	# NEXT_PUBLIC_BASE_PATH=/pro. This is intentionally separate from n8n.
+	# Scorpion — full Next app (ungated; matches restored live routing)
+	handle /scorpion* {
+		reverse_proxy localhost:3003
+	}
+
 	handle /pro* {
-		import operator_gate
 		reverse_proxy localhost:3204
 	}
 
-	# Public portfolio health (no auth)
-	handle /portfolio-healthz {
-		rewrite * /healthz
-		reverse_proxy localhost:4010
-	}
-
-	# Public front door
 	handle {
-		reverse_proxy localhost:4010
-	}
-
-	# Cancelled / missing basic_auth used to render a blank white tab in browsers.
-	# Keep WWW-Authenticate so the login prompt still appears on reload.
-	handle_errors {
-		@auth401 expression `{err.status_code} == 401`
-		handle @auth401 {
-			header Content-Type "text/html; charset=utf-8"
-			header WWW-Authenticate "Basic realm=\"restricted\""
-			respond `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Operator login required</title>
-<style>
-body{margin:0;font-family:ui-sans-serif,system-ui,sans-serif;background:#0a0d10;color:#e4e8ee}
-main{max-width:36rem;margin:4rem auto;padding:0 1.25rem}
-h1{color:#13c6a8;font-size:1.75rem}
-p{line-height:1.55;color:rgba(228,232,238,.8)}
-code{color:#13c6a8}
-a{color:#13c6a8}
-</style></head><body><main>
-<h1>Operator login required</h1>
-<p>This path is gated by Caddy basic_auth. Enter the operator credentials when the browser prompts, or reload and try again.</p>
-<p>Public pages: <a href="/">home</a> · <a href="/work">/work</a></p>
-<p><code>/scorpion</code>, <code>/pro</code>, <code>/n8n</code>, <code>/claw</code>, <code>/builder</code>, and <code>/lightningflow</code> are operator-only.</p>
-</main></body></html>` 401
-		}
+		reverse_proxy localhost:3200
 	}
 }
 
@@ -313,9 +215,4 @@ evenslouis.pro {
 
 www.evenslouis.pro {
 	redir https://evenslouis.ca/pro{uri} permanent
-}
-
-# Optional legacy portfolio host → apex
-portfolio.n8ncloud.tech {
-	redir https://evenslouis.ca{uri} permanent
 }

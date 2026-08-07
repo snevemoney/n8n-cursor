@@ -1,27 +1,30 @@
 # Domain path consolidation rollback
 
-Canonical hosts after cutover:
+**RESTORE (2026-08-07):** Operator `basic_auth` gates and portfolio-on-apex were rolled back.
+Live routing matches the pre-gate cutover (Client Engine on apex). Do not re-gate without owner approval.
 
-- `https://evenslouis.ca/` — public portfolio (visitors)
-- `https://evenslouis.ca/n8n/` (from `n8ncloud.tech`) — operator + webhooks
-- `https://evenslouis.ca/pro` (from `evenslouis.pro`) — Client Engine, operator only
-- `https://evenslouis.ca/scorpion` — Scorpion ops, operator only
-- `https://evenslouis.ca/lightningflow` — parked, operator gated
+Canonical hosts (restored):
 
-See also: [EVENSLOUIS_PRODUCT_MAP.md](./EVENSLOUIS_PRODUCT_MAP.md), [OPERATOR_PASSWORD.md](./OPERATOR_PASSWORD.md)
+- `https://evenslouis.ca/` — Client Engine (`:3200`)
+- `https://evenslouis.ca/pro` — Client Engine pro (`:3204`)
+- `https://evenslouis.ca/scorpion` — Scorpion (`:3003`)
+- `https://evenslouis.ca/n8n/` — n8n UI + webhooks
+- `https://evenslouis.ca/lightningflow` — LightningFlow web
 
-## Live topology (path dual-host)
+See also: [EVENSLOUIS_PRODUCT_MAP.md](./EVENSLOUIS_PRODUCT_MAP.md)
+
+## Live topology (restored ungated)
 
 | Path | Upstream | Notes |
 |------|----------|-------|
-| `/` | `127.0.0.1:4010` | Public portfolio |
-| `/n8n/*` UI | `127.0.0.1:5678` | Strip prefix + `base-path.js`; **basic_auth** |
-| `/n8n/webhook*` | `127.0.0.1:5678` | **No** basic_auth |
-| `/lightningflow*` | `127.0.0.1:3202` | Parked; **basic_auth** |
-| `/lightningflow/ops*` | `127.0.0.1:3203` | Ops; **basic_auth** |
-| `/pro*` | `127.0.0.1:3204` | Client Engine; **basic_auth** |
-| `/scorpion*` | `127.0.0.1:3003` | Scorpion `basePath=/scorpion`; **basic_auth** |
-| `/api*` | `127.0.0.1:3200` | CE APIs; **basic_auth** |
+| `/` | `127.0.0.1:3200` | Client Engine (apex) |
+| `/n8n/*` UI | `127.0.0.1:5678` | Strip prefix + `base-path.js` |
+| `/n8n/webhook*` | `127.0.0.1:5678` | Machine path |
+| `/lightningflow*` | `127.0.0.1:3202` | Web app |
+| `/lightningflow/ops*` | `127.0.0.1:3203` | Ops |
+| `/pro*` | `127.0.0.1:3204` | Client Engine pro |
+| `/scorpion*` | `127.0.0.1:3003` | Scorpion `basePath=/scorpion` |
+| `/api*` | `127.0.0.1:3200` | CE APIs |
 
 Compose files:
 
