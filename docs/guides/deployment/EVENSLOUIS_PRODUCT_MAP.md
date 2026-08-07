@@ -22,7 +22,7 @@ Code registry: `packages/shared-config/src/product-registry.ts`
 | `/n8n/*` UI | `127.0.0.1:5678` (strip prefix) | operator | basic_auth + n8n login |
 | `/n8n/webhook*`, `/n8n/webhook-test*` | n8n | machines | **No** basic_auth |
 | `/n8n/healthz` | n8n | public monitor | No basic_auth |
-| `/scorpion*` | `127.0.0.1:3003` | operator | `NEXT_PUBLIC_BASE_PATH=/scorpion` |
+| `/scorpion*` | `127.0.0.1:3003` | operator | Gated stub live now; full app uses `NEXT_PUBLIC_BASE_PATH=/scorpion` (`Dockerfile.evenslouis`) when build is green |
 | `/lightningflow*` | `:3202` / ops `:3203` | parked + operator gate | Keep alive; not featured |
 | `/builder*` | `:3001` | operator | May 502 until image exists |
 | `/api*` | Client Engine `:3200` | operator | Gated; CE path APIs also under `/pro` |

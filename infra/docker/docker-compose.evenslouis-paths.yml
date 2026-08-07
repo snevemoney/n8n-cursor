@@ -31,30 +31,24 @@ services:
     mem_limit: 384m
     pids_limit: 150
 
+  # Temporary operator stub (full Next image: apps/scorpion/Dockerfile.evenslouis).
+  # Keeps /scorpion healthy + gated while the full app build is repaired.
   scorpion:
     <<: *defaults
     build:
-      context: ../..
-      dockerfile: apps/scorpion/Dockerfile.evenslouis
-      args:
-        NEXT_PUBLIC_BASE_PATH: /scorpion
+      context: ./scorpion-stub
     ports:
       - "127.0.0.1:3003:3003"
     environment:
-      NODE_ENV: production
       PORT: 3003
-      HOSTNAME: 0.0.0.0
-      NEXT_PUBLIC_BASE_PATH: /scorpion
-      NEXT_TELEMETRY_DISABLED: "1"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/scorpion/healthz"]
-      interval: 30s
+      interval: 20s
       timeout: 5s
-      retries: 10
-      start_period: 60s
-    cpus: "1.5"
-    mem_limit: 1536m
-    pids_limit: 300
+      retries: 5
+    cpus: "0.25"
+    mem_limit: 128m
+    pids_limit: 64
 
   lightningflow-landing:
     <<: *defaults
