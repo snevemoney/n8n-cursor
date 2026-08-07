@@ -1,39 +1,26 @@
 # Workflow Screenshots
 
-Add your n8n workflow screenshots here. The portfolio will automatically display them in the "Featured Automation Work" section.
+Portfolio “Featured Automation Work” loads images from this directory.
 
-## Required Screenshots
+## Current placeholders
 
-Save your screenshots with these exact filenames:
+SVG previews ship by default (no console 404s). Replace any file with a real n8n screenshot using the **same basename** and either `.svg` or update `AutomationShowcase.tsx` to `.png`.
 
-1. **elevenlabs-post-call.png** - ElevenLabs POST Call Workflow
-2. **inbound-assistant.png** - Inbound Assistant
-3. **social-media-finder.png** - Social Profile Finder
-4. **text-to-image-video.png** - AI Nana - Text to Image & Video
-5. **email-notifications.png** - Email Notification System
-6. **lead-capture.png** - Website Lead Capture with Apollo.io
-7. **rag-chatbot.png** - RAG Agent / PI Attorney Lead Qualifier
-8. **voice-assistant.png** - Voice Assistant Agent (Telegram)
+| File | Workflow |
+|------|----------|
+| `elevenlabs-post-call.svg` | ElevenLabs POST Call |
+| `inbound-assistant.svg` | Inbound Assistant |
+| `social-media-finder.svg` | Social Profile Finder |
+| `text-to-image-video.svg` | AI Nana - Text to Image & Video |
+| `email-notifications.svg` | Email Notification System |
+| `lead-capture.svg` | Website Lead Capture with Apollo.io |
+| `rag-chatbot.svg` | RAG Agent / PI Attorney Lead Qualifier |
+| `voice-assistant.svg` | Voice Assistant Agent (Telegram) |
 
-## How to Add Screenshots
+## Replacing with real screenshots
 
-1. Take screenshots of your n8n workflows
-2. Save them to this directory (`apps/portfolio/public/workflows/`)
-3. Use the exact filenames listed above
-4. Recommended format: PNG, 1200-1600px width
-5. After adding screenshots, rebuild and restart:
-   ```bash
-   cd apps/portfolio
-   npm run build
-   pm2 restart portfolio
-   ```
+1. Capture the n8n canvas (1200–1600px wide PNG recommended)
+2. Save as the matching basename (update `AutomationShowcase.tsx` if switching to `.png`)
+3. Rebuild/redeploy portfolio
 
-## Screenshot Tips
-
-- Capture the full workflow view (all nodes visible)
-- Use n8n's "read-only visualization" mode for clean screenshots
-- Ensure good contrast and readability
-- Crop to show the most important parts of the workflow
-
-The portfolio will automatically display these screenshots in the workflow cards. If a screenshot is missing, the image area will be hidden gracefully.
-
+Missing files used to 404 in the browser console even when `onError` hid the `<img>`; keep a file present for each referenced path.

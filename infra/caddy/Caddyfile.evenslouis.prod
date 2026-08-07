@@ -225,7 +225,11 @@ evenslouis.ca {
 		respond "InsightsLM reserved — not staged yet. See EVENSLOUIS_PRODUCT_MAP.md" 503
 	}
 
-	# Builder — operator only
+	# Builder — operator only (exact /builder must not fall through to portfolio 404)
+	handle /builder {
+		import operator_gate
+		redir * /builder/ permanent
+	}
 	handle /builder/* {
 		import operator_gate
 		reverse_proxy localhost:3001

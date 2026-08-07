@@ -17,7 +17,7 @@ const workflows: Workflow[] = [
     description:
       "n8n workflow that sends scripts to ElevenLabs via POST call, generates voice assets, handles retries, and stores results with logs.",
     tech: ["n8n", "ElevenLabs API", "Webhooks", "File Management"],
-    screenshot: "/workflows/elevenlabs-post-call.png",
+    screenshot: "/workflows/elevenlabs-post-call.svg",
   },
   {
     id: "inbound-assistant",
@@ -26,7 +26,7 @@ const workflows: Workflow[] = [
     description:
       "Inbound messages (email/forms/webhooks) are routed to an AI assistant, which crafts responses and sends replies automatically. Includes calendar, email, contact, and FAQ agents.",
     tech: ["n8n", "OpenAI", "Email", "Webhooks", "VAPI"],
-    screenshot: "/workflows/inbound-assistant.png",
+    screenshot: "/workflows/inbound-assistant.svg",
   },
   {
     id: "social-media-finder",
@@ -35,7 +35,7 @@ const workflows: Workflow[] = [
     description:
       "Given a name or brand, the workflow searches and returns main social profiles (Instagram, LinkedIn, Twitter, TikTok, Facebook) to support research, outreach, or lead generation.",
     tech: ["n8n", "Web Scraping", "APIs"],
-    screenshot: "/workflows/social-media-finder.png",
+    screenshot: "/workflows/social-media-finder.svg",
   },
   {
     id: "text-to-image-video",
@@ -44,7 +44,7 @@ const workflows: Workflow[] = [
     description:
       "Transforms text prompts into images, then into UGC-style videos using external APIs. Handles Telegram triggers, image generation, video creation, and automated delivery.",
     tech: ["n8n", "Text-to-Image", "Image-to-Video", "Telegram", "OpenAI"],
-    screenshot: "/workflows/text-to-image-video.png",
+    screenshot: "/workflows/text-to-image-video.svg",
   },
   {
     id: "email-notifications",
@@ -53,7 +53,7 @@ const workflows: Workflow[] = [
     description:
       "Routes incoming emails by type and sends automated responses. Handles welcome emails, verification, password resets, work orders, compliance alerts, and monthly reports.",
     tech: ["n8n", "Email", "Routing", "Automation"],
-    screenshot: "/workflows/email-notifications.png",
+    screenshot: "/workflows/email-notifications.svg",
   },
   {
     id: "lead-capture",
@@ -62,7 +62,7 @@ const workflows: Workflow[] = [
     description:
       "Captures leads from webhooks, enriches data from Apollo.io, creates contacts in HubSpot, and sends automated thank you and team notifications.",
     tech: ["n8n", "Apollo.io", "HubSpot", "Gmail", "Webhooks"],
-    screenshot: "/workflows/lead-capture.png",
+    screenshot: "/workflows/lead-capture.svg",
   },
   {
     id: "rag-chatbot",
@@ -71,7 +71,7 @@ const workflows: Workflow[] = [
     description:
       "Retrieval-augmented chatbot combining custom documents with an LLM to answer context-aware questions. Includes Google Drive ingestion, vector store, and chat interface.",
     tech: ["n8n", "RAG", "OpenAI", "Supabase Vector Store", "Google Drive"],
-    screenshot: "/workflows/rag-chatbot.png",
+    screenshot: "/workflows/rag-chatbot.svg",
   },
   {
     id: "voice-assistant",
@@ -80,7 +80,7 @@ const workflows: Workflow[] = [
     description:
       "Voice-enabled Telegram assistant that transcribes audio, processes requests through specialized agents (email, calendar, contact, YouTube, web), and responds with audio or text.",
     tech: ["n8n", "Telegram", "OpenAI", "Audio Transcription", "AI Agents"],
-    screenshot: "/workflows/voice-assistant.png",
+    screenshot: "/workflows/voice-assistant.svg",
   },
 ];
 
