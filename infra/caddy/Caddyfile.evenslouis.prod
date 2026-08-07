@@ -191,6 +191,14 @@ evenslouis.ca {
 
 	# Existing authenticated client dashboard, built independently with
 	# NEXT_PUBLIC_BASE_PATH=/pro. This is intentionally separate from n8n.
+	# Client Engine product UI (private dashboard) — not the public marketing page at /
+	handle /ce {
+		redir * /dashboard permanent
+	}
+	handle /ce/* {
+		redir * /dashboard{uri} permanent
+	}
+
 	# Scorpion — full Next app (ungated; matches restored live routing)
 	handle /scorpion* {
 		reverse_proxy localhost:3003
@@ -209,10 +217,11 @@ www.evenslouis.ca {
 	redir https://evenslouis.ca{uri} permanent
 }
 
+# CE product entry (per client-engine README): .pro → dashboard, not /pro marketing
 evenslouis.pro {
-	redir https://evenslouis.ca/pro{uri} permanent
+	redir https://evenslouis.ca/dashboard permanent
 }
 
 www.evenslouis.pro {
-	redir https://evenslouis.ca/pro{uri} permanent
+	redir https://evenslouis.ca/dashboard permanent
 }
