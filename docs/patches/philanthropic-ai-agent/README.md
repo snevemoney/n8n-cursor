@@ -5,6 +5,7 @@ Cursor App cannot push to `philanthropic-ai-agent`. Apply on VPS or a machine wi
 ## Add tools (read-heavy first)
 
 Wire these names into the existing tool registry (`app/api/agent/tools/`).
+Production module: [tools/hive.ts](./tools/hive.ts) (register via `hiveTools` in `index.ts`).
 Contracts: [tools/TOOL_CONTRACTS.md](./tools/TOOL_CONTRACTS.md), sketch [tools/ce_list_actions.ts](./tools/ce_list_actions.ts).
 
 Prefer Scorpion hive bridge + **n8n MCP broker** (not scattered secrets).
