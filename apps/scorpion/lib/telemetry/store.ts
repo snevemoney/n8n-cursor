@@ -147,3 +147,16 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
   },
 }));
 
+/** Server-side telemetry accessor used by ML API routes */
+export function getTelemetryStore() {
+  return {
+    getRecentEvents(_limit = 100): DomainEvent[] {
+      try {
+        return useTelemetryStore.getState().events.slice(-_limit);
+      } catch {
+        return [];
+      }
+    },
+  };
+}
+
