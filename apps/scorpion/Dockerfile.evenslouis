@@ -26,7 +26,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/scorpion/node_modules ./apps/scorpion/node_modules
 COPY --from=deps /app/packages ./packages
 COPY . .
-RUN pnpm --filter scorpion build
+# Ensure public/ exists even if the app ships without static assets
+RUN mkdir -p apps/scorpion/public && pnpm --filter scorpion build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -36,7 +37,8 @@ ENV PORT=3003
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_PUBLIC_BASE_PATH=/scorpion
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs \
-  && apk add --no-cache wget
+  && apk add --no-cache wget \
+  && mkdir -p ./apps/scorpion/public
 COPY --from=builder /app/apps/scorpion/public ./apps/scorpion/public
 COPY --from=builder /app/apps/scorpion/.next/standalone ./
 COPY --from=builder /app/apps/scorpion/.next/static ./apps/scorpion/.next/static
