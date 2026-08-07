@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/workflows-simple - Get ONLY n8n workflows (no filesystem merge)
  */

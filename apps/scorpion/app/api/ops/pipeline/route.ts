@@ -4,6 +4,8 @@ import "@/lib/orchestrator";
 import { runPipeline, PipelineContext } from "@/lib/orchestrator/run-pipeline";
 import { planner, council, router, rag, userToolsAdapter, executor } from "./_adapters";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Create a safe ReadableStream with error handling for controller state
  */

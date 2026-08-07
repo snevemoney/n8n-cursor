@@ -8,6 +8,8 @@
 import { NextResponse } from 'next/server';
 import { createScorpionTransformer, MiniTransformer } from '@/server/transformer/mini-transformer';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const transformer = createScorpionTransformer();

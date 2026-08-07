@@ -10,6 +10,8 @@ import { getActiveOptimizations, getPerformanceConfig, resetPerformanceConfig } 
 import { getSSDIntegrationsStatus } from '@/lib/storage/ssd-integrations';
 import { getPerformanceComparison } from '@/lib/storage/performance-monitor';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Get current storage configuration

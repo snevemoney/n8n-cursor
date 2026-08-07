@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { listJobs, getJobStats } from '@/server/runtime/jobStore';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/dev/jobs
  * 

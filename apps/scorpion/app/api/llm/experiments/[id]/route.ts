@@ -8,6 +8,8 @@ import { withErrorHandling, createSuccessResponse, validateRequest, createErrorR
 import { getExperimentTracker } from '@/lib/llm/experiment-tracker';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const updateExperimentSchema = z.object({
   status: z.enum(['pending', 'running', 'completed', 'failed', 'cancelled']).optional(),
   metrics: z.record(z.any()).optional(),

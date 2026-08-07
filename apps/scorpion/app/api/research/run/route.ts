@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { runScorpionBrain } from '@/server/orchestrator';
 import { ScorpionContextSnapshot } from '@/server/types/strategy';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   const body = await req.json();
   const query: string = body.query || '';

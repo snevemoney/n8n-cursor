@@ -7,6 +7,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { getStoredAgents, addAgent, getAgentById, updateAgentStatus } from '@/lib/agent-storage';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 // In-memory status cache for council members (static agents)
 // In production, this could be persisted to a database
 const councilMemberStatusCache = new Map<string, 'active' | 'standby' | 'offline'>();

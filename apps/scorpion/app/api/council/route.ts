@@ -7,6 +7,8 @@ import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 // Default council members (matching council.ts)
 const defaultCouncilMembers = [
   { id: 'E-001', name: 'Architectus', weight: 1.5, role: 'System Architect' },

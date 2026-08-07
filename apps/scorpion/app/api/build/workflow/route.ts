@@ -3,6 +3,8 @@ import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const workflowCreateSchema = z.object({
   name: z.string().min(1),
   plan: z.any(), // Build plan object

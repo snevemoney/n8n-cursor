@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 export const GET = withErrorHandling(async () => {
   const client = getMCPn8nClient();
   

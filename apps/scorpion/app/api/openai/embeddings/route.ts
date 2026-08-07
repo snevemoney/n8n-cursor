@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIService, isOpenAIAvailable } from '@scorpion/core/llm';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * OpenAI Embeddings API Route
  * Generate embeddings for text using OpenAI (hybrid: falls back to Ollama if unavailable)

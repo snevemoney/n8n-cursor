@@ -9,6 +9,8 @@ import { runModel } from '@scorpion/core';
 import { z } from 'zod';
 import { calculateSimilarity } from '@/lib/utils/similarity';
 
+export const dynamic = 'force-dynamic';
+
 const compareModelsSchema = z.object({
   prompt: z.string().min(1),
   models: z.array(z.object({

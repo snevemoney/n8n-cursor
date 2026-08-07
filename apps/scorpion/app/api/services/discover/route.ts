@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceRegistry } from '@/lib/services/registry';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/services/discover - Discover service instances
  */

@@ -5,6 +5,8 @@ import { analyzeResourceEfficiency, getLowEfficiencyResources, storeEfficiencyAn
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/sustainability/efficiency - Get resource efficiency analysis
  */

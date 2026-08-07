@@ -3,6 +3,8 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { withErrorHandling } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Resolve prompt file path correctly regardless of cwd
  */

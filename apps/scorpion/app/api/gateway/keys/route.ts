@@ -8,6 +8,8 @@ import { getApiKeyManager } from '@/lib/api-gateway/key-manager';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const createKeySchema = z.object({
   keyName: z.string().min(1).max(255),
   rateLimitPerMinute: z.number().min(1).max(10000).optional(),

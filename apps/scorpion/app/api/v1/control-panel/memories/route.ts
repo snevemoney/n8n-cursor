@@ -8,6 +8,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { z } from 'zod';
 import { getMemoryStore } from '@/lib/memory/store';
 
+export const dynamic = 'force-dynamic';
+
 const memorySchema = z.object({
   scope: z.string(),
   content: z.string().min(1),

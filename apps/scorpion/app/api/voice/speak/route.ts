@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 // Power of 10 Rule 2: Bounded retries
 const MAX_RETRIES = 3;
 const VOICE_SERVICE_URL = process.env['VOICE_SERVICE_URL'] || 'http://localhost:7001';

@@ -8,6 +8,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { z } from 'zod';
 import { behaviorConfig, type ScorpionMode } from '@/config/behavior';
 
+export const dynamic = 'force-dynamic';
+
 const modeSchema = z.object({
   mode: z.enum(['owner', 'safe_saas', 'nursing_study', 'bitcoin_research', 'architecture_planner']),
 });

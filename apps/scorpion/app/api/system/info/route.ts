@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getSystemRAMInfo, detectLightweightMode } from '@/lib/utils/systemResources';
 import { getModelRecommendations, getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/system/info
  * Returns system information including RAM, lightweight mode status, and model recommendations

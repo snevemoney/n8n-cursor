@@ -5,6 +5,8 @@ import { getAgentOperationsExecutor } from '@/lib/agent-operations-executor';
 import { getAgentOperations } from '@/lib/agent-operations';
 import { getMCPn8nClient } from '@/lib/mcp-n8n-client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * WebSocket endpoint for control commands
  * 

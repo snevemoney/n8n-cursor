@@ -4,6 +4,8 @@ import path from 'path';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const SETTINGS_FILE = path.join(process.cwd(), 'data', 'scorpion', 'settings.json');
 
 interface Settings {

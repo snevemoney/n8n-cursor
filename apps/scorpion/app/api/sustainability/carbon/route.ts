@@ -5,6 +5,8 @@ import { getCarbonSummary, calculateCarbonEmissions, storeCarbonEmissions } from
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const carbonRequestSchema = z.object({
   resourceId: z.string().optional(),
   start: z.string().optional(),

@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getHealthChecker } from '@/lib/services/health-checker';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/services/health - Check health of all services
  */

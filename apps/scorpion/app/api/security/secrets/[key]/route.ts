@@ -9,6 +9,8 @@ import { getSecretsManager } from '@/lib/security/secrets-manager';
 import { requireAuth } from '@/lib/security/auth';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/security/secrets/[key] - Retrieve a secret value
  */

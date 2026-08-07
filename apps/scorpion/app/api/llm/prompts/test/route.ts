@@ -9,6 +9,8 @@ import { runModel } from '@scorpion/core';
 import { z } from 'zod';
 import { calculateSimilarity } from '@/lib/utils/similarity';
 
+export const dynamic = 'force-dynamic';
+
 const testPromptsSchema = z.object({
   prompts: z.array(z.object({
     name: z.string().min(1),

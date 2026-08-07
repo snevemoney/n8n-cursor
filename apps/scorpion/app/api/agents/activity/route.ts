@@ -3,6 +3,8 @@ import { getAgentOperationsExecutor } from '@/lib/agent-operations-executor';
 import { getAgentOperations } from '@/lib/agent-operations';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/agents/activity - Get agent activity logs from operations executor
  */

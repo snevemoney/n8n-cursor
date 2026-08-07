@@ -11,6 +11,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { z } from 'zod';
 import type { Region } from '@/lib/edge/types';
 
+export const dynamic = 'force-dynamic';
+
 const registerNodeSchema = z.object({
   region: z.enum(['us-east', 'us-west', 'eu-west', 'eu-central', 'ap-south', 'ap-northeast', 'local']),
   host: z.string().min(1),

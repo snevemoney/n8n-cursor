@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIService, isOpenAIAvailable } from '@scorpion/core/llm';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * OpenAI Image Generation API Route
  * Generate images using OpenAI DALL-E (hybrid: requires OpenAI)

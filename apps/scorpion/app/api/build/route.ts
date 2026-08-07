@@ -5,6 +5,8 @@ import path from 'path';
 import { withErrorHandling, createSuccessResponse, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const buildSchema = z.object({
   target: z.string().min(1),
   features: z.array(z.string()).min(1),

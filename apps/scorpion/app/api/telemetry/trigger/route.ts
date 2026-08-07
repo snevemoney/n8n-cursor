@@ -3,6 +3,8 @@ import { telemetry } from '@/lib/telemetry/emitter';
 import { v4 as uuidv4 } from 'uuid';
 import { createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/telemetry/trigger
  * 

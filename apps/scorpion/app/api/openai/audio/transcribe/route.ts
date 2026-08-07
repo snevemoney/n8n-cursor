@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIService, isOpenAIAvailable } from '@scorpion/core/llm';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * OpenAI Audio Transcription API Route
  * Transcribe audio using OpenAI Whisper (hybrid: requires OpenAI)

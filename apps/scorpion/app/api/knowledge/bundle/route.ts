@@ -3,6 +3,8 @@ import { getRAGStore } from '@/lib/shared-stores';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const bundleSchema = z.object({
   bundleId: z.string(),
   title: z.string(),

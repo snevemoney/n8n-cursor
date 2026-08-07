@@ -14,6 +14,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, validate
 import { saveResearchSession, type ResearchSession } from '@/lib/research/research-storage';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 // Store active sessions
 const activeSessions = new Map<string, any>();
 

@@ -5,6 +5,8 @@ import { getGovernanceService } from '@/lib/governance/governanceService';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const checkSchema = z.object({
   action: z.enum(['read', 'write', 'delete', 'export', 'share', 'admin']),
   assetId: z.string().optional(),

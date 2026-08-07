@@ -3,6 +3,8 @@ import { runCouncil } from '@/server/council';
 import { extractDomainTags } from '@/server/council/runCouncil';
 import type { CouncilInput, CouncilResult } from '@/server/types/council';
 
+export const dynamic = 'force-dynamic';
+
 interface BuildAnalysisRequest {
   workflowName: string;
   workflowStatus: 'success' | 'failure' | 'cancelled';

@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSLISLOTracker } from '@/lib/monitoring/sli-slo';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/metrics/slos - Get all SLOs
  */

@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getApiKeyManager } from '@/lib/api-gateway/key-manager';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * DELETE /api/gateway/keys/[id] - Revoke an API key
  */

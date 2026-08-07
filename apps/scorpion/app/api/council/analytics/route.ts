@@ -3,6 +3,8 @@
 import { NextResponse } from 'next/server';
 import { getCouncilStatistics, getAllCouncilResults } from '@/server/council/councilStorage';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);

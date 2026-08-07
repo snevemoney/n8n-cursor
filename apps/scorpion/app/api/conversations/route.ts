@@ -4,6 +4,8 @@ import path from 'path';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/conversations - Save conversation to shared storage
  * GET /api/conversations - List all conversations

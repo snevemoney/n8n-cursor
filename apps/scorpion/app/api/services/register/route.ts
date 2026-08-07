@@ -8,6 +8,8 @@ import { getServiceRegistry } from '@/lib/services/registry';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const registerSchema = z.object({
   serviceName: z.string().min(1),
   version: z.string().min(1),

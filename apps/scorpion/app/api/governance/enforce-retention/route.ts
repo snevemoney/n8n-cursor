@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getGovernanceService } from '@/lib/governance/governanceService';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/governance/enforce-retention - Trigger retention enforcement
  */

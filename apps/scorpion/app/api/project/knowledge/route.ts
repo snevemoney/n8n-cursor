@@ -3,6 +3,8 @@ import { ProjectKnowledgeOrchestrator, RAGStore } from '@scorpion/core';
 import { getOrchestrator, getRAGStore } from '@/lib/shared-stores';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 // Increase timeout for ingestion endpoint (5 minutes)
 export const maxDuration = 300;
 

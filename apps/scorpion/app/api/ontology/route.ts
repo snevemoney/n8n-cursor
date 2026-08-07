@@ -4,6 +4,8 @@ import { getOntologyStore } from '@/lib/shared-stores';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const ontologyEntitySchema = z.object({
   id: z.string().min(1),
   type: z.string().min(1),

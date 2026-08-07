@@ -10,6 +10,8 @@ import { requireAuth } from '@/lib/security/auth';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const setSecretSchema = z.object({
   key: z.string().min(1),
   value: z.string().min(1),

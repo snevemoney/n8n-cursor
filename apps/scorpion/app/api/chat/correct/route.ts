@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMistakeLearner } from '@/lib/fine-tuning/mistake-learner';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/chat/correct - Record a correction
  */

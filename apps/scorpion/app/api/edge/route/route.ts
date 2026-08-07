@@ -9,6 +9,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { z } from 'zod';
 import type { RoutingStrategy, Region } from '@/lib/edge/router';
 
+export const dynamic = 'force-dynamic';
+
 const routeRequestSchema = z.object({
   path: z.string().min(1),
   method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional(),

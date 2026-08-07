@@ -15,6 +15,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { z } from 'zod';
 import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
 
+export const dynamic = 'force-dynamic';
+
 // Agent registry
 const agentClasses = {
   'data-analytics': DataAnalyticsAgent,
