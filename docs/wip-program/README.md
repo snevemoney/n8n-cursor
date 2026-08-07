@@ -9,6 +9,7 @@ In-repo deliverables for the fused **20-phase** WIP program.
 | [DISK_PLAN.md](./DISK_PLAN.md) | 0 / 18 |
 | [MISSION_PLAYBOOKS.md](./MISSION_PLAYBOOKS.md) | 8 |
 | [PROMOTION_CHECKLIST.md](./PROMOTION_CHECKLIST.md) | 16 / 19 |
+| [URL_FINISH_TASKLISTS.md](./URL_FINISH_TASKLISTS.md) | live URL → finish tasks (Playwright) |
 | [phases/](./phases/) | 1–19 |
 | [../patches/philanthropic-ai-agent/tools/](../patches/philanthropic-ai-agent/tools/) | 1+ |
 | [../patches/client-engine/HIVE_API.md](../patches/client-engine/HIVE_API.md) | 2 / 6 / 7 |
