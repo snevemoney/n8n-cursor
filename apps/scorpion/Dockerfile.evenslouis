@@ -32,7 +32,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3003
 ENV HOSTNAME=0.0.0.0
 ENV NEXT_PUBLIC_BASE_PATH=/scorpion
-RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs \
+  && apk add --no-cache wget
 COPY --from=builder /app/apps/scorpion/public ./apps/scorpion/public
 COPY --from=builder /app/apps/scorpion/.next/standalone ./
 COPY --from=builder /app/apps/scorpion/.next/static ./apps/scorpion/.next/static
