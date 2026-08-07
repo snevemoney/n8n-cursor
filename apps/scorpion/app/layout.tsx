@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+// Operator console is always request-time; skip SSG that OOMs/timeouts on VPS builds.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Scorpion - Operations Console',
   description: 'Scorpion OS - Central command for AI stack, workflows, and agents',

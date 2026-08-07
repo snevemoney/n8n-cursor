@@ -19,6 +19,7 @@ ARG NEXT_PUBLIC_BASE_PATH=/scorpion
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS=--max-old-space-size=3072
+ENV NEXT_PRIVATE_WORKER_THREADS=false
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/scorpion/node_modules ./apps/scorpion/node_modules
 COPY --from=deps /app/packages ./packages

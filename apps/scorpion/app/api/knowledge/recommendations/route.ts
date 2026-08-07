@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import { getRAGStore } from '@/lib/shared-stores';
 import { createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * GET /api/knowledge/recommendations - Get recommended knowledge cards and PDF bundles
  */

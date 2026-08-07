@@ -13,10 +13,12 @@ const nextConfig = {
   poweredByHeader: false,
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
   // Path deploy must ship behind Caddy even when legacy lint/type debt remains.
+  // VPS builds are memory-tight — raise SSG timeout and serialize static workers.
   ...(basePath
     ? {
         eslint: { ignoreDuringBuilds: true },
         typescript: { ignoreBuildErrors: true },
+        staticPageGenerationTimeout: 300,
       }
     : {}),
 
@@ -69,6 +71,8 @@ const nextConfig = {
     serverComponentsExternalPackages: ['@scorpion/core', 'undici'],
     // Optimize font loading
     optimizeServerReact: true,
+    // Path/VPS builds: one static worker avoids OOM/timeout storms
+    ...(basePath ? { cpus: 1, workerThreads: false } : {}),
   },
   // Enable faster page transitions
   compiler: {
