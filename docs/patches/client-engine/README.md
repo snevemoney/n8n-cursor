@@ -2,25 +2,18 @@
 
 These patches belong in `snevemoney/client-engine` (VPS: `/root/client-engine`).
 
-They are mirrored here because this cloud agent’s Cursor GitHub App installation
-currently only includes `snevemoney/n8n-cursor` (`repository_selection=selected`,
-`total_count=1`). Calls to `snevemoney/client-engine` return **404 Not Found**
-for the agent token even when the human owner has granted access elsewhere.
+**Push path:** this cloud agent’s Cursor GitHub App token is still limited to
+`snevemoney/n8n-cursor` only (`/installation/repositories` → total 1), so
+`git push` as `cursor[bot]` to `client-engine` returns 403. The VPS can push
+as GitHub user `snevemoney` via `~/.ssh/id_ed25519`.
 
-## Grant access to this agent
+To let cloud agents push CE directly, grant the Cursor GitHub App access to
+`client-engine` (or All repositories) under GitHub → Settings → Applications → Cursor.
 
-In GitHub → **Settings → Applications → Cursor** (GitHub App) → **Repository access**:
-
-1. Either choose **All repositories**, or
-2. **Only select repositories** and add **`client-engine`** (exact name).
-
-Then re-run / resume the agent so it gets a new installation token.
-
-Verify with:
+Verify App scope:
 
 ```bash
 gh api /installation/repositories --jq '.repositories[].full_name'
-# should list snevemoney/client-engine
 ```
 
 ## Apply on a machine that already has the repo
