@@ -46,6 +46,13 @@ services:
       PORT: 3003
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_BASE_PATH: /scorpion
+      CE_HIVE_BASE_URL: ${CE_HIVE_BASE_URL:-http://host.docker.internal:3205}
+      CE_HIVE_TOKEN: ${CE_HIVE_TOKEN:-}
+      HIVE_MACHINE_TOKEN: ${HIVE_MACHINE_TOKEN:-}
+      N8N_BASE_URL: ${N8N_BASE_URL:-http://host.docker.internal:5678}
+      N8N_API_KEY: ${N8N_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/scorpion/healthz"]
       interval: 20s
@@ -133,6 +140,32 @@ services:
     mem_limit: 512m
     pids_limit: 180
 
+  # CE hive machine API (Phases 2/6/7) — shares CE Postgres, no CE image rebuild
+  ce-hive-bridge:
+    <<: *defaults
+    build:
+      context: ./ce-hive-bridge
+    ports:
+      - "127.0.0.1:3205:3205"
+    env_file:
+      - path: ../../.env.hive
+        required: false
+    environment:
+      PORT: 3205
+      CE_HIVE_TOKEN: ${CE_HIVE_TOKEN:-}
+      DATABASE_URL: ${CE_DATABASE_URL:-}
+    networks:
+      - default
+      - client-engine_default
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3205/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    cpus: "0.25"
+    mem_limit: 128m
+    pids_limit: 64
+
   # Placeholder until the real out-of-repo CE builder is restored on :3001
   builder:
     <<: *defaults
@@ -150,3 +183,7 @@ services:
     cpus: "0.25"
     mem_limit: 128m
     pids_limit: 64
+
+networks:
+  client-engine_default:
+    external: true

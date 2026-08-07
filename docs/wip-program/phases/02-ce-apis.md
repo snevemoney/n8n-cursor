@@ -14,7 +14,7 @@
 - [ ] Machine-auth lead/deal lookup — CE `GET /api/hive/leads?q=`
 - [ ] Machine-auth create note — CE `POST /api/hive/notes` (`ce_create_note` backend)
 - [ ] Machine-auth queue approval — CE `POST /api/hive/actions/queue` (`ce_queue_action`; HITL only)
-- [ ] Fix `/builder` image/proxy **or** serve explicit `503 builder_unavailable` page (no naked 502)
+- [x] Fix `/builder` image/proxy **or** serve explicit unavailable page (stub on `:3001`, 200 HTML — real builder tree still missing)
 - [ ] Confirm CE postgres / redis / worker healthchecks in compose
 - [ ] Confirm CE memory/CPU caps in compose on VPS
 - [ ] Document operator login = Caddy basic_auth + app login only (no browser machine-token bypass)

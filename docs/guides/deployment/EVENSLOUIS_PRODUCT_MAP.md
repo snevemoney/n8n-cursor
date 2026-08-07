@@ -25,20 +25,21 @@ Code registries:
 
 | Path | Upstream | Audience | Notes |
 |------|----------|----------|-------|
-| `/` | `127.0.0.1:4010` portfolio | public | Brand front door |
-| `/work` | portfolio | public | Project catalog with lane badges |
-| `/portfolio-healthz` | portfolio `/healthz` | public | Apex health without colliding n8n `/healthz` |
-| `/pro*` | `127.0.0.1:3204` Client Engine | operator | Entire tree gated |
-| `/n8n/*` UI | `127.0.0.1:5678` (strip prefix) | operator | basic_auth + n8n login |
+| `/` | `127.0.0.1:3200` Client Engine | public | CE marketing (restored; portfolio parked `:4010`) |
+| `/work` | CE `:3200` | public | CE work/case studies |
+| `/dashboard`, `/login`, `/ce` | CE `:3200` | operator | App login / product UI |
+| `/pro*` | `127.0.0.1:3204` Client Engine | operator | `basePath=/pro` twin |
+| `/api/hive*` | `127.0.0.1:3205` ce-hive-bridge | machines | Bearer `CE_HIVE_TOKEN` |
+| `/api*` (other) | CE `:3200` | operator/app | Auth.js session APIs |
+| `/n8n/*` UI | `127.0.0.1:5678` (strip prefix) | operator | n8n login |
 | `/n8n/webhook*`, `/n8n/webhook-test*` | n8n | machines | **No** basic_auth |
-| `/n8n/healthz` | n8n | public monitor | No basic_auth |
-| `/scorpion*` | `127.0.0.1:3003` | operator | Gated; prefer full `Dockerfile.evenslouis` when build green |
-| `/claw/hooks*` | OpenClaw gateway (localhost) | machines | **No** basic_auth — same pattern as n8n webhooks |
-| `/claw` / `/claw/*` (non-hooks) | OpenClaw status stub or gateway | operator | basic_auth; no secrets |
-| `/insights*` | reserved | operator | Gated when staged; not live until CE/n8n/OpenClaw stable |
-| `/lightningflow*` | `:3202` / ops `:3203` | parked + operator gate | Keep alive; not featured |
-| `/builder*` | `:3001` | operator | May 502 until image exists |
-| `/api*` | Client Engine `:3200` | operator | Gated; CE path APIs also under `/pro` |
+| `/healthz` | n8n | public monitor | |
+| `/scorpion*` | `127.0.0.1:3003` | operator | Full Next image |
+| `/claw/hooks*` | OpenClaw `:18789` | machines | **No** basic_auth |
+| `/claw` / `/claw/*` (non-hooks) | OpenClaw `:18789` | operator | Control UI |
+| `/insights*` | reserved 503 | — | Stage after Phase 8 (Ph15) |
+| `/lightningflow*` | `:3202` / ops `:3203` | parked | Health only; not featured |
+| `/builder*` | stub `:3001` | operator | Real builder tree missing |
 | Apex `/webhook*` | n8n | machines | No basic_auth |
 
 Legacy: `n8ncloud.tech` webhooks/api/rest/healthz dual-host; UI redirects to `/n8n`.

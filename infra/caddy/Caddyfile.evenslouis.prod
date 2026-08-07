@@ -181,6 +181,10 @@ evenslouis.ca {
 			flush_interval -1
 		}
 	}
+	# CE hive machine APIs (Phases 2/6/7) — lightweight bridge on :3205
+	handle /api/hive* {
+		reverse_proxy localhost:3205
+	}
 	# /api* must reach Client Engine on :3200 (login/dashboard/auth).
 	# n8n API remains available at /n8n/* via handle_path above, and on
 	# n8ncloud.tech dual-host compatibility routes.
