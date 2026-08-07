@@ -57,12 +57,29 @@ curl -sS -X POST \
   "$BASE/virtual-machines/$VPS_ID/docker" | tee /tmp/cursor-ops-deploy.json
 echo
 
-for i in $(seq 1 12); do
-  sleep 3
+# Wait up to ~10 minutes for long VPS jobs (git clones, builds)
+for i in $(seq 1 100); do
+  sleep 6
   curl -sS -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
     "$BASE/virtual-machines/$VPS_ID/docker/$PROJECT/logs" > /tmp/cursor-ops-logs.json
-  if grep -q 'CURSOR_OPS_DONE' /tmp/cursor-ops-logs.json; then
-    # ensure this run finished (not only historical)
+  # Prefer a fresh completion: look for DONE after the latest MARKER if present
+  if python3 - <<'PY'
+import json
+d=json.load(open('/tmp/cursor-ops-logs.json'))
+blocks=d if isinstance(d,list) else (d.get('logs') or [])
+lines=[]
+for b in blocks:
+  if isinstance(b,dict) and 'ops' in str(b.get('service')):
+    for e in b.get('entries') or []:
+      if isinstance(e,dict): lines.append(e.get('line') or '')
+# last CURSOR_OPS_DONE must be after last MARKER_* if any marker exists
+markers=[i for i,l in enumerate(lines) if str(l).startswith('MARKER_')]
+dones=[i for i,l in enumerate(lines) if 'CURSOR_OPS_DONE' in str(l)]
+if not dones: raise SystemExit(1)
+if markers and dones[-1] < markers[-1]: raise SystemExit(1)
+raise SystemExit(0)
+PY
+  then
     break
   fi
 done
