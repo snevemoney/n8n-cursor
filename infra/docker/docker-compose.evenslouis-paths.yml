@@ -12,6 +12,50 @@ x-defaults: &defaults
       max-file: "3"
 
 services:
+  portfolio:
+    <<: *defaults
+    build:
+      context: ../../apps/portfolio
+    ports:
+      - "127.0.0.1:4010:4010"
+    environment:
+      NODE_ENV: production
+      PORT: 4010
+      HOSTNAME: 0.0.0.0
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4010/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "0.5"
+    mem_limit: 384m
+    pids_limit: 150
+
+  scorpion:
+    <<: *defaults
+    build:
+      context: ../..
+      dockerfile: apps/scorpion/Dockerfile.evenslouis
+      args:
+        NEXT_PUBLIC_BASE_PATH: /scorpion
+    ports:
+      - "127.0.0.1:3003:3003"
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_BASE_PATH: /scorpion
+      NEXT_TELEMETRY_DISABLED: "1"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/scorpion/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    cpus: "1.5"
+    mem_limit: 1536m
+    pids_limit: 300
+
   lightningflow-landing:
     <<: *defaults
     build:

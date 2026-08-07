@@ -5,10 +5,14 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || '').replace(/\/$/, '');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  ...(basePath ? { basePath, assetPrefix: basePath } : {}),
+
   // Security headers
   async headers() {
     return [

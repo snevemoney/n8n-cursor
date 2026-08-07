@@ -91,7 +91,7 @@ export function AutomationShowcase() {
         <h2 className="text-3xl md:text-4xl font-semibold mb-4">Featured Automation Work</h2>
         <p className="text-lg text-[rgba(228,232,238,0.8)] max-w-3xl">
           I don&apos;t just build one-off flows — I&apos;ve built a full library of reusable workflows for content, operations, and data. 
-          You didn&apos;t just learn n8n, you built a small automation agency in your VPS.
+          Not just n8n tutorials — production automations running on my own infrastructure.
         </p>
       </div>
 

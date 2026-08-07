@@ -2,20 +2,26 @@
 
 Canonical hosts after cutover:
 
-- `https://evenslouis.ca/n8n/` (from `n8ncloud.tech`)
-- `https://evenslouis.ca/lightningflow` (from `lightningflow.online` + subdomains)
-- `https://evenslouis.ca/pro` (from `evenslouis.pro`)
+- `https://evenslouis.ca/` — public portfolio (visitors)
+- `https://evenslouis.ca/n8n/` (from `n8ncloud.tech`) — operator + webhooks
+- `https://evenslouis.ca/pro` (from `evenslouis.pro`) — Client Engine, operator only
+- `https://evenslouis.ca/scorpion` — Scorpion ops, operator only
+- `https://evenslouis.ca/lightningflow` — parked, operator gated
+
+See also: [EVENSLOUIS_PRODUCT_MAP.md](./EVENSLOUIS_PRODUCT_MAP.md), [OPERATOR_PASSWORD.md](./OPERATOR_PASSWORD.md)
 
 ## Live topology (path dual-host)
 
 | Path | Upstream | Notes |
 |------|----------|-------|
-| `/n8n/*` | `127.0.0.1:5678` | `handle_path` strip + `base-path.js` override |
-| `/lightningflow*` | `127.0.0.1:3202` | LightningFlow web (`NEXT_PUBLIC_BASE_PATH=/lightningflow`) |
-| `/lightningflow/ops*` | `127.0.0.1:3203` | Ops panel |
-| `/lightningflow/_landing/*` | `127.0.0.1:3201` | Landing asset prefix |
-| `/pro*` | `127.0.0.1:3204` | Isolated Client Engine build (original app stays on `:3200`) |
-| `/` (apex) | `127.0.0.1:3200` | Unchanged Client Engine root app |
+| `/` | `127.0.0.1:4010` | Public portfolio |
+| `/n8n/*` UI | `127.0.0.1:5678` | Strip prefix + `base-path.js`; **basic_auth** |
+| `/n8n/webhook*` | `127.0.0.1:5678` | **No** basic_auth |
+| `/lightningflow*` | `127.0.0.1:3202` | Parked; **basic_auth** |
+| `/lightningflow/ops*` | `127.0.0.1:3203` | Ops; **basic_auth** |
+| `/pro*` | `127.0.0.1:3204` | Client Engine; **basic_auth** |
+| `/scorpion*` | `127.0.0.1:3003` | Scorpion `basePath=/scorpion`; **basic_auth** |
+| `/api*` | `127.0.0.1:3200` | CE APIs; **basic_auth** |
 
 Compose files:
 

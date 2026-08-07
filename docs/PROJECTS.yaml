@@ -1,11 +1,27 @@
 # PROJECTS.yaml - Project Boundaries and Allowed Paths
 # This file defines the contract for what Cursor can and cannot touch
 
+# Access model (evenslouis.ca): visitors → / only; operator-only tools behind Caddy basic_auth.
+# See docs/guides/deployment/EVENSLOUIS_PRODUCT_MAP.md
+
 projects:
+  portfolio:
+    name: "Evens Louis Portfolio"
+    description: "Public brand front door (work + contact)"
+    allowed_paths:
+      - "apps/portfolio/**"
+      - "infra/caddy/Caddyfile.evenslouis.prod"
+      - "infra/docker/docker-compose.evenslouis-paths.yml"
+      - "docs/guides/deployment/EVENSLOUIS_PRODUCT_MAP.md"
+    ports:
+      - 4010
+    health_endpoints:
+      - "https://evenslouis.ca/portfolio-healthz"
+
   lfai:
     name: "LightningFlow AI"
-    description: "Main LightningFlow AI application and services"
-    # Public URL: https://evenslouis.ca/lightningflow
+    description: "Parked Lightning SaaS (operator-gated); not the public front door"
+    # Public URL: https://evenslouis.ca/lightningflow (gated)
     # Legacy domain: lightningflow.online (redirect + API compatibility only)
     allowed_paths:
       - "apps/lightningflow/**"
