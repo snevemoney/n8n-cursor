@@ -54,15 +54,24 @@ Script: `scripts/wip-program/ce-nav-playwright-crawl.mjs`
 
 Lead Intake, Prospect, Signals, Decisions, Proposals, Handoffs, Build Ops, Deploys, Proof, Campaigns, Reviews, Proof Candidates, Content Posts, Risk, Intelligence, Next Actions, Inbox, Founder OS, Knowledge, Automation, Operator, Settings, Notifications, Channels, Flywheel, Exec Metrics, Job Schedules.
 
+## Dev-side fixes prepared
+
+Patch: [`../patches/client-engine/dashboard-dev-fixes-59dd.diff`](../patches/client-engine/dashboard-dev-fixes-59dd.diff)
+
+| Issue | Fix |
+|-------|-----|
+| Health `77.142857…warning` | `formatHealthScore` + Founder/Copilot display spacing |
+| CSP / fbevents on dashboard | `MetaPixel` skips operator paths; CSP allowlists FB for marketing |
+| Conversion all zeros | API default `range=all` + range selector UI |
+
 ## Suggested fix order
 
-1. **Meta Ads token** (blocking live ads control)  
-2. **Round health score + CSP/Pixel** (global polish / console clean)  
-3. **Workday / Scoreboard / Jobs stale** (system automation)  
-4. **Conversion funnel vs Leads count mismatch** (metrics bug)  
-5. **Reminders overdue + Follow-ups empty** (operator loop)  
-6. **YouTube failure backlog**  
-7. Data empties (Growth/Scorecard) once pipelines run  
+1. **Apply dashboard-dev patch + rebuild CE app** (items above)  
+2. **Meta Ads token** (ops — regenerate Graph/System User token)  
+3. **Workday / Scoreboard / Jobs stale** (ops automation)  
+4. **Reminders overdue + Follow-ups empty** (operator loop)  
+5. **YouTube failure backlog**  
+6. Data empties (Growth/Scorecard) once pipelines run  
 
 ## Full severity table
 
