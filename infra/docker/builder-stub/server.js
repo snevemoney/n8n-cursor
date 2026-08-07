@@ -28,7 +28,8 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({ ok: true, service: 'builder', mode: 'stub' }));
     return;
   }
-  res.writeHead(503, { 'Content-Type': 'text/html; charset=utf-8' });
+  // 200 so the route is reachable; body explains the real builder is missing.
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.end(html);
 });
 
