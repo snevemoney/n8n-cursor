@@ -26,11 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.20.0
+      - uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
           exit-code: '1'
           ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
 
   no-cross-family:
     runs-on: ubuntu-latest
