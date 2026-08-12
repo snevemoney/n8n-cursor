@@ -49,9 +49,9 @@ The hero section ships with a CSS gradient + light-leak + grain fallback. To add
 
 ### Optional proof broll
 
-Place stills in `public/proof/`:
-- `broll-light-leak.png` — decorative strip between heading and cards
-- `broll-glass-planes.png` — secondary decorative element
+Place WebP stills in `public/proof/` (do not ship raw PNG masters):
+- `broll-light-leak.webp` — decorative strip between heading and cards
+- `broll-glass-planes.webp` — secondary decorative element
 
 Images hide gracefully (via `onError`) when not present.
 

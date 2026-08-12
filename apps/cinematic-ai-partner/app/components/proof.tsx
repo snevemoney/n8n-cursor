@@ -52,7 +52,7 @@ export function Proof() {
         <Reveal delay={0.2}>
           <div className="mt-10 flex items-center justify-center gap-4 overflow-hidden">
             <img
-              src="/proof/broll-light-leak.png"
+              src="/proof/broll-light-leak.webp"
               alt=""
               aria-hidden="true"
               className="h-20 w-auto rounded-lg opacity-50 md:h-28"
@@ -61,7 +61,7 @@ export function Proof() {
               }}
             />
             <img
-              src="/proof/broll-glass-planes.png"
+              src="/proof/broll-glass-planes.webp"
               alt=""
               aria-hidden="true"
               className="h-20 w-auto rounded-lg opacity-50 md:h-28"
