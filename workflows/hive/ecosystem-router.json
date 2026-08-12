@@ -1,0 +1,174 @@
+{
+  "name": "Hive Ecosystem Master Router",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hive-ecosystem-router",
+        "options": {
+          "responseMode": "responseNode"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Ecosystem Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "hive-ecosystem-router"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract signal type from payload and determine route\nconst body = $json.body || $json;\nconst signalType = body.signalType || body.signal_type || body.type || 'unknown';\nconst source = body.source || 'unknown';\n\nconst ROUTE_MAP = {\n  'founder-signal': 'https://evenslouis.ca/webhook/hive-founder-signal',\n  'ops-alert': 'https://evenslouis.ca/webhook/hive-ops-alert',\n  'ce-lead': 'https://evenslouis.ca/webhook/hive-ce-lead',\n  'golden-path': 'https://evenslouis.ca/webhook/hive-golden-path-smoke'\n};\n\nconst targetUrl = ROUTE_MAP[signalType] || null;\n\nreturn [{\n  json: {\n    ...body,\n    _routing: {\n      signalType,\n      source,\n      targetUrl,\n      resolved: targetUrl !== null,\n      routeMap: Object.keys(ROUTE_MAP)\n    }\n  }\n}];"
+      },
+      "id": "resolve-route",
+      "name": "Resolve Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "route-check",
+              "leftValue": "={{ $json._routing.resolved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "route-resolved-check",
+      "name": "Route Resolved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [700, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json._routing.targetUrl }}",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify(Object.fromEntries(Object.entries($json).filter(([k]) => k !== '_routing'))) }}",
+        "options": {
+          "timeout": 10000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": true
+            }
+          }
+        }
+      },
+      "id": "forward-to-target",
+      "name": "Forward to Target",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [950, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle forward result — surface soft errors for unregistered/inactive webhooks\nconst input = $input.first().json;\nconst statusCode = input.statusCode || input.code || null;\nconst error = input.error || input.message || null;\n\nif (statusCode === 404 || error) {\n  return [{\n    json: {\n      forwarded: false,\n      error: `Target webhook returned ${statusCode || 'error'}: ${error || 'Not Found'}. The target workflow may be inactive or not yet imported in n8n.`,\n      hint: 'Operator: import and activate the target workflow (e.g. hive-founder-signal-ingest) in n8n UI.',\n      originalPayload: input\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    forwarded: true,\n    response: input\n  }\n}];"
+      },
+      "id": "handle-forward-result",
+      "name": "Handle Forward Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// No matching route found\nconst routing = $json._routing || {};\nreturn [{\n  json: {\n    forwarded: false,\n    error: `No route found for signalType '${routing.signalType}'. Known routes: ${(routing.routeMap || []).join(', ')}`,\n    hint: 'Check signalType field in the inbound payload.'\n  }\n}];"
+      },
+      "id": "no-route-handler",
+      "name": "No Route Found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [950, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": "={{ $json.forwarded === false ? 422 : 200 }}"
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1450, 400]
+    }
+  ],
+  "connections": {
+    "Ecosystem Webhook": {
+      "main": [
+        [
+          { "node": "Resolve Route", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Resolve Route": {
+      "main": [
+        [
+          { "node": "Route Resolved?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Route Resolved?": {
+      "main": [
+        [
+          { "node": "Forward to Target", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "No Route Found", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Forward to Target": {
+      "main": [
+        [
+          { "node": "Handle Forward Result", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Handle Forward Result": {
+      "main": [
+        [
+          { "node": "Respond", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "No Route Found": {
+      "main": [
+        [
+          { "node": "Respond", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "id": "5d1c6bbb-555f-42b2-919d-309d2b4f748d",
+  "meta": {
+    "instanceId": "hive-ops"
+  },
+  "tags": [
+    { "name": "hive" },
+    { "name": "router" },
+    { "name": "priority-1" }
+  ]
+}

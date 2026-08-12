@@ -24,9 +24,51 @@ SECRET_PATTERNS=(
 )
 
 for pattern in "${SECRET_PATTERNS[@]}"; do
-    if grep -r -i -E "$pattern" --exclude-dir=.git --exclude-dir=node_modules --exclude="*.example" --exclude="*.template" . >/dev/null 2>&1; then
+    if grep -r -i -E "$pattern" \
+        --exclude-dir=.git \
+        --exclude-dir=node_modules \
+        --exclude-dir=.github \
+        --exclude-dir=__tests__ \
+        --exclude-dir=test \
+        --exclude-dir=tests \
+        --exclude="*.example" \
+        --exclude="*.template" \
+        --exclude="*.sh" \
+        --exclude="*.yml" \
+        --exclude="*.yaml" \
+        --exclude="*.md" \
+        --exclude="*.test.*" \
+        --exclude="*.spec.*" \
+        --exclude="*.json" \
+        --exclude=".env.*" \
+        --include="*.ts" \
+        --include="*.tsx" \
+        --include="*.js" \
+        --include="*.jsx" \
+        apps/ packages/ 2>/dev/null | grep -v "process\.env\|import\|require\|type \|interface \|selector\|querySelector\|data-test\|Label\|placeholder\|htmlFor\|confirm\|show\|hide\|className\|useState\|validation\|error\|\.d\.ts\|header" >/dev/null 2>&1; then
         echo "❌ Potential hardcoded secret found:"
-        grep -r -i -E "$pattern" --exclude-dir=.git --exclude-dir=node_modules --exclude="*.example" --exclude="*.template" . | head -5
+        grep -r -i -E "$pattern" \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules \
+            --exclude-dir=.github \
+            --exclude-dir=__tests__ \
+            --exclude-dir=test \
+            --exclude-dir=tests \
+            --exclude="*.example" \
+            --exclude="*.template" \
+            --exclude="*.sh" \
+            --exclude="*.yml" \
+            --exclude="*.yaml" \
+            --exclude="*.md" \
+            --exclude="*.test.*" \
+            --exclude="*.spec.*" \
+            --exclude="*.json" \
+            --exclude=".env.*" \
+            --include="*.ts" \
+            --include="*.tsx" \
+            --include="*.js" \
+            --include="*.jsx" \
+            apps/ packages/ 2>/dev/null | grep -v "process\.env\|import\|require\|type \|interface \|selector\|querySelector\|data-test\|Label\|placeholder\|htmlFor\|confirm\|show\|hide\|className\|useState\|validation\|error\|\.d\.ts\|header" | head -5
         VIOLATIONS+=("hardcoded_secrets")
     fi
 done

@@ -16,14 +16,16 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -56,14 +58,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -92,14 +96,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -128,14 +134,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -163,14 +171,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -198,14 +208,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -233,14 +245,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -280,7 +294,7 @@ jobs:
       - name: Check for unexpected new files
         run: |
           # Allowed new files (edit this list for your repo)
-          ALLOW_RE='^(migrations/|supabase/migrations/|apps/.+__tests__/.+|docs/ADR/|scripts/.+\.sh|packages/.+/__generated__/|contracts/|packages/contracts/)'
+          ALLOW_RE='^(migrations/|supabase/migrations/|apps/.+__tests__/.+|docs/ADR/|scripts/.+\.sh|packages/.+/__generated__/|contracts/|packages/contracts/|workflows/)'
           
           git fetch origin ${{ github.base_ref }}
           ADDED=$(git diff --name-status origin/${{ github.base_ref }}...HEAD | awk '$1=="A"{print $2}')

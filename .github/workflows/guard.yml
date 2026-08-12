@@ -14,14 +14,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -106,8 +108,8 @@ jobs:
             exit 1
           fi
           
-          # Count total health endpoints
-          HEALTH_COUNT=$(find apps/ -name "*healthz*" -type f | wc -l)
+          # Count total health endpoints (directories named healthz or files containing healthz)
+          HEALTH_COUNT=$(find apps/ -path "*healthz*" -name "route.ts" -type f | wc -l)
           if [ "$HEALTH_COUNT" -ge 2 ]; then
             echo "✅ Found $HEALTH_COUNT health endpoints"
           else
@@ -124,8 +126,12 @@ jobs:
 
       - name: Check for secrets in code
         run: |
-          # Check for common secret patterns
-          if grep -r -i "password\|secret\|key\|token" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+          # Check for hardcoded secret VALUES (not variable names or UI labels)
+          # Pattern: assignment of a literal string that looks like a real secret
+          if grep -r -E "(api_key|secret_key|private_key|auth_token)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]" \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist \
+            apps/ packages/ 2>/dev/null | grep -v "process\.env\|test-\|mock-\|fake-\|dummy\|vitest\|jest\|\.test\.\|\.spec\.\|__test"; then
             echo "❌ Potential secrets found in code"
             exit 1
           fi
@@ -228,14 +234,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@8.15.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -1,0 +1,73 @@
+{
+  "name": "Hive Founder Signal Ingest",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hive-founder-signal",
+        "options": {
+          "responseMode": "responseNode"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Founder Signal Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "hive-founder-signal"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate and normalize inbound founder signal\nconst body = $json.body || $json;\n\nconst signal = {\n  signalId: body.signalId || body.id || `sig_${Date.now()}`,\n  signalType: body.signalType || body.type || 'founder-signal',\n  source: body.source || 'ecosystem-router',\n  title: body.title || body.subject || 'Untitled Signal',\n  content: body.content || body.message || body.description || '',\n  priority: body.priority || 'normal',\n  metadata: body.metadata || {},\n  receivedAt: new Date().toISOString()\n};\n\nreturn [{ json: signal }];"
+      },
+      "id": "normalize-signal",
+      "name": "Normalize Signal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"received\": true,\n  \"signalId\": \"{{ $json.signalId }}\",\n  \"status\": \"ingested\",\n  \"receivedAt\": \"{{ $json.receivedAt }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Acknowledge Signal",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [700, 400]
+    }
+  ],
+  "connections": {
+    "Founder Signal Webhook": {
+      "main": [
+        [
+          { "node": "Normalize Signal", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Normalize Signal": {
+      "main": [
+        [
+          { "node": "Acknowledge Signal", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "hive-ops",
+    "notes": "This workflow must be ACTIVE in n8n for the Ecosystem Router to forward founder signals successfully. If inactive, the router will receive 404 and surface a soft error."
+  },
+  "tags": [
+    { "name": "hive" },
+    { "name": "founder-signal" },
+    { "name": "priority-1" }
+  ]
+}
