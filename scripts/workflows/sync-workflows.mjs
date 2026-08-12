@@ -125,7 +125,7 @@ async function listN8nWorkflows() {
         }
 
         const url = new URL(`${N8N_BASE_URL}/workflows`);
-        url.searchParams.set('limit', '100');
+        url.searchParams.set('limit', '250');
         if (cursor) url.searchParams.set('cursor', cursor);
 
         const response = await fetch(url.toString(), {

@@ -38,7 +38,7 @@ async function paginatedFetch(fetchFn) {
 
   do {
     const url = new URL('http://localhost:5678/rest/workflows');
-    url.searchParams.set('limit', '100');
+    url.searchParams.set('limit', '250');
     if (cursor) url.searchParams.set('cursor', cursor);
 
     const r = await fetchFn(url.toString());
@@ -137,6 +137,20 @@ describe('n8n workflow list pagination', () => {
     const result = await paginatedFetch(fetchFn);
     assert.equal(result.length, 50);
     assert.equal(fetchFn.mock.calls.length, 50);
+  });
+
+  test('177-workflow estate fits in single page at limit=250', async () => {
+    const ids = Array.from({ length: 177 }, (_, i) => i + 1);
+    const fetchFn = mock.fn(async () => ({
+      ok: true,
+      json: async () => makePage(ids),
+    }));
+
+    const result = await paginatedFetch(fetchFn);
+    assert.equal(result.length, 177);
+    assert.equal(fetchFn.mock.calls.length, 1, 'should complete in one request');
+    const activeCount = result.filter(r => r.active).length;
+    assert.ok(activeCount > 0, 'should include active workflows');
   });
 
   test('API error throws on first page', async () => {

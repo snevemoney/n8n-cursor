@@ -412,7 +412,7 @@ class N8nMcpServer {
     let cursor = null;
     const maxPages = 50;
     let page = 0;
-    const pageSize = 100;
+    const pageSize = 250;
 
     do {
       const params = new URLSearchParams();
@@ -445,13 +445,17 @@ class N8nMcpServer {
       filteredWorkflows = filteredWorkflows.slice(0, args.limit);
     }
 
+    const activeCount = filteredWorkflows.filter(w => w.active).length;
+
     return {
       content: [
         {
           type: 'text',
           text: JSON.stringify({
             success: true,
-            count: filteredWorkflows.length,
+            total: filteredWorkflows.length,
+            active: activeCount,
+            inactive: filteredWorkflows.length - activeCount,
             workflows: filteredWorkflows.map(w => ({
               id: w.id,
               name: w.name,

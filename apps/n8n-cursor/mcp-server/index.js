@@ -91,7 +91,7 @@ server.setRequestHandler("tools/call", async (req) => {
 
     do {
       const url = new URL(`${N8N_URL}/rest/workflows`);
-      url.searchParams.set("limit", "100");
+      url.searchParams.set("limit", "250");
       if (cursor) url.searchParams.set("cursor", cursor);
 
       const r = await h(url.toString());
@@ -111,7 +111,13 @@ server.setRequestHandler("tools/call", async (req) => {
       page++;
     } while (cursor && page < maxPages);
 
-    return { content: [{ type: "text", text: JSON.stringify(allRows, null, 2) }] };
+    const activeCount = allRows.filter(w => w.active).length;
+    return { content: [{ type: "text", text: JSON.stringify({
+      total: allRows.length,
+      active: activeCount,
+      inactive: allRows.length - activeCount,
+      workflows: allRows
+    }, null, 2) }] };
   }
 
   if (name === "n8n_get_workflow") {
