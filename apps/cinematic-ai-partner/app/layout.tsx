@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0a0a0c',
+  themeColor: '#0A0A0C',
   width: 'device-width',
   initialScale: 1,
 };
@@ -37,6 +37,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Display: Instrument Serif (swap fallback to Newsreader → Georgia) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="grain">{children}</body>
     </html>
   );

@@ -10,7 +10,7 @@ export function CTA() {
         <Reveal>
           <h2
             id="cta-heading"
-            className="font-display text-3xl font-normal leading-tight text-text-primary md:text-5xl"
+            className="font-display text-3xl font-normal leading-tight text-text md:text-5xl"
           >
             Ready to stop managing tools
             <br className="hidden md:block" />
@@ -19,7 +19,7 @@ export function CTA() {
         </Reveal>
 
         <Reveal delay={0.15}>
-          <p className="mt-6 text-lg leading-relaxed text-text-secondary">
+          <p className="mt-6 text-lg leading-relaxed text-text-muted">
             One conversation to see if we&apos;re the right fit. No pitch deck —
             just a candid look at where agents can move the needle for your team.
           </p>
@@ -29,7 +29,7 @@ export function CTA() {
           <div className="mt-10">
             <a
               href={siteConfig.ctaHref}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-sm font-semibold text-surface-primary transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-primary"
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-sm font-semibold text-bg transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             >
               {siteConfig.ctaLabel}
               <span aria-hidden="true">&rarr;</span>

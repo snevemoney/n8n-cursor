@@ -30,7 +30,7 @@ export function HowWeWork() {
     <section className="section-padding" aria-labelledby="how-heading">
       <div className="mx-auto max-w-4xl px-6">
         <Reveal>
-          <p className="mb-3 text-center text-sm font-medium uppercase tracking-[0.2em] text-accent-muted">
+          <p className="mb-3 text-center text-sm font-medium uppercase tracking-[0.2em] text-text-muted">
             How we work
           </p>
         </Reveal>
@@ -38,7 +38,7 @@ export function HowWeWork() {
         <Reveal delay={0.1}>
           <h2
             id="how-heading"
-            className="mx-auto max-w-2xl text-center font-display text-3xl font-normal leading-tight text-text-primary md:text-4xl"
+            className="mx-auto max-w-2xl text-center font-display text-3xl font-normal leading-tight text-text md:text-4xl"
           >
             A focused operator. Purpose-built agents.
             <br className="hidden md:block" />
@@ -47,7 +47,7 @@ export function HowWeWork() {
         </Reveal>
 
         <Reveal delay={0.2}>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-text-secondary">
+          <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-text-muted">
             You don&apos;t hire a department — you gain a partner who brings the
             right agents to each problem and owns the outcome end-to-end.
           </p>
@@ -56,15 +56,15 @@ export function HowWeWork() {
         <div className="mt-16 space-y-0">
           {steps.map((step, i) => (
             <Reveal key={step.number} delay={0.1 * (i + 1)}>
-              <div className="group flex gap-6 border-l border-white/10 py-8 pl-8 transition-colors hover:border-accent/30">
-                <span className="shrink-0 font-display text-2xl text-accent/50 transition-colors group-hover:text-accent">
+              <div className="group flex gap-6 border-l border-line py-8 pl-8 transition-colors hover:border-accent/40">
+                <span className="shrink-0 font-display text-2xl text-accent/40 transition-colors group-hover:text-accent">
                   {step.number}
                 </span>
                 <div>
-                  <h3 className="text-lg font-medium text-text-primary">
+                  <h3 className="text-lg font-medium text-text">
                     {step.title}
                   </h3>
-                  <p className="mt-2 max-w-lg text-sm leading-relaxed text-text-secondary">
+                  <p className="mt-2 max-w-lg text-sm leading-relaxed text-text-muted">
                     {step.body}
                   </p>
                 </div>

@@ -6,24 +6,20 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'serif'],
       },
       colors: {
-        surface: {
-          primary: 'var(--surface-primary)',
-          secondary: 'var(--surface-secondary)',
-          elevated: 'var(--surface-elevated)',
-        },
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
         accent: {
           DEFAULT: 'var(--accent)',
-          muted: 'var(--accent-muted)',
         },
         text: {
-          primary: 'var(--text-primary)',
-          secondary: 'var(--text-secondary)',
-          muted: 'var(--text-muted)',
+          DEFAULT: 'var(--text)',
+          muted: 'var(--muted)',
         },
+        line: 'var(--line)',
       },
       keyframes: {
         'grain': {

@@ -34,7 +34,7 @@ export function Proof() {
     <section className="section-padding" aria-labelledby="proof-heading">
       <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="mb-3 text-center text-sm font-medium uppercase tracking-[0.2em] text-accent-muted">
+          <p className="mb-3 text-center text-sm font-medium uppercase tracking-[0.2em] text-text-muted">
             Outcomes
           </p>
         </Reveal>
@@ -42,23 +42,47 @@ export function Proof() {
         <Reveal delay={0.1}>
           <h2
             id="proof-heading"
-            className="text-center font-display text-3xl font-normal leading-tight text-text-primary md:text-4xl"
+            className="text-center font-display text-3xl font-normal leading-tight text-text md:text-4xl"
           >
             Three things we deliver.
           </h2>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        {/* Optional broll strip */}
+        <Reveal delay={0.2}>
+          <div className="mt-10 flex items-center justify-center gap-4 overflow-hidden">
+            <img
+              src="/proof/broll-light-leak.png"
+              alt=""
+              aria-hidden="true"
+              className="h-20 w-auto rounded-lg opacity-50 md:h-28"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+            <img
+              src="/proof/broll-glass-planes.png"
+              alt=""
+              aria-hidden="true"
+              className="h-20 w-auto rounded-lg opacity-50 md:h-28"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        </Reveal>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {outcomes.map((card, i) => (
             <Reveal key={card.label} delay={0.15 * (i + 1)}>
-              <article className="group flex h-full flex-col rounded-2xl border border-white/5 bg-surface-secondary p-7 transition-colors hover:border-accent/20">
+              <article className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-7 transition-colors hover:border-accent/25">
                 <span className="mb-4 inline-block w-fit rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
                   {card.label}
                 </span>
-                <h3 className="font-display text-xl font-normal leading-snug text-text-primary">
+                <h3 className="font-display text-xl font-normal leading-snug text-text">
                   {card.title}
                 </h3>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-text-secondary">
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-text-muted">
                   {card.description}
                 </p>
               </article>
