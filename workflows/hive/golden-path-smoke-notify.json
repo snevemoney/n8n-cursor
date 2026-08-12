@@ -1,0 +1,114 @@
+{
+  "name": "Hive Golden Path Smoke Notify",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hive-golden-path-smoke",
+        "options": {
+          "responseMode": "responseNode"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Golden Path Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "hive-golden-path-smoke"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize inbound payload and build Scorpion-compatible register body\n// Scorpion /api/services/register requires:\n//   serviceName (string, min 1)\n//   version (string, min 1)\n//   host (string, min 1)\n//   port (number, int, 1-65535)\n//   protocol (enum: 'http' | 'https' | 'grpc')\n//   status? ('healthy' | 'unhealthy' | 'unknown')\n//   metadata? (Record<string, string>)\n//   tags? (string[])\nconst body = $json.body || $json;\n\nconst serviceName = body.serviceName || body.service_name || body.name || 'hive-golden-path-smoke';\nconst version = body.version || body.ver || '1.0.0';\nconst host = body.host || body.hostname || 'evenslouis.ca';\nconst port = Number(body.port) || 443;\nconst protocol = body.protocol || 'https';\nconst status = body.status || 'healthy';\n\nconst metadata = {\n  correlationId: body.correlationId || body.correlation_id || `gp_${Date.now()}`,\n  source: body.source || 'hive-golden-path',\n  goal: body.goal || 'smoke-test-registration',\n  summary: body.summary || `Golden path smoke from ${serviceName}`,\n  jobType: body.jobType || body.job_type || 'maintenance',\n  triggeredAt: new Date().toISOString()\n};\n\nconst tags = body.tags || ['hive', 'golden-path', 'smoke-test'];\n\nreturn [{\n  json: {\n    registerPayload: {\n      serviceName,\n      version,\n      host,\n      port,\n      protocol,\n      status,\n      metadata,\n      tags\n    },\n    originalInput: body\n  }\n}];"
+      },
+      "id": "build-register-payload",
+      "name": "Build Register Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evenslouis.ca/api/services/register",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "register-scorpion",
+      "name": "Register Scorpion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Evaluate registration result\nconst result = $input.first().json;\nconst statusCode = result.statusCode || result.code || 200;\nconst success = statusCode >= 200 && statusCode < 300;\n\nif (!success) {\n  return [{\n    json: {\n      registered: false,\n      statusCode,\n      error: result.message || result.error || 'Registration failed',\n      hint: 'Check payload shape matches Scorpion /api/services/register Zod schema: serviceName, version, host, port (int), protocol (http|https|grpc).',\n      sentPayload: $('Build Register Payload').first().json.registerPayload\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    registered: true,\n    serviceId: result.data?.id || result.id || null,\n    message: result.data?.message || result.message || 'OK'\n  }\n}];"
+      },
+      "id": "evaluate-result",
+      "name": "Evaluate Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [950, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": "={{ $json.registered ? 200 : 422 }}"
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1200, 400]
+    }
+  ],
+  "connections": {
+    "Golden Path Webhook": {
+      "main": [
+        [
+          { "node": "Build Register Payload", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build Register Payload": {
+      "main": [
+        [
+          { "node": "Register Scorpion", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Register Scorpion": {
+      "main": [
+        [
+          { "node": "Evaluate Result", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Evaluate Result": {
+      "main": [
+        [
+          { "node": "Respond", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "hive-ops"
+  },
+  "tags": [
+    { "name": "hive" },
+    { "name": "golden-path" },
+    { "name": "priority-1" }
+  ]
+}
