@@ -84,17 +84,40 @@ server.setRequestHandler("tools/call", async (req) => {
   const { name, arguments: args } = req.params;
 
   if (name === "n8n_list_workflows") {
-    const r = await h(`${N8N_URL}/rest/workflows`);
-    if (!r.ok) throw new Error(`n8n API error ${r.status}`);
-    const data = await r.json();
-    const rows = data.data?.map(w => ({ 
-      id: w.id, 
-      name: w.name, 
-      active: !!w.active,
-      updatedAt: w.updatedAt,
-      nodes: w.nodes?.length || 0
-    })) || [];
-    return { content: [{ type: "text", text: JSON.stringify(rows, null, 2) }] };
+    const allRows = [];
+    let cursor = null;
+    const maxPages = 50;
+    let page = 0;
+
+    do {
+      const url = new URL(`${N8N_URL}/rest/workflows`);
+      url.searchParams.set("limit", "250");
+      if (cursor) url.searchParams.set("cursor", cursor);
+
+      const r = await h(url.toString());
+      if (!r.ok) throw new Error(`n8n API error ${r.status}`);
+      const data = await r.json();
+      const workflows = data.data || [];
+      for (const w of workflows) {
+        allRows.push({
+          id: w.id,
+          name: w.name,
+          active: !!w.active,
+          updatedAt: w.updatedAt,
+          nodes: w.nodes?.length || 0
+        });
+      }
+      cursor = data.nextCursor || null;
+      page++;
+    } while (cursor && page < maxPages);
+
+    const activeCount = allRows.filter(w => w.active).length;
+    return { content: [{ type: "text", text: JSON.stringify({
+      total: allRows.length,
+      active: activeCount,
+      inactive: allRows.length - activeCount,
+      workflows: allRows
+    }, null, 2) }] };
   }
 
   if (name === "n8n_get_workflow") {

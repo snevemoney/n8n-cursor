@@ -107,40 +107,58 @@ function getWorkflowName(workflow) {
 async function listN8nWorkflows() {
   const maxRetries = 3;
   const retryDelay = 1000;
-  
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (N8N_API_KEY) {
-        headers['X-N8N-API-KEY'] = N8N_API_KEY;
+  const allWorkflows = [];
+  let cursor = null;
+  const maxPages = 50;
+  let page = 0;
+
+  do {
+    let pageWorkflows = null;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+
+        if (N8N_API_KEY) {
+          headers['X-N8N-API-KEY'] = N8N_API_KEY;
+        }
+
+        const url = new URL(`${N8N_BASE_URL}/workflows`);
+        url.searchParams.set('limit', '250');
+        if (cursor) url.searchParams.set('cursor', cursor);
+
+        const response = await fetch(url.toString(), {
+          headers,
+          signal: AbortSignal.timeout(15000)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to list workflows: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        pageWorkflows = data.data || [];
+        cursor = data.nextCursor || null;
+        break;
+      } catch (error) {
+        if (attempt < maxRetries) {
+          console.warn(`⚠️ Retry ${attempt}/${maxRetries} after error:`, error.message);
+          await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+          continue;
+        }
+        console.error('❌ Failed to list n8n workflows after retries:', error.message);
+        return allWorkflows;
       }
-      
-      const response = await fetch(`${N8N_BASE_URL}/workflows`, {
-        headers,
-        signal: AbortSignal.timeout(10000) // 10 second timeout
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to list workflows: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      return data.data || [];
-    } catch (error) {
-      if (attempt < maxRetries) {
-        console.warn(`⚠️ Retry ${attempt}/${maxRetries} after error:`, error.message);
-        await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
-        continue;
-      }
-      console.error('❌ Failed to list n8n workflows after retries:', error.message);
-      return [];
     }
-  }
-  
-  return [];
+
+    if (pageWorkflows) {
+      allWorkflows.push(...pageWorkflows);
+    }
+    page++;
+  } while (cursor && page < maxPages);
+
+  return allWorkflows;
 }
 
 /**
