@@ -68,13 +68,13 @@ class N8nMcpServer {
         // Workflow Operations
         {
           name: 'workflows.list',
-          description: 'List all workflows with filtering options',
+          description: 'List all workflows with filtering options. Auto-paginates to return the full inventory by default.',
           inputSchema: {
             type: 'object',
             properties: {
               active: { type: 'boolean', description: 'Filter by active status' },
               tags: { type: 'array', items: { type: 'string' }, description: 'Filter by tags' },
-              limit: { type: 'number', default: 50, description: 'Maximum workflows to return' },
+              limit: { type: 'number', description: 'Cap the number of workflows returned (omit for all)' },
             },
           },
         },
@@ -408,24 +408,41 @@ class N8nMcpServer {
 
   // Workflow Management Methods
   async listWorkflows(args) {
-    let url = '/rest/workflows';
-    const params = new URLSearchParams();
-    
-    if (args.active !== undefined) params.append('active', args.active.toString());
-    if (args.limit) params.append('limit', args.limit.toString());
-    
-    if (params.toString()) {
-      url += '?' + params.toString();
-    }
+    const allWorkflows = [];
+    let cursor = null;
+    const maxPages = 50;
+    let page = 0;
+    const pageSize = 100;
 
-    const workflows = await this.n8nRequest(url);
-    
+    do {
+      const params = new URLSearchParams();
+      params.append('limit', pageSize.toString());
+      if (args.active !== undefined) params.append('active', args.active.toString());
+      if (cursor) params.append('cursor', cursor);
+
+      const url = '/rest/workflows?' + params.toString();
+      const response = await this.n8nRequest(url);
+
+      const workflows = response.data || response;
+      if (Array.isArray(workflows)) {
+        allWorkflows.push(...workflows);
+      }
+
+      cursor = response.nextCursor || null;
+      page++;
+    } while (cursor && page < maxPages);
+
     // Filter by tags if specified
-    let filteredWorkflows = workflows;
+    let filteredWorkflows = allWorkflows;
     if (args.tags && args.tags.length > 0) {
-      filteredWorkflows = workflows.filter(workflow => 
+      filteredWorkflows = allWorkflows.filter(workflow => 
         workflow.tags && workflow.tags.some(tag => args.tags.includes(tag.name))
       );
+    }
+
+    // Apply caller-specified limit after collecting all pages
+    if (args.limit && args.limit < filteredWorkflows.length) {
+      filteredWorkflows = filteredWorkflows.slice(0, args.limit);
     }
 
     return {
@@ -456,11 +473,13 @@ class N8nMcpServer {
     if (args.id) {
       workflow = await this.n8nRequest(`/rest/workflows/${args.id}`);
     } else if (args.name) {
-      const workflows = await this.n8nRequest('/rest/workflows');
-      workflow = workflows.find(w => w.name === args.name);
+      const listResult = await this.listWorkflows({});
+      const allWorkflows = JSON.parse(listResult.content[0].text).workflows;
+      workflow = allWorkflows.find(w => w.name === args.name);
       if (!workflow) {
         throw new McpError(ErrorCode.InvalidParams, `Workflow not found: ${args.name}`);
       }
+      workflow = await this.n8nRequest(`/rest/workflows/${workflow.id}`);
     }
 
     // Remove sensitive data unless specifically requested
