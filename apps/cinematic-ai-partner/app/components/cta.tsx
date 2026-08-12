@@ -25,20 +25,19 @@ export function CTA() {
           </p>
         </Reveal>
 
-        <Reveal delay={0.3}>
-          <div className="mt-10">
-            <a
-              href={siteConfig.ctaHref}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-sm font-semibold text-bg transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-            >
-              {siteConfig.ctaLabel}
-              <span aria-hidden="true">&rarr;</span>
-            </a>
-            <p className="mt-4 text-xs text-text-muted">
-              No commitment. 30-minute call.
-            </p>
-          </div>
-        </Reveal>
+        {/* CTA button is never hidden behind opacity-0 */}
+        <div className="mt-10">
+          <a
+            href={siteConfig.ctaHref}
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-sm font-semibold text-bg transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          >
+            {siteConfig.ctaLabel}
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+          <p className="mt-4 text-xs text-text-muted">
+            No commitment. 30-minute call.
+          </p>
+        </div>
       </div>
     </section>
   );

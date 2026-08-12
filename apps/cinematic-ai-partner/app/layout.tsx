@@ -49,6 +49,15 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
+        {/* No-JS / failed-hydration safety: override Framer Motion inline opacity */}
+        <noscript>
+          <style
+            dangerouslySetInnerHTML={{
+              __html:
+                '[style*="opacity: 0"]{opacity:1!important;transform:none!important}',
+            }}
+          />
+        </noscript>
       </head>
       <body className="grain">{children}</body>
     </html>
