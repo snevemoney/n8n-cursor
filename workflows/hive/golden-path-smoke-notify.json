@@ -4,17 +4,16 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "hive-golden-path-smoke",
-        "options": {
-          "responseMode": "responseNode"
-        }
+        "path": "hive-smoke-notify",
+        "responseMode": "onReceived",
+        "options": {}
       },
       "id": "webhook-trigger",
       "name": "Golden Path Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [200, 400],
-      "webhookId": "hive-golden-path-smoke"
+      "webhookId": "hive-smoke-notify"
     },
     {
       "parameters": {
@@ -53,20 +52,6 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [950, 400]
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ $json }}",
-        "options": {
-          "responseCode": "={{ $json.registered ? 200 : 422 }}"
-        }
-      },
-      "id": "respond-webhook",
-      "name": "Respond",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [1200, 400]
     }
   ],
   "connections": {
@@ -88,13 +73,6 @@
       "main": [
         [
           { "node": "Evaluate Result", "type": "main", "index": 0 }
-        ]
-      ]
-    },
-    "Evaluate Result": {
-      "main": [
-        [
-          { "node": "Respond", "type": "main", "index": 0 }
         ]
       ]
     }
