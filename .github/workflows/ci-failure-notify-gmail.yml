@@ -1,0 +1,83 @@
+# Mirrors GitHub Actions failure alerts to Gmail for Grok agent triage.
+# Native GitHub emails still follow account settings (github.com/settings/notifications).
+#
+# Required repo secrets (reuse council SMTP if present):
+#   SMTP_USER or N8N_SMTP_USER — Gmail address (e.g. snevemoney12@gmail.com)
+#   SMTP_PASSWORD or N8N_SMTP_PASS — Gmail app password
+# Optional:
+#   CI_FAILURE_NOTIFY_EMAIL — defaults to snevemoney12@gmail.com
+#   SMTP_HOST / SMTP_PORT / SMTP_FROM — same as council-consolidated-reports.yml
+
+name: CI Failure Notify Gmail
+
+on:
+  workflow_run:
+    workflows:
+      - Reliability Guards
+      - Security Scan
+      - Scope Validation & Quality Gates
+      - Global Consistency Contract Enforcement
+      - LightningFlow AI CI/CD Pipeline
+      - Global Guards
+      - Scorpion CI - Tests & Security
+      - CI - Integration
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  notify-gmail:
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.event != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build alert body
+        id: body
+        env:
+          RUN: ${{ github.event.workflow_run }}
+        run: |
+          NAME=$(echo "$RUN" | jq -r '.name')
+          BRANCH=$(echo "$RUN" | jq -r '.head_branch')
+          SHA=$(echo "$RUN" | jq -r '.head_sha' | cut -c1-7)
+          URL=$(echo "$RUN" | jq -r '.html_url')
+          ACTOR=$(echo "$RUN" | jq -r '.actor.login')
+          MSG=$(echo "$RUN" | jq -r '.display_title // .head_commit.message // "—"' | head -1)
+          {
+            echo "content<<EOF"
+            echo "[${{ github.repository }}] CI failed"
+            echo ""
+            echo "Workflow: $NAME"
+            echo "Branch:   $BRANCH"
+            echo "Commit:   $SHA — $MSG"
+            echo "Actor:    $ACTOR"
+            echo ""
+            echo "View run: $URL"
+            echo ""
+            echo "— Grok Communications Manager / Forge triage (github-ci-failure-triage skill)"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Send Gmail alert
+        if: secrets.SMTP_USER != '' || secrets.N8N_SMTP_USER != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}
+          server_port: ${{ secrets.SMTP_PORT || secrets.N8N_SMTP_PORT || 587 }}
+          username: ${{ secrets.SMTP_USER || secrets.N8N_SMTP_USER }}
+          password: ${{ secrets.SMTP_PASSWORD || secrets.N8N_SMTP_PASS }}
+          subject: '[${{ github.repository }}] CI failed: ${{ github.event.workflow_run.name }}'
+          to: ${{ secrets.CI_FAILURE_NOTIFY_EMAIL || 'snevemoney12@gmail.com' }}
+          from: ${{ secrets.SMTP_FROM || secrets.N8N_SMTP_SENDER || 'Hive CI <snevemoney12@gmail.com>' }}
+          body: ${{ steps.body.outputs.content }}
+          content_type: text/plain
+          ignore_cert: true
+        continue-on-error: true
+
+      - name: SMTP not configured
+        if: secrets.SMTP_USER == '' && secrets.N8N_SMTP_USER == ''
+        run: |
+          echo "::warning::CI failure Gmail mirror skipped — set SMTP_USER + SMTP_PASSWORD (Gmail app password) in repo secrets."
+          echo "Until then, only GitHub account notification email receives failures (currently sneve1@hotmail.com)."
