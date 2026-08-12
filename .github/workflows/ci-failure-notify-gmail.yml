@@ -22,6 +22,16 @@ on:
       - Scorpion CI - Tests & Security
       - CI - Integration
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      workflow_name:
+        description: Workflow name for test alert
+        required: false
+        default: Manual SMTP test
+      run_url:
+        description: Link included in test body
+        required: false
+        default: https://github.com/snevemoney/n8n-cursor/actions
 
 permissions:
   actions: read
@@ -30,21 +40,45 @@ permissions:
 jobs:
   notify-gmail:
     if: >-
-      github.event.workflow_run.conclusion == 'failure' &&
-      github.event.workflow_run.event != 'schedule'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'failure' &&
+       github.event.workflow_run.event != 'schedule')
     runs-on: ubuntu-latest
     steps:
+      - name: Detect SMTP secrets
+        id: smtp
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          N8N_SMTP_USER: ${{ secrets.N8N_SMTP_USER }}
+        run: |
+          if [ -n "$SMTP_USER" ] || [ -n "$N8N_SMTP_USER" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build alert body
         id: body
         env:
           RUN: ${{ github.event.workflow_run }}
+          DISPATCH_NAME: ${{ github.event.inputs.workflow_name }}
+          DISPATCH_URL: ${{ github.event.inputs.run_url }}
         run: |
-          NAME=$(echo "$RUN" | jq -r '.name')
-          BRANCH=$(echo "$RUN" | jq -r '.head_branch')
-          SHA=$(echo "$RUN" | jq -r '.head_sha' | cut -c1-7)
-          URL=$(echo "$RUN" | jq -r '.html_url')
-          ACTOR=$(echo "$RUN" | jq -r '.actor.login')
-          MSG=$(echo "$RUN" | jq -r '.display_title // .head_commit.message // "—"' | head -1)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            NAME="$DISPATCH_NAME"
+            BRANCH="${{ github.ref_name }}"
+            SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            URL="$DISPATCH_URL"
+            ACTOR="${{ github.actor }}"
+            MSG="Manual SMTP connectivity test"
+          else
+            NAME=$(echo "$RUN" | jq -r '.name')
+            BRANCH=$(echo "$RUN" | jq -r '.head_branch')
+            SHA=$(echo "$RUN" | jq -r '.head_sha' | cut -c1-7)
+            URL=$(echo "$RUN" | jq -r '.html_url')
+            ACTOR=$(echo "$RUN" | jq -r '.actor.login')
+            MSG=$(echo "$RUN" | jq -r '.display_title // .head_commit.message // "—"' | head -1)
+          fi
           {
             echo "content<<EOF"
             echo "[${{ github.repository }}] CI failed"
@@ -61,23 +95,22 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Send Gmail alert
-        if: secrets.SMTP_USER != '' || secrets.N8N_SMTP_USER != ''
+        if: steps.smtp.outputs.configured == 'true'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}
           server_port: ${{ secrets.SMTP_PORT || secrets.N8N_SMTP_PORT || 587 }}
           username: ${{ secrets.SMTP_USER || secrets.N8N_SMTP_USER }}
           password: ${{ secrets.SMTP_PASSWORD || secrets.N8N_SMTP_PASS }}
-          subject: '[${{ github.repository }}] CI failed: ${{ github.event.workflow_run.name }}'
+          subject: '[${{ github.repository }}] CI failed: ${{ github.event.inputs.workflow_name || github.event.workflow_run.name }}'
           to: ${{ secrets.CI_FAILURE_NOTIFY_EMAIL || 'snevemoney12@gmail.com' }}
           from: ${{ secrets.SMTP_FROM || secrets.N8N_SMTP_SENDER || 'Hive CI <snevemoney12@gmail.com>' }}
           body: ${{ steps.body.outputs.content }}
           content_type: text/plain
           ignore_cert: true
-        continue-on-error: true
 
       - name: SMTP not configured
-        if: secrets.SMTP_USER == '' && secrets.N8N_SMTP_USER == ''
+        if: steps.smtp.outputs.configured != 'true'
         run: |
           echo "::warning::CI failure Gmail mirror skipped — set SMTP_USER + SMTP_PASSWORD (Gmail app password) in repo secrets."
-          echo "Until then, only GitHub account notification email receives failures (currently sneve1@hotmail.com)."
+          exit 1
