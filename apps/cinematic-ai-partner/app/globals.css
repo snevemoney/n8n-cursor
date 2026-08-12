@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ── Surface tokens (dark premium) ── */
+  --surface-primary: #0a0a0c;
+  --surface-secondary: #121216;
+  --surface-elevated: #1a1a20;
+
+  /* ── Accent: restrained warm amber ── */
+  --accent: #c8956c;
+  --accent-muted: #8a6548;
+
+  /* ── Text ── */
+  --text-primary: #f0ece6;
+  --text-secondary: #a09a90;
+  --text-muted: #605c56;
+
+  /* ── Spacing scale ── */
+  --space-section: clamp(4rem, 10vw, 8rem);
+
+  /* ── Font ── */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Georgia', 'Times New Roman', serif;
+}
+
+/* ── Film grain overlay (signature motif) ── */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -200%;
+  width: 400%;
+  height: 400%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 9999;
+  animation: grain 8s steps(10) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain::after {
+    animation: none;
+    opacity: 0.02;
+  }
+}
+
+/* ── Base resets ── */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Section utility ── */
+.section-padding {
+  padding-top: var(--space-section);
+  padding-bottom: var(--space-section);
+}
+
+/* ── Divider ── */
+.section-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--text-muted) 20%,
+    var(--text-muted) 80%,
+    transparent
+  );
+  opacity: 0.3;
+  margin: 0 auto;
+  max-width: 60rem;
+}
