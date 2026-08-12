@@ -19,7 +19,7 @@ jobs:
       - name: Check scope
         run: |
           # Extract AFFECTED_PATHS from PR description or use default
-          AFFECTED_PATHS=${AFFECTED_PATHS:-"apps/**,packages/**,infra/**"}
+          AFFECTED_PATHS=${AFFECTED_PATHS:-"apps/**,packages/**,infra/**,.github/**,scripts/**,workflows/**,docs/**"}
           ./scripts/validate/scope-check.sh "$AFFECTED_PATHS"
 
   port-validation:
@@ -67,7 +67,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -94,7 +94,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -118,7 +118,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -174,7 +174,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install dependencies

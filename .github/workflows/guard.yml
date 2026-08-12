@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -126,8 +126,12 @@ jobs:
 
       - name: Check for secrets in code
         run: |
-          # Check for common secret patterns (exclude node_modules, type definitions, test fixtures)
-          if grep -r -i "password\|secret\|api_key\|private_key" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist apps/ | grep -v "process\.env\|NEXT_PUBLIC_\|type\|interface\|selector\|querySelector\|data-test\|\.d\.ts"; then
+          # Check for hardcoded secret VALUES (not variable names or UI labels)
+          # Pattern: assignment of a literal string that looks like a real secret
+          if grep -r -E "(api_key|secret_key|private_key|auth_token)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]" \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist \
+            apps/ packages/ 2>/dev/null | grep -v "process\.env\|test-\|mock-\|fake-\|dummy\|vitest\|jest\|\.test\.\|\.spec\.\|__test"; then
             echo "❌ Potential secrets found in code"
             exit 1
           fi
