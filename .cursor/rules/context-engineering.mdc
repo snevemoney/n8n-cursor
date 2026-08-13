@@ -1,0 +1,11 @@
+---
+description: High-signal context — load index, filesystem-first, avoid dumb zone
+alwaysApply: true
+---
+
+# Context engineering
+
+- Load from `docs/program-design/AGENT_LOAD_INDEX.md`.
+- Prefer facts on disk (`docs/hive`, `docs/adr`, `docs/external`).
+- When quality drops, write a handoff doc and start a fresh session.
+- Right tokens > more tokens.

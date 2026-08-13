@@ -1,0 +1,15 @@
+---
+description: Evens Louis hive mind — solo+hive, anti-overlap, HITL, sacred OpenClaw
+alwaysApply: true
+---
+
+# Hive mind
+
+Before changing cross-product behavior, read `docs/hive/README.md` and `docs/wip-program/HARD_RULES.md`.
+
+- One money OS (Client Engine), one agent face (OpenClaw), one ops cockpit (Scorpion).
+- Keep target repo solo-usable; respect `docs/hive/INTEROP_CONTRACTS.md`.
+- HITL for spend, client send, prod deploy, delete data, secrets, `openclaw.json`.
+- Never wipe OpenClaw souls/topics or `n8n_data` volumes.
+- Never put basic_auth on n8n webhooks or `/claw/hooks*`.
+- Prefer execute+verify; do not claim done without checking the live surface.

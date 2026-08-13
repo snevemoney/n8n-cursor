@@ -1,0 +1,82 @@
+[
+  {
+    "id": "n8n-cursor",
+    "github": "https://github.com/snevemoney/n8n-cursor",
+    "lane": "hive_core"
+  },
+  {
+    "id": "client-engine",
+    "github": "https://github.com/snevemoney/client-engine",
+    "lane": "hive_core"
+  },
+  {
+    "id": "philanthropic-ai-agent",
+    "github": "https://github.com/snevemoney/philanthropic-ai-agent",
+    "lane": "hive_core"
+  },
+  {
+    "id": "outer-heaven-backups",
+    "github": "https://github.com/snevemoney/outer-heaven-backups",
+    "lane": "hive_core"
+  },
+  {
+    "id": "shield-buddies",
+    "github": "https://github.com/snevemoney/shield-buddies",
+    "lane": "product_candidate"
+  },
+  {
+    "id": "clipengine",
+    "github": "https://github.com/snevemoney/clipengine",
+    "lane": "product_candidate"
+  },
+  {
+    "id": "trendspotter-ai",
+    "github": "https://github.com/snevemoney/trendspotter-ai",
+    "lane": "product_candidate"
+  },
+  {
+    "id": "proof-qc-assist",
+    "github": "https://github.com/snevemoney/proof-qc-assist",
+    "lane": "product_candidate"
+  },
+  {
+    "id": "autoflow-finance",
+    "github": "https://github.com/snevemoney/autoflow-finance",
+    "lane": "side_wip"
+  },
+  {
+    "id": "book-reimagined",
+    "github": "https://github.com/snevemoney/book-reimagined",
+    "lane": "side_wip"
+  },
+  {
+    "id": "quick-list-hub-42",
+    "github": "https://github.com/snevemoney/quick-list-hub-42",
+    "lane": "side_wip"
+  },
+  {
+    "id": "clearfield-evidence-flow",
+    "github": "https://github.com/snevemoney/clearfield-evidence-flow",
+    "lane": "hive_capability"
+  },
+  {
+    "id": "insights-lm-private",
+    "github": "https://github.com/snevemoney/insights-lm-private",
+    "lane": "hive_capability"
+  },
+  {
+    "id": "lightningflow-monorepo",
+    "github": "https://github.com/snevemoney/n8n-cursor",
+    "lane": "parked"
+  },
+  {
+    "id": "lightning-ui",
+    "github": "https://github.com/snevemoney/lightning-ui",
+    "lane": "legacy"
+  },
+  {
+    "id": "lightningflow-gh",
+    "github": "https://github.com/snevemoney/lightningflow",
+    "lane": "legacy"
+  }
+]
