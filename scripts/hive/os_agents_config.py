@@ -9,7 +9,16 @@ Can-act gate: scripts/hive/product-state.py --can-act + os/should-run.py
 """
 from __future__ import annotations
 
+import importlib.util
+from pathlib import Path
 from typing import Any, TypedDict
+
+_doc_spec = importlib.util.spec_from_file_location(
+    "agent_doctrine_lanes", Path(__file__).resolve().parent / "agent-doctrine-lanes.py"
+)
+_doctrine = importlib.util.module_from_spec(_doc_spec)
+assert _doc_spec.loader is not None
+_doc_spec.loader.exec_module(_doctrine)
 
 # ---------------------------------------------------------------------------
 # 1. Core roster (exactly 17 — order is canonical)
@@ -133,9 +142,9 @@ AGENT_CARDS: dict[str, AgentCard] = {
     "Big Boss": {
         "title": "Chief of staff",
         "lane": "strategy",
-        "job": "Set daily priorities across life, business, wealth, and projects; arbitrate ownership conflicts.",
+        "job": "Set daily priorities across the multi-business portfolio (websites, Amazon, dropship, hive OS, future lanes); arbitrate ownership conflicts; rotate attention — never tunnel-vision one product.",
         "runs_when": "Morning brief, urgent interrupts, weekly review, or agent escalation.",
-        "solves": "Attention overload — one ranked focus list instead of 17 competing voices.",
+        "solves": "Single-product myopia — one ranked focus list per ACTIVE business lane plus cross-portfolio delegation.",
         "handoff_to": "Specialists by domain; never hoard calendar, code, or money lanes.",
         "hitl_level": "L1",
         "suppression_note": "When calm: still give a short status (3 bullets). Skip only manufactured busywork — never ignore the operator.",
@@ -207,7 +216,7 @@ AGENT_CARDS: dict[str, AgentCard] = {
         "job": "Gather cited evidence; label FACT/INFERENCE/OPINION/UNVERIFIED; produce Research Packets for JIT learning.",
         "runs_when": "Big Boss routes research, specialist KNOWLEDGE_GAP, Wealth Manager stock ask, Forge needs primary docs.",
         "solves": "Hype-driven decisions — verifiable briefs and progressive video/social research before money or build commits.",
-        "handoff_to": "Product GTM, Wealth Manager, Career Strategist, Consultant, Forge (packet delivery).",
+        "handoff_to": "Product GTM, Wealth Manager, Career Strategist, Consultant, Forge, Librarian (validated don'ts).",
         "hitl_level": "L0",
         "suppression_note": "Browser read-only — bounded budgets per docs/os/RESEARCH.md; never blind-trust video/social.",
         "research_capabilities": "jit_owner: progressive video L1-L4, packet builder, multi-source OSINT",
@@ -325,6 +334,9 @@ def _compact_description(name: str, card: AgentCard) -> str:
         f"SOLVES: {card['solves']}\n"
         f"HANDOFF: {card['handoff_to']}\n"
         f"HITL: {card['hitl_level']} — {card['suppression_note']}\n\n"
+        f"{_doctrine.doctrine_lane(name)}\n"
+        f"Full doctrine: {_doctrine.DOCTRINE_SKILL}\n\n"
+        f"When can-act=RUN: execute TOOL COOKBOOK (plugins, browser, shell) before asking operator for steps.\n"
         f"Before any routine: check can-act gate ({_CAN_ACT_REF}). "
         f"If decision ≠ RUN → explain why in plain English + ask the operator one clarifying question. "
         f"Never go silent.\n"
@@ -405,6 +417,14 @@ def validate_config() -> list[str]:
     ]
     if bad_fused:
         errors.append(f"RETIRED_AGENTS invalid fusedInto for: {bad_fused}")
+
+    missing_doctrine = [n for n in CORE_AGENT_NAMES if n not in _doctrine.DOCTRINE_BY_AGENT]
+    if missing_doctrine:
+        errors.append(f"DOCTRINE_BY_AGENT missing: {missing_doctrine}")
+
+    extra_doctrine = [n for n in _doctrine.DOCTRINE_BY_AGENT if n not in CORE_AGENT_NAMES]
+    if extra_doctrine:
+        errors.append(f"DOCTRINE_BY_AGENT extras not in roster: {extra_doctrine}")
 
     if not (30 <= len(RETIRED_AGENTS) <= 40):
         errors.append(

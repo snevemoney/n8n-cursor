@@ -1,0 +1,64 @@
+{
+  "version": "1.0.0",
+  "operator": "Evens Louis",
+  "hive_identity": "Automation business — AI agent employees manage workflows across a portfolio of operator-owned businesses",
+  "rules": [
+    "Agents serve the PORTFOLIO, never tunnel-vision on one product unless operator names a lane this session",
+    "Big Boss rotates attention across active lanes in morning brief — at least one bullet per ACTIVE lane",
+    "Each lane has its own KPI, baseline, and owner agents — do not merge unrelated economics",
+    "product-state.py projects gate product-specific agents; operator lane covers cross-portfolio ops",
+    "New profitable businesses get a lane entry here before GTM/build spend"
+  ],
+  "lanes": [
+    {
+      "id": "ai-partner-websites",
+      "name": "Website / AI Partner services",
+      "status": "active",
+      "description": "Cinematic sites, audits, AI Partner engagements — client-facing services lane",
+      "operator_role": "Builder/strategist — NOT primary outbound salesperson this cycle (introvert/home/high-leverage)",
+      "primary_agents": ["Consultant", "Product GTM", "Forge", "Creative Studio", "Lead Hunter", "Communications Manager"],
+      "product_state": "clipengine",
+      "notes": "MONEY MIX: prefer leveraged seats; sell OS/workflow to operators with existing demand"
+    },
+    {
+      "id": "amazon-own-store",
+      "name": "Operator Amazon store",
+      "status": "active",
+      "description": "Own Amazon.ca Individual practice store — proof-first, match existing ASIN, no spend until live",
+      "operator_role": "Operator-as-seller — practice lane, not default pitch to other sellers",
+      "primary_agents": ["Researcher", "Money Desk", "Product GTM", "Forge", "HITL Operator"],
+      "product_state": "operator",
+      "notes": "Packet: ecom-ops-cut-20260813; Tier 3 for inventory/ads/Professional"
+    },
+    {
+      "id": "dropship",
+      "name": "Dropshipping",
+      "status": "planned",
+      "description": "Future ecom lane — sequence after Amazon practice proves one loop",
+      "operator_role": "TBD",
+      "primary_agents": ["Researcher", "Product GTM", "Money Desk", "Forge"],
+      "product_state": "operator",
+      "notes": "Do not let agents assume dropship is today's priority unless operator activates"
+    },
+    {
+      "id": "hive-os",
+      "name": "Hive / agent automation platform",
+      "status": "active",
+      "description": "The meta-business — 17 Grok agents, control plane, workflows that run the other businesses",
+      "operator_role": "Operator + Forge/Cursor — this repo and Grok fleet",
+      "primary_agents": ["Big Boss", "Watchdog", "Forge", "Librarian", "Researcher"],
+      "product_state": "operator",
+      "notes": "n8n/Scorpion = legacy fallback; Grok-first"
+    },
+    {
+      "id": "future",
+      "name": "Future profitable businesses",
+      "status": "reserved",
+      "description": "Placeholder — Big Boss + Librarian register new lanes when operator commits",
+      "operator_role": "TBD per opportunity",
+      "primary_agents": ["Big Boss", "Consultant", "Researcher", "Product GTM"],
+      "product_state": "operator",
+      "notes": "Evidence before engineering burn; one KPI per new lane"
+    }
+  ]
+}

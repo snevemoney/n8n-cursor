@@ -3,6 +3,16 @@
 
 from __future__ import annotations
 
+import importlib.util
+from pathlib import Path
+
+_doc_spec = importlib.util.spec_from_file_location(
+    "agent_doctrine_lanes", Path(__file__).resolve().parent / "agent-doctrine-lanes.py"
+)
+_doc = importlib.util.module_from_spec(_doc_spec)
+assert _doc_spec.loader is not None
+_doc_spec.loader.exec_module(_doc)
+
 VAULT = "/Users/evenslouis/Documents/My_Billion_Dollar_Vault"
 CACHE = "/Users/evenslouis/.grokbot/outer-heaven"
 REPO = "/Users/evenslouis/n8n-cursor"
@@ -10,6 +20,7 @@ BRIEF_CMD = f'python3 {REPO}/scripts/hive/os/outer-heaven-brief.py --agent "{{ag
 
 TOOL_USAGE_RULES = f"""
 GROK-FIRST TOOLS (default — use before legacy hive):
+- **You HAVE browser/computer + local shell.** Use them autonomously when can-act=RUN. Do not ask operator "should I use Gmail?" — just use it.
 - **First action every session/routine:** {BRIEF_CMD.format(agent="YOUR_AGENT_NAME")}
   Mac asleep / cloud cron: add `--source vps`
   Deep read one note: add `--read OPERATOR_MEMORY.md` (vault-relative path)
@@ -21,7 +32,9 @@ GROK-FIRST TOOLS (default — use before legacy hive):
 - Legacy hive CLI (only when needed): python3 scripts/hive/grok-hive-tool.py --list-tools
 Do NOT use Scorpion obsidian HTTP for Grok memory — direct brief + disk only.
 Do NOT open every briefing with n8n, Scorpion, OpenClaw, or CE — Grok agents do the work themselves.
+**Delegate:** when another agent owns the lane, message them in Grok with a concrete task — operator should not name agents for you.
 Tier 3 (money/send/deploy/secrets): propose in Grok chat; operator decides.
+Org doctrine (all 17 agents): scripts/hive/grok-skills/ai-native-operator-doctrine.md — each agent has a lane line in TOOL COOKBOOK below.
 """.strip()
 
 # 17-agent OS cookbooks (Grok-native first)
@@ -31,7 +44,8 @@ Morning brief (Grok-native):
 1. {BRIEF_CMD.format(agent="Big Boss")}
 2. Gmail + Calendar plugins — today's load
 3. python3 {REPO}/scripts/hive/product-state.py --list
-4. Top 3 priorities; delegate to specialist agents in Grok chat
+4. Read {REPO}/scripts/hive/business-lanes.json — cover every ACTIVE lane in brief
+5. Top 3 priorities; delegate to specialist agents in Grok chat (tag lane id per priority)
 Optional register: grok-hive-tool scorpion_register_outcome (audit only)
 """.strip(),
     "Day Planner": f"""
@@ -155,6 +169,10 @@ Creative Studio creates; never publish without operator OK.
 
 def cookbook_for(agent_name: str) -> str:
     body = TOOL_COOKBOOK.get(agent_name, "").strip()
+    lane = _doc.doctrine_lane(agent_name)
     if not body:
+        if lane:
+            return f"{TOOL_USAGE_RULES}\n\nTOOL COOKBOOK ({agent_name}):\n{lane}\nFull skill: {_doc.DOCTRINE_SKILL}"
         return TOOL_USAGE_RULES
-    return f"{TOOL_USAGE_RULES}\n\nTOOL COOKBOOK ({agent_name}):\n{body}"
+    doctrine = f"\n{lane}\nFull skill: {_doc.DOCTRINE_SKILL}" if lane else ""
+    return f"{TOOL_USAGE_RULES}\n\nTOOL COOKBOOK ({agent_name}):\n{body}{doctrine}"

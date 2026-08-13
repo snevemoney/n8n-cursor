@@ -26,8 +26,9 @@
     "Communications Manager"
   ],
   "suppressed_agents": [],
-  "expected_output": "Morning brief, inbox triage, memory capture, operator leverage",
-  "definition_of_done": "can-act RUN for comms/day-planner; shared-context fresh; 17 routines armed",
+  "expected_output": "Morning brief across portfolio lanes, inbox triage, memory capture, operator leverage",
+  "definition_of_done": "can-act RUN for comms/day-planner; shared-context fresh; 17 routines armed; Big Boss covers all ACTIVE business lanes",
+  "business_lanes": "scripts/hive/business-lanes.json",
   "resources": {
     "repo": "n8n-cursor",
     "vault": "/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven",
