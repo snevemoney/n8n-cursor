@@ -36,8 +36,8 @@ DOCTRINE_BY_AGENT: dict[str, str] = {
         "evidence/walkthrough beats screenshots; never assume one product is the whole company."
     ),
     "Researcher": (
-        "DOCTRINE: Operator video requests → chapter breakdown + implement in hive (researcher-video-to-system); "
-        "tool≠skill; cheap read/expensive decide; hand validated don'ts to Librarian for all 17 agents."
+        "DOCTRINE: Any operator research (video, X bookmarks, web topic) → structured breakdown + implement "
+        "in hive (researcher-research-to-system); cheap read/expensive decide; Librarian promotes don'ts for all 17."
     ),
     "Forge": (
         "DOCTRINE: Reject 70% done — verification checklist (click paths, mobile, forms) vs "

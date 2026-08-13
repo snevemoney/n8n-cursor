@@ -177,16 +177,14 @@ Propose-only for send/deals — hitl_propose_action.""",
         "enabled": True,
         "prompt": routine_prompt(
             "Researcher",
-            """VIDEO + RESEARCH (operator "watch this" = mandatory full pipeline):
-Skill: scripts/hive/grok-skills/researcher-video-to-system.md
-1. Grok watch or hive-web-research.py youtube --url 'URL'
-2. python3 scripts/hive/researcher-video-implement.py --watch-json PATH --title "TITLE" --write
-3. Deliver timestamped CHAPTERS to operator; fill IMPLEMENTATION_MAP; edit repo so all 17 agents adapt
-4. Message @Librarian (don'ts) + affected agents; reprovision if agent rules changed
-Weekly intel (when no operator video):
-5. python3 scripts/hive/os/knowledge-policy.py --hierarchy Researcher
-6. python3 scripts/hive/hive-web-research.py packet --question "TOPIC" --agent Researcher --tier standard --register
-Register jobType research.video_system or research.web_intel. Never chat-only summary.""",
+            """RESEARCH (operator request = mandatory full pipeline):
+Skill: scripts/hive/grok-skills/researcher-research-to-system.md
+- Video: researcher-research-implement.py video --write → CHAPTERS
+- X bookmarks: researcher-research-implement.py bookmarks --filter ai --write → themed FINDINGS
+- Topic/web: researcher-research-implement.py dossier --question "..." --write → findings by source
+Deliver breakdown to operator; IMPLEMENTATION_MAP; edit repo so all 17 agents adapt; @Librarian + specialists
+Weekly intel (no operator ask): hive-web-research.py packet --agent Researcher --register
+Register jobType research.bookmarks_system | research.video_system | research.dossier_system""",
         ),
     },
     "Forge": {

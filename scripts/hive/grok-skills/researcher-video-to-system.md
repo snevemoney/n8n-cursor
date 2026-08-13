@@ -1,14 +1,16 @@
 # Skill: researcher-video-to-system
 
-**Owner:** Researcher — **mandatory** when operator says "watch this video", shares a URL, or asks for a breakdown.
+**Owner:** Researcher — video subtype of `researcher-research-to-system.md`.
+
+**Parent skill (all research types):** `scripts/hive/grok-skills/researcher-research-to-system.md`
 
 **Goal:** Chapter breakdown for the operator **and** implement learnings in the hive so all 17 agents adapt — research is not a chat summary that dies in-thread.
 
 **Companion CLI:**
 
 ```bash
-python3 scripts/hive/researcher-video-implement.py --watch-json /path/to/watch.json --title "VIDEO TITLE"
-python3 scripts/hive/researcher-video-implement.py --youtube-url 'https://www.youtube.com/watch?v=...' --title "VIDEO TITLE"
+python3 scripts/hive/researcher-research-implement.py video --watch-json /path/to/watch.json --title "VIDEO TITLE" --write
+python3 scripts/hive/researcher-research-implement.py video --youtube-url 'https://www.youtube.com/watch?v=...' --title "VIDEO TITLE" --write
 ```
 
 ---

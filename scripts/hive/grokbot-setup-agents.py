@@ -151,7 +151,8 @@ Assess: python3 scripts/hive/os/knowledge-policy.py --confidence 0.5 --agent \"A
 Packet: python3 scripts/hive/hive-web-research.py packet --question \"...\" --agent Forge --tier standard
 \"I need to learn first\" → KNOWLEDGE_GAP is success, not failure. Delegate deep research to Researcher.
 Video watch analysis skill: /analyze-video-watch-output | docs/os/VIDEO_ANALYSIS.md
-Operator video trigger: scripts/hive/grok-skills/researcher-video-to-system.md (chapters + implement for all agents)
+Operator research trigger: scripts/hive/grok-skills/researcher-research-to-system.md (video/bookmarks/dossier → breakdown + implement)
+Video detail: scripts/hive/grok-skills/researcher-video-to-system.md
 """.strip()
 
 DELEGATION_PROTOCOL = """
@@ -226,19 +227,19 @@ AGENT_BEHAVIOR = {
     for name in CORE_AGENT_NAMES
 }
 
-RESEARCHER_VIDEO_MANDATE = """
-VIDEO WATCH MANDATE (operator trigger — highest priority for Researcher):
-When operator says "watch this video", pastes a URL, or asks for a breakdown:
-1. Run full pipeline: scripts/hive/grok-skills/researcher-video-to-system.md (NOT a chat-only summary)
-2. Grok computer watch (L3–L4) when visuals matter; save watch JSON
-3. Chapter breakdown with timestamps — operator reads CHAPTERS first
-4. CLI: python3 scripts/hive/researcher-video-implement.py --watch-json … --title "…" --write
-5. IMPLEMENT in repo (doctrine, skills, OPERATOR_MEMORY, agent lanes) so all 17 agents adapt
-6. Message @Librarian (don'ts) + affected agents + @Big Boss if portfolio priority shifts
-7. Reprovision agents after repo edits. Research that stays in-chat = failure.
+RESEARCHER_MANDATE = """
+RESEARCH MANDATE (operator trigger — highest priority for Researcher):
+When operator asks to watch a video, find bookmarks, research a topic, or "break down what you found":
+1. Run full pipeline: scripts/hive/grok-skills/researcher-research-to-system.md (NOT a chat-only summary)
+2. Deliver structured breakdown: video=chapters | bookmarks=themes/clusters | dossier=findings by source
+3. CLI:
+   python3 scripts/hive/researcher-research-implement.py video|bookmarks|dossier ... --write
+4. IMPLEMENT in repo so all 17 agents adapt (skills, doctrine, OPERATOR_MEMORY, learnings-implement)
+5. Message @Librarian + affected agents + @Big Boss if portfolio shifts; reprovision after edits
+Research that stays in-chat = failure.
 """.strip()
 
-AGENT_BEHAVIOR["Researcher"] = f"{AGENT_BEHAVIOR['Researcher']}\n\n{RESEARCHER_VIDEO_MANDATE}"
+AGENT_BEHAVIOR["Researcher"] = f"{AGENT_BEHAVIOR['Researcher']}\n\n{RESEARCHER_MANDATE}"
 
 
 def core_lead(name: str, technical: str) -> str:

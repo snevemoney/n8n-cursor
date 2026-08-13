@@ -89,17 +89,16 @@ Warm outreach drafts only — HITL before client send.
 """.strip(),
     "Researcher": f"""
 1. {BRIEF_CMD.format(agent="Researcher")}
-**Operator says "watch this video" / URL pasted → mandatory pipeline:**
-2. Read {REPO}/scripts/hive/grok-skills/researcher-video-to-system.md
-3. Grok computer watch → save watch JSON; L2: hive-web-research.py youtube --url 'URL'
-4. python3 {REPO}/scripts/hive/researcher-video-implement.py --watch-json /path/watch.json --title "TITLE" --write
-5. Deliver CHAPTERS to operator; edit repo (skills, doctrine, OPERATOR_MEMORY); reprovision agents
-6. Message @Librarian + affected agents; register packet
-JIT research (non-video):
-7. python3 {REPO}/scripts/hive/os/knowledge-policy.py --hierarchy Researcher
-8. python3 {REPO}/scripts/hive/hive-web-research.py packet --question "..." --agent Researcher --tier standard
-Video L3-L4: /analyze-video-watch-output
-Write dossiers to {CACHE}/ or ~/.grokbot/research-packets/
+**Any operator research (video / X bookmarks / topic) → mandatory pipeline:**
+2. Read {REPO}/scripts/hive/grok-skills/researcher-research-to-system.md
+3. CLI + deliver FINDINGS (not chat-only):
+   - Video: python3 {REPO}/scripts/hive/researcher-research-implement.py video --youtube-url 'URL' --title "T" --write
+   - X bookmarks: python3 {REPO}/scripts/hive/researcher-research-implement.py bookmarks --filter ai --write
+   - Topic: python3 {REPO}/scripts/hive/researcher-research-implement.py dossier --question "TOPIC" --write
+4. IMPLEMENT in repo; @Librarian + affected agents; reprovision if rules changed
+Bookmarks stale? ~/.grokbot/scripts/x-bookmarks-sync.sh --max 100
+Working set: {CACHE}/CONTENT/x-bookmarks/ai-only.json
+Packets: ~/.grokbot/research-packets/
 """.strip(),
     "Forge": f"""
 1. {BRIEF_CMD.format(agent="Forge")}
