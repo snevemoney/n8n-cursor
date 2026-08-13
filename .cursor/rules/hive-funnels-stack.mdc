@@ -12,5 +12,5 @@ alwaysApply: true
 - **Lists:** 50 → score 60–70% great → rewrite exclusions (`list-anneal-funnel`).
 - **Website offer:** `website-offer-funnel` is a **router**. Named client = Path A (MUST + margin + private-book). Volume list = Path B. Our Stripe/page = Path C. Do not skip the money spine on a client.
 - **Hard step:** send / pay / deploy / book / publish stay HITL (`ask-principal`).
-- **Steal sheet:** after research (video, Watch Later, **or X bookmarks**), ICPs/machines go in the **one** `CONTENT/watch-later/STEAL_SHEET.md` (tag `yt:` / `x:`). Whole argument goes in `DEEP_SUMMARIES.md` (bookmarks = clusters). Do not fork `x-bookmarks/STEAL_SHEET.md`. Pick `icp_id` then the router. Thesis-only is not done.
+- **Steal sheet:** after research, ICPs/machines go in `CONTENT/watch-later/STEAL_SHEET.md`. **Run today:** `CONTENT/icp-runbooks/{icp_id}.md` + skill `icp-runbook`. Whole argument: `DEEP_SUMMARIES.md`. Thesis-only is not done.
 - Skill files: `scripts/hive/grok-skills/` and `.cursor/skills/hive-funnels/SKILL.md`.

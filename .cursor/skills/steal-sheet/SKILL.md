@@ -15,9 +15,12 @@ Whole argument: `docs/hive/outer-heaven/CONTENT/watch-later/DEEP_SUMMARIES.md`
 Skill: `scripts/hive/grok-skills/steal-usecases.md`  
 Router: `website-offer-funnel` Path A / B / C
 
-1. Tag the prospect with an `icp_id` from the catalog (do not invent).
-2. Load the `steal_as` run in `steal-usecases`.
-3. Hard step stays HITL.
+1. Tag the prospect with an `icp_id` from the catalog (do not invent). Route siblings via INDEX.
+2. Load `CONTENT/icp-runbooks/{icp_id}.md` — run **Today** then the skill chain.
+3. **Named URL?** Path A money spine before build.
+4. Append row(s) to `CONTENT/icp-runbooks/HUNT_LOG.md`. Default city: Greater Montreal.
+5. Load the `steal_as` run in `steal-usecases`.
+6. Hard step stays HITL.
 
 **Take:** `local-clinic` · `local-pro` · `restaurant` · `exec-coach` · `creator-longform` · `agency-delivery` · `industrial-smb` · `mktg-software` · `owner-coach-fitness` · `law-adj` · `us`
 

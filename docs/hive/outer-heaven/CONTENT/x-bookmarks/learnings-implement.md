@@ -92,16 +92,16 @@ That is already our hive. The bookmarks are a mirror, not a new company.
 
 ## Actionable implementables
 
-| Priority | Action | Owner | Lane |
-|----------|--------|-------|------|
-| P0 | Lock cinematic recipe: big model only for taste, 3 reference sites, hero = video not fake 3D (`cinematic-recipe` on master steal sheet) | Forge + Creative Studio | ai-partner-websites |
-| P0 | One MCP demo page that actually reads a connector (already queued) | Forge + Researcher | ai-partner-websites |
-| P0 | After every site ship: agent opens URL and clicks (`click-live-site`). No “looks good.” | Forge + Watchdog | hive-os |
-| P0 | Merged into one catalog: STEAL_SHEET + DEEP_SUMMARIES XB-1…XB-7 (do not fork under x-bookmarks/) | Researcher | hive-os |
-| P1 | Higgsfield/AE: one real proof clip from a reference still | Creative Studio | ai-partner-websites |
-| P1 | Librarian: one “job card” page per agent (owns / never) — LLM Wiki lite, not 8k nodes | Librarian | hive-os |
-| P2 | GTM talk track: “one person + named AI employees.” Ban $20k/$50k/$1B quotes | Product GTM | ai-partner-websites |
-| P2 | Game/sprite bookmarks stay THEMES only | Creative Studio | creative-themes |
+| Priority | Action | Owner | Lane | Status |
+|----------|--------|-------|------|--------|
+| P0 | Lock cinematic recipe: big model only for taste, 3 reference sites, hero = video not fake 3D (`cinematic-recipe`) | Forge + Creative Studio | ai-partner-websites | **done** — [PLAYBOOK.md v2](../website-building/cinematic/PLAYBOOK.md) + `slice-build` |
+| P0 | One MCP demo page that actually reads a connector | Forge + Researcher | ai-partner-websites | **done** — `:3006` / PR #38 (do not rebuild) |
+| P0 | After every site ship: `click-live-site` — open URL and click | Forge + Watchdog | hive-os | **done** — skill + doctrine + `slice-build` verify |
+| P0 | One catalog: STEAL_SHEET + DEEP_SUMMARIES XB-1…XB-7 | Researcher | hive-os | **done** |
+| P1 | Higgsfield/AE proof clip from reference still | Creative Studio | ai-partner-websites | **done (caveat)** — [higgsfield-ae-proof](../creative/higgsfield-ae-proof/HOWTO.md); conceptual pack, not live AE MCP session |
+| P1 | Job card per agent (owns / never) — LLM Wiki lite | Librarian | hive-os | **done** — [CONTENT/job-cards/](../job-cards/) + `outer-heaven-brief.py` inject |
+| P2 | GTM talk track: one person + 17 named employees; ban tweet $ | Product GTM | ai-partner-websites | **done** — `outcome-offer-funnel` + product-gtm kit + doctrine |
+| P2 | Game/sprite bookmarks = THEMES only | Creative Studio | creative-themes | **done** — steal Kill + job card |
 
 ## Do not
 - Rebuild Claude Code inside Grok

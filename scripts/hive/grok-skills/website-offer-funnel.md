@@ -9,6 +9,8 @@ description: Router for website funnel or website workflow. Picks client money s
 
 Do not run every stage. **Pick a path first.** If unclear, ask Evens one question: *client install, or our list/page?*
 
+**Tagged `icp_id`?** Load `CONTENT/icp-runbooks/{icp_id}.md` and run the **Today** block first (skill `icp-runbook`).
+
 ## Pick
 
 | Job | Path | Do not |

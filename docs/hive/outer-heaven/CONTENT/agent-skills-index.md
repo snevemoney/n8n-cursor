@@ -167,14 +167,14 @@ Also still shipped: constraint-position · roi-five-slide · pricing-margin-roi-
 | Skill | Owner | When |
 |-------|-------|------|
 | website-offer-funnel | Big Boss + specialists | Router: Path A client / B lists / C our surface |
-| steal-usecases | Researcher (extract) · all 17 (run) | After L2 **or** bookmark true-read: append the one STEAL_SHEET + business-types.json (tag `yt:` / `x:`). Pick icp_id then router. |
+| steal-usecases | Researcher (extract) · all 17 (run) | After L2: append STEAL_SHEET + business-types.json. Pick icp_id then router. |
 | one-person-usecases | Consultant / GTM / Lead Hunter / Publishing | Subset: review-to-book · clip-factory · Person B brief · speed-positioning · demand-validate |
 | session-bootstrap | Forge / Researcher | New project dump |
 | slice-build | Forge / Creative | One system per session |
 | list-anneal-funnel | Lead Hunter | Volume 50 → 3–5 into Path A |
 | lead-web-find | Lead Hunter | Named leaky URL (not the raw 50) |
 
-Master sheet: `CONTENT/watch-later/STEAL_SHEET.md` · `business-types.json` (Watch Later **and** X bookmarks — one catalog)  
-Whole argument: `CONTENT/watch-later/DEEP_SUMMARIES.md` (videos + bookmark clusters XB-1…XB-7)  
+Master sheet: `CONTENT/watch-later/STEAL_SHEET.md` · `business-types.json`  
+Whole argument: `CONTENT/watch-later/DEEP_SUMMARIES.md`  
 One-person subset: `CONTENT/watch-later/USE_CASES-one-person.md`
 

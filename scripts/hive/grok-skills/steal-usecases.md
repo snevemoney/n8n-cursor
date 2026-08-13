@@ -55,7 +55,8 @@ After L2 transcript / chapters for **each** video or Watch Later item, **or** af
 
 ## When (other agents)
 
-Need a business type or SKU → open the master sheet, pick `icp_id` + `steal_as`, then the router. Do not invent a new ICP without Researcher steal + triangle.
+Need a business type or SKU → open the master sheet, pick `icp_id` + `steal_as`, then the router.  
+**Run today:** load `CONTENT/icp-runbooks/{icp_id}.md` (skill `icp-runbook`). **Default city:** Greater Montreal. **Log:** `CONTENT/icp-runbooks/HUNT_LOG.md`. Route siblings via INDEX disambiguation. Do not invent a new ICP without Researcher steal + triangle.
 
 ---
 
@@ -64,14 +65,14 @@ Need a business type or SKU → open the master sheet, pick `icp_id` + `steal_as
 | icp_id | Who | Default machine | Path |
 |--------|-----|-----------------|------|
 | `local-clinic` | Dentists, med-spa, physio, vet | `review-to-book` | A |
-| `local-pro` | Plumber, HVAC, salon, lawyer-solo, gym | `private-book-install` | A |
+| `local-pro` | Plumber, HVAC, salon, home services (trade) | `private-book-install` | A |
 | `restaurant` | Independent restaurant | `missed-call-book` | A |
-| `exec-coach` | Coaches turning VPs into consultants | `orchestrated-site-brief` | A/C |
+| `exec-coach` | Exec coaches: VP→consulting | `orchestrated-site-brief` | A/C |
 | `creator-longform` | Podcasters, YouTubers, course people | `clip-factory` | A or C |
 | `agency-delivery` | Agency owners drowning in client delivery | `client-delivery-kit` | A/C |
 | `industrial-smb` | Manufacturing, castings, robotics, B2B ops | `list-anneal` → Path A | B→A |
-| `mktg-software` | Marketing **software** (not agencies) | `list-anneal` | B |
-| `owner-coach-fitness` | Coach / trainer with a leaky book | `private-book-install` | A |
+| `mktg-software` | Marketing **software** (not agencies) | `list-anneal` → install on leak | B |
+| `owner-coach-fitness` | Fitness / wellness coach with leaky book | `private-book-install` | A |
 | `law-adj` | Solo/boutique consult rails | `private-book-install` | A |
 | `us` | Evens / hive OS | internal machines | C |
 
@@ -89,7 +90,7 @@ Pick `steal_as`, then follow the hive skills. Hard step (send / pay / book / dep
 | `clip-factory` | C or A | Creative + Publishing: transcript → hooks → cut → captions/thumbs/copy → Evens ships. No Opus/Descript. |
 | `orchestrated-site-brief` | C | `session-bootstrap` with ICP / numbered promise / tone / fear / CTA → `slice-build` 3–5 passes |
 | `speed-positioning` | A | Researcher competitors → Consultant 3 options → GTM 2-week calendar + Loom |
-| `demand-validate` | B | Public gigs >$500 with completed jobs; can we do ~80%? Then `money-now-pick3` |
+| `demand-validate` | B | Pre-hunt gate for `us` only — public gigs >$500; then `money-now-pick3`. Not a client ICP. |
 | `morning-ceo-desk` | C | `morning-day-plan` — visible → efficient → automatic → then delegate |
 | `folder-to-deck` | C | Cursor Agent on one notes folder → one deck/page (`slice-build`) |
 | `interview-gym` | C | Career Strategist: stay in character → coach → harder persona |
@@ -110,7 +111,7 @@ Pick `steal_as`, then follow the hive skills. Hard step (send / pay / book / dep
 | `checkout-proof` | C | `paid-slice-funnel` — real pay in one sitting; warm network first |
 | `one-channel-deep` | C | `outcome-offer-funnel` — one surface, spaced posts, warm net |
 | `cinematic-recipe` | C | Big model for taste · 3 loved motion sites · hero = video not fake 3D · `slice-build`. $50k tweet = UNVERIFIED |
-| `click-live-site` | C | After every site ship: Watchdog/Forge open the URL and click. No “looks good.” |
+| `click-live-site` | C | After every site ship: Watchdog/Forge open the URL and click. Skill: `click-live-site.md`. No “looks good.” |
 | `agent-job-card` | C | Librarian: one page per agent (owns / never) before the agent works. Not 8k nodes |
 | `motion-pipeline` | C | Creative: still → frames → clip → grade; previs before a long render. Higgsfield/AE we have |
 

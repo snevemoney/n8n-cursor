@@ -23,7 +23,8 @@ Write the sentence here; do not skip those two on a named client.
 3. **Time-to-aha:** when does the user feel it? If it takes 3–5 generations, they churn.
 4. Proof: walkthrough, before/after, testimonial — not a workflow screenshot.
 5. **One channel deep.** Warm network before spray. Space posts; don’t stack.
-6. Money Desk: count checkout + warm conversions. Quarantine YouTube $ claims.
+6. Money Desk: count checkout + warm conversions. Quarantine YouTube **and tweet** $ claims.
+7. **Talk track (allowed):** “One person + **17 named AI employees**” — each with a job card. Not a nameless swarm.
 
 ## Stop
 Publish / send / ads spend = HITL.  
@@ -34,3 +35,5 @@ Volume list → Path B. Our page/Stripe → Path C.
 - “I do AI” positioning
 - Strangers-pay-in-10-hours myth without receipts
 - Mass-DM / account farms (same *shape* as multi-surface, different ethics)
+- Quoting bookmark/YouTube income as proof: **$20k / $50k / $1B / $400 / 40 agents / $500/mo swarm** — UNVERIFIED
+- Selling “cinematic” or “AI employees” without a numbered outcome for one ICP

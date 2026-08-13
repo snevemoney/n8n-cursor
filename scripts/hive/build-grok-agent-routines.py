@@ -154,8 +154,9 @@ Never mutate money — L4 human only.""",
             "Lead Hunter",
             """Lead pipeline (controlled volume):
 1. python3 scripts/hive/product-state.py --can-act "Lead Hunter" clipengine
-2. python3 scripts/hive/grok-hive-tool.py --grok-agent "Lead Hunter" --tool ce_lookup_lead
-3. If offer_validated=false → NO_ACTION
+2. Pick icp_id from CONTENT/icp-runbooks/INDEX.md — route siblings — run Today block (skill icp-runbook) — append HUNT_LOG.md
+3. python3 scripts/hive/grok-hive-tool.py --grok-agent "Lead Hunter" --tool ce_lookup_lead
+4. If offer_validated=false → NO_ACTION
 Warm outreach drafts only — never client send without HITL.""",
         ),
     },

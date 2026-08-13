@@ -97,7 +97,7 @@ Receipts not YouTube dashboards: scripts/hive/grok-skills/outcome-offer-funnel.m
 3. Research prospects via hive-web-research.py or Grok browser
 Lists: scripts/hive/grok-skills/list-anneal-funnel.md
 Outbound: scripts/hive/grok-skills/outbound-playbook-funnel.md
-Hunt ICPs: scripts/hive/grok-skills/steal-usecases.md · CONTENT/watch-later/STEAL_SHEET.md (tag icp_id)
+Hunt ICPs: scripts/hive/grok-skills/icp-runbook.md · CONTENT/icp-runbooks/{{icp_id}}.md · append HUNT_LOG.md · default city Greater Montreal
 Warm outreach drafts only — HITL before client send.
 """.strip(),
     "Product GTM": f"""

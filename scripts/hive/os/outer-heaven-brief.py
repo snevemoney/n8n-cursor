@@ -24,6 +24,28 @@ _spec.loader.exec_module(vc)
 
 SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
 MAX_BRIEF_CHARS = 4500
+JOB_CARD_MAX_CHARS = 800
+
+# Display name → job-cards filename slug
+AGENT_JOB_CARD_SLUG: dict[str, str] = {
+    "Big Boss": "big-boss",
+    "Day Planner": "day-planner",
+    "Watchdog": "watchdog",
+    "HITL Operator": "hitl-operator",
+    "Money Desk": "money-desk",
+    "Lead Hunter": "lead-hunter",
+    "Product GTM": "product-gtm",
+    "Researcher": "researcher",
+    "Forge": "forge",
+    "Creative Studio": "creative-studio",
+    "Consultant": "consultant",
+    "Librarian": "librarian",
+    "Wealth Manager": "wealth-manager",
+    "Personal CFO": "personal-cfo",
+    "Career Strategist": "career-strategist",
+    "Communications Manager": "communications-manager",
+    "Publishing Engine": "publishing-engine",
+}
 
 
 def _read_tail(path: Path, max_lines: int = 80) -> str:
@@ -145,6 +167,29 @@ def _read_note(root: Path, rel: str, max_chars: int = 3000) -> str:
     return ""
 
 
+def _job_card_brief(root: Path, agent: str, max_chars: int = JOB_CARD_MAX_CHARS) -> str:
+    """Owns/never excerpt from CONTENT/job-cards/{slug}.md for brief injection."""
+    slug = AGENT_JOB_CARD_SLUG.get(agent)
+    if not slug:
+        return ""
+    text = _read_note(root, f"CONTENT/job-cards/{slug}.md", max_chars=8000)
+    if not text:
+        return ""
+    own = _extract_section(text, "You own", 380)
+    never = _extract_section(text, "You never", 380)
+    if not own and not never:
+        return ""
+    parts = []
+    if own:
+        parts.append(f"**You own:** {own.replace(chr(10), ' ')}")
+    if never:
+        parts.append(f"**You never:** {never.replace(chr(10), ' ')}")
+    block = " ".join(parts)
+    if len(block) > max_chars:
+        block = block[: max_chars - 1] + "…"
+    return block
+
+
 def build_brief(
     *,
     agent: str = "Big Boss",
@@ -173,16 +218,25 @@ def build_brief(
     if read_note:
         brief["noteExcerpt"] = _read_note(root, read_note)
 
+    job_card = _job_card_brief(root, agent)
+    brief["jobCard"] = job_card
+
     md_parts = [
         f"# Outer Heaven brief — {agent}",
         f"Project: {project} | Source: {root}",
         f"Capture: {brief['captureFreshness']}",
         "",
-        "## North stars",
-        brief["northStars"] or "(see OPERATOR_MEMORY.md)",
-        "",
-        "## Recent chronicle",
     ]
+    if job_card:
+        md_parts.extend(["## Job card", job_card, ""])
+    md_parts.extend(
+        [
+            "## North stars",
+            brief["northStars"] or "(see OPERATOR_MEMORY.md)",
+            "",
+            "## Recent chronicle",
+        ]
+    )
     for s in brief["chronicleRecent"]:
         md_parts.append(f"- {s}")
     if not brief["chronicleRecent"]:

@@ -16,21 +16,23 @@ Researcher must **append** this file after every L2 video, Watch Later batch, or
 
 ## Business types we will take (ICP catalog)
 
-These are the kinds of businesses the hive is allowed to hunt, brief, and install for. Tag every prospect with an `icp_id`.
+These are the kinds of businesses the hive is allowed to hunt, brief, and install for. Tag every prospect with an `icp_id`.  
+**Default hunt city:** Greater Montreal (unless Evens names another).  
+**Run today:** open [../icp-runbooks/{icp_id}.md](../icp-runbooks/INDEX.md) — skill `icp-runbook`. **Log:** [HUNT_LOG.md](../icp-runbooks/HUNT_LOG.md).
 
-| icp_id | Who | Pain we steal | Default machine | Path |
-|--------|-----|---------------|-----------------|------|
-| `local-clinic` | Dentists, med-spa, physio, vet | Reviews sit unused; book path weak | `review-to-book` | A |
-| `local-pro` | Plumber, HVAC, salon, lawyer-solo, gym | Missed calls, no-shows, email-only | `private-book-install` + speed-to-lead | A |
-| `restaurant` | Independent restaurant | Phone booking chaos; we do **not** auto-dial | missed-call / book CTA; voice = `ask-principal` only | A |
-| `exec-coach` | Coaches turning VPs into consultants | Vague “coaching site” | `orchestrated-site-brief` | A/C |
-| `creator-longform` | Podcasters, YouTubers, course people | Long ep dies after publish | `clip-factory` | A or C |
-| `agency-delivery` | Agency owners drowning in client delivery | No kit, no aha | `client-delivery-kit` (Client Pack analog) | A/C |
-| `industrial-smb` | Manufacturing, castings, robotics, B2B ops | Need lists + site, not a dial factory | `list-anneal` → Path A | B→A |
-| `mktg-software` | Marketing **software** (not agencies) | Exclusion nuance | `list-anneal` | B |
-| `owner-coach-fitness` | Coach / trainer with a leaky book | Newsletter ≠ intake | existing money-now | A |
-| `law-adj` | Solo/boutique consult rails | Apply 404 / no book | existing money-now | A |
-| `us` | Evens / hive OS | Our desk, wiki, paid slice | internal machines | C |
+| icp_id | Who | Pain we steal | Default machine | Path | Runbook |
+|--------|-----|---------------|-----------------|------|---------|
+| `local-clinic` | Dentists, med-spa, physio, vet | Reviews sit unused; book path weak | `review-to-book` | A | [local-clinic](../icp-runbooks/local-clinic.md) |
+| `local-pro` | Plumber, HVAC, salon, home services (trade) | Missed calls, no-shows, email-only | `private-book-install` + speed-to-lead | A | [local-pro](../icp-runbooks/local-pro.md) |
+| `restaurant` | Independent restaurant | Phone booking chaos; we do **not** auto-dial | missed-call / book CTA; voice = `ask-principal` only | A | [restaurant](../icp-runbooks/restaurant.md) |
+| `exec-coach` | Exec coaches: VP→consulting, numbered promise | Vague “coaching site” | `orchestrated-site-brief` | A/C | [exec-coach](../icp-runbooks/exec-coach.md) |
+| `creator-longform` | Podcasters, YouTubers, course people | Long ep dies after publish | `clip-factory` | A or C | [creator-longform](../icp-runbooks/creator-longform.md) |
+| `agency-delivery` | Agency owners drowning in client delivery | No kit, no aha | `client-delivery-kit` (Client Pack analog) | A/C | [agency-delivery](../icp-runbooks/agency-delivery.md) |
+| `industrial-smb` | Manufacturing, castings, robotics, B2B ops | Need lists + site, not a dial factory | `list-anneal` → Path A | B→A | [industrial-smb](../icp-runbooks/industrial-smb.md) |
+| `mktg-software` | Marketing **software** (not agencies) | Exclusion nuance; install on leak not list-as-SKU | `list-anneal` | B | [mktg-software](../icp-runbooks/mktg-software.md) |
+| `owner-coach-fitness` | Fitness / wellness coach with leaky book | Newsletter ≠ intake | `private-book-install` | A | [owner-coach-fitness](../icp-runbooks/owner-coach-fitness.md) |
+| `law-adj` | Solo lawyer, boutique consult rails | Apply 404 / no book | `private-book-install` | A | [law-adj](../icp-runbooks/law-adj.md) |
+| `us` | Evens / hive OS | Our desk, wiki, paid slice | internal machines | C | [us](../icp-runbooks/us.md) |
 
 **Not an ICP (kill):** OnlyFans / IG farms · betting / prediction markets · “I do AI” shops · generic landing mills · outsourced auto-dial factories.
 

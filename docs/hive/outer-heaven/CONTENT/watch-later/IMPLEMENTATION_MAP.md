@@ -22,6 +22,14 @@
 | 14 | Steal one-person use cases (not just thesis) | USE_CASES-one-person.md + one-person-usecases + usecase-to-sku | GTM, Consultant, LH, Publishing | done |
 | 15 | Steal all 15 videos + memorize ICPs | STEAL_SHEET.md + business-types.json + steal-usecases + OM FACTS | Researcher, GTM, Consultant, LH, all 17 | done |
 | 16 | Deep summaries of all 15 (whole argument, not SKU-only) | DEEP_SUMMARIES.md | Researcher, all 17 | done |
+| 17 | X bookmarks → one steal/deep catalog | STEAL_SHEET + DEEP_SUMMARIES XB-1…XB-7 | Researcher | done |
+| 18 | `click-live-site` skill + Forge/Watchdog doctrine | click-live-site.md + agent-doctrine-lanes | Forge, Watchdog | done |
+| 19 | `cinematic-recipe` wired into slice-build verify | slice-build.md + cinematic PLAYBOOK | Forge, Creative Studio | done |
+| 20 | 17 agent job cards + brief inject | CONTENT/job-cards + outer-heaven-brief.py | Librarian, all 17 | done |
+| 21 | GTM talk track — ban tweet/$ swarm quotes | outcome-offer-funnel + product-gtm kit | Product GTM | done |
+| 22 | MCP demo (connector reads) | :3006 / PR #38 | Forge | done (do not rebuild) |
+| 23 | Higgsfield/AE proof pack | CONTENT/creative/higgsfield-ae-proof | Creative Studio | done (caveat: conceptual) |
+| 24 | Games/sprite bookmarks = themes only | steal Kill + creative job card | Creative Studio | done |
 
 ## Reprovision checklist
 
@@ -34,7 +42,9 @@
 
 ## Agent adaptation notes
 
-- **Librarian** — new DON'TS (farms, betting SKU, income quotes).
+**Bookmark implementables (2026-08-13):** Forge/Watchdog — `click-live-site` after ship. Librarian — `CONTENT/job-cards/` + brief inject. Product GTM — 17 named jobs; no tweet/$ quotes. Creative — motion proof pack; no game studio.
+
+- **Librarian** — new DON'TS (farms, betting SKU, income quotes); job cards canon.
 - **Forge** — slice builds; session dump; don't rewrite MCP this week.
 - **Creative Studio** — no one-shot cinematic/game/site.
 - **Lead Hunter** — playbook before send; score lists; no dialer/farm.
