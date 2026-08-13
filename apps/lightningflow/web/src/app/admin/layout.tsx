@@ -1,4 +1,5 @@
 'use client';
+import { appPath } from '@/lib/base-path';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -50,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 Welcome, admin@dev.local
               </span>
               <button
-                onClick={() => window.location.href = '/login'}
+                onClick={() => window.location.href = appPath('/login')}
                 className="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700"
               >
                 Sign Out

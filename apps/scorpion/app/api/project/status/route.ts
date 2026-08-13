@@ -3,6 +3,8 @@ import { getOrchestrator } from '@/lib/shared-stores';
 import { responseCache } from '@/lib/cache';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 const CACHE_TTL = 30000; // 30 seconds
 
 async function getOrchestratorInstance() {

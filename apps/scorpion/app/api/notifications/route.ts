@@ -4,6 +4,8 @@ import { getNotificationManager } from '@/lib/notification-manager';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/notifications - Get all unread notifications and pending approvals
  * Query params:

@@ -1,0 +1,189 @@
+name: evenslouis_paths
+
+x-defaults: &defaults
+  restart: unless-stopped
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  portfolio:
+    <<: *defaults
+    build:
+      context: ../../apps/portfolio
+    ports:
+      - "127.0.0.1:4010:4010"
+    environment:
+      NODE_ENV: production
+      PORT: 4010
+      HOSTNAME: 0.0.0.0
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4010/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "0.5"
+    mem_limit: 384m
+    pids_limit: 150
+
+  # Full Scorpion Next.js app at /scorpion (basePath-aware).
+  scorpion:
+    <<: *defaults
+    build:
+      context: ../..
+      dockerfile: apps/scorpion/Dockerfile.evenslouis
+      args:
+        NEXT_PUBLIC_BASE_PATH: /scorpion
+    ports:
+      - "127.0.0.1:3003:3003"
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_BASE_PATH: /scorpion
+      CE_HIVE_BASE_URL: ${CE_HIVE_BASE_URL:-http://ce-hive-bridge:3205}
+      CE_HIVE_TOKEN: ${CE_HIVE_TOKEN:-}
+      HIVE_MACHINE_TOKEN: ${HIVE_MACHINE_TOKEN:-}
+      N8N_BASE_URL: ${N8N_BASE_URL:-http://host.docker.internal:5678}
+      N8N_API_KEY: ${N8N_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/scorpion/healthz"]
+      interval: 20s
+      timeout: 5s
+      start_period: 60s
+      retries: 10
+    cpus: "1.0"
+    mem_limit: 768m
+    pids_limit: 256
+
+  lightningflow-landing:
+    <<: *defaults
+    build:
+      context: ../../apps/lightningflow/landing
+      args:
+        NEXT_PUBLIC_BASE_PATH: /lightningflow
+        NEXT_PUBLIC_ASSET_PREFIX: /lightningflow/_landing
+        NEXT_PUBLIC_DASHBOARD_URL: /lightningflow/dashboard
+    ports:
+      - "127.0.0.1:3201:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_BASE_PATH: /lightningflow
+      NEXT_PUBLIC_ASSET_PREFIX: /lightningflow/_landing
+      NEXT_PUBLIC_DASHBOARD_URL: /lightningflow/dashboard
+    healthcheck:
+      # Landing serves /healthz (basePath pages are separate)
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "0.5"
+    mem_limit: 384m
+    pids_limit: 150
+
+  lightningflow-web:
+    <<: *defaults
+    build:
+      context: ../..
+      dockerfile: apps/lightningflow/web/Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: /lightningflow
+        NEXT_PUBLIC_APP_URL: https://evenslouis.ca/lightningflow
+        NEXT_PUBLIC_API_URL: https://evenslouis.ca/lightningflow/api
+    ports:
+      - "127.0.0.1:3202:3001"
+    env_file:
+      - path: ../../.env.production
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_BASE_PATH: /lightningflow
+      NEXT_PUBLIC_APP_URL: https://evenslouis.ca/lightningflow
+      NEXT_PUBLIC_API_URL: https://evenslouis.ca/lightningflow/api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/lightningflow/api/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "1.5"
+    mem_limit: 1536m
+    pids_limit: 300
+
+  lightningflow-ops:
+    <<: *defaults
+    build:
+      context: ../..
+      dockerfile: apps/lightningflow/ops/Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: /lightningflow/ops
+    ports:
+      - "127.0.0.1:3203:3002"
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      NEXT_PUBLIC_BASE_PATH: /lightningflow/ops
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3002/lightningflow/ops/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+    cpus: "0.5"
+    mem_limit: 512m
+    pids_limit: 180
+
+  # CE hive machine API (Phases 2/6/7) — shares CE Postgres, no CE image rebuild
+  ce-hive-bridge:
+    <<: *defaults
+    build:
+      context: ./ce-hive-bridge
+    ports:
+      - "127.0.0.1:3205:3205"
+    env_file:
+      - path: ../../.env.hive
+        required: false
+    environment:
+      PORT: 3205
+      CE_HIVE_TOKEN: ${CE_HIVE_TOKEN:-}
+      DATABASE_URL: ${CE_DATABASE_URL:-}
+    networks:
+      - default
+      - client-engine_default
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3205/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    cpus: "0.25"
+    mem_limit: 128m
+    pids_limit: 64
+
+  # Placeholder until the real out-of-repo CE builder is restored on :3001
+  builder:
+    <<: *defaults
+    build:
+      context: ./builder-stub
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      PORT: 3001
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    cpus: "0.25"
+    mem_limit: 128m
+    pids_limit: 64
+
+networks:
+  client-engine_default:
+    external: true

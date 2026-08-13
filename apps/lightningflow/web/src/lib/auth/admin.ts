@@ -115,10 +115,9 @@ export async function requireAdminAuth(): Promise<AdminUser> {
       };
     }
     
-    // Redirect to login for browser requests
-    if (typeof window !== 'undefined') {
-      redirect('/login?redirect=/admin');
-    }
+    // Redirect to login for browser/server-rendered requests.
+    // next/navigation redirect() already applies basePath.
+    redirect('/login?redirect=/admin');
     
     // Throw error for API requests
     throw new Error('Admin authentication required');

@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX || undefined
+
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
+  basePath,
+  assetPrefix,
 }
 
 module.exports = nextConfig

@@ -7,6 +7,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkPlannerPreflight } from '@scorpion/core';
 
+export const dynamic = 'force-dynamic';
+
 export interface PreflightResult {
   planner: {
     ready: boolean;

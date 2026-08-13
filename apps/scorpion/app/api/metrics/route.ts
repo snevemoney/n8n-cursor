@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMetricsCollector } from '@/lib/monitoring/metrics';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/metrics - Prometheus metrics endpoint
  */

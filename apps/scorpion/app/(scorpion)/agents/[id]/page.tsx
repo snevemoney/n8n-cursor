@@ -589,7 +589,7 @@ export default function AgentDetailPage({ params }: { params: { id: string } }) 
                       </div>
                       {workflow.n8nId && (
                         <a
-                          href={`https://n8ncloud.tech/workflow/${workflow.n8nId}`}
+                          href={`https://evenslouis.ca/n8n/workflow/${workflow.n8nId}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-purple-400 hover:text-purple-300"

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   return createSuccessResponse({
     // Standardize on N8N_API_URL (N8N_BASE_URL kept for backward compatibility)

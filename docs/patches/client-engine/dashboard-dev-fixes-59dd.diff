@@ -1,0 +1,547 @@
+diff --git a/next.config.ts b/next.config.ts
+index 7dcb4ef..e0cb308 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -13,7 +13,12 @@ const nextConfig: NextConfig = {
+           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+-          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-src 'self' http://localhost:3001 https://*.vercel.app; frame-ancestors 'none';" },
++          // Marketing Meta Pixel may load on public pages; dashboard never injects it (see MetaPixel.tsx).
++          {
++            key: "Content-Security-Policy",
++            value:
++              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-src 'self' http://localhost:3001 https://*.vercel.app; frame-ancestors 'none';",
++          },
+         ],
+       },
+     ];
+diff --git a/src/app/api/metrics/conversion/route.ts b/src/app/api/metrics/conversion/route.ts
+index ddae1a6..e54c599 100644
+--- a/src/app/api/metrics/conversion/route.ts
++++ b/src/app/api/metrics/conversion/route.ts
+@@ -31,8 +31,11 @@ export async function GET(req: NextRequest) {
+     const session = await requireAuth();
+     if (!session) return jsonError("Unauthorized", 401);
+ 
+-    const rangeParam = req.nextUrl.searchParams.get("range") ?? "last_4_weeks";
+-    const range = VALID_RANGES.includes(rangeParam as MetricsRange) ? (rangeParam as MetricsRange) : "last_4_weeks";
++    // Default `all` so /dashboard/conversion matches the Leads inventory (not an empty 4-week window).
++    const rangeParam = req.nextUrl.searchParams.get("range") ?? "all";
++    const range = VALID_RANGES.includes(rangeParam as MetricsRange)
++      ? (rangeParam as MetricsRange)
++      : "all";
+ 
+     try {
+       const [input, cycleInput] = await Promise.all([
+diff --git a/src/app/dashboard/conversion/page.tsx b/src/app/dashboard/conversion/page.tsx
+index 6d0b9e6..0e38e63 100644
+--- a/src/app/dashboard/conversion/page.tsx
++++ b/src/app/dashboard/conversion/page.tsx
+@@ -1,13 +1,22 @@
+ "use client";
+ 
+-import { useEffect } from "react";
++import { useEffect, useState } from "react";
+ import { BarChart3 } from "lucide-react";
+ import { useRetryableFetch } from "@/hooks/useRetryableFetch";
+ import { AsyncState } from "@/components/ui/AsyncState";
+ import { useBrainPanel } from "@/contexts/BrainPanelContext";
+ 
+ interface ConversionData {
+-  counts: { total: number; proposalSent: number; approved: number; buildStarted: number; buildCompleted: number; won: number; lost: number };
++  range?: string;
++  counts: {
++    total: number;
++    proposalSent: number;
++    approved: number;
++    buildStarted: number;
++    buildCompleted: number;
++    won: number;
++    lost: number;
++  };
+   rates: {
+     proposalSentRate: number;
+     approvedRate: number;
+@@ -23,6 +32,15 @@ interface ConversionData {
+   };
+ }
+ 
++type RangeKey = "this_week" | "last_4_weeks" | "last_12_weeks" | "all";
++
++const RANGES: Array<{ key: RangeKey; label: string }> = [
++  { key: "this_week", label: "This week" },
++  { key: "last_4_weeks", label: "Last 4 weeks" },
++  { key: "last_12_weeks", label: "Last 12 weeks" },
++  { key: "all", label: "All time" },
++];
++
+ function formatMs(ms: number | null): string {
+   if (ms == null) return "—";
+   if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
+@@ -32,7 +50,10 @@ function formatMs(ms: number | null): string {
+ 
+ export default function ConversionPage() {
+   const { setPageData } = useBrainPanel();
+-  const { data, loading, error, refetch } = useRetryableFetch<ConversionData>("/api/metrics/conversion");
++  const [range, setRange] = useState<RangeKey>("all");
++  const { data, loading, error, refetch } = useRetryableFetch<ConversionData>(
++    `/api/metrics/conversion?range=${range}`,
++  );
+ 
+   useEffect(() => {
+     if (loading || !data) return;
+@@ -44,74 +65,126 @@ export default function ConversionPage() {
+     const buildCompleted = c.buildCompleted ?? 0;
+     const winRate = (r.winRate ?? 0) * 100;
+     setPageData(
+-      `Conversion: ${total} leads, ${won} won (${winRate.toFixed(0)}% win rate), ${proposalSent} proposals sent, ${buildCompleted} builds completed.`
++      `Conversion (${range}): ${total} leads, ${won} won (${winRate.toFixed(0)}% win rate), ${proposalSent} proposals sent, ${buildCompleted} builds completed.`,
+     );
+-  }, [data, loading, setPageData]);
++  }, [data, loading, range, setPageData]);
+ 
+-  const counts = data?.counts ?? { total: 0, proposalSent: 0, approved: 0, buildStarted: 0, buildCompleted: 0, won: 0, lost: 0 };
+-  const rates = data?.rates ?? { proposalSentRate: 0, approvedRate: 0, buildStartRate: 0, buildCompleteRate: 0, winRate: 0 };
+-  const medianMs = data?.medianMs ?? { created_to_proposalSent: null, proposalSent_to_approved: null, approved_to_buildStarted: null, buildStarted_to_buildCompleted: null };
+-  const maxCount = Math.max(counts.total, 1);
++  const counts = data?.counts ?? {
++    total: 0,
++    proposalSent: 0,
++    approved: 0,
++    buildStarted: 0,
++    buildCompleted: 0,
++    won: 0,
++    lost: 0,
++  };
++  const rates = data?.rates ?? {
++    proposalSentRate: 0,
++    approvedRate: 0,
++    buildStartRate: 0,
++    buildCompleteRate: 0,
++    winRate: 0,
++  };
++  const medianMs = data?.medianMs ?? {
++    created_to_proposalSent: null,
++    proposalSent_to_approved: null,
++    approved_to_buildStarted: null,
++    buildStarted_to_buildCompleted: null,
++  };
+ 
+   return (
+     <div className="space-y-6">
+-      <div>
+-        <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+-          <BarChart3 className="w-6 h-6" /> Conversion funnel
+-        </h1>
+-        <p className="text-sm text-neutral-400 mt-1">Lead → proposal sent → approved → build → won/lost</p>
+-      </div>
+-
+-      <AsyncState loading={loading} error={error} empty={!loading && !error && !data} emptyMessage="No conversion data" onRetry={refetch}>
+-
+-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+-        {[
+-          { label: "Total leads", value: counts.total },
+-          { label: "Proposal sent", value: counts.proposalSent },
+-          { label: "Approved", value: counts.approved },
+-          { label: "Build started", value: counts.buildStarted },
+-          { label: "Build completed", value: counts.buildCompleted },
+-          { label: "Won", value: counts.won, color: "text-emerald-400" },
+-          { label: "Lost", value: counts.lost, color: "text-red-400" },
+-        ].map(({ label, value, color }) => (
+-          <div key={label} className="border border-neutral-800 rounded-lg p-4">
+-            <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{label}</div>
+-            <div className={`text-2xl font-semibold mt-1 ${color ?? ""}`}>{value}</div>
+-          </div>
+-        ))}
++      <div className="flex flex-wrap items-end justify-between gap-3">
++        <div>
++          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
++            <BarChart3 className="w-6 h-6" /> Conversion funnel
++          </h1>
++          <p className="text-sm text-neutral-400 mt-1">
++            Intake + pipeline leads → proposal sent → approved → build → won/lost
++          </p>
++        </div>
++        <div className="flex flex-wrap gap-1 rounded-lg border border-neutral-800 p-1">
++          {RANGES.map((r) => (
++            <button
++              key={r.key}
++              type="button"
++              onClick={() => setRange(r.key)}
++              className={`rounded-md px-2.5 py-1 text-xs ${
++                range === r.key
++                  ? "bg-neutral-100 text-neutral-900"
++                  : "text-neutral-400 hover:text-neutral-200"
++              }`}
++            >
++              {r.label}
++            </button>
++          ))}
++        </div>
+       </div>
+ 
+-      <div className="border border-neutral-800 rounded-lg p-4">
+-        <h2 className="text-sm font-semibold mb-3">Conversion rates</h2>
+-        <div className="space-y-2">
++      <AsyncState
++        loading={loading}
++        error={error}
++        empty={!loading && !error && !data}
++        emptyMessage="No conversion data"
++        onRetry={refetch}
++      >
++        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+           {[
+-            { label: "Proposal sent / total", rate: rates.proposalSentRate },
+-            { label: "Approved / proposal sent", rate: rates.approvedRate },
+-            { label: "Build started / approved", rate: rates.buildStartRate },
+-            { label: "Build completed / started", rate: rates.buildCompleteRate },
+-            { label: "Win rate (won / approved)", rate: rates.winRate },
+-          ].map(({ label, rate }) => (
+-            <div key={label} className="flex items-center gap-3">
+-              <div className="w-48 text-sm text-neutral-400">{label}</div>
+-              <div className="flex-1 h-5 bg-neutral-900 rounded overflow-hidden">
+-                <div className="h-full bg-neutral-600 rounded" style={{ width: `${rate * 100}%` }} />
++            { label: "Total leads", value: counts.total },
++            { label: "Proposal sent", value: counts.proposalSent },
++            { label: "Approved", value: counts.approved },
++            { label: "Build started", value: counts.buildStarted },
++            { label: "Build completed", value: counts.buildCompleted },
++            { label: "Won", value: counts.won, color: "text-emerald-400" },
++            { label: "Lost", value: counts.lost, color: "text-red-400" },
++          ].map(({ label, value, color }) => (
++            <div key={label} className="border border-neutral-800 rounded-lg p-4">
++              <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
++                {label}
+               </div>
+-              <span className="text-sm font-medium w-12">{(rate * 100).toFixed(0)}%</span>
++              <div className={`text-2xl font-semibold mt-1 ${color ?? ""}`}>{value}</div>
+             </div>
+           ))}
+         </div>
+-      </div>
+ 
+-      <div className="border border-neutral-800 rounded-lg p-4">
+-        <h2 className="text-sm font-semibold mb-3">Median time between stages</h2>
+-        <div className="grid gap-2 sm:grid-cols-2">
+-          <div className="text-sm">Created → Proposal sent: {formatMs(medianMs.created_to_proposalSent)}</div>
+-          <div className="text-sm">Proposal sent → Approved: {formatMs(medianMs.proposalSent_to_approved)}</div>
+-          <div className="text-sm">Approved → Build started: {formatMs(medianMs.approved_to_buildStarted)}</div>
+-          <div className="text-sm">Build started → Completed: {formatMs(medianMs.buildStarted_to_buildCompleted)}</div>
++        <div className="border border-neutral-800 rounded-lg p-4">
++          <h2 className="text-sm font-semibold mb-3">Conversion rates</h2>
++          <div className="space-y-2">
++            {[
++              { label: "Proposal sent / total", rate: rates.proposalSentRate },
++              { label: "Approved / proposal sent", rate: rates.approvedRate },
++              { label: "Build started / approved", rate: rates.buildStartRate },
++              { label: "Build completed / started", rate: rates.buildCompleteRate },
++              { label: "Win rate (won / approved)", rate: rates.winRate },
++            ].map(({ label, rate }) => (
++              <div key={label} className="flex items-center gap-3">
++                <div className="w-48 text-sm text-neutral-400">{label}</div>
++                <div className="flex-1 h-5 bg-neutral-900 rounded overflow-hidden">
++                  <div className="h-full bg-neutral-600 rounded" style={{ width: `${rate * 100}%` }} />
++                </div>
++                <span className="text-sm font-medium w-12">{(rate * 100).toFixed(0)}%</span>
++              </div>
++            ))}
++          </div>
+         </div>
+-      </div>
+ 
++        <div className="border border-neutral-800 rounded-lg p-4">
++          <h2 className="text-sm font-semibold mb-3">Median time between stages</h2>
++          <div className="grid gap-2 sm:grid-cols-2">
++            <div className="text-sm">
++              Created → Proposal sent: {formatMs(medianMs.created_to_proposalSent)}
++            </div>
++            <div className="text-sm">
++              Proposal sent → Approved: {formatMs(medianMs.proposalSent_to_approved)}
++            </div>
++            <div className="text-sm">
++              Approved → Build started: {formatMs(medianMs.approved_to_buildStarted)}
++            </div>
++            <div className="text-sm">
++              Build started → Completed: {formatMs(medianMs.buildStarted_to_buildCompleted)}
++            </div>
++          </div>
++        </div>
+       </AsyncState>
+     </div>
+   );
+diff --git a/src/app/dashboard/copilot/coach/CoachContent.tsx b/src/app/dashboard/copilot/coach/CoachContent.tsx
+index 93475f6..7cb7a3c 100644
+--- a/src/app/dashboard/copilot/coach/CoachContent.tsx
++++ b/src/app/dashboard/copilot/coach/CoachContent.tsx
+@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
+ import Link from "next/link";
+ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
++import { formatHealthScore } from "@/lib/operator-score/trends";
+ 
+ type CTA = {
+   label: string;
+@@ -125,7 +126,7 @@ export default function CoachContent() {
+       if (controller.signal.aborted) return;
+ 
+       const scoreStr = scoreData?.latest
+-        ? `Score ${scoreData.latest.score} (${scoreData.latest.band})`
++        ? `Score ${formatHealthScore(Number(scoreData.latest.score))} (${scoreData.latest.band})`
+         : "No score";
+       const riskStr = riskData?.openBySeverity
+         ? `Open: ${(riskData.openBySeverity.critical ?? 0) + (riskData.openBySeverity.high ?? 0)} critical/high`
+diff --git a/src/app/dashboard/founder/page.tsx b/src/app/dashboard/founder/page.tsx
+index fda3258..e72aec9 100644
+--- a/src/app/dashboard/founder/page.tsx
++++ b/src/app/dashboard/founder/page.tsx
+@@ -8,6 +8,7 @@ import { useAsyncAction } from "@/hooks/useAsyncAction";
+ import { fetchJsonThrow } from "@/lib/http/fetch-json";
+ import { AsyncState } from "@/components/ui/AsyncState";
+ import { useBrainPanel } from "@/contexts/BrainPanelContext";
++import { formatHealthScore } from "@/lib/operator-score/trends";
+ 
+ type FounderMove = {
+   title: string;
+@@ -153,7 +154,7 @@ export default function FounderPage() {
+   useEffect(() => {
+     if (loading || !summary) return;
+     const scoreStr = summary.score?.latest
+-      ? `Score ${summary.score.latest.score} (${summary.score.latest.band})`
++      ? `Score ${formatHealthScore(summary.score.latest.score)} (${summary.score.latest.band})`
+       : "Score: —";
+     const movesCount = summary.todayPlan?.length ?? 0;
+     const quarterStr = quarter?.title ?? "no quarter";
+@@ -182,9 +183,9 @@ export default function FounderPage() {
+               <div>
+                 <p className="text-xs text-neutral-500">Score</p>
+                 <p className={`text-lg font-semibold ${summary?.score?.latest ? bandColor(summary.score.latest.band) : "text-neutral-500"}`}>
+-                  {summary?.score?.latest ? summary.score.latest.score : "—"}
++                  {summary?.score?.latest ? formatHealthScore(summary.score.latest.score) : "—"}
+                   {summary?.score?.latest && (
+-                    <span className="text-xs font-normal text-neutral-500 ml-1">
++                    <span className="ml-2 text-xs font-normal text-neutral-500">
+                       {summary.score.latest.band}
+                     </span>
+                   )}
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index 7687ebe..3c456f8 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,7 +1,7 @@
+ import type { Metadata } from "next";
+ import { Inter } from "next/font/google";
+-import Script from "next/script";
+ import { PostHogProvider } from "@/components/providers/PostHogProvider";
++import { MetaPixel } from "@/components/MetaPixel";
+ import { Toaster } from "sonner";
+ import "./globals.css";
+ 
+@@ -22,37 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode })
+   return (
+     <html lang="en" className="dark">
+       <body className={`${inter.className} bg-neutral-950 text-neutral-100 antialiased`}>
+-        {META_PIXEL_ID && (
+-          <>
+-            <Script
+-              id="meta-pixel"
+-              strategy="afterInteractive"
+-              dangerouslySetInnerHTML={{
+-                __html: `
+-!function(f,b,e,v,n,t,s)
+-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+-n.queue=[];t=b.createElement(e);t.async=!0;
+-t.src=v;s=b.getElementsByTagName(e)[0];
+-s.parentNode.insertBefore(t,s)}(window, document,'script',
+-'https://connect.facebook.net/en_US/fbevents.js');
+-fbq('init', '${META_PIXEL_ID}');
+-fbq('track', 'PageView');
+-                `.trim(),
+-              }}
+-            />
+-            <noscript>
+-              <img
+-                height="1"
+-                width="1"
+-                style={{ display: "none" }}
+-                src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+-                alt=""
+-              />
+-            </noscript>
+-          </>
+-        )}
++        {META_PIXEL_ID ? <MetaPixel pixelId={META_PIXEL_ID} /> : null}
+         <PostHogProvider>{children}</PostHogProvider>
+         <Toaster richColors position="bottom-right" theme="dark" />
+       </body>
+diff --git a/src/components/MetaPixel.tsx b/src/components/MetaPixel.tsx
+new file mode 100644
+index 0000000..d3c5734
+--- /dev/null
++++ b/src/components/MetaPixel.tsx
+@@ -0,0 +1,58 @@
++"use client";
++
++/**
++ * Meta Pixel for marketing surfaces only.
++ * Never load on /dashboard* or /login — operator CSP + privacy.
++ */
++
++import Script from "next/script";
++import { usePathname } from "next/navigation";
++
++function isOperatorPath(pathname: string | null): boolean {
++  if (!pathname) return false;
++  return (
++    pathname === "/login" ||
++    pathname.startsWith("/login/") ||
++    pathname === "/dashboard" ||
++    pathname.startsWith("/dashboard/") ||
++    pathname === "/pro" ||
++    pathname.startsWith("/pro/")
++  );
++}
++
++export function MetaPixel({ pixelId }: { pixelId: string }) {
++  const pathname = usePathname();
++  if (!pixelId || isOperatorPath(pathname)) return null;
++
++  return (
++    <>
++      <Script
++        id="meta-pixel"
++        strategy="afterInteractive"
++        dangerouslySetInnerHTML={{
++          __html: `
++!function(f,b,e,v,n,t,s)
++{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
++n.callMethod.apply(n,arguments):n.queue.push(arguments)};
++if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
++n.queue=[];t=b.createElement(e);t.async=!0;
++t.src=v;s=b.getElementsByTagName(e)[0];
++s.parentNode.insertBefore(t,s)}(window, document,'script',
++'https://connect.facebook.net/en_US/fbevents.js');
++fbq('init', '${pixelId}');
++fbq('track', 'PageView');
++          `.trim(),
++        }}
++      />
++      <noscript>
++        <img
++          height="1"
++          width="1"
++          style={{ display: "none" }}
++          src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
++          alt=""
++        />
++      </noscript>
++    </>
++  );
++}
+diff --git a/src/lib/copilot/coach-actions.ts b/src/lib/copilot/coach-actions.ts
+index 1db293c..8aa0706 100644
+--- a/src/lib/copilot/coach-actions.ts
++++ b/src/lib/copilot/coach-actions.ts
+@@ -12,6 +12,7 @@ import {
+   runNextActions,
+ } from "./coach-tools";
+ import { runDeliveryAction } from "@/lib/next-actions/delivery-actions";
++import { formatHealthScore } from "@/lib/operator-score/trends";
+ 
+ export const COACH_ACTION_KEYS = [
+   "run_risk_rules",
+@@ -79,7 +80,7 @@ async function fetchContextSnapshot(
+   const scoreStr = score.error
+     ? `Error: ${score.error}`
+     : score.latest
+-      ? `Score ${score.latest.score} (${score.latest.band})`
++      ? `Score ${formatHealthScore(Number(score.latest.score))} (${score.latest.band})`
+       : "No score";
+   const riskStr = risk.error
+     ? `Error: ${risk.error}`
+diff --git a/src/lib/copilot/coach-engine.ts b/src/lib/copilot/coach-engine.ts
+index 4414eb9..58b0133 100644
+--- a/src/lib/copilot/coach-engine.ts
++++ b/src/lib/copilot/coach-engine.ts
+@@ -22,7 +22,9 @@ export type CoachContexts = {
+ function formatScoreLatest(ctx: ScoreContext): string {
+   if (ctx.error) return `Error: ${ctx.error}`;
+   if (!ctx.latest) return "No score data";
+-  return `Score ${ctx.latest.score} (${ctx.latest.band}), computed ${ctx.latest.computedAt}`;
++  const n = Number(ctx.latest.score);
++  const score = Number.isFinite(n) ? (Number.isInteger(n) ? String(n) : n.toFixed(1)) : "—";
++  return `Score ${score} (${ctx.latest.band}), computed ${ctx.latest.computedAt}`;
+ }
+ 
+ function formatRiskSummary(ctx: RiskContext): string {
+@@ -166,7 +168,9 @@ export function deriveCoachResponse(
+   // Derive diagnosis
+   const diagnosisParts: string[] = [];
+   if (score.latest) {
+-    diagnosisParts.push(`Score: ${score.latest.score} (${score.latest.band}).`);
++    const n = Number(score.latest.score);
++    const s = Number.isFinite(n) ? (Number.isInteger(n) ? String(n) : n.toFixed(1)) : "—";
++    diagnosisParts.push(`Score: ${s} (${score.latest.band}).`);
+   }
+   if (criticalRisks > 0) {
+     diagnosisParts.push(`Open critical/high risks: ${criticalRisks}.`);
+@@ -193,7 +197,11 @@ export function deriveCoachResponse(
+       title: "Recover operator score",
+       actionKey: "run_recompute_score",
+       why: "Score is in critical band.",
+-      evidence: [`Score: ${score.latest.score}`, `Band: ${score.latest.band}`, `Computed: ${score.latest.computedAt}`],
++      evidence: [
++        `Score: ${Number.isFinite(Number(score.latest.score)) ? (Number.isInteger(Number(score.latest.score)) ? String(Number(score.latest.score)) : Number(score.latest.score).toFixed(1)) : "—"}`,
++        `Band: ${score.latest.band}`,
++        `Computed: ${score.latest.computedAt}`,
++      ],
+       sources: actionSources,
+       cta: {
+         label: "Recompute score",
+diff --git a/src/lib/operator-score/trends.test.ts b/src/lib/operator-score/trends.test.ts
+index faf99ba..07ae790 100644
+--- a/src/lib/operator-score/trends.test.ts
++++ b/src/lib/operator-score/trends.test.ts
+@@ -6,6 +6,7 @@ import {
+   compareScoreToPrevious,
+   gradeToColor,
+   formatScoreLabel,
++  formatHealthScore,
+ } from "./trends";
+ 
+ describe("operator-score trends", () => {
+@@ -75,4 +76,16 @@ describe("operator-score trends", () => {
+       expect(formatScoreLabel(NaN)).toBe("—");
+     });
+   });
++
++  describe("formatHealthScore", () => {
++    it("rounds long floats", () => {
++      expect(formatHealthScore(77.14285714285714)).toBe("77.1");
++    });
++    it("keeps whole numbers clean", () => {
++      expect(formatHealthScore(80)).toBe("80");
++    });
++    it("returns — for invalid", () => {
++      expect(formatHealthScore(Number.NaN)).toBe("—");
++    });
++  });
+ });
+diff --git a/src/lib/operator-score/trends.ts b/src/lib/operator-score/trends.ts
+index 2b972e6..d632c90 100644
+--- a/src/lib/operator-score/trends.ts
++++ b/src/lib/operator-score/trends.ts
+@@ -75,3 +75,10 @@ export function formatScoreLabel(score: number): string {
+   if (!Number.isFinite(score)) return "—";
+   return String(Math.round(score));
+ }
++
++/** Display helper for command-center / founder health scores (avoids 77.142857…). */
++export function formatHealthScore(score: number, digits = 1): string {
++  if (!Number.isFinite(score)) return "—";
++  const rounded = Number(score.toFixed(digits));
++  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(digits);
++}

@@ -1,3 +1,4 @@
+import { apiPath } from '@/lib/base-path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -206,7 +207,7 @@ export class LightningRebalancer {
     afterState?: any
   ): Promise<void> {
     try {
-      await fetch('/api/channel/audit', {
+      await fetch(apiPath('/api/channel/audit'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

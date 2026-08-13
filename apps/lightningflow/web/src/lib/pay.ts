@@ -1,3 +1,4 @@
+import { apiPath } from '@/lib/base-path';
 import { supabase } from './supabase';
 import { Database } from './database.types';
 
@@ -46,7 +47,7 @@ export async function createInvoice(
   }
 
   // Now get the LNURL for this invoice
-  const res = await fetch(`/api/lnurl-pay?invoice_id=${invoice.id}`);
+  const res = await fetch(apiPath(`/api/lnurl-pay?invoice_id=${invoice.id}`));
   if (!res.ok) {
     console.error('Error generating LNURL:', await res.text());
     throw new Error('Failed to generate LNURL');
@@ -65,7 +66,7 @@ export async function createInvoice(
  * Request an LNURL from the server for a specific invoice
  */
 export async function createLnurlPay(invoiceId: string): Promise<string> {
-  const res = await fetch(`/api/lnurl-pay?invoice_id=${invoiceId}`);
+  const res = await fetch(apiPath(`/api/lnurl-pay?invoice_id=${invoiceId}`));
   if (!res.ok) {
     throw new Error('Failed to create LNURL');
   }
@@ -122,7 +123,7 @@ export async function checkInvoiceStatus(
   for (const payment of payments) {
     if (payment.payment_hash) {
       try {
-        const res = await fetch(`/api/lightning/invoice/status?payment_hash=${payment.payment_hash}&tenant_id=${tenantId}`);
+        const res = await fetch(apiPath(`/api/lightning/invoice/status?payment_hash=${payment.payment_hash}&tenant_id=${tenantId}`));
         
         if (!res.ok) {
           console.error('Error checking payment status:', await res.text());

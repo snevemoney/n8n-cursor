@@ -7,6 +7,8 @@ import path from 'path';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 let workflowIngester: WorkflowIngester | null = null;
 const CACHE_TTL = 30000; // 30 seconds (reduced for faster updates)
 const FILESYSTEM_CACHE_TTL = 60000; // 60 seconds for filesystem (more stable)

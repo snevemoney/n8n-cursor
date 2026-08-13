@@ -5,7 +5,7 @@ export default function PortfolioPage() {
   return (
     <div className="min-h-screen bg-[#0a0d10] text-[#e4e8ee]">
       <div className="max-w-5xl mx-auto px-6 py-16 md:py-24">
-        {/* Hero Section */}
+        {/* Hero — public brand only; no tool login links */}
         <section className="mb-20 md:mb-32">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-12">
             <div className="flex-1">
@@ -13,18 +13,28 @@ export default function PortfolioPage() {
                 <span className="text-[#13c6a8]">EVENS LOUIS</span>
               </h1>
               <p className="text-xl md:text-2xl text-[rgba(228,232,238,0.65)] mb-6">
-                AI Automation Engineer • Workflow Architect • Personal AI OS Builder
+                AI Automation Engineer • Workflow Architect • Systems Builder
               </p>
               <p className="text-lg text-[rgba(228,232,238,0.8)] max-w-3xl leading-relaxed">
                 I design and build intelligent automation systems, multi-agent workflows, and private AI infrastructure.
                 My work combines cloud orchestration, workflow automation, system design, and LLM engineering into a single stack.
               </p>
               <p className="text-base text-[rgba(228,232,238,0.7)] max-w-3xl mt-4 leading-relaxed">
-                I built Scorpion, my personal AI operating system and remote automation cloud, capable of coordinating agents, 
-                running distributed workflows, and executing enterprise-style automations across my devices and my KVM2 server.
+                Below is selected work — systems I run daily, not slide-deck demos.
               </p>
-              <p className="text-sm text-[rgba(228,232,238,0.6)] max-w-3xl mt-3 italic">
-                This is not a demo. This is my daily operating system.
+              <p className="mt-8 flex flex-wrap gap-4">
+                <a
+                  href="mailto:evens.louis.dev@gmail.com"
+                  className="inline-block bg-[#13c6a8] text-[#0a0d10] font-semibold px-6 py-3 rounded-md hover:opacity-90 transition"
+                >
+                  Contact me
+                </a>
+                <a
+                  href="/work"
+                  className="inline-block border border-[rgba(19,198,168,0.45)] text-[#13c6a8] font-semibold px-6 py-3 rounded-md hover:bg-[rgba(19,198,168,0.08)] transition"
+                >
+                  All projects
+                </a>
               </p>
             </div>
             <div className="w-24 h-24 rounded-full bg-[#0f1318] border border-[rgba(255,255,255,0.08)] flex items-center justify-center text-2xl font-semibold text-[#13c6a8] flex-shrink-0">
@@ -349,14 +359,11 @@ export default function PortfolioPage() {
             <div className="flex items-center gap-3">
               <span className="text-2xl">🌐</span>
               <a
-                href="https://portfolio.n8ncloud.tech"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="https://evenslouis.ca/"
                 className="text-lg text-[#13c6a8] hover:underline"
               >
-                portfolio.n8ncloud.tech
+                evenslouis.ca
               </a>
-              <span className="text-sm text-[rgba(228,232,238,0.6)]">(live)</span>
             </div>
           </div>
         </section>

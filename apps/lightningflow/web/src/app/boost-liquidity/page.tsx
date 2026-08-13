@@ -1,4 +1,5 @@
 "use client";
+import { apiPath, appPath } from '@/lib/base-path';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,7 +72,7 @@ export default function BoostLiquidity() {
 
   useEffect(() => {
     // Fetch user's current liquidity stats
-    fetch('/api/liquidity/check')
+    fetch(apiPath('/api/liquidity/check'))
       .then(res => res.json())
       .then(setUserStats)
       .catch(console.error);
@@ -80,7 +81,7 @@ export default function BoostLiquidity() {
   const getAIRecommendation = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/ai/recommend-liquidity', {
+      const response = await fetch(apiPath('/api/ai/recommend-liquidity'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -101,13 +102,13 @@ export default function BoostLiquidity() {
 
   const markLiquidityFixed = async () => {
     try {
-      await fetch('/api/liquidity/mark-resolved', {
+      await fetch(apiPath('/api/liquidity/mark-resolved'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
       
       // Redirect back to dashboard
-      window.location.href = '/dashboard?liquidity_fixed=true';
+      window.location.href = appPath('/dashboard?liquidity_fixed=true');
     } catch (error) {
       console.error('Failed to mark liquidity as fixed:', error);
     }
@@ -312,7 +313,7 @@ export default function BoostLiquidity() {
         {/* Back to Dashboard */}
         <div className="text-center">
           <Button
-            onClick={() => window.location.href = '/dashboard'}
+            onClick={() => window.location.href = appPath('/dashboard')}
             variant="outline"
           >
             Back to Dashboard

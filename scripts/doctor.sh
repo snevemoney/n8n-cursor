@@ -102,21 +102,21 @@ check_health_endpoints() {
     echo "-----------------------"
     
     # Check main health endpoint
-    if curl -fsS -m 5 https://lightningflow.online/healthz >/dev/null 2>&1; then
+    if curl -fsS -m 5 https://evenslouis.ca/lightningflow/healthz >/dev/null 2>&1; then
         pass "Main health endpoint responding"
     else
         fail "Main health endpoint not responding"
     fi
     
     # Check API health endpoint
-    if curl -fsS -m 5 https://lightningflow.online/api/healthz >/dev/null 2>&1; then
+    if curl -fsS -m 5 https://evenslouis.ca/lightningflow/api/healthz >/dev/null 2>&1; then
         pass "API health endpoint responding"
     else
         fail "API health endpoint not responding"
     fi
     
     # Check n8n health endpoint
-    if curl -fsS -m 5 https://n8ncloud.tech/healthz >/dev/null 2>&1; then
+    if curl -fsS -m 5 https://evenslouis.ca/n8n/healthz >/dev/null 2>&1; then
         pass "n8n health endpoint responding"
     else
         fail "n8n health endpoint not responding"
@@ -131,7 +131,7 @@ check_health_latency() {
     echo "--------------------------"
     
     # Check main health latency
-    MAIN_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://lightningflow.online/healthz 2>/dev/null || echo "999")
+    MAIN_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://evenslouis.ca/lightningflow/healthz 2>/dev/null || echo "999")
     if (( $(echo "$MAIN_LATENCY < 0.2" | bc -l) )); then
         pass "Main health endpoint latency: ${MAIN_LATENCY}s"
     else
@@ -139,7 +139,7 @@ check_health_latency() {
     fi
     
     # Check API health latency
-    API_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://lightningflow.online/api/healthz 2>/dev/null || echo "999")
+    API_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://evenslouis.ca/lightningflow/api/healthz 2>/dev/null || echo "999")
     if (( $(echo "$API_LATENCY < 0.2" | bc -l) )); then
         pass "API health endpoint latency: ${API_LATENCY}s"
     else
@@ -147,7 +147,7 @@ check_health_latency() {
     fi
     
     # Check n8n health latency
-    N8N_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://n8ncloud.tech/healthz 2>/dev/null || echo "999")
+    N8N_LATENCY=$(curl -sw '%{time_total}' -o /dev/null https://evenslouis.ca/n8n/healthz 2>/dev/null || echo "999")
     if (( $(echo "$N8N_LATENCY < 0.2" | bc -l) )); then
         pass "n8n health endpoint latency: ${N8N_LATENCY}s"
     else

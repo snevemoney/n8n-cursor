@@ -32,7 +32,7 @@ export async function handler(args: z.infer<typeof schema>) {
     });
 
     // Use environment variables for production n8n
-    const n8nUrl = process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL || 'https://n8ncloud.tech';
+    const n8nUrl = process.env.N8N_URL || process.env.NEXT_PUBLIC_N8N_URL || 'https://evenslouis.ca/n8n';
     const n8nApiKey = process.env.N8N_API_KEY;
     
     // Try to trigger via webhook first

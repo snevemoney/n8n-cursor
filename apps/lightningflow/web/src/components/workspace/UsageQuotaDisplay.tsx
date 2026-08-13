@@ -1,4 +1,5 @@
 'use client'
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,7 +28,7 @@ export function UsageQuotaDisplay() {
 
   const fetchUsageStats = async () => {
     try {
-      const response = await fetch('/api/quota/check')
+      const response = await fetch(apiPath('/api/quota/check'))
       if (response.ok) {
         const data = await response.json()
         setStats(data)

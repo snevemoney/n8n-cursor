@@ -8,6 +8,8 @@ import { withErrorHandling, createSuccessResponse, validateRequest, createErrorR
 import { getExperimentTracker } from '@/lib/llm/experiment-tracker';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const createExperimentSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),

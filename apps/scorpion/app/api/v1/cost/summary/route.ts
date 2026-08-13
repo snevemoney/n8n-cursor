@@ -11,6 +11,8 @@ import { NextRequest } from 'next/server';
 import { withGateway } from '@/lib/api-gateway/with-gateway';
 import { GET as originalGet } from '../../cost/summary/route';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/cost/summary - Cost summary with API Gateway
  * 

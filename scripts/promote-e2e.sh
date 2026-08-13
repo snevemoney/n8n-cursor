@@ -39,7 +39,7 @@ wait_for_deployment() {
                 fi
                 ;;
             "prod")
-                if check_health "https://lightningflow.online/healthz" "Production"; then
+                if check_health "https://evenslouis.ca/lightningflow/healthz" "Production"; then
                     return 0
                 fi
                 ;;
@@ -171,7 +171,7 @@ echo "===================="
 
 check_health "https://int.lightningflow.online/healthz" "Integration"
 check_health "https://staging.lightningflow.online/healthz" "Staging"
-check_health "https://lightningflow.online/healthz" "Production"
+check_health "https://evenslouis.ca/lightningflow/healthz" "Production"
 
 echo ""
 echo "🎉 Complete E2E Promotion Successful!"
@@ -180,7 +180,7 @@ echo ""
 echo "All environments are now running the latest version:"
 echo "  🔧 Integration: https://int.lightningflow.online"
 echo "  🧪 Staging:     https://staging.lightningflow.online"
-echo "  🚀 Production:  https://lightningflow.online"
+echo "  🚀 Production:  https://evenslouis.ca/lightningflow"
 echo ""
 echo "Next steps:"
 echo "1. Monitor production for any issues"

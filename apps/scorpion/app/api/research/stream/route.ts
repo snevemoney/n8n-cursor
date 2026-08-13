@@ -9,6 +9,8 @@ import { NextRequest } from 'next/server';
 import { getBrowserPool } from '@/lib/research/browser-pool';
 import type { BrowserAction } from '@/lib/research/browser-pool';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const encoder = new TextEncoder();
   const { searchParams } = new URL(req.url);

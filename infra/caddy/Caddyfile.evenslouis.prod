@@ -1,0 +1,269 @@
+# Live VPS Caddyfile — RESTORED ungated routing (2026-08-07)
+# Apex / → Client Engine :3200 (NOT portfolio, NOT basic_auth)
+# /pro → Client Engine pro :3204
+# /scorpion → Scorpion :3003
+# /n8n, /lightningflow, /builder as before path-gate cutover
+#
+# Do NOT re-introduce operator_gate/basic_auth without explicit owner approval.
+#
+lightningflow.online {
+	encode gzip
+
+	handle /api/* {
+		rewrite * /lightningflow{uri}
+		reverse_proxy localhost:3202
+	}
+
+	handle {
+		redir https://evenslouis.ca/lightningflow{uri} permanent
+	}
+}
+
+www.lightningflow.online {
+	redir https://evenslouis.ca/lightningflow{uri} permanent
+}
+
+app.lightningflow.online {
+	redir https://evenslouis.ca/lightningflow/dashboard{uri} permanent
+}
+
+ops.lightningflow.online {
+	redir https://evenslouis.ca/lightningflow/ops{uri} permanent
+}
+
+api.lightningflow.online {
+	rewrite * /lightningflow/api{uri}
+	reverse_proxy localhost:3202
+}
+
+docs.lightningflow.online {
+	redir https://evenslouis.ca/lightningflow/docs{uri} permanent
+}
+
+n8ncloud.tech {
+	encode gzip
+	handle /webhook* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /webhook-test* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /rest* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /api* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /healthz {
+		reverse_proxy localhost:5678
+	}
+	handle {
+		# {uri} includes leading slash → /n8n{uri} (NOT /n8n/{uri})
+		redir https://evenslouis.ca/n8n{uri} permanent
+	}
+}
+
+www.n8ncloud.tech {
+	redir https://evenslouis.ca/n8n{uri} permanent
+}
+
+llm.n8ncloud.tech {
+	# Ollama when up; otherwise clear HTML (not a blank Cloudflare/Caddy 502)
+	handle {
+		reverse_proxy 127.0.0.1:11434
+	}
+	handle_errors {
+		@down expression `{err.status_code} >= 500`
+		handle @down {
+			header Content-Type "text/html; charset=utf-8"
+			respond `<!doctype html><html><head><title>LLM offline</title></head>
+<body style="font-family:system-ui;background:#0a0d10;color:#e4e8ee;padding:2rem">
+<h1>Ollama is not running</h1>
+<p><code>llm.n8ncloud.tech</code> proxies to <code>127.0.0.1:11434</code>. Start Ollama on the VPS, then retry.</p>
+</body></html>` 503
+		}
+	}
+}
+
+evenslouis.ca {
+	# Collapse accidental double /pro/pro prefix (basePath bugs)
+	@doublePro path_regexp double_pro ^/pro/pro(/.*)?$
+	redir @doublePro /pro{re.double_pro.1}
+
+	# gzip can break MCP streamable-http — exclude MCP/OAuth discovery
+	@gzipEligible not path /n8n/mcp-server/* /n8n/mcp-oauth/* /.well-known/oauth-protected-resource/*
+	encode @gzipEligible gzip
+
+	# Builder — exact /builder must not fall through to CE 404
+	handle /builder {
+		redir * /builder/ permanent
+	}
+	handle /builder/* {
+		reverse_proxy localhost:3001
+	}
+
+	# OpenClaw gateway (hooks stay machine-reachable; UI at /claw)
+	handle /claw/hooks* {
+		reverse_proxy 127.0.0.1:18789 {
+			flush_interval -1
+		}
+	}
+	handle /claw* {
+		reverse_proxy 127.0.0.1:18789
+	}
+
+	# InsightsLM reserved
+	handle /insights* {
+		header Content-Type "text/html; charset=utf-8"
+		respond `<!doctype html><html><head><title>Insights reserved</title></head>
+<body style="font-family:system-ui;background:#0a0d10;color:#e4e8ee;padding:2rem">
+<h1>InsightsLM — not staged yet</h1>
+<p>Path reserved. See EVENSLOUIS_PRODUCT_MAP.</p>
+</body></html>` 503
+	}
+
+	# Collapse /n8n//... produced by bad legacy redirects (breaks Vue router base).
+	# Use //+ — avoid {2,} which Caddy treats as a placeholder.
+	@n8nDouble path_regexp n8n_double ^/n8n//+(.*)$
+	redir @n8nDouble /n8n/{re.n8n_double.1} permanent
+
+	# SPA: bare /n8n/ and /n8n/home are not Vue routes in n8n 2.x — Overview is /home/workflows
+	@n8nRoot path /n8n /n8n/ /n8n/home /n8n/home/
+	redir @n8nRoot /n8n/home/workflows permanent
+
+	# SPA base path override (required for path-strip hosting on n8n 2.x)
+	handle /static/base-path.js {
+		header Content-Type text/javascript
+		header Cache-Control "no-store"
+		root * /etc/caddy/static-overrides
+		rewrite * /base-path.js
+		file_server
+	}
+
+	# n8n WWW-Authenticate advertises apex resource metadata for MCP OAuth
+	handle /.well-known/oauth-protected-resource/n8n* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+
+	handle_path /n8n/* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+
+	handle /assets* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /static* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /types* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /rest* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	# CE hive machine APIs (Phases 2/6/7) — lightweight bridge on :3205
+	handle /api/hive* {
+		reverse_proxy localhost:3205
+	}
+	# /api* must reach Client Engine on :3200 (login/dashboard/auth).
+	# n8n API remains available at /n8n/* via handle_path above, and on
+	# n8ncloud.tech dual-host compatibility routes.
+	handle /api* {
+		reverse_proxy localhost:3200
+	}
+	handle /webhook* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /webhook-test* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /icon* {
+		reverse_proxy localhost:5678 {
+			flush_interval -1
+		}
+	}
+	handle /favicon.ico {
+		reverse_proxy localhost:5678
+	}
+	handle /healthz {
+		reverse_proxy localhost:5678
+	}
+
+	# LightningFlow path deployment.
+	# Root + app traffic go to the customer web app (:3202). Landing (:3201)
+	# keeps a dedicated asset prefix so its Next chunks cannot collide.
+	# Web app has no /lightningflow/healthz — use landing /healthz.
+	handle /lightningflow/healthz {
+		rewrite * /healthz
+		reverse_proxy localhost:3201
+	}
+	handle_path /lightningflow/_landing/* {
+		reverse_proxy localhost:3201
+	}
+	handle /lightningflow/ops* {
+		reverse_proxy localhost:3203
+	}
+	handle /lightningflow* {
+		reverse_proxy localhost:3202
+	}
+
+	# Existing authenticated client dashboard, built independently with
+	# NEXT_PUBLIC_BASE_PATH=/pro. This is intentionally separate from n8n.
+	# Client Engine product UI (private dashboard) — not the public marketing page at /
+	handle /ce {
+		redir * /dashboard permanent
+	}
+	handle /ce/* {
+		redir * /dashboard{uri} permanent
+	}
+
+	# Scorpion — full Next app (ungated; matches restored live routing)
+	handle /scorpion* {
+		reverse_proxy localhost:3003
+	}
+
+	handle /pro* {
+		reverse_proxy localhost:3204
+	}
+
+	handle {
+		reverse_proxy localhost:3200
+	}
+}
+
+www.evenslouis.ca {
+	redir https://evenslouis.ca{uri} permanent
+}
+
+# CE product entry (per client-engine README): .pro → dashboard, not /pro marketing
+evenslouis.pro {
+	redir https://evenslouis.ca/dashboard permanent
+}
+
+www.evenslouis.pro {
+	redir https://evenslouis.ca/dashboard permanent
+}

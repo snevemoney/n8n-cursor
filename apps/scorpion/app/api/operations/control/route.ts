@@ -4,6 +4,8 @@ import { getNotificationManager } from '@/lib/notification-manager';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 interface SystemControl {
   status: 'running' | 'paused' | 'stopped';
   acceptingNew: boolean;

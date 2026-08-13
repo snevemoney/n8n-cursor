@@ -9,6 +9,8 @@ import { hash } from '@/lib/security/encryption';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const loginSchema = z.object({
   userId: z.string().min(1),
   password: z.string().optional(), // For future password-based auth

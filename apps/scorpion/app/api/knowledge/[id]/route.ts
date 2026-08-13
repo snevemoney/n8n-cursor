@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRAGStore } from '@/lib/shared-stores';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/knowledge/[id] - Get full content for a knowledge item
  */

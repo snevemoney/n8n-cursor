@@ -65,17 +65,21 @@ services:
 
   n8n:
     <<: *dflt
-    image: n8nio/n8n:1.55.1
+    # Live pin 2.34.1 — see docker-compose.n8n-evenslouis.yml for VPS project
+    image: n8nio/n8n:2.34.1
     env_file: [../../.env.production]
     environment:
-      - N8N_HOST=n8ncloud.tech
+      - N8N_HOST=evenslouis.ca
       - N8N_PORT=5678
-      - WEBHOOK_URL=https://n8ncloud.tech/
+      - WEBHOOK_URL=https://evenslouis.ca/n8n/
       - N8N_PROTOCOL=https
+      - N8N_PATH=/n8n/
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-your-encryption-key}
-      - N8N_EDITOR_BASE_URL=https://n8ncloud.tech
-      - N8N_PUBLIC_URL=https://n8ncloud.tech
-    ports: ["127.0.0.1:5679:5678"]  # ✅ SECURE: localhost only, external port 5679
+      - N8N_EDITOR_BASE_URL=https://evenslouis.ca/n8n/
+      - N8N_PUBLIC_URL=https://evenslouis.ca/n8n/
+      - N8N_SECURE_COOKIE=true
+      - N8N_PROXY_HOPS=1
+    ports: ["127.0.0.1:5678:5678"]  # matches live VPS + Caddy upstream
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/healthz"], interval: 15s, timeout: 3s, retries: 10 }
     cpus: "1.5"; mem_limit: "1g"; pids_limit: 250
     volumes:

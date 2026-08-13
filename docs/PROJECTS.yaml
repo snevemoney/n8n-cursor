@@ -1,10 +1,28 @@
 # PROJECTS.yaml - Project Boundaries and Allowed Paths
 # This file defines the contract for what Cursor can and cannot touch
 
+# Access model (evenslouis.ca): visitors → / only; operator-only tools behind Caddy basic_auth.
+# See docs/guides/deployment/EVENSLOUIS_PRODUCT_MAP.md
+
 projects:
+  portfolio:
+    name: "Evens Louis Portfolio"
+    description: "Public brand front door (work + contact)"
+    allowed_paths:
+      - "apps/portfolio/**"
+      - "infra/caddy/Caddyfile.evenslouis.prod"
+      - "infra/docker/docker-compose.evenslouis-paths.yml"
+      - "docs/guides/deployment/EVENSLOUIS_PRODUCT_MAP.md"
+    ports:
+      - 4010
+    health_endpoints:
+      - "https://evenslouis.ca/portfolio-healthz"
+
   lfai:
     name: "LightningFlow AI"
-    description: "Main LightningFlow AI application and services"
+    description: "Parked Lightning SaaS (operator-gated); not the public front door"
+    # Public URL: https://evenslouis.ca/lightningflow (gated)
+    # Legacy domain: lightningflow.online (redirect + API compatibility only)
     allowed_paths:
       - "apps/lightningflow/**"
       - "packages/lf-sdk/**"
@@ -19,19 +37,21 @@ projects:
       - "workflows/**"         # n8n workflows are separate
       - "mcp/side-hustle/**"   # Side hustle MCP server
     ports:
-      - 5678  # API
-      - 5679  # n8n
-      - 9001  # dozzle
-      - 8443  # code-server
+      - 3201  # path landing
+      - 3202  # customer web + API
+      - 3203  # ops
     health_endpoints:
-      - "http://localhost:5678/healthz"
-      - "http://localhost:5679/healthz"
-      - "http://localhost:9001/healthz"
-      - "http://localhost:8443/healthz"
+      - "https://evenslouis.ca/lightningflow/healthz"
+      - "https://evenslouis.ca/lightningflow/api/healthz"
+      - "https://evenslouis.ca/lightningflow/ops/healthz"
 
   n8n-cursor:
     name: "n8n Cursor Side Hustle"
     description: "n8n workflows and automation for side hustle projects"
+    # Public URL: https://evenslouis.ca/n8n (legacy dual-host: n8ncloud.tech)
+    # Live VPS compose: /home/evens/n8n-cursor/docker-compose.yml
+    # Data volume: n8n-cursor_n8n_data (SQLite) — never prune / recreate empty
+    # Image pin: n8nio/n8n:2.34.1
     allowed_paths:
       - "apps/n8n-cursor/**"
       - "workflows/**"
@@ -39,14 +59,16 @@ projects:
       - "tools/mcp-servers/**"
       - "scripts/n8n-*.sh"
       - "docs/workflows/**"
+      - "infra/docker/docker-compose.n8n-evenslouis.yml"
+      - "infra/caddy/Caddyfile.evenslouis.prod"
     excluded_paths:
       - "apps/lightningflow/**"  # Keep separate from main app
       - "packages/lf-sdk/**"     # Main app SDK
-      - "infra/**"               # Infrastructure is shared
     ports:
-      - 5670  # n8n side hustle
+      - 5678  # n8n (127.0.0.1 only; public via Caddy /n8n)
     health_endpoints:
-      - "http://localhost:5670/healthz"
+      - "http://127.0.0.1:5678/healthz"
+      - "https://evenslouis.ca/n8n/healthz"
 
   shared:
     name: "Shared Infrastructure"

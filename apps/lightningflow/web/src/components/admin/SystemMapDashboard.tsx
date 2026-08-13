@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -141,7 +142,7 @@ export function SystemMapDashboard() {
 
   async function generateNewReport() {
     try {
-      const response = await fetch('/api/admin/system-audit', {
+      const response = await fetch(apiPath('/api/admin/system-audit'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });

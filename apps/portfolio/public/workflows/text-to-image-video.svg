@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Text to Image/Video workflow">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0d10"/>
+      <stop offset="100%" stop-color="#0f1a1c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <rect x="48" y="48" width="1184" height="624" rx="16" fill="#0f1318" stroke="rgba(19,198,168,0.35)" stroke-width="2"/>
+  <circle cx="160" cy="200" r="36" fill="rgba(19,198,168,0.15)" stroke="#13c6a8" stroke-width="2"/>
+  <circle cx="360" cy="200" r="36" fill="rgba(19,198,168,0.15)" stroke="#13c6a8" stroke-width="2"/>
+  <circle cx="560" cy="320" r="36" fill="rgba(19,198,168,0.15)" stroke="#13c6a8" stroke-width="2"/>
+  <circle cx="760" cy="320" r="36" fill="rgba(19,198,168,0.15)" stroke="#13c6a8" stroke-width="2"/>
+  <circle cx="960" cy="480" r="36" fill="rgba(19,198,168,0.15)" stroke="#13c6a8" stroke-width="2"/>
+  <line x1="196" y1="200" x2="324" y2="200" stroke="rgba(19,198,168,0.45)" stroke-width="3"/>
+  <line x1="396" y1="200" x2="524" y2="320" stroke="rgba(19,198,168,0.45)" stroke-width="3"/>
+  <line x1="596" y1="320" x2="724" y2="320" stroke="rgba(19,198,168,0.45)" stroke-width="3"/>
+  <line x1="796" y1="320" x2="924" y2="480" stroke="rgba(19,198,168,0.45)" stroke-width="3"/>
+  <text x="80" y="620" fill="#13c6a8" font-family="ui-sans-serif,system-ui,sans-serif" font-size="36" font-weight="600">Text to Image/Video</text>
+  <text x="80" y="660" fill="rgba(228,232,238,0.55)" font-family="ui-sans-serif,system-ui,sans-serif" font-size="22">n8n workflow preview</text>
+</svg>

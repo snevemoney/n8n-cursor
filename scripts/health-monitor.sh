@@ -10,9 +10,9 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 # Health check endpoints
 declare -A HEALTH_ENDPOINTS=(
-    ["UI"]="https://lightningflow.online/healthz"
-    ["API"]="https://lightningflow.online/api/healthz"
-    ["n8n"]="https://n8ncloud.tech/healthz"
+    ["UI"]="https://evenslouis.ca/lightningflow/healthz"
+    ["API"]="https://evenslouis.ca/lightningflow/api/healthz"
+    ["n8n"]="https://evenslouis.ca/n8n/healthz"
     ["Grafana"]="http://localhost:3000/healthz"
     ["Prometheus"]="http://localhost:9090/healthz"
     ["Loki"]="http://localhost:3100/healthz"

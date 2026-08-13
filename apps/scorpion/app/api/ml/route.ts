@@ -7,6 +7,8 @@ import type { MLRequest } from '@/lib/ai-ml/types';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const mlRequestSchema = z.object({
   task: z.enum([
     'text-generation',

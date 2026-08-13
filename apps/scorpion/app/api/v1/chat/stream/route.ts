@@ -11,6 +11,8 @@ import { NextRequest } from 'next/server';
 import { withOptionalGateway } from '@/lib/api-gateway/with-gateway';
 import { POST as originalPost } from '../../chat/stream/route';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/v1/chat/stream - Chat stream with API Gateway
  * 

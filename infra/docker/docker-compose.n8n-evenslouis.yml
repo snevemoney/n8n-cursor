@@ -1,0 +1,46 @@
+# Live VPS n8n project (Hostinger Docker Manager: n8n-cursor)
+# Path: /home/evens/n8n-cursor/docker-compose.yml
+# Data volume: n8n-cursor_n8n_data (DO NOT rename / wipe)
+# Public URL: https://evenslouis.ca/n8n/
+# Caddy: handle_path /n8n/* (strip) + override /static/base-path.js to BASE_PATH=/n8n/
+# Do NOT set N8N_PATH on n8n 2.x — HTML asset prefixes break while files stay at /assets
+#
+# Pin: n8nio/n8n:2.34.1 (upgraded from live 1.115.3 / latest)
+# Zero-data-loss: always keep external volume name n8n-cursor_n8n_data
+
+services:
+  n8n:
+    image: n8nio/n8n:2.34.1
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - N8N_HOST=evenslouis.ca
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - N8N_EDITOR_BASE_URL=https://evenslouis.ca/n8n/
+      - N8N_PUBLIC_URL=https://evenslouis.ca/n8n/
+      - WEBHOOK_URL=https://evenslouis.ca/n8n/
+      - N8N_SECURE_COOKIE=true
+      - N8N_PROXY_HOPS=1
+      - N8N_USER_MANAGEMENT_DISABLED=false
+      - N8N_LOG_LEVEL=info
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - n8n-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5678/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  n8n_data:
+    external: true
+    name: n8n-cursor_n8n_data
+
+networks:
+  n8n-network:
+    driver: bridge

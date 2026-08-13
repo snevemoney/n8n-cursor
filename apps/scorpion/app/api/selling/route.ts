@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { withErrorHandling, createSuccessResponse, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/selling - Get real product and sales data
  */

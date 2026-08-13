@@ -1,0 +1,49 @@
+# Lean standalone image for https://evenslouis.ca/scorpion
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/scorpion/package.json ./apps/scorpion/
+COPY packages/scorpion-core/package.json ./packages/scorpion-core/
+COPY packages/shared-config/package.json ./packages/shared-config/
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/shared-helpers/package.json ./packages/shared-helpers/
+COPY packages/agent-factory/package.json ./packages/agent-factory/
+COPY packages/contracts/package.json ./packages/contracts/
+RUN pnpm install --frozen-lockfile --filter scorpion...
+
+FROM base AS builder
+ARG NEXT_PUBLIC_BASE_PATH=/scorpion
+ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV NEXT_PRIVATE_WORKER_THREADS=false
+# Avoid accidental SSG/network hangs during "Collecting page data"
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/scorpion/node_modules ./apps/scorpion/node_modules
+COPY --from=deps /app/packages ./packages
+COPY . .
+# Ensure public/ exists even if the app ships without static assets
+RUN mkdir -p apps/scorpion/public && pnpm --filter scorpion build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3003
+ENV HOSTNAME=0.0.0.0
+ENV NEXT_PUBLIC_BASE_PATH=/scorpion
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs \
+  && apk add --no-cache wget \
+  && mkdir -p ./apps/scorpion/public
+COPY --from=builder /app/apps/scorpion/public ./apps/scorpion/public
+COPY --from=builder /app/apps/scorpion/.next/standalone ./
+COPY --from=builder /app/apps/scorpion/.next/static ./apps/scorpion/.next/static
+USER nextjs
+EXPOSE 3003
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:3003/scorpion/healthz || exit 1
+CMD ["node", "apps/scorpion/server.js"]

@@ -9,7 +9,7 @@
         "MCP_MODE": "stdio",
         "LOG_LEVEL": "error",
         "DISABLE_CONSOLE_OUTPUT": "true",
-        "N8N_API_URL": "https://n8ncloud.tech/api/v1",
+        "N8N_API_URL": "https://evenslouis.ca/n8n/api/v1",
         "N8N_API_KEY": "YOUR_NEW_API_KEY_HERE"
       }
     },

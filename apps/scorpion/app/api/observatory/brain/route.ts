@@ -6,6 +6,8 @@
 import { NextResponse } from 'next/server';
 import { buildBrainGraph } from '@/server/observatory/buildBrainGraph';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const graph = await buildBrainGraph();

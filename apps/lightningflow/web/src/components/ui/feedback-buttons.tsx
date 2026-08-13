@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -40,7 +41,7 @@ export default function FeedbackButtons({
     setError(null);
     
     try {
-      const response = await fetch('/api/track/feedback', {
+      const response = await fetch(apiPath('/api/track/feedback'), {
         method: 'POST',
         body: JSON.stringify({ 
           embedding_id: embeddingId, 

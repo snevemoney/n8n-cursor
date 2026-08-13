@@ -8,6 +8,8 @@ import { getNotificationSystem } from '@/lib/notifications';
 import { getMetricsCollector } from '@/lib/metrics';
 import { createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/telemetry/populate
  * 

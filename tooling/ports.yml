@@ -17,7 +17,17 @@ traefik_https:  443
 vector_sink:    8686
 
 # Portfolio Services
-portfolio:      4010
+portfolio:      4010   # public apex https://evenslouis.ca/
+
+# Scorpion (operator) — https://evenslouis.ca/scorpion
+scorpion:       3003
+
+# evenslouis.ca path deployments
+evens_lf_landing: 3201   # /lightningflow (parked)
+evens_lf_web:    3202   # /lightningflow
+evens_lf_ops:    3203   # /lightningflow/ops
+evens_pro:       3204   # /pro Client Engine (operator)
+
 
 # Node.js Versions (not actual ports, but referenced in compose)
 node_20:        20

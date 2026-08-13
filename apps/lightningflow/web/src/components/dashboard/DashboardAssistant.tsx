@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,7 @@ export default function DashboardAssistant() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/agents/explain-dashboard-agent', {
+      const response = await fetch(apiPath('/api/agents/explain-dashboard-agent'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

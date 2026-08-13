@@ -78,7 +78,7 @@ services:
 
   n8n:
     <<: *dflt
-    image: n8nio/n8n:1.55.1
+    image: n8nio/n8n:2.34.1
     env_file: [../../.env.int]
     ports: ["127.0.0.1:5678:5678"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/"], interval: 15s, timeout: 3s, retries: 10 }

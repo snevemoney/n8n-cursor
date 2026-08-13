@@ -24,7 +24,7 @@ services:
   # Minimal n8n for lightweight mode
   n8n:
     <<: *dflt
-    image: n8nio/n8n:1.55.1
+    image: n8nio/n8n:2.34.1
     env_file: [../../.env.local]
     environment:
       - N8N_HOST=localhost

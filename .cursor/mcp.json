@@ -1,10 +1,23 @@
 {
   "mcpServers": {
+    "n8n": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "supergateway",
+        "--streamableHttp",
+        "https://evenslouis.ca/n8n/mcp-server/http",
+        "--header",
+        "Authorization:Bearer ${N8N_MCP_TOKEN}"
+      ]
+    },
     "n8n-mcp": {
       "command": "node",
-      "args": ["tools/mcp-servers/comprehensive-n8n-server.mjs"],
+      "args": [
+        "tools/mcp-servers/comprehensive-n8n-server.mjs"
+      ],
       "env": {
-        "N8N_BASE_URL": "https://n8ncloud.tech",
+        "N8N_BASE_URL": "https://evenslouis.ca/n8n",
         "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYjYxOWE3MC1jMzQ2LTQ0NDQtODlkZi0zZTUxODE1MjhhMzQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2OTQ5NjYwfQ.GaodXlSEJJuKirhnni4hq8XjgTbrZ8Px6DC1znpUn7A",
         "N8N_API_PATH": "/api/v1",
         "N8N_AUTH_HEADER": "X-N8N-API-KEY"
@@ -12,7 +25,10 @@
     },
     "radar-audit": {
       "command": "node",
-      "args": ["./mcp/radar/if-enabled.mjs", "./mcp/radar/server.mjs"],
+      "args": [
+        "./mcp/radar/if-enabled.mjs",
+        "./mcp/radar/server.mjs"
+      ],
       "env": {
         "ENABLED": "1",
         "SUPABASE_URL": "${SUPABASE_URL}",
@@ -21,7 +37,10 @@
     },
     "lightningflow-ai": {
       "command": "node",
-      "args": ["./mcp/lightningflow/if-enabled.mjs", "./mcp/lightningflow/server.mjs"],
+      "args": [
+        "./mcp/lightningflow/if-enabled.mjs",
+        "./mcp/lightningflow/server.mjs"
+      ],
       "env": {
         "ENABLED": "1",
         "LNFLOW_ENV": "${LNFLOW_ENV}",
@@ -37,7 +56,10 @@
     },
     "side-hustles": {
       "command": "node",
-      "args": ["./mcp/side-hustle/if-enabled.mjs", "./mcp/side-hustle/server.mjs"],
+      "args": [
+        "./mcp/side-hustle/if-enabled.mjs",
+        "./mcp/side-hustle/server.mjs"
+      ],
       "env": {
         "ENABLED": "1",
         "SUPABASE_URL": "${SUPABASE_URL}",
@@ -52,11 +74,19 @@
       "parameters": {
         "env": {
           "type": "string",
-          "enum": ["local", "int", "test", "stg", "prod"],
+          "enum": [
+            "local",
+            "int",
+            "test",
+            "stg",
+            "prod"
+          ],
           "default": "local"
         }
       },
-      "required": ["env"]
+      "required": [
+        "env"
+      ]
     },
     "radar_list_deadletters": {
       "description": "List top N oldest dead letters for triage.",
@@ -69,7 +99,13 @@
         },
         "env": {
           "type": "string",
-          "enum": ["local", "int", "test", "stg", "prod"],
+          "enum": [
+            "local",
+            "int",
+            "test",
+            "stg",
+            "prod"
+          ],
           "description": "Filter by environment (optional)"
         }
       }
@@ -104,7 +140,10 @@
           "description": "Invoice expiry time in seconds"
         }
       },
-      "required": ["amount_sats", "payer_ref"]
+      "required": [
+        "amount_sats",
+        "payer_ref"
+      ]
     },
     "ln_get_invoice_status": {
       "description": "Get LightningFlow AI invoice status by payment_hash or ext_id.",
@@ -132,7 +171,9 @@
           "description": "Maximum fee in satoshis"
         }
       },
-      "required": ["bolt11"]
+      "required": [
+        "bolt11"
+      ]
     },
     "ln_liquidity_check": {
       "description": "Check LightningFlow AI channel inbound/outbound liquidity.",
@@ -147,7 +188,11 @@
       "parameters": {
         "status": {
           "type": "string",
-          "enum": ["active", "inactive", "suspended"],
+          "enum": [
+            "active",
+            "inactive",
+            "suspended"
+          ],
           "default": "active",
           "description": "Filter by tenant status"
         },
@@ -206,7 +251,10 @@
           "description": "Daily rate limit"
         }
       },
-      "required": ["name", "slug"]
+      "required": [
+        "name",
+        "slug"
+      ]
     },
     "side_hustle_get_mappings": {
       "description": "Get field mappings for a side-hustle tenant (for your existing n8n workflows).",
@@ -249,7 +297,10 @@
           "description": "Secret for webhook verification"
         }
       },
-      "required": ["job_type", "input_data"]
+      "required": [
+        "job_type",
+        "input_data"
+      ]
     },
     "side_hustle_get_job_status": {
       "description": "Get status and results of a side-hustle job.",
@@ -259,7 +310,9 @@
           "description": "Job UUID"
         }
       },
-      "required": ["job_id"]
+      "required": [
+        "job_id"
+      ]
     },
     "side_hustle_get_rate_limit_status": {
       "description": "Check rate limit status for a side-hustle tenant.",

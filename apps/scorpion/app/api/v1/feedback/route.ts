@@ -10,6 +10,8 @@ import { query } from '@/lib/db/client';
 import { randomUUID } from 'crypto';
 import { emitEvent } from '@/lib/events/event-bus';
 
+export const dynamic = 'force-dynamic';
+
 const feedbackSchema = z.object({
   conversationId: z.string().optional(),
   messageId: z.string().optional(),

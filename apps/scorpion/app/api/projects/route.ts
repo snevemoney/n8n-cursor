@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getOrchestrator } from '@/lib/shared-stores';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/projects - Get project details and statistics
  */

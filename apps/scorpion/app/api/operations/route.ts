@@ -5,6 +5,8 @@ import { getAgentOperationsExecutor } from '@/lib/agent-operations-executor';
 import { getAgentOperations } from '@/lib/agent-operations';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/operations - Get active and recent operations
  * Optimized with parallel processing using Promise.allSettled

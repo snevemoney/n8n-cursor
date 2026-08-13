@@ -4,6 +4,8 @@ import { NextRequest } from 'next/server';
 import { getMigrationService } from '@/lib/migration/migrationService';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/migration/jobs/[id]/run - Run a migration job
  */

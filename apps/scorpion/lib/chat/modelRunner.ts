@@ -205,7 +205,7 @@ async function runOllama(
     if (onChunk) {
       const controller = new AbortController();
       // Use longer timeout for remote servers (CPU-only inference is slower)
-      const isRemote = ollamaUrl.startsWith('https://') || ollamaUrl.includes('n8ncloud.tech') || ollamaUrl.includes('lightningflow.online');
+      const isRemote = ollamaUrl.startsWith('https://') || ollamaUrl.includes('evenslouis.ca') || ollamaUrl.includes('n8ncloud.tech') || ollamaUrl.includes('lightningflow.online');
       const timeoutMs = isRemote ? 120000 : 30000; // 2 minutes for remote, 30s for local
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -414,7 +414,7 @@ async function runLlamaCpp(
     if (onChunk) {
       // Streaming API - llama.cpp Web UI uses OpenAI-compatible format
       const controller = new AbortController();
-      const isRemote = llamacppUrl.startsWith('https://') || llamacppUrl.includes('n8ncloud.tech') || llamacppUrl.includes('lightningflow.online');
+      const isRemote = llamacppUrl.startsWith('https://') || llamacppUrl.includes('evenslouis.ca') || llamacppUrl.includes('n8ncloud.tech') || llamacppUrl.includes('lightningflow.online');
       const timeoutMs = isRemote ? 120000 : 60000; // 2 minutes for remote, 1 minute for local
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 

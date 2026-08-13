@@ -1,7 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
 // 🔐 HARDCODED ADMIN SECURITY
 // Replace with your actual Supabase UUID from Auth > Users
 const ADMIN_UID = process.env.NEXT_PUBLIC_ADMIN_UID || 'your-uuid-here-replace-me';
@@ -77,6 +76,7 @@ export async function middleware(req: NextRequest) {
       // 🔒 HARDCODED SECURITY: Only allow specific UUID
       if (!user || error || user.id !== ADMIN_UID) {
         console.log(`🚨 Admin access denied: ${user?.id || 'no user'} (expected: ${ADMIN_UID})`);
+        // Middleware pathnames are basePath-stripped; Next adds basePath on redirect.
         return NextResponse.redirect(new URL('/login', req.url));
       }
 

@@ -56,7 +56,7 @@ N8N_STG_API_KEY=your_staging_api_key_here
 # PRODUCTION ENVIRONMENT
 # =============================================================================
 
-N8N_PRD_BASE_URL=https://n8ncloud.tech
+N8N_PRD_BASE_URL=https://evenslouis.ca/n8n
 N8N_PRD_API_KEY=your_production_api_key_here
 
 # =============================================================================

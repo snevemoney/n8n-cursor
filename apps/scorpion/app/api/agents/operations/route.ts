@@ -4,6 +4,8 @@ import { getAgentOperations, getAllSafeOperations } from '@/lib/agent-operations
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/agents/operations - Get available operations and status
  */

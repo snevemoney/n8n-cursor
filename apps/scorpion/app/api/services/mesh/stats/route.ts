@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMeshClient } from '@/lib/services/mesh-client';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/services/mesh/stats - Get mesh statistics
  */

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
+import { appPath } from '@/lib/base-path';
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://demo.supabase.co',
@@ -110,7 +111,7 @@ export default function LoginPage() {
                     Development Mode Active
                   </h3>
                   <p className="text-sm text-yellow-400/80 mt-1">
-                    Admin bypass enabled. Visit <a href="/admin" className="underline font-medium hover:text-yellow-300">/admin</a> directly.
+                    Admin bypass enabled. Visit <a href={appPath('/admin')} className="underline font-medium hover:text-yellow-300">/admin</a> directly.
                   </p>
                 </div>
               </div>

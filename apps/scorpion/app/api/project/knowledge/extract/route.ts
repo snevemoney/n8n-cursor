@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrchestrator } from '@/lib/shared-stores';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/project/knowledge/extract - Extract specific knowledge item
  */

@@ -12,6 +12,8 @@ import { Metadata } from 'next';
 import { requireAdminAuth } from '@/lib/auth/admin';
 import AdminRevenueForecastClient from './AdminRevenueForecastClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Revenue Forecast - Lightning AI Platform',
   description: 'AI-powered revenue forecasting and analysis'

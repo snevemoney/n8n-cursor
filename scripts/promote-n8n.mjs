@@ -70,7 +70,7 @@ const envConfig = {
     authHeader: 'X-N8N-API-KEY'
   },
   production: {
-    baseUrl: process.env.N8N_PRD_BASE_URL || 'https://n8ncloud.tech',
+    baseUrl: process.env.N8N_PRD_BASE_URL || 'https://evenslouis.ca/n8n',
     apiKey: process.env.N8N_PRD_API_KEY,
     apiPath: '/api/v1',
     authHeader: 'X-N8N-API-KEY'

@@ -5,6 +5,8 @@ import { getSustainabilityGoals, createSustainabilityGoal, updateGoalProgress } 
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const goalSchema = z.object({
   name: z.string().min(1),
   type: z.enum(['carbon_reduction', 'energy_efficiency', 'resource_optimization']),

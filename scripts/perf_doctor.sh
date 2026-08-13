@@ -68,17 +68,17 @@ echo "== External Health Checks =="
 echo "Testing external endpoints..."
 
 # Test main site
-if time curl -fsS https://lightningflow.online/ >/dev/null 2>&1; then
+if time curl -fsS https://evenslouis.ca/lightningflow/ >/dev/null 2>&1; then
     echo "✅ lightningflow.online: OK"
 else
     echo "❌ lightningflow.online: FAILED"
 fi
 
 # Test n8n site
-if time curl -fsS https://n8ncloud.tech/ >/dev/null 2>&1; then
-    echo "✅ n8ncloud.tech: OK"
+if time curl -fsS https://evenslouis.ca/n8n/ >/dev/null 2>&1; then
+    echo "✅ evenslouis.ca/n8n: OK"
 else
-    echo "❌ n8ncloud.tech: FAILED"
+    echo "❌ evenslouis.ca/n8n: FAILED"
 fi
 
 echo ""

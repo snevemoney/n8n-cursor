@@ -8,6 +8,8 @@ import { getMeshClient } from '@/lib/services/mesh-client';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const resetSchema = z.object({
   serviceName: z.string().min(1),
 });

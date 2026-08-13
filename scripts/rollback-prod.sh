@@ -29,7 +29,7 @@ echo "🔄 Rolling back to BLUE stack..."
 ./scripts/flip_blue.sh
 
 echo "🏥 Checking Production health after rollback..."
-if curl -fsS https://lightningflow.online/healthz >/dev/null 2>&1; then
+if curl -fsS https://evenslouis.ca/lightningflow/healthz >/dev/null 2>&1; then
     echo "✅ Production rollback successful"
     echo "Production is now running the previous stable version"
 else
@@ -41,4 +41,4 @@ fi
 echo ""
 echo "🎉 Production rollback complete!"
 echo "Production is now running the previous stable version"
-echo "Monitor: https://lightningflow.online/healthz"
+echo "Monitor: https://evenslouis.ca/lightningflow/healthz"

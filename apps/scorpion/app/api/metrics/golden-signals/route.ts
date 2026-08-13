@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getGoldenSignalsTracker } from '@/lib/monitoring/golden-signals';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/metrics/golden-signals - Get Four Golden Signals
  */

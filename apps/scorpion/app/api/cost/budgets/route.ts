@@ -11,6 +11,8 @@ import { getCostTracker } from '@/lib/cost/tracker';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 import type { BudgetDefinition } from '@/lib/cost/tracker';
 
+export const dynamic = 'force-dynamic';
+
 export const GET = withErrorHandling(async () => {
   const tracker = getCostTracker();
   const budgets = await tracker.getBudgetStatus();

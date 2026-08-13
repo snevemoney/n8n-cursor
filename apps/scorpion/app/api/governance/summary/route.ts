@@ -5,6 +5,8 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db/client';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/governance/summary - Get governance summary statistics
  */

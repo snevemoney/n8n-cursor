@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -102,7 +103,7 @@ export default function AdminBotsClient() {
       addLog(`📋 Configuration: ${testConfig.botCount} bots, ${testConfig.testDuration}s duration, ${testConfig.mode} mode`);
 
       // Start the bot test via API
-      const response = await fetch('/api/admin/bot-test', {
+      const response = await fetch(apiPath('/api/admin/bot-test'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

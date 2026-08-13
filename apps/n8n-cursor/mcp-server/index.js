@@ -10,7 +10,7 @@ import YAML from "yaml";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const N8N_URL = process.env.N8N_URL || "https://n8ncloud.tech";
+const N8N_URL = process.env.N8N_URL || "https://evenslouis.ca/n8n";
 const N8N_API_KEY = process.env.N8N_API_KEY || ""; 
 const WORKDIR = process.env.N8N_WORKDIR || "/home/evens/n8n-cursor";
 

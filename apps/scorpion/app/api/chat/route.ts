@@ -6,6 +6,8 @@ import { withRateLimit, getClientIdentifier } from '@/lib/rate-limiter';
 import { getMetricsCollector } from '@/lib/metrics';
 import { trace } from '@/lib/tracing';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Unified chat endpoint - works with any model source
  * Always uses RAG and collects training data

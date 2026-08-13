@@ -3,6 +3,8 @@ import { runModelUnified } from '@/lib/chat/modelRunner';
 import { createSuccessResponse, createErrorResponse, ApiErrorCode, withErrorHandling } from '@/lib/api-error-handler';
 import { getRecommendedModelForRAM } from '@/lib/utils/modelSelector';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/chat/test
  * 

@@ -5,6 +5,8 @@ import { ExtractedKnowledge } from '@scorpion/core';
 import { createWorker } from 'tesseract.js';
 import { getFileTracker } from '@/lib/chat/file-tracker';
 
+export const dynamic = 'force-dynamic';
+
 // Dynamic import for pdf-parse to avoid build errors if dependency is incompatible
 let pdfParse: any = null;
 try {

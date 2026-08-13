@@ -8,6 +8,8 @@ import { getSystemAutomation } from '@/lib/system-automation';
 // Import types and helper from parent route
 import type { AgentDossier, AgentActivity } from '../route';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Get real activities for an agent from system logs and operations
  * Now connected to real execution data from AgentOperationsExecutor

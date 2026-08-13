@@ -12,36 +12,72 @@
   }
 }
 
-# Landing page (public marketing)
+# Legacy LightningFlow hosts
 lightningflow.online, www.lightningflow.online {
   import common
-  @health path /healthz
-  handle @health { respond 200 }
-  handle_path /api/* { reverse_proxy 127.0.0.1:4000 }   # API (prod)
-  handle_path /      { reverse_proxy 127.0.0.1:3000 }   # landing (prod)
+  handle /api/* {
+    rewrite * /lightningflow{uri}
+    reverse_proxy 127.0.0.1:3202
+  }
+  handle { redir https://evenslouis.ca/lightningflow{uri} permanent }
 }
 
-# Customer dashboard (authenticated users)
 app.lightningflow.online {
-  import common
-  @health path /healthz
-  handle @health { respond 200 }
-  handle_path / { reverse_proxy 127.0.0.1:3001 }        # customer app (prod)
+  redir https://evenslouis.ca/lightningflow/dashboard{uri} permanent
 }
 
-# Internal ops dashboard (admin only)
 ops.lightningflow.online {
-  import common
-  @health path /healthz
-  handle @health { respond 200 }
-  basicauth /* { {$OPS_USER} {$OPS_PASS} }              # swap to SSO when ready
-  handle_path / { reverse_proxy 127.0.0.1:3002 }        # internal ops (prod)
+  redir https://evenslouis.ca/lightningflow/ops{uri} permanent
 }
 
-# n8n instance
+api.lightningflow.online {
+  rewrite * /lightningflow/api{uri}
+  reverse_proxy 127.0.0.1:3202
+}
+
+docs.lightningflow.online {
+  redir https://evenslouis.ca/lightningflow/docs{uri} permanent
+}
+
+# n8n (legacy apex — dual-host during cutover; UI redirects to evenslouis.ca/n8n)
 n8ncloud.tech, www.n8ncloud.tech {
   import common
+  handle /webhook* { reverse_proxy 127.0.0.1:5678 }
+  handle /webhook-test* { reverse_proxy 127.0.0.1:5678 }
+  handle /rest* { reverse_proxy 127.0.0.1:5678 }
+  handle /api* { reverse_proxy 127.0.0.1:5678 }
   @health path /healthz
-  handle @health { respond 200 }
-  handle_path / { reverse_proxy 127.0.0.1:5678 }        # n8n (prod)
+  handle @health { reverse_proxy 127.0.0.1:5678 }
+  handle { redir https://evenslouis.ca/n8n{uri} permanent }
+}
+
+# Personal site + n8n under /n8n (strip prefix; proxy absolute editor assets)
+evenslouis.ca, www.evenslouis.ca {
+  import common
+  handle /builder/* { reverse_proxy 127.0.0.1:3001 }
+  @n8nExact path /n8n
+  redir @n8nExact /n8n/ permanent
+  handle /static/base-path.js {
+    header Content-Type text/javascript
+    respond "window.BASE_PATH = '/n8n/';" 200
+  }
+  handle_path /n8n/* { reverse_proxy 127.0.0.1:5678 }
+  handle /assets* { reverse_proxy 127.0.0.1:5678 }
+  handle /static* { reverse_proxy 127.0.0.1:5678 }
+  handle /types* { reverse_proxy 127.0.0.1:5678 }
+  handle /rest* { reverse_proxy 127.0.0.1:5678 }
+  handle /webhook* { reverse_proxy 127.0.0.1:5678 }
+  handle /webhook-test* { reverse_proxy 127.0.0.1:5678 }
+  handle /icon* { reverse_proxy 127.0.0.1:5678 }
+  handle /favicon.ico { reverse_proxy 127.0.0.1:5678 }
+  handle /lightningflow/healthz { reverse_proxy 127.0.0.1:3202 }
+  handle_path /lightningflow/_landing/* { reverse_proxy 127.0.0.1:3201 }
+  handle /lightningflow/ops* { reverse_proxy 127.0.0.1:3203 }
+  handle /lightningflow* { reverse_proxy 127.0.0.1:3202 }
+  handle /pro* { reverse_proxy 127.0.0.1:3204 }
+  handle { reverse_proxy 127.0.0.1:3200 }
+}
+
+evenslouis.pro, www.evenslouis.pro {
+  redir https://evenslouis.ca/pro{uri} permanent
 }

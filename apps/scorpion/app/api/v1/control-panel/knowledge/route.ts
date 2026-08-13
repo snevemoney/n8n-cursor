@@ -8,6 +8,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { z } from 'zod';
 import { knowledgeSourceWeights, type KnowledgeSource } from '@/config/knowledge';
 
+export const dynamic = 'force-dynamic';
+
 const weightSchema = z.object({
   source: z.string(),
   weight: z.number().min(0).max(5),

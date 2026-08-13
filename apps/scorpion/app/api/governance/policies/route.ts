@@ -6,6 +6,8 @@ import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiError
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 const policySchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),

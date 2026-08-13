@@ -4,6 +4,8 @@ import { resolve } from 'path';
 import { runToolMatrix } from '../../../../scripts/run-tool-matrix';
 import { createSSEMessage } from '@/lib/chat/events';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/diagnostics/run-tool-matrix
  * Returns the latest report without running tests

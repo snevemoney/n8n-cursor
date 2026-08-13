@@ -5,6 +5,8 @@ import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handle
 // import { TechDebtAnalyzer } from '@scorpion/core';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+
 interface DetailedIssue {
   id: string;
   type: 'tech-debt' | 'missing-feature' | 'typescript-error' | 'unimplemented-tool' | 'todo';

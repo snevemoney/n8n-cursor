@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname } from 'next/navigation';
@@ -139,7 +140,7 @@ export function VectorSearch({
     setError(null);
 
     try {
-      const response = await fetch('/api/vector/search', {
+      const response = await fetch(apiPath('/api/vector/search'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +180,7 @@ export function VectorSearch({
    */
   const fetchAutoSuggestions = useCallback(async () => {
     try {
-      const response = await fetch(`/api/vector/search?q=${encodeURIComponent(query)}&type=${searchType}`);
+      const response = await fetch(apiPath(`/api/vector/search?q=${encodeURIComponent(query)}&type=${searchType}`));
       const data = await response.json();
       
       setAutoSuggestions(data.suggestions || []);
@@ -196,7 +197,7 @@ export function VectorSearch({
     try {
       const additionalFeedback = feedbackText.get(result.id) || '';
       
-      const response = await fetch('/api/feedback/vector', {
+      const response = await fetch(apiPath('/api/feedback/vector'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

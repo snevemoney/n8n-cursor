@@ -68,7 +68,7 @@ This document provides comprehensive API reference for the ${SERVICE_NAME} servi
 
 ## Base URL
 \`\`\`
-https://lightningflow.online/api/$SERVICE_SLUG
+https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG
 \`\`\`
 
 ## Authentication
@@ -76,7 +76,7 @@ All API requests require authentication using Bearer tokens:
 
 \`\`\`bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \\
-     https://lightningflow.online/api/$SERVICE_SLUG/endpoint
+     https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/endpoint
 \`\`\`
 
 ## Endpoints
@@ -162,10 +162,10 @@ POST /execute
 ### cURL
 \`\`\`bash
 # Health check
-curl -X GET https://lightningflow.online/api/$SERVICE_SLUG/healthz
+curl -X GET https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/healthz
 
 # Execute action
-curl -X POST https://lightningflow.online/api/$SERVICE_SLUG/execute \\
+curl -X POST https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/execute \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_TOKEN" \\
   -d '{
@@ -178,7 +178,7 @@ curl -X POST https://lightningflow.online/api/$SERVICE_SLUG/execute \\
 
 ### JavaScript
 \`\`\`javascript
-const response = await fetch('https://lightningflow.online/api/$SERVICE_SLUG/execute', {
+const response = await fetch('https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/execute', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -200,7 +200,7 @@ console.log(data);
 \`\`\`python
 import requests
 
-url = 'https://lightningflow.online/api/$SERVICE_SLUG/execute'
+url = 'https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/execute'
 headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer YOUR_TOKEN'
@@ -237,11 +237,11 @@ info:
   version: 1.0.0
   contact:
     name: LightningFlow AI Support
-    url: https://lightningflow.online/support
-    email: support@lightningflow.online
+    url: https://evenslouis.ca/lightningflow/support
+    email: support@evenslouis.ca
 
 servers:
-  - url: https://lightningflow.online/api/$SERVICE_SLUG
+  - url: https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG
     description: Production server
   - url: https://staging.lightningflow.online/api/$SERVICE_SLUG
     description: Staging server
@@ -386,7 +386,7 @@ import { ${SERVICE_NAME//[^a-zA-Z0-9]/} } from '@lightningflow/$SERVICE_SLUG';
 
 const client = new ${SERVICE_NAME//[^a-zA-Z0-9]/}({
   apiKey: 'your-api-key',
-  baseUrl: 'https://lightningflow.online/api/$SERVICE_SLUG'
+  baseUrl: 'https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG'
 });
 
 // Execute an action
@@ -405,7 +405,7 @@ console.log(result);
 ### Environment Variables
 \`\`\`bash
 LIGHTNINGFLOW_API_KEY=your-api-key
-LIGHTNINGFLOW_BASE_URL=https://lightningflow.online/api/$SERVICE_SLUG
+LIGHTNINGFLOW_BASE_URL=https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG
 LIGHTNINGFLOW_TIMEOUT=30000
 \`\`\`
 
@@ -413,7 +413,7 @@ LIGHTNINGFLOW_TIMEOUT=30000
 \`\`\`javascript
 const config = {
   apiKey: 'your-api-key',
-  baseUrl: 'https://lightningflow.online/api/$SERVICE_SLUG',
+  baseUrl: 'https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG',
   timeout: 30000,
   retries: 3,
   debug: false
@@ -563,7 +563,7 @@ const client = new ${SERVICE_NAME//[^a-zA-Z0-9]/}({
 - **Documentation**: https://docs.lightningflow.online/$SERVICE_SLUG
 - **GitHub Issues**: https://github.com/lightningflow/lightningflow-ai/issues
 - **Discord Community**: https://discord.gg/lightningflow
-- **Email Support**: support@lightningflow.online
+- **Email Support**: support@evenslouis.ca
 
 ### Reporting Bugs
 When reporting bugs, please include:
@@ -907,7 +907,7 @@ make rollback
 ### Health Checks
 \`\`\`bash
 # Check service health
-curl -f https://lightningflow.online/api/$SERVICE_SLUG/healthz
+curl -f https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/healthz
 
 # Check all services
 make health-check
@@ -994,7 +994,7 @@ docker compose restart ${SERVICE_SLUG}
 ### Performance Issues
 \`\`\`bash
 # Check response times
-curl -w "@curl-format.txt" -o /dev/null -s https://lightningflow.online/api/$SERVICE_SLUG/healthz
+curl -w "@curl-format.txt" -o /dev/null -s https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/healthz
 
 # Check resource usage
 make resource-check
@@ -1032,11 +1032,11 @@ docker compose up -d
 - **Documentation**: https://docs.lightningflow.online
 - **GitHub Issues**: https://github.com/lightningflow/lightningflow-ai/issues
 - **Discord**: https://discord.gg/lightningflow
-- **Email**: support@lightningflow.online
+- **Email**: support@evenslouis.ca
 
 ### Emergency Contacts
-- **Critical Issues**: support@lightningflow.online
-- **Security Issues**: security@lightningflow.online
+- **Critical Issues**: support@evenslouis.ca
+- **Security Issues**: security@evenslouis.ca
 - **Outage**: +1-XXX-XXX-XXXX
 EOF
 }
@@ -1054,7 +1054,7 @@ generate_troubleshooting_docs() {
 docker compose ps ${SERVICE_SLUG}
 
 # Check service health
-curl -f https://lightningflow.online/api/$SERVICE_SLUG/healthz
+curl -f https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/healthz
 
 # Check service logs
 docker compose logs -f ${SERVICE_SLUG}
@@ -1207,7 +1207,7 @@ free -h
 #### Diagnosis
 \`\`\`bash
 # Test response time
-curl -w "@curl-format.txt" -o /dev/null -s https://lightningflow.online/api/$SERVICE_SLUG/healthz
+curl -w "@curl-format.txt" -o /dev/null -s https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/healthz
 
 # Check CPU usage
 top
@@ -1245,7 +1245,7 @@ ping lightningflow.online
 docker compose logs ${SERVICE_SLUG} | grep -i auth
 
 # Test with valid token
-curl -H "Authorization: Bearer VALID_TOKEN" https://lightningflow.online/api/$SERVICE_SLUG/healthz
+curl -H "Authorization: Bearer VALID_TOKEN" https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/healthz
 \`\`\`
 
 #### Solutions
@@ -1292,7 +1292,7 @@ export DEBUG=*
 docker compose up -d
 
 # Check application metrics
-curl https://lightningflow.online/api/$SERVICE_SLUG/metrics
+curl https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/metrics
 \`\`\`
 
 ## Monitoring & Alerting
@@ -1301,8 +1301,8 @@ curl https://lightningflow.online/api/$SERVICE_SLUG/metrics
 \`\`\`bash
 # Automated health check
 #!/bin/bash
-if ! curl -f https://lightningflow.online/api/$SERVICE_SLUG/healthz >/dev/null 2>&1; then
-    echo "Service is down!" | mail -s "Alert: ${SERVICE_SLUG} down" admin@lightningflow.online
+if ! curl -f https://evenslouis.ca/lightningflow/api/$SERVICE_SLUG/healthz >/dev/null 2>&1; then
+    echo "Service is down!" | mail -s "Alert: ${SERVICE_SLUG} down" admin@evenslouis.ca
 fi
 \`\`\`
 
@@ -1391,11 +1391,11 @@ open http://localhost:3000
 - **Documentation**: https://docs.lightningflow.online/$SERVICE_SLUG
 - **GitHub Issues**: https://github.com/lightningflow/lightningflow-ai/issues
 - **Discord**: https://discord.gg/lightningflow
-- **Email**: support@lightningflow.online
+- **Email**: support@evenslouis.ca
 
 ### Escalation
 - **Level 1**: Community support (Discord, GitHub)
-- **Level 2**: Email support (support@lightningflow.online)
-- **Level 3**: Emergency support (security@lightningflow.online)
+- **Level 2**: Email support (support@evenslouis.ca)
+- **Level 3**: Emergency support (security@evenslouis.ca)
 EOF
 }

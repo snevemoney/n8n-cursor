@@ -37,7 +37,7 @@ export class N8nClient {
 
   constructor(apiKey?: string, options?: { maxRetries?: number; retryDelay?: number }) {
     // Use N8N_API_URL if set, otherwise fall back to getN8nBaseUrl()
-    // N8N_API_URL should be the full API base URL (e.g., https://n8ncloud.tech/api/v1)
+    // N8N_API_URL should be the full API base URL (e.g., https://evenslouis.ca/n8n/api/v1)
     if (process.env.N8N_API_URL) {
       this.baseUrl = process.env.N8N_API_URL;
     } else {

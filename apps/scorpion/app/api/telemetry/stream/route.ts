@@ -2,6 +2,8 @@ import { NextRequest } from 'next/server';
 import { getTelemetryBus } from '@/lib/telemetry/bus';
 import { DomainEventSchema, MetricsPointSchema, type DomainEvent, type MetricsPoint } from '@/lib/telemetry/schema';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/telemetry/stream
  * 

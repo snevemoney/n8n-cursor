@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 import { behaviorConfig } from '@/config/behavior';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/control-panel/modes - Get all available modes
  */

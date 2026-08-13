@@ -3,6 +3,8 @@ import { runCouncilLegacy } from '@/server/orchestrator/council/legacy';
 import { extractDomainTags } from '@/server/council';
 import { withErrorHandling, createSuccessResponse } from '@/lib/api-error-handler';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/council/test - Test the council system (new v2 vs old legacy)
  * 

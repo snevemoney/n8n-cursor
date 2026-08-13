@@ -1,4 +1,5 @@
 "use client"
+import { apiPath } from '@/lib/base-path';
 
 import { RefreshCw } from "lucide-react"
 import { Button } from "../../components/ui/button"
@@ -8,7 +9,7 @@ export function ResetDataButton() {
   const handleReset = async () => {
     try {
       // In a production app, this would be a real API endpoint
-      // await fetch("/api/mock/reset", { method: "POST" })
+      // await fetch(apiPath("/api/mock/reset"), { method: "POST" })
       
       toast.success('Mock data has been reset', {
         description: 'Node data has been restored to initial values'

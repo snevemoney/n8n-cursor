@@ -8,6 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEventBus } from '@/lib/events/event-bus';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;

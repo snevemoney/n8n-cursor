@@ -1,4 +1,5 @@
 'use client';
+import { apiPath } from '@/lib/base-path';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -98,7 +99,7 @@ export function useOnboardingTracker({
         ...event,
       };
 
-      const response = await fetch('/api/analytics/onboarding', {
+      const response = await fetch(apiPath('/api/analytics/onboarding'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -457,7 +458,7 @@ export function useSimpleOnboardingTracker() {
         page_referrer: document.referrer
       };
 
-      const response = await fetch('/api/track/onboarding', {
+      const response = await fetch(apiPath('/api/track/onboarding'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
