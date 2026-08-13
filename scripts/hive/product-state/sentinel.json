@@ -1,0 +1,24 @@
+{
+  "project_id": "sentinel",
+  "display_name": "SENTINEL",
+  "lifecycle": "specification",
+  "agent_state": "IDLE",
+  "owner_agent": null,
+  "priority": "P3",
+  "blocked": false,
+  "requires_human": false,
+  "offer_validated": false,
+  "next_milestone": "spec complete",
+  "dependencies": [],
+  "allowed_agents": ["Researcher", "Consultant", "Big Boss", "Librarian"],
+  "suppressed_agents": ["Product GTM", "Publishing Engine", "Lead Hunter", "Forge"],
+  "expected_output": "product specification",
+  "definition_of_done": "spec reviewed by operator",
+  "resources": {
+    "repo": "n8n-cursor",
+    "branch": "main",
+    "url": null
+  },
+  "last_action": null,
+  "next_action": "Researcher market scan"
+}

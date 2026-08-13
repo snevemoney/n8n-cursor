@@ -1,0 +1,70 @@
+{
+  "id": "complexity-router",
+  "name": "Complexity Router",
+  "description": "Route each agent turn to a model tier (complex / simple / free) based on prompt content, agent identity, and explicit markers. Runs on the before_model_resolve hook and rewrites the initial model pick; the existing model.fallbacks array in openclaw.json still provides the cascade safety net.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "tiers": {
+        "type": "object",
+        "description": "Map of tier name to model identifier (e.g. {\"complex\": \"anthropic/claude-sonnet-4-6\", \"simple\": \"anthropic/claude-haiku-4-5-20251001\", \"free\": \"openrouter/openrouter/free\"}).",
+        "additionalProperties": { "type": "string" }
+      },
+      "agentDefaults": {
+        "type": "object",
+        "description": "Map of agent id to default tier name. Used when no markers/keywords/length rule triggers.",
+        "additionalProperties": { "type": "string" }
+      },
+      "complexKeywords": {
+        "type": "array",
+        "description": "Lowercase substrings that force the 'complex' tier.",
+        "items": { "type": "string" }
+      },
+      "simpleKeywords": {
+        "type": "array",
+        "description": "Lowercase substrings that force the 'simple' tier (only applied if no complex keyword matched).",
+        "items": { "type": "string" }
+      },
+      "lengthThresholds": {
+        "type": "object",
+        "description": "Prompt character-length thresholds. Prompts shorter than 'simple' tend toward the simple tier; longer than 'complex' tend toward the complex tier.",
+        "properties": {
+          "simple": { "type": "number", "minimum": 0 },
+          "complex": { "type": "number", "minimum": 0 }
+        }
+      },
+      "markers": {
+        "type": "object",
+        "description": "Explicit prompt substrings that unconditionally select a tier. Highest priority.",
+        "additionalProperties": { "type": "string" }
+      },
+      "defaultTier": {
+        "type": "string",
+        "description": "Fallback tier name when nothing else matches."
+      },
+      "disabled": {
+        "type": "boolean",
+        "description": "When true, the plugin loads but does not override any model selection."
+      }
+    }
+  },
+  "uiHints": {
+    "tiers": {
+      "label": "Model tiers",
+      "help": "Tier name -> model id. Tier names are referenced by agentDefaults, markers, and defaultTier. The plugin only sets the INITIAL model; the agent's model.fallbacks array still handles intra-tier cascade."
+    },
+    "agentDefaults": {
+      "label": "Per-agent defaults",
+      "help": "When no explicit rule matches, each agent falls back to its configured tier. Agents not listed use 'defaultTier'."
+    },
+    "markers": {
+      "label": "Explicit markers",
+      "help": "Substrings a user can include in the message to force a tier. E.g. {\"!fast\": \"free\", \"!smart\": \"complex\"}."
+    },
+    "disabled": {
+      "label": "Disabled",
+      "help": "Kill-switch. Flip to true to passthrough without touching any model selection."
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "confidence_bands": {
+    "proceed": 0.85,
+    "quick_verify": 0.65,
+    "research": 0.4
+  },
+  "budgets": {
+    "quick": { "max_sources": 5, "max_videos": 1, "requires_approval": false },
+    "standard": { "max_sources": 15, "max_videos": 3, "requires_approval": false },
+    "deep": { "max_sources": 40, "max_videos": 8, "requires_approval": false },
+    "exceptional": { "max_sources": 100, "max_videos": 15, "requires_approval": true }
+  },
+  "default_source_hierarchy": [
+    "primary_official_documentation",
+    "primary_data",
+    "high_quality_technical_sources",
+    "youtube_video_tutorials",
+    "forums_community",
+    "social_media_signals"
+  ],
+  "per_agent": {
+    "Researcher": {
+      "source_hierarchy": ["primary_official_documentation", "primary_data", "high_quality_technical_sources", "youtube_video_tutorials", "forums_community", "social_media_signals"],
+      "social_video_role": "evidence"
+    },
+    "Forge": {
+      "source_hierarchy": ["primary_official_documentation", "github_issues", "stackoverflow", "youtube_video_tutorials", "forums_community"],
+      "social_video_role": "evidence",
+      "delegate_deep_research_to": "Researcher"
+    },
+    "Wealth Manager": {
+      "source_hierarchy": ["sec_filings", "company_filings", "earnings_materials", "official_company_sources", "reputable_financial_datasets", "credible_expert_analysis", "youtube_x_social"],
+      "social_video_role": "hypothesis_only"
+    },
+    "Creative Studio": {
+      "source_hierarchy": ["reference_videos", "style_guides", "creator_portfolios", "youtube_tutorials"],
+      "social_video_role": "evidence"
+    },
+    "Product GTM": {
+      "source_hierarchy": ["product_demos", "reviews", "reddit_discussions", "competitor_sites", "youtube_demos", "social_reactions"],
+      "social_video_role": "sentiment_only"
+    },
+    "Career Strategist": {
+      "source_hierarchy": ["job_listings", "salary_data", "official_role_descriptions", "day_in_life_videos", "reddit_experiences"],
+      "social_video_role": "evidence"
+    }
+  },
+  "stop_research_when": [
+    "answer_confidence_exceeds_threshold",
+    "two_independent_credible_sources_agree",
+    "official_documentation_confirms_core_behavior",
+    "remaining_uncertainty_unlikely_to_change_implementation",
+    "diminishing_expected_value"
+  ]
+}

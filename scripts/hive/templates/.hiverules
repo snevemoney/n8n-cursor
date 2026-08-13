@@ -1,0 +1,14 @@
+# Hive orchestration settings (template)
+# Copy to repo root: cp scripts/hive/templates/.hiverules .hiverules
+
+hive_orchestration_settings:
+  communication_protocol: JSON-RPC-over-HTTP
+  discovery_mechanism: manifest_scavenge
+  failover_behavior: redirect_to_n8n_error_handler
+  execute_webhook_path: /webhook/hive-execute-tool
+
+global_tool_constraints:
+  - All tools accept strict JSON inputs.
+  - Errors include route + stackTrace per ECOSYSTEM_ERROR_PAYLOAD.md.
+  - No cross-app DB writes without n8n routing.
+  - Tier 3 HITL for money/deploy/secrets/client send.

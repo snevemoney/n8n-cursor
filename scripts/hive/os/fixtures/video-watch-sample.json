@@ -1,0 +1,27 @@
+{
+  "video_id": "test123",
+  "video_url": "https://youtube.com/watch?v=test123",
+  "sampling_interval_sec": 5,
+  "frames": [
+    {
+      "timestamp": "00:00",
+      "description": "Presenter full-screen with title text"
+    },
+    {
+      "timestamp": "00:07",
+      "description": "Cursor IDE settings page visible"
+    }
+  ],
+  "transcript": [
+    {
+      "start": "00:00",
+      "end": "00:07",
+      "text": "I spent 30 days testing this workflow."
+    },
+    {
+      "start": "00:07",
+      "end": "00:15",
+      "text": "Open Cursor settings and click Rules."
+    }
+  ]
+}

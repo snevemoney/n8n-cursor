@@ -1,0 +1,313 @@
+{
+  "webhookBase": "https://evenslouis.ca/webhook",
+  "entries": [
+    {
+      "name": "hive-golden-path-smoke-notify",
+      "webhookPath": "/webhook/hive-smoke-notify",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (required)",
+        "message": "string (required)"
+      }
+    },
+    {
+      "name": "hive-outer-heaven-report-notify",
+      "webhookPath": "/webhook/hive-outer-heaven-report",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (optional)"
+      }
+    },
+    {
+      "name": "phase9-pipedrive-lead",
+      "webhookPath": "/webhook/phase9-pipedrive-lead",
+      "hitl": true,
+      "authHeader": "none",
+      "registerTo": "scorpion",
+      "note": "Pipedrive posts directly; do not trigger via tool unless operatorConfirm"
+    },
+    {
+      "name": "hive-error-heal-notify",
+      "webhookPath": "/webhook/hive-error-heal",
+      "hitl": true,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (optional — generated if absent)",
+        "statusCode": "number (default 500)",
+        "route": "string (required)",
+        "error": "string (required)",
+        "stackTrace": "string (optional)",
+        "repo": "string (default n8n-cursor)",
+        "service": "string (optional)"
+      },
+      "note": "Secret 7 self-heal: registers ops.self_heal.proposed need_hitl; Forge opens PR, operator merges"
+    },
+    {
+      "name": "hive-market-signal-ingest",
+      "webhookPath": "/webhook/hive-market-signal",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (required)",
+        "source": "string (reddit|x|competitor|ce)",
+        "signal": "string (required)",
+        "url": "string (optional)"
+      },
+      "note": "Secret 9 — planned; ingest market signals. Prefer: scripts/hive/hive-revenue-sensors.py ingest-signal"
+    },
+    {
+      "name": "hive-feature-priority-rank",
+      "webhookPath": "/webhook/hive-feature-rank",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (required)",
+        "signals": "array of { signal, revenueScore?, easeScore? }"
+      },
+      "note": "Secret 9 — planned; rank features. Prefer: scripts/hive/hive-revenue-sensors.py rank-features"
+    },
+    {
+      "name": "hive-revenue-sensor-hourly",
+      "webhookPath": null,
+      "hitl": false,
+      "authHeader": "internal",
+      "registerTo": "scorpion",
+      "inputSchema": {},
+      "note": "Secret 15 — planned cron. Prefer: scripts/hive/hive-revenue-sensors.py hourly (no n8n required)"
+    },
+    {
+      "name": "hive-ecosystem-route",
+      "webhookPath": "/webhook/hive-ecosystem-route",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "route": "string (golden-path-smoke|error-heal|outer-heaven-report|market-signal|ce-lead-notify|founder-signal|meta-critique|predictive-construct|chronicle-ingest)",
+        "correlationId": "string (required)",
+        "sourceRepo": "string (repo id from repo-registry)",
+        "payload": "object (forwarded to target webhook)"
+      },
+      "note": "Secret 21 master cross-repo router. Import: n8n-import-ecosystem-router.sh"
+    },
+    {
+      "name": "hive-ce-lead-notify",
+      "webhookPath": "/webhook/hive-ce-lead-notify",
+      "hitl": true,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "both",
+      "inputSchema": {
+        "correlationId": "string (required, min 8 chars)",
+        "leadId": "string (optional)",
+        "name": "string (required if no email)",
+        "email": "string (optional)",
+        "status": "string (default new)",
+        "source": "string (default client-engine)"
+      },
+      "note": "Vertical slice CE lead → Scorpion ce.lead.received → Telegram #alerts. Route via hive-ecosystem-route key ce-lead-notify. Import: n8n-import-ce-lead-slice.sh"
+    },
+    {
+      "name": "hive-founder-signal",
+      "webhookPath": "/webhook/hive-founder-signal",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "both",
+      "inputSchema": {
+        "correlationId": "string (required)",
+        "signalType": "note|calendar|chat|telemetry|doc",
+        "text": "string (required)",
+        "source": "string (optional)",
+        "tags": "array (optional)"
+      },
+      "note": "Meta-cognitive external loop — founder behavior ingest. May forward to predictive-construct. Import: n8n-import-meta-cognitive.sh"
+    },
+    {
+      "name": "hive-chronicle-ingest",
+      "webhookPath": "/webhook/hive-chronicle-ingest",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (optional)",
+        "source": "string (cursor|grok|manual|n8n)",
+        "workspace": "string (optional)",
+        "summary": "string (required)",
+        "project": "string (optional)",
+        "tags": "array or comma string (optional)",
+        "survivability": "ops|business|personal (optional)",
+        "highSignal": "boolean (optional — forwards to hive-founder-signal)"
+      },
+      "note": "Outer Heaven living chronicle ingest. Registers outer_heaven.chronicle.ingested. Import: n8n-import-outer-heaven-library.sh"
+    },
+    {
+      "name": "hive-meta-critique",
+      "webhookPath": "/webhook/hive-meta-critique",
+      "hitl": true,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "both",
+      "inputSchema": {
+        "correlationId": "string (optional)",
+        "repos": "array (optional)",
+        "directive": "string (optional override)"
+      },
+      "note": "Internal criticism loop — CRITIQUE.md directive to Forge, staging PR only. Sunday cron: Hive Sunday Meta Critique"
+    },
+    {
+      "name": "hive-predictive-construct",
+      "webhookPath": "/webhook/hive-predictive-construct",
+      "hitl": true,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "both",
+      "inputSchema": {
+        "correlationId": "string (required)",
+        "thesis": "string (required)",
+        "confidence": "number (optional)",
+        "keywordHits": "array (optional)"
+      },
+      "note": "Predictive construction — inactive n8n DRAFT_PENDING_REVIEW + need_hitl. Never auto prod activate."
+    },
+    {
+      "name": "hive-sunday-meta-critique",
+      "webhookPath": null,
+      "hitl": true,
+      "authHeader": "internal",
+      "registerTo": "both",
+      "inputSchema": {},
+      "note": "Cron Mon 03:00 UTC — weekly meta-critique directive. Same import script."
+    },
+    {
+      "name": "hive-execute-tool",
+      "webhookPath": "/webhook/hive-execute-tool",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "jsonrpc": "string (2.0)",
+        "id": "string (correlationId)",
+        "method": "string (tool_name.endpoint_id)",
+        "params": "object"
+      },
+      "note": "Hive-Mind toolbox JSON-RPC router. Import: n8n-import-toolbox-router.sh. Registry: manifests/hive-toolbox-registry.json"
+    },
+    {
+      "name": "hive-creative-pivot",
+      "webhookPath": "/webhook/hive-creative-pivot",
+      "hitl": true,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string",
+        "fix_attempt": "number (>= 3 triggers pivot)",
+        "tool_method": "string",
+        "business_goal": "string",
+        "error": "string",
+        "estimated_loop_cost_usd": "number (halt if > 15)"
+      },
+      "note": "Dual-loop Phase 2 heuristic. Import: n8n-import-creative-pivot.sh"
+    },
+    {
+      "name": "hive-telemetry-ingest",
+      "webhookPath": "/webhook/hive-telemetry-ingest",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "timestamp": "ISO8601",
+        "repository_name": "string",
+        "event_type": "BOOT_UP|TEST_SUCCESS|TEST_FAILURE|CREATIVE_PIVOT|REVENUE_EARNED|INFO|WARN",
+        "severity": "INFO|WARN|CRITICAL",
+        "context": "object",
+        "hive_state": "object (optional)"
+      },
+      "note": "Unified telemetry CIA ingest. Import: n8n-import-telemetry.sh"
+    },
+    {
+      "name": "hive-daily-operational-digest",
+      "webhookPath": null,
+      "hitl": false,
+      "authHeader": "internal",
+      "registerTo": "scorpion",
+      "inputSchema": {},
+      "note": "Cron daily State of the Hive digest → Telegram. Same import script."
+    },
+    {
+      "name": "hive-operator-digest",
+      "webhookPath": "/webhook/hive-operator-digest",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (optional)"
+      },
+      "note": "Daily 07:00 EDT JSON digest for Grok Big Boss + Telegram fallback. Import: workflows/hive/hive-operator-digest.json"
+    },
+    {
+      "name": "hive-web-learning-cycle",
+      "webhookPath": null,
+      "hitl": false,
+      "authHeader": "internal",
+      "registerTo": "scorpion",
+      "inputSchema": {},
+      "note": "Weekly read-only web learning — run scripts/hive/outer-heaven/web-learning-cycle.py on VPS cron (Sunday). Inactive n8n stub."
+    },
+    {
+      "name": "evens-email-notify",
+      "webhookPath": "/webhook/notifications/email",
+      "hitl": false,
+      "authHeader": "none",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "to": "string (optional)",
+        "subject": "string (required)",
+        "body": "string (required)",
+        "correlationId": "string (optional)"
+      },
+      "note": "evenslouis.ca/n8n — Email Notification System (operator notify, not client send)"
+    },
+    {
+      "name": "evens-support-agent",
+      "webhookPath": "/webhook/support-agent",
+      "hitl": true,
+      "authHeader": "none",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "query": "string",
+        "category": "string (optional)",
+        "correlationId": "string (optional)"
+      },
+      "note": "evenslouis.ca/n8n — Support Agent Webhook; operatorConfirm required"
+    },
+    {
+      "name": "evens-master-orchestrator",
+      "webhookPath": "/webhook/master-orchestrator",
+      "hitl": true,
+      "authHeader": "none",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "service": "string",
+        "payload": "object",
+        "correlationId": "string (optional)"
+      },
+      "note": "evenslouis.ca/n8n — Master Orchestration System; operatorConfirm for paid/client paths"
+    },
+    {
+      "name": "evens-elevenlabs-post-call",
+      "webhookPath": "/webhook/cb151ce6-4393-47c1-a724-60a3491e206b",
+      "hitl": true,
+      "authHeader": "none",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "script": "string (optional)",
+        "voiceId": "string (optional)",
+        "correlationId": "string (optional)"
+      },
+      "note": "evenslouis.ca/n8n — elevenlabs post call workflow (active on VPS); operatorConfirm before client-facing audio"
+    }
+  ]
+}

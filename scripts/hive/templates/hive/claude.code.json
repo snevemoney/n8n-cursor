@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "comment": "Hive business constraints for Claude Code — reference; sync per repo as needed.",
+  "permissions": {
+    "allow": [],
+    "deny": []
+  },
+  "hooks": {},
+  "systemPromptAppend": "DUAL-LOOP: Phase1 deterministic heal+test→staging; Phase2 fix_attempt>=3→creative pivot (CREATIVE_PIVOT.yaml). CONTAINMENT: no prod DDL, $15 API breaker, Tier3 money. MULTI-REPO: manifest+JSON-RPC hive-execute-tool. Load DUAL_LOOP_ENGINE.md, CONTAINMENT_GRID.md.",
+  "loadDocs": [
+    "docs/hive/DUAL_LOOP_ENGINE.md",
+    "docs/hive/CONTAINMENT_GRID.md",
+    "docs/hive/HIVE_TOOLBOX.md",
+    "docs/hive/MULTI_REPO_GRID.md",
+    "docs/hive/SHARED_CORE_REGISTRY.md",
+    "docs/hive/MOGUL_MODE.md",
+    "docs/hive/SELF_EVOLUTION.md",
+    "docs/hive/NOVICE_ARCHITECT.md",
+    "docs/hive/OPERATIONAL_MANDATE.md",
+    "docs/hive/EMPIRE_SECRETS.yaml",
+    "docs/hive/AUTONOMOUS_FACTORY.md",
+    "docs/hive/USER_INTENT.md",
+    "docs/wip-program/HARD_RULES.md"
+  ]
+}

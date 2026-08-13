@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.hive.outer-heaven-sync</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>REPLACE_REPO/scripts/hive/outer-heaven/run-capture-cycle.sh</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HIVE_OBSIDIAN_VAULT</key>
+    <string>REPLACE_VAULT</string>
+  </dict>
+  <key>StartInterval</key>
+  <integer>900</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/outer-heaven-sync.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/outer-heaven-sync.err</string>
+</dict>
+</plist>

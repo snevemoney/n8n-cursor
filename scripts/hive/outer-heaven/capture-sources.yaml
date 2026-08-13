@@ -1,0 +1,33 @@
+# Operator-editable capture source paths for mine-transcripts.py
+# Env vars override globs (OUTER_HEAVEN_CHATGPT_EXPORT, OUTER_HEAVEN_CLAUDE_EXPORT)
+
+cursor:
+  glob: "~/.cursor/projects/*/agent-transcripts/**/*.jsonl"
+  exclude_workspaces:
+    - hub-game-starter
+
+grok:
+  dir: "~/.grokbot"
+  exclude_filename_patterns:
+    - credential
+    - connection
+    - daemon-credential
+
+scorpion:
+  path: "apps/scorpion relative: .scorpion/conversations/conversations.json"
+
+chatgpt_export:
+  globs:
+    - "~/Downloads/chatgpt-export*/**/*.json"
+    - "~/Downloads/**/conversations.json"
+  env_override: OUTER_HEAVEN_CHATGPT_EXPORT
+
+claude_export:
+  globs:
+    - "~/Downloads/claude-export*/**/*"
+    - "~/Downloads/**/claude*/**/*.json"
+  env_override: OUTER_HEAVEN_CLAUDE_EXPORT
+
+inbox:
+  dir: "00_Outer_Heaven/INBOX"
+  script: ingest-inbox.py

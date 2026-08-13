@@ -1,0 +1,24 @@
+{
+  "project_id": "proofcheck",
+  "display_name": "ProofCheck",
+  "lifecycle": "development",
+  "agent_state": "READY",
+  "owner_agent": "Forge",
+  "priority": "P2",
+  "blocked": false,
+  "requires_human": false,
+  "offer_validated": false,
+  "next_milestone": "staging smoke pass",
+  "dependencies": [],
+  "allowed_agents": ["Forge", "Researcher", "Watchdog", "Big Boss", "Librarian"],
+  "suppressed_agents": ["Product GTM", "Publishing Engine", "Lead Hunter"],
+  "expected_output": "MVP staging deploy",
+  "definition_of_done": "Playwright smokes green on staging",
+  "resources": {
+    "repo": "n8n-cursor",
+    "branch": "staging",
+    "url": "https://evenslouis.ca"
+  },
+  "last_action": null,
+  "next_action": "Forge CI fix"
+}

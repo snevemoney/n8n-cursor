@@ -1,0 +1,113 @@
+{
+  "version": "2.0.0-os",
+  "description": "Agent-to-agent handoff chains — 17-agent OS (grokbot-orchestrate.py)",
+  "maxHopsPerCorrelation": 5,
+  "pollAgent": "Big Boss",
+  "chains": [
+    {
+      "id": "research-to-gtm",
+      "description": "Researcher dossier → Product GTM positioning → Forge → HITL",
+      "hops": [
+        {
+          "when": { "jobType": "research.web_intel", "status": ["done"] },
+          "to": "Product GTM",
+          "prompt": "HANDOFF — research-to-gtm (hop 1/3)\n\nUpstream: Researcher completed dossier.\n\ncorrelationId: {correlationId}\nsummary: {summary}\n\nCheck can-act for Product GTM. If WAIT_FOR_STATE → NO_ACTION.\nApply dossier to ONE GTM phase. Register gtm.handoff."
+        },
+        {
+          "when": { "jobType": "gtm.handoff", "status": ["done"] },
+          "to": "Forge",
+          "prompt": "HANDOFF — research-to-gtm (hop 2/3)\n\nUpstream: Product GTM handoff.\n\ncorrelationId: {correlationId}\nsummary: {summary}\n\nTranslate to engineering scope. Register engineering.scope."
+        },
+        {
+          "when": { "jobType": "engineering.scope", "status": ["done"] },
+          "to": "HITL Operator",
+          "tier3Stop": true,
+          "prompt": "HANDOFF — research-to-gtm (hop 3/3) — L3 gate\n\ncorrelationId: {correlationId}\nsummary: {summary}\n\nhitl_propose_action if deploy/spend needed. Register hitl.proposal."
+        }
+      ]
+    },
+    {
+      "id": "intel-to-build",
+      "description": "GTM handoff → Forge scope → HITL",
+      "hops": [
+        {
+          "when": { "jobType": "gtm.handoff", "status": ["done"] },
+          "to": "Forge",
+          "prompt": "HANDOFF — intel-to-build (hop 1/2)\n\ncorrelationId: {correlationId}\nsummary: {summary}\n\nEngineering scope + smokes. Register engineering.scope."
+        },
+        {
+          "when": { "jobType": "engineering.scope", "status": ["done"] },
+          "to": "HITL Operator",
+          "tier3Stop": true,
+          "prompt": "HANDOFF — intel-to-build (hop 2/2) — L3\n\ncorrelationId: {correlationId}\n\nPropose Tier 3 items only."
+        }
+      ]
+    },
+    {
+      "id": "heal-loop",
+      "description": "Watchdog failure → Forge retry → Big Boss rollup",
+      "hops": [
+        {
+          "when": { "jobType": "hive.watchdog.run", "status": ["failed"] },
+          "to": "Forge",
+          "prompt": "HANDOFF — heal-loop (hop 1/2)\n\ncorrelationId: {correlationId}\nsummary: {summary}\n\nRead-only smokes. Register build.smoke."
+        },
+        {
+          "when": { "jobType": "build.smoke", "status": ["failed"] },
+          "to": "Big Boss",
+          "prompt": "HANDOFF — heal-loop (hop 2/2)\n\ncorrelationId: {correlationId}\n\nOne operator action max — link /pro or /n8n."
+        }
+      ]
+    },
+    {
+      "id": "consulting-ladder",
+      "description": "Researcher → Consultant → Forge → Money Desk → HITL",
+      "hops": [
+        {
+          "when": { "jobType": "research.web_intel", "status": ["done"] },
+          "to": "Consultant",
+          "prompt": "HANDOFF — consulting-ladder (hop 1/4)\n\ncorrelationId: {correlationId}\n\nRung 1 audit scope + four blanks. Register audit.scope."
+        },
+        {
+          "when": { "jobType": "audit.scope", "status": ["done"] },
+          "to": "Forge",
+          "prompt": "HANDOFF — consulting-ladder (hop 2/4)\n\ncorrelationId: {correlationId}\n\n2-week vertical slice. Register engineering.scope."
+        },
+        {
+          "when": { "jobType": "engineering.scope", "status": ["done"] },
+          "to": "Money Desk",
+          "prompt": "HANDOFF — consulting-ladder (hop 3/4)\n\ncorrelationId: {correlationId}\n\nProfitability/economics read for proposal."
+        },
+        {
+          "when": { "jobType": "finance.snapshot", "status": ["done"] },
+          "to": "HITL Operator",
+          "tier3Stop": true,
+          "prompt": "HANDOFF — consulting-ladder (hop 4/4) — L3\n\ncorrelationId: {correlationId}\n\nPropose client send/deal via hitl_propose_action."
+        }
+      ]
+    },
+    {
+      "id": "jit-research",
+      "description": "Agent requests JIT research → Researcher packet → return to requester",
+      "hops": [
+        {
+          "when": { "jobType": "research.requested", "status": ["done"] },
+          "to": "Researcher",
+          "prompt": "HANDOFF — jit-research (hop 1/2)\n\nUpstream: specialist entered KNOWLEDGE_GAP.\n\ncorrelationId: {correlationId}\nsummary: {summary}\n\nRun: python3 scripts/hive/hive-web-research.py packet --question \"...\" --agent Researcher --tier standard --register\nProduce Research Packet with recommended_approach + known_failure_modes. Register research.packet."
+        },
+        {
+          "when": { "jobType": "research.packet", "status": ["done"] },
+          "to": "{requestingAgent}",
+          "prompt": "HANDOFF — jit-research (hop 2/2)\n\nUpstream: Researcher completed packet.\n\ncorrelationId: {correlationId}\nsummary: {summary}\n\nRead packet at ~/.grokbot/research-packets/. Transition to KNOWLEDGE_READY. Execute task. Validate result."
+        }
+      ]
+    }
+  ],
+  "gtmAgentResolve": {
+    "proofcheck": "Product GTM",
+    "sentinel": "Product GTM",
+    "clipengine": "Product GTM",
+    "trendspotter": "Product GTM",
+    "default": "Product GTM"
+  }
+}
