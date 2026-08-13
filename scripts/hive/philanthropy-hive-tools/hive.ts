@@ -8,6 +8,7 @@ import { ToolHandler, ToolRegistry } from './types'
 import { fetchWithTimeout, missingKeyAlert, sendTelegramAlert } from './utils'
 import { sendTelegramVoiceBrief } from '@/lib/telegram'
 import { listTier3Policy } from './hitl-gate'
+import { isHardPath, isSoftOrLegacy } from './golden-paths.config'
 
 function hiveBase(): string {
   const raw =
@@ -508,16 +509,26 @@ function formatGoldenPathReport(gp: {
   passCount?: number
   total?: number
   paths?: Array<{ path: string; name: string; pass: boolean; detail?: string }>
-}): { text: string; voiceBrief: string } {
-  const pass = gp.passCount ?? '?'
-  const total = gp.total ?? '?'
-  const lines = [`🦂 Hive score: ${pass}/${total} golden paths OK`, '']
-  for (const p of gp.paths ?? []) {
+}): { text: string; voiceBrief: string; hardPassCount: number; hardTotal: number } {
+  const paths = gp.paths ?? []
+
+  const hardPaths = paths.filter((p) => isHardPath(p.path))
+  const hardPassCount = hardPaths.filter((p) => p.pass).length
+  const hardTotal = hardPaths.length
+
+  const lines = [`🦂 Hive score: ${hardPassCount}/${hardTotal} hard golden paths OK`, '']
+  for (const p of paths) {
     const label = stripUrls(String(p.name || p.path || ''))
-    lines.push(`${p.pass ? '✅' : '❌'} ${p.path}: ${label}`)
+    const soft = isSoftOrLegacy(p.path)
+    const icon = p.pass ? '✅' : soft ? '⚠️' : '❌'
+    const suffix = soft ? ' (legacy/soft — not scored)' : ''
+    lines.push(`${icon} ${p.path}: ${label}${suffix}`)
   }
   lines.push('', 'Updated automatically when golden paths change.')
-  return { text: lines.join('\n'), voiceBrief: `Hive report. ${pass} of ${total} golden paths passing.` }
+  lines.push('Soft/legacy paths do not fail watchdog heartbeats.')
+
+  const voiceBrief = `Hive report. ${hardPassCount} of ${hardTotal} hard golden paths passing.`
+  return { text: lines.join('\n'), voiceBrief, hardPassCount, hardTotal }
 }
 
 const hive_send_report: ToolHandler = async (params) => {
@@ -544,7 +555,7 @@ const hive_send_report: ToolHandler = async (params) => {
     return NextResponse.json({ error: message, code: 'HIVE_FETCH_FAILED' }, { status: 502 })
   }
 
-  const { text, voiceBrief } = formatGoldenPathReport(gp)
+  const { text, voiceBrief, hardPassCount, hardTotal } = formatGoldenPathReport(gp)
   const skipAlert = params.skipAlert === true || params.skipAlert === 'true'
   const forceAlert = params.forceAlert === true || params.forceAlert === 'true'
   const deduped = shouldSkipHiveAlert(text, forceAlert)
@@ -566,8 +577,8 @@ const hive_send_report: ToolHandler = async (params) => {
       source: 'telegram',
       status: 'done',
       registerTo: 'scorpion',
-      summary: `Telegram report ${gp.passCount ?? '?'}/${gp.total ?? '?'} golden paths`,
-      metadata: { topicId, agentId: params.agentId ?? 'bigboss' },
+      summary: `Telegram report ${hardPassCount}/${hardTotal} hard golden paths`,
+      metadata: { topicId, agentId: params.agentId ?? 'bigboss', hardPassCount, hardTotal },
     }),
   })
 
@@ -575,8 +586,11 @@ const hive_send_report: ToolHandler = async (params) => {
   return NextResponse.json({
     ok: true,
     correlationId,
-    passCount: gp.passCount,
-    total: gp.total,
+    passCount: hardPassCount,
+    total: hardTotal,
+    hardPassCount,
+    hardTotal,
+    softExcluded: (gp.paths ?? []).filter((p) => isSoftOrLegacy(p.path)).map((p) => p.path),
     topicId,
     postedTo: '#alerts',
     summary: text,
