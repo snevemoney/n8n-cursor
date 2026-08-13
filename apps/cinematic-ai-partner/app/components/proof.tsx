@@ -2,30 +2,34 @@
 
 import { Reveal } from './reveal';
 
-interface OutcomeCard {
+interface OutcomeChapter {
+  number: string;
   label: string;
   title: string;
   description: string;
 }
 
-const outcomes: OutcomeCard[] = [
+const outcomes: OutcomeChapter[] = [
   {
+    number: '01',
     label: 'Acquire',
-    title: 'New pipelines, opened by agents',
+    title: 'Warm doors, not a blast.',
     description:
-      'Research-driven outreach powered by Grok and custom agent workflows. We identify high-signal prospects, craft context-aware messaging, and put warm leads in your pipeline — not spam in theirs.',
+      'We find the leak — book, apply, contact — and put a real conversation in front of the owner. Research and outreach stay on a named bench, with a human on the send.',
   },
   {
+    number: '02',
     label: 'Grow',
-    title: 'Revenue you can measure',
+    title: 'Pages that feel directed.',
     description:
-      'Full-stack site builds, conversion audits, and SEO infrastructure that compounds. We ship production pages — not decks about pages — and tie every change to a growth metric.',
+      'Audit first. Cinematic rebuild when the site itself is the constraint. Production pages, not decks about pages — tied to a metric you can point at.',
   },
   {
+    number: '03',
     label: 'Cut',
-    title: 'Glue work, eliminated',
+    title: 'Glue work, ended.',
     description:
-      'Workflow automation, ops audits, and agent-orchestrated processes that replace the duct tape. We find the manual loops your team runs daily and turn them into reliable systems.',
+      'The loops your team reruns every week become a system. Agents draft. A human stays on the dangerous step. No duct-tape dashboard.',
   },
 ];
 
@@ -34,7 +38,7 @@ export function Proof() {
     <section className="section-padding" aria-labelledby="proof-heading">
       <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <p className="mb-3 text-center text-sm font-medium uppercase tracking-[0.2em] text-text-muted">
+          <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-text-muted">
             Outcomes
           </p>
         </Reveal>
@@ -42,49 +46,63 @@ export function Proof() {
         <Reveal delay={0.1}>
           <h2
             id="proof-heading"
-            className="text-center font-display text-3xl font-normal leading-tight text-text md:text-4xl"
+            className="max-w-xl font-display text-3xl font-normal leading-tight text-text md:text-5xl"
           >
-            Three things we deliver.
+            Three beats. One desk.
           </h2>
         </Reveal>
 
-        {/* Optional broll strip */}
-        <Reveal delay={0.2}>
-          <div className="mt-10 flex items-center justify-center gap-4 overflow-hidden">
+        <Reveal delay={0.15}>
+          <div className="relative mt-12 h-36 overflow-hidden md:h-48">
             <img
               src="/proof/broll-light-leak.webp"
               alt=""
               aria-hidden="true"
-              className="h-20 w-auto rounded-lg opacity-50 md:h-28"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
+              className="absolute inset-0 h-full w-full object-cover opacity-40"
+              onError={(event) => {
+                event.currentTarget.style.display = 'none';
               }}
             />
             <img
               src="/proof/broll-glass-planes.webp"
               alt=""
               aria-hidden="true"
-              className="h-20 w-auto rounded-lg opacity-50 md:h-28"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
+              className="absolute inset-0 h-full w-full object-cover mix-blend-screen opacity-30"
+              onError={(event) => {
+                event.currentTarget.style.display = 'none';
+              }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(to right, var(--bg), transparent 30%, transparent 70%, var(--bg))',
               }}
             />
           </div>
         </Reveal>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {outcomes.map((card, i) => (
-            <Reveal key={card.label} delay={0.15 * (i + 1)}>
-              <article className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-7 transition-colors hover:border-accent/25">
-                <span className="mb-4 inline-block w-fit rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
-                  {card.label}
+        <div className="mt-4">
+          {outcomes.map((chapter, i) => (
+            <Reveal key={chapter.label} delay={0.08 * (i + 1)}>
+              <article className="grid gap-6 border-t border-line py-12 md:grid-cols-[7rem_1fr] md:gap-12">
+                <span
+                  className="font-display text-5xl leading-none text-accent/35 md:text-6xl"
+                  aria-hidden="true"
+                >
+                  {chapter.number}
                 </span>
-                <h3 className="font-display text-xl font-normal leading-snug text-text">
-                  {card.title}
-                </h3>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-text-muted">
-                  {card.description}
-                </p>
+                <div>
+                  <p className="text-sm font-medium uppercase tracking-[0.2em] text-accent">
+                    {chapter.label}
+                  </p>
+                  <h3 className="mt-3 font-display text-2xl font-normal leading-snug text-text md:text-3xl">
+                    {chapter.title}
+                  </h3>
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-text-muted">
+                    {chapter.description}
+                  </p>
+                </div>
               </article>
             </Reveal>
           ))}

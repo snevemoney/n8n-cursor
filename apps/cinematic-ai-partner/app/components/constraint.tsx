@@ -38,7 +38,7 @@ export function Constraint() {
         <ul className="mt-12 space-y-6 text-left" role="list">
           {painPoints.map((point, i) => (
             <Reveal key={i} delay={0.15 * (i + 1)}>
-              <li className="flex items-start gap-4 rounded-xl border border-line bg-surface p-5">
+              <li className="flex items-start gap-4 border-t border-line py-5">
                 <span
                   className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent"
                   aria-hidden="true"

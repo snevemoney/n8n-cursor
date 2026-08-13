@@ -1,3 +1,4 @@
+import { Pathfinder } from './components/pathfinder';
 import { Hero } from './components/hero';
 import { Constraint } from './components/constraint';
 import { Proof } from './components/proof';
@@ -8,6 +9,7 @@ import { Footer } from './components/footer';
 export default function Home() {
   return (
     <main>
+      <Pathfinder />
       <Hero />
       <hr className="section-divider" />
       <Constraint />

@@ -61,7 +61,7 @@ export function HowWeWork() {
                   {step.number}
                 </span>
                 <div>
-                  <h3 className="text-lg font-medium text-text">
+                  <h3 className="font-display text-2xl font-normal text-text">
                     {step.title}
                   </h3>
                   <p className="mt-2 max-w-lg text-sm leading-relaxed text-text-muted">

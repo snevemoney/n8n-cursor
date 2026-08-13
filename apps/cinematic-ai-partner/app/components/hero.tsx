@@ -1,89 +1,86 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
 import { siteConfig } from '../config';
+import { useHeroMotion } from './use-hero-motion';
 
 export function Hero() {
   const prefersReduced = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const plateRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoReady, setVideoReady] = useState(false);
+  const motionOn = prefersReduced === false;
 
-  useEffect(() => {
-    if (prefersReduced) return;
-
-    fetch('/hero/hero.webm', { method: 'HEAD' })
-      .then((r) => {
-        if (r.ok) setVideoReady(true);
-      })
-      .catch(() => {});
-  }, [prefersReduced]);
-
-  useEffect(() => {
-    if (videoReady && videoRef.current && !prefersReduced) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, [videoReady, prefersReduced]);
+  useHeroMotion({
+    enabled: motionOn,
+    sectionRef,
+    plateRef,
+    videoRef,
+  });
 
   return (
-    <section className="hero-glass relative flex min-h-[100svh] items-end overflow-hidden">
-      {/* Poster / gradient fallback — always rendered */}
+    <section
+      ref={sectionRef}
+      className="hero-glass relative flex min-h-[100svh] items-end overflow-hidden"
+    >
       <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: [
-            'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(91,140,255,0.06), transparent)',
-            'linear-gradient(175deg, #0e0e12 0%, #0A0A0C 40%, #141418 100%)',
-          ].join(', '),
-        }}
-      />
-
-      {/* Video layer — only when media exists AND motion is allowed */}
-      {videoReady && !prefersReduced && (
-        <video
-          ref={videoRef}
-          className="absolute inset-0 z-0 h-full w-full object-cover opacity-35"
-          muted
-          loop
-          playsInline
-          autoPlay
-          preload="none"
-          poster="/hero/poster.jpg"
-          aria-hidden="true"
-        >
-          <source src="/hero/hero.webm" type="video/webm" />
-          <source src="/hero/hero.mp4" type="video/mp4" />
-        </video>
-      )}
-
-      {/* Static poster for reduced-motion users when media exists */}
-      {prefersReduced && (
-        <img
-          src="/hero/poster.jpg"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 z-0 h-full w-full object-cover opacity-30"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
+        ref={plateRef}
+        className="hero-plate absolute inset-[-4%] z-0 will-change-transform"
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(91,140,255,0.06), transparent)',
+              'linear-gradient(175deg, #0e0e12 0%, #0A0A0C 40%, #141418 100%)',
+            ].join(', '),
           }}
         />
-      )}
 
-      {/* Bottom vignette */}
+        {motionOn ? (
+          <video
+            ref={videoRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ opacity: 0.32 }}
+            muted
+            playsInline
+            preload="auto"
+            poster="/hero/poster.webp"
+            aria-hidden="true"
+            onError={(event) => {
+              event.currentTarget.style.display = 'none';
+            }}
+          >
+            <source src="/hero/hero.webm" type="video/webm" />
+            <source src="/hero/hero.mp4" type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src="/hero/poster.webp"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover opacity-30"
+            onError={(event) => {
+              event.currentTarget.src = '/hero/poster.jpg';
+            }}
+          />
+        )}
+      </div>
+
       <div
-        className="absolute inset-0 z-[2]"
+        className="pointer-events-none absolute inset-0 z-[2]"
         style={{
           background:
             'linear-gradient(to top, var(--bg) 0%, transparent 50%, rgba(10,10,12,0.4) 100%)',
         }}
       />
 
-      {/* Content */}
       <div className="relative z-[3] mx-auto w-full max-w-5xl px-6 pb-20 pt-40 md:pb-28 md:pt-56">
         <motion.p
           className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-accent"
-          initial={prefersReduced ? {} : { opacity: 0 }}
+          initial={motionOn ? { opacity: 0 } : false}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.3 }}
         >
@@ -92,7 +89,7 @@ export function Hero() {
 
         <motion.h1
           className="max-w-3xl font-display text-4xl font-normal leading-[1.1] tracking-tight text-text md:text-6xl lg:text-7xl"
-          initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
+          initial={motionOn ? { opacity: 0, y: 20 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{
             duration: 0.9,
@@ -100,14 +97,14 @@ export function Hero() {
             ease: [0.22, 1, 0.36, 1],
           }}
         >
-          Your growth team&apos;s
+          Taste plus agents.
           <br />
-          <span className="text-accent">unfair advantage.</span>
+          <span className="text-accent">Not another tool stack.</span>
         </motion.h1>
 
         <motion.p
           className="mt-6 max-w-xl text-lg leading-relaxed text-text-muted md:text-xl"
-          initial={prefersReduced ? {} : { opacity: 0, y: 16 }}
+          initial={motionOn ? { opacity: 0, y: 16 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{
             duration: 0.8,
@@ -115,13 +112,13 @@ export function Hero() {
             ease: [0.22, 1, 0.36, 1],
           }}
         >
-          We embed as your AI operations partner — a focused operator backed by
-          purpose-built agents — so you ship outcomes, not tickets.
+          One operator. Named employees for research, build, and taste. We
+          embed so Acquire, Grow, and Cut actually ship.
         </motion.p>
 
         <motion.div
           className="mt-10"
-          initial={prefersReduced ? {} : { opacity: 0 }}
+          initial={motionOn ? { opacity: 0 } : false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 1.2 }}
         >

@@ -43,9 +43,9 @@ The hero section ships with a CSS gradient + light-leak + grain fallback. To add
    - `hero.mp4` — fallback (~631 KB)
    - `poster.jpg` — still frame / OG image (1200×630)
    - `poster.webp` — optional optimized poster
-2. The component auto-detects `hero.webm` via HEAD request and enables video.
-3. **Motion allowed**: muted autoplay, loop, playsInline — no sound controls, no WebGL.
-4. **Reduced motion**: static `poster.jpg` shown instead; no video loop, no autoplay.
+2. **Motion allowed**: muted video, no loop. Scroll progress 0→1 scrubs `currentTime` and eases a slight scale. Cursor translates the plate 8px max. No WebGL.
+3. **Reduced motion**: static `poster.webp` (jpg fallback); no scrub, no cursor, no autoplay.
+4. Pathfinder (1px top bar) is orientation only — not a decoration.
 
 ### Optional proof broll
 

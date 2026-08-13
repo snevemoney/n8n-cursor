@@ -44,6 +44,11 @@
   }
 }
 
+/* Hero media plate — cursor + scroll transform origin */
+.hero-plate {
+  transform-origin: center center;
+}
+
 /* ── Light-leak accent (hero-only via .hero-glass) ── */
 .hero-glass::before {
   content: '';
