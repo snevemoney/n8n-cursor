@@ -99,6 +99,8 @@ Researcher: complete this table, then edit repo files and reprovision agents.
 | 1 | | docs/hive/outer-heaven/OPERATOR_MEMORY.md (LESSONS) | Librarian | pending |
 | 2 | | scripts/hive/agent-doctrine-lanes.py | all 17 | pending |
 | 3 | | scripts/hive/grok-skills/ or CONTENT/x-bookmarks/learnings-implement.md | varies | pending |
+| 4 | Steal ICPs/machines (not thesis-only) | CONTENT/watch-later/STEAL_SHEET.md + business-types.json | Researcher, GTM, Consultant | pending |
+| 5 | Whole-argument deep summary (not SKU-only) | CONTENT/watch-later/DEEP_SUMMARIES.md | Researcher | pending |
 
 ## Reprovision checklist
 
@@ -338,6 +340,8 @@ def bookmarks_findings_md(
             "| Priority | Action | Owner agent(s) | Hive target |",
             "|----------|--------|----------------|-------------|",
             "| P0 | _Researcher fills from themes_ | | CONTENT/x-bookmarks/learnings-implement.md |",
+            "| P0 | Steal ICPs/machines into the **one** master sheet (not a second catalog) | Researcher, GTM, Consultant | CONTENT/watch-later/STEAL_SHEET.md |",
+            "| P0 | Whole-argument deep summary (clusters, not one essay per tweet) | Researcher | CONTENT/watch-later/DEEP_SUMMARIES.md |",
             "",
             "## Quarantine / ignore",
             "",

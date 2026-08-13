@@ -1,8 +1,7 @@
 {
-  "total_items": 4,
-  "playlist_count_claimed": 1802,
-  "items_in_ledger": 4,
-  "coverage_pct": 0,
+  "total_items": 15,
+  "items_in_ledger": 15,
+  "coverage_pct": 100,
   "loggedIn": true,
   "blocker": null,
   "batch_size": 25,
@@ -11,9 +10,10 @@
     "batches/batch-001.md"
   ],
   "themes": {
-    "other": 1,
-    "claude-code-desktop": 1,
-    "knowledge-graph": 2
+    "other": 10,
+    "claude-code-desktop": 2,
+    "knowledge-graph": 2,
+    "mcp-connectors": 1
   },
   "read_protocol": "Researcher reads batches/batch-NNN.md in order; every item appears exactly once; report items_read == total_items before done. Never invent videos if signed_out."
 }

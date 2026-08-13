@@ -192,6 +192,8 @@ Researcher: complete this table, then edit repo files and reprovision agents.
 | 1 | | docs/hive/outer-heaven/OPERATOR_MEMORY.md (LESSONS) | Librarian | pending |
 | 2 | | scripts/hive/agent-doctrine-lanes.py | all 17 | pending |
 | 3 | | scripts/hive/grok-skills/{{new-skill}}.md | all | pending |
+| 4 | Steal ICPs/machines | CONTENT/watch-later/STEAL_SHEET.md + steal-usecases | Researcher, GTM | pending |
+| 5 | Whole-argument deep summary | CONTENT/watch-later/DEEP_SUMMARIES.md | Researcher | pending |
 
 ## Reprovision checklist
 

@@ -6,7 +6,7 @@
 
 **Parent skill.** Type-specific add-ons:
 - Video → `researcher-video-to-system.md`
-- X bookmarks → section below + `CONTENT/x-bookmarks/learnings-implement.md` as example output
+- X bookmarks → section below + `CONTENT/x-bookmarks/learnings-implement.md` as theme-table example. Steal + deep merge into the **same** master files as Watch Later (do not fork `x-bookmarks/STEAL_SHEET.md`).
 
 **CLI:**
 
@@ -90,6 +90,28 @@ Full item list, raw counts, methodology.
 **Bookmarks** uses **Themes/clusters** (e.g. Claude Code, MCP, cinematic sites, agent hype).  
 **Dossier** uses **Findings by source** with confidence labels.
 
+### 2b. Steal sheet (mandatory)
+
+Thesis-only is **not done**. **Any source** (video, Watch Later, X bookmarks, dossier) that names an ICP, numbered offer, or delivery machine:
+
+1. Load `scripts/hive/grok-skills/steal-usecases.md`
+2. Write/append packet `STEAL_SHEET.md` (who + machine + Path A/B/C + hive skills + kill)
+3. Merge into the **one** master: `docs/hive/outer-heaven/CONTENT/watch-later/STEAL_SHEET.md` + `business-types.json`
+4. Tag sources `yt:{videoId}` or `x:{tweetId}`. Bookmarks = **cluster** rows, not one row per tweet
+5. Sellable rows → `usecase-to-sku`. New `icp_id` → OPERATOR_MEMORY FACTS
+6. $ on tape/tweet = UNVERIFIED. Stack = Cursor + Grok only
+
+Do **not** create `CONTENT/x-bookmarks/STEAL_SHEET.md`. **Every later video/bookmark batch must append the master.**
+
+### 2c. Deep summaries (mandatory)
+
+Do not flatten a doctrine into a SKU. After steal:
+
+1. Write/append packet + `CONTENT/watch-later/DEEP_SUMMARIES.md` — the **whole argument** (economics, role, failure modes, close), not just machines
+2. Videos = per-video (video 8 pattern: paradox / orchestration / illusion of progress). Bookmarks = **clusters**, not 98 essays
+3. Theme tables (`learnings-implement.md`) ≠ this file. CHAPTERS stays Means-for-Evens
+4. Do **not** create `CONTENT/x-bookmarks/DEEP_SUMMARIES.md`
+
 ### 3. System implementation (agents adapt)
 
 Same as video skill — fill `IMPLEMENTATION_MAP.md`:
@@ -100,7 +122,9 @@ Same as video skill — fill `IMPLEMENTATION_MAP.md`:
 | `agent-doctrine-lanes.py` | behavior change for any of 17 |
 | `grok-skills/*.md` | new procedure |
 | `business-lanes.json` | new business model |
-| `CONTENT/x-bookmarks/learnings-implement.md` | bookmark-derived implementables |
+| `CONTENT/watch-later/STEAL_SHEET.md` + `business-types.json` | steal ICPs / machines from **any** source (one catalog) |
+| `CONTENT/watch-later/DEEP_SUMMARIES.md` | whole-argument summaries (videos + bookmark clusters) |
+| `CONTENT/x-bookmarks/learnings-implement.md` | bookmark theme table + P0–P2 (not a second steal sheet) |
 | Reprovision agents | after repo edits |
 
 ### 4. Hand off
@@ -153,6 +177,7 @@ python3 scripts/hive/researcher-research-implement.py bookmarks --filter ai --wr
 ```
 
 Cluster bookmarks into themes; reference `learnings-implement.md` pattern for P0–P2 table.  
+Then **§2b + §2c**: merge ICPs/machines and cluster doctrine into the **master** steal sheet + `DEEP_SUMMARIES.md` (same files as Watch Later).  
 Working set for daily signal = **AI-only**, not full 98.
 
 ---
@@ -178,6 +203,8 @@ python3 scripts/hive/researcher-research-implement.py watchlater --from-json PAT
 
 Repo mirror: `docs/hive/outer-heaven/CONTENT/watch-later/`
 
+After L2 chapters: **§2b steal sheet** — append every ICP/machine to `STEAL_SHEET.md`. **§2c** — whole argument into `DEEP_SUMMARIES.md`. Thesis-only or SKU-only = not done.
+
 **Never** invent videos. **Never** substitute subscriptions, Gmail YouTube mail, or the public homepage for Watch Later.
 
 ---
@@ -190,12 +217,17 @@ Repo mirror: `docs/hive/outer-heaven/CONTENT/watch-later/`
 - Invent bookmarks not in synced JSON
 - Invent Watch Later videos when the browser session is signed out
 - Copy hype literally (40-agent marketing swarms → sober 17-agent OS narrative)
+- Stop at thesis after L2 or a bookmark true-read — steal ICPs/machines into the **master** `STEAL_SHEET.md` (`steal-usecases`)
+- Fork a second steal/deep file under `x-bookmarks/`
 
 ---
 
 ## Related
 
 - `researcher-video-to-system.md`
-- `CONTENT/x-bookmarks/README.md`
+- `steal-usecases.md` — mandatory after L2 **or** bookmark true-read
+- `CONTENT/watch-later/STEAL_SHEET.md` + `business-types.json` — **one** catalog (yt + x)
+- `CONTENT/watch-later/DEEP_SUMMARIES.md` — whole argument (videos + bookmark clusters)
+- `CONTENT/x-bookmarks/README.md` · `learnings-implement.md` (theme table only)
 - `hive-web-research.py`
 - `ai-native-operator-doctrine.md`
