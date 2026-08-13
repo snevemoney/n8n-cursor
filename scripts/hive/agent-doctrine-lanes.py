@@ -36,8 +36,8 @@ DOCTRINE_BY_AGENT: dict[str, str] = {
         "evidence/walkthrough beats screenshots; never assume one product is the whole company."
     ),
     "Researcher": (
-        "DOCTRINE: Tool ≠ skill — packets need break/fix + FACT/INFERENCE labels; cheap tier "
-        "read/summarize, expensive tier only for high-stakes calls; hand validated DON'TS to Librarian."
+        "DOCTRINE: Operator video requests → chapter breakdown + implement in hive (researcher-video-to-system); "
+        "tool≠skill; cheap read/expensive decide; hand validated don'ts to Librarian for all 17 agents."
     ),
     "Forge": (
         "DOCTRINE: Reject 70% done — verification checklist (click paths, mobile, forms) vs "

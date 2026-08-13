@@ -2,6 +2,8 @@
 
 **Shared skill** — Researcher (owner), Creative Studio, Forge, Product GTM, Career Strategist, Wealth Manager.
 
+**System implementation:** After analysis, Researcher runs `researcher-video-to-system` skill — chapters for operator + repo updates for all agents.
+
 ## When to use
 
 After Grok computer **watch** produces JSON with `frames[]` and `transcript[]` for the same video. Use for L3–L4 analysis when transcripts alone are insufficient.

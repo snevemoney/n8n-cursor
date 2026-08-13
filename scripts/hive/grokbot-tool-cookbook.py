@@ -89,10 +89,16 @@ Warm outreach drafts only — HITL before client send.
 """.strip(),
     "Researcher": f"""
 1. {BRIEF_CMD.format(agent="Researcher")}
-JIT research owner:
-2. python3 {REPO}/scripts/hive/os/knowledge-policy.py --hierarchy Researcher
-3. python3 {REPO}/scripts/hive/hive-web-research.py packet --question "..." --agent Researcher --tier standard
-4. Video: L1-L2 via hive-web-research; L3-L4 via Grok watch + /analyze-video-watch-output
+**Operator says "watch this video" / URL pasted → mandatory pipeline:**
+2. Read {REPO}/scripts/hive/grok-skills/researcher-video-to-system.md
+3. Grok computer watch → save watch JSON; L2: hive-web-research.py youtube --url 'URL'
+4. python3 {REPO}/scripts/hive/researcher-video-implement.py --watch-json /path/watch.json --title "TITLE" --write
+5. Deliver CHAPTERS to operator; edit repo (skills, doctrine, OPERATOR_MEMORY); reprovision agents
+6. Message @Librarian + affected agents; register packet
+JIT research (non-video):
+7. python3 {REPO}/scripts/hive/os/knowledge-policy.py --hierarchy Researcher
+8. python3 {REPO}/scripts/hive/hive-web-research.py packet --question "..." --agent Researcher --tier standard
+Video L3-L4: /analyze-video-watch-output
 Write dossiers to {CACHE}/ or ~/.grokbot/research-packets/
 """.strip(),
     "Forge": f"""
@@ -118,7 +124,7 @@ Propose-only for client send.
 1. {BRIEF_CMD.format(agent="Librarian")}
 Memory consolidation:
 2. Read/write {CACHE}/OPERATOR_MEMORY.md (cache-first)
-3. Promote LESSONS/FACTS from ~/.grokbot/research-packets/
+3. Promote LESSONS/FACTS from ~/.grokbot/research-packets/ — including video-*/CHAPTERS.md + IMPLEMENTATION_MAP.md from Researcher
 4. bash {REPO}/scripts/hive/outer-heaven/run-capture-cycle.sh (publishes shared-context.json)
 Never delete CHRONICLE entries.
 """.strip(),
