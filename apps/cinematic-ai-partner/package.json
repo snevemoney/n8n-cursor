@@ -1,0 +1,29 @@
+{
+  "name": "cinematic-ai-partner",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3005",
+    "build": "next build",
+    "start": "next start -p 3005",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "framer-motion": "^11.18.2",
+    "next": "14.2.29",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "14.2.29",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.0.0"
+  }
+}

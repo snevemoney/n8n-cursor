@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ── Locked brand tokens ── */
+  --bg: #0A0A0C;
+  --surface: #141418;
+  --text: #F2F2F4;
+  --muted: #8B8B96;
+  --accent: #5B8CFF;
+  --line: #2A2A32;
+
+  /* ── Spacing scale ── */
+  --space-section: clamp(4rem, 10vw, 8rem);
+
+  /* ── Font stacks ── */
+  --font-display: 'Instrument Serif', 'Newsreader', 'Georgia', serif;
+  --font-body: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ── Motion ── */
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Film grain overlay ── */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -200%;
+  width: 400%;
+  height: 400%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+  animation: grain 8s steps(10) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain::after {
+    animation: none;
+    opacity: 0.018;
+  }
+}
+
+/* Hero media plate — cursor + scroll transform origin */
+.hero-plate {
+  transform-origin: center center;
+}
+
+/* ── Light-leak accent (hero-only via .hero-glass) ── */
+.hero-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 40%, rgba(91,140,255,0.07), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(180,140,255,0.04), transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-glass::before {
+    opacity: 0.6;
+  }
+}
+
+/* ── Base resets ── */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Section utility ── */
+.section-padding {
+  padding-top: var(--space-section);
+  padding-bottom: var(--space-section);
+}
+
+/* ── Divider ── */
+.section-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--line) 20%,
+    var(--line) 80%,
+    transparent
+  );
+  opacity: 0.6;
+  margin: 0 auto;
+  max-width: 60rem;
+}
