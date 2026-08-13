@@ -128,17 +128,18 @@ def write_packet_dir(
     print(f"  IMPLEMENTATION_MAP.md")
 
 
-def resolve_bookmarks_path(prefer_ai: bool) -> Path | None:
-    candidates = [
-        Path.home() / ".grokbot/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
-        REPO / "docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
-        Path.home() / ".grokbot/x-bookmarks.json",
-        REPO / "docs/hive/outer-heaven/CONTENT/x-bookmarks/latest.json",
-    ]
-    if prefer_ai:
-        for p in candidates[:2]:
-            if p.is_file():
-                return p
+def resolve_bookmarks_path(*, filter_ai: bool) -> Path | None:
+    if filter_ai:
+        candidates = [
+            Path.home() / ".grokbot/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
+            REPO / "docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
+        ]
+    else:
+        candidates = [
+            Path.home() / ".grokbot/x-bookmarks.json",
+            REPO / "docs/hive/outer-heaven/CONTENT/x-bookmarks/latest.json",
+            Path.home() / ".grokbot/outer-heaven/CONTENT/x-bookmarks/latest.json",
+        ]
     for p in candidates:
         if p.is_file():
             return p
@@ -146,7 +147,7 @@ def resolve_bookmarks_path(prefer_ai: bool) -> Path | None:
 
 
 def load_bookmarks(*, filter_ai: bool) -> tuple[list[dict[str, Any]], dict[str, Any], Path]:
-    path = resolve_bookmarks_path(prefer_ai=filter_ai)
+    path = resolve_bookmarks_path(filter_ai=filter_ai)
     if not path:
         raise SystemExit(
             "No bookmarks file found. Run: ~/.grokbot/scripts/x-bookmarks-sync.sh --max 100"
@@ -164,33 +165,111 @@ def load_bookmarks(*, filter_ai: bool) -> tuple[list[dict[str, Any]], dict[str, 
     return items, meta, path
 
 
+def classify_item(item: dict[str, Any]) -> str:
+    text = item.get("text") or ""
+    if QUARANTINE_RE.search(text):
+        return "quarantine"
+    for theme_id, pattern, _agents in BOOKMARK_THEMES:
+        if re.search(pattern, text, re.I):
+            return theme_id
+    return "other"
+
+
 def cluster_bookmarks(items: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     clusters: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    quarantine: list[dict[str, Any]] = []
-
     for item in items:
-        text = item.get("text") or ""
-        if QUARANTINE_RE.search(text):
-            quarantine.append(item)
-            continue
-        matched = False
-        for theme_id, pattern, _agents in BOOKMARK_THEMES:
-            if re.search(pattern, text, re.I):
-                clusters[theme_id].append(item)
-                matched = True
-                break
-        if not matched:
-            clusters["other"].append(item)
-
-    if quarantine:
-        clusters["quarantine"] = quarantine
+        clusters[classify_item(item)].append(item)
     return dict(clusters)
+
+
+def items_ledger_md(items: list[dict[str, Any]]) -> str:
+    """Full ledger — every bookmark gets a line (no skipping)."""
+    lines = [
+        "# Items ledger (full read pass)",
+        "",
+        f"**Total items:** {len(items)} — Researcher must account for every row before reporting done.",
+        "",
+        "| # | Theme | Author | Text (full) | URL |",
+        "|---|-------|--------|-------------|-----|",
+    ]
+    for i, it in enumerate(items, 1):
+        theme = classify_item(it)
+        user = it.get("author_username") or it.get("author_name") or "?"
+        text = (it.get("text") or "").replace("|", "\\|").replace("\n", " ")
+        url = it.get("url") or ""
+        lines.append(f"| {i} | {theme} | @{user} | {text} | {url} |")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def write_batch_files(
+    packet_dir: Path, items: list[dict[str, Any]], *, batch_size: int = 25
+) -> list[Path]:
+    """Split ledger into batch files for Grok to read sequentially (large sets)."""
+    batch_dir = packet_dir / "batches"
+    batch_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    total = len(items)
+    batch_num = 0
+    for start in range(0, total, batch_size):
+        batch_num += 1
+        chunk = items[start : start + batch_size]
+        end = start + len(chunk)
+        lines = [
+            f"# Batch {batch_num} — items {start + 1}–{end} of {total}",
+            "",
+            "_Researcher: read every row in this batch before moving to the next._",
+            "",
+        ]
+        for i, it in enumerate(chunk, start + 1):
+            theme = classify_item(it)
+            user = it.get("author_username") or it.get("author_name") or "?"
+            text = it.get("text") or ""
+            url = it.get("url") or ""
+            lines.extend(
+                [
+                    f"## Item {i} · `{theme}` · @{user}",
+                    "",
+                    text,
+                    "",
+                    f"**URL:** {url}",
+                    "",
+                    "---",
+                    "",
+                ]
+            )
+        path = batch_dir / f"batch-{batch_num:03d}.md"
+        path.write_text("\n".join(lines), encoding="utf-8")
+        written.append(path)
+    return written
+
+
+def coverage_meta(
+    items: list[dict[str, Any]], batch_paths: list[Path], *, batch_size: int
+) -> dict[str, Any]:
+    clusters: dict[str, int] = defaultdict(int)
+    for it in items:
+        clusters[classify_item(it)] += 1
+    return {
+        "total_items": len(items),
+        "items_in_ledger": len(items),
+        "coverage_pct": 100 if items else 0,
+        "batch_size": batch_size,
+        "batch_count": len(batch_paths),
+        "batch_files": [f"batches/{p.name}" for p in batch_paths],
+        "themes": dict(clusters),
+        "read_protocol": (
+            "Researcher reads batches/batch-NNN.md in order; every item appears exactly once; "
+            "report items_read == total_items before done."
+        ),
+    }
 
 
 def bookmarks_findings_md(
     items: list[dict[str, Any]],
     clusters: dict[str, list[dict[str, Any]]],
     meta: dict[str, Any],
+    coverage: dict[str, Any] | None = None,
 ) -> str:
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     lines = [
@@ -198,6 +277,8 @@ def bookmarks_findings_md(
         f"**Type:** bookmarks",
         f"**Source:** `{meta.get('source_path', '')}`",
         f"**Items analyzed:** {len(items)} (AI filter: {meta.get('filter_ai', True)})",
+        f"**Coverage:** {coverage.get('items_in_ledger', len(items)) if coverage else len(items)}/{coverage.get('total_items', len(items)) if coverage else len(items)} items in ledger (100% required)",
+        f"**Read batches:** {(coverage or {}).get('batch_count', 1)} file(s) in `batches/` — read every batch in order",
         f"**Analyzed:** {today}",
         f"**Skill:** scripts/hive/grok-skills/researcher-research-to-system.md",
         "",
@@ -230,11 +311,17 @@ def bookmarks_findings_md(
             url = it.get("url") or ""
             lines.append(f"  - @{user}: {text}… ({url})")
         if len(group) > 5:
-            lines.append(f"  - _…and {len(group) - 5} more_")
+            lines.append(f"  - _See ITEMS_LEDGER.md + batches/ for all {len(group)} items (full text)_")
         lines.append("")
 
     lines.extend(
         [
+            "## Full read pass (mandatory)",
+            "",
+            "- Every bookmark appears in **ITEMS_LEDGER.md** (full text) and **batches/batch-NNN.md**.",
+            "- Researcher reads batches sequentially; cannot report done until `items_read == total_items`.",
+            "- FINDINGS above is the synthesis; ledger is the proof you did not glance.",
+            "",
             "## Actionable implementables (ranked)",
             "",
             "| Priority | Action | Owner agent(s) | Hive target |",
@@ -254,13 +341,29 @@ def bookmarks_findings_md(
     return "\n".join(lines)
 
 
-def run_bookmarks(*, filter_ai: bool, write: bool, slug: str | None) -> dict[str, Any]:
+def run_bookmarks(
+    *,
+    filter_ai: bool,
+    write: bool,
+    slug: str | None,
+    batch_size: int = 25,
+) -> dict[str, Any]:
     items, meta, path = load_bookmarks(filter_ai=filter_ai)
     meta["filter_ai"] = filter_ai
     clusters = cluster_bookmarks(items)
-    findings = bookmarks_findings_md(items, clusters, meta)
     slug = slug or ("x-bookmarks-ai" if filter_ai else "x-bookmarks")
     title = "X bookmarks (AI-related)" if filter_ai else "X bookmarks (full)"
+
+    coverage: dict[str, Any] = {
+        "total_items": len(items),
+        "items_in_ledger": len(items),
+        "coverage_pct": 100 if items else 0,
+        "batch_size": batch_size,
+        "batch_count": max(1, (len(items) + batch_size - 1) // batch_size) if items else 0,
+        "batch_files": [],
+    }
+    findings = bookmarks_findings_md(items, clusters, meta, coverage)
+
     result: dict[str, Any] = {
         "ok": True,
         "type": "bookmarks",
@@ -276,6 +379,9 @@ def run_bookmarks(*, filter_ai: bool, write: bool, slug: str | None) -> dict[str
         return result
 
     packet_dir = PACKETS / f"bookmarks-{slug}"
+    batch_paths = write_batch_files(packet_dir, items, batch_size=batch_size)
+    coverage = coverage_meta(items, batch_paths, batch_size=batch_size)
+    findings = bookmarks_findings_md(items, clusters, meta, coverage)
     meta_out = {
         "title": title,
         "type": "bookmarks",
@@ -284,6 +390,7 @@ def run_bookmarks(*, filter_ai: bool, write: bool, slug: str | None) -> dict[str
         "source_path": str(path),
         "item_count": len(items),
         "clusters": {k: len(v) for k, v in clusters.items()},
+        "coverage": coverage,
     }
     write_packet_dir(
         packet_dir,
@@ -292,7 +399,11 @@ def run_bookmarks(*, filter_ai: bool, write: bool, slug: str | None) -> dict[str
         slug=slug,
         title=title,
         research_type="bookmarks",
-        extras={"items.json": json.dumps(items, indent=2) + "\n"},
+        extras={
+            "items.json": json.dumps(items, indent=2) + "\n",
+            "ITEMS_LEDGER.md": items_ledger_md(items),
+            "coverage.json": json.dumps(coverage, indent=2) + "\n",
+        },
     )
     result["packetDir"] = str(packet_dir)
     return result
@@ -437,6 +548,7 @@ def main() -> int:
     bp = sub.add_parser("bookmarks", help="X bookmarks → themed findings")
     bp.add_argument("--filter", choices=["ai", "all"], default="ai")
     bp.add_argument("--slug")
+    bp.add_argument("--batch-size", type=int, default=25, help="Items per batch file for full read pass")
     bp.add_argument("--write", action="store_true")
     bp.add_argument("--json", action="store_true")
 
@@ -453,7 +565,12 @@ def main() -> int:
         return run_video(args)
 
     if args.cmd == "bookmarks":
-        result = run_bookmarks(filter_ai=args.filter == "ai", write=args.write, slug=args.slug)
+        result = run_bookmarks(
+            filter_ai=args.filter == "ai",
+            write=args.write,
+            slug=args.slug,
+            batch_size=max(1, args.batch_size),
+        )
         if args.json:
             print(json.dumps(result, indent=2))
         elif not args.write:

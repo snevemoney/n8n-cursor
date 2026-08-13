@@ -231,7 +231,7 @@ RESEARCHER_MANDATE = """
 RESEARCH MANDATE (operator trigger — highest priority for Researcher):
 When operator asks to watch a video, find bookmarks, research a topic, or "break down what you found":
 1. Run full pipeline: scripts/hive/grok-skills/researcher-research-to-system.md (NOT a chat-only summary)
-2. Deliver structured breakdown: video=chapters | bookmarks=themes/clusters | dossier=findings by source
+2. Deliver structured breakdown: video=chapters | bookmarks=themes + **read every item** (ITEMS_LEDGER + batches/) | dossier=findings by source
 3. CLI:
    python3 scripts/hive/researcher-research-implement.py video|bookmarks|dossier ... --write
 4. IMPLEMENT in repo so all 17 agents adapt (skills, doctrine, OPERATOR_MEMORY, learnings-implement)

@@ -118,6 +118,23 @@ Packet path: `~/.grokbot/research-packets/{type}-{slug}/`
 
 **Never** claim live X API from Grok — read synced files only.
 
+### Full read pass (not a glance)
+
+Even with **hundreds** of bookmarks, Researcher must **read every item**:
+
+1. Run CLI with `--write` — produces:
+   - `ITEMS_LEDGER.md` — **every** bookmark, full tweet text, one row each
+   - `batches/batch-001.md`, `batch-002.md`, … — **25 items per batch** (default)
+   - `coverage.json` — `total_items` must equal `items_in_ledger` (100%)
+2. Read **each batch file in order** in Grok (shell `cat` or `--read` via brief)
+3. Synthesize themes in FINDINGS.md — top items are **summary only**; ledger is proof
+4. Report to operator: `Read 98/98 bookmarks across 4 batches` — never "…and 93 more" without ledger
+
+```bash
+python3 scripts/hive/researcher-research-implement.py bookmarks --filter ai --write --batch-size 25
+# Full set (98+): --filter all
+```
+
 Paths (first existing wins):
 1. `~/.grokbot/outer-heaven/CONTENT/x-bookmarks/ai-only.json` (working set, ~34 AI-related)
 2. `docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json` (repo mirror)

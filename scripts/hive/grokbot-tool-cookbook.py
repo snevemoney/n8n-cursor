@@ -93,7 +93,8 @@ Warm outreach drafts only — HITL before client send.
 2. Read {REPO}/scripts/hive/grok-skills/researcher-research-to-system.md
 3. CLI + deliver FINDINGS (not chat-only):
    - Video: python3 {REPO}/scripts/hive/researcher-research-implement.py video --youtube-url 'URL' --title "T" --write
-   - X bookmarks: python3 {REPO}/scripts/hive/researcher-research-implement.py bookmarks --filter ai --write
+   - X bookmarks: python3 {REPO}/scripts/hive/researcher-research-implement.py bookmarks --filter ai --write --batch-size 25
+     → read ALL batches/ + ITEMS_LEDGER.md (every item, even if 100+)
    - Topic: python3 {REPO}/scripts/hive/researcher-research-implement.py dossier --question "TOPIC" --write
 4. IMPLEMENT in repo; @Librarian + affected agents; reprovision if rules changed
 Bookmarks stale? ~/.grokbot/scripts/x-bookmarks-sync.sh --max 100
