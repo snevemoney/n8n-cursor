@@ -2,7 +2,11 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Lead } from './types';
 
-const DATA_DIR = path.join(process.cwd(), '.data');
+// Vercel serverless: only /tmp is writable; local dev uses .data/
+const DATA_DIR =
+  process.env.VERCEL === '1'
+    ? path.join('/tmp', 'speed-to-lead-demo')
+    : path.join(process.cwd(), '.data');
 const LEADS_FILE = path.join(DATA_DIR, 'leads.json');
 
 async function ensureDataDir(): Promise<void> {
