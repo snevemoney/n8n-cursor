@@ -1,0 +1,311 @@
+#!/usr/bin/env python3
+"""Shared institutional brief for all Grok Bot agents — direct vault/cache read."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts/hive/os"))
+
+import importlib.util
+
+_vc_path = ROOT / "scripts/hive/os/vault-config.py"
+_spec = importlib.util.spec_from_file_location("vault_config", _vc_path)
+assert _spec and _spec.loader
+vc = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(vc)
+
+SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
+MAX_BRIEF_CHARS = 4500
+
+
+def _read_tail(path: Path, max_lines: int = 80) -> str:
+    if not path.is_file():
+        return ""
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    return "\n".join(lines[-max_lines:])
+
+
+def _extract_section(text: str, heading: str, max_chars: int = 1200) -> str:
+    pattern = rf"^## {re.escape(heading)}\s*$"
+    m = re.search(pattern, text, re.MULTILINE)
+    if not m:
+        return ""
+    rest = text[m.end() :]
+    nxt = re.search(r"^## ", rest, re.MULTILINE)
+    body = rest[: nxt.start()] if nxt else rest
+    body = body.strip()
+    return body[:max_chars] + ("…" if len(body) > max_chars else "")
+
+
+def _chronicle_summaries(root: Path, n: int = 3) -> list[str]:
+    chron_dir = root / "CHRONICLE"
+    if not chron_dir.is_dir():
+        return []
+    files = sorted(chron_dir.glob("*.md"), reverse=True)
+    summaries: list[str] = []
+    for f in files:
+        text = f.read_text(encoding="utf-8", errors="replace")
+        for block in re.split(r"\n---\n", text):
+            if "## Summary" not in block:
+                continue
+            sm = re.search(r"## Summary\s*\n\n(.+?)(?:\n## |\Z)", block, re.DOTALL)
+            if sm:
+                s = sm.group(1).strip().replace("\n", " ")[:280]
+                if s:
+                    summaries.append(s)
+            if len(summaries) >= n:
+                return summaries
+    return summaries
+
+
+def _graph_hubs(root: Path, top_n: int = 10) -> list[str]:
+    idx = root / ".hive/graph-index.json"
+    if not idx.is_file():
+        idx = Path(vc.vault_root() or "") / ".hive/graph-index.json"
+    if not idx.is_file():
+        return []
+    try:
+        data = json.loads(idx.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    nodes = data.get("nodes") or {}
+    scored: list[tuple[int, str]] = []
+    for name, meta in nodes.items():
+        links = meta.get("links") if isinstance(meta, dict) else []
+        score = len(links) if isinstance(links, list) else 0
+        scored.append((score, name))
+    scored.sort(reverse=True)
+    return [name for _, name in scored[:top_n]]
+
+
+def _cursor_chat_titles(root: Path, n: int = 10) -> list[str]:
+    idx = root / "CURSOR_CHATS_INDEX.md"
+    if not idx.is_file():
+        return []
+    titles: list[str] = []
+    for line in idx.read_text(encoding="utf-8", errors="replace").splitlines():
+        if line.startswith("|") and "title" not in line.lower() and "---" not in line:
+            parts = [p.strip() for p in line.split("|") if p.strip()]
+            if len(parts) >= 2:
+                titles.append(parts[1][:80])
+        if len(titles) >= n:
+            break
+    return titles
+
+
+def _product_state_lines() -> list[str]:
+    script = ROOT / "scripts/hive/product-state.py"
+    if not script.is_file():
+        return []
+    try:
+        out = subprocess.run(
+            [sys.executable, str(script), "--list"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            cwd=str(ROOT),
+        )
+        if out.returncode != 0:
+            return []
+        return [ln.strip() for ln in out.stdout.splitlines() if ln.strip()][:8]
+    except (subprocess.TimeoutExpired, OSError):
+        return []
+
+
+def _capture_freshness(root: Path) -> str:
+    p = root / "last-capture.json"
+    if not p.is_file():
+        p = vc.cache_root() / "last-capture.json"
+    if not p.is_file():
+        return "unknown"
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+        return str(data.get("timestamp", "unknown"))
+    except (json.JSONDecodeError, OSError):
+        return "unknown"
+
+
+def _read_note(root: Path, rel: str, max_chars: int = 3000) -> str:
+    rel = rel.lstrip("/")
+    for base in (root, vc.cache_root(), vc.vault_outer_heaven() or Path(), vc.REPO_MIRROR):
+        if not base or not Path(base).is_dir():
+            continue
+        path = Path(base) / rel
+        if path.is_file():
+            text = path.read_text(encoding="utf-8", errors="replace")
+            return text[:max_chars] + ("…" if len(text) > max_chars else "")
+    return ""
+
+
+def build_brief(
+    *,
+    agent: str = "Big Boss",
+    project: str = "proofcheck",
+    source: str = "auto",
+    read_note: str | None = None,
+) -> dict:
+    root = vc.read_root(source if source != "auto" else "auto")
+    mem_path = root / "OPERATOR_MEMORY.md"
+    mem_text = mem_path.read_text(encoding="utf-8", errors="replace") if mem_path.is_file() else ""
+
+    brief: dict = {
+        "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "agent": agent,
+        "project": project,
+        "sourceRoot": str(root),
+        "northStars": _extract_section(mem_text, "Four north stars", 900),
+        "decisions": _extract_section(mem_text, "DECISIONS (seeded)", 600),
+        "goals": _extract_section(mem_text, "GOALS (seeded)", 600),
+        "chronicleRecent": _chronicle_summaries(root, 3),
+        "graphHubs": _graph_hubs(root, 10),
+        "recentCursorChats": _cursor_chat_titles(root, 10),
+        "productState": _product_state_lines(),
+        "captureFreshness": _capture_freshness(root),
+    }
+    if read_note:
+        brief["noteExcerpt"] = _read_note(root, read_note)
+
+    md_parts = [
+        f"# Outer Heaven brief — {agent}",
+        f"Project: {project} | Source: {root}",
+        f"Capture: {brief['captureFreshness']}",
+        "",
+        "## North stars",
+        brief["northStars"] or "(see OPERATOR_MEMORY.md)",
+        "",
+        "## Recent chronicle",
+    ]
+    for s in brief["chronicleRecent"]:
+        md_parts.append(f"- {s}")
+    if not brief["chronicleRecent"]:
+        md_parts.append("- (none indexed)")
+    md_parts.extend(["", "## Graph hubs", ", ".join(brief["graphHubs"]) or "(no index)", ""])
+    md_parts.extend(["## Recent Cursor chats"])
+    for t in brief["recentCursorChats"]:
+        md_parts.append(f"- {t}")
+    md_parts.extend(["", "## Product state"])
+    for ln in brief["productState"]:
+        md_parts.append(f"- {ln}")
+    if read_note and brief.get("noteExcerpt"):
+        md_parts.extend(["", f"## Note: {read_note}", brief["noteExcerpt"]])
+
+    markdown = "\n".join(md_parts)
+    if len(markdown) > MAX_BRIEF_CHARS:
+        markdown = markdown[: MAX_BRIEF_CHARS - 1] + "…"
+    brief["markdown"] = markdown
+    brief["hash"] = hashlib.sha256(markdown.encode()).hexdigest()[:16]
+    return brief
+
+
+def publish_shared_context(brief: dict) -> Path:
+    SHARED_CONTEXT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "timestamp": brief["generatedAt"],
+        "hash": brief["hash"],
+        "agent": brief["agent"],
+        "sourceRoot": brief["sourceRoot"],
+        "captureFreshness": brief["captureFreshness"],
+        "markdown": brief["markdown"],
+    }
+    SHARED_CONTEXT_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    cache_brief = vc.cache_root() / "brief.json"
+    cache_brief.write_text(json.dumps(brief, indent=2) + "\n", encoding="utf-8")
+    return SHARED_CONTEXT_PATH
+
+
+def fetch_vps_brief() -> str:
+    host = "root@69.62.66.78"
+    cmd = (
+        "OUTER_HEAVEN_MIRROR=/root/outer-heaven-mirror "
+        "bash /root/domain-paths/n8n-cursor/scripts/hive/outer-heaven/vps-outer-heaven-brief.sh"
+    )
+    try:
+        out = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, cmd],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if out.returncode == 0 and out.stdout.strip():
+            return out.stdout.strip()
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    mirror = vc.cache_root() / "brief.json"
+    if mirror.is_file():
+        try:
+            data = json.loads(mirror.read_text(encoding="utf-8"))
+            return data.get("markdown", "")
+        except json.JSONDecodeError:
+            pass
+    return ""
+
+
+def self_test() -> list[str]:
+    errors: list[str] = []
+    b = build_brief(agent="Watchdog")
+    if not b.get("markdown"):
+        errors.append("empty markdown brief")
+    if not b.get("hash"):
+        errors.append("missing brief hash")
+    cr = vc.cache_root()
+    if not cr.is_dir():
+        errors.append("cache root missing")
+    return errors
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Outer Heaven shared brief for Grok agents")
+    ap.add_argument("--agent", default="Big Boss")
+    ap.add_argument("--project", default="proofcheck")
+    ap.add_argument("--source", default="auto", choices=["auto", "cache", "vault", "mirror", "vps"])
+    ap.add_argument("--read", metavar="REL_PATH", help="Optional vault-relative note to include")
+    ap.add_argument("--format", default="markdown", choices=["markdown", "json"])
+    ap.add_argument("--publish", action="store_true", help="Write ~/.grokbot/shared-context.json")
+    ap.add_argument("--self-test", action="store_true")
+    args = ap.parse_args()
+
+    if args.self_test:
+        errs = self_test()
+        if errs:
+            print("FAIL:", "; ".join(errs), file=sys.stderr)
+            return 1
+        print("OK: outer-heaven-brief self-test")
+        return 0
+
+    if args.source == "vps":
+        text = fetch_vps_brief()
+        if not text:
+            print("VPS brief unavailable; falling back to local", file=sys.stderr)
+            brief = build_brief(agent=args.agent, project=args.project, read_note=args.read)
+        else:
+            print(text)
+            return 0
+    else:
+        brief = build_brief(
+            agent=args.agent,
+            project=args.project,
+            source=args.source,
+            read_note=args.read,
+        )
+
+    if args.publish:
+        path = publish_shared_context(brief)
+        print(f"published {path}", file=sys.stderr)
+
+    if args.format == "json":
+        print(json.dumps(brief, indent=2))
+    else:
+        print(brief["markdown"])
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "generatedBy": "scripts/hive/grok-trigger-routines.json",
+  "description": "Event-trigger routines for Grok Bot (GitHub v1; Slack deferred). Provision via grokbot-setup-routines.py --triggers",
+  "triggers": [
+    {
+      "agent": "Forge",
+      "name": "GitHub PR opened",
+      "enabled": true,
+      "trigger": {
+        "type": "github",
+        "event": "pull_request.opened",
+        "repository": "n8n-cursor"
+      },
+      "prompt": "GITHUB TRIGGER — new PR opened on n8n-cursor.\n1. Use GitHub plugin — read PR title, author, changed files summary\n2. Post 5-bullet summary in this chat for operator\n3. If staging/agent/* branch → note CI auto-merge path; if main → L3 HITL only\n4. python3 scripts/hive/grok-hive-tool.py --grok-agent \"Forge\" --tool scorpion_register_outcome\nRead-only — never merge or deploy."
+    },
+    {
+      "agent": "Forge",
+      "name": "GitHub push staging",
+      "enabled": false,
+      "trigger": {
+        "type": "github",
+        "event": "push",
+        "repository": "n8n-cursor",
+        "branch": "staging"
+      },
+      "prompt": "GITHUB TRIGGER — push to staging on n8n-cursor.\n1. Summarize commits in push (GitHub plugin)\n2. Suggest smoke commands: smoke-ce-builder.sh, grokbot-verify-agents.sh\n3. Register read-only outcome — no deploy\nDisabled by default — enable after operator confirms GitHub trigger works in Grok UI."
+    }
+  ],
+  "operatorPromptTemplate": "Set up a Grok routine: when {event} on repo {repository}, run agent {agent} with instructions: {summary}. Use Plugins → GitHub already connected."
+}

@@ -1,0 +1,96 @@
+{
+  "version": "1.0.0",
+  "timezone": "America/Toronto",
+  "presets": {
+    "hourly": {
+      "label": "Top of every hour",
+      "engine": "cron",
+      "cron": "0 * * * *"
+    },
+    "every_6_hours": {
+      "label": "Every 6 hours",
+      "engine": "cron",
+      "cron": "0 */6 * * *"
+    },
+    "daily_early": {
+      "label": "Daily 06:00",
+      "engine": "cron",
+      "cron": "0 6 * * *"
+    },
+    "daily_morning": {
+      "label": "Daily 07:00",
+      "engine": "cron",
+      "cron": "0 7 * * *"
+    },
+    "daily_morning_730": {
+      "label": "Daily 07:30",
+      "engine": "cron",
+      "cron": "30 7 * * *"
+    },
+    "daily_morning_8": {
+      "label": "Daily 08:00",
+      "engine": "cron",
+      "cron": "0 8 * * *"
+    },
+    "daily_midday": {
+      "label": "Daily 12:00",
+      "engine": "cron",
+      "cron": "0 12 * * *"
+    },
+    "daily_eod": {
+      "label": "Daily 18:00 end of day",
+      "engine": "cron",
+      "cron": "0 18 * * *"
+    },
+    "daily_night": {
+      "label": "Daily 21:00",
+      "engine": "cron",
+      "cron": "0 21 * * *"
+    },
+    "before_bed": {
+      "label": "Daily 22:00 before bed",
+      "engine": "cron",
+      "cron": "0 22 * * *"
+    },
+    "weekly_monday": {
+      "label": "Mondays 09:00",
+      "engine": "cron",
+      "cron": "0 9 * * 1"
+    },
+    "biweekly_monday": {
+      "label": "Every other Monday (launchd gate)",
+      "engine": "launchd",
+      "launchd": {
+        "weekday": 1,
+        "hour": 9,
+        "minute": 0,
+        "intervalDays": 14
+      }
+    },
+    "semi_monthly": {
+      "label": "1st and 15th at 09:00",
+      "engine": "cron",
+      "cron": "0 9 1,15 * *"
+    },
+    "monthly": {
+      "label": "1st of month 09:00",
+      "engine": "cron",
+      "cron": "0 9 1 * *"
+    },
+    "quarterly_90d": {
+      "label": "Quarterly (1st of Jan/Apr/Jul/Oct)",
+      "engine": "cron",
+      "cron": "0 9 1 */3 *"
+    },
+    "semi_annual": {
+      "label": "Jan 1 and Jul 1",
+      "engine": "cron",
+      "cron": "0 9 1 1,7 *"
+    },
+    "yearly": {
+      "label": "January 1",
+      "engine": "cron",
+      "cron": "0 9 1 1 *"
+    }
+  }
+}

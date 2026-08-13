@@ -1,0 +1,30 @@
+{
+  "tool_name": "REPLACE_ME_snake_case",
+  "description": "One sentence: what this tool does for the hive.",
+  "version": "0.1.0-alpha",
+  "status": "unfinished_backend_only",
+  "execution_mode": "webhook_api",
+  "repo_id": "your-repo-id",
+  "base_url": "https://example.com",
+  "auth": {
+    "type": "bearer",
+    "env": "HIVE_MACHINE_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "example_action",
+      "path": "/api/v1/example",
+      "method": "POST",
+      "description": "What this endpoint does.",
+      "required_inputs": {
+        "correlationId": "string",
+        "example_field": "string"
+      },
+      "outputs": {
+        "ok": "boolean",
+        "result": "object"
+      },
+      "hitl": false
+    }
+  ]
+}

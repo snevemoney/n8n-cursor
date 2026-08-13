@@ -106,7 +106,6 @@ jobs:
           to: ${{ secrets.CI_FAILURE_NOTIFY_EMAIL || 'snevemoney12@gmail.com' }}
           from: ${{ secrets.SMTP_FROM || secrets.N8N_SMTP_SENDER || 'Hive CI <snevemoney12@gmail.com>' }}
           body: ${{ steps.body.outputs.content }}
-          content_type: text/plain
           ignore_cert: true
 
       - name: SMTP not configured

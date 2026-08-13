@@ -1,0 +1,84 @@
+# .cursorrules — Solo scale / hive Autonomous Software Factory
+# Source: scripts/hive/templates/hive/.cursorrules — sync to repo roots as needed
+
+# 0. LOAD HIVE CANON (before any feature work)
+# docs/hive/outer-heaven/OUTER_HEAVEN_LIBRARY.md · HIVEMIND_DNA.md · SURVIVAL_CONTRACT.md · OPERATIONAL_MANDATE.yaml · EMPIRE_SECRETS.yaml · NOVICE_ARCHITECT.md · USER_INTENT.md
+# Tier 3: money/deploy/secrets never auto from agents — /pro + operator merge for prod
+
+# 6. NOVICE ARCHITECT MANDATE (operator is strategist, not syntax programmer)
+- Operator is founder/strategist — write simple, modular, heavily commented code a beginner can follow.
+- Default to n8n catalog workflows or external APIs (Stripe via CE, Twilio, SaaS) before custom code.
+- Never delete existing code without explaining structural impact; wait for explicit approval on destructive changes.
+- Graceful failure: catch errors, register correlationId, emit n8n webhook payload — never silent crash.
+- Before medium+ features: RDD — explain APIs, files, security risks; do not write code until operator says "Approved".
+- Accept intent as Given-When-Then pseudocode; you translate to TypeScript/Python.
+- On errors: fix + add regression test + one-sentence plain-English explanation of root cause.
+
+# 1. ARCHITECTURAL PREFERENCES
+- Always prefer headless, API-first architecture.
+- Prefer existing hive hooks: Scorpion /api/hive/*, Philanthropy /api/agent, n8n catalog webhooks, CE bridge.
+- Every new route or function must register outcomes (correlationId) and include health/telemetry hooks.
+- UI is a thin consumer of the same API Telegram agents use.
+
+# 2. CODE ELIMINATION
+- Before custom logic, query external APIs (Stripe via CE, Twilio, n8n, SaaS) for offload paths.
+- If LOC can drop 20%+ with a battle-tested library, do it.
+- >5 files for a tiny fix → stop; vertical slice.
+
+# 3. SELF-HEALING HOOKS
+- Catch exceptions cleanly; emit JSON payload to n8n orchestration webhook (catalog row required).
+- Never auto-merge to main; open PR for operator merge (Tier 3 prod gate).
+- Post-fix: typecheck, smoke, scorpion_register_outcome.
+
+# 4. BUSINESS CONSTRAINTS (solo human-count-one)
+- Billing/money: Client Engine /pro path only — propose via hitl_propose_action, do not auto-wire Treasury.
+- Endpoints must be hyper-instrumented; reject copyable UI-only features without data moat.
+- Run: bash scripts/hive/empire-validation-gate.sh before prod deploy.
+
+# 5. AUTONOMOUS FACTORY LOOP
+- Errors → n8n → patch PR. Market signals → n8n rank → scaffold staging → human merge.
+- Load docs/hive/AUTONOMOUS_FACTORY.md for wiring.
+
+# 7. SELF-EVOLUTION (Secrets 14–16 — lights-dimmed)
+- Full autonomy on STAGING: agent/* PRs auto-merge when GitHub Actions pass (agent-sandbox-auto-merge.yml).
+- NEVER auto-merge to main or prod deploy — Tier 3 HITL; operator promotes staging→main after golden paths.
+- Every agent change: unit test + integration/e2e; CI fail → hive-error-heal webhook → retry loop.
+- Revenue sensor: read-only metrics → hypothesis register; money writes via CE /pro only.
+- Load docs/hive/SELF_EVOLUTION.md and SELF_EVOLUTION_PROTOCOL.md.
+
+# 8. MOGUL MODE (Secrets 17–19 — capture and optimize)
+- SIMPLIFY: absolute minimum to solve core pain; delete 50% of plan before code (bash scripts/hive/mogul-gate.sh).
+- MONOPOLIZE: reject generic clones; name one niche choke point (Thiel) or abort.
+- SCALE: n8n/hive APIs before new servers; justify every new always-on component.
+- MARKET: design viral data loops (public artifacts → SEO → CE funnel); client send = Tier 3.
+- MONEY: capture engine = CE /pro only — hitl_propose_action, never auto Treasury.
+- Load docs/hive/MOGUL_MODE.md and MOGUL_PROTOCOL.md.
+
+# 9. MULTI-REPO ECOSYSTEM GRID (Secrets 20–22)
+- Multi-repo grid: unfinished apps connect via API + n8n — not isolated local features.
+- API-first: every major function exposes secure endpoint or catalog webhook; UI optional.
+- Cross-repo transit: centralized n8n router (hive-ecosystem-route) — no custom inter-repo glue.
+- Shared core: check packages/* (SHARED_CORE_REGISTRY.md) before new auth/telemetry/billing helpers; flag extract-to-shared-core on reusable modules.
+- Errors: standardized JSON (ECOSYSTEM_ERROR_PAYLOAD.md) → hive-error-heal webhook.
+- Cross-repo work: bash scripts/hive/ecosystem-gate.sh before wiring.
+- Load docs/hive/MULTI_REPO_GRID.md and repo-registry.ts.
+
+# 10. HIVE-MIND TOOLBOX (MCP + JSON-RPC)
+- Every repo: manifest.json (schema: schemas/hive-tool-manifest.schema.json) — agents scavenge, never guess.
+- Execute tools via single n8n hook: POST hive-execute-tool (JSON-RPC method = tool_name.endpoint_id).
+- Read .hiverules + manifests/hive-toolbox-registry.json before cross-app dispatch.
+- Do not manual cross-repo refactors — dispatch router; on fail isolate tool + hive-error-heal + pivot.
+- No cross-app DB writes — n8n/HTTP only. Load docs/hive/HIVE_TOOLBOX.md and HIVE_MIND_PROTOCOL.md.
+
+# 11. DUAL-LOOP COGNITIVE ENGINE (deterministic + heuristic)
+- Phase 1 DETERMINISTIC: every manifest endpoint needs matching test; error → hive-error-heal with fix_attempt + tool_method.
+- Surgeon: patch + regression test + PR staging; CI green → agent-sandbox auto-merge (never main).
+- Phase 2 HEURISTIC: fix_attempt >= 3 → hive-creative-pivot; scavenge manifests; re-route JSON-RPC or staging mock only.
+- CONTAINMENT: no prod DDL; $15 API expense breaker; Tier 3 money/deploy; load CREATIVE_PIVOT.yaml + CONTAINMENT_GRID.md.
+
+# 12. TELEMETRY OVERWATCH (absolute visibility)
+- Every endpoint, test file, and async script: wrap with try/catch or withHiveTelemetry — POST unified schema to hive-telemetry-ingest.
+- Event types: BOOT_UP, TEST_SUCCESS, TEST_FAILURE, CREATIVE_PIVOT, REVENUE_EARNED, INFO, WARN — severity INFO|WARN|CRITICAL.
+- Forbidden: unmonitored deploys; missing repository_name, tool_executed, file_path on errors.
+- CRITICAL routes to Telegram + self-heal via n8n ingest. Daily digest: HIVE_AUDITOR_PROMPT.md.
+- Load docs/hive/TELEMETRY_OVERWATCH.md · SDK: apps/scorpion/lib/hive/telemetry.ts

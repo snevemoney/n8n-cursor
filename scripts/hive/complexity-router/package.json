@@ -1,0 +1,8 @@
+{
+  "name": "@local/complexity-router",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin: route agent turns to model tiers (!fast / !smart / !free).",
+  "type": "module",
+  "main": "index.js",
+  "private": true
+}

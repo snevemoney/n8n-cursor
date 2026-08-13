@@ -1,0 +1,24 @@
+{
+  "project_id": "clipengine",
+  "display_name": "ClipEngine",
+  "lifecycle": "beta",
+  "agent_state": "READY",
+  "owner_agent": "Product GTM",
+  "priority": "P2",
+  "blocked": false,
+  "requires_human": false,
+  "offer_validated": true,
+  "next_milestone": "launch_ready review",
+  "dependencies": ["proofcheck"],
+  "allowed_agents": ["Product GTM", "Forge", "Creative Studio", "Publishing Engine", "Lead Hunter", "Money Desk"],
+  "suppressed_agents": [],
+  "expected_output": "beta launch checklist",
+  "definition_of_done": "analytics + onboarding verified",
+  "resources": {
+    "repo": "n8n-cursor",
+    "branch": "staging",
+    "url": "https://evenslouis.ca"
+  },
+  "last_action": null,
+  "next_action": "GTM launch readiness"
+}

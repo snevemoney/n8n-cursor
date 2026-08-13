@@ -1,0 +1,35 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "text",
+      "text": "User Lands on Page",
+      "x": 0,
+      "y": 0,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "id": "n2",
+      "type": "text",
+      "text": "Triggers Welcome Email (Tier 3 draft)",
+      "x": 320,
+      "y": 0,
+      "width": 280,
+      "height": 80
+    },
+    {
+      "id": "n3",
+      "type": "text",
+      "text": "Processes Payment via CE /pro",
+      "x": 640,
+      "y": 0,
+      "width": 280,
+      "height": 80
+    }
+  ],
+  "edges": [
+    { "id": "e1", "fromNode": "n1", "toNode": "n2" },
+    { "id": "e2", "fromNode": "n2", "toNode": "n3" }
+  ]
+}
