@@ -22,11 +22,11 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3005](http://localhost:3005).
+Open [http://localhost:3006](http://localhost:3006).
 
 ## Port
 
-**3005** (configured in package.json scripts).
+**3006** (configured in package.json scripts). Cinematic AI Partner demo uses **3005**.
 
 ## Environment variables
 
