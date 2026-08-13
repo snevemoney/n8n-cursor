@@ -4,21 +4,20 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "hive-ecosystem-router",
-        "options": {
-          "responseMode": "responseNode"
-        }
+        "path": "hive-ecosystem-route",
+        "responseMode": "responseNode",
+        "options": {}
       },
       "id": "webhook-trigger",
       "name": "Ecosystem Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [200, 400],
-      "webhookId": "hive-ecosystem-router"
+      "webhookId": "hive-ecosystem-route"
     },
     {
       "parameters": {
-        "jsCode": "// Extract signal type from payload and determine route\nconst body = $json.body || $json;\nconst signalType = body.signalType || body.signal_type || body.type || 'unknown';\nconst source = body.source || 'unknown';\n\nconst ROUTE_MAP = {\n  'founder-signal': 'https://evenslouis.ca/webhook/hive-founder-signal',\n  'ops-alert': 'https://evenslouis.ca/webhook/hive-ops-alert',\n  'ce-lead': 'https://evenslouis.ca/webhook/hive-ce-lead',\n  'golden-path': 'https://evenslouis.ca/webhook/hive-golden-path-smoke'\n};\n\nconst targetUrl = ROUTE_MAP[signalType] || null;\n\nreturn [{\n  json: {\n    ...body,\n    _routing: {\n      signalType,\n      source,\n      targetUrl,\n      resolved: targetUrl !== null,\n      routeMap: Object.keys(ROUTE_MAP)\n    }\n  }\n}];"
+        "jsCode": "// Extract signal type from payload and determine route\nconst body = $json.body || $json;\nconst signalType = body.signalType || body.signal_type || body.type || body.route || 'unknown';\nconst source = body.source || 'unknown';\n\nconst ROUTE_MAP = {\n  'founder-signal': 'https://evenslouis.ca/webhook/hive-founder-signal',\n  'ops-alert': 'https://evenslouis.ca/webhook/hive-ops-alert',\n  'ce-lead': 'https://evenslouis.ca/webhook/hive-ce-lead',\n  'golden-path': 'https://evenslouis.ca/webhook/hive-smoke-notify',\n  'golden-path-smoke': 'https://evenslouis.ca/webhook/hive-smoke-notify',\n  'ce-lead-notify': 'https://evenslouis.ca/webhook/hive-ce-lead-notify'\n};\n\nconst targetUrl = ROUTE_MAP[signalType] || null;\n\nreturn [{\n  json: {\n    ...body,\n    _routing: {\n      signalType,\n      source,\n      targetUrl,\n      resolved: targetUrl !== null,\n      routeMap: Object.keys(ROUTE_MAP)\n    }\n  }\n}];"
       },
       "id": "resolve-route",
       "name": "Resolve Route",
