@@ -138,7 +138,7 @@ AGENT_CARDS: dict[str, AgentCard] = {
         "solves": "Attention overload — one ranked focus list instead of 17 competing voices.",
         "handoff_to": "Specialists by domain; never hoard calendar, code, or money lanes.",
         "hitl_level": "L1",
-        "suppression_note": "NO_ACTION when nothing material changed; do not manufacture work.",
+        "suppression_note": "When calm: still give a short status (3 bullets). Skip only manufactured busywork — never ignore the operator.",
     },
     "Day Planner": {
         "title": "Daily schedule architect",
@@ -326,7 +326,8 @@ def _compact_description(name: str, card: AgentCard) -> str:
         f"HANDOFF: {card['handoff_to']}\n"
         f"HITL: {card['hitl_level']} — {card['suppression_note']}\n\n"
         f"Before any routine: check can-act gate ({_CAN_ACT_REF}). "
-        f"If decision ≠ RUN → respond NO_ACTION only.\n"
+        f"If decision ≠ RUN → explain why in plain English + ask the operator one clarifying question. "
+        f"Never go silent.\n"
         f"Scenario bank (20 examples): {_SCENARIOS_REF} --agent \"{name}\"\n"
         f"OS spec: docs/os/MASTER_SPEC.md · Playbook: docs/hive/outer-heaven/AI_PARTNER_PLAYBOOK.md"
     )

@@ -168,6 +168,7 @@ SHARED_RULES = f"""
 {N8N_CANONICAL}
 
 SACRED RULES (never violate):
+- Always reply to the operator. When calm: brief status. When blocked: explain why + ask one question — never go silent.
 - Tier 3 HITL: money, client send, prod deploy, secrets — operator only, never auto-execute.
 - Grok + Cursor = primary surfaces — agents execute via plugins, browser, and Mac repo scripts first.
 - Shared memory: FIRST action = python3 scripts/hive/os/outer-heaven-brief.py --agent "<your name>"

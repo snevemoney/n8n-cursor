@@ -129,8 +129,8 @@ def gate_prompt_prefix(agent: str, decision: Decision, reason: str) -> str:
         return (
             f"CAN-ACT GATE: {decision}\n"
             f"Reason: {reason}\n"
-            f"Respond with NO_ACTION only — do not manufacture work.\n"
-            f"Register scorpion_register_outcome with status skipped if useful.\n\n"
+            f"Tell the operator what blocked you and ask one clarifying question.\n"
+            f"You may skip autonomous work — do not skip the reply.\n\n"
         )
     return (
         f"CAN-ACT GATE: RUN\n"

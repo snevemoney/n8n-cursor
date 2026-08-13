@@ -357,7 +357,7 @@ def write_doc(data: dict[str, Any]) -> None:
     lines.extend(
         [
             "",
-            "All routines open with can-act gate. NO_ACTION is success.",
+            "All routines open with can-act gate. When blocked, explain + ask — never silent skip.",
             "",
             "Handoff chains: `scripts/hive/grok-handoff-chains.json`",
         ]
