@@ -267,7 +267,7 @@ Healthy Watchdog heartbeat, empty HITL queue, and calm inbox should return NO_AC
 - **scope:** ops
 - **canonical:** [[CONTENT/watch-later/FINDINGS]]
 
-DON'T treat a cloud/native Chrome session as the operator's logged-in Google account. Watch Later is private. Signed-out `playlist?list=WL` renders 0 rows — that is an **auth miss**, not an empty queue. Don't invent videos. Don't substitute Gmail YouTube mail or the subscriptions interest graph. Re-scrape on the operator-logged tab, then `researcher-research-implement.py watchlater`.
+DON'T treat cloud Chrome or Playwright MCP as the operator's Cursor YouTube preview. The preview can be logged in (1802 WL videos) while agent browsers render a blank `playlist?list=WL`. Scrape the preview node (`ytd-item-section-renderer`); never invent the rest of the queue; never report 4/4 when the UI says 1802.
 
 ---
 
@@ -318,11 +318,11 @@ Forge + Creative Studio craft pack. Skill ladder: site-brief → … → client-
 
 ### CONTENT: YouTube Watch Later queue (2026-08-13)
 
-- **source:** Researcher native-browser scrape | 2026-08-13
-- **confidence:** high (auth miss) / none (queue contents)
+- **source:** Researcher · operator Cursor preview `ytd-item-section-renderer` | 2026-08-13
+- **confidence:** high (login + first 4 rows) / low (remaining ~1798)
 - **canonical:** [[CONTENT/watch-later/FINDINGS]]
 
-FACT: cloud Chrome opened `playlist?list=WL` **signed out** (`ytd-playlist-video-renderer` = 0, visitor cookies only). **0 items ≠ empty playlist.** Re-run on operator-logged YouTube tab. Pipeline: `researcher-research-implement.py watchlater`.
+FACT: Snevemoney **À regarder plus tard** is **logged in**, **1802** videos, sort newest-added. First four: Swadia 4-agents · Nate Herk Karpathy wiki · Dream Labs prompting · No Priors Skill Issue/AutoResearch. Cloud Chrome/Playwright are a **different signed-out** session. Coverage **4/1802**. Outer Heaven already is the LLM-wiki — don't fork a second vault.
 
 ### SOPS: Outer Heaven agent load contract
 

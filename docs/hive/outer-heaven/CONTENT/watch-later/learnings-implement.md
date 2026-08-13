@@ -1,24 +1,21 @@
 # Watch Later learnings → hive
 
 **Date:** 2026-08-13  
-**Source:** Researcher native-browser scrape of `playlist?list=WL` (signed out)  
-**Label:** FACT (auth miss) / pending (queue contents)
+**Source:** Cursor browser preview `ytd-item-section-renderer` (Snevemoney WL, 1802 claimed)  
+**This pass:** 4 newest videos only
 
-## Implemented this pass
+## Implemented
 
-1. **First-class type `watchlater`** — same full-read protocol as X bookmarks (ledger + batches).
-2. **Signed-out is a blocker, not an empty list** — CLI keeps `items: []` and refuses to invent titles.
-3. **Acquire order** — already-open YouTube tab → confirm renderers > 0 → scroll → JSON → Researcher CLI.
+1. Corrected the signed-out miss: **your preview is logged in**; agent Chrome/Playwright are not that tab.
+2. First-screen ledger (4 rows) with oembed-verified IDs.
+3. Hive mapping: Outer Heaven **is** the Karpathy LLM-wiki; do not clone Obsidian from Nate Herk.
+4. Quarantine “automate 99% of your life” and Dream Labs community CTAs.
 
 ## Still blocked
 
-Operator-logged Watch Later rows. Re-run on Grok computer / local Chrome where `ytd-playlist-video-renderer` count > 0, then:
-
-```bash
-python3 scripts/hive/researcher-research-implement.py watchlater --from-json PATH --write --mirror-repo
-```
+Full 1802-row dump. The selected section is 13004px tall and already has more rows than the truncated `visible_text`. Next scrape must run **inside this preview** (scroll + collect `a[href*="watch?v="]`), not in Playwright `about:blank`.
 
 ## Don'ts
 
-- Don't treat cloud Chrome as the operator's Google session.
-- Don't substitute Gmail YouTube memberships, live alerts, or the ~827-sub interest graph for Watch Later.
+- Don't tell the operator they are signed out when this preview shows À regarder plus tard / Snevemoney / 1802.
+- Don't report 4/4 coverage when the UI says 1802.

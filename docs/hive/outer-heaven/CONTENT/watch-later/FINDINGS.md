@@ -1,52 +1,57 @@
 # Research: YouTube Watch Later
 **Type:** watchlater
-**Source:** native Chrome tab `youtube.com/playlist?list=WL` (this cloud session)
+**Source:** `docs/hive/outer-heaven/CONTENT/watch-later/first-screen.json`
 **URL:** https://www.youtube.com/playlist?list=WL
-**Logged in:** False
-**Items analyzed:** 0
-**Coverage:** 0/0 items in ledger
+**Logged in:** True
+**Items analyzed:** 4 (first screen from operator-selected `ytd-item-section-renderer`)
+**Coverage:** 4/1802 — playlist claims 1802; remainder not scraped this pass
 **Analyzed:** 2026-08-13
 **Skill:** scripts/hive/grok-skills/researcher-research-to-system.md
 
 ## Executive summary
 
-- **FACT:** Native browser opened `youtube.com/playlist?list=WL` but the session is **signed out**.
-- **FACT:** Item count is **0** — this is an auth miss, not proof the playlist is empty.
-- **DON'T:** Invent Watch Later videos, substitute subscriptions, or treat Gmail YouTube mail as the queue.
-- **P0:** Re-run scrape on the **operator-logged** YouTube tab (Grok computer / local Chrome), then this CLI with `--from-json`.
-
-## Probe evidence
-
-- Native Chrome window title 'YouTube - Google Chrome' already open; URL youtube.com/playlist?list=WL
-- Left sidebar Sign in CTA: 'Sign in to like videos, comment, and subscribe'
-- Header avatar/notification slots were empty placeholders
-- DevTools: document.title === 'YouTube'
-- DevTools: document.querySelectorAll('ytd-playlist-video-renderer').length === 0
-- DevTools: document.body.innerText === Home / Shorts / Subscriptions / You only
-- Console: googlevideo.com 403s; no playlist rows rendered
-- Cookie DB after visit: visitor-only (GPS, PREF, VISITOR_INFO1_LIVE, VISITOR_PRIVACY_METADATA, YSC, __Secure-ROLLOUT_TOKEN, __Secure-YNID) — no SAPISID or LOGIN_INFO
-- Chrome CDP port 9222 was flagged on the process but not listening; scrape used the on-screen tab + DevTools, not a fresh logged-out navigation away from WL
-- Cloud agent Chrome is not the operator's desktop YouTube session
+- **Knowledge Graph** — 2 video(s)
+- **Other** — 1 video(s)
+- **Claude Code Desktop** — 1 video(s)
 
 ## Themes / clusters
 
-_None — no items. Ledger is empty on purpose._
+### Knowledge Graph (2 items)
+
+- **Owner agents:** Librarian
+- **Means for Evens / hive:** _Researcher: fill after review_
+- **Label:** INFERENCE (titles/channels only until L2 transcript)
+- **Top items:**
+  - Dream Labs AI: Andrej Karpathy just changed how he prompts claude... (INSANE RESULTS!) (https://www.youtube.com/watch?v=eMPWBunaOic)
+  - No Priors: AI, Machine Learning, Tech, & Startups: Skill Issue: Andrej Karpathy on Code Agents, AutoResearch, and the Loopy Era of AI (https://www.youtube.com/watch?v=kwSVtQ7dziU)
+
+### Other (1 items)
+
+- **Owner agents:** Researcher
+- **Means for Evens / hive:** _Researcher: fill after review_
+- **Label:** INFERENCE (titles/channels only until L2 transcript)
+- **Top items:**
+  - Sandeep Swadia: 4 AI Agents To Automate 99% Of Your Life (https://www.youtube.com/watch?v=TL8V41Ea6oM)
+
+### Claude Code Desktop (1 items)
+
+- **Owner agents:** Forge, Big Boss
+- **Means for Evens / hive:** _Researcher: fill after review_
+- **Label:** INFERENCE (titles/channels only until L2 transcript)
+- **Top items:**
+  - Nate Herk | AI Automation: Andrej Karpathy Just 10x'd Everyone's Claude Code (https://www.youtube.com/watch?v=sboNwYmH3AY)
+
+## Full read pass (mandatory)
+
+- Every video appears in **ITEMS_LEDGER.md** and **batches/batch-NNN.md**.
+- Researcher cannot report done until `items_read == total_items`.
 
 ## Actionable implementables (ranked)
 
 | Priority | Action | Owner agent(s) | Hive target |
 |----------|--------|----------------|-------------|
-| P0 | Re-scrape WL from a logged-in YouTube session | Researcher | CONTENT/watch-later/latest.json |
-| P1 | Keep watchlater as a first-class research type | Researcher | researcher-watchlater-implement.py |
-| P2 | Remember cloud Chrome ≠ operator Google session | Librarian | OPERATOR_MEMORY LESSONS |
+| P0 | _Researcher fills from themes_ | | CONTENT/watch-later/learnings-implement.md |
 
 ## Quarantine / ignore
 
-- Do not use Gmail YouTube memberships or live alerts as a Watch Later stand-in.
-- **UNVERIFIED / not WL:** Gmail YouTube mail shows channel memberships (What's The Dirt, Grid, MCT, King Akademiks, hoe_math, President Rose) and a 2026-08-12 Zaffy live alert. Explicitly **not** the Watch Later queue.
-
-## What we implemented
-
-- `scrape-youtube-watch-later.py` + `researcher-watchlater-implement.py` + `watchlater` CLI.
-- Skill, doctrine, cookbook, scenario, verify self-tests.
-- Repo mirror: `docs/hive/outer-heaven/CONTENT/watch-later/`
+_Entertainment / off-brand rows stay in the ledger but do not drive hive doctrine._

@@ -4,13 +4,16 @@
   "scrapedAt": "2026-08-13T18:41:00+00:00",
   "loggedIn": true,
   "scrolledToEnd": false,
-  "pageTitle": "\u00c0 regarder plus tard",
-  "source": "docs/hive/outer-heaven/CONTENT/watch-later/first-screen.json",
+  "pageTitle": "À regarder plus tard",
+  "owner": "Snevemoney",
+  "playlistCountClaimed": 1802,
+  "sort": "Date d'ajout (plus récentes)",
+  "source": "cursor-browser-preview-selected-node",
   "notes": [
     "Operator selected ytd-item-section-renderer on the logged-in Watch Later preview (page-subtype=playlist).",
     "UI: French, YouTube Premium CA, owner Snevemoney, claimed 1802 videos, unavailable videos hidden.",
-    "Sort: Date d'ajout (plus r\u00e9centes). Item 1 marked En cours de lecture.",
-    "Selected node bounds height 13004px \u2014 list is loaded well beyond the first viewport; visible_text from the selection was truncated in-chat.",
+    "Sort: Date d'ajout (plus récentes). Item 1 marked En cours de lecture.",
+    "Selected node bounds height 13004px — list is loaded well beyond the first viewport; visible_text from the selection was truncated in-chat.",
     "Cloud VM Chrome and Playwright MCP are a different signed-out session (blank WL). This scrape uses the operator preview node + oembed-verified IDs for the first-screen rows only.",
     "Do not treat 4 items as the full 1802."
   ],
@@ -19,12 +22,7 @@
     "class": "style-scope ytd-section-list-renderer",
     "pageSubtype": "playlist",
     "lockupContainerType": 3,
-    "boundsCssPx": {
-      "top": 425,
-      "left": 72,
-      "width": 806,
-      "height": 13004
-    }
+    "boundsCssPx": { "top": 425, "left": 72, "width": 806, "height": 13004 }
   },
   "items": [
     {
@@ -34,7 +32,9 @@
       "url": "https://www.youtube.com/watch?v=TL8V41Ea6oM",
       "videoId": "TL8V41Ea6oM",
       "duration": "20:47",
-      "added": ""
+      "views": "653k",
+      "addedHint": "il y a 2 semaines",
+      "playing": true
     },
     {
       "index": 2,
@@ -43,7 +43,8 @@
       "url": "https://www.youtube.com/watch?v=sboNwYmH3AY",
       "videoId": "sboNwYmH3AY",
       "duration": "17:47",
-      "added": ""
+      "views": "668k",
+      "addedHint": "il y a 4 mois"
     },
     {
       "index": 3,
@@ -52,7 +53,8 @@
       "url": "https://www.youtube.com/watch?v=eMPWBunaOic",
       "videoId": "eMPWBunaOic",
       "duration": "14:12",
-      "added": ""
+      "views": "23k",
+      "addedHint": "il y a 5 jours"
     },
     {
       "index": 4,
@@ -61,9 +63,8 @@
       "url": "https://www.youtube.com/watch?v=kwSVtQ7dziU",
       "videoId": "kwSVtQ7dziU",
       "duration": "",
-      "added": ""
+      "views": "",
+      "addedHint": ""
     }
-  ],
-  "totalItems": 4,
-  "uniqueVideoIds": 4
+  ]
 }
