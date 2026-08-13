@@ -2,9 +2,11 @@
 
 **Identity:** AI Partner — sell outcomes, not features or automation theater.
 
-**Portfolio:** Operator runs **multiple businesses** (websites, Amazon, dropship, hive OS, future). The hive is the **automation layer** — AI employees across all lanes. SSOT: `scripts/hive/business-lanes.json`
+**Portfolio (operator):** Multiple businesses — SSOT `scripts/hive/business-lanes.json`. Big Boss covers every **ACTIVE** lane in the morning brief. This doc is **`ai-partner-websites` only** (client-facing website / AI Partner services).
 
-**Doctrine skill:** `scripts/hive/grok-skills/ai-native-operator-doctrine.md` — **all 17 agents** have a lane line in `scripts/hive/agent-doctrine-lanes.py`.
+**Hunt prospects (not new lanes):** Tag `icp_id` from `CONTENT/watch-later/business-types.json` · run **Today** from `CONTENT/icp-runbooks/{icp_id}.md` · append `CONTENT/icp-runbooks/HUNT_LOG.md` · default city **Greater Montreal**. Skill `icp-runbook`. Do **not** add a `business-lanes.json` row from a YouTube/X ICP without operator yes.
+
+**Doctrine:** `scripts/hive/grok-skills/ai-native-operator-doctrine.md` · per-agent lane lines in `scripts/hive/agent-doctrine-lanes.py`.
 
 ---
 
@@ -64,6 +66,9 @@ Five real owner conversations for pattern recognition. Warm outreach > cold pitc
 
 ## Related
 
+- `scripts/hive/business-lanes.json` — portfolio lanes (not hunt ICPs)
+- `CONTENT/icp-runbooks/INDEX.md` — hunt runbooks + disambiguation
+- `CONTENT/watch-later/STEAL_SHEET.md` — steal machines + `icp_id` catalog
 - `docs/hive/outer-heaven/OPERATOR_MEMORY.md`
 - `docs/hive/outer-heaven/HIVEMIND_DNA.md`
 - `scripts/hive/grok-skills/ai-native-operator-doctrine.md`

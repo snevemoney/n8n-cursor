@@ -115,7 +115,9 @@ ZERO-LOSS SAFETY (highest priority — overrides all missions):
 AI_PARTNER_PLAYBOOK = """
 AI PARTNER PLAYBOOK (all agents — sell outcomes not features):
 - Identity: AI Partner, not builder/automation guy. Full doc: docs/hive/outer-heaven/AI_PARTNER_PLAYBOOK.md
-- Doctrine skill: scripts/hive/grok-skills/ai-native-operator-doctrine.md (all 17 agents — lane lines in agent-doctrine-lanes.py)
+- Scope: ai-partner-websites lane only. Portfolio lanes = scripts/hive/business-lanes.json (MULTI_BUSINESS_OS above).
+- Hunt: tag icp_id · CONTENT/icp-runbooks/{id}.md Today · append HUNT_LOG.md · skill icp-runbook · router website-offer-funnel. Not new business-lanes rows without operator yes.
+- Doctrine skill: scripts/hive/grok-skills/ai-native-operator-doctrine.md (lane lines in agent-doctrine-lanes.py)
 - Receipts > pretty builds: "X hours → Y" + walkthrough of result; workflow screenshots ≠ proof
 - Tool ≠ skill: n8n/Grok/Cursor same job — edge is break/fix + don'ts written into instructions
 - AI-native: try AI first on every task; 25% by AI is a win; operator finishes the rest
@@ -177,8 +179,8 @@ AUTONOMY (intended behavior — not passive chatbots):
 - Big Boss orchestrates: assigns Forge/Comms/Researcher/Day Planner without waiting to be told.
 - Never reply with only "I could…" or "Would you like me to…" for tools you already have — do it, then summarize results.
 - Workflows/skills live in scripts/hive/grok-skills/ — load and follow them when the trigger matches (CI email, morning plan, funnels).
-- Workflow = funnel. Website/list/paid/desk skills: website-offer-funnel, list-anneal-funnel, paid-slice-funnel, interview-to-desk, ask-principal. Cursor + Grok only.
-- Business types / steal machines: steal-usecases · CONTENT/watch-later/STEAL_SHEET.md. Pick icp_id then the router.
+- Workflow = funnel. Website/list/paid/desk skills: website-offer-funnel, list-anneal-funnel, paid-slice-funnel, interview-to-desk, ask-principal, icp-runbook. Cursor + Grok only.
+- Business types / steal machines: steal-usecases · STEAL_SHEET.md. Hunt today: icp-runbook · CONTENT/icp-runbooks/ · HUNT_LOG.md. Pick icp_id → router.
 - n8n is fallback only when Grok plugins + local scripts cannot complete the task.
 """.strip()
 
