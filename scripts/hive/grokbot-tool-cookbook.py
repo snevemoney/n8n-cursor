@@ -89,13 +89,15 @@ Warm outreach drafts only — HITL before client send.
 """.strip(),
     "Researcher": f"""
 1. {BRIEF_CMD.format(agent="Researcher")}
-**Any operator research (video / X bookmarks / topic) → mandatory pipeline:**
+**Any operator research (video / Watch Later / X bookmarks / topic) → mandatory pipeline:**
 2. Read {REPO}/scripts/hive/grok-skills/researcher-research-to-system.md
 3. CLI + deliver FINDINGS (not chat-only):
    - Video: python3 {REPO}/scripts/hive/researcher-research-implement.py video --youtube-url 'URL' --title "T" --write
    - X bookmarks: python3 {REPO}/scripts/hive/researcher-research-implement.py bookmarks --filter ai --write --batch-size 25
      → read ALL batches/ + ITEMS_LEDGER.md (every item, even if 100+)
    - Topic: python3 {REPO}/scripts/hive/researcher-research-implement.py dossier --question "TOPIC" --write
+   - Watch Later: python3 {REPO}/scripts/hive/researcher-research-implement.py watchlater --from-json PATH --write --mirror-repo
+     → native logged-in YouTube tab only; signed-out = 0 items, never invent
 4. IMPLEMENT in repo; @Librarian + affected agents; reprovision if rules changed
 Bookmarks stale? ~/.grokbot/scripts/x-bookmarks-sync.sh --max 100
 Working set: {CACHE}/CONTENT/x-bookmarks/ai-only.json

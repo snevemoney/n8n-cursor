@@ -207,7 +207,7 @@ SCENARIO_BANK: dict[str, list[str]] = {
         "Compare APIs.",
         "Research customer pain points.",
         "Investigate pricing benchmarks.",
-        "Analyze recent technology trend.",
+        "Scrape operator YouTube Watch Later from a logged-in native tab → themed FINDINGS + full ledger; signed-out session = 0 items, never invent.",
         "Research a stock for Wealth Manager.",
         "Investigate employment salary ranges.",
         "Find primary documentation for Forge.",

@@ -260,6 +260,15 @@ Librarian updates this table on major state transitions; file is SSOT.
 
 Healthy Watchdog heartbeat, empty HITL queue, and calm inbox should return NO_ACTION — not manufactured tasks. Suppression protects attention.
 
+### LESSONS: Cloud Chrome ≠ operator YouTube (Watch Later)
+
+- **source:** Researcher native-browser scrape | 2026-08-13
+- **confidence:** high
+- **scope:** ops
+- **canonical:** [[CONTENT/watch-later/FINDINGS]]
+
+DON'T treat a cloud/native Chrome session as the operator's logged-in Google account. Watch Later is private. Signed-out `playlist?list=WL` renders 0 rows — that is an **auth miss**, not an empty queue. Don't invent videos. Don't substitute Gmail YouTube mail or the subscriptions interest graph. Re-scrape on the operator-logged tab, then `researcher-research-implement.py watchlater`.
+
 ---
 
 ## SOPS (pointers)
@@ -306,6 +315,14 @@ Forge + Creative Studio craft pack. Skill ladder: site-brief → … → client-
 - **canonical:** [[CONTENT/operator-youtube-dossier]]
 
 ~827 subs. AI diet: Claude Code multi-agent + n8n + audits + Grok Bot/Hermes/OpenClaw. Speak audit → multi-agent → retainer.
+
+### CONTENT: YouTube Watch Later queue (2026-08-13)
+
+- **source:** Researcher native-browser scrape | 2026-08-13
+- **confidence:** high (auth miss) / none (queue contents)
+- **canonical:** [[CONTENT/watch-later/FINDINGS]]
+
+FACT: cloud Chrome opened `playlist?list=WL` **signed out** (`ytd-playlist-video-renderer` = 0, visitor cookies only). **0 items ≠ empty playlist.** Re-run on operator-logged YouTube tab. Pipeline: `researcher-research-implement.py watchlater`.
 
 ### SOPS: Outer Heaven agent load contract
 

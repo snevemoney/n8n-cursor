@@ -1,0 +1,37 @@
+{
+  "playlistUrl": "https://www.youtube.com/playlist?list=WL",
+  "playlistId": "WL",
+  "scrapedAt": "2026-08-13T18:31:00+00:00",
+  "loggedIn": false,
+  "scrolledToEnd": false,
+  "pageTitle": "YouTube",
+  "source": "native-chrome-open-tab",
+  "notes": [
+    "Native Chrome window title 'YouTube - Google Chrome' already open; URL youtube.com/playlist?list=WL",
+    "Left sidebar Sign in CTA: 'Sign in to like videos, comment, and subscribe'",
+    "Header avatar/notification slots were empty placeholders",
+    "DevTools: document.title === 'YouTube'",
+    "DevTools: document.querySelectorAll('ytd-playlist-video-renderer').length === 0",
+    "DevTools: document.body.innerText === Home / Shorts / Subscriptions / You only",
+    "Console: googlevideo.com 403s; no playlist rows rendered",
+    "Cookie DB after visit: visitor-only (GPS, PREF, VISITOR_INFO1_LIVE, VISITOR_PRIVACY_METADATA, YSC, __Secure-ROLLOUT_TOKEN, __Secure-YNID) \u2014 no SAPISID or LOGIN_INFO",
+    "Chrome CDP port 9222 was flagged on the process but not listening; scrape used the on-screen tab + DevTools, not a fresh logged-out navigation away from WL",
+    "Cloud agent Chrome is not the operator's desktop YouTube session"
+  ],
+  "probe": {
+    "rendererCount": 0,
+    "innerTextSidebarOnly": true,
+    "devtoolsEvaluate": {
+      "title": "YouTube",
+      "playlistVideoRendererCount": 0
+    },
+    "cookies": {
+      "sapisid": false,
+      "loginInfo": false,
+      "visitorCookies": true
+    }
+  },
+  "items": [],
+  "totalItems": 0,
+  "uniqueVideoIds": 0
+}

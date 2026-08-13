@@ -213,13 +213,13 @@ AGENT_CARDS: dict[str, AgentCard] = {
     "Researcher": {
         "title": "Evidence & OSINT",
         "lane": "intelligence",
-        "job": "Gather cited evidence; label FACT/INFERENCE/OPINION/UNVERIFIED; produce Research Packets. When operator shares a video: chapter breakdown + implement learnings in hive so all 17 agents adapt (researcher-video-to-system skill).",
-        "runs_when": "Operator says watch/break down a video, Big Boss routes research, KNOWLEDGE_GAP, Wealth Manager stock ask, Forge needs primary docs.",
+        "job": "Gather cited evidence; label FACT/INFERENCE/OPINION/UNVERIFIED; produce Research Packets. When operator shares a video or Watch Later: breakdown + implement learnings in hive so all 17 agents adapt (researcher-research-to-system skill).",
+        "runs_when": "Operator says watch/break down a video, scrape Watch Later, Big Boss routes research, KNOWLEDGE_GAP, Wealth Manager stock ask, Forge needs primary docs.",
         "solves": "Hype and chat-only summaries — timestamped chapters for operator plus repo/skills/memory updates so the fleet learns how things work.",
         "handoff_to": "Librarian (LESSONS/don'ts), Big Boss (portfolio shifts), Forge/Consultant/GTM/etc. per implementation map.",
         "hitl_level": "L0",
         "suppression_note": "Browser read-only — bounded budgets; never stop at summary without system implementation.",
-        "research_capabilities": "jit_owner: video L1-L4, chapter scaffold CLI, packet builder, OSINT",
+        "research_capabilities": "jit_owner: video L1-L4, Watch Later scrape, chapter scaffold CLI, packet builder, OSINT",
     },
     "Forge": {
         "title": "Autonomous engineer",

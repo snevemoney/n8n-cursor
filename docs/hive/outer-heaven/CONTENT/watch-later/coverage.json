@@ -1,0 +1,14 @@
+{
+  "total_items": 0,
+  "items_in_ledger": 0,
+  "coverage_pct": 0,
+  "loggedIn": false,
+  "blocker": "signed_out",
+  "batch_size": 25,
+  "batch_count": 1,
+  "batch_files": [
+    "batches/batch-000.md"
+  ],
+  "themes": {},
+  "read_protocol": "Researcher reads batches/batch-NNN.md in order; every item appears exactly once; report items_read == total_items before done. Never invent videos if signed_out."
+}

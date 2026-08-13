@@ -19,6 +19,10 @@ python3 scripts/hive/researcher-research-implement.py bookmarks --filter ai --wr
 
 # Web dossier / packet
 python3 scripts/hive/researcher-research-implement.py dossier --question "TOPIC" --write
+
+# YouTube Watch Later (native logged-in browser scrape JSON)
+python3 scripts/hive/scrape-youtube-watch-later.py --from-json PATH --write-dir docs/hive/outer-heaven/CONTENT/watch-later
+python3 scripts/hive/researcher-research-implement.py watchlater --from-json PATH --write --mirror-repo
 ```
 
 ---
@@ -29,6 +33,7 @@ python3 scripts/hive/researcher-research-implement.py dossier --question "TOPIC"
 |---------------|---------------|
 | "Watch this video" / URL | video |
 | "Find my X bookmarks" / "AI bookmarks" | bookmarks |
+| "Scrape Watch Later" / "my YouTube queue" | watchlater |
 | "Research X" / "Look into Y" / "What's the state of Z" | dossier |
 | "Break down what you found" | **always** — any type |
 | "Implement this" | **always** — system pass required |
@@ -44,6 +49,7 @@ Use the right source — **execute tools**, don't ask operator to paste data you
 | Type | Sources (in order) |
 |------|-------------------|
 | **Video** | Grok watch → `researcher-research-implement.py video` |
+| **Watch Later** | Native **logged-in** YouTube tab `playlist?list=WL` → JSON → `researcher-research-implement.py watchlater`. Signed-out cloud Chrome = **0 items, do not invent**. |
 | **X bookmarks** | `~/.grokbot/x-bookmarks.json` or `CONTENT/x-bookmarks/ai-only.json` (sync via `~/.grokbot/scripts/x-bookmarks-sync.sh` if stale) |
 | **Web / topic** | `hive-web-research.py dossier` or `packet` |
 | **Papers** | `hive-web-research.py papers --query` |
@@ -80,6 +86,7 @@ Full item list, raw counts, methodology.
 ```
 
 **Video** uses **Chapters** instead of Themes (timestamps).  
+**Watch Later** uses **Themes/clusters** (same family as bookmarks; full ITEMS_LEDGER + batches/). Signed-out scrape → blocker FINDINGS, empty ledger.  
 **Bookmarks** uses **Themes/clusters** (e.g. Claude Code, MCP, cinematic sites, agent hype).  
 **Dossier** uses **Findings by source** with confidence labels.
 
@@ -150,12 +157,38 @@ Working set for daily signal = **AI-only**, not full 98.
 
 ---
 
+## YouTube Watch Later (specific)
+
+**Private playlist** (`https://www.youtube.com/playlist?list=WL`). Requires the **operator's logged-in YouTube tab**. Cloud Chrome / signed-out native browser will show a blank page — that is **not** an empty queue.
+
+### Acquire
+
+1. Use the **already-open** YouTube tab (do not start a logged-out session).
+2. Confirm Watch Later rows render (`ytd-playlist-video-renderer` count > 0). If Sign in CTA is visible, **stop** and write `loggedIn: false`, `items: []`.
+3. Scroll until the list stops growing. Dump JSON (`title`, `channel`, `url`, `videoId`, `duration`, `index`).
+4. Normalize: `python3 scripts/hive/scrape-youtube-watch-later.py --from-json PATH --write-dir …`
+
+### Full read pass
+
+Same as bookmarks: `ITEMS_LEDGER.md` + `batches/` + `coverage.json`. Then:
+
+```bash
+python3 scripts/hive/researcher-research-implement.py watchlater --from-json PATH --write --mirror-repo
+```
+
+Repo mirror: `docs/hive/outer-heaven/CONTENT/watch-later/`
+
+**Never** invent videos. **Never** substitute subscriptions, Gmail YouTube mail, or the public homepage for Watch Later.
+
+---
+
 ## Do not
 
 - Reply "I found some interesting bookmarks" without theme breakdown + counts  
 - Skip implementation map  
 - Treat one business lane as the whole company  
-- Invent bookmarks not in synced JSON  
+- Invent bookmarks not in synced JSON
+- Invent Watch Later videos when the browser session is signed out
 - Copy hype literally (40-agent marketing swarms → sober 17-agent OS narrative)
 
 ---

@@ -229,11 +229,11 @@ AGENT_BEHAVIOR = {
 
 RESEARCHER_MANDATE = """
 RESEARCH MANDATE (operator trigger — highest priority for Researcher):
-When operator asks to watch a video, find bookmarks, research a topic, or "break down what you found":
+When operator asks to watch a video, scrape Watch Later, find bookmarks, research a topic, or "break down what you found":
 1. Run full pipeline: scripts/hive/grok-skills/researcher-research-to-system.md (NOT a chat-only summary)
-2. Deliver structured breakdown: video=chapters | bookmarks=themes + **read every item** (ITEMS_LEDGER + batches/) | dossier=findings by source
+2. Deliver structured breakdown: video=chapters | watchlater=themes + **read every item** (ITEMS_LEDGER + batches/; signed-out = 0 items never invent) | bookmarks=themes + full ledger | dossier=findings by source
 3. CLI:
-   python3 scripts/hive/researcher-research-implement.py video|bookmarks|dossier ... --write
+   python3 scripts/hive/researcher-research-implement.py video|bookmarks|watchlater|dossier ... --write
 4. IMPLEMENT in repo so all 17 agents adapt (skills, doctrine, OPERATOR_MEMORY, learnings-implement)
 5. Message @Librarian + affected agents + @Big Boss if portfolio shifts; reprovision after edits
 Research that stays in-chat = failure.

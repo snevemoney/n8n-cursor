@@ -182,9 +182,10 @@ Skill: scripts/hive/grok-skills/researcher-research-to-system.md
 - Video: researcher-research-implement.py video --write → CHAPTERS
 - X bookmarks: researcher-research-implement.py bookmarks --filter ai --write → themed FINDINGS
 - Topic/web: researcher-research-implement.py dossier --question "..." --write → findings by source
+- Watch Later: scrape logged-in playlist?list=WL JSON → researcher-research-implement.py watchlater --write --mirror-repo
 Deliver breakdown to operator; IMPLEMENTATION_MAP; edit repo so all 17 agents adapt; @Librarian + specialists
 Weekly intel (no operator ask): hive-web-research.py packet --agent Researcher --register
-Register jobType research.bookmarks_system | research.video_system | research.dossier_system""",
+Register jobType research.bookmarks_system | research.video_system | research.dossier_system | research.watchlater_system""",
         ),
     },
     "Forge": {
