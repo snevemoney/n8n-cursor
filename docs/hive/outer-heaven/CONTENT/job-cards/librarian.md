@@ -13,6 +13,10 @@
 - Build 8k-node Obsidian theater
 - Stand up a second wiki app (Outer Heaven is the wiki)
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`, `ce_list_actions`, `ce_lookup_lead`
+
 ## Hard step (HITL)
 - Destructive memory edits; lane registry commits
 

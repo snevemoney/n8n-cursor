@@ -1,0 +1,9 @@
+{
+  "lane_id": "amazon-own-store",
+  "name": "Operator Amazon store",
+  "created": "2026-08-13",
+  "currency": "CAD",
+  "revenue_mtd": 0,
+  "expense_mtd": 0,
+  "notes": "Grandfathered operating lane — stub P&L"
+}

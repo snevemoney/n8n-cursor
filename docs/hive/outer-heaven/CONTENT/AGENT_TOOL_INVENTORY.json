@@ -1,0 +1,1259 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-08-14",
+  "rules": [
+    "Grok plugins are workspace-shared \u2014 assignment is policy, not OAuth isolation",
+    "PSTN stays on n8n + HITL \u2014 no Twilio/ElevenLabs keys in Cursor or Grok plugins",
+    "Kill tools must never appear in agents.use",
+    "Hive tools in use must be in grokbot-agent-roles allowlist"
+  ],
+  "layers": [
+    "grok_plugin",
+    "grok_native",
+    "mac_script",
+    "hive_tool",
+    "n8n_webhook",
+    "skill"
+  ],
+  "tools": {
+    "gmail": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "draft",
+      "owners": [
+        "Communications Manager",
+        "Day Planner",
+        "Big Boss",
+        "Career Strategist"
+      ],
+      "never": [
+        "Wealth Manager"
+      ],
+      "note": "Send is Tier 3. Career = read employer threads only."
+    },
+    "calendar": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Day Planner",
+        "Big Boss"
+      ],
+      "never": [],
+      "note": "Never accept/invite without HITL."
+    },
+    "github": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "draft",
+      "owners": [
+        "Forge",
+        "Watchdog",
+        "Big Boss"
+      ],
+      "never": [
+        "Creative Studio",
+        "Publishing Engine"
+      ],
+      "note": "PR/CI. Prod merge = HITL."
+    },
+    "higgsfield": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "draft",
+      "owners": [
+        "Creative Studio",
+        "Publishing Engine"
+      ],
+      "never": [
+        "Lead Hunter"
+      ],
+      "note": "Check authorized on this bot. Ad spend = HITL."
+    },
+    "brief": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "outer-heaven-brief.py \u2014 all 17"
+    },
+    "browser": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "Read-only research/demos. No localhost in client drafts."
+    },
+    "shell": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "Cookbook scripts only. No secrets in chat."
+    },
+    "delegate": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "In-chat @Agent with a concrete task."
+    },
+    "twilio_number": {
+      "layer": "n8n_webhook",
+      "status": "connected_n8n",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator",
+        "Communications Manager"
+      ],
+      "never": [
+        "Lead Hunter",
+        "Product GTM"
+      ],
+      "secret": "operator",
+      "note": "Number already on Twilio/n8n. Do not store digits or keys in git."
+    },
+    "n8n.elevenlabs-post-call": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "Creative Studio",
+        "HITL Operator"
+      ],
+      "never": [],
+      "n8n_id": "7GkfpweJWvHmzSQ0",
+      "catalog": "evens-elevenlabs-post-call",
+      "note": "Client audio = operatorConfirm. No vendor keys in Cursor/Grok."
+    },
+    "n8n.on-demand-calling": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator",
+        "Communications Manager"
+      ],
+      "never": [
+        "Lead Hunter",
+        "Product GTM"
+      ],
+      "n8n_id": "yYhgcj1b6XgPObIZ",
+      "catalog": "evens-on-demand-calling",
+      "note": "Hive number path. Propose only \u2014 Forge/Watchdog trigger after HITL."
+    },
+    "n8n.voice-assistant-telegram": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Day Planner",
+        "Communications Manager"
+      ],
+      "never": [],
+      "n8n_id": "EsQaobwWMvt3mPK0",
+      "note": "Telegram + Gcal \u2014 not PSTN. No client book."
+    },
+    "n8n.outbound-calls": {
+      "layer": "n8n_webhook",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "n8n_id": "xbMNXMcrgfYFDrCK",
+      "note": "Inactive autodial. Do not activate."
+    },
+    "n8n.dentist-voice-agent": {
+      "layer": "n8n_webhook",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "n8n_id": "i2CN5woqG017s6X8",
+      "note": "Auto-book voice adjacent. Do not revive."
+    },
+    "n8n.voice-assistant-2": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "n8n_id": "ikfzzGIQb6L7qRtr",
+      "note": "Inactive parked copy."
+    },
+    "vapi": {
+      "layer": "grok_plugin",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "note": "Second voice vendor \u2014 stack lock."
+    },
+    "auto-dial": {
+      "layer": "skill",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "note": "Kill ICP / machine."
+    },
+    "ce_approve_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_list_actions": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_lookup_lead": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_reject_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_resolve_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "hitl_gate_status": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "hitl_propose_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "hive_send_report": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n_get_execution": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n_list_workflows": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n_trigger_catalog_webhook": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "scorpion_health": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "scorpion_list_missions": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "scorpion_register_outcome": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n.hive-golden-path-smoke-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-golden-path-smoke-notify",
+      "note": "n8n catalog webhook"
+    },
+    "n8n.hive-outer-heaven-report-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-outer-heaven-report-notify",
+      "note": "n8n catalog webhook"
+    },
+    "n8n.phase9-pipedrive-lead": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "phase9-pipedrive-lead",
+      "note": "Pipedrive posts directly; do not trigger via tool unless operatorConfirm"
+    },
+    "n8n.hive-error-heal-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-error-heal-notify",
+      "note": "Secret 7 self-heal: registers ops.self_heal.proposed need_hitl; Forge opens PR, operator merges"
+    },
+    "n8n.hive-market-signal-ingest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-market-signal-ingest",
+      "note": "Secret 9 \u2014 planned; ingest market signals. Prefer: scripts/hive/hive-revenue-sensors.py ingest-signal"
+    },
+    "n8n.hive-feature-priority-rank": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-feature-priority-rank",
+      "note": "Secret 9 \u2014 planned; rank features. Prefer: scripts/hive/hive-revenue-sensors.py rank-features"
+    },
+    "n8n.hive-revenue-sensor-hourly": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-revenue-sensor-hourly",
+      "note": "Secret 15 \u2014 planned cron. Prefer: scripts/hive/hive-revenue-sensors.py hourly (no n8n required)"
+    },
+    "n8n.hive-ecosystem-route": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-ecosystem-route",
+      "note": "Secret 21 master cross-repo router. Import: n8n-import-ecosystem-router.sh"
+    },
+    "n8n.hive-ce-lead-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-ce-lead-notify",
+      "note": "Vertical slice CE lead \u2192 Scorpion ce.lead.received \u2192 Telegram #alerts. Route via hive-ecosystem-route key ce-lead-notify. Import: n8n-import-ce-lead-slice.sh"
+    },
+    "n8n.hive-founder-signal": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-founder-signal",
+      "note": "Meta-cognitive external loop \u2014 founder behavior ingest. May forward to predictive-construct. Import: n8n-import-meta-cognitive.sh"
+    },
+    "n8n.hive-chronicle-ingest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-chronicle-ingest",
+      "note": "Outer Heaven living chronicle ingest. Registers outer_heaven.chronicle.ingested. Import: n8n-import-outer-heaven-library.sh"
+    },
+    "n8n.hive-meta-critique": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-meta-critique",
+      "note": "Internal criticism loop \u2014 CRITIQUE.md directive to Forge, staging PR only. Sunday cron: Hive Sunday Meta Critique"
+    },
+    "n8n.hive-predictive-construct": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-predictive-construct",
+      "note": "Predictive construction \u2014 inactive n8n DRAFT_PENDING_REVIEW + need_hitl. Never auto prod activate."
+    },
+    "n8n.hive-sunday-meta-critique": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-sunday-meta-critique",
+      "note": "Cron Mon 03:00 UTC \u2014 weekly meta-critique directive. Same import script."
+    },
+    "n8n.hive-execute-tool": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-execute-tool",
+      "note": "Hive-Mind toolbox JSON-RPC router. Import: n8n-import-toolbox-router.sh. Registry: manifests/hive-toolbox-registry.json"
+    },
+    "n8n.hive-creative-pivot": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-creative-pivot",
+      "note": "Dual-loop Phase 2 heuristic. Import: n8n-import-creative-pivot.sh"
+    },
+    "n8n.hive-telemetry-ingest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-telemetry-ingest",
+      "note": "Unified telemetry CIA ingest. Import: n8n-import-telemetry.sh"
+    },
+    "n8n.hive-daily-operational-digest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-daily-operational-digest",
+      "note": "Cron daily State of the Hive digest \u2192 Telegram. Same import script."
+    },
+    "n8n.hive-operator-digest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-operator-digest",
+      "note": "Daily 07:00 EDT JSON digest for Grok Big Boss + Telegram fallback. Import: workflows/hive/hive-operator-digest.json"
+    },
+    "n8n.hive-web-learning-cycle": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-web-learning-cycle",
+      "note": "Weekly read-only web learning \u2014 run scripts/hive/outer-heaven/web-learning-cycle.py on VPS cron (Sunday). Inactive n8n stub."
+    },
+    "n8n.evens-email-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "evens-email-notify",
+      "note": "evenslouis.ca/n8n \u2014 Email Notification System (operator notify, not client send)"
+    },
+    "n8n.evens-support-agent": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "evens-support-agent",
+      "note": "evenslouis.ca/n8n \u2014 Support Agent Webhook; operatorConfirm required"
+    },
+    "n8n.evens-master-orchestrator": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "evens-master-orchestrator",
+      "note": "evenslouis.ca/n8n \u2014 Master Orchestration System; operatorConfirm for paid/client paths"
+    },
+    "skill.ai-native-operator-doctrine": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/ai-native-operator-doctrine.md"
+    },
+    "skill.analyze-video-watch-output": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/analyze-video-watch-output.md"
+    },
+    "skill.ask-principal": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/ask-principal.md"
+    },
+    "skill.catalog-demand-match": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/catalog-demand-match.md"
+    },
+    "skill.click-live-site": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/click-live-site.md"
+    },
+    "skill.github-ci-failure-triage": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/github-ci-failure-triage.md"
+    },
+    "skill.github-pr-summary": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/github-pr-summary.md"
+    },
+    "skill.hive-health-snapshot": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/hive-health-snapshot.md"
+    },
+    "skill.icp-runbook": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/icp-runbook.md"
+    },
+    "skill.inbox-to-task-routing": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/inbox-to-task-routing.md"
+    },
+    "skill.interview-to-desk": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/interview-to-desk.md"
+    },
+    "skill.invoice-email-automation": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/invoice-email-automation.md"
+    },
+    "skill.list-anneal-funnel": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/list-anneal-funnel.md"
+    },
+    "skill.morning-day-plan": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/morning-day-plan.md"
+    },
+    "skill.one-person-usecases": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/one-person-usecases.md"
+    },
+    "skill.outbound-playbook-funnel": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/outbound-playbook-funnel.md"
+    },
+    "skill.outcome-offer-funnel": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/outcome-offer-funnel.md"
+    },
+    "skill.paid-slice-funnel": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/paid-slice-funnel.md"
+    },
+    "skill.pipeline-stage-brief": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/pipeline-stage-brief.md"
+    },
+    "skill.product-ad-from-photo": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/product-ad-from-photo.md"
+    },
+    "skill.researcher-research-to-system": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/researcher-research-to-system.md"
+    },
+    "skill.researcher-video-to-system": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/researcher-video-to-system.md"
+    },
+    "skill.session-bootstrap": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/session-bootstrap.md"
+    },
+    "skill.slice-build": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/slice-build.md"
+    },
+    "skill.steal-usecases": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/steal-usecases.md"
+    },
+    "skill.website-offer-funnel": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/website-offer-funnel.md"
+    },
+    "skill.wiki-ingest": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/wiki-ingest.md"
+    }
+  },
+  "agents": {
+    "Big Boss": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail",
+        "calendar",
+        "github"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Day Planner": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail",
+        "calendar",
+        "n8n.voice-assistant-telegram"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Watchdog": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "github",
+        "n8n_trigger_catalog_webhook"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "HITL Operator": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "n8n.elevenlabs-post-call",
+        "hitl_propose_action"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Money Desk": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "ce_list_actions",
+        "ce_lookup_lead"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Lead Hunter": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "ce_lookup_lead"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "gmail"
+      ]
+    },
+    "Product GTM": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "ce_list_actions",
+        "ce_lookup_lead"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "twilio_number",
+        "n8n.on-demand-calling"
+      ]
+    },
+    "Researcher": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "scorpion_register_outcome"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Forge": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "github",
+        "n8n_trigger_catalog_webhook"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Creative Studio": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "higgsfield",
+        "n8n.elevenlabs-post-call"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "github",
+        "ce_list_actions",
+        "ce_lookup_lead"
+      ]
+    },
+    "Consultant": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Librarian": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "ce_list_actions",
+        "ce_lookup_lead"
+      ]
+    },
+    "Wealth Manager": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "gmail"
+      ]
+    },
+    "Personal CFO": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Career Strategist": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Communications Manager": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail",
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "n8n.voice-assistant-telegram"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ]
+    },
+    "Publishing Engine": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "higgsfield"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "github"
+      ]
+    }
+  }
+}

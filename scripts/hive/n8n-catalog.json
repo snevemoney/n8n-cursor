@@ -308,6 +308,19 @@
         "correlationId": "string (optional)"
       },
       "note": "evenslouis.ca/n8n — elevenlabs post call workflow (active on VPS); operatorConfirm before client-facing audio"
+    },
+    {
+      "name": "evens-on-demand-calling",
+      "webhookPath": null,
+      "n8nId": "yYhgcj1b6XgPObIZ",
+      "hitl": true,
+      "authHeader": "none",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (optional)",
+        "note": "payload UNVERIFIED — do not invent webhook path"
+      },
+      "note": "Live n8n On-demand calling (active). Twilio number already on n8n. HITL propose only. No webhook URL in git."
     }
   ]
 }

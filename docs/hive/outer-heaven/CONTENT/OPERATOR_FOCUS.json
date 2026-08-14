@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-08-13",
+  "session_tag": "hunt",
+  "lane": "ai-partner-websites",
+  "icp_id": "local-pro",
+  "machine": "private-book-install",
+  "city": "Greater Montreal",
+  "runbook": "CONTENT/icp-runbooks/local-pro.md",
+  "note": "Operator sets when starting work; clear after Session 2 or on request. Empty icp_id = Lead Hunter NO_ACTION.",
+  "session_goal": "Phase 0 hunt week — MUST on best URL, Forge evidence, Session 2 → qualified/ready",
+  "proof_apps": {
+    "speed-to-lead": "docs/hive/outer-heaven/CONTENT/speed-to-lead-demo/INDEX.md",
+    "cinematic": "docs/hive/outer-heaven/CONTENT/website-building/cinematic/INDEX.md"
+  },
+  "operator_time_budget_hours": 20,
+  "autonomous_tiers": "0-2 during day job; WARN+ only at work"
+}

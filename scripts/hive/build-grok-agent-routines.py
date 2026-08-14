@@ -86,13 +86,16 @@ CORE_ROUTINES: dict[str, dict[str, Any]] = {
         "prompt": routine_prompt(
             "Big Boss",
             """MORNING BRIEF — Grok-first multi-business OS (daily 07:00):
-0. Read portfolio lanes: scripts/hive/business-lanes.json — ACTIVE lanes get coverage this brief
+0. Read portfolio lanes: scripts/hive/business-lanes.json — ACTIVE lanes get **equal** coverage (no hidden priority)
+0b. Read catalog stats: docs/hive/outer-heaven/CONTENT/BUSINESS_CATALOG.json (operating vs catalog counts)
+0c. python3 scripts/hive/hunt-log-stats.py — pipeline stage rollup if OPERATOR_FOCUS.icp_id set
 1. Gmail + Calendar plugins — scan today (read-only) — USE plugins, do not ask operator to paste calendar
 2. python3 scripts/hive/product-state.py --list
 3. Top 3 priorities P0-P2 **tagged by lane id** (ai-partner-websites | amazon-own-store | hive-os | …); delegate NOW to named agent
-4. Portfolio rollup: ≥1 bullet per ACTIVE lane — websites, Amazon, hive OS, planned dropship/future if relevant
-5. If CI failures in Gmail → message Forge with workflow link from github-ci-failure-triage skill
-6. New lane / website funnel → scripts/hive/grok-skills/interview-to-desk.md or website-offer-funnel.md
+4. Portfolio rollup: ≥1 bullet per ACTIVE lane — websites, Amazon, hive OS, catalog winners in building
+5. Unmapped operator need → python3 scripts/hive/catalog-demand-match.py --need "..." (never invent lane from chat)
+6. If CI failures in Gmail → message Forge with workflow link from github-ci-failure-triage skill
+7. New lane → pilot PASS + operator yes → scripts/hive/catalog-lane-upgrade.py (not raw business-lanes edit)
 Do NOT lead with n8n/Scorpion/OpenClaw/CE unless infra is actually broken.""",
         ),
     },
@@ -117,9 +120,11 @@ Never send email — draft only.""",
             "Watchdog",
             """Control plane heartbeat (local Mac first):
 1. python3 scripts/hive/product-state.py --validate
-2. python3 scripts/hive/os/should-run.py --self-test
-3. Scan ~/.grokbot/os-events.jsonl for P0/P1 (if present)
-4. Weekly: bash scripts/hive/grokbot-verify-agents.sh
+2. python3 scripts/hive/catalog-lanes-sync-check.py
+3. python3 scripts/hive/agent-tool-inventory.py --check
+4. python3 scripts/hive/os/should-run.py --self-test
+5. Scan ~/.grokbot/os-events.jsonl for P0/P1 (if present)
+6. Weekly: bash scripts/hive/grokbot-verify-agents.sh
 Only SSH/VPS smokes if operator explicitly requests infra check.""",
         ),
     },
@@ -152,11 +157,13 @@ Never mutate money — L4 human only.""",
         "enabled": True,
         "prompt": routine_prompt(
             "Lead Hunter",
-            """Lead pipeline (controlled volume):
+            """Lead pipeline (controlled volume — **only when OPERATOR_FOCUS.icp_id is set**):
 1. python3 scripts/hive/product-state.py --can-act "Lead Hunter" clipengine
-2. Pick icp_id from CONTENT/icp-runbooks/INDEX.md — route siblings — run Today block (skill icp-runbook) — append HUNT_LOG.md
-3. python3 scripts/hive/grok-hive-tool.py --grok-agent "Lead Hunter" --tool ce_lookup_lead
-4. If offer_validated=false → NO_ACTION
+2. Read CONTENT/OPERATOR_FOCUS.json — if icp_id empty → NO_ACTION (do not hunt random ICP)
+3. Run Today block from CONTENT/icp-runbooks/{icp_id}.md (skill icp-runbook) — append HUNT_LOG.md with stage column
+4. python3 scripts/hive/hunt-log-stats.py — report stage counts in EOD summary
+5. python3 scripts/hive/grok-hive-tool.py --grok-agent "Lead Hunter" --tool ce_lookup_lead
+6. If offer_validated=false → NO_ACTION
 Warm outreach drafts only — never client send without HITL.""",
         ),
     },

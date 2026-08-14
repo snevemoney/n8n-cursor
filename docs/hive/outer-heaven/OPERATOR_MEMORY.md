@@ -679,6 +679,14 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 - **FACT (run today):** Each `icp_id` has a runbook at `CONTENT/icp-runbooks/{icp_id}.md` — Route here/not here, landmines, skill chain, **Today** + **Session 2**, done-when. Skill `icp-runbook`. Index: `CONTENT/icp-runbooks/INDEX.md`. **Hunt log:** `CONTENT/icp-runbooks/HUNT_LOG.md` — append every Today. **Default city:** Greater Montreal. **Route siblings** via INDEX disambiguation — do not double-tag (e.g. lawyer → `law-adj`, not `local-pro`). **Named URL = Path A money spine before build** even on A/C types. Proof in client drafts: public URLs only; STL `:3007`, MCP `:3006`, cinematic `:3005`. `review-to-book` = `local-clinic` only.
 - **FACT (X bookmarks → machines, no new icp_id):** `cinematic-recipe` · `click-live-site` · `agent-job-card` · `motion-pipeline`. Doctrine: `DEEP_SUMMARIES.md` XB-1…XB-7. Kill: tweet $ as proof · jailbreak/watermark/NSFW · cold postcards · game studio this cycle · rebuild Claude inside Grok · 8k-node theater.
 
+### FACTS: Agent tool inventory (2026-08-13) [hive-os]
+
+- **FACT:** SSOT = `CONTENT/AGENT_TOOL_INVENTORY.json` · matrix `CONTENT/job-cards/TOOL_MATRIX.md`. Check: `python3 scripts/hive/agent-tool-inventory.py --check`.
+- **FACT:** Grok plugins are workspace-shared. Assignment is policy (use/never), not OAuth isolation.
+- **FACT:** Twilio number + ElevenLabs already live on n8n (`On-demand calling` `yYhgcj1b6XgPObIZ` · `elevenlabs post call` `7GkfpweJWvHmzSQ0`). Catalog stub `evens-on-demand-calling` has no webhook URL. Do not buy a second number or add Grok Twilio/ElevenLabs plugins.
+- **FACT:** Cursor/Grok do **not** get `TWILIO_*` / `ELEVENLABS_*`. Calls = `n8n_trigger_catalog_webhook` after HITL. `outbound calls` stays inactive (autodial kill).
+- **FACT:** Phone owners = HITL Operator + Communications Manager (propose). Creative Studio proposes ElevenLabs post-call. Lead Hunter never live-dials.
+
 ### LESSONS: Bookmark implementables closed (2026-08-13) [hive-os · ai-partner-websites]
 
 - **source:** `CONTENT/x-bookmarks/learnings-implement.md` · plan leftover implementables

@@ -13,6 +13,10 @@
 - Send without HITL and margin green
 - Hunt OFM/betting/auto-dial ICPs
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`, `ce_lookup_lead`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`, `twilio_number`, `n8n.on-demand-calling`, `gmail`
+
 ## Hard step (HITL)
 - Client send; any outbound that reaches a prospect
 

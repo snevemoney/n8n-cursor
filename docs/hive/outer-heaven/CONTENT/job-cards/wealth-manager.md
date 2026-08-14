@@ -12,6 +12,10 @@
 - Quote tweet income as portfolio proof
 - Treat bookmark drama as fact
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`, `gmail`
+
 ## Hard step (HITL)
 - Any trade, transfer, or account change
 

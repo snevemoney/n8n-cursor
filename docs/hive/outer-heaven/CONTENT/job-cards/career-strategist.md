@@ -11,6 +11,10 @@
 - Send employment email without HITL
 - Quote unverified salary leaks from bookmarks
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`, `gmail`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
+
 ## Hard step (HITL)
 - Job applications, employer send, offer accept/decline
 

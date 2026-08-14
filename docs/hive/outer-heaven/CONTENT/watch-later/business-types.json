@@ -55,7 +55,7 @@
     "interview-to-desk": {"path": "C", "icps": ["us"], "skills": ["interview-to-desk"], "source": "yt:EzQAgnjTq2k"},
     "context-docs": {"path": "C", "icps": ["us"], "skills": ["wiki-ingest"], "source": "yt:EzQAgnjTq2k"},
     "ask-principal": {"path": "C", "icps": ["us", "restaurant"], "skills": ["ask-principal"], "source": "yt:whIp1SOahOM"},
-    "missed-call-book": {"path": "A", "icps": ["restaurant", "local-pro"], "skills": ["private-book-install", "ask-principal"], "source": "yt:whIp1SOahOM"},
+    "missed-call-book": {"path": "A", "icps": ["restaurant", "local-pro"], "skills": ["private-book-install", "ask-principal"], "source": "yt:whIp1SOahOM", "required_plugins": ["n8n.on-demand-calling"], "note": "Twilio number already on n8n — handshake connected_n8n, not connect Twilio"},
     "playbook-before-send": {"path": "A", "icps": ["industrial-smb"], "skills": ["outbound-playbook-funnel"], "source": "yt:nS2FrgXN-EY"},
     "same-day-qa": {"path": "A", "icps": ["industrial-smb"], "skills": ["outbound-playbook-funnel"], "source": "yt:nS2FrgXN-EY"},
     "list-anneal": {"path": "B", "icps": ["industrial-smb", "mktg-software"], "skills": ["list-anneal-funnel"], "source": "yt:ESIxitOLYoQ"},

@@ -14,6 +14,10 @@
 - Approve money, send, deploy, or secrets (→ HITL)
 - Quote tweet/YouTube income as proof
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`, `gmail`, `calendar`, `github`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
+
 ## Hard step (HITL)
 - Strategic commits that spend money or change lane registry
 

@@ -25,4 +25,11 @@
 | Communications Manager | [communications-manager.md](./communications-manager.md) |
 | Publishing Engine | [publishing-engine.md](./publishing-engine.md) |
 
+**Tool assignment:** [TOOL_MATRIX.md](./TOOL_MATRIX.md) · SSOT [AGENT_TOOL_INVENTORY.json](../AGENT_TOOL_INVENTORY.json)
+
+```bash
+python3 scripts/hive/agent-tool-inventory.py --check
+python3 scripts/hive/agent-tool-inventory.py --agent "HITL Operator"
+```
+
 **Steal machine:** `agent-job-card` · Path C · skill `wiki-ingest`

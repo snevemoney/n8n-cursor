@@ -9,7 +9,7 @@ description: Load the hunt runbook for a tagged icp_id and run website-offer-fun
 **Hunt log:** `CONTENT/icp-runbooks/HUNT_LOG.md` — append at end of every Today  
 **JSON:** `CONTENT/watch-later/business-types.json`  
 **Default city:** Greater Montreal (unless Evens names another)  
-**Router:** `website-offer-funnel`
+**Router:** `catalog-demand-match` **then** `website-offer-funnel` (never website-first for unmapped needs)
 
 ## When
 Operator or agent tags a prospect with `icp_id`, or says “hunt [type] today.”
@@ -20,7 +20,7 @@ Operator or agent tags a prospect with `icp_id`, or says “hunt [type] today.�
 3. Confirm Path A / B / C from the runbook (do not guess).
 4. **Named URL on any client ICP?** Run Path A money spine first: MUST → constraint → four-blank → margin — **before** build (even A/C types).
 5. Run the **Today** block — three actions max this session.
-6. **Append row(s) to `HUNT_LOG.md`** (date · icp_id · city · url · leak · contact · MUST · next · owner).
+6. **Append row(s) to `HUNT_LOG.md`** (date · icp_id · city · url · leak · contact · MUST · **stage** · next · owner). Default `stage=discovered`.
 7. Follow the skill chain in order; hard step = HITL.
 8. Map pattern → `usecase-to-sku` after Consultant POSITION (Path A).
 9. Never quote tape/tweet $. Stack = Cursor + Grok only.

@@ -13,6 +13,10 @@
 - Launch spend before KPI + baseline per lane
 - Fork Client Pack SaaS this week
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`, `ce_list_actions`, `ce_lookup_lead`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`, `twilio_number`, `n8n.on-demand-calling`
+
 ## Hard step (HITL)
 - Publish, ads spend, pricing commits on custom domain
 

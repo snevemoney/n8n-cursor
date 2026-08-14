@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 _doc_spec = importlib.util.spec_from_file_location(
@@ -46,6 +47,9 @@ FUNNELS (workflow = funnel). Load scripts/hive/grok-skills/<slug>.md or ~/.grokb
   steal offers / business types → steal-usecases · CONTENT/watch-later/STEAL_SHEET.md + business-types.json (Watch Later + X bookmarks, one catalog)
   one-person subset → one-person-usecases
 Stack: Cursor + Grok Bot only. Hard step (send/pay/book/deploy) = HITL.
+Tool assignment SSOT: docs/hive/outer-heaven/CONTENT/AGENT_TOOL_INVENTORY.json
+  python3 scripts/hive/agent-tool-inventory.py --agent "YOUR_AGENT_NAME"
+PSTN = existing n8n (Twilio number + ElevenLabs). No vendor keys in Cursor/Grok plugins. No Vapi / autodial.
 """.strip()
 
 # 17-agent OS cookbooks (Grok-native first)
@@ -209,12 +213,30 @@ Creative Studio creates; never publish without operator OK. No farms / mass-DM.
 }
 
 
+def _assignment_line(agent_name: str) -> str:
+    inv = Path(__file__).resolve().parent.parent.parent / "docs/hive/outer-heaven/CONTENT/AGENT_TOOL_INVENTORY.json"
+    if not inv.is_file():
+        return ""
+    try:
+        data = json.loads(inv.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return ""
+    row = (data.get("agents") or {}).get(agent_name) or {}
+    use = ", ".join(row.get("use") or [])
+    never = ", ".join(row.get("never") or [])
+    if not use and not never:
+        return ""
+    return f"Tools you use: {use}.\nTools you never: {never}."
+
+
 def cookbook_for(agent_name: str) -> str:
     body = TOOL_COOKBOOK.get(agent_name, "").strip()
     lane = _doc.doctrine_lane(agent_name)
+    assign = _assignment_line(agent_name)
+    extra = f"\n{assign}" if assign else ""
     if not body:
         if lane:
-            return f"{TOOL_USAGE_RULES}\n\nTOOL COOKBOOK ({agent_name}):\n{lane}\nFull skill: {_doc.DOCTRINE_SKILL}"
-        return TOOL_USAGE_RULES
+            return f"{TOOL_USAGE_RULES}\n\nTOOL COOKBOOK ({agent_name}):\n{lane}{extra}\nFull skill: {_doc.DOCTRINE_SKILL}"
+        return TOOL_USAGE_RULES + extra
     doctrine = f"\n{lane}\nFull skill: {_doc.DOCTRINE_SKILL}" if lane else ""
-    return f"{TOOL_USAGE_RULES}\n\nTOOL COOKBOOK ({agent_name}):\n{body}{doctrine}"
+    return f"{TOOL_USAGE_RULES}\n\nTOOL COOKBOOK ({agent_name}):\n{body}{extra}{doctrine}"

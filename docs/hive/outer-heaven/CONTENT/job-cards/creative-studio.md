@@ -13,6 +13,10 @@
 - Send taste work to a small/cheap model
 - NSFW / watermark / jailbreak patterns
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`, `higgsfield`, `n8n.elevenlabs-post-call`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`, `github`, `ce_list_actions`, `ce_lookup_lead`
+
 ## Hard step (HITL)
 - Licensed asset spend; client-facing publish of creative
 

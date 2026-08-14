@@ -13,6 +13,10 @@
 - Mass-DM / account-farm funnels
 - Quote YouTube RPM/tweet $ as our pricing
 
+## Tools
+- **Use:** `brief`, `browser`, `shell`, `delegate`, `higgsfield`
+- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`, `github`
+
 ## Hard step (HITL)
 - Publish · schedule live · paid boost
 
