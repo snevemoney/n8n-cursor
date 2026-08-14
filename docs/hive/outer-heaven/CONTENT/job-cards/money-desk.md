@@ -12,10 +12,6 @@
 - Quote YouTube/tweet $ as our pricing proof
 - Collapse retainer bands without labeling UNVERIFIED stretch
 
-## Tools
-- **Use:** `brief`, `browser`, `shell`, `delegate`, `ce_list_actions`, `ce_lookup_lead`
-- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
-
 ## Hard step (HITL)
 - Any payment, refund, or fee approval
 
@@ -23,5 +19,6 @@
 - `paid-slice-funnel` checkout proof (warm network first)
 
 ## Load first
+- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/outcome-offer-funnel.md`
 - `usecase-to-sku`

@@ -13,10 +13,6 @@
 - Rewrite MCP/stateless HTTP this week unless broken
 - Rebuild Claude Code inside Grok
 
-## Tools
-- **Use:** `brief`, `browser`, `shell`, `delegate`, `github`, `n8n_trigger_catalog_webhook`
-- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
-
 ## Hard step (HITL)
 - Prod deploy · custom domain · Stripe live
 
@@ -24,6 +20,7 @@
 - `slice-build` · `click-live-site` · cinematic → `cinematic-recipe`
 
 ## Load first
+- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/slice-build.md`
 - `scripts/hive/grok-skills/click-live-site.md`
 - `CONTENT/website-building/cinematic/PLAYBOOK.md`

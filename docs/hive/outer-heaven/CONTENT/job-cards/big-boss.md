@@ -14,10 +14,6 @@
 - Approve money, send, deploy, or secrets (→ HITL)
 - Quote tweet/YouTube income as proof
 
-## Tools
-- **Use:** `brief`, `browser`, `shell`, `delegate`, `gmail`, `calendar`, `github`
-- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
-
 ## Hard step (HITL)
 - Strategic commits that spend money or change lane registry
 
@@ -25,5 +21,6 @@
 - `interview-to-desk` when operator proposes a new desk
 
 ## Load first
+- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/interview-to-desk.md`
 - `scripts/hive/business-lanes.json`

@@ -12,10 +12,6 @@
 - Spend money or deploy anything
 - Build product or client deliverables
 
-## Tools
-- **Use:** `brief`, `browser`, `shell`, `delegate`, `gmail`, `calendar`, `n8n.voice-assistant-telegram`
-- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
-
 ## Hard step (HITL)
 - Accept/send calendar invites; any message that leaves the inbox
 
@@ -23,4 +19,5 @@
 - `morning-ceo-desk` digest shape (visible → efficient → automatic)
 
 ## Load first
+- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/morning-day-plan.md`

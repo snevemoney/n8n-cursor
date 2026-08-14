@@ -12,10 +12,6 @@
 - Auto-book a restaurant or close a call alone
 - Bypass dual-gate on warm outreach
 
-## Tools
-- **Use:** `brief`, `browser`, `shell`, `delegate`, `twilio_number`, `n8n.on-demand-calling`, `n8n.elevenlabs-post-call`, `hitl_propose_action`
-- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
-
 ## Hard step (HITL)
 - **You are** the hard step for Tier 3
 
@@ -23,4 +19,5 @@
 - `ask-principal`
 
 ## Load first
+- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/ask-principal.md`

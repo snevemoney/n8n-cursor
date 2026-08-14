@@ -1,6 +1,7 @@
 # Agent job cards (17)
 
 **Purpose:** Karpathy wiki lite — every agent loads **you own / you never** before work.  
+**Transcripts:** video-first walk in [LESSONS-FROM-TAPE.md](./LESSONS-FROM-TAPE.md) — each `full.txt`, then all 17 takes, then roll-ups. Captions live in `~/.grokbot/research-packets/`.  
 **Not:** n8n one-pagers (workflows) or business-kits (CE flywheel). Those stay separate.
 
 **Brief injection:** `outer-heaven-brief.py --agent "<Name>"` prepends owns/never from this folder.

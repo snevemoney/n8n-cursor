@@ -13,10 +13,6 @@
 - Send without HITL and margin green
 - Hunt OFM/betting/auto-dial ICPs
 
-## Tools
-- **Use:** `brief`, `browser`, `shell`, `delegate`, `ce_lookup_lead`
-- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`, `twilio_number`, `n8n.on-demand-calling`, `gmail`
-
 ## Hard step (HITL)
 - Client send; any outbound that reaches a prospect
 
@@ -24,6 +20,7 @@
 - `list-anneal` (Path B) · `lead-web-find` (Path A)
 
 ## Load first
+- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `CONTENT/icp-runbooks/INDEX.md` — route siblings, pick `icp_id`, run **Today**
 - `CONTENT/icp-runbooks/HUNT_LOG.md` — append row(s) at end of Today
 - `scripts/hive/grok-skills/icp-runbook.md`

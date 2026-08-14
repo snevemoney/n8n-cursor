@@ -13,10 +13,6 @@
 - Invent Watch Later rows when signed out
 - Quote tape/tweet $ as ours
 
-## Tools
-- **Use:** `brief`, `browser`, `shell`, `delegate`, `scorpion_register_outcome`
-- **Never:** `vapi`, `n8n.outbound-calls`, `n8n.dentist-voice-agent`, `n8n.voice-assistant-2`, `auto-dial`
-
 ## Hard step (HITL)
 - Operator reprovision / routine force-update (confirm with Evens if duplicate risk)
 
@@ -24,5 +20,6 @@
 - `steal-usecases` · `wiki-ingest` · `competitive-teardown`
 
 ## Load first
+- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/researcher-research-to-system.md`
 - `scripts/hive/grok-skills/steal-usecases.md`
