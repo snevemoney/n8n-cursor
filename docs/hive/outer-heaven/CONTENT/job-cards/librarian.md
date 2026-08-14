@@ -20,6 +20,5 @@
 - `agent-job-card` · `wiki-ingest`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/wiki-ingest.md`
 - `CONTENT/job-cards/INDEX.md`

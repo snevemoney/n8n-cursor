@@ -21,6 +21,5 @@
 - `interview-to-desk` when operator proposes a new desk
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/interview-to-desk.md`
 - `scripts/hive/business-lanes.json`

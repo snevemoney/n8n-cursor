@@ -20,6 +20,5 @@
 - `outcome-offer-funnel` · `orchestrated-site-brief` (Path C)
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/outcome-offer-funnel.md`
 - `scripts/hive/grok-skills/website-offer-funnel.md`

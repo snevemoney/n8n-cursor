@@ -20,6 +20,5 @@
 - `click-live-site` · `golden-test-loop`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/click-live-site.md`
 - `scripts/hive/grok-skills/paid-slice-funnel.md` (preview ≠ domain)

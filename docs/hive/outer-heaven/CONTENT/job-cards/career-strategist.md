@@ -18,6 +18,5 @@
 - `interview-gym` · `context-docs`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `CONTENT/job-cards/` (this card)
 - Researcher packets when confidence low

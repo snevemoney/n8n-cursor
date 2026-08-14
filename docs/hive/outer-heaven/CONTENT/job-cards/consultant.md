@@ -20,7 +20,6 @@
 - `speed-positioning` · `client-delivery-kit` (agency-delivery)
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `CONTENT/icp-runbooks/{icp_id}.md` — scope from **Today** + skill chain
 - `scripts/hive/grok-skills/icp-runbook.md`
 - `scripts/hive/grok-skills/outcome-offer-funnel.md`

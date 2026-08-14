@@ -20,7 +20,6 @@
 - `slice-build` · `click-live-site` · cinematic → `cinematic-recipe`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/slice-build.md`
 - `scripts/hive/grok-skills/click-live-site.md`
 - `CONTENT/website-building/cinematic/PLAYBOOK.md`

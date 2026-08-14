@@ -19,5 +19,4 @@
 - `morning-ceo-desk` digest shape (visible → efficient → automatic)
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/morning-day-plan.md`

@@ -20,7 +20,6 @@
 - `list-anneal` (Path B) · `lead-web-find` (Path A)
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `CONTENT/icp-runbooks/INDEX.md` — route siblings, pick `icp_id`, run **Today**
 - `CONTENT/icp-runbooks/HUNT_LOG.md` — append row(s) at end of Today
 - `scripts/hive/grok-skills/icp-runbook.md`

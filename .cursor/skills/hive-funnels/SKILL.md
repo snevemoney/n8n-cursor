@@ -29,10 +29,11 @@ Load the matching file in `scripts/hive/grok-skills/` and follow it. Grok `/` co
 | One-person use cases | `one-person-usecases` | review-to-book · clip-factory · Person B brief · speed-positioning · demand-validate |
 | Any steal / business type | `steal-usecases` + `.cursor/skills/steal-sheet` | One master `STEAL_SHEET.md` — pick `icp_id` then router. Doctrine: `DEEP_SUMMARIES.md` |
 | Hunt / run today | `icp-runbook` + `.cursor/skills/icp-runbook` | Open `CONTENT/icp-runbooks/{icp_id}.md` → **Today** block → `website-offer-funnel` |
+| Spawn desks here | `hive-spawn-desks` | 17 Cursor `Task`s in this chat. Never Grok Bot / `sendPrompt` |
 
 ## Hard step
 Send, pay, deploy, book, publish = operator. Never auto.
 
 ## Never
 Claude Cowork, Claude Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus.  
-IG OTP farms, auto-dial, unverified YouTube income.
+Operate-never: OTP farms, auto-dial, unverified YouTube income as ours. Steal the machine from those tapes; do not skip them. Evens is the visionary — Cursor does not pre-vote the never-list.

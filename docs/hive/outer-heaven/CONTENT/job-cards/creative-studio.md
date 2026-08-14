@@ -20,6 +20,5 @@
 - `motion-pipeline` · `cinematic-recipe`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `CONTENT/website-building/cinematic/PLAYBOOK.md`
 - `CONTENT/creative/higgsfield-ae-proof/HOWTO.md`

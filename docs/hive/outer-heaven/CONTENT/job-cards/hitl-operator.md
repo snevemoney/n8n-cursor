@@ -19,5 +19,4 @@
 - `ask-principal`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/ask-principal.md`

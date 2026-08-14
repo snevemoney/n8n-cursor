@@ -19,5 +19,4 @@
 - Cheap read / expensive decide (no steal SKU)
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - Knowledge-policy hierarchy in OPERATOR_MEMORY

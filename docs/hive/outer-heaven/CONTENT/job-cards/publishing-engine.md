@@ -20,5 +20,4 @@
 - `one-channel-deep` · `clip-factory`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/outcome-offer-funnel.md`

@@ -1,7 +1,6 @@
 # Agent job cards (17)
 
 **Purpose:** Karpathy wiki lite — every agent loads **you own / you never** before work.  
-**Transcripts:** video-first walk in [LESSONS-FROM-TAPE.md](./LESSONS-FROM-TAPE.md) — each `full.txt`, then all 17 takes, then roll-ups. Captions live in `~/.grokbot/research-packets/`.  
 **Not:** n8n one-pagers (workflows) or business-kits (CE flywheel). Those stay separate.
 
 **Brief injection:** `outer-heaven-brief.py --agent "<Name>"` prepends owns/never from this folder.
@@ -25,12 +24,5 @@
 | Career Strategist | [career-strategist.md](./career-strategist.md) |
 | Communications Manager | [communications-manager.md](./communications-manager.md) |
 | Publishing Engine | [publishing-engine.md](./publishing-engine.md) |
-
-**Tool assignment:** [TOOL_MATRIX.md](./TOOL_MATRIX.md) · SSOT [AGENT_TOOL_INVENTORY.json](../AGENT_TOOL_INVENTORY.json)
-
-```bash
-python3 scripts/hive/agent-tool-inventory.py --check
-python3 scripts/hive/agent-tool-inventory.py --agent "HITL Operator"
-```
 
 **Steal machine:** `agent-job-card` · Path C · skill `wiki-ingest`

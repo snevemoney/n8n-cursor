@@ -76,7 +76,9 @@ Need a business type or SKU → open the master sheet, pick `icp_id` + `steal_as
 | `law-adj` | Solo/boutique consult rails | `private-book-install` | A |
 | `us` | Evens / hive OS | internal machines | C |
 
-**Kill (never an ICP):** OFM / IG farms · betting / prediction markets · “I do AI” shops · generic landing mills · auto-dial factories · auto-book with no callback · tweet-$ swarms · jailbreak/watermark/NSFW · cold postcard mail · game studio this cycle.
+**Kill (never an ICP / do not operate):** OFM / IG farms · betting / prediction markets · “I do AI” shops · generic landing mills · auto-dial factories · auto-book with no callback · tweet-$ swarms · jailbreak/watermark/NSFW · cold postcard mail · game studio this cycle.
+
+**Steal the machine, do not skip the tape.** Farms/OTP/mass-DM stay operate-never. The workflow (many surfaces → one destination, dashboard as proof, parallel workers, redirect panel, speed, close) is fair steal. Evens keeps or kills.
 
 ---
 
@@ -114,8 +116,12 @@ Pick `steal_as`, then follow the hive skills. Hard step (send / pay / book / dep
 | `click-live-site` | C | After every site ship: Watchdog/Forge open the URL and click. Skill: `click-live-site.md`. No “looks good.” |
 | `agent-job-card` | C | Librarian: one page per agent (owns / never) before the agent works. Not 8k nodes |
 | `motion-pipeline` | C | Creative: still → frames → clip → grade; previs before a long render. Higgsfield/AE we have |
+| `private-book-install` | A | Site book CTA on the page they have (Cal/Tally/alert). Not a second Twilio number. PSTN missed-call = `missed-call-book`. `:3007` is proof, not a third machine. |
+| `agent-as-hire` | C | `session-bootstrap` → one real SOP (`interview-to-desk`) → review/correct → then connectors. Cursor + Grok. Send/pay/deploy stay HITL. `yt:Ums8suyAG1A` |
+| `info-gain-cite` | C | One honest page from work we ran → HITL publish → ask Grok if it cited. `one-channel-deep`. No indexer, no farm. `yt:kpMreA9ATOo` |
+| `solo-then-consult` | C | One ICP + leak → MUST/margin → Loom → HITL send → metrics. No agency hire before 3–5 paid Path A. `yt:QIsJe-nZ5XE` |
 
 ---
 
 ## Never
-Quote YouTube $ or tweet $ as ours · farm IG · auto-dial · betting SKU · skip Path A MUST/margin on a named client · add a `business-lanes.json` row from a YouTube/X ICP without operator yes · fork a second steal sheet under `x-bookmarks/`.
+Quote YouTube $ or tweet $ as ours · operate an IG farm / OTP / mass-DM · auto-dial · betting SKU · skip Path A MUST/margin on a named client · add a `business-lanes.json` row from a YouTube/X ICP without operator yes · fork a second steal sheet under `x-bookmarks/` · quote job-loss % / “replace millions” as FACT · install Claude Code · give Lead Hunter Gmail because Clay was on screen · Indexceptional / rank-everywhere farm · quote 24h first page or “3,700 businesses” as FACT · agency-first · invent hours×$100 pain · Accenture $ as our price · AI-excitement as a MUST gate · skip an ugly tape because Cursor wrote CUT.

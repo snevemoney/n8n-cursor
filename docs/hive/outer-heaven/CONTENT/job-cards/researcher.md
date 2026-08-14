@@ -20,6 +20,5 @@
 - `steal-usecases` · `wiki-ingest` · `competitive-teardown`
 
 ## Load first
-- `CONTENT/job-cards/LESSONS-FROM-TAPE.md` — video-first walk (your name under each packet) + your roll-up
 - `scripts/hive/grok-skills/researcher-research-to-system.md`
 - `scripts/hive/grok-skills/steal-usecases.md`
