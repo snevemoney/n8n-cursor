@@ -1,0 +1,525 @@
+So, right now, it feels like everyone trying to get into AI is kind of hearing this one shiny path, which is to start an AI automation agency.
+
+And that's the current trend, and I get it because I did that, and a lot of the top creators in this space are teaching content and building offers around that business model.
+
+And I'm not saying that that isn't a viable business model, but today, I want to talk about something else that is more realistic for, I think, the majority of people.
+
+And if you don't know who I am, my name is Nate.
+
+I've been deep in the AI game for a while now.
+
+I run a free community of over 350,000 people, and I scaled my AI agency to over $100,000 a month and then sold it.
+
+So, the reason that I mention all that is because I've worked with businesses, and I've seen the problems that they're trying to solve, and I've also seen a ton of my students go through all the phases of scaling their own AI automation agency, and I spent a lot of my free time just thinking about where the space is headed.
+
+And what really got me thinking about this was IBM.
+
+They surveyed 2,000 CEOs from some pretty massive companies.
+
+So, what I want to talk about in this video is a huge opportunity that nobody on AI YouTube is really talking about.
+
+And it's a move that fits people who don't want to run sales calls all day, and what every business is actually hiring and promoting for in 2026.
+
+So, if you've ever sat there thinking, "I need to get involved with AI.
+
+You know, I can't miss this boat, but I don't know what do I actually do?" then this video is for you, and hopefully by the end, you have some clarity, and you feel excited about this crazy time that we're currently living in.
+
+And by the way, in this video, I'm going to be briefly going over some stats from the study.
+
+I'm going to be talking about the two paths.
+
+I'm going to be talking about what actually matters for you to be successful.
+
+So, there are timestamps down below.
+
+Feel free to jump around to whatever you find interesting.
+
+All right, so let's start with the first stat that blew my mind.
+
+So, this study surveyed 2,000 CEOs from large publicly traded companies with a median annual revenue of about $5.8 billion.
+
+So, we're talking big, established companies here.
+
+Now, these are diverse industries, but it's not a global average of every single business out there, and that matters when you hear these stats because what is true for these CEOs is not automatically true everywhere.
+
+Okay, so listen to this.
+
+76% of CEOs in this study either already have a chief AI officer, or they are hiring one this year.
+
+76%.
+
+Two years ago, this number was 26%.
+
+Now, real quick, in case you don't know what a chief AI officer is, let me give you some quick context.
+
+You probably know what a CEO is, a chief executive officer, they run the place.
+
+A CFO is a chief financial officer who runs the money.
+
+A COO runs operations.
+
+Some companies even have a CISO, the chief information security officer, who runs cybersecurity.
+
+Now, think about that last one for a second.
+
+The CISO did not exist as a role until the internet showed up.
+
+Nobody needed a chief information security officer in 1980 because cyber threats were not really a thing yet.
+
+Then, the internet hit and cyber attacks became a real cost to business.
+
+And within about 15 years, every major company had to have someone, you know, somewhere to coordinate that responsibility.
+
+And maybe not all of them are called CISOs, but those responsibilities 100% fall on someone at those companies.
+
+The name is obviously just the name, but the role was created because a brand new problem appeared that nobody at the top knew how to handle.
+
+And that right there is exactly what's happening right now with AI.
+
+AI did not exist as a serious business priority 5 years ago, but today every CEO is getting asked about it on every earnings call, every meeting from the board.
+
+They are feeling so much pressure it's not even funny.
+
+So, naturally, the CAIO role was born.
+
+Except this time it didn't take decades.
+
+It didn't take 15 years.
+
+The chief AI officer came around in about 24 months.
+
+It literally jumped from 26% of these companies in 2024 to 76% in 2026.
+
+And that doesn't just happen for no reason.
+
+So, the question becomes, who is going to fill all of those seats?
+
+Because I mean, they need to be filled.
+
+And the part that I really want to plant in your head here is that you don't have to become a chief AI officer to play this game because most people watching this video probably won't, and that's completely fine.
+
+Because the same report says that every other leader in the C-suite has to also become AI fluent, which means every company is quietly installing AI fluent leaders in every department, whether that's marketing or finance or ops or uh sales, you know, whatever it is.
+
+The CAIO is the most visible new seat, but it's not the only one.
+
+So, if becoming a chief AI officer feels far away or unrealistic, don't worry.
+
+There is a seat in this wave for almost every type of person who's watching this.
+
+And we will get to which one fits you in just a minute here.
+
+But, there's another stat that's really interesting, and I need to show it to you guys because it's like a big gap that is causing a lot of panic amongst CEOs right now.
+
+So, once again, inside these companies that were surveyed, only 25% of employees are actually using AI tools in their daily work.
+
+25% one in four.
+
+But, the same CEOs are saying that 86% of their employees do actually have the skills to use AI, or at least could pick them up with just a little bit of training.
+
+So, actually hear those numbers.
+
+86% have the skills, but 25% actually use them.
+
+That is a 61-point gap.
+
+Now, of course, this is self-reported survey data, and employees almost certainly always under report what they actually use day-to-day.
+
+So, the exact gap is fuzzy, but the existence of the gap is absolutely real, and every CEO is staring at it, and they know it's real.
+
+I mean, like adoption is such a huge problem with tech.
+
+Change management is such a huge problem.
+
+And this number tells you almost exactly where the bottleneck is.
+
+The reason that most companies have not deployed AI everywhere yet is not that they don't have the right people.
+
+It's more so that nobody is connecting the people who can use AI to the workflows that actually need it.
+
+Nobody is like building that bridge from oh, you know, we have the skills to we're actually saving like 40 hours a week with these new tools and with these new automations, and that bridge doesn't just get built unless someone is like curious enough to take that initiative, or they are explicitly assigned to build that bridge.
+
+What I basically just alluded to, nobody's rushing to take charge of that because change management is so brutal, especially the larger the company is.
+
+Because whenever a new new shows up, you have like a very real short-term cost that you have to bear as an organization before you get that long-term payoff because people need retraining.
+
+Existing workflows need to be torn down and rebuilt.
+
+Things get worse before they actually get better and then even though the long-term upside is enormous, that short-term pain is what scares most decision-makers into just like doing what they're already doing.
+
+So honestly, in a lot of cases, the smartest move inside of a big company might not even be transitioning the whole org.
+
+It might be like spinning up a new business unit that is AI first from day one because they don't have those legacy SOPs or standard operating procedures.
+
+They don't have to rework those.
+
+They don't have like a new tech stack to migrate.
+
+They can just build one up AI native from the start.
+
+And that is honestly just it's way easier than dragging an entire organization, you know, hundreds of employees through a new set of procedures, you know, because they have their own way that they're already so used to operating.
+
+But either way, somebody does have to lead the charge.
+
+And that somebody is the person that we're talking about in this video.
+
+They might be called the chief AI officer.
+
+They might be called the director of AI or the head of AI.
+
+They might be even be called just like head of marketing, but this head of marketing happens to be the AI person at the company, the most AI fluent person in the building.
+
+So whoever closes this gap is the person that every CEO is paying for right now.
+
+And there's not just going to be one per company.
+
+This is going to be the new normal.
+
+I mean, we've all heard that cliché, AI's not going to take your job.
+
+Someone who knows how to use it is going to take your job.
+
+And the other thing is you don't need to be hired into this role to start doing that type of work.
+
+You can just start closing the gap inside of your existing job right now.
+
+You can just pick one workflow in your function that nobody on your team has touched with AI yet.
+
+Build the AI version of it or automate it or whatever you want to do there.
+
+Document it, show the time saved, show the benefits, and then just show your boss, show your team.
+
+And the more you do this kind of stuff, the better.
+
+Okay, so how do you actually go full-time into this because I kind of see it right now as like two paths into that seat.
+
+And I think that one of them is way more accessible than most people actually realize.
+
+So, path A is you start as an AI consultant, an AI automation agency, or some kind of just like advisor.
+
+You take a few clients, maybe some freelance gigs.
+
+You help businesses solve their problems with AI inside of their company.
+
+And some of those companies are going to look at you and go, "We should just hire you full-time." You So, you're basically getting pulled in-house through the work that you already did.
+
+And this is what a lot of you guys who have been in the space for a while are probably doing right now or actively pursuing.
+
+And this is path A.
+
+Now, path B is more of that internal promotion path.
+
+Like, you already have a job at a company.
+
+You're quietly the most AI-fluent person in the building.
+
+You're showing up to meetings with prompts that saved your team 3 hours.
+
+You are shipping internal automations that nobody asked for because you're curious and you know, you're learning, you're experimenting.
+
+And the next time that a seat opens up at the big boy table or maybe just like the the bigger boy table, you are the obvious person to fill that seat.
+
+And this is path B.
+
+Now, most people watching this video assume that path A is the only option because once again, that's kind of been like the narrative and something that I've obviously talked a lot about on this channel as well.
+
+Start agency, sell agents, freelance, become a consultant, you know.
+
+It works because you're still helping these businesses, you know, sort of navigate this overwhelming AI world.
+
+And what you're really doing there is you're proving a couple things.
+
+You're proving that you can provide value and you're proving that you do have a level of expertise in this field.
+
+But, path B might actually be way more accessible for you.
+
+And there's a stat from a different IBM study that backs this up.
+
+So, in a 2025 IBM study of 600 chief AI officers, 57% of them were appointed from inside that company.
+
+So, they were internal employees who were already there and got promoted into that seat of chief AI officer.
+
+And most of these CAIOs at major companies got the job because they were already inside building doing the work before there was even a title for it.
+
+And I'm literally seeing this play out in real time in my own communities right now.
+
+In the last few months alone, I've watched multiple AIS+ members either get pulled in-house from agency work or get promoted internally because they were already the AI person in their org.
+
+And it's for real, it's happening right now and it's really cool to see.
+
+So, maybe your freelancing gigs or your AI agency, it's good for cash flow right now and for building a nice reputation.
+
+And it's kind of like your on-ramp for a deeper, more impactful role like an in-house CAIO or something similar.
+
+I just think that there's more ways to achieve like what is your ultimate end goal?
+
+Is it financial freedom?
+
+Is it location freedom?
+
+Like it's not always in this case just like start an AI agency.
+
+There's other ways to change your life with AI.
+
+And the real question is which path fits you?
+
+Because the answer depends way less on title and way more on something that we still haven't yet talked about.
+
+And that thing is passion.
+
+You cannot commit to something that you don't actually like.
+
+You just can't.
+
+And a lot of people watching this video right now are seeing the same narrative everywhere.
+
+You know, if you want to make money with AI, if you want to change your life with AI, start an AI agency.
+
+And they think that that is what they have to do because it's basically all they're being shown.
+
+But a lot of those same people don't want to get on those sales calls.
+
+They don't want to close leads.
+
+They don't want to chase leads.
+
+They don't want to hear no 50 times before they get their first yes.
+
+They just don't want to do that and just isn't who they are.
+
+And there's absolutely nothing wrong with that.
+
+This truly matters more than anything else in this whole video because to actually become the AI native version of yourself, you have to put in the hours.
+
+You have to push through things that are overwhelming.
+
+And most days, you know, you might get outputs that are just eh and the work is going to be hard.
+
+The client might want something different than what you built or what you scoped.
+
+And you might feel behind.
+
+You're going to feel overwhelmed.
+
+The only thing that gets you through is loving the thing enough to keep going.
+
+You know, people ask me like why am I making so many YouTube videos or why am I doing this?
+
+It's because I wake up and I'm excited to actually go do it.
+
+So, if you don't love sales calls, you are probably going to hate running an agency.
+
+You're probably going to hate trying to get people to close.
+
+You're probably going to hate how many times do to hear no.
+
+It just sucks at times.
+
+But if you love that hustle, then it sucks less and you can actually win.
+
+And it's the same thing on the inside.
+
+Like even if you don't want to be an entrepreneur, it's still about what you already are good at and what you know.
+
+Like if you love marketing, you are going to hate to try to build a bunch of finance agents and automations.
+
+You are just going to hate it.
+
+But, you're going to love automating things like your content creation or your marketing copy or building your landing pages.
+
+You are going to be the AI-native marketer that your CMO eventually promotes.
+
+And that's the move.
+
+So, whatever you love right now, that thing is the play.
+
+Build the AI-native version of what you already do.
+
+Don't try to be someone else.
+
+That's where the imposter syndrome comes from, which is one of the most common issues I hear in my communities.
+
+Now, I want to show you the data behind why that reframe works, because every word I just said is backed up by what these 2,000 CEOs are telling IBM.
+
+Okay, so stat number one is that 85% of CEOs in the study said that every single functional leader at their company has to become a tech expert.
+
+Every single one of them.
+
+The CMO, the CFO, the COO, the head of sales, head of customer success, all of them.
+
+And that is the CEOs themselves saying this.
+
+This isn't just consultants at Big Tech like Anthropic or Google.
+
+These are CEOs.
+
+These are the people that are actually running these companies.
+
+So, stat number two, 77% said that talent leadership and tech leadership roles are converging.
+
+That means that the soft skills role of leading people and the hard skills role of running tech are kind of merging into one job.
+
+The leader who can do both of those is going to win.
+
+So, think about it like this.
+
+When the internet hit us, right?
+
+That was like one of the biggest shifts we'd seen in the past couple decades, we had internet agencies.
+
+We had digital marketing consultants.
+
+We had internet marketers.
+
+And that was an actual job category that people would like write on their business cards.
+
+But now that's just all it's just all marketing.
+
+If someone walked up to you today and introduced themselves as an internet marketer, you'd probably look at them like they were crazy because that is just marketing now.
+
+The internet seeped into every single function so completely that that qualifier of saying internet before things disappeared.
+
+And I think that that exact same like qualifier disappearing pattern is going to happen with AI.
+
+Like, you know, right now we have AI consultants, we have AI agencies, we have AI strategists, but it's just going to be consultants.
+
+And if a consultant doesn't natively speak AI, then there's no way they're going to be able to keep up with their peers.
+
+There's just no shot.
+
+So, this is not a new industry being created that you can just like opted in or opt out of.
+
+AI is going to change the way that businesses actually get stuff done.
+
+It's going to change the infrastructure.
+
+It's going to change the way that all teams work.
+
+It's going to literally like seep into everything and fill the cracks of everything.
+
+But once again, I know that that might sound scary and that's not what I'm trying to do.
+
+I'm trying to like excite you here because the fact that it's going to go into everything means that you get to actually find what you already enjoy and what you're already good at, what you would already potentially consider yourself an expert at, and just think, "Hmm, how can I use AI here to help me do this, this thing that I already love, help me do this better and faster?" Okay, so then also IBM drops this quote, and I'm going to paraphrase this slightly, but it really made me think.
+
+They said, "Today AI augments people.
+
+By 2030, people will augment AI." "The biggest shift will not be structural, it will be cultural." Like I said, that one makes me think.
+
+You know, today AI augments you, but by 2030 you will augment AI, and that is the inversion of the entire human to machine relationship in 5 years.
+
+The thing that actually changes is the way that you work, and all of the fancy tools and tech is just kind of like downstream of that.
+
+Now, there is something that I noticed while I was reading this report that I think is pretty fascinating.
+
+The chief AI officer role itself is being pretty much invented in real time.
+
+Like, there's no template for it because in a separate IBM study, 40% of CAIOs report directly to the CEO.
+
+24% of them report to the CIO.
+
+And the rest are scattered across reporting to CTOs and COOs and whatnot and other senior roles.
+
+So, really nobody can actually agree on what this role 100% is.
+
+And that might sound chaotic, but I think it's actually good news for you because if you walk into a company today and you start operating as like the AI native version of yourself, there's no playbook for someone to compare you to because you essentially are the playbook.
+
+The first person to define what this looks like inside of a given function wins by default.
+
+Now, if you're in healthcare or finance or defense or government or any other industry that's pretty highly regulated, you might think that this whole video does not apply to you because you can't just plug AI into like all of your existing workflows and data and there are compliance rules on the way.
+
+But I would actually challenge you to think about the fact that it might even apply more because domain knowledge plus AI fluency inside of a constraint is the single rarest hire in the world right now.
+
+Everyone else fluent in AI has no idea how your industry works because you actually have both.
+
+So, please lean into that.
+
+But I know that some of you might be thinking like, "Okay, Nate, yeah, I've been trying, you know, I've been pushing leadership.
+
+I have been researching compliant tools.
+
+I've been pitching things to my team and I just keep getting told no." And yeah, I mean, that sucks.
+
+It happens.
+
+Especially in regulated industries where one wrong move could cost, you know, millions of dollars in fines or it could end up getting someone fired.
+
+But getting told no right now obviously does not mean you should stop.
+
+You should build your own projects at home for fun.
+
+You should build the AI version of a workflow that you actually have at your job, but you would just use dummy data so you're not, you know, sending anything sensitive over.
+
+And then just casually start sharing it with your team and showing them, "Hey, look what I built this weekend.
+
+I'm just messing around.
+
+Hey, look what I could do.
+
+Look, AI is awesome." Just start like planting those seeds because inevitably your company is going to get the green light.
+
+Eventually your boss is going to walk into a meeting and someone's going to be like, "Hey, we need an AI strategy." Or, you know, something along those lines.
+
+And in that exact moment, your name is going to be the first one that pops into your boss's head because you're already AI fluent.
+
+So, before I close this out, a few more things that I realized when I was reading all this stuff and like just thinking that I need you to understand.
+
+So first, these stats are from a survey of 2,000 CEOs from large established companies, right?
+
+There's, you know, different regions and there's diverse industries, but these CEOs run companies most people watching this video don't work at.
+
+The 76% CAIO adoption number is real for these companies, but it is not real for the world.
+
+Like globally, the actual percentage I imagine is significantly lower.
+
+Like I would be shocked if that was over 30%.
+
+Second, CEOs are guessing in public.
+
+In 2024, half of these CEOs thought that AI would be primarily driving growth by 2026.
+
+But today, in 2026, almost halfway through the year, only 10% say that it actually is.
+
+So, they were off by about 40% in 1 year.
+
+You should obviously still be taking this timeline very, very seriously because this stuff is evolving way quicker than anyone imagined, but I did want to let you know that some of the predictions that the CEOs in the study made were pretty far off.
+
+But what is not in dispute is this.
+
+CEOs are hiring, the org chart is changing, the functional leaders who are the most AI fluent are getting promoted.
+
+That part is real and it's happening right now.
+
+All right.
+
+So, let me just wrap this whole thing up.
+
+You do not need to change your role, you need to change which version of your role you are.
+
+You need to play to your strengths because you can outsource your thinking, but you cannot outsource your understanding.
+
+So, pick your path on purpose.
+
+So, that is what I wanted to talk to you guys about after reading this report over and over and just thinking about it all week, and I will link it in the description if you're curious and if you want to check it out yourself.
+
+And if you feel like this might have sparked something for you and you want to dive a little bit deeper, then definitely check out my free community.
+
+It is linked down there in the description.
+
+You can get in there.
+
+You can talk to people.
+
+You can ask what they're doing.
+
+You can ask questions.
+
+You can check out all my free resources and you can just start learning more about AI.
+
+But anyways, that is going to do it for this one.
+
+So, if you guys enjoyed the video or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video, and I'll see you all in the next one.
+
+Thanks, everyone.

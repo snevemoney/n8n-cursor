@@ -16,7 +16,6 @@
 8. One-person video use cases stolen as SKUs (`review-to-book`, `clip-factory`, `orchestrated-site-brief`, `speed-positioning`, `demand-validate`). $ on tape UNVERIFIED.
 9. **All 15** stolen into `STEAL_SHEET.md` + `business-types.json`. Researcher funnel §2b = steal after L2. Hunt ICPs memorized in OPERATOR_MEMORY FACTS. Not new `business-lanes.json` rows.
 10. **DEEP_SUMMARIES.md** — whole argument of each video (video 8: cheap-output paradox, orchestration, illusion of progress). Do not flatten doctrine into a SKU.
-11. **X bookmarks (AI 34)** share this catalog — `cinematic-recipe` · `click-live-site` · `agent-job-card` · `motion-pipeline`. Cluster doctrine XB-1…XB-7. No second steal sheet. No new `icp_id`.
 
 ## Don'ts
 

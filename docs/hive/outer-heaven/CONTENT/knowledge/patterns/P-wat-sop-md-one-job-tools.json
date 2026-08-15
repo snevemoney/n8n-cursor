@@ -1,0 +1,25 @@
+{
+  "pattern_id": "P-wat-sop-md-one-job-tools",
+  "version": 1,
+  "title": "Workflow = SOP markdown; tool = one action. No on-tape vendor install.",
+  "steps": [
+    "Write the sequence in markdown. Update from feedback.",
+    "One-job tools. Look for existing tools first.",
+    "Steal the split. Do not install Claude Code / Firecrawl."
+  ],
+  "support_ids": [
+    "K-tDGiWn0flK8-01",
+    "K-AO5aW01DKHo-02",
+    "K-3GAxd90fEE4-01"
+  ],
+  "dissent_ids": [
+    "K-tDGiWn0flK8-02",
+    "K-3GAxd90fEE4-04"
+  ],
+  "valid_when": "Hive `workflow-compiler` / `slice-build`. n8n stays for boring/predictable.",
+  "less_relevant_when": "Chat-only locker; dentist-scrape hunt (operate-never).",
+  "confidence": "high as the folder recipe",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "'no code' vs Python+.env is speech≠behavior — kept as dissent."
+}

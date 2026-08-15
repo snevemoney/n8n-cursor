@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-primitive",
+  "title": "Reusable agent primitive underneath a demo",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "primitive_id",
+    "name",
+    "loop",
+    "source_video_id",
+    "status"
+  ],
+  "properties": {
+    "primitive_id": { "type": "string" },
+    "name": { "type": "string", "description": "e.g. EVENT-DRIVEN AGENT LOOP" },
+    "loop": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Ordered engineering steps, not the YouTuber SKU name"
+    },
+    "obvious_demo": { "type": "string" },
+    "other_applications": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Notes only. Do not auto-wire."
+    },
+    "capability_ids": { "type": "array", "items": { "type": "string" } },
+    "source_video_id": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "knowledge_type": {
+      "type": "string",
+      "enum": ["declared", "demonstrated", "implicit", "synthesis"]
+    },
+    "evidence_status": {
+      "type": "string",
+      "enum": ["observed", "transcript-implied", "unobserved", "UNKNOWN"]
+    },
+    "status": { "type": "string", "const": "UNTESTED" }
+  }
+}

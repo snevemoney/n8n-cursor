@@ -1,0 +1,263 @@
+So, today Claude announced that they agreed to a partnership with SpaceX, so Elon Musk's company, and it's going to substantially increase their compute capacity, which means that they've been able to increase their usage limits for Claude Code and for the Claude API.
+
+So, today in San Francisco was the first Code with Claude event of 2026, which is basically just a big developer conference that they're doing in San Francisco, London, and Tokyo over the next month or so.
+
+And they actually got so much demand for this that they extended it.
+
+It looks like they did an extra day in each of these locations.
+
+So, pretty cool.
+
+But as you guys probably are aware if you've been using Claude for a while is that this past couple months, this past quarter, has been awful with outages.
+
+There's been so many times where Claude has just died while you're trying to use it.
+
+And there's probably a lot of different reasons for that, you know, like they were doing a lot of testing, they were shipping so many features, they had the Opus, they had Mythos.
+
+But really the main reason is that they just didn't have enough compute to handle how much demand there was.
+
+There was way too many people trying to use Claude than what Claude could actually support.
+
+So, today I wanted to actually break this down and help you guys understand what this means for you practically and what you might want to start doing differently.
+
+So, higher usage limits for Claude and a compute deal with SpaceX, very very interesting.
+
+So, because of this partnership, what that means, effective immediately, is that first of all, they're going to be able to double Claude Code's 5-hour rate limits, double.
+
+Whether you're on Pro, Max, or Team, your 5-hour limit is going to be doubled.
+
+So, when you're here inside of Claude, whatever plan you're on, this is going to last two times as long now.
+
+What they also did is they removed the peak hours limit reduction on Claude Code for Pro and Max accounts.
+
+So, if you guys remember, maybe a month ago or so, they came out with this announcement and said, "Hey, during peak hours, so like weekday mornings-ish, you will hit your session limit faster." Because once again, they had way too many people using Claude Code during peak hours, and they didn't have enough compute on their side.
+
+And then they also did that thing where they tested out not letting people buy a Pro plan, so the $20-a-month plan, and using Claude Code.
+
+You had to buy a Max plan in order to use it, unless you who already a subscriber.
+
+So, they were doing all these things to figure out like how can we actually compete or how can we actually keep up with how much demand we're getting for our platform right now?
+
+Because you also have the issue of if you go out and buy a bunch of extra compute and it's just sitting there and it's not being utilized, then that's also money going down the drain because the computer is just sitting there not being utilized.
+
+So, if you really think about like the math and the projections you'd have to do, it's really not a very simple problem to solve.
+
+And I'm not sure if this was the intention.
+
+Remember when people were using the Claude subscription for like open Claude and Hermes agent and then they said, "Hey, you can't do that anymore.
+
+It's against our terms of service." Yes, it is against their terms of service, but I wonder if there was also some motivation there to be like, "Whoa, we got to like chill a little bit with how many people are just abusing their subscriptions right now." And we know if we switch over to API keys, then a lot of people might stop using our models as much for open Claude or Hermes.
+
+So, anyways, just a quick thought.
+
+But then the final thing is that they are raising their API rate limits considerably for Claude Opus models.
+
+So, it is a really decent chunk.
+
+So, per minute, you used to only be able to send 30K input tokens at a time or you'd be rate limited.
+
+And that has been upgraded by like 16% on the output side.
+
+It used to be 8,000 a minute and now it's 80,000 a minute.
+
+So, every single tier got a really a significant jump here.
+
+I mean, if you think about only being able to output 8,000 tokens in a minute, I have gone past that so many times.
+
+Once again, this is not for Claude code, this is for the API.
+
+But besides just the partnership with SpaceX, they were also on kind of a buying spree.
+
+You know, they have an agreement with Amazon.
+
+They have an agreement with Google and Broadcom.
+
+They also have a partnership with Microsoft and Nvidia and a big investment in American AI infrastructure with FluidStack.
+
+So, this was obviously a big announcement with SpaceX, but they were kind of working towards this and they've been moving in the direction of figuring out how to get more compute either way.
+
+And the day before this actual conference, they made an announcement about partnering with that Goldman Sachs JV as well as Blackstone.
+
+And you can just tell that they're really going after enterprise here and they need to have compute to be able to handle enterprise and they are expanding internationally.
+
+So, anyways, let's just start to break this down.
+
+I don't want to waste too much time.
+
+I want to keep this video pretty quick.
+
+So, the headline, we read all this, right?
+
+Anthropic released three big changes.
+
+Um they also released something pretty interesting with managed agents.
+
+They gave them like webhooks and auto dreaming and um you know, multi-agent orchestration.
+
+And I'm not going to cover that right now.
+
+I'm definitely going to play around with it and I'll bring a video if I find some interesting stuff.
+
+But, this one's more about the actual usage limits.
+
+The 5-hour rate limits got doubled.
+
+Peak hours throttling has been removed.
+
+And API rate limits have been improved significantly.
+
+So, why does this matter?
+
+Well, for months, everyone who was building with Claude code has been hitting walls.
+
+There's been so many complaints about people hitting the limits so fast.
+
+So many complaints about people wanting to upgrade from Pro to Max to Max higher, and even on the highest Max plan still getting shut down and not being able to use 5 hours worth of Claude code.
+
+And I don't know how many of you guys are, but if you were using the API for Opus, and you were trying to build production agents or you know, apps that have some AI on the back end with Opus, you might be hitting rate limits very frequently.
+
+So, these are the three changes that we just talked about that have happened today.
+
+And let's look at this rate limiting again because the statistics are pretty interesting.
+
+The lowest tiers obviously got the biggest multiples.
+
+We see 16 here and we see 10 here.
+
+But still, having all of these other ones, you know, the inputs getting more than the output just because input is much less expensive than output tokens.
+
+But this basically meant if you had half a million input tokens per minute, you could pump roughly 370 pages of context per minute.
+
+And that's just on tier one.
+
+But before today, you would have only had 30K tokens, which might have been like 20 to 22 pages.
+
+And on the output side, we can now generate way more content much quicker.
+
+So, if you wanted to have like a bunch of different agents running in parallel, that just would have been really, really hard to do under the previous rate limits with Opus.
+
+And so, obviously how they paid for this was the SpaceX deal, right?
+
+They got 300 megawatts of capacity.
+
+They got over 220,000 Nvidia GPUs.
+
+And they did this all super, super fast, which is really impressive.
+
+And I'm not going to get very technical here, right?
+
+But compute is expensive and these AI models need compute.
+
+If you think about like you have all these closed source models like the Geminis and the Opuses and the GPTs, and if you think about the open source models that we have like the deep six and the Gemmas and all these other open source models, what's the difference?
+
+Why are the closed source ones so much better?
+
+It's because they have more compute behind them.
+
+The open source models that you take and you want to run locally, you have to have a machine with enough RAM and enough VRAM to actually run them and run them fast and run them well.
+
+But when you're actually just like using cloud code and you're talking to Opus, you're relying on Anthropic's servers.
+
+You're relying on Anthropic's infrastructure to actually process that for you and that's why it's able to come back so fast.
+
+And even if you wanted to like buy a VPS to host a local model on, you would have to buy a VPS that has enough compute to actually hold and run all of those models.
+
+So once again, Amazon, Google, Broadcom, Microsoft, Nvidia, and Fluidstack, they're clearly investing here in compute.
+
+And what's interesting here, which was at the bottom of the announcement, is that Anthropic and SpaceX have expressed interest in developing multiple gigawatts of orbital AI compute capacity.
+
+Which means GPUs in space.
+
+Right here.
+
+Super interesting.
+
+As part of this agreement, we have also expressed interest in partnering with SpaceX to develop multiple gigawatts of orbital AI compute capacity.
+
+So cool.
+
+So it doesn't seem like that's going to happen right now in this year, but Anthropic believes that terrestrial compute, which is stuff like the power and the water and the cooling and also the community not liking how much water and electricity it's using, has a real long-term ceiling.
+
+So putting compute in space and think all these AI models running in space is what's going to really unlock like the next level of all of these different AI models.
+
+So what does this change for you guys, for builders?
+
+Um I came up with these five main points and not all five may hit you, but let's just run through them quick.
+
+The first thing is to retest workflows that broke before.
+
+So if you tried building an Opus agent six months ago and you gave up because of rate limits, the wall might not actually exist anymore and it's worth a reattempt.
+
+I always think of this story when I was working with a client and they wanted a LinkedIn automation with AI generated infographics and I was like I just I can't confidently give you something that I would want you to post.
+
+Like it's just not there yet.
+
+3 months later, new image model dropped.
+
+I tested it out, it worked.
+
+I called him up and then we built it out for him.
+
+So, things move fast.
+
+Sometimes it's worth revisiting old projects.
+
+The other thing is, if you were using something like /opus plan or if you were consistently delegating a lot of work to Haiku or Sonnet just because you were trying to really maximize your session limit, then maybe you can start to you know, give yourself you know, treat yourself a little bit more.
+
+Use Opus a little bit more.
+
+Now, obviously, context management is still going to be really, really important.
+
+So, I've made a ton of videos on that kind of stuff.
+
+You can check out my channel.
+
+But, with these new limits, you can experiment maybe a little bit more.
+
+Third, we have that the 1 million context window is finally usable in production because you're not going to be getting rate limited.
+
+And this is when I'm thinking of like the API calls, not so much the Claude code.
+
+Claude code can also sit behind production infrastructure now, not just prototypes because previously, if you would have had all of these different routines firing off and you still wanted to be able to do your knowledge work and build automations and stuff like that on the day-to-day, then you're using your session limit on Claude code automations in the agentic loop as well as your daily knowledge work.
+
+And you were just going to eat through it too quick.
+
+But now, with double the usage, you might be able to push some of those workflows that you want on a routine and you want to have like a lot of autonomy, those can now be routines and it doesn't affect your session limit as much.
+
+And then, multi-agent workflows are way more viable.
+
+So, you could have things like five sub-agents, each reading 50k tokens.
+
+And so, this one's kind of similar to point three, but basically just the idea that your API driven workflows, you have a lot more flexibility now.
+
+So anyways, just wanted to wrap up here with what it signals about Anthropic's direction, at least what I think.
+
+So, they are clearly playing for 5 plus years of compute.
+
+They invested a ton of money into it.
+
+So, obviously, this is the future for them.
+
+Claude code also seems to be clearly their flagship product.
+
+They didn't make any announcements today, at least best of my knowledge, about co-work.
+
+They talked about this Claude session limits and they talked about APIs second.
+
+But obviously this session limit counts towards pretty much all of your Claude products, but Claude code was what was heavily discussed.
+
+Now yes, this event was called code with Claude, so there's a bit of that, but anyways, just something I wanted to call out.
+
+And then the commitment to cover consumer electricity hikes around their data centers is a community trust play long term that lets them build faster than competitors who get pushed out of small towns.
+
+So anyways, I hope that this one was exciting.
+
+I hope that this gave you a few things that you want to try and hopefully you learned something new.
+
+Next I would still say it's important to obviously be thinking about how do tokens work under the hood and how should you be looking to manage your session limits.
+
+So if you want to check out some hacks, I'll tag this video right up here which I recommend you guys go watch next.
+
+Hopefully I'll see you guys over there, but as always, thanks for making it to the end of the video and I'll see you on the next one.
+
+Thanks everyone.

@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-079",
+  "version": 1,
+  "title": "retrieval / build — brain-native-tools-vs-agent-attached-tools",
+  "steps": [
+    "Steal the *classification*: instance-tool vs model-native tool. Do not install n8n-cloud/OpenAI because tape.",
+    "Steal “ID is an array + filter required (then).” Do not paste a guessed filter.",
+    "Steal the *disagreement row*: cost vs cite vs untested quality.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-lokbsA5VXOk-01",
+    "K-lokbsA5VXOk-03",
+    "K-lokbsA5VXOk-04",
+    "K-lokbsA5VXOk-13"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=retrieval; stage=build; His node version. Filter JSON is on-screen, not in `full.txt` — **do not invent the JSON**.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

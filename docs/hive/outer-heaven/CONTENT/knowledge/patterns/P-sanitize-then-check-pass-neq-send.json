@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-sanitize-then-check-pass-neq-send",
+  "version": 1,
+  "title": "Sanitize before the model; check before leave; pass ≠ send",
+  "steps": [
+    "Redact PII/keys before text hits a model.",
+    "Test the miss: secret-keys can pass a password.",
+    "Draft outreach into a DB. Human sequences. Do not send."
+  ],
+  "support_ids": [
+    "K-oWdJMJp2HgM-01",
+    "K-oWdJMJp2HgM-02",
+    "K-HNKlFTd1maM-01"
+  ],
+  "dissent_ids": [],
+  "valid_when": "Any text into a model or out to a human. Hive `sanitize-in-check-out` / `send-removed` / `warm-draft-hitl`.",
+  "less_relevant_when": "Later tapes that celebrate auto-send — keep as HITL-send siblings, do not average.",
+  "confidence": "high as spoken scope; tape $ UNVERIFIED",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Sanitize is not a send-gate. Fail branch is yours to wire."
+}

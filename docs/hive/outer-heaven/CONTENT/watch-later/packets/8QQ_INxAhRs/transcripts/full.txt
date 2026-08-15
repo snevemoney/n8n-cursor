@@ -1,0 +1,905 @@
+So, this right here is basically my entire life and my entire business all in one second brain.
+
+And Claude Fable is able to understand all of this better than I do.
+
+And not only that, but it's helping me automate a lot of this.
+
+So, if you haven't heard, Claude Fable just dropped and it is basically just Claude Mythos 5, but there are more cyber guardrails baked in.
+
+And Claude Mythos is the model that Anthropic has been teasing for months now.
+
+It's the one that's so powerful that it's not generally available.
+
+It's only available to heavy cyber and infrastructure partners that are in Project Classified.
+
+And what you'll notice here is there aren't a ton of like major, major jumps, but a lot of the feedback that I've been seeing from Andrej Karpathy, Boris Cherny, and also just the general community is saying that this model is definitely a major step.
+
+However, today is June 9th and this thing's only available from today through June 22nd on your subscription and then it's going to switch to usage credits.
+
+Now, I'm sure that is going to come back to the subscription at some point, but you definitely want to get in here and play around with this model for the next 2 weeks-ish before it goes to usage credits.
+
+And this model is two times as expensive as Opus, so $10 for million input tokens and $50 for million output tokens.
+
+So, it will eat your subscription faster than Opus.
+
+But anyways, what I want you guys to understand in this video is that this is kind of my second brain and then I've obviously got my operating system, which is called Herc 2.
+
+So, if you've been following my channel for a while now, you probably are aware that this exists.
+
+And this isn't something that I just built today because Claude Fable dropped.
+
+This is something that I've been working on for months, but today I've been playing around with Fable all day long to see how it's able to adjust into my AI operating system and that's what I want to talk about with you guys today.
+
+Basically, show you exactly how I've set everything up and exactly how I keep improving it over time and how I'm able to be so productive and efficient.
+
+So, today I'm going to go over my Claude Fable AI operating system and how this thing is my second brain.
+
+So, the first thing that I want to start off by talking about is a lot of this is a mindset shift.
+
+A lot of this is basically an adoption issue.
+
+It's a it's a habits shift.
+
+So, basically, before I started using this AI operating system, I was opening different AI tools, different subscriptions I paid for, and I was using like custom projects or custom GPTs, and I thought that that was being really productive, and it still was, but I was repeating myself, and it didn't feel like I had an actual kind of like a co-founder that I could talk to that always knew what was going on in my life and my business.
+
+And so, the first step is basically close out of all those tabs and try to have the mindset shift, try to default to using Claude Code or Codex or whatever you want your harness to be.
+
+Most of you guys clicked on this video, you probably want Claude Code, but just default to using Claude Code.
+
+I don't care if you use that in the desktop app or in VS Code like I'm going to be showing you in this video, just default to doing everything through Claude Code.
+
+And you start to build up so much context and so much memory and preferences, and that's trust me, that's just the way to do it.
+
+So, anyways, an OS doesn't start with architecture, it starts with a default.
+
+From there, we've kind of got two layers, and you'll probably hear people talk about my agentic OS or my second brain or my executive assistant, whatever they want to call it.
+
+I think of it in two distinct ways.
+
+I think of the second brain is the first piece.
+
+Without a second brain, you can't have an AI operating system.
+
+Second brain is basically your knowledge.
+
+Does this thing know what's going on in your business and your life, with your clients, you know, with your YouTube channel, whatever it is, does your second brain know that, and can you ask it questions?
+
+Once you have a second brain, you're able to then build on top more of the OS infrastructure, the architecture of hey, now that we have all this knowledge, let's start to build some skills, let's start to automate some things, and let's start to actually work out of here as my operating system, rather than Apple or Windows or whatever you normally operate in, let's operate inside of this second brain instead.
+
+And so, everyone has different definitions of second brain and AI OS, but that is the way that I think about it, and I think it's pretty simple.
+
+So, from there, the framework that I like to use to think about building and maintaining my AI operating system is called the four C's, and we take it in order.
+
+You can see the first two are the second brain, the second two are the AI operating system.
+
+And we start with context, which is who you are, who your business is, stuff like that.
+
+And then we have connections.
+
+Can your second brain actually reach out for live data?
+
+Because sometimes you have data that's static, right?
+
+Like your background, your meeting transcripts, your whatever, your 2025 progress and achievements.
+
+But then you have connections, which is real data, like your ClickUp messages to the team, or your emails, or your, you know, your QuickBooks P&L.
+
+Any data that's less static and that's constantly changing, that's what I want to use as my connections.
+
+And then from there we have capabilities, which is where we get into AI OS territory, building skills, building agents, building automations, building pipelines, and then turning those capabilities into cadence, meaning they can run on their own when you're sleeping, not just when you're sitting there triggering them manually and baby sitting your AI OS.
+
+So this is the order, this is what I like to teach, and it let's say you already have your AI OS set up, this is still something really important to think about, because maybe in the future you need to help your team get upskilled with an AI OS, or you maybe actually want to go sell AI OS setups to a business.
+
+This is the framework to teach.
+
+So starting with the context, this is your routing tree.
+
+You know, I'm going to try to basically make this video by answering all the questions that I've been getting in my communities, in my comments about how I use my AI OS day-to-day.
+
+So I'm going to show you guys, I'm going to open it up, show you guys what's in there, but it's a routing tree.
+
+And so I think of my Claude and MD file as my router, meaning yes, I have some stuff in there about like, "Hey, this is your goal, this is what I do, this is your, you know, um your your processes." But more so it's like, "Okay, this is where the files live." So I'm pointing my agent to all the rules, to the references, to the skills, to the other projects, to the wikis.
+
+And basically the pulse check here is, you know, when I open up my iOS, you guys will see I have so much so much context in here, so many files.
+
+And people ask me the question a lot about at what point is it too much, and how do you know when you need to like split some stuff up?
+
+And so far mine has not been too much, because whenever I ask it to find things or I ask it to like pull in some data, it it finds them really quick.
+
+And because I'm sitting there watching it, if it's if it's searching for like 5 minutes for a file that I know where it is right away, then that's probably an issue and I probably need to update the architecture and the file system.
+
+You know, we've heard context engineering, prompt engineering, harness engineering.
+
+I also think that architecture engineering is going to be a new kind of like art and I don't think there's a right answer, but basically the pulse check for me is is it intuitive to myself?
+
+Could I manually drill through my folders and files and find what I need and can my agent do that as well?
+
+Okay, so here is my setup.
+
+Here are all of my files and folders on the left and before I start drilling in, I just wanted to let you guys know, this changes for me all the time.
+
+I'm always changing stuff around a little bit.
+
+I'm always adding new things and I am always updating my Claude at MD, but let me click in here real quick and just show you what's going on.
+
+So, you are Nate Hurks executive assistant.
+
+I probably need to update that.
+
+It's more of my AOS.
+
+Your job is to help him spend less time on operations, people management and admin so we can focus on learning AI tools and making YouTube videos.
+
+Here's some information about the knowledge base.
+
+I give it the exact wiki path.
+
+I give it the hot cash.
+
+I give it the master index and I give it basically the way to look through it.
+
+I then start to talk about tools.
+
+I then start to talk about API keys.
+
+I show where the skills live.
+
+I show how the skills should structure.
+
+I show what's active and when to use what.
+
+Honestly, I should probably clean this up a little bit, but that is kind of the way that I am thinking about showing where things are.
+
+Now, you also notice in here, I've got some other stuff.
+
+And in my dot Claude, the two most important things for me really in here are my my sub agents and then my skills.
+
+This is pretty much my number one favorite feature in Claude code and this is how I'm so productive is with all of these custom skills that I'm building out.
+
+So, that's where they live, of course.
+
+And then something that I recently have switched over to, which I've gotten a ton of questions about, is I'm using a a folder that I call other worlds and what lives in my other worlds are basically other Claude code projects.
+
+Like things that I was normally working in a completely different repo.
+
+You know, I would open them up from the file opener right here or the folder opener, but now I've just moved everything that I use frequently into my Herc 2 project.
+
+Now, a couple reasons for that.
+
+I think the main one, honestly, when I really started to think about it, is from a syncing perspective.
+
+If I wanted to push my Herc 2 project to GitHub, so that I could go on my laptop and pull it in, I now have all of these synced up as well, and I don't have to go push like six different, you know, projects to GitHub before I move over to my laptop.
+
+So, that's one reason.
+
+Another good reason is because now my main operating system has context into like other things that I'm doing.
+
+So, in here, I can have it go look at my book project.
+
+I can have it go change something on the website.
+
+I can have it, you know, edit the edit videos or do something in the token dashboard, whatever I want to do, I can kind of do that all from here, and it can CD around, and it can find its way to what it needs.
+
+And I just kind of love having that feeling of all I have to do is open up Herc 2, and I can get to what I need to do.
+
+And these are not small projects, right?
+
+Like if I open up, for example, the YouTube OS, we've got projects, we've got references, we've got transcripts, we've got a ton of drill-downs in here.
+
+Like these are pretty big projects, and I'm still able to keep everything finding, you know, where it needs.
+
+I'm still able to have my agent find things.
+
+And if I go in here, in my main Herc 2 directory, and I do a {slash} context, I'm, you know, I'm still only at 40,000 tokens starting off.
+
+The majority of that is system tools, you know, we've got a little bit of memory files here, but this has not been an issue for me, and I don't think that these markdown files will be an issue for a while.
+
+I also have a ton of working projects in here.
+
+So, if I open up my projects folder, you can see that basically most of the stuff that I'm doing is typically creating a new folder inside of my projects.
+
+And these are not usually small folders, either.
+
+Like if I go to my YouTube videos project, you can see this is a pretty big folder with a bunch of YouTube videos that I've been working on, and those drill down even farther.
+
+So, the point I'm trying to make here is you guys are asking a lot of questions, and I don't think there's a right or wrong answer.
+
+There's obviously a way to tell, okay, something's not right here because I'm spending so much tokens, or my agent's searching for 20 minutes, but for the most part, all, not a right or wrong answer.
+
+So, you kind of get to be creative and orchestrate your own architecture here.
+
+As long as you can follow the paths and it's intuitive to you, and as long as your agent isn't wasting your tokens, then I don't think there's a wrong answer.
+
+So, anyways, that was just hopefully give you guys a little sense of comfort.
+
+So, that's kind of the idea of context and the way that I like to think about what things to pull in and where to have my connections, which is the second C, is this is kind of like the first tier that I think about.
+
+I think about, okay, on a weekly basis, what apps might I open?
+
+What bookmarks do I have in Chrome?
+
+Where do I go to text people or talk to people, whether that's internal or external?
+
+And when you think about that tier one of like the main things you would reach for, >> [snorts] >> those are probably great things to pull in first.
+
+You know, they're they're pretty high priority.
+
+And so, if you're having trouble thinking through that, I would think about revenue, customers, your calendar, comms, tasks, you know, project management, meetings, knowledge.
+
+Where does that stuff live and where would you reach?
+
+And just start to write that down.
+
+So, for me, I just threw in some examples, right?
+
+And you can see that some might live in multiple.
+
+So, for me, school lives in revenue and customers.
+
+I also have customers on, you know, YouTube.
+
+I have revenue in Stripe and QuickBooks.
+
+My calendar's in Google Workspace.
+
+I comm in Google Workspace, ClickUp, and Slack.
+
+So, I just start to go through these things and and start to pull in context and start to make my connections.
+
+And my connections are typically through API keys and API endpoints, but I will get to that in the next section.
+
+But, that is how it works and I've got a full course, by the way.
+
+So, this video's more of like my high-level mindset, how mine is set up, how I think about using it, and how I get more out of it, and how I prompt it.
+
+But, if you want a full step-by-step course, I've got one in my free school community.
+
+It's like a couple hours long.
+
+And like I said, it's completely free.
+
+So, join my free school community.
+
+The link for that is down in the description, and you can do the build your own AI OS course.
+
+That's more of a like a step-by-step.
+
+I also in that course give you guys a free GitHub repo, which you can clone in.
+
+And then basically, when you clone in that repo, it helps you walk you through all of that, the four C's.
+
+It gives you an audit, and it helps you build out the folder architecture from the beginning.
+
+So, we go over the three M's, and we go over the four C's.
+
+So, all of that's available in my free school community.
+
+Anyways, let's keep on moving here.
+
+So, the gut check is if you opened up your Claude code right now and you asked it about, you know, something about you, something about you and your business, would you get an answer that sounds like a stranger or would you get an answer that sounds more like a teammate or a co-founder?
+
+That's a really good gut check.
+
+So, just to show you guys real quick two examples of something that Fable did for me and proving to you that it knows me so well, look at this one.
+
+So, this first one I said {slash} goal.
+
+Using hyper frames, I want you to look through this project.
+
+What do you know about me?
+
+What do you know about my YouTube channel?
+
+What do you know about our business?
+
+Create me a video that explains my journey, who I am and what I'm up to.
+
+So, let me pull up that video.
+
+All right, so I'm going to play this video on 1.5 speed, but who am I?
+
+Nate Hurk, AI automation, Chicago founder, creator, talk dad.
+
+I teach everyday people to build up AI.
+
+2024 hit record for the first time.
+
+Anyone can build AI agents, no code required.
+
+41 videos in 2024, 261 videos in 2025.
+
+The channel today, so here's one piece that I realized this is wrong.
+
+You know, right now I'm at um like 800k subscribers, but it got this wrong because I have a lot of static data inside of my AIOS.
+
+So, last time it did a refresh, it found that I had 620,000 subscribers.
+
+Now, if I right now prompted Claude code and said, "How many subscribers do I have?" and and pull that in live, it would pull that in live, it would update the static data, and we'd be fine.
+
+But anyways, just wanted to call out why that was outdated there.
+
+So, anyways, those are channel stats.
+
+We move on to the free 8-hour course, which got, you know, over 1.5 million views.
+
+We've got the flywheel, YouTube funnels down to AI's free, funnels down to AI's paid, which funnels into coaching high ticket, which is something that we don't have yet available.
+
+Our certification program we're working on, some of you guys might know, but more information to come about that soon, but obviously I've been talking to it about it, brainstorming, ideating, building automations.
+
+It knows what we're doing there.
+
+We go through the flywheel, every video feeds the machine.
+
+It talks about some revenue stuff, which is not completely accurate.
+
+There's a lot of different data sources that has to pull together, but either way, a 13-person team runs the machine and that is up at AI.
+
+That's actually the core kind of like management company that owns everything that we're doing across our different ventures.
+
+So, 13-person team is kind of the core team right now.
+
+Um my only job is to learn AI, make videos, delegate the rest.
+
+Obviously, it it has some bias because its job is to help me do that as much as possible, but we also recently made a big pivot this year from to Cloud Code.
+
+Same mission, sharper tools.
+
+Going AI native, agents in every quarter of the business.
+
+And then we also have AI's coaching, live events, and the book that I'm working on right here.
+
+So, these are all things that aren't actually out yet, but you guys may know about all this.
+
+Obviously, it's helping me do that on the back end.
+
+So, anyways, the point I was trying to make here is there's a video it did in one prompt.
+
+I used the slash goal and it created this video.
+
+Now, one thing to throw out here is that, you know, Fable is not cheap and that's one of the problems that people has been have been saying is that it is eating up their session limits.
+
+I, when I first started playing around with this, I ate up my whole $200 a month max plan session in um you know, the 5-hour session.
+
+I did that in it was like a little over an hour.
+
+Now, obviously, I was stress testing this thing, but it is noticeably eating it up more than Opus was and that's obviously to be expected.
+
+So, be careful with it.
+
+Now, here's another one that I did, which is really cool.
+
+I did slash goal.
+
+I'm not going to read this whole prompt.
+
+You guys can pause it if you want, but this was basically a one-shot prompt, right?
+
+This goal finished up in about 21 minutes.
+
+And I basically asked it to put all of my transcripts and all of these like relationships into a super clean interface that anyone can go click through.
+
+Also, I just realized that um this window was a little bit too high.
+
+So, sorry about that.
+
+Hopefully, that wasn't bothering you guys too much, but let's look at the output from this, which I think is amazing.
+
+So, we have ideas, we have tools and harnesses, and we have techniques.
+
+And when I click on them, they show the actual connections.
+
+So, agentic workflows, that loops into context windows.
+
+And how does it?
+
+Claude code, Vercel, and it in plan mode, value-based pricing.
+
+And I can keep clicking around, and I can see these relationships.
+
+I can see the videos that those concepts are talked about in, and I think that this is just really cool.
+
+Claude code is kind of funny, it connects to literally everything, but we've got Codex here, we've got open claw, Hermes agent.
+
+We've got all these different things that we can click around, and basically anything that I've talked about on YouTube, we now have this system where someone can come in here and and look at it.
+
+And this was once again a one-shot prompt from Fable, and um I also have up here, I'm new here, it can show you where to start.
+
+I built things, it shows you where to start, and I run a business, I can show you where to start.
+
+So, this was something that I was pretty impressed by, honestly, if you think about what I asked Fable to do, this was pretty solid.
+
+Because keep in mind, like what it had to go and do is it had to obviously build a front end and build these things, but it had to basically look through everything in here.
+
+It had to look through my actual YouTube transcripts and figure out the different relationships between things, and how they actually come together in a practical way.
+
+And and it thought about the user journey there.
+
+So, very, very impressive.
+
+So, that was kind of starting to talk about connections.
+
+I kind of already hit on this, right?
+
+Do they change constantly or is it static, and how you think about bringing them in?
+
+And for most of the, you know, for the most part, no database is going to be needed when you start.
+
+Like you Like you saw here, I'm basically just using markdown files, I'm using Karpathy's LLM wiki with Obsidian, which I've got a video about, which I'll tag right up here, and that's kind of how I'm using all of my contacts and connections right now.
+
+All right, so moving on to the third C, which is capabilities.
+
+This is basically, now that you have, you know, context and connections, what can you actually do?
+
+What are the skills and what are the workflows and automations that you can build out of this thing?
+
+A big part of this, once again, is adoption.
+
+Now that you have everything in here, can you actually start using it instead?
+
+And not just using it for when you want to brainstorm or when you have, like, maybe a script you want to write, but using it to do things, using it to actually do your tasks.
+
+So, the thing thing I always try to challenge my students to do is rather than opening up that that Chrome tab when you were going to send an email or when you were going to go pull a report from, you know, some software, can you just default to opening up your VS Code, which is obviously where I like to use my Cloud Code, right?
+
+Can you default to doing it inside of your AIOS rather than opening up that tab or opening up Perplexity or whatever you open up normally, try to do it here.
+
+Try to figure out, okay, does this tool have a have an API endpoint?
+
+If yes, grab it.
+
+Does it have a CLI?
+
+Grab that.
+
+I tend to like to use CLIs and APIs more than MCP servers, but if you want to use MCP servers, you can.
+
+The reason for that is I just feel like I have more control with CLIs and with APIs.
+
+They also seem to be cheaper, so I just like to use those instead.
+
+Anyways, skills don't have to be some crazy massive 10-step workflow.
+
+They can also just be a prompt.
+
+If you always are writing the same prompt or doing the same things on a Monday morning or Friday evening, turn that into a skill.
+
+If your brain's humming with Cloud Code about how to do something and then you actually end up doing it, then say, "Hey, what you just did was really good.
+
+I like this output." Turn that into a skill because next week when I have to do this again, I want to do that again and I want it to be faster.
+
+And the thing you have to think about is your skill will almost never be perfect on the first try.
+
+Every time you use your skill, that's data.
+
+It's data because you're able to say, "Here's what I liked what you just did.
+
+Here's what I didn't like.
+
+Update the skill.
+
+Let's run it again and let's just make the skill better and better." And the thing is in my workflow or in my Cloud Code here, I've got a ton of skills, right?
+
+This is maybe 20, uh maybe a little more than that.
+
+And then I've also got a bunch of global skills.
+
+Every single time I use a skill, I give it feedback and I say, "Update the skill." So, even though, you know, maybe this generate image skill I built 4 months ago, I'm still iterating upon it every single time I use it because my preferences change, the models change, maybe even the endpoints change, who knows?
+
+Just have that mindset of like there's no such thing as a finished product.
+
+And as you're building out more skills and as you're doing more work inside of Cloud Code, this is something that I've thought about even from the early N and N days, which is how can you have one AI doing one thing really, really well.
+
+Kind of thinking like an assembly line.
+
+You have one person that's making the wheels, one person is making the axles, one person's making the hood, and it finally all comes together at the end.
+
+So, you're basically creating these little specialized AIs, and that's the way I like to think about my sessions.
+
+So, if you did everything in one session, things might start to blur together, you might run into some context rot territory, but if you do kind of like, "Hey, spin up a Claude code agent and say, 'Okay, let's do some research on X, Y, and Z.'" And then you take that output, you do a {slash} clear, and then you bring that output into the next session.
+
+And now you you're you're working on the draft.
+
+And then you've taken that draft that is fully researched, you're doing, you know, taking that output, putting into the next step, which is polishing.
+
+And that's obviously a very rough example, but I like to work in phases like that.
+
+I like to bring outputs and chain them together and have different specialized agents.
+
+Now, skills obviously kind of help with that because skills let you kind of bring in subject matter expertise into any session immediately, which is very nice.
+
+But for the most part, if you just have that mindset shift of like, "My AI needs to do this one thing really, really well, and then I'm going to bring that to a different AI." Now, it's interesting because Claude Fable has been really impressive for me.
+
+It has been, you know, I I try to tell you guys to not always feel like the benchmarks is the best way to judge if a model is is the right one or not.
+
+I think more importantly, it's the hardness and the way it's the way that you use it.
+
+But I also think that there's a lot of feel.
+
+And I saw this text or I saw this tweet from um Karpathy.
+
+Yeah, as if like Andrej Karpathy is just texting me about how what he thinks about Claude Fable.
+
+I saw this tweet, and at this point he said, "You can give Fable a lot more ambitious tasks than what you're used to, and the model just gets it." And he put gets it in quotes.
+
+And it's interesting because a lot of times the model is all about feel.
+
+And I kind of have this feeling that when I'm talking to to Fable, it just gets things more often, and it's just understands a little bit of what I'm talking about.
+
+And later in this video I have some usage tips on how I feel like I'm able to get more out of Fable, but one of those things is like giving it more context.
+
+And the more context you give it as far as like why you're doing something and what not to do, it just seems to get it with, you know, multi-step reasoning and knowledge work.
+
+And this is Andre Karpathy.
+
+Yes, he did just join Anthropic, so maybe he has different motivations, but he's usually a pretty sound voice and he said this is a super exciting release.
+
+He said yes, the benchmarks are great and kind of state of the art, but this is a major version bump deserving step change forward.
+
+So far I think it's a really impressive model.
+
+Some of the issues I've been seeing with it are on the the the pricing.
+
+Um sometimes it's a little bit slow.
+
+Sometimes we run into those kind of guardrails because we know that it's being restricted, you know, cyber safeguards.
+
+And sometimes those are firing off frequently.
+
+Like hey, I can't do that, blah blah blah.
+
+Like it like it says here.
+
+Model still has quirks that people will run into and the safeguards are configured to be a little bit too trigger-happy for launch, which honestly makes perfect sense to me, but those will hopefully be tuned over time.
+
+So they will be monitoring this and they will be um tuning that stuff as more people use it and as the community gives more feedback on it.
+
+So that was context discipline.
+
+The other thing is about delegation.
+
+So not only do you kind of have your specialized like assembly line for chronological work, but for parallel work you also want to delegate, especially if you are using Fable, which is not cheap, then you can delegate to cheaper workers.
+
+Whether that be Sonnet or whether that be Haiku, you can delegate for parallel tasks and then get one clean summary back.
+
+And that's basically what the um dynamic workflows do.
+
+I also just dropped a video on how to use Claude sub agents better.
+
+I'll tag that one right up here if you guys want to check that out.
+
+And then moving on to number four we have cadence.
+
+So this is basically the idea what like I said that you can have things running while you sleep.
+
+And this is the last step and you have to earn this because you have to prove that your skills are battle-tested.
+
+You have to figure out the right use cases to actually automate.
+
+Because there's two things I want to call out here.
+
+As you start to add more AI into things, the cost goes up and the risk goes up.
+
+And also the maintenance goes up.
+
+Because just because you put something into production and you automate something, doesn't mean you can just forget about it forever.
+
+You still need visibility, you still need to check in on it, and you still need to make sure that it's actually moving the needle.
+
+And more autonomy doesn't mean you forget about it.
+
+You still have to be the owner of that automation at the end of the day or or someone has to have ownership over it.
+
+So from here, you're basically figuring out I have all these skills, I have all this context, I have all these, you know, capabilities.
+
+What's the trigger?
+
+If it's manual and I just ask for it, then maybe it stays in your AI OS and maybe you do that.
+
+If it's an event, meaning whenever you get a new email or whenever a new customer books a call or whatever it is, then you have a process happen.
+
+Or maybe it's a schedule.
+
+Maybe it's every Monday you do this or maybe it's every Sunday night you do this.
+
+There's different ways that you can trigger automations.
+
+There's different ways to deploy them, too.
+
+You can have them be Claude code routines, you can have them be loops, you can have them be deterministic scripts that you chuck on something like Modal or TypeScript.
+
+There's a lot of different ways to have automations.
+
+You can even have your Claude code OS build you out an end-to-end automation, and then you can just push that into end-to-end.
+
+So there's so many different ways, nine ways to skin a cat, but figure out what works best for you and for your use case.
+
+I also have a video going over different ways to deploy your Claude automations, which I will tag right up here if you want to check that one out.
+
+And the important part here about operating in your AI OS and giving it so much reach and giving it so much context is that you have to earn the trust.
+
+And it's not just a feeling, it's not a vibe, it's a legit thing that you can actually feel safe about.
+
+So, a permission layer.
+
+A prompt is never a permission layer.
+
+You basically have to have the assumption that if it can, it will.
+
+So if it could send an email, it might.
+
+If it could read that database, it will.
+
+I'm sure you guys have heard the story that I've told, which is we actually sent out an agent sent out an email to 150,000, 200,000 people on our list with a discount code that was not supposed to go out.
+
+And what happened was the agent was proactively picking up tasks from a list, and it interpreted the task wrong and thought that I need to write this discount code and send it out, and it did.
+
+And so that was obviously a big problem.
+
+We had to issue an apology.
+
+And so that was just a really great lesson for the entire team to realize that we have to understand exactly what our agents could possibly touch.
+
+What do they have the keys to?
+
+Because if they don't have the key to get into the room where they can send an email, then there's no way that they can actually go send that email.
+
+And that is what you need to have.
+
+You need to have keys, not prompts.
+
+And that's how you have an a permission layer that you can actually trust.
+
+And from there, just think about every single time that you use your AI OS as, you know, more data.
+
+It compounds.
+
+If it slips up, you get data.
+
+It's not a failure.
+
+I wasn't mad at the person who built this agent where this happened.
+
+We treated this as an opportunity to write a case study and for the whole team to understand the risks of what we're doing and how we do things safely.
+
+But that was great data for us, right?
+
+Like in a way we almost needed that experience to learn.
+
+So, fix the instruction, it never happens again.
+
+You go in this loop.
+
+Like I said, I've been building my AI OS for months now, and every day I make it better.
+
+And that is what's so cool about this is the data helps us make it better.
+
+Okay, so let's move into some usage tips here.
+
+So, the first one is to treat this thing as a thought partner.
+
+This thing is really smart, and involving it in your planning and your ideation is a really good idea.
+
+But you want to take that with a grain of salt.
+
+Don't just use it as a thought partner and say, "Okay, how would I do this?" It gives you an answer and you say, "Okay, go.
+
+Let's do it." Use it as a thought partner, meaning brainstorm with it, and make it play devil's advocate, and you play devil's advocate.
+
+So, take it with a grain of salt, and maybe have it spin up different sub agents to give you different perspectives.
+
+I love doing that.
+
+I love having sub agents or maybe even agent teams debate with each other, give me different perspectives, and then I'm able to use all of that research and those different, you know, personas and perspectives to make a more informed decision based on my gut.
+
+But, I love using my Claude as a thought partner.
+
+These models do have a tendency to be sycophants, so they will just basically please you and say yes.
+
+I do think that's getting better, but because that's kind of a known issue with all AI models in general, you should keep that in mind, right?
+
+The next thing is have it interview you.
+
+So, I've got a skill called grill me, which I will drop in my free school community along with everything else that I told you guys you can get in there.
+
+And the grill me skill was originally from Matt Pocock, so shout out to Matt, but I changed it up a little bit so that it has like brainstorm docs.
+
+So, if I come in here and I go to um my brainstorm folder, which is right here, which will automatically get created if you use my skill, I've got different sessions where it's grilled me relentlessly for I'm talking like 15 questions, 25 questions, 30 questions, and it's extracted so much more knowledge out of my head into my AI OS.
+
+So, that's a really great way to start off, too.
+
+You can literally set up your AI OS and say, "Use the grill me skill to figure out everything about my business." And it will just ask you questions until it has enough info.
+
+I actually did a grill me here, as you can see, literally today to help figure out the way that I use my AI OS, the way that I've set it up, the way that I think about it.
+
+And this helped me plan out this entire video.
+
+So, it's a very, very helpful skill.
+
+And then the final thing, which I think is the most important, is to to verify its own work.
+
+You'll notice if I go into Claude and I go to this session where I prompted it to build this, you know, this relationship map thing.
+
+At the end of my prompt here, I said I gave it some context.
+
+I said, "This is a demonstration for YouTube, so don't feel the need to make this production ready, but it should be easy to understand, so don't make it confusing." That's not even what I meant to show you guys.
+
+I meant to show you guys this.
+
+And then, once you have built that, use a dynamic workflow to verify that everything is accurate and works as expected.
+
+It's really important that you are visually checking your work and testing that different personas would be able to click through this and understand it.
+
+Meaning a beginner, a software engineer, a business owner, etc.
+
+So, verifying its own work is super important, whether that is visually, whether that is by opening up a Playwright browser and clicking around.
+
+However you as a human would verify the work that, you know, maybe an intern gave you or an analyst would give you.
+
+However you would verify, just give Claude code the ability to do that instead.
+
+So, that way when it verifies its work, instead of it giving you something on the first pass that was maybe like 70% of the way there and you have to iterate a little bit, maybe it can give you something that's 92% of the way there and you still iterate a little bit, but it's giving you things that are better and you're able to trust those outputs more.
+
+And one more thing, another big mindset shift is that the model, the harness, all of this is just basically the engine and what you're building here is a system.
+
+You're building a second brain.
+
+You're building capabilities.
+
+You're building context and connections.
+
+You're building something that looks like this and you're building something that looks like this.
+
+And at the end of the day, all this is is folders and files.
+
+So, who cares if you switch over to Codex tomorrow?
+
+Who cares if you switch back to Sonic 4.5?
+
+I don't care.
+
+It's folders and files and every coding agent can use this stuff.
+
+That's why you see here, I've got my dot Claude, but I've also got my dot Codex and I've also got my dot agents and I've got my Claude dot MD, but I've also got my agents dot MD.
+
+And I want this thing to be as tool agnostic as possible so that I can switch in different models.
+
+Like I'm still using this thing on a daily basis with Codex because I'm trying it out with different stuff.
+
+I'm seeing what's better.
+
+And that is the mindset you should have with oh, these new models come out, right?
+
+Like I don't have to do I have to rebuild this?
+
+Oh, I'm building this wrong.
+
+I'm I'm learning Codex.
+
+I'm not learning Claude code.
+
+You're learning everything at once because you're building your own repeatable, essentially IP of your business, your life, and your capabilities.
+
+Folders and markdown files, skills and routing logic, logs and wikis.
+
+That's what you're truly building in your second brain and in your AI OS.
+
+You're not building a Claude code AI OS.
+
+You're building your own personal operating system.
+
+And it's really, really cool to think about that because it should hopefully remove some of that overwhelm or stress that you have about trying to stay up-to-date with the latest drops and stuff.
+
+You're building your own system, and whatever you plug in, whatever AI intelligence or harness you plug in, that's just what you're using right now.
+
+Cuz it'll probably get to the point one day where maybe you're using your own harness that you've built with an open-source model, and you're not technical at all, but it just happened.
+
+Like I I could see that definitely happening for a lot of you guys.
+
+And finally, I thought I'd end off with a little bit of a lightning round with other questions that I might feel like I I hear frequently.
+
+So, what does this cost to run all day?
+
+Depends on the day.
+
+I mean, I'm generally just doing knowledge work in here.
+
+I'm not doing heavy heavy coding, but I'm on the $200 a month plan, and I rarely hit my 5-hour limit every once in a while.
+
+And every once in a while I hit my session limit for the week.
+
+So, that's what I'm on.
+
+Where does my data actually go?
+
+Well, if you're using Claude models, then that's going to Anthropic.
+
+It is a closed-source model, so if you are dealing with tons of sensitive data, then you might not want to use closed-source models.
+
+Do I need to know how to code?
+
+No.
+
+Day one, empty folder, what's the first thing I type?
+
+I would use the AIS OS GitHub repo that I am dropping in my free school community along with the course.
+
+It tells you exactly how to do that.
+
+Follow that was in there, and you will be able to get up and running in one day.
+
+What happens when it confidently gets something wrong?
+
+Well, as soon as it makes a mistake, you should be checking the work, obviously, but as soon as it makes a mistake, update it.
+
+Say, "Update your Claude that I'm doing so this never happens again.
+
+Update the skills so this never happens again.
+
+Always be verifying the exact source, and show me the exact source where you're getting this data from." Saying things like that is how you make the system better and better over time, because it will confidently tell you something, and it will be wrong.
+
+So, it's on you to find that out, and then to fix it.
+
+How do the live connections actually work?
+
+APIs or um CLIs, and really all you have to do is search like, let's say for example, you wanted to connect to Fireflies.
+
+You would search Fireflies API documentation, give that research to Claude Code, or even just have Claude Code do that research in the first place, and then say, "Here are the exact endpoints I need to connect to.
+
+What do you need?
+
+How does that work?" And it will walk you through pretty much everything.
+
+If you really want to get into it, you can start to get scoped API keys, which basically means, "Okay, this API key is for Cloud Code, and it can only read all my meeting transcripts, and it can't actually edit them, or can't delete them, or it can't, you know, do anything with my team.
+
+All it can do is pull in transcripts." And that's how we talked about the permission layer.
+
+What is your Cloud Code able to actually physically do?
+
+Not just prompts.
+
+What if I ignore it for a few weeks?
+
+Probably nothing too bad.
+
+You'll just have to like sync in your data, or pull in some data.
+
+What about my team?
+
+Just everyone build their own?
+
+Uh yes.
+
+That's a good one to end on.
+
+I say yes, but I think that you have to learn it first.
+
+You have to learn how it works first, and you have to be able to teach them it first, because then you can help them set it up.
+
+You can help them maybe you've built a few skills that are team-wide that you can give to your team.
+
+And then when it comes to shared knowledge, you should be thinking about where is our team's knowledge?
+
+Does that live in ClickUp, or Slack, or Notion, or maybe both, or Google Drive?
+
+Where is the team knowledge that everyone should have read-only access to?
+
+Because the worst-case scenario really is that everyone's duplicating knowledge, duplicating skills, duplicating work.
+
+And the biggest issue there is adoption.
+
+Actually getting people to use the shared knowledge, and actually getting certain stakeholders and process owners to update that shared knowledge.
+
+Adoption is the biggest issue, which is why you have to learn the tech first, and be able to explain it and communicate it, and make sure that your team adopts it.
+
+So, that is going to do it for this one.
+
+I tried to put a ton of value in here, and I tried to make this one practical for you guys.
+
+So, I hope that it was insightful, and I hope that it helped you guys out.
+
+If it did, please give it a like.
+
+It helps me out a ton.
+
+And as always, I really appreciate you guys making it to the end of the video, and I will see you all in the next one.
+
+Thanks, guys.

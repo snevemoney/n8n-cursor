@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-system-upgrade",
+  "title": "Infrastructural upgrade candidate (not a desk skill)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "upgrade_id",
+    "type",
+    "discovery",
+    "applicability",
+    "proposed_change",
+    "evidence",
+    "status",
+    "next"
+  ],
+  "properties": {
+    "upgrade_id": { "type": "string" },
+    "type": { "type": "string", "description": "e.g. Agent infrastructure" },
+    "discovery": { "type": "string" },
+    "applicability": { "type": "string", "description": "e.g. ALL browser-using agents" },
+    "proposed_change": { "type": "string" },
+    "evidence": { "type": "string", "description": "video + timestamps" },
+    "source_video_id": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["UNTESTED", "WIRED"],
+      "description": "UNTESTED = candidate only. WIRED = skill + hive-funnels + spawn/job-card hook. Not live/money."
+    },
+    "next": { "type": "string" }
+  }
+}

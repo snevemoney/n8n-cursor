@@ -1,0 +1,571 @@
+So, in a matter of minutes and just one prompt, I was able to use Cloud Code to find all of these leads, enrich all of them, write personalized subject lines and bodies, and then we're able to take all of that and put it into a campaign, all using natural language and thanks to Clay on the back end, helping us find the leads and enrich those leads.
+
+So, today I'm going to be showing you guys how you can do the exact same thing by using Cloud Code as the orchestrator and using Clay as the data source.
+
+So, one of the biggest problems that I always hear is about struggling to find leads.
+
+You know, I've talked a lot on my channel about how you probably want to start with your warm network.
+
+And if you can do inbound, then utilize inbound.
+
+But when you're ready to scale, or if you don't have those options, then you probably are going to look for something like cold outbound.
+
+And getting your first client through cold outreach can be tough because of three main reasons, which are finding the right business, getting real contact info, and then writing outreach that isn't super AI generated and spammy.
+
+So there's the data problem, actually being able to find those businesses and finding the emails.
+
+And then there's the tool problem because you've got so many different, you know, softwares you could use and so many different tabs to switch between.
+
+And so the workflow I'm showing you guys today, Clay is going to fix the data problem and Claude Code is going to fix the tool problem.
+
+Because the way I'm showing you guys this today, you don't have to learn a whole new UI.
+
+You basically just have to create a Clay account, connect that Clay account to Cloud Code, and then let Cloud Code figure out the rest because it's really good at understanding the endpoints and understanding what you need.
+
+You just have to explain clearly what to do.
+
+So here is what this is going to look like in practice.
+
+Once we've connected Clay to Cloud Code, we will open up Cloud Code and we will say something like, "Hey, I need you to get me 50 leads that look like, you know, X, Y, and Z.
+
+This is my avatar." Cloud code will then reach out to Clay and it will source those leads.
+
+It will scrape the lead list.
+
+It will set up everything for you and it will pull back those initial leads.
+
+And then Clay once again will enrich those leads.
+
+So it will find data from the company.
+
+It will find the emails, the phone numbers, anything else that you're asking for.
+
+And then it'll send all of that data back to Claude Code and Claude Code can then write you the personalized outreach.
+
+Now the important part here is the personalized outreach.
+
+Even though Clay can get you tons of leads and tons of enriched leads, which is really important, that doesn't mean that you are automatically going to get a client.
+
+So what you're going to do is you need to make sure that Claude Code can write personalized copy.
+
+So in this example, this is just a demo project I set up.
+
+You'll notice that I have context files here where I've given Claude Code things like my business profile.
+
+I've given it some case studies.
+
+I've given it some FAQs about our business.
+
+I've given it some proof and our offer and I've also given it our website copy.
+
+So, the whole idea that I've been talking about on this channel a lot, you know, building your own AI operating system and giving Claude Code a bunch of data about you and your business, this is kind of like a prerec.
+
+If Cloud Code currently knows nothing about you, it'll be pretty hard for it to write a really good like cold email copy for you.
+
+So, anyways, we'll talk about this more in a sec, but that is basically the flow of what we're looking to do.
+
+And then what's really really cool is once you have like basically the output from this will be a CSV with um you know the leads the the enrichment and the personalized copy then we can upload that to Clay and right in there we can buy domains, we can get them warmed up and we can just start the campaign right from there.
+
+So this is seriously the easiest way that I've ever seen doing lead generation and outreach.
+
+Now, before I show you guys how to get set up, I want to talk about why did I choose to use Clay for this video.
+
+Because you've probably heard of a bunch of different other platforms out there that might have, you know, like B2B data.
+
+The reason I chose Clay is because they have the best data.
+
+First of all, they have their own data set, but then they've also negotiated access with a ton of other providers where instead of having to pay for subscriptions on a ton of different platforms that have B2B data, you can bring in your API keys and you can just pay for credits.
+
+So, if you have a subscription to Clay and you have credits in Clay, you're going to be getting the best data that's out there.
+
+And then what's really cool is as we run through this enrichment, they have this waterfall.
+
+So, they'll basically check their top provider and if they don't get a hit, they'll move down to provider 2.
+
+And if they still don't get a hit, they'll keep moving down the waterfall until they're able to actually get a hit.
+
+So, if you're looking at just one vendor, then you might just get, you know, 30% of your leads, you'll find the right email.
+
+But with the waterfall, that number is going to increase somewhere up to more like 80 to 90%.
+
+And once again, the thing to me that was really important about making this video is that I didn't want to teach you guys a new UI.
+
+And I don't like learning new UIs.
+
+I like to have my agent, Cloud Code, or whatever other agent I'm using.
+
+I like to have the agent figure out how to navigate the page, how to hit the endpoints, and how to do what I need.
+
+So, all I want to do is just sit here and talk in natural language.
+
+And that is basically the way that we're able to work with Clay.
+
+And I have been talking to the Clay team themselves about making this video.
+
+They're also planning on making everything in their platform way more agentfriendly.
+
+So, the future is looking bright.
+
+Okay, so the first thing you're going to want to do is go to clay.com and sign up for an account.
+
+Clay has been around for a long time, even before this, you know, AI stuff has blown up.
+
+You can see here there's automated inbound, there's lead scoring, there's automated outbound, CRM enrichment.
+
+There's a lot of things you can do here inside of Clay, but that also means if you open it up, it might feel a little bit confusing, which is why I'm going so hard on like orchestrating it with cloud code.
+
+So anyways, get in here, go ahead and start a free trial, sign up for an account, and then all you'll need to do later is grab your API key from there.
+
+All right, now to actually install the Clay plugin and marketplace.
+
+It's pretty easy.
+
+So I opened up a fresh project, you can see there's literally nothing in here, just so I can show you how this all works.
+
+Now, the only thing to note here is that in order to get this installed, you have to do it through the Cloud Code terminal rather than the desktop app or like the VS Code extension as you see right here.
+
+That does not mean that you can't use this plugin in the VS Code extension or in the cloud desktop app.
+
+It just means to install the marketplace.
+
+You have to do it this way.
+
+You'll have to go through the terminal.
+
+So, if you have never installed Cloud Code before, just go ahead and Google Cloud Code install and click on this page.
+
+And it's really as simple as just copying and pasting one command based on your operating system.
+
+Once you have that set up, you can open something like VS Code, which is what I'm in right now, which is also a completely free download as you can see.
+
+And then I'll open up the terminal inside of VS Code.
+
+I'll type claude.
+
+You could also just open up like your command prompt or your PowerShell or whatever you're using.
+
+And then once you have this open, you're going to do a slashmarketplace.
+
+You can see right here we have slplugin and we can see marketplace.
+
+I'm going to click on that and then we are going to install a new one.
+
+So install a plugin from a marketplace.
+
+I'll open that up.
+
+All I have to do now is click on add a marketplace.
+
+And then I'm going to paste in this link which you can see right here.
+
+Take a screenshot of it.
+
+And then once you actually put that in there, it will go ahead and install this one.
+
+Clay build with clay and cloud code.
+
+Cool.
+
+So now that I have that installed, I can go ahead and do reload plugins as it prompts us to in order to apply all those changes.
+
+And then all you have to do is ask it to help you authenticate.
+
+So hey, I just installed this Clay plugin.
+
+Can we go ahead and connect my account?
+
+Can you help me authenticate?
+
+You can see that Clay actually loaded up its own skill, which is meant to help you guys get set up super easily.
+
+So then what happens is it gives you this link that you will be able to just click on and open up.
+
+Also, for some reason, the terminal wrapping can be weird if you try to open this up.
+
+So you might have to just copy it manually and paste it in.
+
+You see, we got this weird one.
+
+But if I copy the whole thing and paste it in, now the link actually works.
+
+And all you have to do here is choose the workspace that you want to connect to Clay, hit authorize, and then you should be good to go back into your terminal.
+
+And now we are fully set up with Clay.
+
+So now that everything has been connected, let's go ahead and see if Cloud Code can use Clay.
+
+Check if you can use Clay and tell me what available actions and tools you have.
+
+Awesome.
+
+So you can see that it loaded the Clay skill.
+
+It looked at the Clay plugin.
+
+We're trying to connect to this Clay MCP server, which is connected and authenticated.
+
+So we can execute Clay actions which has a ton of different actions as you can see here.
+
+This is things like finding emails, enriching a person or company, looking up a phone.
+
+These all cost you credits.
+
+So once we do our demo run, I'll show you how much that actually costed me in real money.
+
+But we can also look at a table, we can read, we can edit node, we can validate workflow, we can do a bunch of other stuff.
+
+And like I said, because Cloud Code understands this, we just have to ask in natural language, which is pretty cool.
+
+So anyways, I'm just going to clear this out.
+
+And what I'm gonna do is real quick tell you guys about my fake business setup here.
+
+So the business profile is Tradewind Automations, which is a small early stage AI automation agency for home service businesses.
+
+And that's where we've put in a few case studies here, which will be potentially used in the copy, some FAQs, some proof, and our offer, as well as our website copy.
+
+Our avatar here is going to be like small HVAC businesses.
+
+We're trying to obviously get in front of business owners, so that is what I'm going to ask it to find for me.
+
+And something that I've been playing around with with Clay lately is using goal prompts.
+
+So, if you don't know what a slash goal is, basically what it lets you do is just set kind of like an end condition and then you can have Claude keep working until it hits that condition, which is pretty cool because what we want here is let's say we want 50 enriched leads all with the personalized subject, lines, and body copy.
+
+So, that's basically the goal that we're telling Cloud Code to work towards.
+
+All right, so I am looking for some more leads.
+
+I want 50 enriched leads that are HVAC or home service companies and we are looking to get in front of decision makers.
+
+So business owners or you know presidents, people that might be decision makers at these companies and we want them to be fully enriched leads.
+
+So we need their email addresses, we need their business's pain points, anything that's recently happened in their business, any notable achievements so that you can also get me the subject lines and the body for the email.
+
+Everything should be of course super personalized.
+
+And the CTA, the end result that we want this person when they receive the email to do is we want them to say yes to us sending over a 90-second Loom video that explains a little bit more about how our business can help them and solve their specific business pain points.
+
+So, do not stop until you have all 50 of these leads for me.
+
+Use a dynamic workflow to verify that you've done everything correctly and verify that everything is accurate.
+
+And then once you are done, deliver me a CSV file that has all of this information in there.
+
+There should be no blank columns.
+
+Every single lead should have an email, a subject line, and a body.
+
+And they should be enriched with other data.
+
+So, that's what I need.
+
+So, I just went ahead and shot off that goal prompt.
+
+You can see right here it says goal active, and it's been active for about 8 seconds now.
+
+So, I'm just going to come back once we have our finished results.
+
+Okay, so we're 20 minutes in.
+
+Just wanted to show you guys what's actually going on because there is a lot going on behind the scenes because of the way that I prompted this thing.
+
+So, it's picked an approach.
+
+You can see here it launched six agents.
+
+So, we're looking in Houston, San Antonio, Atlanta, Charlotte, Tampa, and Las Vegas.
+
+And each of these sub agents is looking for 25 shops and enriching them.
+
+And then after they come back, they're going to aggregate everything and they're going to ddup and check yield and make sure that everything is pretty much exactly what we asked for.
+
+And that's the whole verification part of this /go prompt.
+
+You can see these agents down here running.
+
+If I was to click into the Atlanta one, for example, you can see that it was prompted and now it is actually looking through the Clay plugin and it is gathering all of these leads and enriching them.
+
+So anyways, I'll go back to the main session now and check in with you guys again when we are fully done.
+
+All right, so this just finished up.
+
+You can see if I open up the output folder right here, we can see that we have this leads on July 2nd, which is today.
+
+We also have a run summary which we can look at, but I'll open this up in a sec.
+
+What you'll notice about this goal is that it took an hour.
+
+So they're not all going to take an hour.
+
+This is because this thing went nuts.
+
+It did a bunch of verification passes.
+
+It fixed a bunch of stuff.
+
+It rewrote a bunch of the subject lines.
+
+And now what I would do is I'd probably build some skills around this. and then I'd shoot it off overnight so I could wake up with like 500 leads.
+
+But I just wanted to show you that I did this other request where I said, "Hey, use Clay to find me 50 leads in HVAC." And I just said, "Oput it here." You can see we have the 50 leads.
+
+So it just hit Clay real quick, brought back the data, and this only took 5 minutes.
+
+So not every time that you're looking for 50 leads, it's going to take you this long.
+
+This is because we worked in enriching, verification, a bunch of passes.
+
+It even did some debates where it literally had the dynamic workflow agents debating on if the subject line and the body were actually good or not.
+
+So that's why this one took a little bit longer.
+
+But anyways, we have all the data.
+
+Let's go take a look.
+
+And the other thing I wanted to call out here is that this costed us 172 clay credits, which is only about 12 bucks.
+
+So if you think about that, let's say you are converting about 1% of the people you're reaching out to.
+
+This would cost you 24 bucksish to get 100 leads.
+
+And that one person that you convert is probably going to earn you more than 24 bucks.
+
+So that is really not too bad when you think about the return on that investment.
+
+Okay.
+
+So here you can see we have our 51 rows.
+
+So we've got 50 leads as requested.
+
+I'm not going to show you all obviously all this data, but let's look at the columns we got.
+
+We have the business name, we have decision maker, we have the title, we have the email, we have the email status.
+
+As you can see, all of these emails have been verified and validated, which is great.
+
+We got their phone numbers.
+
+We got their website.
+
+We got the city that they're in.
+
+We got the Google rating.
+
+We got the review count, business pain points, recent current signal, notable achievement.
+
+So, as you can see, this stuff is just awesome.
+
+We've got a personalization hook.
+
+We've got our hook source, email subject, email body, and then anything else that needs review.
+
+Let's take a look at one email subject and body real quick.
+
+We can see your subject here is your one bad review is about call backs.
+
+And then the email body is, "Hey, Ante, saw the review about a customer still waiting on a call back about a month later." So, very specific pain point there.
+
+A few different people reaching out with no one following through.
+
+Rare miss for a shop at 4.7 stars across 4100 reviews.
+
+We recently helped a local business turn calls it was missing into book jobs without adding anyone to the phones.
+
+Honest offer.
+
+I'm still getting this off the ground.
+
+No case study yet.
+
+I'll set this up on your line.
+
+Run it free for 30 days.
+
+If it doesn't book jobs, you'd have missed.
+
+You owe nothing.
+
+Only ask if it works as a reference.
+
+Can I send over a 90-second video?
+
+So, not too bad.
+
+Keep in mind, like I said at the beginning, even if Clay gives you the best possible data, that doesn't mean you're going to get clients.
+
+What you need to do is make sure that Cloud Code is prompted in the right way and has the right context about you and your business to actually be able to write all of this stuff at scale, really high quality.
+
+And if you want to dive a little bit deeper, I actually did a podcast with Sav um a few months ago, and he basically broke down his entire strategy.
+
+He was able to generate over $500,000 in sales opportunities through cold email.
+
+So, he breaks down pretty much everything.
+
+And literally what I did for this specific example is I took the transcript of this video and I fed it into my cloud code system right here and I said this is how I want you to write cold email subject and body.
+
+So that's what I did here.
+
+Anyways, now that we have this awesome table of 50 enriched leads with our messages already crafted, now we're going to go back into Clay.
+
+So I'm going to close out of this Excel sheet.
+
+And when I'm in Clay, what I want to do is I want to click on import data.
+
+And we're going to import a CSV.
+
+So that's why we had Claude generate us that CSV.
+
+So, I just have to choose this output right here, which was the leads table that it just built for us.
+
+I'm going to go ahead and import that, choosing the delimiter as the comma.
+
+Basically, just how it's going to separate up the different columns.
+
+And then I'm going to go ahead and click continue.
+
+What I'm going to do here is add this to a new blank table.
+
+But if you already have an existing table you want to add this to, then you can do that.
+
+But we're going to go ahead and do a new blank table and then complete that import.
+
+Okay.
+
+Boom.
+
+So now we have that CSV in here as a clay table.
+
+And what I'm going to do is go back to the home.
+
+And what we want to do now is we want to create a campaign.
+
+This is how we can actually start firing off emails to those 50 people.
+
+And ideally, you're running this in a bigger batch.
+
+So maybe you have 500 leads in there or maybe a thousand.
+
+And all you have to do now is come in here and click on add lead list and choose that table that we just built, which is right here, leads July 2nd.
+
+And I can select this table and bring it into this campaign.
+
+So you can see you could generate your messages here with Clay or we can just pull in the ones we already generated and claude, which is probably going to be better.
+
+So I'll click on start from an empty message and all we have to do here is we have to use variables.
+
+So, this first one is the subject line.
+
+I'll go ahead and do a slash and I will do from our rows.
+
+And then in here, I can just go ahead and choose the email subject.
+
+And then down here, I'll do the exact same thing.
+
+And we're going to be choosing for our email body, which is right there.
+
+And then when I click on preview right here, we can see that we're getting the preview of what will actually go through in Gmail or however we send this.
+
+We've got the subject right there, and then we have the body right there.
+
+And this would happen for every single lead.
+
+If I click through, this is now saving across all 50 of the leads that we just enriched and we created these personalized messages for all of them.
+
+Cool.
+
+So, that's how you kind of set up the campaign.
+
+Now, what if you don't have any accounts to actually send from?
+
+That's when you'd move on to the next step here and go to sender accounts.
+
+And this is pretty cool because you can actually purchase accounts right here inside of Clay.
+
+And if you've never touched cold outreach before with email, then there's some things you have to think about like warming up the domains and then making sure you don't get put in spam.
+
+And so what you can do is you can buy domains right here in Clay that are going to be warmed up for you and they're going to make sure that you're only sending 30 per day.
+
+So they're going to make sure that your emails are pretty much good to go.
+
+So what you can do is you can click on select accounts.
+
+If you have any they'll be right here.
+
+Otherwise you can click on add account down here and then you can buy some.
+
+So right here, buy email accounts.
+
+I'll hit continue.
+
+And then you can choose between Gmail or Outlook.
+
+But you just type in something that is similar to your business.
+
+So in this case, what was our business called again?
+
+And if I go back to our context to our business profile, we are called Tradewind Automations.
+
+So if I go in here and I just type in Tradewind, I could see what domains I could buy real quick.
+
+So I could buy all tradewind.
+
+I could buy Bright Tradewind.
+
+I could buy Click Tradewind.
+
+I could also come back in here and throw in the word automations.
+
+And now it's going to give me even more options.
+
+I could even buy Tradewind automations.
+
+But then I've got a ton of other ones to buy.
+
+And it doesn't really matter that they're not the exact domain as long as they're similar to your business name.
+
+So let's say I wanted to buy this one. you can buy five accounts per domain and then you can set up the first and last name on those accounts.
+
+So, it's super nice that once you have all this data, Clay can basically handle the rest for you.
+
+And then from there, you can come into campaigns and you can just manage everything from here.
+
+You can even set up a follow-up message so 3 days later if no one responds and then you can even do another third follow-up after that.
+
+And once again, Cloud could generate those messages for you or you could set that up here in Clay.
+
+Clay's MCP server cannot yet manage all of this.
+
+I'm assuming maybe by the time you're watching this that's already out there.
+
+I'm assuming it will be coming very soon.
+
+But that is where we're going to end the video today.
+
+Hopefully this one was helpful and it was able to open your eyes as to what is possible when you connect cloud code to something like Clay.
+
+I think it's going to make lead generation and outreach so much easier for a lot of you guys.
+
+So anyways, if you guys haven't yet started to set up like your own second brain and your AI operating system in cloud code, then definitely do so.
+
+Join my free school community.
+
+Link for that is down in the description.
+
+You can see that we've got a full course in here around, you know, building your AIOS as well as a bunch of other resources.
+
+What else I'm going to do is I know that you guys are probably curious around this exact demo project.
+
+I will compile all of this into a single markdown file that explains exactly how I set everything up, how we have the outputs, how we have the context, how we have basically everything in here so that you could import this into your project and say, "Hey, I want you to be able to use Clay just like Nate did in this video and it should be pretty simple for you." So, all of those resources will be in my free school community.
+
+The link for that is down in the description.
+
+Anyways, if you guys enjoyed the video or you learned something new, please give it a like.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.

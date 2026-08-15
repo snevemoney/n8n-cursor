@@ -1,0 +1,233 @@
+Today, I'm going to talk about five Claude AI side hustles that you can actually run while working
+a full-time job. And if you're bracing for another generic list that you could have Googled in 10
+seconds, stick with me because I didn't just research this one, I lived it. I was a pharmacist,
+multiple six figures in student loan debt, all for a job that I hated by month three. And I didn't
+have time to build my way out. I had a lunch break, so that's where I did it. 1 hour a day in the
+back of the store, then I'd build on Saturdays and Sundays. And that thing that I built on my lunch
+break has made me over $10 million. And I've helped hundreds of people since do the exact same thing.
+People I've worked with have generated over $100 million in revenue between them, and almost none
+of them quit their main job first. They all were able to start this on the side. So, that's what
+you're going to be getting. All five of these, what it is, what it actually pays, and exactly where
+Claude does the heavy part so that it fits the hours that you actually have. Now, some of these
+can clear six figures, some made their first dollar in the same week, and one of them out-earned
+a $90,000 while she was still clocking into that job every Monday. So, whether you're a nurse or
+a healthcare professional, or you're later on in your career, or you have a high-earning corporate
+job, or you're a marketing manager quietly making somebody else rich, or you're just getting started
+in your career, there's going to be one in here built for exactly where you're standing. And every
+one of these is going to have a real-named person with a real receipt as well. So, if you appreciate
+me making this type of content and you want me to make more of it in the future, then let me know
+by gently cheersing that like button, and let's jump into it right now. Okay, so let's start with
+the obvious one, which is building an AI app without coding. And I know you've probably heard this
+one a bunch of times before, but I'm going to tell you how to do it in a way that's actually much
+more likely to lead you to success because the truth is, you have an exceptionally low percentage
+chance of success building an app. It's even lower than most businesses out there. But there's a
+certain way of doing it that increases your probability of success significantly. So, basically,
+you don't have to know how to code to do this. You basically just describe what you want in plain
+English, and Claude writes the actual software. So, you're not learning to code, you're just learning
+to describe. And this guy right here, Max, built 28 apps in 8 months. And all of them were entirely
+built around his day job. &gt;&gt; In just 8 months, he shipped 28 apps and went from $200 a month
+to $10,000 a month, all while working his full-time job. &gt;&gt; an iOS engineer and a father of
+two, and he was still employed the whole time. And his record was one app shipped in two hours.
+We're talking idea to App Store in two hours, pretty good. And he uses Cloud to map the screens
+and features, then reuses about 90% of the code between the apps. And four of them carry about $1,500
+a month each, and he's making about $10,000 a month total on about $300 a month in costs. So, yeah,
+this is a really smart way of doing it. He didn't go all in on one app and hope that it worked.
+He built 28 separate ones knowing that most of them were going to fail, but a few of them had some
+success, caught on, and they're making in total over $10,000 a month. And if you think Max pulled
+that off because he was already an engineer, well, go ahead and watch this. There's a channel called
+Mikey No Code, and the video is literally titled How Cloud Code Build a $10,000 app without me coding.
+&gt;&gt; And if I told you that I used AI to copy an app from the App Store while I sat back and
+gave it simple prompts. &gt;&gt; Then there's Code with Beto, who walks a complete beginner through
+building their first app in Cloud Code with no experience needed. &gt;&gt; Who with zero coding
+experience are building and shipping real applications right now. &gt;&gt; But now you're probably
+thinking, "Okay, Shane, but that's going to take a lot of time for me to make." Well, this same
+guy built one in 20 minutes. 20 minutes, yeah. That video is 20 minutes long, and the app is done
+by the end of it. And one of my own employees built an app using Cloud, you know, you might know
+the app Whisper Flow, for instance. This is the one where you talk instead of type, and he built
+something that works like it, and he is not a coder, and he doesn't know anything about coding,
+but he built it anyways. So, can you run this while working full-time? Well, Max literally did with
+two kids and a full-time engineering job. And many of these apps that he shipped he was able to
+do them in 20 minutes to two hours, not six months. So, that's a Saturday afternoon, not an entire
+career change. Now, Now, I'll be honest with you, probably the smartest way to do this is to clone
+an app that already makes money and then just modify it a little bit. And that's exactly what this
+guy does right here. Now, you can watch the video if you want to, but basically he just finds apps
+that are already working and then he makes them 1% better and 1% different. And he's making over
+$400,000 a year doing this. Now, if you do this, your probability of success is going to go up tremendously.
+Now, just to be very clear, I'm not telling you to copy other people's apps. Copy the idea of the
+app, but then change it to make it better and different. Okay, so let's talk about how to actually
+do this and how Claude does the heavy part. Don't open Claude and say, "Build me an app." Make Claude
+interview you first. Tell it to ask you questions. What the app does, who it's for, what the one
+core feature is, what you already know, if you already have an app that you want to use as proof
+of concept, etc., etc. And do all this before it writes a single line. Once it has that, it maps
+out every screen and writes the code, and you're the one with the idea and the taste, but it's the
+one doing the typing. So, this is really important to not skip this. I've done some incredible work
+with Claude. For instance, I've created a bunch of different AI software that people inside my community
+that are building personal brands and growing on YouTube use to solve just about every single YouTube-related
+problem there is. And this is exactly how I made that software, right? I literally just have an
+AI interview me and I give it as much context as it possibly needs, right? So, it might ask for
+different context. Might ask me to get stuff and then upload it into Claude and I do that over and
+over again until it has enough context to give me a really good answer and a really good output.
+So, here's the Claude prompt. I'm going to go ahead and put this up on the screen. What you can
+do is you can just screenshot it if you want to and then literally just copy and paste it into Claude.
+Quick break, I'm going to be doing a live training this week on how to start YouTube step-by-step
+for beginners. It's going to be for people who want to start a channel, but they don't know what
+niche to pick, what videos to make, or how to actually get started the right way. Since it's a completely
+free training, no strings attached. In fact, I'm giving away even more bonuses at this training.
+Just as an example, I'm going to be giving away my niche validator, which works for ChatGPT as well
+as Claude skills, which is a super valuable piece of software where you can finally figure out what
+the best niche for you is. So, do not miss out on this training. Make sure you sign up for it down
+in the description and the pin comment below because you only get it if you join the training. So,
+if you don't join now, you might miss out on it forever. But that being said, in the workshop, you'll
+get to meet me and you get to ask me questions directly. So, I look forward to seeing you. So, click
+the link in the description and the pin comment below this week. Make sure you put on your calendar
+and if for whatever reason you missed out on it or you weren't able to attend, make sure you still
+click that link because we might be having workshops in the future as well and you'll be the first
+to know about it. So, yeah, hope to see you there. Now, back to our regularly scheduled programming.
+All right, the next side hustle to make money with Claude is teaching what you already know. So,
+in many cases, you might already be explaining the same things over and over again. People that
+you teach or people that you tutor or people that you coach and you get paid once for it or maybe
+you just don't even get paid at all. So, instead of explaining it over and over again, record it
+one time instead and get paid every time somebody watches. Now, you might be thinking, "I'm not
+an expert at anything, Shane." Well, you don't have to be an expert at something else. You can just
+teach what you already do. So, a teacher named Lisa Collum, for instance, took the writing curriculum
+that she already used in her own classroom, put five copies into five binders from an office supply
+store with the last $99 in her account and sold it to other schools. And that side hustle passed
+her $40,000 teaching salary in four years and it now does $1.9 million a year. And that number is
+profit, not revenue. I checked. Now, you might be thinking, "Shane, this is way too basic for anyone
+to pay." Well, another channel called English with Lucy teaches basic grammar, vocabulary, and pronunciation.
+And this channel makes 10 to 29,000 dollars a month from AdSense alone and I happen to know because
+I met Lucy as well as her husband at a business conference where they did a speech where they revealed
+that they're making over $400,000 a month. And a physics teacher in India named Alakh Pandey started
+filming his lessons in a basement with a camera that I would generously describe as a potato. Yeah,
+the camera quality was really bad. You can barely even see the whiteboard, and he's blurry as well.
+But he built this YouTube channel up, and then he launched an app called Physics Wallah, and that
+company now has a $5.2 billion valuation. And it all came from a physics teacher with a bad camera
+in a basement. So, can you run this while working full-time? Well, you're already doing the teaching,
+you're just doing it one person at a time for free, and recording is the only thing that changes.
+Now, here's how Claude does the heavy lifting. Write down the 10 questions that people ask you most
+at work. Work does seem to be the most common one, but you can also write down other questions,
+like if you coach people, or patient client or customer questions that you get, or questions that
+you get from students, or your kids, etc., etc. And a lot of the times you don't want to focus on
+the interesting ones. You really want to focus on the boring ones, the ones that make you sigh.
+And that sigh is a signal because a question that you're sick of answering is a question that thousands
+of people are probably still typing into a search bar, and you can give Claude the 10, have it rank
+them by how many people are actually looking for that answer, and have it write the first script
+in your own words. So, here's the Claude prompt. I'll put it up on the screen, you can go ahead
+and copy and paste it into Claude, and then just go ahead and get started. And by the way, there's
+so many other ways of monetizing this. Obviously, you can make money directly from YouTube or any
+other social media platform that you promote this with. YouTube is the best one by far. You can
+promote it on other platforms as well, and you can sell some sort of digital product or something
+like that, kind of like that we talked about before. But there's honestly so many different ways
+to monetize this. You know, Physics Wallah did an app, English with Lucy sells digital products,
+the teacher named Lisa Colum sold physical products, etc., etc. There's so many different ways to
+monetize this. And this brings us to the next one, which is guiding people in their decision-making.
+So, you already made a decision that a lot of people are about to make, and you already know how
+it turned out. They don't, and that gap is worth the money. So, a community member of ours named
+Isaiah Harris was about to get laid off from his job. He found my free content, came to one of my
+live trainings, and asked his question and got the answer that he needed to start. Now, he teaches
+experienced vocalists like singer-songwriters, worship leaders, recording artists, vocal warm-ups,
+how to basically sing like a pro. And in 2 months, he gained 8,000 subscribers on a brand new channel
+and made $32,000 in pure profit. Now, you might be thinking that nobody would take advice from you
+specifically. Well, there's a guy called Kevin Hunter, the Homework Guy, and he spent his career
+around car dealerships. And now he just tells people how to not get destroyed buying a car. And
+he has 460,000 subscribers and he is not selling cars. He's telling you what he learned from the
+other side of the desk. &gt;&gt; Finance office files, the fake discount. &gt;&gt; And he also has
+a website where you can book a call with him and he can talk to you about what you should and shouldn't
+do before buying a car. And another good example of this is basically me, right? I worked as a pharmacist
+and on the side I taught people how to pick a college degree and how to pick the right career. The
+best ones, the worst one, how to choose a school without getting scammed, and how to pick the right
+career path for yourself, that's something that you like, but also something that you're actually
+going to be able to make money with, not just a hobby. And I did that because I went into debt for
+a job that I hated. And I wrote my scripts on my lunch break in the back of the pharmacy. And if
+things got slow and I had an hour, I'd go to the back and write. Then I'd record on the weekend.
+So, basically lunch breaks and Saturdays. So, can you run this while working full-time? Well, I
+did it in the back of the pharmacy on my lunch break. Isaiah did it with a layoff coming. So, you
+don't really need more time, you just need one decision that you already made. Now, let's talk about
+how Claude does the heavy lifting. Write down the biggest decision that you've ever made, the degrees,
+the move, the career, the mortgage, the surgery. And if you want to, you can write several of them.
+Then write what you'd tell somebody standing exactly where you stood the day before you made it.
+And literally just pretend like you have a time machine and you could go back in time and tell the
+younger version of yourself what you would and wouldn't have done. What would you tell them? And
+that's the thing that you needed that nobody gave you. And Claude is going to turn it into a script
+and you supply the scar and the story and the lesson and the wisdom. So, here's a Claude prompt.
+Just screenshot it and put it into Claude and follow the prompts, and it might come up with some
+really good stuff for you. Now, by the way, if you want to know exactly how we help people like
+Isaiah grow and make money on his YouTube channel so quickly from absolute scratch, I actually have
+a live training this week where I'm going to teach you step-by-step exactly how to do it, and I'm
+going to be giving you an AI that helps you pick your niche or dial it in. And this AI has been
+trained on thousands of hours of us helping our clients do this. So, it's completely free. Click
+that link in the description and pin comment below, and I look forward to seeing you there. All
+right, next is going to be selling AI agents to businesses. And I call this the hired robot. So,
+you build a small automation that does one repetitive job that a business is currently paying a
+human to do, then you charge them a fraction of what that human costs. Now, you might be thinking
+that you need to be technical for this. Well, Nate Hurk sold four AI agents for $23,000 as a beginner,
+and you might be thinking that it takes real money to start. Well, two guys, ALO and Powers, spent
+$185 total building an AI tool called Diamond dozen, and it made $66,000 in 7 months, and then they
+sold it for $150,000. And that income was verified by documents reviewed by CNBC Make It. It's not
+a screenshot, but actual documents. So, can you run this while working full-time? Well, absolutely
+yes. But, my best piece of advice is to go after businesses that already live online, not the pizza
+place down the street. That may work in the future, but right now, it's probably best to just go
+after the online ones. And that's really the difference between the people who make money at this
+and the people who make videos about it. Now, here's how Claude does the heavy lifting. Pick one
+repetitive task that you already watched somebody do badly at your own job. Sorting inbound emails,
+chasing invoices, writing the same five replies. That can be your product because you already know
+exactly what it's worth and exactly who hates doing it. And then have Claude build the automation
+or write the pitch, and then charge monthly, not hourly. Here's the Claude prompt. You can go ahead
+and screen cap it, copy and paste into Claude, and let it interview you. And now, my second piece
+of advice is a little bit different, and that is literally just look at what people are already
+buying, and then do very similar to that, just do it a little bit different. So, if plumbers are
+already buying websites, then sell websites to plumbers, but just do it differently or do it better
+than your competitors. Because when somebody else is already doing something, that is proof that
+it's working, and you really want to have proof of concept. So, the next one is explaining the system
+that you work inside, and this is the one that nobody thinks of, right? You don't teach people how
+to do your job, you explain the system that your job lives inside. Because to everyone standing
+outside of it, that system is terrifying. So, you already speak the language, you know what stores
+to knock on, and you know what the form actually means. Now, you might be thinking you've never
+made a video in your life. And a community member of ours, Nurse Jen, is a registered nurse, and
+she is still working in healthcare right now today. And in her exact words, she said, "I hadn't
+dipped my toe into YouTube." And less than 2 months later, she was at a full-time income from this,
+and that is before the affiliate deals and the brand deals stacked on top. And so, she basically
+went from zero to a full-time income in just a couple months. And you might be thinking, "Well,
+that's just a one-time thing." Well, actually, Nurse Julie also joined our program. She spent 33
+years in nursing, and she spent over 20 years with an autoimmune illness that nobody could diagnose.
+So, she has both halves, the clinical training, and she was the patient that everyone else gave
+up on. And one of her videos crossed 100,000 views in just 2 months. And you might be thinking,
+"Oh, well, I guess healthcare-related careers are super easy." Nope, we have people that have done
+this in IT, cybersecurity, digital marketing, accounting and finance, and all kinds of other related
+careers as well. This is like a freaking cheat code. So, can you run this while working a full-time
+job? Of course, you can. Now, let's talk about how Claude can do the heavy lifting. Think of the
+last time somebody outside of your industry asked you something, and you had to stop yourself from
+saying, "Everyone knows that." The thing is, they don't. That's the whole business. Write down five
+things that everyone at your job assumes is obvious, and film the one that would make an outsider
+angry if they found out. Claude can turn each one into a script, and you just have to stop assuming
+that it's common knowledge. Because for you, it's common knowledge, but for everyone else outside
+of your job, it likely isn't. You can go ahead and screenshot this one, copy and paste it into Claude,
+have it interview you, and that'll be a really good starting spot. With that being said, if you
+want to learn how Nurse Jen and all the other people that I just showed you were able to grow and
+make money on YouTube with their personal brands, I'm going to be revealing the entire thing in
+the live training that I'm doing this week. So, click that link in the description in the pin comment
+below to check that out. Do not miss out on it. I can't promise I'm going to be doing it in the
+future because the truth is all of these side hustles work, but they all need one thing and that
+is traffic. They all need distribution and YouTube is the best form of traffic and distribution
+that exists on the internet. Now, I know that 99% of you are just going to watch this video, get
+a ton of value out of it, you're going to attend my live trainings, get a ton of value out of that
+as well, and we're never going to end up working together one-on-one and that is completely okay.
+I like to give way more value than I receive and I'm more than happy to do that. With that being
+said, there's going to be 1% of you out there, maybe 0.1% of you out there that wants that one-on-one
+mentorship, that one-on-one hand-holding experience so you can get to your goals as fast as possible
+with the least amount of time, effort, and money. Or you literally just want us to personalize it
+for you, do the work for you, and tell you exactly what to do. So, if that sounds like you, go ahead
+and click the link in the description in the pin comment below to book a call. But, only book a
+call if you're very serious about growing and making money on YouTube. The types of people we typically
+work with are professionals, typically people who are experts or they have a lot of experience and
+they're on the older side and they have a lot of value to give the world and they have a lot of
+wisdom to share. But, we also work with business owners who want to get leads and make more revenue
+from YouTube and also grow their brand. We also work with YouTubers who are getting a lot of views,
+but they're struggling with monetization, YouTubers who are crushing it, but they want to crush
+it even harder, and then people who have big social media followings on other platforms, but they
+want to move over to YouTube because they know that YouTube is where the money's at. So, if that
+sounds like you, click that link in the description in the pin comment below, but we can only onboard
+about five people right now and we have an 18% acceptance rate. So, again, only do it if you're
+very serious about growing and making money on YouTube. With that being said, check out this video
+right here where we talk about exactly how we helped Isaiah grow and make money on his YouTube channel
+even when he was about to get fired from his job.

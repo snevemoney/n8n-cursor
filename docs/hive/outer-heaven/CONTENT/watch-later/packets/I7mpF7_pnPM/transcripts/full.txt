@@ -1,0 +1,403 @@
+I am going to be building an AI SAS from scratch and get complete strangers to pay for it in 10
+hours. I'm going to be building the product, the brand, the website, all the itty stuff when starting
+a business and getting people to pay for it all within this 10-hour challenge. The goal of this
+challenge isn't going to be a weight list or a beta product. It's going to be a real product with
+a real checkout that real people will want to and be paying for. Now, to start this challenge, I
+have a laptop, a $10 a month Chat LLM by Abbitus AI subscription, and a Stripe account. Those are
+the only two things I'm allowing myself to have during the challenge. And I have no idea if I'm
+up for it. If it doesn't work out, you're going to watch it not work out. Learn from the mistakes
+I make during this challenge because I'm filming the whole thing either way. There's no version
+of this video where I quietly delete the footage and re-record it as a success story. You are going
+to be seeing everything. Now, the clock for this challenge starts when I stop talking. But before
+I dive in, there's only one rule to this challenge that I must set at the start. Now, rule number
+one, and the only rule is that the whole challenge would take me 10 hours total. What I don't mean
+is a 10-hour build for a product with a vague plan to market it later. I mean, I'm going to be building
+the product, creating a working website and a checkout page, plus all the itty stuff that I mentioned
+earlier, and doing the marketing. So, the 10-hour clock covers everything I need to do to get a
+product into the market. However, the result of this challenge will not be within the 10-hour mark
+because that's just unrealistic to expect any sales or admirable metrics within such a short time
+span. Now that we got out of the way, let's start a challenge right now. Okay, so let's start already.
+So, the first thing we need to do, which is actually a big misconception that a lot of people think,
+you know, when they're starting their SAS or starting their app is actually um to build it first
+and then market later. Should not be the way you should be doing things in 2026. you should be selling
+it first, building an audience first and then building the product because it's actually much harder
+to get distribution than building something nowadays in 2026. Okay, so what I actually already did
+last night um was create an X post saying I'm going to be building an AI SAS in 10 hours on my X
+account. Um I have about 400 leather followers. So, it's good that I'm, you know, with my audience,
+I'm, you know, getting people a little bit aware of what I'm trying to do so that when I launch,
+right, usually the launch expose gets a lot of views, market it first, build an audience first,
+and then sell it. But now that we got out of the way, let's quickly do the rest. Um, so in terms
+of the product we need to sell, I actually already have an idea of what I want to sell, and it is
+actually this. So, I don't know if you've heard there uh I recently watched a YouTube video about
+these 16 year olds making 100K a month um through this and I was super intrigued because um what
+I see is that you know they might have um an AI agent that's super smart and trained to analyze
+market data um based on uh news and data and then give a very accurate you know uh response and
+pick. But I feel like this is something that we can definitely do. Um, so we already have what we
+want to sell, which is basically the number one analyzer of u AI analyzer of the market and our
+business name. I already went ahead and um try to ask claude for the names. Uh, but looking through
+everything, right, I'm not too happy with the names. Forecaster is okay, right? Um, these I don't
+even know what it means. Market mind is okay. I think we should do quality mind. I think quality
+mind is there because you know if you're doing quality markets, right? Um so I think that's actually
+a good name. So let me go ahead and start creating the logo because now that we got that out of
+the way, right, we got the product, we got the business name, right? We need to make the logo. So
+we need to go here. So let's go to Canva and let's search up logo. Oops. Okay. So, I'm on Canva
+here and I want to make a logo. And look, for these type of things, we should not be kind of stressing
+it too much, right? The brand doesn't really matter too much, right? We're on a timeline, so we're
+on a um time clock. So, we got to be creating one that's clean, simple, easy to understand, right?
+Um nothing over the top. Um let's literally just put the name Polymind. That's actually pretty clean.
+I I I kind of like this. Um, so I'm going to be downloading this. Um, let's download this. Boy,
+mind. Okay. And let's take a screenshot. Let's put it right here. Guys, we are doing good on time.
+Um, so we've done the logo. We've done the business name. We know what we're doing. Um, so we need
+to create the website. So for the website, I'm going to be using um the challen by Abacus AI's software.
+So I'm going to be going to Abacus. the abocus AI and um I'm going to go to a new task and I want
+to create a website that has Stripe integrated. So we can go here, right? Um so but I'm going to
+ask it to just Hi, can you please create a similar website to And you guys, this platform, you can
+literally do whatever you need to do. So, we're going to be building the MVP of the product. We're
+going to be bringing the product. We're going to be creating the checkout page. We're going to be
+creating the website all on this platform. Um, so I do really recommend you guys to use this if
+you're making any apps, SAS, or you just want to create a new business, right? I would suggest using
+this platform to help you guys kind of um start a business from scratch because I think it's really
+helpful. Um, and you don't have to be technical, right? I'm not that technical. So I'm literally
+just pasting a prompt in this. I want the I want the copy and sections structure to be similar.
+And I also want you to make sure the design isn't too similar where people will recognize this as
+a replica. Okay. So while it's doing that, we want to go back here and we want to start with our
+offer. So whenever I, you know, try to create an offer, right? Um, and an offer is extremely important
+because we got to understand what we're really selling because that's going to help us so much when
+we're doing the marketing and distribution side of this product. So, the first thing we want to
+identify is our ICP, which is basically our ideal customer profile. And it's super simple to understand.
+Um, ideal customer profile is just their age. So, how old are people on these platforms like Kawi
+and Py Mark are? What's their usually age range? What's Oh, yeah. What's the usual age range of
+people that are that are on Koshi and Poly Market? So, 18 to 34 years old, right? Um, you know,
+Gemini does um recommend 18 to 34 years old, but I'm actually going to be just having the 25 to
+34 years old because you don't want to have a huge time range on the ideal customer profile, right?
+You don't want to have more than 10 years in difference. I'm actually a little bit surprised. I
+thought people like would be younger, right? Uh but again, I am pretty young. So, um so the next
+thing we want to understand are the demographics. I'm going to put this here. Say what are the usual
+countries these people are located in. Okay, so United States. So let's just focus on that, right?
+We don't want to be too specific, but we also don't want to be too broad, right? We just kind of
+have that sweet spot. And let's just say the country is United States. The next thing we need to
+do is figure out what's their occupation, their job level, the income, the education. Because believe
+it or not, it's actually important because if we're targeting people that are, you know, um that
+don't have so much capital, then we might want to go to Tik Tok, right? Okay, we might go post content
+on Tik Tok, but if we're talking people with more capital, we might want to post on Instagram, Facebook,
+we're already posting on X. People on X already are usually founders. U people with high executives.
+So, it's really important to understand who our ideal customer profile is. So, who wait um what
+is the education level and income level these people as well as well? Okay. Um, and we want to figure
+out what's their gender, education slashinccome level. Let's call this person's name Alex. Why not?
+Um, are they bo men or women? Usually. Okay. So, their income level is usually high, right? 100,000
+annually. That's pretty high. Um, education, 70% of heavy traders on the platform at least have
+a bachelor's degree. So, we're looking at people who are normal, well educated, um that make a good
+amount of money every year. Male, you don't even need to look too much on on that. Let's just focus
+on that. Okay. Um I think I filled this out last night on the one problem that kills. Um people
+don't have to worry on their trading. Actually, yeah, this is okay. Our oneline pitch. Oh, what's
+their one line pitch? Just go to competitive most of the times. Doesn't really matter. Just copy
+this. Wait, you're all one platform of making money. Let's go to Quillbot. Oh, wait. Um, Quillbot.
+And then let's paraphrase this. Polymind. Oh my god. Paraphraser. And then let's go. Polymind is
+your all-in-one platform. Okay, that's pretty good actually. Um, our pricing, what's their pricing?
+$1 first week, $1. Um, I think this is actually not bad. $1 is a small investment where they can
+see the value and then they can pay for additional. So, I think $1 for seven days is our pricing
+as well. Our guarantee is um what's their guarantee? I think to a reverse risk if um you aren't
+profitable within 7 days of using Polymind, we give you back your $1. I think that's a good offer.
+Um post the offer on X. Um I think for now, right, we don't have to post it on X. Actually, we could
+um cuz we don't want to split our expost to be too long of a difference, right? Um you can't be
+posting on X more than a 3-hour difference cuz then the algorithm will, you know, catch it as not
+that, you know, I mean, just in personal experience, right? X doesn't like it when you know you
+post so much at the same time. Um, so we might want to hold that off and Okay, let's look back on
+what they have created for us. Okay, so I've already kind of gone back and forth with the agent
+and I've created um this platform. Um, it looks kind of similar, right? You can kind of see the
+similarity. Um, but I think it's good enough where people can, you know, distinguish the difference
+between the two. So, what I'm going to be doing now is I'm going to have to connect my Stripe um
+to this platform so that you know people can actually pay for this with a real checkout. And then
+I want to actually um I want to actually also start creating the MVP. And all I need to do is literally
+um plug in here and say, "Hey, now make the MVP of the product." That's literally all I have to
+do, right? Um look, I think it's a good looking website, right? Um let me check the mobile version.
+Actually, I like this. Okay. Um, what I'm going to do, I'm just gonna make it say like for this
+I want it. Can you make it where um it's um aligned in the middle and not to the left. Okay. As
+long as that's done, I'm going to ask it to make the MVP. And I'm also going to have to connect
+the stripe first and then um from there I think you know we have to do some few tweaking right we
+have to um go back and forth a little bit on what we need to do but you can you know you can prompt
+engineer it correctly where um you don't have to go back and forth that much right um so I'm going
+to be doing that for I think the next hour but we are doing really good on time guys so I might
+um go ahead and actually start creating the reels tools and the distribution strategies I have um
+for my product here. And so my marketing plan is to use X you personal network on the people like
+my friends who I know you know spend money on these platforms already and create some Instagram
+res on my Instagram channel and um pretty much also maybe promote it on my school community that
+has over 700 people on it already. So, um, there's a lot of ways on where I can post it on. Um,
+but yeah, what we really want to do, right? I think the whole objective is this video is that, you
+know, you want to see how fast you can get it into market and whether or not, you know, you either
+get product market fit, probably not, but whether there's actually any demand on the product. Now,
+because we already copying something that already works, right, there's definitely going to be some
+demand. Um, at least that that's what I think, right? But what we also actually have to do is to
+actually buy the domain. And I went ahead and actually already bought the domain of GoDaddy. And
+we want to also connect this to our um to our platform here. Um so the next steps right now is really
+to connect to Stripe, build the MVP, connect the domain, and go back and forth whether the MVP is
+workable enough where it actually works, the product actually works. We don't actually have to go
+too much back and forth, but it's got to be at a point where it's accurate enough and it's pulling
+real stuff for information. We might need to include a brave search API key. We might need to use
+some other third party platforms. Um but um yeah, so there's a lot to do, right? So I think our
+to-do list right now, let's go over here. Where is it? Let's go over here and let's say that the
+website, we buy the domain. So phase one, I mean phase two, phase three, right? Phase four kind
+of, right? We still have to we have to set up the stripe and deploy it right on a live MVP. So we
+we're basically at phase four right now, which is super good. We're doing really good on time, but
+I do really want to spend majority of my time on phase five, which is distribution, right? Um because
+the distribution is always the hardest part. Um but yeah, is it better now? Okay, so you guys, I've
+fixed the mobile version, right? It looks so much cleaner. I love this kind of um design and u uh
+UI. Um and I've actually already configured my Stripe API. Um we've built the Polymind MVP web app,
+which is super good. Um but now we actually have to deploy this thing. And to deploy it, we want
+to be using a custom domain. Um so I'm going to add a new domain. I'm going to do the one I already
+have. I'm going to say polyine US. Let's click add. And then let's go to uh let's do automatic configuration.
+Okay. So I'm going to have to add these DNS records. Um so all I got to do is go here and then let's
+go DNS adding new record. Um, I'm going to do type A and do this and use this and then press save.
+It's going to ask me to verify. Oh, never mind. Um, then I'm going have to add this. So, I'm going
+to add another type A and copy this and then copy this cuz that's ask AI what's going on. I'm a
+bit confused. Okay. So, I'm just going to add a new record and then I'm going to this to this and
+then press save. then it should work now and give it a second. Okay, so I'm just gonna give GoDaddy
+a couple minutes to connect. Um, and hopefully by then our domain should be connected. Okay, so
+my DNS records are working now and I'm ready to deploy this thing. Um before I do, right, um I want
+to make sure the MEP actually works and everything's working really smoothly where you know someone
+comes to the website, they go through the process and everything works out as smoothly as possible.
+So I really want to make that happen and really want to make sure that the MVP actually works and
+test it out for myself. So that's what we're doing. So what we've done is we have included the stripe.
+We can deploy on a live URL. Uh we have built the core features. We built the stack. I want to test
+this out. Yeah. So we're really just doing this part and then once that's done, I will do the post
+and then start the distribution plan which is by far the most important thing we need to do. So
+let's just go ahead and try this out for ourselves. Okay. So I'm going to go preview. Okay. Okay.
+So, if I press this, right? Um, I go here. &gt;&gt; Okay. Wait. Maybe I should just deploy this
+thing first. Best way to learn is to try and fail and fail and fail. But I'm going to see first
+how it responds. Okay. So, while the agent is doing that, I want to go over here and start our distribution
+strategy. I want to create an X post. Kind of giving people a little preview. That way, when they
+see the product, they're not too surprised on what's been going on. Let's let the agent finish this
+first. All right. So, it's done with the changes that I wanted to make. I'm going to click the deploy
+option and I want to select deploy mind us and hit deploy. And as you can see I literally like created
+an actual AI SAS right with a working website with a working MVP right. Okay. So after some back
+and forth now the workflow should be complete where I go and any of the CTA buttons and then I will
+get to a stripe checkout where I need to pay and then I go to the dashboard. So let's for example
+let's start with this right. Okay. So let's just um kind of do this workflow and test it out. Okay.
+So, I've paid the subscription and then now I press login and then I'm going to enter my email and
+then I'm going to enter my password and then I press login and then I have access to the entire
+MVP. So, I get analyze, I get my history, I get my settings, right? So, the entire SAS works. We
+have we literally have an AI SAS from scratch and we have our offer, we have our ICP um finalized,
+we have a working MVP, we have a working website, we have a working checkout, we have a working
+workflow, everything is looking good. The only thing I'm going to do before I create the launch
+expost, which I believe would actually will actually get a lot of eyeballs on the product and I
+think, you know, it's definitely going to get a lot of people on the website and perhaps maybe some
+people that are, you know, want to try it out for themselves. I'm going to actually test it out
+and see if you know um everything works smoothly. So, for this um let's just make let's just do
+a test and let's just take a screenshot and then I'm going to drag it here and then we're do analyst
+market and then it's going to read market data. It's going to scan live news and signals. It's going
+to basically look through the entire internet and give a very well educated guess on what's the
+right option and what's the right pick. Okay. So, it's giving me a medium risk where it says no
+and that I should actually pick no. So, look, I'm going to find something where I can like actually
+um look at something that's going to happen overnight. And then when I wake up in the morning, cuz
+it's kind of late right now, right? I'm going to see it's 11:20 p.m. right now. And I after I put
+the bet, I want to finalize that decision. And then when I wake up tomorrow, I will understand whether
+or not this bot, you know, this AI analyzer really works. And I'll be super happy. I'll be super
+pumped. And I'll be doing so much freaking distribution, posting my school community, making Instagram
+reels, making YouTube shorts. I'm going be doing a lot and promoting it on my personal brand and
+and actually getting people to, you know, use this product and pay for it because I know it works,
+right? As well as um I'm going to make a X post tonight. Um so before I go to sleep, we got to do
+two things. We got to find a bet where I can see overnight if whether or not the market analyzer
+really works. And the second thing I need to do is make the X launch post. The two things I need
+to do before I uh wrap this up and then I continue this challenge tomorrow. So you can see the history.
+So everything works properly. I like how everything's working properly. It's giving me some daily
+AI picks already on some educated guesses it already has. So I'm really loving how it's going right
+now. So, let me find a bet right now that I can see when I wake up tomorrow and see whether or not
+I paid the right bet. Okay, so a really common one that I can do, right, is basically do a temperature
+bet. So, the highest temperature in soul in on August 7th. So, what I want to do is I'm going to
+take a screenshot and then I'm going to go to my analyze. I'm going to paste my screenshot here.
+Press analyze. So, once we have our decision here, we're going to lock it in. And then when I wake
+up tomorrow, I want to see what actually happened. What I also want to do is create the X post.
+So while it's scanning this, right, let's go to my X account. Okay, so let's go to my X profile
+here. And I want to create a new post saying I just launched my new AI SAS that I made. Uh, wait.
+I knew AI SAS at 16. I know it seems cliche, kind of cringe, right, to put 16, but it's actually
+like it helps it be more marketable, right? Um, so it's going to attract more eyeballs. And then
+I'm going to say polymind us. And then I'm actually gonna go to Claude here and say, "Hey, how can
+I make this X post more engaging and viral worthy?" Actually, no, I think it's fine. Uh, so I'm
+going to press Actually, I'm going to remove this and I'm just going to do this because I think
+it's going to attract more people. Um, and I'm just going to connect this and boom. Going to go
+to Twitter and then they'll see this. Awesome. Okay, so guys, we have literally finished all of
+phase 4. So guys, we are going so fast. We have finished phase two. We have finished phase three.
+We have finished phase four. Um, we have finished the X part on phase five. We're going to post
+another expost tomorrow. And then we're also going to be posting some Instagram news as well as
+YouTube shorts as well as my school community and my personal network. So those are the platforms
+I'll be posting tomorrow. And we also want to check in say check in on my sheet. Okay. So that's
+it for tonight and I'll see you guys when I wake up. Okay. So, we have to first check in in our
+Cry bet. So, looking into our bet, right? Um, looks like we made the right choice by picking no.
+If we put money on picking no, then we probably would have made money. Uh, I mean, not probably,
+we definitely would have made money. So, I feel kind of assured that this product is actually usable
+and that it actually works. So, what I'm going to be doing now is I'm going to be clicking off this
+cuz I already did that. Um, before I write my expose, I want to create a list on all the people
+I think for my personal network and business network that I think would want this product. Okay,
+so I've kind of built I've built my list on all the personal and business network people I think,
+you know, would be interested in the product. And I'm going to be drafting up a message about, you
+know, whether or not they'll be interested in this product. And I also have to draft up my message
+for my expost. I'm gonna go back to here on Claude and I say, "Okay, while Claude is doing that,
+I want to also think, uh, what should my next post be?" Cuz as you can see, I posted this like 20
+roughly 20 hours ago, right? Um, and it's gotten really bad. It's gotten some couple comments. Let
+me reply to him actually. Right. So it's really whether or not like I think it's more about the
+post. I don't think you know I put too much effort on towards this post. So I think I think that's
+the reason why uh nobody really wanted to you know I think that's why the the post didn't really
+go up that well. But in terms of how we can improve it, right? So what we can do is I've noticed
+that a lot of my ex posts, right? especially um like these type of posts where I'm launching something
+exciting a celebration or uh with a picture right something with a picture or something like this
+where I have analytics so I think what I can do is I think kind of include that personal story kind
+of narrative as well as include what I what I did about the post because usually the personal story
+post do really well on X right for instance this post my most popular post 13K views use, right?
+So, um it's really it's really popular these kind of posts. So, what I can do is let me draft up
+a post using with the help of Claude. Okay. So, yeah. So, I think for the people that I've met business
+network, it's probably better to use this. I definitely agree. Um, so I'm going to be using this,
+right? And then let's uh let's actually go to my business network first. And then let's send a quick
+message to my the first person on my list. Cross this out here. I say, okay, and I'll send it to
+him. And then by the way, let's focus more on our um on the business network first and then I'm
+going to go to Retesh Verma and I'm going say hey been cooking up something on the side ever since
+sign case for a YouTube video. Okay, so I'm uh kind of done with all the business people I think
+you know would be kind of interested in this right now. I'll go to the people that I know are more
+of my friends that I personal network and the people that I know actually actively bet on Koshi
+and on Poly Market. So, I know for sure that they're on these platforms and I think that actually
+the I wouldn't say the target user, but we're talking consumer or just the SCP, but I think um they're
+relevant to the product. So, I want to be using this kind of message template for my friends. So,
+I'm just kind of be going through all my friends and then so I'm going to send this So, we're almost
+done sending all the people in my personal network. Let's just wait into any replies. I'm pretty
+sure maybe one or two of them is actually going to try it out for themselves cuz they're pretty
+intrigued in these type of things. So, usually what I do, right, um I've done I'm done with all
+the my personal network, right? So, that part is done, but we still got to be posting on X and on
+my school community. Okay. So, what I usually like to do when I'm trying to find an expose, right?
+I was pretty lazy with this yesterday, and it's a good lesson, right? You shouldn't halfass it.
+You should, you know, put in your effort and time to really create something that's um worthwhile,
+right? Anything worthwhile does take time. It takes effort, right? Nothing comes easy in this world.
+This is a lesson that I've learned from this post especially. And what I like to do with expost,
+right? Um I like to actually just copy a lot of people. So, for instance, um I like to pick copy
+things that are already working, right? I don't like to think of things that, you know, might work
+because I thought of it and I thought it was a new idea, right? Um I like to think of things that
+are already working, already in the works and I know it for sure that it has proof of concept already.
+So for instance, this one, right? Um I follow this guy. So this one got 16k views, which is pretty
+cool. So I think this is a really good um expost. So I might copy that. But let's not finalize it
+all, right? Let's not finalize it right now. Let's keep looking through. So look, these type of
+post where I just sold my company on three months for $300,000. Like these type of things are engaging.
+They're viral worthy hooks, right? And if you can add image, that would be super cool as well. So
+I think uh not a good way I did. I just put the link on it, which isn't great. So I think for my
+next post, I'm going to be copying something like this. I'm going to copy the combination. Wait,
+sorry. Copy this. And I'm going to copy this and this. So, what I can do for the hook, I think I'm
+going to copy this. I'm going to say, I don't think that's how you spell finally. Wait. Okay. I
+made $25,000 a month and I still don't know how to spell simple words like finally. Okay. Uh after
+10 hours of straight up vibe Cody, I finally finished developing. Okay. So, looking at a post like
+this, um let me just read it out loud because sometimes you read it out loud, you kind of visualize
+how when a viewer looks at your post. And then what I'm going to do is actually post a picture of
+myself. I'm going to find the thing on my phone. I'm going to use a very hooky image that you can
+say, right? I'm going to be using this picture. I think it's a vow worthy, you know, hook post image.
+I don't know. Maybe I can spice it up a little bit better. I feel like something is off. Can you
+give me your suggestions and add emojis to this as well? Okay. So look guys, um we have finished
+our personal network. We finished our distribution on X and all we have to do left is to create
+our scripts for our Instagram reels. Look at the content on what we want to make and then make the
+content and post it. And then from there Oh yeah, we also have to post on our school community.
+So I'm going to post something here. My school community has 700 members. Do suggest you guys check
+it out. Um, I have free courses on learning about how to make AI stuff. Definitely check it out.
+It's free, so you know, nothing no risk on your side, right? I'm going to make the post here, make
+the scripts, post it, and then guys, we're doing good on time, right? Um, so post on school community,
+make the real and then from there, I'll give you guys an update within probably like 48 hours, 72
+hours on any results. I will not touch anything else. I will literally just check in whether or
+not we have any sales, any traction. Right? We can check over here for analytics. If we go settings
+and then we can see the analytics see the analytics here. So 74 page views, right? Um yeah, I think
+this is actually better. I disagree with this. Yeah. I know like for these type of things, right?
+I might copy this, but you shouldn't, you know, follow too much on their advice because they're
+posting to builders, right? So, you you don't need to, you know, say too much about it, right? For
+instance, right, this guy, he didn't post anything much about what the thing does. Probably in the
+comments, I'll probably say something like he's he just puts the URL on the comments, right? So,
+that's probably what I'm going to be doing as well. So, I want Oh crap, where did my post go? Let
+me copy back this. And let me go back here. Let me go to my images. Put image here. Wait. You want
+to take a screenshot of this bad boy again? I don't know. Something about the structure doesn't
+make me feel right. Look, most of these times you should trust your gut, right? Um trust your gut
+when it says doesn't feel like the thing you want. Um, it doesn't feel the right kind of thing.
+So, 10 hours. Uh, um, let me see. I mean, get any ideas. Yeah, I think this is fine, actually. Um,
+and then let's post this. And then let's go over here and go here. And then let's copy this. And
+let's copy this. Let's look at the exemplar. Okay, done with expost. What I want what I also want
+to do is I want to go to my school community here and 10 hours general discussion. Boom. So, I'm
+done with that. Um, the last thing I got to do is obviously the hardest part, right? Um, I got to
+make the Instagram res, which is pain in the ass. If you've ever made content before, it's just
+so annoying. But yeah, that's the last thing we need to do. And then after that, it's pretty much
+hands off. And let's see if we get any traction on it. Okay, so now we have to actually create our
+Instagram re, which is our last, you know, way on getting more distribution and getting more people
+to actively go on the website and perhaps become a user/c customer, right? And I think a great way
+is through Instagram marketing. You should not be spending any money nowadays on ads, anything that's
+paid, right? Uh sponsorships, whatever, right? You shouldn't be spending any money on that. There's
+so many opportunities out there to make content, post content, and get something trying to go viral
+worthy. And I think that's going to be a lot more efficient on getting people to wherever you need
+um or getting people to your app, your SAS, your product, your agency, your business, right? It's
+so much better using content nowadays um than using paid ads. So that's what we're going to be using
+right now. We're going to be creating some Instagram res um for the product, but I think we're going
+to make one to two. And then what I usually like to do is basically just scroll on my phone. I like
+to go to my Instagram uh I usually like to go to my Instagram and just scroll stuff because we're
+going to find a lot of content ideas and once we find those ideas, we can ideas that are already
+working preferably, right? and then maybe a format or a certain way, right? And then once we understand,
+you know, the content we want to make, we create the scripts and we just record perhaps do some
+simple editing. I don't think I'm going to be making any videos that were going to require a lot
+of editing. For instance, right, averages grow that claw of you about 49% more than a video like
+this requires a lot of editing and I don't think I'm going to be making those kind of content, especially
+for this kind of product. Don't be making something more simple just that just requires maybe one
+to one and then you're just shooting yourself recording like um and I think that's a good way maybe
+um so yeah so right now I'm literally just going to go on my Instagram and just scroll and find
+ideas that I think will help you know promote an AI SAS like this right okay so I finished making
+the video and um I'm going to be uploading it tonight. But after I upload it, we complete all the
+phases that I wanted to do, which is build the product, build the offer, um identify the ICP, make
+the website, make a working checkout page, distribute it through X, my school community, my personal
+business network, and on Instagram as well, which is basically content marketing. So, it wraps up
+our entire challenge and the results would be I think I'll give it maybe 48 72 hours and I'll touch
+base with you guys then and let you know what the end results are, what we finished on, how many
+users, how many people signed up, how many people paid and kind of go over maybe some of the views
+I got for maybe my expost, my school community, and my Instagram re as well. So, it's been 48 hours
+since the last update and here's where we're at. Two people have paid to try out Polymine. Now,
+it's only a dollar, right? So, I'm not going to sit here and call that revenue, but it's something.
+Somebody put out their credit card and typed in their details for a product that didn't exist 10
+hours ago. And at this stage, that's the only signal I really care about. On a distribution level,
+the last expost I did got more than a,000 views. And for context, my expost only has about 400 followers.
+So, that's an outlier for my account. So, I'm pretty sure it worked out. I'm pretty confident one
+of the two people came from my ex because most of the sites traffic came from the link clicks for
+my ex post and also because my school post only got a few comments from people inside the community
+and the Instagram re I made completely flop and got like 400 views and I also know for sure one
+of the two guys came from a person named Steve Pan. Now he's from my business network and he already
+invests in prediction market startups and actively trades on plugin market koshi and stuff like
+that. That is somebody who looks at this category professionally and saw what I built and went,
+"Yeah, let me try that out." Now, he signed up and ran it himself. But after all this, the question
+really is, am I going to keep pursuing Polymind now? Well, the short answer is no. I'm going to
+be killing it. But let me tell you what Polymind actually proved in 10 hours. Two people paid to
+try out the product, mainly because they were curious or interested. But again, it was only a $1
+commitment. But this is with very minimal distribution and marketing. My ex post got semi viral.
+The Instagram video I made completely flopped, right? And but my business network pulled through.
+So there's a couple of green lights and that's a better first day than most startups. But here's
+the thing. Nobody tells you about opportunity. An opportunity isn't good or bad on its own. It's
+good or bad depending on the cost of pursuing the opportunity. In other words, opportunity costs.
+And right now I'm running autoplay, which is my main business on helping businesses implement AI.
+So for Polymine to be worth my time, it has to be something that I truly believe has potential.
+And I don't think it does. I don't think this thing is going to be massive. I think it's a good
+idea with a lot more of time and effort to be done on the product side until as product market fit.
+Which brings me to you. If you're watching this right now and you're starting out with nothing,
+I mean, no clients, no revenue, no offer, no proof of concept of a business that you've started,
+this clears the bar easily. If I was starting over and I had a product with two paying customers
+and a semi viral post after 10 hours of work, I would not be sitting here thinking about killing
+it. I'll be thinking about how to get 10 more customers by Friday and then 20 more by next Friday.
+It's the same exact opportunity, but it's a no for me and a yes for you if you're just starting
+out. The opportunity cost is just too great for me, which is the main reason I'm not going to be
+pursuing this thing. And if you can take one thing out of this challenge, take this. I sold this
+before it worked. I literally viodated the product, the website, the workflow in under an hour,
+right? And that's the whole game right now. Ideas are worthless. I'm not going to sit here and pretend
+poly mine was some genius insight or idea I came up with before the challenge. I mean, I got the
+idea from a couple of kids my age that are already crushing it with this kind of product. Everyone's
+trying to optimize to create the perfect website or product, but really, you should be optimizing
+to find out fast whether or not it even has the slightest glimpse of potential. And perfect isn't
+the standard. A shipped and tested product or concept is the standard. And look, you saw the whole
+thing. You saw the plan that I made for the challenge, and you saw the parts that didn't work. But
+for the majority, it worked out okay. And that's not because I'm bad or really good at this. That's
+because the plan I wrote up for this challenge was built on years of doing this and getting it wrong.
+And even with all that, I still got some of it wrong. Right? So, if you're sitting there going,
+I just don't know where to start. I don't know how. I don't know what. Don't worry. You just need
+to keep on grinding. That's the real price of entrepreneurship. Not the 10 hours, but it's the years
+before the 10 hours, and it's the years before you see any results. But if you want to skip all
+that part, that's what I do, right? I work with people one-on-one on building AI business, the offer,
+the outreach, the delivery, all of it. Link in the description to book a call to see whether or
+not you're a good fit for this program. It's going to be really beneficial for you to get someone
+like me who has a lot of experience in this so that you can skip years ahead of your journey. But
+before you go, I've made my call. I'm going to stop pursuing it, not because it's a fair experience,
+but tell me I'm wrong. I read every single comment. So, comment below if you think I'm leaving money
+on the table or potential made the case. Because if enough of you make a good enough argument, I'll
+do a part two. Drop a like if you got something out of this video. Subscribe. I post content. I've
+been a little inconsistent nowadays, but so but still subscribe. And I'll see you in the next one.

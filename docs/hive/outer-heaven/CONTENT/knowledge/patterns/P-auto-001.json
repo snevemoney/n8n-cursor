@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-001",
+  "version": 1,
+  "title": "agent-eval / ops — prompt-as-power-up",
+  "steps": [
+    "Treat generated prompts as drafts; expect a tail failure.",
+    "If you need a discriminator, name it; do not pretend 100% is the bar."
+  ],
+  "support_ids": [
+    "K-NO97pqqc10A-01",
+    "K-NO97pqqc10A-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-eval; stage=ops; Game-show eval, not a production SLA.",
+  "less_relevant_when": "A real eval should not hide the hard item as a gag.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

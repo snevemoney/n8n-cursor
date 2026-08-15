@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-014",
+  "version": 1,
+  "title": "agent-ops / build — form-to-roadmap-email-to-book-cta",
+  "steps": [
+    "Steal form→diagnose→table→book. HITL send. Do not install Base44.",
+    "Treat gen-UI as draft 0."
+  ],
+  "support_ids": [
+    "K-bX_stJ_Eiog-01",
+    "K-bX_stJ_Eiog-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=build; Form fields exist; send workflow exists. Caption-only: do not invent clicks. Clients parked.",
+  "less_relevant_when": "First UI was too “AI”; he had to iterate spacing. Email title garbled (“ination”). Caption-only: do not invent clicks. C",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

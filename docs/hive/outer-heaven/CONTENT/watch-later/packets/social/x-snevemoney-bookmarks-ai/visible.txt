@@ -1,0 +1,152 @@
+x:@snevemoney bookmarks AI-only
+source: xurl-dump 2026-08-14 17:09 EDT
+headed: CURSOR-BROWSER-NOT-LOGGED-IN
+
+x:2087589633152459123 2026-08-12 @natecurtiss_yt
+https://x.com/i/web/status/2087589633152459123
+We found a way to write AI scripts for YouTube that don't sound like AI, and they still perform.  No robotic pacing, no generic phrasing, no obvious AI language. The script pulls straight from your voice.  Reply "SCRIPT" and I'll send it to you. https://t.co/Dcs3mCTcZi
+
+x:2086976486771155361 2026-08-11 @1337_viking
+https://x.com/i/web/status/2086976486771155361
+@Polymarket Translate → back-translate  Translate the text into another language, then translate it back to English.  This almost always scrambles the original token pattern enough to break the watermark.  🤷‍♂️  Not sure why Claude is being low IQ here.
+
+x:2082070276112564256 2026-07-28 @chesny
+https://x.com/i/web/status/2082070276112564256
+El CEO de Anthropic dándose cuenta de que Claude Fable 5 volvió hace 48 horas y un tipo lo uso para construir un sistema para crear sitios web cinematográficos de $50,000 y acaba de filtrar toda la estrategia gratis https://t.co/68FqDHmPo5 https://t.co/CTGLeL34km
+
+x:2079674432038248611 2026-07-21 @ClaudeDevs
+https://x.com/i/web/status/2079674432038248611
+Claude Code on desktop now works with the iOS simulator.  Build and run your iOS app, and the simulator opens in a panel right next to your conversation. Available today in public beta. https://t.co/su4IguzPVb
+
+x:2079315551206379890 2026-07-20 @ClaudeDevs
+https://x.com/i/web/status/2079315551206379890
+Docs: https://t.co/c2WKykWv12
+
+x:2077827886149439547 2026-07-16 @mweinbach
+https://x.com/i/web/status/2077827886149439547
+I asked a Kimi K3 Max agent swarm to recreate macOS 27 with real Liquid Glass and native apps in web browser and it’s been going for 3 hours https://t.co/lC8dAPHkB5
+
+x:2077489907350856038 2026-07-15 @ClaudeDevs
+https://x.com/i/web/status/2077489907350856038
+Claude Code artifacts can now call MCP connectors, letting you build dashboards and apps that can fetch information and take actions for each viewer on demand.  Available on Pro, Max, Team, and Enterprise plans. Not available on publicly-shared artifacts. https://t.co/FcvtiOqv0J
+
+x:2077199463278395732 2026-07-15 @0xMiraqle
+https://x.com/i/web/status/2077199463278395732
+Claude "Puzzling" while GPT 5.6 on GOD-MODE just bade a banger that's mindblowing.  Here's the exact way to get a site like this, step by step:  &gt; open the desktop app, pick Sol, reasoning on High. taste work never goes to small models  &gt; drop it 3 sites with motion you love and https://t.co/BvJujhrb2t https://t.co/tGgpiLNpn6
+
+x:2076738496778445003 2026-07-13 @techleadhd
+https://x.com/i/web/status/2076738496778445003
+I gave an AI blocks. It built me a castle.  (full video below) https://t.co/2NLEGTmxSN
+
+x:2077016770939122149 2026-07-14 @higgsfield
+https://x.com/i/web/status/2077016770939122149
+Higgsfield MCP/Plugin for After Effects just got upgraded. Powered by Fable 5.  1. Build your own AE plugins 2. Drop in your reference and it decomposes into editable vector layers you can animate 3. AI assistant that answers or does it for you 4. Localize a project seamlessly https://t.co/WL4pqMgLEM
+
+x:2075545587093807111 2026-07-10 @viktoroddy
+https://x.com/i/web/status/2075545587093807111
+The New GPT 5.6 Sol is insane.  ❤️‍🔥Just recorded a 21-min Full Tutorial on How To Build Premium, Cinematic Websites with GPT 5.6 Sol! https://t.co/rTMd8x40ZE
+
+x:2075611333668540502 2026-07-10 @BusyFocusApp
+https://x.com/i/web/status/2075611333668540502
+Claude widget prototype for BUSY Bar 👀   It shows your live usage limits and lets you approve or deny Claude requests straight from BUSY Bar.  Not planned as an official app yet, but we wanted to try it out and see if people would actually use something like this. https://t.co/wsL7FcY1xa
+
+x:2075635283211772279 2026-07-10 @ClaudeDevs
+https://x.com/i/web/status/2075635283211772279
+Claude Code on desktop now has an in-app browser.  Claude can pull up docs, designs, or any other site. It can read, click through, and interact the same way it does with your local dev servers.  It's sandboxed and configurable: you choose whether sessions persist. https://t.co/Jbc21OP0vJ
+
+x:2075192866553413944 2026-07-09 @ibexdream
+https://x.com/i/web/status/2075192866553413944
+When you've got so much control over the AI tools,  you start messing with them for fun🖱️  Image: @midjourney v8.2 Animation: Seedance 2.0 on @runwayml Upscale: @topazlabs SPL 2.5 Edit &amp; Color Grading: DaVinci Resolve Timing help: Fable 5 https://t.co/d9JE2tgVEU
+
+x:2074438871526379532 2026-07-07 @Av1dlive
+https://x.com/i/web/status/2074438871526379532
+this is f**king dangerous  someone just figured out how to get fable 5 reasoning in opus 4.8 with one prompt   you have less than 24 hours to set this up as this takes away 20% of your usage limit   here is how:  1) Paste the prompt and ask it to "make an operating manual" 2) https://t.co/b5lzkGnbBd https://t.co/7yNWNzteFn
+
+x:2074304050880012736 2026-07-07 @arrakis_ai
+https://x.com/i/web/status/2074304050880012736
+Holy Shxt... Humans have officially become the bottleneck.  I built a system around Andrej Karpathy's LLM Wiki.  Every employee's responsibilities, workflows, and operational context are captured in the LLM Wiki, allowing the system to understand how work is organized before https://t.co/p3OTflaPTf
+
+x:2074589352273867128 2026-07-07 @OriSilver
+https://x.com/i/web/status/2074589352273867128
+Any subject you can think of can now be fully automated.   From research to publishing without leaving your Claude or Chatgpt.   Maxfusion AI MCP handles it all... https://t.co/S22kiPE2vK https://t.co/MLDflFAQhN
+
+x:2074290108782534890 2026-07-07 @DramaAlert
+https://x.com/i/web/status/2074290108782534890
+Anthropic just revealed the secret sauce to their AI… turns out they have something similar to consciousness called the J-space.  https://t.co/7uP6g2bkJB
+
+x:2074046218741678570 2026-07-06 @AdamKPx
+https://x.com/i/web/status/2074046218741678570
+btw AI agents can now vibe test your apps too 👀 https://t.co/kSRE2n3o06
+
+x:2074208949205881033 2026-07-06 @ClaudeDevs
+https://x.com/i/web/status/2074208949205881033
+https://t.co/v694m8Eaj6
+
+x:2074158868142194898 2026-07-06 @monokern
+https://x.com/i/web/status/2074158868142194898
+This site looks like it was built by a team of 3D developers  It wasn't. It's just video. And that's the part nobody expects  &gt; he generated two frames with AI &gt; turned them into a clip with Seedance 2.0 &gt; then gave it to Claude 4.8 to wrap into a full immersive scrollable https://t.co/thTUi1YAya https://t.co/yVeHkUSqkP
+
+x:2074119000137601528 2026-07-06 @rom1trs
+https://x.com/i/web/status/2074119000137601528
+I built a Claude skill that makes motion-style animation.  &gt; Paste a reference image &gt; It generates frames with Nano Banana 2  &gt; and animates the video with Seedance 2.0  Everything runs in Claude through the Arcads MCP  Comment "Motion", and I'll send you the skill https://t.co/4YQq5d3E7g
+
+x:2074108067361280173 2026-07-06 @TheoMediaAI
+https://x.com/i/web/status/2074108067361280173
+Crazy impressive results using Claude Fable to build out a pose/depth previs for Seedance.   This was inspired by Josh Daws' build-- but of course I made a few tweaks I'll showcase on the channel later this week.  Another example below that shows why I think this is awesome: https://t.co/6FQ0UcdZkc
+
+x:2074005214219432097 2026-07-06 @KlassicKohli
+https://x.com/i/web/status/2074005214219432097
+Hey @grok remove the weakest one https://t.co/kPqfIzgEan
+
+x:2073272122508513702 2026-07-04 @VictorTaelin
+https://x.com/i/web/status/2073272122508513702
+8 hours of work with Fable:  - Implemented this game prototype from scratch. Fable built the demo with fluid movements, robust rollback netcode, and US/BR servers it deployed itself. Try it (links below).  - Investigated and solved a paradox in Bend2. This led us to a new, https://t.co/0E1BhDb5KF
+
+x:2073378450459570257 2026-07-04 @0xDeliriumm
+https://x.com/i/web/status/2073378450459570257
+ANTHROPIC'S LEAD ENGINEER MAKING $2.2M/YEAR LEAKED THE COMPANY'S INTERNAL OBSIDIAN BRAIN - AND GOT FIRED THE SAME DAY  00:07 a live neural network with 21 inputs, 10+ hidden layers, ReLU activation - thousands of connections firing in real time as the system processes every https://t.co/TA6FSWYjSd https://t.co/52IRTZqrPn
+
+x:2073306997064421677 2026-07-04 @xingbugengming
+https://x.com/i/web/status/2073306997064421677
+Codex+Godot游戏引擎不仅可以制作2D游戏，也可以制作3D游戏  这是我做的一个3D游戏demo，其中建模、绑定模型骨架全部由AI完成，最后由Codex帮助我整合所有项目资源到Godot引擎运行  下面是我完整的工作流： https://t.co/WNcjkTHWYo https://t.co/7G5aTGbk9F
+
+x:2073469967308030384 2026-07-04 @Lentils80
+https://x.com/i/web/status/2073469967308030384
+Told Claude Fable 5 to make a Vampire Survivors clone in pure C++, no engine, no asset files  Everything from sprites, sounds, graphics to music tracks is generated by code at runtime  Source code is in the thread below https://t.co/SnRFR9vcWP
+
+x:2073423288882090405 2026-07-04 @JoshDaws
+https://x.com/i/web/status/2073423288882090405
+Had Fable build a tool that lets me turn shots from movies into previs I can provide to Seedance, the same way I'd show a cinematographer the shots I want to emulate. https://t.co/UNWfEZ7ylV https://t.co/JlxgheIHIH
+
+x:2073320835658772937 2026-07-04 @bigaiguy
+https://x.com/i/web/status/2073320835658772937
+A developer just killed the real estate walkthrough industry by scanned an entire house with his phone. Uploaded it.  Now anyone on Earth can walk through it in a browser tab. No app. No VR. No agent. No appointment.  Click → you’re inside. Every room. Every angle. Every shadow. https://t.co/QKuwzEwsiE
+
+x:2073250825858892241 2026-07-04 @TimJayas
+https://x.com/i/web/status/2073250825858892241
+Claude Fable 5 just one shot this procedural creatures! 🤯  Built a whole procedural 3D character generator in Three.js with:  &gt; Ragdoll-like characters made from primitive shapes that merge into one seamless body   &gt; Custom vertex shader + SDF tech that removes all seams and https://t.co/xHjJvHFOan
+
+x:2072932020003496380 2026-07-03 @0xDeliriumm
+https://x.com/i/web/status/2072932020003496380
+ANTHROPIC DROPPED THEIR OWN OBSIDIAN BRAIN THAT MANAGES ALL COMPANY INNOVATIONS AND KNOWLEDGE FLOWS  00:22 8,893 nodes, 4,729 links, 8,893 views - a knowledge graph so dense it looks like a galaxy when you zoom out  Marginalia Collection, Glossary Backbone, Comparative Grammar https://t.co/6szF6FHZqt https://t.co/52IRTZqrPn
+
+x:2072001793492763022 2026-06-30 @tryrevyl
+https://x.com/i/web/status/2072001793492763022
+claude code and codex can now drive iOS features on a live device.   no scripts. no selectors. no xcode.   one prompt
+
+x:2072980099050410259 2026-07-03 @SD_Tutorial
+https://x.com/i/web/status/2072980099050410259
+LTX 2.3 10-Eros 🥵 LoRA  You obviously know that 10 Eros is for NSFW gen.  Now you can use it with base LTX2.3, then add the 10Eros LoRA the same way as all LoRAs.  👇 https://t.co/najJI1GDNB
+
+x:2073003743897854113 2026-07-03 @majidmanzarpour
+https://x.com/i/web/status/2073003743897854113
+So apparently @claudeai Fable can animate rigged models in @threejs with pure code  Details below 👇 https://t.co/Fa07uTh2nO
+
+x:2072364163054395409 2026-07-01 @JafarNajafov
+https://x.com/i/web/status/2072364163054395409
+I found a tool that turns a single character image into fully animated sprite sheets in seconds.  AI just killed the most annoying part of game development. And honestly this is getting kind of crazy 👇  AutoSprite uses AI to generate walk cycles, attacks, idles, and basically https://t.co/6g6kCmMAfx
+
+x:2072498082819014925 2026-07-02 @oldgamesnob
+https://x.com/i/web/status/2072498082819014925
+I Built an AI Game Development Toolkit &amp; Game Engine (and you can use it too) link in the comments  This has been my every waking hour for the last 5 months... I think it's coming along nicely, with a lot still planned, Basically: it's an ever-expanding toolkit to help make asset https://t.co/PTYCA4LKTd
+

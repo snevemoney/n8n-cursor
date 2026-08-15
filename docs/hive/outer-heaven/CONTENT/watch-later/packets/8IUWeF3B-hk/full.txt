@@ -1,0 +1,35 @@
+If you want to build and sell workflows, you have to learn how to evaluate them.
+
+I thought it would first make sense to talk about what is evaluation.
+
+In my mind, the simplest way to put it is validating your hypothesis with objective proof.
+
+Think back to when you were building an AI agent or workflow and you weren't happy with the results.
+
+What you do is you think about, okay, if I do X, it's going to make the output better.
+
+And so that's your hypothesis.
+
+You go ahead and you make that change.
+
+You run it again, and you basically subjectively judge, is it better or worse.
+
+All right.
+
+So now we're actually in nen and we're going to look at how we do an evaluation flow.
+
+It's going to pull in our data set which in this case we're going to use this data set of six examples with our expected category and our expected priority.
+
+So it's going to pull in those examples.
+
+It's going to feed them through the AI model which is supposed to tag them, you know, the different categories and the priority set outputs which just means it's going to write the AI's answers back into the Google sheet and then it will set the category and the priority which we will be able to check in the evaluations tab.
+
+And then I'm going to go to evaluations and just hit run test.
+
+And so this is basically going to send those six different items in our data set through this model.
+
+It's going to collect an average of how many tokens were used, um, prompts total, and then also how long it took, and then it's going to give us an average of the priority and category score correctness.
+
+So, looks like that already finished up.
+
+If I clicked into it, you can see it processed all six and you can see which ones, you know, were right and which ones weren't.

@@ -1,0 +1,51 @@
+{
+  "capability_id": "CAP-gt8k4bA01Mo-award-plate-scrub",
+  "name": "award-ref-continuous-plate-scroll-scrub",
+  "goal": "award-site refs → one continuous 720p plate → scroll-scrub page → CTA roast on live URL",
+  "observed_workflow": [
+    "Pick 1–3 Awwwards / award pages and name the signature motion",
+    "Connect already-authorized motion tool (hive: Higgsfield on Creative)",
+    "Generate one continuous Seedance plate (≤30s spoken; 720p)",
+    "Wrap: scroll scrubs the plate",
+    "Roast live: CTA before scroll, repeated after proof, unique color",
+    "verify-after-browser. Localhost ≠ prod. Deploy HITL"
+  ],
+  "tools": [
+    "Higgsfield (on desk)",
+    "Seedance 2.5 (on tape)",
+    "Claude Code / Jarvis (on-tape operate-never)"
+  ],
+  "agent_abilities": [
+    "draft cinematic-recipe wrap",
+    "fail-the-build CTA roast"
+  ],
+  "triggers": [
+    "premium motion page",
+    "award-site replica ask"
+  ],
+  "state": "plate exists or not; CTA visible before scroll or fail",
+  "guardrails": [
+    "send / pay / deploy / book / publish stay HITL",
+    "Claude Code / Jarvis / paid community operate-never",
+    "do not quote $10k / $28.5M as FACT",
+    "localhost ≠ prod"
+  ],
+  "reproduce": "Dry-run: name 3 award refs + CTA-before-scroll check on an existing preview. Do not generate billed video.",
+  "generalize": "Same primitive as cinematic-recipe video hero. Continuous plate is the steal.",
+  "improve": "Do not improve by installing Claude or auto-publishing localhost.",
+  "primitive_ids": [
+    "PRIM-gt8k4bA01Mo-continuous-plate-scrub"
+  ],
+  "atom_ids": [
+    "K-gt8k4bA01Mo-01",
+    "K-gt8k4bA01Mo-03"
+  ],
+  "behavior_ids": [
+    "BEH-gt8k4bA01Mo-award-plate-scrub"
+  ],
+  "source_video_id": "gt8k4bA01Mo",
+  "timestamp": "00:34-13:13",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

@@ -1,0 +1,4040 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.000 --> 00:00:01.230 align:start position:0%
+ 
+Right<00:00:00.320><c> here,</c><00:00:00.480><c> I've</c><00:00:00.600><c> got</c><00:00:00.800><c> four</c><00:00:01.000><c> different</c>
+
+00:00:01.230 --> 00:00:01.240 align:start position:0%
+Right here, I've got four different
+ 
+
+00:00:01.240 --> 00:00:02.670 align:start position:0%
+Right here, I've got four different
+agents<00:00:01.520><c> that</c><00:00:01.640><c> are</c><00:00:01.720><c> looping,</c><00:00:02.200><c> calling</c><00:00:02.520><c> other</c>
+
+00:00:02.670 --> 00:00:02.680 align:start position:0%
+agents that are looping, calling other
+ 
+
+00:00:02.680 --> 00:00:04.110 align:start position:0%
+agents that are looping, calling other
+sub<00:00:02.960><c> agents,</c><00:00:03.320><c> and</c><00:00:03.560><c> writing</c><00:00:03.840><c> all</c><00:00:03.960><c> these</c>
+
+00:00:04.110 --> 00:00:04.120 align:start position:0%
+sub agents, and writing all these
+ 
+
+00:00:04.120 --> 00:00:05.750 align:start position:0%
+sub agents, and writing all these
+prompts<00:00:04.400><c> for</c><00:00:04.560><c> me,</c><00:00:04.720><c> and</c><00:00:04.840><c> designing</c><00:00:05.360><c> systems</c>
+
+00:00:05.750 --> 00:00:05.760 align:start position:0%
+prompts for me, and designing systems
+ 
+
+00:00:05.760 --> 00:00:06.870 align:start position:0%
+prompts for me, and designing systems
+for<00:00:05.920><c> me.</c><00:00:06.240><c> But,</c><00:00:06.400><c> is</c><00:00:06.480><c> this</c><00:00:06.640><c> actually</c>
+
+00:00:06.870 --> 00:00:06.880 align:start position:0%
+for me. But, is this actually
+ 
+
+00:00:06.880 --> 00:00:08.590 align:start position:0%
+for me. But, is this actually
+productive,<00:00:07.320><c> or</c><00:00:07.520><c> is</c><00:00:07.600><c> that</c><00:00:07.760><c> just</c><00:00:07.960><c> a</c><00:00:08.000><c> cool</c><00:00:08.160><c> demo?</c>
+
+00:00:08.590 --> 00:00:08.600 align:start position:0%
+productive, or is that just a cool demo?
+ 
+
+00:00:08.600 --> 00:00:09.750 align:start position:0%
+productive, or is that just a cool demo?
+Here's<00:00:08.800><c> your</c><00:00:08.920><c> monthly</c><00:00:09.160><c> reminder</c><00:00:09.520><c> that</c><00:00:09.640><c> you</c>
+
+00:00:09.750 --> 00:00:09.760 align:start position:0%
+Here's your monthly reminder that you
+ 
+
+00:00:09.760 --> 00:00:11.190 align:start position:0%
+Here's your monthly reminder that you
+shouldn't<00:00:10.120><c> be</c><00:00:10.240><c> prompting</c><00:00:10.640><c> coding</c><00:00:10.960><c> agents</c>
+
+00:00:11.190 --> 00:00:11.200 align:start position:0%
+shouldn't be prompting coding agents
+ 
+
+00:00:11.200 --> 00:00:13.590 align:start position:0%
+shouldn't be prompting coding agents
+anymore.<00:00:11.920><c> You</c><00:00:12.080><c> should</c><00:00:12.240><c> be</c><00:00:12.360><c> designing</c><00:00:13.000><c> loops</c>
+
+00:00:13.590 --> 00:00:13.600 align:start position:0%
+anymore. You should be designing loops
+ 
+
+00:00:13.600 --> 00:00:15.590 align:start position:0%
+anymore. You should be designing loops
+that<00:00:13.800><c> prompt</c><00:00:14.120><c> your</c><00:00:14.320><c> agents.</c><00:00:14.920><c> Boris</c><00:00:15.240><c> Cherny</c>
+
+00:00:15.590 --> 00:00:15.600 align:start position:0%
+that prompt your agents. Boris Cherny
+ 
+
+00:00:15.600 --> 00:00:17.390 align:start position:0%
+that prompt your agents. Boris Cherny
+and<00:00:15.800><c> Peter</c><00:00:16.000><c> Steinberg</c><00:00:16.560><c> publicly</c><00:00:17.080><c> said</c><00:00:17.280><c> they</c>
+
+00:00:17.390 --> 00:00:17.400 align:start position:0%
+and Peter Steinberg publicly said they
+ 
+
+00:00:17.400 --> 00:00:19.150 align:start position:0%
+and Peter Steinberg publicly said they
+no<00:00:17.600><c> longer</c><00:00:17.920><c> prompt</c><00:00:18.200><c> their</c><00:00:18.280><c> coding</c><00:00:18.560><c> agents.</c>
+
+00:00:19.150 --> 00:00:19.160 align:start position:0%
+no longer prompt their coding agents.
+ 
+
+00:00:19.160 --> 00:00:20.950 align:start position:0%
+no longer prompt their coding agents.
+They<00:00:19.400><c> write</c><00:00:19.720><c> loops.</c><00:00:20.400><c> A</c><00:00:20.440><c> loop</c><00:00:20.680><c> is</c><00:00:20.800><c> three</c>
+
+00:00:20.950 --> 00:00:20.960 align:start position:0%
+They write loops. A loop is three
+ 
+
+00:00:20.960 --> 00:00:23.590 align:start position:0%
+They write loops. A loop is three
+things:<00:00:21.360><c> a</c><00:00:21.400><c> trigger,</c><00:00:22.240><c> an</c><00:00:22.400><c> action,</c><00:00:23.120><c> and</c><00:00:23.200><c> a</c><00:00:23.240><c> stop</c>
+
+00:00:23.590 --> 00:00:23.600 align:start position:0%
+things: a trigger, an action, and a stop
+ 
+
+00:00:23.600 --> 00:00:24.950 align:start position:0%
+things: a trigger, an action, and a stop
+condition.<00:00:24.080><c> If</c><00:00:24.160><c> you're</c><00:00:24.280><c> still</c><00:00:24.520><c> writing</c><00:00:24.760><c> loops</c>
+
+00:00:24.950 --> 00:00:24.960 align:start position:0%
+condition. If you're still writing loops
+ 
+
+00:00:24.960 --> 00:00:25.950 align:start position:0%
+condition. If you're still writing loops
+that<00:00:25.080><c> prompt</c><00:00:25.320><c> coding</c><00:00:25.600><c> agents,</c><00:00:25.880><c> you're</c>
+
+00:00:25.950 --> 00:00:25.960 align:start position:0%
+that prompt coding agents, you're
+ 
+
+00:00:25.960 --> 00:00:27.710 align:start position:0%
+that prompt coding agents, you're
+falling<00:00:26.200><c> behind.</c><00:00:26.840><c> You</c><00:00:26.960><c> need</c><00:00:27.120><c> to</c><00:00:27.200><c> build</c><00:00:27.400><c> a</c><00:00:27.440><c> meta</c>
+
+00:00:27.710 --> 00:00:27.720 align:start position:0%
+falling behind. You need to build a meta
+ 
+
+00:00:27.720 --> 00:00:29.070 align:start position:0%
+falling behind. You need to build a meta
+agent<00:00:27.960><c> that</c><00:00:28.080><c> infers</c><00:00:28.480><c> what</c><00:00:28.600><c> loops</c><00:00:28.880><c> you</c><00:00:28.960><c> would</c>
+
+00:00:29.070 --> 00:00:29.080 align:start position:0%
+agent that infers what loops you would
+ 
+
+00:00:29.080 --> 00:00:30.670 align:start position:0%
+agent that infers what loops you would
+have<00:00:29.280><c> wanted</c><00:00:29.600><c> based</c><00:00:29.840><c> on</c><00:00:29.920><c> your</c><00:00:30.080><c> vibe,</c><00:00:30.360><c> and</c><00:00:30.480><c> then</c>
+
+00:00:30.670 --> 00:00:30.680 align:start position:0%
+have wanted based on your vibe, and then
+ 
+
+00:00:30.680 --> 00:00:32.350 align:start position:0%
+have wanted based on your vibe, and then
+write<00:00:30.840><c> those</c><00:00:31.040><c> loops.</c><00:00:31.520><c> We're</c><00:00:31.640><c> seeing</c><00:00:31.920><c> a</c><00:00:32.000><c> ton</c><00:00:32.240><c> of</c>
+
+00:00:32.350 --> 00:00:32.360 align:start position:0%
+write those loops. We're seeing a ton of
+ 
+
+00:00:32.360 --> 00:00:33.830 align:start position:0%
+write those loops. We're seeing a ton of
+talk<00:00:32.640><c> about</c><00:00:32.920><c> agent</c><00:00:33.240><c> loops,</c><00:00:33.600><c> loop</c>
+
+00:00:33.830 --> 00:00:33.840 align:start position:0%
+talk about agent loops, loop
+ 
+
+00:00:33.840 --> 00:00:34.950 align:start position:0%
+talk about agent loops, loop
+engineering,<00:00:34.240><c> whatever</c><00:00:34.480><c> you</c><00:00:34.560><c> want</c><00:00:34.680><c> to</c><00:00:34.720><c> call</c>
+
+00:00:34.950 --> 00:00:34.960 align:start position:0%
+engineering, whatever you want to call
+ 
+
+00:00:34.960 --> 00:00:36.230 align:start position:0%
+engineering, whatever you want to call
+it.<00:00:35.080><c> So,</c><00:00:35.200><c> I</c><00:00:35.240><c> wanted</c><00:00:35.520><c> to</c><00:00:35.600><c> make</c><00:00:35.720><c> a</c><00:00:35.760><c> video</c><00:00:36.080><c> to</c>
+
+00:00:36.230 --> 00:00:36.240 align:start position:0%
+it. So, I wanted to make a video to
+ 
+
+00:00:36.240 --> 00:00:37.710 align:start position:0%
+it. So, I wanted to make a video to
+clear<00:00:36.520><c> up</c><00:00:36.680><c> what</c><00:00:36.840><c> that</c><00:00:36.960><c> actually</c><00:00:37.240><c> means.</c>
+
+00:00:37.710 --> 00:00:37.720 align:start position:0%
+clear up what that actually means.
+ 
+
+00:00:37.720 --> 00:00:39.230 align:start position:0%
+clear up what that actually means.
+Because<00:00:37.920><c> I</c><00:00:38.000><c> think</c><00:00:38.280><c> that</c><00:00:38.520><c> everyone</c><00:00:38.920><c> kind</c><00:00:39.120><c> of</c>
+
+00:00:39.230 --> 00:00:39.240 align:start position:0%
+Because I think that everyone kind of
+ 
+
+00:00:39.240 --> 00:00:40.670 align:start position:0%
+Because I think that everyone kind of
+has<00:00:39.400><c> their</c><00:00:39.520><c> own</c><00:00:39.680><c> spin</c><00:00:40.160><c> and</c><00:00:40.280><c> a</c><00:00:40.360><c> different</c>
+
+00:00:40.670 --> 00:00:40.680 align:start position:0%
+has their own spin and a different
+ 
+
+00:00:40.680 --> 00:00:42.870 align:start position:0%
+has their own spin and a different
+definition<00:00:41.240><c> of</c><00:00:41.480><c> what</c><00:00:41.680><c> this</c><00:00:41.920><c> is,</c><00:00:42.600><c> and</c><00:00:42.800><c> it</c>
+
+00:00:42.870 --> 00:00:42.880 align:start position:0%
+definition of what this is, and it
+ 
+
+00:00:42.880 --> 00:00:44.390 align:start position:0%
+definition of what this is, and it
+applies<00:00:43.320><c> to</c><00:00:43.400><c> everyone</c><00:00:43.800><c> very,</c><00:00:44.160><c> very</c>
+
+00:00:44.390 --> 00:00:44.400 align:start position:0%
+applies to everyone very, very
+ 
+
+00:00:44.400 --> 00:00:45.630 align:start position:0%
+applies to everyone very, very
+differently.<00:00:45.040><c> I</c><00:00:45.120><c> think</c><00:00:45.280><c> that</c><00:00:45.440><c> this</c>
+
+00:00:45.630 --> 00:00:45.640 align:start position:0%
+differently. I think that this
+ 
+
+00:00:45.640 --> 00:00:47.390 align:start position:0%
+differently. I think that this
+definition<00:00:46.120><c> sums</c><00:00:46.360><c> it</c><00:00:46.440><c> up</c><00:00:46.520><c> pretty</c><00:00:46.720><c> well.</c><00:00:47.200><c> Loop</c>
+
+00:00:47.390 --> 00:00:47.400 align:start position:0%
+definition sums it up pretty well. Loop
+ 
+
+00:00:47.400 --> 00:00:48.950 align:start position:0%
+definition sums it up pretty well. Loop
+engineering<00:00:47.880><c> is</c><00:00:48.000><c> replacing</c><00:00:48.400><c> yourself</c><00:00:48.800><c> as</c><00:00:48.880><c> the</c>
+
+00:00:48.950 --> 00:00:48.960 align:start position:0%
+engineering is replacing yourself as the
+ 
+
+00:00:48.960 --> 00:00:50.830 align:start position:0%
+engineering is replacing yourself as the
+person<00:00:49.240><c> who</c><00:00:49.360><c> prompts</c><00:00:49.680><c> the</c><00:00:49.800><c> agent.</c><00:00:50.400><c> You</c><00:00:50.520><c> design</c>
+
+00:00:50.830 --> 00:00:50.840 align:start position:0%
+person who prompts the agent. You design
+ 
+
+00:00:50.840 --> 00:00:52.750 align:start position:0%
+person who prompts the agent. You design
+the<00:00:50.920><c> system</c><00:00:51.400><c> that</c><00:00:51.560><c> does</c><00:00:51.760><c> that</c><00:00:51.960><c> instead.</c><00:00:52.680><c> A</c>
+
+00:00:52.750 --> 00:00:52.760 align:start position:0%
+the system that does that instead. A
+ 
+
+00:00:52.760 --> 00:00:54.110 align:start position:0%
+the system that does that instead. A
+loop<00:00:52.960><c> here</c><00:00:53.120><c> can</c><00:00:53.280><c> be</c><00:00:53.520><c> thought</c><00:00:53.800><c> of</c><00:00:53.920><c> as</c><00:00:54.040><c> a</c>
+
+00:00:54.110 --> 00:00:54.120 align:start position:0%
+loop here can be thought of as a
+ 
+
+00:00:54.120 --> 00:00:55.710 align:start position:0%
+loop here can be thought of as a
+recursive<00:00:54.560><c> goal,</c><00:00:55.000><c> where</c><00:00:55.160><c> you</c><00:00:55.240><c> define</c><00:00:55.680><c> a</c>
+
+00:00:55.710 --> 00:00:55.720 align:start position:0%
+recursive goal, where you define a
+ 
+
+00:00:55.720 --> 00:00:57.990 align:start position:0%
+recursive goal, where you define a
+purpose,<00:00:56.520><c> and</c><00:00:56.720><c> the</c><00:00:56.760><c> AI</c><00:00:57.080><c> iterates</c><00:00:57.720><c> until</c>
+
+00:00:57.990 --> 00:00:58.000 align:start position:0%
+purpose, and the AI iterates until
+ 
+
+00:00:58.000 --> 00:00:59.590 align:start position:0%
+purpose, and the AI iterates until
+complete.<00:00:58.640><c> And</c><00:00:58.760><c> there's</c><00:00:58.880><c> really</c><00:00:59.080><c> two</c><00:00:59.360><c> most</c>
+
+00:00:59.590 --> 00:00:59.600 align:start position:0%
+complete. And there's really two most
+ 
+
+00:00:59.600 --> 00:01:01.270 align:start position:0%
+complete. And there's really two most
+important<00:01:00.040><c> pillars</c><00:01:00.200><c> of</c><00:01:00.280><c> that</c><00:01:00.440><c> in</c><00:01:00.520><c> my</c><00:01:00.640><c> mind,</c>
+
+00:01:01.270 --> 00:01:01.280 align:start position:0%
+important pillars of that in my mind,
+ 
+
+00:01:01.280 --> 00:01:03.710 align:start position:0%
+important pillars of that in my mind,
+which<00:01:01.560><c> are</c><00:01:02.440><c> the</c><00:01:02.600><c> goal.</c><00:01:03.080><c> What</c><00:01:03.200><c> is</c><00:01:03.320><c> the</c><00:01:03.440><c> actual</c>
+
+00:01:03.710 --> 00:01:03.720 align:start position:0%
+which are the goal. What is the actual
+ 
+
+00:01:03.720 --> 00:01:05.870 align:start position:0%
+which are the goal. What is the actual
+objective?<00:01:04.280><c> Something</c><00:01:04.760><c> typically</c>
+
+00:01:05.870 --> 00:01:05.880 align:start position:0%
+objective? Something typically
+ 
+
+00:01:05.880 --> 00:01:07.550 align:start position:0%
+objective? Something typically
+that's<00:01:06.080><c> objective,</c><00:01:06.520><c> not</c><00:01:06.720><c> subjective.</c><00:01:07.440><c> And</c>
+
+00:01:07.550 --> 00:01:07.560 align:start position:0%
+that's objective, not subjective. And
+ 
+
+00:01:07.560 --> 00:01:08.950 align:start position:0%
+that's objective, not subjective. And
+then<00:01:07.680><c> verification.</c><00:01:08.280><c> How</c><00:01:08.440><c> does</c><00:01:08.560><c> the</c><00:01:08.680><c> agent</c>
+
+00:01:08.950 --> 00:01:08.960 align:start position:0%
+then verification. How does the agent
+ 
+
+00:01:08.960 --> 00:01:10.790 align:start position:0%
+then verification. How does the agent
+know<00:01:09.560><c> what</c><00:01:09.720><c> that</c><00:01:09.880><c> stop</c><00:01:10.160><c> condition</c><00:01:10.520><c> is?</c><00:01:10.680><c> How</c>
+
+00:01:10.790 --> 00:01:10.800 align:start position:0%
+know what that stop condition is? How
+ 
+
+00:01:10.800 --> 00:01:12.630 align:start position:0%
+know what that stop condition is? How
+does<00:01:10.920><c> it</c><00:01:11.040><c> check</c><00:01:11.400><c> and</c><00:01:11.560><c> iterate?</c><00:01:12.240><c> So,</c><00:01:12.360><c> anyways,</c>
+
+00:01:12.630 --> 00:01:12.640 align:start position:0%
+does it check and iterate? So, anyways,
+ 
+
+00:01:12.640 --> 00:01:13.830 align:start position:0%
+does it check and iterate? So, anyways,
+if<00:01:12.760><c> you</c><00:01:12.840><c> take</c><00:01:13.080><c> all</c><00:01:13.160><c> that</c><00:01:13.280><c> advice,</c><00:01:13.640><c> and</c><00:01:13.720><c> then</c>
+
+00:01:13.830 --> 00:01:13.840 align:start position:0%
+if you take all that advice, and then
+ 
+
+00:01:13.840 --> 00:01:15.110 align:start position:0%
+if you take all that advice, and then
+you<00:01:13.920><c> start</c><00:01:14.160><c> doing</c><00:01:14.400><c> stuff</c><00:01:14.640><c> like</c><00:01:14.800><c> this,</c><00:01:15.000><c> and</c>
+
+00:01:15.110 --> 00:01:15.120 align:start position:0%
+you start doing stuff like this, and
+ 
+
+00:01:15.120 --> 00:01:16.910 align:start position:0%
+you start doing stuff like this, and
+designing<00:01:15.600><c> swarms</c><00:01:16.120><c> and</c><00:01:16.240><c> fleets</c><00:01:16.480><c> of</c><00:01:16.600><c> agents</c>
+
+00:01:16.910 --> 00:01:16.920 align:start position:0%
+designing swarms and fleets of agents
+ 
+
+00:01:16.920 --> 00:01:19.910 align:start position:0%
+designing swarms and fleets of agents
+that<00:01:17.120><c> constantly</c><00:01:17.560><c> run</c><00:01:17.720><c> 24/7,</c><00:01:18.960><c> then</c><00:01:19.680><c> you</c><00:01:19.800><c> need</c>
+
+00:01:19.910 --> 00:01:19.920 align:start position:0%
+that constantly run 24/7, then you need
+ 
+
+00:01:19.920 --> 00:01:21.070 align:start position:0%
+that constantly run 24/7, then you need
+to<00:01:20.000><c> think</c><00:01:20.240><c> about</c><00:01:20.480><c> what</c><00:01:20.640><c> are</c><00:01:20.680><c> you</c><00:01:20.800><c> actually</c>
+
+00:01:21.070 --> 00:01:21.080 align:start position:0%
+to think about what are you actually
+ 
+
+00:01:21.080 --> 00:01:22.710 align:start position:0%
+to think about what are you actually
+doing<00:01:21.360><c> here?</c><00:01:21.720><c> And</c><00:01:21.880><c> is</c><00:01:22.000><c> this</c><00:01:22.200><c> actually</c><00:01:22.480><c> moving</c>
+
+00:01:22.710 --> 00:01:22.720 align:start position:0%
+doing here? And is this actually moving
+ 
+
+00:01:22.720 --> 00:01:24.110 align:start position:0%
+doing here? And is this actually moving
+the<00:01:22.800><c> needle?</c><00:01:23.240><c> So,</c><00:01:23.360><c> first</c><00:01:23.560><c> of</c><00:01:23.680><c> all,</c><00:01:23.840><c> I</c><00:01:23.920><c> thought</c>
+
+00:01:24.110 --> 00:01:24.120 align:start position:0%
+the needle? So, first of all, I thought
+ 
+
+00:01:24.120 --> 00:01:25.830 align:start position:0%
+the needle? So, first of all, I thought
+to<00:01:24.200><c> myself,</c><00:01:24.640><c> how</c><00:01:24.760><c> do</c><00:01:24.960><c> I</c><00:01:25.040><c> actually</c><00:01:25.360><c> use</c><00:01:25.560><c> agent</c>
+
+00:01:25.830 --> 00:01:25.840 align:start position:0%
+to myself, how do I actually use agent
+ 
+
+00:01:25.840 --> 00:01:26.990 align:start position:0%
+to myself, how do I actually use agent
+loops?<00:01:26.200><c> Because</c><00:01:26.440><c> when</c><00:01:26.560><c> you</c><00:01:26.640><c> read</c><00:01:26.840><c> some</c><00:01:26.960><c> of</c>
+
+00:01:26.990 --> 00:01:27.000 align:start position:0%
+loops? Because when you read some of
+ 
+
+00:01:27.000 --> 00:01:28.590 align:start position:0%
+loops? Because when you read some of
+those<00:01:27.160><c> tweets</c><00:01:27.480><c> that</c><00:01:27.600><c> I</c><00:01:27.680><c> just</c><00:01:27.880><c> showed</c><00:01:28.280><c> earlier</c>
+
+00:01:28.590 --> 00:01:28.600 align:start position:0%
+those tweets that I just showed earlier
+ 
+
+00:01:28.600 --> 00:01:30.070 align:start position:0%
+those tweets that I just showed earlier
+in<00:01:28.680><c> this</c><00:01:28.800><c> video,</c><00:01:29.440><c> you</c><00:01:29.560><c> kind</c><00:01:29.760><c> of</c><00:01:29.880><c> think</c><00:01:30.000><c> to</c>
+
+00:01:30.070 --> 00:01:30.080 align:start position:0%
+in this video, you kind of think to
+ 
+
+00:01:30.080 --> 00:01:32.310 align:start position:0%
+in this video, you kind of think to
+yourself,<00:01:30.400><c> okay,</c><00:01:30.640><c> if</c><00:01:30.840><c> I'm</c><00:01:30.960><c> not</c><00:01:31.120><c> having</c><00:01:31.960><c> five</c>
+
+00:01:32.310 --> 00:01:32.320 align:start position:0%
+yourself, okay, if I'm not having five
+ 
+
+00:01:32.320 --> 00:01:34.390 align:start position:0%
+yourself, okay, if I'm not having five
+agents<00:01:32.720><c> that</c><00:01:32.880><c> are</c><00:01:33.480><c> continuously</c><00:01:34.120><c> around</c><00:01:34.320><c> the</c>
+
+00:01:34.390 --> 00:01:34.400 align:start position:0%
+agents that are continuously around the
+ 
+
+00:01:34.400 --> 00:01:36.030 align:start position:0%
+agents that are continuously around the
+clock<00:01:34.680><c> orchestrating</c><00:01:35.280><c> five</c><00:01:35.600><c> of</c><00:01:35.680><c> their</c><00:01:35.840><c> own</c>
+
+00:01:36.030 --> 00:01:36.040 align:start position:0%
+clock orchestrating five of their own
+ 
+
+00:01:36.040 --> 00:01:37.430 align:start position:0%
+clock orchestrating five of their own
+agents,<00:01:36.320><c> then</c><00:01:36.480><c> I'm</c><00:01:36.600><c> falling</c><00:01:36.880><c> behind,</c><00:01:37.240><c> or</c><00:01:37.360><c> I'm</c>
+
+00:01:37.430 --> 00:01:37.440 align:start position:0%
+agents, then I'm falling behind, or I'm
+ 
+
+00:01:37.440 --> 00:01:39.230 align:start position:0%
+agents, then I'm falling behind, or I'm
+not<00:01:37.680><c> using</c><00:01:38.280><c> my</c><00:01:38.400><c> cloud</c><00:01:38.640><c> subscription</c><00:01:39.120><c> in</c><00:01:39.160><c> the</c>
+
+00:01:39.230 --> 00:01:39.240 align:start position:0%
+not using my cloud subscription in the
+ 
+
+00:01:39.240 --> 00:01:41.630 align:start position:0%
+not using my cloud subscription in the
+best<00:01:39.520><c> way.</c><00:01:40.160><c> And</c><00:01:40.280><c> I</c><00:01:40.360><c> think</c><00:01:40.600><c> that</c><00:01:41.080><c> that's</c><00:01:41.400><c> very</c>
+
+00:01:41.630 --> 00:01:41.640 align:start position:0%
+best way. And I think that that's very
+ 
+
+00:01:41.640 --> 00:01:43.030 align:start position:0%
+best way. And I think that that's very
+false.<00:01:42.200><c> Because</c><00:01:42.360><c> if</c><00:01:42.480><c> you</c><00:01:42.560><c> don't</c><00:01:42.720><c> understand</c>
+
+00:01:43.030 --> 00:01:43.040 align:start position:0%
+false. Because if you don't understand
+ 
+
+00:01:43.040 --> 00:01:45.310 align:start position:0%
+false. Because if you don't understand
+what<00:01:43.160><c> you're</c><00:01:43.240><c> doing,</c><00:01:43.880><c> then</c><00:01:44.760><c> you're</c><00:01:44.960><c> probably</c>
+
+00:01:45.310 --> 00:01:45.320 align:start position:0%
+what you're doing, then you're probably
+ 
+
+00:01:45.320 --> 00:01:46.870 align:start position:0%
+what you're doing, then you're probably
+just<00:01:45.480><c> going</c><00:01:45.600><c> to</c><00:01:45.680><c> scale</c><00:01:46.120><c> problems,</c><00:01:46.720><c> and</c><00:01:46.800><c> you're</c>
+
+00:01:46.870 --> 00:01:46.880 align:start position:0%
+just going to scale problems, and you're
+ 
+
+00:01:46.880 --> 00:01:48.190 align:start position:0%
+just going to scale problems, and you're
+going<00:01:47.000><c> to</c><00:01:47.080><c> have</c><00:01:47.200><c> a</c><00:01:47.240><c> ton</c><00:01:47.480><c> of</c><00:01:47.560><c> bugs</c><00:01:47.840><c> and</c><00:01:47.920><c> a</c><00:01:47.960><c> ton</c><00:01:48.120><c> of</c>
+
+00:01:48.190 --> 00:01:48.200 align:start position:0%
+going to have a ton of bugs and a ton of
+ 
+
+00:01:48.200 --> 00:01:49.230 align:start position:0%
+going to have a ton of bugs and a ton of
+things<00:01:48.440><c> that</c><00:01:48.560><c> you're</c><00:01:48.640><c> going</c><00:01:48.760><c> to</c><00:01:48.840><c> have</c><00:01:48.920><c> to</c><00:01:49.000><c> fix</c>
+
+00:01:49.230 --> 00:01:49.240 align:start position:0%
+things that you're going to have to fix
+ 
+
+00:01:49.240 --> 00:01:51.110 align:start position:0%
+things that you're going to have to fix
+later.<00:01:49.760><c> And</c><00:01:49.880><c> also,</c><00:01:50.120><c> not</c><00:01:50.360><c> all</c><00:01:50.560><c> of</c><00:01:50.640><c> us</c><00:01:50.800><c> are</c><00:01:50.920><c> in</c><00:01:51.080><c> a</c>
+
+00:01:51.110 --> 00:01:51.120 align:start position:0%
+later. And also, not all of us are in a
+ 
+
+00:01:51.120 --> 00:01:53.350 align:start position:0%
+later. And also, not all of us are in a
+scenario<00:01:51.680><c> where</c><00:01:51.840><c> having</c><00:01:52.160><c> agents</c><00:01:52.480><c> work</c><00:01:52.680><c> 24/7</c>
+
+00:01:53.350 --> 00:01:53.360 align:start position:0%
+scenario where having agents work 24/7
+ 
+
+00:01:53.360 --> 00:01:55.190 align:start position:0%
+scenario where having agents work 24/7
+around<00:01:53.520><c> the</c><00:01:53.600><c> clock</c><00:01:53.960><c> actually</c><00:01:54.240><c> benefits</c><00:01:54.640><c> us.</c>
+
+00:01:55.190 --> 00:01:55.200 align:start position:0%
+around the clock actually benefits us.
+ 
+
+00:01:55.200 --> 00:01:57.550 align:start position:0%
+around the clock actually benefits us.
+For<00:01:55.320><c> example,</c><00:01:56.160><c> I</c><00:01:56.320><c> don't.</c><00:01:56.880><c> I</c><00:01:56.960><c> have</c><00:01:57.120><c> agents</c><00:01:57.400><c> that</c>
+
+00:01:57.550 --> 00:01:57.560 align:start position:0%
+For example, I don't. I have agents that
+ 
+
+00:01:57.560 --> 00:01:58.830 align:start position:0%
+For example, I don't. I have agents that
+do<00:01:57.680><c> things</c><00:01:57.960><c> on</c><00:01:58.000><c> a</c><00:01:58.040><c> certain</c><00:01:58.320><c> cadence</c><00:01:58.720><c> and</c><00:01:58.800><c> I</c>
+
+00:01:58.830 --> 00:01:58.840 align:start position:0%
+do things on a certain cadence and I
+ 
+
+00:01:58.840 --> 00:02:00.470 align:start position:0%
+do things on a certain cadence and I
+have<00:01:59.000><c> agents</c><00:01:59.280><c> that</c><00:01:59.440><c> do</c><00:01:59.600><c> things</c><00:02:00.080><c> based</c><00:02:00.360><c> on</c>
+
+00:02:00.470 --> 00:02:00.480 align:start position:0%
+have agents that do things based on
+ 
+
+00:02:00.480 --> 00:02:02.910 align:start position:0%
+have agents that do things based on
+certain<00:02:00.920><c> event</c><00:02:01.400><c> actions,</c><00:02:02.160><c> but</c><00:02:02.400><c> just</c><00:02:02.640><c> having</c>
+
+00:02:02.910 --> 00:02:02.920 align:start position:0%
+certain event actions, but just having
+ 
+
+00:02:02.920 --> 00:02:05.070 align:start position:0%
+certain event actions, but just having
+them<00:02:03.080><c> do</c><00:02:03.360><c> 24/7</c><00:02:03.960><c> work</c><00:02:04.120><c> for</c><00:02:04.240><c> me</c><00:02:04.360><c> isn't</c><00:02:04.560><c> helpful.</c>
+
+00:02:05.070 --> 00:02:05.080 align:start position:0%
+them do 24/7 work for me isn't helpful.
+ 
+
+00:02:05.080 --> 00:02:06.830 align:start position:0%
+them do 24/7 work for me isn't helpful.
+I<00:02:05.160><c> think</c><00:02:05.360><c> if</c><00:02:05.479><c> I</c><00:02:05.560><c> was</c><00:02:05.720><c> working</c><00:02:06.000><c> with</c><00:02:06.160><c> a</c><00:02:06.200><c> team</c><00:02:06.680><c> on</c>
+
+00:02:06.830 --> 00:02:06.840 align:start position:0%
+I think if I was working with a team on
+ 
+
+00:02:06.840 --> 00:02:07.990 align:start position:0%
+I think if I was working with a team on
+a<00:02:06.880><c> codebase</c><00:02:07.440><c> and</c><00:02:07.560><c> we</c><00:02:07.640><c> were</c><00:02:07.720><c> building</c><00:02:07.960><c> a</c>
+
+00:02:07.990 --> 00:02:08.000 align:start position:0%
+a codebase and we were building a
+ 
+
+00:02:08.000 --> 00:02:09.510 align:start position:0%
+a codebase and we were building a
+product<00:02:08.399><c> and</c><00:02:08.479><c> we</c><00:02:08.560><c> were</c><00:02:08.640><c> constantly</c><00:02:09.039><c> iterating</c>
+
+00:02:09.510 --> 00:02:09.520 align:start position:0%
+product and we were constantly iterating
+ 
+
+00:02:09.520 --> 00:02:11.070 align:start position:0%
+product and we were constantly iterating
+and<00:02:09.679><c> pulling</c><00:02:09.960><c> in</c><00:02:10.039><c> different</c><00:02:10.320><c> things,</c><00:02:10.880><c> then</c><00:02:11.000><c> it</c>
+
+00:02:11.070 --> 00:02:11.080 align:start position:0%
+and pulling in different things, then it
+ 
+
+00:02:11.080 --> 00:02:12.830 align:start position:0%
+and pulling in different things, then it
+would<00:02:11.240><c> maybe</c><00:02:11.480><c> make</c><00:02:11.680><c> more</c><00:02:11.800><c> sense,</c><00:02:12.080><c> but</c><00:02:12.200><c> for</c><00:02:12.320><c> me,</c>
+
+00:02:12.830 --> 00:02:12.840 align:start position:0%
+would maybe make more sense, but for me,
+ 
+
+00:02:12.840 --> 00:02:14.190 align:start position:0%
+would maybe make more sense, but for me,
+that<00:02:12.959><c> doesn't</c><00:02:13.160><c> apply.</c><00:02:13.680><c> So,</c><00:02:13.800><c> I</c><00:02:13.840><c> just</c><00:02:13.959><c> wanted</c><00:02:14.120><c> to</c>
+
+00:02:14.190 --> 00:02:14.200 align:start position:0%
+that doesn't apply. So, I just wanted to
+ 
+
+00:02:14.200 --> 00:02:15.750 align:start position:0%
+that doesn't apply. So, I just wanted to
+come<00:02:14.320><c> in</c><00:02:14.400><c> here,</c><00:02:14.600><c> explain</c><00:02:15.040><c> this</c><00:02:15.240><c> as</c><00:02:15.400><c> simple</c><00:02:15.640><c> as</c>
+
+00:02:15.750 --> 00:02:15.760 align:start position:0%
+come in here, explain this as simple as
+ 
+
+00:02:15.760 --> 00:02:18.390 align:start position:0%
+come in here, explain this as simple as
+I<00:02:15.840><c> can,</c><00:02:16.480><c> and</c><00:02:16.680><c> hopefully</c><00:02:17.400><c> shed</c><00:02:17.600><c> some</c><00:02:17.760><c> light</c><00:02:18.040><c> on</c>
+
+00:02:18.390 --> 00:02:18.400 align:start position:0%
+I can, and hopefully shed some light on
+ 
+
+00:02:18.400 --> 00:02:20.949 align:start position:0%
+I can, and hopefully shed some light on
+where<00:02:18.720><c> you</c><00:02:18.840><c> guys</c><00:02:19.080><c> can</c><00:02:19.160><c> start</c><00:02:19.360><c> applying</c><00:02:19.959><c> loops</c>
+
+00:02:20.949 --> 00:02:20.959 align:start position:0%
+where you guys can start applying loops
+ 
+
+00:02:20.959 --> 00:02:23.470 align:start position:0%
+where you guys can start applying loops
+into<00:02:21.240><c> your</c><00:02:21.440><c> workflows</c><00:02:21.959><c> and</c><00:02:22.280><c> why</c><00:02:22.720><c> and</c><00:02:22.920><c> how.</c><00:02:23.320><c> So,</c>
+
+00:02:23.470 --> 00:02:23.480 align:start position:0%
+into your workflows and why and how. So,
+ 
+
+00:02:23.480 --> 00:02:25.870 align:start position:0%
+into your workflows and why and how. So,
+I<00:02:23.520><c> actually</c><00:02:23.920><c> built</c><00:02:24.240><c> an</c><00:02:24.360><c> agent</c><00:02:24.600><c> loop</c><00:02:25.000><c> for</c><00:02:25.240><c> this</c>
+
+00:02:25.870 --> 00:02:25.880 align:start position:0%
+I actually built an agent loop for this
+ 
+
+00:02:25.880 --> 00:02:27.430 align:start position:0%
+I actually built an agent loop for this
+HTML<00:02:26.360><c> that</c><00:02:26.440><c> we're</c><00:02:26.520><c> going</c><00:02:26.640><c> to</c><00:02:26.680><c> look</c><00:02:26.760><c> at</c><00:02:26.880><c> today,</c>
+
+00:02:27.430 --> 00:02:27.440 align:start position:0%
+HTML that we're going to look at today,
+ 
+
+00:02:27.440 --> 00:02:28.750 align:start position:0%
+HTML that we're going to look at today,
+and<00:02:27.560><c> it</c><00:02:27.640><c> basically</c><00:02:28.000><c> went</c><00:02:28.200><c> through</c><00:02:28.360><c> a</c><00:02:28.400><c> ton</c><00:02:28.680><c> of</c>
+
+00:02:28.750 --> 00:02:28.760 align:start position:0%
+and it basically went through a ton of
+ 
+
+00:02:28.760 --> 00:02:30.230 align:start position:0%
+and it basically went through a ton of
+different<00:02:28.959><c> sources.</c><00:02:29.360><c> It</c><00:02:29.480><c> checked</c><00:02:29.760><c> 45</c>
+
+00:02:30.230 --> 00:02:30.240 align:start position:0%
+different sources. It checked 45
+ 
+
+00:02:30.240 --> 00:02:31.990 align:start position:0%
+different sources. It checked 45
+sources,<00:02:30.640><c> whether</c><00:02:30.840><c> that</c><00:02:31.000><c> was</c><00:02:31.400><c> articles,</c>
+
+00:02:31.990 --> 00:02:32.000 align:start position:0%
+sources, whether that was articles,
+ 
+
+00:02:32.000 --> 00:02:33.949 align:start position:0%
+sources, whether that was articles,
+YouTube<00:02:32.280><c> video</c><00:02:32.480><c> transcripts,</c><00:02:33.040><c> X</c><00:02:33.240><c> posts.</c><00:02:33.800><c> It</c>
+
+00:02:33.949 --> 00:02:33.959 align:start position:0%
+YouTube video transcripts, X posts. It
+ 
+
+00:02:33.959 --> 00:02:35.350 align:start position:0%
+YouTube video transcripts, X posts. It
+looked<00:02:34.160><c> through</c><00:02:34.280><c> a</c><00:02:34.320><c> ton</c><00:02:34.480><c> of</c><00:02:34.560><c> stuff,</c><00:02:35.120><c> and</c><00:02:35.240><c> then</c>
+
+00:02:35.350 --> 00:02:35.360 align:start position:0%
+looked through a ton of stuff, and then
+ 
+
+00:02:35.360 --> 00:02:36.790 align:start position:0%
+looked through a ton of stuff, and then
+it<00:02:35.480><c> kept</c><00:02:35.720><c> looping</c><00:02:36.000><c> on</c><00:02:36.120><c> this</c><00:02:36.280><c> until</c><00:02:36.520><c> it</c><00:02:36.600><c> had</c><00:02:36.760><c> a</c>
+
+00:02:36.790 --> 00:02:36.800 align:start position:0%
+it kept looping on this until it had a
+ 
+
+00:02:36.800 --> 00:02:39.110 align:start position:0%
+it kept looping on this until it had a
+good<00:02:36.959><c> idea</c><00:02:37.560><c> of</c><00:02:37.760><c> what</c><00:02:37.920><c> to</c><00:02:38.040><c> build.</c><00:02:38.880><c> And</c><00:02:39.000><c> then</c>
+
+00:02:39.110 --> 00:02:39.120 align:start position:0%
+good idea of what to build. And then
+ 
+
+00:02:39.120 --> 00:02:41.390 align:start position:0%
+good idea of what to build. And then
+once<00:02:39.240><c> it</c><00:02:39.360><c> built</c><00:02:39.600><c> this</c><00:02:39.720><c> HTML,</c><00:02:40.520><c> this</c><00:02:40.760><c> wasn't</c><00:02:41.040><c> V1.</c>
+
+00:02:41.390 --> 00:02:41.400 align:start position:0%
+once it built this HTML, this wasn't V1.
+ 
+
+00:02:41.400 --> 00:02:43.270 align:start position:0%
+once it built this HTML, this wasn't V1.
+This<00:02:41.520><c> was</c><00:02:41.640><c> probably</c><00:02:42.040><c> V7.</c><00:02:42.600><c> It</c><00:02:42.680><c> had</c><00:02:42.840><c> to</c><00:02:42.920><c> keep</c>
+
+00:02:43.270 --> 00:02:43.280 align:start position:0%
+This was probably V7. It had to keep
+ 
+
+00:02:43.280 --> 00:02:44.910 align:start position:0%
+This was probably V7. It had to keep
+checking,<00:02:43.760><c> screenshotting,</c><00:02:44.400><c> reviewing,</c>
+
+00:02:44.910 --> 00:02:44.920 align:start position:0%
+checking, screenshotting, reviewing,
+ 
+
+00:02:44.920 --> 00:02:46.470 align:start position:0%
+checking, screenshotting, reviewing,
+iterating,<00:02:45.640><c> and</c><00:02:45.800><c> then</c><00:02:45.920><c> it</c><00:02:46.040><c> finally</c><00:02:46.320><c> said,</c>
+
+00:02:46.470 --> 00:02:46.480 align:start position:0%
+iterating, and then it finally said,
+ 
+
+00:02:46.480 --> 00:02:48.070 align:start position:0%
+iterating, and then it finally said,
+"Okay,<00:02:46.680><c> we're</c><00:02:46.800><c> done.</c><00:02:47.400><c> This</c><00:02:47.560><c> is</c><00:02:47.640><c> what</c><00:02:47.760><c> we</c><00:02:47.840><c> got."</c>
+
+00:02:48.070 --> 00:02:48.080 align:start position:0%
+"Okay, we're done. This is what we got."
+ 
+
+00:02:48.080 --> 00:02:49.070 align:start position:0%
+"Okay, we're done. This is what we got."
+So,<00:02:48.160><c> let</c><00:02:48.320><c> me</c><00:02:48.440><c> walk</c><00:02:48.640><c> through</c><00:02:48.760><c> this</c><00:02:48.880><c> with</c><00:02:49.000><c> you</c>
+
+00:02:49.070 --> 00:02:49.080 align:start position:0%
+So, let me walk through this with you
+ 
+
+00:02:49.080 --> 00:02:51.070 align:start position:0%
+So, let me walk through this with you
+guys.<00:02:49.480><c> An</c><00:02:49.600><c> agent</c><00:02:49.840><c> loop</c><00:02:50.040><c> is</c><00:02:50.160><c> just</c><00:02:50.360><c> an</c><00:02:50.520><c> AI</c><00:02:50.800><c> that</c>
+
+00:02:51.070 --> 00:02:51.080 align:start position:0%
+guys. An agent loop is just an AI that
+ 
+
+00:02:51.080 --> 00:02:53.070 align:start position:0%
+guys. An agent loop is just an AI that
+reasons<00:02:51.480><c> on</c><00:02:51.600><c> what</c><00:02:51.720><c> to</c><00:02:51.800><c> do,</c><00:02:52.440><c> acts</c><00:02:52.760><c> on</c><00:02:52.880><c> what</c><00:02:53.000><c> to</c>
+
+00:02:53.070 --> 00:02:53.080 align:start position:0%
+reasons on what to do, acts on what to
+ 
+
+00:02:53.080 --> 00:02:54.910 align:start position:0%
+reasons on what to do, acts on what to
+do,<00:02:53.440><c> starts</c><00:02:53.760><c> implementing,</c><00:02:54.600><c> and</c><00:02:54.720><c> then</c><00:02:54.840><c> it</c>
+
+00:02:54.910 --> 00:02:54.920 align:start position:0%
+do, starts implementing, and then it
+ 
+
+00:02:54.920 --> 00:02:57.030 align:start position:0%
+do, starts implementing, and then it
+observes<00:02:55.440><c> the</c><00:02:55.560><c> result.</c><00:02:56.160><c> And</c><00:02:56.320><c> it</c><00:02:56.400><c> will</c><00:02:56.520><c> do</c><00:02:56.760><c> that</c>
+
+00:02:57.030 --> 00:02:57.040 align:start position:0%
+observes the result. And it will do that
+ 
+
+00:02:57.040 --> 00:02:58.710 align:start position:0%
+observes the result. And it will do that
+over<00:02:57.280><c> and</c><00:02:57.400><c> over</c><00:02:57.560><c> and</c><00:02:57.680><c> over</c><00:02:57.959><c> until</c><00:02:58.360><c> some</c><00:02:58.560><c> sort</c>
+
+00:02:58.710 --> 00:02:58.720 align:start position:0%
+over and over and over until some sort
+ 
+
+00:02:58.720 --> 00:03:01.270 align:start position:0%
+over and over and over until some sort
+of<00:02:58.880><c> goal</c><00:02:59.200><c> is</c><00:02:59.360><c> met,</c><00:02:59.640><c> until</c><00:03:00.040><c> it</c><00:03:00.160><c> knows</c><00:03:00.880><c> we've</c><00:03:01.080><c> hit</c>
+
+00:03:01.270 --> 00:03:01.280 align:start position:0%
+of goal is met, until it knows we've hit
+ 
+
+00:03:01.280 --> 00:03:03.110 align:start position:0%
+of goal is met, until it knows we've hit
+the<00:03:01.360><c> stop</c><00:03:01.600><c> criteria,</c><00:03:02.080><c> this</c><00:03:02.280><c> is</c><00:03:02.400><c> good,</c><00:03:02.920><c> I'm</c>
+
+00:03:03.110 --> 00:03:03.120 align:start position:0%
+the stop criteria, this is good, I'm
+ 
+
+00:03:03.120 --> 00:03:04.710 align:start position:0%
+the stop criteria, this is good, I'm
+going<00:03:03.360><c> to</c><00:03:03.440><c> stop</c><00:03:03.800><c> now.</c><00:03:04.160><c> And</c><00:03:04.239><c> a</c><00:03:04.280><c> really</c><00:03:04.480><c> simple</c>
+
+00:03:04.710 --> 00:03:04.720 align:start position:0%
+going to stop now. And a really simple
+ 
+
+00:03:04.720 --> 00:03:06.910 align:start position:0%
+going to stop now. And a really simple
+visual<00:03:05.040><c> that</c><00:03:05.160><c> I</c><00:03:05.239><c> like</c><00:03:05.400><c> to</c><00:03:05.480><c> think</c><00:03:05.680><c> about</c><00:03:06.000><c> is</c><00:03:06.480><c> AI</c>
+
+00:03:06.910 --> 00:03:06.920 align:start position:0%
+visual that I like to think about is AI
+ 
+
+00:03:06.920 --> 00:03:08.430 align:start position:0%
+visual that I like to think about is AI
+is<00:03:07.160><c> never</c><00:03:07.560><c> perfect,</c><00:03:08.000><c> right?</c><00:03:08.080><c> It's</c><00:03:08.200><c> never</c>
+
+00:03:08.430 --> 00:03:08.440 align:start position:0%
+is never perfect, right? It's never
+ 
+
+00:03:08.440 --> 00:03:09.910 align:start position:0%
+is never perfect, right? It's never
+going<00:03:08.560><c> to</c><00:03:08.680><c> one-shot</c><00:03:09.160><c> something</c><00:03:09.480><c> and</c><00:03:09.600><c> you</c><00:03:09.720><c> just</c>
+
+00:03:09.910 --> 00:03:09.920 align:start position:0%
+going to one-shot something and you just
+ 
+
+00:03:09.920 --> 00:03:11.710 align:start position:0%
+going to one-shot something and you just
+accept<00:03:10.320><c> that</c><00:03:10.519><c> final</c><00:03:10.800><c> output.</c><00:03:11.200><c> And</c><00:03:11.320><c> so,</c><00:03:11.480><c> if</c><00:03:11.600><c> we</c>
+
+00:03:11.710 --> 00:03:11.720 align:start position:0%
+accept that final output. And so, if we
+ 
+
+00:03:11.720 --> 00:03:13.350 align:start position:0%
+accept that final output. And so, if we
+have<00:03:11.920><c> attempts</c><00:03:12.360><c> on</c><00:03:12.440><c> the</c><00:03:12.560><c> x-axis</c><00:03:13.120><c> and</c><00:03:13.200><c> we</c><00:03:13.239><c> have</c>
+
+00:03:13.350 --> 00:03:13.360 align:start position:0%
+have attempts on the x-axis and we have
+ 
+
+00:03:13.360 --> 00:03:15.670 align:start position:0%
+have attempts on the x-axis and we have
+quality<00:03:13.840><c> on</c><00:03:14.480><c> the</c><00:03:14.640><c> y-axis,</c><00:03:15.239><c> let's</c><00:03:15.360><c> think</c><00:03:15.480><c> about</c>
+
+00:03:15.670 --> 00:03:15.680 align:start position:0%
+quality on the y-axis, let's think about
+ 
+
+00:03:15.680 --> 00:03:18.229 align:start position:0%
+quality on the y-axis, let's think about
+this.<00:03:16.440><c> On</c><00:03:16.560><c> attempt</c><00:03:16.920><c> one,</c><00:03:17.519><c> if</c><00:03:17.680><c> you</c><00:03:17.880><c> are</c><00:03:18.000><c> just</c>
+
+00:03:18.229 --> 00:03:18.239 align:start position:0%
+this. On attempt one, if you are just
+ 
+
+00:03:18.239 --> 00:03:19.990 align:start position:0%
+this. On attempt one, if you are just
+giving<00:03:18.480><c> your</c><00:03:18.640><c> agent</c><00:03:18.880><c> some</c><00:03:19.080><c> sort</c><00:03:19.560><c> of</c><00:03:19.680><c> simple</c>
+
+00:03:19.990 --> 00:03:20.000 align:start position:0%
+giving your agent some sort of simple
+ 
+
+00:03:20.000 --> 00:03:21.910 align:start position:0%
+giving your agent some sort of simple
+task,<00:03:20.800><c> maybe</c><00:03:21.120><c> you</c><00:03:21.239><c> get</c><00:03:21.400><c> to</c><00:03:21.480><c> like,</c><00:03:21.640><c> let's</c><00:03:21.800><c> just</c>
+
+00:03:21.910 --> 00:03:21.920 align:start position:0%
+task, maybe you get to like, let's just
+ 
+
+00:03:21.920 --> 00:03:23.630 align:start position:0%
+task, maybe you get to like, let's just
+say<00:03:22.040><c> attempt</c><00:03:22.360><c> one,</c><00:03:22.519><c> you</c><00:03:22.600><c> get</c><00:03:22.720><c> to</c><00:03:22.800><c> 50%,</c><00:03:23.560><c> and</c>
+
+00:03:23.630 --> 00:03:23.640 align:start position:0%
+say attempt one, you get to 50%, and
+ 
+
+00:03:23.640 --> 00:03:24.670 align:start position:0%
+say attempt one, you get to 50%, and
+then<00:03:23.760><c> you</c><00:03:23.840><c> look</c><00:03:24.000><c> at</c><00:03:24.080><c> that</c><00:03:24.200><c> and</c><00:03:24.320><c> say,</c><00:03:24.440><c> "Okay,</c>
+
+00:03:24.670 --> 00:03:24.680 align:start position:0%
+then you look at that and say, "Okay,
+ 
+
+00:03:24.680 --> 00:03:26.110 align:start position:0%
+then you look at that and say, "Okay,
+here<00:03:24.880><c> are</c><00:03:24.959><c> some</c><00:03:25.080><c> changes</c><00:03:25.400><c> to</c><00:03:25.519><c> make."</c><00:03:26.040><c> And</c><00:03:26.040><c> then</c>
+
+00:03:26.110 --> 00:03:26.120 align:start position:0%
+here are some changes to make." And then
+ 
+
+00:03:26.120 --> 00:03:27.390 align:start position:0%
+here are some changes to make." And then
+by<00:03:26.239><c> attempt</c><00:03:26.560><c> two,</c><00:03:26.760><c> maybe</c><00:03:27.000><c> you</c><00:03:27.120><c> bump</c><00:03:27.320><c> up</c>
+
+00:03:27.390 --> 00:03:27.400 align:start position:0%
+by attempt two, maybe you bump up
+ 
+
+00:03:27.400 --> 00:03:29.710 align:start position:0%
+by attempt two, maybe you bump up
+another<00:03:27.880><c> five</c><00:03:28.160><c> or</c><00:03:28.239><c> 10%.</c><00:03:29.040><c> And</c><00:03:29.160><c> every</c><00:03:29.360><c> time</c><00:03:29.600><c> that</c>
+
+00:03:29.710 --> 00:03:29.720 align:start position:0%
+another five or 10%. And every time that
+ 
+
+00:03:29.720 --> 00:03:31.350 align:start position:0%
+another five or 10%. And every time that
+you<00:03:29.840><c> give</c><00:03:30.080><c> more</c><00:03:30.280><c> feedback</c><00:03:30.760><c> and</c><00:03:30.880><c> iterate,</c><00:03:31.280><c> you</c>
+
+00:03:31.350 --> 00:03:31.360 align:start position:0%
+you give more feedback and iterate, you
+ 
+
+00:03:31.360 --> 00:03:33.229 align:start position:0%
+you give more feedback and iterate, you
+just<00:03:31.480><c> kind</c><00:03:31.640><c> of</c><00:03:31.720><c> keep</c><00:03:31.959><c> moving</c><00:03:32.280><c> up</c><00:03:32.440><c> on</c><00:03:32.560><c> quality</c>
+
+00:03:33.229 --> 00:03:33.239 align:start position:0%
+just kind of keep moving up on quality
+ 
+
+00:03:33.239 --> 00:03:34.470 align:start position:0%
+just kind of keep moving up on quality
+until<00:03:33.519><c> you</c><00:03:33.600><c> hit</c><00:03:33.800><c> somewhere</c><00:03:34.160><c> where</c><00:03:34.280><c> you're</c>
+
+00:03:34.470 --> 00:03:34.480 align:start position:0%
+until you hit somewhere where you're
+ 
+
+00:03:34.480 --> 00:03:37.110 align:start position:0%
+until you hit somewhere where you're
+okay<00:03:34.760><c> with</c><00:03:34.920><c> that,</c><00:03:35.480><c> 90,</c><00:03:35.880><c> 95%.</c><00:03:36.880><c> And</c><00:03:36.959><c> so,</c><00:03:37.040><c> the</c>
+
+00:03:37.110 --> 00:03:37.120 align:start position:0%
+okay with that, 90, 95%. And so, the
+ 
+
+00:03:37.120 --> 00:03:38.830 align:start position:0%
+okay with that, 90, 95%. And so, the
+whole<00:03:37.280><c> idea</c><00:03:37.519><c> is</c><00:03:37.640><c> why</c><00:03:37.760><c> don't</c><00:03:37.959><c> we</c><00:03:38.200><c> outsource</c>
+
+00:03:38.830 --> 00:03:38.840 align:start position:0%
+whole idea is why don't we outsource
+ 
+
+00:03:38.840 --> 00:03:41.070 align:start position:0%
+whole idea is why don't we outsource
+this<00:03:39.120><c> part,</c><00:03:39.760><c> this</c><00:03:40.040><c> feedback</c><00:03:40.519><c> and</c><00:03:40.600><c> iteration</c>
+
+00:03:41.070 --> 00:03:41.080 align:start position:0%
+this part, this feedback and iteration
+ 
+
+00:03:41.080 --> 00:03:42.870 align:start position:0%
+this part, this feedback and iteration
+loop,<00:03:41.560><c> to</c><00:03:41.680><c> an</c><00:03:41.840><c> agent</c><00:03:42.200><c> rather</c><00:03:42.400><c> than</c><00:03:42.519><c> having</c><00:03:42.760><c> the</c>
+
+00:03:42.870 --> 00:03:42.880 align:start position:0%
+loop, to an agent rather than having the
+ 
+
+00:03:42.880 --> 00:03:44.030 align:start position:0%
+loop, to an agent rather than having the
+human<00:03:43.160><c> do</c><00:03:43.280><c> that?</c><00:03:43.480><c> Cuz</c><00:03:43.600><c> this</c><00:03:43.760><c> is</c><00:03:43.840><c> going</c><00:03:43.959><c> to</c>
+
+00:03:44.030 --> 00:03:44.040 align:start position:0%
+human do that? Cuz this is going to
+ 
+
+00:03:44.040 --> 00:03:46.110 align:start position:0%
+human do that? Cuz this is going to
+happen<00:03:44.320><c> either</c><00:03:44.519><c> way.</c><00:03:45.040><c> So,</c><00:03:45.360><c> if</c><00:03:45.560><c> we</c><00:03:45.760><c> have</c><00:03:45.959><c> an</c>
+
+00:03:46.110 --> 00:03:46.120 align:start position:0%
+happen either way. So, if we have an
+ 
+
+00:03:46.120 --> 00:03:47.949 align:start position:0%
+happen either way. So, if we have an
+agent<00:03:46.480><c> do</c><00:03:46.600><c> that</c><00:03:46.800><c> instead</c><00:03:47.040><c> of</c><00:03:47.080><c> a</c><00:03:47.160><c> human,</c><00:03:47.800><c> then</c>
+
+00:03:47.949 --> 00:03:47.959 align:start position:0%
+agent do that instead of a human, then
+ 
+
+00:03:47.959 --> 00:03:50.670 align:start position:0%
+agent do that instead of a human, then
+what<00:03:48.080><c> might</c><00:03:48.280><c> happen</c><00:03:48.600><c> is</c><00:03:48.800><c> on</c><00:03:49.519><c> attempt</c><00:03:49.880><c> one,</c><00:03:50.519><c> we</c>
+
+00:03:50.670 --> 00:03:50.680 align:start position:0%
+what might happen is on attempt one, we
+ 
+
+00:03:50.680 --> 00:03:52.550 align:start position:0%
+what might happen is on attempt one, we
+will<00:03:50.800><c> go</c><00:03:50.920><c> straight</c><00:03:51.200><c> up</c><00:03:51.320><c> to</c><00:03:51.400><c> here.</c><00:03:52.160><c> And</c><00:03:52.280><c> then</c><00:03:52.440><c> we</c>
+
+00:03:52.550 --> 00:03:52.560 align:start position:0%
+will go straight up to here. And then we
+ 
+
+00:03:52.560 --> 00:03:53.910 align:start position:0%
+will go straight up to here. And then we
+can<00:03:52.720><c> give</c><00:03:52.880><c> a</c><00:03:52.920><c> little</c><00:03:53.120><c> bit</c><00:03:53.240><c> more</c><00:03:53.400><c> feedback.</c><00:03:53.800><c> And</c>
+
+00:03:53.910 --> 00:03:53.920 align:start position:0%
+can give a little bit more feedback. And
+ 
+
+00:03:53.920 --> 00:03:55.110 align:start position:0%
+can give a little bit more feedback. And
+then<00:03:54.080><c> by</c><00:03:54.240><c> attempt,</c><00:03:54.640><c> you</c><00:03:54.720><c> know,</c><00:03:54.840><c> three</c><00:03:55.040><c> or</c>
+
+00:03:55.110 --> 00:03:55.120 align:start position:0%
+then by attempt, you know, three or
+ 
+
+00:03:55.120 --> 00:03:56.870 align:start position:0%
+then by attempt, you know, three or
+four,<00:03:55.680><c> we're</c><00:03:55.840><c> already</c><00:03:56.080><c> so</c><00:03:56.280><c> much</c><00:03:56.520><c> higher</c><00:03:56.720><c> than</c>
+
+00:03:56.870 --> 00:03:56.880 align:start position:0%
+four, we're already so much higher than
+ 
+
+00:03:56.880 --> 00:03:58.550 align:start position:0%
+four, we're already so much higher than
+where<00:03:57.000><c> we</c><00:03:57.120><c> would</c><00:03:57.280><c> have</c><00:03:57.400><c> been</c><00:03:57.920><c> without</c><00:03:58.280><c> sort</c><00:03:58.480><c> of</c>
+
+00:03:58.550 --> 00:03:58.560 align:start position:0%
+where we would have been without sort of
+ 
+
+00:03:58.560 --> 00:04:00.390 align:start position:0%
+where we would have been without sort of
+that<00:03:58.800><c> agent</c><00:03:59.080><c> verification</c><00:03:59.720><c> loop</c><00:04:00.240><c> right</c>
+
+00:04:00.390 --> 00:04:00.400 align:start position:0%
+that agent verification loop right
+ 
+
+00:04:00.400 --> 00:04:01.590 align:start position:0%
+that agent verification loop right
+there.<00:04:00.760><c> And</c><00:04:00.880><c> that's</c><00:04:01.040><c> why</c><00:04:01.120><c> a</c><00:04:01.160><c> lot</c><00:04:01.320><c> of</c><00:04:01.400><c> people</c>
+
+00:04:01.590 --> 00:04:01.600 align:start position:0%
+there. And that's why a lot of people
+ 
+
+00:04:01.600 --> 00:04:03.390 align:start position:0%
+there. And that's why a lot of people
+are<00:04:01.680><c> explaining</c><00:04:02.160><c> this</c><00:04:02.320><c> in</c><00:04:02.400><c> a</c><00:04:02.440><c> different</c><00:04:02.800><c> way,</c>
+
+00:04:03.390 --> 00:04:03.400 align:start position:0%
+are explaining this in a different way,
+ 
+
+00:04:03.400 --> 00:04:05.110 align:start position:0%
+are explaining this in a different way,
+where<00:04:03.840><c> some</c><00:04:04.000><c> people</c><00:04:04.200><c> have</c><00:04:04.360><c> the</c><00:04:04.480><c> think</c><00:04:04.840><c> act</c>
+
+00:04:05.110 --> 00:04:05.120 align:start position:0%
+where some people have the think act
+ 
+
+00:04:05.120 --> 00:04:06.990 align:start position:0%
+where some people have the think act
+see,<00:04:05.680><c> you</c><00:04:05.800><c> know,</c><00:04:05.920><c> we</c><00:04:06.040><c> basically</c><00:04:06.400><c> like</c><00:04:06.600><c> reason</c>
+
+00:04:06.990 --> 00:04:07.000 align:start position:0%
+see, you know, we basically like reason
+ 
+
+00:04:07.000 --> 00:04:08.990 align:start position:0%
+see, you know, we basically like reason
+act<00:04:07.240><c> observe</c><00:04:07.720><c> reason</c><00:04:08.040><c> act</c><00:04:08.240><c> observe.</c><00:04:08.840><c> Some</c>
+
+00:04:08.990 --> 00:04:09.000 align:start position:0%
+act observe reason act observe. Some
+ 
+
+00:04:09.000 --> 00:04:10.350 align:start position:0%
+act observe reason act observe. Some
+people<00:04:09.240><c> have</c><00:04:09.400><c> the</c><00:04:09.480><c> model</c><00:04:09.800><c> just</c><00:04:09.959><c> going</c><00:04:10.200><c> back</c>
+
+00:04:10.350 --> 00:04:10.360 align:start position:0%
+people have the model just going back
+ 
+
+00:04:10.360 --> 00:04:11.750 align:start position:0%
+people have the model just going back
+and<00:04:10.440><c> forth</c><00:04:10.640><c> with</c><00:04:10.760><c> tools</c><00:04:11.080><c> back</c><00:04:11.280><c> and</c><00:04:11.360><c> forth</c><00:04:11.560><c> back</c>
+
+00:04:11.750 --> 00:04:11.760 align:start position:0%
+and forth with tools back and forth back
+ 
+
+00:04:11.760 --> 00:04:13.270 align:start position:0%
+and forth with tools back and forth back
+and<00:04:11.840><c> forth.</c><00:04:12.440><c> Some</c><00:04:12.600><c> people</c><00:04:12.840><c> have</c><00:04:13.000><c> just,</c><00:04:13.200><c> you</c>
+
+00:04:13.270 --> 00:04:13.280 align:start position:0%
+and forth. Some people have just, you
+ 
+
+00:04:13.280 --> 00:04:14.750 align:start position:0%
+and forth. Some people have just, you
+know,<00:04:13.560><c> a</c><00:04:13.680><c> goal</c><00:04:13.959><c> that</c><00:04:14.160><c> runs</c><00:04:14.360><c> completely</c>
+
+00:04:14.750 --> 00:04:14.760 align:start position:0%
+know, a goal that runs completely
+ 
+
+00:04:14.760 --> 00:04:16.390 align:start position:0%
+know, a goal that runs completely
+unattended.<00:04:15.520><c> And</c><00:04:15.640><c> some</c><00:04:15.800><c> people</c><00:04:16.000><c> are</c><00:04:16.120><c> using</c>
+
+00:04:16.390 --> 00:04:16.400 align:start position:0%
+unattended. And some people are using
+ 
+
+00:04:16.400 --> 00:04:17.670 align:start position:0%
+unattended. And some people are using
+these<00:04:16.560><c> like</c><00:04:16.799><c> fleets</c><00:04:17.079><c> of</c><00:04:17.200><c> agents</c><00:04:17.519><c> with</c>
+
+00:04:17.670 --> 00:04:17.680 align:start position:0%
+these like fleets of agents with
+ 
+
+00:04:17.680 --> 00:04:18.949 align:start position:0%
+these like fleets of agents with
+managers<00:04:18.120><c> prompting</c><00:04:18.480><c> other</c><00:04:18.680><c> agents</c>
+
+00:04:18.949 --> 00:04:18.959 align:start position:0%
+managers prompting other agents
+ 
+
+00:04:18.959 --> 00:04:20.590 align:start position:0%
+managers prompting other agents
+prompting<00:04:19.280><c> other</c><00:04:19.480><c> agents.</c><00:04:20.160><c> And</c><00:04:20.239><c> it's</c><00:04:20.400><c> just</c>
+
+00:04:20.590 --> 00:04:20.600 align:start position:0%
+prompting other agents. And it's just
+ 
+
+00:04:20.600 --> 00:04:22.270 align:start position:0%
+prompting other agents. And it's just
+like,<00:04:21.160><c> you</c><00:04:21.280><c> know,</c><00:04:21.440><c> those</c><00:04:21.680><c> Russian</c><00:04:21.959><c> nesting</c>
+
+00:04:22.270 --> 00:04:22.280 align:start position:0%
+like, you know, those Russian nesting
+ 
+
+00:04:22.280 --> 00:04:23.670 align:start position:0%
+like, you know, those Russian nesting
+dolls.<00:04:22.760><c> So</c><00:04:22.840><c> that's</c><00:04:23.040><c> why</c><00:04:23.120><c> I</c><00:04:23.200><c> wanted</c><00:04:23.400><c> to</c><00:04:23.480><c> put</c>
+
+00:04:23.670 --> 00:04:23.680 align:start position:0%
+dolls. So that's why I wanted to put
+ 
+
+00:04:23.680 --> 00:04:25.430 align:start position:0%
+dolls. So that's why I wanted to put
+this<00:04:23.800><c> into</c><00:04:24.240><c> kind</c><00:04:24.440><c> of</c><00:04:24.720><c> the</c><00:04:24.840><c> main</c><00:04:25.040><c> pillars,</c>
+
+00:04:25.430 --> 00:04:25.440 align:start position:0%
+this into kind of the main pillars,
+ 
+
+00:04:25.440 --> 00:04:28.030 align:start position:0%
+this into kind of the main pillars,
+which<00:04:25.600><c> I</c><00:04:25.680><c> think</c><00:04:25.919><c> are</c><00:04:26.360><c> reason</c><00:04:26.880><c> act</c><00:04:27.480><c> observe.</c>
+
+00:04:28.030 --> 00:04:28.040 align:start position:0%
+which I think are reason act observe.
+ 
+
+00:04:28.040 --> 00:04:29.350 align:start position:0%
+which I think are reason act observe.
+Think<00:04:28.240><c> of</c><00:04:28.320><c> this</c><00:04:28.440><c> like</c><00:04:28.600><c> a</c><00:04:28.640><c> smart</c><00:04:28.960><c> intern</c><00:04:29.240><c> that</c>
+
+00:04:29.350 --> 00:04:29.360 align:start position:0%
+Think of this like a smart intern that
+ 
+
+00:04:29.360 --> 00:04:30.950 align:start position:0%
+Think of this like a smart intern that
+you<00:04:29.440><c> don't</c><00:04:29.640><c> micromanage.</c><00:04:30.440><c> You</c><00:04:30.600><c> hand</c><00:04:30.800><c> them</c><00:04:30.919><c> a</c>
+
+00:04:30.950 --> 00:04:30.960 align:start position:0%
+you don't micromanage. You hand them a
+ 
+
+00:04:30.960 --> 00:04:32.950 align:start position:0%
+you don't micromanage. You hand them a
+goal,<00:04:31.480><c> they</c><00:04:31.640><c> figure</c><00:04:31.919><c> out</c><00:04:32.040><c> what</c><00:04:32.160><c> to</c><00:04:32.240><c> do</c><00:04:32.400><c> next,</c>
+
+00:04:32.950 --> 00:04:32.960 align:start position:0%
+goal, they figure out what to do next,
+ 
+
+00:04:32.960 --> 00:04:34.230 align:start position:0%
+goal, they figure out what to do next,
+they<00:04:33.080><c> check</c><00:04:33.280><c> their</c><00:04:33.440><c> own</c><00:04:33.600><c> work,</c><00:04:33.840><c> and</c><00:04:33.960><c> they</c><00:04:34.040><c> go</c>
+
+00:04:34.230 --> 00:04:34.240 align:start position:0%
+they check their own work, and they go
+ 
+
+00:04:34.240 --> 00:04:35.710 align:start position:0%
+they check their own work, and they go
+again,<00:04:34.560><c> and</c><00:04:34.640><c> then</c><00:04:34.760><c> they</c><00:04:34.880><c> only</c><00:04:35.160><c> come</c><00:04:35.400><c> back</c><00:04:35.600><c> to</c>
+
+00:04:35.710 --> 00:04:35.720 align:start position:0%
+again, and then they only come back to
+ 
+
+00:04:35.720 --> 00:04:37.670 align:start position:0%
+again, and then they only come back to
+you<00:04:35.800><c> and</c><00:04:35.919><c> say,</c><00:04:36.040><c> "Hey,</c><00:04:36.520><c> I'm</c><00:04:36.720><c> done."</c><00:04:37.320><c> After</c><00:04:37.560><c> they</c>
+
+00:04:37.670 --> 00:04:37.680 align:start position:0%
+you and say, "Hey, I'm done." After they
+ 
+
+00:04:37.680 --> 00:04:39.030 align:start position:0%
+you and say, "Hey, I'm done." After they
+probably<00:04:37.960><c> checked</c><00:04:38.240><c> it</c><00:04:38.320><c> a</c><00:04:38.360><c> few</c><00:04:38.520><c> times</c><00:04:38.800><c> and</c><00:04:38.880><c> made</c>
+
+00:04:39.030 --> 00:04:39.040 align:start position:0%
+probably checked it a few times and made
+ 
+
+00:04:39.040 --> 00:04:40.790 align:start position:0%
+probably checked it a few times and made
+some<00:04:39.160><c> changes.</c><00:04:39.760><c> So</c><00:04:39.880><c> you</c><00:04:40.000><c> would</c><00:04:40.120><c> say,</c><00:04:40.280><c> "Okay,</c>
+
+00:04:40.790 --> 00:04:40.800 align:start position:0%
+some changes. So you would say, "Okay,
+ 
+
+00:04:40.800 --> 00:04:42.310 align:start position:0%
+some changes. So you would say, "Okay,
+Claude<00:04:41.080><c> code,</c><00:04:41.600><c> here's</c><00:04:41.800><c> what</c><00:04:41.919><c> I</c><00:04:41.960><c> want</c><00:04:42.160><c> you</c><00:04:42.200><c> to</c>
+
+00:04:42.310 --> 00:04:42.320 align:start position:0%
+Claude code, here's what I want you to
+ 
+
+00:04:42.320 --> 00:04:44.390 align:start position:0%
+Claude code, here's what I want you to
+do."<00:04:42.680><c> We</c><00:04:43.000><c> as</c><00:04:43.120><c> humans</c><00:04:43.600><c> are</c><00:04:43.800><c> really,</c><00:04:44.160><c> really</c>
+
+00:04:44.390 --> 00:04:44.400 align:start position:0%
+do." We as humans are really, really
+ 
+
+00:04:44.400 --> 00:04:46.150 align:start position:0%
+do." We as humans are really, really
+good<00:04:44.560><c> at</c><00:04:44.640><c> defining</c><00:04:45.160><c> what</c><00:04:45.280><c> we</c><00:04:45.400><c> want.</c><00:04:46.000><c> We're</c>
+
+00:04:46.150 --> 00:04:46.160 align:start position:0%
+good at defining what we want. We're
+ 
+
+00:04:46.160 --> 00:04:48.390 align:start position:0%
+good at defining what we want. We're
+really<00:04:46.400><c> good</c><00:04:46.520><c> at</c><00:04:46.600><c> defining</c><00:04:47.040><c> an</c><00:04:47.200><c> end</c><00:04:47.520><c> goal.</c><00:04:48.320><c> And</c>
+
+00:04:48.390 --> 00:04:48.400 align:start position:0%
+really good at defining an end goal. And
+ 
+
+00:04:48.400 --> 00:04:49.470 align:start position:0%
+really good at defining an end goal. And
+then<00:04:48.520><c> on</c><00:04:48.600><c> top</c><00:04:48.840><c> of</c><00:04:48.919><c> that,</c><00:04:49.080><c> we</c><00:04:49.160><c> have</c><00:04:49.240><c> to</c><00:04:49.320><c> say,</c>
+
+00:04:49.470 --> 00:04:49.480 align:start position:0%
+then on top of that, we have to say,
+ 
+
+00:04:49.480 --> 00:04:51.430 align:start position:0%
+then on top of that, we have to say,
+"Okay,<00:04:50.280><c> how</c><00:04:50.360><c> do</c><00:04:50.520><c> you</c><00:04:50.680><c> know</c><00:04:51.040><c> when</c><00:04:51.200><c> that</c><00:04:51.320><c> is</c>
+
+00:04:51.430 --> 00:04:51.440 align:start position:0%
+"Okay, how do you know when that is
+ 
+
+00:04:51.440 --> 00:04:53.070 align:start position:0%
+"Okay, how do you know when that is
+done?"<00:04:51.919><c> So</c><00:04:52.040><c> when</c><00:04:52.160><c> you're</c><00:04:52.280><c> making</c><00:04:52.560><c> a</c><00:04:52.640><c> cake,</c><00:04:53.000><c> you</c>
+
+00:04:53.070 --> 00:04:53.080 align:start position:0%
+done?" So when you're making a cake, you
+ 
+
+00:04:53.080 --> 00:04:54.390 align:start position:0%
+done?" So when you're making a cake, you
+stick<00:04:53.280><c> the</c><00:04:53.360><c> fork</c><00:04:53.640><c> in</c><00:04:53.720><c> it,</c><00:04:53.840><c> and</c><00:04:53.919><c> when</c><00:04:54.040><c> it</c><00:04:54.120><c> comes</c>
+
+00:04:54.390 --> 00:04:54.400 align:start position:0%
+stick the fork in it, and when it comes
+ 
+
+00:04:54.400 --> 00:04:56.270 align:start position:0%
+stick the fork in it, and when it comes
+out<00:04:54.680><c> and</c><00:04:54.800><c> it</c><00:04:54.919><c> doesn't</c><00:04:55.160><c> have</c><00:04:55.640><c> batter</c><00:04:55.919><c> all</c><00:04:56.080><c> over</c>
+
+00:04:56.270 --> 00:04:56.280 align:start position:0%
+out and it doesn't have batter all over
+ 
+
+00:04:56.280 --> 00:04:57.830 align:start position:0%
+out and it doesn't have batter all over
+it,<00:04:56.400><c> that</c><00:04:56.600><c> means</c><00:04:56.800><c> it's</c><00:04:56.919><c> done.</c><00:04:57.480><c> How</c><00:04:57.600><c> do</c><00:04:57.720><c> you</c>
+
+00:04:57.830 --> 00:04:57.840 align:start position:0%
+it, that means it's done. How do you
+ 
+
+00:04:57.840 --> 00:05:00.590 align:start position:0%
+it, that means it's done. How do you
+tell<00:04:58.560><c> your</c><00:04:59.040><c> agent</c><00:04:59.680><c> something</c><00:05:00.000><c> as</c><00:05:00.200><c> objective</c>
+
+00:05:00.590 --> 00:05:00.600 align:start position:0%
+tell your agent something as objective
+ 
+
+00:05:00.600 --> 00:05:02.670 align:start position:0%
+tell your agent something as objective
+as<00:05:00.720><c> possible,</c><00:05:01.520><c> what</c><00:05:01.720><c> is</c><00:05:01.840><c> the</c><00:05:01.919><c> stop</c><00:05:02.200><c> criteria,</c>
+
+00:05:02.670 --> 00:05:02.680 align:start position:0%
+as possible, what is the stop criteria,
+ 
+
+00:05:02.680 --> 00:05:04.070 align:start position:0%
+as possible, what is the stop criteria,
+what<00:05:02.800><c> is</c><00:05:02.880><c> the</c><00:05:02.960><c> definition</c><00:05:03.360><c> of</c><00:05:03.480><c> done?</c><00:05:03.840><c> And</c><00:05:03.960><c> so</c>
+
+00:05:04.070 --> 00:05:04.080 align:start position:0%
+what is the definition of done? And so
+ 
+
+00:05:04.080 --> 00:05:05.710 align:start position:0%
+what is the definition of done? And so
+what<00:05:04.160><c> it</c><00:05:04.240><c> will</c><00:05:04.320><c> do</c><00:05:04.600><c> is</c><00:05:04.720><c> it</c><00:05:04.800><c> will</c><00:05:04.960><c> reason,</c><00:05:05.600><c> it</c>
+
+00:05:05.710 --> 00:05:05.720 align:start position:0%
+what it will do is it will reason, it
+ 
+
+00:05:05.720 --> 00:05:07.230 align:start position:0%
+what it will do is it will reason, it
+will<00:05:05.840><c> plan</c><00:05:06.200><c> out,</c><00:05:06.640><c> and</c><00:05:06.720><c> then</c><00:05:06.840><c> it</c><00:05:06.880><c> will</c><00:05:06.960><c> start</c><00:05:07.160><c> to</c>
+
+00:05:07.230 --> 00:05:07.240 align:start position:0%
+will plan out, and then it will start to
+ 
+
+00:05:07.240 --> 00:05:09.390 align:start position:0%
+will plan out, and then it will start to
+implement.<00:05:08.000><c> After</c><00:05:08.280><c> it</c><00:05:08.360><c> implemented,</c><00:05:09.120><c> it</c><00:05:09.280><c> will</c>
+
+00:05:09.390 --> 00:05:09.400 align:start position:0%
+implement. After it implemented, it will
+ 
+
+00:05:09.400 --> 00:05:10.830 align:start position:0%
+implement. After it implemented, it will
+observe.<00:05:09.880><c> So</c><00:05:10.040><c> maybe</c><00:05:10.280><c> that's</c><00:05:10.520><c> visual</c>
+
+00:05:10.830 --> 00:05:10.840 align:start position:0%
+observe. So maybe that's visual
+ 
+
+00:05:10.840 --> 00:05:12.190 align:start position:0%
+observe. So maybe that's visual
+verification,<00:05:11.440><c> maybe</c><00:05:11.640><c> that's</c><00:05:11.840><c> running</c><00:05:12.080><c> an</c>
+
+00:05:12.190 --> 00:05:12.200 align:start position:0%
+verification, maybe that's running an
+ 
+
+00:05:12.200 --> 00:05:14.190 align:start position:0%
+verification, maybe that's running an
+actual<00:05:12.600><c> code</c><00:05:12.919><c> test.</c><00:05:13.440><c> Whatever</c><00:05:13.680><c> it</c><00:05:13.800><c> means</c><00:05:14.080><c> to</c>
+
+00:05:14.190 --> 00:05:14.200 align:start position:0%
+actual code test. Whatever it means to
+ 
+
+00:05:14.200 --> 00:05:16.390 align:start position:0%
+actual code test. Whatever it means to
+verify,<00:05:14.680><c> it</c><00:05:14.800><c> has</c><00:05:14.960><c> to</c><00:05:15.080><c> verify.</c><00:05:15.880><c> And</c><00:05:16.000><c> then</c><00:05:16.120><c> after</c>
+
+00:05:16.390 --> 00:05:16.400 align:start position:0%
+verify, it has to verify. And then after
+ 
+
+00:05:16.400 --> 00:05:17.430 align:start position:0%
+verify, it has to verify. And then after
+it<00:05:16.480><c> looks</c><00:05:16.640><c> at</c><00:05:16.720><c> the</c><00:05:16.800><c> results,</c><00:05:17.160><c> it</c><00:05:17.240><c> will</c><00:05:17.320><c> say,</c>
+
+00:05:17.430 --> 00:05:17.440 align:start position:0%
+it looks at the results, it will say,
+ 
+
+00:05:17.440 --> 00:05:19.430 align:start position:0%
+it looks at the results, it will say,
+"Okay,<00:05:17.680><c> did</c><00:05:17.840><c> I</c><00:05:17.880><c> meet</c><00:05:18.080><c> this</c><00:05:18.240><c> done</c><00:05:18.480><c> criteria?</c><00:05:19.280><c> If</c>
+
+00:05:19.430 --> 00:05:19.440 align:start position:0%
+"Okay, did I meet this done criteria? If
+ 
+
+00:05:19.440 --> 00:05:21.030 align:start position:0%
+"Okay, did I meet this done criteria? If
+no,<00:05:19.840><c> I'm</c><00:05:19.880><c> going</c><00:05:20.000><c> to</c><00:05:20.080><c> act</c><00:05:20.320><c> again,</c><00:05:20.600><c> then</c><00:05:20.720><c> observe</c>
+
+00:05:21.030 --> 00:05:21.040 align:start position:0%
+no, I'm going to act again, then observe
+ 
+
+00:05:21.040 --> 00:05:22.710 align:start position:0%
+no, I'm going to act again, then observe
+again,<00:05:21.280><c> and</c><00:05:21.360><c> then</c><00:05:21.520><c> reason.</c><00:05:22.240><c> Otherwise,</c><00:05:22.640><c> I'm</c>
+
+00:05:22.710 --> 00:05:22.720 align:start position:0%
+again, and then reason. Otherwise, I'm
+ 
+
+00:05:22.720 --> 00:05:24.030 align:start position:0%
+again, and then reason. Otherwise, I'm
+going<00:05:22.840><c> to</c><00:05:23.200><c> stop,</c><00:05:23.600><c> and</c><00:05:23.680><c> I'm</c><00:05:23.760><c> going</c><00:05:23.880><c> to</c><00:05:23.919><c> say,</c>
+
+00:05:24.030 --> 00:05:24.040 align:start position:0%
+going to stop, and I'm going to say,
+ 
+
+00:05:24.040 --> 00:05:26.110 align:start position:0%
+going to stop, and I'm going to say,
+"Okay,<00:05:24.240><c> Mr.</c><00:05:24.840><c> or</c><00:05:24.919><c> Mrs.</c><00:05:25.200><c> Human,</c><00:05:25.560><c> I</c><00:05:25.640><c> am</c><00:05:25.760><c> done."</c>
+
+00:05:26.110 --> 00:05:26.120 align:start position:0%
+"Okay, Mr. or Mrs. Human, I am done."
+ 
+
+00:05:26.120 --> 00:05:27.150 align:start position:0%
+"Okay, Mr. or Mrs. Human, I am done."
+And<00:05:26.200><c> what's</c><00:05:26.360><c> really</c><00:05:26.520><c> interesting</c><00:05:26.919><c> is</c><00:05:27.000><c> that</c>
+
+00:05:27.150 --> 00:05:27.160 align:start position:0%
+And what's really interesting is that
+ 
+
+00:05:27.160 --> 00:05:29.630 align:start position:0%
+And what's really interesting is that
+the<00:05:27.240><c> majority</c><00:05:27.720><c> of</c><00:05:27.840><c> tasks</c><00:05:28.320><c> don't</c><00:05:28.720><c> need</c><00:05:29.080><c> loops.</c>
+
+00:05:29.630 --> 00:05:29.640 align:start position:0%
+the majority of tasks don't need loops.
+ 
+
+00:05:29.640 --> 00:05:30.790 align:start position:0%
+the majority of tasks don't need loops.
+What<00:05:29.760><c> I've</c><00:05:29.880><c> started</c><00:05:30.200><c> doing</c><00:05:30.480><c> is</c><00:05:30.600><c> for</c><00:05:30.720><c> the</c>
+
+00:05:30.790 --> 00:05:30.800 align:start position:0%
+What I've started doing is for the
+ 
+
+00:05:30.800 --> 00:05:32.870 align:start position:0%
+What I've started doing is for the
+majority<00:05:31.160><c> of</c><00:05:31.240><c> my</c><00:05:31.360><c> tasks,</c><00:05:31.800><c> I</c><00:05:31.919><c> will</c><00:05:32.520><c> build</c><00:05:32.720><c> some</c>
+
+00:05:32.870 --> 00:05:32.880 align:start position:0%
+majority of my tasks, I will build some
+ 
+
+00:05:32.880 --> 00:05:34.310 align:start position:0%
+majority of my tasks, I will build some
+sort<00:05:33.040><c> of</c><00:05:33.160><c> loop,</c><00:05:33.400><c> but</c><00:05:33.520><c> it's</c><00:05:33.640><c> just</c><00:05:34.000><c> because</c><00:05:34.240><c> of</c>
+
+00:05:34.310 --> 00:05:34.320 align:start position:0%
+sort of loop, but it's just because of
+ 
+
+00:05:34.320 --> 00:05:36.510 align:start position:0%
+sort of loop, but it's just because of
+the<00:05:34.360><c> verification,</c><00:05:34.960><c> right?</c><00:05:35.480><c> This</c><00:05:35.760><c> piece</c><00:05:36.360><c> is</c>
+
+00:05:36.510 --> 00:05:36.520 align:start position:0%
+the verification, right? This piece is
+ 
+
+00:05:36.520 --> 00:05:38.350 align:start position:0%
+the verification, right? This piece is
+so<00:05:36.720><c> important,</c><00:05:37.200><c> the</c><00:05:37.320><c> verification</c><00:05:37.960><c> loop.</c><00:05:38.280><c> But</c>
+
+00:05:38.350 --> 00:05:38.360 align:start position:0%
+so important, the verification loop. But
+ 
+
+00:05:38.360 --> 00:05:39.870 align:start position:0%
+so important, the verification loop. But
+a<00:05:38.400><c> lot</c><00:05:38.600><c> of</c><00:05:38.680><c> times,</c><00:05:39.040><c> you</c><00:05:39.120><c> don't</c><00:05:39.360><c> need</c><00:05:39.560><c> some</c><00:05:39.720><c> sort</c>
+
+00:05:39.870 --> 00:05:39.880 align:start position:0%
+a lot of times, you don't need some sort
+ 
+
+00:05:39.880 --> 00:05:42.070 align:start position:0%
+a lot of times, you don't need some sort
+of<00:05:40.000><c> massive</c><00:05:40.480><c> agent</c><00:05:40.760><c> architecture</c><00:05:41.760><c> in</c><00:05:41.880><c> order</c>
+
+00:05:42.070 --> 00:05:42.080 align:start position:0%
+of massive agent architecture in order
+ 
+
+00:05:42.080 --> 00:05:44.190 align:start position:0%
+of massive agent architecture in order
+to<00:05:42.480><c> run</c><00:05:42.760><c> this</c><00:05:42.919><c> sort</c><00:05:43.080><c> of</c><00:05:43.200><c> like</c><00:05:43.360><c> dynamic</c><00:05:43.880><c> looping</c>
+
+00:05:44.190 --> 00:05:44.200 align:start position:0%
+to run this sort of like dynamic looping
+ 
+
+00:05:44.200 --> 00:05:45.830 align:start position:0%
+to run this sort of like dynamic looping
+workflow.<00:05:44.840><c> You</c><00:05:45.000><c> You</c><00:05:45.120><c> just</c><00:05:45.280><c> get</c><00:05:45.400><c> it</c><00:05:45.480><c> done</c><00:05:45.680><c> with</c>
+
+00:05:45.830 --> 00:05:45.840 align:start position:0%
+workflow. You You just get it done with
+ 
+
+00:05:45.840 --> 00:05:47.750 align:start position:0%
+workflow. You You just get it done with
+one<00:05:46.080><c> simple</c><00:05:46.360><c> terminal</c><00:05:46.720><c> session</c><00:05:47.360><c> and</c><00:05:47.480><c> a</c><00:05:47.560><c> good</c>
+
+00:05:47.750 --> 00:05:47.760 align:start position:0%
+one simple terminal session and a good
+ 
+
+00:05:47.760 --> 00:05:49.310 align:start position:0%
+one simple terminal session and a good
+prompt.<00:05:48.320><c> You</c><00:05:48.440><c> can</c><00:05:48.560><c> have</c><00:05:48.720><c> the</c><00:05:48.800><c> speed</c><00:05:49.080><c> just</c><00:05:49.280><c> a</c>
+
+00:05:49.310 --> 00:05:49.320 align:start position:0%
+prompt. You can have the speed just a
+ 
+
+00:05:49.320 --> 00:05:50.870 align:start position:0%
+prompt. You can have the speed just a
+solo<00:05:49.640><c> loop,</c><00:05:49.880><c> which</c><00:05:50.040><c> is</c><00:05:50.120><c> what</c><00:05:50.360><c> I'm</c><00:05:50.520><c> typically</c>
+
+00:05:50.870 --> 00:05:50.880 align:start position:0%
+solo loop, which is what I'm typically
+ 
+
+00:05:50.880 --> 00:05:52.390 align:start position:0%
+solo loop, which is what I'm typically
+doing<00:05:51.080><c> the</c><00:05:51.120><c> most.</c><00:05:51.720><c> One</c><00:05:51.880><c> agent</c><00:05:52.160><c> that's</c>
+
+00:05:52.390 --> 00:05:52.400 align:start position:0%
+doing the most. One agent that's
+ 
+
+00:05:52.400 --> 00:05:53.710 align:start position:0%
+doing the most. One agent that's
+reasoning,<00:05:52.760><c> that's</c><00:05:52.960><c> acting,</c><00:05:53.240><c> observing,</c><00:05:53.640><c> and</c>
+
+00:05:53.710 --> 00:05:53.720 align:start position:0%
+reasoning, that's acting, observing, and
+ 
+
+00:05:53.720 --> 00:05:54.750 align:start position:0%
+reasoning, that's acting, observing, and
+repeating.<00:05:54.080><c> And</c><00:05:54.200><c> I'll</c><00:05:54.280><c> show</c><00:05:54.400><c> you</c><00:05:54.480><c> guys</c><00:05:54.640><c> some</c>
+
+00:05:54.750 --> 00:05:54.760 align:start position:0%
+repeating. And I'll show you guys some
+ 
+
+00:05:54.760 --> 00:05:56.630 align:start position:0%
+repeating. And I'll show you guys some
+examples<00:05:55.200><c> of</c><00:05:55.800><c> what</c><00:05:55.960><c> these</c><00:05:56.120><c> loops</c><00:05:56.320><c> might</c><00:05:56.480><c> look</c>
+
+00:05:56.630 --> 00:05:56.640 align:start position:0%
+examples of what these loops might look
+ 
+
+00:05:56.640 --> 00:05:58.390 align:start position:0%
+examples of what these loops might look
+like<00:05:56.840><c> in</c><00:05:56.920><c> just</c><00:05:57.120><c> a</c><00:05:57.160><c> sec.</c><00:05:57.680><c> You</c><00:05:57.760><c> can</c><00:05:57.880><c> have</c><00:05:58.000><c> a</c><00:05:58.080><c> maker</c>
+
+00:05:58.390 --> 00:05:58.400 align:start position:0%
+like in just a sec. You can have a maker
+ 
+
+00:05:58.400 --> 00:06:00.030 align:start position:0%
+like in just a sec. You can have a maker
+checker,<00:05:58.960><c> where</c><00:05:59.080><c> you</c><00:05:59.200><c> have</c><00:05:59.520><c> one</c><00:05:59.680><c> agent</c><00:05:59.920><c> that</c>
+
+00:06:00.030 --> 00:06:00.040 align:start position:0%
+checker, where you have one agent that
+ 
+
+00:06:00.040 --> 00:06:01.390 align:start position:0%
+checker, where you have one agent that
+does<00:06:00.280><c> the</c><00:06:00.400><c> thing</c><00:06:00.680><c> and</c><00:06:00.800><c> then</c><00:06:00.920><c> one</c><00:06:01.080><c> agent</c><00:06:01.280><c> that</c>
+
+00:06:01.390 --> 00:06:01.400 align:start position:0%
+does the thing and then one agent that
+ 
+
+00:06:01.400 --> 00:06:02.950 align:start position:0%
+does the thing and then one agent that
+grades<00:06:01.640><c> the</c><00:06:01.760><c> thing</c><00:06:01.960><c> and</c><00:06:02.040><c> gives</c><00:06:02.200><c> feedback.</c><00:06:02.840><c> Or</c>
+
+00:06:02.950 --> 00:06:02.960 align:start position:0%
+grades the thing and gives feedback. Or
+ 
+
+00:06:02.960 --> 00:06:04.550 align:start position:0%
+grades the thing and gives feedback. Or
+you<00:06:03.040><c> can</c><00:06:03.160><c> have</c><00:06:03.360><c> this</c><00:06:03.480><c> sort</c><00:06:03.640><c> of</c><00:06:03.760><c> manager</c><00:06:04.360><c> with</c><00:06:04.520><c> a</c>
+
+00:06:04.550 --> 00:06:04.560 align:start position:0%
+you can have this sort of manager with a
+ 
+
+00:06:04.560 --> 00:06:06.310 align:start position:0%
+you can have this sort of manager with a
+bunch<00:06:04.720><c> of</c><00:06:04.800><c> helpers.</c><00:06:05.520><c> And</c><00:06:05.640><c> then</c><00:06:05.760><c> as</c><00:06:05.960><c> as</c><00:06:06.080><c> long</c><00:06:06.240><c> as</c>
+
+00:06:06.310 --> 00:06:06.320 align:start position:0%
+bunch of helpers. And then as as long as
+ 
+
+00:06:06.320 --> 00:06:07.790 align:start position:0%
+bunch of helpers. And then as as long as
+you've<00:06:06.440><c> got</c><00:06:06.640><c> one</c><00:06:06.840><c> main</c><00:06:07.040><c> agent</c><00:06:07.640><c> that's</c>
+
+00:06:07.790 --> 00:06:07.800 align:start position:0%
+you've got one main agent that's
+ 
+
+00:06:07.800 --> 00:06:09.190 align:start position:0%
+you've got one main agent that's
+orchestrating<00:06:08.320><c> the</c><00:06:08.360><c> whole</c><00:06:08.480><c> thing,</c><00:06:09.000><c> then</c><00:06:09.120><c> you</c>
+
+00:06:09.190 --> 00:06:09.200 align:start position:0%
+orchestrating the whole thing, then you
+ 
+
+00:06:09.200 --> 00:06:10.350 align:start position:0%
+orchestrating the whole thing, then you
+can<00:06:09.320><c> build</c><00:06:09.520><c> these</c><00:06:09.680><c> loops</c><00:06:09.880><c> in</c><00:06:10.000><c> so</c><00:06:10.200><c> many</c>
+
+00:06:10.350 --> 00:06:10.360 align:start position:0%
+can build these loops in so many
+ 
+
+00:06:10.360 --> 00:06:11.790 align:start position:0%
+can build these loops in so many
+different<00:06:10.600><c> ways.</c><00:06:11.160><c> So,</c><00:06:11.240><c> let</c><00:06:11.360><c> me</c><00:06:11.440><c> just</c><00:06:11.600><c> show</c><00:06:11.720><c> you</c>
+
+00:06:11.790 --> 00:06:11.800 align:start position:0%
+different ways. So, let me just show you
+ 
+
+00:06:11.800 --> 00:06:13.910 align:start position:0%
+different ways. So, let me just show you
+guys<00:06:12.040><c> a</c><00:06:12.120><c> few</c><00:06:12.440><c> examples</c><00:06:13.040><c> that</c><00:06:13.200><c> I</c><00:06:13.280><c> pulled.</c><00:06:13.720><c> These</c>
+
+00:06:13.910 --> 00:06:13.920 align:start position:0%
+guys a few examples that I pulled. These
+ 
+
+00:06:13.920 --> 00:06:15.030 align:start position:0%
+guys a few examples that I pulled. These
+first<00:06:14.200><c> two</c><00:06:14.320><c> that</c><00:06:14.400><c> I'm</c><00:06:14.480><c> going</c><00:06:14.600><c> to</c><00:06:14.640><c> show</c><00:06:14.800><c> you</c>
+
+00:06:15.030 --> 00:06:15.040 align:start position:0%
+first two that I'm going to show you
+ 
+
+00:06:15.040 --> 00:06:16.830 align:start position:0%
+first two that I'm going to show you
+were<00:06:15.080><c> actually</c><00:06:15.400><c> from</c><00:06:16.000><c> this</c><00:06:16.200><c> loop</c><00:06:16.440><c> library</c>
+
+00:06:16.830 --> 00:06:16.840 align:start position:0%
+were actually from this loop library
+ 
+
+00:06:16.840 --> 00:06:18.390 align:start position:0%
+were actually from this loop library
+that<00:06:17.040><c> Matthew</c><00:06:17.360><c> Berman</c><00:06:17.680><c> published.</c><00:06:18.320><c> He</c>
+
+00:06:18.390 --> 00:06:18.400 align:start position:0%
+that Matthew Berman published. He
+ 
+
+00:06:18.400 --> 00:06:20.070 align:start position:0%
+that Matthew Berman published. He
+created<00:06:18.800><c> this</c><00:06:19.040><c> loop</c><00:06:19.320><c> library,</c><00:06:19.760><c> which</c><00:06:19.960><c> is</c><00:06:20.040><c> a</c>
+
+00:06:20.070 --> 00:06:20.080 align:start position:0%
+created this loop library, which is a
+ 
+
+00:06:20.080 --> 00:06:21.470 align:start position:0%
+created this loop library, which is a
+list<00:06:20.320><c> of</c><00:06:20.440><c> agent</c><00:06:20.680><c> loops</c><00:06:20.840><c> that</c><00:06:20.960><c> you</c><00:06:21.040><c> can</c><00:06:21.200><c> use,</c>
+
+00:06:21.470 --> 00:06:21.480 align:start position:0%
+list of agent loops that you can use,
+ 
+
+00:06:21.480 --> 00:06:23.310 align:start position:0%
+list of agent loops that you can use,
+and<00:06:21.560><c> people</c><00:06:21.800><c> can</c><00:06:21.919><c> go</c><00:06:22.040><c> submit</c><00:06:22.400><c> their</c><00:06:22.560><c> own.</c><00:06:22.919><c> So,</c>
+
+00:06:23.310 --> 00:06:23.320 align:start position:0%
+and people can go submit their own. So,
+ 
+
+00:06:23.320 --> 00:06:24.630 align:start position:0%
+and people can go submit their own. So,
+kind<00:06:23.520><c> of</c><00:06:23.600><c> cool</c><00:06:23.800><c> to</c><00:06:23.919><c> just</c><00:06:24.040><c> go</c><00:06:24.200><c> in</c><00:06:24.280><c> here</c><00:06:24.400><c> and</c><00:06:24.520><c> play</c>
+
+00:06:24.630 --> 00:06:24.640 align:start position:0%
+kind of cool to just go in here and play
+ 
+
+00:06:24.640 --> 00:06:26.150 align:start position:0%
+kind of cool to just go in here and play
+around<00:06:24.919><c> with</c><00:06:25.040><c> and</c><00:06:25.120><c> see</c><00:06:25.280><c> what's</c><00:06:25.400><c> available.</c>
+
+00:06:26.150 --> 00:06:26.160 align:start position:0%
+around with and see what's available.
+ 
+
+00:06:26.160 --> 00:06:28.390 align:start position:0%
+around with and see what's available.
+And<00:06:26.280><c> I</c><00:06:26.320><c> grabbed</c><00:06:26.760><c> two</c><00:06:27.120><c> for</c><00:06:27.880><c> these</c><00:06:28.120><c> first</c><00:06:28.320><c> two</c>
+
+00:06:28.390 --> 00:06:28.400 align:start position:0%
+And I grabbed two for these first two
+ 
+
+00:06:28.400 --> 00:06:30.150 align:start position:0%
+And I grabbed two for these first two
+demos.<00:06:29.080><c> So,</c><00:06:29.200><c> this</c><00:06:29.400><c> was</c><00:06:29.520><c> the</c><00:06:29.600><c> first</c><00:06:29.919><c> one</c><00:06:30.000><c> right</c>
+
+00:06:30.150 --> 00:06:30.160 align:start position:0%
+demos. So, this was the first one right
+ 
+
+00:06:30.160 --> 00:06:32.430 align:start position:0%
+demos. So, this was the first one right
+here.<00:06:30.520><c> It</c><00:06:30.680><c> was</c><00:06:30.919><c> a</c><00:06:31.000><c> {slash}</c><00:06:31.400><c> goal</c><00:06:31.640><c> prompt</c><00:06:32.160><c> in</c>
+
+00:06:32.430 --> 00:06:32.440 align:start position:0%
+here. It was a {slash} goal prompt in
+ 
+
+00:06:32.440 --> 00:06:34.430 align:start position:0%
+here. It was a {slash} goal prompt in
+Cloud<00:06:32.680><c> Code</c><00:06:33.320><c> to</c><00:06:33.440><c> make</c><00:06:33.640><c> me</c><00:06:33.760><c> a</c><00:06:33.800><c> thumbnail.</c><00:06:34.240><c> So,</c><00:06:34.360><c> I</c>
+
+00:06:34.430 --> 00:06:34.440 align:start position:0%
+Cloud Code to make me a thumbnail. So, I
+ 
+
+00:06:34.440 --> 00:06:35.990 align:start position:0%
+Cloud Code to make me a thumbnail. So, I
+told<00:06:34.640><c> it</c><00:06:34.720><c> basically</c><00:06:35.080><c> what</c><00:06:35.320><c> to</c><00:06:35.440><c> use</c><00:06:35.680><c> to</c><00:06:35.800><c> make</c>
+
+00:06:35.990 --> 00:06:36.000 align:start position:0%
+told it basically what to use to make
+ 
+
+00:06:36.000 --> 00:06:37.550 align:start position:0%
+told it basically what to use to make
+them.<00:06:36.360><c> It</c><00:06:36.480><c> says,</c><00:06:36.680><c> "Make</c><00:06:36.960><c> 10</c><00:06:37.240><c> thumbnail</c>
+
+00:06:37.550 --> 00:06:37.560 align:start position:0%
+them. It says, "Make 10 thumbnail
+ 
+
+00:06:37.560 --> 00:06:39.350 align:start position:0%
+them. It says, "Make 10 thumbnail
+concepts<00:06:38.040><c> and</c><00:06:38.160><c> score</c><00:06:38.400><c> each</c><00:06:38.600><c> one</c><00:06:38.760><c> against</c><00:06:39.040><c> Mr.</c>
+
+00:06:39.350 --> 00:06:39.360 align:start position:0%
+concepts and score each one against Mr.
+ 
+
+00:06:39.360 --> 00:06:41.470 align:start position:0%
+concepts and score each one against Mr.
+Beast<00:06:39.640><c> YouTube</c><00:06:39.919><c> thumbnails</c><00:06:40.360><c> using</c><00:06:40.640><c> a</c><00:06:40.720><c> rubric.</c>
+
+00:06:41.470 --> 00:06:41.480 align:start position:0%
+Beast YouTube thumbnails using a rubric.
+ 
+
+00:06:41.480 --> 00:06:42.950 align:start position:0%
+Beast YouTube thumbnails using a rubric.
+Clarity<00:06:41.800><c> at</c><00:06:41.880><c> small</c><00:06:42.160><c> size,</c><00:06:42.440><c> curiosity,</c>
+
+00:06:42.950 --> 00:06:42.960 align:start position:0%
+Clarity at small size, curiosity,
+ 
+
+00:06:42.960 --> 00:06:44.430 align:start position:0%
+Clarity at small size, curiosity,
+emotional<00:06:43.360><c> pull,</c><00:06:43.600><c> visual</c><00:06:43.840><c> contrast."</c><00:06:44.240><c> Stuff</c>
+
+00:06:44.430 --> 00:06:44.440 align:start position:0%
+emotional pull, visual contrast." Stuff
+ 
+
+00:06:44.440 --> 00:06:46.230 align:start position:0%
+emotional pull, visual contrast." Stuff
+like<00:06:44.600><c> that.</c><00:06:45.040><c> And</c><00:06:45.080><c> after</c><00:06:45.280><c> it</c><00:06:45.320><c> makes</c><00:06:45.520><c> those</c><00:06:45.680><c> 10,</c>
+
+00:06:46.230 --> 00:06:46.240 align:start position:0%
+like that. And after it makes those 10,
+ 
+
+00:06:46.240 --> 00:06:48.030 align:start position:0%
+like that. And after it makes those 10,
+it<00:06:46.360><c> selects</c><00:06:46.640><c> the</c><00:06:46.720><c> top</c><00:06:46.960><c> three,</c><00:06:47.520><c> it</c><00:06:47.600><c> identifies</c>
+
+00:06:48.030 --> 00:06:48.040 align:start position:0%
+it selects the top three, it identifies
+ 
+
+00:06:48.040 --> 00:06:49.750 align:start position:0%
+it selects the top three, it identifies
+the<00:06:48.120><c> weakest</c><00:06:48.400><c> part</c><00:06:48.600><c> of</c><00:06:48.680><c> each</c><00:06:48.800><c> concept,</c><00:06:49.640><c> it</c>
+
+00:06:49.750 --> 00:06:49.760 align:start position:0%
+the weakest part of each concept, it
+ 
+
+00:06:49.760 --> 00:06:51.710 align:start position:0%
+the weakest part of each concept, it
+improves<00:06:50.160><c> them,</c><00:06:50.640><c> rescores</c><00:06:51.200><c> them,</c><00:06:51.520><c> and</c><00:06:51.600><c> then</c>
+
+00:06:51.710 --> 00:06:51.720 align:start position:0%
+improves them, rescores them, and then
+ 
+
+00:06:51.720 --> 00:06:53.110 align:start position:0%
+improves them, rescores them, and then
+it<00:06:51.800><c> continues</c><00:06:52.240><c> iterating</c><00:06:52.720><c> on</c><00:06:52.880><c> on</c><00:06:53.040><c> the</c>
+
+00:06:53.110 --> 00:06:53.120 align:start position:0%
+it continues iterating on on the
+ 
+
+00:06:53.120 --> 00:06:55.430 align:start position:0%
+it continues iterating on on the
+strongest<00:06:53.600><c> concept</c><00:06:54.120><c> until</c><00:06:54.400><c> it's</c><00:06:54.600><c> satisfied.</c>
+
+00:06:55.430 --> 00:06:55.440 align:start position:0%
+strongest concept until it's satisfied.
+ 
+
+00:06:55.440 --> 00:06:56.909 align:start position:0%
+strongest concept until it's satisfied.
+So,<00:06:55.560><c> that's</c><00:06:55.800><c> one</c><00:06:55.960><c> of</c><00:06:56.000><c> the</c><00:06:56.120><c> issues</c><00:06:56.400><c> with</c><00:06:56.680><c> this</c>
+
+00:06:56.909 --> 00:06:56.919 align:start position:0%
+So, that's one of the issues with this
+ 
+
+00:06:56.919 --> 00:06:59.150 align:start position:0%
+So, that's one of the issues with this
+prompt<00:06:57.240><c> here</c><00:06:57.919><c> is</c><00:06:58.080><c> that</c>
+
+00:06:59.150 --> 00:06:59.160 align:start position:0%
+prompt here is that
+ 
+
+00:06:59.160 --> 00:07:01.590 align:start position:0%
+prompt here is that
+the<00:06:59.240><c> definition</c><00:06:59.720><c> of</c><00:06:59.840><c> done</c><00:07:00.400><c> was</c><00:07:01.120><c> "until</c><00:07:01.440><c> you're</c>
+
+00:07:01.590 --> 00:07:01.600 align:start position:0%
+the definition of done was "until you're
+ 
+
+00:07:01.600 --> 00:07:03.230 align:start position:0%
+the definition of done was "until you're
+satisfied."<00:07:02.400><c> And</c><00:07:02.520><c> sometimes</c><00:07:02.840><c> you</c><00:07:02.960><c> have</c><00:07:03.160><c> to</c>
+
+00:07:03.230 --> 00:07:03.240 align:start position:0%
+satisfied." And sometimes you have to
+ 
+
+00:07:03.240 --> 00:07:04.950 align:start position:0%
+satisfied." And sometimes you have to
+have<00:07:03.440><c> these</c><00:07:03.640><c> subjective</c><00:07:04.240><c> sort</c><00:07:04.440><c> of</c><00:07:04.560><c> grading</c>
+
+00:07:04.950 --> 00:07:04.960 align:start position:0%
+have these subjective sort of grading
+ 
+
+00:07:04.960 --> 00:07:06.710 align:start position:0%
+have these subjective sort of grading
+criteria,<00:07:05.840><c> but</c><00:07:06.000><c> you</c><00:07:06.120><c> want</c><00:07:06.360><c> to</c><00:07:06.440><c> get</c><00:07:06.600><c> it</c>
+
+00:07:06.710 --> 00:07:06.720 align:start position:0%
+criteria, but you want to get it
+ 
+
+00:07:06.720 --> 00:07:08.750 align:start position:0%
+criteria, but you want to get it
+objective<00:07:07.400><c> as</c><00:07:07.560><c> objective</c><00:07:07.880><c> as</c><00:07:07.960><c> possible.</c><00:07:08.640><c> The</c>
+
+00:07:08.750 --> 00:07:08.760 align:start position:0%
+objective as objective as possible. The
+ 
+
+00:07:08.760 --> 00:07:10.190 align:start position:0%
+objective as objective as possible. The
+best<00:07:09.040><c> agent</c><00:07:09.280><c> loops</c><00:07:09.560><c> are</c><00:07:09.680><c> where</c><00:07:09.800><c> you</c><00:07:09.919><c> literally</c>
+
+00:07:10.190 --> 00:07:10.200 align:start position:0%
+best agent loops are where you literally
+ 
+
+00:07:10.200 --> 00:07:13.150 align:start position:0%
+best agent loops are where you literally
+say,<00:07:10.800><c> "Keep</c><00:07:11.080><c> iterating</c><00:07:11.600><c> until</c><00:07:12.480><c> X</c><00:07:12.760><c> metric</c>
+
+00:07:13.150 --> 00:07:13.160 align:start position:0%
+say, "Keep iterating until X metric
+ 
+
+00:07:13.160 --> 00:07:15.710 align:start position:0%
+say, "Keep iterating until X metric
+equals<00:07:14.040><c> Y</c><00:07:14.320><c> result."</c><00:07:14.919><c> You</c><00:07:15.080><c> can</c><00:07:15.200><c> see</c><00:07:15.360><c> right</c><00:07:15.560><c> here</c>
+
+00:07:15.710 --> 00:07:15.720 align:start position:0%
+equals Y result." You can see right here
+ 
+
+00:07:15.720 --> 00:07:17.350 align:start position:0%
+equals Y result." You can see right here
+what<00:07:15.840><c> it</c><00:07:15.919><c> did</c><00:07:16.040><c> is</c><00:07:16.160><c> it</c><00:07:16.240><c> created</c><00:07:16.600><c> 10.</c><00:07:17.120><c> We've</c><00:07:17.240><c> got</c>
+
+00:07:17.350 --> 00:07:17.360 align:start position:0%
+what it did is it created 10. We've got
+ 
+
+00:07:17.360 --> 00:07:18.630 align:start position:0%
+what it did is it created 10. We've got
+number<00:07:17.560><c> one,</c><00:07:17.840><c> we've</c><00:07:17.919><c> got</c><00:07:18.040><c> number</c><00:07:18.200><c> two,</c><00:07:18.400><c> number</c>
+
+00:07:18.630 --> 00:07:18.640 align:start position:0%
+number one, we've got number two, number
+ 
+
+00:07:18.640 --> 00:07:20.270 align:start position:0%
+number one, we've got number two, number
+three,<00:07:18.840><c> number</c><00:07:19.040><c> four,</c><00:07:19.240><c> number</c><00:07:19.440><c> five.</c><00:07:20.160><c> It</c>
+
+00:07:20.270 --> 00:07:20.280 align:start position:0%
+three, number four, number five. It
+ 
+
+00:07:20.280 --> 00:07:22.270 align:start position:0%
+three, number four, number five. It
+ended<00:07:20.480><c> up</c><00:07:20.600><c> choosing</c><00:07:21.040><c> that</c><00:07:21.280><c> number</c><00:07:21.520><c> one</c><00:07:22.080><c> was</c>
+
+00:07:22.270 --> 00:07:22.280 align:start position:0%
+ended up choosing that number one was
+ 
+
+00:07:22.280 --> 00:07:24.150 align:start position:0%
+ended up choosing that number one was
+one<00:07:22.440><c> of</c><00:07:22.520><c> the</c><00:07:22.640><c> top</c><00:07:22.880><c> contenders,</c><00:07:23.320><c> number</c><00:07:23.560><c> two,</c>
+
+00:07:24.150 --> 00:07:24.160 align:start position:0%
+one of the top contenders, number two,
+ 
+
+00:07:24.160 --> 00:07:25.909 align:start position:0%
+one of the top contenders, number two,
+and<00:07:24.320><c> so</c><00:07:24.520><c> was</c><00:07:24.720><c> number</c><00:07:25.040><c> eight.</c><00:07:25.520><c> So,</c><00:07:25.640><c> then</c><00:07:25.760><c> it</c>
+
+00:07:25.909 --> 00:07:25.919 align:start position:0%
+and so was number eight. So, then it
+ 
+
+00:07:25.919 --> 00:07:27.710 align:start position:0%
+and so was number eight. So, then it
+iterated<00:07:26.320><c> on</c><00:07:26.440><c> these.</c><00:07:26.760><c> You</c><00:07:26.880><c> can</c><00:07:27.000><c> see</c><00:07:27.160><c> here's</c>
+
+00:07:27.710 --> 00:07:27.720 align:start position:0%
+iterated on these. You can see here's
+ 
+
+00:07:27.720 --> 00:07:29.310 align:start position:0%
+iterated on these. You can see here's
+number<00:07:27.960><c> one</c><00:07:28.120><c> original,</c><00:07:28.720><c> here's</c><00:07:28.960><c> number</c><00:07:29.160><c> one</c>
+
+00:07:29.310 --> 00:07:29.320 align:start position:0%
+number one original, here's number one
+ 
+
+00:07:29.320 --> 00:07:31.310 align:start position:0%
+number one original, here's number one
+V2,<00:07:30.280><c> here's</c><00:07:30.440><c> number</c><00:07:30.600><c> two</c><00:07:30.720><c> original,</c><00:07:31.120><c> here's</c>
+
+00:07:31.310 --> 00:07:31.320 align:start position:0%
+V2, here's number two original, here's
+ 
+
+00:07:31.320 --> 00:07:33.390 align:start position:0%
+V2, here's number two original, here's
+number<00:07:31.560><c> two</c><00:07:31.800><c> V2,</c><00:07:32.640><c> and</c><00:07:32.760><c> here's</c><00:07:33.000><c> number</c><00:07:33.280><c> eight</c>
+
+00:07:33.390 --> 00:07:33.400 align:start position:0%
+number two V2, and here's number eight
+ 
+
+00:07:33.400 --> 00:07:35.270 align:start position:0%
+number two V2, and here's number eight
+original,<00:07:33.840><c> and</c><00:07:33.919><c> here's</c><00:07:34.120><c> number</c><00:07:34.320><c> eight</c><00:07:34.480><c> V2.</c>
+
+00:07:35.270 --> 00:07:35.280 align:start position:0%
+original, and here's number eight V2.
+ 
+
+00:07:35.280 --> 00:07:36.750 align:start position:0%
+original, and here's number eight V2.
+And<00:07:35.400><c> what</c><00:07:35.520><c> it</c><00:07:35.600><c> did</c><00:07:35.760><c> is</c><00:07:35.919><c> after</c><00:07:36.200><c> those</c><00:07:36.440><c> version</c>
+
+00:07:36.750 --> 00:07:36.760 align:start position:0%
+And what it did is after those version
+ 
+
+00:07:36.760 --> 00:07:38.150 align:start position:0%
+And what it did is after those version
+twos<00:07:37.000><c> of</c><00:07:37.160><c> all</c><00:07:37.280><c> of</c><00:07:37.360><c> it,</c><00:07:37.480><c> it</c><00:07:37.560><c> said,</c><00:07:37.680><c> "Okay,</c>
+
+00:07:38.150 --> 00:07:38.160 align:start position:0%
+twos of all of it, it said, "Okay,
+ 
+
+00:07:38.160 --> 00:07:39.750 align:start position:0%
+twos of all of it, it said, "Okay,
+number<00:07:38.400><c> eight's</c><00:07:38.560><c> the</c><00:07:38.640><c> best.</c><00:07:39.200><c> So,</c><00:07:39.320><c> here</c><00:07:39.560><c> is</c>
+
+00:07:39.750 --> 00:07:39.760 align:start position:0%
+number eight's the best. So, here is
+ 
+
+00:07:39.760 --> 00:07:41.670 align:start position:0%
+number eight's the best. So, here is
+number<00:07:40.040><c> eight</c><00:07:40.520><c> V3."</c><00:07:41.080><c> And</c><00:07:41.200><c> so,</c><00:07:41.320><c> this</c><00:07:41.480><c> is</c><00:07:41.560><c> the</c>
+
+00:07:41.670 --> 00:07:41.680 align:start position:0%
+number eight V3." And so, this is the
+ 
+
+00:07:41.680 --> 00:07:43.950 align:start position:0%
+number eight V3." And so, this is the
+final<00:07:42.040><c> thumbnail</c><00:07:42.480><c> that</c><00:07:42.600><c> we</c><00:07:42.720><c> got</c><00:07:43.280><c> after</c><00:07:43.560><c> we</c><00:07:43.720><c> ran</c>
+
+00:07:43.950 --> 00:07:43.960 align:start position:0%
+final thumbnail that we got after we ran
+ 
+
+00:07:43.960 --> 00:07:46.350 align:start position:0%
+final thumbnail that we got after we ran
+this<00:07:44.160><c> goal,</c><00:07:44.520><c> which</c><00:07:44.720><c> took</c><00:07:45.200><c> Claude</c><00:07:45.440><c> Code</c><00:07:45.960><c> 27</c>
+
+00:07:46.350 --> 00:07:46.360 align:start position:0%
+this goal, which took Claude Code 27
+ 
+
+00:07:46.360 --> 00:07:48.270 align:start position:0%
+this goal, which took Claude Code 27
+minutes<00:07:47.200><c> right</c><00:07:47.400><c> there.</c><00:07:47.680><c> So</c><00:07:47.760><c> that's</c><00:07:47.960><c> one</c><00:07:48.080><c> quick</c>
+
+00:07:48.270 --> 00:07:48.280 align:start position:0%
+minutes right there. So that's one quick
+ 
+
+00:07:48.280 --> 00:07:49.870 align:start position:0%
+minutes right there. So that's one quick
+example<00:07:48.720><c> of</c><00:07:48.880><c> the</c><00:07:49.000><c> loop.</c><00:07:49.240><c> You</c><00:07:49.320><c> can</c><00:07:49.440><c> see</c><00:07:49.560><c> it</c><00:07:49.640><c> was</c>
+
+00:07:49.870 --> 00:07:49.880 align:start position:0%
+example of the loop. You can see it was
+ 
+
+00:07:49.880 --> 00:07:51.310 align:start position:0%
+example of the loop. You can see it was
+it<00:07:50.000><c> was</c><00:07:50.160><c> scoring</c><00:07:50.600><c> each</c><00:07:50.800><c> of</c><00:07:50.880><c> these,</c><00:07:51.080><c> and</c><00:07:51.160><c> that's</c>
+
+00:07:51.310 --> 00:07:51.320 align:start position:0%
+it was scoring each of these, and that's
+ 
+
+00:07:51.320 --> 00:07:53.070 align:start position:0%
+it was scoring each of these, and that's
+how<00:07:51.440><c> it</c><00:07:51.520><c> decided</c><00:07:51.960><c> on</c><00:07:52.120><c> the</c><00:07:52.200><c> winner.</c><00:07:52.880><c> But</c><00:07:53.000><c> the</c>
+
+00:07:53.070 --> 00:07:53.080 align:start position:0%
+how it decided on the winner. But the
+ 
+
+00:07:53.080 --> 00:07:54.510 align:start position:0%
+how it decided on the winner. But the
+one<00:07:53.240><c> thing</c><00:07:53.400><c> here</c><00:07:53.640><c> is</c><00:07:53.720><c> that</c><00:07:53.880><c> these</c><00:07:54.080><c> scores</c><00:07:54.400><c> were</c>
+
+00:07:54.510 --> 00:07:54.520 align:start position:0%
+one thing here is that these scores were
+ 
+
+00:07:54.520 --> 00:07:56.310 align:start position:0%
+one thing here is that these scores were
+subjective.<00:07:55.360><c> So</c><00:07:55.480><c> if</c><00:07:55.560><c> we</c><00:07:55.640><c> wanted</c><00:07:55.880><c> to</c><00:07:55.960><c> improve</c>
+
+00:07:56.310 --> 00:07:56.320 align:start position:0%
+subjective. So if we wanted to improve
+ 
+
+00:07:56.320 --> 00:07:58.030 align:start position:0%
+subjective. So if we wanted to improve
+this<00:07:56.480><c> flow,</c><00:07:57.200><c> we</c><00:07:57.360><c> would</c><00:07:57.480><c> try</c><00:07:57.600><c> to</c><00:07:57.680><c> figure</c><00:07:57.920><c> out</c>
+
+00:07:58.030 --> 00:07:58.040 align:start position:0%
+this flow, we would try to figure out
+ 
+
+00:07:58.040 --> 00:07:59.470 align:start position:0%
+this flow, we would try to figure out
+how<00:07:58.160><c> do</c><00:07:58.240><c> we</c><00:07:58.360><c> make</c><00:07:58.600><c> this</c><00:07:58.760><c> scoring</c><00:07:59.280><c> more</c>
+
+00:07:59.470 --> 00:07:59.480 align:start position:0%
+how do we make this scoring more
+ 
+
+00:07:59.480 --> 00:08:01.110 align:start position:0%
+how do we make this scoring more
+objective?<00:08:00.320><c> And</c><00:08:00.440><c> maybe</c><00:08:00.640><c> what</c><00:08:00.760><c> we</c><00:08:00.880><c> would</c><00:08:01.000><c> want</c>
+
+00:08:01.110 --> 00:08:01.120 align:start position:0%
+objective? And maybe what we would want
+ 
+
+00:08:01.120 --> 00:08:03.310 align:start position:0%
+objective? And maybe what we would want
+to<00:08:01.200><c> do</c><00:08:01.400><c> is</c><00:08:01.520><c> create</c><00:08:01.840><c> a</c><00:08:01.880><c> separate</c><00:08:02.560><c> sub</c><00:08:02.800><c> agent</c>
+
+00:08:03.310 --> 00:08:03.320 align:start position:0%
+to do is create a separate sub agent
+ 
+
+00:08:03.320 --> 00:08:05.230 align:start position:0%
+to do is create a separate sub agent
+that<00:08:03.480><c> was</c><00:08:03.680><c> a</c><00:08:03.760><c> dedicated</c><00:08:04.320><c> scorer,</c><00:08:04.960><c> and</c><00:08:05.120><c> we</c>
+
+00:08:05.230 --> 00:08:05.240 align:start position:0%
+that was a dedicated scorer, and we
+ 
+
+00:08:05.240 --> 00:08:06.910 align:start position:0%
+that was a dedicated scorer, and we
+would<00:08:05.400><c> prompt</c><00:08:05.800><c> that</c><00:08:05.960><c> scoring</c><00:08:06.280><c> agent</c><00:08:06.560><c> and</c><00:08:06.720><c> run</c>
+
+00:08:06.910 --> 00:08:06.920 align:start position:0%
+would prompt that scoring agent and run
+ 
+
+00:08:06.920 --> 00:08:08.390 align:start position:0%
+would prompt that scoring agent and run
+that<00:08:07.160><c> through</c><00:08:07.280><c> a</c><00:08:07.320><c> bunch</c><00:08:07.520><c> of</c><00:08:07.600><c> evaluations</c><00:08:08.280><c> so</c>
+
+00:08:08.390 --> 00:08:08.400 align:start position:0%
+that through a bunch of evaluations so
+ 
+
+00:08:08.400 --> 00:08:10.470 align:start position:0%
+that through a bunch of evaluations so
+that<00:08:08.600><c> we</c><00:08:08.880><c> could</c><00:08:09.120><c> feel</c><00:08:09.320><c> more</c><00:08:09.480><c> confident</c><00:08:10.280><c> about</c>
+
+00:08:10.470 --> 00:08:10.480 align:start position:0%
+that we could feel more confident about
+ 
+
+00:08:10.480 --> 00:08:12.030 align:start position:0%
+that we could feel more confident about
+its<00:08:10.640><c> scoring</c><00:08:10.920><c> ability.</c><00:08:11.480><c> Anyways,</c><00:08:11.800><c> let's</c><00:08:11.920><c> take</c>
+
+00:08:12.030 --> 00:08:12.040 align:start position:0%
+its scoring ability. Anyways, let's take
+ 
+
+00:08:12.040 --> 00:08:13.310 align:start position:0%
+its scoring ability. Anyways, let's take
+a<00:08:12.120><c> look</c><00:08:12.240><c> at</c><00:08:12.280><c> the</c><00:08:12.360><c> next</c><00:08:12.600><c> one.</c><00:08:12.760><c> So</c><00:08:12.880><c> the</c><00:08:12.960><c> next</c><00:08:13.200><c> one</c>
+
+00:08:13.310 --> 00:08:13.320 align:start position:0%
+a look at the next one. So the next one
+ 
+
+00:08:13.320 --> 00:08:15.030 align:start position:0%
+a look at the next one. So the next one
+was<00:08:13.440><c> another</c><00:08:13.760><c> slash</c><00:08:14.120><c> goal,</c><00:08:14.640><c> as</c><00:08:14.760><c> you</c><00:08:14.840><c> can</c><00:08:14.919><c> see</c>
+
+00:08:15.030 --> 00:08:15.040 align:start position:0%
+was another slash goal, as you can see
+ 
+
+00:08:15.040 --> 00:08:17.310 align:start position:0%
+was another slash goal, as you can see
+right<00:08:15.200><c> here.</c><00:08:15.640><c> This</c><00:08:15.800><c> one</c><00:08:15.919><c> took</c><00:08:16.120><c> 37</c><00:08:16.680><c> minutes.</c>
+
+00:08:17.310 --> 00:08:17.320 align:start position:0%
+right here. This one took 37 minutes.
+ 
+
+00:08:17.320 --> 00:08:18.550 align:start position:0%
+right here. This one took 37 minutes.
+And<00:08:17.400><c> the</c><00:08:17.480><c> prompt</c><00:08:17.760><c> for</c><00:08:17.840><c> this</c><00:08:18.000><c> one</c><00:08:18.160><c> was</c><00:08:18.400><c> right</c>
+
+00:08:18.550 --> 00:08:18.560 align:start position:0%
+And the prompt for this one was right
+ 
+
+00:08:18.560 --> 00:08:20.710 align:start position:0%
+And the prompt for this one was right
+here,<00:08:18.919><c> straight</c><00:08:19.280><c> from</c><00:08:20.080><c> Matthew</c><00:08:20.400><c> Berman's</c>
+
+00:08:20.710 --> 00:08:20.720 align:start position:0%
+here, straight from Matthew Berman's
+ 
+
+00:08:20.720 --> 00:08:21.870 align:start position:0%
+here, straight from Matthew Berman's
+Loop<00:08:20.919><c> Library.</c><00:08:21.280><c> I'm</c><00:08:21.360><c> not</c><00:08:21.480><c> going</c><00:08:21.600><c> to</c><00:08:21.680><c> read</c><00:08:21.800><c> this</c>
+
+00:08:21.870 --> 00:08:21.880 align:start position:0%
+Loop Library. I'm not going to read this
+ 
+
+00:08:21.880 --> 00:08:23.030 align:start position:0%
+Loop Library. I'm not going to read this
+whole<00:08:22.000><c> thing.</c><00:08:22.240><c> You</c><00:08:22.320><c> guys</c><00:08:22.520><c> can</c><00:08:22.600><c> pause</c><00:08:22.840><c> it</c><00:08:22.919><c> right</c>
+
+00:08:23.030 --> 00:08:23.040 align:start position:0%
+whole thing. You guys can pause it right
+ 
+
+00:08:23.040 --> 00:08:24.390 align:start position:0%
+whole thing. You guys can pause it right
+there<00:08:23.160><c> if</c><00:08:23.240><c> you</c><00:08:23.320><c> want</c><00:08:23.440><c> to</c><00:08:23.520><c> see.</c><00:08:24.160><c> But</c><00:08:24.240><c> it</c><00:08:24.320><c> was</c>
+
+00:08:24.390 --> 00:08:24.400 align:start position:0%
+there if you want to see. But it was
+ 
+
+00:08:24.400 --> 00:08:26.270 align:start position:0%
+there if you want to see. But it was
+basically<00:08:24.680><c> supposed</c><00:08:24.960><c> to</c><00:08:25.040><c> make</c><00:08:25.520><c> a</c><00:08:25.600><c> plane</c><00:08:26.040><c> using</c>
+
+00:08:26.270 --> 00:08:26.280 align:start position:0%
+basically supposed to make a plane using
+ 
+
+00:08:26.280 --> 00:08:28.550 align:start position:0%
+basically supposed to make a plane using
+3.js.<00:08:26.960><c> So</c><00:08:27.320><c> I'll</c><00:08:27.400><c> open</c><00:08:27.560><c> that</c><00:08:27.680><c> up</c><00:08:27.760><c> right</c><00:08:27.919><c> here.</c>
+
+00:08:28.550 --> 00:08:28.560 align:start position:0%
+3.js. So I'll open that up right here.
+ 
+
+00:08:28.560 --> 00:08:29.950 align:start position:0%
+3.js. So I'll open that up right here.
+We<00:08:28.680><c> can</c><00:08:28.760><c> see</c><00:08:28.880><c> this</c><00:08:29.040><c> is</c><00:08:29.120><c> the</c><00:08:29.360><c> spinning</c><00:08:29.720><c> plane</c>
+
+00:08:29.950 --> 00:08:29.960 align:start position:0%
+We can see this is the spinning plane
+ 
+
+00:08:29.960 --> 00:08:31.830 align:start position:0%
+We can see this is the spinning plane
+that<00:08:30.080><c> it</c><00:08:30.160><c> made.</c><00:08:30.440><c> We</c><00:08:30.560><c> can</c><00:08:30.680><c> sort</c><00:08:30.840><c> of</c><00:08:30.960><c> zoom</c><00:08:31.240><c> in.</c><00:08:31.760><c> We</c>
+
+00:08:31.830 --> 00:08:31.840 align:start position:0%
+that it made. We can sort of zoom in. We
+ 
+
+00:08:31.840 --> 00:08:34.709 align:start position:0%
+that it made. We can sort of zoom in. We
+can<00:08:32.120><c> move</c><00:08:32.280><c> it</c><00:08:32.360><c> around.</c><00:08:33.200><c> And</c><00:08:33.960><c> that</c><00:08:34.240><c> is</c><00:08:34.400><c> what</c><00:08:34.560><c> we</c>
+
+00:08:34.709 --> 00:08:34.719 align:start position:0%
+can move it around. And that is what we
+ 
+
+00:08:34.719 --> 00:08:36.310 align:start position:0%
+can move it around. And that is what we
+got.<00:08:35.240><c> Now</c><00:08:35.360><c> from</c><00:08:35.520><c> a</c><00:08:35.560><c> looping</c><00:08:35.840><c> perspective,</c>
+
+00:08:36.310 --> 00:08:36.320 align:start position:0%
+got. Now from a looping perspective,
+ 
+
+00:08:36.320 --> 00:08:37.990 align:start position:0%
+got. Now from a looping perspective,
+what<00:08:36.440><c> it</c><00:08:36.520><c> had</c><00:08:36.640><c> to</c><00:08:36.719><c> do</c><00:08:36.960><c> was</c><00:08:37.080><c> it</c><00:08:37.159><c> had</c><00:08:37.280><c> to</c><00:08:37.360><c> build</c><00:08:37.640><c> it</c>
+
+00:08:37.990 --> 00:08:38.000 align:start position:0%
+what it had to do was it had to build it
+ 
+
+00:08:38.000 --> 00:08:39.990 align:start position:0%
+what it had to do was it had to build it
+and<00:08:38.120><c> then</c><00:08:38.200><c> verify.</c><00:08:38.760><c> Open</c><00:08:39.000><c> up</c><00:08:39.080><c> the</c><00:08:39.159><c> browser,</c>
+
+00:08:39.990 --> 00:08:40.000 align:start position:0%
+and then verify. Open up the browser,
+ 
+
+00:08:40.000 --> 00:08:41.630 align:start position:0%
+and then verify. Open up the browser,
+spin<00:08:40.159><c> it</c><00:08:40.240><c> around,</c><00:08:40.599><c> see</c><00:08:40.719><c> if</c><00:08:40.840><c> it</c><00:08:40.919><c> works,</c><00:08:41.440><c> see</c><00:08:41.560><c> if</c>
+
+00:08:41.630 --> 00:08:41.640 align:start position:0%
+spin it around, see if it works, see if
+ 
+
+00:08:41.640 --> 00:08:43.029 align:start position:0%
+spin it around, see if it works, see if
+it's<00:08:41.760><c> rendering</c><00:08:42.039><c> properly,</c><00:08:42.719><c> and</c><00:08:42.800><c> then</c><00:08:42.919><c> it</c>
+
+00:08:43.029 --> 00:08:43.039 align:start position:0%
+it's rendering properly, and then it
+ 
+
+00:08:43.039 --> 00:08:44.910 align:start position:0%
+it's rendering properly, and then it
+kept<00:08:43.280><c> iterating</c><00:08:43.719><c> until</c><00:08:43.919><c> we</c><00:08:44.039><c> finally</c><00:08:44.400><c> got</c><00:08:44.680><c> this</c>
+
+00:08:44.910 --> 00:08:44.920 align:start position:0%
+kept iterating until we finally got this
+ 
+
+00:08:44.920 --> 00:08:46.390 align:start position:0%
+kept iterating until we finally got this
+version.<00:08:45.440><c> And</c><00:08:45.560><c> as</c><00:08:45.680><c> you</c><00:08:45.760><c> can</c><00:08:45.880><c> see</c><00:08:46.000><c> still,</c><00:08:46.280><c> like</c>
+
+00:08:46.390 --> 00:08:46.400 align:start position:0%
+version. And as you can see still, like
+ 
+
+00:08:46.400 --> 00:08:47.630 align:start position:0%
+version. And as you can see still, like
+it's<00:08:46.520><c> not</c><00:08:46.720><c> perfect.</c><00:08:47.120><c> There's</c><00:08:47.240><c> some</c><00:08:47.360><c> things</c><00:08:47.560><c> we</c>
+
+00:08:47.630 --> 00:08:47.640 align:start position:0%
+it's not perfect. There's some things we
+ 
+
+00:08:47.640 --> 00:08:48.710 align:start position:0%
+it's not perfect. There's some things we
+want<00:08:47.760><c> to</c><00:08:47.839><c> change.</c><00:08:48.120><c> I</c><00:08:48.200><c> think</c><00:08:48.320><c> it</c><00:08:48.360><c> was</c><00:08:48.480><c> supposed</c>
+
+00:08:48.710 --> 00:08:48.720 align:start position:0%
+want to change. I think it was supposed
+ 
+
+00:08:48.720 --> 00:08:49.870 align:start position:0%
+want to change. I think it was supposed
+to<00:08:48.760><c> be</c><00:08:48.880><c> see-through</c><00:08:49.240><c> like</c><00:08:49.400><c> this</c><00:08:49.560><c> so</c><00:08:49.640><c> we</c><00:08:49.720><c> could</c>
+
+00:08:49.870 --> 00:08:49.880 align:start position:0%
+to be see-through like this so we could
+ 
+
+00:08:49.880 --> 00:08:52.790 align:start position:0%
+to be see-through like this so we could
+like<00:08:50.320><c> actually</c><00:08:50.560><c> go</c><00:08:50.680><c> look</c><00:08:50.800><c> inside.</c><00:08:51.800><c> But</c><00:08:52.440><c> this</c>
+
+00:08:52.790 --> 00:08:52.800 align:start position:0%
+like actually go look inside. But this
+ 
+
+00:08:52.800 --> 00:08:54.230 align:start position:0%
+like actually go look inside. But this
+is<00:08:53.040><c> so</c><00:08:53.200><c> much</c><00:08:53.440><c> better</c><00:08:53.680><c> than</c><00:08:53.800><c> it</c><00:08:53.920><c> would</c><00:08:54.040><c> have</c>
+
+00:08:54.230 --> 00:08:54.240 align:start position:0%
+is so much better than it would have
+ 
+
+00:08:54.240 --> 00:08:55.950 align:start position:0%
+is so much better than it would have
+been<00:08:54.520><c> if</c><00:08:54.680><c> I</c><00:08:54.760><c> didn't</c><00:08:55.080><c> give</c><00:08:55.200><c> it</c><00:08:55.280><c> that</c><00:08:55.440><c> slash</c><00:08:55.760><c> goal</c>
+
+00:08:55.950 --> 00:08:55.960 align:start position:0%
+been if I didn't give it that slash goal
+ 
+
+00:08:55.960 --> 00:08:57.470 align:start position:0%
+been if I didn't give it that slash goal
+with<00:08:56.080><c> the</c><00:08:56.160><c> criteria,</c><00:08:56.760><c> and</c><00:08:56.880><c> I</c><00:08:56.920><c> just</c><00:08:57.080><c> said</c><00:08:57.240><c> build</c>
+
+00:08:57.470 --> 00:08:57.480 align:start position:0%
+with the criteria, and I just said build
+ 
+
+00:08:57.480 --> 00:09:00.070 align:start position:0%
+with the criteria, and I just said build
+me<00:08:57.560><c> a</c><00:08:57.640><c> 3D</c><00:08:57.920><c> plane</c><00:08:58.400><c> with,</c><00:08:58.720><c> you</c><00:08:58.800><c> know,</c><00:08:59.200><c> 3.js.</c><00:08:59.960><c> So</c>
+
+00:09:00.070 --> 00:09:00.080 align:start position:0%
+me a 3D plane with, you know, 3.js. So
+ 
+
+00:09:00.080 --> 00:09:02.190 align:start position:0%
+me a 3D plane with, you know, 3.js. So
+that's<00:09:00.400><c> one</c><00:09:00.600><c> of</c><00:09:00.680><c> the</c><00:09:00.720><c> key</c><00:09:00.880><c> takeaways</c><00:09:01.240><c> here.</c>
+
+00:09:02.190 --> 00:09:02.200 align:start position:0%
+that's one of the key takeaways here.
+ 
+
+00:09:02.200 --> 00:09:03.790 align:start position:0%
+that's one of the key takeaways here.
+Agent<00:09:02.440><c> loops</c><00:09:02.680><c> and</c><00:09:02.800><c> goals</c><00:09:03.200><c> are</c><00:09:03.320><c> not</c><00:09:03.560><c> supposed</c>
+
+00:09:03.790 --> 00:09:03.800 align:start position:0%
+Agent loops and goals are not supposed
+ 
+
+00:09:03.800 --> 00:09:05.710 align:start position:0%
+Agent loops and goals are not supposed
+to<00:09:03.839><c> give</c><00:09:04.040><c> you</c><00:09:04.160><c> 100%</c><00:09:04.760><c> perfect</c><00:09:05.040><c> output.</c><00:09:05.640><c> They're</c>
+
+00:09:05.710 --> 00:09:05.720 align:start position:0%
+to give you 100% perfect output. They're
+ 
+
+00:09:05.720 --> 00:09:07.470 align:start position:0%
+to give you 100% perfect output. They're
+supposed<00:09:05.960><c> to</c><00:09:06.080><c> help</c><00:09:06.360><c> you</c><00:09:06.480><c> get</c><00:09:06.720><c> much</c><00:09:06.960><c> closer</c><00:09:07.360><c> on</c>
+
+00:09:07.470 --> 00:09:07.480 align:start position:0%
+supposed to help you get much closer on
+ 
+
+00:09:07.480 --> 00:09:08.829 align:start position:0%
+supposed to help you get much closer on
+the<00:09:07.560><c> first</c><00:09:07.839><c> try.</c><00:09:08.240><c> And</c><00:09:08.320><c> here's</c><00:09:08.440><c> another</c><00:09:08.680><c> great</c>
+
+00:09:08.829 --> 00:09:08.839 align:start position:0%
+the first try. And here's another great
+ 
+
+00:09:08.839 --> 00:09:10.030 align:start position:0%
+the first try. And here's another great
+example<00:09:09.200><c> of</c><00:09:09.320><c> that</c><00:09:09.680><c> with</c><00:09:09.800><c> the</c><00:09:09.920><c> whole</c>
+
+00:09:10.030 --> 00:09:10.040 align:start position:0%
+example of that with the whole
+ 
+
+00:09:10.040 --> 00:09:12.150 align:start position:0%
+example of that with the whole
+subjectivity<00:09:10.680><c> thing.</c><00:09:11.200><c> Here's</c><00:09:11.480><c> the</c><00:09:11.720><c> last</c><00:09:12.040><c> one</c>
+
+00:09:12.150 --> 00:09:12.160 align:start position:0%
+subjectivity thing. Here's the last one
+ 
+
+00:09:12.160 --> 00:09:13.790 align:start position:0%
+subjectivity thing. Here's the last one
+I<00:09:12.240><c> did,</c><00:09:12.480><c> which</c><00:09:12.640><c> is</c><00:09:12.760><c> a</c><00:09:13.120><c> a</c><00:09:13.200><c> prompt</c><00:09:13.520><c> that</c><00:09:13.640><c> I</c><00:09:13.680><c> had</c>
+
+00:09:13.790 --> 00:09:13.800 align:start position:0%
+I did, which is a a prompt that I had
+ 
+
+00:09:13.800 --> 00:09:15.790 align:start position:0%
+I did, which is a a prompt that I had
+Claude<00:09:14.080><c> Code</c><00:09:14.280><c> make,</c><00:09:14.760><c> a</c><00:09:14.839><c> slash</c><00:09:15.160><c> goal.</c><00:09:15.560><c> It</c><00:09:15.680><c> was</c>
+
+00:09:15.790 --> 00:09:15.800 align:start position:0%
+Claude Code make, a slash goal. It was
+ 
+
+00:09:15.800 --> 00:09:17.950 align:start position:0%
+Claude Code make, a slash goal. It was
+looking<00:09:16.080><c> at</c><00:09:16.240><c> this</c><00:09:16.839><c> famous</c><00:09:17.240><c> picture</c><00:09:17.720><c> of</c><00:09:17.880><c> the</c>
+
+00:09:17.950 --> 00:09:17.960 align:start position:0%
+looking at this famous picture of the
+ 
+
+00:09:17.960 --> 00:09:19.750 align:start position:0%
+looking at this famous picture of the
+Beatles<00:09:18.440><c> Abbey</c><00:09:18.680><c> Road.</c><00:09:19.200><c> And</c><00:09:19.280><c> then</c><00:09:19.360><c> what</c><00:09:19.480><c> I</c><00:09:19.520><c> told</c>
+
+00:09:19.750 --> 00:09:19.760 align:start position:0%
+Beatles Abbey Road. And then what I told
+ 
+
+00:09:19.760 --> 00:09:21.870 align:start position:0%
+Beatles Abbey Road. And then what I told
+it<00:09:19.839><c> to</c><00:09:19.920><c> do</c><00:09:20.040><c> was</c><00:09:20.240><c> recreate</c><00:09:20.680><c> this</c><00:09:21.280><c> without</c><00:09:21.640><c> using</c>
+
+00:09:21.870 --> 00:09:21.880 align:start position:0%
+it to do was recreate this without using
+ 
+
+00:09:21.880 --> 00:09:23.430 align:start position:0%
+it to do was recreate this without using
+image<00:09:22.040><c> generation.</c><00:09:22.600><c> So</c><00:09:22.720><c> just</c><00:09:23.000><c> recreating</c>
+
+00:09:23.430 --> 00:09:23.440 align:start position:0%
+image generation. So just recreating
+ 
+
+00:09:23.440 --> 00:09:25.390 align:start position:0%
+image generation. So just recreating
+this<00:09:23.600><c> using</c><00:09:23.839><c> like</c><00:09:24.000><c> HTML</c><00:09:24.480><c> or</c><00:09:24.560><c> CSS</c><00:09:25.120><c> or</c><00:09:25.200><c> whatever</c>
+
+00:09:25.390 --> 00:09:25.400 align:start position:0%
+this using like HTML or CSS or whatever
+ 
+
+00:09:25.400 --> 00:09:27.230 align:start position:0%
+this using like HTML or CSS or whatever
+it<00:09:25.480><c> wants</c><00:09:25.680><c> to</c><00:09:25.760><c> do.</c><00:09:26.440><c> And</c><00:09:26.560><c> then</c><00:09:26.680><c> it</c><00:09:26.800><c> goes</c><00:09:27.040><c> through</c>
+
+00:09:27.230 --> 00:09:27.240 align:start position:0%
+it wants to do. And then it goes through
+ 
+
+00:09:27.240 --> 00:09:28.550 align:start position:0%
+it wants to do. And then it goes through
+and<00:09:27.320><c> it</c><00:09:27.440><c> creates,</c><00:09:27.800><c> you</c><00:09:27.880><c> know,</c><00:09:28.000><c> version</c><00:09:28.320><c> one,</c>
+
+00:09:28.550 --> 00:09:28.560 align:start position:0%
+and it creates, you know, version one,
+ 
+
+00:09:28.560 --> 00:09:30.270 align:start position:0%
+and it creates, you know, version one,
+version<00:09:28.839><c> two,</c><00:09:29.040><c> version</c><00:09:29.360><c> three.</c><00:09:29.839><c> And</c><00:09:29.960><c> it</c><00:09:30.040><c> ended</c>
+
+00:09:30.270 --> 00:09:30.280 align:start position:0%
+version two, version three. And it ended
+ 
+
+00:09:30.280 --> 00:09:32.590 align:start position:0%
+version two, version three. And it ended
+up<00:09:30.360><c> stopping</c><00:09:30.800><c> after</c><00:09:31.520><c> version</c><00:09:31.880><c> seven.</c><00:09:32.400><c> You</c><00:09:32.480><c> can</c>
+
+00:09:32.590 --> 00:09:32.600 align:start position:0%
+up stopping after version seven. You can
+ 
+
+00:09:32.600 --> 00:09:33.950 align:start position:0%
+up stopping after version seven. You can
+see<00:09:32.720><c> the</c><00:09:32.800><c> prompt</c><00:09:33.080><c> here</c><00:09:33.240><c> says,</c><00:09:33.560><c> "If</c><00:09:33.800><c> the</c>
+
+00:09:33.950 --> 00:09:33.960 align:start position:0%
+see the prompt here says, "If the
+ 
+
+00:09:33.960 --> 00:09:36.270 align:start position:0%
+see the prompt here says, "If the
+average<00:09:34.320><c> is</c><00:09:34.400><c> above</c><00:09:34.720><c> nine</c><00:09:35.320><c> or</c><00:09:35.480><c> equal</c><00:09:35.680><c> to</c><00:09:35.800><c> nine,</c>
+
+00:09:36.270 --> 00:09:36.280 align:start position:0%
+average is above nine or equal to nine,
+ 
+
+00:09:36.280 --> 00:09:38.310 align:start position:0%
+average is above nine or equal to nine,
+then<00:09:36.440><c> stop."</c><00:09:36.880><c> And</c><00:09:37.000><c> that's</c><00:09:37.200><c> when</c><00:09:37.360><c> you</c><00:09:37.600><c> end.</c><00:09:38.200><c> The</c>
+
+00:09:38.310 --> 00:09:38.320 align:start position:0%
+then stop." And that's when you end. The
+ 
+
+00:09:38.320 --> 00:09:39.910 align:start position:0%
+then stop." And that's when you end. The
+other<00:09:38.520><c> thing</c><00:09:38.640><c> it</c><00:09:38.720><c> said</c><00:09:38.920><c> is</c><00:09:39.040><c> hard</c><00:09:39.280><c> cap</c><00:09:39.560><c> on</c><00:09:39.760><c> eight</c>
+
+00:09:39.910 --> 00:09:39.920 align:start position:0%
+other thing it said is hard cap on eight
+ 
+
+00:09:39.920 --> 00:09:41.630 align:start position:0%
+other thing it said is hard cap on eight
+passes.<00:09:40.360><c> So,</c><00:09:40.480><c> it</c><00:09:40.520><c> was</c><00:09:40.640><c> getting</c><00:09:40.880><c> near</c><00:09:41.080><c> that</c><00:09:41.280><c> cap</c>
+
+00:09:41.630 --> 00:09:41.640 align:start position:0%
+passes. So, it was getting near that cap
+ 
+
+00:09:41.640 --> 00:09:43.470 align:start position:0%
+passes. So, it was getting near that cap
+either<00:09:41.880><c> way.</c><00:09:42.200><c> But,</c><00:09:42.560><c> these</c><00:09:42.760><c> images</c><00:09:43.080><c> are</c><00:09:43.160><c> not</c>
+
+00:09:43.470 --> 00:09:43.480 align:start position:0%
+either way. But, these images are not
+ 
+
+00:09:43.480 --> 00:09:45.110 align:start position:0%
+either way. But, these images are not
+very<00:09:43.720><c> good.</c><00:09:44.240><c> What</c><00:09:44.320><c> we</c><00:09:44.400><c> can</c><00:09:44.560><c> see</c><00:09:44.760><c> though</c><00:09:45.000><c> is</c>
+
+00:09:45.110 --> 00:09:45.120 align:start position:0%
+very good. What we can see though is
+ 
+
+00:09:45.120 --> 00:09:46.870 align:start position:0%
+very good. What we can see though is
+that<00:09:45.240><c> it</c><00:09:45.360><c> did</c><00:09:45.480><c> its</c><00:09:45.600><c> verification.</c><00:09:46.520><c> So,</c><00:09:46.680><c> each</c>
+
+00:09:46.870 --> 00:09:46.880 align:start position:0%
+that it did its verification. So, each
+ 
+
+00:09:46.880 --> 00:09:48.190 align:start position:0%
+that it did its verification. So, each
+time<00:09:47.080><c> it</c><00:09:47.160><c> went</c><00:09:47.360><c> through</c><00:09:47.680><c> and</c><00:09:47.800><c> created</c><00:09:48.120><c> the</c>
+
+00:09:48.190 --> 00:09:48.200 align:start position:0%
+time it went through and created the
+ 
+
+00:09:48.200 --> 00:09:49.950 align:start position:0%
+time it went through and created the
+HTML,<00:09:49.040><c> it</c><00:09:49.160><c> had</c><00:09:49.280><c> to</c><00:09:49.320><c> actually</c><00:09:49.600><c> put</c><00:09:49.760><c> it</c><00:09:49.840><c> in</c><00:09:49.920><c> a</c>
+
+00:09:49.950 --> 00:09:49.960 align:start position:0%
+HTML, it had to actually put it in a
+ 
+
+00:09:49.960 --> 00:09:51.110 align:start position:0%
+HTML, it had to actually put it in a
+browser<00:09:50.680><c> and</c><00:09:50.760><c> then</c><00:09:50.840><c> it</c><00:09:50.880><c> would</c><00:09:50.960><c> take</c><00:09:51.080><c> a</c>
+
+00:09:51.110 --> 00:09:51.120 align:start position:0%
+browser and then it would take a
+ 
+
+00:09:51.120 --> 00:09:52.430 align:start position:0%
+browser and then it would take a
+screenshot<00:09:51.560><c> of</c><00:09:51.640><c> it.</c><00:09:51.800><c> You</c><00:09:51.920><c> can</c><00:09:52.000><c> see</c><00:09:52.160><c> here's</c><00:09:52.360><c> the</c>
+
+00:09:52.430 --> 00:09:52.440 align:start position:0%
+screenshot of it. You can see here's the
+ 
+
+00:09:52.440 --> 00:09:53.990 align:start position:0%
+screenshot of it. You can see here's the
+screenshot<00:09:52.880><c> for</c><00:09:52.960><c> number</c><00:09:53.160><c> one,</c><00:09:53.760><c> here's</c>
+
+00:09:53.990 --> 00:09:54.000 align:start position:0%
+screenshot for number one, here's
+ 
+
+00:09:54.000 --> 00:09:55.910 align:start position:0%
+screenshot for number one, here's
+version<00:09:54.280><c> two,</c><00:09:54.880><c> here's</c><00:09:55.080><c> version</c><00:09:55.400><c> three,</c>
+
+00:09:55.910 --> 00:09:55.920 align:start position:0%
+version two, here's version three,
+ 
+
+00:09:55.920 --> 00:09:57.670 align:start position:0%
+version two, here's version three,
+here's<00:09:56.120><c> version</c><00:09:56.400><c> four.</c><00:09:57.080><c> So,</c><00:09:57.200><c> we</c><00:09:57.240><c> can</c><00:09:57.400><c> see</c><00:09:57.560><c> it</c>
+
+00:09:57.670 --> 00:09:57.680 align:start position:0%
+here's version four. So, we can see it
+ 
+
+00:09:57.680 --> 00:09:59.190 align:start position:0%
+here's version four. So, we can see it
+in<00:09:57.800><c> real</c><00:09:58.000><c> time</c><00:09:58.360><c> getting</c><00:09:58.600><c> better</c><00:09:58.840><c> and</c><00:09:58.960><c> better</c>
+
+00:09:59.190 --> 00:09:59.200 align:start position:0%
+in real time getting better and better
+ 
+
+00:09:59.200 --> 00:10:01.190 align:start position:0%
+in real time getting better and better
+with<00:09:59.360><c> each</c><00:09:59.560><c> version,</c><00:10:00.000><c> with</c><00:10:00.200><c> each</c><00:10:00.360><c> iteration.</c>
+
+00:10:01.190 --> 00:10:01.200 align:start position:0%
+with each version, with each iteration.
+ 
+
+00:10:01.200 --> 00:10:02.390 align:start position:0%
+with each version, with each iteration.
+But<00:10:01.320><c> still,</c><00:10:01.640><c> this</c><00:10:01.800><c> is</c><00:10:01.880><c> the</c><00:10:02.000><c> one</c><00:10:02.120><c> that</c><00:10:02.240><c> it</c><00:10:02.280><c> gave</c>
+
+00:10:02.390 --> 00:10:02.400 align:start position:0%
+But still, this is the one that it gave
+ 
+
+00:10:02.400 --> 00:10:03.910 align:start position:0%
+But still, this is the one that it gave
+me<00:10:02.480><c> at</c><00:10:02.560><c> the</c><00:10:02.680><c> end</c><00:10:03.160><c> and</c><00:10:03.320><c> obviously</c><00:10:03.600><c> that</c><00:10:03.720><c> looks</c>
+
+00:10:03.910 --> 00:10:03.920 align:start position:0%
+me at the end and obviously that looks
+ 
+
+00:10:03.920 --> 00:10:05.550 align:start position:0%
+me at the end and obviously that looks
+nothing<00:10:04.200><c> like</c><00:10:04.360><c> the</c><00:10:04.440><c> picture.</c><00:10:05.160><c> We've</c><00:10:05.320><c> got</c><00:10:05.480><c> the</c>
+
+00:10:05.550 --> 00:10:05.560 align:start position:0%
+nothing like the picture. We've got the
+ 
+
+00:10:05.560 --> 00:10:06.870 align:start position:0%
+nothing like the picture. We've got the
+car<00:10:05.800><c> here,</c><00:10:06.040><c> we've</c><00:10:06.120><c> got</c><00:10:06.240><c> the</c><00:10:06.320><c> trees,</c><00:10:06.680><c> we've</c><00:10:06.760><c> got</c>
+
+00:10:06.870 --> 00:10:06.880 align:start position:0%
+car here, we've got the trees, we've got
+ 
+
+00:10:06.880 --> 00:10:09.910 align:start position:0%
+car here, we've got the trees, we've got
+the<00:10:06.960><c> road,</c><00:10:07.560><c> we've</c><00:10:07.680><c> got</c><00:10:08.120><c> yellow,</c><00:10:08.440><c> black,</c><00:10:09.320><c> gray,</c>
+
+00:10:09.910 --> 00:10:09.920 align:start position:0%
+the road, we've got yellow, black, gray,
+ 
+
+00:10:09.920 --> 00:10:11.630 align:start position:0%
+the road, we've got yellow, black, gray,
+light<00:10:10.160><c> blue,</c><00:10:10.600><c> just</c><00:10:10.800><c> like</c><00:10:10.920><c> the</c><00:10:11.040><c> actual</c><00:10:11.320><c> image.</c>
+
+00:10:11.630 --> 00:10:11.640 align:start position:0%
+light blue, just like the actual image.
+ 
+
+00:10:11.640 --> 00:10:13.670 align:start position:0%
+light blue, just like the actual image.
+If<00:10:11.800><c> I</c><00:10:11.880><c> go</c><00:10:12.400><c> back</c><00:10:12.640><c> here,</c><00:10:13.040><c> did</c><00:10:13.120><c> I</c><00:10:13.200><c> say</c><00:10:13.320><c> yellow?</c><00:10:13.640><c> I</c>
+
+00:10:13.670 --> 00:10:13.680 align:start position:0%
+If I go back here, did I say yellow? I
+ 
+
+00:10:13.680 --> 00:10:15.670 align:start position:0%
+If I go back here, did I say yellow? I
+meant<00:10:13.800><c> to</c><00:10:13.880><c> say</c><00:10:14.000><c> white.</c><00:10:14.440><c> White,</c><00:10:14.720><c> black,</c><00:10:15.400><c> dark</c>
+
+00:10:15.670 --> 00:10:15.680 align:start position:0%
+meant to say white. White, black, dark
+ 
+
+00:10:15.680 --> 00:10:17.590 align:start position:0%
+meant to say white. White, black, dark
+gray,<00:10:16.360><c> light</c><00:10:16.560><c> blue.</c><00:10:16.920><c> And</c><00:10:17.040><c> so,</c><00:10:17.160><c> obviously</c><00:10:17.480><c> it's</c>
+
+00:10:17.590 --> 00:10:17.600 align:start position:0%
+gray, light blue. And so, obviously it's
+ 
+
+00:10:17.600 --> 00:10:18.950 align:start position:0%
+gray, light blue. And so, obviously it's
+nothing<00:10:17.840><c> like</c><00:10:18.080><c> it.</c><00:10:18.400><c> If</c><00:10:18.520><c> we</c><00:10:18.640><c> would</c><00:10:18.760><c> have</c><00:10:18.840><c> done</c>
+
+00:10:18.950 --> 00:10:18.960 align:start position:0%
+nothing like it. If we would have done
+ 
+
+00:10:18.960 --> 00:10:20.590 align:start position:0%
+nothing like it. If we would have done
+this<00:10:19.080><c> with</c><00:10:19.320><c> image</c><00:10:19.560><c> generation,</c><00:10:20.360><c> it</c><00:10:20.480><c> could</c>
+
+00:10:20.590 --> 00:10:20.600 align:start position:0%
+this with image generation, it could
+ 
+
+00:10:20.600 --> 00:10:22.350 align:start position:0%
+this with image generation, it could
+have<00:10:20.720><c> been</c><00:10:21.080><c> probably</c><00:10:21.400><c> much</c><00:10:21.600><c> closer.</c><00:10:22.200><c> But</c><00:10:22.320><c> I</c>
+
+00:10:22.350 --> 00:10:22.360 align:start position:0%
+have been probably much closer. But I
+ 
+
+00:10:22.360 --> 00:10:23.470 align:start position:0%
+have been probably much closer. But I
+just<00:10:22.520><c> wanted</c><00:10:22.680><c> to</c><00:10:22.760><c> try</c><00:10:22.920><c> how</c><00:10:23.000><c> that</c><00:10:23.120><c> would</c><00:10:23.280><c> work</c>
+
+00:10:23.470 --> 00:10:23.480 align:start position:0%
+just wanted to try how that would work
+ 
+
+00:10:23.480 --> 00:10:26.310 align:start position:0%
+just wanted to try how that would work
+with<00:10:24.000><c> pure</c><00:10:24.280><c> code.</c><00:10:24.760><c> The</c><00:10:24.840><c> point</c><00:10:25.160><c> being,</c><00:10:25.760><c> it</c><00:10:25.960><c> had</c>
+
+00:10:26.310 --> 00:10:26.320 align:start position:0%
+with pure code. The point being, it had
+ 
+
+00:10:26.320 --> 00:10:27.710 align:start position:0%
+with pure code. The point being, it had
+the<00:10:26.400><c> verification</c><00:10:27.040><c> checks,</c><00:10:27.320><c> it</c><00:10:27.440><c> had</c><00:10:27.640><c> the</c>
+
+00:10:27.710 --> 00:10:27.720 align:start position:0%
+the verification checks, it had the
+ 
+
+00:10:27.720 --> 00:10:29.750 align:start position:0%
+the verification checks, it had the
+ability<00:10:28.160><c> to</c><00:10:28.280><c> take</c><00:10:28.480><c> screenshots</c><00:10:29.360><c> and</c><00:10:29.560><c> look</c>
+
+00:10:29.750 --> 00:10:29.760 align:start position:0%
+ability to take screenshots and look
+ 
+
+00:10:29.760 --> 00:10:31.390 align:start position:0%
+ability to take screenshots and look
+through<00:10:30.040><c> each</c><00:10:30.240><c> of</c><00:10:30.320><c> its</c><00:10:30.480><c> iterations,</c>
+
+00:10:31.390 --> 00:10:31.400 align:start position:0%
+through each of its iterations,
+ 
+
+00:10:31.400 --> 00:10:33.790 align:start position:0%
+through each of its iterations,
+understand<00:10:32.280><c> how</c><00:10:32.520><c> did</c><00:10:32.760><c> this</c><00:10:33.040><c> still</c><00:10:33.280><c> not</c><00:10:33.520><c> look</c>
+
+00:10:33.790 --> 00:10:33.800 align:start position:0%
+understand how did this still not look
+ 
+
+00:10:33.800 --> 00:10:35.430 align:start position:0%
+understand how did this still not look
+like<00:10:34.040><c> the</c><00:10:34.160><c> reference</c><00:10:34.520><c> image,</c><00:10:35.080><c> and</c><00:10:35.280><c> what</c>
+
+00:10:35.430 --> 00:10:35.440 align:start position:0%
+like the reference image, and what
+ 
+
+00:10:35.440 --> 00:10:37.230 align:start position:0%
+like the reference image, and what
+changes<00:10:35.760><c> do</c><00:10:35.800><c> we</c><00:10:35.920><c> need</c><00:10:36.040><c> to</c><00:10:36.120><c> make</c><00:10:36.560><c> each</c><00:10:36.760><c> time?</c>
+
+00:10:37.230 --> 00:10:37.240 align:start position:0%
+changes do we need to make each time?
+ 
+
+00:10:37.240 --> 00:10:38.590 align:start position:0%
+changes do we need to make each time?
+And<00:10:37.360><c> so,</c><00:10:37.440><c> that's</c><00:10:37.680><c> why</c><00:10:37.800><c> a</c><00:10:37.840><c> loop</c><00:10:38.080><c> is</c><00:10:38.240><c> only</c><00:10:38.480><c> going</c>
+
+00:10:38.590 --> 00:10:38.600 align:start position:0%
+And so, that's why a loop is only going
+ 
+
+00:10:38.600 --> 00:10:41.070 align:start position:0%
+And so, that's why a loop is only going
+to<00:10:38.680><c> be</c><00:10:38.800><c> as</c><00:10:39.040><c> good</c><00:10:39.360><c> as</c><00:10:39.520><c> it's</c><00:10:39.760><c> done</c><00:10:40.080><c> check,</c><00:10:40.680><c> as</c><00:10:40.960><c> the</c>
+
+00:10:41.070 --> 00:10:41.080 align:start position:0%
+to be as good as it's done check, as the
+ 
+
+00:10:41.080 --> 00:10:42.590 align:start position:0%
+to be as good as it's done check, as the
+done<00:10:41.360><c> criteria.</c><00:10:42.040><c> So,</c><00:10:42.120><c> there's</c><00:10:42.280><c> two</c><00:10:42.400><c> things</c>
+
+00:10:42.590 --> 00:10:42.600 align:start position:0%
+done criteria. So, there's two things
+ 
+
+00:10:42.600 --> 00:10:43.990 align:start position:0%
+done criteria. So, there's two things
+you<00:10:42.680><c> need</c><00:10:42.800><c> to</c><00:10:42.880><c> think</c><00:10:43.040><c> about</c><00:10:43.240><c> before</c><00:10:43.560><c> you</c><00:10:43.680><c> build</c>
+
+00:10:43.990 --> 00:10:44.000 align:start position:0%
+you need to think about before you build
+ 
+
+00:10:44.000 --> 00:10:46.510 align:start position:0%
+you need to think about before you build
+your<00:10:44.160><c> first</c><00:10:44.839><c> loop</c><00:10:45.120><c> or</c><00:10:45.280><c> your</c><00:10:45.400><c> goals.</c><00:10:46.120><c> What</c><00:10:46.280><c> does</c>
+
+00:10:46.510 --> 00:10:46.520 align:start position:0%
+your first loop or your goals. What does
+ 
+
+00:10:46.520 --> 00:10:48.750 align:start position:0%
+your first loop or your goals. What does
+done<00:10:46.839><c> mean?</c><00:10:47.560><c> And</c><00:10:47.680><c> then</c><00:10:47.839><c> how</c><00:10:48.040><c> will</c><00:10:48.200><c> it</c><00:10:48.320><c> check?</c>
+
+00:10:48.750 --> 00:10:48.760 align:start position:0%
+done mean? And then how will it check?
+ 
+
+00:10:48.760 --> 00:10:49.829 align:start position:0%
+done mean? And then how will it check?
+Because<00:10:48.960><c> let's</c><00:10:49.120><c> say</c><00:10:49.200><c> you're</c><00:10:49.320><c> building</c><00:10:49.680><c> an</c>
+
+00:10:49.829 --> 00:10:49.839 align:start position:0%
+Because let's say you're building an
+ 
+
+00:10:49.839 --> 00:10:51.350 align:start position:0%
+Because let's say you're building an
+actual<00:10:50.120><c> game,</c><00:10:50.440><c> a</c><00:10:50.480><c> game</c><00:10:50.680><c> that</c><00:10:50.839><c> you</c><00:10:50.920><c> can</c><00:10:51.040><c> open</c><00:10:51.240><c> up</c>
+
+00:10:51.350 --> 00:10:51.360 align:start position:0%
+actual game, a game that you can open up
+ 
+
+00:10:51.360 --> 00:10:53.270 align:start position:0%
+actual game, a game that you can open up
+on<00:10:51.480><c> your</c><00:10:51.600><c> PC</c><00:10:51.880><c> and</c><00:10:52.000><c> play.</c><00:10:52.800><c> It</c><00:10:52.920><c> would</c><00:10:53.040><c> have</c><00:10:53.160><c> to</c>
+
+00:10:53.270 --> 00:10:53.280 align:start position:0%
+on your PC and play. It would have to
+ 
+
+00:10:53.280 --> 00:10:55.070 align:start position:0%
+on your PC and play. It would have to
+check<00:10:53.560><c> that</c><00:10:53.880><c> in</c><00:10:54.240><c> many</c><00:10:54.480><c> ways.</c><00:10:54.800><c> It</c><00:10:54.880><c> would</c><00:10:54.960><c> have</c>
+
+00:10:55.070 --> 00:10:55.080 align:start position:0%
+check that in many ways. It would have
+ 
+
+00:10:55.080 --> 00:10:56.430 align:start position:0%
+check that in many ways. It would have
+to<00:10:55.160><c> check</c><00:10:55.400><c> visually,</c><00:10:56.080><c> it</c><00:10:56.160><c> would</c><00:10:56.240><c> have</c><00:10:56.360><c> to</c>
+
+00:10:56.430 --> 00:10:56.440 align:start position:0%
+to check visually, it would have to
+ 
+
+00:10:56.440 --> 00:10:58.070 align:start position:0%
+to check visually, it would have to
+check<00:10:56.720><c> functionally,</c><00:10:57.600><c> and</c><00:10:57.680><c> it</c><00:10:57.760><c> would</c><00:10:57.839><c> have</c><00:10:57.960><c> to</c>
+
+00:10:58.070 --> 00:10:58.080 align:start position:0%
+check functionally, and it would have to
+ 
+
+00:10:58.080 --> 00:10:59.870 align:start position:0%
+check functionally, and it would have to
+play<00:10:58.320><c> the</c><00:10:58.440><c> levels</c><00:10:58.839><c> and</c><00:10:59.000><c> see</c><00:10:59.440><c> if</c><00:10:59.600><c> anything</c>
+
+00:10:59.870 --> 00:10:59.880 align:start position:0%
+play the levels and see if anything
+ 
+
+00:10:59.880 --> 00:11:01.310 align:start position:0%
+play the levels and see if anything
+breaks.<00:11:00.400><c> If</c><00:11:00.480><c> you're</c><00:11:00.600><c> writing</c><00:11:00.839><c> some</c><00:11:01.000><c> sort</c><00:11:01.200><c> of</c>
+
+00:11:01.310 --> 00:11:01.320 align:start position:0%
+breaks. If you're writing some sort of
+ 
+
+00:11:01.320 --> 00:11:03.110 align:start position:0%
+breaks. If you're writing some sort of
+like<00:11:01.520><c> script,</c><00:11:02.320><c> how</c><00:11:02.440><c> does</c><00:11:02.600><c> it</c><00:11:02.720><c> check?</c><00:11:03.000><c> It</c>
+
+00:11:03.110 --> 00:11:03.120 align:start position:0%
+like script, how does it check? It
+ 
+
+00:11:03.120 --> 00:11:04.510 align:start position:0%
+like script, how does it check? It
+doesn't<00:11:03.320><c> need</c><00:11:03.440><c> to</c><00:11:03.520><c> check</c><00:11:03.720><c> visually,</c><00:11:04.160><c> it</c><00:11:04.320><c> just</c>
+
+00:11:04.510 --> 00:11:04.520 align:start position:0%
+doesn't need to check visually, it just
+ 
+
+00:11:04.520 --> 00:11:06.350 align:start position:0%
+doesn't need to check visually, it just
+needs<00:11:04.680><c> to</c><00:11:04.760><c> check</c><00:11:05.240><c> flow.</c><00:11:05.839><c> It</c><00:11:05.920><c> needs</c><00:11:06.120><c> to</c><00:11:06.200><c> check</c>
+
+00:11:06.350 --> 00:11:06.360 align:start position:0%
+needs to check flow. It needs to check
+ 
+
+00:11:06.360 --> 00:11:07.430 align:start position:0%
+needs to check flow. It needs to check
+that<00:11:06.480><c> it</c><00:11:06.560><c> sounds</c><00:11:06.760><c> like</c><00:11:06.880><c> your</c><00:11:06.960><c> tone</c><00:11:07.120><c> of</c><00:11:07.200><c> voice.</c>
+
+00:11:07.430 --> 00:11:07.440 align:start position:0%
+that it sounds like your tone of voice.
+ 
+
+00:11:07.440 --> 00:11:09.030 align:start position:0%
+that it sounds like your tone of voice.
+It<00:11:07.520><c> needs</c><00:11:07.680><c> to</c><00:11:07.760><c> check</c><00:11:08.000><c> in</c><00:11:08.120><c> other</c><00:11:08.360><c> ways.</c><00:11:08.880><c> So,</c>
+
+00:11:09.030 --> 00:11:09.040 align:start position:0%
+It needs to check in other ways. So,
+ 
+
+00:11:09.040 --> 00:11:10.510 align:start position:0%
+It needs to check in other ways. So,
+based<00:11:09.360><c> on</c><00:11:09.640><c> what</c><00:11:09.800><c> you're</c><00:11:09.920><c> building,</c><00:11:10.440><c> the</c>
+
+00:11:10.510 --> 00:11:10.520 align:start position:0%
+based on what you're building, the
+ 
+
+00:11:10.520 --> 00:11:12.150 align:start position:0%
+based on what you're building, the
+verification<00:11:11.120><c> checks</c><00:11:11.520><c> obviously</c><00:11:11.920><c> look</c>
+
+00:11:12.150 --> 00:11:12.160 align:start position:0%
+verification checks obviously look
+ 
+
+00:11:12.160 --> 00:11:13.550 align:start position:0%
+verification checks obviously look
+different<00:11:12.520><c> and</c><00:11:12.640><c> it's</c><00:11:12.760><c> your</c><00:11:12.920><c> job</c><00:11:13.200><c> to</c><00:11:13.280><c> make</c><00:11:13.440><c> sure</c>
+
+00:11:13.550 --> 00:11:13.560 align:start position:0%
+different and it's your job to make sure
+ 
+
+00:11:13.560 --> 00:11:15.790 align:start position:0%
+different and it's your job to make sure
+that<00:11:13.720><c> your</c><00:11:13.920><c> agents</c><00:11:14.480><c> have</c><00:11:14.680><c> the</c><00:11:14.760><c> right</c><00:11:15.000><c> tools</c><00:11:15.640><c> in</c>
+
+00:11:15.790 --> 00:11:15.800 align:start position:0%
+that your agents have the right tools in
+ 
+
+00:11:15.800 --> 00:11:17.630 align:start position:0%
+that your agents have the right tools in
+order<00:11:15.960><c> to</c><00:11:16.120><c> do</c><00:11:16.280><c> those</c><00:11:16.480><c> checks.</c><00:11:17.200><c> And</c><00:11:17.320><c> then</c><00:11:17.520><c> of</c>
+
+00:11:17.630 --> 00:11:17.640 align:start position:0%
+order to do those checks. And then of
+ 
+
+00:11:17.640 --> 00:11:18.710 align:start position:0%
+order to do those checks. And then of
+course,<00:11:17.839><c> on</c><00:11:17.880><c> the</c><00:11:17.960><c> other</c><00:11:18.080><c> side,</c><00:11:18.320><c> what</c><00:11:18.520><c> does</c>
+
+00:11:18.710 --> 00:11:18.720 align:start position:0%
+course, on the other side, what does
+ 
+
+00:11:18.720 --> 00:11:20.670 align:start position:0%
+course, on the other side, what does
+done<00:11:19.040><c> mean?</c><00:11:19.440><c> Like</c><00:11:19.640><c> I</c><00:11:19.680><c> mentioned</c><00:11:20.000><c> earlier,</c><00:11:20.560><c> if</c>
+
+00:11:20.670 --> 00:11:20.680 align:start position:0%
+done mean? Like I mentioned earlier, if
+ 
+
+00:11:20.680 --> 00:11:22.190 align:start position:0%
+done mean? Like I mentioned earlier, if
+you<00:11:20.760><c> can</c><00:11:20.920><c> get</c><00:11:21.080><c> as</c><00:11:21.240><c> objective</c><00:11:21.680><c> as</c><00:11:21.800><c> possible</c>
+
+00:11:22.190 --> 00:11:22.200 align:start position:0%
+you can get as objective as possible
+ 
+
+00:11:22.200 --> 00:11:23.829 align:start position:0%
+you can get as objective as possible
+with<00:11:22.320><c> a</c><00:11:22.400><c> specific</c><00:11:22.880><c> metric,</c><00:11:23.480><c> then</c><00:11:23.640><c> that's</c>
+
+00:11:23.829 --> 00:11:23.839 align:start position:0%
+with a specific metric, then that's
+ 
+
+00:11:23.839 --> 00:11:25.550 align:start position:0%
+with a specific metric, then that's
+best.<00:11:24.400><c> But</c><00:11:24.520><c> sometimes</c><00:11:24.880><c> you</c><00:11:24.960><c> can't.</c><00:11:25.240><c> Sometimes</c>
+
+00:11:25.550 --> 00:11:25.560 align:start position:0%
+best. But sometimes you can't. Sometimes
+ 
+
+00:11:25.560 --> 00:11:27.230 align:start position:0%
+best. But sometimes you can't. Sometimes
+you<00:11:25.640><c> have</c><00:11:25.760><c> to</c><00:11:25.839><c> say</c><00:11:26.400><c> until</c><00:11:26.720><c> you're</c><00:11:26.800><c> 100%</c>
+
+00:11:27.230 --> 00:11:27.240 align:start position:0%
+you have to say until you're 100%
+ 
+
+00:11:27.240 --> 00:11:29.310 align:start position:0%
+you have to say until you're 100%
+confident,<00:11:27.680><c> right?</c><00:11:28.200><c> And</c><00:11:28.320><c> so</c><00:11:28.480><c> like,</c><00:11:28.839><c> my</c><00:11:29.080><c> most</c>
+
+00:11:29.310 --> 00:11:29.320 align:start position:0%
+confident, right? And so like, my most
+ 
+
+00:11:29.320 --> 00:11:31.030 align:start position:0%
+confident, right? And so like, my most
+common<00:11:29.640><c> use</c><00:11:29.839><c> of</c><00:11:29.960><c> these</c><00:11:30.120><c> loops</c><00:11:30.440><c> is</c><00:11:30.560><c> when</c><00:11:30.720><c> I</c><00:11:30.800><c> use</c>
+
+00:11:31.030 --> 00:11:31.040 align:start position:0%
+common use of these loops is when I use
+ 
+
+00:11:31.040 --> 00:11:32.790 align:start position:0%
+common use of these loops is when I use
+hyper<00:11:31.280><c> frames</c><00:11:31.600><c> in</c><00:11:31.680><c> Cloud</c><00:11:31.920><c> Code</c><00:11:32.480><c> to</c><00:11:32.600><c> edit</c>
+
+00:11:32.790 --> 00:11:32.800 align:start position:0%
+hyper frames in Cloud Code to edit
+ 
+
+00:11:32.800 --> 00:11:34.470 align:start position:0%
+hyper frames in Cloud Code to edit
+videos<00:11:33.240><c> because</c><00:11:33.520><c> I</c><00:11:33.600><c> will</c><00:11:33.760><c> basically</c><00:11:34.080><c> chuck</c><00:11:34.360><c> it</c>
+
+00:11:34.470 --> 00:11:34.480 align:start position:0%
+videos because I will basically chuck it
+ 
+
+00:11:34.480 --> 00:11:36.190 align:start position:0%
+videos because I will basically chuck it
+in,<00:11:34.880><c> do</c><00:11:35.000><c> a</c><00:11:35.040><c> slash</c><00:11:35.360><c> goal,</c><00:11:35.840><c> and</c><00:11:35.920><c> it</c><00:11:36.000><c> does</c>
+
+00:11:36.190 --> 00:11:36.200 align:start position:0%
+in, do a slash goal, and it does
+ 
+
+00:11:36.200 --> 00:11:37.750 align:start position:0%
+in, do a slash goal, and it does
+everything<00:11:36.600><c> for</c><00:11:36.760><c> me.</c><00:11:37.080><c> It</c><00:11:37.160><c> has</c><00:11:37.360><c> to</c><00:11:37.560><c> get</c><00:11:37.680><c> the</c>
+
+00:11:37.750 --> 00:11:37.760 align:start position:0%
+everything for me. It has to get the
+ 
+
+00:11:37.760 --> 00:11:39.350 align:start position:0%
+everything for me. It has to get the
+transcript,<00:11:38.560><c> cut</c><00:11:38.680><c> out</c><00:11:38.760><c> the</c><00:11:38.800><c> mistakes</c><00:11:39.240><c> and</c><00:11:39.320><c> the</c>
+
+00:11:39.350 --> 00:11:39.360 align:start position:0%
+transcript, cut out the mistakes and the
+ 
+
+00:11:39.360 --> 00:11:41.030 align:start position:0%
+transcript, cut out the mistakes and the
+pauses,<00:11:39.840><c> it</c><00:11:39.920><c> has</c><00:11:40.080><c> to</c><00:11:40.200><c> make</c><00:11:40.440><c> the</c><00:11:40.560><c> beats,</c><00:11:40.840><c> it</c><00:11:40.920><c> has</c>
+
+00:11:41.030 --> 00:11:41.040 align:start position:0%
+pauses, it has to make the beats, it has
+ 
+
+00:11:41.040 --> 00:11:43.310 align:start position:0%
+pauses, it has to make the beats, it has
+to<00:11:41.120><c> sync</c><00:11:41.360><c> the</c><00:11:41.440><c> beats,</c><00:11:42.040><c> it</c><00:11:42.160><c> has</c><00:11:42.360><c> to</c><00:11:42.960><c> obviously</c>
+
+00:11:43.310 --> 00:11:43.320 align:start position:0%
+to sync the beats, it has to obviously
+ 
+
+00:11:43.320 --> 00:11:44.590 align:start position:0%
+to sync the beats, it has to obviously
+render<00:11:43.560><c> them,</c><00:11:43.840><c> and</c><00:11:43.920><c> then</c><00:11:44.040><c> it</c><00:11:44.120><c> has</c><00:11:44.240><c> a</c><00:11:44.280><c> ton</c><00:11:44.520><c> of</c>
+
+00:11:44.590 --> 00:11:44.600 align:start position:0%
+render them, and then it has a ton of
+ 
+
+00:11:44.600 --> 00:11:46.030 align:start position:0%
+render them, and then it has a ton of
+verification<00:11:45.160><c> on</c><00:11:45.240><c> making</c><00:11:45.520><c> sure</c><00:11:45.680><c> that</c><00:11:45.840><c> all</c><00:11:45.960><c> of</c>
+
+00:11:46.030 --> 00:11:46.040 align:start position:0%
+verification on making sure that all of
+ 
+
+00:11:46.040 --> 00:11:47.910 align:start position:0%
+verification on making sure that all of
+the<00:11:46.160><c> beats</c><00:11:46.680><c> are</c><00:11:47.080><c> in</c><00:11:47.240><c> bounds</c><00:11:47.640><c> and</c><00:11:47.720><c> that</c><00:11:47.840><c> they</c>
+
+00:11:47.910 --> 00:11:47.920 align:start position:0%
+the beats are in bounds and that they
+ 
+
+00:11:47.920 --> 00:11:49.590 align:start position:0%
+the beats are in bounds and that they
+line<00:11:48.160><c> up</c><00:11:48.400><c> with</c><00:11:48.560><c> the</c><00:11:48.640><c> transcript</c><00:11:49.080><c> correctly.</c>
+
+00:11:49.590 --> 00:11:49.600 align:start position:0%
+line up with the transcript correctly.
+ 
+
+00:11:49.600 --> 00:11:50.870 align:start position:0%
+line up with the transcript correctly.
+And<00:11:49.680><c> that</c><00:11:49.800><c> is</c><00:11:49.880><c> how</c><00:11:50.040><c> you're</c><00:11:50.160><c> able</c><00:11:50.360><c> to</c><00:11:50.480><c> see</c><00:11:50.680><c> a</c><00:11:50.760><c> lot</c>
+
+00:11:50.870 --> 00:11:50.880 align:start position:0%
+And that is how you're able to see a lot
+ 
+
+00:11:50.880 --> 00:11:52.350 align:start position:0%
+And that is how you're able to see a lot
+of<00:11:50.960><c> these</c><00:11:51.080><c> people</c><00:11:51.280><c> say,</c><00:11:51.440><c> "Okay,</c><00:11:51.920><c> I</c><00:11:52.040><c> did</c><00:11:52.240><c> this</c>
+
+00:11:52.350 --> 00:11:52.360 align:start position:0%
+of these people say, "Okay, I did this
+ 
+
+00:11:52.360 --> 00:11:54.510 align:start position:0%
+of these people say, "Okay, I did this
+with<00:11:52.560><c> one</c><00:11:52.800><c> shot,</c><00:11:53.160><c> with</c><00:11:53.400><c> one</c><00:11:53.560><c> prompt."</c><00:11:54.200><c> Because</c>
+
+00:11:54.510 --> 00:11:54.520 align:start position:0%
+with one shot, with one prompt." Because
+ 
+
+00:11:54.520 --> 00:11:55.710 align:start position:0%
+with one shot, with one prompt." Because
+it<00:11:54.600><c> was</c><00:11:54.760><c> a</c><00:11:54.800><c> loop,</c><00:11:55.240><c> because</c><00:11:55.480><c> it</c><00:11:55.560><c> had</c>
+
+00:11:55.710 --> 00:11:55.720 align:start position:0%
+it was a loop, because it had
+ 
+
+00:11:55.720 --> 00:11:57.510 align:start position:0%
+it was a loop, because it had
+verification<00:11:56.440><c> and</c><00:11:56.560><c> iteration.</c><00:11:57.200><c> So,</c><00:11:57.360><c> what</c>
+
+00:11:57.510 --> 00:11:57.520 align:start position:0%
+verification and iteration. So, what
+ 
+
+00:11:57.520 --> 00:11:59.470 align:start position:0%
+verification and iteration. So, what
+makes<00:11:57.760><c> a</c><00:11:57.800><c> loop</c><00:11:58.080><c> actually</c><00:11:58.400><c> work?</c><00:11:58.960><c> A</c><00:11:59.040><c> checkable</c>
+
+00:11:59.470 --> 00:11:59.480 align:start position:0%
+makes a loop actually work? A checkable
+ 
+
+00:11:59.480 --> 00:12:03.630 align:start position:0%
+makes a loop actually work? A checkable
+goal,<00:12:00.200><c> a</c><00:12:00.280><c> hard</c><00:12:00.560><c> stop,</c><00:12:01.440><c> good</c><00:12:01.720><c> tools,</c><00:12:02.560><c> memory,</c><00:12:03.560><c> a</c>
+
+00:12:03.630 --> 00:12:03.640 align:start position:0%
+goal, a hard stop, good tools, memory, a
+ 
+
+00:12:03.640 --> 00:12:06.150 align:start position:0%
+goal, a hard stop, good tools, memory, a
+separate<00:12:04.000><c> checker,</c><00:12:04.920><c> planning</c><00:12:05.240><c> first,</c>
+
+00:12:06.150 --> 00:12:06.160 align:start position:0%
+separate checker, planning first,
+ 
+
+00:12:06.160 --> 00:12:08.750 align:start position:0%
+separate checker, planning first,
+logging,<00:12:07.080><c> and</c><00:12:07.280><c> then</c><00:12:07.960><c> making</c><00:12:08.240><c> it</c><00:12:08.360><c> make</c><00:12:08.520><c> sense</c>
+
+00:12:08.750 --> 00:12:08.760 align:start position:0%
+logging, and then making it make sense
+ 
+
+00:12:08.760 --> 00:12:10.070 align:start position:0%
+logging, and then making it make sense
+with<00:12:08.880><c> the</c><00:12:08.960><c> cost.</c><00:12:09.320><c> Because</c><00:12:09.560><c> a</c><00:12:09.600><c> lot</c><00:12:09.760><c> of</c><00:12:09.840><c> times</c>
+
+00:12:10.070 --> 00:12:10.080 align:start position:0%
+with the cost. Because a lot of times
+ 
+
+00:12:10.080 --> 00:12:13.110 align:start position:0%
+with the cost. Because a lot of times
+these<00:12:10.280><c> loops</c><00:12:10.880><c> can</c><00:12:11.240><c> run</c><00:12:11.840><c> for</c><00:12:11.960><c> a</c><00:12:12.000><c> long</c><00:12:12.240><c> time,</c><00:12:12.880><c> and</c>
+
+00:12:13.110 --> 00:12:13.120 align:start position:0%
+these loops can run for a long time, and
+ 
+
+00:12:13.120 --> 00:12:15.070 align:start position:0%
+these loops can run for a long time, and
+especially<00:12:13.640><c> if</c><00:12:13.800><c> you</c><00:12:13.920><c> have</c><00:12:14.280><c> a</c><00:12:14.360><c> pretty</c><00:12:14.720><c> hard</c>
+
+00:12:15.070 --> 00:12:15.080 align:start position:0%
+especially if you have a pretty hard
+ 
+
+00:12:15.080 --> 00:12:16.670 align:start position:0%
+especially if you have a pretty hard
+goal,<00:12:15.400><c> a</c><00:12:15.440><c> goal</c><00:12:15.680><c> that</c><00:12:16.000><c> might</c><00:12:16.240><c> take</c><00:12:16.400><c> a</c><00:12:16.440><c> lot</c><00:12:16.600><c> of</c>
+
+00:12:16.670 --> 00:12:16.680 align:start position:0%
+goal, a goal that might take a lot of
+ 
+
+00:12:16.680 --> 00:12:19.550 align:start position:0%
+goal, a goal that might take a lot of
+iteration,<00:12:17.520><c> and</c><00:12:17.640><c> then</c><00:12:17.800><c> if</c><00:12:17.960><c> the</c><00:12:18.720><c> done</c><00:12:18.960><c> criteria</c>
+
+00:12:19.550 --> 00:12:19.560 align:start position:0%
+iteration, and then if the done criteria
+ 
+
+00:12:19.560 --> 00:12:21.630 align:start position:0%
+iteration, and then if the done criteria
+is<00:12:19.760><c> also</c><00:12:20.040><c> very</c><00:12:20.280><c> hard,</c><00:12:20.560><c> where</c><00:12:21.120><c> maybe</c><00:12:21.400><c> it</c><00:12:21.480><c> just</c>
+
+00:12:21.630 --> 00:12:21.640 align:start position:0%
+is also very hard, where maybe it just
+ 
+
+00:12:21.640 --> 00:12:23.390 align:start position:0%
+is also very hard, where maybe it just
+can't<00:12:21.960><c> actually</c><00:12:22.280><c> ever</c><00:12:22.480><c> hit</c><00:12:22.640><c> that,</c><00:12:23.120><c> then</c><00:12:23.240><c> that</c>
+
+00:12:23.390 --> 00:12:23.400 align:start position:0%
+can't actually ever hit that, then that
+ 
+
+00:12:23.400 --> 00:12:24.630 align:start position:0%
+can't actually ever hit that, then that
+thing's<00:12:23.560><c> going</c><00:12:23.680><c> to</c><00:12:23.760><c> run</c><00:12:23.880><c> for</c><00:12:24.000><c> a</c><00:12:24.040><c> long</c><00:12:24.280><c> time.</c>
+
+00:12:24.630 --> 00:12:24.640 align:start position:0%
+thing's going to run for a long time.
+ 
+
+00:12:24.640 --> 00:12:25.830 align:start position:0%
+thing's going to run for a long time.
+So,<00:12:24.760><c> I've</c><00:12:24.920><c> had</c><00:12:25.120><c> a</c><00:12:25.160><c> couple</c><00:12:25.400><c> loops</c><00:12:25.640><c> that</c><00:12:25.720><c> have</c>
+
+00:12:25.830 --> 00:12:25.840 align:start position:0%
+So, I've had a couple loops that have
+ 
+
+00:12:25.840 --> 00:12:27.750 align:start position:0%
+So, I've had a couple loops that have
+gone<00:12:26.040><c> for</c><00:12:26.160><c> 12</c><00:12:26.440><c> hours</c><00:12:26.640><c> plus,</c><00:12:27.200><c> and</c><00:12:27.440><c> they're</c><00:12:27.560><c> just</c>
+
+00:12:27.750 --> 00:12:27.760 align:start position:0%
+gone for 12 hours plus, and they're just
+ 
+
+00:12:27.760 --> 00:12:29.830 align:start position:0%
+gone for 12 hours plus, and they're just
+not<00:12:28.280><c> like</c><00:12:28.480><c> super</c><00:12:28.720><c> useful</c><00:12:29.000><c> to</c><00:12:29.080><c> me.</c><00:12:29.440><c> Most</c><00:12:29.680><c> of</c><00:12:29.760><c> the</c>
+
+00:12:29.830 --> 00:12:29.840 align:start position:0%
+not like super useful to me. Most of the
+ 
+
+00:12:29.840 --> 00:12:31.230 align:start position:0%
+not like super useful to me. Most of the
+time<00:12:30.080><c> when</c><00:12:30.200><c> I'm</c><00:12:30.320><c> running</c><00:12:30.520><c> loops</c><00:12:30.760><c> that</c><00:12:30.920><c> run</c><00:12:31.120><c> for</c>
+
+00:12:31.230 --> 00:12:31.240 align:start position:0%
+time when I'm running loops that run for
+ 
+
+00:12:31.240 --> 00:12:32.870 align:start position:0%
+time when I'm running loops that run for
+a<00:12:31.280><c> while,</c><00:12:31.840><c> it's</c><00:12:32.000><c> usually</c><00:12:32.240><c> more</c><00:12:32.400><c> like</c><00:12:32.560><c> these.</c>
+
+00:12:32.870 --> 00:12:32.880 align:start position:0%
+a while, it's usually more like these.
+ 
+
+00:12:32.880 --> 00:12:35.150 align:start position:0%
+a while, it's usually more like these.
+It's<00:12:33.040><c> usually</c><00:12:33.320><c> things</c><00:12:33.600><c> that</c><00:12:33.760><c> take</c><00:12:34.440><c> like</c><00:12:34.640><c> 35</c>
+
+00:12:35.150 --> 00:12:35.160 align:start position:0%
+It's usually things that take like 35
+ 
+
+00:12:35.160 --> 00:12:37.150 align:start position:0%
+It's usually things that take like 35
+minutes<00:12:35.520><c> or</c><00:12:35.600><c> maybe</c><00:12:35.839><c> a</c><00:12:35.880><c> couple</c><00:12:36.200><c> hours,</c><00:12:36.600><c> but</c><00:12:37.040><c> I</c>
+
+00:12:37.150 --> 00:12:37.160 align:start position:0%
+minutes or maybe a couple hours, but I
+ 
+
+00:12:37.160 --> 00:12:38.470 align:start position:0%
+minutes or maybe a couple hours, but I
+don't<00:12:37.400><c> need</c><00:12:37.600><c> a</c><00:12:37.680><c> loop</c><00:12:37.920><c> that's</c><00:12:38.080><c> going</c><00:12:38.200><c> to</c><00:12:38.280><c> run</c>
+
+00:12:38.470 --> 00:12:38.480 align:start position:0%
+don't need a loop that's going to run
+ 
+
+00:12:38.480 --> 00:12:40.310 align:start position:0%
+don't need a loop that's going to run
+for<00:12:38.600><c> 4</c><00:12:38.839><c> days</c><00:12:39.040><c> straight.</c><00:12:39.360><c> I</c><00:12:39.440><c> just</c><00:12:39.760><c> don't</c><00:12:40.080><c> really</c>
+
+00:12:40.310 --> 00:12:40.320 align:start position:0%
+for 4 days straight. I just don't really
+ 
+
+00:12:40.320 --> 00:12:42.630 align:start position:0%
+for 4 days straight. I just don't really
+need<00:12:40.560><c> that.</c><00:12:40.800><c> So,</c><00:12:41.320><c> another</c><00:12:41.960><c> kind</c><00:12:42.160><c> of</c><00:12:42.280><c> message</c>
+
+00:12:42.630 --> 00:12:42.640 align:start position:0%
+need that. So, another kind of message
+ 
+
+00:12:42.640 --> 00:12:43.829 align:start position:0%
+need that. So, another kind of message
+that<00:12:42.760><c> I'm</c><00:12:42.839><c> trying</c><00:12:43.000><c> to</c><00:12:43.080><c> send</c><00:12:43.320><c> here</c><00:12:43.480><c> is</c><00:12:43.640><c> just</c>
+
+00:12:43.829 --> 00:12:43.839 align:start position:0%
+that I'm trying to send here is just
+ 
+
+00:12:43.839 --> 00:12:45.190 align:start position:0%
+that I'm trying to send here is just
+because<00:12:44.080><c> you're</c><00:12:44.200><c> seeing</c><00:12:44.560><c> someone</c><00:12:44.839><c> like</c><00:12:45.000><c> Peter</c>
+
+00:12:45.190 --> 00:12:45.200 align:start position:0%
+because you're seeing someone like Peter
+ 
+
+00:12:45.200 --> 00:12:46.990 align:start position:0%
+because you're seeing someone like Peter
+Steinberger<00:12:45.680><c> saying</c><00:12:45.960><c> something</c><00:12:46.200><c> like</c><00:12:46.320><c> this,</c>
+
+00:12:46.990 --> 00:12:47.000 align:start position:0%
+Steinberger saying something like this,
+ 
+
+00:12:47.000 --> 00:12:48.550 align:start position:0%
+Steinberger saying something like this,
+doesn't<00:12:47.320><c> actually</c><00:12:47.600><c> mean</c><00:12:47.800><c> that</c><00:12:47.960><c> this</c><00:12:48.080><c> applies</c>
+
+00:12:48.550 --> 00:12:48.560 align:start position:0%
+doesn't actually mean that this applies
+ 
+
+00:12:48.560 --> 00:12:50.670 align:start position:0%
+doesn't actually mean that this applies
+directly<00:12:49.560><c> to</c><00:12:49.800><c> you</c><00:12:50.000><c> and</c><00:12:50.120><c> your</c><00:12:50.280><c> use</c><00:12:50.480><c> case.</c>
+
+00:12:50.670 --> 00:12:50.680 align:start position:0%
+directly to you and your use case.
+ 
+
+00:12:50.680 --> 00:12:52.110 align:start position:0%
+directly to you and your use case.
+Because<00:12:50.960><c> he's</c><00:12:51.160><c> a</c><00:12:51.200><c> hardcore</c><00:12:51.640><c> coder,</c><00:12:51.920><c> he's</c>
+
+00:12:52.110 --> 00:12:52.120 align:start position:0%
+Because he's a hardcore coder, he's
+ 
+
+00:12:52.120 --> 00:12:55.150 align:start position:0%
+Because he's a hardcore coder, he's
+building<00:12:53.080><c> agents,</c><00:12:53.440><c> he</c><00:12:53.640><c> works</c><00:12:53.880><c> at</c><00:12:54.000><c> OpenAI.</c>
+
+00:12:55.150 --> 00:12:55.160 align:start position:0%
+building agents, he works at OpenAI.
+ 
+
+00:12:55.160 --> 00:12:56.550 align:start position:0%
+building agents, he works at OpenAI.
+This<00:12:55.360><c> probably</c><00:12:55.720><c> makes</c><00:12:55.960><c> a</c><00:12:56.000><c> lot</c><00:12:56.200><c> of</c><00:12:56.240><c> sense</c><00:12:56.480><c> for</c>
+
+00:12:56.550 --> 00:12:56.560 align:start position:0%
+This probably makes a lot of sense for
+ 
+
+00:12:56.560 --> 00:12:57.990 align:start position:0%
+This probably makes a lot of sense for
+the<00:12:56.680><c> way</c><00:12:56.800><c> that</c><00:12:56.920><c> he</c><00:12:57.040><c> works</c><00:12:57.360><c> and</c><00:12:57.440><c> has</c><00:12:57.560><c> probably</c>
+
+00:12:57.990 --> 00:12:58.000 align:start position:0%
+the way that he works and has probably
+ 
+
+00:12:58.000 --> 00:12:59.910 align:start position:0%
+the way that he works and has probably
+10xed<00:12:58.760><c> his</c><00:12:58.920><c> productivity.</c><00:12:59.600><c> And</c><00:12:59.680><c> that's</c><00:12:59.839><c> the</c>
+
+00:12:59.910 --> 00:12:59.920 align:start position:0%
+10xed his productivity. And that's the
+ 
+
+00:12:59.920 --> 00:13:01.670 align:start position:0%
+10xed his productivity. And that's the
+cool<00:13:00.120><c> thing</c><00:13:00.240><c> about</c><00:13:00.480><c> AI</c><00:13:00.760><c> is</c><00:13:00.880><c> that</c><00:13:01.040><c> it</c><00:13:01.280><c> because</c>
+
+00:13:01.670 --> 00:13:01.680 align:start position:0%
+cool thing about AI is that it because
+ 
+
+00:13:01.680 --> 00:13:02.910 align:start position:0%
+cool thing about AI is that it because
+it's<00:13:01.800><c> going</c><00:13:01.960><c> to</c><00:13:02.040><c> seep</c><00:13:02.280><c> into</c><00:13:02.440><c> every</c><00:13:02.680><c> single</c>
+
+00:13:02.910 --> 00:13:02.920 align:start position:0%
+it's going to seep into every single
+ 
+
+00:13:02.920 --> 00:13:04.630 align:start position:0%
+it's going to seep into every single
+vertical<00:13:03.280><c> and</c><00:13:03.400><c> every</c><00:13:03.560><c> single</c><00:13:03.800><c> role,</c><00:13:04.400><c> not</c>
+
+00:13:04.630 --> 00:13:04.640 align:start position:0%
+vertical and every single role, not
+ 
+
+00:13:04.640 --> 00:13:05.910 align:start position:0%
+vertical and every single role, not
+everyone<00:13:04.960><c> will</c><00:13:05.080><c> use</c><00:13:05.200><c> it</c><00:13:05.280><c> the</c><00:13:05.360><c> same.</c><00:13:05.680><c> So,</c><00:13:05.800><c> it's</c>
+
+00:13:05.910 --> 00:13:05.920 align:start position:0%
+everyone will use it the same. So, it's
+ 
+
+00:13:05.920 --> 00:13:07.470 align:start position:0%
+everyone will use it the same. So, it's
+good<00:13:06.080><c> to</c><00:13:06.160><c> stay</c><00:13:06.440><c> up</c><00:13:06.600><c> to</c><00:13:06.680><c> date</c><00:13:06.880><c> with</c><00:13:07.040><c> what</c><00:13:07.200><c> people</c>
+
+00:13:07.470 --> 00:13:07.480 align:start position:0%
+good to stay up to date with what people
+ 
+
+00:13:07.480 --> 00:13:09.230 align:start position:0%
+good to stay up to date with what people
+like<00:13:07.680><c> Peter</c><00:13:07.920><c> Steinberger</c><00:13:08.400><c> are</c><00:13:08.480><c> saying,</c><00:13:09.120><c> but</c>
+
+00:13:09.230 --> 00:13:09.240 align:start position:0%
+like Peter Steinberger are saying, but
+ 
+
+00:13:09.240 --> 00:13:10.350 align:start position:0%
+like Peter Steinberger are saying, but
+that<00:13:09.360><c> doesn't</c><00:13:09.640><c> mean</c><00:13:09.800><c> you</c><00:13:09.839><c> have</c><00:13:09.960><c> to</c><00:13:10.040><c> drop</c>
+
+00:13:10.350 --> 00:13:10.360 align:start position:0%
+that doesn't mean you have to drop
+ 
+
+00:13:10.360 --> 00:13:12.630 align:start position:0%
+that doesn't mean you have to drop
+everything<00:13:10.720><c> right</c><00:13:10.880><c> now</c><00:13:11.400><c> and</c><00:13:11.560><c> go</c><00:13:11.760><c> try</c><00:13:12.120><c> it.</c><00:13:12.520><c> Or</c>
+
+00:13:12.630 --> 00:13:12.640 align:start position:0%
+everything right now and go try it. Or
+ 
+
+00:13:12.640 --> 00:13:13.590 align:start position:0%
+everything right now and go try it. Or
+maybe<00:13:12.839><c> it's</c><00:13:12.960><c> good</c><00:13:13.040><c> to</c><00:13:13.120><c> try</c><00:13:13.320><c> it,</c><00:13:13.400><c> but</c><00:13:13.520><c> that</c>
+
+00:13:13.590 --> 00:13:13.600 align:start position:0%
+maybe it's good to try it, but that
+ 
+
+00:13:13.600 --> 00:13:14.870 align:start position:0%
+maybe it's good to try it, but that
+doesn't<00:13:13.800><c> mean</c><00:13:13.920><c> you</c><00:13:13.960><c> have</c><00:13:14.080><c> to</c><00:13:14.160><c> fully</c><00:13:14.480><c> integrate</c>
+
+00:13:14.870 --> 00:13:14.880 align:start position:0%
+doesn't mean you have to fully integrate
+ 
+
+00:13:14.880 --> 00:13:17.510 align:start position:0%
+doesn't mean you have to fully integrate
+it<00:13:15.000><c> into</c><00:13:15.680><c> every</c><00:13:15.960><c> single</c><00:13:16.240><c> Cloud</c><00:13:16.480><c> Code</c><00:13:16.640><c> session</c>
+
+00:13:17.510 --> 00:13:17.520 align:start position:0%
+it into every single Cloud Code session
+ 
+
+00:13:17.520 --> 00:13:18.150 align:start position:0%
+it into every single Cloud Code session
+forever.
+
+00:13:18.150 --> 00:13:18.160 align:start position:0%
+forever.
+ 
+
+00:13:18.160 --> 00:13:21.150 align:start position:0%
+forever.
+So,<00:13:18.280><c> anyways,</c><00:13:18.960><c> coming</c><00:13:19.280><c> from</c><00:13:19.720><c> a</c><00:13:20.600><c> non-coding</c>
+
+00:13:21.150 --> 00:13:21.160 align:start position:0%
+So, anyways, coming from a non-coding
+ 
+
+00:13:21.160 --> 00:13:23.710 align:start position:0%
+So, anyways, coming from a non-coding
+background,<00:13:21.680><c> coming</c><00:13:22.000><c> from</c><00:13:22.480><c> a</c><00:13:22.920><c> perspective</c><00:13:23.480><c> of</c>
+
+00:13:23.710 --> 00:13:23.720 align:start position:0%
+background, coming from a perspective of
+ 
+
+00:13:23.720 --> 00:13:25.110 align:start position:0%
+background, coming from a perspective of
+someone<00:13:24.000><c> who</c><00:13:24.080><c> uses</c><00:13:24.320><c> Cloud</c><00:13:24.560><c> Code</c><00:13:24.800><c> all</c><00:13:25.000><c> all</c>
+
+00:13:25.110 --> 00:13:25.120 align:start position:0%
+someone who uses Cloud Code all all
+ 
+
+00:13:25.120 --> 00:13:27.830 align:start position:0%
+someone who uses Cloud Code all all
+time,<00:13:25.720><c> 24/7,</c><00:13:26.400><c> but</c><00:13:26.560><c> I</c><00:13:26.680><c> use</c><00:13:27.000><c> it</c><00:13:27.360><c> for</c><00:13:27.480><c> knowledge</c>
+
+00:13:27.830 --> 00:13:27.840 align:start position:0%
+time, 24/7, but I use it for knowledge
+ 
+
+00:13:27.840 --> 00:13:30.750 align:start position:0%
+time, 24/7, but I use it for knowledge
+work<00:13:28.080><c> rather</c><00:13:28.360><c> than</c><00:13:28.960><c> massive</c><00:13:29.760><c> database</c><00:13:30.440><c> code</c>
+
+00:13:30.750 --> 00:13:30.760 align:start position:0%
+work rather than massive database code
+ 
+
+00:13:30.760 --> 00:13:33.030 align:start position:0%
+work rather than massive database code
+base<00:13:31.000><c> refactors</c><00:13:31.720><c> and</c><00:13:32.000><c> building</c><00:13:32.360><c> software</c><00:13:32.880><c> and</c>
+
+00:13:33.030 --> 00:13:33.040 align:start position:0%
+base refactors and building software and
+ 
+
+00:13:33.040 --> 00:13:34.710 align:start position:0%
+base refactors and building software and
+building<00:13:33.400><c> apps</c><00:13:33.640><c> every</c><00:13:33.840><c> day.</c><00:13:34.160><c> That's</c><00:13:34.440><c> kind</c><00:13:34.640><c> of</c>
+
+00:13:34.710 --> 00:13:34.720 align:start position:0%
+building apps every day. That's kind of
+ 
+
+00:13:34.720 --> 00:13:36.070 align:start position:0%
+building apps every day. That's kind of
+the<00:13:34.800><c> way</c><00:13:34.920><c> that</c><00:13:35.040><c> I</c><00:13:35.120><c> feel</c><00:13:35.440><c> about</c><00:13:35.680><c> these</c><00:13:35.800><c> agent</c>
+
+00:13:36.070 --> 00:13:36.080 align:start position:0%
+the way that I feel about these agent
+ 
+
+00:13:36.080 --> 00:13:37.190 align:start position:0%
+the way that I feel about these agent
+loops,<00:13:36.360><c> and</c><00:13:36.480><c> I've</c><00:13:36.560><c> been</c><00:13:36.680><c> seeing</c><00:13:36.840><c> a</c><00:13:36.920><c> ton</c><00:13:37.120><c> of</c>
+
+00:13:37.190 --> 00:13:37.200 align:start position:0%
+loops, and I've been seeing a ton of
+ 
+
+00:13:37.200 --> 00:13:38.950 align:start position:0%
+loops, and I've been seeing a ton of
+stuff<00:13:37.720><c> about</c><00:13:37.960><c> them</c><00:13:38.080><c> lately,</c><00:13:38.360><c> so</c><00:13:38.520><c> I</c><00:13:38.600><c> felt</c><00:13:38.800><c> like</c>
+
+00:13:38.950 --> 00:13:38.960 align:start position:0%
+stuff about them lately, so I felt like
+ 
+
+00:13:38.960 --> 00:13:40.630 align:start position:0%
+stuff about them lately, so I felt like
+I<00:13:39.000><c> needed</c><00:13:39.280><c> to</c><00:13:39.360><c> come</c><00:13:39.480><c> in</c><00:13:39.560><c> here</c><00:13:40.120><c> and</c><00:13:40.240><c> just</c><00:13:40.400><c> share</c>
+
+00:13:40.630 --> 00:13:40.640 align:start position:0%
+I needed to come in here and just share
+ 
+
+00:13:40.640 --> 00:13:42.030 align:start position:0%
+I needed to come in here and just share
+my<00:13:40.760><c> opinions</c><00:13:41.160><c> on</c><00:13:41.280><c> it.</c><00:13:41.560><c> Some</c><00:13:41.680><c> of</c><00:13:41.720><c> you</c><00:13:41.800><c> guys</c><00:13:41.920><c> may</c>
+
+00:13:42.030 --> 00:13:42.040 align:start position:0%
+my opinions on it. Some of you guys may
+ 
+
+00:13:42.040 --> 00:13:43.390 align:start position:0%
+my opinions on it. Some of you guys may
+disagree<00:13:42.320><c> with</c><00:13:42.440><c> this,</c><00:13:42.720><c> but</c><00:13:42.960><c> that's</c><00:13:43.200><c> the</c><00:13:43.280><c> way</c>
+
+00:13:43.390 --> 00:13:43.400 align:start position:0%
+disagree with this, but that's the way
+ 
+
+00:13:43.400 --> 00:13:44.710 align:start position:0%
+disagree with this, but that's the way
+that<00:13:43.600><c> I've</c><00:13:43.720><c> been</c><00:13:43.840><c> using</c><00:13:44.080><c> them</c><00:13:44.240><c> because</c><00:13:44.480><c> I</c><00:13:44.520><c> do</c>
+
+00:13:44.710 --> 00:13:44.720 align:start position:0%
+that I've been using them because I do
+ 
+
+00:13:44.720 --> 00:13:45.990 align:start position:0%
+that I've been using them because I do
+use<00:13:44.880><c> them.</c><00:13:45.280><c> I</c><00:13:45.360><c> just</c><00:13:45.520><c> don't</c><00:13:45.640><c> go</c><00:13:45.760><c> for</c><00:13:45.840><c> those</c>
+
+00:13:45.990 --> 00:13:46.000 align:start position:0%
+use them. I just don't go for those
+ 
+
+00:13:46.000 --> 00:13:47.470 align:start position:0%
+use them. I just don't go for those
+fancy<00:13:46.280><c> runs</c><00:13:46.520><c> that</c><00:13:46.680><c> run</c><00:13:46.840><c> for</c><00:13:46.960><c> like</c><00:13:47.120><c> 3</c><00:13:47.320><c> days</c>
+
+00:13:47.470 --> 00:13:47.480 align:start position:0%
+fancy runs that run for like 3 days
+ 
+
+00:13:47.480 --> 00:13:49.070 align:start position:0%
+fancy runs that run for like 3 days
+straight.<00:13:47.960><c> A</c><00:13:48.000><c> lot</c><00:13:48.160><c> of</c><00:13:48.240><c> times</c><00:13:48.480><c> if</c><00:13:48.600><c> I</c><00:13:48.640><c> have</c><00:13:48.840><c> a</c><00:13:48.880><c> big</c>
+
+00:13:49.070 --> 00:13:49.080 align:start position:0%
+straight. A lot of times if I have a big
+ 
+
+00:13:49.080 --> 00:13:51.470 align:start position:0%
+straight. A lot of times if I have a big
+goal,<00:13:49.600><c> I</c><00:13:49.760><c> will</c><00:13:50.200><c> shoot</c><00:13:50.400><c> off</c><00:13:50.560><c> a</c><00:13:50.600><c> nice</c><00:13:51.120><c> chunky</c>
+
+00:13:51.470 --> 00:13:51.480 align:start position:0%
+goal, I will shoot off a nice chunky
+ 
+
+00:13:51.480 --> 00:13:53.310 align:start position:0%
+goal, I will shoot off a nice chunky
+loop<00:13:51.800><c> before</c><00:13:52.040><c> I</c><00:13:52.120><c> go</c><00:13:52.200><c> to</c><00:13:52.280><c> bed,</c><00:13:52.840><c> and</c><00:13:52.960><c> I</c><00:13:53.000><c> can</c><00:13:53.120><c> wake</c>
+
+00:13:53.310 --> 00:13:53.320 align:start position:0%
+loop before I go to bed, and I can wake
+ 
+
+00:13:53.320 --> 00:13:54.790 align:start position:0%
+loop before I go to bed, and I can wake
+up<00:13:53.440><c> with</c><00:13:53.520><c> something</c><00:13:53.760><c> that's</c><00:13:53.960><c> ran</c><00:13:54.160><c> for</c><00:13:54.280><c> maybe</c><00:13:54.520><c> 4</c>
+
+00:13:54.790 --> 00:13:54.800 align:start position:0%
+up with something that's ran for maybe 4
+ 
+
+00:13:54.800 --> 00:13:56.710 align:start position:0%
+up with something that's ran for maybe 4
+or<00:13:55.040><c> maybe</c><00:13:55.120><c> 8</c><00:13:55.280><c> hours,</c><00:13:55.760><c> and</c><00:13:55.880><c> that</c><00:13:56.040><c> is</c><00:13:56.160><c> truly</c><00:13:56.480><c> very</c>
+
+00:13:56.710 --> 00:13:56.720 align:start position:0%
+or maybe 8 hours, and that is truly very
+ 
+
+00:13:56.720 --> 00:13:58.270 align:start position:0%
+or maybe 8 hours, and that is truly very
+beneficial.<00:13:57.520><c> But</c><00:13:57.640><c> a</c><00:13:57.680><c> lot</c><00:13:57.840><c> of</c><00:13:57.880><c> that</c><00:13:58.000><c> stuff</c><00:13:58.160><c> is</c>
+
+00:13:58.270 --> 00:13:58.280 align:start position:0%
+beneficial. But a lot of that stuff is
+ 
+
+00:13:58.280 --> 00:13:59.870 align:start position:0%
+beneficial. But a lot of that stuff is
+more<00:13:58.440><c> experimental</c><00:13:59.080><c> for</c><00:13:59.200><c> me,</c><00:13:59.600><c> and</c><00:13:59.680><c> then</c><00:13:59.800><c> I'm</c>
+
+00:13:59.870 --> 00:13:59.880 align:start position:0%
+more experimental for me, and then I'm
+ 
+
+00:13:59.880 --> 00:14:01.270 align:start position:0%
+more experimental for me, and then I'm
+able<00:14:00.040><c> to</c><00:14:00.120><c> take</c><00:14:00.320><c> that</c><00:14:00.480><c> output</c><00:14:00.720><c> I</c><00:14:00.800><c> got</c><00:14:01.000><c> from</c><00:14:01.160><c> the</c>
+
+00:14:01.270 --> 00:14:01.280 align:start position:0%
+able to take that output I got from the
+ 
+
+00:14:01.280 --> 00:14:03.030 align:start position:0%
+able to take that output I got from the
+overnight<00:14:01.640><c> run,</c><00:14:02.240><c> and</c><00:14:02.360><c> then</c><00:14:02.520><c> chuck</c><00:14:02.760><c> it</c><00:14:02.840><c> back</c>
+
+00:14:03.030 --> 00:14:03.040 align:start position:0%
+overnight run, and then chuck it back
+ 
+
+00:14:03.040 --> 00:14:04.910 align:start position:0%
+overnight run, and then chuck it back
+into<00:14:03.200><c> some</c><00:14:03.320><c> more</c><00:14:03.480><c> loops</c><00:14:03.840><c> or</c><00:14:04.320><c> iterate</c><00:14:04.640><c> on</c><00:14:04.720><c> that</c>
+
+00:14:04.910 --> 00:14:04.920 align:start position:0%
+into some more loops or iterate on that
+ 
+
+00:14:04.920 --> 00:14:06.510 align:start position:0%
+into some more loops or iterate on that
+myself<00:14:05.320><c> as</c><00:14:05.440><c> a</c><00:14:05.480><c> human.</c><00:14:05.960><c> So,</c><00:14:06.120><c> there's</c><00:14:06.280><c> a</c><00:14:06.360><c> little</c>
+
+00:14:06.510 --> 00:14:06.520 align:start position:0%
+myself as a human. So, there's a little
+ 
+
+00:14:06.520 --> 00:14:07.830 align:start position:0%
+myself as a human. So, there's a little
+bit<00:14:06.640><c> more</c><00:14:06.760><c> detail</c><00:14:07.080><c> that</c><00:14:07.160><c> was</c><00:14:07.240><c> covered</c><00:14:07.520><c> in</c><00:14:07.680><c> this</c>
+
+00:14:07.830 --> 00:14:07.840 align:start position:0%
+bit more detail that was covered in this
+ 
+
+00:14:07.840 --> 00:14:09.870 align:start position:0%
+bit more detail that was covered in this
+slide<00:14:08.120><c> deck</c><00:14:08.400><c> as</c><00:14:08.600><c> well</c><00:14:08.800><c> as</c><00:14:09.000><c> this</c><00:14:09.240><c> full</c><00:14:09.480><c> audit,</c>
+
+00:14:09.870 --> 00:14:09.880 align:start position:0%
+slide deck as well as this full audit,
+ 
+
+00:14:09.880 --> 00:14:11.430 align:start position:0%
+slide deck as well as this full audit,
+which<00:14:10.080><c> is</c><00:14:10.160><c> way</c><00:14:10.320><c> more</c><00:14:10.520><c> wordy</c><00:14:10.840><c> and</c><00:14:11.000><c> super</c><00:14:11.240><c> ugly</c>
+
+00:14:11.430 --> 00:14:11.440 align:start position:0%
+which is way more wordy and super ugly
+ 
+
+00:14:11.440 --> 00:14:13.310 align:start position:0%
+which is way more wordy and super ugly
+to<00:14:11.520><c> look</c><00:14:11.720><c> at,</c><00:14:12.160><c> but</c><00:14:12.280><c> I</c><00:14:12.320><c> will</c><00:14:12.480><c> attach</c><00:14:12.920><c> both</c><00:14:13.200><c> of</c>
+
+00:14:13.310 --> 00:14:13.320 align:start position:0%
+to look at, but I will attach both of
+ 
+
+00:14:13.320 --> 00:14:14.750 align:start position:0%
+to look at, but I will attach both of
+these<00:14:13.600><c> sources</c><00:14:14.040><c> in</c><00:14:14.240><c> my</c><00:14:14.360><c> free</c><00:14:14.560><c> school</c>
+
+00:14:14.750 --> 00:14:14.760 align:start position:0%
+these sources in my free school
+ 
+
+00:14:14.760 --> 00:14:16.230 align:start position:0%
+these sources in my free school
+community<00:14:15.080><c> if</c><00:14:15.160><c> you</c><00:14:15.240><c> guys</c><00:14:15.400><c> want</c><00:14:15.520><c> to</c><00:14:15.600><c> check</c><00:14:16.120><c> all</c>
+
+00:14:16.230 --> 00:14:16.240 align:start position:0%
+community if you guys want to check all
+ 
+
+00:14:16.240 --> 00:14:17.310 align:start position:0%
+community if you guys want to check all
+that<00:14:16.440><c> out.</c><00:14:16.560><c> The</c><00:14:16.640><c> link</c><00:14:16.800><c> for</c><00:14:16.880><c> that</c><00:14:17.000><c> is</c><00:14:17.080><c> down</c><00:14:17.240><c> in</c>
+
+00:14:17.310 --> 00:14:17.320 align:start position:0%
+that out. The link for that is down in
+ 
+
+00:14:17.320 --> 00:14:18.710 align:start position:0%
+that out. The link for that is down in
+the<00:14:17.360><c> description.</c><00:14:18.120><c> You'll</c><00:14:18.280><c> hop</c><00:14:18.440><c> in</c><00:14:18.520><c> the</c><00:14:18.600><c> free</c>
+
+00:14:18.710 --> 00:14:18.720 align:start position:0%
+the description. You'll hop in the free
+ 
+
+00:14:18.720 --> 00:14:19.950 align:start position:0%
+the description. You'll hop in the free
+school<00:14:18.920><c> community,</c><00:14:19.360><c> you'll</c><00:14:19.520><c> go</c><00:14:19.680><c> to</c>
+
+00:14:19.950 --> 00:14:19.960 align:start position:0%
+school community, you'll go to
+ 
+
+00:14:19.960 --> 00:14:21.630 align:start position:0%
+school community, you'll go to
+classroom,<00:14:20.840><c> you'll</c><00:14:20.960><c> click</c><00:14:21.120><c> on</c><00:14:21.240><c> all</c><00:14:21.400><c> YouTube</c>
+
+00:14:21.630 --> 00:14:21.640 align:start position:0%
+classroom, you'll click on all YouTube
+ 
+
+00:14:21.640 --> 00:14:22.990 align:start position:0%
+classroom, you'll click on all YouTube
+resources,<00:14:22.120><c> and</c><00:14:22.200><c> you</c><00:14:22.240><c> can</c><00:14:22.360><c> find</c><00:14:22.640><c> everything</c>
+
+00:14:22.990 --> 00:14:23.000 align:start position:0%
+resources, and you can find everything
+ 
+
+00:14:23.000 --> 00:14:24.430 align:start position:0%
+resources, and you can find everything
+in<00:14:23.120><c> there.</c><00:14:23.800><c> But,</c><00:14:23.880><c> that's</c><00:14:24.040><c> going</c><00:14:24.160><c> to</c><00:14:24.240><c> do</c><00:14:24.280><c> it</c><00:14:24.360><c> for</c>
+
+00:14:24.430 --> 00:14:24.440 align:start position:0%
+in there. But, that's going to do it for
+ 
+
+00:14:24.440 --> 00:14:25.910 align:start position:0%
+in there. But, that's going to do it for
+today.<00:14:25.040><c> So,</c><00:14:25.080><c> if</c><00:14:25.160><c> you</c><00:14:25.240><c> guys</c><00:14:25.400><c> enjoyed</c><00:14:25.640><c> the</c><00:14:25.680><c> video</c>
+
+00:14:25.910 --> 00:14:25.920 align:start position:0%
+today. So, if you guys enjoyed the video
+ 
+
+00:14:25.920 --> 00:14:27.030 align:start position:0%
+today. So, if you guys enjoyed the video
+or<00:14:26.000><c> you</c><00:14:26.080><c> learned</c><00:14:26.240><c> something</c><00:14:26.440><c> new,</c><00:14:26.880><c> please</c>
+
+00:14:27.030 --> 00:14:27.040 align:start position:0%
+or you learned something new, please
+ 
+
+00:14:27.040 --> 00:14:28.510 align:start position:0%
+or you learned something new, please
+give<00:14:27.160><c> it</c><00:14:27.200><c> a</c><00:14:27.240><c> like.</c><00:14:27.440><c> Helps</c><00:14:27.600><c> me</c><00:14:27.680><c> out</c><00:14:27.760><c> a</c><00:14:27.800><c> ton.</c><00:14:28.440><c> And</c>
+
+00:14:28.510 --> 00:14:28.520 align:start position:0%
+give it a like. Helps me out a ton. And
+ 
+
+00:14:28.520 --> 00:14:29.750 align:start position:0%
+give it a like. Helps me out a ton. And
+as<00:14:28.640><c> always,</c><00:14:28.960><c> I</c><00:14:29.000><c> appreciate</c><00:14:29.320><c> you</c><00:14:29.360><c> guys</c><00:14:29.600><c> making</c>
+
+00:14:29.750 --> 00:14:29.760 align:start position:0%
+as always, I appreciate you guys making
+ 
+
+00:14:29.760 --> 00:14:31.150 align:start position:0%
+as always, I appreciate you guys making
+it<00:14:29.839><c> to</c><00:14:29.880><c> the</c><00:14:29.960><c> end</c><00:14:30.080><c> of</c><00:14:30.160><c> the</c><00:14:30.200><c> video,</c><00:14:30.920><c> and</c><00:14:31.000><c> I'll</c><00:14:31.040><c> see</c>
+
+00:14:31.150 --> 00:14:31.160 align:start position:0%
+it to the end of the video, and I'll see
+ 
+
+00:14:31.160 --> 00:14:32.510 align:start position:0%
+it to the end of the video, and I'll see
+you<00:14:31.200><c> on</c><00:14:31.280><c> the</c><00:14:31.320><c> next</c><00:14:31.520><c> one.</c>
+
+00:14:32.510 --> 00:14:32.520 align:start position:0%
+you on the next one.
+ 
+
+00:14:32.520 --> 00:14:34.880 align:start position:0%
+you on the next one.
+Thanks,<00:14:32.600><c> guys.</c>
+

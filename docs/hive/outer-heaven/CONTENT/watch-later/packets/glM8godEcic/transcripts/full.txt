@@ -1,0 +1,81 @@
+This NADN MCP server powers my entire voice agent.
+
+So we talked about how we have the front end with Vappy and we have the back end with Naden.
+
+So how do we actually connect these two things?
+
+Well, in Vappy we have a tool for our AI assistant called NAND.
+
+And so that Naden tool looks like this.
+
+It is our MCP server with all seven of these workflows that we also built out in Naden.
+
+So here is the client lookup tool.
+
+Here is the new client CRM.
+
+Here is the check availability.
+
+Here is the book event.
+
+Here is the update appointment.
+
+Here is the lookup appointment.
+
+And then here is our delete appointment.
+
+But that's what's so cool about this is that each tool has one very specific function.
+
+And so it's just basically up to Vappy and the MCP server to figure out which one to call and then it can get answers back so quick.
+
+I'm going to pull up the calendar on the lefth hand side and the CRM on the right hand side so that we can see all of this updating and happening in real time.
+
+All right, so we're going to go ahead and give Kylie a ring and we'll see how this works. >> Hi, this is Kylie with Hercules Detailing.
+
+Can I please have your email so I can look you up in the system?
+
+Yeah, I'm actually a new caller, so I won't be in the system. >> Welcome.
+
+Super glad you called.
+
+Hercules Detailing today.
+
+All I need is your email address, your full name and phone number to get you set up.
+
+Just let me know those details. >> Sure.
+
+Yeah, my email is nate@acample.com.
+
+My name is Natek.
+
+That's spelled with a K at the end.
+
+And then my phone number is 3334445678. >> Just to confirm, your email is nateample.com.
+
+Your full name is Nate Herk with a K at the end and phone number is 333 4445678.
+
+Right?
+
+That's all correct.
+
+Sounds >> good to you.
+
+Give me one second to send that in and get your profile set up. >> Yeah.
+
+I'm just looking to schedule an interior detailing for tomorrow. >> All right.
+
+Here's what tomorrow looks like.
+
+We do have some time slots already taken.
+
+One in the morning from 10:15 to 11:15 and another from 2 to 3.
+
+But every other hourong slot during the day is open.
+
+Yeah, let's do an 8 a.m. slot. >> All right, Nate, you're all set for an interior detailing appointment tomorrow at 8 a.m.
+
+Your spot is reserved and ready to go.
+
+If you need to change anything or have any questions about your appointment or our services, seriously, just let me know.
+
+If you want to watch the full breakdown, then click on that play button right here, and I'll see you guys over

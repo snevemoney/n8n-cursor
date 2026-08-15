@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-033",
+  "version": 1,
+  "title": "content-ops / build — still-plus-ugc-prompt-product-in-hand-video",
+  "steps": [
+    "Steal still→UGC-prompt→check product fidelity. Do not publish.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-uC5tDwGhyVA-01",
+    "K-uC5tDwGhyVA-04",
+    "K-uC5tDwGhyVA-05"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=content-ops; stage=build; A still that already looks like the SKU; a prompt that names UGC + product love.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

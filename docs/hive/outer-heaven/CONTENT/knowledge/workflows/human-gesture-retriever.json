@@ -1,0 +1,54 @@
+{
+  "workflow_id": "WF-human-gesture-retriever-v1",
+  "project_id": "human-gesture-retriever",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Load desk wiki + this workflow",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Run deep-video-learning",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T3",
+      "title": "THINK/BEHAVE/TRICKS/USE",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Dry-run without hard steps",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T5",
+      "title": "Watchdog grades",
+      "coverage": "have hive skill"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-kOKavHnlPik-01",
+    "K-kOKavHnlPik-02",
+    "K-kOKavHnlPik-03",
+    "K-kOKavHnlPik-04"
+  ],
+  "dissent_ids": [
+    "K-kOKavHnlPik-05",
+    "K-kOKavHnlPik-06",
+    "K-kOKavHnlPik-07",
+    "K-kOKavHnlPik-08"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "kOKavHnlPik",
+  "words_read": 4209
+}

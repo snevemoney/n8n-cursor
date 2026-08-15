@@ -666,33 +666,17 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 - **source:** Watch Later 15 + X bookmarks AI 34 · `CONTENT/watch-later/STEAL_SHEET.md`
 - **FACT:** Hive hunts these `icp_id`s. Tag every prospect. Path A unless noted. Bookmarks added **machines**, not new ICPs.
   - `local-clinic` → `review-to-book`
-  - `local-pro` → `private-book-install` (trade only — not lawyer/gym)
+  - `local-pro` → `private-book-install`
   - `restaurant` → `missed-call-book` (no auto-voice book)
   - `exec-coach` → `orchestrated-site-brief`
   - `creator-longform` → `clip-factory`
   - `agency-delivery` → `client-delivery-kit` (do not fork Client Pack SaaS this week)
   - `industrial-smb` → `list-anneal` then Path A (no dialer)
-  - `mktg-software` → `list-anneal` → install on leak (not list-as-SKU)
-  - `owner-coach-fitness` / `law-adj` → `private-book-install` money-now rails
+  - `mktg-software` → `list-anneal` (software, not agencies)
+  - `owner-coach-fitness` / `law-adj` → existing money-now book rails
   - `us` → internal desk machines (wiki, slice, paid-slice)
 - **FACT:** This catalog is a hunt list. Do not add a `business-lanes.json` row from a YouTube or X ICP without operator yes.
-- **FACT (run today):** Each `icp_id` has a runbook at `CONTENT/icp-runbooks/{icp_id}.md` — Route here/not here, landmines, skill chain, **Today** + **Session 2**, done-when. Skill `icp-runbook`. Index: `CONTENT/icp-runbooks/INDEX.md`. **Hunt log:** `CONTENT/icp-runbooks/HUNT_LOG.md` — append every Today. **Default city:** Greater Montreal. **Route siblings** via INDEX disambiguation — do not double-tag (e.g. lawyer → `law-adj`, not `local-pro`). **Named URL = Path A money spine before build** even on A/C types. Proof in client drafts: public URLs only; STL `:3007`, MCP `:3006`, cinematic `:3005`. `review-to-book` = `local-clinic` only.
 - **FACT (X bookmarks → machines, no new icp_id):** `cinematic-recipe` · `click-live-site` · `agent-job-card` · `motion-pipeline`. Doctrine: `DEEP_SUMMARIES.md` XB-1…XB-7. Kill: tweet $ as proof · jailbreak/watermark/NSFW · cold postcards · game studio this cycle · rebuild Claude inside Grok · 8k-node theater.
-
-### FACTS: Agent tool inventory (2026-08-13) [hive-os]
-
-- **FACT:** SSOT = `CONTENT/AGENT_TOOL_INVENTORY.json` · matrix `CONTENT/job-cards/TOOL_MATRIX.md`. Check: `python3 scripts/hive/agent-tool-inventory.py --check`.
-- **FACT:** Grok plugins are workspace-shared. Assignment is policy (use/never), not OAuth isolation.
-- **FACT:** Twilio number + ElevenLabs already live on n8n (`On-demand calling` `yYhgcj1b6XgPObIZ` · `elevenlabs post call` `7GkfpweJWvHmzSQ0`). Catalog stub `evens-on-demand-calling` has no webhook URL. Do not buy a second number or add Grok Twilio/ElevenLabs plugins.
-- **FACT:** Cursor/Grok do **not** get `TWILIO_*` / `ELEVENLABS_*`. Calls = `n8n_trigger_catalog_webhook` after HITL. `outbound calls` stays inactive (autodial kill).
-- **FACT:** Phone owners = HITL Operator + Communications Manager (propose). Creative Studio proposes ElevenLabs post-call. Lead Hunter never live-dials.
-
-### LESSONS: Bookmark implementables closed (2026-08-13) [hive-os · ai-partner-websites]
-
-- **source:** `CONTENT/x-bookmarks/learnings-implement.md` · plan leftover implementables
-- **FACT:** All P0–P2 rows closed. Do not rebuild cinematic (:3005) or MCP (:3006) demos.
-- **DO:** Load job card from `CONTENT/job-cards/` (brief injects owns/never). After site ship: `click-live-site`. Cinematic delivery: PLAYBOOK v2 + `cinematic-recipe`. GTM: one person + 17 named employees — never $20k/$50k/$1B/$400/40-agent quotes.
-- **FACT:** Higgsfield proof = `CONTENT/creative/higgsfield-ae-proof/` (conceptual layer-stack; not a live Claude↔AE session claim).
 
 ### LESSONS: Rest-of-bookmarks (non-AI ~56/98) [hive-os · ai-partner-websites · amazon-own-store]
 

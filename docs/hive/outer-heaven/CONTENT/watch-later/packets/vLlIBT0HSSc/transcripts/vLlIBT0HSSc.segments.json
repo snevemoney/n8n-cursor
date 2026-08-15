@@ -1,0 +1,1762 @@
+[
+  {
+    "start": "00:00",
+    "end": "00:04",
+    "text": "There's a job in tech right now where"
+  },
+  {
+    "start": "00:01",
+    "end": "00:08",
+    "text": "mid-level engineers are making 3 to"
+  },
+  {
+    "start": "00:04",
+    "end": "00:10",
+    "text": "400k. Job postings grew over 1,000% in a"
+  },
+  {
+    "start": "00:08",
+    "end": "00:12",
+    "text": "single year, and most developers have"
+  },
+  {
+    "start": "00:10",
+    "end": "00:14",
+    "text": "never even heard of it. Now, it's called"
+  },
+  {
+    "start": "00:12",
+    "end": "00:16",
+    "text": "a forward deployed engineer, and the big"
+  },
+  {
+    "start": "00:14",
+    "end": "00:18",
+    "text": "companies like OpenAI, Anthropic,"
+  },
+  {
+    "start": "00:16",
+    "end": "00:21",
+    "text": "Google, and Palantir are all fighting"
+  },
+  {
+    "start": "00:18",
+    "end": "00:23",
+    "text": "over the same small pool of people who"
+  },
+  {
+    "start": "00:21",
+    "end": "00:25",
+    "text": "can actually do it. And here's the part"
+  },
+  {
+    "start": "00:23",
+    "end": "00:27",
+    "text": "that's pretty interesting. This is not"
+  },
+  {
+    "start": "00:25",
+    "end": "00:29",
+    "text": "some high-level PhD research role. The"
+  },
+  {
+    "start": "00:27",
+    "end": "00:31",
+    "text": "skill set is mostly things that a solid"
+  },
+  {
+    "start": "00:29",
+    "end": "00:33",
+    "text": "developer can learn pretty quickly, and"
+  },
+  {
+    "start": "00:31",
+    "end": "00:36",
+    "text": "when stacked in a specific combination,"
+  },
+  {
+    "start": "00:33",
+    "end": "00:37",
+    "text": "almost nobody has it. So, in this video,"
+  },
+  {
+    "start": "00:36",
+    "end": "00:40",
+    "text": "I'm going to break down what a forward"
+  },
+  {
+    "start": "00:37",
+    "end": "00:42",
+    "text": "deployed engineer does, the exact skills"
+  },
+  {
+    "start": "00:40",
+    "end": "00:45",
+    "text": "that you need, how the interviews work,"
+  },
+  {
+    "start": "00:42",
+    "end": "00:47",
+    "text": "and a realistic fast path to get hired"
+  },
+  {
+    "start": "00:45",
+    "end": "00:49",
+    "text": "as one. Let's dive in."
+  },
+  {
+    "start": "00:47",
+    "end": "00:51",
+    "text": "Okay. So, what is a forward deployed"
+  },
+  {
+    "start": "00:49",
+    "end": "00:53",
+    "text": "engineer? Well, this role was basically"
+  },
+  {
+    "start": "00:51",
+    "end": "00:55",
+    "text": "invented at Palantir. And that's because"
+  },
+  {
+    "start": "00:53",
+    "end": "00:57",
+    "text": "their software was powerful, but also"
+  },
+  {
+    "start": "00:55",
+    "end": "00:59",
+    "text": "incredibly complex. So, instead of just"
+  },
+  {
+    "start": "00:57",
+    "end": "01:01",
+    "text": "shipping it and hoping, they actually"
+  },
+  {
+    "start": "00:59",
+    "end": "01:03",
+    "text": "embedded engineers directly with the"
+  },
+  {
+    "start": "01:01",
+    "end": "01:04",
+    "text": "customer to make sure that it works. So,"
+  },
+  {
+    "start": "01:03",
+    "end": "01:07",
+    "text": "that's kind of the forward deployed"
+  },
+  {
+    "start": "01:04",
+    "end": "01:08",
+    "text": "part. You're deployed forward out of the"
+  },
+  {
+    "start": "01:07",
+    "end": "01:10",
+    "text": "headquarters, and you're actually in the"
+  },
+  {
+    "start": "01:08",
+    "end": "01:12",
+    "text": "field and working directly with"
+  },
+  {
+    "start": "01:10",
+    "end": "01:14",
+    "text": "customers. Now, every series AI company"
+  },
+  {
+    "start": "01:12",
+    "end": "01:16",
+    "text": "has pretty much discovered the same"
+  },
+  {
+    "start": "01:14",
+    "end": "01:19",
+    "text": "thing. And that's because every"
+  },
+  {
+    "start": "01:16",
+    "end": "01:20",
+    "text": "enterprise AI product has one major gap."
+  },
+  {
+    "start": "01:19",
+    "end": "01:22",
+    "text": "And that's the demo works extremely"
+  },
+  {
+    "start": "01:20",
+    "end": "01:24",
+    "text": "well, but then it meets the customer's"
+  },
+  {
+    "start": "01:22",
+    "end": "01:26",
+    "text": "real world. So, their legacy systems,"
+  },
+  {
+    "start": "01:24",
+    "end": "01:28",
+    "text": "their weird data, their compliance"
+  },
+  {
+    "start": "01:26",
+    "end": "01:29",
+    "text": "rules, their internal processes,"
+  },
+  {
+    "start": "01:28",
+    "end": "01:31",
+    "text": "whatever. Now, a forward deployed"
+  },
+  {
+    "start": "01:29",
+    "end": "01:33",
+    "text": "engineer is the engineer who lives"
+  },
+  {
+    "start": "01:31",
+    "end": "01:35",
+    "text": "inside of that gap. So, you write real"
+  },
+  {
+    "start": "01:33",
+    "end": "01:37",
+    "text": "production code, but not for your"
+  },
+  {
+    "start": "01:35",
+    "end": "01:39",
+    "text": "company's core product. You're writing"
+  },
+  {
+    "start": "01:37",
+    "end": "01:42",
+    "text": "it inside of the customer's environment,"
+  },
+  {
+    "start": "01:39",
+    "end": "01:44",
+    "text": "and effectively wiring an AI product"
+  },
+  {
+    "start": "01:42",
+    "end": "01:46",
+    "text": "into their systems until it actually"
+  },
+  {
+    "start": "01:44",
+    "end": "01:48",
+    "text": "delivers value. So, it's really a hybrid"
+  },
+  {
+    "start": "01:46",
+    "end": "01:51",
+    "text": "role where you're part engineer, part"
+  },
+  {
+    "start": "01:48",
+    "end": "01:53",
+    "text": "consultant, and part product owner. One"
+  },
+  {
+    "start": "01:51",
+    "end": "01:54",
+    "text": "day, you're doing a data pipeline. The"
+  },
+  {
+    "start": "01:53",
+    "end": "01:56",
+    "text": "next, you're in a room with a bunch of"
+  },
+  {
+    "start": "01:54",
+    "end": "01:58",
+    "text": "executives explaining what AI can and"
+  },
+  {
+    "start": "01:56",
+    "end": "01:59",
+    "text": "can't do. And then you're debugging some"
+  },
+  {
+    "start": "01:58",
+    "end": "02:01",
+    "text": "production issue while the client's"
+  },
+  {
+    "start": "01:59",
+    "end": "02:02",
+    "text": "watching over your shoulder."
+  },
+  {
+    "start": "02:01",
+    "end": "02:04",
+    "text": "Now, if that sounds stressful, it's"
+  },
+  {
+    "start": "02:02",
+    "end": "02:07",
+    "text": "because it is, but that's also why this"
+  },
+  {
+    "start": "02:04",
+    "end": "02:09",
+    "text": "role is really hard to fill and pays so"
+  },
+  {
+    "start": "02:07",
+    "end": "02:11",
+    "text": "much money. So, here's a bit of context"
+  },
+  {
+    "start": "02:09",
+    "end": "02:12",
+    "text": "on why this role is suddenly everywhere"
+  },
+  {
+    "start": "02:11",
+    "end": "02:14",
+    "text": "because the numbers are crazy,"
+  },
+  {
+    "start": "02:12",
+    "end": "02:15",
+    "text": "especially in the tech field where we"
+  },
+  {
+    "start": "02:14",
+    "end": "02:18",
+    "text": "know it's been a little bit more"
+  },
+  {
+    "start": "02:15",
+    "end": "02:22",
+    "text": "difficult to get jobs recently. Now, FDE"
+  },
+  {
+    "start": "02:18",
+    "end": "02:25",
+    "text": "job postings grew over 1,165%"
+  },
+  {
+    "start": "02:22",
+    "end": "02:26",
+    "text": "year-over-year going into 2026. Now, one"
+  },
+  {
+    "start": "02:25",
+    "end": "02:29",
+    "text": "recent count actually found hundreds of"
+  },
+  {
+    "start": "02:26",
+    "end": "02:31",
+    "text": "open FDE roles across more than 100"
+  },
+  {
+    "start": "02:29",
+    "end": "02:33",
+    "text": "different companies. So, again, think"
+  },
+  {
+    "start": "02:31",
+    "end": "02:35",
+    "text": "Palantir, OpenAI, Anthropic, Mistral,"
+  },
+  {
+    "start": "02:33",
+    "end": "02:37",
+    "text": "you guys get the idea. All of these big"
+  },
+  {
+    "start": "02:35",
+    "end": "02:38",
+    "text": "AI companies, they're all hiring this"
+  },
+  {
+    "start": "02:37",
+    "end": "02:40",
+    "text": "role."
+  },
+  {
+    "start": "02:38",
+    "end": "02:42",
+    "text": "And interestingly, New York has actually"
+  },
+  {
+    "start": "02:40",
+    "end": "02:44",
+    "text": "overtaken San Francisco as the biggest"
+  },
+  {
+    "start": "02:42",
+    "end": "02:46",
+    "text": "FDE hub. Now, that's because a lot of"
+  },
+  {
+    "start": "02:44",
+    "end": "02:48",
+    "text": "the demand here is in fintech and the"
+  },
+  {
+    "start": "02:46",
+    "end": "02:50",
+    "text": "highly regulated industries where this"
+  },
+  {
+    "start": "02:48",
+    "end": "02:52",
+    "text": "role is a lot more necessary. Now, the"
+  },
+  {
+    "start": "02:50",
+    "end": "02:54",
+    "text": "reason for all of this is pretty simple."
+  },
+  {
+    "start": "02:52",
+    "end": "02:56",
+    "text": "The bottleneck is no longer models. The"
+  },
+  {
+    "start": "02:54",
+    "end": "02:58",
+    "text": "models are good. In fact, they're very"
+  },
+  {
+    "start": "02:56",
+    "end": "02:59",
+    "text": "good. The bottleneck is getting them"
+  },
+  {
+    "start": "02:58",
+    "end": "03:02",
+    "text": "from a demo environment into a"
+  },
+  {
+    "start": "02:59",
+    "end": "03:03",
+    "text": "production system that actually has an"
+  },
+  {
+    "start": "03:02",
+    "end": "03:05",
+    "text": "impact on a company, so they're willing"
+  },
+  {
+    "start": "03:03",
+    "end": "03:06",
+    "text": "to pay for it. Now, companies have"
+  },
+  {
+    "start": "03:05",
+    "end": "03:08",
+    "text": "realized that they don't just need"
+  },
+  {
+    "start": "03:06",
+    "end": "03:10",
+    "text": "researchers anymore, they need people"
+  },
+  {
+    "start": "03:08",
+    "end": "03:12",
+    "text": "who can actually make the AI work in the"
+  },
+  {
+    "start": "03:10",
+    "end": "03:13",
+    "text": "messy real world with all of the systems"
+  },
+  {
+    "start": "03:12",
+    "end": "03:15",
+    "text": "that we talked about. Now, that's"
+  },
+  {
+    "start": "03:13",
+    "end": "03:17",
+    "text": "essentially why forward deployed"
+  },
+  {
+    "start": "03:15",
+    "end": "03:20",
+    "text": "engineers exist. So, now let's dive into"
+  },
+  {
+    "start": "03:17",
+    "end": "03:22",
+    "text": "the skill stack. What do you actually"
+  },
+  {
+    "start": "03:20",
+    "end": "03:23",
+    "text": "need to know if you want this role? And"
+  },
+  {
+    "start": "03:22",
+    "end": "03:25",
+    "text": "there's three main buckets that I'm"
+  },
+  {
+    "start": "03:23",
+    "end": "03:27",
+    "text": "going to split this up into."
+  },
+  {
+    "start": "03:25",
+    "end": "03:29",
+    "text": "Now, first is real software engineering."
+  },
+  {
+    "start": "03:27",
+    "end": "03:30",
+    "text": "So, this is pretty much foundational."
+  },
+  {
+    "start": "03:29",
+    "end": "03:32",
+    "text": "It's not really negotiable. You need"
+  },
+  {
+    "start": "03:30",
+    "end": "03:34",
+    "text": "strong Python. You need to know about"
+  },
+  {
+    "start": "03:32",
+    "end": "03:36",
+    "text": "APIs, so consuming them, building them,"
+  },
+  {
+    "start": "03:34",
+    "end": "03:39",
+    "text": "databases, SQL. You need to know about"
+  },
+  {
+    "start": "03:36",
+    "end": "03:41",
+    "text": "testing, debugging, and writing code."
+  },
+  {
+    "start": "03:39",
+    "end": "03:43",
+    "text": "And then, of course, system design and"
+  },
+  {
+    "start": "03:41",
+    "end": "03:44",
+    "text": "understanding large-scale code bases."
+  },
+  {
+    "start": "03:43",
+    "end": "03:46",
+    "text": "Now, that's effectively also being able"
+  },
+  {
+    "start": "03:44",
+    "end": "03:48",
+    "text": "to take requirements and turning them"
+  },
+  {
+    "start": "03:46",
+    "end": "03:50",
+    "text": "into components, data flows, tradeoffs,"
+  },
+  {
+    "start": "03:48",
+    "end": "03:52",
+    "text": "and decisions that you can defend,"
+  },
+  {
+    "start": "03:50",
+    "end": "03:53",
+    "text": "especially to clients and to"
+  },
+  {
+    "start": "03:52",
+    "end": "03:56",
+    "text": "stakeholders."
+  },
+  {
+    "start": "03:53",
+    "end": "03:58",
+    "text": "Now, bucket two is the AI stuff. So, you"
+  },
+  {
+    "start": "03:56",
+    "end": "04:01",
+    "text": "need to be fluent in building with LLMs,"
+  },
+  {
+    "start": "03:58",
+    "end": "04:03",
+    "text": "calling model APIs, prompt engineering,"
+  },
+  {
+    "start": "04:01",
+    "end": "04:05",
+    "text": "structured outputs, you know, building"
+  },
+  {
+    "start": "04:03",
+    "end": "04:08",
+    "text": "production AI systems, and then things"
+  },
+  {
+    "start": "04:05",
+    "end": "04:10",
+    "text": "like rag, vector databases, you guys get"
+  },
+  {
+    "start": "04:08",
+    "end": "04:12",
+    "text": "the idea. Now, you don't need to be able"
+  },
+  {
+    "start": "04:10",
+    "end": "04:13",
+    "text": "to build your own LLM from scratch, but"
+  },
+  {
+    "start": "04:12",
+    "end": "04:16",
+    "text": "you need to understand agent"
+  },
+  {
+    "start": "04:13",
+    "end": "04:18",
+    "text": "orchestration, multi-step workflows,"
+  },
+  {
+    "start": "04:16",
+    "end": "04:20",
+    "text": "evaluations, observability, logging,"
+  },
+  {
+    "start": "04:18",
+    "end": "04:22",
+    "text": "right? And all of the stuff that goes"
+  },
+  {
+    "start": "04:20",
+    "end": "04:24",
+    "text": "into the integration of these AI"
+  },
+  {
+    "start": "04:22",
+    "end": "04:26",
+    "text": "systems. Now, the third bucket is"
+  },
+  {
+    "start": "04:24",
+    "end": "04:28",
+    "text": "customer skills, and also just being"
+  },
+  {
+    "start": "04:26",
+    "end": "04:30",
+    "text": "personable. Now, this is the one that's"
+  },
+  {
+    "start": "04:28",
+    "end": "04:31",
+    "text": "going to filter out most engineers, and"
+  },
+  {
+    "start": "04:30",
+    "end": "04:33",
+    "text": "it's the reason why the compensation is"
+  },
+  {
+    "start": "04:31",
+    "end": "04:36",
+    "text": "so high. You need to be able to sit with"
+  },
+  {
+    "start": "04:33",
+    "end": "04:38",
+    "text": "a non-technical person, take a vague,"
+  },
+  {
+    "start": "04:36",
+    "end": "04:40",
+    "text": "ambiguous problem, and decompose it into"
+  },
+  {
+    "start": "04:38",
+    "end": "04:42",
+    "text": "a plan. You also need to be able to"
+  },
+  {
+    "start": "04:40",
+    "end": "04:44",
+    "text": "explain technical decisions in the"
+  },
+  {
+    "start": "04:42",
+    "end": "04:46",
+    "text": "customer's language, not in yours. And"
+  },
+  {
+    "start": "04:44",
+    "end": "04:48",
+    "text": "you need actual ownership. So, when it"
+  },
+  {
+    "start": "04:46",
+    "end": "04:49",
+    "text": "breaks at 5:00 p.m. on a Friday, you're"
+  },
+  {
+    "start": "04:48",
+    "end": "04:51",
+    "text": "the one who owns this, and you need to"
+  },
+  {
+    "start": "04:49",
+    "end": "04:53",
+    "text": "fix it. Now, there's a line from a Ford"
+  },
+  {
+    "start": "04:51",
+    "end": "04:55",
+    "text": "deployed engineer hiring guide that sums"
+  },
+  {
+    "start": "04:53",
+    "end": "04:58",
+    "text": "it up pretty nicely. Technical skills"
+  },
+  {
+    "start": "04:55",
+    "end": "05:00",
+    "text": "get you in the door, customer skills get"
+  },
+  {
+    "start": "04:58",
+    "end": "05:01",
+    "text": "you the offer. Now, most developers out"
+  },
+  {
+    "start": "05:00",
+    "end": "05:03",
+    "text": "there are going to have portions of"
+  },
+  {
+    "start": "05:01",
+    "end": "05:05",
+    "text": "bucket one, but almost none of them are"
+  },
+  {
+    "start": "05:03",
+    "end": "05:07",
+    "text": "going to have all three buckets of"
+  },
+  {
+    "start": "05:05",
+    "end": "05:08",
+    "text": "skills. And that's the gap here, but"
+  },
+  {
+    "start": "05:07",
+    "end": "05:10",
+    "text": "it's also the opportunity. So, I'm going"
+  },
+  {
+    "start": "05:08",
+    "end": "05:11",
+    "text": "to show you how to close it and how you"
+  },
+  {
+    "start": "05:10",
+    "end": "05:13",
+    "text": "can learn these skills."
+  },
+  {
+    "start": "05:11",
+    "end": "05:15",
+    "text": "Okay. So, the obvious question is, how"
+  },
+  {
+    "start": "05:13",
+    "end": "05:17",
+    "text": "do you build the first two buckets of"
+  },
+  {
+    "start": "05:15",
+    "end": "05:19",
+    "text": "skills? Because watching this video is"
+  },
+  {
+    "start": "05:17",
+    "end": "05:21",
+    "text": "not it, right? Studies have shown that"
+  },
+  {
+    "start": "05:19",
+    "end": "05:23",
+    "text": "when you just watch tutorials, you read"
+  },
+  {
+    "start": "05:21",
+    "end": "05:25",
+    "text": "articles, you're only retaining about"
+  },
+  {
+    "start": "05:23",
+    "end": "05:27",
+    "text": "20% of the material. But when you learn"
+  },
+  {
+    "start": "05:25",
+    "end": "05:29",
+    "text": "actively by actually writing code and"
+  },
+  {
+    "start": "05:27",
+    "end": "05:32",
+    "text": "building things, the retention can jump"
+  },
+  {
+    "start": "05:29",
+    "end": "05:34",
+    "text": "to 75 to 90%. Now, for a role that's"
+  },
+  {
+    "start": "05:32",
+    "end": "05:36",
+    "text": "entirely about shipping in the real"
+  },
+  {
+    "start": "05:34",
+    "end": "05:37",
+    "text": "world, that difference is literally"
+  },
+  {
+    "start": "05:36",
+    "end": "05:39",
+    "text": "everything. So, that's why for this"
+  },
+  {
+    "start": "05:37",
+    "end": "05:41",
+    "text": "video, I partnered with DataCamp. Now,"
+  },
+  {
+    "start": "05:39",
+    "end": "05:42",
+    "text": "that's because their tracks map directly"
+  },
+  {
+    "start": "05:41",
+    "end": "05:44",
+    "text": "onto the first two buckets that I"
+  },
+  {
+    "start": "05:42",
+    "end": "05:46",
+    "text": "mentioned. Now, I've used DataCamp for"
+  },
+  {
+    "start": "05:44",
+    "end": "05:48",
+    "text": "years to sharpen my own Python and AI"
+  },
+  {
+    "start": "05:46",
+    "end": "05:50",
+    "text": "skills, so I can tell you this from"
+  },
+  {
+    "start": "05:48",
+    "end": "05:52",
+    "text": "actual experience. So, if we talk about"
+  },
+  {
+    "start": "05:50",
+    "end": "05:54",
+    "text": "the software engineering bucket, their"
+  },
+  {
+    "start": "05:52",
+    "end": "05:57",
+    "text": "Python for software engineering track is"
+  },
+  {
+    "start": "05:54",
+    "end": "05:59",
+    "text": "32 hours of hands-on work covering"
+  },
+  {
+    "start": "05:57",
+    "end": "06:00",
+    "text": "exactly what I just described. So,"
+  },
+  {
+    "start": "05:59",
+    "end": "06:02",
+    "text": "object-oriented programming, data"
+  },
+  {
+    "start": "06:00",
+    "end": "06:04",
+    "text": "structures and algorithms, writing"
+  },
+  {
+    "start": "06:02",
+    "end": "06:05",
+    "text": "efficient code, testing, all of that"
+  },
+  {
+    "start": "06:04",
+    "end": "06:07",
+    "text": "stuff that separates someone who can"
+  },
+  {
+    "start": "06:05",
+    "end": "06:08",
+    "text": "write a script from someone who is an"
+  },
+  {
+    "start": "06:07",
+    "end": "06:10",
+    "text": "engineer."
+  },
+  {
+    "start": "06:08",
+    "end": "06:13",
+    "text": "Now, for the AI bucket, their Associate"
+  },
+  {
+    "start": "06:10",
+    "end": "06:15",
+    "text": "AI Engineer for Developers track is 29"
+  },
+  {
+    "start": "06:13",
+    "end": "06:18",
+    "text": "hours where you build real applications,"
+  },
+  {
+    "start": "06:15",
+    "end": "06:20",
+    "text": "and it's just refreshed in July of 2026,"
+  },
+  {
+    "start": "06:18",
+    "end": "06:21",
+    "text": "so all of the content is current. And"
+  },
+  {
+    "start": "06:20",
+    "end": "06:23",
+    "text": "when you finish, there's an"
+  },
+  {
+    "start": "06:21",
+    "end": "06:26",
+    "text": "industry-recognized AI Engineer"
+  },
+  {
+    "start": "06:23",
+    "end": "06:28",
+    "text": "certification with a 4-hour practical"
+  },
+  {
+    "start": "06:26",
+    "end": "06:30",
+    "text": "exam where you build a real AI"
+  },
+  {
+    "start": "06:28",
+    "end": "06:32",
+    "text": "application. Now, that can go straight"
+  },
+  {
+    "start": "06:30",
+    "end": "06:33",
+    "text": "onto your LinkedIn, and for a role where"
+  },
+  {
+    "start": "06:32",
+    "end": "06:35",
+    "text": "you're literally being hired to ship AI"
+  },
+  {
+    "start": "06:33",
+    "end": "06:37",
+    "text": "in production, a certification that"
+  },
+  {
+    "start": "06:35",
+    "end": "06:39",
+    "text": "proves you can actually build one does"
+  },
+  {
+    "start": "06:37",
+    "end": "06:41",
+    "text": "carry real weight, and that's exactly"
+  },
+  {
+    "start": "06:39",
+    "end": "06:43",
+    "text": "why the exam is practical and not just"
+  },
+  {
+    "start": "06:41",
+    "end": "06:44",
+    "text": "multiple-choice. Now, full disclosure"
+  },
+  {
+    "start": "06:43",
+    "end": "06:46",
+    "text": "here, this is not going to cover the"
+  },
+  {
+    "start": "06:44",
+    "end": "06:48",
+    "text": "soft skills that we mentioned earlier,"
+  },
+  {
+    "start": "06:46",
+    "end": "06:50",
+    "text": "but it's a solid base that's going to"
+  },
+  {
+    "start": "06:48",
+    "end": "06:52",
+    "text": "get you most of the way there. So, right"
+  },
+  {
+    "start": "06:50",
+    "end": "06:54",
+    "text": "now, you can get 25% off using my link"
+  },
+  {
+    "start": "06:52",
+    "end": "06:55",
+    "text": "in the description, and considering that"
+  },
+  {
+    "start": "06:54",
+    "end": "06:58",
+    "text": "these skills are literally what you can"
+  },
+  {
+    "start": "06:55",
+    "end": "06:59",
+    "text": "get paid three to $400,000 per year for,"
+  },
+  {
+    "start": "06:58",
+    "end": "07:02",
+    "text": "I would say it's a worthwhile"
+  },
+  {
+    "start": "06:59",
+    "end": "07:04",
+    "text": "investment. Check it out. Okay. So,"
+  },
+  {
+    "start": "07:02",
+    "end": "07:06",
+    "text": "you're building these skills. Now, how"
+  },
+  {
+    "start": "07:04",
+    "end": "07:08",
+    "text": "do you turn them into an actual offer in"
+  },
+  {
+    "start": "07:06",
+    "end": "07:09",
+    "text": "the exact order? Let me share what I"
+  },
+  {
+    "start": "07:08",
+    "end": "07:11",
+    "text": "think."
+  },
+  {
+    "start": "07:09",
+    "end": "07:13",
+    "text": "Now, step one is to build two or three"
+  },
+  {
+    "start": "07:11",
+    "end": "07:16",
+    "text": "deployment-style projects. And I mean a"
+  },
+  {
+    "start": "07:13",
+    "end": "07:18",
+    "text": "very specific type of project, not"
+  },
+  {
+    "start": "07:16",
+    "end": "07:20",
+    "text": "another standard to-do list application."
+  },
+  {
+    "start": "07:18",
+    "end": "07:22",
+    "text": "So, you want to find a real, messy"
+  },
+  {
+    "start": "07:20",
+    "end": "07:23",
+    "text": "problem, ideally from a real business,"
+  },
+  {
+    "start": "07:22",
+    "end": "07:26",
+    "text": "like a friend's company, a local"
+  },
+  {
+    "start": "07:23",
+    "end": "07:27",
+    "text": "business, your own workplace, whatever,"
+  },
+  {
+    "start": "07:26",
+    "end": "07:30",
+    "text": "and you want to solve it end-to-end"
+  },
+  {
+    "start": "07:27",
+    "end": "07:32",
+    "text": "using AI. So, take their actual document"
+  },
+  {
+    "start": "07:30",
+    "end": "07:35",
+    "text": "or the data that they have, build a rag"
+  },
+  {
+    "start": "07:32",
+    "end": "07:37",
+    "text": "system or an agent around it, deploy it,"
+  },
+  {
+    "start": "07:35",
+    "end": "07:39",
+    "text": "and then measure the result."
+  },
+  {
+    "start": "07:37",
+    "end": "07:42",
+    "text": "Now, the magic words on an FTE resume"
+  },
+  {
+    "start": "07:39",
+    "end": "07:44",
+    "text": "are end-to-end ownership and measurable"
+  },
+  {
+    "start": "07:42",
+    "end": "07:46",
+    "text": "impact. So, for example, built an"
+  },
+  {
+    "start": "07:44",
+    "end": "07:48",
+    "text": "internal tool that cut quote turnaround"
+  },
+  {
+    "start": "07:46",
+    "end": "07:50",
+    "text": "from two days to 20 minutes is going to"
+  },
+  {
+    "start": "07:48",
+    "end": "07:52",
+    "text": "beat every single tutorial project"
+  },
+  {
+    "start": "07:50",
+    "end": "07:53",
+    "text": "that's out there because you actually"
+  },
+  {
+    "start": "07:52",
+    "end": "07:55",
+    "text": "did something meaningful. So, you want"
+  },
+  {
+    "start": "07:53",
+    "end": "07:58",
+    "text": "to actually integrate AI into a"
+  },
+  {
+    "start": "07:55",
+    "end": "08:00",
+    "text": "real-world system. That's step one."
+  },
+  {
+    "start": "07:58",
+    "end": "08:02",
+    "text": "Now, step two is to get customer-facing"
+  },
+  {
+    "start": "08:00",
+    "end": "08:04",
+    "text": "reps wherever you are right now. When I"
+  },
+  {
+    "start": "08:02",
+    "end": "08:06",
+    "text": "say reps, I mean repetitions, not like"
+  },
+  {
+    "start": "08:04",
+    "end": "08:07",
+    "text": "the reps of the people that are working"
+  },
+  {
+    "start": "08:06",
+    "end": "08:09",
+    "text": "there. So, you want to be doing things"
+  },
+  {
+    "start": "08:07",
+    "end": "08:11",
+    "text": "like volunteering to demo things, right?"
+  },
+  {
+    "start": "08:09",
+    "end": "08:13",
+    "text": "Talking with leadership, sitting in on"
+  },
+  {
+    "start": "08:11",
+    "end": "08:15",
+    "text": "requirement calls, presenting things to"
+  },
+  {
+    "start": "08:13",
+    "end": "08:16",
+    "text": "non-technical people and getting grilled"
+  },
+  {
+    "start": "08:15",
+    "end": "08:19",
+    "text": "by them. Now, if you're currently a"
+  },
+  {
+    "start": "08:16",
+    "end": "08:20",
+    "text": "developer, this is the free training"
+  },
+  {
+    "start": "08:19",
+    "end": "08:22",
+    "text": "that most of your peers are actively"
+  },
+  {
+    "start": "08:20",
+    "end": "08:24",
+    "text": "avoiding, which is exactly why it's"
+  },
+  {
+    "start": "08:22",
+    "end": "08:25",
+    "text": "valuable to you. You want to be able to"
+  },
+  {
+    "start": "08:24",
+    "end": "08:27",
+    "text": "show that you have experience talking"
+  },
+  {
+    "start": "08:25",
+    "end": "08:29",
+    "text": "with people that aren't just technical"
+  },
+  {
+    "start": "08:27",
+    "end": "08:31",
+    "text": "or developers because that is really a"
+  },
+  {
+    "start": "08:29",
+    "end": "08:33",
+    "text": "lot of the leverage points for this job."
+  },
+  {
+    "start": "08:31",
+    "end": "08:35",
+    "text": "Now, step three, you want to aim at the"
+  },
+  {
+    "start": "08:33",
+    "end": "08:37",
+    "text": "right doors. So, things like Palantir"
+  },
+  {
+    "start": "08:35",
+    "end": "08:38",
+    "text": "and the AI labs are obviously going to"
+  },
+  {
+    "start": "08:37",
+    "end": "08:40",
+    "text": "be famous companies that you want to"
+  },
+  {
+    "start": "08:38",
+    "end": "08:42",
+    "text": "work for, but there are hundreds of"
+  },
+  {
+    "start": "08:40",
+    "end": "08:45",
+    "text": "smaller AI companies that are actively"
+  },
+  {
+    "start": "08:42",
+    "end": "08:47",
+    "text": "hiring FTEs right now with a lot less"
+  },
+  {
+    "start": "08:45",
+    "end": "08:48",
+    "text": "competition. So, if you can get one or"
+  },
+  {
+    "start": "08:47",
+    "end": "08:50",
+    "text": "two years of experience at a smaller"
+  },
+  {
+    "start": "08:48",
+    "end": "08:52",
+    "text": "company in this field, that's going to"
+  },
+  {
+    "start": "08:50",
+    "end": "08:54",
+    "text": "be a massive launchpad to be able to"
+  },
+  {
+    "start": "08:52",
+    "end": "08:56",
+    "text": "work for a company like OpenAI,"
+  },
+  {
+    "start": "08:54",
+    "end": "08:58",
+    "text": "Anthropic, wherever, where you're going"
+  },
+  {
+    "start": "08:56",
+    "end": "08:59",
+    "text": "to be making 500k per year plus. Now, of"
+  },
+  {
+    "start": "08:58",
+    "end": "09:01",
+    "text": "course, this is going to be more"
+  },
+  {
+    "start": "08:59",
+    "end": "09:03",
+    "text": "difficult than I'm making it sound, but"
+  },
+  {
+    "start": "09:01",
+    "end": "09:05",
+    "text": "the idea is build legitimate projects,"
+  },
+  {
+    "start": "09:03",
+    "end": "09:08",
+    "text": "actually integrate AI, get the"
+  },
+  {
+    "start": "09:05",
+    "end": "09:09",
+    "text": "repetitions in in terms of doing social"
+  },
+  {
+    "start": "09:08",
+    "end": "09:12",
+    "text": "stuff, right? Talking with people,"
+  },
+  {
+    "start": "09:09",
+    "end": "09:13",
+    "text": "communicating and showing that charisma,"
+  },
+  {
+    "start": "09:12",
+    "end": "09:15",
+    "text": "charm, and the ability to work with"
+  },
+  {
+    "start": "09:13",
+    "end": "09:17",
+    "text": "clients, which is a massive part of this"
+  },
+  {
+    "start": "09:15",
+    "end": "09:19",
+    "text": "role, and then aim at the right type of"
+  },
+  {
+    "start": "09:17",
+    "end": "09:21",
+    "text": "jobs, get a little bit of experience,"
+  },
+  {
+    "start": "09:19",
+    "end": "09:23",
+    "text": "then really quickly switch up to a"
+  },
+  {
+    "start": "09:21",
+    "end": "09:26",
+    "text": "higher-level company. That's exactly how"
+  },
+  {
+    "start": "09:23",
+    "end": "09:28",
+    "text": "I would do this. Okay. So, now the last"
+  },
+  {
+    "start": "09:26",
+    "end": "09:29",
+    "text": "thing I want to talk about is the FTE"
+  },
+  {
+    "start": "09:28",
+    "end": "09:31",
+    "text": "interview. And the reason for that is"
+  },
+  {
+    "start": "09:29",
+    "end": "09:33",
+    "text": "because it's really not like a normal"
+  },
+  {
+    "start": "09:31",
+    "end": "09:34",
+    "text": "software engineering loop, and if you"
+  },
+  {
+    "start": "09:33",
+    "end": "09:35",
+    "text": "prepare for a normal software"
+  },
+  {
+    "start": "09:34",
+    "end": "09:37",
+    "text": "engineering loop, that's going to lead"
+  },
+  {
+    "start": "09:35",
+    "end": "09:39",
+    "text": "you astray. So, what you're going to"
+  },
+  {
+    "start": "09:37",
+    "end": "09:41",
+    "text": "expect here is about five stages or five"
+  },
+  {
+    "start": "09:39",
+    "end": "09:43",
+    "text": "rounds of interviews, probably over"
+  },
+  {
+    "start": "09:41",
+    "end": "09:45",
+    "text": "about three to six weeks. There's"
+  },
+  {
+    "start": "09:43",
+    "end": "09:47",
+    "text": "usually a technical screen, and yes, you"
+  },
+  {
+    "start": "09:45",
+    "end": "09:48",
+    "text": "want to brush up on your practical"
+  },
+  {
+    "start": "09:47",
+    "end": "09:50",
+    "text": "coding skills, a bit of leak code, or"
+  },
+  {
+    "start": "09:48",
+    "end": "09:52",
+    "text": "sequel, whatever, but the signature"
+  },
+  {
+    "start": "09:50",
+    "end": "09:55",
+    "text": "round here is typically an ambiguous"
+  },
+  {
+    "start": "09:52",
+    "end": "09:56",
+    "text": "case study. So, a hypothetical customer"
+  },
+  {
+    "start": "09:55",
+    "end": "09:59",
+    "text": "is going to hand you a vague problem,"
+  },
+  {
+    "start": "09:56",
+    "end": "10:01",
+    "text": "and you have 45 minutes to decompose it"
+  },
+  {
+    "start": "09:59",
+    "end": "10:03",
+    "text": "and turn it into a plan. Now, this round"
+  },
+  {
+    "start": "10:01",
+    "end": "10:05",
+    "text": "has the lowest pass rate, where about"
+  },
+  {
+    "start": "10:03",
+    "end": "10:06",
+    "text": "40% of people pass it, right? And it"
+  },
+  {
+    "start": "10:05",
+    "end": "10:09",
+    "text": "also is the highest weight in the"
+  },
+  {
+    "start": "10:06",
+    "end": "10:10",
+    "text": "decision of hiring an FDE. So, yes, of"
+  },
+  {
+    "start": "10:09",
+    "end": "10:12",
+    "text": "course, you'll probably need to pass one"
+  },
+  {
+    "start": "10:10",
+    "end": "10:14",
+    "text": "or two leak code rounds, but the mistake"
+  },
+  {
+    "start": "10:12",
+    "end": "10:16",
+    "text": "that almost everyone is making here is"
+  },
+  {
+    "start": "10:14",
+    "end": "10:18",
+    "text": "over indexing on leak code and"
+  },
+  {
+    "start": "10:16",
+    "end": "10:20",
+    "text": "engineering, because roughly half the"
+  },
+  {
+    "start": "10:18",
+    "end": "10:21",
+    "text": "loop here is actually your judgment,"
+  },
+  {
+    "start": "10:20",
+    "end": "10:23",
+    "text": "right? Case studies, stakeholder"
+  },
+  {
+    "start": "10:21",
+    "end": "10:25",
+    "text": "scenarios, behavioral rounds. So, you"
+  },
+  {
+    "start": "10:23",
+    "end": "10:27",
+    "text": "want to prepare your star formatted"
+  },
+  {
+    "start": "10:25",
+    "end": "10:30",
+    "text": "stories, how you handle ambiguity,"
+  },
+  {
+    "start": "10:27",
+    "end": "10:31",
+    "text": "cross-functional work, a failure you"
+  },
+  {
+    "start": "10:30",
+    "end": "10:34",
+    "text": "had, a technical disagreement, driving"
+  },
+  {
+    "start": "10:31",
+    "end": "10:36",
+    "text": "impact, you get the idea, that is so"
+  },
+  {
+    "start": "10:34",
+    "end": "10:37",
+    "text": "important. And in every single round"
+  },
+  {
+    "start": "10:36",
+    "end": "10:39",
+    "text": "here, do the things that forward"
+  },
+  {
+    "start": "10:37",
+    "end": "10:41",
+    "text": "deployed engineers are supposed to do,"
+  },
+  {
+    "start": "10:39",
+    "end": "10:43",
+    "text": "which is clarify before solving,"
+  },
+  {
+    "start": "10:41",
+    "end": "10:45",
+    "text": "decompose the problem out loud, and"
+  },
+  {
+    "start": "10:43",
+    "end": "10:47",
+    "text": "explain your decisions in business"
+  },
+  {
+    "start": "10:45",
+    "end": "10:49",
+    "text": "language, not in engineering terms,"
+  },
+  {
+    "start": "10:47",
+    "end": "10:50",
+    "text": "because that's literally the job here,"
+  },
+  {
+    "start": "10:49",
+    "end": "10:52",
+    "text": "and that's what they're looking for from"
+  },
+  {
+    "start": "10:50",
+    "end": "10:54",
+    "text": "the first minute in the interview."
+  },
+  {
+    "start": "10:52",
+    "end": "10:56",
+    "text": "Okay, so that is forward deployed"
+  },
+  {
+    "start": "10:54",
+    "end": "10:58",
+    "text": "engineers. It is the highest leverage"
+  },
+  {
+    "start": "10:56",
+    "end": "11:00",
+    "text": "role in tech currently, that most"
+  },
+  {
+    "start": "10:58",
+    "end": "11:03",
+    "text": "developers haven't heard of. The demand"
+  },
+  {
+    "start": "11:00",
+    "end": "11:05",
+    "text": "is exploding, the skill combo is very"
+  },
+  {
+    "start": "11:03",
+    "end": "11:06",
+    "text": "learnable, and the window where this is"
+  },
+  {
+    "start": "11:05",
+    "end": "11:08",
+    "text": "under priced is not going to stay open"
+  },
+  {
+    "start": "11:06",
+    "end": "11:10",
+    "text": "forever. So, what I would suggest is"
+  },
+  {
+    "start": "11:08",
+    "end": "11:12",
+    "text": "start learning it now. If you want, you"
+  },
+  {
+    "start": "11:10",
+    "end": "11:13",
+    "text": "can check out the DataCamp tracks that I"
+  },
+  {
+    "start": "11:12",
+    "end": "11:16",
+    "text": "left a link to in the description to get"
+  },
+  {
+    "start": "11:13",
+    "end": "11:18",
+    "text": "25% off to master those two buckets, and"
+  },
+  {
+    "start": "11:16",
+    "end": "11:20",
+    "text": "for the third bucket, focus on all of"
+  },
+  {
+    "start": "11:18",
+    "end": "11:21",
+    "text": "those other things we talked about, and"
+  },
+  {
+    "start": "11:20",
+    "end": "11:22",
+    "text": "you're going to be well set. Anyways,"
+  },
+  {
+    "start": "11:21",
+    "end": "11:24",
+    "text": "guys, that's all I have for you in this"
+  },
+  {
+    "start": "11:22",
+    "end": "11:25",
+    "text": "video. If you enjoyed, leave me a like,"
+  },
+  {
+    "start": "11:24",
+    "end": "11:28",
+    "text": "subscribe, and I will see you in the"
+  },
+  {
+    "start": "11:25",
+    "end": "11:28",
+    "text": "next one."
+  },
+  {
+    "start": "11:31",
+    "end": "11:33",
+    "text": ">> [music]"
+  }
+]

@@ -1,0 +1,1751 @@
+you've got here most AI work being sold today won't survive 2027.
+
+Let's unpack that. >> The value of actually doing development is trending towards zero.
+
+It's like very very stark and very very clear that it's happening. >> AI is not its own bucket.
+
+Every single vertical will just have AI seeping into it. >> As a pure AI readiness consultant, 2 million a year, right?
+
+So like your profit margin, you're going to be able to sell that business for probably $2 million.
+
+But if you're making six million a year, then it's like, "Oh, now I can sell this business for like 5x, right?
+
+I can sell it for 30 million." >> Like a lot of people think they want this opportunity to start an agency, but then they actually don't.
+
+They don't they don't want the the sales.
+
+Maybe they just want to be more of the builder. >> Honestly, most people probably shouldn't do their own thing, right?
+
+Like it's probably not ideal because it's competitive and most people fail.
+
+All right.
+
+So, in this one, I'm sitting down with Devin Karns, who is one of the guys that got me into the AI space about two years ago.
+
+So, him and Custom Studio are doing some really, really cool things.
+
+They've been around the block.
+
+They have seen a lot of stuff.
+
+So, in this video, he drops a lot of great insights.
+
+There are timestamps below, so you can jump around to what piques your interest.
+
+And at the end, he dives into like five things that he wishes he knew sooner.
+
+And throughout the video, he basically talks about what is his path and what is his plan for that $und00 million exit that he's gunning for.
+
+So save this one for later.
+
+I really hope you guys enjoy it and I'll see you in there. >> Hey guys, my name is Devin Karns.
+
+I am the co-founder CEO of Custom AI Studio.
+
+We've been architecting, designing, building and deploying custom AI systems for clients of all sizes from, you know, publicly traded enterprises to solo founders and and startup teams for about two and a half years now.
+
+Um, we've been frankly, you know, fairly successful.
+
+We got in the game really early. obviously have like a YouTube channel and and a little bit of thought leadership in the space and our journey has been one of doing what was $2,500 NAD in automations that I was building in the early days all the way to now we have you know4 million half million dollar projects over a course of a year with you know ongoing managed service contracts and partnerships with clients um typically in the mid-market space but you know a couple of enterprises here or there specifically within departments.
+
+Um, and so, yeah, excited to talk about our business, what we do, and everything in between. >> All right, Devin, it's great to have you here today. >> It's great to be here, man. >> Yeah.
+
+So, Devin is the co-founder and CEO of Custom AI Studio.
+
+It's actually really funny.
+
+Devin is kind of the one way back in the day that that woke me up to the NN stuff.
+
+He had a video that went viral.
+
+It was called like 18 months of building autonomous agents or something like that.
+
+And that one I was like, whoa, this stuff is cool.
+
+And I and I dove in.
+
+Um, and yeah, we actually we were working together for a little bit doing some stuff back in the day.
+
+Um, so yeah, I wanted to just first of all just say thank you for, you know, kind of being a big inspiration to me throughout my journey and yeah, it's really really great to have you here and I'm excited to dig into what Custom Studios been up to. >> I appreciate it.
+
+It's been awesome to see your growth.
+
+Um cuz back when we started working together, you had maybe a thousand subscribers on YouTube and >> uh you know people were coming to you about like hey I want this AI agent or I want this AI automation and we were supporting you and like building those solutions out and we actually are still working with a guy.
+
+He's been a longtime client that you brought us back in that >> really >> time period.
+
+Yeah.
+
+Yeah. >> That's awesome.
+
+I love to hear it. >> Amazing.
+
+Yeah.
+
+I remember I remember sitting in my car um on my lunch break from my job and we were I was doing the interview with you and I was I remember being like so so nervous about that.
+
+So just uh just really cool to uh get the chance to chat today.
+
+So you've put together some stuff for us which I think is going to be really really helpful for my audience here.
+
+Before we jump into what you've got to go over, >> if you could just kind of sum it up like what are people going to learn and take away by the end of this video?
+
+So basically to sum it up is uh I want to uh I guess tell people uh or at least share the approach that we're taking as AI experts, AI consultants, developers, AI automation guys, whatever you want to call us, and reframe the way a lot of the people who are like us who build the stuff or obsessed with it and you know maybe we're trying to grow an AI agency reframe the way that most people I think in space are thinking about it.
+
+I think most people are thinking about it in terms of, you know, a lifestyle business and I do an agency and I have a couple of clients and, you know, I sell automations for a couple grand and, you know, it's a really great lifestyle business to, hey, I could actually grow like a sizable company that has real enterprise value and that I can actually do that myself.
+
+It's not some like pie in the sky thing that the opportunity is there in front of us. um and to share some of our experience having tried to work in this direction, right?
+
+We obviously haven't sold our company yet or whatever, but we early on decided are we building a lifestyle business or are we building something with like meaty enterprise value with the uh plan to like exit eventually, right?
+
+Um and we obviously decided on the latter and I just don't see a lot of people talking about this.
+
+Uh so I wanted to be one of the the few voices in the space bringing it bringing it up.
+
+Yeah.
+
+Yeah, absolutely.
+
+And I mean, we've seen kind of, you know, this AI automation agency model already in the past years evolve so much.
+
+And I feel like every time I've checked in with you, what you've been up to has also been evolving a lot.
+
+So, >> yeah, >> I think it'll be really interesting to see and hear, you know, how you got to these conclusions.
+
+So, yeah, let's just dive right in. >> Yeah.
+
+So, let's go to the deck here.
+
+Obviously big uh clickbaity title, the path to a hund00 million exit as an AI agency, which is our goal personally.
+
+Um, and why we think now is kind of the opportunity to really start thinking about this and repositioning your business if this isn't of interest to you, right?
+
+Like most people, a lot of people are going to be happy with the lifestyle business and not want to put in the work to scale an organization that eventually has a $100 million potential exit, right?
+
+Uh but if you do, now is the opportunity where it genuinely does make sense.
+
+And part of it is because the early majority of companies are starting to come online to AI with Clawot, with Cloud Code, the massive wave of updates and model improvements that have happened over the last four months.
+
+It is seeping into, you know, all of the normies, basically all of their ecosystem.
+
+They're starting to play with the stuff.
+
+People know what Claude is now.
+
+And uh it's pretty obvious that the early majority is coming online to this.
+
+And it's not just like individuals, it's companies, it's leadership, it's executives, people who have had it on their docket to figure out what to do with AI for the company.
+
+Uh you know, they could have just kind of like hold held off and not really actually done anything.
+
+Now they're getting pressured to really do stuff.
+
+Uh and this is a huge opportunity for people who have the expertise to, you know, deliver solutions for them and provide clarity.
+
+So that's essentially what I'm talking about.
+
+It's how to grow a larger version of probably what most of you are doing today. >> So real quick though, like >> yeah, >> what do you think sparked this?
+
+Because I think a lot of people that I've talked to are kind of locked into their, you know, co-pilot ecosystem, >> right? >> So it's like they they see all this stuff and then what I hear very commonly is like, I want to learn it, but I don't know how to start practicing. you know, I don't have a a project to work on because I can't at work, you know, like is do you think there was something specific that happened this year that might have started to wake some people up or >> any thoughts there? >> I think uh Opus 4.6 happened and I think uh Clawbot, Open Claw happened.
+
+I think those two things happen fundamentally because all of the updates that Enthropic has been pushing within the clawed ecosystem >> are all just wrappers around the model being better, you know, and then taking like little cherrypicked nuggets from OpenClaw >> and and then obviously like OpenAI is following suit and GPT 5.5 is like amazing, but they're all doing the same stuff and the value is really in the model.
+
+So when the model does a ma has a massive improvement, everything else like follows suit, right?
+
+So >> I think that that's fundamentally what happened.
+
+Yeah. >> Gotcha.
+
+Yeah.
+
+I mean that that stretch of two or three weeks straight right after open call dropped and Anthropic was just going ham.
+
+That was fun.
+
+That kept me busy. >> Yeah.
+
+You were freaking busy, dude.
+
+Like posting every day.
+
+Like every second it'd be like I get a I get an email from Anthropic like, "Hey, we just updated blah blah blah blah blah." An hour later I see a Nate Herk video on my feed.
+
+It's >> I was having fun, that's for sure. >> I'm seeing a lot of AI Nates out there, too.
+
+Uh, especially on Instagram, which is funny. >> So, I think it's pretty clear now.
+
+Uh, you know, clients that are coming to us now already have a little bit of a PC.
+
+They've already tried to like execute on their idea.
+
+Uh, because like Claude is like very very capable and it's just bringing, you know, it's making it accessible to the normies, right?
+
+And even normies are shipping things into production, right?
+
+And so the point is like the value of actually doing development is trending towards zero.
+
+And we've we've known this for a while.
+
+It's been a pretty obvious trend.
+
+Uh you know, all of the engineers and developers are like, oh, they're trying to automate our jobs away.
+
+And this has been a part of the zeitgeist part of the conversation for a while.
+
+But it's like very very stark and very very clear that it's happening.
+
+And when I get a 67 year old lawyer coming to me with a vioded app that he's built that's like decent, you know, that that's obviously signal that the talent and the skill set of doing development.
+
+Uh while still important for right now, delivering projects as like, hey, come to me.
+
+I'm the developer.
+
+I have this expertise and skill set.
+
+I'll be the one that develops it for you and then you know you're going to pay me for my time to do that and I'm going to charge like however much premium on my hours in order to do that.
+
+That whole thing is collapsing, right?
+
+Which is kind of the point. >> So, you know, you have to be aware like this is happening now and it's like it's like actively occurring, right?
+
+Like you will wake up tomorrow and run out of business if you're just like continuing to do the same thing assuming the market is going to stay the same.
+
+Uh and >> the the outcome of this is across the board org charts are shifting and changing right they're just consolidating.
+
+We all know this where it's like yesterday was like you got the CEO and you got your directors and then you have a bunch of uh you know employees underneath that and you have this massive team that's producing like x amount of outcome or output and then you know today tomorrow it's going to be CEO a handful of directors and then a flurry of AI systems AI agents whatever you want to call them uh producing the same X output that the larger team was producing right >> and so I think that you got escape to where the puck's going. >> Absolutely.
+
+Yeah.
+
+I think the biggest thing that we've been kind of orbiting is the question of what's not going to change.
+
+You know, the whole Jeff Bezos, what's not going to change rather than >> Yeah. >> what will. >> And I know that you've been talking a lot about an AI native org. >> Yeah. >> When you start to see stuff like this where anyone can really take their idea and turn that into a working system, what do you think is the thing that scares you the most about that?
+
+The thing that scares me the most um I mean not to get existential but I'm scared about the entire structure of our uh like society and economy like like when you play out this idea that like intelligence is cheap everywhere.
+
+It's on tap and it's greater intelligence than any human on earth.
+
+Uh, and you just like kind of just like play out the scenarios of like, well, humans could actually fit here.
+
+And then you're like, well, you know, wait, maybe that thing could actually just do what the humans are doing.
+
+And then you're like, oh, well, humans have hands and feet.
+
+It's like, well, the robots and the AI can figure out the robots.
+
+And you it really does get existential when you start to play this out and you realize how fast things are going.
+
+I don't have an answer to all that.
+
+Yeah, I've I've gone down a few rabbit holes of uh Steven Bartlett podcast bringing on AI experts and it's just like >> yeah, >> hey, if there was a button here and it would reset all the AI progress in the past eight years, would you press it?
+
+And you know, many of these people saying yes is >> it does make you think for sure, but yeah, we don't have to go down that rabbit hole.
+
+One more quick question before we move on to the next slide for you would be, >> yeah, >> you hear all these people talking about, you know, like a oneperson billion dollar company or what an org chart will look like in in 20 years.
+
+Yeah.
+
+When you think of an AI native or what do you think that that that org chart really does look like?
+
+You know, is is it can we really just have a CEO and then or maybe even just a founder and then AI agent CEO and the whole seuite or how do you imagine that um really playing out successfully?
+
+I think the you almost have to peel it back and go back to like what the actual point of running a business actually is, which is like providing value to the customer.
+
+And >> if you're, you know, what you were providing was a service that can now be replaced by AI and the AI can actually do it a lot better, you know, maybe that is not even a business of the future, right?
+
+Maybe that's not something that is offered and you know bought and paid for there's no transaction happening there's no market for it like maybe that's the case like I I you know it's just the idea of like what what is the thing that you are providing that is valuable and then think can AI actually provide this thing with the same level of value you know and and start to one like say hey is this business even like viable as a business right are we going to make enough money selling these things.
+
+Can we set up an operation efficiently enough to where the margins make sense?
+
+And I think a lot of businesses will collapse in that way.
+
+And so now you're starting to think, okay, every business has like sales, marketing, they got operations, they have customer success, they have finance and accounting and AI legal.
+
+And in each of those verticals, you're like, man, AI can do like 90% of that in sales, you know, 99% of that in marketing, 99.9% of that in accounting, and like every single vertical is starting to get just chipped away.
+
+And then you're like, what's left?
+
+Well, I tell you, like from personal experience, I can use Claude all day to do all of those things and all those variety of verticals.
+
+But, you know, somebody who's really good at PR positioning and and writing, you know, how how should we position ourselves in the market and whatever, you know, an expert in that way.
+
+Working with them is way more valuable than me trying to work with Claude, right?
+
+Because I don't have that expertise in the way that they do.
+
+And so, something I've actually been thinking about recently is we talk to consultants and we hire consultants because we don't know certain things, right? we don't know you know what's the best way to position ourselves in the market what's the best way to you know run an engineering team or what's the best way to set up CIC pipelines whatever right like people have expertise the reality is like they as a consultant will work with us talk with us about our problem set whatever uh and then they want to have us on they want to you know get on retainer with us so they can actually execute the work the reality is we're thinking the whole time we could actually just build a bunch of agents to like do the stuff that they're telling the real value is like having these meetings with them having them come in understand the problem.
+
+Having them like I can say something in a certain way.
+
+Uh but they can read between the lines, they can read the body language and they can pull out like the real truth of it.
+
+Uh and then once we have that documentation, that spec like that knowledge is like written down and codified, then we can build the systems to go and execute the work.
+
+So I think that there's there's just going to be a lot of value on that upfront, you know, defining because we just don't have the expertise to do all of the certain things.
+
+And then Claude is like like Claude is like how do I know if something's good versus something's bad?
+
+Like I don't have the expertise to be able to validate and judge, right?
+
+Like so I can work with Claude all day, but like my output's just still not going to be all that great.
+
+You know what I mean? >> Right. >> So >> yeah, exactly.
+
+I mean, managing agents and managing people is very different skill set.
+
+Um, >> and I I'm glad that you touched on like the subject matter expertise thing.
+
+Um, you know, you could build a system that you could, for example, train it on 500 hours of Alex Ramoszi speaking, but you don't have Alex Herozi in that AI still.
+
+You know, as you can get you can get closer, but you don't.
+
+But >> yeah, >> man, we we wasting no time here just jumping straight into it.
+
+Um, I like it. >> Yeah.
+
+You want to go ahead and go to the next slide?
+
+By the way, guys, I know we are diving into a ton of information in this episode.
+
+So, what I did is I broke all of this down into a free resource guide that you can access for completely free by joining the free school community.
+
+The link for that is down in the description.
+
+Also, if you want to check out some of the key moments from this episode and all future podcasts on my channel, then go ahead and check out the AI Automation Society YouTube channel where we're going to be posting some of the best moments from the podcast over there.
+
+I'll link that YouTube channel in the description of this video as well.
+
+Anyways, thanks guys.
+
+Let's get back to the podcast. >> Let's do it.
+
+So one of the things that is kind of like a common I don't want to say trope but just like a common line that like you know people will say is like like okay AI is going to like all the hype and all the demos and like all you know all of the energy and investment and whatever it's all wasted because like these systems can't actually like do the stuff that people are espousing that they can do.
+
+Uh, and AI is just not ready.
+
+And then you have like the real depressing people who are just like it'll never be there and whatever.
+
+Like it's and but the reality is like we have systems that we started building last year that are now over the last couple of months like very recently working at a scale that like I didn't even personally anticipate and providing like ROI that is so it it's so like businessch changing and thus life-changing that it's like man wait we this is this is actually insane like all this stuff we were talking about AI going to do this, it's going to do that, it's going to change the game.
+
+It's actually real and we're seeing it firsthand.
+
+And one of the examples I always bring up is is the e-commerce example because we got started on that one early.
+
+They're processing 40,000 tickets a month.
+
+A big subset of those are refunds.
+
+In the e-commerce space, the whole game is like digital advertisement.
+
+And in order to win in digital advertisement, you need to outbid your competitors for ads so you get like the best placement.
+
+So you get more traffic to the site and more people buy the stuff, right?
+
+Uh but in order to like spend more to get the best placement on your ads, you need to uh be able to afford a higher customer acquisition cost.
+
+And in order to do that, you need a high lifetime value for c per customer, right?
+
+It's the LTV to CAC ratio.
+
+Hermosi actually talks about this a lot. >> One of the things in e-commerce that hurts the lifetime value per customer is your refund rate.
+
+So every if you have a high refund rate, it's obviously going to decrease the average lifetime value per customer.
+
+And so when this company came to us, they have like 25 different products under their brand and they were like, "Hey, you know, we're sitting at a 21% refund rate for like our main product.
+
+Uh if we could get that down by like one to two percent, it would actually mean millions of of dollars to our bottom line and allow us and put us on the trajectory to like actually sell this product, like exit this brand, uh and out compete the two competitors that we're going against.
+
+Uh and it's just all we need is like 1 to 2% decrease in the refund rate.
+
+We have this human team, we have this refund push back logic, human team's just not really executing it properly.
+
+Uh we want to build an AI system that actually does this.
+
+And so we did and you know we did it module by module and we we did it correctly, right?
+
+And we got the refund rate from 21% down to 16.
+
+And it's like now we're deploying it to the rest of their products.
+
+And it's like man, if one to 2% was going to be millions of dollars for them on the bottom line and get them get them on the path to exit, like the fact that we were able to get four to 5% is insane and we're going to continue to improve it to get more.
+
+What does that mean for them from an ROI perspective, right?
+
+Like they obviously paid us a certain amount to build the thing, but the value being provided is like absolutely insane right off the bat and only getting better going forward.
+
+Um, and so anyway, for them it's like, okay, now they have a bunch of working capital because they got millions of dollars coming back.
+
+You know, it's the feedback loop here, uh, or the flywheel.
+
+They got millions of dollars coming back into the bank.
+
+Now they can spend more on ads.
+
+Now they can actually create better ads.
+
+Now they could actually hire us to to build AI systems to create those ads at scale at a cheaper price, right?
+
+Like the possibilities for them to scale and grow and to reinvest back in into the business are just like absolutely massive and to unlock more flywheel effect uh things that are kind of like locked in the business, right?
+
+If we can have better ads, better performance metrics, have a closed loop system, all this stuff.
+
+So, >> absolutely.
+
+That's my favorite. >> They're they're walking away thinking >> we just got a steal. >> Highway. >> We just got a crazy deal.
+
+Yeah, absolutely.
+
+And >> you know what's interesting about that is >> so this e-commerce um company was obviously operating at some sort of scale before you started working with them.
+
+It sounds like now. >> Yeah. >> Would this have felt as you know successful if you would have been working with a much much smaller firm?
+
+Like the bottom line would have been potentially the same amount of percentage saving, you know, 21% to 60% potentially, but it's not it's not the same like millions of dollars.
+
+And I know what you what you're kind of in here talking about today is who are you going after and who should people in this audience who are you know maybe wanting to start a little freelancing business um or you know working with the SMBs but really all of these opportunities that you're it seems like you're kind of talking about and shifting towards more of the the mid-markets or you know the bigger companies.
+
+So, >> if that question makes sense at all, >> kind of how do you think about that that divide and also like how long did it take you to get there until you could could start working with some of these bigger fish?
+
+I know you mentioned this was one of your earlier ones, but yeah, any insights around around that point? >> Yeah, it's a it's a great question.
+
+I actually just shot a YouTube video about this and it the title is something like why midm markets are the best position to take advantage of the AI era.
+
+Um, and I actually don't think it's enterprises even though we do work with some enterprises.
+
+I think mid-markets are so prime more than more than you know small SMBs like startups and solos because >> the key really like and the pattern across this this might be the most important part of this whole thing the pattern across every single 97% of the projects that we've done is when you really like break it down fundamentally what we are doing is we're taking the logic of the business whether they've written it down or not but we're taking the logic of the business the the the function that they want to automate or whatever and we're just converting it into an AI system.
+
+And so for a lot of mid-markets, especially the the e-commerce one is they had already mapped out what the refund push back, the customer support team system was supposed to be.
+
+They already had the decision trees in place.
+
+They they had to do that, right?
+
+They needed the SOPs because they were hiring an offshore team.
+
+And so if you're at the mid-market scale, you've had to hire people, right?
+
+And you've had to build systems that are repeatable.
+
+You've had to write SOPs.
+
+You've had to build systems.
+
+And >> without a an existing system in place with like a clear KPI and a clear benchmark or like a clear Yeah. like a clear benchmark to judge against the performance of an AI system.
+
+It's very hard to like one like define success and then two know what you're building is going to work be it's going to be valuable in the end, right?
+
+Because you end up in this whole like scope creep thing where it's like >> oh you know I thought the idea of like an SEO generator was going to like work but like it's just costing me money and I don't see the ROI on the other side and it's like well maybe that actually wasn't the high lever thing to build, right? like maybe we should have spent more time figuring out what exactly is it that we can do that we know for a fact has a through line to the P&L.
+
+Um, and I think SMBs and and solo founders run into that mistake a lot.
+
+They end up being like passion project things that don't actually add to the bottom line.
+
+And enterprises uh, ironically are less systematized than mid-markets in a funny way because they just throw bodies at problems and yeah, that seems to like work for them.
+
+All right.
+
+And they're too distributed. they can't put together a holistic strategy for things and um but some of them are good some of them work. >> Yeah. >> In your mind, what is your mental map of the difference between SMB, mid-market, enterprise?
+
+Where do you draw the line? >> So, it's such a moving everyone's got a different take, right? >> Um when I say mid-market, I'm talking about my scale is much lower than most people's.
+
+Like I'm talking about 10 million to 250 million annual revenue which a 10 million annual revenue company and a 250 million annual revenue company are completely different uh profiles but that's that's usually what I'm talking about.
+
+I mean enterprise I'll go like 100 million to a billion you know or or actually like a billion will be maybe the annual revenue.
+
+I don't really know, dude.
+
+Like, it's to me it's more about like definitely above five because at five you would have had to like actually build systems, right?
+
+It's more about the infrastructure of the business than it is like the headcount or the revenue. >> Um, so yeah, that's not >> No, that makes sense.
+
+I mean, it's almost like we need some sort of actual universal standard of what where business fit into what. >> Right.
+
+Right.
+
+Yeah.
+
+Yeah, because then you get into this whole thing of like low midm market versus high midm market and all this stuff. >> You hit on something interesting which was, you know, when you start to work with with these companies, they either kind of come to you with like, hey, we've got this PDF of 12 agents that we want right now or it's we know that this stuff is awesome, but we don't know quite how to use it.
+
+Mhm. >> And when you have someone approach you with that in that second scenario, it's this balance of okay, you know, do I want to be a good a good vendor?
+
+I want to, you know, build some trust and just do what they they want, or do I have to kind of push back a little bit and really dig into how can we actually get you the quickest return on your investment here?
+
+And I I'd be curious to hear what what your thoughts are about this, but when I was really in the weeds of doing this, I remember so many times having to push back and say, "Hey, let's actually do a couple automations that don't have any AI at all.
+
+Let's just build some of like the most >> fundamental things that you need right now just to move data around and to to sync things up a little bit better." And um it's interesting because some people are all for it and and that builds a lot of trust and says, "Hey, this person is actually looking out for my business." But some people are like, "No, dude. like I just want what I want right now.
+
+I want this document that I've written up and I want you to execute on it otherwise I'll find someone else.
+
+Have you had similar experiences? >> Oh, for sure.
+
+For sure.
+
+And uh it was harder in the beginning because you have imposter syndrome and you're just getting started and you don't uh feel like you have the authority necessarily to be like, hey, you know, let's go a different direction.
+
+So, you kind of just do whatever they want to do.
+
+Right. >> Right.
+
+Um, but when you do that and you realize, you know, some of the percent of the time they don't get value out of it and they know, right?
+
+Sometimes they know that it was like on them with the idea and we just kind of like executed what was in the scope.
+
+Other times like not so much.
+
+Most of the time what ends up happening is like scope creep like we need this and you need that and and then you as as a good person want to just keep working on it because you want to make them happy and you just can't you just can't run a business that way, right?
+
+So >> for us it was like >> we have no choice, right?
+
+Like if if we want our customers, our clients to be happy at the end of this stuff, we have to be very very honest, manage expectations effectively and like not treat this as a uh hey, you know, we're just going to make some money, do what's in the scope, uh check it off, you know, and move on to the next one and just leave like, you know, a bunch of angry clients in our wake, right?
+
+That's no way to like build reputation, to build anything really to build culture within the company, right?
+
+Like so, uh, for us it was like, yeah, we got no choice.
+
+Like, now we have the authority.
+
+We've seen this not work a million times.
+
+Like, and we can say, hey, we've seen this not work a million times, but like, do you want this to not work or do you want this to work?
+
+You know, so, >> right? >> Yeah.
+
+You just got to get those reps in. >> Yeah. >> So, you've got here, most AI work being sold today won't survive 2027. >> Let's unpack that. >> Yeah.
+
+So I I part of this is uh it always goes back to the value, right?
+
+And and being way more sophisticated upfront and comprehensive upfront about whatever you're about to build.
+
+Cool.
+
+You can build it quickly.
+
+Amazing.
+
+Okay, great.
+
+But whatever you're about to build, is it actually going to is there a business case for it that makes sense, right?
+
+Or does it just sound like a nice to have project?
+
+Does it sound like a fun experiment? or does it sound like a bolt-on thing that like you're like, "Oh, I think my customers might like or oh, I think my team's going to like this, you know, oh, I'm going to build this like second brain for my company, which is great for most companies, but a lot of times people don't even like use the second brain for the company.
+
+They still just go and and toggle to Google Drive or like Google Meets and ping the person for the information and they don't actually habit change into using this thing.
+
+And so now it's just sitting there on the shelf getting very small utilization and and you have the executive saying, "Use our thing. use our thing.
+
+And it's like, okay, well, you know, maybe you should have spent some time up front to figure out like, do people actually want to use a chatbot to pull information.
+
+Is there a better way to do this?
+
+Whenever they're pulling information, what are they pulling it for?
+
+What workflow are they are they executing at the time for why they need that?
+
+Can we just collapse that entirely?
+
+You know, and and then you start to get dig into like really first principles about like what's the purpose of this data?
+
+Why does it need to move here?
+
+Who needs to see it? what what are people reasoning on it about or making decisions on it about, right?
+
+Uh and then when you when you do that, you start to uncover like one, a lot of inefficiencies, but two just a lot of bloat in tools that people are using and systems that people build, right?
+
+Um, and so the purpose of this slide is is mainly to say like a a more holistic approach that's very very focused on the business case and and producing like real outcomes is going to be sustainable.
+
+Whereas like bolted on glue or solutions or features or whatever, those things are going to be less and less valuable because they're just not going to be needed anymore.
+
+And you know, whether it's the best thing ever and it actually works and you know, you get the output 100% accurate every time, it doesn't matter.
+
+It's just not going to be needed because the workflow itself will collapse and no one's going to have to actually talk to your second brain chatbot anymore, right?
+
+And I I just want to say like those are still valuable.
+
+Let me say, you know, those are still valuable, but sometimes you just don't need that, right? >> So, >> hear you. >> Hopefully that answers that question. >> Yeah, absolutely.
+
+I mean it sounds like this was kind of a an adoption point rather than like a a tech point. >> Yeah.
+
+And it was also like a need, right?
+
+Like you know Claude for instance kills the need for a lot of the tools that we were using in the early days.
+
+Like when's the last time you set up a system that uses rag?
+
+Realistically, >> it's been a long time. >> Yeah.
+
+Right.
+
+Like >> Yeah.
+
+So some of the systems we built, when's the last time you built something in NAM? >> That's been a long time. >> Exactly.
+
+Exactly. >> Yeah. >> So >> it's it's really interesting to think about, you know, how can you build things with the kind of assumption that in four months your the way that you interact with it will be different, you know, and that's what's nice about all of these different, you know, whether you're using cloud code or codeex or Hermes agent, they can all work out of a directory. they can all work out of a repo.
+
+And so that's that gives me a level of comfort right now. >> But >> yeah, I mean it is it is definitely an interesting thing to think about especially as you know we're trying to build out things like a certification program.
+
+You know, how do we teach things that don't just get taken over in the next year? >> Yeah.
+
+Yeah.
+
+And I think that, you know, the pressure that people are feeling by maybe their bosses or their managers and having to make this stuff a culture shift rather than just like a a compliance training that they might click through once a month is is a very big question. >> Yeah.
+
+Yeah.
+
+I mean, we're still even trying to figure that out, you know? >> Um especially with the politics of of AI, like it's just like people people hate it.
+
+Like they genuinely hate it.
+
+Um, >> some people do really not like AI. >> Yeah, it's like the vitriol is is absolutely insane.
+
+Anyway, it's uh it'll be interesting to see how it all plays out.
+
+Um, and so this I I put a lot of time thinking through this because there's a lot of when I was running my community, which I have since shut down because I'm just not good at it.
+
+Uh there was a lot of people who were like, "Man, I'm playing with this stuff all the time, but like how do I make money doing AI stuff?
+
+Like, how do I make money doing it?
+
+Do I want to be an AI agency?
+
+Do I want to do blah blah blah?" >> Uh and so like these are 11 different playbooks or ways that people are making money as like AI experts, right? >> Okay.
+
+Okay.
+
+And it goes anywhere from like just the creator who's getting sponsorships, the freelancer, you know, one-on-one just like advisory consulting type um pure AI readiness consulting.
+
+So it's like, hey, we'll do an AI readiness assessment, right?
+
+It's a workshop training and enablement.
+
+Metagu is making a crap ton of money out of Australia doing like Microsoft co-pilot, you know, training for enterprises.
+
+Mhm. >> Obviously like automations within ADN managed agents.
+
+It's like, hey, my agent's a content creator and I manage it over here.
+
+You pay me a license uh to use my agent. >> Vertical products, horizontal platforms, which is like the hardest play.
+
+Uh hardware, which you know is like a guilty pleasure of mine is the whole hardware space.
+
+And then you have like full stack consulting firms and private equity.
+
+And you can see by the chart here that it's like okay there's technical depth and complexity along that X- axis but then there's also like the contract size which it's really like the value provided.
+
+And so for us we were like all right we want to build this like large company.
+
+We want to have a very very successful exit.
+
+We're not trying to go lifestyle business.
+
+How do we build enterprise value?
+
+Well let's look at the McKenzis.
+
+Let's look at the Baines.
+
+Let's look at the BCGs.
+
+We don't necessarily want to do the product.
+
+It's more of a lightning in the bottle play.
+
+Uh, everybody's trying to do product and less than 0.1% are going to be successful uh or even defensible over time.
+
+But every company over the next 10 years is going to want to transform their operations into an AI first AI native one.
+
+And us as experts who've done this, who've got who got in early have a unique advantage to take it to take advantage of this opportunity.
+
+Um, we have a unique opportunity to take advantage of this.
+
+Right.
+
+So >> right >> uh yeah anyway full stack consulting firm is more like going up market doing a lot of the consulting and discovery upfront uh market analysis ROI analysis architecting technical architecture and then going and actually building and maintaining those systems.
+
+Um >> I hear you. >> So what do you think about the announcement we saw a few days ago with Enthropic and Blackstone and Goldman coming together? >> What was it?
+
+What was the announcement?
+
+They launched a $ 1.5 billion AI enterprise services firm.
+
+So kind of going right at McKenzie. >> Wow.
+
+Um what I think about it is Anthropic and Open AI are very very very aware of the fact that the models will be commoditized and the amount of money you can make as just purely providing a model is going to be very negligible.
+
+And in order to be a trillion dollar um you know enterprise you have to be on the application layer.
+
+And what the application layer means is uh obviously like putting wrappers like cloud desktop co-work cloud code around your model.
+
+Um and then the other side of it is providing services right and then obviously the other players the banks you know they they want to get involved as well and all this.
+
+So >> right >> but yeah They just launched like those >> Yeah, they just launched like those 10 finance agents and >> you know right after this announcement they came out with the SpaceX announcement for all this compute >> and you know you've got clawed in your you know the majority of businesses >> corporate businesses are running on Microsoft's ecosystem.
+
+So they got all the the word cloud in Word Cloud and Excel and then they freed up all this compute and they were doing that shift of like hey $20 a month users can no longer use cloud code.
+
+I think they rolled that back, but they tried that out.
+
+And it's just like they're clearly understanding that like the enterprises are going to need obviously a lot of compute and they're going to need people to help not only teach them, but help everyone internally adopt it.
+
+And obviously they've got like their little academy too with these different certification programs for >> for educators for for managers and >> yeah, it's just interesting to see what they're doing there.
+
+So >> yeah, >> I I think that you've gone through with Custom Studio a lot of different kind of eras, I guess.
+
+And on this um on this graph here on the x- axis you've got technical depth and delivery complexity.
+
+And then what's on the y? >> Uh contract size. >> Contract size.
+
+Gotcha.
+
+Yeah. >> So basically just like potential for >> ARR maybe.
+
+And >> what did you see like as you bounced from, you know, a pretty lean team and maybe even working more so as like your your standard agency project revenue, bouncing from just kind of keep keep working your way up market, you know, like were there were there certain >> certain stories or challenges that you faced that made you realize you needed to jump up? >> Yeah, I mean like for sure, dude.
+
+I mean like there's so many different uh um you know conflating factors where it's like okay there's one where I know the AI landscape itself this technology is evolving so fast and reshaping the approach you have to take like every few months that's one thing that's constantly happening >> the other is what is the adoption curve in the market who's who wants this stuff and what are they looking for um you know who's who's spending money on AI basically Right.
+
+And why, >> right? >> And that's changing over time. >> And then there's like, okay, well, I have a co-founder and I have a team and my team has certain goals.
+
+Freaking six people on our team last month got tapped or like the last couple of months got tapped by like clients and others trying to poach them, right?
+
+And not in like this this malicious way, right?
+
+But like AI expertise like showing on your CV that you've done things and actually deploy things and work with clients and all that is like so valuable and only getting more valuable, right?
+
+So like >> how do you keep a team who's really good, >> you know, involved and excited and growing and that there's part they're part of something larger than themselves. >> Uh you know and then and then what's your ultimate goal, right?
+
+And we wanted to do a massive exit.
+
+So for us like >> one of the learnings was like >> I mean there's a there's a lot of learn like everything from like sales onboarding the customer experience the solutions that you deploy like literally all the way down you have to get better at each one of those >> aspects right because you're asking for more money so >> right and a lot of people might not want to do that like a lot of people think they want this opportunity to start an agency, but then they actually don't they don't they don't want to do all that the sales.
+
+Maybe they just want to be more of the builder behind the scenes. >> So, >> I guess the question to you would be, you know, if you're kind of thinking about this this whole model of being more on the the the higher side of the market, but you're starting right now, you have to start somewhere.
+
+Where do you start?
+
+And also, what is your argument for sticking to SMBs, if any?
+
+You know, it's um I I you know, I almost hate it because it's said so much, but it is true.
+
+You got to start with distribution.
+
+You and I started on YouTube.
+
+Like Custom App Studio didn't take off until YouTube took off, right?
+
+And that's what made everything else possible.
+
+So, if I'm somebody like like it's just like man, you have to find people who are willing to buy whatever it is you're offering.
+
+And you know, you have to be able to sell it.
+
+And if you're going to sell it, you got to either have like credibility, authority, you have to have experience, maybe a resume, maybe a portfolio, maybe you just need like good vibes and energy, maybe you need a personal connection, you know, whatever it is. like the the unique thing about the AI space that's different from uh other things, especially in the whole AI agency game, is you don't really need a huge portfolio to prove to somebody that you know what you're talking about and that you can build what they want.
+
+You actually don't need you don't need a port portfolio at all, right?
+
+You you need to be able to whip up a PC.
+
+You really what you really need to do is be able to understand people's visions for things, right? like what does this person want?
+
+Okay, what do they really want?
+
+Right?
+
+And then can I show them that I can provide that for them?
+
+And you don't even need all these case studies and you know all this proof or whatever because barely you know this it's just getting started right like no one's expecting anybody to have hundreds of case studies yet.
+
+Now some of us are lucky because we did get we started early but like find people who want to buy your stuff. to distribution and like don't have imposter syndrome would be my two things like just know what you're talking about, you know, and if you don't know what you're talking about, then like keep learning, >> right?
+
+Like I think you just have to show that you've done stuff.
+
+It doesn't have to be specifically for a client that already has 500 RO 500x ROI, but if you can show that you're using this on the daily, and like you said, that a expertise is what what people need and what people want. and starting your own business isn't the only way to achieve maybe the financial freedom or the time freedom that you're looking for. >> Yeah. >> Um it's it's going to be valuable.
+
+I mean, with the the anthropic partnership, they are kind of doing, you know, the whole like we're going to embed engineers directly into your operations because they already have the expertise. >> So, yeah, I think that this was a a cool graphic. >> Yeah, >> I like the way it's laid out. >> Thanks, dude.
+
+Thanks, Claude.
+
+Thanks, Claude. >> Okay, the next three slides are a little um financeheavy, so I think I'm going to go quick because we've kind of uh you know, we like to yap with each other. >> Yeah, no worries.
+
+Keep it casual. >> Yeah, naturally.
+
+So, what I'm outlining here is like is essentially the enterprise value that you may be able to command uh at each of the stages, right?
+
+Okay.
+
+So, like if you're a freelancer, you know, it's like how are you going to sell a freelance business?
+
+You're not.
+
+You're not going to sell it, right?
+
+SMB automation agency maybe, but like not really, right?
+
+I mean, this is eBay of ceilings, right?
+
+So, how much money can you make?
+
+These are lifestyle business types things. >> Still great money.
+
+And I imagine a lot of people watching this are like, "Yeah, dude.
+
+Like, I would love like any of these are great for me." Like, that's a win.
+
+Fantastic.
+
+Um, and then you move on to things where it's like, okay, you can actually make a lot more money doing AI training stuff, uh, AI readiness consulting, right?
+
+There's just more compreh there's more work that needs to get done to provide this value.
+
+Manage agents of course.
+
+Um, it also depends.
+
+It this depends on how you um what your business model is.
+
+And then obviously the the product thing like these this is a lightning in a bottle.
+
+This is like you know the product thing is like you know what are you going for you like unicorn status?
+
+Like I guess you could have like a lifestyle business with a vertical product, but like I don't know, it's a little bit harder I think in my opinion, especially with things becoming obsolete with all the updates.
+
+Uh and then like if this is like what can you command potentially uh with your like enterprise value as a big large consulting firm and then like a PE, right?
+
+And so I might I might uh this is this is taking taken a little bit off of like Hermoszi.
+
+Hormosi did something a couple years ago um when he was talking about acquisition AI and like what their playbook was and he's like we look for companies that are making one to three million a year ARR uh because that's like prime for us to just like improve it, grow it a little bit, get it over that five to six mil mark because once you get over that mark uh you command like you know five 5x your your IBIDA versus like before you could only command like 1 to 2x, right?
+
+So there's a rerating that happens once you pass 56, you know, annual revenue.
+
+And so here it's like, okay, hey, services firms rerate at scale, not necessarily category, right?
+
+So they jump from 3 to 10, right around the uh, you know, like I saying, 3 to 5 milliona once you get to the kind of like 5 to 10, the multiple that you can get on your IBIDA is like is much larger, right? it's almost double.
+
+Um, and so like this is like important to know because when you're looking at this up here around like what's kind of like the natural ceiling for these types of businesses, obviously every business is different, but like typical ceiling for these types of businesses like okay well like am I going to actually be in a position to sell my company uh, you know, making 500k a year as like a you know one-on-one consultant?
+
+It's like no.
+
+It's very much founder dependent. like there's just it's just not going to happen, right?
+
+Am I going to be able to do it as like a pure like AI readiness consulting firm?
+
+Maybe, right?
+
+Like if you're able to like really put in the systems to do it, you you might be able to get there, but you also might not, right?
+
+You might be stuck in that kind of one to three mil, you know, range and and not get the multiple that you want.
+
+So, if you're making if you're making two million a year uh as a you know, pure AI readiness consultant, you can probably, you know, 2 million a year, right?
+
+So like your profit margin, you're going to be able to sell that business for probably $2 million, right?
+
+And it's like, okay, well, why would I do that?
+
+But if you're making 6 million a year, then it's like, oh, now I can sell this business for like 5x, right?
+
+I can sell it for 30 million.
+
+And it's just crazy how the values get rerated and what people are willing to buy changes as you go up.
+
+Uh, and it's it's quite the exponential.
+
+And so just understanding understanding this acquisition, >> you know, landscape and how it all works and what the numbers are is very important because then it defines kind of what your strategy is and the type of business you're going to build. >> Yeah, absolutely.
+
+I mean, I didn't really know about that that line really.
+
+And I think it's interesting because I remember since, you know, our our early days, you always kind of told me about your goal with the exit and you've always been looking at that that number.
+
+But I think a lot of people aren't.
+
+And you know, I certainly haven't been I haven't had a number in the back of my mind that I'm aiming for.
+
+I don't know my my two-year, fiveyear plan.
+
+And I think that most people that are getting into this, it's because they see AI all over their feeds and they know there's an opportunity and they know that they can change their life if they they jump on it in the right way, >> but they don't necessarily have clarity on which opportunity it is or maybe even which which niche to focus on.
+
+And you know, they probably they might not even know what you know, I beta is and have any idea like what type of exit is possible.
+
+So, putting you on the spot a little bit, but like if you're jumping into this space right now and you're kind of starting to play around with cloud code, stuff like that, what do you think is the play?
+
+Like you haven't built anything yet, you've never worked with a client before. >> What is the right path for someone starting out right now to ultimately start making money in in this space? >> Yeah.
+
+What kind of what's the goal, right?
+
+Is are they is it lifestyle?
+
+Is it like support?
+
+Is it I want to do this full-time?
+
+Is it I want to build like a a large business?
+
+What's the instate? >> Yeah.
+
+I mean, I think the most common scenario that that I feel like I see is they have a job right now >> and they would like to work for themselves and be able to support themselves financially.
+
+I'm not sure the majority of people probably don't have a number in mind of of an exit that they're looking for, but >> they would like to work for themselves and >> make money um online essentially. >> Yeah.
+
+You know, the funny thing about that predicament for people is like all of the playbooks are out there to do it.
+
+Um, it's just not that easy.
+
+Like like you got to you got to sell stuff to people fundamentally >> and it's like what do I sell and who are those people?
+
+And I would start with the people like so here from from our story this is exactly what happened when chatbt came out.
+
+I played with it for a week and then I called my buddy from college, Andrew, who you know, and was like, "Dude, we need to start an AI company.
+
+This is the next big thing." Now, I was running a go to market agency before that.
+
+And like I'd already kind of cut my teeth at at this whole agency thing. >> And he was like, "Yeah, whatever." Like, I got him on board.
+
+And the idea that we were what we were trying to do was build a SAS product.
+
+And so we had three different SAS products that we built, >> all of which became obsolete 30 to 60 days after we built them. >> And we had we had worked with like overseas dev teams like and because we weren't developers ourselves and you know coding agents weren't really a thing back then.
+
+And so like we were working with these dev teams and we were just able to negotiate this where we didn't have to pay all this money to like build the thing at first and whatever, right?
+
+And we just had three flops of SAS.
+
+And at the end of that, I was like, dude, this thing is moving so freakishly fast.
+
+If we're trying to bet on building like a software product, which when you're building a software product, it requires a lot of upfront capital to build the thing, find product market fit, get, you know, get beta customers.
+
+And traditional SAS is like, okay, you're going to charge 20 bucks a month.
+
+So, you need a volume of customers paying you 20 bucks a month in order to become profitable.
+
+Uh, now aentic SAS might be different because the unit economics are different, but that can be we can have another video on that.
+
+Um, but anyway, you need a lot of upfront capital to make it successful.
+
+And it's like, okay, if you're going to spend all that time and all that capital to try to make it successful in a space where the likelihood of it being obsolete, whatever you're working on is like extremely high, uh, then you're you're that's just dumb, right?
+
+It's like not the right approach.
+
+So, I basically spent nine months like I was on mine studio.
+
+I was like I was like okay like ChachiBT's got these plug-in things like in Zapier is like really involved and like oh okay like AI agents are kind of like being whispered around and then you Google AI agents and there's nothing about them.
+
+Uh and then you know I stumble upon NAN and I kind of already know how to do automations.
+
+So I'm like oh Nad's cool and then find hidden in their node stack all of the lang chain all of the langraph uh stuff and I'm like oh like this is this is cool.
+
+And then you're you're piecing it together and it's like the first time you were able to like really visualize like what this whole AI agent thing might be and nobody's even talking about it.
+
+Nobody can like explain an AI agent, right?
+
+But to me I was like this is the future, right?
+
+Like AI agents are going to be doing everything.
+
+And so so at that point I'm like all right this right here is so big and so key and I know business.
+
+I know business owners and I know kind of how they think.
+
+I'm gonna write a sales letter.
+
+Um, and my offer is going to be to build an AI agent.
+
+Now, there's going to have to be a little bit of education that happens in the sales letter.
+
+Uh, but fundamentally the pain point that I'm solving is you as a solo founder or you as like a small team.
+
+Uh, you want to scale, but you can't scale because it requires hiring more people.
+
+You don't have the capital to hire more people and you're just stuck in this like this mode.
+
+Uh, and you can't get past the ceiling.
+
+AI agents and AI automation uh can help you break free, right? and help you like grow past all this stuff.
+
+And here's how it works.
+
+Right. >> Um. >> Right. >> Yeah.
+
+And Yeah.
+
+Go ahead. >> I was going to say there there's two things that I that I think I noticed from your answer that also translate over to everyone else I've ever talked to is you had a little bit of you had experience, you had knowledge of some sort that you were able to leverage.
+
+And then you also had just genuine passion and curiosity.
+
+And those two things really really helped because if you don't have that previous experience, you don't understand like the problem that the business owner has and you don't understand how to communicate it to them in a way where you know they will hand you over some cash and if you don't have that curiosity and the the passion for it then it's just going to burn you out because it is hard like you said and and at at times it does suck.
+
+Um to bring up Hermosi again I just saw a quote where he was talking about like >> it sucks like I suffer my life is suffering. >> Yeah.
+
+But at the end of the day, I enjoy that suffering because it gives me, you know, I get something out of it.
+
+And I think >> if you are trying to basically you see the opportunity here in AI and that's why you're jumping on it to make money or you know because you don't want to miss the boat. >> Yeah. >> That's just the wrong intention and it's not going to work because when you have to maybe you know burn the midnight oil if it's not fun to you at least in some way it's just not going to work you know. >> Yeah.
+
+And >> I mean, >> I mean, it's it's basically just the greatest the greatest superpower you can have.
+
+And I think that the cool thing about AI is that obviously our world is AI automation and it's AI agents, >> but every single niche has AI.
+
+It's not going to be AI is not its own bucket.
+
+I mean, right now it really is, but every single vertical will just have AI seeping into it.
+
+So, at the end of the day, it's like everything will just be what it is now.
+
+Like right now we have this term AI consultant >> but like think about in 10 20 years it'll just be consultants like we've had but every consultant will just naturally speak AI >> right >> so >> whatever it is you're passionate about already >> find how you can work AI into that passion I think that's kind of the the other thing that I would say is like >> to give you really the leg up because then you also have like the the experience the knowledge already to apply to it so you're not starting from from scratch right now. >> Yeah it's a great point.
+
+I mean it goes back to what I was saying about every every single one of our projects has been just converting that knowledge that business logic into an AI system right so yeah that makes a ton of sense dude >> absolutely >> that's a good point >> and services the math made explicit let's get let's get let's get to here so let's say that you want to go after um you know the type of client I'm talking about all of them right now are ask are being asked what should we do about AI what's our AI strategy and there's so much noise out there so many tools there's a potential for lock in and stickiness like do I commit to claw do I commit to chatbt should we try to build something custom and what should be the strategy should it be holistic should we just like make everybody AI first and get them cloud accounts and like that's how we do it is like we augment you know every employee on the team or should we think about this from a systems perspective right these these people who have to make these decisions are getting more pressure than they've ever gotten before and they don't know what to do.
+
+And that's the opportunity.
+
+And the hard thing though if you're just getting started, if this if it's the profile person you've been talking about, the hard thing is that this problem isn't it's just like you've been talking about.
+
+The problem isn't like an AI problem.
+
+It's it actually is like a it's a business problem, right? because the AI part of it just becomes a development thing.
+
+It's a it's a development skill set which is collapsing in value, but it's like it's a development thing and understanding how to architect and design systems, right?
+
+Which is important, but the point of it is to solve the business case, the the business problem, right?
+
+And that's the perspective you need when you talk to these people because it's not about, oh, how does Rag work, right?
+
+Because no one uses Rag anymore.
+
+It was relevant at some point, now it's not.
+
+So, it's like it's not about the technology, it's about what it does, the outcome of it ultimately, and relieving them of the pressure that they're feeling.
+
+Uh, and that's such that's so key, not even just for this market, but just for sales and marketing in general.
+
+And these guys that the ones that we go after, they're just getting pressured from like they're bored obviously.
+
+What's our AI strategy, dude?
+
+Like I'm seeing all these open claw videos and like you know people are making whatever and >> claw >> that damn open claw dude >> and their internal teams are spinning up open claw saying hey what's our AI strategy you know you got one guy on the team who's just like loves AI super down for it then you got the other you know gal on the team who hates it right because it wastes too much water and then you got all the industry peers who are like posting LinkedIn content hey our AI thing saved us you know x million bucks and you know we're going to change the game for next year because they're hyping it up because their board is telling them we need an AI strategy and they're putting out their some hyped up AI thing uh that's like not even really real because they know their board's going to read it but then their competitors are reading it thinking it's real and then they're getting stressed about like you know we need to really get an AI strategy because these guys did it >> it's just like the it's just like the worst flywheel possible. >> Exactly.
+
+Exactly.
+
+Feed it feeds upon itself.
+
+Um, and there's no one like there's no one giving them a clear coherent answer.
+
+The reality is actually everyone is giving them a clear coherent answer.
+
+Like that's the real problem is that there's just so I mean clear coherent everyone is giving them an answer.
+
+Uh, and that's really fundamentally the problem.
+
+And so the reality is like they're not buying an AI system or an in automation.
+
+They're buying relief, right?
+
+They're buying the fact that they can say they have an AI strategy.
+
+They trust it.
+
+It's future proof and they can tell their board this.
+
+They can tell their employees this.
+
+They can tell their customers this.
+
+They can tell themselves this, right?
+
+Like like, hey, we're good.
+
+Actually, this whole like what are we going to do about AI thing is no longer a source of anxiety for me.
+
+It's actually a source of excitement because we're early and we're going to out compete people and we know our thing is like real, right?
+
+And not so that's what they're buying.
+
+Interesting.
+
+I've never thought about it like that. >> Yeah. >> I've never thought Does that change the way that you, >> let's say you're meeting with a potential client for the first time, >> does this kind of mindset >> change the way that you speak to them about AI? >> Yeah.
+
+100%.
+
+100%.
+
+Yeah. because I made the mistake of and mistake or not whatever of shifting my day-to-day mindset on to development and architecture and R&D and tech.
+
+And >> what ended up happening is I started talking technical about stuff on sales calls and with clients and whatever.
+
+And this is why developers aren't good sales and mark sales and marketing people, you know, because it's not really it's not about what the thing is and how to do it and and why it's cool.
+
+It's about the actual thing like the reason for why it even exists, right?
+
+Like there's a thing in in marketing that's like unique mechanism.
+
+You like how many different freaking accountants are there?
+
+You know, there's a million accountants out there, but why do you choose one or the other?
+
+Well, maybe this accountant actually has a unique approach, right? like, hey, we're still going to all run your books, but you know, I really, you know, I do a white glove service and I meet with you like, you know, bi-weekly and like we we do XYZ and this is my this is my unique mechanism for delivering the service that a million other people also offer like the same service, right?
+
+Um, and that that's what I lost and I had to re get gain that back and ever since then the conversations have been way better because it's actually keeping it core to the point of why we're even talking in the first place, you know.
+
+Interesting.
+
+Yeah. >> Yeah. >> Yeah.
+
+This is I mean a little bit unrelated but something I wanted to bring up is you know we we kind of started off by talking about the fact that almost anyone can build almost anything now.
+
+And >> yeah, >> when when you have that happening where people are vibe coding so much stuff, you know, I feel like my background with Naden helped a ton because I can understand even though I'm not reading the code, I understand what it's doing and I understand what could potentially go wrong when I deploy this maybe Python script on modal for example, you know, and I I can think about those edge cases.
+
+But people who are just kind of describing their idea and they're brainstorming and then they get something that works, they're generating essentially dark code.
+
+They have no idea what's in there.
+
+Only the AI really does.
+
+And if you're especially if you start to get, you know, really technical where you have multiple people working on the same codebase and nobody's really reading it but their their AIs, >> you know, what happens when all of this stuff is is shipped into production and then it's just not it's not vetted correctly.
+
+So it's like the question I'm trying to ask you is I'm sure that you're you're building a lot of stuff that is is based of code and then you're probably not reading every line and checking it but what do you do to make sure what is your QA process essentially of like >> the metrics you need to hit in order to say okay we're going to roll out this phase or we're going to push this to the prod environment like what kind of are the the the check boxes that you need to hit? >> That's such a reoccurring question. um which is like how do you actually get it into production?
+
+I mean the key of it is uh when you when you do your scope document and you have your different phases and modules to have a like an actual like success criteria checklist and not just one that Claude generated but one that you as the project manager or the engineer understands like what what this actually means like oh success is when you know it generates this document it's properly formatted you know whatever but you know what the right thing actually supposed to look like at the end.
+
+And a lot of times when you're working with clients, it's hard because you're not the industry expert and so you can't necessarily verify the output sometimes.
+
+But like it it it unfortunately but yet fortunately requires like a deep understanding of like the thing that you're trying to build from an architectural systems perspective and the individual success criteria, what that is supposed to look like and like like that's fundamentally what it is.
+
+So when it goes through the pipeline and it's like all green checks on the success criteria and you have your project manager actually look at it sometimes you got to kick it back because it's like okay yeah Claude said success but you know it was missing a bunch of parameters in the JSON payload when it sent it to the LLM.
+
+So the LN was missing some of the context.
+
+Uh and so like the output although like uh correct on your you know 100 tests runs.
+
+Um it will be incorrect on a thousand uh you know because the the margin of error is just going to increase over time.
+
+Like the standard deviation where the margin of error is like okay at 100 like maybe you got one or two wrong uh but at a thousand you have you know 10x you got 20 wrong.
+
+Uh well 20 wrong is actually like a really big deal for the business because when this is live it's actually going to be doing 10,000 uh you know per unit and at that point it's 200 wrong and if 200 are wrong the business is going to collapse right and so it's like oh okay this like test on 100 was like okay yeah we won it was within the margin of error 1% yeah but that's at a volume of a thousand and why was that 1% there oh because we can't just chalk that up to hallucinations or LLMs or nondeterministic black boxes like oh you know there's only so much we can do.
+
+Uh actually checking like okay hey look this this uh input data you know this JSON that I'm looking at here is missing a couple parameters that we need uh potentially you know that like this metadata might not be important for most of it.
+
+Maybe the LLM can kind of like fill in the gaps for a lot of it and like figure it out and still get a right answer at the end.
+
+But the reality is like this metadata should be important.
+
+Um, and we don't want the LM to guess, right?
+
+Because at scale it's going to up.
+
+So that's just like a small example of like it does it does take it does take the knowledge and the knowhow to verify these things.
+
+Now eventually the things will be able to verify themselves and make fewer mistakes.
+
+Yes.
+
+Um, but without a deep understanding of the the eval and test criteria, like success criteria, you're gonna you're just not even going to know until it's in production and at scale where those holes are, right?
+
+So, >> yeah.
+
+Yeah.
+
+Well said.
+
+Well said.
+
+I I just saw a thread this morning where it was like, these guys are just chucking at the end of every prompt.
+
+Make no mistake, and then it's just like, yep, we're good. >> Mistake.
+
+Yeah. >> Yeah. >> Didn't mean to sidetrack you there.
+
+What else you got for us? >> No, you're good, dude.
+
+Um this next is like a kind of a a pivot into so how do we do this right like this is our profile working with midm markets they have all of these pressures right they're you know how do we actually as a consulting firm that also like deploys um get to a point where the cont the the money we're asking for right the contract value whatever is like north of 100 grand north of 500 grand million dollar contracts How do you get to that point?
+
+Because they're not going to come knocking on your door, have an intro call and say like, "Hey, here's a million dollar check.
+
+Like, figure out AI for us." It's just not going to happen.
+
+You have to build a relationship.
+
+I actually just posted a video, a YouTube video today about like, "Hey, you know, we lost a million dollars." And it was it was really a million dollars of like pipeline that could have come in that we lost because we did not spend the time to grow the relationship with the end customer.
+
+And this is kind of like a a little bit of a sales sales approach.
+
+Um but it's like hey the what we learned first and foremost is that everybody like everybody who comes in has a different understanding uh and they're at different levels of understanding when it comes to AI, right?
+
+Like oh I want an AI agent or whatever.
+
+Like people barely know what they're talking about half the time and some people do.
+
+So, what you really need to do before you can actually present the value of what you're going to do for them is you need to say like, "Hey, let's make sure we're on the same page about what AI means, what this landscape is, the assumptions that we're making about where it's going to go, and let's just get on the same page." And so, we we spun up an AI workshop offer.
+
+And that's like the initial like, hey, we're going to do one hour just teaching you about where the landscape is, right?
+
+You might know, you might already know a lot of this, but we're just going to make sure we're on the same page about the current state of AI.
+
+The next session is going to be two hours where you will have given us some pain points about your industry now that we're on the same page about the current state of AI and we're going to do another presentation on what you could possibly do for your company within your industry and where AI is going there and what what can possibly be done, right?
+
+So you can get your mind going.
+
+Now we're on the same page.
+
+Now they trust us as the expert in the room.
+
+Not just from an AI perspective, but also like, hey, we understand you guys.
+
+After that it's like okay let's go deep into the business right let's really understand how work gets done inside of it how the data flows between systems and and not just treat this as hey you know it would be really nice you know if we had like this this AI thing for me or you know this dashboard for me and like taking a bunch of people's ideas and building those but going in from a like a current state perspective how much money is being spent to produce x outcome and how did I get it done uh and then what might this look like if if we were to convert this operation to an AI system, right, without any like conflating like constraints, if we were just, you know, pure first principles. >> And then how can we map that to ROI?
+
+Yeah.
+
+Yeah. >> Are each of these milestones here that you've talked about, are all of those individual fixed price projects essentially? >> You looping in something some big. >> The AI workshop is fixed price, right?
+
+Lower tier to get them in, establish trust.
+
+The blueprint is a discovery process.
+
+That's that's the heavy consulting piece. >> Uh this varies based on like the size and scale and whatever.
+
+We charge around 15 to 35k for this right now. >> Uh and then at the end of it, you get a deliverable, right?
+
+And you could take that blueprint to a different dev shop and have them like build whatever we suggested. >> Um but then we obviously can build the thing, right?
+
+And then this the custom project, just onetime project, we build it and then hand it off to you, teach your team how to use it. that is going to vary depend on like what we uncover in the blueprint and how we align on what needs to get tackled.
+
+And then the key thing that we are uh you know this is something that we really want to do and we we have started to do we flirted with it but now it's becoming possible is the AI technology partnership and this is if you remember the e-commerce example I gave earlier where it's like the the sheer amount of value we're providing it's like man this is this is actually insane right it's not just your typical like oh I'm a dev shop and I build software for you um but like I'm like producing work, right?
+
+Like it's almost as if I like um just handed you like 10 employees that are like a fraction of the cost of your current employees and work 24/7 and are super smart.
+
+And it's like what the value of having done that is so insane that just just charging for the the cost of the project like time and materials uh you know doesn't make sense because it doesn't align with the value and also the time and materials is decreasing from a cost perspective anyway over time because it's getting easier to build this stuff.
+
+So for us it's like okay how do we grow our enterprise value um and also get the uh you know get paid for the value that we're providing but also align incentives and make it make a lot of sense for the end customer.
+
+Um, and I know I'm kind of going off here, but like there's a very popular model, the growth marketing, uh, growth marketer, you know, partner model basically.
+
+And these are all like revenue guys who work with similar size like mid-market companies, sometimes enterprises, and they just go in as like revenue growth experts and they partner with the company.
+
+The company gives them like a budget and they figure out what the strategy is going to be to grow revenue for the business.
+
+It could be ads.
+
+It could be hiring a sales team.
+
+It could be like doing a number of different things.
+
+There's a million ways to make to do growth marketing stuff.
+
+Uh and or it's it's really just growth partner to do like growth revenue like growing revenue.
+
+A million different ways that you can grow revenue.
+
+And uh you them as the expert they go in they say hey um you know just give me like a budget to spend on the resources required to do the things that I want to do and I'm going to take 15% of the topline revenue. um you know and and the more money that I'm able to make you is the more money that I get right and AI being able to deploy these systems even if you do it in the managed agents way right the performance-based marketing has it's it's a unique opportunity for like developers or for technical people or for like you know business consultants in some way to also adopt this growth partner model right which is what we're trying to do so >> right yeah I was just about to ask if you flirted with that that whole sort of like profit or rev share model.
+
+And one thing that I'd be curious real quick to hear your thoughts on is like >> it's super clear the correlation when you're doing something like ads, you know, we spent this much, we made this much. >> How do you think about and how do you communicate if we're increasing productivity, if we're moving these metrics in a certain direction that that actually did come from our systems? >> Fantastic question.
+
+The answer is like not everybody uh qualifies for that kind of thing, right?
+
+Um, the second is like you have to align with the client on what the KPI is and there has to be a direct through line to the bottom line and it can't be a guess.
+
+Like if they think it's like for example, we're working with this large uh real estate investment and property management company like very very large in in middle America and we're working with the investment team right now to to build a system that does a lot of the un underwriting work for them. and he's like, "Hey, my accountant guy like um I want to build a system for the accountant, right?
+
+This isn't this company is an opportunity for us to do an AI technology partnership." But when we think about doing a system for the accounting team, it's like how does that actually have a a throughine to the ROI?
+
+Like how does it hit the bottom line for the business in a way where they feel it genuinely and uh we can get paid on that and there's attribution that it's like our system did X and so we deserve Y.
+
+Mhm. >> It's like, well, you know, you know, I'm going to call him Gary.
+
+His name's not Gary, but Gary's telling us like, I have a bunch of things that I need my accountant to do.
+
+Um, and it's like, okay, well, what are those things then?
+
+And what's like the value provided when he does those things?
+
+And it's like, it's really working together on figuring out what is what is the KPI?
+
+What is the metric?
+
+For the e-commerce one, it was easy.
+
+It was refund rate.
+
+Can we decrease refund rate?
+
+Right?
+
+Uh, and that one's easier because it's easier to kind of like have a a clear KPI that hits the bottom line. >> But, you know, the truth is like not not every company is this going to make sense. >> Um, >> right.
+
+Yeah. >> Yeah.
+
+Yeah. >> Yeah.
+
+I mean, it's so tough if you only have something subjective to work towards.
+
+It's just so hard to because either side can go back and forth.
+
+And even like you said earlier, maybe it's not even just the metric of how maybe revshare is decided, but also just like the the definition of done or the definition of success, >> being able to have something objective to work towards.
+
+Um like you know, if you want to use like Carpath's auto research or like the the Codeex goal, like if you're able to give the system an actual metric to optimize for and to experiment for, then obviously you're going to get better results and it's just going to it's going to be a better partnership at the end of the day. >> Exactly.
+
+And it's got to be the right metric to optimize for.
+
+Um, one of the one of the the stats I saw the other day was like uh 71% of AI investment has been in sales and marketing.
+
+And you know, you wonder why.
+
+It's like, well, the ROI is easy, right?
+
+Like if I could just increase the number of emails I send out, you know, like I'm going to see a direct line to revenue growth.
+
+So, it's like that makes sense.
+
+And then some of the clients are like, "Hey, I want to do this, but like let's start on the sales and marketing side, right? and then we'll use that money, the ROI, uh, to invest in the other stuff.
+
+So, >> yeah. >> Yeah, it's funny. >> It's so interesting though because it's like I always think of the analogy of a pipe, you know, if a pipe is your business and water going through it is cash flow, revenue, um, or customers.
+
+If you've got a clog in the middle of the pipe, which would be some internal process, like essentially that's where your bottleneck is, but you're investing in getting more water to go through, >> but no water can actually make it to the other side or it's squeaking through, you know, like the the cracks because your core problem is in the middle. >> So, that's that's a really interesting interesting stat to hear.
+
+I didn't know that. >> Yeah, it is. >> It makes sense.
+
+It completely makes sense. >> Yeah.
+
+I mean it it and the funny thing is is like once you unlock one bottleneck, you you create others downstream because now there's more water flowing through, you know, and the one thing that was used to just getting the stream because it was the initial blocker was just creating a stream is now getting the the flood, you know, so it's like, you know, it's a never- ending thing. >> Yeah.
+
+And the funny thing is a lot of those clogs are fixed with no AI.
+
+Like >> Yeah.
+
+Yeah, really, if you think about it, they can just be a bunch of little deterministic scripts chained together that that might get a rid of a lot of those constraints. >> So, this kind of goes back to like how do I get started, right?
+
+Um it's a little bit of how do I get started, but it's more of like what do I offer, right?
+
+Do I build a product?
+
+Do I build a SAS thing?
+
+Do I build a manage agent?
+
+Do I do like a course?
+
+Whatever.
+
+What do I offer?
+
+Right?
+
+And this was a challenge for us a little bit.
+
+Um, but you know me, right?
+
+We've talked for a while like I'm a big framework guy and like you know um it was kind of like always just going to be natural that we were going to offer a framework, right?
+
+And it's it's a it's an important repositioning away from like we offer uh you know custom AI development, right? or we offer AI consulting, which is, you know, we offer both of those things.
+
+Like, we do both of those things, but so do a lot of other people and so does the kid next door who who's like been on YouTube for a while and has played with cloud code and is pretty good with it.
+
+You know, he can do custom development.
+
+Uh, he can do AI consulting.
+
+So, what makes us different, right?
+
+How do we differentiate the you have to productize your service or package your service in in a way where it feels like a product and the way that consulting firms do this like Mckenzie, BCG, Bane, PWC, Deote, etc.
+
+KPMG is they create frameworks and that that a lot of times like teaches people like and helps people get very comfortable with like what you're doing cuz a lot of times what you run into as like a vendor or a dev shop is like yeah I'll just do whatever you want you know like just tell me and I'll build it and people you you would think that it engenders trust and it actually quite does the opposite because you you don't really you're not standing on anything and when you're standing on anything, you are just not it doesn't you don't feel as capable, right? >> It's it's kind of like the idea of like a young a young, you know, fresh college grad who's doing sales uh and you know, everybody loves him, right?
+
+All the prospects, they talk they talk to him on the phone, you know, he's trying to close the deals, but you know, they're talking to him on the phone and they're like, "Man, I love that kid.
+
+He's a great guy.
+
+Uh but yeah, I'm not going to sign." Right?
+
+There's a difference between being a light and being seen as like, "Oh yeah, this guy's going to get it done." Right?
+
+Like, >> and that's why a lot of people are like, "Oh, he's an a-hole.
+
+You know, Steve Jobs is an a-hole or Elon Musk is an a-hole, uh, but we still work for him or whatever because he's he's a winner.
+
+He just gets it done, right?
+
+You don't have to be an a-hole, but like there's definitely a level of like, hey, I do AI consulting and development, and I've actually developed my own framework for how to think about this and approach it. here's like my my five-step thing uh and like here's how it's going to apply to your business, right?
+
+That's a way different approach than uh yeah, I can I can totally uh build like a sales automation for you guys, you know?
+
+Hey, yeah, I'll build whatever whatever you want, right?
+
+It's just like a different approach. >> Yeah, >> absolutely.
+
+And so on top of this framework, are you guys niched down? >> Um not not industry-wise.
+
+No.
+
+Gotcha.
+
+Gotcha.
+
+So this I mean I can imagine that this really >> is going to help with your positioning coming from a place where you are kind of more working across the board but you have niched down your process essentially which >> right >> is going to help a ton.
+
+So I can even imagine the power of um you know an industry specific type of firm that has their own process for >> um speed to lead for example >> and you know how much more trust that makes it you know you have in that that sort of person like you said this person will get the job done or this firm will get the job done. >> I love the framework thing though I've been thinking a lot about all these repeated patterns that I've been talking about on YouTube or as we're building out different programs.
+
+It gives the whole brand a feel of consistency as well, you know. >> Yeah.
+
+Exactly. >> So, I love that. >> Exactly.
+
+Um, this right here is it's our framework really like it's our harness, right?
+
+So like the agentic operating system framework is a combination of the way that we run discovery, the way that we understand, synthesize um you know and execute on the AI landscape as a whole.
+
+The way that we go into businesses and run discovery, the way that we architect everything um and it's all centered around the idea of like AI from a first principles perspective.
+
+If you were going to rebuild the business or rebuild this operation today from the ground up knowing what AI can do, how would you do it?
+
+And leveraging AI as you know to the highest possible degree that you can, how would you do it, right? >> Mhm. >> And so like that's the approach and all of it is is um built around this harness architecture right here, which is like I'm giving away the secret sauce and I guarantee people on my team are going to be mad.
+
+But it's so simple and elegant that it's like, okay, it's not even the value though.
+
+The value is like the business logic that's imbued with it. >> Um, >> yeah, >> I'm not even gonna go through and explain it like live, but people can probably piece it together really what it is, which is just an event- driven system that classifies event, routes them to workflows.
+
+The workflows are as deterministic as possible.
+
+Um, rather than having like the LM be the orchestrator, the orchestration is the harness.
+
+Uh, and LM are used when needed.
+
+And a lot of times like they're they're needed a lot to like do agentic work to call tools and whatever but like most of the time like you've been saying a lot of times you just need automation um and then how do you what are the hooks at the end that you need every time right and then how do you learn and yeah close loop >> so >> yeah and I think that you know AI automation is not binary you know like I think a lot of people think >> could you do that with an agent yes or no but it's more like you know what percentage of this could be done with an agent and how do you at least leverage >> maybe it's only 20% can but how can you still le make sure every time you're doing it 20% with that agent >> so >> exactly >> because there are some processes where humans will always be involved no matter what and I I genuinely believe like yeah there there are processes like that >> name one name one >> um I mean I think that high ticket sales over the phone will never I just don't think that'll ever be an agent you know I think that people will try it >> but I just don't think you'll find the same level of success as when someone is basically all the way there, but they just want to hear a human's voice.
+
+They want to see a human to just get that extra little push, the comfort that they need to get over the line.
+
+So, I think I mean there there's definitely others if I think about it, but that's the one that just immediately jumped in my mind. >> Yeah, the trust.
+
+The trust.
+
+Yeah, that's true.
+
+It's a good one.
+
+Uh yeah, this is going more into the the harness.
+
+Um, this is just talking about like, you know, why why did people just not make it past 100K a month?
+
+I realize for your audience like getting to 100K a month is probably like the dream uh scenario for like a lifestyle business.
+
+Um, which is like it's it's a like but I am not at all saying this in a derogatory way or belittling a lifestyle AI agency type of business by any means.
+
+Um, but I do think it's the only thing that's talked about in the space and nobody talks about an alternative approach.
+
+Like I think people only talk about like AI agency lifestyle business um creator with a community or you know aentic AI like product and nobody talks about kind of like the the more comprehensive like consulting the business case consulting the business side consulting with AI as the unique mechanism.
+
+So um people can read this.
+
+It's kind of just like hey what are the traps if if you are small and you want to like grow big what are the traps to avoid right >> so do you think that there will be a ton of agencies that are sold for a decent multiple or do you think that all of these are kind of being more that lifestyle business and more of that potential you know I've heard a lot of people talk about like hey you know this is our research lab for us to develop a product that we can actually scale a bit or with a with potential for a larger exit. >> Yeah. >> Yeah.
+
+What do you think about that? >> I So the product play for me is sketchy.
+
+Like I I'm just not convinced that there's a longtail market for it. >> It's scary.
+
+Yeah. >> Yeah.
+
+I think you can have like short-term success and, you know, if you're just absolute savage, you can make it through all the pitfalls that are headed your way.
+
+But like to me, I think that there's really something to be said about like YC, Sequoas, their whole like AI native services businesses.
+
+I think that that is like far more significant than a lot of people give credit because the reality is if you're a SAS product and you're working like a law firm, right?
+
+A law firm is making million dollars a month and that million dollars in topline revenue is being doled out to labor.
+
+They're paying salaries, you know, they're paying vendors, they're paying for their office space, and then they're paying their software costs.
+
+And their software costs are maybe two grand a month total.
+
+And so if you were the software company and you're charging, you know, 10 bucks a seat and this is like a 10 person law firm and so you're making a hundred bucks per law firm and on average you make a hundred bucks per law firm or something per month.
+
+You are getting out of that million dollars a h 100red bucks, right?
+
+Because the original transaction was the law firm won the case and they got a million dollars from their client and everybody, the employees, the the uh landlord for the office space and the SAS companies are taking a cut of that million dollars.
+
+And software has always been kind one of the smaller pieces of that allocation.
+
+With AI, because it is a labor replacement type of thing, you start to eat more of that, right?
+
+So you start to get some of that labor allocation as well.
+
+Obviously the software allocation and the significance of that is like genuinely insane because it means that like a software company in order to become profitable you had to have thousands of law firms that are making on average 100 bucks a month because you're you're spending millions of bucks a month to like keep this thing going and do sales and try to capture the market which is why software required a lot of upfront capital.
+
+But if you are able to like uh you know provide provide the system that operates the law firm and captures like the work that's being done, not just the software, but the actual labor and the work that's getting done, then you're taking more of that allocation and your your value per law firm has like gone up significantly.
+
+Right now it's like it's it's like 300k per month that you're taking as opposed to 100 bucks, right?
+
+And now it's 300k per law firm that you sign up, you know, per month.
+
+And you know, the cost obviously is larger as well, but it's just like the economics of this are they're significantly different than SAS and that matters, right?
+
+So yeah, that makes sense. >> Yep. >> What do you think? >> Yeah.
+
+Yeah, I mean I think it's really interesting because there are times when you might be talking with a potential client and you know I I've said multiple times, hey, you know, you're asking for this right now.
+
+There is this SAS product I know for 20 bucks a month that would do this exact job and I think that it's probably a better use of your time and investment to just get that for now.
+
+And if you want to go custom, then we can go custom maybe down the road.
+
+And then on the other side, you have like the whole idea of like how easy it is now to build to build things.
+
+And maybe people are getting these different SAS products or SAS products that they're already using and they're basically just like extracting out what about this tool is useful to us and what what which of these features do we not need >> and how do we just take these core maybe four features and just put that into our own OS really and just ingrain it into our own stuff.
+
+And yeah, I don't know.
+
+I mean, there's just I think there's a certain kind of category of SAS tools that I think will always be around because it's like to think about the scale of how you would actually do that and get everyone to >> Yeah. >> to get it to work really.
+
+But there are certainly ones where, you know, 10 years ago they would crush, but now it's just like they're they're way too easy to build. >> I don't know.
+
+It's I mean, I've obviously never been >> in the SAS game.
+
+The other thing is, like you said earlier, it's it takes a lot more until you see your first dollar compared to trying to get your first dollar with like a custom project or, you know, consulting, freelancing.
+
+And you have to be okay with that >> rather than, you know, do you want the the long wait and a potential exponential payoff or do you want kind of trading your time for money at the front and get some momentum behind you? >> Yeah.
+
+Yeah.
+
+You know what's funny is is um people ignore the fact that like sometimes things just require talent and sometimes like not everybody can win.
+
+You know what I mean?
+
+Like all the people who are working a job and maybe want to do their own thing, it's like doing your own thing is not easy, dude.
+
+Like it requires uh a risk appetite to do it and the talent to do it successfully.
+
+And sometimes you just don't have talent or sometimes you don't have resilience and you know you can work on resilience but you know >> so it it's funny like honestly most people probably shouldn't do their own thing right like it's probably not ideal because it's competitive and most people fail so it's like >> yeah it's a very very small percentage of the world that >> is an entrepreneur successfully and >> I think also social media has just ruined it because there's so like you know you'll see you'll see maybe a 19-year-old kid making 10K a month on on Instagram or YouTube.
+
+And you know, I've tried my best to stay as much away from like the get-richqu narrative as possible.
+
+But that's just what's out there right now.
+
+And then what happens is you have your expectation of, you know, if I don't get if I'm not making 5K a month in 3 months by now, then I'm then I'm stupid or I must not be cut out for this.
+
+But in reality, you know, that's just like a way too quick of a timeline.
+
+And if you went into it with no expectations, then you probably would have stuck it out longer. >> Totally.
+
+Dude, you know what I respect about you is we're aligned in this, which is it was never about the financial outcome, right?
+
+And if we did talk about financial outcomes, it was more of a a way to like conceptualize what the real outcome was, which is reputation, right?
+
+It's it's like who am I?
+
+What am I known for at the end of the day, right?
+
+Like what is what is the reputation? what am I building?
+
+Because what I'm building is larger than a check.
+
+You know, what I'm building is a community or what I'm building is like, you know, you're building a little empire over there, dude.
+
+Like, or what I'm building is a a team, right?
+
+Or a culture uh or, you know, whatever.
+
+Like, I'm building my own a brand, right?
+
+So like and and we've always been uh I don't know if we've explicitly talked about this like with each other, but like you know I I very much key in on like what are the inner motivations of people and those that are focused on their reputation of like who what am I known for?
+
+Those people are the ones that I typically like to work with the most because a lot of people are just in it to make money and when you're in it to make money when things get hard you typically just like pivot on to the next thing and like yes money is part of it of course but like you don't have the resilience to the staying power right like you decided to double down on YouTube and when we talked about it it was like hey you know I'm going to just like focus on my YouTube channel you weren't saying I think I'm going to make a ton of money like by focusing on my YouTube you were saying, "I really enjoy doing YouTube.
+
+It's what I really wanted to do.
+
+Uh, and I'm liking the people that I'm talking with and people are telling me that I should go and do it and I had some time to think about it and it wasn't about I want to make a ton of money." So, >> yeah.
+
+Anyway, >> yeah.
+
+Well, I appreciate that.
+
+Um, means a lot coming from you and I think it's it's it's a very very important part to hit on.
+
+You know, kind of goes back to the whole passion thing like why are you doing what you're doing? because it is very easy to see when when someone is kind of optimizing just for the the check at the end of the day because you'll you'll cut corners.
+
+You'll you'll do things that you know the other person might not have done and sometimes it works for you.
+
+You know, sometimes you're able to optimize for the short-term cash >> but what are you risking there and exactly you know your reputation is so much harder to get back. >> Um but yeah, I think that this this slide here looks like a perfect one to sort of start to wrap up on five things I wish I'd known sooner. >> Yeah.
+
+Yeah.
+
+So, this one was figure out, you know, five things I wish I knew sooner, right?
+
+Obviously, um figure out who you who you want to be and just commit to it.
+
+Do you want to do a lifestyle business?
+
+Do you want to build a product?
+
+Whatever, commit to that all in, right?
+
+And and you know, that's your goal, right?
+
+If you're not going to exit with $100 million and you're making 500k a year, uh don't pretend like you're unhappy about it because you decided that that was the type of business that you're building, right? >> Yeah.
+
+People just they hop so much. >> One of my buddies right now has been every week he shot me different ideas and I'm like, "Dude, >> you just got to stick with one." Like, you have a bunch of great ideas here and I know it's it's tough, but you just got to pick one and run with it, >> dude.
+
+So many people like that.
+
+Um the the next one is is package.
+
+Like I wish we could have uh because in the early days like probably like the first 20 projects we did was just like, "Yeah, I'll build whatever you want, right?" And we built the systems worked successfully, but did they provide the value?
+
+Do people still use it?
+
+Right?
+
+Not necessarily.
+
+A lot of those early ones, a lot of those in automations, like are those are they still in use?
+
+I doubt a lot of them still are, right?
+
+Um, and that's just because we just did whatever people wanted to do, right?
+
+And we didn't really think about it from like what do we what are we providing value-wise and how do we package this up for the market?
+
+Um, >> right. >> Yeah.
+
+Third one is like charge what the value is worth.
+
+Uh I think that's only becoming possible now to do performance-based.
+
+It als it obviously requires that your systems are good and they work, right?
+
+If you're going to bet on yourself that like hey I'm going to charge on a performance basis, uh you're really betting that you can do it and you can do it well.
+
+Um, now if you try to charge prior to actually delivering what you, you know, anticipate the value being, it's going to be way harder to convince them of that as well because you haven't proven that you can build it, right? >> Yep. >> Yeah.
+
+Um, and also real quick, it's also because like time and materials, if you charge hourly, it's going towards zero.
+
+Like you just cannot do it anymore.
+
+You have to rethink how you your business model here, even at the small scale. >> Yeah.
+
+Yeah.
+
+Um, the next one was build the funnel before you need it.
+
+This this goes along with the idea of building the relationships ongoing.
+
+If I had to start over genuinely, I probably would start with doing AI workshops.
+
+Uh, doing a ton of those, right?
+
+Not doing building, not doing partnerships, not doing anything, right?
+
+Building in my own time, but like doing the AI workshops.
+
+And then I would move on to doing like the blueprints and discovery.
+
+And I would continue to build those relationships with the people I did workshops for. and like and then I would create the offer for like actual development, right?
+
+Because by then I probably would have attracted some engineers, right?
+
+Built my own framework for development and then the partnership and I would have done it a lot more strategically where I'm building relationships over time and rather than like going straight into I do like custom development, you know. >> Interesting.
+
+I really like that.
+
+I really like that actually.
+
+I've never thought about it like that, but I mean, >> you're basically just perfecting each step of your process in chronological order. >> Yeah. >> And then you can launch it as a kind of a bundle or like that's your standard partnership.
+
+I really like that tip. >> Yeah.
+
+It's kind of what you're doing, dude.
+
+Like you start out on YouTube and then you offer the community and a bunch of like courses and how people can get better and then now you have the credibility and the knowhow and the signal to say here's a certification, you know, and it's there.
+
+It's incredible certification because look at all this stuff that I've learned and doubled down on.
+
+Right.
+
+So like >> um definitely a more natural evolution in that way is what I would have done for sure.
+
+And it actually goes to if you're just starting I would start by a lot of my friends don't even really know what you can do with Claude, >> right?
+
+And if you're a person, don't just point them to the Nate Herk videos.
+
+Say, "Hey, look, I'll sit with you for an hour.
+
+Just pay me like 50 bucks and I'll teach you exactly everything you need to know about Claude, right? at the most basic levels.
+
+I guarantee they know somebody who needs that as well, right?
+
+Like I got people texting me like, "Hey, Parker sent you over like >> to teach them about how to set up Claude, you know, which is crazy." So >> yeah. >> Um and then the last one is around hiring.
+
+Hiring for the company you want to be.
+
+Uh yeah, I mean this this we could go off all day about this, but it's um yeah, >> it's a beast. >> It's a beast. >> It's a beast.
+
+So, you know, one one question to sort of wrap up would be I talk a decent amount in my community about >> starting by yourself and doing the full process from beginning to end by yourself because then you're able to hire better because you understand the challenges, you understand the inputs and the outputs and you've already maybe built an SOP which is going to make onboarding and training and everything just so much better. >> Do you agree with that?
+
+And if you and if you do, like at what point because people start to ask this question of like, okay, when do I know I'm ready to hire someone else or um I guess yeah, what are your thoughts on that whole idea of being able to just start as a oneperson agency? >> Uh again, it depends on your goals, right?
+
+Um if your goal is to provide a ton of value at a higher, you know, go up market and whatever else, you can do a oneperson agency.
+
+Um maybe if you're doing like consulting or AI readiness and it's just you and you have a playbook and then you bring on the next person to do that.
+
+Um but the reality is like in my perspective like I wasn't a trained engineer, right?
+
+I selftaught in and all this stuff.
+
+I did our first few projects and then I went and found people who knew in well and were interested in learning AI brought them in, right?
+
+And you know this I didn't have a ton of SOPs around like how do you build this stuff, right? because we were all just figuring out it was brand new. >> Um, but then like you know I did sales and I had you know a sales motion and I'm still the best at doing the sales in the company, right? like we bring bring in a sales guy who brings a lot of different elements to the table and I got to teach him about like what what what exactly do we do and how should we like talk about it but he's bringing other elements of like he's like you know detail- oriented in a very unique way communicates like very effectively like really good writer and you know he's a doctor so he brings other perspectives to it and I'm just kind of teaching him about like what do we do and like how do I run sales and then he brings his other talents to the table that makes us better and same with you know engineering and project management like I'm probably the worst project management project manager on the team like fundamentally uh you know and and I'm you know I'm not the worst vibe coder on the team but I'm one of the worst vibe coders on the team at this point uh but if it was like me and it was me and what I know replicated you know 15 times we wouldn't be able to provide the service that we are able to provide today right like the the market opport opportunity for us is not as large.
+
+And so like it is very much when you're in the when you're in the whole like I'm going to spin up my own agency starting as a one person and I'm going to build you know this agency space and you're consuming all that content.
+
+It is very much around like do everything, document it, teach someone how to do it.
+
+Do everything, document it, teach someone how to do it and then get yourself out of the business.
+
+Very much still true.
+
+But you need to also try to find people that have other talents than you because that's what it really accelerates thing.
+
+Like without that, you're kind of stuck no matter what.
+
+Yeah. >> Yeah.
+
+Very true. >> Yeah.
+
+Don't got anything else to add to that.
+
+I think that was very well said. >> Nice.
+
+Speechless.
+
+I mean, and that's it, dude.
+
+Thanks. >> Yeah, absolutely.
+
+It was it was great to have you here, Devin.
+
+Um, you you dropped a lot of sauce today.
+
+You shared a lot of info.
+
+Where can people find you if they want to, you know, check out more of your stuff or reach out to you? >> Yeah, I mean, you could just search me up on YouTube.
+
+You can hit me up on LinkedIn.
+
+That's my email, which is probably dumb to just put up there, but whatever.
+
+I get flooded with emails anyway.
+
+Um, and then go to our website.
+
+I'm like revamping the website as we speak, so it might look one way one day and different the next.
+
+Just be aware of that. >> Nice.
+
+Are you viing it?
+
+Uh, everything's a vibe, but like it's very hands-on vibe code.
+
+Yeah. >> There we go. >> We got a position, correctly. >> Yeah. >> Yeah.
+
+Well, well, thanks for the chat today, Deon.
+
+It was it was really great to have you, and I I enjoyed the topics we covered, so >> maybe we'll have you back soon. >> Yeah, we better, dude.
+
+I got to have you on my channel. >> Yeah, let's do it.
+
+Let's do it.
+
+All right.
+
+Thanks so much, Devin. >> All right.
+
+Thanks, brother. >> Peace. >> Thanks so much for watching today's episode.
+
+I hope that you guys enjoyed.
+
+Don't forget that I broke all of this down into a free resource guide that you can access for completely free using the link in the description to join our free school community.
+
+I'll see you guys in there.

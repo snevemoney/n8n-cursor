@@ -1,0 +1,27 @@
+# click-live-site — ALIAS of evenslouis-ca /work. Not a second catalog.
+# /work = real. /pro/work 308 → /work after CE deploy. /pro (no /work) = CE login.
+# Full catalog walk: flows/evenslouis-ca.yaml. Do not treat this as a third product.
+# Schema: ../SCHEMA.md
+# Parent executes headed. This sitting: playbook only. No new tab. No headed re-run.
+id: ce-pro-work
+name: alias — /pro/work 308 → /work (canonical catalog is evenslouis-ca)
+hard_step: send
+host: cursor-ide-browser
+status: fail
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ce-pro-work/RUN.md
+alias_of: evenslouis-ca
+canonical: https://evenslouis.ca/work
+app:
+  url: https://evenslouis.ca/pro/work
+  # package: omitted — web. Native = ASK; do not install Maestro.
+steps:
+  - id: launch-alias
+    action: launchApp
+    url: https://evenslouis.ca/pro/work
+    expected: 308 to https://evenslouis.ca/work. Catalog cards (ProofCheck QC among them). Not /pro login. Not a second catalog at /pro/work.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ce-pro-work/cards/01-launch-catalog.md
+  - id: assert-canonical
+    action: assertVisible
+    target: ProofCheck QC
+    expected: URL is /work (not /pro/work). Same four cards as evenslouis-ca. Continue the catalog walk on evenslouis-ca.yaml — do not keep a third product flow.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ce-pro-work/cards/02-assert-cards.md

@@ -1,0 +1,777 @@
+So thanks to AI, it is now possible to build a one-person business, but only if you know how to use Cloud Code the right way.
+
+So in this video, we're going to cover what this business actually is and how to build it step-by-step.
+
+So before we get into anything, let me just tell you about what this business is because there is a lot of noise out there right now and there's so many different opportunities and most of it just makes this whole thing sound way more complicated than it really is.
+
+So the business model I'm talking about is becoming an AI consultant.
+
+It just takes one person, no agency, and no team.
+
+Just you sitting at your computer using Cloud Code to help businesses use AI inside their actual operations.
+
+And I know the term AI consultant might sound a little bit vague, so let me be more specific.
+
+You're not saying you're an AI builder.
+
+You're not saying you're the automation guy.
+
+The framing that actually wins in 2026 is being an AI partner because builders sell features, but partners sell real outcomes and businesses obviously pay way more for outcomes than they do for fancy features.
+
+So the identity that you really want to take on here, which is the AI partner or AI consultant, it really does matter a lot.
+
+Now real quick, if you don't know who I am, my name is Nate.
+
+I scaled my AI agency to over $100,000 a month and then I exited that business and now I run a free community of over 375 people building with AI.
+
+I've worked with real estate agencies, HVAC companies, coaches, marketing agencies, a ton of different businesses, and I've seen the same patterns over and over.
+
+So when I tell you guys this is doable, it really is and I've seen it work for me and for hundreds of my students.
+
+And the reason Cloud Code unlocks this in 2026, specifically, is very simple.
+
+It's just natural language being the interface, so you don't have to be a developer.
+
+You don't need a formal computer science degree.
+
+You don't need to know how to write code.
+
+You just need to be able to describe what you want clearly and obviously find the opportunities for automation clearly.
+
+And the build time has just collapsed, you know, like stuff that used to take me 2 hours in the end to build.
+
+Now it takes me about 20 to 30 minutes to build in Cloud Code, sometimes even less.
+
+So the point is the barrier to entry is dropping and it keeps dropping and the leverage that you can get from one person has gone way up and it's going to continue to go up.
+
+So you might be wondering, okay, cool, but what am I specifically doing as an AI consultant for these different businesses?
+
+Like what does that actual work look like?
+
+And that is what we're about to get into next.
+
+Okay, so every single business in the world is trying to move one of these three buckets.
+
+So, number one is to get more customers.
+
+New leads, more booked appointments, more conversions from a specific source, anything that brings somebody new into that business's ecosystem who wasn't there before.
+
+And this first bucket is the most growth-focused.
+
+You know, businesses spend the majority of their time and attention and money towards this bucket.
+
+That's where their head is most of the time.
+
+Now, number two is to make each customer worth more.
+
+So, the average order value, the lifetime value, the retention rate, time between repeat purchases, the upsell rate.
+
+This is basically the idea of getting customer to pay you more and stay longer.
+
+In mature businesses tend to find their highest leverage automations in this bucket because the math on customers that you already have is usually way better than the cost of going out to acquire new ones.
+
+And then bucket number three, cut costs.
+
+Hours per task, error rate, ticket count, time to completion.
+
+Essentially, you want the same outcome, but you want that outcome to happen with less labor, less rework, less waste, less money.
+
+And this is where most operations-focused automations land because the metrics are easy to baseline and the wins are easy to attribute.
+
+Like if you save somebody 20 hours a week, you can prove that on a calendar.
+
+So, the idea here is that every project that you go for should roll up into one of those three buckets.
+
+If a build doesn't clearly move the needle in one of those buckets, then it's probably not a project that you want to pursue because it's going to be way harder for you to prove the value that you have added to that business.
+
+So, as you start thinking about what do businesses actually want and what do they actually pay for, you always want to route it back to one of those three buckets.
+
+So, just to put some concrete examples on it.
+
+Lead qualification systems, automated follow-up, that is get more customers.
+
+CRM automation, onboarding flows, that's make each customer worth more.
+
+Internal knowledge assistants, reporting dashboards, ticket sorting, that's cut costs.
+
+Now, with something like onboarding, for example, you could argue that that is making each customer worth more, but also cutting costs.
+
+So, sometimes they kind of do apply to two buckets, but the point I'm trying to make here is you want to clearly associate it with one bucket.
+
+It just gives you a clearer North Star.
+
+And one of the reasons this works as a one-person business is that businesses don't have to go talk to a giant software shop for stuff anymore.
+
+They can talk to you because it's lower overhead on their side, it's faster turnaround on yours, and the relationship is way more direct.
+
+If they went to a big consulting firm like McKinsey, they're going to get charged quarter of a million dollars just for a few hours of consulting and no implementation.
+
+And speaking of McKinsey, their state of AI report found that AI high performers are seeing 3 to 15% revenue uplift and 10 to 20% ROI uplift on sales.
+
+So, the buckets aren't just theoretical, they actually move the needle.
+
+So, that's what the job of an AI consultant really is.
+
+But the next question, and this is where most people get stuck, is how do you actually start selling this stuff?
+
+Because knowing what to do is one thing, but selling the first project is a totally different animal because the first one is always the hardest one.
+
+So, the way that I like to think about it is what I call the service ladder.
+
+It's basically the path that you walk a client through.
+
+We don't know each other at all all the way to I'm paying you every month.
+
+And the rungs are this: education or consulting, then audit, then project, then retainer.
+
+So, rung zero is the on-ramp.
+
+It's just 1 hour or one session, maybe 100 to 500 bucks, and you either teach the business owner or the team how to use AI on real work.
+
+Or you can do like a tech setup, like you can help them get onboarded into Cloud Co-Worker, Cloud Code, and set up their first project, stuff like that.
+
+And the reason why this rung is so so powerful is because they don't have to commit to a big project or sign some sort of scope of work that might be a few thousand dollars.
+
+They just have to commit to 1 hour, which is way less risky on their end, and it's such an easier ask for you because if you don't have any proof or case studies, then it's so hard to get someone to commit to something big.
+
+And by the way, rung zero is totally optional, like if you're already running a project with someone, you don't have to step back down to rung zero.
+
+You can just expand the scope of work of what you're already doing inside of your current engagement to include stuff like education and enablement.
+
+You know, you can offer to come in and run a workshop for the whole team.
+
+And the other thing that I love about rung zero is that it's basically a secret audit, which is rung one, which I'll talk about in just a sec, cuz you're sitting there walking a business owner through, maybe setting up their own AI operating system, or showing their team how to use Cloud Code.
+
+And what you're doing is you're already learning what they care about because you're seeing and hearing where their workflows are breaking down and where they are inefficient.
+
+So, by the time you formally pitch the audit, you've already done most of the discovery work, and maybe you realize you don't even need the audit because you guys are just like building trust and you're talking and you mutually agree on on that you want to take on together.
+
+But rung one is the audit.
+
+This is paid scoping.
+
+This is them paying you to learn their business.
+
+So, you go in for an hour or a couple hours, you map their workflows, you spot what's automatable, what's political inside the org, what's mission-critical, and what's just like nice-to-have fluffy features.
+
+And after one or two hours of focused work, you honestly know their business better than any other AI consultant that they could possibly hire because no one else has done that work of sitting down with them and talking with them.
+
+So, the audit, the actual deliverable here is an audit of their operations.
+
+You know, or maybe just one specific vertical, you know, like sales or something.
+
+And this could be a 10-to-40 page slide deck or PDF going over where the waste is or the opportunities for AI automation or for AI agents.
+
+And typically a proposal at the end of this for the first project saying like, "Hey, this is the first thing I'd want to work on with you guys.
+
+Here's why I want to work on it.
+
+Here's the results I expect to receive from this automation." That makes it practical and not just theoretical.
+
+So, then, rung two is the project.
+
+So, hopefully after the audit they say yes to the project and now you have one focused scope of work to deliver on.
+
+And by this point, trust is already in the bank.
+
+So, your job is different.
+
+Your job here now is to prove ROI.
+
+You're not trying to automate the entire company in one day.
+
+You're shipping one thing that you've already scoped out end-to-end and you're letting the numbers do the talking.
+
+And then from there, rung three is the retainer.
+
+This is where the real income actually lives.
+
+And we'll get to pricing later in this video, but the short version is this.
+
+You go from one-off cash flow project work to predictable monthly revenue.
+
+And it's the natural destination of this whole model.
+
+But, the part that trips most people up is that you have to earn each rung by standing on the one below it.
+
+A lot of beginners are freezing because they're trying to skip straight from nothing to rung three and try to pitch retainers and projects with zero proof and no trust and no case studies.
+
+And then they wonder why nobody's responding to their cold DMs or their cold emails.
+
+So, the fix is you have to start at rung zero.
+
+Don't be afraid to charge someone $100 for an hour of your time.
+
+That's how you get going.
+
+That's how you build momentum.
+
+And here's a stat that makes this whole picture make more sense.
+
+The IBM 2026 CEO study, which surveyed 2,000 CEOs of major companies, they found that only 25% of workers use AI regularly in their day-to-day work.
+
+But, 86% of CEOs in the same study believe that their team is ready to use AI.
+
+So, somehow there's a 61-point gap, and that gap is the business.
+
+It closes one company at a time, and you can help contribute to closing that gap with these rungs if you take them in the right order.
+
+Now, what you'll notice is that across every rung, the workspace where the stuff actually lives is Cloud Code.
+
+You teach inside of it.
+
+You audit with it.
+
+You build your own business with it.
+
+You expand it on the retainer, which is really great in theory, but it also means there's a step that you have to do before any of this works.
+
+The whole idea is that you shouldn't be selling something if you don't understand it and you haven't built it for yourself.
+
+Think about it.
+
+You can't walk into a meeting with a business owner and confidently explain how Cloud Code helps them run their company if you've never used it to help your own company.
+
+You can't bring them specific pain points if you've never solved a pain point yourself.
+
+So, before you go hunting clients, the real move is to spend a couple weeks just building your own AI operating system using Cloud Code.
+
+Use it to run your own one-person business.
+
+Get the reps in.
+
+Get fluent.
+
+Build something you actually use every single day, and this can turn into your own portfolio and your own proof.
+
+And I've got a full free course on building your own AI operating system with Cloud Code.
+
+I'll tag that one right up here in case to watch that next.
+
+You can also join my free school community where I broke that course down even further.
+
+Link for that's down in the description.
+
+It's a free community.
+
+That's where the AI builders are.
+
+And anyways, the examples in your AIOS have a lot of direction, but I'll give you guys the one that I think hits the hardest for most people, and it's pretty easy to set up, which is just a morning brief.
+
+This can be a scheduled automation every morning, every day of the week, that pulls in your calendar, your task list, your priorities, your inbox, whatever's relevant to your day, and helps you plan your day.
+
+And it gives you a quick summary of what actually matters.
+
+Now, it sounds really simple, but the second you build it for yourself, you actually understand how Cloud Code handles tools and schedules and contexts and instructions and recurring workflows.
+
+And you're understanding it on real data, on your own problem, not some sort of tutorial.
+
+Once you've built that, you basically have a template that you can adapt for anyone else.
+
+Because the thing is, that's also super important, is that most busy business owners or employees would find value in that system.
+
+And that's the thing, you're trying to find these patterns where the problem doesn't change, just the data sources do.
+
+Now, obviously this morning briefing project is not something you're going to be able to charge thousands of dollars for, but it's a nice use case and it's something that you could even say, "Hey, on the front end, let me just set this up for you for free.
+
+This is my morning briefing that I use.
+
+I'll build you one for free.
+
+That way you can understand how it works and just so we can like work together a little bit and see what other opportunities you have for automation." The point I'm trying to make here is before you start sending DMs, before you sign up for Upwork, before you post that, you know, LinkedIn, "Hey, look what I'm building" post, just build a version for you first.
+
+It's the fastest way to actually learn the stuff and it gives you something real to point at when someone asks, "What can you actually do?
+
+What have you actually built?" So, just remember the time that you spend learning up front is not a waste of time.
+
+Now, once you've got that running, the temptation is to immediately start hunting for the perfect niche to sell it to, right?
+
+And that's where I want to push back a little bit because that's the move that traps more beginners than anything else.
+
+Everybody online tells you, "Niche down on day one." They say, "Riches is in the niches." They say, "Pick the dental practice vertical and dominate it." And I disagree.
+
+I think if you already have a network or a background in one industry, then I think that that advice is really great.
+
+Like that obviously is where you want to go if you really want to achieve scale.
+
+You should absolutely do that.
+
+But if you don't have that expertise or that network, that same advice is going to freeze you for 3 months.
+
+The reason is because you can't pick intelligently from zero, from no data.
+
+You've never sat across from a small business owner.
+
+You don't actually know what dentists complain about in real life versus what Reddit says they're complaining about.
+
+So, you're essentially just throwing darts in the dark and then you're defending that dart for 6 months because you don't want to admit that you chose the wrong dart.
+
+And all this does is it causes you to procrastinate on the real work that actually moves the needle.
+
+I've seen so many students get caught up on trying to pick the perfect niche from day one.
+
+So, the reframe is this.
+
+Your job in month one is not to make money.
+
+It's to get five conversations with five real business owners, any industry, any problem.
+
+Because you're optimizing here for reps and for pattern recognition, not for revenue.
+
+The cash comes later, but the reps and the pattern recognition has to come first.
+
+And the reason this works is real pain points comes from listening to real business owners, right?
+
+Not just from Googling problems chiropractors have.
+
+Now, of course, there is the exception which I kind of to alluded to earlier, which is if you have one of these three things, then maybe you do pick a niche from day one.
+
+So, number one, you already worked in that industry.
+
+And by that I mean like you've spent the last five years in real estate.
+
+You know the people, you know the workflows, you know the lingo, you know the problems.
+
+If that's the case for you, then pick real estate.
+
+Number two, your warm list lives there.
+
+So maybe everyone in your family's a lawyer.
+
+Maybe you went to law school, so you know a ton of lawyers.
+
+If that's the case, then you have leverage, so use that.
+
+And then number three, you're genuinely just like obsessed with it.
+
+If you love marketing agencies, then build for marketing agencies, because passion is like the number one superpower that you can have just in general in life.
+
+But if none of those three things are true, then just stay deliberately broad for the first five to 10 engagements.
+
+You're going to do the reps, and at some point you're going to notice the same problems showing up three times across three completely different types of clients.
+
+And just to put some data behind this, there was a survey by Reimagine Main Street in 2025 of about a thousand small business owners.
+
+They were asked what the biggest obstacle to AI adoption is, and 25% of them said it's not budget, it's not leadership, it's that they don't know how AI actually applies to their specific business needs.
+
+So that means at the time of the study, one in four owners literally needs exactly what I'm telling you to go sell.
+
+But here's the actual hard part.
+
+To get those five paid conversations, you have to go find business owners who get on a call with you in the first place.
+
+So the question is, where are they?
+
+Where do you find them?
+
+So let's just break this down, because there's actually a clear hierarchy here that really does work.
+
+Above everything else, the first place you need to go is warm outreach.
+
+It's the highest conversion, it's the lowest skill barrier.
+
+And so a warm contact is anyone that you've ever worked with before, gone to school with, played sports with, met at an event, talked to in Discord, sat next to at a wedding.
+
+If you texted them or emailed them, they actually recognize your name. telling you to go sell to your friends.
+
+The pitch isn't hire me, the pitch is, "Hey, I built this thing for my own business.
+
+Can I just show you what it looks like and get some feedback?" Or it could even be something like, "Hey, I've been playing around with this AI automation stuff, and I think I'm getting pretty good at it.
+
+Do you know anyone who might be interested in this and like maybe wants to chat with me?" It's way more about just trying to start conversations about what you're doing, not sales pitches.
+
+The conversations naturally take you where you want to go.
+
+Now it's really interesting because most people just ignore their warm network.
+
+I don't know if it's because they're embarrassed or for X, Y, and Z other reason, but warm network, it's the fastest path to your first paid work like by a mile.
+
+Now, let's say you don't want to do that for some reason or you've exhausted your warm network, which would take a really long time.
+
+The second place you go is Upwork.
+
+This is where strangers go shopping for what you are selling.
+
+So, the intent is already there, which is the whole game.
+
+It's so, so, so much easier than cold outreach because they posted a job, they're looking to spend money.
+
+They don't have to be convinced of that.
+
+They're actively looking for someone to help them.
+
+So, you can get on Upwork and search for AI integration and end-in-workflows, cloud code workflows, automation setup, custom workflow design.
+
+Those are some of the keywords that map directly to your service ladder.
+
+In my course inside of AIS Plus, I cover the Upwork bidding playbook in way more depth, so I'm not going to dive in too much right here, but just know that is the second move.
+
+Now, the third move, and this one compounds the most over time, is building in public.
+
+So, by that, I mean pick a platform or pick a couple, YouTube, LinkedIn, X, School, wherever your audience lives, and start sharing what you're building.
+
+It doesn't have to be super complicated.
+
+It doesn't have to come off like you're trying to be an influencer.
+
+Just make it educational.
+
+Just share what you're building, what it does, what you learned, stuff like that.
+
+Just the work and the thinking behind it.
+
+And let's say it's a little intimidating to you, you can just hop in my free school community with almost 400,000 people in there and just help people.
+
+Share what you're building.
+
+Give advice.
+
+Get advice.
+
+And what this does over time is it flips the dynamic because instead of chasing leads, they just start coming to you.
+
+And plus, your content that you're putting out there basically becomes your portfolio.
+
+So, whenever someone finds you cold or you send them an email and they Google your name, they actually have a feed that they can look through what you're doing and they can be like, "Oh, wow, that's actually a real person.
+
+You know, that's not an AI agent that just emailed me." Even if maybe it was.
+
+Now, before you guys start doing outreach, I want to plant a very important mindset shift for you, which is stop rushing for your first yes, race to your first 10 no's instead.
+
+That reframe is really, really powerful because a low close rate is fine.
+
+And actually like a low close rate is good when you're getting started doing cold outreach.
+
+Because if you're rushing to the first yes, every no is going to feel personal and every no is going to like disencourage you.
+
+But if you're rushing to your first 10 no's, then every conversation is just about data.
+
+You learn faster, you don't take it personally, you iterate, you pick yourself up, you tweak on the pitch, and you start to refine your offer and move on.
+
+And honestly, if you do it like that and you have that mindset, then you're probably going to get your first yes before you even hit your first 10 no's.
+
+Just remember that every single conversation is data.
+
+It's not wasted time, and data is all that matters.
+
+So, here's a quick prompt that you can run right now that'll save you a couple hours of staring at a blank screen.
+
+Just open Claude and drop this in.
+
+Act as a B2B outreach copywriter.
+
+Write me a casual, friendly first-touch message for X warm contact.
+
+I'm a one-person AI consultant.
+
+I just built this specific thing.
+
+My goal is not to pitch this prospect.
+
+It is to get on a 20-minute call to learn about their business and show them what I built.
+
+Keep it under 100 words.
+
+No corporate speak.
+
+No synergy or leverage.
+
+Just write it like a real person who actually built something.
+
+Obviously, you would swap in your own details, run it, tweak the output, and now you've got your outreach template.
+
+And just go ahead and take a screenshot of that prompt.
+
+Okay.
+
+So, now once you've got conversations starting to happen, the next question becomes, when somebody actually asks, "Okay, cool.
+
+Let's talk." What do you scope and what do you build for them?
+
+So, here's where being a partner instead of being a builder actually shows up in practice.
+
+You're not really there to take an order and build whatever they hand you.
+
+Now, in the long run, that's the framing.
+
+Sometimes when you're just getting started, you are prioritizing reps, right?
+
+So, maybe sometimes you do just take orders.
+
+But this is the frame I want you guys to understand.
+
+You're there to look at their business with a fresh set of eyes [music] and help them see what they cannot see.
+
+And honestly, if I had to distill the entire job down into one sentence, it would be this.
+
+Your job is to find the actual constraint, not just the annoyance, but the actual constraint, and then design the solution that fixes that constraint.
+
+And sometimes, what's pretty cool is that the solution doesn't even have to use AI, which I know sounds weird to say in a video about an AI business.
+
+I get that.
+
+But it's very true.
+
+A client might walk in and say, "Hey, I want an AI agent for this thing." And maybe the thing isn't actually where the leverage is.
+
+Or maybe the thing isn't an AI agent.
+
+Maybe it's just a workflow.
+
+Because think about it.
+
+As more AI is introduced, the automations cost more, and they also introduce more risk.
+
+So, if you can get the same solution for cheaper and for, you know, and with higher confidence, then that's going to be a win.
+
+So, here's the actual exercise to find it.
+
+When you get in front of that client, ask them to walk through their operations in chronological order.
+
+So, front all the way to the back.
+
+So, lead comes in, lead gets qualified, deal closes, customer gets onboarded, work gets delivered, whatever happens all the way to the end.
+
+And as they walk through that, you're listening for friction.
+
+Where do they sigh?
+
+Where do they say, "Mm, yeah, that part's a little bit annoying." or "Oh, we do that a lot." Where does the team complain?
+
+Where is the first spot from front to back that you feel that friction?
+
+That's the spot you want to tackle because that's typically the constraint.
+
+And that mindset right there, and that exercise, makes you feel like a true consultant instead of just the automation guy that watches AI YouTube videos.
+
+Okay, so once you've spotted the actual constraint, here's the scoping discipline that I want you guys to internalize.
+
+Anytime you're about to start a build for a client, you have to be able to fill in four blanks before you write a single line of code or start building the automation.
+
+So, here are the four blanks.
+
+You would say something like, "This automation is in the X bucket.
+
+The specific KPI is X metric.
+
+The baseline today is X number, and after 60 days we expect X target." Four blanks.
+
+The first one, that bucket, is one of the three that we talked about earlier in this video, which was get more customers, make each customer worth more, or cut costs.
+
+The metric is the specific number that the bucket maps to, the specific KPI.
+
+And the baseline is what that number is today before you guys start working together.
+
+And then the target is your prediction.
+
+What do you think that metric's going to be after 60 days?
+
+Fill in all four.
+
+And if you can't do that, then you don't have a project.
+
+So, just to give you a sense of why that matters.
+
+Capgemini did some research, and they found that only 13% of AI projects ever make it from proof of concept to production.
+
+So, that means out of every 100 projects that get started with AI, 87 of them just die in the demo phase.
+
+They get built, the founder loves the demo, and then nobody actually uses it.
+
+So, the four-blank discipline is the reason your projects end up in the 13% and not in the 87% that you don't want to be in.
+
+Because you're not just building cool tech, you're moving a specific KPI that the client actually cares about because that KPI directly affects their bottom line.
+
+Now, here's what you need to do to turn a one good project into a real business.
+
+Once you've shipped a really good automation, and you've actually tracked the baseline and the after metrics over time, you have a sentence that sounds like, "Our customer support automation increased ticket resolution from 75 to 87% in 6 months." That is a real case study with real verifiable numbers attached to it.
+
+And hopefully what you should do is get like a testimonial from that client.
+
+And that changes everything for you.
+
+Because now, look at what you can do with that.
+
+Ask yourself, who was that client?
+
+What was their industry?
+
+What was their size?
+
+What stage were they at?
+
+That is your new avatar.
+
+And that's how you start to figure out how you niche down.
+
+Because now you have an avatar, you have a niche.
+
+Go find other business owners who look exactly like that current client.
+
+And walk into the next conversation saying, "Hey, here's what I did for someone just like you.
+
+These are results that I got for them.
+
+Do you want those results, too?" That's a way, way easier ask than just walking in cold, pitching yourself as an AI automation consultant.
+
+And then, the second time you build that same type of automation, you ship it faster.
+
+And you already know where some of the holes are.
+
+The third time, faster and better again.
+
+So, the metric gets sharper because you've already worked out all the failure modes and the edge cases, the case studies get stronger, you start speaking that business owner's language because you've now sat across from that exact avatar five different times.
+
+So, selling gets easier, you're able to increase your prices, and more clients stay on retainer because you're not just a vendor at that point, you're the person who actually understands their business.
+
+So, here's one more prompt for you.
+
+Open up Claude and run this when you're scoping the next build.
+
+So, you say, "Hey, I'm targeting this specific niche, and they struggle with this specific problem.
+
+Help me scope the smallest valuable product I could ship in 2 weeks as a solo founder.
+
+Give me, one, the core feature that solves 80% of the pain.
+
+Two, features I should explicitly not build in V1.
+
+Three, the tech stack you'd recommend for a non-technical founder using Claude code.
+
+And four, potential competitors and how I differentiate." This forces you to think small.
+
+2 weeks, one core feature, explicit cut list.
+
+That's how you actually ship something that lands in the 13%.
+
+All right, so now you've got something real that you can build for somebody.
+
+The last thing to figure out is what to actually charge for that.
+
+So, pricing maps directly to that service ladder that we talked about earlier.
+
+The same four rungs, four price ranges.
+
+And these are based on what I've actually seen people charge across the AIS+ community and across the market.
+
+So, for education or consulting hours, you're probably going to charge anywhere from $100 to $500 per hour.
+
+And this is the on-ramp price.
+
+You obviously don't want to be in the game forever of trading time for money, but like I said, it's the on-ramp.
+
+You're setting it at a rate where it's easy for them to say yes without it feeling like a real commitment.
+
+And $200 is a great default.
+
+Now, for an audit, you can charge a little bit more.
+
+You're charging maybe a flat fee for 500 bucks to maybe even 3,000 bucks, depending on how deep you're going.
+
+They're pulling you in to learn their business, but not to build anything yet.
+
+And that deliverable could be obviously given back to you, or maybe they'll take that deliverable, and hopefully not, but maybe just give it to a different engineering team or whatever.
+
+Now, you can start to charge more for these audits over time.
+
+Like big firms can charge, you know, 5K to even hundreds of thousands of dollars for deep auditing work.
+
+But those firms have 10 years of case studies.
+
+For a beginner, $500 to maybe $3,000 is the right window.
+
+Now, for a project, you're somewhere in the 2500 to 10K range for one focused build.
+
+And the way you anchor this is against what the manual version of the workflow costs every day.
+
+So, if they're spending 15 hours a week on something and an automation cuts that to 1 hour, the math is brutally in your favor.
+
+And you need to show them that math.
+
+You need to justify it.
+
+For a retainer, you're maybe in the 3K to 10K month range per month for a solo operator.
+
+This is where the income lives because think about this.
+
+If you have two clients and you're they're each paying you 5K a month, that's 10K a month.
+
+And you're already at six figures a year with just two clients.
+
+You don't need to have hundreds of clients.
+
+You just need to have a few that you're going to go really deep with and deliver real value for.
+
+And just so you can see that this is real market data.
+
+Upwork's 2026 in-demand skills report came out in February.
+
+They found that demand for AI integration work specifically grew 178% year over year.
+
+AI-enabled freelancers on the platform earn about 40% more per hour than non-AI peers.
+
+So, the market is literally doubling every year and the premium for being AI-fluent is real.
+
+So, one more prompt that you can use if you want to open up Claude and help brainstorm about pricing, say, "I'm a one-person AI consultant offering X service to X type of customer.
+
+They currently solve this by doing X manual alternative.
+
+So, help me build three pricing tiers with psychological anchoring.
+
+The tiers should map to one, education and setup hours.
+
+Two, audit or single project.
+
+Three, monthly retainer.
+
+For each tier, give me the deliverable, the price range, and the single most important thing to communicate about value." So, go ahead and run that.
+
+You'll come out with a pricing page that doesn't feel like you're guessing.
+
+And by the way, pricing is a whole conversation and I made a full deep dive YouTube video which you can check out for completely free.
+
+I will tag that one right up here if you want to give that one a watch as well.
+
+But basically, the whole idea, the TLDR is they don't always ask this, but when you tell a price, you want to assume that they're going to say, "Can you tell me exactly how you got to that number?" And if you're always prepared for that question, you're going to be able to deliver that number confidently every time.
+
+So, look, the first client is the hardest by a mile, but after that, you have momentum.
+
+And the momentum starts to compound because the second client comes from the first one's referral and the first one's case study.
+
+And the third one comes from the case study that you built on the first two, and so on.
+
+You just have to get past number one, which is why at the beginning, it's definitely worth it to prioritize reps over cash.
+
+Okay, so zooming all the way out, building a one-person AI business in 2026 is very doable.
+
+And Cloud Code is what makes it all possible, but only if you use it the right way.
+
+On your business first, then on a client's business, and as the workspace where you turn AI from a chat window into actual leverage.
+
+Now, real quick, before I close this video out, I just want you guys to think about why are you actually pursuing this whole AI opportunity?
+
+Because if the thought of posting a YouTube video case study, or the thought of jumping on a call with a stranger terrifies you, then maybe you don't actually want to run your own one-person business.
+
+Maybe, you want to be the AI builder and you want to partner with someone who enjoys the content creation and enjoys doing the sales.
+
+Or maybe you even just want to be like the AI person at your company and maybe try to get like a head of AI role or like a chief AI officer role.
+
+So, yes, AI, amazing opportunity to change your life in some way, but starting your own business isn't the only answer.
+
+So, I would just encourage you to really think about what do you actually [music] want?
+
+Anyways, little rant over.
+
+I know we just covered a ton of information in this video.
+
+So, what I did is I threw all of this into a free resource guide that you can access for completely free inside of my free school community.
+
+The link is down in the description.
+
+But anyways, that is going to do it for this one.
+
+So, if you guys enjoyed the video or you learned something new, please give it a like, it helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video and I'll see you all in the next one.
+
+Thanks, guys.

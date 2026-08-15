@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-082",
+  "version": 1,
+  "title": "saas-gtm / acquisition — clock-includes-distribution-sell-before-the-repo",
+  "steps": [
+    "Steal clock-includes-distro. No pred-market ICP.",
+    "Steal card-test vs pursue. Hive Path C is our Stripe, not this product. Mark tape $ UNVERIFIED.",
+    "Steal copy-what-works + effort-on-launch. `send-removed` on network blasts. Mark tape $ UNVERIFIED."
+  ],
+  "support_ids": [
+    "K-I7mpF7_pnPM-01",
+    "K-I7mpF7_pnPM-02",
+    "K-I7mpF7_pnPM-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=saas-gtm; stage=acquisition; $1 / 74 views / 100k-mo kids UNVERIFIED.",
+  "less_relevant_when": "He invites comments to un-kill (part 2). Tape $ UNVERIFIED. Speech≠behavior (keep both; do not pick a winner): “real peo",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

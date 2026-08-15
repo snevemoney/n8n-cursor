@@ -1,0 +1,603 @@
+This video is going to replace over 1,000 hours of trial and error inside of Claude Code and tell
+you what you need to focus on whether you're at the beginning stage, intermediate stage, or pro. I'm
+going to cover everything from the desktop app to how to prompt, MCPs, CLI, and even more advanced
+topics like graph engineering and creating your own agentic OS. And by the end, you're going to have
+a complete road map on how to master the most powerful AI tool in the game today. There is a ton to
+cover, so let's get started. Now the first thing we need to talk about in the beginner section is
+where do we run cloud code because this can actually be a confusing question. You technically can
+run cloud code from the web app in the cloud. We also have the desktop version of cloud code. And of
+course we have the terminal. Which of these three should you be using? Especially if you're just
+getting started. Well, if you'd asked me this question a few months ago, I would have pushed you to
+the terminal or something like VS Code with the cloud code extension. But these days, the desktop
+app has gotten a lot better. And if you are someone who is not coming from a technical background,
+this is all brand new to you. I would suggest using the Claude Code desktop app. Yes, the terminal
+will always be a powerful option for those of you who are more technically inclined. But if that's
+not you, don't feel pressured into using it if you're not comfortable. You really aren't missing out
+these days. And the desktop app is getting features that just aren't available inside of the
+terminal. things like voice mode, things like browser automations, and there's a lot of quality of
+life things when you work inside the desktop app, like inline artifacts, and generally a better user
+experience for those of you who have never touched the terminal before. Not to mention, we can also
+use the terminal when we're inside the desktop app. So, it's not like it's an eitheror thing. Now,
+to download and install the Cloud Code desktop app is super easy. Just search for Claw Desktop App.
+You'll hit the first link, and then you're going to download the installer and run it. So now you
+have the desktop app installed and let's do a speedrun through this thing and what you need to
+actually care about. Now in terms of settings, you come over here to the left and hit customize.
+Let's then go to the general tab. And I want you to take a look at instructions for Claude. Take a
+look at mine. It's blank. Yours probably should be blank, too. These are global instructions. By
+global, this means it applies to everything, all your projects and all of your prompts. So if I put
+something in there like, I want all of your responses to me to rhyme. Well, guess what's going to
+happen? Every single response is going to rhyme. stupid example, but the point is, do you actually
+have something that's relevant enough to every single chat you're ever going to have with Claude
+that we should spell it out here? Maybe, but that's a very high bar. And if what you're thinking
+about adding here doesn't meet that bar, I would leave it blank. Next, go to capabilities. Make sure
+tool access mode is load tools when needed, and turn everything else on this page on. In the cloud
+code tab, I would keep everything in general turned on. It has some settings that are purely
+personal preference. And in terms of local sessions, I would turn all of these on as well. Now, the
+exception is when we come down to pull requests. If you don't know what a pull request is, just
+leave this off. It's a little more advanced. And for Claude in Chrome, which is a Google Chrome
+extension where Claude can control things in your browser. I turn this on as well, but understand
+you need to download the Google extension if you want to do that. Now, we'll go into more detail
+when it comes to skills, connectors, and plugins, and memory later, so don't worry about that just
+yet. Now over here we have artifacts. You don't really need to worry about artifacts honestly inside
+of Cloud Code. Routines have to do with automations we run. And we'll go deeper into automations
+later. And over here this is just previous chats we've had with Cloud Code. Now if you go ahead and
+hit new, it should bring up a page that looks like this. And let's break down what we're looking at.
+So obviously right here we have our little chat window. And then we have these four things up here.
+Local, something that says a th00and main, work tree, and then a little plus button. Local is just
+you telling Claude where it's actually going to be running. If you don't know what any of these
+things are, cloud, remote control, WSL, SSH, you should be on local 99.99% of the time. Everything
+else here besides WSL is all about being able to use Claude when you're away from your computer. So,
+if you're in the beginner stages, that's not going to be you. Next, right here where it says 10,00
+that is just the folder I am working in. So if I click on this, I can open a new folder and I can
+pick any one inside of cloud well inside of my computer that I want to work within. So you could
+create a folder on your desktop that just says cloud code projects and that's what you work in.
+Everything you do here inside of cloud code will live in that folder. So you just have to pick one.
+Next we have main and workree. This has to do with git. A little bit more of an advanced topic. So
+if you're a beginner to oversimplify this completely, git just has to do with saving your work. So,
+if you don't know what git is, I'm not going to turn this into a git lesson. Just keep it on main
+and don't check workree. And then we have this plus button. This allows you to add an additional
+folder so your work essentially gets copied in two places. Next, we have permissions. If I click on
+auto, I will see five different modes. What are these modes? This has to do with us telling cloud
+code what it has permission to do with or without our consent. So, on one end of the spectrum, we
+have manual. This means it's going to ask you all the time, can I do this? Can I do that? Can I edit
+things? On the other end of the spectrum, we have bypass permissions. It can do whatever it wants.
+Download things, install things, delete things, edit things. Kind of scary. Now, in between those,
+we have auto, which is essentially bypass permissions, except there's a classifier that takes a look
+at the commands that Cloud Code is running and decides if they're dangerous or not. And if they're
+dangerous, it will stop them. So, this is the default for a reason. You should be sitting here all
+the time. The only other one we're going to play around with is plan, and we'll go into that more
+later. This plus button lets you add things. So you can add screenshots, that sort of thing. And
+then you have a microphone. And then over here on the right, we have the model, we have the effort
+level, and then we have our context window. What model should we be using? Well, it depends on what
+plan you're on. If you're on the $20 a month plan, you really aren't going to be able to use Fable.
+It's just going to burn too much usage, and so you're going to have to sit on Opus. If you are on a
+max plan, 5x, 20x, so $100, 200 bucks a month. I would suggest working in Fable most of the time. It
+is the best model by far. Now, the problem is the usage though because if we click this little thing
+over here, you know, you see context window. We'll talk about that more later. We have a number of
+different limits. We have a 5 hour limit, a weekly limit, and a fable limit. So, only half of our
+usage per week can be dedicated to Fable. So, we don't want to burn too much Fable too early. So,
+what we need to really think about is our effort level, which can be anywhere from low all the way
+to ultra code. The more it thinks, the better it performs, but it's not linear. If I go from extra
+high to ultra code, does that mean I'm going to get like a 10x increase in the performance? No. It
+might be like a 1% increase, but you might pay 5x more. In fact, most of the problems you're trying
+to solve, especially if you're more in the beginner stage, don't require anything beyond medium. In
+fact, you could probably get away with a low and just do fine. Me personally, I sit on Fable medium
+most of the time unless I'm dealing with something rather complex or I'm about to hit a usage reset
+and I know I can just burn it. So, for today, we're going to sit on Fable 5 medium because it's a
+nice happy middle ground. So, lower effort means less usage. Doesn't perform quite as well, but
+generally it does more than enough. Now, let's talk about prompting. Anytime we are going to start
+prompting some new project, I highly, highly suggest you go into plan mode. Now, why is that? Well,
+plan mode is going to allow Claude and I to have a conversation to make sure we are on the same page
+before it goes and executes something. And more importantly, not only are we going to have a
+conversation, it's going to ask you questions because many times, and this is very true if you are
+coming a from a nontechnical background and b if you're trying to do some sort of project that is
+not in your typical, you know, domain of expertise, the issue you're going to run into when using AI
+is that there's just so much that you don't know. And there is so much that you don't know that you
+don't know. These unknown unknowns are a real problem. And the only way you're going to be able to
+figure those out is by having clawed code pretty much bring them up for you to shine a light in
+these dark spaces that you didn't even know exist. And plan mode is the simplest way to solve that
+problem because it's going to force it to ask us questions. So anytime you're like have a fuzzy idea
+of I'm on step A. I want to get to step Z. I don't know what to do. We're going to go into plan
+mode. Now, when I prompt clawed code, this used to be a big thing kind of back in the day, the last
+like year or two, and this has kind of gone away a little bit, but you still have people out there
+who think there's some like magic prompt you need to do. It needs to go in this specific format
+where like here's the goal and here's the context and here's how I want you to act. You don't need
+to do that. What you need to do is you need to buy yourself a microphone. You need to turn the
+microphone on and you just need to give Claude Code a stream of consciousness. So, for this plan,
+for this website we're going to build, we're going to say it's just a website for this fake AI
+analytics company, and we'll call it Lighthouse. And so, that's all I'm going to do. And I'm just
+going to ramble like there there's no plan here. It's going to sound like this. So, I want to create
+a website for a fake AI analytics company called Lighthouse. I don't really know what I want to be
+on the website. Although I know I want sort of the call to action at the end for them to book a call
+with us. So that's going to be kind of the call to action. I think in terms of who the target
+audience is. Let's say it's going for like small startups. So other than that, I don't really know
+what I'm missing. Just go ahead and ask me whatever questions you think are relevant that I haven't
+thought of. Now what I want you to pay attention to is that last bit where I said pretty much just
+start asking me questions and things I haven't thought about. Now, since it's in plan mode, it's
+kind of already going to do that. But anytime you prompt Claude, you can always add that at the end
+of your prompt, like what am I not thinking about? What sort of questions do you have for me? You
+know, and this is going to get you again in sort of that back and forth with cloud code because at
+any point it can bring up something like this where it asks you questions. So, what's the purpose of
+this fake site? Well, we'll say it's for design/dev practice. What does Lighthouse actually do?
+We're going to say product analytics and AI insights. How big should it be? Let's do a landing page
+like that. And then what does vibe should the design have? We'll go with clean light SAS. Next, it
+asks us what text stack should we want the site to be built with? Plain HTML, CSS/JS, next.js plus
+tailwind, or ash plus tailwind. Do you know what any of those are? Genuinely, do you have any idea
+what those are? Do you even know what a tech stack is? If your answer is no, then what should we do?
+Should we just go with the recommended? Yes, but no. So, here's a problem a lot of people run into
+is they're just going to be like, I don't even care what a text stack is. Sure, plain HTML. Go
+recommended. They just click this. And the thing is, these models are so good is that you're still
+going to get a pretty good output. The problem is is when you repeat that behavior of not
+understanding the question and just hitting recommended again and again and again and again. The
+main problem is there's no differentiation between you and any guy on the street who I could put in
+front of your computer and have them do the exact same thing. Like where is any moat whatsoever for
+what you do? Like you're very replaceable. But even more importantly, you're not learning anything.
+And as good as these models are, eventually you're going to have a pet project that's very unique
+that maybe Claude doesn't know the best way to attack it. If you have spent all of your time
+learning cloud code by never actually learning anything and just hitting recommended, recommended,
+recommended, you're going to have zero idea of what's actually happening. Now, you don't ever need
+to learn code again, but you do need to begin to learn AI software engineering fundamentals, like
+big picture stuff, like how these building blocks come together. And the only way you're going to do
+that is when you hit questions like this, you don't just hit recommended. You say something like
+this. Can you explain what a tech stack actually is? I don't really know. I don't really understand
+these options as well. So, can you just give me a quick breakdown of what I'm looking at? And that's
+it. You're just going to tell it to explain the question a little more detail. And if you do that
+over and over and over again for weeks, months, and years, you're eventually going to build an
+actual foundation. You're not going to be this like caricature of a vibe coder. This is extremely
+important. And this is the sort of mentality you have to take with prompting and talking with claude
+code if you actually want to like learn anything because it's going to make you better. So we'll do
+pricing product features. Sure. What should the book uh call CTA work? We'll do a fake booking form
+and it's off to the races. And so we can see here it broke down the what is a text stack question
+and then goes into a little more detail about what everything is. Again, you don't need to become an
+expert at all these things, but as you do this again and again and you kind of go down the rabbit
+holes when they make sense for you, you you generally are going to start like putting the pieces
+together. Like this isn't that complicated. Like coding is difficult. No one's asking you to become
+like an software engineer in that sense. But you can learn what a tech is. You can learn what these
+different languages sort of are and like what we should do in each sort of use case. Now once it
+proposes the plan you will see it populate over here on the right hand side. Now what's cool about
+plan mode inside the desktop app is when it brings this up at any time I can sort of select
+something. So let's say the audience let's say I didn't just want small startups. Let's say I was
+also looking for add I wanted to add medium sized companies as well. So if I do that and I hit
+comments it now starts adding sort of like comments here. So I could add more and more comments and
+go down the line and kind of make these like almost little notes to the plan it's created. I also
+have the ability to add any prompt I want and then I can at any point say hey let's go ahead and
+revise this. So now it's added mediumsiz companies to the audience as well. And once I like the plan
+I can either hit accept or accept with auto mode. So make sure you hit accept and auto mode or else
+it's going to start running it inside of manual mode and we don't want to do that. So we'll do
+accept and auto mode. And now it has gone ahead and built the web page for us. And it's at this
+point we are going to move into the intermediate sort of skills and tips and tricks when it comes to
+claude code. But before we do that, a quick word from today's sponsor, me. So just yesterday, I
+released a completely updated version of my Claude code masterass. We go way deeper on all the
+topics we sort of touch on at a surface level here in today's video, and it is a perfect place for
+you if you're someone who is non-technical and really just wants to learn how to master this amazing
+tool. So, if you want to get your hands on it, you can find it inside of Chase AI Plus. There's a
+link in the pin comment. So, let's build our website. But what I actually want to focus now is on
+this guy down here, this little circle. You remember this that showed our usage? Well, it also shows
+our context window now. And if we click on our context window, it gives us a very specific breakdown
+of what is actually filling it up. Now, the context window is a very important metric we always need
+to keep track of for a few reasons. Now the first reason has to do with performance. But to
+understand this, you need to understand tokens and context. So to keep this oversimplified, every
+single word you send to claude code and every single word you get back is considered a token. A
+token is the currency of large language models. And the context window is the budget. So we have a
+budget of 1 million tokens we can essentially spend in each session. And so far we have spent 156k.
+Now that sounds great. We've only used 15%. I can use another 844,000. Well, sort of. The issue is
+as this context window fills up, in fact, the performance of claude code gets worse. Think of it as
+it just having too much stuff in its brain. If we are sitting at 800,000 tokens over here out of 1
+million and I ask it questions about what's been going on in the last 800,000 tokens, it's going to
+struggle. Especially if we're asking it questions that sort of happened in the middle. So because of
+this, we always want to keep an eye on our context window because we don't want the performance to
+decrease. And this decrease is somewhat linear and there isn't an exact science to it. So rule of
+thumb as we sort of hit like 30%, 40%, certainly 50%, 500k tokens, you definitely want to sit there
+and ask, do I need to continue the session? And really for me, that's at like 30%. And while you can
+see here the context window does get filled up with things besides our messages, including things
+like system tools and skills, the messages are the big thing. Let's say you hit 30% of your context
+window or even 50%. What are your options? Well, we really have one option and that's just to start
+a new chat. Okay, we're just going to start a new chat. Now, there's a couple ways you can do this.
+We can do commands like forward slash clear. If I do forward slashclear, this is going to get rid of
+everything and we're going to start completely fresh, brand new context window, and we're going to
+have top performance. Now, the other option is to do slashcompact. If I do slashcompact, what cloud
+code's going to do is it's going to take a look at the entire conversation history we've had. It's
+going to create a new summary, and then it's going to start a new chat with that summary. Now, your
+other option is just to go over here and hit the plus button, and this will also start a new chat
+inside of that same folder, and then I can reference the old chat at any time. Now the scary thing
+is especially if you've come from primarily the web app where the conversation you have is sort of
+all you have and if you get rid of the conversation it forgets everything. Remember what are we
+doing here? We are working inside a specific folder. We're inside folder 1000 creating our website.
+So if I get rid of this entire conversation it can still take a look at the files at all the code we
+wrote and understand what's happening. So starting a new chat isn't really starting from zero. And
+in that case, you really have nothing to fear if you're filling up the context window and you're
+scared of starting over. It's okay. Just start over and worst case, just have it create that summary
+with /compact. But at this point, we're only at 16%. So, we are okay. Now, let's talk a little bit
+about this website. This website is ugly. This website is actually pretty lame and generic. And by
+the way, I'm looking at this inside the browser pane inside of Claude Code desktop app. So, I can
+actually do a lot of stuff here. Like, if I open this up, I can select certain things. I can put
+comments on these just like in plan mode, which then go into a prompt. I can actually annotate
+things and say like, "Hey, trash, you know, and it will also add it to a comment." So, really easy
+to sort of do like micro edits here, um, if you want to. But big thing we need to solve for is just
+like this website. Why does this look so terrible? Well, this looks pretty awful because a we didn't
+give it enough context. for what we want it to look like. We didn't give it any sort of inspiration.
+We didn't give it screenshots. All we said was we wanted like a clean SAS product. And one of the
+themes of sort of the intermediate section is context engineering. Your ability to give cloud code
+access not just to sort of your thoughts and your vision, but for it to external tools and skills so
+that it can do a better job. So sort of a two-part process here for solving this problem. This is
+where we're going to dive into the idea of skills. Skills are probably the most important thing you
+need to understand and master when it comes to leveling up your Claude code performance. Now, skills
+at their most reductive state, and it gets a little bit more complicated, are simply prompts that
+tell Claude Code to do a specific thing in a specific way. For example, there are a ton of front-end
+design skills that are all about making better websites that are essentially just prompts that tell
+Cloud Code, hey, uh, when you're creating this website, avoid certain gradients, avoid things that
+look like AI slop, do this, do that. Right? It's just giving it specific instructions. That's all
+skills are. So, how do we actually get skills? Well, we can find them inside of the Claude app. So,
+if I go to customize, move this over here, we go down to skills, and you can see some of the skills
+that I have right here. We also have plugins, which also can kind of be skills. It's sort of a gray
+area, especially in the app. When we talk about skills versus plugins, you can kind of think of them
+as the same thing. Plugins can include multiple skills, but it's kind of arbitrary. So, for example,
+if I go to plugins and I go to browse, first of all, what am I going to see? I'm going to see the
+anthropic official plugins. This includes the front-end design plugin, which is simply the front-end
+design skill. So, if I install this, mine's already installed. It will then add the front of design
+skill to claw code. And this is the actual prompt for the exact front of design skill. This is an
+official skill. Like you can just go see this. This is on the official claude code GitHub. If I copy
+this whole thing and I go back inside here and I paste this into the prompt, that's just like I'm
+using the skill. But obviously you wouldn't do that every single time you want to do something
+related to front design. So instead we simply add the skill like I showed you in the UI and we just
+do frontend design. Right? I can do forward slash. And now this is invoked. Now that's the same as
+if I just copied and pasted that whole thing. Now I don't only have to do the forward slash. I could
+just use natural language and say like use front-end design skill and it's smart enough to actually
+know it needs to call that. Now the confusion can happen is if you have multiple front-end design
+related skills and if you do that then you if you just say like hey I'm building a website then it
+might not know which one to pick. So if you have multiple skills that all kind of do the same thing
+you need to nudge Claude in the right direction. Now, the most important skill you can actually add
+right now, and this goes beyond web design, is if you go back to plugins and you go to browse and
+you go to skill creator. This is the most important skill you can add because this is a skill that
+allows you to create other skills. It includes things like measuring skill performance. It runs
+tests. It runs evals. It does benchmarks. We'll talk about this more in a little bit, but obviously
+as we look through here, there isn't that many skills to choose from. And we all know there's a
+billion in one skills floating out there in the world. And so where you will normally find skills is
+GitHub kind of like you see here. So let's say for example I wanted to use another front-end design
+related skill. And let's say I was looking for the impeccable skill and I found it on GitHub. Well,
+how do I actually install this thing? So it can will tell you in the description how to do it step
+by step. But often times it's kind of a pain in the butt. All you need to do is when you find a
+skill you like is just copy the URL from GitHub, go inside of Clawed Code, paste that skill in
+there, and then say something like add this skill. From there, it will literally add the skill to
+your repertoire. And from there, you just invoke it like I showed you. Now, you can get pretty
+advanced when it comes to skills, especially when you have the skill creator skill. For example,
+let's say we finish out this video. I add a bunch of new stuff to this web page. I could at the end
+of doing all this of like prompting it, creating the website, doing the additions, adding whatever I
+want. I could then do something like, let's use the skill creator skill and then say, take a look at
+the entire message history of the session. Take a look at everything we've done today and turn that
+into a skill. So, if there's things that you do over and over and over again, you can turn those
+into skills. And later, I'll even show you how to then turn those skills into automations. So skills
+are very powerful because they allow you to codify things that AI does. You know, one of the issues
+with AI is that it's somewhat non-deterministic, right? If you ask it to do something 10 times, it
+might do it 10 different ways. It's not deterministic. However, skills allow us to be somewhat
+deterministic and give us more control how Cloud does things. So that's why they're so important.
+Now, like I mentioned before, beyond skills, we also need to add more context here. So what I'm
+going to do is I'm just going to search for some screenshots that I can add to this website to make
+it look a bit better. So, I went on Pinterest and I found this image when I put in SAS landing page.
+Thought it looked kind of cool. So, what we're going to do is we're just going to drop this
+screenshot into here. And we're going to say, "Use the front-end design skill to redesign this web
+page." And in fact, I want you to do three versions of it and show me all three versions inside the
+browser pane that I can choose from. All of them should kind of be in the style, but I want it to be
+divergent enough that I can kind of see some differences. So, it did exactly what we asked. If we
+look at this here, we can now see the three different versions of the website. You can see what a
+departure these are from what we were just looking at. And that was with a single skill, which was
+just the generic front of design skill from Anthropic, and a pretty basic prompt alongside the
+screenshot. So, I can take a look at this one. V1 full size. This one looks pretty cool. We have
+this V2. Um, not a huge fan of the colors, although the radar looks kind of cool. And then lastly,
+we have V3, which kind of looks like your typical AI slop to be totally honest. Um, I really like
+V1. I think this is something that looks pretty cool. So, what we're going to do is we're going to
+say, hey, we're just going to go ahead with V1. What that's meant to demonstrate is really the power
+of just injecting context. Literally, one screenshot, one skill, infinitely different end result. So
+now let's talk about how we can supercharge cloud code by bringing in outside tools by connecting
+outside applications to cloud code itself so that claude can control them and we never even have to
+really leave the app. Now there's really three different ways to do this. The first one is by going
+into customize and heading to connectors. Some of these are super easy to connect and you might have
+done already done it already. That's something like Gmail or Google calendar or Google drive. This
+allows Claude Code to talk with these applications, control these applications, usually with some
+guardrails, and it just happens via prompting. So, if I tell Cloud Code, hey, go read my Gmail, it
+does that because it's been connected. Now, most of the big apps out there have some sort of
+connector. So, if you just go to add and you browse connectors, chances are you will find what you
+are looking for. The second way is via plugins. And like I said, there's very much like a fuzzy line
+between all these things. similar to connectors. If it's big, if it's popular, there's probably a
+plugin for it. So, if I go to browse, you're first going to see a bunch of anthropic plugins, which
+really are just skills. If I go to partners, though, I can find something like GitHub or Superbase.
+I simply click on it, and you'll see what's going on under the hood. In this case, this is the
+GitHub MCP. Just like with connectors, if I add some sort of plugin, it's going to allow me to talk
+to control some sort of outside application via cloud code. But there is a third thing that is not
+an MCP or plugin or connector and those are things like CLIs. So we have right here the GitHub CLI.
+So we have a GitHub CLI and we have a GitHub MCP. What is the difference? Well, the difference is a
+little bit technical in terms of the practical application. What you are going to care about in many
+cases there's not a huge difference. In general, the CLI tends to give you more functionality than
+an MCP. And often times the CLIs also include skills. So when you are dealing with some sort of
+outside application, aka you're working inside of cloud code and you need to talk to something else,
+you need to figure out if you can add it through one of those three ways, connectors, plugins or
+CLI. Like you saw connectors and plugins, we can do it through here via the CLI. It's also as simple
+as simply telling Cloud Code to add the CLI. So like the GitHub CLI, there's an actual command if
+you're inside the terminal, but I could just like copy the URL. I can go inside of Claw Code and say
+like, "Hey, here's the Cal CLI for GitHub. Go ahead and add this CLI." And it's going to do exactly
+that. From there, you've pretty much given Claude code. Think of it almost as a skill to call on
+that CLI and have it do whatever that CLI gives it the ability to do. For GitHub, that means I can
+create a repository. I can upload all this code we just created to that repository. I can edit the
+repository. And if we take it a step further and we think of something like Verscell and Verscell,
+if you are unaware, is a web application that allows us to host our actual website. So we just
+created a website and we want to put it on the web and have a true URL. Verscell will allow us to do
+that. Well, instead of going to a dashboard like this inside of Verscell and handling all ourselves,
+why don't I just search for the Verscell CLI? Oh, look at that. forcell has a CLI as well. And so
+what we could do with just those two applications is I can take a look to see if there's a GitHub
+connector. There is. I can take a look to see if there's a GitHub plugin. There is. I can take a
+look to see if there's a GitHub CLI. There is. Add any one of those, add it with Versell, and I now
+have a pipeline where I can take the website I've created. I can create the repo for it inside of
+GitHub and then automatically connect that to Verscell. I've essentially created an entire
+deployment pipeline from cloud code that I just have to talk to in plain language and it'll do
+everything for me. And the big takeaway here is that anytime you are working with anything outside
+of cloud, you need to ask yourself, can I actually just control it with Claude? Because chances are
+Claude can actually control it better than you can, especially if you aren't intimately familiar
+with how that application works. Whether it's a CLI, an MCP, or a connector, it doesn't really
+matter. You just need to pick one. And you also don't even have to like go out and find it. So like
+for example, if I asked Claude code a question like this. Hey, so I'm thinking about deploying this
+website. I've heard of things like GitHub and Verscell. I'm not super familiar with those. I've also
+heard there's like CLIs or perhaps MCPs we could use. So do you think you can go look and see if
+that would make sense for hosting our website? If they do, can you add those CLIs if we need them?
+And then once they're added, can you go ahead and just set up that deployment pipeline and get it
+all properly connected? So a prompt like that where you're just saying like, "Hey, I heard there's
+some tools out there. Maybe they have CLIs. If they have them, add them. Run them." That's all you
+got to do, right? You don't even really have to be a pro. When in doubt, just ask Cloud Code what
+the best practice is. And if it has a CLI, it'll go ahead and search for it, right? So if I run
+that, and by the way, I already have these installed, so it's probably going to come back and say,
+"Hey, I already installed it." All you have to do if you've never used them before is create an
+account and then we'll walk you through the setup. And as these agent coding harnesses like Claude
+Code only become more and more ubiquitous, you're going to see pretty much every app out there come
+out with some version of a CLI, a connector, an MCP, which means again Claude runs the show. And so
+with that prompt, obviously it's going to walk you through how to log in if you haven't done that
+before. It created the GitHub repo. So all the code from our website is essentially living in the
+cloud. And it also set up the Verscell connection. So I now have a live URL I can go to and we can
+also see it right here. So this has a real URL lighthouse site to versel app and I could share this
+with anybody and again did I have to go into GitHub? No. Did I have to go into Verscell? No. All
+control from cloud code. And because it is a GitHub and Verscell connection any changes I make to
+the website inside of Cloud Code here, if I want those to be reflected on the live website, I just
+tell it and it does it. So this deployment pipeline is just one example of bringing outside tools
+into the cloud code fold. Now it's time to move on to some more advanced topics. We're going to
+touch on things like automations. We're going to talk about how we can best approach long horizon
+tasks. We'll do that by discussing things like /goal loop engineering, graph engineering. We're
+going to talk a little bit about model routing, how we can bring in other models like codecs and the
+GPT models into our workflow. And then we'll finish it all off by talking about some more custom
+type harnesses and UIs we can layer on top of cloud code. Whether that's something like this or
+going with an obsidian command center type approach. So let's begin by talking about long horizon
+tasks and loop engineering and this kind of bleeds into things like automations. So when we talk
+about long horizon task, we're talking about things like loop engineering and graph engineering.
+What are we really saying? What we're saying is we have some sort of task, some sort of goal we need
+to complete, but that this might be something we need cloud code to do an infinite amount of times.
+This might be something that runs every single day. And ideally, it is something that not only is
+going to run every single day, but something that we want to be self-improving. So for these long
+horizon tasks, there's really three parts. We are going to have a trigger, a task, and then some
+sort of success criteria. Now, not all long horizon tasks are loops. This could simply be some sort
+of task that you think is going to take 2 hours, 4 hours, 12 hours, days for Claude Code to
+complete, and you don't want it to just stop every single time it fills up its context window. You
+want it to keep co going and going and going until it completes that task. There is a built-in
+command inside of Claude Code that does this. It is called slashgoal. Now, slash goal is perfect if
+you have a complex project that you want Claude Code to complete and you don't want to babysit it
+throughout the entire process. However, there is one specific thing you need and that has to do with
+success. You need to be able to define success because slashgoal isn't the only thing you pass. You
+also have to pass it a prompt. And that prompt needs to be what the success criteria is. Okay? Like
+you have a goal for claude code to do. What do you want it to do? It's not enough for you to
+explain, hey, I want you to do X, Y, and Z. No, like what is the end state? Because what's going to
+happen when we run forward slashgoal is it's going to attempt to complete that goal with code or
+whatever it's going to do. It's going to run its first iteration. It's then going to compare that
+iteration to the success criteria you defined. If it meets the success criteria, cool. It's all
+done. If not, it's going to pull up a second session, run it again. It's going to go ahead and check
+the success criteria. Did it work? No. Then it's going to run it again. Now, each time it runs, it's
+going to take a look at its previous iterations to see, hey, what worked, what didn't, but it's
+going to continue sort of this internal loop until it reaches its goal. And this is extremely
+powerful. It's kind of similar to Ralph loops, if you know what that is. And so, it's important that
+our success criteria is as objective as possible. If I'm just saying, hey, the goal is to create a
+cool website that looks cool, right? That looks neat. How does it know what cool is? How does it
+know what neat is? How can it actually take a look at the end of every single run and say, "Did I
+complete this or not?" So, the more subjective your criteria is, the sort of worse it's going to
+get. Not even necessarily the worst it's going to get, but the less likely that it's going to meet
+your needs. But with all that being said, goal is definitely a form of loop engineering, but it's
+one that pretty much has a definite end. We aren't going to do forward/goal and expect this to run
+for eternity. But there are things we may want to do where we do want it to run for eternity. We
+still want it to act in the same way as goal. We want it to trigger on demand or perhaps on a
+schedule. We have a task we want it to complete. We have success criteria and we want it to also be
+self-improving because again this is self-improving in an aspect because it's always taking a look
+at its outputs and comparing it against some sort of success criteria. So what happens if we want to
+create something that does sort of loop forever, right? Perhaps it's an automation that runs every
+single day that we want to continuously approve upon itself. Now we will continue with these three
+steps, but next we're going to have to add some sort of logging phase. So now let's take a look at a
+custom loop or an example. We have cloud code right here and what we want cloud code to do every
+single day is we want it to create some sort of morning report for us, some sort of morning brief. I
+want to go out on the web. I want it to find AI news for me. I also wanted to check my Gmail and at
+the end give me some sort of document. So cloud code is going to take a look at YouTube. It's going
+to take a look at Twitter, Reddit in my Gmail. It's going to grab all that information, scrape all
+that information, consolidate it, synthesize it, and give it to me in a report. And I want it to do
+it every single day. So how could we bring loop engineering fundamentals into this? Well, remember
+we just have to set up these four things. So, what is the trigger going to be? Well, let's say the
+trigger is every day it's going to run at 7 a.m. What is the task? Well, the task is just what I
+described. Scrape these websites, consolidate, create a report. So, that's set up. Well, what is the
+success criteria? Well, this is this is where it gets difficult, correct? Because this is something
+that's kind of objective, like what makes a good report a good report. We could add some sort of
+subjective material there like hey every single report must have at least five videos from YouTube
+and five Twitter posts and five Reddit post and you must call out XY and ZZ on the Gmail. So there
+are some things we can do here but it's not as simple saying like hey you're doing a loop on some
+Python application and your goal is to get it to this particular speed. And then lastly we have
+logging. So every single one of these reports we could put it in some sort of database, right? That
+way clawed code can always take a look at its past work and compare its upcoming work to things we
+have already done. And this in essence from a theoretical perspective is loop engineering. Now what
+does that actually look like in terms of a practical sense inside of cloud code? Well, step number
+one would be creating some sort of skill. Because what did I just describe here? Well, I just
+described a skill. We can create a skill that cloud code runs on command or on a trigger where it
+does all this stuff where it scrapes information and turns it into report and we can include in that
+skill it's sending all that information to a particular database. So step one to do sort of loop
+engineering for real would be to invoke the skill creator skill. Remember I showed you how to do
+that earlier. And then you would just describe the skill as I just did. From there you would then
+run the skill manually over and over and over until you got it to a pretty good spot. Once you are
+happy with that skill, you would make sure you add a language about, hey, I want this to be logged
+in a database and every time we run the skill, I want you to take a look at the previous iterations
+and see if we can do better. That's sort of where the self-improving aspect comes in. Ideally, you
+would be able to score every single one of your previous reports so it has some sort of objective
+measure it can base its outputs on. But simply, you're first going to turn it into a skill. Once
+you've turned it into a skill, all you have to do now is turn it into an automation that runs all
+the time. And this is really simple inside of Cloud Code because we're just going to turn it into a
+routine. So, if I come here to the left and hit routines and I go to new routine and I go to local,
+guess what I'm going to do? I'm just going to tell this to run that skill every day at a particular
+time. So, this would be like loop skill. We are running the loop skill and then the instructions
+would literally just be run the slash loop skill. Okay, when you're doing this and you're creating
+this inside of cloud code with the skill creator, you would also say like, hey, I'm trying to do
+this to so it's like self-improving. I want to do the database loop engineering fundamentals, etc.,
+etc. The great thing about the skill creator skill inside of cloud code is that it's going to do all
+the heavy lifting for you. it understands sort of like the goal here. And then from there, you just
+schedule it, right? Ideally, it's probably just going to be something that's daily, but you can do
+it hourly, weekday, custom, whatever you want. And that is the practical application of loop
+engineering. And that's pretty much all you need to know because beyond loop engineering, we then
+start talking about graph engineering. And graph engineering can get a little more complicated. But
+what's really happening is remember before when we looked at this, we had all this loop engineering
+stuff going on. Let's actually just let's undo all this. We got all this loop engineering stuff
+going on, right? Like, hey, this one guy is scraping everything. It's looking it's creating the PDF
+and then it's being graded. Well, what if we did all that loop of trigger of task success criteria
+and then grading it? You know, logging the information. What if we did that at every step of the
+journey? So, we had one agent that does this with scraping YouTube. So, it has a trigger, it grabs
+YouTube, it scrapes the data, and then it judges how well it scraped it by looking at its past
+iterations. It self-improves. And then we did that with the Twitter poll and the Reddit poll and the
+Gmail poll and this poll as well. So, instead of having a loop for the entire thing, just like one
+huge loop, we instead had a bunch of like micro loops nested together inside of one run. That's
+graph engineering. So, I did a whole video on that. It can be a little complicated, but at its core,
+that's all graph engineering really is. It's just a bunch of looping agents that also talk to one
+another. That's all it is. And for most people, this is total overkill. You don't usually need this,
+but conceptually, that's how it's working. Now, let's shift the discussion over to dynamic workflows
+and ultraode. So, what exactly is ultra code? How does this different from max effort? Well, Ultra
+Code, what it's going to do is it's essentially going to create a custom harness for whatever
+problem you're trying to solve. What that means in practical terms is it's probably going to spin up
+a bunch of sub aents to deal with whatever issue you have. This can be extremely effective, but this
+is also going to be extremely expensive. One example of a dynamic workflow is for slashde research.
+This is essentially like a pre-built dynamic workflow and it is very similar to how deep research
+works if you're just on the web app and do deep research. So if I run deep research, what's going to
+happen is it's going to spawn a ton of sub aents and these sub aents are going to do a bunch of
+different tasks. So if I ask a question like let's deep research best use cases for dynamic
+workflows inside of cloud code. It's going to now instead of doing a standard web search where it
+spawns, you know, maybe like five sub agents to basically do a Google search, it's going to spawn
+several more than that. I've had it spawn well over a hundred sub aents. And these are going to do a
+number of tasks. It's going to actually go out on the web and scrape data. It's then going to create
+adversarial agents that take a look at the data we found and then compare and contrast it to see
+what actually holds up to scrutiny. Then it's going to do synthesis and then it's going to give me a
+final report. And so you can see over here it decided that for the scope it's going to decompose a
+question into five search angles. It says it's only going to need five parallel web search agents,
+which is nice for us since we're on Fable. And then it's going to pull the top 15 sources, verify
+everything with a three vote adversarial check on each claim, and then finally synthesize it. And so
+we can see it working here over on the right. Since we spawned six agents and every single agent has
+like a pretty much a token cost right off the bat, we've already burned 314,000 tokens. So, I wasn't
+joking about that. Now, when you run Ultra Code, if you don't tell it specifically, like let's say
+I'm on Fable 5 and running Ultra Code, it's going to use Fable for these sub agents, which can be a
+problem because what if it did say, "Hey, I'm going to spawn 100 web search agents." Now, when I
+give it the prompt to get away from something like that, you can specifically say, "Hey, limit it to
+20 sub agents. Limit it to 50 sub aents." Or you can say something like, "I want you to use sonnet
+for the sub aents or opus for the sub aent." So, you aren't necessarily a slave to whatever model
+you're you're using at that time. Now, anthropic put out a pretty good blog explaining dynamic
+workflows. And so, what's going on under the hood is that it's writing orchestration scripts that
+run tend to hundreds of parallel sub aents in a single session, checking its work before anything
+reaches you. And here's some examples of different sorts of dynamic workflows. Remember, when you
+run dynamic workflows in Ultra Code, Claude Code is going to figure out the best one that fits your
+problem. It might be one of these. It might be something completely different. So, classify and act.
+You give it some sort of task. We have a classifier agent that then chooses the best sub agent for
+you. Fan out and synthesize and adversarial review. If we kind of combine these two, that's what
+we're doing with deep research, right? We have some sort of task, find this information. It fans out
+on the web, gets all the information, and then it also does adversarial review to see what actually
+makes sense before synthesizing it for us. Then we got stuff like generate and filter. We have a
+tournament style thing where we try different attempts to solve some sort of problem and includes
+judges. And then we have loop until done, which again very similar to loop engineering. If we jump
+back inside here, we can see this deep research run we started earlier included 103 agents and
+burned six million tokens. And this was all on fable. So, you can imagine how expensive this is.
+Here's a look at the actual report it gave us. And as you can see, pretty deep and also includes 21
+different sources. And out of all the examples, I think deep research is the one you're going to use
+the most. And if you're someone who's about to embark on a pretty complicated project and you really
+want to get all your ducks in a row before you start even going into plan mode, I highly suggest
+using deep research so Claude Co can go out there and see what's what before it starts building.
+Let's talk a little bit about model routing. And really that's just how can we bring in outside
+models into the clawed code fold because some of the big players like chatbt their models are great.
+Soul 5.6 is awesome. Luna and Terra are extremely token efficient and one sort of thing you need to
+keep in mind is AI systems in general and these models in general don't do a great job of grading
+themselves. So if I ask Claude code to grade its own work, I ask Opus to grade its own work, be able
+to grade its own work, it's going to pretty much always say, I did a great job. So how do we solve
+this problem? Especially when we're having it grade work that we ourselves can't grade, it's like
+outside our domain of expertise. I don't really know if that code is great. Well, why don't we bring
+in another frontier agent to take a look at our work? And the way we're going to do this is through
+different skills and plugins. There's actually an official Codeex plugin for Claude Code. This is
+from OpenAI themselves. And this allows you to call on codeex from claude code. You simply take this
+URL, you paste in cloud code and say I want to install this. You can and from here you can have
+codeex do adversary review of the code you've already created or you can even use this to have
+codeex work on specific features of your product. And when it comes specifically to the planning
+stage, I created a skill called grill meex which combines Matt PCO's groom skill with adversary
+review from codec. What happens is you and Fable talk to one another. You come up with a plan and
+then that plan is routed to Codex and Codex and Fable kind of have a back and forth up to five
+rounds where Codex takes a look at what Fable created. Codex says, "This is wrong. This is why."
+Claude reacts to it, says, "Okay, I'll fix that or I don't agree." And they keep going back and
+forth until they reach an agreement. And so this kind of solves the problem of, you know, these
+models struggling to grade their own work and gets us a second set of eyes. And so we can feel
+pretty confident moving forward in complex cases. And this sort of model can be taken even a step
+further if you're someone who doesn't want to use something like Codeex and you instead want to rely
+on much cheaper models or even local models. The whole point of it is you aren't stuck just using
+Opus, Haiku, Sonnet, and Fable. We can bring in whatever we want, especially if we use it as a
+skill. And again, you would just use the skill creator skill to do that. And last but not least, we
+have our custom agentic OS structures like you see here and here. These are all about building a
+custom wrapper on top of Claude and giving us sort of a visual interface that we can't get
+elsewhere. And it's ultimately custom. Now, the real value of these things isn't the visual sort of
+wrapper, even though this is, you know, useful for me for me. This gives me my social media metrics.
+I can easily click and get a deeper dive on that. I get my research done every single day, all in
+one place, showing me what's going on in GitHub, hacker news, etc., etc., All these buttons are
+related to specific skills and automations that I can run on demand. And over here, I pretty much
+have the exact same thing, but it also has a voice mode. But like I said, the true value isn't in
+these cool visual layers. The real value is in the skill architecture behind it all. The whole idea
+of these things is turning Claude into essentially your personal assistant or an actual worker in
+your organization that can do everything you do. So for me, what you're looking at here is
+essentially all the skills I use in my day-to-day mapped across all the different domains that are
+important to me. So you know, I have things related to memory, things like productivity, which is
+like Gmail, my calendar, all that. I have stuff related to research, content, my community, my AI
+agency, sales, etc., etc. Every single one of these things are a task I would do on my own manually.
+And instead of doing them on my own manually, I have now mapped them to specific skills. And if they
+make sense, I turn those skills into automation. And when we look at that in a big picture sense,
+that is really what an Agentic OS is. It's a series of skills and automations that you have mapped
+to your daily tasks. Now, how do you build something like this? Well, we've already kind of talked
+about it, right? This is just building skills. It's just using the skill creator skill, turning on
+your microphone, and giving it a stream of consciousness about what it is you do dayto-day, week to
+week, and then asking Claude code, can we turn those into skills if they make sense? And if they do,
+you do it. And you do that over and over again and eventually you create this corpus of skills that
+allow you to automate huge swaths of your life. And behind all that is Obsidian. And Obsidian allows
+us to easily track everything we do in terms of a markdown file system. Now Obsidian in itself isn't
+giving you some like crazy upgrade to what Claude code can do, but allows us to actually track
+everything. It allows it to give it some memory. And this is sort of the basis of like the Carpathy
+Obsidian Rag system you've probably heard before. Now, as a very quick review of what I mean when
+I'm talking about an obsidian memory system. This is just a file structure. This is just a coherent
+file structure that clog code lives in so you understand where things go. This is again often
+referred to as the Carpathy Obsidian thing. And it's very simple. You have some sort of folder that
+your agentic OS lives in. Mine is called the vault. Inside the vault, you have some sort of file
+structure that looks like this. It doesn't have to be exact, but the idea is in one of those
+folders, we have the raw section. This is sort of where raw data goes. This is where research goes.
+We then have a wiki wiki section and we have an output section. The wiki section is where we take
+all this raw data and we essentially turn it into different reports or wiki style articles. So
+imagine I had cloud code go do a bunch of research on AI agents. We'll dump the raw information here
+and then it creates an article about AI agents under the AI agents subfolder. Now let's say I wanted
+to create something from that AI agent type wiki. I wanted to turn it into a slide deck for example.
+Well then that slide deck would go to the output section. And the idea is with this simple sort of
+model, I am able to deal with a ton of files, potentially hundreds of thousands, and it is set up in
+a clear way that I, as a human being, can easily navigate. And B, Claude can easily navigate. And if
+it can easily navigate this file structure, it's going to make it more accurate and ultimately cost
+less tokens. The key of this whole thing are these sort of like index files at every step of the
+journey. Every time I go deeper into the file structure, there's essentially an index. markdown file
+telling me what is going on inside of there. So essentially like a table of contents. Now I have a
+ton of content that goes a lot deeper into this if that was confusing. But the idea of these agentic
+OS systems is that this visual wrapper sits on top of that custom skill architecture I just talked
+about and is sort of buoied by that Obsidian memory layer which helps you navigate everything you've
+done and helps cloud code navigate it just a little bit better. And the way these systems work
+because it's like hey I'm not actually using cloud code here am I? is we use headless claude which
+uses -p. So essentially a command is sent to the terminal instead of running like just claude it
+uses claude-p which means claude essentially runs invisibly in the background. There was some drama
+about this for a while where anthropic was saying they were going to charge different rates for that
+and wouldn't be usage but that's no longer the case. So these sort of systems are actually just as
+moneyefficient as anything else. Now, creating an agentic or cloud OS like this isn't 100%
+necessary, but I think it is necessary to sort of create these sort of skill architectures. That
+really is the backbone of it all. And of course, if you want to get my exact setup, I have that
+inside of Chase AI Plus as well. So, that is where I'm going to leave you for today. We covered a
+ton of different topics, and these are the ones that I felt kind of can give you the most bang for
+your buck in terms of what you should focus on from everywhere from the beginning all the way to a
+more advanced level. So, as always, let me know what you thought. Make sure to check check out Chase
+Plus if you want to get your hands on my Claude Code Masterass, which kind of covers a lot of the
+same stuff we did here, just in much greater detail. Besides that, I'll see you

@@ -1,0 +1,65 @@
+Here's how to build end AI agents with just your words.
+
+I said to build an AI newsletter workflow that runs every morning at 7 a.m. and it should use Tavi and Perplexity to research the top five trending AI and tech news stories.
+
+So, what I wanted to do here was tell it exactly what chat model I wanted to use and the different tools that I wanted to use.
+
+So, it didn't just try to throw together a random HTTP request.
+
+So, once again, it searched through the nodes, it got all the details, and now it has a bit of a different workflow structure for us.
+
+And we can go ahead and request changes if we want.
+
+But for now, we're going to test out the oneshot prompting and I'm just going to go ahead and approve this plan.
+
+Okay, there we go.
+
+So, once again, it's done and it gave us a setup guide.
+
+So, we'd have to configure our email address.
+
+We'd have to get Tavly API key, Perplexity, Anthropic, Gmail, stuff like that.
+
+But let's go take a look at what it did with the workflow configuration.
+
+So, what it would be doing is it would have us put our Tavly API key here and then because this is an HTTP request, it would pass it over in the actual body request of the HTTP to Tavi.
+
+And then we're going to take a look at Perplexi real quick.
+
+I've connected my Perplexi account, so we should be good there.
+
+We've got a merge node, which is appending those results.
+
+And then we have our newsletter writer agent.
+
+We'll take a look at how this thing was prompted.
+
+Okay, so first let's look at the user message, which is saying create an HTML newsletter from the following research data.
+
+It's telling it to start with headers.
+
+And then here would be the newsletter title.
+
+And then real quick, let's check out the actual system prompt, which is pretty short.
+
+I would have expected this to be a little more detailed.
+
+It says, "You are an expert newsletter writer specializing in AI and tech news." All right.
+
+So, I'm going to go ahead and run this and it's going to do research with Tavali Perplexity.
+
+And then once that agent writes the final newsletter, we'll go to my Gmail and we'll check it out.
+
+Wow.
+
+So, this one looks cool.
+
+And then we've got our sources down below, of course, again, which we can click on and it takes us to real articles.
+
+This one actually pulled from a YouTube video, which is kind of cool.
+
+And we've also got a TechCrunch AI article.
+
+So, that's kind of how the output was coming out.
+
+If you want to watch the full breakdown, then click on that play button right here.

@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-068",
+  "version": 1,
+  "title": "offer-positioning / acquisition — effort-is-the-1-lever-wrong-effort-looks-like-a-bad-model",
+  "steps": [
+    "Steal effort-match. Do not buy Ultra because tape.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-q5lg3npxjAc-01",
+    "K-q5lg3npxjAc-10"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; Claude Code CLI as of May 28, 2026. 30 min hands-on.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

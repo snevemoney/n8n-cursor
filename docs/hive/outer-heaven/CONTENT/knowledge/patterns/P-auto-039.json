@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-039",
+  "version": 1,
+  "title": "grok-bot / ops — one-job-per-bot-description-is-the-router",
+  "steps": [
+    "Steal one-job + description-router. Map `hive-spawn-desks` / `agent-job-card`. No new bots for fun.",
+    "Steal cloud-vs-desk split. Operate-never: auto-like, logged-in scrape, auto-send.",
+    "Steal dry-run-then-patch. Operate-never the like-bot."
+  ],
+  "support_ids": [
+    "K-PQBYZQqan2g-01",
+    "K-PQBYZQqan2g-02",
+    "K-PQBYZQqan2g-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=grok-bot; stage=ops; Cursor Ultra. Grok model on the back.",
+  "less_relevant_when": "Desk deep-work stays Claude/Codex (his words). Speech≠behavior (keep both; do not pick a winner): “I didn’t tell it anyt",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,79 @@
+Google's new AI model just changed voice agents forever.
+
+Hey, so I think that these scissors are broken.
+
+These two different pieces came apart.
+
+Do you know how I might be able to fix this?
+
+I see.
+
+It looks like these are designed to come apart for cleaning.
+
+If you align the rivet on one blade with the slot on the other, they should slide back together securely.
+
+Can you give that a try?
+
+There we go.
+
+I think I got it working.
+
+Perfect.
+
+That's exactly how they connect.
+
+Hey Gemini, how's it going?
+
+Just wanted to make sure you can see me and that we can have a conversation.
+
+I can see you.
+
+You're in a room with light gray walls, a shelf behind you with some trophies, and a microphone in front of you.
+
+Everything looks good from my end.
+
+Ready to chat.
+
+What's on your mind?
+
+What kind of microphone do you think I have?
+
+That looks like a Shure MV7, probably connected to that Rode arm.
+
+Is that right?
+
+Yeah, that is.
+
+You can see right here I've got the Rode, and you can see right here this is the Shure MV7.
+
+All right, so Google just dropped Gemini 3.1 Flash live, which is their latest voice model that has a lot of upgrades.
+
+In fact, you can even see right here in this video they're calling it their biggest upgrade yet.
+
+The whole idea is that this is way more human because it's no longer doing speech-to-text and then text-to-speech, it's just straight-up speech-to-speech.
+
+And it can also see things as you guys saw in that quick demo beforehand.
+
+Now, this first benchmark is about multi-step function calling, which it has outperformed the previous Gemini 2.5 Flash model by about 19% here as you can see.
+
+So, here's a quick example, and I'm going to call out some of the benefits.
+
+So, we know that it's speech-to-speech, we know that there is less latency, and we know that it can work in noisy environments.
+
+So, there's the first one.
+
+You might hear, you know, on the side of the road things like traffic, things like horns.
+
+I can look you up with your registration plate and postcode instead.
+
+Could you provide those for me, please?
+
+Woah.
+
+And it's still able to be unfazed by stuff like that.
+
+It also has a higher level of accuracy when it comes to alphanumeric strings.
+
+And because it's interpreting speech rather than speech being transcribed into text, there's way more contextual awareness because the audio is coming through, and it can understand things like sarcasm or stress or frustration, which is obviously very important if you're setting up something like a customer support bot or maybe like a sales type of agent.
+
+If you want to watch the full breakdown, then click on that play button right here, and I'll see you guys over there.

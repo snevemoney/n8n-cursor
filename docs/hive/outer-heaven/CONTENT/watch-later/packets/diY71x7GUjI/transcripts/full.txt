@@ -1,0 +1,843 @@
+I recently started a new role as head of AI.
+
+I own the AI strategy for 15 different companies. >> Real quick, jump back to that IBM survey that I talked about earlier.
+
+One of the stats that blew my mind, out of these 2,000 CEOs, 76% of them said that they had, essentially, an equivalent of a chief AI officer.
+
+And in 2025, the number was 26%.
+
+So, it jumped up 50% in just 24 months. >> This is no longer something that huge companies can have.
+
+It's actually >> [music] >> something that every company will have.
+
+It looks technical, but it's absolutely non-technical. >> The other thing from the study that really blew my mind was the adoption.
+
+Around 85% of their employees have the skills to use AI, but they felt that the actual utilization of this technology were more around 25%.
+
+So, then after you showed this person what you've been building, what did the rest of that process look like? >> I had a call directly with the [music] CEO of the company. >> [laughter] >> But, speak to HR.
+
+If you're not hands-on, literally every day, you're out. >> Okay, Eileen.
+
+Thank you so much for being here.
+
+I'm super excited to chat with you today.
+
+You just got a super exciting job offer to be a head of AI.
+
+So, congratulations about that.
+
+I'm really excited to dive in.
+
+So, if you'd like to give everyone a real quick intro of who you are, and then let's just kind of jump right in. >> All righty.
+
+First of all, thanks to you for having me here.
+
+Hello, everybody.
+
+I'm Eileen.
+
+Like Nick said, I recently started a new role as head of AI, and I am super excited to share everything that I've been going through in the last few months with everyone watching this.
+
+So, yeah. >> Awesome. >> Thank you. >> Yeah.
+
+I'm really, really excited to dive into your journey and your background to understand how you got here.
+
+So, let's start with the end first.
+
+What exactly is a head of AI? >> So, head of AI, this is basically what I do everyday.
+
+I started recently and I work at a company called Yond, which is basically an entrepreneurial ecosystem.
+
+Um it's one parent company and then it's got 15 vertical companies underneath it.
+
+But they have huge plans to grow.
+
+So they they really want to grow and and make it bigger, which is, you know, crazy because they it's quite big already.
+
+Uh in a good way, by the way.
+
+Um so what I do as the head of AI is I own the AI strategy across the group, which may not seem huge, but if you think about it, it's actually defining the strategy for 15 different companies.
+
+And this is only going to continue growing.
+
+So it's it's a lot in there.
+
+There's a lot of things that can be done.
+
+And we basically, you know, I need to think of what we build, where, how, why, what makes sense, what to, you know, prioritize, what to leave it, you know, for the end or the quick wins and so on.
+
+So it's actually it's a lot of work, but it's really really good fun.
+
+Mhm.
+
+Then there's the implementation because it's not only strategy.
+
+I'm actually hands-on.
+
+So it's not only saying, "Okay, this is going to come first because of this." but it's actually let's build it.
+
+How do we build it?
+
+How do we put it in place?
+
+So it's basically working from start to finish until it's live and make sure it work, basically. >> Yeah.
+
+That is awesome.
+
+That's really really interesting.
+
+So across these 15 different groups, um do each of them have like kind of different different budgets to work with and different teams and different, you know, ultimate end goals?
+
+I think it's it's a it, you know, I imagine there's so many different sub bullets and decisions that go into just saying, you know, I own AI strategy. >> Yes, absolutely.
+
+So each company is completely different.
+
+So it's all under one parent company, but each of them does their own.
+
+So, for example, there's Young Co-working, there's Young Coffee, Young Co- Sorry, co-working spaces, Young Coffee, um Young Hotels.
+
+There's so many of them, and they're completely different.
+
+So, what company one does is completely different to what the other one does.
+
+So, the strategy around what to automate and what Well, maybe even what doesn't make sense to automate.
+
+It's completely different from one to the other. >> Yeah. >> So, it's it's very interesting.
+
+It's There's a lot to learn.
+
+Like I said, I started recently, but it's incredible.
+
+Like it's very, very interesting.
+
+And then, of course, because it's so much, it's not a one-person job.
+
+So, I'm in the process of actually hiring a team, and I'm actually using your community quite a lot because the people there are amazing.
+
+And I'm trying to >> Yeah, I'm trying to hire from there because you can see the energy, you can see the people there, the the commitment to learn and implement and so on.
+
+So, it's it's a really fun thing to do. >> Absolutely.
+
+So, it sounds like you are driving strategy and, you know, kind of managing these projects in a way, but you're not hands-on, obviously, building the stuff.
+
+How technical would you say you Oh, maybe you are.
+
+How Can you dive into that a little bit for us? >> So, I'm actually At the moment, I'm actually doing the the builds as well.
+
+So, you know, I jump in a call with person A, we define what the process looks like, we think about what makes sense to automate because not everything makes sense to automate.
+
+Some things you want to keep human.
+
+And once we have the whole process mapped, it's just a matter of going into code and starting the fun part, which is actually implementing this and seeing what it comes up with and what makes better sense than other approaches and so on.
+
+So, it is actually full on, you know, hands-on.
+
+And I also will be, you know, managing the team and of course driving the the strategy and so on, but I do want to be hands-on because this changes so quickly nowadays that if, you know, if you're not hands-on >> Right. >> because you >> Yeah. >> There's new things every literally every day.
+
+So, I actually want to keep that part, at least for now, very hands-on.
+
+So, I get to continue learning, continue seeing how the space evolves and yeah, it's it's good.
+
+It's good. >> Yeah, absolutely.
+
+So, I've got I've got a quick question for you.
+
+I'd love to hear your take on.
+
+Um there was a study that came out, or a survey I should say, from IBM.
+
+They surveyed 2,000 CEOs.
+
+I think the median annual revenue was about 6 billion of these 2,000 CEOs.
+
+And 25% of them said that they are comfortable with sort of like the operational decisions being made by AI, sort of like strategy type decisions.
+
+And it's expected to almost double by 2030 to about 50%.
+
+So, I'd be curious to hear from you, when it comes to you brainstorming and and driving strategy across these different groups, how comfortable do you feel and how much do you use AI in the brainstorming and like decision-making process?
+
+Or do you like to keep that aspect very human? >> I do a mix.
+
+So, I love to use AI and I think sometimes it thinks of things that maybe I haven't thought through and it's really good input.
+
+Um but it also there's situations where you ask something and it gives you such a reassurance reply and it's like it's the only way and then suddenly you're like, "Hold on.
+
+You know, maybe we can do this this other way." And it's like, "Absolutely." >> [laughter] >> Yeah. >> You know, I think a bit of both is good.
+
+Um not using it at all nowadays, I think it's not the way to go because there's a lot of valuable input out of it.
+
+But um using it for everything it's dangerous as well. >> Absolutely.
+
+Yeah, there's this quote that I that I keep hearing which I love, which is that you can outsource the thinking, but you can't outsource the understanding.
+
+And I think that that's a great example of having AI think about the different paths and do research and bring you these different decisions, but ultimately you should be the one that understands the pros and cons and the tradeoffs of each of these decisions and then you, the human, are making that decision.
+
+So, yeah, I appreciate the the thoughts there.
+
+All right, guys, real quick, I need to take a second to tell you guys about the sponsor of today's video, Hyper Agent.
+
+So, Hyper Agent is an AI agent building platform that is completely in the cloud and it is actually built by Airtable.
+
+So, if you guys already use Airtable for a lot of your data, then Hyper Agent is the next natural step.
+
+But if you've never used Airtable before, don't worry, this is a completely separate platform and just think of it as a cloud AI agent builder.
+
+This is what the command center looks like and by the way, that video you guys just saw, yes, I did build that with my Hyper Agent here.
+
+And what I love about this is it's got its own little virtual desktop over here that I can move around, I can see its plans, I can see the documents, I can see the videos.
+
+It's super cool.
+
+They each have their own kind of like little virtual computer.
+
+But anyways, if you guys have seen stuff like Open Claw or Paperclip, that is exactly what this feels like to me except for you don't have that technical overhead of, "Oh, do I need a Mac mini or do I need to get a VPS?" You literally just log on to Hyper Agent and it works instantly out of the box.
+
+You can see here I can manage my two agents, which right now I have a sales prospector and a chief of staff.
+
+I can see the cost, I can see the breakdown, I can see what needs improvement, I can see what's going on right from here.
+
+So, let's say I wanted to build a new agent.
+
+I would just come over here, click on new agent, and I can create an agent with chat.
+
+Or I could start from a template and choose one of these.
+
+And what I just asked it to create me here is an AI agent that will live in my Slack and basically look at my calendar and proactively do research before I have a sales call and it will give me a brief.
+
+And so that's the shift here is we're not thinking of these things as AI agents, we're more so thinking of them as co-workers because they're always on and they live in the apps that you already use like Slack, like Google, whatever it is.
+
+So this to me just feels like OpenClaw but it's way less technical because if you ever want to connect to something, you literally just click on integrations and then you just have to sign in to all of these different platforms.
+
+And then you can just at mention them in something like Slack and they're awake and they can respond to you.
+
+Just a quick heads-up though, HyperAgent does use usage-based pricing so you can't just plug in your, you know, Claude or ChatGPT subscription.
+
+But what's cool about this is you can refer a bunch of friends and you get $100, they get $1,000 and right now because I'm working with the HyperAgent team, they're doing a limited-time bonus where you right now can go get $1,000 of free usage right here.
+
+It's only for the first 1,000 people that click the link in the description so go ahead and claim that bonus before it's gone.
+
+So anyways, let's get back to the video.
+
+Yeah, let's keep on moving through here.
+
+I'd love to know about a little bit about your background before you had this role and, you know, the steps that people could take if they would like to get a similar sort of role and head of AI or director of AI or maybe even chief AI officer, whatever, you know, they're all being called nowadays.
+
+So yeah, let's let's dive into that. >> All right, so wait, sorry.
+
+My background, I spent 15 years as an email developer which is a lot of time.
+
+It's ridiculously a lot of time.
+
+People used to move from that to front end developer.
+
+Um, I am not a developer.
+
+My head doesn't work like that.
+
+When, you know, something breaks for a developer, they try to fix it and they're motivated where for me, if something broke, I wanted to cry basically.
+
+I would like can someone fix this and, you know, >> I don't think I've ever heard that term before.
+
+What is an email developer? >> So, you know, when you subscribe to some sort of or sorry, you know, when you subscribe for a company's email then you want to receive updates or anything that you're interested, you receive a an email that has images, has call to actions, text and so on. >> Mhm. >> That for it to render properly, you actually have to code it using HTML and CSS, inline CSS. >> Mhm. >> Uh well, yeah, something like that.
+
+So, for it to you know, if you click on the button and for it to take you somewhere else, you actually have to add the code and publish the images and test in all email clients to make sure that everything looks good.
+
+Uh and once you're happy, the email can go out.
+
+Uh but it's making sure >> Yeah, it's working properly in all email clients. >> were handwriting all of that like HTML and CSS and got you.
+
+Okay.
+
+Okay. >> Yes.
+
+Uh but if you ask a proper front end developer if email marketing or HTML is actually developing, they will laugh at your face [laughter] because yeah, it's like the very basics of it. >> Got you.
+
+Okay. >> Yeah.
+
+So, then I got promoted to technical lead and I was the manager of a team of 16 email developers and QAs.
+
+Uh so, we were doing a lot of emails every day.
+
+I was leading the the team.
+
+It was a really really fun job.
+
+I I really enjoyed being management leadership role.
+
+And then 2 years later, all of a sudden, the entire team was let go.
+
+Uh it wasn't, you know, about performance or anything like that.
+
+There were reasons behind it unrelated to to anything like that, but it was real, you know, we were all let go and then from one day to the other, the role that I really loved, it is non-existent.
+
+Mhm.
+
+And so, I think I was 39 years old, unemployed.
+
+I have two kids, very small kids, three and five now.
+
+And this was almost a year ago.
+
+And I was completely done with email development.
+
+But, as it usually happens, the day that I found out that I was going to lose my job, I opened LinkedIn and I started looking for email development management, even email development, even though I didn't want to go back.
+
+But, there are so many tools out there that you can just do a drag and drop without requiring coding or anything.
+
+But, the email development role in itself is actually disappearing.
+
+So, let alone find a management email development or email team role.
+
+It's actually almost impossible nowadays.
+
+So, I thought, "What can I do to actually get out of the email world?" Because I was done with working with emails.
+
+Uh 15 years of emails is insane.
+
+Like, >> Yeah. >> I don't want to see any more emails ever again, basically.
+
+Um so, I was like, "What can I do?
+
+This is happening for a reason.
+
+I need to find out where or what to do instead of this because I'm I'm done.
+
+Like, I don't want to see one more email." Um so, I was on a call [clears throat] with a friend.
+
+And she mentioned automations.
+
+And I was like, "But, isn't that for really technical people?" >> [laughter] >> And she was like, "Well, you know, not really.
+
+You have tools like n8n and it's like, really, you know, it's exploded.
+
+People all over are using n8n and the community is great and and so on.
+
+So, I thought, "Okay, maybe I'll give it a try." So, she told me, "Okay, just give it a a try.
+
+Let's have a call in, you know, 2 weeks and you tell me what you think." So, I did.
+
+I went first into Zapier.
+
+Fun, easy, but fun.
+
+Then, I went into Make.
+
+It was a lot better at in my opinion, like a lot >> Mhm. >> more things to do.
+
+And then I went into into N8N.
+
+And it exploded.
+
+It was like, okay, this is it.
+
+The community is amazing.
+
+N8N is great.
+
+It's non-technical and if there's any code or anything, I had ChatGPT to handle probably most of the code.
+
+And so I opened Atlas, the browser with ChatGPT on the side and N8N on the main window and I started putting in the the automations, which meant, hey ChatGPT, I want to create an automation of >> Yeah. >> So it would tell me node by node exactly what I needed to put, how to put it, how to connect it.
+
+And and then of course it would break at some point and it would start a loop that wouldn't help me fix it and I had no idea what I was doing. >> [laughter] >> I decided to join your community, the the AIS Plus course.
+
+And it was great because I got to go through the whole N8N course and then the course pivoted into Cloud Code.
+
+And if N8N had blown my mind before, Cloud Code just Yeah. exploded. >> Oh, 100%.
+
+Yeah.
+
+So something I'd like to to double tap on real quick is the fact that you had a background, 15 years in email development and were also promoted to a tech lead there, but what I wanted to highlight for people listening is that you didn't have 15 years experience in AI or in automation.
+
+You were writing code in, you know, HTML and and CSS, but you kind of got you were very new into the AI automation world and were still able to in a very short amount of time take on this head of AI role.
+
+So I think it's just really cool to hear and it's it's inspiring to hear that you don't have to be, you know, someone that's been in the AI game for decades already to be able to earn a spot like this.
+
+So it's very cool. >> I agree.
+
+I agree 100% and yes, you're correct on what you say.
+
+And one thing to add here is that a lot of people are scared of going into AI because they think it's really technical and it's not.
+
+Like especially now with Claude Code, it's it looks technical, but it's absolutely non-technical.
+
+So, anyone listen listening to this, don't be scared of, you know, trying it out because it's I think as long as you can follow something to learn, it's easy.
+
+It's really interesting and it's actually amazing. >> Right.
+
+Yeah, and I think the best way to approach it is like whatever your domain of expertise is, just open up something like Claude and say, "Hey, every day I do X, Y, and Z.
+
+How could AI help me here?" It's not like you have to learn any completely new skill.
+
+Like just "I already do this.
+
+How can AI make me faster and better at this?" And I think that's the mindset shift that people who haven't really touched it need to take on. >> Exactly.
+
+Exactly.
+
+Well, and literally the the skills, right?
+
+Because you can also create skills that do these things for you without without, you know, one line of text saying, "Hey, I need to design this." Done. >> Absolutely. >> So, it's easy. >> Yeah, so then after you kind of fell into the Claude Code rabbit hole, what what started going on next? >> So, I know you know this >> [laughter] >> and discover Alex Hormozi and my world changed completely.
+
+I never heard of him until this point and I started going on daily walks because I had the time.
+
+I was unemployed and I >> Wow, you you heard of you heard of Nate Hurk before Hormozi. >> I did. >> compliment. >> [laughter] >> I hear we're on a call.
+
+Amazing.
+
+Um so, yeah, I thought, "Okay, I need something to get me interesting interested in during my walks, otherwise I would stop doing it." And somehow I got to the 100 million dollar offers book.
+
+So I thought, okay, let's give it a try.
+
+I don't know what this is, but it sounds interesting.
+
+I mean, of course I want that.
+
+So I started listening to it and obsession.
+
+Seriously. >> Yeah.
+
+Yeah. >> Something that looks so impossible to achieve before I discovered this was actually it was giving me the path right there in my audiobook while I was walking every day. >> Mhm. >> And so you know, I became obsessed and and with both automations and how to make it work and try to practice and think ahead of maybe not just doing any single thing, but doing things that actually interest me and and putting myself out there.
+
+And yeah.
+
+And the recipe was right there in in my ears because I was listening to it. >> I love that.
+
+Yeah. >> I think then the one thing that Alex Again, you you know this for sure.
+
+The one thing that Alex keeps bringing up is show yourself.
+
+If you want to become someone or do something like big the first step you got to show yourself.
+
+You got to put yourself out there.
+
+It doesn't matter if it's perfect, it doesn't matter.
+
+Just do it.
+
+Start.
+
+And and so back then, this is this was before the the jumping to code.
+
+I was starting with an A 10 and I thought I want to become an ambassador.
+
+So I reached out to the guy here in Valencia.
+
+He recently became the first ambassador here in Valencia, Spain.
+
+So I reached out.
+
+Yeah, and I was like, hey, so can I give you a hand organizing the next event because I know this kind of adds some points to your application when you do apply.
+
+I thought I cheated with something that left me kind of like, wait, what?
+
+He said, do you actually want to be a speaker in in the meetup?" I No.
+
+No, [snorts] >> [laughter] >> I do not.
+
+Thank you, but no.
+
+Uh and he was lovely.
+
+He said, "You know, just think about it.
+
+If you decide no is the answer, that's absolutely okay.
+
+But if you change your mind, just let me know and you'll become a speaker." So, the next 24 hours, I would like to think was Alex Hormozi said, "You got to show yourself." >> [laughter] >> Put yourself out there and kill it.
+
+So, 24 hours later, I reached out to this guy and I was like, "Okay, let's do it." So, I decided to give a chat on any time for non-technical people.
+
+And the day came.
+
+I was honestly terrified.
+
+I hate talking in people.
+
+That's the one thing I knew all my life I was never going to do.
+
+Uh and the guy goes to the front.
+
+I was like, "Okay, we're going to start this and you know, share a bit of information." And the first speaker was me.
+
+And when he called my name, I went up the stage.
+
+And my legs were shaking so bad I thought I was going to faint.
+
+But anyway, I started talking.
+
+I started giving the the chat.
+
+It felt more comfortable after a couple of minutes.
+
+And that was that.
+
+Suddenly I had, you know, pictures to show on LinkedIn and >> Yeah. >> content to put out there about me putting myself out there and so on.
+
+So, this is I'm bringing this up because it actually matters later down the the line on how I got the role of FWI. >> By the way, guys, I know we are diving into a ton of information in this episode.
+
+So, what I did is I broke all of this down into a free resource guide that you can access for completely free by joining the Free School community.
+
+The link for that is down in the description.
+
+Also, if you want to check out some of the key moments from this episode and all future podcasts on my channel, then go ahead and check out the AI Automation Society YouTube channel where we're going to be posting some of the best moments from the podcast over there.
+
+I'll link that YouTube channel in the description of this video as well.
+
+Anyways, thanks guys.
+
+Let's get back to the podcast.
+
+Awesome.
+
+Yeah, well well you know, good for you.
+
+Good for you doing that.
+
+It It takes obviously a lot of guts to get up in front of a a bunch of people in person and and do something like that, but it sounds like it certainly paid off.
+
+So, good for you. >> It was fun.
+
+It was more than 90 people, which I never thought I would do something like that.
+
+So, it was Yeah, it was interesting. >> [laughter] >> Um so, between everything that had gone through up until now, the most or the better advice that I can give is show yourself.
+
+So, I created two YouTube channels.
+
+One is in English and one is in Spanish because I'm Argentinian, so it's more comfortable for me. >> Okay. >> I'm posting steadily or often on LinkedIn.
+
+It Sometimes it's great, sometimes it's not, but still content goes out. >> Yep, consistency is good. >> Exactly.
+
+Exactly.
+
+I followed your course from start to finish and I'm recording everything that I'm building just to be able to show it when the time comes. >> Awesome. >> I am definitely out of my comfort zone as much as I can.
+
+So, getting on there, putting videos up.
+
+I don't have a lot of followers or subscribers or anything in in YouTube, but I'm still doing it is creating visibility.
+
+So, if I build something, I'll put it there and people can check and by the time you get to an interview, that actually shows because if you have things that you can actually show and there's a person there and it's going through it and it's explaining, it becomes real. >> Mhm.
+
+Mhm. >> So, going back to the slides in here, um what I still do, even in this role.
+
+I still try to go out there.
+
+Still try to walk 1 hour a day with my audiobooks.
+
+I actually I'm actually listening to listening to Hermosi again.
+
+Um just to keep motivated and the first time you listen to it you know, you forget stuff.
+
+So, I'm going back to it.
+
+Um I keep hearing the show yourself advice.
+
+So, it's helping me keep on going.
+
+And I am part of the 4:00 a.m. club.
+
+So, I wake up every morning at 4:00 a.m.
+
+I have some concentration period where I can learn, practice, build automations without any interruptions or anything.
+
+And it actually helps me a lot because my day is a lot more structured because of this. >> Yeah, you set up you set up your own scheduled automation for yourself 4:00 a.m. cron job. >> [laughter] >> Just wake every day. >> I love that I love that cuz like the majority of people if I made a joke like that would just look at me like I'm crazy, but you got to find the niche people who like AI automation. >> Exactly right.
+
+And it is true at the end of the day.
+
+It's you know, day in and day out it's happening.
+
+Monday to Friday, that's it. >> Absolutely.
+
+Yeah, I love it. >> Um so, after all of this and it might seem a little bit disconnected from with some pieces, but it's all coming to this. >> Okay. >> Um I decided to start applying to jobs and it took me a while.
+
+I didn't want to go back to doing just anything.
+
+I wanted something that actually gave me motivation and that I actually enjoy what I was doing.
+
+So, I didn't apply to a thousand jobs.
+
+I applied maybe 10 or something like that. >> Okay. >> And one of these was the head of AI role.
+
+And they had my CV because I applied through LinkedIn, but the HR lady sent me an an And she was lovely and the one thing that she asked me was what have you built?
+
+So if I hadn't gone through this whole path I would try to give her an explanation of all the things that I built but that she couldn't see and all the things I had in my head but it's just an email that ChatGPT or Claude or anyone can actually create for you.
+
+So by the time I actually got this email, I had two channels or two YouTube link channels to share.
+
+One in English, one in Spanish which was really funny because there are some people from Argentina in the company and some people from Netherlands so it actually they actually watch both of it.
+
+And I had the LinkedIn proof of everything that I had built.
+
+I had the NA10 meetup lined up for the following week so it didn't happen back then but it was about to happen. >> Yeah. >> I had all the demos that I built through and I was explaining how to do it and how it worked and showing on screen, you know, if you press this it will generate the replies to an email to or whatever it was or agents or whatever.
+
+Um so they could actually see that I mean it wasn't just a person randomly talking about all the awesome things that I did but I cannot show you because I don't have a video or >> Of course. >> Yeah.
+
+That's incredible.
+
+I mean that is what separates you from all the other people that they're looking at on paper.
+
+When they can put a face to the name and maybe even a voice to the to the face >> Exactly. >> see this proof and I think it's just like whether you're applying for a head of AI role or whether you're trying to go get your first client or your seventh all of them are probably going to ask you what have you built and all of them are going to want to see that and I think what you said earlier about like, you know, at this point I didn't even have any followers and I was just kind of posting and you know, building my proof.
+
+I think it's so important because that sort of metric is what might discourage a lot of people.
+
+But to me, if I was looking to hire someone and I see that they've been posting consistently on LinkedIn and YouTube and they're not even having anything go viral or having a bunch of subscribers or followers, then to me that that almost makes it like more respectable because it's like, what is this person's incentive here?
+
+It's not maybe to blow up, it's not to go viral, it's not for money.
+
+It's because this person clearly has a passion for it.
+
+And I think that that's just really amazing. >> Exactly.
+
+And honestly, even if you have zero followers, you're able or sorry, subscriber, you're actually able to show it.
+
+So, when the time comes and they ask you, "What have you built?" You have links.
+
+It doesn't matter how many views they have.
+
+You can show it.
+
+And it's you, there.
+
+It's your face.
+
+I have so many people on LinkedIn that they just post content and you have no idea who they are or maybe even photos or something.
+
+But for me, the videos, they they show the person more than a postcard. >> Absolutely.
+
+Awesome.
+
+So then, after you showed this person what you'd been building, what did the rest of that process look like? >> I had a call directly with the CEO of the company. >> Okay. >> So, I skipped HR >> Wow. >> straight to the to the CEO.
+
+We decided to do a 2-week trial, not hands-on building, but more strategic thinking and she put me on on one of the in the hotels, uh young hotels, and I started talking to the team and seeing what opportunities there were and what I would do and I would propose things and she gave me some feedback, the the CEO and then and then that became, you know, a a really interesting work because it wasn't actually doing automations, it was just thinking about how to improve this, how to do that, what I don't want to automate, what I do want to automate, and what I would do first because, you know, it saves money and it makes sense and and and so on. >> Yeah. >> And within that trial, I had a a call with the founder.
+
+And he is really on board with AI and automations and how to make the best use out of it.
+
+So, he's actually, you know, giving me a green light to do so many cool things, both of them.
+
+Uh that actually makes it perfect.
+
+It's like the perfect job.
+
+It's interesting.
+
+It's got strategy.
+
+It's actually hands-on.
+
+I get the team, which is what I loved from my other job.
+
+It's the perfect role. >> Yeah, absolutely.
+
+I think that that's so interesting.
+
+And if I real quick jump back to that uh IBM survey that I talked about earlier, one of the stats that blew my mind, and now, obviously, grain of salt because this was 2,000 CEOs, but out of these 2,000, 76% of them said that they had essentially an equivalent of a chief AI officer in their organizations, which is 76%, which blew my mind.
+
+And in 2025, so just a year before, or sorry, I think it was actually 2 years before, the number was 26%.
+
+So, it jumped up 50% in just 24 months, which is crazy for a C-suite role.
+
+And the other thing from the study that really blew my mind was the adoption.
+
+They basically said that they would predict that you around 85% of their employees have the skills, or if they were to take a few lessons or courses, they could have the skills to use AI, but they felt that the actual utilization of this technology and of the skills were more around 25%.
+
+So, I'd be curious to hear from you, like, when you think about this head of AI role, you're obviously leading strategy and working on projects and making sure that those projects directly correlate with some sort of KPI and ultimately drive profits or growth to the business in some way.
+
+But how are you and your team also thinking about adoption and making this stuff stick, um kind of the change management from top-down.
+
+What does that look like for you guys? >> I think most people I I don't know the entire team yet, but I think most people are very excited about this.
+
+Uh and I can already see people reaching out saying, "Hey, I would really like to out like this.
+
+What do you think?" And I think that people are interested.
+
+I went into the first call saying, "Hey, hello.
+
+This is me.
+
+First of all, I'm not trying to replace anyone, kind of just putting it out there." And they were like, "Oh, no, we don't care about that.
+
+We're really excited about this." So [laughter] >> That's awesome, yeah. >> Yeah, the team is making it really easy on me.
+
+Like it's >> That's great. >> It's great.
+
+They want to see it working.
+
+They want to use it.
+
+They I think they under- They all understand what it brings to the table.
+
+It's not about firing people to get replaced by AI, but it's making their life better. >> Mhm.
+
+Quality of life, yeah. >> Yeah, so they can actually do more interesting stuff rather than the repeated, automated, or not automated, boring day-to-day stuff. >> So it's >> Yeah, absolutely. >> It's not taking everything out of their plate.
+
+It's just taking the boring out. >> Yeah, I mean, it's got to be a culture shift from the top down.
+
+It's not a you know, two-month workshop that we're doing this quarter or a compliance training you have to click through.
+
+It has to be a culture shift, and I think that's what's so difficult, especially for these larger organizations with legacy systems, legacy SOPs.
+
+It is tough.
+
+And I think it's great that you stepped into an environment where everyone was pretty excited.
+
+That's that's huge. >> Yeah. >> Because I've definitely felt that before where that's not the case, you know?
+
+People are like, "Oh, look at this guy.
+
+This is the one that this guy wants to come in here and take my job with his robots." So, that's great that you have um sounds like just a nice supportive culture. >> Yes, and I was quite scared of that before my first goal.
+
+So, I honestly, I went in and that was the first thing I said, "I'm not trying to replace anyone.
+
+Please don't hate me." You know, this is going to be great.
+
+And I was so happy with the response. >> Yeah. >> Especially because, I mean, you are also in-house, but for people that maybe are taking the approach of like being consultants that come from external into the org, it's like consultants already sometimes have a really negative connotation for the the actual stakeholders of the process.
+
+Um so, very, very important either way, but awesome.
+
+Yeah, so what what kind of happened after you got started then? >> Yes, so the first few weeks it was more understanding what the company is and what each branch of it is and so on.
+
+And then, of course, it was thinking about the processes and better use cases about automations and what was more important within those automations.
+
+And now I'm on the process of hiring a team because this is huge, like the amount of work there is to do.
+
+If I'm the only person doing it, I'm going to be the bottleneck and it's going to get stuck and, you know, we're going to lose that momentum.
+
+So, we're actually starting to hire and having interviews with some people of AI AI AIS Plus. >> Um awesome, awesome. >> Yeah, seeing how it goes, but it's it's interesting.
+
+There's a lot of people really committed and really looking to make a change in this new era with AI and so on.
+
+So, it's it's a good place to be.
+
+It's a good place to dive into AI and everything that can come out of it. >> So, you have talked about kind of how you went from not really feeling comfortable with AI and automation to starting to learn how to build.
+
+And I think that building to some extent is very important.
+
+I'm not saying that everyone needs to go figure out how to build a full stack app themselves, but I think you know, obviously you have to understand what you're building and why and how it works.
+
+You've also talked about building in public and sort of documenting some of the stuff, getting out of your comfort zone.
+
+What else do you have to tell people who maybe would like to be able to step into some sort of role like head of AI.
+
+What else could they be doing when it comes to the the prep or maybe even like the interviewing and the applications?
+
+What else could people be sort of taking away from this? >> I think a couple of advices for people going into interviews.
+
+Things that I started to see now is do your research.
+
+Research the person that's going to interview to interview you.
+
+Or research the company, even more important.
+
+I had people coming into their interview saying, "So, I researched Jagan.
+
+You know, I know this, this, this, and that.
+
+And I think we can do some really cool stuff on this." And actually showing the motivation of what they want to do and what they want to bring to the table.
+
+And then I have other people reaching out and sending abbreviations of the words and like, "Hey, what up?" And I'm like, "Hold on.
+
+Are you looking for a job or like So, I would say try to take it serious.
+
+Try to do your research.
+
+Have something to show.
+
+Just it's going to happen.
+
+There's going to be so many jobs on AI and automation because the world is as we know it is changing.
+
+And this is no longer something that huge companies can't have.
+
+It's actually something that every company will have.
+
+So, if you're interested in doing this, just dive deep.
+
+Learn it.
+
+Play with it.
+
+Apply to jobs.
+
+Just the fundamentals.
+
+Don't don't stay here waiting to, you know, see what happens or maybe I won't replace it.
+
+Just go and go out there and make it happen.
+
+It's so much fun. >> It really is.
+
+It really is once you get in the mindset that everything that you do in life, everything that you try, you always kind of go through that period.
+
+And then this is a this is something I talk about a lot in the community, which is something that I got from Hermosi, which is like the the entrepreneurial um transition curve or just in general, the transition curve.
+
+And the idea that you always are excited at the beginning and that's the stage of the uninformed optimist because you just don't really understand the complexities.
+
+You come over that hump and you become the informed pessimist.
+
+And then you just basically have this decision of do you want to crash and burn or are you going to take that momentum all the way back up again?
+
+Now you're also an optimist, but you're an informed optimist.
+
+And I think that that's really important for people to understand that everyone has that feeling of overwhelm.
+
+And it's not just once.
+
+You get that feeling maybe every week, maybe every month.
+
+But you just got to push through and I think that's really important.
+
+So yeah, um we covered a lot of great stuff today.
+
+What do you have here on this last slide to sort of close us out today? >> Just a closing, I want to thank you night.
+
+Uh if you ask me a year ago I saw this goal coming, I would have laughed at anyone's face like the first thing that came up when I Googled automation was you and your videos and I started going into it and then I asked someone on my LinkedIn like I'm starting on this.
+
+Do you know of any courses that I could do?
+
+And the guy's reply was that course.
+
+And that's it. >> Awesome.
+
+I love it. >> So [laughter] when I started, I was like this guy is awesome.
+
+So having, you know, being here today with you, it feels unreal.
+
+It it And I can't believe it's only been a year since I started this journey.
+
+It's It's insane. >> It's incredible.
+
+A year from basically no AI experience to head of AI at a at a at an awesome company is incredible.
+
+It's super super motivating.
+
+And I'm really glad that you were, you know, in our community and that I had the chance to get to talk to you today. >> Me, too.
+
+Thank you.
+
+And if anyone having [clears throat] a look at this, if you want to connect on LinkedIn or follow or subscribe to my channels, English, Spanish, all the QR codes are there, so feel free to give it a go and stay in touch. >> Awesome.
+
+Well, Alan, thanks thanks so much for joining today.
+
+This was an awesome conversation and I am super excited to follow your journey at Young and see what else you get up to.
+
+And maybe we'll have to bring you back and you can tell us about all the great stuff that you've been doing for the past couple years at Young and how the head of AI role has evolved because I imagine it's going to evolve a lot over your next couple years.
+
+So, yeah, let's let's keep in touch.
+
+Congratulations again on this awesome opportunity and thank you so much for hopping on today. >> Thank you, Nate.
+
+And seriously, this is a great opportunity.
+
+It's really good to get to know you even through the screen.
+
+And thank you for the chance of being here. >> Awesome.
+
+Thanks so much. >> Thanks.
+
+Bye. >> Thanks so much for watching today's episode.
+
+I hope that you guys enjoyed.
+
+Don't forget that I broke all of this down into a free resource guide that you can access for completely free using the link in the description to join our free school community.
+
+I'll see you guys in there.
+
+Thanks so much.

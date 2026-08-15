@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-state",
+  "title": "Typed hive state (filter one key; do not dump)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ids", "profile", "jobs", "last_run", "log", "product_factory"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "ids": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["monotonic", "next_run_id"],
+      "properties": {
+        "monotonic": { "type": "boolean", "const": true },
+        "next_run_id": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operator", "stack", "clients", "hard_step"],
+      "properties": {
+        "operator": { "type": "string" },
+        "stack": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["cursor", "grok"] }
+        },
+        "clients": { "type": "string", "enum": ["parked", "named"] },
+        "hard_step": { "type": "string", "enum": ["hitl"] }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "status", "desk", "updated"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["working", "yellow", "done"] },
+          "desk": { "type": "string" },
+          "updated": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "last_run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "job", "desk", "at"],
+      "properties": {
+        "id": { "type": ["integer", "null"] },
+        "job": { "type": ["string", "null"] },
+        "desk": { "type": ["string", "null"] },
+        "at": { "type": ["string", "null"] },
+        "done_check": { "type": ["string", "null"] },
+        "stop_kind": { "type": ["string", "null"] },
+        "token_receipt": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tokens": { "type": ["integer", "string", "null"] },
+            "duration": { "type": ["string", "null"] },
+            "correctness": {
+              "type": ["string", "null"],
+              "enum": ["pass", "fail", "untested", null]
+            }
+          }
+        }
+      }
+    },
+    "product_factory": {
+      "type": "object",
+      "description": "Pointer only. Filter this key. Do not dump the bank.",
+      "additionalProperties": false,
+      "required": ["primitives", "roadblocks", "promotion"],
+      "properties": {
+        "primitives": { "type": "string" },
+        "roadblocks": { "type": "string" },
+        "promotion": { "type": "string" },
+        "updated": { "type": "string" }
+      }
+    },
+    "log": {
+      "type": "array",
+      "description": "Append-only. Delete a job row ≠ reset next_run_id.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "job", "desk", "at"],
+        "properties": {
+          "id": { "type": "integer" },
+          "job": { "type": "string" },
+          "desk": { "type": "string" },
+          "at": { "type": "string" },
+          "done_check": { "type": ["string", "null"] },
+          "stop_kind": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

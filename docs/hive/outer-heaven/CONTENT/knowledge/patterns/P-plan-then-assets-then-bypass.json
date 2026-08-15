@@ -1,0 +1,25 @@
+{
+  "pattern_id": "P-plan-then-assets-then-bypass",
+  "version": 1,
+  "title": "Plan and drop real assets before bypass. Keys stay human.",
+  "steps": [
+    "Interview / plan first. State must-never (PII, spend cap).",
+    "Drop brand files before accept.",
+    "Bypass after the plan, not as a lifestyle. Keys in env, not chat."
+  ],
+  "support_ids": [
+    "K-tDGiWn0flK8-03",
+    "K-AO5aW01DKHo-01",
+    "K-3GAxd90fEE4-02"
+  ],
+  "dissent_ids": [
+    "K-tDGiWn0flK8-04",
+    "K-3GAxd90fEE4-05"
+  ],
+  "valid_when": "Any agent build. Hive `ask-principal` / `input-required-gate` / `vault-not-prompt`.",
+  "less_relevant_when": "Vague-fix demos that skip plan 'to show self-heal'.",
+  "confidence": "high as the sequence; he still skips on tape (dissent kept)",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Speech≠behavior: 'ask questions' then wonders why it didn't; 'not in history' then leaking bash."
+}

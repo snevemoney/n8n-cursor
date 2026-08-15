@@ -1,0 +1,11 @@
+CURSOR BROWSER THIS SITTING — no living tab.
+
+browser_tabs list: Open tabs: (empty)
+browser_lock: No browser tab available. Please navigate to a page first.
+browser_snapshot: No browser tab available.
+
+Tweet URL named by Evens (not rendered here):
+https://x.com/startupideaspod/status/2088359756096532965
+
+No tweet body on screen. No video player. No spoken audio. No play click.
+Do not treat any prior API dump as visible.txt.

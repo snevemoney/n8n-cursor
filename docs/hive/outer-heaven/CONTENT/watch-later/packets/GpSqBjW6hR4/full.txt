@@ -1,0 +1,319 @@
+Introducing Sakana Fugu.
+
+Our Fugu Ultra model matches the performance of Fable and Mythos, delivering frontier capability without the risk of export controls.
+
+So, obviously we had to put that to the test.
+
+You can see right here in my cloud code I am running on Fugu Ultra 1 million.
+
+You can see the task list that's carrying over is about our dashboard functionality and visuals.
+
+So, what I did is I gave it the slash goal prompts, which you guys can read real quick if you want to.
+
+And this was just me, you know, talking into Glydo.
+
+And then after almost an hour, I got this dashboard back, which is honestly really impressive.
+
+It can refresh live data.
+
+If I click on that button, you can see my stats, you can see the audience pulse, you can see my distribution and performance, median, outlier, stuff like that.
+
+I can see what's working, I can see what's rising, I can see what's underperforming, I can see recommendations.
+
+So, not only am I getting real data on my YouTube dashboard, but I'm also getting AI analysis.
+
+I can look at videos and see specific metrics for each one.
+
+I can look at audience and comments.
+
+I can look at strategy.
+
+And all of this was a one-shot slash goal prompt with Fugu Ultra.
+
+So, this is brought to us by sakana.ai, which is a Japanese company.
+
+Sakana means fish, and that's kind of what you can see right here.
+
+We've got a bunch of little fish coming in to make one larger fish, and that's basically how the Fugu model works.
+
+It is a multi-agent system delivered as one model.
+
+So, basically we have one API to hit, and that API orchestrates and routes to different frontier models.
+
+So, Opus, GPT, Gemini, and probably some more.
+
+Fugu achieves superior performance by dynamically coordinating and orchestrating a diverse pool of powerful models.
+
+So, honestly it's really nothing new.
+
+It's basically a main agent orchestrating a bunch of sub-agents that have different models and different specialties.
+
+This basically just wraps it up for you pretty nice.
+
+You know, I've always talked about when you're working with AI models, you always want to think about it as each AI does one thing really well, one very specific thing, and that is how you achieve great results by chaining those outputs into the next.
+
+And that's how they're able to achieve some of these benchmarks here, as you can see, where we have Fugu outperforming Fable, outperforming GPT-5.5, outperforming Opus 4.8 because it's orchestrating these models together.
+
+So, just to be clear, Fugue is not its own large language model that's better than Fable.
+
+It's saying that they were able to achieve better results than Fable and Mythos preview on certain benchmarks by orchestrating models together.
+
+But, this announcement tweet in 1 day went super viral.
+
+So, obviously, we had to check it out.
+
+So, I ended up running Fugue Ultra versus Claude Opus 4.8 across 38 different tests, and I'm about to dive into what I actually found and the way that I feel about how I'd use this and stuff.
+
+So, let's just dive into today's video.
+
+So, first of all, yes, I was able to use Fugue Ultra inside of Claude Code.
+
+If you guys want to know exactly how, I'm going to attach a markdown file in my free school community that you can give to Claude Code.
+
+And then, all you have to do is give it that markdown file, give it your API key, and you'll be up and running.
+
+So, my free school community is linked in the description.
+
+Join the free school, go to the classroom, go to all YouTube resources, and you will find all of my resources in there for free.
+
+So, this was that first main example that I showed you guys, right?
+
+So, Fugue built all of this, but it obviously used a combination of GPT, probably a little bit of Gemini for some design stuff.
+
+It used GPT-5.5, and maybe some other frontier models inside of that.
+
+And so, basically, what's happening is we're hitting one single API where we have a small manager model, which is literally trained just to break down a task, and then hand it off to a bunch of different AI models.
+
+So, we ask the question to the conductor, and the conductor outsources to specialists.
+
+So, Claude maybe for writing, GPT maybe for coding and bug fixes, and Gemini for research and facts.
+
+And there are also other models that it will delegate to based on the complexity of the task.
+
+And it's all about orchestrating who decides who does the work.
+
+On the left side of the spectrum, you write everything.
+
+You decide who does what.
+
+And on the far right end, you have a model that's automatically doing all of this.
+
+And the interesting thing is this pattern is nothing new.
+
+You already are doing this probably every day without even realizing or you're realizing, but it's essentially the same way that Claude Code spins up sub agents or dynamic workflows, and outsources, breaks up a plan, and outsources things to a haiku worker or a sonnet worker or maybe a bunch of more Opus workers.
+
+Except for instead of Claude code orchestrating across Claude models, we have Fugu Ultra orchestrating across different models.
+
+And that's where you can get really powerful and have this sort of mixture of experts here because we all know that GPT has some strengths over Opus and vice versa.
+
+And so you're able to just get the best of I was going to say both worlds, but the best of all the worlds because Fugu is kind of trained to understand what models are good at what and where to delegate where.
+
+So that's all this is.
+
+It's just a really smart API.
+
+It wraps it up for you nicely.
+
+And so if a lot of you guys are already working with Codex and Claude code and other models on a same code base, that's basically this except for you're just getting a little bit less manual.
+
+It's happening automatically, the delegation.
+
+And orchestration is really just two small questions.
+
+The first question is who does each part?
+
+So if we have job X and we have tasks A, B, and C, maybe model A does task A, maybe model B does task B, and so on.
+
+And then we also have the combination.
+
+So once all of the individual models give us some sort of response, we need obviously another LLM to combine everything together and then present that answer back to us.
+
+So it's very, very similar to the way that you already work with your Claude code sub-agents.
+
+Now that's basically it.
+
+This whole HTML I'm also going to include for free in my free school community if you want to dig in a little bit deeper.
+
+Yes, I had Fugu build this entire HTML just so you guys know.
+
+But here's something else that's kind of interesting.
+
+I was thinking, "Okay, this is pretty similar to the Open Router Fusion API if you guys saw when that dropped the other week." But it's actually different because the Fusion API, what that does is it sends your prompt to three models all at once.
+
+So it doesn't break up the task and delegate, it just says, "Hey, all three of you guys answer this." And then it comes back with a judge that merges all three.
+
+And that alone has also shown to improve the results and the quality that you're getting.
+
+So moral of the story is when you're getting different perspectives and you're getting different large language models processing your stuff, you're probably going to get better results.
+
+But what is that at the cost of?
+
+Typically speed and actual money, so actual cost.
+
+And this stuff is certainly not cheap.
+
+I went for a $200 a month plan and I filled up my 5-hour window and I'm at 34% of my weekly limit.
+
+Now, I upgraded about halfway through from 100 bucks a month to 200 bucks a month.
+
+So, roughly on the 100 bucks a month plan, if I was to fill up three 5-hour windows, I probably would have hit my weekly already.
+
+So, this did fill up very quick, much quicker than my Claude code subscription fills up.
+
+If you guys want to get started, you go to Sakana.ai and then in there, you can go ahead and sign up for an account. on a subscription, but you could also do pay as you go API billing as you see here.
+
+Now, there is Fugu and then there's Fugu Ultra.
+
+I only have tested with Fugu Ultra.
+
+Just for transparency for today's video.
+
+So, let's take a look at the results.
+
+So, what I did in here is I had Codex create a bunch of tests just so there was no like bias or cross-contamination or whatever you want to call it.
+
+And then I did this all through API billing and I had Opus 4.8 go through all the the tests and I had Fugu go through all the tests.
+
+Now, keep in mind, Opus 4.8 is one of the models that Fugu chooses from.
+
+So, it's really interesting like when you see something like, you know, this which I built, maybe 60% of this was built with Opus 4.8.
+
+And, you know, these HTML decks, these were also probably built maybe majority by Opus 4.8.
+
+So, just something to keep in mind.
+
+But overall, we had 36 of the 38 tasks end in a tie.
+
+We had Fugu being 4.5 times slower overall and five times more expensive.
+
+So, if you're getting roughly the same results, why would you want to wait longer and pay more?
+
+You probably don't.
+
+And I'll get into the actual results in a sec, but I was hopping in here with my actual Claude code and I was running Fugu through a ton of my regular stuff, my skills, doing research, and it was able to use them fine.
+
+So, it worked in the harness of Claude code just fine.
+
+It just felt really slow.
+
+The other thing is, it wasn't filling up the context window.
+
+So, I could be talking for, you know, 20, 30 rounds and this would stay at zero because of the way that you're kind of playing with how you actually route this to Fugu's server to get the responses back.
+
+I'm not going to dive into it right now.
+
+That's part of what that markdown file includes.
+
+So, right here you can see I dove into, you know, how this actually works and there's a bunch of stuff it created, but it's not as simple as the way you connect to like GLM 5.2, for example, where you just change the the endpoint and add your API key.
+
+It's just a little bit different, so didn't want to dive into that now, but markdown file in my free school.
+
+But anyways, the point I was trying to make there is this felt pretty solid for my knowledge work.
+
+I mean, it's literally 4.8 GB 5.5.
+
+How can that not be solid for knowledge work?
+
+It just felt really, really slow.
+
+So, the point I'm trying to make here is I don't think I'm going to use this.
+
+I'll probably keep testing it a little bit, but for me, for my knowledge work, I don't need this at all.
+
+I'm going to get more out of my Codex subscription and my Claude code subscription, but I also don't do heavy software development.
+
+I'm not building products.
+
+I'm not working with tons of teams, you know, all working on the same code base.
+
+And if you were, maybe there is a lot of benefit to using Fugu because you've got that, you know, GPT reviewer and the Claude code, you know, planner or ideator all-in-one API, and I could see a lot of value in that.
+
+So, take this analysis with a grain of salt.
+
+I didn't push this through tons and tons and tons of code refactors and stuff like that.
+
+I ran a bunch of AI-created assessments.
+
+So, once again, this is not a smarter model, it's just a manager.
+
+You can see here by the graphic how that all works.
+
+We did 38 tasks across four waves.
+
+We had puzzles, we had traps, we had specs, we had heavy algorithms, and then we had Codex grading all of this stuff, and both models were basically fed the same prompts and the same inputs, and we were just grading the outputs.
+
+So, this is really interesting, right?
+
+Overall, they were basically always tying.
+
+A lot of these were designed to be pass/fail rather than like a score, just because I wanted to make this hopefully as objective as possible, but they were basically tying every time except for two of the times Opus 1, which once again, it's interesting if you think about the fact that Opus 4.8 is available within the Fugu Ultra.
+
+But what was way more interesting to me is how long I had to wait.
+
+So, I had to wait in total for all of the Fugu runs 357 minutes, whereas for Opus, I was waiting total of 80 minutes across these 38 different tasks.
+
+And what was really interesting is some of these, some of these very easy ones, Opus answered in like 6 seconds, whereas Fugu would take multiple minutes for that same thing that took Opus 6 seconds.
+
+And then on the cost side, Fugu was very expensive.
+
+It was running, you know, Opus and GBT and probably some other models, and it was just running so long that it was just costing way more.
+
+Across all of these calls, Opus only cost us about 10 bucks, whereas Fugu costed me 50 bucks.
+
+So, about five times more expensive.
+
+I was definitely expecting this to be more expensive.
+
+Like I I imagine the Fusion API from Open Router is also more expensive.
+
+I just wasn't expecting five times more.
+
+Or if I was getting that higher cost, I was expecting better quality, which I did not feel based on my use cases and based on my experiments.
+
+So, I wanted to come in here and make this video because when you see something like this, 15 million views, and you see, "Hey, this matches the performance of Fable and Mythos," everyone's freaking out.
+
+Everyone's going to want to try it.
+
+And so, obviously, I wanted to try it.
+
+And so, my honest takeaway is for my use cases, Fable noticeably felt better than Opus 4.8.
+
+But Fugu Ultra does not noticeably feel better than Opus 4.8.
+
+I really do think that this is amazing, these metrics that they were able to get, and I do think that this is the future.
+
+Not locking yourself into one provider, understanding how to play with the unit economics to understand what is the cheapest model that I can use for this task that doesn't sacrifice quality.
+
+I imagine that type of stuff becoming a very, very important skill as we continue into the future of AI.
+
+I just don't think that this is the answer for me yet.
+
+I think that they're onto something awesome, and I think that, you know, Open Router clearly pushed out that API for a reason, because that's something that I try to do manually for myself.
+
+I try to use Codex and Claude code together all the time based on what I feel like their strengths and weaknesses are.
+
+And think about the fact that when Fable does come back, if and when it comes back, and all of these models starting to probably maybe get more expensive, really being able to be a master at optimizing the efficiency is going to be a super important skill and a super important thing to be thinking about all the time.
+
+So, that is my takeaway after I have battle tested Fugu.
+
+That is what I think, but I'm definitely going to be keeping my eye on Sakana AI Labs and this whole idea of orchestration.
+
+So, I know that this one was super quick, but hopefully you guys enjoyed or you learned something new.
+
+And if you did, please give it a like.
+
+It helps me out a ton.
+
+Don't forget to hop into our free school community.
+
+We are pushing way past 400,000 members.
+
+This has just been an awesome ride and you can grab every single free resource ever in here.
+
+GitHub repos, skills, markdown files, resource guides, whatever it is, grab it in here for free.
+
+And that's going to do it for today.
+
+So, I appreciate you guys making it to the end of the video and I'll see you on the next one.
+
+Thanks, guys.

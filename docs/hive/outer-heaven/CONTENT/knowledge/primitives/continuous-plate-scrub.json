@@ -1,0 +1,25 @@
+{
+  "primitive_id": "PRIM-gt8k4bA01Mo-continuous-plate-scrub",
+  "name": "CONTINUOUS-PLATE-THEN-SCRUB",
+  "loop": [
+    "award / taste refs exist",
+    "one continuous motion plate (not stitched shorts)",
+    "split to frames only after the plate exists",
+    "page scroll scrubs the plate",
+    "roast CTA on the live URL",
+    "stop — deploy HITL"
+  ],
+  "obvious_demo": "Seedance 2.5 3D scrolling website",
+  "other_applications": [
+    "Notes only: cinematic-recipe video hero",
+    "Do not auto-wire WebGL"
+  ],
+  "capability_ids": [
+    "CAP-gt8k4bA01Mo-award-plate-scrub"
+  ],
+  "source_video_id": "gt8k4bA01Mo",
+  "timestamp": "00:34-13:13",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

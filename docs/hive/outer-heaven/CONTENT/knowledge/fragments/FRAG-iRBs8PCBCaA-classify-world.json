@@ -1,0 +1,23 @@
+{
+  "fragment_id": "FRAG-iRBs8PCBCaA-classify-world",
+  "version": 1,
+  "input": "A “3D / world / physics” video-model claim",
+  "steps": [
+    "Ask offline chunk vs real-time interactive",
+    "Cite failure class if they claim physics",
+    "Page → cinematic-recipe; interactive → RESEARCH/ASK",
+    "No new icp_id"
+  ],
+  "output": "Classification: offline-plate | interactive-world | UNKNOWN",
+  "source_ids": [
+    "iRBs8PCBCaA",
+    "K-iRBs8PCBCaA-01",
+    "K-iRBs8PCBCaA-03"
+  ],
+  "behavior_ids": [
+    "BEH-iRBs8PCBCaA-classify-world"
+  ],
+  "valid_when": "Someone is selling a world-model as a page or SKU.",
+  "less_relevant_when": "Ordinary clip grade with no world claim.",
+  "knowledge_type": "declared"
+}

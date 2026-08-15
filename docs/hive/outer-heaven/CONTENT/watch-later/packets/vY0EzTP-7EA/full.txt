@@ -1,0 +1,269 @@
+The way people make money with Claude is about to change.
+
+For the last couple years, the move was pretty simple.
+
+Start an AI agency, sell some automations, and build workflows for businesses. [music] And it worked, but now that window is closing fast.
+
+Every day, more people get into the market, and it's harder to make money now.
+
+But there is one way to make money with Claude that's actually getting easier.
+
+It's been flying under the radar for about a year now, and it's about to blow up because it solves a problem that every single business is running into right now.
+
+So, in this video, I'm going to tell you exactly what this new opportunity is and how to get started.
+
+So, let's get into it.
+
+So, the AI market has completely blown up over the last couple years, and there's more money pouring into the space than ever before.
+
+The big tech companies are spending tens of billions of dollars every single month on this stuff.
+
+Amazon, Microsoft, Google, and Meta, those four companies alone are on pace to spend around $725 billion combined in 2026.
+
+But up until now, if you wanted to actually make money off of your AI skills, there was really only one path being talked about, which was to start an AI agency.
+
+And the problem that I've been seeing is that maybe 95% of you guys watching don't want to start your own AI agency.
+
+Most of you are just learning AI so you don't get left behind, but you don't want to necessarily chase clients and run sales calls all day long.
+
+You just want to be really good at your job and get paid well for it.
+
+And if you would have asked me a year ago what the solution was for people like you, I really didn't have a great answer.
+
+But over the last few months, we've seen a shift where more and more companies are deciding to solve their AI problems in house.
+
+Because some companies went out and bought all these AI tools, they spun up all these little pilot projects, and most of it went absolutely nowhere.
+
+I'm sure you guys all heard about that MIT study that found that 95% of generative AI pilots inside companies had little measurable impact on the company's bottom line.
+
+So, they spent all this money, and they basically got nothing back.
+
+And that is a massive opportunity for people like you.
+
+Somebody has to get inside these companies and actually drive real results with AI.
+
+Somebody who's focused only on their business and their problems.
+
+AI consulting has absolutely taken off over the past year, and the people doing it are some of the best paid people in the entire space.
+
+So, while everyone else is racing to the bottom selling cheap automations, these people are getting paid for something completely different.
+
+And that's exactly what you want to become, a Claude AI consultant.
+
+So, what actually is that?
+
+A consultant is just the person who walks into a business, figures out where they're losing time and money, and then uses Claude to fix it.
+
+Think about it like Claude is the car, the company is the passenger, and you're the driver using Claude to get them to the destination that they want, which is just making more money and saving more time.
+
+So, you might be wondering why Claude specifically, and the answer to that is that Claude is just the leader right now.
+
+It's what I run my entire business on, and it's what I've built everything you guys have seen on this channel with.
+
+But, the real skill that you're building here is taking a messy business problem and getting AI to solve it reliably, and that skill transfers to whatever is the next tool that comes up.
+
+And that very well could be open-source AI models.
+
+So, as the space evolves, especially with these open-source models getting better and better, you're not locking yourself into one ecosystem.
+
+You're just starting with what I think is the best tool out there right now.
+
+And of course, the money flowing into the space is crazy.
+
+AI consulting is already a market worth billions of dollars, and depending on which research firm you ask, it's growing 20-plus percent every single year.
+
+BCG found that companies plan to basically double their AI spending in 2026 as a share of their revenue.
+
+And LinkedIn's 2026 list of the fastest-growing jobs in the US has AI consultant and strategist ranked number two, only behind, you guessed it, AI engineers.
+
+So, this opportunity is very real, but there are two completely different ways to become a Claude AI consultant, and they fit two completely different types of people.
+
+So, let me break down both so you can figure out which one is for you.
+
+Okay, so, the first type is the freelance consultant.
+
+You work for yourself, you go client to client, you find their problems, and you build the fix.
+
+And the upside here is freedom.
+
+You can set your own hours, you can work from anywhere, and there's really no ceiling on what you can make.
+
+And LinkedIn's data backs this path up, too.
+
+Independent consultants and strategic advisers just climbed into their top 10 fastest-growing roles in the US.
+
+But, it's of course got some real downsides as well.
+
+Some months, maybe you'll make great money, and then you can lose a client from one day to the next, and you have to do everything over again yourself.
+
+Finding the clients, closing the clients, and then actually doing the work.
+
+So, this option is for you if you care more about controlling your time than having a predictable paycheck, and you don't mind kind of the chaos of, you know, owning a business and doing things like sales calls.
+
+Okay, now the second type, and for a lot of you guys, I think this is the one that's the smarter play because almost every company is in the same spot right now.
+
+They know they need AI.
+
+They've already got the tools, but they have nobody inside who can actually make it work for their specific business.
+
+McKinsey found that 88% of companies now use AI in at least one part of their business, but only about a third of them have scaled it past a few test projects, and just 6% are what McKinsey calls high performers, meaning they're actually seeing a real measurable impact on their bottom line from AI.
+
+So, paying for AI turned out to be the easy part.
+
+Actually using it is, of course, the bottleneck.
+
+Accenture found that nearly two-thirds of executives say their AI plans are stuck because they don't have the skills in-house to pull them off.
+
+And companies are desperate to fix this.
+
+Manpower Group surveyed 39,000 employers across 41 countries and found that AI skills are now the hardest thing in the world for companies to hire for, harder than traditional IT and engineering for the first time ever.
+
+And because of this, the pay is climbing.
+
+PwC's latest AI Jobs Barometer found that workers with AI skills earn a 62% wage premium over people without them.
+
+And that premium has gone up every single year that they've measured it.
+
+So, the second type of consultant you can become is the in-house consultant inside the company that you already work for.
+
+You get a stable paycheck, plus an advantage no agency can ever touch because you actually understand the business already.
+
+You know the people, you know the systems, and you know exactly where the time's getting wasted.
+
+Now, of course, the catch here is you're maybe giving up some time and location freedom, but you don't have to wait for this position to open up somewhere.
+
+You can kind of come in and create this role for yourself.
+
+And if there's just one thing that you take away from this video, it should be this.
+
+Become the AI person.
+
+Whether you're being the freelancer or whether you're being the in-house consultant, become the AI person.
+
+This stuff is so new that nobody has, you know, a 10-year head start on you.
+
+Whether you graduated last month or whether you've been at your company for 15 years.
+
+Everyone is basically starting at the same line right now.
+
+So, learn this stuff deeply, figure out where it can actually help you, and become the AI person.
+
+Because if you're early to this, everything downstream, the clients, the promotions, the raises, it all comes looking for you.
+
+So, let me show you the four steps to become that person.
+
+Now, real quick, before we get into the how, I put together a file with these exact steps and everything that you need to do at each one.
+
+So, you can download it and just check things off as you go.
+
+You can find this inside of my free school community.
+
+The link's down in the description.
+
+But, let's get back to the video.
+
+Okay, step one is to pick one painful problem.
+
+Open a doc and list every manual task you or your team did last week.
+
+And then circle the one that eats the most hours.
+
+Say it's the report you build from scratch every Friday.
+
+Then, before you build anything, decide on the metric you're trying to move.
+
+And this is the whole consultant mindset.
+
+Most people build automations because they look cool or they've got a bunch of little sub-agents and it might look good as a LinkedIn post.
+
+But, a consultant finds the constraint and designs a fix that moves a specific number.
+
+So, let's take that Friday report example.
+
+The metric is the 4 hours it eats every week.
+
+Whatever your problem is, name the number before you touch anything.
+
+Because that number is what you're selling.
+
+You're selling the destination, you're not selling the journey.
+
+And the destination is always one of three things: time saved, mistakes cut, or money made.
+
+And real quick, just cuz I have to throw this out there, before you touch anything, only use AI tools that your company allows and never put company or customer data into something that isn't approved.
+
+So, just be smart.
+
+Anyways, now you've got one problem.
+
+And you've got the number that you're trying to move when you're solving this problem.
+
+Step two is to build the fix and then document it.
+
+And building the fix doesn't mean you have to write code.
+
+It means setting up Claude with the right instructions and the real documents behind the task.
+
+So, for this Friday report, you give Claude maybe the last few reports, those are some examples, you know, you give it the template, you give it a checklist of where the numbers come from, and you work with it until it nails the report every single time, and you build skills and instructions around this process.
+
+If you can get Claude to do one task reliably with real process docs, you're ready.
+
+If you can explain things clearly, if you can judge and critique things and then give Claude feedback, you're ready.
+
+Then, when you get something you're happy with, record a quick 2-minute before and after demo.
+
+You know, "Hey, this used to take me 4 hours, but just watch it happen when I run one command, and now it takes 10 minutes." Step three is to deliver it and prove that the number actually moved, the number that we picked before you started building.
+
+So, now you can say, "Hey, 4 hours down to just 20 minutes is 3 and 1/2 hours back every single week." And that's the destination that you had promised, and you actually delivered on it, too.
+
+So, show it.
+
+Bring it up in a team meeting or put it in front of the business owner and ask one question.
+
+Does anyone have a task they'd want me to look at and see how I could maybe automate it with AI.
+
+That question will do more for you than any pitch and every task you collect runs right back through that same loop.
+
+You find the constraint, you name the metric, you build the fix, and then you prove that the metric moved.
+
+Step four is where you turn this into money.
+
+Your results are now case study.
+
+If you're a freelancer, take it to people who already know you first and then cold outreach is the volume play.
+
+And the motion I ran in my own business was first build for free, then I would do paid audits, and then I would price the builds off that audit, and then try to get them on a monthly retainer, which is what fixes the income roller coaster.
+
+And if you're in-house, you take your stack of wins to your boss, you frame every win as your boss's win, and you make the role official.
+
+Now, this may not happen immediately, but when you do stuff like this, you are creating an association in your co-workers and in your boss's mind that you are the AI person.
+
+Inevitably, you will be in high demand.
+
+Companies are already posting jobs like this under titles like, you know, chief AI officer, AI enablement lead.
+
+You're just becoming that person before the posting even exists.
+
+And if you don't have a job right now, bring your one demo build into interviews and you are the AI hire that these companies can't find right from the jump.
+
+So, all these numbers, they're going to close deals or they're going to get you promotions.
+
+So, now you have a complete roadmap to becoming the AI person and making money with Claude in 2026.
+
+But, if you want to move faster, you need to know exactly what to learn because if you don't, you'll just end up consuming information forever.
+
+Inside my free community, you'll find complete courses on Claude and resources that'll help you skip weeks of learning.
+
+And if you want to go deeper, you can join my plus community where you'll get courses on building your portfolio, getting clients, and scaling your one-person AI automation agency.
+
+The link for both of these communities is down in the description.
+
+But, anyways, that is going to do it for this one.
+
+So, if you guys enjoyed or learned something new, please give it a like.
+
+That really helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video, and I'll see you all in the next one.
+
+Thanks, everyone.

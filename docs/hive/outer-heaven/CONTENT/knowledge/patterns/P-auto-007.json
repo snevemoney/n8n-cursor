@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-007",
+  "version": 1,
+  "title": "agent-ops / build — search-then-always-allow-then-send",
+  "steps": [
+    "Learn the loop; operate-never always-allow send.",
+    "Steal “remote the existing workflow”; do not mark done without the artifact.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-mPflFTQUCGk-01",
+    "K-mPflFTQUCGk-02",
+    "K-mPflFTQUCGk-05",
+    "K-mPflFTQUCGk-06"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=build; A send workflow already exists; you click always-allow.",
+  "less_relevant_when": "Always-allow is the opposite of hive HITL. Instance-wide search is the blast radius from `9IzGe0BBj_c`.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

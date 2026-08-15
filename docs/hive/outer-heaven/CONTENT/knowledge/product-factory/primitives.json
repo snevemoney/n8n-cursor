@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "updated": "2026-08-15",
+  "next_sku_rule": "New product must reuse this registry. Do not rebuild login, payments, or social-share. Status connected only after Watchdog GRADE. Pay / deploy / publish stay Evens.",
+  "primitives": [
+    {
+      "id": "login",
+      "purpose": "Email/session contract the next app implements. Point at existing ProofCheck + CE auth. No new vendor.",
+      "status": "wired_untested",
+      "attach": "/Users/evenslouis/proof-qc-assist/src/lib/loginPrimitive.ts (wraps AuthContext supabase client; AuthContext stays React UI). CE /pro = operator login (client-engine-1), not the catalog.",
+      "hitl": false,
+      "deny": [
+        "invent a new auth vendor",
+        "rewrite ~/proof-qc-assist",
+        "treat /pro as the Path C catalog"
+      ],
+      "contract": "scripts/hive/os/product-factory/contracts.ts#LoginPrimitive"
+    },
+    {
+      "id": "payments",
+      "purpose": "Charge interface + HITL. Next SKU calls proposeCharge. Never live-wires Stripe from this registry.",
+      "status": "stub",
+      "attach": "scripts/hive/os/product-factory/contracts.ts#PaymentsPrimitive. ProofCheck: no Stripe. QuickMarket: demo $5, no real Stripe. checkout-in-one-sitting when Evens names pay.",
+      "hitl": true,
+      "deny": [
+        "live Stripe keys",
+        "checkout drive",
+        "fake working Stripe",
+        "quote tape $ as ours"
+      ],
+      "contract": "scripts/hive/os/product-factory/contracts.ts#PaymentsPrimitive"
+    },
+    {
+      "id": "social-share",
+      "purpose": "Share-card / OG / copy hook for Path C. Not auto-post.",
+      "status": "stub",
+      "attach": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/SHARE-CARD.md",
+      "hitl": true,
+      "deny": [
+        "auto-post",
+        "publish without Evens",
+        "six network clones"
+      ],
+      "contract": "scripts/hive/os/product-factory/contracts.ts#ShareCard"
+    },
+    {
+      "id": "promotion",
+      "purpose": "Owned media that sells the product is part of the machine. Path C ProofCheck offer. Emit/update the surface after a bite. Do not publish.",
+      "status": "wired_untested",
+      "attach": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/PROMOTION.md → checkout-offer-2026-08-14 + evenslouis.ca/work/proof-qc-assist + website-offer-funnel Path C",
+      "hitl": true,
+      "deny": [
+        "new marketing site this sitting",
+        "publish / deploy the offer",
+        "Path A client hunt",
+        "sell the factory as a SKU"
+      ],
+      "contract": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/PROMOTION.md"
+    }
+  ]
+}

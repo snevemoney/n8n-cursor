@@ -1,0 +1,55 @@
+Here's how to automate any content creation with Poppy and NAN.
+
+At this point, I'm assuming you guys are all familiar with what NAN is, but if you're not, it is a workflow automation tool that looks like this, and you're able to build no code AI agents and AI automations.
+
+And if you're not familiar with Poppy, it is also a noode visual builder that lets you paste in any data sources that you want and then chat with them.
+
+So, I want to show you guys what I mean by that super quick and then we'll get into the rest of the video.
+
+So, here I am in my YouTube channel.
+
+I'm going to go ahead and copy the link to my latest YouTube video.
+
+Open up a new copy and I just hit paste.
+
+And now what it's doing is it's already transcribed this video and it's analyzed the thumbnail and it knows what's going on in here.
+
+I could also then go to my website, copy this link, go back into Poppy and paste that in.
+
+And now it's able to look at everything on this website.
+
+So now that we have these data sources in here, I can click on this button which pulls up an AI chat.
+
+And all I have to do is use these circles to make sure that the chat can read both of these data sources.
+
+And now that it sees that, I can go ahead and ask it, please give me three key takeaways from my YouTube video as well as how it applies to true horizon AI.
+
+So I'll shoot that off.
+
+You can see we're using cloud for sonnet, but we have the option to switch to these other models as well.
+
+So based on the YouTube video, stop selling AI agents, sell AI solutions instead.
+
+Here are three key takeaways and how they apply to true horizon.
+
+So the key here is figuring out when is naden actually needed.
+
+For example, something I just did is I have four of my LinkedIn posts that performed well, and I have three articles about LinkedIn best practices.
+
+And then I came in here and I pasted in my latest YouTube video, gave it to the assistant and told it to create a LinkedIn post based on my writing style and best practices.
+
+And so, I easily could have built an automation to do this.
+
+It would trigger when I drop a new video, it would call this Poppy assistant, and then it would spit out LinkedIn post for me.
+
+But I would say that might be overkill because I could just as easily come in here, paste that in, and get my LinkedIn post right away.
+
+And so that's the value of this sort of system because you can now trigger content on its own.
+
+You can do research before or after.
+
+And you can even add additional elements after Poppy gives you back the copy.
+
+If you want to watch the full video, then click on that play button right here.
+
+And I'll see you guys over there.

@@ -1,0 +1,52 @@
+{
+  "capability_id": "CAP-eecUhBpTz_g-spec-queue-holdout",
+  "name": "spec-queue-separate-holdout",
+  "goal": "PRD → queue → builder bite → hidden hold-outs → other-session review → named deploy (HITL)",
+  "observed_workflow": [
+    "Write PRD / spec first",
+    "Interview the harness (autonomy, check, escalate)",
+    "Three files: global rules · factory rules · mission.md (can reject)",
+    "One spec = one ticket; labels = state",
+    "Builder runs the bite; validator is a different session",
+    "Priority: fix → review → next accepted → triage",
+    "Named deploy strategy; Evens flips"
+  ],
+  "tools": [
+    "GitHub issues (on tape)",
+    "30-min cron (scheduled ≠ 24/7 host)",
+    "Claude/Codex (on-tape operate-never)"
+  ],
+  "agent_abilities": [
+    "write hold-outs the builder must not see",
+    "Watchdog GRADE"
+  ],
+  "triggers": [
+    "factory / dark-factory / auto-deploy proposal",
+    "builder about to self-score"
+  ],
+  "state": "hold-outs hidden or leaked; merge≠ship",
+  "guardrails": [
+    "deploy / merge-to-users stay HITL",
+    "do not wire a dark-factory auto-deploy skill",
+    "stay Shapiro level 3",
+    "Claude Code / Codex operate-never"
+  ],
+  "reproduce": "Dry-run: write one hold-out the builder must not see for an existing slice. Do not cron a new host.",
+  "generalize": "Same as separate-verifier + checkable-stop. Cron is scheduled.",
+  "improve": "Do not improve by unsupervised /goal or auto-deploy.",
+  "primitive_ids": [
+    "PRIM-eecUhBpTz_g-builder-must-not-see-exam"
+  ],
+  "atom_ids": [
+    "K-eecUhBpTz_g-01",
+    "K-eecUhBpTz_g-03"
+  ],
+  "behavior_ids": [
+    "BEH-eecUhBpTz_g-spec-queue-holdout"
+  ],
+  "source_video_id": "eecUhBpTz_g",
+  "timestamp": "02:03-23:48",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

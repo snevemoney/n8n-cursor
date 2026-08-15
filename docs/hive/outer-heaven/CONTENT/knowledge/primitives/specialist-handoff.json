@@ -1,0 +1,25 @@
+{
+  "primitive_id": "PRIM-lRUpu2-KtGQ-specialist-handoff",
+  "name": "SPECIALIST-HANDOFF-THEN-DRAFT",
+  "loop": [
+    "name two specialists",
+    "dump + one reference artifact",
+    "classify WAKE (schedule vs event)",
+    "write the handoff sentence",
+    "draft the outbound artifact",
+    "human sends / pays / publishes"
+  ],
+  "obvious_demo": "Grok Bot inbox + invoice + Higgsfield ad",
+  "other_applications": [
+    "Notes only: hive 17 desks already are specialists",
+    "Do not auto-install ClickUp"
+  ],
+  "capability_ids": [
+    "CAP-lRUpu2-KtGQ-specialist-handoff"
+  ],
+  "source_video_id": "lRUpu2-KtGQ",
+  "timestamp": "00:41-17:22",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

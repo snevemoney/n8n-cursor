@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-057",
+  "version": 1,
+  "title": "model-ops / operate — prompts-models-live-in-a-table-not-the-canvas",
+  "steps": [
+    "Steal externalized prompt/model. Hive: `context-docs`, not n8n-cloud. No dentist hunt.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-lcNN3X9gXls-01",
+    "K-lcNN3X9gXls-11"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=model-ops; stage=operate; Exact workflow-name match. Four column types.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,349 @@
+So, I just gave Claude Fable this one {slash} goal prompts right here, and when it finished, I had a whole company.
+
+It spun up hundreds of agents, did a ton of verification, did a ton of research, made videos, and by the end, I got a landing page, a product, launch videos, a business plan, market research, brand guidelines, so much stuff to get a business off the ground.
+
+So, I'm going to walk through all of this that just happened and explain the prompts to you guys, but let's real quick take a look at this landing page.
+
+If I open this up real quick, you can see that we have Counter Brief.
+
+Win the disputes templates lose.
+
+Now, this landing page isn't anything extraordinary, but some of this stuff is pretty cool.
+
+Take a look at this launch video that it made for me. >> [music] [music] >> Okay, that that like dubstep ending is a little bit interesting, but what's cool about that is the UI that you guys saw right here, not only did it feel like it was a little bit syncing to the music, which I thought was a nice touch.
+
+This is the actual product that it built.
+
+This is Counter Brief.
+
+This is the dashboard where you can see the different disputes, you can open them up, you can see if you should fight them or fold them, and you can like look at all the evidence, you can do all this, right?
+
+But, what that tells me is that Fable had to go in here, and it had to come to some of these disputes, and it had to click around, and obviously it verified that it worked, but it was like recording the screen or at least taking screenshots, and then snipped all that together with the music, with the other motion graphics, with the mouse, with the sound effects, and it created us that demo.
+
+If we keep going down through the page here, obviously like I said, none of this is anything extraordinary.
+
+We really could have had Fable do better on the design here, but the elements that were worked in, not too bad.
+
+If we go all the way down to the bottom after the pricing, you can see that we also have a why this exists message, and this is straight from me, and a note from the founder.
+
+So, obviously I didn't film this, but let's go ahead and see what this actually says.
+
+Hey, I'm Nate.
+
+So, I kept seeing Shopify store owners lose chargebacks they should have won because the tool they were paying just sent the bank a template.
+
+So, I built Counter Brief.
+
+It pulls the real evidence from your store, tracking, emails, order history, and you read the exact packet before the bank does.
+
+19 bucks flat, you keep everything you win.
+
+If that's you, come check it out.
+
+So, what's cool about that is it was able to obviously go through my project and look what we had available, what API keys, and it pulled my HeyGen avatar and my 11 Labs voice clone, and then just made that message from a founder video.
+
+It also created a different launch video.
+
+You can see we have one that was the viral one, which is the one that we just saw, right?
+
+You know, super kind of like more fast-paced.
+
+It called it the viral one, and it was more of like a SaaS product demo.
+
+But, then this other one that it created, let's go ahead and watch it real quick.
+
+I think this was more of like a a voice-over.
+
+It it felt slower, but anyways, take a look.
+
+A chargeback just hit your store.
+
+The bank already believes the customer, and most tools respond with a template.
+
+Counter Brief builds the case instead, tracking, fraud analysis, order history, the customer's own emails, assembled into evidence you read before the bank does.
+
+You approve it. $19 flat, keep everything you win.
+
+Counter Brief, win the disputes templates lose.
+
+There you go.
+
+That is the other launch video that it made.
+
+Okay, so let's first take a look at the prompt, and then we'll kind of walk through what it actually did here and why this is pretty cool.
+
+So, the prompt that I gave it was read this file.
+
+So, I'll pull up this full file in a sec, and execute everything below the divider line as your goal.
+
+That file is your full instruction set.
+
+So, mission, guardrails, phases, deliverables, definition of done, follow it exactly, including the never ask rule.
+
+Do not report back to me until the definition of done is met.
+
+Start now.
+
+So, the reason that I did this is because if you guys didn't know, the slash goal has a character limit of like 4,000.
+
+So, if you have way more than that, then you can just throw it in a file and tell it in the prompt to read it.
+
+So, there's really no character limit.
+
+But, anyways, let Let up this file real quick.
+
+Okay, so here is the prompt.
+
+I said, "Build me a complete company from scratch.
+
+Start with nothing but the open internet.
+
+Find a real painful underserved problem that real people are complaining about right now, and design a business around it.
+
+So, build the product and the brand and the website, and hand me a finished package that I could take to market this month.
+
+Then prove to me why it would work.
+
+This is a test of how far you can go on your own.
+
+I am not going to answer questions mid-run.
+
+Make every call yourself.
+
+Write down why you made it and keep moving.
+
+Within the guardrails below, you have total creative freedom.
+
+Do whatever you want.
+
+Surprise me.
+
+I want to see your best work, not your safest work." So, I gave it some guardrails like no new spending.
+
+I said, "Hey, anything that's in the API keys or sorry, anything that's in my .env, fair game." I said, "Publish nothing.
+
+Just This is Create me all these things locally." I said, "Invent nothing.
+
+So, you must do research and verify every fact, every stat.
+
+Work inside this project right here, and never ask me anything." Then I said, "What does orchestrate means?" It means to use multi-agent workflows aggressively.
+
+Fan out parallel researchers across different sources and angles.
+
+Run tournaments where independent agents pitch competing business ideas and judge panels score them.
+
+Adversarially verify every important claim with skeptic agents whose only job is to refute it using completeness critic before you call any phase done.
+
+Design whatever orchestration shapes the work calls for.
+
+The patterns above are a floor, not a ceiling." I truly think that this paragraph right here did so much heavy lifting because after I let this run and I watched it and then I checked in on at the end, this hardly even moved my Fable limit.
+
+So, I mean, look at this.
+
+If I close out of this real quick, I'll come back.
+
+This used about 500,000 tokens.
+
+Tho- Those are the only tokens that Fable really used here because every single sub-agent that it spun up was Opus or Sonnet.
+
+And that's what is so cool about this.
+
+If you guys watch my video from um like a few days ago where I said, "Hey, this is how I make Opus think like Fable," then check that out if you haven't.
+
+I'll tag that right up here.
+
+But basically, I wanted to take those principles and put that here and show how Fable is able to not only plan things out, but figure out, you know, what works and what doesn't.
+
+And then it is the manager.
+
+It is the orchestrator that just says, "Hey, Opus do this, this, and this, and this.
+
+And when you're done, I'll check it.
+
+And if it's not good enough, I'm going to tell you to do it better." And that is the way that Fable was able to orchestrate all of this, and it only used like maybe 15% of this weekly Fable budget.
+
+I don't know.
+
+I mean, I guess it's a lot, but it didn't blow through as much up here as I thought it would, and it didn't spin up any Fable workers.
+
+So, that's pretty good.
+
+As far as my actual 5-hour limit that literally just reset, but this is what it did eat up a decent chunk of.
+
+This was probably um I don't know, at least 30 or 40% of my 5-hour limit here with my max $200 a month plan.
+
+So, I'm not sitting here saying that this was super cheap to run, but I'm saying this is pretty impressive if you consider the fact that Fable didn't actually build anything.
+
+All Fable did was plan, delegate, review.
+
+That was basically it.
+
+Because I'm sure this would have been even better if every single worker that Fable spun up was also Fable, but it would have been 100 times more expensive.
+
+Anyways, back to the master prompt.
+
+The arc, I said, "Hunt for pain, pick the winner, design the business, build a brand, build a thing, make the launch video, make the founder video, try to kill it, and then package it.
+
+And then, once again, that is a floor, not a ceiling.
+
+So, if you want to do more stuff, do more stuff." And it did obviously a few more things.
+
+Then I gave it kind of a subjective definition of done, which is, "A stranger should be able to open the recap HTML and understand the business, watch the video, run the site, demo it, all this kind of stuff.
+
+Now go build me a company." So, this is the HTML recap that I was just referring to there.
+
+This was the end deliverable that has everything else linked down here on the bottom.
+
+So, let's go through some of this.
+
+It decided to come up with a company called Counter Brief.
+
+It designed the brand guidelines.
+
+It designed this logo, obviously.
+
+It designed all of it.
+
+It's for Shopify stores with three plus disputes a month.
+
+It's priced at $19 flat uh per month or per oh per approved response.
+
+And then, no success fees.
+
+You keep 100% of your wins.
+
+So, mm that's what we have.
+
+So, here's what actually happened from open internet to launch package in nine phases.
+
+First was the pain hunt.
+
+So, 10 research agents swept Reddit and Hacker News, G2, blah blah blah.
+
+They found 35 raw problems merged into 18 candidates, and 18 independent verifies re-fetched every key quote.
+
+All 18 survived.
+
+Then we entered a tournament where five judge personas scored all of those 18 opportunities on pain, urgency, reachability, willingness to pay, buildability, and incumbent weakness.
+
+The top four got an advocate and a skeptic each.
+
+Three fresh judges voted, and chargeback evidence won 3 to 0.
+
+Now, from there we had researchers start to design.
+
+So, competitor pricing pages, platform docs, Visa's own rule PDFs, and API references.
+
+Then the brand started getting built out, so we had counterbrief.com, it's available.
+
+It checked, it didn't buy, and it's collision clean.
+
+The logo went through six AI generations and a critique loop.
+
+Then the winner was hand vectorized, so it's crisp from favicon to billboard.
+
+Serif carries the argument, mono carries the evidence.
+
+Then we had the build, landing page with the offer, with all this kind of stuff.
+
+Then it made the videos, and then we had the red team.
+
+So, six skeptic agents attacked the market size, all of these different things, and the verdict was that it's viable with fixes.
+
+Zero kills, 38 attacks ruled on.
+
+Every fix was applied to the plan and the site.
+
+We got these honesty artifacts, and then it was packaged up below, and it verified all this, right?
+
+And now everything that we can click through and look at exists right here.
+
+We have site stuff, we have video stuff, research, the business, brand, and the record.
+
+So, right here in my file explorer, you can see this was a company builder experiment.
+
+This was the master prompt we just looked at, and this was run one.
+
+Here's basically everything that it did in this run.
+
+If I go to the brand, you can see um we have the voiceover, we have the scripts, we have the logos, we have brand guidelines, avatar, logo candidates.
+
+It generated a bunch of different versions and tested them out.
+
+We have exports, it has a bunch of different versions as well, like some PNGs in different sizes and stuff like that.
+
+If I go back out one more time, we have research.
+
+So, this is where we got the business design, the candidates, the condensed candidates, red team, tournament.
+
+So, this was like kind of think like kind of it's internal experiments.
+
+So, these are kind of more of like the deliverables.
+
+This is our brand, our business plan, launch plan, market research.
+
+So, I'm not going to go through all of that cuz I think that would be really boring.
+
+But, I guess let's just open up a few to make sure that they do look pretty legit.
+
+Okay, so here's the business plan.
+
+It goes over the actual problem, the ideal customer profile.
+
+It goes over the product itself.
+
+It goes over the offer and pricing and the unit economics of it.
+
+So, it clearly went pretty deep.
+
+It went to the business model, channels, and positioning, moat, risks.
+
+Like, this stuff is pretty in-depth.
+
+What else do we have here?
+
+We have the market research, which was them trying to figure out what the business opportunity was.
+
+So, we can see all the candidates.
+
+We can see all the evidence.
+
+We can see basically how it was able to get to like a place where it narrowed these down and then from there, it narrowed them down even further.
+
+Really, the point that I was trying to prove and make in this video is that, first of all, you know, from here, this only took I think a little over This took like three or four hours.
+
+So, in three or four hours, we got to a place that would have taken me weeks and weeks to do by myself.
+
+Now, looking back at this, what I would have put more emphasis on is probably the upfront idea.
+
+Like, figuring out how viable is the idea and really really stress testing that before we build everything out.
+
+Cuz I think we all agree we're at the point now where with Fable and even with Opus, if you do it if you use it right, even GPT 5.5, these things can build basically anything for you as long as you have a good idea and you can clearly define what is good.
+
+I was really impressed by the creativity it used here, the thoroughness that it used here, and how it was able to actually understand what does it look like for me to take this goal that's pretty ambiguous with a definition of done that's also pretty ambiguous and just figure out my own path to get there.
+
+You know, I think it's really important that we allow the model to actually be creative and we get out of its way so that it can do what it does really well.
+
+So, anyways, I know this video was quicker and it's not like a super super practical tutorial.
+
+This is more about just being able to experiment with stuff like this and have takeaways and have lessons from seeing what's possible when you do stuff like that.
+
+There's a lot a lot of things that I would come in here and fix, but functionality-wise, this works pretty well.
+
+It I don't like the way it looks and I think that there's a lot of improvement to be done here and also on the actual landing page itself, but like come on.
+
+The launch video I thought was really impressive.
+
+The ideas behind it and the research that went into this up front, I thought was pretty impressive.
+
+And now, you know, maybe we're 50% of the way there and we can just continue to iterate.
+
+What happens if I did another goal prompt like this after V1 and we went into run two and we gave it all the feedback from this first run and we said, "Okay, let's just make all this better now." So, that is going to do it for today.
+
+I hope you guys enjoyed the video or you learned something new and if you did, please give it a like.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video and I'll see you on the next one.
+
+Thanks, guys.

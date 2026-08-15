@@ -1,0 +1,12 @@
+{
+  "name": "Hive Error Heal Notify",
+  "meta": {
+    "status": "MISSING_FROM_REPO",
+    "note": "Live n8n may still have this workflow (id hint RbQEZ8LYInOIsWoK). Repo has no export. Do not import or activate from this stub. Export from live n8n before treating as SSOT.",
+    "liveIdHint": "RbQEZ8LYInOIsWoK"
+  },
+  "nodes": [],
+  "connections": {},
+  "active": false,
+  "_stub": true
+}

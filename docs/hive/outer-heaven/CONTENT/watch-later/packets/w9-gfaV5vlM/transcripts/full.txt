@@ -1,0 +1,487 @@
+If you want to make money with AI, you need to stop selling AI agents and workflows and start selling AI solutions.
+
+And I'm not talking about AI operating systems or regular automations.
+
+I'm talking about diagnosing problems that businesses face and then using AI to solve those problems.
+
+So, in this video, I'm going to break down why selling agents isn't enough, what to sell instead that will actually make you money, and how to do it yourself step by step.
+
+So, why are you guys all here watching this video?
+
+Because AI has exploded.
+
+And with that explosion comes hype.
+
+Tons of people throwing around buzzwords like agents and workflows.
+
+And what's funny is automation has been around forever.
+
+It's nothing new.
+
+When I was working full-time at Goldman Sachs in business intelligence, automation was my entire role.
+
+And that job had existed for years.
+
+But the majority of small and mid-size businesses, hardly any automation's in place.
+
+The difference now is that because you slap the word AI in front of it, suddenly business owners are paying attention.
+
+It's like putting a neon sign on an old restaurant.
+
+The food hasn't changed.
+
+It's nothing new, but suddenly people are noticing it.
+
+And here's the thing, most beginners get this part wrong.
+
+They get caught up in the tech, the nodes, the HTTP requests, the multi- aent architectures.
+
+They're so focused on the shiny parts that it causes them to forget what actually matters to businesses.
+
+And I've definitely got carried away with this, too.
+
+In fact, my best performing YouTube videos are the ones that are really flashy and have multiple agents because it was trendy and cooler.
+
+But if you were to ask me which YouTube builds have actually been the most practical and highest ROI, it would be some of my lowest performing videos.
+
+When I sold my very first $1,200 workflow, I didn't walk in saying, "Hey, I got this build with 15 nodes and an API call to blah blah blah." I said, "This will save you hours every single week on content creation." And that's what made it a no-brainer.
+
+And here's the truth.
+
+Businesses really only care about three things: time, money, focus.
+
+That's it.
+
+They don't care if you deliver it with AI or a VA or duct tape and chewing gum.
+
+Think of it like a taxi ride.
+
+If you need to get across town, you don't care if you ride in a Prius, a Tesla, or a horsedrawn carriage.
+
+Well, I suppose some of us may, but that's beside the point.
+
+You just care that it gets you to your destination fast, cheap, and without stress.
+
+Businesses feel the same way.
+
+They don't fanboy over AI itself.
+
+They fanboy over the outcomes.
+
+That's why AIcentric selling doesn't work.
+
+Selling agents or workflows as products is already a crowded commoditized market.
+
+You've probably seen people offering entire libraries of end templates, claiming that you can resell them all for $5,000 a month.
+
+Yet, they're only charging you $200 to access that bundle of templates.
+
+Why?
+
+Because it's a race to the bottom on price.
+
+Take LinkedIn outreach bots as an example.
+
+You could build the flashiest, most complex bot out there, but if you just pitch it as a LinkedIn outreach agent, nobody's going to care that much.
+
+But when it is framed as a system that helps you generate qualified leads without spending on ads, suddenly people see the value and they want it.
+
+The shift is simple.
+
+Stop selling AI tools and start selling the outcomes of those tools.
+
+Spotlight the pain.
+
+Frame the solution around time, money, and focus.
+
+And that's how you win.
+
+And that leads us right into the next section.
+
+What should you actually be selling?
+
+AI solutions.
+
+The difference is an AI workflow is just a tool.
+
+But an AI solution is a tool that's directly tied to solving an actual business painoint.
+
+When you pitch a solution, you're not saying, "I'll build you a chatbot." You're saying, "I'll cut down your customer support workload by 60%.
+
+I'll automate your client onboarding so you save 10 hours a week." Or, "I'll help you create AI assisted content so you can slash marketing spend by 30%." And just to get it to stick, I'll throw one more terrible analogy at you guys.
+
+Think of it like medicine.
+
+If you have a headache, most people don't care whether you prescribe Advil, Tylenol, or an herbal remedy.
+
+They just care that their headache goes away.
+
+The pill is the tool.
+
+The outcome is pain relief.
+
+That's exactly how businesses see AI.
+
+So the framework we're going to be talking about today is to diagnose, then solve, then value, then price.
+
+And it's a simple process that I use every time.
+
+Diagnose means find the pain point.
+
+Where is the business leaking time, money, or focus?
+
+Solve means build the system that fixes that exact pain.
+
+Value.
+
+Translate that fix into numbers.
+
+Hours saved, dollars saved, revenue gained.
+
+And finally, price.
+
+Anchor your offer around that value.
+
+And when you think about that framework and you think about the core problem that you're trying to solve, you can see how reselling a bundle of 20 edit templates doesn't really do that.
+
+So let's take a look at an example.
+
+Automating client onboarding.
+
+First, we diagnose.
+
+Right now, your team spends 5 hours a week onboarding new clients.
+
+Then we solve.
+
+I'll build a system that can automate 80% of that.
+
+Then we turn that into value, which is 200 plus hours saved a year at $50 an hour.
+
+That's $10,000 back in your pocket annually.
+
+And then you price, I'm saving you 10K a year.
+
+I'm only going to charge you 3K right now.
+
+Suddenly, the price isn't a cost.
+
+It's now just a fraction of the value that they're gaining.
+
+Here comes another analogy.
+
+Think of it like a home renovation.
+
+If you're a contractor and you walk into someone's house and you say, "I've got the best hammer.
+
+I've got the strongest nails, the fanciest saws, blah blah blah." Nobody cares.
+
+But if you say, "This remodel will increase your home's value by $50,000, and we can do it in half the time of other contractors." Now, you've got their attention.
+
+The hammer doesn't matter.
+
+The results do.
+
+This is why when I'm on calls, I don't lead with, "Let me show you my workflow." I lead with questions.
+
+Where are you losing the most time in your business?
+
+What processes do you wish could run themselves?
+
+Because the diagnosis always points me to the solution.
+
+And the solution always ties back to measurable business value.
+
+And when you get good at this, you stop being just another automation freelancer.
+
+You become the person who can look at a business, spot inefficiencies, and design solutions that save them time, money, and focus.
+
+That's the shift from becoming an agent seller to a solution seller and being seen as an AI expert or an AI partner.
+
+So, you know why selling AI doesn't work and that you need to sell AI solutions, but how do you actually do this for yourself step by step?
+
+That's what we're going to cover now in a few simple steps.
+
+And remember, we're going to tie everything back to that same framework that we just talked about, diagnose, solve, value, price.
+
+Okay, so step one, pick a niche and diagnose the landscape.
+
+The goal here is simple.
+
+Choose one group so that problems repeat and your wins compound.
+
+Spend 10 minutes deciding whether you'll serve agencies, real estate, e-commerce, coaches, local services like dental or HVAC, SAS startups, whatever you want it to be.
+
+Run your pick through these quick filters.
+
+Do they repeat processes weekly?
+
+Can they say yes and pay fast?
+
+And do you already speak their language through content you've made or past work or interests?
+
+When you think about repeatable pains, picture agencies struggling with lead qualification, client onboarding, reporting, and content ops.
+
+Real estate teams juggling inbound lead triage, showing coordination, and document collection. e-commerce brands needing CX ticket deflection, returns automation, product content, and ops reporting, or coaches begging for application filtering, calendar triage, and content repurposing.
+
+The outcome of this step is just to have a short list of niches that you're confident enough to carry into this next step.
+
+Step two, talk to five to 10 businesses and diagnose pain.
+
+Treat these as informational interviews that could often turn into discovery calls and paid work.
+
+I like opening with a simple message.
+
+Hey, name, I'm mapping the top drains in X niche.
+
+In 15 minutes, I'll try to quantify your biggest bottleneck and share where AI actually helps and where it doesn't.
+
+No pitch unless you ask.
+
+I'm genuinely just trying to learn how I can provide value to businesses.
+
+On the call, I would then use the LRP framework, the listen, repeat, poke.
+
+This basically means that I listen while they describe their week or their processes.
+
+I repeat back the pattern to confirm alignment and then I poke to quantify it.
+
+So, let's say the business owner is talking to me about some onboarding and reporting flows and I find out that it eats about 6 to 8 hours a week.
+
+I would then poke back with a question like whose hours are those?
+
+What's their hourly value?
+
+How often does this process result in an error?
+
+You could also talk about money.
+
+Where are you paying people to copy and paste or chase info?
+
+You could talk about focus.
+
+What interrupts you the most between 9 and noon?
+
+You can talk about errors.
+
+Where do mistakes cause rework, refunds, or churn?
+
+And finally, you could talk about a trigger.
+
+If I could remove one weekly fire, which one changes your week?
+
+The outcome of this step is to have a ranked list of actual business pain points with rough numbers associated with them.
+
+Those numbers being hours, cost, frequency, mistake rate, stuff like that.
+
+We can then take that list and move into step three, which is building one simple solution and solve.
+
+Once you've diagnosed a clear problem, prototype the fix.
+
+And notice how I just said prototype.
+
+This doesn't have to be a perfect production ready system.
+
+It's a P or a proof of concept that shows that you understand their world and it proves your technical expertise.
+
+This doesn't mean you have to dedicate an entire week to it.
+
+Here's how you could spend one up in an hour and a half.
+
+Spend about 15 minutes drawing the flow.
+
+Now that you understand the process, just map out the trigger, the steps, the data sources, the outputs, and a clear definition of done.
+
+Spend the next hour doing a rough build on one platform like Nitn so you have something real to click through and demo.
+
+And then finally, use the last 15 minutes to record a quick 3minute loom that walks through the before, the actual solution itself, and then the result.
+
+And make sure you have your camera on because people want to hire people, not faceless screens.
+
+This is exactly why my not so fancy LinkedIn workflow felt like magic to that first client because it removed the pain of ideiation, research, and writing.
+
+And it didn't need to be super fancy to do that.
+
+So avoid the classic traps.
+
+Don't drift into multi- aent fantasies.
+
+Don't stitch together five vendors just to try them.
+
+And don't start building a platform when the job is just to fix Tuesday's bottleneck.
+
+Just try to take a step back and think about the actual problem you're trying to solve.
+
+Because a lot of times you may not even need like a very custom nen agent.
+
+Sometimes there's already a platform out there or sometimes you can do it already naturally in someone's CRM.
+
+Don't overengineer.
+
+Just be resourceful and solve problems.
+
+The outcome of this step is that you now have a demo video that you can send to some of your other nurtured leads to show them how you can solve their specific pain points.
+
+Next is step four, which can trip up a lot of beginners.
+
+This is turning your solution into a price.
+
+And the easiest way to do that is to translate what you built into plain math that a business owner can understand and relate to.
+
+Here's how I explain it on calls.
+
+First, you have to figure out how much time the process takes today.
+
+Hopefully, you already did that earlier in step two.
+
+Let's say a team spends 10 hours a week on client onboarding.
+
+Then ask what those hours are worth.
+
+If the average employee is paid $25 an hour, that's $250 a week.
+
+Multiply that by 4 weeks to get a month and suddenly the process is costing the business around $1,000 a month or $12,000 annually.
+
+Now, let's say you're only able to automate 60% of that workload.
+
+That's still $600 saved every single month.
+
+Over the course of a year, that's more than $7,000 back in that business owner's pocket.
+
+So, when you turn around and say, "Hey, I'm only going to charge you $3,000 for the solution." It's not an expense anymore.
+
+It's an investment that has a very clear, measurable return that already pays for itself in 5 months, and then keep saving more money every single month after that.
+
+And that's how you make it a no-brainer.
+
+And of course, you have to remember that value doesn't equal time.
+
+The client's not paying you for how long it took.
+
+When I built my very first workflow for $1,200, it only took me about 2 hours, which is $600 an hour, which is a crazy rate.
+
+But once again, the client wasn't paying me for the hours. they were paying for the outcome, which was saving them hours of content creation every week.
+
+Finally, make sure to keep your scope clear and simple.
+
+Write down the objective, what's included, what's not included, the timeline, what's expected from the client, the payment terms, stuff like that.
+
+This avoids confusion, ambiguity.
+
+It protects you from scope creep, and it makes you look professional.
+
+The number one biggest mistake that I made when I was starting off was underscoping and then having to deal with all of this ambiguity.
+
+So if you can make your proposals as specific as possible and saying these 10 things are the exact functionality of the system, this is exactly the definition of done.
+
+Then you're really going to be protecting yourself and thanking yourself later.
+
+So to recap, the formula is dead simple.
+
+Figure out how much time and money the process is costing.
+
+Now build a PC and show how your solution cuts down that time and money and then price your project at a fraction of those yearly savings.
+
+Businesses will pay happily when that math makes sense.
+
+All right, moving on to step five, which is to stack proof, build confidence, and then scale.
+
+I'm gonna be honest real quick.
+
+When you're starting, imposter syndrome is normal.
+
+You're going to wonder if you can deliver and whether the client will be happy.
+
+I felt the exact same way when I started working with clients.
+
+I wasn't even calling myself an expert.
+
+I was just curious, building for fun, sharing things online, and clients started reaching out.
+
+At this stage, I would have been happy to do work for free just to get experience.
+
+And the fact that I was getting paid was a big bonus.
+
+And if you're stuck with that worry, you have two great options.
+
+The first one is to do free or very cheap work in exchange for proof.
+
+Say, "Hey, I'll try this build out for you for free.
+
+Either way, the system will be yours.
+
+I just want to see if I can help create something valuable for you in your business.
+
+This removes pressure and lets you optimize for reps, not money, which is exactly what you should be doing when you're starting off because the testimonials and case studies and confidence that you're going to gain are worth far more downstream than a quick $1,200 today.
+
+And those first three to five projects really should be just thought of as paid practice.
+
+They exist to teach you the process, give you those case studies, and provide proof.
+
+Your other option is if you'd rather not do it for free, just offer a money back guarantee. say, "Hey, if you're not happy with it when I deliver it, or it doesn't deliver the value that we discussed, you'll get all your money back." That flips the risk, creates a stress-free environment for you to learn and experiment, and still gives the client a fair outcome.
+
+This matters because in the early days, once again, you're optimizing for experience, proof, reps, not money.
+
+And once you have all that confidence, you can actually move from being a freelancer to a consultant and eventually get larger and larger builds and larger and larger contracts.
+
+Over the past year, we've been working on projects that have ranged anywhere from $1 to $2,000 all the way up to $30,000 plus.
+
+And none of that would have happened without the low stakes project that built up my confidence and portfolio, which let me comfortably charge more and more every time we scoped out builds.
+
+And honestly, I still think a lot of our projects we've undercharged, but that's a conversation for another time.
+
+Anyways, once you have those first wins under your belt, make sure you're collecting that baseline and after data.
+
+So, your hours saved, your errors reduced, your money saved, and then turn them into simple case studies.
+
+Of course, you want to ask for testimonials and referrals and then rerun the framework with new prospects.
+
+But now that you have proof in hand, it's going to be a lot easier because at that point, you're no longer saying, "I think I can help you." You're saying, "I've already helped three businesses just like yours.
+
+Here's the proof.
+
+Here's the results.
+
+Do you want me to do the same for you?" And that's when the imposttor syndrome fades because the market is actually validating that what you're doing is working.
+
+And that's pretty much the full loop.
+
+Diagnose the problem, solve it with a simple system, tie it back to business value, and then price accordingly.
+
+From there, you stack up your proof until you can scale with confidence.
+
+If you want to succeed at selling AI, you've got to leave your obsession for technology behind and think purely about the customer, aka the business that you're selling to.
+
+So, I know that was a lot of information.
+
+Tried to make this one as valuable as possible.
+
+What I'm going to do is have all of this condensed into a resource that you guys can access and look at later.
+
+I will put that in my free school community.
+
+Once again, completely free.
+
+The link for that will be down in the description.
+
+And if you found this video helpful and you're looking for a full course pretty much just like this, then check out my plus community.
+
+The link for that's also down in the description.
+
+We just dropped a full course in there called One Person AI Agency.
+
+So, you'll be able to get a formal course material that goes over starting your oneperson AI agency from scratch.
+
+And the great thing about that community is we have over 2,000 other people who are also trying to do that exact same thing.
+
+So, it's a great space to meet people, potentially a business partner, and maybe even make a few hires in there or pick up your first couple gigs.
+
+So, if you enjoyed the video or you learned something new, please give it a like.
+
+Definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you all in the next one.
+
+Thanks guys.

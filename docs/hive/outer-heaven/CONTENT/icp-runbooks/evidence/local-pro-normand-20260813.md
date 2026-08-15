@@ -11,6 +11,10 @@ The site routes all urgency to phone/form contact with no self-serve book slot a
 
 ![Plomberie Chauffage Normand — contact-first hero](../icp-runbooks/evidence/local-pro-normand-20260813.png)
 
+## Session 2 (2026-08-13)
+
+MUST **PASS** · margin **PASS** · stage **qualified**. Packet: [../packets/local-pro-normand/PACKET.md](../packets/local-pro-normand/PACKET.md). Draft: [../packets/local-pro-normand/WARM_DRAFT.md](../packets/local-pro-normand/WARM_DRAFT.md).
+
 ## HITL
 
 Warm draft and send remain operator-approved. No localhost in client-facing materials.

@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-073",
+  "version": 1,
+  "title": "openai-tools / setup — responses-toggle-unlocks-built-in-tools",
+  "steps": [
+    "Steal allow-list + cite-the-sites. Do not treat 2025 Series as FACT.",
+    "Know the two RAG paths exist; operate neither without Evens."
+  ],
+  "support_ids": [
+    "K-QrJhdTbK3TU-01",
+    "K-QrJhdTbK3TU-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=openai-tools; stage=setup; Files already uploaded to that store.",
+  "less_relevant_when": "Domain allow-list can hide the true source (if you only allow Wikipedia, etc.).",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

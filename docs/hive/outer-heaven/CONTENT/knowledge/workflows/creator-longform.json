@@ -1,0 +1,60 @@
+{
+  "workflow_id": "WF-creator-longform-v1",
+  "project_id": "creator-longform",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Hunt parked; Path C clip only if Evens names our channel",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T2",
+      "title": "Reference-lock + generation log",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T3",
+      "title": "Publish is HITL — do not ship from the desk",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T4",
+      "title": "On-tape vendor (Higgsfield) is operate-never",
+      "coverage": "need knowledge"
+    }
+  ],
+  "pattern_ids": [
+    "P-clip-reference-lock-hitl-publish",
+    "P-tape-dollars-unverified"
+  ],
+  "support_ids": [
+    "K-0Ujdys4LqNs-01",
+    "K-AYsg5gAMWyo-03",
+    "K-HbsbqMQE-lI-01",
+    "K-HbsbqMQE-lI-02",
+    "K-TWvjqpk3uSQ-02",
+    "K-UT_Ek_tmeVA-01",
+    "K-Vm8QOo9MiC4-02",
+    "K-ZRb7D6R64hM-01",
+    "K-jBanaNBY-sM-01",
+    "K-pxzo2lXhWJE-03"
+  ],
+  "dissent_ids": [
+    "K-2J3uX8iRNng-05",
+    "K-7UNsK9LoORo-04",
+    "K-jBanaNBY-sM-02",
+    "K-jBanaNBY-sM-06",
+    "K-pxzo2lXhWJE-04",
+    "K-pxzo2lXhWJE-06",
+    "K-rMf-JuikR-Q-05",
+    "K-xn6Z5PYyAIE-02"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  }
+}

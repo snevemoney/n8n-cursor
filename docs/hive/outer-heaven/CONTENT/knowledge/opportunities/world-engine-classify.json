@@ -1,0 +1,17 @@
+{
+  "opportunity_id": "OPP-iRBs8PCBCaA-world-engine-classify",
+  "what_became_possible": "Classify offline diffusion plate vs interactive world-engine so a landing is not sold as Genie.",
+  "leverage": "Stops a false upgrade of cinematic-recipe. No robotics SKU.",
+  "possible_product_service": "None this week. RESEARCH / ASK only.",
+  "may_improve_desks": [
+    "creative-studio",
+    "forge",
+    "researcher"
+  ],
+  "may_be_standalone": false,
+  "capability_id": "CAP-iRBs8PCBCaA-classify-world-engine",
+  "source_video_id": "iRBs8PCBCaA",
+  "tape_dollars": "UNVERIFIED",
+  "new_icp_id": null,
+  "status": "UNTESTED"
+}

@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-021",
+  "version": 1,
+  "title": "agent-ops / build — delegate-parallel-researchers-then-a-diagram",
+  "steps": [
+    "Steal split-scope-then-merge-viz. Map to hive desks, not Claude Code.",
+    "Keep a HITL gate when a sub-agent appears.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-xsAOpqjebOo-01",
+    "K-xsAOpqjebOo-02",
+    "K-xsAOpqjebOo-05",
+    "K-xsAOpqjebOo-06"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=build; The task (comments) triggered a gated tool.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

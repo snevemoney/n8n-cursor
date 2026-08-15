@@ -1,0 +1,37 @@
+So, I built this agent in 2 hours and someone actually paid me $1,200 for it.
+
+And it wasn't anything too complex or advanced.
+
+In fact, I actually built this back when I had just first started messing around with an end.
+
+And honestly, if I was to rebuild this system today, it would probably take me 30 minutes max.
+
+What's crazy about that is I'm pretty sure all of you guys could build something just like this.
+
+So, in this video, I'm going to walk through what the agent does, why someone paid me for it, what this means for anyone trying to get started, and how I'd sell my first AI agent if I was starting from zero today.
+
+So, what was the AI agent that I ended up selling?
+
+Well, it's funny because it's actually not an AI agent at all.
+
+It's more of an AI workflow, AI system.
+
+At this point, AI agent was kind of a buzzword and everyone was calling everything agents, myself included.
+
+But more realistically, this was an AI workflow that I sold.
+
+So, what did this workflow do?
+
+Every single day, it would go off three times in the morning and it would go through an idea generator AI, which was prompted to think of topics that would appeal to this client's target audience.
+
+The end goal was that everything was speaking through his company's branding and his tone of voice to ultimately help nurture and convert the target avatar that his LinkedIn profile is trying to speak to.
+
+And you can see here it's a very, very simple system.
+
+You guys may even think it's funny how simple this thing looks right now.
+
+But at the time, there were some pretty advanced things going on here with like data aggregation, splitting out different items, stuff like that.
+
+Making an HTTP request, and then creating content, which was a really hot topic and still is when it came to AI powered systems.
+
+And at this point in my life, you know, I was still working full-time and I was just building a lot of stuff with Naden for fun and really just trying to learn what was possible.

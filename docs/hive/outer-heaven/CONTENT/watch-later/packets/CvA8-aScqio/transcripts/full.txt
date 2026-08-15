@@ -1,0 +1,313 @@
+So a few days ago, Anthropic asked the whole world for a way to slow down AI.
+
+This week, OpenAI published their big plan for the future and they asked for basically the exact same thing.
+
+So both of these companies also just took a real step towards going public.
+
+So the two companies racing the hardest are also the two who have turned around and said, "Hey world, we need to slow down." So what the heck is going on?
+
+That's what I want to get into today.
+
+Now, let me just start off real quick by being straight with you.
+
+I use both of these tools every single day, right?
+
+Claude, ChatGPT, whatever.
+
+I don't own any stock.
+
+I'm not on anybody's payroll.
+
+I don't have insider information.
+
+I don't even have a horse in the race to see like who wins.
+
+I'm just a guy who builds stuff and pays attention.
+
+So I'm not here to defend any of these companies.
+
+I'm just here to figure out what does this actually mean for people like you and me.
+
+So anyways, on June 8th, OpenAI put out this thing called built to benefit everyone, our plan.
+
+And it's Sam Altman and their chief scientist laying out their whole vision, essentially.
+
+And the mission line right at the top is to ensure that AGI benefits all of humanity.
+
+And that same day, totally sep- arately, they also announced that they'd filed to go public.
+
+But anyways, in this first article, they lay out three main goals.
+
+Number one is an AI automated researcher.
+
+So basically AI that can do a lot of the AI research itself.
+
+And they predict maybe by March of 2028 they will have that.
+
+Number two is accelerating the economy and sharing the gains.
+
+And basically giving every single person on Earth their own personal AGI.
+
+And they do say a lot of stuff that I agree with here.
+
+They say they don't want to automate everything.
+
+They say that they don't think power should be concentrated with just a few companies.
+
+And then number three is they straight-up call for some kind of international group that could let the world, and this is the quote, take coordinated action including slowing frontier development when needed.
+
+And it's interesting because a few days before this article from OpenAI, Anthropic put out their own report asking for the same exact thing.
+
+A verifiable way to slow or pause AI if it just gets too scary.
+
+So it's just really, really interesting to me because you We've the spectrum, right?
+
+And on one end, you've got the two leading AI labs and people that are in the weeds every day.
+
+The people that understand this tech better than anyone.
+
+And they're basically saying, "This stuff is moving so fast and it's getting so powerful that we need the entire world to come together and help us slow it down." And then, on the other end of the spectrum, you've got a ton of just regular people who think AI is just some funny tool that makes an image or, you know, a fancier version of Google search.
+
+And they basically barely touched it and they have no idea what it can actually do.
+
+And a lot of them think that it's a bad thing.
+
+There's a very negative, you know, association with AI.
+
+So, that gap between the people who are building this stuff and the people who are going to have to live with this and go through this whole, you know, kind of like paradigm shift, not to throw out a buzzword, is enormous.
+
+It's an enormous gap and I don't understand how it got so wide.
+
+Because the brand of AI right now is honestly terrible.
+
+And I was going to make a separate YouTube video about this and I probably will, but I mean, you've got commencement speakers, right?
+
+And they're getting booed at the second they bring up AI.
+
+And I think it's because a lot of people haven't really used it.
+
+So, when they hear AI, they picture some society where robots are, you know, their masters and taking their jobs and, you know, all of this negative stuff rather than thinking, "Wait, I could actually just do way more, way faster and my life actually gets a lot better because I'm using AI." And the way that I think about it is it's an amplifier.
+
+On its own, it has no good or bad, you know, intentions.
+
+It basically just does whatever you point it at and it helps you do that faster.
+
+So, you want to cure cancer, it'll help you do the research, it'll help you do all this stuff.
+
+If you want to hack into systems and you have malicious intent, it might help you do that, too.
+
+Now, most of these models are getting essentially filtered.
+
+They're getting guardrails baked in to protect against that malicious intent, but you get my point.
+
+The intent is always the humans.
+
+And just like these companies say, the judgment, which is, you know, knowing when and where and whether to even use this stuff, all of that stays us, the humans.
+
+The AI is more of the tool.
+
+And that's exactly why giving society more time to catch up is not a crazy thing to ask for.
+
+So, why would the two companies with the most to gain from going as fast as possible both turn around and say, "Hey, let's slow this stuff down." And OpenAI actually tells you why.
+
+The reason that they give for wanting this international group is, in in their exact words, "especially because the incentives around commercial and national competition are hard to escape." They're basically telling us right there that they cannot escape the incentive to race because the competition and the incentive is just too strong.
+
+And Anthropic says basically the exact same thing just in different words.
+
+Their whole pause idea hinges on everybody being able to verify everybody else is actually pausing, too.
+
+So, what's interesting there is neither of them are really saying, "We're going to stop." What they're both saying is we can't stop on our own.
+
+We can't give up our lead.
+
+So, somebody needs to build some sort of group or like a referee that makes all of us stop together and actually verifies that everyone is stopping.
+
+And that's a completely different thing.
+
+You know, the break they're asking for isn't a break that they're willing to pull.
+
+It's a break that they want somebody else to create and hold.
+
+And not to throw out conspiracy theories, but it doesn't seem like a super easy thing.
+
+So, I wonder like are they just throwing that out there for good press because they know it's not going to happen.
+
+But anyways, I don't necessarily think that it's them being evil, by the way.
+
+And, you know, to be fair, it's not like they've done nothing.
+
+They've each, you know, they've published their own safety rules, you know, for for years already.
+
+They say they won't cross without certain protections in place.
+
+And so, they're essentially inviting more regulation into their own industry right as they're both going out to raise money from public investors who just want growth.
+
+Which is it could be considered a costly thing to ask for.
+
+So anyways, the people building what they themselves call the most powerful tech ever just told you on the record that the system they're in won't let them slow down on their own.
+
+So, they're paying a price to ask for help.
+
+So, the next thing I start wondering is could that sort of treaty or referee, could something like that even exist?
+
+And I'm not like a foreign policy guy, right?
+
+But I just started thinking about actually what it would look like and what it would take to build what they're asking for.
+
+You'd basically need every single country that's serious about AI, probably every country in general, to agree.
+
+Not just the US, you'd need China, Russia, you need everybody.
+
+All signing some sort of treaty saying that they would play by the same rules.
+
+And, you know, let's just say somehow that actually happens.
+
+Everyone agrees.
+
+Now you need someone who can actually enforce that.
+
+You need like inspectors who can go look inside these companies, inside these countries, verify nobody's secretly training a bigger model in some basement somewhere.
+
+You know, kind of like nuclear weapons inspectors, but for AI.
+
+Now you think the AI part would be the impossible thing to track, you know, it's just code, it's a bunch of chips in a building running math.
+
+It's actually the opposite.
+
+I think that training one of these frontier models takes a huge visible footprint.
+
+You know, tens of thousands of specialized chips, a single building pulling as much power as a small city.
+
+And that whole footprint is probably kind of hard to hide.
+
+You know, there's construction, there's power it's going to pull, there's massive chip orders.
+
+It all does leave a trail.
+
+And those chips basically come from one supply chain on the entire planet.
+
+So, the chips are kind of like the uranium here.
+
+Anthropic has said something about the bottleneck basically just being compute.
+
+So anyways, the point I'm trying to make there is I don't know how you would verify it and how that would work, but that's one issue, right?
+
+And that's probably solvable even if it's not super super um, you know, trivial.
+
+But I think the real wall is the incentive, just like OpenAI mentioned, because nobody who's in the lead is incentivized to slow down and let everyone else catch up.
+
+The whole game is to win, really.
+
+I mean, so even if every country signs the treaty, the second that one of them thinks that they can quietly sprint ahead and grab the biggest prize in history, the whole treaty falls apart.
+
+It's the same way I think about a contract, right?
+
+No matter how bulletproof a contract is, if it covers every single scenario, it's only as good as the person on the other side of it.
+
+So anyways, that's the trap that OpenAI is pointing out when they say that those incentives are really hard to escape.
+
+A slowdown only holds if breaking it costs you more than winning ever could.
+
+So, the real question isn't whether we could build that treaty and we could build that verification system, it's how do you actually flip that incentive?
+
+How do you get to a world where the winning move is to respect to slow down and you actually like think about society and like how can everyone be doing this AI thing together rather than competing?
+
+Because until somebody cracks that, I think that asking for a global pause button is either a genuine cry for help or just the safest thing you can say when you already know you can't actually stop.
+
+Maybe a little bit of both and I don't obviously know which, but that's just what I'm thinking about right now.
+
+And whichever one of these labs you root for between Open AI and Anthropic, you're not really the mission.
+
+I mean, I think people kind of feel like Open AI is for the consumer and you know, ChatGPT is the AI that your parents know or like the general person knows and Anthropic's more of like the enterprise one, you know, Claude is built for businesses and engineers.
+
+And that split was real, but it's starting to blur, I think.
+
+Now that they're both going public and they're chasing the same dollars and either way, you're the same thing to them.
+
+You're a user to sell to, you're you know, a seat on some company's bill.
+
+So, anyways, the point I'm trying to make when I'm saying all this is don't really I wouldn't bet on a company, I'd just bet on yourself.
+
+Like the skills, the skills that you need to learn on how to use AI, how to become AI native, how to do it safely, how to think about it, how to communicate about it, those sorts of things is what you should be betting on.
+
+You know, and I don't have kids yet.
+
+A lot of you guys probably do.
+
+And if you've got a kid right now, you're probably thinking about all of this and you're wondering what a career is going to look like when they're 22 and entering the workforce.
+
+I wonder the same thing, just kind of one step removed.
+
+Because I know the world in 20 years isn't going to be some slightly upgraded version of the one that we've got right now.
+
+It's going to be fundamentally different.
+
+How business works, how the economy works, where the money sits, where the power sits, all of that is just going to look a lot different.
+
+And right now, it can feel like the whole future is getting decided by I don't know, let's just say eight people that have the whole world in the palm of their hands because of this this huge, you know, tech wave.
+
+And plus, you know, you've got a couple of chip companies and stuff like that, but they're moving so fast that the rest of the world can't even react in real time.
+
+So, how does the upside of all of this not just pull up around them?
+
+They basically said that they don't want it to be a huge divide like that.
+
+They want a personal AGI for every single person on Earth, and on paper that's the great equalizer.
+
+Everybody gets the same superpower, but if you're renting that intelligence from one of, you know, three companies that can change the price, change the rules, or cut you off whenever they feel like it, do you actually get handed that power?
+
+Anyways, I'm not going to pretend that I have the whole answer.
+
+You know, anyone who tells you they know exactly how this stuff is going to pan out is probably trying to sell you something, but I don't know.
+
+You don't really have a vote on the treaty right now.
+
+You don't have a vote on whether they slow down.
+
+The only thing that you fully control is how good you get at this stuff and what you know about it.
+
+And their own plan basically tells you where to aim.
+
+They say the human role that stays valuable is judgment, taste, deciding what's actually worth doing because the moment everybody's got a personal AGI, the tool stops being the edge.
+
+So, I think like if you are really obsessed with this AI stuff, which I bet if you're watching this video you are, and you have a lot of friends, a lot of family, a lot of people that you care about that aren't, really start pushing them to learn it, you know?
+
+I just think it's really, really important.
+
+And you can just pick one thing you do over and over.
+
+Your email, planning out your week, putting together a report, and actually just run it through one of these tools instead of doing it the old way.
+
+That's the whole move is you just start trying what you already do every day with these new tools rather than trying to invent new workflows for yourself and invent new, you know, passions.
+
+Just do what you already do with this technology.
+
+Also, I'm sure you guys have heard the news, but Claude Mythos and Claude Fable did get taken down.
+
+At the moment of filming this, they say it's going to come back.
+
+We will see, but the US government basically told Anthropic that they needed to suspend access.
+
+So, what's interesting about this is that the US government is getting involved.
+
+Not in the exact same way that Anthropic and OpenAI have asked for as I talked about in this video, but it is something to mention and I will be making more videos dedicated towards what happened here and what this means for the future, but I just wanted to at least let you know if you hadn't heard about this, this did happen.
+
+This was on June 12th.
+
+Um you can obviously come here and read this tweet and then Anthropic put out a whole statement here, which you can read and dig into why that happened.
+
+Like I said, a video will be coming on it, but I wanted to throw that out there.
+
+So, there you go.
+
+Anyways, if any of that got your brain going and you want to get good at using these tools yourself, I've got a free community, it's linked down in the description.
+
+We've got about 400,000 people in there who are building with AI, beginners, business owners, you know, engineers, whatever it is, a bunch of free resources in there and a bunch of people who are talking about this kind of stuff and it's completely free.
+
+But anyways, that is going to do it for this one.
+
+So, if you guys enjoyed the video or you learned something new, please give it a like, it helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video and I'll see you on the next one.
+
+Thanks, guys.

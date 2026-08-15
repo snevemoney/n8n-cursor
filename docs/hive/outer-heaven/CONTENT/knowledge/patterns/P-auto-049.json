@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-049",
+  "version": 1,
+  "title": "media-agents / delivery — name-and-share-then-edit",
+  "steps": [
+    "Keep human name + explicit share settings.",
+    "Always pack-then-pick before motion.",
+    "Treat extra text-only as a side try; do not ship it by default."
+  ],
+  "support_ids": [
+    "K-IlNwjnIzrOo-01",
+    "K-IlNwjnIzrOo-02",
+    "K-IlNwjnIzrOo-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=media-agents; stage=delivery; Agent may spawn extra attempts.",
+  "less_relevant_when": "Autonomy ≠ publish; he still picks.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,873 @@
+All right, so Claude Opus 5 is here and if you start to look at the benchmarks, it's really interesting because it shows us that for a lot of things that I care about, it's actually better than Fable and it is half the cost of Fable.
+
+Ultimately, Fable 5 is still Anthropic's most impressive and, you know, strongest model, but for a lot of these things, you know, I've realized when I'm doing knowledge work and when I'm building, you know, my videos or my research or whatever it is, Opus is more than enough power than what I need.
+
+And when you look at some of these charts, it's really interesting because it shows on things like the Frontier Bench and the Bench and this Coding Agent Index, that Opus is actually outperforming Fable and it's cheaper.
+
+And this really shocked me.
+
+So, obviously, I like to take all of this stuff with a grain of salt.
+
+It's fun to look at and it's good to look at, but you want to actually get your hands dirty and run these models through your own actual workflows.
+
+So, today's video, I'm just going to break down a bunch of different experiments that I ran with Opus 5 versus Fable 5 and break down things like the cost, the time, and the tokens so that you can start to understand where you should work in these different models within your workflows.
+
+All right, so pretty much all of the experiments that I've been running today that I'm going to show you guys, I did within Claude Code, which means we're comparing the models, but also inside of the Claude Code harness.
+
+And the variable is the same, so it doesn't really change too much, but I did do a few tests where I was actually in Claude Chat and I was just, you know, seeing how they felt without a harness wrapped around.
+
+And let me just show you one quick example.
+
+So, here I asked Fable 5 and Opus 5 to generate me an Excalidraw diagram that accurately and visually explains how semantic search with factorization works on a large data set for AI agents.
+
+And it's interesting here because there's no skills it can use and it doesn't have any context of me or, you know, any really way to verify.
+
+All it did was it spit out a um JSON file of Excalidraw for me and then I pasted it into Excalidraw.
+
+So, here's what we got.
+
+Fable came back with this version over here, where we see we've got like our indexing pipeline, we have a large database, and it looks like it actually misspelled this right here, which is interesting.
+
+Large Oh, data set.
+
+Okay, it was just like not expanded enough.
+
+Same thing over here, vectorize.
+
+And this is part of the whole it had no way to verify.
+
+And as you guys know, if you've been kind of building agent loops and stuff, verification is so, so important.
+
+So anyways, large data set, we chunk it up, we vectorize it with an embedding model.
+
+We then get our embeddings, which is just like the numerical representation of the data.
+
+We put it into a vector database here, and then we can actually start to search.
+
+So, we've got similarity, and that's on, you know, points being close together.
+
+So, your question lands here, and it would grab the K nearest neighbors, and different meaning is farther apart.
+
+We've got different clusters here, and then we come down here to the actual query.
+
+So, if the user asks how I get my money back, the agent searches the knowledge base, and then it does semantic search.
+
+It looks it up with the actual query vectors, and we get the matches back.
+
+So, pretty accurate.
+
+I will say though, Opus's layout seems a bit more organized, right?
+
+Like it's it's got boxes, and it's got I mean, this might not be as visual, you could argue.
+
+You could argue that Fables was more visual, which, you know, I think that that's true.
+
+But this definitely feels more organized.
+
+It feels a little bit more detailed as well.
+
+So, that's just a very subjective exam.
+
+A lot of the stuff that I'm going to be talking about today is just really opinionated and subjective, but I'm going to still give you my honest thoughts.
+
+So, in this example, I think that if I wanted to teach someone, I probably would take Opus 5's version here.
+
+Okay, so let's start off with the first test I ran, which was basically giving them a huge code base, and having them look through any bugs, and looking through like the expected behavior, and in some instructions like that.
+
+So, it had to do some exploration here and help us out, right?
+
+So, I set the goal, and I gave it this prompt.
+
+And then, what I did is I had Codex review the output that Fable 5 gave us, and that Opus gave us.
+
+So, real quick, before we look at the results, Fable took about 11 minutes, and it cost $5.30.
+
+Whereas, Opus here took 13 minutes, so a little bit longer, but it was cheaper at $4.22.
+
+You can also see the breakdown here of input and output tokens and like what models they use and stuff like that.
+
+But, let me switch over to Codex here.
+
+This is the actual result.
+
+So, head-to-head, they both pretty much passed everything, which is great.
+
+But, Codex think that Fable wins here because Fable's production patch is exactly the one-line upstream fix, blah blah blah.
+
+You guys can read through this if you want.
+
+But, the final ranking here was that Fable and Opus did similar, right?
+
+But, Fable's was a little bit cleaner and immediately reviewable.
+
+But, now let's take a look at the second one.
+
+So, I did a very similar example on the second one where I gave them both, you know, the same prompt, the same code base, as you can see.
+
+Here was the repo, here was the bug, here's example, expected behavior, blah blah blah.
+
+So, in this case, Opus took 20 minutes ish and it costed us $6.50, whereas Fable on the exact same prompt, exact same code base, took 12 minutes and costed us $8.73.
+
+So, let's go see what Codex said about these results.
+
+So, here, right, because Fable versus Opus, we actually had Opus perform better.
+
+Four out of four passed right here, whereas Fable only passed two out of four and left this unresolved.
+
+So, the technical score for Opus was 93 out of 95 and Fable scored 66 out of 95, which is really, really interesting.
+
+And think about the fact that once again, Opus in this case was cheaper for us.
+
+The bottom line was both agents demonstrated strong repository navigation and independently found the core architectural issue, but Fable's patch is functionally close and fixes the user-facing update bug while Opus delivered the more accurate, thoroughly tested, benchmark-passing implementation.
+
+And one thing that I was really excited to see in this release blog from Anthropic, if I can keep scrolling down here and find the right spot, they basically talked about how there was a huge improvement in Opus 5.
+
+Okay, let me just find this real quick.
+
+Opus 5 is much stronger at verifying its work and iterating carefully until it succeeds, which is huge.
+
+Like I kind of alluded to earlier, verification has become one of the most important things you can do for your AI agents.
+
+Essentially saying, "Hey, don't stop until you hit this condition, and this is the stopping condition.
+
+Here's how you can test if it's actually done or not, which basically means if you want them to not stop until, you know, a certain metric is hit like explicitly 10 out of 10 of this objective criteria, or if it's something a little bit more subjective, you can have them spin up sub-agents that have to argue and debate and you have to keep going until all five of them come to a consensus or something like that.
+
+Basically just the ability for the AI to build something, design tests to see if it's done or if it's good, and then keep iterating until the test passes.
+
+So, that's something I've realized as I've been testing out different models and different harnesses.
+
+It's like, yes, that does matter, but at the end of the day what matters way more is how you instruct it and how you feed context in.
+
+So, just keep that kind of stuff in mind.
+
+Yes, it's good to find the best model, but find the best model for your use case and then understand how to talk to the models, right?
+
+By the way, guys, as I'm editing this video, I just wanted to say that at the end I go over like a snapshot of all of these experiments and see like total cost, total tokens, total time to run.
+
+So, if you kind of want to skim through the experiments, feel free.
+
+If you want to jump to the end and see like the total consensus, then that's there.
+
+So, just want to let you guys know, but let's get back to the video.
+
+Okay, let's take a look at our next example here.
+
+So, in this one, what I did was I said, "Hey, {slash} goal, build me a 10-second hyper-edited engaging, viral-worthy announcement video for AIS Live." So, that was our live event that we just did.
+
+And I told her that it could look through whatever it wanted in my codebase and my entire computer to figure out, you know, the information to use.
+
+So, let's take a look at the two examples and how much they costed us.
+
+So, this one was Opus, right?
+
+And I'm going to open up this example right here.
+
+This one actually created us a vertical version and a landscape version.
+
+So, let's take a look.
+
+Okay, that was the vertical.
+
+Let me play the landscape real quick. >> Okay, so not bad, but not great.
+
+It only had 10 seconds to work with, and it was pretty fast-paced, and it honestly looked just a little bit like computer-y, like not super professional, but anyways, let's see how much that actually costed.
+
+That took 40 minutes, and it costed $11.19.
+
+Let's go over to Fable and see what it did.
+
+Okay, very cool.
+
+So, that one, you know, they they had different sound effects, they had different music.
+
+Also, what you'll notice here is that some of that was inaccurate.
+
+I don't know if you guys want to AIS live or not, but some of that data was outdated.
+
+Now, that's not Fable's fault, that's probably more on me for not keeping that context completely updated inside of my OS.
+
+But, if it would have been better about verification, I'm pretty confident it could have found the right stuff.
+
+If it would have dug deeper into my school community and looked for threads, if it would have looked at some other LinkedIn posts or other things that I've done, it could have found out that some of that stuff was inaccurate. of the speakers didn't end up speaking at this event and stuff like that.
+
+So, there was a little bit of like a context issue there, but as far as the actual videos, that's what we got, right?
+
+And they're they're different.
+
+You can tell that the models have different taste.
+
+They were given the exact same prompt.
+
+Opus decided to make two, Fable decided to make only one.
+
+So, let's take a look at the cost of Fable.
+
+This one was obviously, you know, about half the cost, about $7.07.49.
+
+Um so, Opus took a lot longer here, but it did decide to do basically double the output.
+
+And by the way, at the end, I'm going to show a full breakdown of all of the total costs, time, input, output tokens, so just stay tuned for that.
+
+But, let's keep flying through some of these other experiments here.
+
+And by the way, if you want to access this entire free breakdown document, as well as all the other resources that I ever give away on YouTube for free, just go to my free school community.
+
+The link for that's down in the description.
+
+You'll go to classroom, you'll go to all YouTube resources, and then you'll find everything in there for free.
+
+So, let's get back to the video.
+
+Okay, so I think you guys get the point.
+
+All of these other experiments we're going to do the same thing.
+
+Exact same prompt.
+
+I'll show the cost and we'll look at the outputs.
+
+So, this time I asked for a one-page landing page for a certified AI consultant program.
+
+I told it it could look through whatever it wanted and, you know, make it as impressive as possible.
+
+So, let me real quick pull up both of these outputs.
+
+Okay, so here is the Opus output.
+
+Not another AI course, the credential the SMB market hires from.
+
+You can see there's a bit of a dynamic 3D element in the background.
+
+It pulled my logo.
+
+We have an apply button.
+
+We can jump down to certain sections.
+
+That's pretty cool.
+
+If I go to the nine pillars, you can see what this course is actually designed around.
+
+I mean, this does look pretty generic.
+
+It has our brand guidelines though.
+
+It uses our colors.
+
+It uses our logos.
+
+It uses our different buttons and our different design kind of criteria.
+
+And it has all of this which is, so far what I can see, all of this is completely accurate information based on my meeting recordings, based on my, you know, internal docs about this cohort.
+
+As you can see right here, we've got this information as well.
+
+And yeah, um this isn't too bad.
+
+It's very wordy, but it's also very accurate.
+
+So, let's switch over now to Fables version of this and see what it did here.
+
+If I can find where it caps this HTML, here it is.
+
+I'm going to have to open this up in the browser real quick.
+
+Okay, so here is Fables version.
+
+It's very similar.
+
+We have the card right here, which is a nice touch because we do actually have like a card designed very similar to this.
+
+Not another AI course, the credential the SMB market hires from.
+
+Um we've got nine pillars, two layers each, 54 job posts analyzed, 50 founding seats.
+
+Claim a founding seat.
+
+We can keep scrolling down.
+
+So, they're very similar style, right?
+
+This one has a nice little animation here.
+
+They both obviously pulled my logo and our brand guidelines that you can see that they're designed very similarly, which is great, you know?
+
+Um we have other stuff here like the disciplines, the pillars are the same once again.
+
+I don't know.
+
+I mean, they're they're obviously designed very similarly.
+
+This is a nice touch here.
+
+I think the thing about this is I probably would obviously want to manually tweak both versions.
+
+They're very similar.
+
+I don't think one definitively beats the other.
+
+So, let's look at the cost and the time.
+
+So, Fable was 20 bucks and 50 cents, and it took 22 minutes, whereas Opus was 35 bucks and 83 cents and took almost an hour.
+
+So, this is one of those cases where Fable was actually cheaper and quicker, and arguably maybe just like a little bit better, but it was very similar on that side and very subjective.
+
+So, maybe one conclusion we can start to draw here is that Fable still kind of wins on the creativity and the design side compared to Opus 5, whereas right now Opus 5 is kind of having more of an edge for me on like actually following directions, verification.
+
+In most cases, it's going to be cheaper once again.
+
+Okay, let's keep on moving here.
+
+So, experiment number three here was that I wanted a LinkedIn post with a LinkedIn carousel, and you can read the rest of this post here, but basically I was trying to raise the stakes, right?
+
+I was trying to say, "Hey, you know, if I post this out on my audience, um it would be bad if this was, you know, clearly AI-generated or whatever." And I also had it choose the topic.
+
+So, Opus, let's see what it decided to do.
+
+Here is the actual PDF it created for me as the carousel.
+
+I don't love this styling, right?
+
+It's obviously pretty consistent with our brand guidelines, but it just looks a little bit, you know, meh.
+
+It just doesn't look super, super professional.
+
+So, that's the carousel.
+
+It basically chose to write about AI got dramatically better at coding and trust in it went down.
+
+So, let's see what the actual post looks like.
+
+It probably used my LinkedIn writing skill to do this.
+
+So, here is the actual post.
+
+We've got some real stats in here.
+
+We've got the arrows, a reference to the actual carousel down there, okay?
+
+And if I go to Fable version now, let's scroll up here.
+
+Aha, so Fable used a different style of carousel, which I actually like a lot more.
+
+It's kind of like that tweet style.
+
+AI agents went mainstream, trust didn't.
+
+So, that's pretty interesting.
+
+It did similar research, and they honestly both came to a similar conclusion on, "Hey, you know, based on Nate's audience and based on what's going on in the space, what should we write about?" which is pretty interesting.
+
+But, ultimately, I like this deliverable much better.
+
+And I mean, honestly, I think that when I read through these, the actual content of LinkedIn posts are pretty similar.
+
+As far as like which one do I trust more?
+
+You know, I've got a skill built around it.
+
+I've got a no AI slop sort of skill as well.
+
+And this is a perfect example of like writing a LinkedIn post, generating that content, I think even Opus 5 is overkill.
+
+Like you could write really good content with Sonnet, you know, Sonnet 4.5.
+
+So, those are pretty similar.
+
+Let's look at the cost and the time.
+
+Fable cost us $6.17 and took about 7 and 1/2 minutes.
+
+And Opus here cost us $8.22 and took longer.
+
+So, another example where Fable actually came in cheaper and faster, which is quite shocking to me because what that tells us is that Opus is using so many more tokens to actually be more expensive.
+
+Because if Fable and Opus used the exact same number of tokens, both input and output, then Opus would be pretty much exactly half the cost, but that's not the case.
+
+So, when Opus comes in costing more than Fable, it means that it was way less token efficient as well, which is a little bit concerning.
+
+Okay, so let's just keep on moving here though cuz obviously all of these experiments I could run is not going to be the exact same as when you use it.
+
+And you know, at the end of the day, it's a black box.
+
+You're pulling a lever on a slot machine.
+
+So, let's move on to Fable or sorry, the the fourth experiment.
+
+So, here I told it to go to my YouTube channel, pull comments, and then say go to my school communities and look through threads.
+
+And I want to understand what my audience is saying, what the pain points are, the number one product that I could build to help solve their pain points, and the number one best YouTube video that would resonate with them.
+
+So, let's open up the HTML here for Opus.
+
+What your audience is actually telling you, it pulled a bunch of sources.
+
+It pulled things from, like I said right here, if I can keep scrolling up, 2,200 comments on YouTube, 480 school posts, it looks like.
+
+And here's what we've got.
+
+So, we've got an HTML.
+
+Once again, I don't love this font in general.
+
+I mean, this is on our brand guidelines, but I might want to change that cuz it just looks very typewritery.
+
+It looks very cheap, honestly.
+
+Anyways, we've got pain points that are ranked, pricing and scoping, proving the automation worked, and then inverse cloud versus co-work, token, blah blah blah.
+
+The number one product to build would be the offer engine.
+
+So, a Cloud Code skill pack plus templates that takes a discovery call and then produces a scoped priced offer with a working measurement layer out the other.
+
+So, a bunch of different skills.
+
+It tells us why, and then the number one video to make would be I sold an AI system to a real business in 7 days.
+
+Real client, real invoice.
+
+Okay?
+
+So, let's see if Fable can do a similar type of conclusion with what I could build.
+
+So, once again, this thing looked through um YouTube comments, as well as it looked through school posts.
+
+It looked through less school posts, though, which is interesting.
+
+Let me pull up this HTML.
+
+So, we have cost and token pricing, error stuck mid-build, getting money, or sorry, getting clients making money.
+
+It goes over the YouTube mood, the school mood, pain points, once again, which don't seem to be the exact same.
+
+They're similar, but, you know, they're not the exact same.
+
+The number one product to build would be the AI consultant kit.
+
+So, very similar.
+
+A packaged client delivery system that takes a member from I can build automations to a business paid me, not another how to build course, blah blah blah.
+
+Okay?
+
+So, that's pretty similar, and then I worked as an AI consultant for real business, real client, real numbers.
+
+Okay.
+
+So, these are very, very similar results.
+
+So, this would be a matter of which one do you trust more, and maybe which one looked through more data, and that's how you could maybe trust it more.
+
+So, let's look at the cost.
+
+Fable here spent $10.60 and took 10 minutes, almost 11 minutes, whereas Opus spent $8.34 and took 20 minutes.
+
+So, a little bit less efficient, once again, from Opus, but ultimately ended up being cheaper.
+
+Okay.
+
+Let's move on to the fifth experiment.
+
+I'm sorry if I'm going fast, but I also don't want to bore you guys just like really, really diving into all these, because there's a lot of things to go through, but I want to show you a kind of a wide range of stuff.
+
+So, this fifth one.
+
+Your job is to create me a YouTube video outline and a slideshow, an Excalidraw an Excalidraw style presentation for this YouTube video.
+
+I want you to go through past LinkedIn posts, school posts, YouTube videos, my AI's plus Q&A.
+
+So, there's a lot of things to dig through.
+
+And then I basically told it, "You are a product manager.
+
+You're in charge of agents.
+
+You don't do anything.
+
+You just delegate work and you review stuff." So, that's what I wanted.
+
+Okay.
+
+So, it created the presentation and the outline.
+
+Let's first look at the outline.
+
+So, context engineering for agents.
+
+We have a cold open.
+
+We then move into what changed, why the terms exist, the failure modes of context, and we get into writing, selecting, compressing, isolating.
+
+Okay.
+
+So, it a pretty legit outline, as you can see here.
+
+Let's open up the actual Excalidraw slide deck it made for us.
+
+Okay.
+
+So, context engineering for AI agents.
+
+Your AI agent isn't dumb.
+
+Your context is.
+
+Bigger windows didn't help.
+
+So, harder to see.
+
+I like that little touch.
+
+We've got Excalidraw style boxes here.
+
+Um Andrej Karpathy, Anthropic.
+
+We've got a quote right here.
+
+Attention is a budget.
+
+And honestly, this doesn't look very branded the way my other Excalidraw uh presentations look.
+
+So, I'm not sure exactly what happened here, but this doesn't feel exactly right.
+
+Poisoning, distraction, confusion, clash, and rot.
+
+We've got some other stats here.
+
+So, not too bad, right?
+
+I would obviously make some tweaks before I would get ready to start, you know, thinking about how I'm going to present this, but not too bad, especially for one pass.
+
+Okay.
+
+Let's go ahead and see what Fable did here, what kind of topic it shows for us.
+
+So, if I go to it it created outline, slides, and notes.
+
+So, I'm going to go to the outline.
+
+Context engineering for AI agents.
+
+Wow, very similar.
+
+Okay.
+
+So, we've got the hook.
+
+We've got the section-by-section outline.
+
+What bad context is costing you, the four moves, write, select, compress, isolate.
+
+Okay.
+
+So, these are finding similar things, which is pretty interesting.
+
+I mean, it's looking through them assuming similar data sources.
+
+So, that's kind of good to know, right?
+
+Like, the consistency makes me feel good.
+
+This looks more like what my YouTube video ones typically do look like, though.
+
+So, that means maybe Fable did a better job navigating into my other project and finding the right skills because I forgot to mention this directory was a completely fresh one.
+
+Both of these are working in completely fresh environments, so it's not inside of my Herc 2 as all of my normal things are running.
+
+This one had 29 slides, so quite a bit.
+
+We've got um a big story here, which is something that happened to us.
+
+We have these different colors here.
+
+This one looks way more like what I typically am trying to build.
+
+We've got this nice visual with context rot.
+
+Gets lost in the middle.
+
+You know, we've got these nice visuals here.
+
+I would say this one is definitely a better presentation.
+
+So, once again Fable is kind of coming in on top when it comes to like the actual visual elements.
+
+I'm assuming they both did verification loops of screenshotting and you know, validating.
+
+I like these a lot.
+
+These are nice slides.
+
+Yeah.
+
+I like these slides better, so definitely I think Fable takes the cake here.
+
+Let's look at cost.
+
+So, Fable took about 8 minutes and cost us 40 bucks.
+
+Wow, almost 41 bucks.
+
+For that Opus let's see an hour and 15 minutes and 33 bucks.
+
+So I don't know.
+
+I think that Fable wins here even though it was a little bit more expensive because it was still more token efficient and it was faster.
+
+Okay.
+
+Let's go to the next one, number six.
+
+So, this one's interesting.
+
+This one's very interesting.
+
+I wanted to try to show you guys some computer use stuff.
+
+I compared it a little bit with Codex computer use and ultimately I still like Codex computer use.
+
+I don't know why.
+
+Um they're very similar now but I think because I just have this bias you know already for Codex computer use I don't know.
+
+Anyways, I don't use computer use but I do use it a lot for verification stuff.
+
+So here I told it to use Playwright CLI and I told it this is something interesting, right?
+
+I told it to go to Google and play the snake game.
+
+So, I don't know if you guys you obviously know like what the snake game is but if I come here, you can just play snake right here, which I used to do in class all the time.
+
+So, I told these two models to go to Google and to do that.
+
+I wanted it to only play five games and screenshot the score of each game and give us the average, right?
+
+Okay, you know what's really weird?
+
+I actually just noticed something.
+
+So, I made a big whoopsies here.
+
+I I sent this off as Fable, but I only but I actually used Opus.
+
+And then for the Opus run, where I thought I was using Opus, I was using Opus.
+
+So, I did Opus twice here, but I'm not even going to change that cuz I want to show you guys this.
+
+Same exact prompt to Opus, right?
+
+Same exact prompt to the same exact model twice.
+
+But, we got drastically different results.
+
+In this first version, the one that I thought was Fable, 1 hour and 53 minutes, 18 bucks.
+
+But, look what I had to do here.
+
+You were told to only run five games and give me the average score there.
+
+I'm not sure why you went rogue.
+
+This thing started running like 30 different games and it just kept running and kept running games.
+
+It was trying to like maximize itself, right?
+
+Here, it got an average of 63.
+
+So, it was running batches of five games at a time and did that so many times.
+
+I was like, why why are you not following my instructions, but Opus is so much better, but I didn't realize that they were both Opus.
+
+So, that's just a really good reminder that like, at the end of the day, these things are completely non-deterministic.
+
+You don't know what they're going to do.
+
+So, anyways, this Opus run, 2 hours, 18 dollars.
+
+And then, the real Opus run that I thought was Opus from the beginning, um 1 hour, 10 minutes, and $10.
+
+But, this Opus run did much better, which is really weird.
+
+81 25 33 21 54, which is like so so much better than the other one did.
+
+So, I'm not sure exactly what happened there, but anyways, hopefully that was kind of interesting to you guys.
+
+Okay, so let's take a look at this last one that I have to show off to you guys today.
+
+So, this one was um a bit longer, right?
+
+You can read this if you want, but basically what I wanted was a simulator where we could see different like buildings and vehicles and we could stress test them with different weather.
+
+We could add weights and we could even build and design our own um structures and then test them.
+
+And this one's pretty interesting, right?
+
+Cuz I gave this same prompt obviously to Fable and to Opus, but let's take a look at the two differences first, and then how long they ran.
+
+So, I'm not going to tell you which one's which yet.
+
+Let's just take a look.
+
+So, here's the first one.
+
+As you can see, there's a lot going on.
+
+Like, it's a little bit overwhelming, right?
+
+So, if they wanted to build something that was kind of user-friendly and not intimidating, they failed on that front, but that's not exactly what we asked for.
+
+We can see the different nodes, we can see the different beams, we can add like weights to them, we can see if they're passing or failing.
+
+I don't even know, like, this is one of my first times opening, you know, this.
+
+I just opened them both to look at them, but I didn't use them.
+
+We can see I can add like snow, right?
+
+So, if I come here, and if we want to add snow, we can see how things are changing.
+
+And if I add some rain, um this is adding it to the whole thing, gust factor, gravity.
+
+You can see it starts to change colors right there because there was way too much weight on here.
+
+And as you move this stuff, you know, I'm not an engineer, so I'm not going to come in here and tell you this is completely structurally accurate, and you could use this for, um you know, making sure that your stuff isn't going to fall and hurt people.
+
+This is a good simulation, right?
+
+Because you can see where things are being put under pressure and where you need to increase, um some stability and stuff like that.
+
+Now, I will say this is pretty, um overwhelming.
+
+Like, this UI, I don't really understand what to do, but if someone did understand how to get in here and how to test out this different stuff and, you know, build their own custom things, I could see this being very useful.
+
+And it just goes to show that in less than 2 hours, I already have this POC that I could go get feedback on and iterate on and stuff like that.
+
+We've even got these skyscrapers in here that we can start to add a bunch of different, you know, things to.
+
+So, anyways, this was the first version.
+
+We've got a bunch of different machines, and then you can also build your own.
+
+So, let's take a look at the other version.
+
+This one's a bit more user-friendly, right?
+
+And this one, honestly, does look a little bit more AI-made.
+
+This looks very like legacy software.
+
+This one clearly looks a little bit more AI, but, you know, the UI I wasn't too concerned with.
+
+But, this one's a lot simpler.
+
+I can see the different things.
+
+I can easily add wind or snow or an earthquake and I can see how much pressure is being put on these different points.
+
+You can see I can change to a skyscraper or a school or a vehicle and we can do the same thing once again.
+
+And this one also makes it way simpler for me if I wanted to build and design my own thing.
+
+So if I wanted to add a few nodes here, I could add one there, I could have one there, one there, one there, one there and then I can start to connect these, right?
+
+So I can connect these here and here and here and there and here and there and you know, put some triangles in here if we really want to, you know, start getting fancy and building some nice support.
+
+So anyways, this one just makes a bit more sense and I didn't prompt it to say, "Hey, you know, like this should be easy to use and people should understand it and the UI should not be intimidating or whatever." Um but anyways, like I can add weight to these different things and I can start to really put some pressure on this stuff and, you know, see what it's going to do.
+
+This is saying that this one is unstable.
+
+So anyways, which one do you think was which?
+
+Because this one was actually Fable and this one was actually Opus, which I wouldn't have expected, honestly.
+
+Because I think this one is honestly much more well-designed when you think about what you're actually seeing in the data.
+
+So let's take a look at how much these costed us.
+
+So Fable this only took Fable 7 minutes and it costed us 73 bucks.
+
+So it was just that that just goes to show how quick Fable can really run your session if you're not being careful.
+
+And then when we go to Opus here, this one took us 2 hours and 26 minutes and 112 bucks.
+
+So clearly Opus got stuck in a different loop or had for some reason Opus interpreted the verification criteria a little bit differently and it ran way more sub-agents and it did more stress testing on it.
+
+And maybe that just goes to show this line that we talked about that Claude Opus is much stronger at verifying its own work and iterating carefully until it succeeds.
+
+So maybe that just goes to show that in action right there.
+
+Because the thing is I think that Claude Fable could have easily designed something and built something this level of detail and much better, like far, far better.
+
+I've seen Fable do things that are way more incredible than this, and it could have, but it just decided for some reason, based on the way I prompted it or whatever it was, it just decided to be done.
+
+It decided to be done here, which as you guys know if you played with Fable, it's capable of so much more.
+
+But I think that that's a really good reminder of the fact that once again, these models are not deterministic, but also that Opus 5 interprets things different than Opus 4.8 and interprets things different than Fable 5, which means the first thing that I did when I got Opus 5 is I ran my skills.
+
+I ran my regular workflows.
+
+I ran my regular things that I do, you know, generating some YouTube stuff and helping me out because I wanted to see how it feels.
+
+That's why I always say I take these benchmarks with a grain of salt because it matters way more about how you talk to it and how it feels and how you prompt for verification and all of that kind of stuff.
+
+Okay, so here are the consolidated results from those sessions that I just showed you guys.
+
+Keep in mind, I accidentally ran 10 with Opus and eight with Fable.
+
+It should have been nine and nine, but either way, the numbers are still pretty telling.
+
+Look at this.
+
+Opus 5 spent more, which once again means that it's more inefficient, or I could have just said less efficient, with spending tokens because Opus 5, per token, is half the cost of Fable 5.
+
+So for it to be more expensive means that it's using way more tokens.
+
+We can see the combined output tokens right here, 2 million for Opus and 832,000 for Fable.
+
+We can see the active time for Opus was 630 minutes, so an average of an hour for all of these sessions, whereas an average of about 25 minutes for the Fable sessions.
+
+Here's the total.
+
+Now, we can see on the output speed, we have some stats here with Opus and with Fable, the cost per minute with Opus and Fable, the cost per 1,000 output tokens, Opus and Fable, API calls per session, and tool calls per session.
+
+And just a breakdown of where the money went.
+
+So, it's a pretty similar split, right?
+
+A cache reads a lot of it, and then we have cache write, and then we have output and input.
+
+And on both of these and on all of these runs, the input was pretty minimal because it was basically just, you know, um creating output.
+
+And if you look at all of the sessions from most expensive to least expensive, it's honestly pretty split besides the fact that Opus here owns like the most expensive one.
+
+But anyways, I will attach this exact document in my free school community if you guys really want to check out this, you know, this data session by session.
+
+But what I really wanted to see was this headline up here.
+
+This headline is super interesting to me when it comes to the output tokens and when it comes to the time for actually running these models.
+
+So once again, guys, I hope that you enjoyed this comparison here where I showed you some actual things that I have done.
+
+Like I said, I rec- really recommend that you just get in here with Opus 5 and you run your skills and just see what feels good and what doesn't.
+
+Have it do some verification loops and see if you like the way that Opus feels as an orchestrator.
+
+I still personally like the feeling of having Fable being an orchestrator and I like to say something like you shouldn't be writing any code or executing anything.
+
+You should just be telling Opus what to do and that saves your session limit with Fable big time because you can be running Fable for multiple hours or even a day and it won't even hit like 300k or 400k on the context because all it's doing is delegating.
+
+So try out that tip, but also, you know, start using Opus for that because I think a lot of us don't realize how powerful like a an older Sonnet model really is that you could use that to drive most of your daily knowledge work.
+
+And sometimes Opus 5 and Fable 5 are both overkill.
+
+So really think about what you're doing and matching the intelligence of the model with the intelligence needed for the task.
+
+But anyways, I hope you guys enjoyed this video.
+
+I hope you found it insightful and if you did, please give it a like.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video and I'll see you on the next one.
+
+Thanks, everyone. >> Mhm.

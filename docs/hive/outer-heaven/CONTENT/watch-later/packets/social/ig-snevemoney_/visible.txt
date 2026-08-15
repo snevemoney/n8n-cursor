@@ -1,0 +1,11 @@
+ig:@snevemoney_
+url: https://www.instagram.com/snevemoney_
+source: CHANNEL_WALK public profile 2026-08-14; API fail this pass
+display: Evens
+followers: 22
+following: 1
+biography: UNKNOWN (API schema fail)
+bio_link: none recorded
+offer_on_profile: no
+posts_ingested: 0
+note: same stem as x.com/snevemoney and youtube.com/@Snevemoney

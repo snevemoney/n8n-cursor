@@ -1,0 +1,1001 @@
+What would you say by the end of today's episode that the audience is going to take away and what will they have learned? >> But if you are having trouble selling, the issue is that you are having trouble storytelling.
+
+You shouldn't be selling AI.
+
+AI is not valuable in and of itself.
+
+Sell that story.
+
+Sell the transformation.
+
+Sell the real impact of what you're delivering.
+
+Handing out [music] claw credits to your employees in buckets is the same thing as giving a 480 volt sparking live line to a factory worker and saying figure it out.
+
+How's that going to go?
+
+Right. >> 76% of the CEOs believe that all of these leaders need to be tech fluent.
+
+You agree with that narrative or did I misinterpret? >> No, I strongly agree with it.
+
+The expectation increasingly [music] is that the seauite in those orgs they need to get more technical.
+
+When I have the the privilege of sitting down with with CEOs, I tell them the buck stops with you.
+
+You are the AI change you want to [music] see in the world.
+
+If you are not using codeex, if you are not using cloud code, don't expect other people to. >> Absolutely. >> We are telling ourselves monster stories about AI and we're telling them very loudly. [music] And that's getting to our dinner tables.
+
+And we need to be thoughtful and deliberate about the stories we tell about artificial intelligence.
+
+And we need to be intentional about the specifics of why AI matters. [music] MidJourneys hit $200 million run rate with 40 employees.
+
+What do they do?
+
+They invest [music] in people.
+
+They invest in the first new medical imaging technology in [music] 50 years.
+
+Do you think eight people in the world kind of hold hold the world in the palm of their hands and that's like what is going to decide what happens for our kids and their kids?
+
+I >> I think to me all right today I am here with Nate B.
+
+Jones.
+
+Nate, I'm super excited to be speaking with you today.
+
+If you guys don't know who Nate B Jones is, you are on the wrong side of YouTube.
+
+So hopefully after this video the algorithm starts sending his stuff over your way.
+
+He is honestly my favorite like AI news and strategy person on YouTube genuinely.
+
+So I'm super super excited to have you here today Nate. >> It's the meeting of the Nate.
+
+So when I was in college I actually roommed with a Nate and I love it whenever we Nates connect in the world and I've been following your stuff for a while Nate and I'm just so excited we get a chance to chat. >> Thank you.
+
+Thank you.
+
+I appreciate it.
+
+So real quick before I give you a chance to dive into your background and we just jump into it.
+
+What would you say by the end of today's episode that the audience is going to take away and what will they have learned? >> So, I like to keep it really simple.
+
+I firmly believe that if you are building in the AI space, let's say you're starting an agency or you want to build a small business in the AI space, you are are pulling the future forward for hundreds and thousands of companies that exist all over America and the rest of the world.
+
+And they will not reach the AI future without you.
+
+And so what I want you to take away from this conversation is a sense of what it looks like for those companies, what it looks like in the midst of the AI transformation as an operator and what we need from folks like you in order to reach that future. >> I love that.
+
+Well, I'm definitely feeling inspired.
+
+So I would love to hear a bit about your background because I know that you've you've done some pretty impressive things.
+
+You've been at some big companies and you've jumped around quite a bit and now you're kind of all in on AI.
+
+So, I'd love to hear about how you got started.
+
+And, you know, one thing that I've taken away from a lot of your content, and something that I know we both firmly believe is that the model is not the moat, and it's all about the way that you use it.
+
+It's all about your subject matter, expertise.
+
+And so, when I watch your content, it really resonates with me, and I think it speaks directly to a lot of people because you've >> built teams and you've you've sat in different roles and you're able to communicate this stuff in a way that is very applicable.
+
+So, I would love to hear about kind of how you got here today.
+
+I'll give you the cliff notes.
+
+So, I grew up overseas.
+
+I grew up in Indonesia in the Philippines.
+
+Uh, I think it taught me a lot about sort of cultural flexibility and that's helped me throughout my career.
+
+Got started uh back in Thailand and Indonesia in my working career.
+
+Uh, and I got started helping kids learn to read.
+
+Uh, I actually was building scalable programs uh working across different continents to get the funding sorted out.
+
+Very meaningful time.
+
+Helped thousands of kids learn to read.
+
+Uh, not super tech oriented.
+
+Uh, and what I found was I had a passion for leverage.
+
+I had a passion for how do I make bigger impact?
+
+And that's what drew me into tech. >> Um, and so I was in tech in the 2000s.
+
+Uh, this was back in the days when like Oracle databases and on-prem servers were a thing.
+
+One of the things that I think will make you chuckle is I have been the guy that melted down email servers in the basement because I did not learn to throttle my email send.
+
+And at the time there was no auto throttling.
+
+None of the stuff that's like abstracting away that problem was there at the time. was preass and I I melted down the servers, right?
+
+It was a bad day and it taught me early on in my career that the technical details matter a lot and that's something I've really taken with me.
+
+Uh I went from there to found my own business.
+
+I was early in 3P at Amazon.
+
+Um went over to Amazon after sort of a good business run for uh almost a decade and I've uh had different roles there, right?
+
+I was in Amazon pay, I was on the retail side of the business.
+
+Uh I was at Prime Video for a bit uh sort of solving their metadata and images problems and then uh from there I decided to take a jump into really leading product teams at startups and some of them were private equity, some of them were VC.
+
+Um I went through three exits out of four sort of swings at the bat.
+
+Uh so that was pretty fun and I you know as I was doing this like if you kicked around tech for a while uh AI finds you right.
+
+So I was doing AI stuff at Amazon.
+
+I was doing AI stuff at these startups.
+
+This was long before the chat GPT moment. >> Started to share some of those reflections, kind of combine them as you're saying with some of the sort of the insights I gained from leading teams, etc.
+
+And it just it connected in a way I never really expected.
+
+And so as that started to take off, I realized that speaking of leverage, right, I could find more leverage and impact more people by diving sort of head first into this AI space.
+
+And so that's that's what I've been doing. >> Absolutely.
+
+And when you talk about your background there, one thing that I kind of noticed is that you never mentioned being a coder or being hands- on keyboard as a dev. >> And that's one thing that's obviously very cool about this whole shift we're going through is you just have to be more so able to think clearly, understand what you want, and understand more importantly how to verify that you're actually getting what you want.
+
+But when you hear the term vibe coding and you see the cost of development dropping and the barrier to entry dropping, what scares you about that?
+
+Real quick, guys, a message from today's sponsor, ClickUp.
+
+So, I've obviously built a ton of AI agents, Naden, Cloud Code, Custom Tools, all of it.
+
+So, it's funny that one of the agents I reach for is one that I didn't even build.
+
+It's one of ClickUp super agents running on their AI Brain 2.
+
+And because it lives right there in your workspace, it already knows your tasks, your team, what all your products are about.
+
+So there's really nothing to like connect or set up.
+
+You just tell it what you want in plain English.
+
+So I set one up every time I drop a video idea into this list, take it, turn it into a real plan for me.
+
+Meaning like research it from multiple angles, pull out any interesting quotes or stats and then give me a rough outline to work from.
+
+So now I just type in one line and it builds the whole thing out.
+
+And I never even have to switch between tabs because I'm pretty much always already in ClickUp.
+
+But if you don't use ClickUp already, this is a great reason to test it out.
+
+And you can use code Nate Herk B2 for 15% off ClickUp Biz Plus.
+
+The link for that is in the description and they're confident enough that if it doesn't save you time, you get your money back within 30 days.
+
+So, let's get back to the video.
+
+Yeah, it it's funny that you say that because you're absolutely right.
+
+I didn't talk about coding.
+
+Uh I was the guy that was sort of building my uh desktop computer from spare parts with Pentium chips back in the 90s uh for fun, but I never felt like I was a coder in that sense.
+
+And I think that when I look at the moment that we're in now, uh, the thing that pops out to me and pops out to a lot of the business leaders I talk to is the need for an intent verification loop.
+
+And so if we think of vibe coding as a way to communicate intent and sort of instantiate that intent in code, you sort of put that into code.
+
+What what business leaders need is essentially a way to say, "We don't care how you did it, right?
+
+You don't have to handcode this.
+
+No one's expecting that.
+
+We just need to know that what was done is actually correct, sustainable, secure.
+
+And that's especially a theme sort of post mythos as you start to see all of these stories circulate about the security of code structures that we've had for 20 years in some cases.
+
+And that's going to be a huge investment theme for business leaders in 2027 is thinking about not just how do they verify the code is secure, but what are AI powered ways we can start to get into that verification process.
+
+I was actually talking about that with someone just this morning. >> Absolutely.
+
+So, when you think about the different ways that people start to integrate AI and start to use it, we've heard this term of becoming AI native.
+
+I would be curious to hear real quick, I know it's a pretty open-ended question, but what does that mean to you? >> That's such a good question, and you're right, it means different things to different folks.
+
+I I think to me the simplest way that I can explain AI native and this is something that I've seen as a common pattern whether you're an individual contributor or whether you're a business leader uh or a startup founder AI native builders reach for artificial intelligence first second and last and they don't reach for other ways of doing things except as tool calls if you will right it's not that we don't believe in deter deterministic code.
+
+It's an important part of the future.
+
+It's not that we don't think that there are really important human team stuff that we will need to tackle as leaders in the future.
+
+Those are all really critical.
+
+But what I find is AI native folks recognize all of that and still go after it from an AI can help me as a supertool first.
+
+It's almost like AI native folks think of themselves as wearing an AI mech suit all the time and that gives them superpowers across a wide range of problems. >> By the way guys, I know we are diving into a ton of information in this episode.
+
+So what I did is I broke all of this down into a free resource guide that you can access for completely free by joining the free school community.
+
+The link for that is down in the description.
+
+Also, if you want to check out some of the key moments from this episode and all future podcasts on my channel, then go ahead and check out the AI Automation Society YouTube channel where we're going to be posting some of the best moments from the podcast over there.
+
+I'll link that YouTube channel in the description of this video as well.
+
+Anyways, thanks guys.
+
+Let's get back to the podcast.
+
+I love that it's it's definitely a mindset thing.
+
+It is a it's a mental shift is kind of what I've called it.
+
+I've made the analogy of, you know, in The Karate Kid, how he's doing all these random movements like um with his hands and feet and he just doesn't get the point until he realizes that now when it's time to fight, his brain just does that.
+
+And >> you put it together.
+
+Yeah.
+
+Exactly. >> Yeah.
+
+Now, because we've talked about this whole reaching for AI first and we've talked about a little bit the idea that the subject matter expertise that goes into your systems that you're orchestrating is really what gives you the results that you're looking for.
+
+How would you personally think about solving a problem where it's not in your domain at all?
+
+You know, maybe you need to um I don't know.
+
+I don't know why the first example in my mind came to producing a movie, but whatever the whatever the use case is, if you don't have subject matter expertise there, how do you >> leverage a team of AI agents to go do that research for you or watch a bunch of interviews for you?
+
+What does that look like?
+
+I think that's a great question because I think so much of what the talent set looks like now is is what I'll call I think people are calling it X-shaped where you have the ability to go deep in multiple directions and the ability to go wide at the top in multiple directions.
+
+And a lot of that is AI powered.
+
+And so I I love the producing a movie.
+
+I I am not a movie producer.
+
+Like that's something [laughter and clears throat] I would have to work on.
+
+Uh but the first place I go is I look and say, you know, have people who are smarter than me been able to figure this out? and and like there are folks like Boris Turney and others who have absolutely talked very publicly about how they think on the movie production, video production side AI can help and what are tools they're using etc.
+
+And I don't pick on Boris just because he's the only name in the space.
+
+He's not a movie producing guy either.
+
+He's using those AI tools as well.
+
+And so like I start with basically what are people who are very AI native doing and then I look at what are people who are deep domain experts in that space doing with AI because that's going to be a different perspective.
+
+Um and then once I understand that I start to bring that back and say okay the combination of the two does that solve my problem here.
+
+Do I now have enough where it's like an MCP server and I can just call it and it's a tool call and I can get it done with codeex uh or with clawed code or is it one of those things where this is new territory and then if it's new territory that's even more fun right because then I get to build and I think of it as building a skill building a tool whatever it is that allows me to start to get at that problem and if it's an undefined problem even better because then I can start to build it input by input and so I and say all right so if it's a movie production thing I have to look at script I have to look at camera I have to look at editing etc etc you start to build out those input pieces and if you start to think about problems that way and they're unsolved problems they rapidly become IP for you something that either you can use as a part of the ordinary course of business or something that you can build and then sell to others [clears throat] I love that and I want to double click on something you you mentioned there you mentioned codeex or cloud code And it's obviously a very big conversation, right?
+
+And there's so many other harnesses and models.
+
+And the thing that I see most frequently in my communities and my comments is that people are very overwhelmed with how many tools are coming out.
+
+There's always new updates. >> They are releasing things right on top of each other to try to overshadow each other. >> How do you practically think about when you reach for what tool or when you see a big, you know, a tweet going viral?
+
+How do you think to yourself, this is something I'm going to try or not for me? >> So, I love that question and I get that a ton with my community as well. [laughter] I think it's a universal question, right?
+
+It's it's one of those things where the tools are evolving so fast you're just going to have those questions. >> I I look at it from a weight off my shoulders perspective.
+
+Like I firmly believe AI should take weight off your shoulders and if it is not then it is not doing its job and you probably can improve your skills.
+
+Like I think it's like both end.
+
+And so in that sense uh I I look at some releases and I'm like you know for my workflow for what I'm building this doesn't take weight off my shoulders so I'm not going to mess with it.
+
+Whereas for other workflows I I get really excited because I know what I do dayto-day and I'm like this is a big deal.
+
+So I'll I'll give you a specific example because I think it starts to ground it.
+
+Um for me the fluency that computer use has in codecs is a really big deal and I know where they got it.
+
+They got it from the Sky team and the Sky team used to work at Apple and they got acquired by OpenAI and so I know sort of the story of that team and they are phenomenal at Mac OS and so in my particular workflow on Mac OS dealing with a single window in codeex that lets me just do computer use is phenomenal but not everyone has that need set right and so I like to tap that and say for me this is a big deal this really works >> but not everyone has that and so I would say look at where you're loaded and then find a way to make sure that you look for the AI innovations that take that load off >> 100%. [clears throat] And I think in order to be able to do that, you have to understand what is your northstar and what are you building towards because if they look at, you know, people like us, one of our kind of like motivations or um incentives is to kind of stay on top of these trends and and bring to our audience what we think is relevant.
+
+And that means I'm very incentivized to play with every tool that drops, you know, at least in some capacity to experiment.
+
+And I think that also contributes to the overwhelm.
+
+But I I like the way you put it.
+
+Weight off your shoulders.
+
+Does this specific functionality solve a painoint that I actually have on the day-to-day or does it not?
+
+And getting clear on that is it sounds very obvious, but it it isn't actually, I don't think, to most people.
+
+And I I remember there was one time I was I had the opportunity to be on this group coaching call with Alex >> Herozi >> and I asked him a question which was basically like kind of similar.
+
+It was I I see so many opportunities that I want to pursue whether that be different coaching programs or products or whatever it is.
+
+And I was like how do I choose between the different opportunities?
+
+And he just he kind of looked at me as if it was a a dumb question.
+
+He was like well what's your goal?
+
+And I was like I I don't know.
+
+He's like you need to know your goal.
+
+So if you don't have a goal, it makes all of those decisions way more emotional and hard to hard to work towards.
+
+So I think that that's a very important way to be to be thinking about it.
+
+And speaking of goals, right before me and you hopped on and started recording, we kind of were briefly discussing what our audiences look like.
+
+And I think it's very tough because we're in a space that is rapidly evolving.
+
+Our audiences are probably rapidly evolving as well.
+
+The buckets are blurred and so it's not super super easy to tell who the avatar is.
+
+And one thing that I do know is that it seems to be that a big bulk of my audience is looking to start an AI agency or start some sort of AI business.
+
+And I know that a big bulk of your audience is, you know, you've definitely got some builders and aspiring entrepreneurs in there, but you've also got a lot of managers, leaders, operators.
+
+So, because we're kind of looking at both sides of the spectrum here, a big pain point that I'm hear from my side is I don't know how to sell my stuff to a business.
+
+I got to the point where I feel like I can I understand how to do like how to scope out a project.
+
+I understand how to deliver on that project, but it's the selling and it's the getting caught in the analysis paralysis of choosing a niche.
+
+And it's all of these things that are kind of stopping me or giving me that imposter syndrome.
+
+So looking at it from the perspective of a business, what is the most valuable thing that someone like, you know, people in my audience could do to go out to these small to mediumsized businesses and start to try to provide some real value? >> Yeah, I I love that question because to me, I think it gets at this nested idea of the importance of intent in storytelling, which I see come up over and over again as a theme with artificial intelligence.
+
+Um, I think we see the importance of intent with prompts.
+
+We see the importance of storytelling when you're trying to get the AI to build something.
+
+You have to tell it a story so it can build something.
+
+And when you look at it from an builder perspective, you're trying to build something you can sell to a manager, to an operator, and you're having trouble selling it.
+
+Exactly your question.
+
+To me, the first question I would ask is what is your story and how clear it is? because I I have talked to people at every scale from like a 50 person company, 10 person company up to, you know, leaders who are leading uh companies with hundreds of thousands of employees.
+
+Uh and so all the way across that spectrum, not one of them is not interested in AI.
+
+You have an incredibly motivated audience.
+
+They want to see those benefits.
+
+And so if you are having trouble selling, the issue is that you are having trouble storytelling.
+
+And I'm going to give you a specific uh real example that I ran into that I think illustrates the challenge.
+
+Um and so this is from the legal profession where compliance is very sort of a high priority, right?
+
+You have to be sure where your data lives.
+
+You have to know that you can answer in court for anything that your data, you know, processed with, etc. >> And so that the bar is really high.
+
+And so these the a whole line of AI solution providers were sort of coming out the door to this small legal firm and all of them had the same language.
+
+It's secure.
+
+It's compliant.
+
+You know, trust us.
+
+Here's a, you know, list of our certifications, right?
+
+They all had that, right?
+
+That's table stakes.
+
+You know which one won the deal? the one that literally brought in a a server and plunked it on the table and said, "Your data lives here and it won't leave." And that simply got the deal done.
+
+And I'm not saying every single law firm only wants onrem, right?
+
+Like that's a specific example, but it illustrates the idea that having a story that is going to be easy to grasp for a leader that needs to be accountable for what they invest in, that's really really important.
+
+Um, and I think that I firmly believe in the importance of cultivating the skill of storytelling as much as cultivating the skill of building. >> I love that.
+
+I love that perspective.
+
+I think that something that's interesting to think about with that storytelling angle is two things that come to mind.
+
+The first one is that the cost of building is dropping.
+
+So more people are able to build things, more people have portfolios.
+
+But the second one that I'm thinking of is kind of the era of the agentic web falling upon us where more AIs are now on the internet than humans.
+
+And so how do you stand out as a human who's trying to provide services if AI is scanning a hundred people at the same time?
+
+How do you stick out with your story, with your proof?
+
+What does that start to look like?
+
+Do you think >> we're all building that together?
+
+Um I I know you and I have both been working on that with our communities and I think that's amazing.
+
+Uh I think it's going to be really important.
+
+I think if I step back and I look at the five-year perspective and sort of the next half decade, we are going to live in a world like Harpathy talked about where it's 99% agent attention and like 1% human attention.
+
+And in that world, the value of relationships, the value of being able to build a connection with people, of [snorts] being able to build something that other people actually are interested in when they hear it from you directly is priceless.
+
+And it's priceless precisely because it can't be inflated away.
+
+You can have n number of agents running all over the internet producing this and that and the other thing.
+
+You only have one human in the story, right?
+
+You only have one human buying.
+
+You only have one human selling.
+
+And I I think ironically for the right folks who are willing to invest not just in their leverage but in their ability to build meaningful connections with others around AI and what we're trying to build together and why it matters and the human story of it all.
+
+That's a tremendous opportunity that like that that like you can't it's currency that you can't debase, right?
+
+Like it's gold.
+
+And I I think I've never been more optimistic about the possibility of the builder who can use agents to leverage themselves but knows that moment of human connection and knows how to make make those stories count. >> So what do you think that looks like for someone who has never worked with a business yet?
+
+How do they get in the right rooms?
+
+How do they start building these real kind of face-to-face connections?
+
+So there's there's like a dozen different ways to skin that cat.
+
+Uh the first thing I would say is you're not alone.
+
+You're not alone.
+
+Uh this is something that everybody's struggling with.
+
+Uh I talk with a lot of folks about it on my side who are sort of builders uh as well.
+
+And what I have found is that it comes back to what you were saying about having intent and gold sort of being very clear for you.
+
+Make sure that you have a very clear intent around what you want to do with your precious time.
+
+And once you have that, make sure it's tied to a specific demographic that you are looking to serve business-wise.
+
+Like be as specific as you can.
+
+So, you know, I live in Seattle.
+
+So, let's say uh HVAC companies in Seattle.
+
+You want to serve HVAC companies in Seattle.
+
+That's great.
+
+The the good news is for that particular demographic, uh you're not competing with a bunch of agents for their attention.
+
+This is not a particularly online demographic.
+
+You're going to have to build connections with them, relationships with them, find creative ways to connect with them.
+
+And that can really be anything, right?
+
+Like I know some people who have gotten creative and invested in billboards along a particular route for a business they're targeting.
+
+I know folks who have gotten creative with hyperargeted Facebook ads and Instagram ads.
+
+I know folks who um have literally done the inerson thing and dropped by or uh found ways to offer their services for free just to get people in the door and then sort of incentivize long-term relationships.
+
+So, there's a lot of ways to do it, but I think that those tactics only emerge when you deeply understand the demographic you're targeting and that comes from that intent piece.
+
+And so I would say study your customer, get to know them, get to love them, passionately care about what makes them successful, and then the natural opportunities to connect are going to start to emerge from there. >> Do you think that one of the objections I get sometimes is that it seems like the people that they're trying to convince that they need AI just aren't bought in enough yet. they're they're kind of flirting with the idea because maybe they're seeing their competitors on LinkedIn talk about their AI strategy or they're getting pressure from their board or whatever it is. >> But we're in this interesting time right now where >> the majority of the people I talk to that are, you know, my friends before I started doing all this AI stuff, >> there's a pretty negative connotation >> with AI. you know, it's got a pretty bad brand if you look at the general population because we've also got, you know, on one side of the spectrum, Anthropic has a model so powerful that the US government said, "Shut this down." And they had to take it back.
+
+And on the other side of the spectrum, we have people that are opening up chatbt, making an image, and then closing it.
+
+And that's that's they think like the extent of it, and the gap is just so so wide.
+
+So, I'm curious based on what you've seen too, how early right now truly are we and what is the what is it going to look like for the majority of the world to kind of catch up? >> So, I think you're asking like two or three questions in one.
+
+Let me see if I can kind of break. [laughter] >> Okay, that was a lot. >> No, it's good.
+
+It's good.
+
+Uh, and I think that actually like AI questions tend to be entangled.
+
+I think the first thing I would say is that you shouldn't be selling AI.
+
+AI is not valuable in and of itself.
+
+It's valuable in what it does for us.
+
+And so, sell that outcome.
+
+Sell that story.
+
+Sell the transformation.
+
+Sell the real impact of what you're delivering.
+
+So, if we go back to the HVAC story, uh, every company I've ever called has had trouble answering their phones and getting quick responses and getting guys on site. and it's always some like some some person in the back office who has to answer the phones and deal with dispatch and this and that.
+
+Make that easier.
+
+Take away that painoint.
+
+Make it super easy for people to connect with that business 247 and make sure that they always get their care and concerns heard.
+
+Like that's a specific problem space.
+
+AI can help you solve that.
+
+But AI is not what you're selling.
+
+You're selling I pick up the phone.
+
+Mhm. >> And I I think that that is a much much easier story to tell because it gets at the actual concern that operators tend to have.
+
+Um and then the other thing you were talking about, I really agree with you.
+
+Like I I have folks in my life that I've known friends and family pre AI.
+
+I also hear that conversation around the dinner table or a Thanksgiving dinner table where like the the sentiment is negative.
+
+Um, and I think the best sort of advice I can give there is, you know, you listen a lot and then you try and respond in a gracious way that helps people to see the larger perspective in the story.
+
+Um, and I am the first one to say I don't think folks in our AI industry are always helping us here.
+
+Um, I I wrote an an essay on just a very short one on X yesterday called there are no monsters here or no monsters in the forest.
+
+And the whole point was that we are telling ourselves monster stories about AI and we're telling them very loudly.
+
+And that's getting to our dinner tables.
+
+It's getting to the Thanksgiving table.
+
+And we need to be thoughtful and deliberate about the stories we tell about artificial intelligence.
+
+And we need to be intentional about the specifics of why AI matters.
+
+And so when people start to say, "Oh, you know, it's taking all the water." Um, I could be snappy and I could say, "Well, your almond milk latte takes a lot more than [laughter] that." Right?
+
+Like, and it's true.
+
+I could uh but I find it's much more useful to say well let's talk about what people are doing that's positive and useful and specific with AI and I think that you know it's it's very much in the news right now but the midjourney spa is a great example like they hit $200 million run rate or whatever with 40 employees they have lots of excess capital they're bootstrapped what do they do they invest in people they invest in the first new medical imaging technology in 50 years and there's lots of stories like that if you dig and if you if you look for them you can be part of making stories like that because I I firmly believe the future is made by all of us together and so we can choose to build in those kinds of directions. >> I love that.
+
+I think it's a very healthy perspective to have on it.
+
+And I think also something that I was a little surprised by and I'd be interested to hear why you think this is, >> but when I when I first started diving into all of this, I was kind of under the assumption that my generation was going to pick it up really quick and be kind of all on all in on it, but they only seem to use it for homework help really at the end of the day.
+
+And the reason why I started to realize that, hey, this might like AI might have a a branding problem was just this past May, you see all these commencement speakers getting boot as soon as they bring up the AI thing.
+
+And I mean, I think it's kind of around the narrative of AI is going to replace like if you look at the org chart and you think about that bottom layer first and then everyone coming out of college is thinking, well, that's where I would be.
+
+But do you think there's any other factors there?
+
+Like why do you think that this is is kind of happening? >> [sighs] >> So there are absolutely other factors.
+
+One example um we we overhired during zero interest rates like the tech industry dramatically overhired and so a lot of the story of the last few years is you know during COVID there was a ton of hiring in the runup in the 2010s there was a ton of hiring um and there was really a hiring overhang and so that that is a reshake that would have happened whether AI had been there or not.
+
+Um, the other thing I look at is that I, and maybe this is just coming from talking to a lot of operators sitting in a bunch of boardrooms, I don't believe the statements that are put out around AI because I see how the sausage is made inside those rooms.
+
+Um, and the reality is there is a tremendous amount of pressure on boards right now to demonstrate AIdriven efficiency and AIdriven growth.
+
+Boards that turn to firing people, and I'm I'm with Jensen on this.
+
+Jensen Hang has said this very publicly.
+
+Boards that turn to firing people are unccreative boards who are out of ideas and who can't imagine using people for the incredible creative potential that they bring to the table.
+
+And if if you fire people, that's what you're saying is we don't have ideas.
+
+Like we're out of ideas on this.
+
+And to me, that's a signal that the company is not thinking really creatively about what it can do when it leverages people 10x.
+
+Now, obviously, there's always going to be people who opt out of the AI revolution, right?
+
+I know someone who is a senior engineer who ended up deciding to be a carpenter.
+
+He just didn't want any part of it and he walked away.
+
+That is a privilege that very few people have.
+
+And so, I think it's more productive or useful when we read the newspaper to look at those kinds of stories as stories of desperation in most cases.
+
+Um, and when you see those stories to think to yourself, where can I see other kinds of investments that people are making in AI that are more people centered?
+
+Uh, I think Shopify has done a good job of this.
+
+Shopify is aggressively running an intern program that brings really really sharp folks out of school into the company partly because they believe that being AI native is something that they need to get from young people and they think that that's something that they can productively get sort of out of a program that offers people a bridge into full-time employment etc.
+
+Um but the other thing and I would be remiss if I didn't say this especially you know as we've talked about our audiences you've talked about the audience that you have being builders and entrepreneurs like guys if if you are passionate about building and founding a business as a founder I can tell you there has never ever ever been a better time and I do believe that we are seeing an explosion in entrepreneurship because more and more people are recognizing that and so I do think that the future does to some extent look like more of these single and small person team businesses that are powered by AI.
+
+And that's sort of the other side of that story. >> I completely agree.
+
+And I I'm curious, do you think that there's a sort of specific window that we're in right now where before there's much more supply, it's going to be just easier to kind of get off the ground compared to maybe let's just say five years from now? >> That's a great question.
+
+So I I go back to the whole idea that like part of what a lot of folks who learn AI initially do is they figure out how to bring the rewards of that knowledge back into the firm, right?
+
+Whether that's a client firm they're working with or whether they're founding an AI native [clears throat] whether that's a client firm they're working with or whether they're founding an AI native business.
+
+Um either way you're trying to take the the knowledge that you bring and essentially do information arbitrage like you take that information you apply it directly that is where we are for the next at least 5 years and and the comparison I have is if you were in the early 1900s uh you had electricity coming into the factory um and it took a while to rebuild the factory around electricity as a core source of energy.
+
+It was not overnight.
+
+That is the world that we are living in for a bit here.
+
+Um, it's as if and and I actually I think this is a very correct analogy.
+
+I think it reflects what we're actually doing.
+
+Handing out claude credits to your employees in buckets is the same thing as giving a 480 volt sparking live line to a factory worker and saying, "Hey, it's electricity.
+
+We need electricity to make stuff.
+
+Figure it out. make yourself more productive, right?
+
+I it it is how's that going to go, right?
+
+Like that that's that's not going to go super well.
+
+You need to have a thoughtful approach to how you design electricity into the factory and you need a thoughtful approach for how you think about how AI can transform teams and organizations.
+
+Uh and I think we're just the beginning of that and we have a tremendous opportunity to invent that together and it's going to look different for different companies.
+
+There is no one-sizefits-all answer and therein lies the value that we can create. the hyperscalers can't answer this for us.
+
+If they could, they wouldn't have tried to hire thousands of forward deployed engineers.
+
+They know they can't answer this. >> Yeah.
+
+And one thing that you mentioned to me before we hopped on here is that you thought it might be interesting to talk about the path to 100 million tokens a day. >> And so I'd love to just hand this over to you and kind of open-endedly ask like what did you mean by that? and and what interests you about that idea of teams getting these token budgets or however you want to kind of whatever you want to call that.
+
+So I I think the first thing I would say is 100 million tokens a day is a very manageable bar.
+
+Like I hit that almost every day and I don't even have to really think about it.
+
+And that comes down to sort of an AI native way of working.
+
+Like there are days when I hit, you know, 800 million tokens >> and the when you look at that with a larger group, it doesn't look that way.
+
+And you usually have and I've literally seen this in teams of several hundred people where they review token usage. you have your your passionate AI adopters who are at two billion tokens a day and then you have a whole host of people who uh basically are proud that they have the account and are burning maybe 2 to three million tokens 5 million tokens a day and they're not doing anything productive with with AI at all and so in that world the the best thing that I have been able to do for those teams is to say you got to pick a challenge that is big that is close in time and that is a little bit scary and the team has to believe in it. the team has to want it as a challenge and because it's close in time you wouldn't be able to deliver it through normal means you have to turn to AI as a way of getting there and that ends up being a catalyst and people start to rally around that and then you start to see people learning from each other which is actually the way AI usage starts to scale up and the way that starts to happen you have people who are in the room they're next to each other and they say well oh wait I didn't know you could do that with claude hang on this could help me over here, right?
+
+And then they go and the lights come on in their eyes and they do that.
+
+I've seen that over and over again.
+
+And you just need a sort of catalyst or a project that they can grab onto that gets the team together and shoulder-to-shoulder to start to unlock some of that.
+
+And at that point, the the 100 million token bar becomes easy.
+
+And from an expense perspective, like we've seen like GLM 5.2 dropped.
+
+We've seen these increasingly capable open models.
+
+It's not going to be a long-term issue with a good auto router. like expense is not going to be a thing if you know how to build your agentic systems.
+
+And that's why I chuckle when I see companies that are literally saying, "No more AI for you.
+
+You spent too much cloud tokens." I'm like, "Did you not think about building an auto router?
+
+It's not that hard.
+
+Just build an auto router, send 95% of your queries to open models, hit the frontier when you need to, and watch your costs fall." Like, come on. >> Yeah.
+
+Oh, it's going to be such an important skill to be able to understand the the unit economics there of you don't need fable for everything.
+
+You don't need opus all the time, but you definitely need a way a practical way to think about that and to make sure that it it is working across the team because what happens when >> someone hits their their budget halfway through the month and then they're told, "Oh, well, too bad." And then now they're working 10 times slower for the rest of the month.
+
+And I don't know.
+
+I mean, I think it's it's a really interesting question because for us, you know, we went through kind of like an internal enablement push last quarter where we tried to make sure everyone started to use it and we put it in safe environments.
+
+We made sure they could book in one-on-one calls and like >> felt comfortable about it because I think a lot of it is managing the overwhelm. >> But it's a lot tougher as you scale up obviously 20, 50, 100, 500 plus people on your team. it gets a lot tougher.
+
+And kind of looping a little bit back to the whole conversation of becoming AI native, I've seen a lot of interviews and podcasts about people talking about what it looks like for your business to be AI native.
+
+And there seems to be a general consensus that it's easier to kind of restart your business or have a digital twin and build that one AI native from the ground up and then sort of just like slowly transition things over rather than trying to go through an entire orgwide AI native transformation.
+
+What do you think about that hypothesis? >> I I have some sympathy for it.
+
+I I think that I can layer onto that some of the actual sort of conversations in the rooms I've been in around how people think about the team side of that um and what it means from a people perspective.
+
+I think the first thing I would call out is that the the team leader role is absolutely critical and people end up going through if you're a senior leader and you look at your team leaders and you name them one by one and you assess the degree to which they can be a champion for AI and it becomes a huge huge deal how many of those people that you have.
+
+The the other side of that is that AI native teams tend to be smaller.
+
+And so, you know, when I was at Amazon, having a dozen engineers working with a PM wasn't unusual at all.
+
+But now, like what can five people build?
+
+Like almost anything like you have 40 people with this $200 million business at midjourney, right?
+
+Like it's it's one of those things where small teams have a tremendous amount of leverage if they're extraordinary.
+
+And so I tend to see senior leaders basically handpicking out and forming into small teams AI native builders and champions to see if they can get that team dynamic to gel and then see if they can start to build really incredible things really fast.
+
+And then they tend to use that as a leverage point and then they tend to you know talk to the uh adopters who are partway through the AI journey maybe not all the way bought in maybe not all the way AI native but at least interested and say look this is where career advancement lies this is where the upside in your career is going so jump with us figure this out we're going to do it team by team we're going to pick the team leaders we're going to make the team make sure the team leaders get you know into boot camps where they can really scale up and get passionate and then we're going to start to sort of move that way.
+
+Um, I don't think it works if you don't have team leaders that are passionate.
+
+I'm talking people who are like SDM level, right?
+
+Software development manager level who can lead at a 10 people or a dozen people at most.
+
+Um, and then start to kind of move them down this journey.
+
+Because if you don't have that kind of high touch where you're in one-on ones with most of your people every week, it's not going to work.
+
+You're not going to have the degree of engagement you need to have to move people forward. >> Interesting.
+
+So, what the way that I'm interpreting what you said pretty closely aligns with a a survey that I saw from IBM where they did their 2000 CEO survey.
+
+And [snorts] one of the stats in there that I that has really kind of stuck with me is I think it was 76% of the CEOs believe that all of these leaders need to be tech fluent in their domain to in order to actually apply their subject matter expertise into the systems and to be able to actually have their reports start to utilize the technology as well.
+
+And it sounds like based on what you said, you agree with that narrative or did I misinterpret? >> No, I strongly agree with it.
+
+In fact, it reminds me of another piece that I didn't even get a chance to call out, which is I think there's a macro theme for senior leaders outside product and technical org.
+
+So if you look at marketing, if you look at sales, if you look at finance and accounting, if you look at legal, HR, those orgs are typically not technical.
+
+Those orgs are typically and traditionally served by IT and deterministic software provisioning.
+
+The expectation increasingly is that the seauite in those orgs like your chief people officer, your chief marketing officer, they need to get more technical.
+
+They need to get more technical because otherwise they don't have the technical imagination to envision what AI can do for their orgs and to accurately run this change management process for their teams. uh they just can't do it because they don't understand and their AI usage is limited to what they read on LinkedIn and their sort of chat GPT usage and that's not enough.
+
+Um and and that goes all the way up to the CEO.
+
+Like when I have the the privilege of sitting down with with CEOs, I tell them the buck stops with you.
+
+You are the AI change you want to see in the world.
+
+If you are not using codeex, if you are not using claude code, don't expect other people to. >> Absolutely.
+
+Yeah.
+
+Yeah, I think it's really important that it's it's really got to come from the top down.
+
+Otherwise, it's it's not going to stick.
+
+It has to align with incentives is something that I was just talking to my team about where I mean, people only want to do what they're incentivized to do at at you know, the simplest way you can put it.
+
+And if if someone's not incentivized to learn this new tool, and we all know that like when you typically start to dive into something new, there's typically that short-term cost that you have to bear before you feel and see those gains.
+
+So, I completely agree with that.
+
+I completely agree with that.
+
+I think that as we kind of move into the end here, I' I'd be interested to hear, and I'm putting you on the spot a little bit, but I'd be really interested to hear any of your It's kind of twofold.
+
+Any of your AI predictions that you have or any of your like hot takes that that you feel like some people wouldn't agree with.
+
+But >> yeah, what comes to mind with when I when I throw that out there? >> Predictions and hot takes.
+
+Um, okay.
+
+This one has become a sort of controversial take.
+
+I do not think all jobs are screwed.
+
+I just don't.
+
+Um, and I don't know why that's a hot take.
+
+To me, that feels very boring.
+
+Um, because we've had employment for a long time.
+
+So it feels like very boring to say we'll continue to have employment, but apparently that's a hot take now.
+
+And the reason why is simple.
+
+Uh jobs are more than tasks.
+
+And so you can have an AI that is very good at a task or a group of tasks and that will not in any way sum up the total impact of the job.
+
+And I think this gets at something you shared earlier where people sort of they do what they're incentivized to do.
+
+I think that what business leaders are looking for, whether they're working with an AI native agency, whether they're working with AI native teams internally, they want people who are bought into the mission of this company and where it's going and how it can grow.
+
+And if you have that, you're going to have a job.
+
+Like it it's just it's that mission commitment that allows you to evolve the role.
+
+And so like task after task, maybe AI can do that, but you're delegating, you're managing, you're driving, you're you're scaling your impact.
+
+Um, so that's one piece that I think I don't think it should be controversial, but apparently it is.
+
+Um, another one that comes to mind for me is I strongly think that we are super super early on AI anywhere outside of tech and it's less controversial to say that for other parts of business, right?
+
+For for marketing, uh, you know, we were talking about HR, for legal, etc.
+
+It is a little bit more controversial if I say I think that AI as a transformation technology is something that we haven't even begun to touch in our households and personal life like like we are just so early on that and I think that that is where from a human quality of life perspective like 90% of the impact will be there and we haven't even begun to touch it and when I say that to people are like oh really interesting and and we talk about work because work is where the action is right now.
+
+But I don't want to lose sight of that.
+
+Like when I talk to my family, they're looking for things that AI can solve for them, but they don't frame it as an AI problem.
+
+Don't imagine that AI could help.
+
+Like we're so early. >> You know what's interesting about how early we are and and the way people's attention works is people seem to crave what's rare.
+
+And it really makes me interested with what's going to happen to content creation and what's going to happen with the way that we consume media and stuff because I mean you see these like let's just take fashion for example, these old Champion clothes are coming back into style because they're vintage and people are loving that vintage look because it's now not the norm.
+
+But then soon all of that stuff will once again become the norm and then people crave >> the opposite again.
+
+And so I'm curious what's going to happen with like >> I don't know AI generated content or these AI avatars that are out there and you know people kind of thinking about how much easier it is nowadays to go make a thumbnail because you don't really need to go hire you know a freelancer off Fiverr or whatever it is.
+
+But then if everyone's thumbnails start to look the same, then does the value of the human thumbnail designer once again um become higher in demand?
+
+I don't know.
+
+It's it's it's going to be interesting to see what happens with all that kind of stuff, too. >> Yeah.
+
+This gets into there's been like I I swear a dozen startups in the last month that are all focused on the problem of AI and taste. >> And I think it's really interesting because everybody's thinking about that now.
+
+And to me, it's a very simple thing.
+
+Taste is a signifier that you are a little bit outside the cultural mainstream and you have a position or perspective on something that allows you to see it from a different angle and so you have a unique insight to bear.
+
+The most memorable websites we see uh started out as websites that had taste that stood out in a sea of something else.
+
+Um I think a great example is Linear.
+
+Linear's look has now been copied across hundreds and thousands of websites but when it came out initially it was new, it was different.
+
+It had taste and then that taste commodified and now we're looking for something else that speaks to this moment.
+
+And I think the best the best and most important moments in communication, in storytelling, in content creation, uh, in the creation of taste happen when someone has an insight about this moment and is willing to zag when everyone else is zigging, right? like they're willing to go the opposite way and try something new and say, you know, this is just the way I do things.
+
+I'll give you an example.
+
+I speak to camera like what you're seeing is what you get when uh you you jump on my channel.
+
+Not everyone does that.
+
+There are a lot of people that really like to show the screen and they're just in a little corner and they're showing what they're working on.
+
+I think storytelling matters.
+
+Um, and there are places you can go, like you can go to my subset, you can go to my my my Slack channel that I have, and you can get all of that like detailed content if you want it.
+
+But I think that if we're trying to tell stories, we should talk to the camera like we're talking to our friend.
+
+Um, and I think that that creates a long-term connection, and that's part of why I do it. >> I love that.
+
+Any other AI predictions or hot takes that you want to get off your chest?
+
+I think one of my spiciest takes is that [laughter] one of my spiciest takes is that the future of AI is not going to be determined by the hyperscaler labs and whatever point they reach as far as closed source model bench scores or whatever else you want to name as a measure of intelligence.
+
+I think that the future of AI is going to principally be determined by open-source models and by the ability of artificial intelligence to change the trajectory of entire countries that are AI optimistic and AI leaned in.
+
+And so I actually look around the world and I say you you're absolutely right.
+
+The United States is not a particularly AI optimistic country.
+
+And so I ask myself, are there other places in the world that are more leaned in?
+
+Like the UAE is super leaned in.
+
+It's a tiny country, but it's super leaned in on AI.
+
+There are other countries as well. >> And so I think if you look at this story of how AI transforms our world 50 years from now, >> that is going to be a story of entire societies that leaned in and leapfrogged and often used open source models to do it.
+
+And I don't hear that very often. >> Wow.
+
+You know, I don't hear that very often either, but I love that take.
+
+I really like that take because I think some of the narrative you hear is the whole about eight people in the world. >> Yeah. >> Kind of hold hold the world in the palm of their hands and that's like what is going to decide what happens for our kids and their kids. >> I just disagree. >> I love that.
+
+Well, it's really good to hear that from you. >> Reality is surprisingly detailed, Nate.
+
+Right.
+
+Like going the last mile is how we deliver value as builders, how we deliver value with agency.
+
+And going the last mile is something that everyone on Earth is going to have to tackle with AI.
+
+And it's not in the hyperscaler's power. >> So will you be getting one of those personal like neo robots in your home? [laughter] >> One thing at a time.
+
+I have a robot lawn mower.
+
+So we're going robot by robot house.
+
+I have to get permission for the robot inside the house. >> Yeah. [laughter] That is awesome.
+
+Wow.
+
+I think that's a perfect way to end this episode, Nate.
+
+Thank you so much.
+
+Where can people find more if they want to hear more from you? >> Um, I'm Nate B.
+
+Jones all over the internet.
+
+Uh, I have a YouTube.
+
+Uh, and I really focus the YouTube on deep dives.
+
+Um, and I try and show a build every week that I'm working on.
+
+So, it kind of gives you a sense of what I look at.
+
+And then if you want to figure out like how can I build this for myself?
+
+How can I connect with a community of builders?
+
+I have a very active community.
+
+Uh it's driven off of Substacks.
+
+You can uh head over to my Substack and sign up.
+
+But I think the funny thing is people think Substack means articles.
+
+And yeah, like I do articles, but really what I found is that people connect with it because it's a way to get into the Slack, get into community with one another and a way for us to build together and to build on some of the stuff that I've released publicly like the open brain uh GitHub which is open source, right? like I release that and like people are building on it in the community and there's a ton of action around that.
+
+There's a lot more coming in that direction as we build together.
+
+So, a little bit about where you can find me.
+
+I'm not hard to find. >> Absolutely.
+
+And yeah, just um to to what Nate brought up earlier about building connections and growing in that way.
+
+So bullish on communities.
+
+Absolutely.
+
+So bullish on communities.
+
+So >> I absolutely love that.
+
+Nate, you know, it's really funny.
+
+I did a tutorial multiple months back and the use case I showed was building an automation in Claude Code >> that scraped Nate B.
+
+Jones videos when they dropped and sent me a clickup summary of what he talked about. [laughter] >> You're not the only one.
+
+We have folks in the community that have agents that do that and post it for folks.
+
+Yeah, that's >> I love it.
+
+I love it.
+
+I get my little my brief every time you drop.
+
+And >> there you go. >> Yeah.
+
+So, Nate, thank you for all you do for the space.
+
+Thank you so much for hopping on today.
+
+I would love to have you back at some point or maybe we do some sort of collab with our communities at some point.
+
+It's been a pleasure and yeah, thank you so much for hopping on today. >> It's truly been a delight, Nate.
+
+I love the conversation.
+
+We have lots to talk about in future and yeah, we can find ways for our communities to connect. >> Awesome.
+
+I love it.
+
+Well, thanks so much, Nate.
+
+Have a good one. >> Yep.
+
+You, too. >> Thanks so much for watching today's episode.
+
+I hope that you guys enjoyed.
+
+Don't forget that I broke all of this down into a free resource guide that you can access for completely free using the link in the description to join our free school community.
+
+I'll see you guys in there.

@@ -1,0 +1,93 @@
+Here's how you can build anything with B4 and NAND AI agents.
+
+What we're building today is a lead magnet system.
+
+And so let's say you are an AI consultant and you're trying to get some clients.
+
+We're going to create a front end with B 44.
+
+And this front end is going to allow the client to put in their name, their email, and describe a problem they're having.
+
+And so the data that the client enters into our B 44 app is going to be sent to an N anen AI agent that's going to be trained on how to conduct an AI implementation road map.
+
+Okay, so that is my very very brief prompt that we put in here.
+
+We're going to send this off.
+
+And what's happening now is on the right hand side, you can see it's creating our app.
+
+And so this is where we're going to see a preview of our web app.
+
+And on the lefth hand side, we have just like a conversation thread.
+
+And this is where we can talk back and forth and make sure that our website is turning out how we want it.
+
+All right.
+
+So we just got back our first iteration.
+
+We have AI consulting excellence, AI Automation Society, AI consulting.
+
+That's a lot of AI.
+
+And then down here you can see we have start your AI journey today. first name, last name, email address, and then describe business process.
+
+So, this is a great place to start.
+
+It's It's really nice.
+
+It's very clean, but you can definitely tell that this was vibe coded with AI.
+
+So, we want to change up a few of these things and make it look more professional.
+
+All right, cool.
+
+So, I just said, "Please add some space between the benefit cards and the text boxes." And you can see it added space, and it still kept this effect.
+
+So, that's looking really nice.
+
+We have our effect here.
+
+We've got our background that when you basically load in the page, that's when it sort of like has that animation where it falls down and and and floats down.
+
+Okay, so I filled in some information.
+
+We're going to go ahead and submit that.
+
+We can see your information has been received.
+
+I'm going to go to our edit in workflow and I'm going to click on executions and we should see nice, it is running.
+
+All right, so you can see that this just finished up and the email has been sent.
+
+So let's hop over and see what it looks like.
+
+Okay, so we got your free AI ination guide once again.
+
+Meeting prep, automation, proposal, and road map.
+
+We start off again by diagnosing the problem.
+
+So 20 minutes per meeting manually.
+
+We then once again highlight more pain.
+
+Why is this current process inefficient?
+
+This is a really cool table.
+
+We have the component.
+
+We have the tech.
+
+And then we have the function.
+
+So it breaks down the trigger, the data enrichment with Apollo or People Data Labs.
+
+And then the nice call to action here.
+
+Ready to reclaim eight plus hours per week and never walk into an unprepared meeting again.
+
+Well, book in a discovery call right here.
+
+If you want to watch the full breakdown, click on that play button right here.

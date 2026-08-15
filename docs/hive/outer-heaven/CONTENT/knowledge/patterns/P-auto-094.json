@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-094",
+  "version": 1,
+  "title": "voice-agents / setup — calendar-tools-before-the-pretty-prompt",
+  "steps": [
+    "Attach the two tools; require a when-to-use clause.",
+    "If you generate a prompt, inspect tool-policy before the call."
+  ],
+  "support_ids": [
+    "K-G9Ho8n4lD6I-01",
+    "K-G9Ho8n4lD6I-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=voice-agents; stage=setup; Calendar connected; a bookable service list.",
+  "less_relevant_when": "Arena clip reported tail issues; this clip’s test call sounds clean (do not flatten).",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

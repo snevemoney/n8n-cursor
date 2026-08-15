@@ -1,0 +1,467 @@
+If you've been feeling overwhelmed trying to keep up with the different AI tools and agents and different things that you should be using, then this video is for you because there's a lot in the space moves really quick.
+
+So, I want to show you guys the tools that I'm actually using on the day-to-day and the tools that I use every once in a while and talk about why.
+
+I'm also going to talk about my mindset when I'm living in this environment, experimenting with new stuff, and what actually moves the needle so that you guys don't end up getting in the cycle where every single month you feel overwhelmed because there's so much new stuff to learn.
+
+All right, so let's just go ahead and get started.
+
+This is not a technical breakdown of all these tools.
+
+This is just my list and me personally telling you guys about the tech stack that I use and why.
+
+So, we're going to start off up top with our S tier.
+
+These are our daily drivers.
+
+So, you know I have to chuck CloudCode in there.
+
+This is probably my overall number one favorite AI tool ever.
+
+This is basically my operating system.
+
+I live inside of my CloudCode project and I try to do as much work as I can directly from inside of CloudCode.
+
+Now, up next on the S tier is VS Code, which is basically where I like to use my CloudCode.
+
+You could use it in the desktop app, straight in the CLI.
+
+I like to use it inside of VS Code, which is just an IDE, meaning you could also use CloudCode inside of different IDEs like Cursor or, you know, Winzer for anti-gravity.
+
+So, here's VS Code.
+
+I can see my files on the left.
+
+I can have CloudCode in the terminal right here or I can use the CloudCode extension.
+
+And our third and actually our final S tier AI tool is Glydo.
+
+This is our speech-to-text startup and I fully transitioned over from Whisper to Glydo.
+
+It's the fastest one on the market.
+
+It's private and we're going to make this thing super agentic.
+
+So, if you want to check it out, link in the description.
+
+And Windows support is literally about to roll out.
+
+So, stay tuned for that.
+
+Okay, so now let's move on to A tier.
+
+Now, these are the ones that I'm using on a weekly basis 100% but they're not really my daily drivers.
+
+So, the first one we have is Codex.
+
+Codex is a similar type of agent hardest to CloudCode and I've been using it a lot more lately because a lot of its strengths complement CloudCode's weaknesses and vice versa.
+
+So, they're really good to be able to use together even though right now I still do the majority of my work inside of CloudCode.
+
+And by the way, if you guys are seeing some tools throughout and you're curious and you want to see more about how I use them or, you know, better breakdowns, then let me know in the comments what else you guys want to see.
+
+The next A-tier is just Claude in general, Claude chat.
+
+Now, typically I am using Claude code for all of my chat-based stuff, but I still do have some times when I just go to chat really quick because I can just open it up and it's right there and I, you know, chat.
+
+Okay, the next one, which I have not talked about too much on this channel at all, is Hermes agent.
+
+I've been using this a lot more lately and it's really nice for general knowledge work and being able to do stuff when I'm out and about because it wakes up on demand when you talk to it through Telegram.
+
+It has instant crons.
+
+It has a lot of things that I really like about it that are just easier to set up sometimes than doing a whole Claude code infrastructure setup.
+
+All right, next we have Perplexity.
+
+Now, Perplexity I feel like isn't as popular as, you know, it used to be.
+
+I I don't really use Perplexity computer too much, but when I am plugging in automations and I'm having my agents do research, I really like to use Perplexity for my research.
+
+I'm also using Groq a lot as far as research and, you know, using X's built-in Groq right there when I need to, you know, maybe I want to search through a lot of Twitter threads or something and I want to find specific posts or find specific insights, I like to use Groq in X for that.
+
+And so, that's honestly my core stack.
+
+That's all we have for S and A-tier.
+
+And the reason I wanted to show you guys this is because it's a pretty lean stack.
+
+When it comes to core AI tools, it's basically Claude code, Glido, Codex, Hermes agent, Perplexity, and Groq.
+
+And you can see how many tools there are still down here to be placed into different categories.
+
+Now, I don't want to get into a bunch of like different project management tools and like things like, you know, Hostinger obviously is my VPS provider for Claude code or for Hermes or for other things that I'm setting up.
+
+You know, ClickUp is where I live as far as project management and stuff like that and communication with my team.
+
+Fireflies is in all of my meetings and, you know, I just wanted to chuck these in here to give them some love to show you where they fit in my AI stack, but these aren't really ones that are like my AI first tools that I'm using on the day-to-day for knowledge work.
+
+So, the specialists are one where I use them for a very specific use case, you know, like I have a certain process that I need or within processes I have a very specific task and then I would go grab some of these specialists.
+
+So, another example would be Appify.
+
+I don't live in Appify, but every once in a while I'll have an automation or every once in a while I want my Hermes agent to grab something and it has to use Apify and a certain actor within Apify.
+
+We also have things like GBT image 2, which I've been loving lately, and Nano Banana 2.
+
+They're really good at different things.
+
+I kind of use Nano Banana as like my Photoshop tool and I use GBT 2 as like my creator tool, if that makes sense when it comes to images.
+
+And then usually when I'm plugging in like image generation or video generation into agents, I always use key.ai for that.
+
+It's kind of like the open router but for image and video models.
+
+And then actually reminds me, I left Open Router out of this, but Open Router definitely deserves a spot in the B tier for specialists.
+
+I've got a few other specialists here and it's probably going to shoot off the edge, so let me just expand this a little bit.
+
+But I also use HeyGen for whenever I need avatars.
+
+I don't avatar my YouTube channel and yeah, I know you guys say that in the comments.
+
+I've never done that and I don't plan on it, but I will use this sometimes for certain videos.
+
+Maybe for certain course material or whatever it is, sometimes I will use an avatar and I go to HeyGen for that.
+
+And then alongside that, I use Eleven Labs to clone my voice or for specific voice agent builds.
+
+Okay, so it's really starting to slim down here as you guys can see.
+
+We only have one actual row left, which is experimenting, but I'll tell you what, not all of these tools are going to fit into this row.
+
+So let's see what's going to happen.
+
+Okay, so for C tier, these are things that I'm kind of keeping my eye on and I'm playing with a little bit and I use very frequently and they're in my ecosystem, but I wouldn't really consider them a main tool I use.
+
+Actually, before we get to that, I did leave out Cloud Design.
+
+Cloud Design is definitely a specialist and we've been adopting it more and more as a team because now everyone on the team can build landing pages using the exact same design system.
+
+I know you could have done it either way in Cloud Code before, but it just makes it so much easier to share designs, comment on things.
+
+We've been loving Cloud Design for specific use cases.
+
+Okay, so now let's get into the experimenting AI tools.
+
+So honestly, Gemini.
+
+Gemini and Anti-Gravity, I just don't really use very often.
+
+It's not part of my core stack.
+
+I am using Nano Banana more than I would go talk to Gemini 3 Pro or something like that in the actual app.
+
+The next one would be Ollama.
+
+I don't run on local models, but I do use Ollama to download stuff or maybe to even use their cloud because I like to play around with the open source models and see what's happening.
+
+I like to keep up-to-date and experiment.
+
+And then the last one that I wanted to throw on this list was Manifold.
+
+I really don't use it too much, but every once in a while I'll just open it up and test out some things.
+
+I know you guys have been giving me some comments about Manifold, but yeah, I mean I think it's a great tool and if you were maybe new to this AI world and you started with Manifold, it could potentially be your main, you know, S-tier daily driver.
+
+But for me, I just would prefer to use my Cloud Code.
+
+And now you may be wondering what's going on with all of these tools down here.
+
+These are in a separate category for me, which I would call graduated, which means they used to be somewhere in this top four tier list, but now I just don't really use them anymore.
+
+So, ChatGPT, regular chat, I've graduated.
+
+Open Claw, I've graduated.
+
+I would say that Hermes has kind of replaced Open Claw for me.
+
+Cursor, I've graduated from.
+
+Notebook LM, Poppy AI, Anytten, and then WhisperFlow.
+
+And one thing I want to say about these graduated tools is that this doesn't mean that they are trash.
+
+This just means that I no longer use them.
+
+I feel like I've kind of moved above them.
+
+And this could be for many different reasons.
+
+Maybe it means that they're a little bit outdated.
+
+Maybe it means that they were got replaced.
+
+Like in this case, WhisperFlow 1 million percent has been replaced by Glido.
+
+So, this one we can even just put off to the side.
+
+But like Anytten, not a bad tool at all.
+
+I just prefer now to build automations in Cloud Code.
+
+Poppy AI, not a bad tool at all.
+
+I just realized that if I want to use Poppy's functionality, I could do that better in Cloud Code and it can be more customized to me and cheaper.
+
+So, sometimes these tools, you know, like Notebook LM, they're all very, very good tools, but what I've done is instead of paying for them now, I basically have extracted the features that I like from them and I've worked them into my own ecosystem because the idea really is to keep your tech stack lean.
+
+And I know this looks like a lot, but really, the daily drivers is the main ones that I use.
+
+I could use just my Cloud Code and my Glido and just work the whole day and be fine.
+
+And I really wanted to make this video because I've been considering making more content on Codex and Hermes Agent and maybe a few other things, but I don't want to overwhelm you guys, which is why I've been only on Claude Code for the past like 3 months.
+
+I was trying to stay consistent so that you guys could try to, you know, keep learning one tool consistently.
+
+And I really hope that I'm not contributing to your overwhelm and maybe your stress with all this AI stuff going on.
+
+I'm trying to keep you guys all educated, but I also am able to realize that when you see a new video from me every day, it does feel like you need to watch them all and drown and you feel a little bit overwhelmed.
+
+So, I'm trying to help you guys out here.
+
+By the way, guys, I know we're about to cover a ton of information in this video, so I broke all of this down into a free resource guide.
+
+All these tools, all these different frameworks and rules to remember, and I put that inside of my free school community.
+
+The link for that is down in the description.
+
+Once again, completely free.
+
+You join here, you go to the classroom, you click on all YouTube resources, and you'll be able to download every resource that I've ever dropped on YouTube for completely free.
+
+So, hop in the community and let's get back to the video.
+
+Thanks, guys.
+
+So, let's talk about some other mindset stuff.
+
+I've got a couple different key points here that I wanted to hit on, which will hopefully clear up a lot of this stuff.
+
+So, the first thing is that coding agents are just harnesses.
+
+These images are kind of funny.
+
+It just made this up.
+
+This was GPT image 2, by the way.
+
+But, they're all different on the surface, right?
+
+They've got different harnesses, they might use different models on the back end, they might have different ways that they use their skills, but they're all just harnesses.
+
+They're all just AI that work inside some sort of directory.
+
+So, if you have your project with your Claude .md file or your agent .md file and your scripts and your skills and whatever, all of your different agents can work on that directory.
+
+So, I have my main operating system, right?
+
+Like my main project called Herc 2, and I have had Open Claude and Hermes and Codex and Claude Code all be able to work inside of that directory.
+
+So, they can all do things for me in there.
+
+And the lesson here is to build directories like they're going to outlive any tool because they will.
+
+We don't know if Claude Code's going to be king in a few months.
+
+We don't know if Codex will be king in a few months.
+
+We don't know if some random startup is going to, you know, just take over everything.
+
+But, what we do know is if we're creating directories and we're creating our projects and we're keeping them clean and we're building in them, that whatever AI is the new kid on the block will be able to plug into it and it will be just fine.
+
+The next thing I want you guys to think about is what is your North Star?
+
+Because it's probably very different from my North Star.
+
+You know, obviously I've got a bunch of business goals with what we're building out with AI Automation Society and our certifications and our events, but my North Star when it comes to YouTube is test out every tool, form my own opinions, and share with you guys what I think is interesting to know.
+
+And so that North Star for me means I test out a lot of stuff.
+
+I jump on announcements.
+
+I have to experiment.
+
+And that doesn't mean that you have to.
+
+Because if your star is building a business or a company that does X really good, like what is the mission, then is every single new hot framework or every single new model or trending tool or latest feature is that actually your path to the North Star or is that just a distraction?
+
+Like the number one mistake that entrepreneurs make is they get distracted and they try to do too much.
+
+So really the idea would be, okay, I'm just going to stay on this path.
+
+I'm going to save links to YouTube videos that Nate drops.
+
+I'm going to save these Twitter threads for later and just kind of remember that they're there.
+
+But I don't need to actually go learn all of these new features.
+
+Maybe I'll watch Nate's, you know, 10-minute video, but that doesn't mean I have to dedicate my whole next day to learning and building what he showed.
+
+There's a difference between knowing the what and knowing the how.
+
+And sometimes you only need to know all the what's.
+
+You don't need to know the how's.
+
+And I've got another point which is kind of like the decision framework and I'll touch on that in a bit, but hopefully this alone will make you guys think, "Wow, you know, there is a lot of things that I've just experimented with and I don't know why.
+
+I don't even have a use case for that." This next one is the 20% productivity dip rule.
+
+So basically it's the idea that every single time you make a switch in your business, you are going to maybe lose about 20% of your efficiency or, you know, whatever metric you're thinking about.
+
+You're going to take a 20% dip because change is change and it can be hard sometimes.
+
+So what you have to figure out is, if I'm going to make this change and I'm going to guarantee have some sort of dip in productivity, is that dip going to ultimately take me higher than where I would have been?
+
+As you can see, the blue line is worth it and the red line is not worth it.
+
+If the dip only gets you back up to the same green line, then that's also not worth it.
+
+It wasn't worth the dip.
+
+So, if you know that the dip will actually boost you above and take your business, you know, maybe break through a plateau or push to another level that you couldn't have reached before without that dip, then that's how you know it's something worth doing.
+
+Okay, then we have productivity is needle moved per hour, not hours worked.
+
+I fallen into this trap.
+
+I think a lot of you guys in my community have fallen into this trap as well.
+
+You work a 12-hour day.
+
+You think, "Damn, I was productive today." But, what you don't realize is like, were you?
+
+Because I could maybe sit down for 4 hours and be more productive than you in 12 hours because I'm actually doing everything that actually moves the needle.
+
+Rather than 12 hours of responding to a bunch of threads, reading through community posts, watching YouTube videos, just like planning out a bunch of stuff, but not actually doing anything.
+
+So, this kind of relates back to that North Star thing.
+
+Let's say every day you sit down in the morning and you say, "Okay, by the end of the day, I want to achieve X." Every single thing that you want to do that day should be driving towards achieving X.
+
+And then maybe once you've achieved X, then you can spend some other time like looking into some new features and experimenting with some stuff.
+
+But, productivity means that you're actually doing things that are moving the needle for you.
+
+Not how long did you work today?
+
+Okay, so this one kind of goes back to that first point about the fact that all agents and agent harnesses are just different harnesses and they all work in your same stuff.
+
+Because the mindset here, which is something that I've been thinking a lot about.
+
+I've been building out frameworks, we're building a certification program, we're doing all this, and our thinking is basically what Jeff Bezos said.
+
+Think about what will never change, not what will change.
+
+And so, if you can become tool agnostic in the way that you work, that means, "Okay, let's say Claude Coach shut down tomorrow.
+
+Are you okay?
+
+Could you pick up Code X?
+
+Could you pick up something else?
+
+Could you keep working?
+
+Could you be okay?" And if the answer is no, you might want to think about things, right?
+
+Cuz like, if you're one of those people where I mean, I've been there, Claude goes down.
+
+Like, the status page is down, the API's throttled, you can't use Claude.
+
+Are you just sitting there like, "Oh my god, I can't work anymore.
+
+I have to wait till it's back up." Because if that happens, then you're probably not in a great spot.
+
+You probably want to be learning how to plug in a few other things into your main stack, into your main working directory.
+
+And what you'll realize is that you have overall job responsibilities or functions or processes.
+
+And what happens in a process is that it's basically built up of a bunch of different mini tasks.
+
+And usually the right question isn't which tool is best, the right question is for this specific task in this specific context, which tool is best.
+
+So here's a quick example, right?
+
+Like let's say I'm making a YouTube video.
+
+Maybe I use Perplexity for research.
+
+Maybe I use Claude Code with a skill and with knowledge about me to help structure the video.
+
+And then maybe I use Claude Chat for some reason to actually write the script.
+
+And then I use like GPT image 2 to create me that thumbnail.
+
+And then I use Nano Banana to to add a glowing effect or to just make some stuff stand out.
+
+And then after I do all that, maybe I drop it into DaVinci Resolve or Adobe Premiere Pro just to stamp it up and get it out the door.
+
+So not every single step in a process has to be AI, not every single step in the process has to be the same AI.
+
+Break things down into baby steps and think about for this specific baby step, what tools do I have in my list, you know, all of these different tools that we looked at earlier, which one of these tools is going to be the best for this little output that I need.
+
+And the last thing here is basically the decision framework.
+
+So this is what I alluded to when I was talking about that North Star and finding the path that you're running on which is directly leading towards that North Star.
+
+When a new AI tool or feature drops or a YouTube video from me drops, look at the title, click on the video, understand what I'm talking about, and ask yourself, does this video or does this new feature solve a pain point for me right now?
+
+Most of the time, the answer will probably be no.
+
+And if the answer is no, but you think the feature is cool or the agent framework is cool or whatever it is, then just save the link so that you know, okay, later if I do want to watch this, I know where it is.
+
+If the answer is yes, then maybe it makes sense to actually test it out.
+
+But don't just spend like a month testing it out.
+
+Try to test it out in a real scenario, you know, like don't just test it out with mock data.
+
+Try to test it out with something that actually moves the needle for you.
+
+Not in a way where it would be risky, you know, like sending out emails or restructuring a whole database, but do something in your actual working environment, so you have real proof of if you like it or if you don't, or if it actually solves a problem or not.
+
+And then, at the end of the week after you've used it, just ask yourself, did this make sense?
+
+Did this solve my pain point to the point where I'm going to put this into my main, you know, daily drivers or my main companions of tech tools, or is it not?
+
+Because if it didn't, then get rid of it for now.
+
+And then, only later, if you realize, okay, I'm working on my business and I'm I'm hitting this pain point every single day.
+
+Do I have any features or agents in this list of like other things that I need to look at?
+
+Do any of these directly help me solve this pain point?
+
+If the answer is yes, then you reach for that tutorial, and then you grab it, and then you learn it.
+
+Does that make sense?
+
+Like, sometimes, as you're walking down this path, you don't want to jump to the right or to the left to all these holes, but sometimes you might actually run into a roadblock.
+
+And the only thing that might get you over that roadblock is to jump into one of those holes, understand it, and then all of a sudden the roadblock is easy to just like walk through or jump over or whatever.
+
+Okay, let me take a breath. >> [laughter] >> I was talking really fast in this video, and I don't know, it's just something that I'm passionate about and something that I wanted to get off my chest, because I feel like I've been answering these questions a lot in the comments and in my community, but I really, really hope that this one gave you some clarity.
+
+And once again, I use a bunch of tools, and I've really, really tried to only bring you guys like cloud code content for the majority, because I don't want to overwhelm, but please let me know what other tools do you want to see me cover?
+
+Especially anything in here, especially some of these constant companions that I am using a lot.
+
+What do you want to see?
+
+Just let me know in the comments.
+
+But anyways, that is going to do it for today.
+
+So, if you guys enjoyed the video or you learned something new, please give it a like.
+
+It helps me out a ton.
+
+And don't forget to download that free resource guide, join my free school community.
+
+All of my resources are in there.
+
+And yeah, I appreciate you guys making it to the end of the video, and I'll see you in the next one.
+
+Thanks, everyone.

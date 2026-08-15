@@ -1,0 +1,67 @@
+{
+  "workflow_id": "WF-dark-factory-v2",
+  "project_id": "dark-factory",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "PRD first",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "Interview the harness",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "Three files",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "One ticket",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T5",
+      "title": "Bite; hold-outs hidden",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T6",
+      "title": "Other-session GRADE",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T7",
+      "title": "Fix-first",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T8",
+      "title": "Named deploy; Evens flips",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-eecUhBpTz_g-01",
+    "K-eecUhBpTz_g-02",
+    "K-eecUhBpTz_g-03",
+    "K-eecUhBpTz_g-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "eecUhBpTz_g",
+  "words_read": 5426,
+  "tape_faithful": true
+}

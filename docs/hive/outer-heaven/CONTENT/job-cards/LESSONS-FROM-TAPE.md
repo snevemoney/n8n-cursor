@@ -2,6 +2,8 @@
 
 **Purpose:** Evens is the visionary. The 17 Grok desks cowork with him on stored `full.txt` files. Cursor fetches, wires, dispatches. Cursor does not pre-vote the never-list or write 17 hats.
 
+**Decision (2026-08-14):** Evens skipped merge. Canonical = `takes/{slug}.md`. Do not merge. Do not ask again. Do not Load the cursor-draft.
+
 **Canonical takes:** [takes/](./takes/README.md) — one file per desk.  
 **Not canonical:** [LESSONS-FROM-TAPE.cursor-draft.md](./LESSONS-FROM-TAPE.cursor-draft.md) — do not Load first, do not merge from it.
 
@@ -31,11 +33,11 @@ Agents load **their** `takes/{slug}.md`. They do not load every other desk every
 
 ## Walk
 
-Desks write in [takes/](./takes/README.md). This page stays a shell until Evens says keep, then Researcher + Librarian merge unique desk wording here — video first, then roll-ups. Do not flatten to CUT.
+Desks write in [takes/](./takes/README.md). This page stays a short shell. Evens skipped merge on 2026-08-14. Canonical = `takes/{slug}.md`. Do not merge. Do not ask again. Do not Load the cursor-draft.
 
 ## Maintain
 
-- Next L2: skill `tape-self-teach` — desk writes its take file; merge only after Evens keeps.
+- Next L2: skill `tape-self-teach` — desk writes its take file. Evens skipped merge on 2026-08-14; takes stay SSOT. Do not merge. Do not ask again.
 - Fleet walk: `python3 scripts/hive/grokbot-dispatch-tape-self-teach.py` (operator-ordered).
 - Do not inject this file into every morning brief.
 - Normand send is not unlocked by this page.

@@ -1,0 +1,24 @@
+{
+  "primitive_id": "PRIM-iRBs8PCBCaA-offline-vs-interactive",
+  "name": "OFFLINE-PLATE-VS-INTERACTIVE-WORLD",
+  "loop": [
+    "name the job",
+    "if page/clip → offline consistent plate",
+    "if mid-shot input / WASD → interactive world class",
+    "look for limb/orientation failure class",
+    "do not stand up Genie"
+  ],
+  "obvious_demo": "Genie 3 vs diffusion video",
+  "other_applications": [
+    "Notes only: cinematic-recipe stays the page wrap",
+    "No robotics SKU"
+  ],
+  "capability_ids": [
+    "CAP-iRBs8PCBCaA-classify-world-engine"
+  ],
+  "source_video_id": "iRBs8PCBCaA",
+  "timestamp": "00:31-07:37",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

@@ -1,0 +1,45 @@
+{
+  "capability_id": "CAP-iRBs8PCBCaA-classify-world-engine",
+  "name": "offline-plate-vs-interactive-world",
+  "goal": "name the job → offline plate OR interactive-world RESEARCH — do not build Genie",
+  "observed_workflow": [
+    "Ask offline consistent chunk vs real-time interactive",
+    "Treat physics demos as approximations; look for limb/orientation fails",
+    "If marketing page → cinematic-recipe video hero",
+    "If interactive infinite → RESEARCH / ASK, do not stand up Genie",
+    "No new icp_id"
+  ],
+  "tools": [
+    "none new"
+  ],
+  "agent_abilities": [
+    "classify plate vs world-engine"
+  ],
+  "triggers": [
+    "someone sells 3D website / world model / learns physics"
+  ],
+  "state": "classified; no Genie build",
+  "guardrails": [
+    "do not compile a robotics SKU",
+    "do not quote 2026/2027 as a ship date",
+    "WL title ≠ his claim (approximate, not learn-physics)"
+  ],
+  "reproduce": "Classify one existing cinematic page as offline plate. Stop.",
+  "generalize": "Dissent row on cinematic-recipe. Not a new product.",
+  "improve": "Do not improve by switching to Unity/Unreal.",
+  "primitive_ids": [
+    "PRIM-iRBs8PCBCaA-offline-vs-interactive"
+  ],
+  "atom_ids": [
+    "K-iRBs8PCBCaA-01",
+    "K-iRBs8PCBCaA-03"
+  ],
+  "behavior_ids": [
+    "BEH-iRBs8PCBCaA-classify-world"
+  ],
+  "source_video_id": "iRBs8PCBCaA",
+  "timestamp": "00:31-07:37",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

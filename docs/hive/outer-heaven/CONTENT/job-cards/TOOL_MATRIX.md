@@ -22,7 +22,7 @@ Do not put Twilio/ElevenLabs API keys in Cursor or Grok plugins.
 | `n8n.dentist-voice-agent` | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | never |
 | `vapi` | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | never |
 | `auto-dial` | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | never |
-| `n8n_trigger_catalog_webhook` |  |  | U |  |  |  |  |  | U |  |  |  |  |  |  |  |  | tier3 |
+| `n8n_trigger_catalog_webhook` |  | - | U |  |  |  |  |  | U |  |  |  |  |  |  |  |  | tier3 |
 | `ce_lookup_lead` |  |  |  |  | U | U | U |  |  | - |  | - |  |  |  |  |  | read |
 | `ce_list_actions` |  |  |  |  | U |  | U |  |  | - |  | - |  |  |  |  |  | read |
 | `hitl_propose_action` |  |  |  | U |  |  |  |  |  |  |  |  |  |  |  |  |  | read |
@@ -30,7 +30,7 @@ Do not put Twilio/ElevenLabs API keys in Cursor or Grok plugins.
 | `ce_reject_action` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | tier3 |
 | `ce_resolve_action` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | read |
 | `hitl_gate_status` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | read |
-| `hive_send_report` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | read |
+| `hive_send_report` |  | - |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | read |
 | `n8n_get_execution` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | read |
 | `n8n_list_workflows` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | read |
 | `scorpion_health` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | read |

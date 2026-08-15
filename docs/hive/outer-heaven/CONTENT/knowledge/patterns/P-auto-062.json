@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-062",
+  "version": 1,
+  "title": "offer-positioning / acquisition — inbound-casual-almost-free-throw-a-number",
+  "steps": [
+    "Steal no-CTA email + throw-a-number-after-value. No free Path A without Evens.",
+    "Steal 2-of-3 + fail-fast + SME sentence. HITL price."
+  ],
+  "support_ids": [
+    "K-8C6iCpJ9HPo-01",
+    "K-8C6iCpJ9HPo-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; 2024-ish n8n YouTube. He says the space changed 8–9 months later.",
+  "less_relevant_when": "Example math is “just to throw out.”",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,159 @@
+AI probably occupies half of my time right now in terms of like what I'm thinking about within the
+business. And so Okay. Okay, so from a beliefs perspective, right? Like one of the big shifts that
+everybody here has to make is shifting away from thinking about roles based growth and expansion
+towards workflow based automation. So Imagine that you're you're like I want to hire I want to hire
+an editor. All right, I'm just making this up. I want to hire an editor. This is how we used to
+think about things. I need to hire an editor so they can do XYZ. The way that we all have to think
+about our businesses now is that this editor really was going to do these four or five things, right?
+And each of these things should exist in a workflow. Like the reason that like and this is the editor
+does this one and they're doing this one in this workflow and maybe they're doing these three in
+this workflow. And so basically you have to go more granular to the level of like because every
+single business, if you really think about it, can be connected at the most intricate level of like
+this action to this action to this action to this action all the way through. Now it might be 120
+actions that go from inbound lead to dirt, you know, turf, whatever, right? And it's getting granular
+and this is the thinking that most people won't do, which is why they will lose and why I think
+a lot of people are going to get [ __ ] But if you have a little bit more horsepower and have a
+little bit more time to think about things, that's where instead of saying I need to hire an editor,
+you say I need an agent who just does this and I need an agent that just does this and an agent
+that just does this. And so it's switching from um again, roles to workflows. And everything just
+has to be organized in workflows. And so it's like a very fun project is thinking like can you actually
+draw your entire business in one linear workflow? Cuz it does happen and if you can't draw it, how
+the [ __ ] do you have a business, right? But it really starts with like like the business for us
+for example starts with an idea. This sounds silly, but like it starts with an idea. So how does
+an idea come to happen? Well, the what is the workflow around an idea? For us it would be like,
+okay, um I check our school community and I look at what's happening. Okay, that is a workflow,
+which is uh search, you know, search this database, which is school, but it could be, you know,
+trends.com or what you know, one of 10.com, whatever. Um where you look at what things are outperforming
+in this particular market. And then it says, okay, then it gives you this list of the outperformers
+and then there's going to be a match between this list and our competency. So it's like I have a
+list of things that I like talking about. These are the list of things that people want to hear
+about. This is the intersection between those things. Great. What does this look like in terms of
+uh uh scripting, right? So it's like, okay, we're going to have some sort of scripting around this.
+So I want uh templated ideas. AI does this. So it gives us um okay, this is a seven-step, whatever.
+And it has each of the steps underneath of it and we're like, great. Now that the scripting's done,
+we're going to go into packaging. All right, what are going to be the headlines, what are going
+to be the thumbnails? This is an AI workflow. And then we're going to get into production, right?
+And so all of this is broken down to so that we can get one thing to happen, which is a click. Right,
+but every single element of the business can be broken down into the into its constituent workflows.
+And so I think the mistake that a lot of people are making right now with AI is being like, well
+AI can't do what a human can do, which is obviously [ __ ] but like you have to train it the way
+you train a human. So saying like, well I'm going to bring this this human in and tell them nothing
+and expect them to do a good job is ridiculous, but we're somewhere that we like believe that a
+machine should be able to do that. But instead of thinking, okay, this editor or videographer or
+whatever it is, um actually does 16 actual activities and each of those activities we have to take
+one at a time and we can have an agent that's trained on that thing. And so like right now, like
+Nomadic's is working super hard with Julian on this, but like we have so I do like my Hormozi hotlines.
+And so I do a hotline and then that then goes into um basically an AI thing that does uh that breaks
+down the the transcript. So that's like step one. From the transcript it then says, okay, notice
+when there's different speakers. All right? So it has to do that two times. One is notice when it's
+Alex versus the other person. So it's ABAB. Imagine I'm A, but then it eventually switches to ACACAC
+and then it goes to ADADAD because there's new person that I'm on the phone with. So it's going
+to say segment first between when it goes from AB to AC. So great, now we have 10 underneath clips.
+From there, uh it'll run a separate script that's like look cuz it's like what would an editor do?
+The first thing you do is clip out the individual portions. Okay, there's 10 different conversations
+Alex had. Okay. Now that we have these 10 conversations, look through this and try to find the highest
+tension moment. And so it'll read the words and say this is the highest tension moment. And be like,
+great, start the [snorts] clip at the highest tension moment and then get into the rest of the clip.
+What else do we want? Remove all ums and ahs. Great. Now from there, what are the um what data is
+required in order to have the insight that Alex delivers? Only these four points. Great, collapse
+the rest. Now export final file of that. That's the workflow. And so it's really just building this
+on a consistent basis and continuing to update that prompt, which is literally just like updating
+the training for a human being of like actually do this too, just like you would with an editor,
+but doing that across every function of the business. So that is like that is the future. And the
+nice thing is that with there's a lot of businesses that like agencies for example have been a notoriously
+shitty business to run. Um but in the future, I think they'll be incredibly lucrative businesses
+for the people who are really good with AI because the demand for more customers is infinite. And
+so there's like no one's like, hey, what's product market fit for an agency? You don't have to ask.
+People want customers. It's not hard to like you don't need to ask for product market fit. The issue
+is that the ops around being good at getting customers is significantly harder, but if you can operationalize
+each of the flows, it becomes much better. And this is why like like I'm built for this movement
+because it's all about being black and white with observable behavior and that's like what I geek
+out on. And so this is where vague language, like machines do not understand like vague language.
+Also, neither do you [ __ ] humans. Um we just nod our heads because we've been reinforced for doing
+so, but this is where being very specific about like, hey, I need you to be more charismatic means
+nothing. We have to say I need you to raise your voice in this way. I need you to talk faster. I
+need you to raise your head when you're speaking. I need you to nod when the other person's talking.
+We have to break it down to what someone would do. And so um as though you were teaching a toddler,
+you have to work the same way with the machine, but the machine never forgets. Hopefully that answered
+the question. It does. Okay. But yeah, this is what I'm thinking a lot about. So it starts with
+a clear process map or workflow map of the every action in the business. Exactly. And I would I
+would start like start start with the big ideas first. So it's like, okay, I do I I I have an idea
+and then I make a script and then I uh I shoot it and then I, you know, then we we export the clip
+and then we edit it and then we post it. Okay, that's the that's the big picture. But now underneath
+of each of those there's probably six or seven things that actually happen in order to post it.
+It's like so I actually go to this page, I look at the schedule of what was, you know, last posted,
+I add three hours to it, I like you just have to like one word turns into six six actions. And it's
+just continuing down until there's you can't reduce it anymore and then that's what you automate.
+Do you have a special AI implementation team to build this? Uh yeah, we have a full dev team. Yeah.
+Yeah, but they're typically on this stuff. Yeah. So I think I think many of you, especially those
+of you who are online, uh an amazing high leverage hire is just an AI like an AI automation Like
+they can just sit next to teams and just watch what they're doing and then just say like I can automate
+that. I can automate that. I can automate that. All right. So that's something that we should do
+right now. Yeah. >> Yeah. If you have the cash flow for it. Mhm. What does a dev hire run? Hm? What
+does a somebody like that run? Depends on how good they are. I think though as Lindsay Lohan said
+it best, the limit does not exist. So like there there's a there's a there's a price tag for every
+level of skill you want. But even just somebody who would I would just consider like a hacker and
+I say hacker like loosely, like somebody who just duct tapes tools together, probably like 150 grand
+a year. And in terms of prioritizing for us, would you focus on the delivery side first? I think
+that you getting um the elements that we walked through specifically around the expectation setting
+number one, um I think CAC expectations number two and then the controllables around brand. Like
+the the brand controllables, I think that should be largely automated. Um because it is automatable.
+It's literally pattern detection, which is like machines do it better than humans do anyways. And
+so what what humans do shitty at is giving the pattern to recognize. And so that's like in terms
+of like what skill will you need to be get good at is when someone says like this is off brand,
+like what the [ __ ] does that mean? Like tell me in describables so that otherwise, how am I if
+you can't tell me, how am I going to know? So it has to be in black and white language. Yeah. I
+think for like home services and brick and mortar, a lot of um basically all administrative work
+should just not really be a thing. Like, you know, invoicing, matching billables, like back office
+for sure is like that's already there. Like that's like now. Um receivables, that's like now. Like
+you don't need to There's nothing there. Lead nurture, that's now. Like you don't Like a lot of
+that stuff's already already kind of done. The advantage that um y'all have for in person is that
+like I don't know how horses will respond to robots. So, you probably have a little bit of you probably
+have a little bit of security, you know, like otherwise you're going to get, you know, mule kicks
+into the into the side of the stall. Um uh I think that from a landscaping perspective, there will
+be kind of like once Optimus comes out and you can teach it how to like mow lawns and [ __ ] like
+that'll be a thing for sure. Um Hm? Yeah. Yeah, yeah, I mean it can do it. Um there'll also be I
+think like job specific ones, but most likely, I think the biggest proliferation is going to be
+on generalized humanoid robots because the world is already built for us. And so, as much as it's
+like, you know, I'm sure you've seen like the like the Zumba of lawn cares, I'm sure you've seen
+these things where it's like you drop them around, but like I haven't seen anyone really take off
+with that. At least I haven't seen it. And I think it's just because like there's too many unique
+scenarios, it costs too much like the cost doesn't make sense yet. Maybe in three or four generations
+it'll be there. But in the meantime, the skeleton key for the world is just the way the human body
+works. Door handles, everything's already built for that. So, it's like as silly as it sounds, it's
+like the world's already We already built the world for ourselves. If there's a robot that can fit
+underneath the door, we could make a special purpose robot that does that, but it's like you'd have
+to do that in every door in every building. Or you just build a [ __ ] human robot, which is what
+everyone's doing. Yeah, I think I think you're fine for the short term. The The stuff that you should
+be focusing on from an automation perspective is going to be back office. Yeah. And there's And
+the thing is it's great at that. It's [ __ ] awesome at it. And you should totally use it for that.
+But you, AJ? Yeah, like wait, would that be something like using AI for like the nurture like that?
+Yeah. 100%. Right now, voice is almost there. This is supposed to be the year of voice. Um it's
+close. It's not There's a lot of tools out there. I won't make any recommendations cuz like they
+change all the time. Um I would say voice is very close. Text is there. Yeah, I [snorts] was thinking
+about like off hours having like a voice like auto auto attendant. I went to a gym that was local
+here. It's a It's like a very exclusive like whatever. I think it's like 10 grand a year or something
+like that. It has like 400 members and that's the deal. Um pretty interesting model. But I went
+to the site and it was just a chat interface. It just said like what do you want to know? And so
+I was like hours and it was like here's the hours. I was like what else do you want to know? And
+I was like membership prices. And it was like here's the membership prices. What else do you want
+to know? I was like, hm. I mean it should have asked me for my information, but it's not It was
+not well trained enough. >> [laughter] >> Um but like I was like this is pretty slick. Like why
+navigate when it just already has the answers? Not to get very odd for you guys, but in the next
+I would say 12 to 24 months, a lot of like the UX is going to disappear. Like we're not going to
+be clicking things. Like the mouse like what brought computers into mainstream was a mouse. Like
+that was the big innovation was having a mouse you could point and click and then all of a sudden
+people were like, oh, I just want that thing. It's like click and it worked. And so, nothing's really
+kind of happened in the computational world besides speed and power and all that stuff, but it's
+all been um more of the same. The next phase shift is that UX disappears, which is that you just
+have an agent that you just talk to. Right? And you say, hey, you know, what did we do in cash flow
+last month? And then you just text it or you say it and it just answers. And like the world of CRMs
+is going to Like this is this is the next 12 to 24. Yeah. And don't you think that we are very into
+it, but 99% of people are still >> Yeah. Oh, yeah. I mean there are legal firms that use fax machines
+now. And so there's this idea that like, oh my god, the whole world It's like no, just like always,
+humans plus technology will beat humans with inferior technology. And so if you learn how to use
+the tech, you'll do better. But there will be people who still have law firms and use fax machines
+that will make money. It's just there will be people who don't use fax machines that will make more
+money. So, I'm not like an AI alarmist. I think it's going to take a while, but um I do think there's
+Well, I won't even get into that, so I'll just stop, but we just get too much of a future no one
+knows anything about.

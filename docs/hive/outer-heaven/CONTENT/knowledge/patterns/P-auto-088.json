@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-088",
+  "version": 1,
+  "title": "voice-agents / build — linear-guardrails-beat-an-autonomous-therapist",
+  "steps": [
+    "Steal linear-over-autonomous for high-stakes flows. Operate-never: Vapi, mental-health product, fake 911 path.",
+    "Steal write-back-then-rewrite. Do not store client therapy notes. No new ICP.",
+    "Steal occupy/release for any scarce outbound resource. Hive: no Vapi buy."
+  ],
+  "support_ids": [
+    "K-7siRW0My05o-01",
+    "K-7siRW0My05o-02",
+    "K-7siRW0My05o-03"
+  ],
+  "dissent_ids": [
+    "K-7siRW0My05o-04"
+  ],
+  "valid_when": "domain=voice-agents; stage=build; Demo onboarding only. No long-run proof.",
+  "less_relevant_when": "HIPAA / public launch blocked by his own admission.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

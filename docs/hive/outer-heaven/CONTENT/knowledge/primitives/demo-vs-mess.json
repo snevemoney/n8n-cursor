@@ -1,0 +1,25 @@
+{
+  "primitive_id": "PRIM-vLlIBT0HSSc-demo-vs-mess",
+  "name": "DEMO-VS-MESS-GAP",
+  "loop": [
+    "name what works in the demo",
+    "name what breaks in their world (legacy / data / compliance / process)",
+    "write production-shaped work against those constraints",
+    "measure one number",
+    "translate to their language",
+    "hard step HITL"
+  ],
+  "obvious_demo": "Forward Deployed Engineer at Palantir-shaped companies",
+  "other_applications": [
+    "Notes only: Path A delivery shape (clients parked)",
+    "Career case-study gym — no employer send"
+  ],
+  "capability_ids": [
+    "CAP-vLlIBT0HSSc-forward-deployed-gap"
+  ],
+  "source_video_id": "vLlIBT0HSSc",
+  "timestamp": "00:47-10:50",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

@@ -1,0 +1,23 @@
+{
+  "pattern_id": "P-auto-085",
+  "version": 1,
+  "title": "tooling / architecture — route-the-model-per-step-not-per-day",
+  "steps": [
+    "Steal step-level routing. Do not buy z.ai / switch hive stack because tape.",
+    "Steal gather-vs-apply split. Map to `info-gain-cite` + existing research skills. No new skill file."
+  ],
+  "support_ids": [
+    "K-2OD14-0cot4-01",
+    "K-2OD14-0cot4-02"
+  ],
+  "dissent_ids": [
+    "K-2OD14-0cot4-04",
+    "K-2OD14-0cot4-05"
+  ],
+  "valid_when": "domain=tooling; stage=architecture; His day of hammering; z.ai $60 plan; 1M context GLM.",
+  "less_relevant_when": "He would not let GLM decide life-application from the pile.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

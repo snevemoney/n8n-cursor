@@ -1,0 +1,403 @@
+One of the most common questions I get is basically some form of, "Hey Nate, my agent is not answering me correctly.
+
+How do I fix it?" And I usually take a deep breath and say, "Oh boy, I've got a lot of questions." There are so many different levers to pull and there are so many different ways you can optimize agents to do different things.
+
+And it all basically starts with having that end goal in mind.
+
+And you really have to think about what type of questions will be asked and what does it need to look at in order to respond accurately.
+
+So, in today's video, I'm going to be going over four different methods of rag and getting your agents to look at things in order to respond.
+
+And I'm going to be breaking down real examples of how it works and when you should choose that specific type of rag.
+
+So, here's the workflow that we're going to be looking at today.
+
+We've got, like I said, different examples.
+
+We have one where we're using filters.
+
+We have one where we're doing a SQL query.
+
+We have a few with full context.
+
+And then we have the final one which is using a vector database.
+
+And the thing is, I think when people realize that their agent needs external data or information, they immediately run straight to a vector database as the solution.
+
+But there's tons of problems with that.
+
+So before we actually dive into these four examples, let's go over to my whiteboard right here and just talk real real quick about chunk based retrieval.
+
+So chunk based retrieval is where large documents are broken down into manageable pieces that can be searched and retrieved more efficiently.
+
+And this is great for lots of reasons.
+
+It basically makes our search cheaper and faster.
+
+And I'll show you exactly what I mean by that later with a real example.
+
+But the issue is we're searching through the chunks semantically or not we the agents searching through the chunks semantically meaning it loses a lot of context of an overall document.
+
+So basically this is what it looks like in a simple visualization.
+
+Let's say we've got a 20-page PDF and that gets split into tons of different chunks.
+
+All of those chunks are embedded into the vector database as these little dots which are the vectors and each of the vectors represents one tiny chunk in the entire document.
+
+So what that means is let's say we took three transcripts from YouTube videos as documents and we embedded them and there was multiple chunks or vectors for each of those.
+
+Now, when we pull back those chunks, we wouldn't really know what YouTube video it came from, what the URL was, or even the timestamp of this chunk within video A right here.
+
+We could do this with things like metadata tagging, and that's a whole different topic, which I've had some videos on as well.
+
+But basically, what I'm trying to say is if you had a YouTube video vectorzed and you asked for a summary of the entire video, the agent would probably not be looking at that entire video.
+
+It would give you a summary of the chunks that it found.
+
+Like I said here, if you ask for a summarization of a meeting, it will search for March 5th meeting summary and it will only summarize the chunks that it has, which sometimes isn't the worst, but once again, you have to think about what should it be looking at and what type of questions will this agent receive.
+
+And when you move into tabular data, this is where you see lots of issues with chunkbased retrieval because let's say we have sales data and we ask our agent, what week did we have the highest sales?
+
+It would search through the knowledge base with highest sales and let's just say it pulls back one chunk which is these.
+
+I don't know how many rows this is but let's say it's these rows.
+
+So what it will do is it will take this chunk in black and it will basically pick out of this chunk which of these weeks did we have the highest total sales which was week number six right here 15,583.
+
+But what you'll notice is week four we actually had higher sales and we also did in week 14 and we also did in week 19.
+
+And so because we did chunk based retrieval here, it's not giving us a holistic picture of all the context we need.
+
+Same thing if we asked for something like the average.
+
+What is our average order value?
+
+It would look for average.
+
+Let's say it pulled this chunk right here in black.
+
+And it would take an average of just the orders in this chunk rather than calculating all of the weeks and taking the average of those numbers.
+
+All right, so that's enough of my lecture.
+
+Let's get into the real examples so you guys can actually contextualize all of that mumbo jumbo that I had just said.
+
+So the first example that we have is filters.
+
+And what we have here is a data table in Nadn which looks like this.
+
+It has sales data.
+
+We have 20 rows where we have product name, the date it was sold, the price and the quantity and the product ID.
+
+And so what we can do in here is we can talk to this agent and have it set up filters so it can look through and search for filters of just certain products that we've sold or just on certain dates and things like that.
+
+So if I shoot off this query to the agent that says, "How many Bluetooth speakers did we sell on September 16th this year?" What it's going to do is use its product name query most likely in order to filter out every single row in the database that doesn't have product name equals Bluetooth speakers.
+
+And then what it did was a date query to make sure it's also filtering out any of those rows where the date is not September 16th.
+
+So that just finished up and it said you sold five Bluetooth speakers on September 16th.
+
+How I got this, I queried the sales for product Bluetooth speaker and then I filtered the date to September 16th and then I added those up.
+
+So if we go into the actual database and we do that manually and you think about that, right?
+
+If you were human and someone said, "Hey, how many Bluetooth speakers did we sell on September 16th?" You would have done the same thing. you first would have looked at maybe September 16th and then out of September 16th you would have said okay we sold a Bluetooth speaker here and we sold a Bluetooth speaker here and then you would have added up the quantity which was 1 + 4 which equals 5 and once again you can see if we look at the actual tools if I click into this one it did a product name equals Bluetooth speaker query and it got those rows back and then it did a date query where date sold equals September 16th and it got those rows back and then it just had to use its calculator in order to do that math to give us the answer of five.
+
+So using a simple database filter, what does this actually mean and when would you use this?
+
+You're basically telling the system only give me rows that match these criteria or these rules.
+
+So product equals x, date equals x or date equals y.
+
+Like we just saw, you want to use this type of query when your data is structured in rows and columns.
+
+So it's tabular when you already know exactly what fields you want to filter by and when the question can be answered by looking at a small subset of records.
+
+And why does this work well?
+
+Well, it's really fast, it's cheap, and it's accurate, and it scales well to large data sets to an extent.
+
+And the beginner rule of thumb here is that if a human would use filters in a spreadsheet, then use filters in any of because think about it, what we could do is we could just have the agent look at all 20 rows and it would still be able to get that answer.
+
+But what it would be doing in that case is processing more tokens because it's pulling more data into nen.
+
+And there's also just a higher chance of hallucination because there's way more tokens that it's looking at which also makes it more expensive.
+
+So the goal is you have a huge data set on one side and you have an NN agent on one side.
+
+How can you get the agent to only pull in what it needs and limit the amount of data actually coming into NIN?
+
+And so a lot of times the filter will be the answer, you know, like contact databases or sales databases and things like that.
+
+But like I said, to an extent and once that gets too big and once you need to do a little bit more of like math or more complex queries, that's where you may want to consider doing an actual SQL query.
+
+And actually before we move on to the SQL query agent, I wanted to show the system prompt in this sales data agent.
+
+And I won't read through every line, but you can go ahead and pause it if you want.
+
+This whole workflow will also be available for download, which will be linked in my free school community.
+
+But the reason why I wanted to call this out is because I had to tell the agent the different options it had to choose from when it was making those filters.
+
+So here you can see I said the valid product names are wireless headphones, Bluetooth speaker, phone case, and those had capital letters to start each of those words.
+
+Because if I just said phone case and then it spelled it wrong, our filter wouldn't have actually worked because it's not doing semantic search.
+
+It's doing explicit does X equal Y filters.
+
+And same thing with the date.
+
+I had to make sure it always sent over that date format.
+
+And so I wanted to show you guys this because it's not magic.
+
+And if you added a new product category or if you added a different date format, you'd have to make sure that your agent understands that.
+
+But it's also important to know because something similar typically happens over here with a SQL agent.
+
+The only way that you can have it be a bit more dynamic, which is if you also give the agent a tool to look up the schema before it makes its query.
+
+And I don't want to really dive into exactly what I meant by that or show an example.
+
+I don't want to confuse you guys.
+
+But just keep in mind even with the SQL agent 2, I'm still giving it the different table details like the order ID column, the customer name column, the product column, and I'm still giving it the examples as you can see.
+
+But anyways, let's take a look at how this one works.
+
+So this time our database is being held in Postgress in Subase and it is sales data.
+
+So similar type of table, but it's different fields and examples and also this one is 50 rows rather than just 20 just for the sake of a different example.
+
+Now I also have this sales data in an Excel and I made a quick pivot chart to show that this is actually going to give us the right answers.
+
+So these are different products that have been sold and then this is how much money has been made from each of those products ranked in descending order.
+
+So basically these three were the most profitable products.
+
+So I'm going to ask the agent exactly that question.
+
+So I'm shooting off what are our three highest earning products?
+
+And once again it should be able to use its brain to make that SQL query.
+
+It just executed that function real quick.
+
+And now it probably won't even have to use the calculator tool like this one did over here because the SQL query that it's constructing is actually doing the math and the sorting and the summarization.
+
+Oh, I stand corrected.
+
+It actually did use the calculator tool.
+
+But that is typically a benefit of SQL queries is that it can do a lot of the math in the query itself.
+
+All right, so it ended up using the calculator four times.
+
+But let's just make sure that it got it right.
+
+So, it said that it ran the top three products by revenue and then it got total revenue by summing it all up.
+
+And its results were AI automation course 34.93 which is right here, consulting call 33383 right here, and then workflow template 1659 which is right there.
+
+And it also gave us percentages of our total revenue, which is pretty cool.
+
+You can also see it gave us some notes and assumptions and some suggested next steps.
+
+But I just wanted to prove to you guys that it was in fact making SQL queries.
+
+And if I click into here, what you can see is happening is we're having AI build that SQL query and it makes it right over here.
+
+And then it shoots that off to Postgress.
+
+So the first time it basically said I want to select products.
+
+I want to sum the total price as total revenue and I want to do this from the sales data table which if we go back into Subbase, you can see that's what it's called right here.
+
+Then it said, I want to group by product and I want to order by total revenue descending and I want to keep just three of them.
+
+So if you actually read through SQL queries in natural language, you can kind of understand what they're trying to do.
+
+So remember how I said it wasn't going to need to use the calculator.
+
+Well, the reason it used the calculator, which is pretty cool, it was doing math to figure out the percentages of all of them.
+
+So this was the first percentage, this was the second, and then after it got all three, it added those up and found the total percentage of our top three products.
+
+So basically our top three products account for 80% of all the revenue is what it found.
+
+So anyways hopefully you guys understand how the SQL queries work and when you would use it would be if you need totals, averages, rankings or trends, if the question involves many rows or if you need to combine or compare data.
+
+And it works well because these databases are built to do this type of work.
+
+They're much more reliable than having the AI look at all the rows or just set up a few basic filters.
+
+And it's still cheaper and more accurate than doing vector search for structured data.
+
+So the beginner rule of thumb here is if a human would use a pivot table or formulas, use SQL.
+
+Okay, so moving on to the full context method.
+
+So let's say we have these two documents that we want our agent to read.
+
+And typically we would just maybe chunk this up and throw it in a vector database.
+
+But we all know what could happen when you do that.
+
+So this method is just the idea that you let the agent read the entire document every time rather than just looking for a specific chunk that it needs.
+
+So right away, what are the pros and the cons?
+
+Well, the pro is that it gets full context and it will probably answer more accurately.
+
+The con is that it may take longer and it will be more expensive because it's processing more tokens.
+
+The other con is that you may run into a limit with the context window.
+
+But I will show you guys how many tokens we process here.
+
+And with the models every day getting more and more to but with the models every day increasing their context window limits, it is not too much of an issue at the moment.
+
+And of course, there's some cool things you can do with like hybrid context hybrid chunks.
+
+But either way, let's just get into the example.
+
+So here I have two YouTube video transcripts.
+
+I've got one called I built an agent in 2 hours and I've got the full transcript which is a five-page doc, four-page doc.
+
+And then I've got so you're building with AI now what?
+
+And this is also a 4 and a half page doc.
+
+So I'll show you how many tokens these things are once we run these examples.
+
+Okay.
+
+So I am asking this agent to give me a chronological breakdown of the agent in 2 hours video which if we did this in a chunk based retrieval method we would have to give it kind of like percentages or timestamps and things like that so it understood if it was looking at the whole video or not.
+
+But in this case it's simply just reading that entire transcript.
+
+So it gave us our opening hook, what I did, the text stack, the personal context, lead genen, sales moment, all of this stuff.
+
+And it did this in order because like I said it read the whole thing.
+
+And when we click on the AI agent, we can see that this only took 4,000 tokens out of GBT5 Mini's 400,000 context window limit.
+
+So that's one way that you can have full context is where you give them the tools to choose between because that way if I say I just want data from one video, it can choose just the one.
+
+If I say I want both, it can choose both.
+
+Or if we want to take away that flexibility, we could just put the full context in the prompt.
+
+So in this actual prompt, I said, hey, you have these two videos to choose from.
+
+So this is the first one.
+
+You're building with AI.
+
+Now what?
+
+And then if I scroll all the way down, I might have scrolled past it already.
+
+Here's the second one.
+
+So I built this agent in 2 hours.
+
+Blah blah blah.
+
+And so now it will read all of this context no matter what, which sometimes is great.
+
+But then of course the issue is if you don't need one of them or if you don't need either of them, it's going to process all those tokens every time, which will be more expensive.
+
+So let me just show you how many actual tokens that eats up.
+
+I'm just going to shoot off the same query and it should pretty much answer in the same way, but this time it will be probably double if not more than double the amount of tokens from the previous run.
+
+So what you'll notice is that was faster because it didn't have to call a tool, but of course 6577 tokens, which is more expensive than what we just did up above.
+
+And so this final method is pretty much the exact same thing, but it's a bit more flexible because what happens is in this system prompt, if you ever change those, you know, sources of truth, you'd have to come change it in the agent.
+
+But what you could do is you could have those be fed in dynamically every time where basically every time we ask this agent a question, it will pull in the first doc, it will pull in the second doc, and then it feeds them into the agent as variables.
+
+So here you can see I basically just have these dynamic variables, but every time it will be looking at the content of the doc.
+
+So that's another way that you could do the system prompt method.
+
+It doesn't make it any cheaper or more expensive than this method, but it does make it more dynamic and more flexible.
+
+So when would you want to take the full context retrieval method when you need summaries, timelines, or step-by-step explanations?
+
+If the order of the information really does matter, or if the data set is small enough to just fit in the model, then just chuck it in there.
+
+This is actually what I did in the agentic arena if you guys saw that for the rag challenge.
+
+I ended up just taking all the PDFs and just jamming it into the system prompt of the AI agent, especially cuz we were on like a time crunch.
+
+But it does work, especially with these models getting better and better at finding the needle in the haststack where they have tons of tons of text to look through.
+
+They can still find exactly what they're looking for.
+
+So the beginner rule of thumb here is if a human would read the whole document before answering, then you should have the agent read the full document before answering.
+
+So, like if a human's onboarding someone, they would need to read all of the process.
+
+But if a human's answering a support question and they can just find one FAQ out of the 100, they only need to look at that one FAQ.
+
+And that segus nice into the final one of course, which is our chunkbased retrieval with vector search.
+
+And so what I already did is I put these two documents, the same ones we were just looking at over here, into Superbase.
+
+As you can see here, these are our vectors from those two transcripts.
+
+And now we're going to talk to the agent and we're going to see basically the difference in the way that it responds, but also how much cheaper and faster it is.
+
+So if I first of all ask it that same question, which was give me a chronological breakdown of the agent in 2 hours video, we're going to notice that it's faster and cheaper, but we're also of course going to notice that it's not as accurate because it doesn't understand order right now.
+
+So you can see that it found the intro and the hook.
+
+It found what the agent actually was, why someone paid, and then I walk through the solution, case study, things like that.
+
+And so, it does a decent job at using its AI brain to understand, okay, I have these amount of chunks that came back.
+
+Now, I can put them in order that I think makes sense.
+
+We could also play with this by doing things like increasing the limit.
+
+So, instead of just giving it four chunks to pull back, we could tell it to pull back 20, which would help.
+
+But the thing that I wanted you guys to pay attention to here was this agent only took 2600 tokens, which is at this point about half of what it did earlier when it read the full context.
+
+But keep in mind that gap would exponentially become greater when we have more and more data in the actual database.
+
+So anyways, like I said earlier, this all kind of comes back to the idea of context engineering.
+
+And it's just super super important to think about these different five things which are beginning with the end in mind, designing your data pipeline, ensuring data accuracy, optimizing context windows, and embracing AI specialization.
+
+So I'm not going to read all of that out right now.
+
+I don't want this video to go too long.
+
+But if you're interested in diving deeper into context engineering, and it's a super important thing to understand because AI is only as smart as the context and the data that you give it, then definitely check out my plus community.
+
+The link for that is down in the description.
+
+We've got over 3,000 members in here who are building with NAND every day and building businesses with NAND every day.
+
+We also have courses in here.
+
+We've got agent zero 10 hours to 10 seconds, one person AI agency, subs to sales, and we've got tons of niten projects in here which are just like live step-by-step projects that you can replicate for yourself.
+
+I also do one live Q&A every week, which are super fun.
+
+So, I'd love to see you guys in those calls in the community.
+
+But that's going to do it for today.
+
+So, if you enjoyed or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.

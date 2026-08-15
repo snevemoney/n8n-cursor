@@ -1,0 +1,243 @@
+[00:00] So, in 2026, you will be hearing a lot
+[00:02] about spatial intelligence, world
+[00:04] models, and media understanding. In
+[00:07] other words, AI that can understand the
+[00:10] physical world, but also generate it
+[00:12] with photorealistic quality. Not only is
+[00:15] this tech important for robotics, but a
+[00:17] whole slew of media and entertainment
+[00:19] applications.
+[00:31] What these companies mean is that these
+[00:33] AI video generators, by virtue of
+[00:35] predicting the next frame, just like a
+[00:37] text model predicts the next token, by
+[00:39] predicting the next frame, you have to
+[00:41] understand a lot about the real world,
+[00:44] the physics that govern it, how entities
+[00:46] move and behave within it. And all of
+[00:48] these models, as they've started scaling
+[00:50] them up, are showing signs of having
+[00:52] this type of understanding. In other
+[00:54] words, if you drop a boulder into an
+[00:56] ocean, how should it ripple and like how
+[00:59] would it create waves within it?
+[01:00] >> [music]
+[01:00] >> Or a person that's walking and jumps up
+[01:03] against a wall, how they would clash
+[01:05] against it and fall down. Now, this is
+[01:07] really novel because these models aren't
+[01:09] computing physics like they would inside
+[01:12] of a game engine, where maybe you're
+[01:13] doing ragdoll physics to figure out how
+[01:16] does this character like mash up against
+[01:17] a wall? They are understanding it
+[01:19] implicitly because they've seen enough
+[01:21] diversity of data, aka all of
+[01:23] internet-scale video data, such as
+[01:24] YouTube, and are able to approximate
+[01:27] these kind of physical interactions. So,
+[01:30] we've seen these models just getting
+[01:31] better and better at doing exactly this.
+[01:34] Now, they're not perfect, as you
+[01:36] probably have noticed. So, for example,
+[01:37] a gymnast trying to do these complex,
+[01:40] you know, physical movements with her
+[01:41] body, you'll notice the orientation of
+[01:44] the head will change. Or if you have a
+[01:46] horse that's trotting along, the front
+[01:48] and back legs would swap together. So,
+[01:50] clearly, these models have a while to
+[01:52] go, but what happens when you can start
+[01:55] predicting the next frame, but do that
+[01:57] in real real time at 15, 20, 30 frames
+[02:01] per second.
+[02:03] Suddenly, you start getting a model like
+[02:05] Genie 3. Now, Genie 3 is fundamentally
+[02:08] an autoregressive model, except instead
+[02:10] of predicting like the next token like a
+[02:11] large language model would, it's like
+[02:13] predicting the next frame, right? So,
+[02:14] while we don't know exactly what the
+[02:16] underpinnings are, we can speculate that
+[02:18] essentially Genie 3 treats like visual
+[02:21] patches sort of as these tokens that are
+[02:23] predicted sequentially, and that gives
+[02:25] you a lot of the spatial and temporal
+[02:26] coherence. Like physics becomes an
+[02:28] emergent property that comes out of it,
+[02:30] but you get a degree of consistency for
+[02:32] free. And this is really powerful
+[02:33] because essentially like given a bunch
+[02:35] of frames that have been predicted, the
+[02:36] next frame can be predicted based on the
+[02:39] action that the user gave and all prior
+[02:41] frames that have already been generated
+[02:43] to make sure everything looks cohesive.
+[02:45] Now, this is in contrast to diffusion
+[02:47] models where everything is sort of
+[02:49] predicted at once. Basically, treat a
+[02:51] video generation as this like single
+[02:54] three-dimensional block. Think of it
+[02:55] like the height, the width, and then the
+[02:57] time axis, right? Like the temporal
+[02:59] aspect. And then these models use
+[03:00] essentially like diffusion transformers
+[03:02] to like simultaneously denoise the whole
+[03:05] stack, if you will. And this gives you
+[03:07] amazing consistency within the
+[03:08] generation because since you're doing
+[03:10] the denoising all at once, like you're
+[03:11] not going to have like completely weird
+[03:14] artifacts that you might have seen in
+[03:16] previous models where each of the key
+[03:17] frames were generated individually and
+[03:19] then you sort of like interpolate
+[03:21] between them. Now, this also helps with
+[03:22] consistency of these offline generated
+[03:24] videos because like every patch of the
+[03:26] video sees every other patch. So, if you
+[03:28] have like a basketball that's flying
+[03:30] across the scene, like all the frames
+[03:32] are being generated with the movement of
+[03:34] that basketball in mind so that it's
+[03:36] coherent across the generation. Now, of
+[03:38] course, this doesn't work for real-time
+[03:40] scenarios, and the advantage of having
+[03:41] this autoregressive approach is like you
+[03:43] could have like a seemingly infinite
+[03:45] length generation, right? This is why
+[03:47] video diffusion models are capped at 5
+[03:49] seconds, 10 10 15 seconds, 20, 30
+[03:51] seconds tops, after which you have to go
+[03:53] do another extended generation where you
+[03:55] take the last frame and go back doing
+[03:57] the whole process again. Whereas with
+[03:59] this auto-regressive paradigm, such as
+[04:00] Genie-3, you could just keep predicting
+[04:03] the next frame till infinity.
+[04:06] The question then becomes is how do you
+[04:08] have some notion of visual spatial
+[04:10] memory? Like how does the model remember
+[04:12] what was in that generation? And hey, I
+[04:15] left the ball over here, so the ball
+[04:16] should exactly be over here when I look
+[04:18] back at it. Well, right now, you'll
+[04:19] notice a lot of these models have a
+[04:21] rolling context window.
+[04:23] Essentially, all the frames that were
+[04:25] generated, it's keeping that in memory
+[04:27] and is able to look back at it. But
+[04:28] after a certain point, the size of that
+[04:30] just explodes and is far outside of the
+[04:32] context window. So what you do is just
+[04:34] handle in a rolling fashion. Like as new
+[04:36] frames keep getting generated, you get
+[04:38] rid of the previous ones and push them
+[04:39] outside of the context window. Meaning
+[04:41] that it remembers everything that
+[04:43] happened, let's say in the last minute
+[04:45] or so, and it's true and consistent to
+[04:47] that. Basically, like a video game where
+[04:49] you have NPCs or other physics effects
+[04:51] or damage that's taken place, it'll
+[04:53] remember exactly where it is when you
+[04:55] walk back to it. The difference here is
+[04:57] it's remembering absolutely everything
+[04:59] that it saw cuz it's got all of the
+[05:00] frames in the context [music] window to
+[05:02] look back at.
+[05:05] Now this auto-regressive architecture
+[05:06] for video generation not only lets you
+[05:08] create things in near real time and keep
+[05:10] predicting the next frame up to infinity
+[05:12] to create theoretically unlimited length
+[05:14] videos, it also lets the user inject
+[05:17] input into what should be happening. Now
+[05:19] of course, when you do traditional
+[05:20] diffusion-based video generation, like
+[05:22] you're in this place where you have to
+[05:23] prompt out all the action that happens,
+[05:25] right? In this case, as you go along,
+[05:27] you could change the action. So at the
+[05:29] simplest level, think of it like instead
+[05:31] of the Genie-3 demos where you're just
+[05:32] using WSAD and just sort of using
+[05:34] keyboard controls as the input, what if
+[05:36] you took your tracked camera phone using
+[05:38] ARKit ARCore and sent the 3D position,
+[05:41] the 3D pose of this camera, and use that
+[05:44] as the input so you're literally
+[05:45] controlling the action as it plays out
+[05:48] in real time and recording that to disk.
+[05:50] I suspect you'll start seeing expanses
+[05:52] like this next year. You can start doing
+[05:54] things like the promptable events that
+[05:55] Genie 3 showcased. You're like, "Hey, a
+[05:57] character walks in through the right.
+[05:58] Oh, an explosion drops on the left." And
+[06:00] then you can suddenly see that video
+[06:02] react in real time to these key-framed
+[06:05] events that you're popping into the
+[06:07] world. Now, I'm anchoring, of course, to
+[06:08] video generation, but if you take a step
+[06:10] back, we're essentially creating a new
+[06:12] type of engine, an engine that's trained
+[06:15] on all the audio-visual data on the
+[06:17] internet, but then a lot of synthetic
+[06:18] training data from traditional game
+[06:20] engines like Unity and Unreal. And
+[06:23] effectively, if you have the ability to
+[06:25] prompt this thing with image, audio,
+[06:27] video, and these kind of promptable
+[06:29] events, you can create whatever you
+[06:31] want. Dare I say, you can create a world
+[06:34] model. Or the one thing that I think
+[06:36] maybe a reach for 2026, but will
+[06:38] certainly happen in 2027, is the ability
+[06:40] to control agents within these models,
+[06:43] right? Now, we saw this with Seema
+[06:44] agent, where Google had created this
+[06:46] agent that can use Genie 3 and like
+[06:49] navigate and do things inside of it.
+[06:50] What I'm describing is the feeling of a
+[06:53] director being on a sound stage and
+[06:55] asking its talent to do do interesting
+[06:57] things. In other words, when can we have
+[06:59] real-time video generation with embodied
+[07:01] characters within them, where you're
+[07:03] asking them to do things and they're
+[07:05] intelligently not only reasoning about
+[07:06] the environment and how to navigate it,
+[07:08] but how to give you the best performance
+[07:10] possible. I think 2026 might be a
+[07:12] stretch for this, but that is my dream
+[07:14] and hope where things will get to for
+[07:16] 2027. And think about it, you kind of
+[07:19] need this. If we're talking about world
+[07:21] models and video models, if they're
+[07:23] running in real time, essentially being
+[07:25] these new kind of world [music] engines,
+[07:27] we need the ability to have a bunch of
+[07:29] concurrent entities or agents within
+[07:31] them doing stuff and you can coherently
+[07:34] capture them from different angles.
+[07:36] We're not quite there yet, but that's
+[07:37] the future that I'm super excited about.
+[07:39] So, to wrap things up, you'll be hearing
+[07:41] a lot about spatial intelligence and
+[07:42] world models in the new year. Video
+[07:44] generation is going to start becoming
+[07:46] real time. And that's where the next
+[07:48] level of opportunity is for all these AI
+[07:50] model companies. They want to go beyond
+[07:52] just media and entertainment and unlock
+[07:54] a new category of robotics and
+[07:56] simulation. And if you want to
+[07:58] understand why are world models so
+[08:00] important for simulation, stick around
+[08:02] for my next video. For now, if you want
+[08:04] to know how world models operate and why
+[08:06] the hell is everyone talking about them,
+[08:08] be sure to check out this video. Belavo
+[08:10] signing off and I'll see you all in the
+[08:12] next one. Cheers.

@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-025",
+  "version": 1,
+  "title": "agent-ops / ops — one-board",
+  "steps": [
+    "Steal one-board visibility. Hive: hive-spawn-desks. No Claude OS.",
+    "Steal cwd-on-board. Hive spawn stays folder-scoped."
+  ],
+  "support_ids": [
+    "K-ZAaxx3qyT8g-01",
+    "K-ZAaxx3qyT8g-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=ops; Caption-only. Visual/click UNKNOWN.",
+  "less_relevant_when": "Caption-only: do not invent clicks. Clients parked. Do not install Claude OS as hive.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

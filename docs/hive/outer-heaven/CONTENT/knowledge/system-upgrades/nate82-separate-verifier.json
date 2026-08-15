@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-separate-verifier",
+  "type": "Agent infrastructure",
+  "discovery": "Maker-checker. A read-only second desk grades against last-known-good. The lead does not pass its own pane. Subjective until-satisfied needs a dedicated scorer or a hard cap.",
+  "applicability": "ALL multi-agent / loop jobs",
+  "proposed_change": "Every ship path names a verifier desk (default Watchdog) with no Send/Pay tools. Wired as skill separate-verifier on golden-test-loop / click-live-site — Watchdog grades Forge.",
+  "evidence": "e18sdZLwP7o · EuzYhzB0vbI · vDVSGVpB2vc · 8IUWeF3B-hk · lcNN3X9gXls · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "e18sdZLwP7o",
+  "status": "WIRED",
+  "next": "Dry-run one golden path with Watchdog filling GRADE. Forge must not self-score. Do not enable Claude teams."
+}

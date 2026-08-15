@@ -1,0 +1,49 @@
+You see these little agents working right up here?
+
+Those are my Claude Code agents running my business.
+
+All right, so here I am in Claude Code in the terminal right over here.
+
+What you'll notice is that this agent is actually my Claude Code agent.
+
+So when I send off this message where I'm asking it to spin up two researcher agents, one to research Google, one to research OpenAI, and then create a visual diagram, you'll see that this agent actually gets that task.
+
+And now you can see that we have three agents actually running right now in parallel.
+
+This one's researching Google AI strengths, and this one is researching OpenAI strengths.
+
+And this is the main one that delegated the tasks to those two researcher agents.
+
+What you can also see on this right-hand side, that's exactly what's being ran right now.
+
+And if I wanted to open up another terminal, so I add another agent, it pops in another agent right here in which I can have a different conversation with.
+
+Give me a quick analysis of my YouTube comment section from the past couple videos I've made.
+
+So now I shoot that message off to this AI agent in Claude Code, and it's going to pick up the task and start working on other things.
+
+And you just heard that little notification noise, which means that this spun up a sub-agent.
+
+And you can see that it was analyzing comments, but now it needs approval.
+
+So basically what we have here is a visual way to see all of the different terminals and sub-agents that we have working in Claude Code.
+
+We get notifications and we get visual things like this that tell us what they're doing.
+
+So I can see that those sub-agents on this left-hand side are disappearing, so I can hop back over to that first terminal, and I'll be able to see that this first one is already done, and now the OpenAI one is still being worked on, which is this agent right over here.
+
+I don't know where she's off to, but you can see now that both of these agents are done.
+
+They're idle.
+
+They're done working.
+
+So here's that actual visualization that it made.
+
+We have strengths and weaknesses for both Google and OpenAI.
+
+And then coming over to the second terminal, we can see the comment analysis over the last 2 weeks.
+
+So we've got some pain points about Claude API costs and it into Claude Code, getting first client with zero social proof.
+
+If you want to watch the full breakdown, then click on that play button right here, and I'll see you guys over there.

@@ -1,0 +1,33 @@
+NN&N's new instance level MCP is truly a gamecher and in today's video I'm going to talk about why that is how easy it is to use and how to connect it to things like chatbt claude or lovable.
+
+So this is where MCP really started with NINDN where we had an update where you could make these native MCP server triggers meaning we could create our own MCP servers in NADN that hooked up to different tools or different workflows that we built and then we could have an MCP client like Claude or Cursor actually talk to these servers and trigger these workflows or tools.
+
+But with Naden instance level MCP, it's not just limited to these workflows or tools that we assign.
+
+It's actually letting our MCP clients search through our entire NAND instance and look at the workflows, understand the schemas, what they do, and actually execute any of them.
+
+Which means right now in your Nident instance, you probably have tons of workflows that you're like, huh, I would love to just throw this into Lovable or Claude and just have them be able to use them for me whenever they want.
+
+And now you can.
+
+But what does that really mean?
+
+And the easiest way that I like to think about it is it's just an AI agent.
+
+That's not like the technical definition, but it's the way I like to think about it.
+
+So right here we have an N AI agent.
+
+And I'm assuming we all know what we're looking at here, where the agent has all of these different tools, and it basically understands based on the request coming in, which tool do I need to use?
+
+And when I call that tool, what do I have to send it?
+
+So picture it as if Chatbt is the agent and it can see all of the different workflows in your instance.
+
+It knows what they do.
+
+It knows what to send it.
+
+And it knows when to call each one.
+
+If you want to watch the full breakdown, then click on that play button right here, and I'll see you guys over

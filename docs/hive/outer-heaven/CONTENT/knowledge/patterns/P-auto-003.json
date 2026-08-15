@@ -1,0 +1,32 @@
+{
+  "pattern_id": "P-auto-003",
+  "version": 1,
+  "title": "agent-harness / deploy — chooser-is-a-2-axis-slider-not-a-winner",
+  "steps": [
+    "Steal the slider. Keep Trigger-deep tape separate.",
+    "Steal terminal-vs-desktop cron scar. No 10-min public reply bot.",
+    "Steal “script host vs prompt inject vs SDK.” Caps HITL.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-xJ5oz63mIec-01",
+    "K-xJ5oz63mIec-03",
+    "K-xJ5oz63mIec-05",
+    "K-xJ5oz63mIec-12",
+    "K-xJ5oz63mIec-13",
+    "K-xJ5oz63mIec-14",
+    "K-xJ5oz63mIec-15"
+  ],
+  "dissent_ids": [
+    "K-xJ5oz63mIec-02",
+    "K-xJ5oz63mIec-04",
+    "K-xJ5oz63mIec-06"
+  ],
+  "valid_when": "domain=agent-harness; stage=deploy; Caps / jitter / 3-vs-7-day UNVERIFIED beyond speech.",
+  "less_relevant_when": "Agent SDK on Modal/Trigger adds A but API-bills.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

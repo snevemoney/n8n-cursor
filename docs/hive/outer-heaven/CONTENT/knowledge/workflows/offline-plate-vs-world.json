@@ -1,0 +1,47 @@
+{
+  "workflow_id": "WF-offline-plate-vs-world-v2",
+  "project_id": "offline-plate-vs-world",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Finite clip or next-frame loop",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "Steer or scrub",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "Implicit vs computed physics",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "Route",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-iRBs8PCBCaA-01",
+    "K-iRBs8PCBCaA-02",
+    "K-iRBs8PCBCaA-03",
+    "K-iRBs8PCBCaA-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "iRBs8PCBCaA",
+  "words_read": 1612,
+  "tape_faithful": true
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-mismatch",
+  "title": "Stated principle vs observed behavior",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mismatch_id",
+    "source_video_id",
+    "stated_principle",
+    "observed_behavior",
+    "discrepancy",
+    "do_not_resolve"
+  ],
+  "properties": {
+    "mismatch_id": { "type": "string" },
+    "source_video_id": { "type": "string" },
+    "stated_principle": { "type": "string" },
+    "stated_atom_id": { "type": "string" },
+    "observed_behavior": { "type": "string" },
+    "observed_behavior_id": { "type": "string" },
+    "discrepancy": { "type": "string" },
+    "do_not_resolve": {
+      "type": "boolean",
+      "const": true,
+      "description": "The discrepancy is knowledge. Do not pick a winner."
+    },
+    "evidence_status": {
+      "type": "string",
+      "enum": ["observed", "transcript-implied", "unobserved", "UNKNOWN"]
+    }
+  }
+}

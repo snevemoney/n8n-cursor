@@ -1,0 +1,871 @@
+And so, I'm going to break this into three pieces. All right, AI hygiene, be
+very quick, workflows, uh and then AI assets. All right, that's the That's the
+That's the deal. All right. So, AI hygiene. Um Many of you guys do not follow AI
+hygiene and for some reason you don't know about this. Okay. Um You want to
+start a new chat for every new topic. So, when I first started using AI a long,
+long time ago, I basically had an never-ending one chat that just kept going
+forever and ever and I talked it was like, "Hey, I've got this weird spot on my
+arm. What's that?" And then I was like, "Hey, how do I change this light bulb in
+my car?" And then it was, you know, after that it's like, "By the way, write me
+some copy." And like the AI probably thought I was a a psychopath and it would
+be correct. Um but I don't want it to know that. I want it to infer that. So,
+for every time that you want to ask anything that is not related to the the
+question before, you want to start a new chat. All right, so just for everybody.
+Number one. Next, the more iterations and or feedback loops you provide within
+the same chat, the better the outputs will continue to be. And so, your fourth
+answer uh on a string is going to be superior to the first answer. Again, the
+big C-word is context. All right, can we get a favorites chat? I don't even know
+what that means. But that That's what we're looping here. All right, so if you
+have you have your initial prompt that you added your big context uh to, it then
+might ask you some more questions, then you give that feedback, and then it
+gives you an output, and then you give output on that feedback, that next thing
+it gives will be significantly better than if you just took the first thing it
+gave you. Okay? So, if you want to increase the quality of the outputs, increase
+the number of iterations within each window. All right. Next, uh verify facts
+and figures of outputs. We We try to make sure as, you know, we minimize
+hallucinations as much as possible, but like you for sure, like if they have If
+there's numbers in there or it says a study, make sure that um that you just
+double-check it. Um One important point uh that I will make here in this kind of
+rough reference to Keenan story is that like at the end of the day,
+decision-making is still yours, right? You cannot outsource thinking. You'll
+still be rewarded by the quality of your judgment and your taste. So, what we
+want to really have AI do is outsource the typing, right? Like if you know what
+you want to type and you already have the ideas, you can just have someone else
+click, click, click, click, click on the keys. All right, so outsource the
+typing, not the thinking. Next, the big thing here is that the idea is still the
+alpha. So, your idea from a content, from a sales message, from an offer, the
+idea is still the alpha. That is still where the highest returns come, not
+necessarily the the collateral. Now, the collateral is a part of it to describe
+or or or execute or implement against the alpha. Um but the idea is still the
+core thing, and I'll show you what I mean in a second. Okay. So, that's AI
+hygiene. Please start new chats when you have a new idea. The more iterations
+you have within a chat, the higher the the the quality of the output. Verify
+facts and figures. Don't outsource your thinking, only the typing, and the idea
+is still the thing that matters most. Okay. Now, this gets into a little bit
+higher level for those of you who are who have teams, okay? And if you don't
+have teams, then this will still apply to you, but just um it's just a different
+way of organizing uh workflows. Okay, let's rock. So, So, here's a big idea for
+you. Who here has heard the term SOP, standard operating procedure? Who has
+heard SOP before? Give me a Give me an SOP in the chat if you've heard of SOP.
+Okay? Yes, you guys have heard of SOP. What I want you to do is in your brain
+translate SOP to prompt. It is the same thing. Think about what it is. I want to
+give you, my employee or myself, our standard operating procedure for some task,
+right? We give them a standard operating procedure. What do you think a prompt
+is? You're giving them the operating procedure to get an output. And so, the
+prompt is the SOP. And so, when you think about it from that perspective, you
+will realize that most of y'all's prompts are too short. You're trying to uh
+outsource work to an employee with one sentence. And so, like everything worth
+doing in life, it still takes work. Now, I'm going to talk about the leverage
+that this creates later, but big picture, you still have to do You have to do
+some of that thinking work up front to get higher quality outputs. Like you
+still You can be dumber than you were before and still be kind of successful,
+but you get significantly more returns when you're smart and work hard. Now, the
+rich get richer still. Now, when we want to have repeated workflows, so you have
+things that occur every single week within your business. You make a certain
+amount of content, you do a certain amount of outreach, you send a certain
+amount of emails, um you send voicemails, you have you know, RFPs that you
+respond to, um you have emails that happen in in and out every day, you have
+Slack messages. All of these things are are that happen on a regular basis,
+right? What you want to do is create standardized prompts for repeated work. So,
+inside that AI folder that we had, we had business context, which was one
+folder. The next folder that we would have is SOP prompts. Okay? So, inside of
+those SOP prompts is where we want to put the prompts for repeated work. Now, if
+you're not sure what those are yet, at the very least, create a list of the
+things that you do on a regular basis. Now, if you don't know how what that is,
+then what you'd want to do is a time study where you can look at what you spend
+your time on in a given week, and then block it out at 15-minute slots, and you
+can see where you spend your time. Now, the vast majority of that stuff um is
+stuff that is repeated. And so, all we have to do is spend one-time work.
+Remember I said one-time work forever payoff or for forever time saving.
+One-time work actually really thinking through what our SOP would be if we
+wanted to hand this off to an employee, what would it really be, and then that
+becomes the basis for the prompt for the AI in the future. Yes, ADHD wins again.
+Okay. So, you want to store these centrally in that folder. And if you're the
+one using them, um you can save it into a master doc with tabs. For those of you
+who use Google tabs, that's one way of doing it. If you just like love having
+master docs, I tend to be a psychopath who likes like one doc to rule them all.
+Some of you guys like folders, that's up to you. I'm a big like one doc that has
+a zillion tabs guy. That's me. Um but it's up to you. Now, most of you um like
+if you really think about what those would translate for a role is, you might
+have like a customer success manager, and there might be 15 tabs, and each of
+those tabs relates to one of 15 tasks that they have to do, and the prompt
+related to that task. Is this making sense? And if you're not sure what an SOP
+looks like, I will show you. I will show you. Okay, I will show you. Don't
+worry. We good so far? Yes? All right. Now, um if you are also solo working,
+here's an alternative method of implementing it within your business. If you
+have repeated calendar blocks, so if you're somebody who does time blocking,
+which I'm a big advocate of, which is you block your calendar for when you're
+going to do work, um you can put the prompt inside of the calendar block, so
+that when you see it on your calendar, the prompt is already there, and you can
+make it a repeated event. All right, you can also do this for a new employee,
+you can time block their time, and inside of their calendar event is the prompt
+that they would use to do the work. Pretty slick, right? Okay, can I give you an
+example? Yes, I'll give you an example of an SOP in a second. All right. And so,
+what you want to do is you then can train the team on using those SOPs, those
+prompts, rather than just saying, "Hey, guys, use AI AI. Use the LLMs, right? Go
+use them." It's like that's not helpful for somebody. Just like saying, "Go make
+emails." They need more context so they can make them the way you want them to
+be made. And to be clear, this is just like uh this is just using AI like any
+other machine with a checklist. And so, the end result here of this second
+second little portion here is that you have a prompt repository. You have an
+area where your SOPs are saved, and these become even new powerful new age SOPs.
+So, think of prompts as just 2.0 SOPs 2.0. Right? And so, your business
+functionally is run by a series of prompts. There is work that must be done.
+There is a way to do that work, and we save the prompts for how to do that work
+properly. Okay. If you do it many times, then it means you should only do it
+once and do it right, and then replicate it. I'm going to say that again. If you
+do the same thing over and over again, then you should do it one time right so
+that you don't have to do it again over and over again. Brian, how do we know
+when to update the prompts? When you stop getting outputs that are good. Okay.
+Now, this may be the the meatiest part of today, okay? And I said I was going to
+keep today shorter, and that's because this is already a shitload of work. All
+right, so I like My goal here is just like I want you to actually do this. Okay.
+This is the bigger one. All right, so big picture, we got our context window,
+101 and 201. That's what we did first. Next, we make sure we follow our AI
+hygiene. We start new chats. We iterate more times within the chat in order to
+get better outputs. We're good on that. Then, for the repeated tasks that we do
+within the business, we start creating a prompt repository, SOP list, and you
+can do this by role, and you can do it on their calendar. You can do it within a
+Google Doc, or you can do both. So, people know exactly what steps to follow in
+order to do the work. Now, the third piece here is AI assets. All right? This is
+This is going to be probably the Besides the context window, this will be the
+highest ROI. So, I probably put the SOP thing that I just said as as third
+highest ROI. This will be the second highest ROI thing that we will do today.
+Okay? So, we already have the folder of AI assets. So, we have our business our
+business context number one. We have our SOP or prompt repository number two.
+And then number three, we have AI assets. I'm sorry, we have um I mean, you
+could call them I guess it's AI assets within AI assets. But, um I just probably
+have to call it a different name. Um You can call it data sources if you want
+to. Um but, call it data sources for for right now. Sorry, I I I messed that up
+by saying calling the same name twice. Um data sources. All right? That's what
+the folder will be. Now, what you want to do is go by function and gather the
+assets. Now, what does that mean? Okay? So, what we would do is we will export
+the things that you have already done. So, the big advantage that you have,
+especially the longer you've been in business, is that you have done stuff. You
+have worked. And that work has created output. That output is data. That data
+can be used to create more data like it in the future. So, you should have a
+place where you have a source that has all of the data of the work that you've
+already done so that it can help you create more work that looks like that. So,
+this is a sample list of assets that I would start with. If those of you who
+tweet, I would put all of your tweets, which you can export in one button on X.
+You export every single one of your tweets, and that becomes boom, your prompt.
+That becomes that Excuse me, a data source. Number one, I put all my tweets all
+time data source. Real quick, I'm going to show you the exact 10-stage roadmap
+from zero to 100 million plus that less than 1% of companies finish I've now
+done multiple times. And so, I can say with a lot of confidence that these are
+the stages as head count increases that you need to get through. And I broke
+each of these down by eight different functions of the business, what the
+constraint feels like, like what are the symptoms of it when you're going
+through it, and then what steps we actually took to graduate. And we've done
+this across software, physical products, uh service businesses, brick and
+mortar, all of this, and it works. And it's my gift to you. It's absolutely
+free. And so, the link's in the description. Just enter your info, and it'll
+spit it right back to you all free. Number two, if you've sent any emails to
+your list over the last however many years of your of your customers, take those
+emails, and then put all of them in one document, one master doc that just has
+the emails that you've ever sent. Now, alternatively, if for each of these that
+I'm giving you, if you have certain emails that you like, you can use those
+emails. Right? If you like an e-commerce store that's in certain type of email
+or or whatever, you could just search all those, then export, and then boom, you
+have another data source. By the way, the calendar prompt is not a prompt. It's
+just you paste in the prompt, and you just put it in the description of the
+calendar event. Um so that when that person clicks the time, they can see the
+prompt, they can import the prompt, they can do it. They can use it. So, it's
+not like a special thing. I'm just saying it's a different way of organizing it.
+Another asset that you should probably have, for those of you who have sales
+teams, you probably have SDRs or setters, right? You probably have those calls
+recorded. You already have this stuff. Take your top 10, top 100, if you want,
+recordings, the transcriptions of those calls, and then we want to make that
+another data source. Now, what I'm putting in the bold next to this as we're
+going through this is what you can create from these assets. Right? So, if I
+have my top 10 sets of all time transcribed, I'm going to give you the prompt
+momentarily that you can use to transform that into the golden standard of your
+SDR script. If you have your uh email newsletters that you've done in the past,
+that helps you create your future newsletters. If you have your all your X posts
+and tweets that you've done in the past, that helps you create future X posts
+and tweets. If you have your top 10 closing calls recorded, this will help you
+create your VSLs. It'll create your emails. It'll create your follow-up. Create
+your closer script. So, what do I use for extracting just uh transcriptions if
+it's in a different language than English? I mean, I don't think it matters. The
+all the LLMs speak the same language. They They're universal. They're They're
+large large language models. You can speak in whatever language you want. Um if
+you have uh lead nurture uh sequences, uh you can export all of those things,
+and then say, "Hey, this is my current lead nurture. How could I improve this?
+How could I make this better?" Output superior versions of the lead nurture. So,
+I'm going to keep going through these cuz I know that like SDR means setter, the
+person who qualifies leads. Um I'm going to keep going through these, but the
+the big takeaway that I want everyone to have from this is that you already have
+these data sources. You have already done this work. And so, it's So, the
+advantage that all of us who have done work in the past have for using AI is
+that you can get the AI to sound like you because you have done stuff. So, I'll
+I'll pause real quick. Who here in the chat has seen content on the internet and
+been like, "This was written with AI."? Just give me a give me a give me a an
+eyeballs eyeballs emoji if you've seen AI content on the internet. Just like
+words. Just the words, not even the videos. Just the words. Yes? Of course. Now,
+the question is, why? Why is it AI content? How can we tell that it looks like
+AI content? The reason we can tell it's AI content is because AI sounds like a a
+melting pot of the internet. And so, AI sounds like the internet. And so, if you
+want So, AI doesn't sound like AI. AI sounds like us if we had no personality.
+And so, if you want the AI to have a tone, have a a pattern of speaking, have a
+certain cadence that it that it communicates in, the advantage that you have,
+all of us who have actually done work, is that you can use the work you did and
+say, "Don't sound like you, sound like this." And then it will use that in
+pattern match to create the output that you want. And so, AI doesn't Like if
+people Like I hear this a lot. Like like, "AI can only make stuff that sounds
+like AI." No. AI sounds like AI if you give it no context. You have given it no
+asset, no data source to work off of. Then it's just going to fabricate from the
+large data set that it has, which is the internet. And so, that's why these
+filters That's why we start with these contexts uh up front so that it can know
+what pattern to match with the outputs. But wait, there's more. Thank you, Wade.
+Okay. And so, for each of these that I'm showing you here, it's you've got the
+data source, and then we've got the thing that we can create from the data
+source. And I'll give you the pro- I'll show you the prompt stuff in a second.
+Okay? But, each of these This is the relationship I want you to see is that like
+if we have if we have sales recordings, there's lots of stuff we can do with
+that. We can improve a gold standard script. We can make a video sales letter
+taking the best closes we have. We can take those sales scripts, put them into
+emails. We can do it, make it into a follow-up. All of these first asset These
+assets or these data sources can create further assets and data sources in the
+future. Okay. Um if you want to help if you if you're like, "Hey, I want to make
+better content." Use transcripts from YouTube videos that you like. And yes, uh
+Jaime or Jamie. Um I'll show you how to do the the tone blueprint. And it's like
+We'll do that at the end. Uh transcripts from YouTube videos that you like,
+great. We take those transcripts, and then we feed it in, and that gives us more
+videos like this. All right? And I'll show you again the more tactical one. But,
+this is I just want to give you conceptually the idea here so I can get your get
+your juices flowing. Because every single one of you right now, you guys tweet,
+you write emails, you have you have sales people, you have VSLs, video sales
+letters, you have emails, you have follow-up, you make content. You make all
+this stuff, right? And if you're not using this to make that, then you're not
+you're not using the AC QA I to the at all the same degree that you could be and
+getting way more out of it. Okay? Um product FAQs, right? That transforms into
+sales page copy, VSLs, follow-up, lead long-term nurture. Uh customer support
+transcripts. So, when we're thinking about this folder that we're talking about,
+we've got our assets, we click in, we've got our contacts, right? We have our
+SOPs and prompts for the repeated work we do in the business, and then we have
+the data sources that those SOPs and prompts are based off of. Are you seeing
+how this all put together? Or if I can Is there an infrared camera that's on? If
+there isn't, let me know about it. I can use my hands. No, over there. >>
+There's not Okay. Okay. So, then pay close attention to my hands. We're going to
+double click on this first folder, which is your AI assets. Inside, you will
+have three folders. Folder number one is your business context. That is all the
+data that you're going to have on your business. Folder number two is you're
+going to have your prompt repository, your SOP repository. These are the prompts
+that dictate how you do the work you do on a regular basis in your business.
+These are instructions. The third folder is going to be the data sources. This
+is what these prompts will reference to pattern match to create outputs. All
+right? Does everyone get all three of those? Everyone Everyone with me so far?
+Yes? Business SOP repository. Data sources. That's it. That's all we're doing.
+Your SOPs are the things you do and how you do them. Business context is what
+you've already done and the description of your business. And your data sources
+are where you're gathering, you're exporting data from things you've already
+done. Your tweets, your emails, your SCR recordings, your sales recordings, your
+existing email sequences, uh video transcripts, transcripts of videos you like,
+emails you like. Right? Content you enjoy, product FAQs, reviews online,
+customer support transcripts. All of that stuff, all of those are data sources.
+Your best performing ad copy. To give you a few others. If you've got high
+engaging uh social media posts that you like or have seen from other people,
+keep a one, you know, one doc that has the the post that you like the most. That
+rhymed. Uh your website copy in and of itself is an asset. Right? It's a data
+source that it can pull off of. Which can also give you page improvements, copy
+improvements, ad copy from there, emails from there. If you have blog posts or
+articles that you enjoy, those become data sources. SOPs and internal process.
+Some of you guys already have some SOPs. Great. Now, I will uh I don't know if
+I'm going to hit that memo system. I'll I think I might I might blow someone's
+gasket, so I might not do that one right now. I think it's going to it's going
+to melt some minds. Okay. We'll We'll just move on to the next one. Um
+onboarding scripts for customers or employees. Right? These are all things that
+you have. Pitch decks and webinars. Slide decks that you have. All of these, new
+data sources. Top performing email sequences. Guys, are you guys with You guys
+with me on this? You want that that repository to be rich with the highest
+quality data you can. And the higher the quality that you curate with those
+sources, the higher quality the AI will pattern match to create outputs. And the
+more complete the context, the more specific and personalized they'll be to your
+business. And the more detailed the prompt, the more they will follow the
+instructions, give you the output you want. That's how all three of these things
+work. All right? It has to know what your business is about. It has to have good
+data that it can base off saying this is what it looks like when it's right. And
+it has to get clear instructions on exactly what you want. When you have all
+three of these things, you can put them together and make banger outputs. And so
+things only sound like AI when you don't have a baseline to train it on. So AI
+sounds like the internet, but if you train it on the work you've done, it sounds
+like the work you've done. Yes, I will give you guys examples. I want to give
+you I want to walk through this first. Okay. And so these are the most common
+things that people are using uh to get outputs with ACQ AI. So people are
+looking for sales scripts. So right now, many of you, I know because I've talked
+to you guys, many of you need one or more items on this list, right? So who here
+um actually, what do we have? Yeah, we have 12 items on the list. Who here, say
+on number one to 12, how many of these things you know you could do better at
+than you are right now? You could do better on one of them, do better on two of
+them, five of them, all 12. Put a number one through 12 of these things that are
+on this list, sales scripts. 12, 12. We got a lot of 12s. Okay. That was not
+actually where I was going for that, but that's good to know that there are a
+lot of 12s. Three, right? A lot of 12s. Five. A lot of 12s. Um some fours, some
+seven, six. Okay. Use AI a lot. This is brilliant. Okay, cool. So the reason I
+bring this up is that this this now gets to the crux of the issue of like what
+separates ACQ AI from kind of the generic AI, right? Which is that for many of
+you, these 12 things are the majority of how you make money. Right? You make
+content. You run ads. You do outreach with words and videos and media. And then
+those people become engaged leads. And then you give them more information via
+sales scripts and video sales letters and webinars. And then with that extra
+information, they then make an informed decision and then purchase your stuff.
+And then after that, they get more information from you in some way. Right? And
+so it's not that do you have this or not have it, it's how much do you have and
+how good is it. And this is why the difference between a .225 batter and a .300
+batter is such an important point. So the whole idea here is that we're trying
+to make the asset ACQ AI that can help improve the quality of these things as
+they come out based on all the things that we've trained it on. Now, this is
+clearly just an asset. There's obviously, you know, offer strategy, there's
+decision making, there's things like that that it also has trained on. But for
+many of you, when I look at the top use cases that you guys have, these are the
+these are the big use cases you guys use it for. All right? So if many of you
+guys did say at least one of those things is something that you could improve
+on, okay? The reason this is important, why this matters, is that if more better
+is how you grow, this allows you to do that. You no longer have an excuse
+because you now have tremendous leverage. And I just found this little
+infographic that I thought was funny. All right? Boss, leader, introvert,
+introvert with AI. Right? I thought it was cute. And so some of you guys asked
+how do I use this? All right? How do we put out so much stuff and how do we keep
+the quality high? Here's how we do this. So Mosey Minute used to take me between
+60 90 minutes per email. And so this generates, put this in context, this
+generates about 20% of the revenue of ACQ uh the advisory practice. All right?
+Now it takes 4 hours for me to make 16 So basically one half day per month, I
+sit down and I write all the emails for the month. And so I get So this gives me
+4x leverage using what I just outlined. I've got my business context, again.
+What are the three pieces here? I probably should have put a slide up, so I
+apologize. There's three big pieces. We have business context. We have the rules
+of engagement. We have how we do the stuff. And then we have the stuff we base
+it on. Our data sources. Those are the three things that you need to have to use
+AI well. And so using all three of those things, I wrote the Mosey Minute for a
+very long time before using AI. And so then I said great. And I'll tell you,
+it's like AI does not come up with the idea, though. This is a big one. AI does
+not come up with the idea. It will take the idea that I have and say, "Hey, um I
+want to write uh uh a Mosey Minute based on this core offer structure. This is
+why it's cool. This is why I think it's awesome. Turn this into an email that
+looks like these ones and follows that structure." And then it gives me the
+output and then I tweak and edit it. Thank you. I appreciate that, that. I still
+spend time on it. It's just the difference is that I get more time back. So many
+of you guys think in terms of automation when you really should just be thinking
+in terms of leverage and amplification. I want to say this again cuz I think
+it's a really important point. Many people want to sell you on automation and it
+and hey, it's sexy as hell. Automation sexy. But more realistically, what you
+will get is amplification, not automation. You will get more leverage, not
+infinite leverage. True automation is infinite leverage. Right? It's It's It
+just It continues to run. It never has to get checked. It never breaks. It
+always improves. That is uncommon. What is far more common is that something
+that used to take me 60 to 90 minutes now takes me 15 to 20 minutes. Real? So
+I'm getting 4x. Thank you, Kevin. I appreciate that. Um and to be fair, Kevin,
+it's not AI. It's me. It's my idea. It just helps me type the words faster um
+and give examples faster, right? So instead of me sitting there and being like,
+"All right, what example do I want to use here?" It just gives the example. I'm
+like, "Great. It already It already used the idea that I had and applies it."
+Right? And so they're not AI. I take the emails that I have already written that
+write that I write like me. I have the idea that's me. I say, "Go make this
+similar to that." It gives me the output and then I still edit it and tweak it.
+Right? And the tweets, for example, that start the email with, those are tweets
+that I pull from somewhere else. Right? And so all of this is leverage. All
+right. Next. Um tweets themselves used to take me about an hour and a half a
+day. And to give you context on this, it gets a 20 to 30% of all of our content
+comes from tweets. All right? And so now it takes me about 90 minutes a week. So
+basically I'm seven times more efficient. I haven't automated this. It's not AI
+making my tweets. It's that it will help me generate ideas from which to iterate
+to make tweets that are good. Right? So if I could just purely say, "Hey, make
+me all these tweets" and I copy paste them, it I it wouldn't work. I like
+Believe me, I've like this doesn't work. Right? But it can give me inspiration
+uh and ideation to base off of to then make my stuff happen faster. Because
+before this, I'd sit there and be like, "Ugh, all right." And I would scroll I'd
+scroll X, I'd scroll uh social media and usually I'd just wait until I felt an
+emotion about something and then be like, "Why do I feel this way?" And then I
+would respond to that content as my tweet. Right? And technically, Steven, no,
+it's not still written by AI cuz I'm still still editing a lot of it. Um it
+would be assisted. Um if it's pure AI, it's different. So which is a a specific
+difference, by the way, from a from a copyright perspective. Um So next is um
+YouTube, right? So videos used to take 2 hours per video for me. And this is
+like where 40% of lead flow comes from. Right? So now it takes 15 minutes per
+video. And so what's interesting is that many of you will take the word AI and
+think, "Oh, bad quality." And that's because you don't know how to use it. It's
+also because you don't have existing resources. This is a big point. It's a big
+deal. You are rewarded for the work that you have done. My Mosey Minute emails
+are bangers because I wrote a shitload of bangers. My tweets are good because I
+already wrote 6,000 [ __ ] tweets before I did this. 6,000. All right, I'm at
+7,000 now. 6,000 was just me. Right? And so it has a huge data bank data source
+to pull from to give inspiration in terms of sentence structure, in terms of
+ideation, that allows me to go work a lot faster. And so I gave my estimated
+Yes, I I do a lot of work, Dylan. Yes, Emil, exactly. I put 6,000 in and said,
+"Learn from this." Right? Now, um if we're going through here, notice not all of
+the amplification is the same. Right? I got 4x leverage on emails. I got 8x on
+YouTube. Different, right? And the key point here, big big point, it's the idea.
+The idea is the leverage. The ultimate alpha is the idea. And so it's not going
+to come up with the Mosey Minute because it can't have my experience. And so I
+know some of the questions that I'm going to get around this are like, "Is AI
+going to replace us?" Eventually. Not for a while. But the main reason is that
+because AI cannot live in real life and cannot get real life experiences. And so
+those experiences are the alpha. That's the idea. That's the learnings. Those
+learnings, those stories, those narratives, it can then flesh out, but the core
+idea is yours. That is the essence of it. And so this is how this is how I've
+scaled what I do. It's like I can take the core the core value, and then I can
+amplify it. It's not automated. It's just amplified. You guys digging this? Is
+this making sense? Correct, Moritz. AI is not a AI is not original yet. It does
+It's like a remixer, right? Exactly. For now, it will get better in the future.
+But for now it it more or less remixes. And so the idea is what I want to Okay,
+I can now articulate this well. What we're trying to remix is our language
+patterns, our sentence structure, the format of the video. I'm going to have an
+intro, I'm going to have three main points, I'm going to have stories, whatever.
+The format, the structure. That is what AI is very good at replicating. The
+essence of it, the core value that's being created That sounds like very
+amorphous language for me. Um fundamentally, the good [ __ ] all right, that's
+inside, that still is going to come from you. Which is why a beginner who just
+tries to churn out AI content still doesn't win because they have no idea. They
+have no experience. They haven't done anything. And the AI can't do it for you.
+Can't live your life for you. Can't have the experience for you. So you have to
+do stuff, like I've always said, and then take the stuff you did, and you talk
+about it. AI just allows you to talk about more of it faster. Yes, Rayan. We can
+amplify. That's the goal here. All right. Um memos used to take me at least 4
+hours per memo. Um now they take me probably an hourish. Right? Um maybe it's a
+little less than that. I don't know. Maybe that Maybe it was again Maybe it was
+a little aggressive of me to say that. Probably still takes me about an hour. Um
+so probably it was 4x leverage at 8x. Scripts for sales guys, my god, that would
+take me a long time. Um and now we can write scripts much faster for new offers,
+for portfolio companies, for anything. Right? So we get significantly more
+leverage. And so I'm bringing this up for you guys to show you that like how do
+I use AI to make YouTube videos? It's going to be more structure and ideation.
+Um and then honestly, I have a skill set which is that I've developed over many
+years, which is that I can riff on topics in a way that's interesting, and I
+know syntax and rhetoric that people find engaging. Being real. Um so my stuff
+isn't scripted, and that's what also makes it a lot easier. Um so for me it's
+much more like what are the what are the what are the interesting prompts that
+drive response around a topic, and that is easier. So like I still So the way I
+use AI is actually to prompt me to say interesting things. Actually, that's
+probably the easiest way for me to say this. Like the tweets for me is that it
+prompts me to respond to things, which helps me ideate on interesting things to
+say faster. It does not say, "Hey Alex, say this." Now, for for scripts, yes,
+you can use it to create sales scripts. All right, so that's what we're going to
+get into next. All right, and so yes, VSLs used to take a full day, and now you
+can do them really quick. Okay? So, the part that many of you guys have been
+waiting for. So, big picture, we've we've broken this down into number one, we
+have our business context. Number two, we have our SOP repository of how we do
+[ __ ] And I'm going to give you examples of this in a second. And number three,
+we have our data sources, right, which is stuff that we've done in the past that
+it can reference to make more stuff like it. Okay. What if you're not confident
+about the quality of your current content? Excellent question, Casper. I will
+give you use cases for how to improve this. Yeah, AI uses me the way other
+people use AI. Yes, I get AI to prompt me. Okay. So the goal here is we use to
+make future work. So this is the overarching step process. So number one is you
+get assets. You separate them clearly. So what I mean by that? So let's say
+let's say you got 10 sales call transcripts. You just got to make sure that each
+sales call is clearly delineated. Like space space space, star star star star
+star, begin second script, star star star star, begin third script, star star
+star star, begin fourth script. All right, ba ba ba ba ba ba as you go through
+it. So you get your assets, you separate them clearly, and then you upload them.
+All right, so this is the data sources we're talking about. So you upload that,
+put your little paper clip, right? You upload it. Then you prompt, right, the
+prompt repository that I was referencing. I probably should have done step three
+instead of step two first, but you get the idea. Okay. So, you'll notice that
+the best outputs come from the best inputs. And when done right, these create
+prompt chains, and I'll explain what this means later. So, for example, if you
+have a sales recording, but don't have a gold standard sales script, let me um
+let me send something. Hold on. Luis, can you pull something up um on on the
+screen? Can we go like back and forth between two screens? Is that possible? I
+I'm sending you a doc cuz I want to show what the prompt looks like. Um so that
+they can they can see it. So, just so you guys know, I'm going to give you Yeah.
+I mean also Believe me, this is like the 101 training, so I'm not going to do
+any more with this. Um I don't I don't want you to be overwhelmed. Again, before
+anyone gets too deep in this, levels here, okay? Number one is get your context
+window right. Do 101 and 201. Get that first. If you If you do nothing else but
+doing that, it's a W. The second thing you can do is just get your data sources.
+Everyone has them. There's There's no work that's really involved there besides
+you just capturing it. Just put it together. All right, that's the second big
+thing. The third thing is the prompt repository that references both of these
+things to create outputs. Thomas, there is a Isn't there a limit for writing
+context? On every one of the platforms there is, but this is why I'm saying try
+do things in Word format, uh and that'll dramatically decrease the size. Like if
+you're talking It's 25 megabytes. If you're doing just words, you'll have more
+than enough. You can put a book as context with 25. Again, the key to thing is
+you don't put images inside. Okay. So, I'm going to have my team um uh go
+through this. So, I had this originally as in the slide deck, but I think I'll
+just voice over it. I think it'll be more useful for everybody. Um yes, thank
+you, Buck. We've worked on it. Um okay. So, let's say right now um you have some
+sales recordings, okay? You have some sales recordings, um but you don't have a
+unified script. So your sales team doesn't have a unified script. So what we
+would do is we would paste the transcript of the 10 or call recordings, and then
+we'd post this prompt inside of it. Right? And so it would be like, "Hey, this
+is the number one. This is for you guys." And I will give you guys a copy, my
+gift to you, of every one of these prompts uh as an email. Okay? So you guys get
+an email with every one of these. Um but I want to go through each of them so
+you understand how this works because fundamentally, you've got stuff, we give
+it a prompt to make better stuff or analyze that stuff and improve it. That's
+it. All right. So, you're an elite B2B sales trainer and script doctor. I'll
+paste 10 full transcripts of successful sales calls that sold the same offer to
+the same type of prospect. Your job is to go to one mother script from these
+calls by extracting only what actually moves the sale forward and deleting
+everything else. Follow these rules. So, you can scroll up. So analyze these
+calls first. Identify common structure best calls follow from greeting to close.
+Note the exact questions and phrases that consistently leads to open disclosure,
+uh commitment, and payment. Define the call structure. Build a script in clear
+sections with headings. Opening rapport, framing agenda, discovery, transition
+to pitch, offer and value stack, handling three to five objections, final close,
+and next steps. All right. Booking, bam fam. Right? Create the unified script.
+Use only lines that appear in multiple winning sales calls or are clearly
+essential glue. Remove filler, small talk, or stories that don't directly help
+the sale. Keep language single Keep language simple, direct, and conversational.
+Third to sixth grade reading level. Uh keep the core pitch portion short enough
+to be said under 5 minutes at a normal pace. Where useful, include questions the
+rep should ask verbatim and notes about intent or tone. Uh output format, a
+short overview of the structure in bullet form, uh final word-for-word script
+organized by section headings. Bullet list of the top 10 most powerful phrases
+or lines you pulled from the calls. Remember prioritize clarity, brevity, and
+closing power. Delete everything that doesn't help prospect decide and buy. All
+right. So, this is what you can take your transcripts and turn it into sales
+scripts. Transcripts, sales scripts. Transcripts, sales scripts. This is cool,
+right? It's pretty sweet, isn't it? Yes? Dope? Dope ass [ __ ] Okay, cool. So, I
+said I was going to give you guys examples. Like, we're going to This is This is
+the meat. All right, this is the meat. All right. I know transcripts sales are
+pretty sexy. All right. So, now let's say you want to write more emails. So,
+right now you know you should be following up, right, with your leads. You know
+you should be following up with your leads. You know you should have a
+newsletter because Alex says he's getting 20% of his revenue just from spending
+1/2 day a month and you're like, "Man, if I spend 1/2 day a month and I and I
+got an extra 20% revenue, that would be make me money." And I would say, "I
+agree with that." Uh and you should do that. So, how do you do it? All right. Uh
+this is a newsletter style and and So, basically, you're going to analyze
+newsletter and generate it. So, it's both. So, you're an expert copywriter and
+narrative strategist. You'll notice the same structure for a lot of these. You
+give them the role, you give the task, you give rules, and you give output. It's
+kind of the four the four kind of structure for good prompting. All right. So,
+you're an expert copywriter and narrative strategist trained to analyze writing
+samples, extract voice, structure, style patterns, and reproduce them with new
+ideas while maintaining the same feel and reader impact. I'll provide my past
+email newsletters that performed well. Your job is to learn the voice, tone,
+pacing, narrative structure, rhetorical patterns, and call to action style from
+these examples. Analyze my past So, tasks, analyze my past winning newsletters.
+For all newsletters I give you to extract voice profile, writing ticks,
+narrative structure, format and patterns, persuasion mechanism, CTA style.
+Provide concise but complete descriptions of the style you infer. Next, build a
+reusable newsletter template. Using the patterns above, create a generalized
+structure for my winning newsletter style including opening hook style, story
+and butter pattern, teaching framework, pacing and rhythm rules, closing style.
+This becomes the newsletter blueprint. Three, generate a brand new newsletter
+after analysis when I give a new topic idea. So, this is This is the alpha,
+right? Remember guys, I was like, "You still have to come with the idea." So,
+you say, "Hey, I want to write So, I want to write a newsletter on some stuff
+that roofers, you know, people who own roofs, uh or people who have the leaky
+pipes, whatever, that they can do to avoid having leaky pipes in the winter."
+Easy. So, I want to have this specific thing, this core story or core element
+that happened. And I'm going to say, "Hey, that's the story." And I say,
+"Great." Boom. Put in my template, go run it, right? And then it's going to fill
+in the gaps within that structure. It's going to take that story and amplify it
+so that it actually finishes follows the structure that I want. So, then the
+output will be one full newsletter, match the same style, use the template, and
+then it should feel like I wrote it. And so, then it has rules. So, some of you
+guys, never copy phrasing from old newsletters. Learn the style, not the words.
+Newsletter must be 100% original content in my voice, right? That's why the key
+idea is so important. If you actually just ask it to just write newsletters for
+you guys, it will suck. I'm just telling you, it will suck. It does not work. If
+you give it the idea, then you will have a valuable a valuable insight. Keep the
+construction structure consistent, never break character. Um and if you need
+more samples to refine the model, ask. Yes, Simon. I'm going to give you all
+these. I give to you. All right. Uh and then this is the output format. So, you
+can just scroll past this. Okay. So, here's another one. So, let's say you have
+Notice, it's like if you have this, then you can do this, right? So, let's say
+you've got a uh Um you're you're getting you're getting stuck on rebuttals,
+right? You're like, "People are are not buying from you and they're coming up
+with objections, right?" So, we say, "Great. Let's help solve this. We're going
+to upload our transcripts, right? And now we're just going to focus on the
+objections." So, you're an expert sales and objection handling strategist. You
+specialize in reviewing failed sales calls, identifying the core objection
+patterns, and turning them into clear, repeatable objection handling playbooks.
+The input, I'll provide you with one or more failed sales transcripts. Each
+transcript may include hesitation, filler words, messy phrasing, or incomplete
+responses. Your job is to extract and clean the insights. Task, identify the
+primary objection in each call. So, each transcript I give you, give you the
+primary objection, secondary objection, quote the exact lines from the
+transcript that signal the objection, summarize the objection in one clean
+sentence. Two, propose strong objection handling sentences. So, for each
+objection, write three to five short, powerful objection handling lines a
+salesperson could say next time. These must be conversational,
+non-confrontational, confidence building, framed around value, clarity, and
+reducing perceived risk, including both softening statements and direct
+reframes. Three, build a consolidated objection guide after processing multiple
+calls. Across all transcripts you analyze, create a running playbook. Identify
+all objections that appear more than once, cluster them in the top 10 most
+common objections, and for each of the 10, give a clean definition of the
+objection, list example phrases customers say, and provide three to five
+objection handling lines. Provide the root cause behind the objection, fear,
+confusion, misalignment, timing, money, and then format the final guide in clean
+way that can be copied into your training manual. Right? Okay. There's more
+output. I have I'm not going to read the output formats for you guys, but that's
+cuz then it just you just taught how you want it to, you know, deliver the
+thing. So, you can scroll the next one. Okay. Um So, next one. One of you guys
+said earlier, "I wish there was like some sort of writing style analyzer,
+right?" This is what it looks like. So, if you've written stuff anywhere via
+Slack, via email, blog posts, uh any any any content you put out, you can deduce
+your writing style. And then you can feel you can you can put inputs in so it
+doesn't sound like AI. It'll sound like you. All right. So, role is you're a
+world-class writing style analyst. Your job is to dissect the style of a given
+text so it can be reverse engineered or reused. Focus on how it's written, not
+what it says. I'll paste sample writing after this prompt, analyze it deeply and
+systematically. Number one, high-level snapshot. So, overall style summary,
+author persona, and then primary goals of the writing. Next, give me the voice
+and tone. Formal or informal, direct or indirect, conversational or
+authoritative. Uh tone shifts. Does it stay consistent or does it change? Any
+notable moments where tone becomes intense, emotional, humorous, serious?
+Relationship to the reader. Does the speaker see themselves as expert, coach,
+storyteller, teacher, or something else? Is the voice empathetic, challenging,
+supportive, or confrontational? Structure and flow, number three. How is the
+text built? All right, so overall structure pattern. So, is it hook, story,
+lesson, framework, CTA? Are there distinct sections or acts? Is there opening?
+Is there closing? Is there logical flows? Right, how we work through this stuff.
+Sentence Sentence level style. So, drill into how sentences are written. So,
+sentence length and rhythm, syntax and construction, punctuation habits, use of
+questions, right? Diction and word choice. I would scroll through this. Joy,
+yeah. Is there repetition? Are there analogies? Are there metaphors? Are there
+rhetorical devices? Notice how much detail there is on this one. We're trying to
+get the We're trying to get the true essence of the writing. Most of you guys
+are just saying, "Sound like me." We have to be specific. That's the idea. It is
+a It is a machine, right? So, you give it machine-like instructions. Imagine you
+gave this to a human. The The what's interesting about this is that a human
+would have a very hard time maintaining all this context in their mind when
+they're trying to write. A robot can. And that's what makes this powerful. Cool?
+Okay. Keep scrolling Keep scrolling for me. So, style and rules and checklist.
+You can keep going. And then emulation sample, and then we have the output
+format again. All right. And so, then this becomes our next thing that you can
+complete like completely plug in to anything else. Yes, this is talking to an
+autistic specialist, right? >> [laughter] >> Um real talk, everything I do I
+take from that perspective, Moritz. Um when I give instructions, that's the
+whole point. Um you can use these prompts, obviously, in HQ AI, which is what
+I'm talking about, but fundamentally, so like I'm like I have I want everyone to
+win. That's my whole goal here. Um I use all the LLMs, including including HQ
+AI. I use HQ AI the most for my own business strategy questions because it pulls
+from the most context of business of business, right? Rather than like this is
+pulling from blogs and Wikipedia and stuff. Like, I want stuff that is the most
+applicable for a small business, which, you know, for our purposes will be, you
+know, 0 to 100 million. Um And so, especially strategy questions, especially
+like offer-based questions, pricing questions, sales flow, sales process it's
+exceptional at. Very good with sales process. Uh yeah, don't tell GPT sound like
+me again. Yes, please don't. Okay. So, with each of these other ones you can get
+the idea for how much depth there is here. I'm going to just read the the
+headlines um so that you can get an idea for how this works. So, um For some of
+you guys, you guys have sales transcripts and recordings, which if you don't,
+please do that first, but you don't have VSLs. You can take your sales
+transcripts and say, "Hey, you're a top top-tier direct response writer and
+sales strategist. You specialize in converting long-term sales transcripts into
+polished, high-converting VSLs." So, you upload the document containing 10
+successful sales calls, and your job is to extract persuasion patterns,
+emotional beats, objection overcomes, promises made, and transform and
+transformation described, and convert them into a cohesive, cinematic VSL
+script. And so, many of you guys need to just take this, take your 10 sales
+calls, use this to transform them into a VSL script, and then read the damn
+script. All right, let's go to the next one. Just scroll all the way to the next
+one. Okay. So, uh number six. So, uh sales call manager, sales call feedback
+analyzer. So, this is a big one. So, many of you guys have sales teams and
+you're too lazy to give sales uh sales feedback. So, you can have the team one
+of two things. One is the sales manager, if that's you, you take their
+transcript, feed it and then say, "Hey, give feedback as like give me the
+feedback on the sales script as though you're a master salesperson." So, then
+when you go into your one-on-one, you can say, "Hey, this is what you need to
+work on." And then you can role-play it. Now, if you need to do that for the
+whole team, you can do that, too. Guess what else you can do? You can have the
+team get their own feedback on their own sales call. Or you can take your own
+sales script and get your own feedback from a master salesperson. Right? Okay.
+Let's go to the next one. Okay. So, if you like specific style of YouTube
+videos, right? You're like, "I like this style. I like this structure." Um take
+YouTube videos you like and paste it in and then you'd include what you want it
+to be about and then it would pattern match to make a video that's about a new
+topic with your idea with that general structure and tone. Right? So, you're
+world-class YouTube script analyst and creator. You study videos transcripts to
+extract structure, tone, pacing, narrative mechanics, emotional beats, comedic
+timing of any, hook, story arc, CTA patterns, and signature stylistic choices. I
+will upload one to five transcripts from YouTube that I like. Your job is to
+analyze them, extract the style, structure, tone rules, build a reusable script
+template. Four, when I give you a new idea, generate a brand new script using
+that template matching the exact feel of the original videos but with completely
+new content. Dallas, how do you get transcripts from YouTube? You literally
+there's a button on videos on YouTube to get them. Like literally it's like a
+button. So, in the description, you hit see more and if you scroll, there'll be
+a button that says see transcript. And then you can just copy it. It's like you
+don't even have to have a tool. You can just like YouTube gives you the
+transcripts. So, you copy two or three of those and make sure again with
+whenever you have multiples, make sure that you delineate star star star, you
+know, number one star star star number two star star star number three as you
+keep going, okay? Great. Do I prefer ASQA for writing copy? Yeah, I mean, I use
+it. Um I'm biased though, so. Um yes. Uh I like it for writing copy. I again I
+like I'll be honest like I use everything. I use everything. I use ASQA the most
+around offer, pricing, sales flow, copy. That's probably the big four that I use
+it the most for. Um but anyways, let's keep going. So, uh this would then output
+um YouTube stuff from past YouTubes that were good. So, keep going. Okay. Uh
+shorts script. So, for those of you that's that's the longs format. This is if
+you have shorts format. So, either take the your best performing shorts or take
+shorts that you like that you like the style of and then you insert those into
+our data [snorts] source and it already has the context window of your business.
+And so, then you say, "Great, boom, here's the prompt." You're a world-class
+short-form content analyst and creator. You break down YouTube shorts, TikToks,
+reels and understand their hook, style, pacing, emotional beats, jump cut
+rhythm, punchline and timing, creator voice. Upload one to four I will upload
+one to four one to five short-form transcripts videos I like. You analyze the
+transcripts exact structure and tone and pacing rules, build a reusable short
+script template. And when I give a new idea, generate a brand new short-form
+script using that style. Auto script must uh feel indistinguishable in vibe from
+the original content while containing completely new content. All right. Let's
+go to the next one. I like Gemini for images. For those of you who are curious,
+I like Gemini and GPT for images. Um I like I use those I use a lot for images.
+I use GPT a ton for like personal questions. So, more like health stuff like if
+I like I'll give you a real story. My microwave kept getting this child lock on
+it. So, I took a picture of it and I said, "Can I how can I remove this?" And it
+was like, "Oh, this is series E17722. Here's the owner's manual. It says this is
+how to remove it." I was like, "Great." Stuff like that. I use it for the those
+types of things. Um I use Grok for anything that I want to not have any kind of
+political agenda woven into it. So, anything that I have that I want to ask Grok
+about is like more like edgy. If I have like hypothetical questions that I don't
+need the GPT to judge me, um I'll ask Grok. Um so, yeah, that's that's like what
+I use those ones for. All right. Back to this. So, uh many of you guys uh need
+lead magnets, okay? So, many of you guys have videos, have content that you've
+made in in the past. You take those transcripts, uh you take those SAPs, you
+take those assets that you already have and then you plug it in to create a lead
+magnet for your business. So, your world-class content strategist and direct
+response marketer, you specialize in transforming video content into
+high-converting lead magnets designed to create demand, build authority, and
+generate inbound leads. I will upload one to three videos or transcripts of
+content I like. It may be educational, motivational, tactical, or story-based.
+You will take the tone, structure, frameworks, insights, and teaching patterns
+and then build a master lead magnet based on these patterns but with new
+original content aligned with my topic and audience. Yes, more. It's exactly. If
+you want to be the sole emperor of the world, how would I go about this?
+Exactly. Okay. So, that's if you have this stuff and need lead magnets. Let's go
+to the next one. This is the last This is the second to last main one and then
+I'll show you the last kind of advanced thing and I think we're I think that
+probably we'll have enough minds melted for the day. Um So, uh once you have the
+lead magnet, like once you give a mouse a cookie, it's going to ask for some
+milk, right? So, once you have the lead magnet, what do you need next? You need
+the follow-up for that lead magnet. And so, you say, "Hey, you're a lead email
+and SMS conversion copywriter. You specialize in turning lead magnet downloads
+into book sales calls using this big stack. I will upload my lead magnet PDF or
+text. Your job is to read it, extract the messaging, and create a compelling or
+sorry, complete follow-up system that converts readers into book calls." Right?
+That's the idea. So, some of you guys have lead magnets and you're like, "Oh, it
+doesn't work. No one books calls." It's like, "Well, have you asked it to make
+an idealized um uh follow-up sequence?" Right? That's SMS and email that's
+proven for that specific lead magnet? That's what this helps you do. Okay. Let's
+go to the next one. Okay. Uh keep going keep going. Okay. Offer architect. So,
+this is one of the big ones for you guys. Um this is one of the like based on
+the use cases that we've already pulled from the AI, this is one of the biggest
+ones that you guys use it most commonly. Um So, this is going to be a little bit
+different. So, 11 through 14, the ones I'm going to show you are actually a
+prompt chain. All right. So, what's the difference here? So, the first 10 I
+showed you were more or less like if you have this, you know, basically use this
+prompt plus your context plus the data source to get a good output, right?
+That's the idea. 11 through 14 basically stacks or loops the output to create
+the input of the next one, okay? So, output output one becomes input two, input
+output two becomes input three, output three becomes input four. All right? This
+is the best $60 ever spent. I'm glad, Daniel. Glad to hear that. Okay. So, this
+is the offer architect. So, some of you guys like need to sell more stuff or
+people aren't buying as much as you want. And so, this is what we'd start with.
+So, you're an offer architect, world-class strategist. You think like pricing
+economist, behavioral psychologist, blah blah blah blah. Your job is to observe
+any offer I upload and turn it more powerful, more irresistible, higher
+converting, higher profit, and more defensible offer. So, I'm going to read this
+one in total cuz I think it's important and then I'll get to the other ones. All
+right. So, step one, analyze my current offer. When I upload my offer, extract
+core promise, mechanism, value drivers, tangible outcomes, intangible outcomes,
+time to result, effort required, risk, pricing structure, guarantees, bonuses,
+delivery model, avatar sophistication level, how it's currently positioned
+versus the market. Then, create a diagnostic report showing strengths,
+weaknesses, missing elements, marketability risks. That's step one. Step two,
+now build a more irresistible version of my offer. So, offer enhancements. Add
+or improve guarantee, bonuses, fast action incentive, delivery upgrades, reduce
+reduce steps or complexity, increase time to value, uh increasing perceived
+certainty, increasing tangibility, uh social proof or evidence, insert
+recommendations. Value stack, right? I'll go through all I'll just going to skip
+that one. Okay. Pricing architecture. Here's optimal pricing. Here's our anchor
+pricing, middle, entry, bundles, hybrid pricing, payment plans, etc. Step three,
+add upsells, downsells, or cross-sells. This is optional. Boom boom boom boom
+boom. Step four, build the grand slam offer version. Create a completely new
+re-architect version of my offer that is clear, simple, dramatically blah blah
+blah blah blah. Keep going through. Um include the title, one sentence promise,
+target avatar, primary mechanism, delivery model, what they get, line by line,
+bonuses, guarantees, pricing, reasoning behind the pricing. That's a key one, by
+the way. Uh and CTA framing. Step five, high-converting offer positioning
+messaging. So, now give the elevator pitch, headlines, risk reversal statement,
+mechanisms. Keep going. Step six, now we have the output format and we can skip
+the output. So, is each step a new prompt? No. This is one This is the thing.
+It's like you guys are putting like two sentence prompts in and somehow
+expecting it to write a book for you. Like let me give you let me give the let
+me give you the way it works. The longer the prompt, the stronger the output.
+The shorter the prompt, the longer the output. It's kind of like the shorter the
+question, longer the answer. Like what's the meaning of life? Very short
+question, very long answer. If I said, "If you are a you know, uh you know, old
+white American man born in this time, married to this person, here's a book
+about that person. What is that person's meaning of life? It might be a
+sentence. That is, the more context you give, the more it narrows the answer.
+So, many of you guys probably Let me Let me know in the chat, actually, if you
+guys get annoyed when you put a simple question in and you get like two pages of
+answers. You're like, I just needed [ __ ] yes or no. Right? Do I ever get tired
+of cranking so much value? Brian, that's a great question. Um I don't know. I'll
+tell you Well, we'll find out by the end of the day. Um Yes, you guys get that.
+I get super annoyed, too. Why do you think that is? Short prompt, long response.
+Long prompt, short response. It's what it is. You have to give more context so
+that it answers exactly what you want. It doesn't know what you want, so it just
+gives you a ton of answers, hoping that one of them matches. Okay? Now, remember
+what we just did number 11 is that we got the new offer, right? The output was
+the offer. Yes? Yeah, I'm tired of it now. Thanks, buddy. So, we got the So,
+remember output input output input. So, the the output of prompt 11 was the
+prompt of number 12. So, we now have our offer. What do we need? We need our
+sales page copy generator. So, we say, okay, I have my offer. Now, I got to
+write the copy. So, your world-class copywriter specializes in writing
+high-converting sales page based on a clear, structured offer. So, I will paste
+my offer architect output including all of these things. So, we take the output
+and we paste it in as the input. And then scroll. We can just scroll all the
+way. It's fine. And then it's going to output all these por- portions. Now, the
+output of that one is going to be our sales page. And so, we say, hey, with the
+output of our offer architect, I want you to also create my sales call script.
+Right? Cuz we have our architect who gave us the output. We say, great. You're a
+world-class sales trainer and call flow architect. You turn offers into
+high-converting sales call scripts. I will paste my offer architect output. Your
+job is to create complete sales call script that a rep can follow. Boom. Now, we
+have our sales call script off of number 11. Yes, the chain prompt. Yes. And
+then number 14. Great. Now that we have our offer and then we have our sales
+page and we have our call script, what else we need? We need our VSL. So, we
+take our offer architect again, we put the output in, and then boom, we have our
+VSL. And so, just like that, when you can chain these together, you can build
+out entire marketing universes the way you want it. And the key point of all of
+this stuff, guys, is the three wheels I started this whole day with. Which is,
+we have to have the 47 questions of context around your business, right? And so,
+you say, now I'll paste my offer, create the VSL using the structure above,
+right? So, whenever you see those things at the bottom, that's where you clearly
+separate it with star star star star star, and then you put the put the inputs,
+right? Um [snorts] So, all of these will work if you have wheel number one,
+complete context of the business. Wheel number two, great prompts, which is what
+we're saying, clear instructions to follow. And then rule number three, the data
+source that it can pull from to make good quality outputs. Those are the three
+wheels of making AI work significantly better. People can tell the difference
+between truly automated work, which is why nothing I have sounds like I mean,
+doesn't Nothing I have sounds like AI. Right? I just use it because it helps you
+get more. That's the game. Right? The game is more now. That's the game. If you
+can do 10 times the work, which is the part that you guys I think many of you
+guys are missing. It's like, every one of you should be able to 10x your output
+with this and still keep your quality the same. That's the key. If you like, I
+know a bunch of you guys are like, I love Musely Made. Me, too. I spend time on
+it. I just don't spend 90 minutes like I used to. I spend like 20. Now, if some
+of you are like, well, you only spend 20 minutes on it now. Well, I don't know.
+I do Q&A things that are 5 minutes and people pay a lot of money to do stuff
+like that. Right? And so, like I just don't have to waste my time on lower value
+work. So, if I know what the core idea that I want to talk about is, once the
+core idea is there, flushing out some of the words in the sentences and the
+transitions and like bolding the stuff, like that stuff is a pain in the ass. It
+takes time. It's not valuable. Right? The value's in the idea. The value's in
+the narrative. The value's in the value's in the story. That's the value. The
+value's in the experience. And that's what everyone who's watching this, you
+guys, you have the experience. You guys are doing stuff in the real world. You
+need to document that. That's what the data sources are for. We have to have
+these data sources so that you can have something that's unique. Right? We want
+to use the AI like a workhorse. Right? Use it like a workhorse. Not to make your
+decisions for you. Real quick, I'm going to show you the exact 10-stage roadmap
+from zero to 100 million plus that less than 1% of companies finish I've now
+done multiple times. And so, I can say with a lot of confidence that these are
+the stages as head count increases that you need to get through. And I broke
+each of these down by eight different functions of the business, what the
+constraint feels like, like what are the symptoms of it when you're going
+through it, and then what steps we actually took to graduate. And we've done
+this across software, physical products, uh service businesses, brick and
+mortar, all of this, and it works. And it's my gift to you. It's absolutely
+free. And so, the link's in the description. Just enter your info and it'll spit
+it right back to you. Offer deck.

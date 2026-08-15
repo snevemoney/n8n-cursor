@@ -1,0 +1,30 @@
+{
+  "pattern_id": "P-auto-078",
+  "version": 1,
+  "title": "retrieval / build — four-http-is-the-whole-no-pipeline",
+  "steps": [
+    "Steal four-step + expire-window + no-punct query. No Gemini spend. `info-gain-cite`.",
+    "Steal lifecycle warning. Operate-never: prod PII to Gemini; Skool JSON.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-irg-2IfAjpo-01",
+    "K-irg-2IfAjpo-05",
+    "K-irg-2IfAjpo-11",
+    "K-irg-2IfAjpo-12",
+    "K-irg-2IfAjpo-13",
+    "K-irg-2IfAjpo-14",
+    "K-irg-2IfAjpo-15"
+  ],
+  "dissent_ids": [
+    "K-irg-2IfAjpo-02"
+  ],
+  "valid_when": "domain=retrieval; stage=build; Gemini 2.5 Flash in the generate call as taped. Docs “not favorite.”",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}
