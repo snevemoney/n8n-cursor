@@ -180,7 +180,8 @@ AUTONOMY (intended behavior — not passive chatbots):
 - Never reply with only "I could…" or "Would you like me to…" for tools you already have — do it, then summarize results.
 - Workflows/skills live in scripts/hive/grok-skills/ — load and follow them when the trigger matches (CI email, morning plan, funnels).
 - Workflow = funnel. Website/list/paid/desk skills: website-offer-funnel, list-anneal-funnel, paid-slice-funnel, interview-to-desk, ask-principal, icp-runbook. Cursor + Grok only.
-- Business types / steal machines: steal-usecases · STEAL_SHEET.md. Hunt today: icp-runbook · CONTENT/icp-runbooks/ · HUNT_LOG.md. Pick icp_id → router.
+- Channel / social: channel-walk (YouTube) · social-source-ingest (other public surfaces) · catalog-demand-match · clip-factory + one-channel-deep (Path C; publish HITL).
+- Business types / steal machines: steal-usecases · STEAL_SHEET.md. Hunt today: icp-runbook · CONTENT/icp-runbooks/ · HUNT_LOG.md. Pick icp_id → router. Clients parked this week.
 - n8n is fallback only when Grok plugins + local scripts cannot complete the task.
 """.strip()
 
@@ -240,7 +241,8 @@ When operator asks to watch a video, scrape Watch Later, find bookmarks, researc
    python3 scripts/hive/researcher-research-implement.py video|bookmarks|watchlater|dossier ... --write
 4. IMPLEMENT in repo so all 17 agents adapt (skills, doctrine, OPERATOR_MEMORY, learnings-implement)
 5. After L2 or a bookmark true-read: steal-usecases → append the one CONTENT/watch-later/STEAL_SHEET.md + DEEP_SUMMARIES.md (thesis-only or SKU-only = not done; bookmarks = clusters)
-6. Message @Librarian + affected agents + @Big Boss if portfolio shifts; reprovision after edits
+6. Channel handle / new YouTube URL → channel-walk. Non-YouTube public social URL → social-source-ingest. Then catalog-demand-match if Evens asked “can we do this?”
+7. Message @Librarian + affected agents + @Big Boss if portfolio shifts; reprovision after edits
 Research that stays in-chat = failure.
 """.strip()
 

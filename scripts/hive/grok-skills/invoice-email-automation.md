@@ -26,3 +26,6 @@ Send · charge · change payment terms · legal commitments
 
 ## Never
 Autonomous payment · quote $ as proof · skip Money Desk margin on client offers
+
+**Merged 2026-08-14:** `lRUpu2-KtGQ` invoice specialist + inbox handoff + PDF style ref + **draft** reply (he sends). Event wake ≠ 24/7 host. Gmail “send on my behalf” on-tape = operate-never (`send-removed`). ClickUp not auto-installed.
+

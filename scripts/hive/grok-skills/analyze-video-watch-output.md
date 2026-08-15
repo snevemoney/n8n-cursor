@@ -4,9 +4,19 @@
 
 **System implementation:** After analysis, Researcher runs `researcher-video-to-system` skill — chapters for operator + repo updates for all agents.
 
+**Browser path (capture, then this skill):**
+
+```
+IF Cursor → cursor-video-watch → packets/{id}/watch.json
+IF Grok Bot → Grok computer watch → same watch.json
+THEN analyze-video-watch.py / this skill (beats). Same card either way.
+```
+
+Do not tell a Grok desk to call Cursor MCP. Do not rip out Grok computer watch. Playwright / Chrome / browser-use = never for capture.
+
 ## When to use
 
-After Grok computer **watch** produces JSON with `frames[]` and `transcript[]` for the same video. Use for L3–L4 analysis when transcripts alone are insufficient.
+After either host writes JSON with `frames[]` and `transcript[]` for the same video (`cursor-video-watch` on Cursor, or Grok computer **watch** on Grok Bot). Use for L3–L4 analysis when transcripts alone are insufficient. Caption-only packets stay caption-only until that capture runs.
 
 ## Steps
 

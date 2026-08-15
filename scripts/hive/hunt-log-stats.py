@@ -9,6 +9,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_LOG = ROOT / "docs/hive/outer-heaven/CONTENT/icp-runbooks/HUNT_LOG.md"
+# Path B list-only uses — / - as empty url. Count the row; do not drop it.
+_EMPTY_URL = frozenset({"", "url", "—", "-", "–", "−"})
+FIXTURE_EMPTY_URL = (
+    Path(__file__).resolve().parent / "tests" / "fixtures" / "hunt-log-empty-url.md"
+)
 
 
 def parse_hunt_log(path: Path) -> dict:
@@ -38,8 +43,9 @@ def parse_hunt_log(path: Path) -> dict:
         if cells[0] in ("date", "") or not re.match(r"\d{4}-\d{2}-\d{2}", cells[0]):
             continue
         row = dict(zip(headers, cells))
-        if row.get("url") and row["url"] not in ("url", "—", "-"):
-            rows.append(row)
+        if "url" in row and row["url"] in _EMPTY_URL:
+            row["url"] = ""
+        rows.append(row)
 
     by_stage: dict[str, int] = {}
     by_icp: dict[str, int] = {}
@@ -67,11 +73,45 @@ def parse_hunt_log(path: Path) -> dict:
     }
 
 
+def self_test(path: Path | None = None) -> int:
+    """Fixture: url=— and url=- still count. Do not write live HUNT_LOG."""
+    fixture = path or FIXTURE_EMPTY_URL
+    stats = parse_hunt_log(fixture)
+    # Require Normand URL row + Path B url=— / url=- (do not write live HUNT_LOG).
+    if stats["total_rows"] < 3:
+        print(f"FAIL hunt-log-stats self-test: total_rows={stats['total_rows']} (expected >=3)")
+        return 1
+    by_icp = stats.get("by_icp_id") or {}
+    if by_icp.get("local-pro", 0) < 1:
+        print("FAIL hunt-log-stats self-test: Normand/local-pro row dropped")
+        return 1
+    if by_icp.get("industrial-smb", 0) < 1:
+        print("FAIL hunt-log-stats self-test: url=— Path B row dropped")
+        return 1
+    if by_icp.get("mktg-software", 0) < 1:
+        print("FAIL hunt-log-stats self-test: url=- Path B row dropped")
+        return 1
+    print(
+        f"hunt-log-stats self-test: OK (rows={stats['total_rows']} "
+        f"local-pro={by_icp.get('local-pro')} "
+        f"industrial-smb={by_icp.get('industrial-smb')} "
+        f"mktg-software={by_icp.get('mktg-software')})"
+    )
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--path", type=Path, default=DEFAULT_LOG)
     ap.add_argument("--format", choices=["json", "text"], default="json")
+    ap.add_argument(
+        "--self-test",
+        action="store_true",
+        help="Parse tests/fixtures/hunt-log-empty-url.md (url=— not dropped)",
+    )
     args = ap.parse_args()
+    if args.self_test:
+        return self_test()
     stats = parse_hunt_log(args.path)
     if args.format == "json":
         print(json.dumps(stats, indent=2))

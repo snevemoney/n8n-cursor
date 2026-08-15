@@ -12,6 +12,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE_DIR = Path(__file__).resolve().parent / "product-state"
+OPERATOR_FOCUS_PATH = ROOT / "docs/hive/outer-heaven/CONTENT/OPERATOR_FOCUS.json"
+# Live hunt is OPERATOR_FOCUS.icp_id on the operator project — not a second lane.
+_EMPTY_ICP = frozenset({"", "none", "(none)", "null", "parked"})
 
 LIFECYCLE_ORDER = [
     "idea",
@@ -122,9 +125,40 @@ def transition(project_id: str, lifecycle: str | None, agent_state: str | None, 
     return state
 
 
+def load_operator_focus_icp(path: Path | None = None) -> str:
+    """Return OPERATOR_FOCUS.icp_id, or empty if unset / missing."""
+    p = path or OPERATOR_FOCUS_PATH
+    if not p.is_file():
+        return ""
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return ""
+    return str(data.get("icp_id") or "").strip()
+
+
 def can_act(agent: str, project_id: str | None) -> dict[str, Any]:
     should_run, gate_prefix = _load_should_run()
     state = load_state(project_id) if project_id else {}
+    # Lead Hunter hunts the focused ICP on operator. clipengine allowlist unchanged.
+    if agent == "Lead Hunter" and project_id == "operator":
+        icp = load_operator_focus_icp()
+        if not icp or icp.lower() in _EMPTY_ICP:
+            decision: str = "IGNORE"
+            reason = (
+                "OPERATOR_FOCUS.icp_id empty — Lead Hunter NO_ACTION "
+                "(do not hunt random ICP)"
+            )
+            return {
+                "agent": agent,
+                "project_id": project_id,
+                "decision": decision,
+                "reason": reason,
+                "gate_prefix": gate_prefix(agent, decision, reason),
+            }
+        allowed = list(state.get("allowed_agents") or [])
+        if "Lead Hunter" not in allowed:
+            state = {**state, "allowed_agents": [*allowed, "Lead Hunter"]}
     decision, reason = should_run(agent, None, state)
     return {
         "agent": agent,

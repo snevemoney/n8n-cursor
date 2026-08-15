@@ -53,7 +53,7 @@ Use the right source — **execute tools**, don't ask operator to paste data you
 | **X bookmarks** | `~/.grokbot/x-bookmarks.json` or `CONTENT/x-bookmarks/ai-only.json` (sync via `~/.grokbot/scripts/x-bookmarks-sync.sh` if stale) |
 | **Web / topic** | `hive-web-research.py dossier` or `packet` |
 | **Papers** | `hive-web-research.py papers --query` |
-| **Social** | Grok browser read-only; label UNVERIFIED |
+| **Social** | `social-source-ingest` (IG/X/Reddit/FB/TikTok public text → packet). YouTube = `channel-walk`. Label UNVERIFIED |
 
 Budget: `python3 scripts/hive/os/knowledge-policy.py --hierarchy Researcher`
 

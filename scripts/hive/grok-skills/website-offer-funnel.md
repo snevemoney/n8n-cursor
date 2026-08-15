@@ -36,8 +36,8 @@ Named URL → paid install. This is the AI Partner machine.
 5. `pricing-margin-roi-guardrails` — HOLD or go. Pain $ = UNVERIFIED until they say it.
 6. `warm-draft-hitl` — approve draft ≠ approve send.
 7. After they reply: `discovery-spiced-constraint` then `demo-walk-script`.
-8. Delivery: `private-book-install` (their Cal/CTA). **Not** `paid-slice-funnel` unless we are selling *our* checkout.
-9. `proof-30-60-90` → retainer or stop. Change order if scope creeps.
+8. Delivery: `private-book-install` — draft a callback slot on *their* CTA/Cal. **HITL book** (`ask-principal`). No auto-Calendly fire. Tag the prospect `icp_id` (clinic → `local-clinic`, restaurant → `restaurant`, law → `law-adj`, fitness → `owner-coach-fitness`, trade → `local-pro`). Not always plumber. **Not** `paid-slice-funnel` unless we are selling *our* checkout.
+9. `proof-30-60-90` → retainer or stop. No-reply → `no-reply-follow-up`. No-show → `no-show-follow-up`. Change order if scope creeps.
 
 Hard step: HITL + `ask-principal`. You send / you approve money.
 
@@ -64,8 +64,9 @@ Proof page, cinematic slice, or *our* paid product.
 1. `session-bootstrap` then `slice-build` (bible → one system).
 2. Watchdog: preview **and** custom domain.
 3. *Their* book button → `private-book-install`.
-4. *Our* Stripe / new domain → `paid-slice-funnel`.
+4. *Our* Stripe / new domain → `paid-slice-funnel`. Pay HITL. No live keys from the factory.
 5. Website craft still applies (brief, tokens, SEO, ship) — see `CONTENT/website-building/`. Do not one-shot the kit.
+6. After a **ProofCheck** bite: update the owned offer surface (`CONTENT/knowledge/product-factory/PROMOTION.md` + SHARE-CARD). Do **not** publish. Do not build a new marketing site.
 
 ---
 

@@ -222,8 +222,10 @@ def youtube_to_watch(url: str) -> dict[str, Any]:
     if proc.returncode != 0:
         raise SystemExit(f"youtube fetch failed: {proc.stderr or proc.stdout}")
     data = json.loads(proc.stdout)
+    if not data.get("ok"):
+        raise SystemExit(f"youtube fetch failed: {proc.stdout}")
     segments = []
-    for seg in data.get("transcript") or data.get("segments") or []:
+    for seg in data.get("transcriptSegments") or data.get("transcript") or data.get("segments") or []:
         segments.append(
             {
                 "start": seg.get("start", "00:00"),
@@ -231,6 +233,8 @@ def youtube_to_watch(url: str) -> dict[str, Any]:
                 "text": seg.get("text") or seg.get("content") or "",
             }
         )
+    if not segments and data.get("fullTranscript"):
+        segments = [{"start": "00:00", "end": "00:00", "text": data["fullTranscript"]}]
     vid = re.search(r"[?&]v=([^&]+)", url)
     return {
         "video_id": vid.group(1) if vid else "unknown",

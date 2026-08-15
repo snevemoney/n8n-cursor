@@ -12,7 +12,7 @@ New offer, new lane, or “what do we sell” as **marketing language**.
 
 This is not Path A diagnosis:
 - Their ops sigh → `constraint-position` (after MUST)
-- Engagement scope → `four-blank-sku`
+- Engagement scope → `four-blank-sku` (`scripts/hive/grok-skills/four-blank-sku.md`) — one numbered KPI; baseline TBD/UNVERIFIED allowed; do not invent owner volume
 Write the sentence here; do not skip those two on a named client.
 
 ## Steps

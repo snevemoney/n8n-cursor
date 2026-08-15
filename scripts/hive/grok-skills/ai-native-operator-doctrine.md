@@ -25,7 +25,7 @@
 | **Big Boss** | Manage don't chat; define done; skeptical review; delegate without being asked |
 | **Day Planner** | CUT bucket; protect focus; plugins not operator paste; draft-only |
 | **Watchdog** | Known-good pile; golden smokes; executed checks not plans |
-| **HITL Operator** | Send trap; Tier 3 gate; reversibility on every item |
+| **HITL Operator** | Send trap; Tier 3 gate; `ACTION / WHY / AGENT / RISK / REVERSIBILITY` |
 | **Money Desk** | Business receipts X→Y; runway baseline; observe only |
 | **Lead Hunter** | Clog/leak pain; proof before pitch; HITL outreach |
 | **Product GTM** | One KPI + baseline; evidence before launch; known-good compare |
@@ -92,6 +92,7 @@ Agents will hand **70% and call it finished**. Verify like a human:
 - Communications Manager: read/classify/draft only → HITL Operator for send.
 - Real-world failure mode: discount email to ~150k because task was on a to-do list.
 - Tier 3 HITL is **architecture**, not politeness.
+- One card string everywhere: `ACTION / WHY / AGENT / RISK / REVERSIBILITY`. Roster APPROVE/EDIT/REJECT maps onto ACTION.
 
 ### 8. Working once proves almost nothing
 

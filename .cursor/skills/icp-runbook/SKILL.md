@@ -16,8 +16,8 @@ Default city: **Greater Montreal**
 2. If operator need is broader than one prospect → run `catalog-demand-match.py` first.
 3. Read `CONTENT/icp-runbooks/{icp_id}.md`.
 3. **Named URL?** Path A money spine (MUST → margin) before build — even for A/C types.
-4. Run **Today** (max 3 actions), then append **HUNT_LOG.md** with **stage** column (`discovered` minimum).
-5. Pipeline stages: `CONTENT/icp-runbooks/ICP_PIPELINE.md` · stats: `python3 scripts/hive/hunt-log-stats.py`
+4. Run **Today** (max 3 actions), then append **HUNT_LOG.md** with **stage** column (`discovered` minimum). Live Path A skills on disk: `lead-web-find` → `four-blank-sku` → `warm-draft-hitl` → `private-book-install` (HITL book, no auto-Calendly) → `discovery-spiced-constraint` → `demo-walk-script` → `proof-30-60-90`. Follow-up: `no-reply-follow-up` · `no-show-follow-up`.
+5. Pipeline stages: `CONTENT/icp-runbooks/ICP_PIPELINE.md` · stats: `python3 scripts/hive/hunt-log-stats.py` (needs `stage` on the live header).
 6. Session 2 on next loop.
 
 Proof in client drafts: public URLs only · STL `:3007` · cinematic `:3005` · MCP `:3006`.

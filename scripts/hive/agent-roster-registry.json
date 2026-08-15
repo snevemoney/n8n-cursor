@@ -9,8 +9,8 @@
       "id": "grok-os-big-boss",
       "lane": "strategy",
       "title": "Chief of staff",
-      "operatorSummary": "Set daily priorities across life, business, wealth, and projects; arbitrate ownership conflicts.",
-      "partnerOutcome": "Attention overload \u2014 one ranked focus list instead of 17 competing voices.",
+      "operatorSummary": "Set daily priorities across the multi-business portfolio (websites, Amazon, dropship, hive OS, future lanes); arbitrate ",
+      "partnerOutcome": "Single-product myopia \u2014 one ranked focus list per ACTIVE business lane plus cross-portfolio delegation.",
       "valueBucket": "strategy",
       "status": "core",
       "core": true
@@ -86,8 +86,8 @@
       "id": "grok-os-researcher",
       "lane": "intelligence",
       "title": "Evidence & OSINT",
-      "operatorSummary": "Gather cited evidence; label FACT/INFERENCE/OPINION/UNVERIFIED; report uncertainty.",
-      "partnerOutcome": "Hype-driven decisions \u2014 verifiable briefs before money or build commits.",
+      "operatorSummary": "Gather cited evidence; label FACT/INFERENCE/OPINION/UNVERIFIED; produce Research Packets. When operator shares a video o",
+      "partnerOutcome": "Hype and chat-only summaries \u2014 timestamped chapters for operator plus repo/skills/memory updates so the fleet learns how",
       "valueBucket": "intelligence",
       "status": "core",
       "core": true
@@ -175,7 +175,7 @@
       "lane": "comms",
       "title": "Email triage & drafts",
       "operatorSummary": "Classify inbox, label/archive noise, summarize important threads, draft replies.",
-      "partnerOutcome": "Inbox attention tax \u2014 relationship-aware triage without unrestricted sending.",
+      "partnerOutcome": "Inbox attention tax \u2014 relationship-aware triage; send removed.",
       "valueBucket": "comms",
       "status": "core",
       "core": true

@@ -13,6 +13,12 @@
   <dict>
     <key>HIVE_OBSIDIAN_VAULT</key>
     <string>REPLACE_VAULT</string>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/opt/homebrew/opt/node@20/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>HOME</key>
+    <string>REPLACE_HOME</string>
+    <key>OUTER_HEAVEN_MIRROR_TIMEOUT</key>
+    <string>120</string>
   </dict>
   <key>StartInterval</key>
   <integer>900</integer>

@@ -29,3 +29,5 @@ Send / dial / book = operator. No auto-dialer. No mass-DM.
 - AI on the call instead of around the call
 - Course/community CTA as the product
 - Farms or fake-follower distribution
+
+**Merged 2026-08-14:** `I7mpF7_pnPM` warm network first; no paid ads; no mass-DM. Draft only (`send-removed`). Tape $ UNVERIFIED.

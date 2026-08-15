@@ -31,3 +31,6 @@ python3 scripts/hive/catalog-lane-upgrade.py --parent-model product-ad-from-phot
 
 ## Never
 New portfolio lane from chat · fake revenue claims · skip pilot gate
+
+**Merged 2026-08-14:** `lRUpu2-KtGQ` — phone photo + `/` skill (exploding teardown) + Higgsfield plugin. Same machine. Skill file = the repeatable recipe. Publish HITL. Claude Cowork on-tape only.
+

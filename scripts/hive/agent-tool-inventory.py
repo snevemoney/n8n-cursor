@@ -23,6 +23,15 @@ MATRIX = ROOT / "docs/hive/outer-heaven/CONTENT/job-cards/TOOL_MATRIX.md"
 JOB_CARDS = ROOT / "docs/hive/outer-heaven/CONTENT/job-cards"
 N8N_CATALOG = ROOT / "scripts/hive/n8n-catalog.json"
 SKILLS_DIR = ROOT / "scripts/hive/grok-skills"
+GRADE_ROOT = ROOT / "docs/hive/outer-heaven/CONTENT/knowledge/workflows/dry-runs"
+DEFAULT_WAKE = [
+    "Forge",
+    "Watchdog",
+    "HITL Operator",
+    "Researcher",
+    "Communications Manager",
+]
+COLD_UNLESS_NAMED = ["Wealth Manager", "Personal CFO"]
 
 _roles_spec = importlib.util.spec_from_file_location(
     "grokbot_agent_roles", Path(__file__).resolve().parent / "grokbot-agent-roles.py"
@@ -50,7 +59,7 @@ SEED_TOOLS: dict[str, dict] = {
         "hitl": "draft",
         "owners": ["Communications Manager", "Day Planner", "Big Boss", "Career Strategist"],
         "never": ["Wealth Manager"],
-        "note": "Send is Tier 3. Career = read employer threads only.",
+        "note": "Send removed. Draft on disk. Outbound = Gmail SMTP from env (SMTP_*), not Gmail MCP. Career = read employer threads only.",
     },
     "calendar": {
         "layer": "grok_plugin",
@@ -90,7 +99,7 @@ SEED_TOOLS: dict[str, dict] = {
         "hitl": "read",
         "owners": list(CORE),
         "never": [],
-        "note": "Read-only research/demos. No localhost in client drafts.",
+        "note": "Grok Bot path = Grok Bot web browser (do not call Cursor MCP). Cursor path = cursor-ide-browser. Playwright is Scorpion e2e only. Research/demos. No localhost in client drafts.",
     },
     "shell": {
         "layer": "grok_native",
@@ -196,26 +205,187 @@ SHARED_NEVER = ["vapi", "n8n.outbound-calls", "n8n.dentist-voice-agent", "n8n.vo
 
 # Extra use beyond shared (never always includes SHARED_NEVER)
 SEED_USE: dict[str, list[str]] = {
-    "Big Boss": ["gmail", "calendar", "github"],
-    "Day Planner": ["gmail", "calendar", "n8n.voice-assistant-telegram"],
-    "Watchdog": ["github", "n8n_trigger_catalog_webhook"],
-    "HITL Operator": ["twilio_number", "n8n.on-demand-calling", "n8n.elevenlabs-post-call", "hitl_propose_action"],
-    "Money Desk": ["ce_list_actions", "ce_lookup_lead"],
-    "Lead Hunter": ["ce_lookup_lead"],
-    "Product GTM": ["ce_list_actions", "ce_lookup_lead"],
-    "Researcher": ["scorpion_register_outcome"],
-    "Forge": ["github", "n8n_trigger_catalog_webhook"],
-    "Creative Studio": ["higgsfield", "n8n.elevenlabs-post-call"],
-    "Consultant": [],
-    "Librarian": [],
+    "Big Boss": [
+        "gmail",
+        "calendar",
+        "github",
+        "skill.checkable-stop",
+        "skill.state-json",
+        "skill.hosted-neq-scheduled",
+        "skill.observe-pane",
+        "skill.assume-it-will-touch",
+        "skill.api-macro-vision",
+        "skill.channel-walk",
+        "skill.coverage-loop",
+        "skill.website-offer-funnel",
+        "skill.pipeline-stage-brief",
+        "skill.catalog-demand-match",
+        "skill.desk-wiki-before-work",
+        "skill.dark-factory",
+        "skill.skill-from-session",
+        "skill.actuate-tape-skill",
+    ],
+    "Day Planner": [
+        "gmail",
+        "calendar",
+        "n8n.voice-assistant-telegram",
+        "skill.checkable-stop",
+        "skill.hosted-neq-scheduled",
+        "skill.specialist-handoff",
+    ],
+    "Watchdog": [
+        "github",
+        "n8n_trigger_catalog_webhook",
+        "skill.golden-test-loop",
+        "skill.checkable-stop",
+        "skill.verify-after-browser",
+        "skill.separate-verifier",
+        "skill.side-effect-not-essay",
+        "skill.observe-pane",
+        "skill.knowledge-audit",
+        "skill.dark-factory",
+        "skill.actuate-tape-skill",
+    ],
+    "HITL Operator": [
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "n8n.elevenlabs-post-call",
+        "hitl_propose_action",
+        "skill.ask-principal",
+        "skill.send-removed",
+        "skill.confirm-then-actuate",
+        "skill.input-required-gate",
+        "skill.checkable-stop",
+        "skill.verify-after-browser",
+        "skill.sanitize-in-check-out",
+        "skill.vault-not-prompt",
+        "skill.assume-it-will-touch",
+        "skill.specialist-handoff",
+    ],
+    "Money Desk": [
+        "ce_list_actions",
+        "ce_lookup_lead",
+        "skill.token-receipt",
+        "skill.catalog-demand-match",
+        "skill.checkout-in-one-sitting",
+    ],
+    "Lead Hunter": [
+        "ce_lookup_lead",
+        "skill.steal-usecases",
+        "skill.catalog-demand-match",
+        "skill.website-offer-funnel",
+        "skill.icp-runbook",
+        "skill.filter-then-llm",
+    ],
+    "Product GTM": [
+        "ce_list_actions",
+        "ce_lookup_lead",
+        "skill.website-offer-funnel",
+        "skill.outcome-offer-funnel",
+        "skill.paid-slice-funnel",
+        "skill.catalog-demand-match",
+        "skill.one-person-usecases",
+        "skill.mcp-on-private-demo",
+        "skill.checkout-in-one-sitting",
+    ],
+    "Researcher": [
+        "scorpion_register_outcome",
+        "skill.channel-walk",
+        "skill.social-source-ingest",
+        "skill.steal-usecases",
+        "skill.deep-video-learning",
+        "skill.capability-acquisition",
+        "skill.multimodal-youtube-learning",
+        "skill.researcher-research-to-system",
+        "skill.researcher-video-to-system",
+        "skill.cursor-video-watch",
+        "skill.analyze-video-watch-output",
+        "skill.catalog-demand-match",
+        "skill.filter-then-llm",
+        "skill.coverage-loop",
+        "skill.verify-after-browser",
+        "skill.sanitize-in-check-out",
+        "skill.knowledge-architecture",
+    ],
+    "Forge": [
+        "github",
+        "n8n_trigger_catalog_webhook",
+        "skill.verify-after-browser",
+        "skill.api-macro-vision",
+        "skill.vault-not-prompt",
+        "skill.cinematic-recipe",
+        "skill.mcp-on-private-demo",
+        "skill.forward-deployed-gap",
+        "skill.seedance-site",
+        "skill.dark-factory",
+        "skill.skill-from-session",
+        "skill.actuate-tape-skill",
+        "skill.roadblock-bank",
+    ],
+    "Creative Studio": [
+        "higgsfield",
+        "n8n.elevenlabs-post-call",
+        "skill.clip-factory",
+        "skill.cinematic-recipe",
+        "skill.motion-grade-pipeline",
+        "skill.higgsfield-ae-vectors",
+        "skill.script-beat-motion",
+        "skill.seedance-site",
+    ],
+    "Consultant": [
+        "skill.steal-usecases",
+        "skill.catalog-demand-match",
+        "skill.website-offer-funnel",
+        "skill.one-person-usecases",
+        "skill.forward-deployed-gap",
+    ],
+    "Librarian": [
+        "skill.state-json",
+        "skill.filter-then-llm",
+        "skill.wiki-ingest",
+        "skill.knowledge-architecture",
+        "skill.knowledge-audit",
+        "skill.channel-walk",
+        "skill.coverage-loop",
+        "skill.desk-wiki-before-work",
+        "skill.skill-from-session",
+        "skill.actuate-tape-skill",
+        "skill.roadblock-bank",
+    ],
     "Wealth Manager": [],
     "Personal CFO": [],
-    "Career Strategist": ["gmail"],
-    "Communications Manager": ["gmail", "twilio_number", "n8n.on-demand-calling", "n8n.voice-assistant-telegram"],
-    "Publishing Engine": ["higgsfield"],
+    "Career Strategist": [
+        "gmail",
+        "skill.interview-gym",
+        "skill.context-docs",
+        "skill.forward-deployed-gap",
+    ],
+    "Communications Manager": [
+        "gmail",
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "n8n.voice-assistant-telegram",
+        "skill.send-removed",
+        "skill.confirm-then-actuate",
+        "skill.input-required-gate",
+        "skill.sanitize-in-check-out",
+        "skill.filter-then-llm",
+        "skill.specialist-handoff",
+    ],
+    "Publishing Engine": [
+        "higgsfield",
+        "skill.one-channel-deep",
+        "skill.clip-factory",
+        "skill.verify-after-browser",
+        "skill.sanitize-in-check-out",
+        "skill.voice-script-from-operator",
+        "skill.script-beat-motion",
+        "skill.checkout-in-one-sitting",
+    ],
 }
 
 SEED_NEVER_EXTRA: dict[str, list[str]] = {
+    "Day Planner": ["n8n_trigger_catalog_webhook", "hive_send_report"],
     "Lead Hunter": ["twilio_number", "n8n.on-demand-calling", "gmail"],
     "Product GTM": ["twilio_number", "n8n.on-demand-calling"],
     "Creative Studio": ["github", "ce_list_actions", "ce_lookup_lead"],
@@ -253,6 +423,39 @@ def _uniq(items: list[str]) -> list[str]:
             seen.add(i)
             out.append(i)
     return out
+
+
+def _assigned_skill_ids() -> set[str]:
+    assigned: set[str] = set()
+    for tools in SEED_USE.values():
+        for tid in tools:
+            if tid.startswith("skill."):
+                assigned.add(tid)
+    return assigned
+
+
+def _skill_has_watchdog_grade(slug: str) -> bool:
+    if not GRADE_ROOT.is_dir():
+        return False
+    exact = GRADE_ROOT / slug / "watchdog" / "GRADE.md"
+    if exact.is_file() and exact.stat().st_size > 0:
+        return True
+    for path in GRADE_ROOT.glob(f"{slug}-*/watchdog/GRADE.md"):
+        if path.is_file() and path.stat().st_size > 0:
+            return True
+    return False
+
+
+def _skill_status(slug: str, tid: str, assigned: set[str]) -> tuple[str, str]:
+    rel = f"scripts/hive/grok-skills/{slug}.md"
+    if _skill_has_watchdog_grade(slug):
+        return "connected", f"{rel} · Watchdog GRADE on disk"
+    if tid in assigned:
+        return (
+            "wired_untested",
+            f"{rel} · in SEED_USE · no Watchdog GRADE · file ≠ connected",
+        )
+    return "playbook", f"{rel} · playbook on disk · load ≠ live"
 
 
 def _hive_tool_meta(tool_id: str) -> dict:
@@ -301,19 +504,33 @@ def discover_tools(existing: dict[str, dict]) -> dict[str, dict]:
                 "note": (entry.get("note") or "n8n catalog webhook")[:160],
             }
 
+    assigned = _assigned_skill_ids()
     if SKILLS_DIR.is_dir():
         for p in sorted(SKILLS_DIR.glob("*.md")):
             tid = f"skill.{p.stem}"
-            if tid not in tools:
-                tools[tid] = {
-                    "layer": "skill",
-                    "status": "connected",
-                    "hitl": "read",
-                    "owners": [],
-                    "never": [],
-                    "note": f"scripts/hive/grok-skills/{p.name}",
-                }
+            status, note = _skill_status(p.stem, tid, assigned)
+            if tid in tools:
+                if tools[tid].get("status") != "kill":
+                    tools[tid]["status"] = status
+                    tools[tid]["note"] = note
+                continue
+            tools[tid] = {
+                "layer": "skill",
+                "status": status,
+                "hitl": "read",
+                "owners": [],
+                "never": [],
+                "note": note,
+            }
     return tools
+
+
+def _wake_for(name: str) -> str:
+    if name in DEFAULT_WAKE:
+        return "default"
+    if name in COLD_UNLESS_NAMED:
+        return "cold"
+    return "on_demand"
 
 
 def build_agents() -> dict[str, dict]:
@@ -322,7 +539,7 @@ def build_agents() -> dict[str, dict]:
         use = _uniq([*SHARED_USE, *SEED_USE.get(name, [])])
         never = _uniq([*SHARED_NEVER, *SEED_NEVER_EXTRA.get(name, [])])
         never = [t for t in never if t not in use]
-        agents[name] = {"use": use, "never": never}
+        agents[name] = {"use": use, "never": never, "wake": _wake_for(name)}
     return agents
 
 
@@ -332,11 +549,27 @@ def build_inventory() -> dict:
     return {
         "version": "1.0.0",
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "factory": {
+            "level": 3,
+            "kind": "process",
+            "loop": ["code", "surface", "chat"],
+            "product_factory": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/",
+            "not": [
+                "unsupervised dark plant",
+                "auto-merge to users",
+                "factory as company SKU",
+            ],
+        },
+        "default_wake": list(DEFAULT_WAKE),
+        "cold_unless_named": list(COLD_UNLESS_NAMED),
         "rules": [
             "Grok plugins are workspace-shared — assignment is policy, not OAuth isolation",
             "PSTN stays on n8n + HITL — no Twilio/ElevenLabs keys in Cursor or Grok plugins",
             "Kill tools must never appear in agents.use",
             "Hive tools in use must be in grokbot-agent-roles allowlist",
+            "Skill status: playbook = file exists; wired_untested = in a desk use list and no Watchdog GRADE; connected = Watchdog GRADE.md on disk. SKILL.md ≠ connected.",
+            "Default wake: Forge, Watchdog, HITL Operator, Researcher, Communications Manager. Wealth Manager and Personal CFO stay cold unless Evens names them.",
+            "Product-factory = primitives + roadblock bank + Path C promotion. Not a sold SKU. connected only after Watchdog GRADE.",
         ],
         "layers": ["grok_plugin", "grok_native", "mac_script", "hive_tool", "n8n_webhook", "skill"],
         "tools": tools,
@@ -386,6 +619,19 @@ def check(data: dict | None = None) -> list[str]:
         for tid in SHARED_NEVER:
             if tid in use:
                 errors.append(f"{name} uses shared-never {tid}")
+    wake_default = set(data.get("default_wake") or [])
+    for name in COLD_UNLESS_NAMED:
+        if name in wake_default:
+            errors.append(f"{name} must not be on default wake")
+        wake = (agents.get(name) or {}).get("wake")
+        if wake and wake != "cold":
+            errors.append(f"{name} wake must be cold, got {wake}")
+    for tid, meta in tools.items():
+        if meta.get("layer") != "skill" or meta.get("status") != "connected":
+            continue
+        slug = tid.removeprefix("skill.")
+        if not _skill_has_watchdog_grade(slug):
+            errors.append(f"{tid} status=connected without Watchdog GRADE")
     return errors
 
 

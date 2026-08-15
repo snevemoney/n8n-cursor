@@ -207,12 +207,19 @@ def philanthropy_agent_id(grok_agent: str) -> str | None:
     return row[0] if row else None
 
 
+# Day Planner consumes digests. Do not let comms_qa inherit webhook/send.
+DAY_PLANNER_DENY = frozenset({"n8n_trigger_catalog_webhook", "hive_send_report"})
+
+
 def allowed_tools(grok_agent: str) -> list[str] | None:
     row = _load_roster_map().get(grok_agent.strip())
     if not row:
         return None
     agent_id, profile = row
-    return tools_for_profile(profile, agent_id)
+    tools = tools_for_profile(profile, agent_id)
+    if grok_agent.strip() == "Day Planner":
+        tools = [t for t in tools if t not in DAY_PLANNER_DENY]
+    return tools
 
 
 def tool_allowed(grok_agent: str, tool: str) -> tuple[bool, str]:
@@ -237,12 +244,15 @@ def tool_allowed(grok_agent: str, tool: str) -> tuple[bool, str]:
 def list_policy() -> dict:
     agents = []
     for name, (agent_id, profile) in sorted(_load_roster_map().items()):
+        tools = tools_for_profile(profile, agent_id)
+        if name == "Day Planner":
+            tools = [t for t in tools if t not in DAY_PLANNER_DENY]
         agents.append(
             {
                 "grokAgent": name,
                 "philanthropyAgentId": agent_id,
                 "profile": profile,
-                "tools": tools_for_profile(profile, agent_id),
+                "tools": tools,
             }
         )
     return {"grokAgents": agents, "hiveTools": sorted(HIVE_TOOLS)}

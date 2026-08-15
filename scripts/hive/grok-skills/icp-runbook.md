@@ -20,8 +20,8 @@ Operator or agent tags a prospect with `icp_id`, or says “hunt [type] today.�
 3. Confirm Path A / B / C from the runbook (do not guess).
 4. **Named URL on any client ICP?** Run Path A money spine first: MUST → constraint → four-blank → margin — **before** build (even A/C types).
 5. Run the **Today** block — three actions max this session.
-6. **Append row(s) to `HUNT_LOG.md`** (date · icp_id · city · url · leak · contact · MUST · **stage** · next · owner). Default `stage=discovered`.
-7. Follow the skill chain in order; hard step = HITL.
+6. **Append row(s) to `HUNT_LOG.md`** (date · icp_id · city · url · leak · contact · MUST · **stage** · next · owner). Default `stage=discovered`. Stats: `python3 scripts/hive/hunt-log-stats.py`.
+7. Follow the skill chain in order; hard step = HITL. On disk: `lead-web-find` · `four-blank-sku` · `warm-draft-hitl` · `private-book-install` (draft slot, HITL book, icp_id not always plumber) · `discovery-spiced-constraint` · `demo-walk-script` · `proof-30-60-90` · `no-reply-follow-up` · `no-show-follow-up`.
 8. Map pattern → `usecase-to-sku` after Consultant POSITION (Path A).
 9. Never quote tape/tweet $. Stack = Cursor + Grok only.
 

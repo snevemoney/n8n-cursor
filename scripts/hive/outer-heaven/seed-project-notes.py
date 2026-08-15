@@ -19,6 +19,8 @@ DEFAULT_TARGET = ROOT / "scripts/hive/obsidian-vault-template/00_Outer_Heaven/PR
 
 
 def parse_registry() -> list[dict]:
+    if not REGISTRY_TS.is_file():
+        return []
     text = REGISTRY_TS.read_text(encoding="utf-8")
     entries: list[dict] = []
     blocks = re.findall(r"\{\s*id:\s*'([^']+)'.*?\}", text, re.DOTALL)

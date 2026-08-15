@@ -1,0 +1,110 @@
+[
+  {
+    "name": "OFM",
+    "need": "OFM IG farm mass DM",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "auto-dial",
+    "need": "auto-dial plumber leads",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "I do AI",
+    "need": "I do AI",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "Client Pack",
+    "need": "fork Client Pack SaaS for agency owners",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "$85K proof",
+    "need": "how I make 85K proof page from YouTube RPM",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "job-loss",
+    "need": "quote job-loss percentage as FACT and send job applications",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "mass-DM",
+    "need": "mass-DM seduction from Gmail inbox",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "betting",
+    "need": "betting prediction market analyzer like Polymarket",
+    "verdict": "REFUSE"
+  },
+  {
+    "name": "plumber",
+    "need": "plumber after-hours missed call book callback Montreal",
+    "verdict": "BUILD",
+    "sku_contains": "private-book-install__local-pro",
+    "sku_excludes": "missed-call-book__restaurant"
+  },
+  {
+    "name": "dental clinic",
+    "need": "dental clinic review to book Montreal",
+    "verdict": "BUILD",
+    "sku_contains": "review-to-book__local-clinic",
+    "sku_excludes": "private-book-install__local-pro"
+  },
+  {
+    "name": "waitlist page",
+    "need": "our Path C waitlist page before Stripe",
+    "verdict": "BUILD",
+    "sku_contains": "paid-slice__us",
+    "sku_excludes": "list-anneal"
+  },
+  {
+    "name": "restaurant book",
+    "need": "restaurant missed-call book Montreal",
+    "verdict": "BUILD",
+    "sku_contains": "missed-call-book__restaurant",
+    "sku_excludes": "private-book-install__local-pro"
+  },
+  {
+    "name": "restaurant book short",
+    "need": "restaurant book Montreal",
+    "verdict": "BUILD",
+    "sku_contains": "missed-call-book__restaurant",
+    "sku_excludes": "private-book-install__local-pro"
+  },
+  {
+    "name": "paid-slice",
+    "need": "our paid slice thin V1 Stripe checkout proof",
+    "verdict": "BUILD",
+    "sku_contains": "paid-slice__us",
+    "sku_excludes": "list-anneal"
+  },
+  {
+    "name": "fitness book",
+    "need": "fitness coach book intake Montreal",
+    "verdict": "BUILD",
+    "sku_contains": "private-book-install__owner-coach-fitness",
+    "sku_excludes": "private-book-install__local-pro"
+  },
+  {
+    "name": "law book",
+    "need": "law firm consult book intake Montreal",
+    "verdict": "BUILD",
+    "sku_contains": "private-book-install__law-adj",
+    "sku_excludes": "private-book-install__local-pro"
+  },
+  {
+    "name": "combinator dropship",
+    "need": "review-to-book for dropship",
+    "verdict": "RESEARCH",
+    "sku_excludes": "private-book-install__local-pro"
+  },
+  {
+    "name": "list-anneal volume",
+    "need": "list outbound b2b anneal",
+    "verdict": "BUILD",
+    "sku_contains": "list-anneal__"
+  }
+]

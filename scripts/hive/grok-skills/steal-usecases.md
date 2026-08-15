@@ -22,8 +22,10 @@ ICPs below are a **hunt catalog**, not new `business-lanes.json` rows. Do not re
 
 After L2 transcript / chapters for **each** video or Watch Later item, **or** after an X-bookmark true-read, that names an ICP, numbered offer, or delivery machine.
 
+**Videos:** load `deep-video-learning` first. Reconstruct A–K globally, **then** steal. Never “understand only, don’t steal.” Never “steal first, skip the transcript.” Steal is informed by A–K (why it works, conditions, exceptions, implicit rules from examples) — not a one-line skim.
+
 ## Extract steps
-1. Read the transcript **or** bookmark cluster. List every **who** (business type) and every **machine** (steps → hard step).
+1. **Video:** read the entire `full.txt` and finish A–K (`deep-video-learning`) before listing machines. **Bookmark cluster:** read the cluster. Then list every **who** (business type) and every **machine** (steps → hard step, checkable stop, questions, procedures, examples).
 2. For each: `steal_as` slug · Path A/B/C · hive skills · kill/quarantine. Tag `yt:{videoId}` or `x:{tweetId}`.
 3. Append to packet `STEAL_SHEET.md` **and** merge into the **one** master sheet + `business-types.json`. Bookmarks = cluster bullets, not one row per tweet.
 4. If sellable → add a row on `usecase-to-sku`. Promote new `icp_id` to OPERATOR_MEMORY FACTS.
@@ -76,9 +78,9 @@ Need a business type or SKU → open the master sheet, pick `icp_id` + `steal_as
 | `law-adj` | Solo/boutique consult rails | `private-book-install` | A |
 | `us` | Evens / hive OS | internal machines | C |
 
-**Kill (never an ICP / do not operate):** OFM / IG farms · betting / prediction markets · “I do AI” shops · generic landing mills · auto-dial factories · auto-book with no callback · tweet-$ swarms · jailbreak/watermark/NSFW · cold postcard mail · game studio this cycle.
+**Kill (never an ICP / do not operate):** OFM / IG farms · betting / prediction markets · “I do AI” shops · generic landing mills · auto-dial factories · auto-book with no callback · tweet-$ swarms · jailbreak/watermark/NSFW · cold postcard mail · game studio this cycle · Client Pack SaaS fork · “how I make $85K” / YouTube-RPM proof page · job-loss % as FACT · mass-DM / mass-DM seduction (even without OFM).
 
-**Steal the machine, do not skip the tape.** Farms/OTP/mass-DM stay operate-never. The workflow (many surfaces → one destination, dashboard as proof, parallel workers, redirect panel, speed, close) is fair steal. Evens keeps or kills.
+**Steal the machine, do not skip the tape.** Learn globally first, then steal. Farms/OTP/mass-DM stay operate-never. The workflow (many surfaces → one destination, dashboard as proof, parallel workers, redirect panel, speed, close) is fair steal. Evens keeps or kills.
 
 ---
 
@@ -124,4 +126,4 @@ Pick `steal_as`, then follow the hive skills. Hard step (send / pay / book / dep
 ---
 
 ## Never
-Quote YouTube $ or tweet $ as ours · operate an IG farm / OTP / mass-DM · auto-dial · betting SKU · skip Path A MUST/margin on a named client · add a `business-lanes.json` row from a YouTube/X ICP without operator yes · fork a second steal sheet under `x-bookmarks/` · quote job-loss % / “replace millions” as FACT · install Claude Code · give Lead Hunter Gmail because Clay was on screen · Indexceptional / rank-everywhere farm · quote 24h first page or “3,700 businesses” as FACT · agency-first · invent hours×$100 pain · Accenture $ as our price · AI-excitement as a MUST gate · skip an ugly tape because Cursor wrote CUT.
+Quote YouTube $ or tweet $ as ours · operate an IG farm / OTP / mass-DM / mass-DM seduction (even without OFM) · auto-dial · betting SKU · fork Client Pack SaaS (use `client-delivery-kit` analog only) · publish a “how I make $85K” / YouTube-RPM proof page · skip Path A MUST/margin on a named client · add a `business-lanes.json` row from a YouTube/X ICP without operator yes · fork a second steal sheet under `x-bookmarks/` · quote job-loss % / “replace millions” as FACT · install Claude Code · give Lead Hunter Gmail because Clay was on screen · Indexceptional / rank-everywhere farm · quote 24h first page or “3,700 businesses” as FACT · agency-first · invent hours×$100 pain · Accenture $ as our price · AI-excitement as a MUST gate · skip an ugly tape because Cursor wrote CUT · understand-only / skip steal · steal first / skip the transcript · one-line skim steal without A–K.

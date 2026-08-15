@@ -300,10 +300,10 @@ AGENT_CARDS: dict[str, AgentCard] = {
         "lane": "comms",
         "job": "Classify inbox, label/archive noise, summarize important threads, draft replies.",
         "runs_when": "email.received events, morning triage, or contact follow-up due.",
-        "solves": "Inbox attention tax — relationship-aware triage without unrestricted sending.",
+        "solves": "Inbox attention tax — relationship-aware triage; send removed.",
         "handoff_to": "Day Planner (deadlines), Money Desk (receipts), Career Strategist (employer), HITL Operator (send).",
         "hitl_level": "L3",
-        "suppression_note": "Send matrix: read/classify/draft=yes; business/employment/financial send=always HITL.",
+        "suppression_note": "Send removed — read/classify/draft only. Evens sends. No ack-reply.",
     },
     "Publishing Engine": {
         "title": "Content distribution",

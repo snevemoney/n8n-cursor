@@ -28,3 +28,6 @@ Stripe live keys, domain DNS, prod deploy = operator only.
 - Codex / Abacus / other site-gen vendors
 - “Preview works” = shipped
 - Quoting unverified $ dashboards
+
+**Merged 2026-08-14:** `I7mpF7_pnPM` — clock includes distribution; $1 card-test ≠ PMF; kill on opportunity cost (`ask-principal`). **Un-hid 2026-08-14:** those extra steps are `checkout-in-one-sitting` (not “already paid-slice”). This skill stays thin V1 + dual smoke. Abacus / betting SKU operate-never. Tape $ UNVERIFIED.
+

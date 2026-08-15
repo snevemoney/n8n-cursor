@@ -180,7 +180,13 @@ def _operator_focus_line() -> str:
         data = json.loads(path.read_text(encoding="utf-8"))
         icp = data.get("icp_id") or "(none)"
         city = data.get("city") or ""
-        return f"OPERATOR_FOCUS: icp_id={icp} city={city}"
+        factory = data.get("factory") or "process"
+        loop = data.get("loop") or []
+        loop_s = "→".join(loop) if isinstance(loop, list) else str(loop)
+        return (
+            f"OPERATOR_FOCUS: factory={factory} loop={loop_s} "
+            f"icp_id={icp} city={city} Path C=ProofCheck"
+        )
     except (json.JSONDecodeError, OSError):
         return ""
 
