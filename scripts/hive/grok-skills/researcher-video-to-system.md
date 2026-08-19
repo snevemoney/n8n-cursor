@@ -73,6 +73,10 @@ Chapter rules:
 
 CLI scaffold: `researcher-video-implement.py` writes `CHAPTERS.md` from transcript/watch JSON.
 
+### 2b. Steal sheet (mandatory)
+
+Same as parent `researcher-research-to-system.md` §2b–2c. After chapters: steal ICPs/machines into `STEAL_SHEET.md`, then write the **whole argument** into `DEEP_SUMMARIES.md`. Skill: `steal-usecases`. Thesis-only or SKU-only = failure.
+
 ### 3. System implementation map (agents adapt)
 
 Research without implementation = failure. For each takeaway, fill:
@@ -83,6 +87,7 @@ Research without implementation = failure. For each takeaway, fill:
 | e.g. "multi-business" | `business-lanes.json` | Big Boss | portfolio rotation |
 | e.g. new DON'T | `OPERATOR_MEMORY.md` LESSONS | Librarian | promote with provenance |
 | e.g. new procedure | `scripts/hive/grok-skills/{slug}.md` | all | skill reference |
+| e.g. named ICP / offer machine | `CONTENT/watch-later/STEAL_SHEET.md` | Researcher, GTM, Consultant | steal-usecases |
 | e.g. client pattern | `AI_PARTNER_PLAYBOOK.md` | Consultant, GTM | scope rule |
 
 **Implementation targets (check each video):**
@@ -128,6 +133,7 @@ Always end with:
 - Implement without labeling claims FACT vs INFERENCE
 - Let one business lane absorb unrelated video advice (tag lane id)
 - Reprovision agents without noting it in the reply
+- Stop at thesis — skip `steal-usecases` / `STEAL_SHEET.md`
 
 ---
 
@@ -136,3 +142,4 @@ Always end with:
 - `/analyze-video-watch-output` — L3–L4 beat merge
 - `scripts/hive/grok-skills/ai-native-operator-doctrine.md` — example of video → system pass
 - `docs/os/RESEARCH.md` — budgets
+- `steal-usecases.md` — ICP / machine extract after chapters

@@ -1,0 +1,190 @@
+# x-2088007687149601254 — raw quotes (do not overwrite)
+
+Packet is an X clip. Ground-truth speech below is from (1) fxtwitter tweet text, (2) YouTube `en-orig` captions on the source episode, and (3) Apple Speech on the X file itself (`xclip-speech.txt`). Pixels still unobserved.
+
+---
+
+## A. Tweet text (fxtwitter API 2026-08-14)
+
+Source: https://api.fxtwitter.com/realcolegordon/status/2088007687149601254
+Tweet: https://x.com/realcolegordon/status/2088007687149601254
+id: 2088007687149601254
+author: realcolegordon (Cole Gordon)
+created_at: Thu Aug 13 21:00:00 +0000 2026
+
+Daniel Fazio on the biggest mistake people make trying to start an AI automation agency:
+
+"Everyone's trying to do outbound. Stop. The problem is when you say 'I can automate your business,' that means a million and a half things. Nobody bites. There's one thing you can do instead that gets their head turning and makes them come to you saying 'oh, could you do that for me?' I had a client, total beginner, no audience at all. The second he started doing it, he partnered with another one of my guys and they're at 200, 300k a month now."
+
+He breaks down exactly what they did here 👇
+
+NOTE: Tweet text does **not** contain “don’t like the term AI” / “most people don’t like the term AI.”
+
+---
+
+## B. Episode caption window (yt-dlp en-orig json3) — XQ4hr48ikwY [50:12]–[52:56]
+
+Episode: https://www.youtube.com/watch?v=XQ4hr48ikwY
+Title: I Studied 5,000+ Offers. These Are The 8 BEST ($50-100M+)
+Channel: Cole Gordon
+This window is the speech that matches Cole’s posted quote (Fazio on AI automation agencies). X-clip exact in/out vs this clock: UNKNOWN. Caption-only. No invented clicks.
+
+[50:12] >> All right. So, I assume you're aware of
+[50:14] the whole like AI automation thing where
+[50:17] people are like you could sell you can
+[50:19] make $100,000 a month selling AI
+[50:22] consulting to businesses and like just
+[50:24] sell AI consulting to small businesses
+[50:25] or have you seen the people selling the
+[50:27] bisops on
+[50:28] >> you could sell a AI chatbot to a med spa
+[50:32] for $1,000 a month or or or or all that.
+[50:35] All right. So there's a way to make it
+[50:37] work and there's a way that flat out
+[50:40] just like absolutely 0% probability ever
+[50:42] works. So what I will say about it is
+[50:45] that
+[50:46] >> selling the bisop on teaching people
+[50:50] to do to sell the chat bots is a really
+[50:53] good business but that would work.
+[50:55] >> Yeah. Legitimately 0% of your customers
+[50:57] are going to get results. Nobody gets
+[50:58] results doing that. Also, if you try to
+[51:02] do outbound or sell to cold with just AI
+[51:06] consulting, also doesn't work.
+[51:08] Absolutely terrible. However, if you go
+[51:11] on X or YouTube and you start showing
+[51:16] any kind of AI automation you've built
+[51:18] at all, there is a completely disgusting
+[51:21] amount of traffic that you will get so
+[51:24] easily and so many inbound leads and
+[51:27] people saying, "Can you do can you do
+[51:28] something like that for me?" Right.
+[51:30] >> I had a client who he was he was trying
+[51:33] to do cold email. He had never done
+[51:35] content before ever, like really like
+[51:37] full actual beginner, like didn't didn't
+[51:39] have any audience at all.
+[51:40] >> And he was trying to sell like
+[51:42] automations and whatnot. And I was like,
+[51:43] dude,
+[51:44] >> the problem with what you're trying to
+[51:45] do is if you were to sell this to
+[51:47] outbound, one, it would need to be a
+[51:49] specific build, but like you don't know
+[51:51] what your specific build is yet. So what
+[51:53] you should do and what what the problem
+[51:56] people are having is if you say I can
+[51:58] help you automate your business
+[52:01] >> that's anything it it means a million
+[52:03] and a half things what you need to do is
+[52:05] show them examples of things you have
+[52:07] done and then it gets their head turning
+[52:09] and they're like oh now could you do
+[52:12] this actually so I had him start just
+[52:15] posting videos and threads on Twitter
+[52:17] and then he ended up partnering with
+[52:19] another one of my clients who was trying
+[52:20] to do the same thing and they're at like
+[52:21] 200 300k a month
+[52:23] literally just posting content about
+[52:26] automations that they've built. And then
+[52:28] this has been replicated with all the
+[52:30] other people who are in my thing who are
+[52:32] trying to do AI automation agencies. I'm
+[52:34] like, stop trying to do outbound. Stop
+[52:35] trying to do it. Just post stuff that
+[52:38] you already build. Like if you are going
+[52:40] to do outbound or like go into groups or
+[52:42] something of people who like are already
+[52:44] business owners and offer to do free
+[52:46] work. And the only exchange here is that
+[52:48] you get to document what you built and
+[52:50] that's it. And then you get to post it.
+[52:52] And I promise you will get a ton of
+[52:54] people coming to you and it is working
+[52:56] so well.
+
+---
+
+## C. Operator-heard (Evens, 2026-08-14) — not in captions
+
+operator-heard: "most people don't like the term AI"
+
+Search against this packet:
+- Tweet / fxtwitter: NOT FOUND
+- Episode en-orig captions, this window: NOT FOUND
+- Full-episode phrase search: "like the term" = false; "don't like AI" = false; "hate AI" = false; "nobody likes AI" = false
+
+Nearest caption lines that are **not** this claim (do not merge):
+- [51:02]–[51:06] "if you try to do outbound or sell to cold with just AI consulting, also doesn't work." → VIEW A (category pitch), not VIEW B (the word).
+- [53:23]–[53:30] Cole, after this beat, on a healthcare compliance example: "nobody likes it and the owners don't like it" → they don't like the **compliance process**, not the term AI.
+
+X-clip audio: **observed** 2026-08-14 (Apple Speech). VIEW B phrase still **not on the file**. If Evens heard it, it was not this clip (or not this audio). Keep as its own unit. Do not upgrade to SOURCE.
+
+---
+
+## D. $ on tape (UNVERIFIED)
+
+- $100,000 a month selling AI consulting (Cole setup)
+- AI chatbot to a med spa $1,000 a month (Cole)
+- beginner + partner 200, 300k a month (Fazio)
+- selling the info-product on teaching chatbot sales "would work" (Fazio) — not a hive SKU
+
+---
+
+## E. X-clip speech (Apple Speech, 2026-08-14) — amplify 2087950687942696960
+
+Source file: `xclip-speech.txt`. Duration 272.9s. Clock is **clip time**, not episode time. X `0:00` ≈ episode `[50:12]`. ASR errors left as heard (e.g. “Celtic cold” = sell to cold; “Zot bots” = chatbots; “no taking” = note taking; “Chamoth” = Chamath; “TPBN” = TBPN).
+
+Phrase search on this speech: “like the term” = false; “don’t like AI” = false; “hate AI” = false; “term AI” = false; “word AI” = false.
+
+[0:00.0-0:21.4] I assume you're aware of the whole, like, AI automation thing where people are like, you could sell, you can make $100,000 a month selling AI consulting to businesses and like, just so AI consulting to small businesses or have you seen the people selling the biz ops on, you could sell an AI chat bot to a med spa for a $1000 a month or all that.
+[0:21.4-0:21.8] All right.
+[0:21.9-0:28.9] So there's a way to make it work, and there's a way that flat out, just like absolutely 0% probability ever works.
+[0:29.0-0:44.3] So what I will say about it is that selling the Bizop, unteaching people, to sell the Zot bots, is a really good business, but yeah, legitimately 0% of your customers are going to get results.
+[0:44.3-0:45.8] Nobody gets results doing that.
+[0:45.8-0:54.3] Also, if you try to do outbound or Celtic cold with just AI consulting, also doesn't work.
+[0:54.4-0:55.2] Absolutely terrible.
+[0:55.3-1:15.6] However, if you go on X or YouTube and you start showing any kind of AI automation you've built at all, there is a completely disgusting amount of traffic that you will get so easily and so many inbound leads of people saying, can you can you do something like that for me?
+[1:15.7-1:21.4] I had a client who he was, he was trying to do cold email.
+[1:21.4-1:26.4] He had never done content before ever, like really like full actual beginner, like didn't have any audience at all.
+[1:26.5-1:29.2] and he was trying to sell like automations and whatnot.
+[1:29.2-1:34.2] And I was like, dude, the problem with what you're trying to do is if you were to sell this to outbound.
+[1:34.3-1:39.5] One, it would need to be a specific build, but like you don't know what your specific build is yet.
+[1:39.5-1:40.8] So what you should do.
+[1:40.9-1:48.1] And what the problem people are having is, if you say, I can help you automate your business, that's anything.
+[1:48.1-1:50.4] It means a 1000000 and a half things.
+[1:50.5-1:59.8] What you need to do is show them examples of things you have done and then it gets their head churning and they're like, oh, not, could you do this, actually?
+[1:59.9-2:03.2] So I had him start just posting videos and threads on Twitter.
+[2:03.2-2:09.3] And then he ended up partnering with another one of my clients who was trying to do the same thing. And there are like 200, 300 K a month now.
+[2:09.4-2:14.5] Literally just posting content about automations that they've built.
+[2:14.5-2:20.3] And then this has been replicated with all the other people who are in my thing who are trying to do AI automations agencies.
+[2:20.4-2:22.1] I'm like, stop trying to do outbound.
+[2:22.1-2:25.1] Stop trying to do it, just post stuff that you already build.
+[2:25.2-2:37.2] Like, if you are going to do outbound or like go into groups or something of people who like are already business owners and offer to do free work, and the only exchange here is that you get to document what you built, and that's it.
+[2:37.3-2:43.0] And then you get to post it and I promise you will get a ton of people coming to you and it is working so well.
+[2:43.0-2:45.0] Well, I think that works as well too.
+[2:45.1-2:54.0] And the way I would, the way I would imagine it would work through ads, is you just have to be very specific in terms of the problem you're solving who you're solving it for.
+[2:54.1-2:57.3] And then, again, in the ad, show like examples.
+[2:57.3-3:12.7] Yes. So I'm trying to think of like something that would be good off the top of my head, but maybe there's a really complex, BS like compliance process that your business has because you're in healthcare, there's always no taking or whatever, and nobody likes it, and the owners don't like it or whatever.
+[3:12.7-3:20.6] And you could basically, like, speak to that problem that you know they don't like and show what you build and, hey, do you want me to build this for you?
+[3:20.6-3:21.0] right?
+[3:21.1-3:25.3] And if it doesn't decrease your compliance work, by whatever, you know, you get a refund.
+[3:25.3-3:26.2] Yeah, da da da da.
+[3:26.4-3:28.1] So, yeah, I think that would be great.
+[3:28.1-3:32.9] And it's funny about that bizop is that, um, I posted this on X.
+[3:33.0-3:44.1] it's like Chamoth Papatia, or Palapatia, however you pronounce his name, you know, he started just basically an AI agency, but he did it for Enterprise, and it's doing like over $100000000000 a year.
+[3:44.2-3:52.0] Now, granted, and that's the thing about enterprise that I've learned, is a lot of the Legion for how to get those companies is just your network.
+[3:52.1-3:53.1] Yes, right?
+[3:53.2-3:54.5] And in his case, like his brand.
+[3:54.6-4:01.8] I mean, dude, his brand is, you know, if TPBN sold for 300, 200 to 300000000 to open AI, did you see that?
+[4:01.8-4:02.6] Right?
+[4:02.7-4:04.7] That's like the live streaming tech show.
+[4:04.8-4:08.4] They sold for like, it's somewhere between 100 to 300 for open AI.
+[4:08.4-4:09.0] Right?
+[4:09.1-4:14.6] So if they were able to do that, they have nowhere near the views as like all in, which are familiar with all in, right?
+[4:14.7-4:16.0] Which is like Chamoth's podcast.
+[4:16.1-4:18.1] So, I mean, he starts that business.
+[4:18.2-4:25.9] It's like, you know, their viewers probably, you know, they're they're super high end and obviously he's going to get some great customers and also he has a great network.
+[4:25.9-4:32.7] If you enjoyed this clip, you can check out the full podcast by clicking on the screen right here to check out the full episode.

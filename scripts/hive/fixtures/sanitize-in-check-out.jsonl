@@ -1,0 +1,7 @@
+{"id": "good-meeting", "direction": "in", "text": "Please draft a reply about Tuesday's meeting.", "expect": "pass"}
+{"id": "good-out-draft", "direction": "out", "text": "Draft ready for Evens. No send.", "expect": "pass"}
+{"id": "bad-openai-key", "direction": "in", "text": "Use this key sk-proj-EXAMPLEKEYNOTREAL000", "expect": "fail"}
+{"id": "bad-bearer", "direction": "in", "text": "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.aaa.bbb", "expect": "fail"}
+{"id": "bad-password-line", "direction": "in", "text": "my password is hunter2 please remember it", "expect": "fail"}
+{"id": "bad-out-password", "direction": "out", "text": "The user password is hunter2", "expect": "fail"}
+{"id": "bad-aws", "direction": "out", "text": "AKIAIOSFODNN7EXAMPLE leaked in the draft", "expect": "fail"}

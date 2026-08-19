@@ -1,0 +1,25 @@
+---
+description: Hive funnels run on Cursor + Grok Bot. Workflow = funnel. Slice builds. HITL on the hard step.
+alwaysApply: true
+---
+
+# Hive funnels + stack
+
+- **Workflow = funnel.** Same machine: who comes in → stages → hard step (Evens sends/pays/books).
+- **Factory:** we are a level-3 software factory (**process** + **product foundation**) — Evens plans + validates, Forge builds, Watchdog grades, merge ≠ ship. Loop: code → surface → chat. Machine: `dark-factory`. Card: `MATRIX-PROCESS-2026-08-15`. SIP “dark headless factory” = login/pay/share primitives (`CONTENT/knowledge/product-factory/`). Our desks = process. Both. Not a sold SKU. Not unsupervised 24/7. Next SKU reuses `primitives.json`. Default wake: Forge, Watchdog, HITL Operator, Researcher, Communications Manager.
+- **Stack:** Cursor (build, browser, repo) + Grok Bot (17 agents; default spawn is the five). Do not install or switch to Claude Cowork, Claude Code, Codex, ChatGPT, Gemini, Coda, Vapi, or Abacus. Those names are on-tape only.
+- **New project:** one long dump, then short loops (`session-bootstrap`).
+- **Builds:** one system per session (`slice-build`). Refuse the whole site/game in one prompt.
+- **Lists:** 50 → score 60–70% great → rewrite exclusions (`list-anneal-funnel`).
+- **Website offer:** `website-offer-funnel` is a **router**. Named client = Path A (MUST + margin + private-book). Volume list = Path B. Our Stripe/page = Path C. Do not skip the money spine on a client.
+- **Hard step:** send / pay / deploy / book / publish stay HITL (`ask-principal`).
+- **Loop:** no loop ships without `checkable-stop` (done-check + cap + cost). Until-satisfied is a weak stop. `/loop` only if Evens names the interval.
+- **Browser:** IF Cursor → `cursor-ide-browser` (navigate, snapshot, click, take_screenshot; lock/unlock). Not Chrome / Playwright / browser-use. IF Grok Bot → Grok Bot’s own web browser (do not call Cursor MCP). After a click, `verify-after-browser` (`ACT` → `EXPECTED` → `OBSERVED` → `COMPARE` → `NEXT`). Caption-only tapes skip; do not invent clicks. No headed send/pay/publish. Ladder first: `api-macro-vision`. Playwright stays Scorpion/app e2e only.
+- **Video watch:** IF Cursor → `cursor-video-watch` (`cursor-ide-browser` on a living YouTube tab → `packets/{id}/watch.json`). IF Grok Bot → Grok computer watch → same `watch.json`. THEN `analyze-video-watch-output`. Do not tell a Grok desk to call Cursor MCP. Caption-only until capture runs.
+- **Infra:** typed `state.json` (filter one key; `product_factory` points at the registry) · Watchdog grades Forge (`separate-verifier`) · permissions = tools (`assume-it-will-touch`) · sanitize-in / check-out (pass ≠ send) · hosted ≠ scheduled · vault-not-prompt · side-effect-not-essay · filter-then-llm · observe-pane (yellow = ask) · token-receipt on billed runs · after a mess write `roadblock-bank` (one JSON row).
+- **Channel / social:** `channel-walk` (YouTube catalog + PACKET+full.txt) · `social-source-ingest` (other public surfaces → packet-shaped note) · then `steal-sheet` / `catalog-demand-match`. Not six network clones. Publish HITL.
+- **Steal sheet:** after research, ICPs/machines go in `CONTENT/watch-later/STEAL_SHEET.md`. **Run today:** `CONTENT/icp-runbooks/{icp_id}.md` + skill `icp-runbook`. Whole argument: `DEEP_SUMMARIES.md`. Thesis-only is not done.
+- **Motion on a spoken beat:** `script-beat-motion`. **Demo≠their mess:** `forward-deployed-gap` (delivery/career gym, not a hunt).
+- **Actuate a wired tape:** `actuate-tape-skill` — factory pack + hidden hold-outs first, named bite, Watchdog GRADE after, scoreboard lists paths. Plate generate later. HITL deploy.
+- **Click live surface:** `click-live-site` (alias click-live-surface) — Maestro-style flow (launch / scroll / tap / swipe / assertVisible) on any owned UI a human can click (prod / staging / preview / localhost-if-ship). Host browser. Per-step `verify-after-browser`. Status on disk. Watchdog GRADE. Not Maestro CLI / Android lab / vibe-test SaaS. Native mobile = ASK. Repo with no UI → API/tests/GRADE.
+- Skill files: `scripts/hive/grok-skills/` and `.cursor/skills/hive-funnels/SKILL.md`.

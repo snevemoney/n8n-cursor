@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-pattern",
+  "title": "Hive pattern synthesis (layer 4)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pattern_id",
+    "version",
+    "title",
+    "steps",
+    "support_ids",
+    "dissent_ids",
+    "valid_when",
+    "less_relevant_when",
+    "confidence"
+  ],
+  "properties": {
+    "pattern_id": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "title": { "type": "string" },
+    "steps": { "type": "array", "items": { "type": "string" } },
+    "support_ids": { "type": "array", "items": { "type": "string" }, "description": "Atom ids that SUPPORT" },
+    "dissent_ids": { "type": "array", "items": { "type": "string" }, "description": "Atom ids that DISSENT — never drop" },
+    "valid_when": { "type": "string" },
+    "less_relevant_when": { "type": "string" },
+    "confidence": { "type": "string" },
+    "demonstration_count": { "type": "integer", "minimum": 0 },
+    "creator_count": { "type": "integer", "minimum": 0 },
+    "exceptions": { "type": "string" },
+    "linked_observation_ids": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Hive Operator Digest",
+  "meta": {
+    "status": "MISSING_FROM_REPO",
+    "note": "No repo export. Day Planner / Big Boss consume only. Do not import, activate, or POST /webhook/hive-operator-digest from this stub.",
+    "liveIdHint": null
+  },
+  "nodes": [],
+  "connections": {},
+  "active": false,
+  "_stub": true
+}

@@ -1,0 +1,1896 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-08-15",
+  "factory": {
+    "level": 3,
+    "kind": "process",
+    "loop": [
+      "code",
+      "surface",
+      "chat"
+    ],
+    "product_factory": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/",
+    "not": [
+      "unsupervised dark plant",
+      "auto-merge to users",
+      "factory as company SKU"
+    ]
+  },
+  "default_wake": [
+    "Forge",
+    "Watchdog",
+    "HITL Operator",
+    "Researcher",
+    "Communications Manager"
+  ],
+  "cold_unless_named": [
+    "Wealth Manager",
+    "Personal CFO"
+  ],
+  "rules": [
+    "Grok plugins are workspace-shared \u2014 assignment is policy, not OAuth isolation",
+    "PSTN stays on n8n + HITL \u2014 no Twilio/ElevenLabs keys in Cursor or Grok plugins",
+    "Kill tools must never appear in agents.use",
+    "Hive tools in use must be in grokbot-agent-roles allowlist",
+    "Skill status: playbook = file exists; wired_untested = in a desk use list and no Watchdog GRADE; connected = Watchdog GRADE.md on disk. SKILL.md \u2260 connected.",
+    "Default wake: Forge, Watchdog, HITL Operator, Researcher, Communications Manager. Wealth Manager and Personal CFO stay cold unless Evens names them.",
+    "Product-factory = primitives + roadblock bank + Path C promotion. Not a sold SKU. connected only after Watchdog GRADE."
+  ],
+  "layers": [
+    "grok_plugin",
+    "grok_native",
+    "mac_script",
+    "hive_tool",
+    "n8n_webhook",
+    "skill"
+  ],
+  "tools": {
+    "gmail": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "draft",
+      "owners": [
+        "Communications Manager",
+        "Day Planner",
+        "Big Boss",
+        "Career Strategist"
+      ],
+      "never": [
+        "Wealth Manager"
+      ],
+      "note": "Send removed. Draft on disk. Outbound = Gmail SMTP from env (SMTP_*), not Gmail MCP. Career = read employer threads only."
+    },
+    "calendar": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Day Planner",
+        "Big Boss"
+      ],
+      "never": [],
+      "note": "Never accept/invite without HITL."
+    },
+    "github": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "draft",
+      "owners": [
+        "Forge",
+        "Watchdog",
+        "Big Boss"
+      ],
+      "never": [
+        "Creative Studio",
+        "Publishing Engine"
+      ],
+      "note": "PR/CI. Prod merge = HITL."
+    },
+    "higgsfield": {
+      "layer": "grok_plugin",
+      "status": "connected",
+      "hitl": "draft",
+      "owners": [
+        "Creative Studio",
+        "Publishing Engine"
+      ],
+      "never": [
+        "Lead Hunter"
+      ],
+      "note": "Check authorized on this bot. Ad spend = HITL."
+    },
+    "brief": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "outer-heaven-brief.py \u2014 all 17"
+    },
+    "browser": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "Grok Bot path = Grok Bot web browser (do not call Cursor MCP). Cursor path = cursor-ide-browser. Playwright is Scorpion e2e only. Research/demos. No localhost in client drafts."
+    },
+    "shell": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "Cookbook scripts only. No secrets in chat."
+    },
+    "delegate": {
+      "layer": "grok_native",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "never": [],
+      "note": "In-chat @Agent with a concrete task."
+    },
+    "twilio_number": {
+      "layer": "n8n_webhook",
+      "status": "connected_n8n",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator",
+        "Communications Manager"
+      ],
+      "never": [
+        "Lead Hunter",
+        "Product GTM"
+      ],
+      "secret": "operator",
+      "note": "Number already on Twilio/n8n. Do not store digits or keys in git."
+    },
+    "n8n.elevenlabs-post-call": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "Creative Studio",
+        "HITL Operator"
+      ],
+      "never": [],
+      "n8n_id": "7GkfpweJWvHmzSQ0",
+      "catalog": "evens-elevenlabs-post-call",
+      "note": "Client audio = operatorConfirm. No vendor keys in Cursor/Grok."
+    },
+    "n8n.on-demand-calling": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator",
+        "Communications Manager"
+      ],
+      "never": [
+        "Lead Hunter",
+        "Product GTM"
+      ],
+      "n8n_id": "yYhgcj1b6XgPObIZ",
+      "catalog": "evens-on-demand-calling",
+      "note": "Hive number path. Propose only \u2014 Forge/Watchdog trigger after HITL."
+    },
+    "n8n.voice-assistant-telegram": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Day Planner",
+        "Communications Manager"
+      ],
+      "never": [],
+      "n8n_id": "EsQaobwWMvt3mPK0",
+      "note": "Telegram + Gcal \u2014 not PSTN. No client book."
+    },
+    "n8n.outbound-calls": {
+      "layer": "n8n_webhook",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "n8n_id": "xbMNXMcrgfYFDrCK",
+      "note": "Inactive autodial. Do not activate."
+    },
+    "n8n.dentist-voice-agent": {
+      "layer": "n8n_webhook",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "n8n_id": "i2CN5woqG017s6X8",
+      "note": "Auto-book voice adjacent. Do not revive."
+    },
+    "n8n.voice-assistant-2": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "n8n_id": "ikfzzGIQb6L7qRtr",
+      "note": "Inactive parked copy."
+    },
+    "vapi": {
+      "layer": "grok_plugin",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "note": "Second voice vendor \u2014 stack lock."
+    },
+    "auto-dial": {
+      "layer": "skill",
+      "status": "kill",
+      "hitl": "never",
+      "owners": [],
+      "never": [
+        "Big Boss",
+        "Day Planner",
+        "Watchdog",
+        "HITL Operator",
+        "Money Desk",
+        "Lead Hunter",
+        "Product GTM",
+        "Researcher",
+        "Forge",
+        "Creative Studio",
+        "Consultant",
+        "Librarian",
+        "Wealth Manager",
+        "Personal CFO",
+        "Career Strategist",
+        "Communications Manager",
+        "Publishing Engine"
+      ],
+      "note": "Kill ICP / machine."
+    },
+    "ce_approve_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_list_actions": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_lookup_lead": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_reject_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "ce_resolve_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "hitl_gate_status": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "hitl_propose_action": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "hive_send_report": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n_get_execution": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n_list_workflows": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n_trigger_catalog_webhook": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "scorpion_health": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "scorpion_list_missions": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "scorpion_register_outcome": {
+      "layer": "hive_tool",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "Fallback via grok-hive-tool.py \u2014 tokens stay on VPS."
+    },
+    "n8n.hive-golden-path-smoke-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-golden-path-smoke-notify",
+      "note": "JSON SSOT path is hive-golden-path-smoke (not hive-smoke-notify). Do not live-POST from docs."
+    },
+    "n8n.hive-outer-heaven-report-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-outer-heaven-report-notify",
+      "note": "n8n catalog webhook"
+    },
+    "n8n.phase9-pipedrive-lead": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "phase9-pipedrive-lead",
+      "note": "Pipedrive posts directly; do not trigger via tool unless operatorConfirm"
+    },
+    "n8n.hive-error-heal-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-error-heal-notify",
+      "note": "Secret 7 self-heal: registers ops.self_heal.proposed need_hitl; Forge opens PR, operator merges"
+    },
+    "n8n.hive-market-signal-ingest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-market-signal-ingest",
+      "note": "Secret 9 \u2014 planned; ingest market signals. Prefer: scripts/hive/hive-revenue-sensors.py ingest-signal"
+    },
+    "n8n.hive-feature-priority-rank": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-feature-priority-rank",
+      "note": "Secret 9 \u2014 planned; rank features. Prefer: scripts/hive/hive-revenue-sensors.py rank-features"
+    },
+    "n8n.hive-revenue-sensor-hourly": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-revenue-sensor-hourly",
+      "note": "Secret 15 \u2014 planned cron. Prefer: scripts/hive/hive-revenue-sensors.py hourly (no n8n required)"
+    },
+    "n8n.hive-ecosystem-route": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-ecosystem-route",
+      "note": "Secret 21 master cross-repo router. Import: n8n-import-ecosystem-router.sh"
+    },
+    "n8n.hive-ce-lead-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-ce-lead-notify",
+      "note": "Vertical slice CE lead \u2192 Scorpion ce.lead.received \u2192 Telegram #alerts. Route via hive-ecosystem-route key ce-lead-notify. Import: n8n-import-ce-lead-slice.sh"
+    },
+    "n8n.hive-founder-signal": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-founder-signal",
+      "note": "Meta-cognitive external loop \u2014 founder behavior ingest. May forward to predictive-construct. Import: n8n-import-meta-cognitive.sh"
+    },
+    "n8n.hive-chronicle-ingest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-chronicle-ingest",
+      "note": "Outer Heaven living chronicle ingest. Registers outer_heaven.chronicle.ingested. Import: n8n-import-outer-heaven-library.sh"
+    },
+    "n8n.hive-meta-critique": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-meta-critique",
+      "note": "Internal criticism loop \u2014 CRITIQUE.md directive to Forge, staging PR only. Sunday cron: Hive Sunday Meta Critique"
+    },
+    "n8n.hive-predictive-construct": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-predictive-construct",
+      "note": "Predictive construction \u2014 inactive n8n DRAFT_PENDING_REVIEW + need_hitl. Never auto prod activate."
+    },
+    "n8n.hive-sunday-meta-critique": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-sunday-meta-critique",
+      "note": "Cron Mon 03:00 UTC \u2014 weekly meta-critique directive. Same import script."
+    },
+    "n8n.hive-execute-tool": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-execute-tool",
+      "note": "Hive-Mind toolbox JSON-RPC router. Import: n8n-import-toolbox-router.sh. Registry: manifests/hive-toolbox-registry.json"
+    },
+    "n8n.hive-creative-pivot": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "hive-creative-pivot",
+      "note": "Dual-loop Phase 2 heuristic. Import: n8n-import-creative-pivot.sh"
+    },
+    "n8n.hive-telemetry-ingest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-telemetry-ingest",
+      "note": "Unified telemetry CIA ingest. Import: n8n-import-telemetry.sh"
+    },
+    "n8n.hive-daily-operational-digest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-daily-operational-digest",
+      "note": "Cron daily State of the Hive digest \u2192 Telegram. Same import script."
+    },
+    "n8n.hive-operator-digest": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-operator-digest",
+      "note": "MISSING repo JSON \u2014 stub at workflows/hive/hive-operator-digest.json. Do not import or activate. Day Planner consumes only; do not fire."
+    },
+    "n8n.hive-web-learning-cycle": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "hive-web-learning-cycle",
+      "note": "Weekly read-only web learning \u2014 run scripts/hive/outer-heaven/web-learning-cycle.py on VPS cron (Sunday). Inactive n8n stub."
+    },
+    "n8n.evens-email-notify": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "read",
+      "owners": [
+        "Forge",
+        "Watchdog"
+      ],
+      "never": [],
+      "catalog": "evens-email-notify",
+      "note": "evenslouis.ca/n8n \u2014 Email Notification System (operator notify, not client send)"
+    },
+    "n8n.evens-support-agent": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "evens-support-agent",
+      "note": "evenslouis.ca/n8n \u2014 Support Agent Webhook; operatorConfirm required"
+    },
+    "n8n.evens-master-orchestrator": {
+      "layer": "n8n_webhook",
+      "status": "legacy",
+      "hitl": "tier3",
+      "owners": [
+        "HITL Operator"
+      ],
+      "never": [],
+      "catalog": "evens-master-orchestrator",
+      "note": "evenslouis.ca/n8n \u2014 Master Orchestration System; operatorConfirm for paid/client paths"
+    },
+    "skill.actuate-tape-skill": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/actuate-tape-skill.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.agent-as-hire": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/agent-as-hire.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.ai-native-operator-doctrine": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/ai-native-operator-doctrine.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.analyze-video-watch-output": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/analyze-video-watch-output.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.api-macro-vision": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/api-macro-vision.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.ask-principal": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/ask-principal.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.assume-it-will-touch": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/assume-it-will-touch.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.capability-acquisition": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/capability-acquisition.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.catalog-demand-match": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/catalog-demand-match.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.channel-walk": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/channel-walk.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.checkable-stop": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/checkable-stop.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.checkout-in-one-sitting": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/checkout-in-one-sitting.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.cinematic-recipe": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/cinematic-recipe.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.click-live-site": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/click-live-site.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.clip-factory": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/clip-factory.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.confirm-then-actuate": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/confirm-then-actuate.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.context-docs": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/context-docs.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.coverage-loop": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/coverage-loop.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.cursor-video-watch": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/cursor-video-watch.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.dark-factory": {
+      "layer": "skill",
+      "status": "connected",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/dark-factory.md \u00b7 Watchdog GRADE on disk"
+    },
+    "skill.deep-video-learning": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/deep-video-learning.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.demo-walk-script": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/demo-walk-script.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.desk-wiki-before-work": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/desk-wiki-before-work.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.discovery-spiced-constraint": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/discovery-spiced-constraint.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.filter-then-llm": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/filter-then-llm.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.forward-deployed-gap": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/forward-deployed-gap.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.four-blank-sku": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/four-blank-sku.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.github-ci-failure-triage": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/github-ci-failure-triage.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.github-pr-summary": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/github-pr-summary.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.golden-test-loop": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/golden-test-loop.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.higgsfield-ae-vectors": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/higgsfield-ae-vectors.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.hive-health-snapshot": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/hive-health-snapshot.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.hosted-neq-scheduled": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/hosted-neq-scheduled.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.icp-runbook": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/icp-runbook.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.inbox-to-task-routing": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/inbox-to-task-routing.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.info-gain-cite": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/info-gain-cite.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.input-required-gate": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/input-required-gate.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.interview-gym": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/interview-gym.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.interview-to-desk": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/interview-to-desk.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.invoice-email-automation": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/invoice-email-automation.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.knowledge-architecture": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/knowledge-architecture.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.knowledge-audit": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/knowledge-audit.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.lead-web-find": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/lead-web-find.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.list-anneal-funnel": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/list-anneal-funnel.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.mcp-on-private-demo": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/mcp-on-private-demo.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.morning-day-plan": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/morning-day-plan.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.motion-grade-pipeline": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/motion-grade-pipeline.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.multimodal-youtube-learning": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/multimodal-youtube-learning.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.no-reply-follow-up": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/no-reply-follow-up.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.no-show-follow-up": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/no-show-follow-up.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.observe-pane": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/observe-pane.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.one-channel-deep": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/one-channel-deep.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.one-person-usecases": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/one-person-usecases.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.outbound-playbook-funnel": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/outbound-playbook-funnel.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.outcome-offer-funnel": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/outcome-offer-funnel.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.paid-slice-funnel": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/paid-slice-funnel.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.pipeline-stage-brief": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/pipeline-stage-brief.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.private-book-install": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/private-book-install.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.product-ad-from-photo": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/product-ad-from-photo.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.proof-30-60-90": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/proof-30-60-90.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.researcher-research-to-system": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/researcher-research-to-system.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.researcher-video-to-system": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/researcher-video-to-system.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.roadblock-bank": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/roadblock-bank.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.sanitize-in-check-out": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/sanitize-in-check-out.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.script-beat-motion": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/script-beat-motion.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.seedance-site": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/seedance-site.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.send-removed": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/send-removed.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.separate-verifier": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/separate-verifier.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.session-bootstrap": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/session-bootstrap.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.side-effect-not-essay": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/side-effect-not-essay.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.skill-from-session": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/skill-from-session.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.slice-build": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/slice-build.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.social-source-ingest": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/social-source-ingest.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.solo-then-consult": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/solo-then-consult.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.specialist-handoff": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/specialist-handoff.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.state-json": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/state-json.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.steal-usecases": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/steal-usecases.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.tape-self-teach": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/tape-self-teach.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.token-receipt": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/token-receipt.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.vault-not-prompt": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/vault-not-prompt.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.verify-after-browser": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/verify-after-browser.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.voice-script-from-operator": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/voice-script-from-operator.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.warm-draft-hitl": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/warm-draft-hitl.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    },
+    "skill.website-offer-funnel": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/website-offer-funnel.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.wiki-ingest": {
+      "layer": "skill",
+      "status": "wired_untested",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/wiki-ingest.md \u00b7 in SEED_USE \u00b7 no Watchdog GRADE \u00b7 file \u2260 connected"
+    },
+    "skill.workflow-compiler": {
+      "layer": "skill",
+      "status": "playbook",
+      "hitl": "read",
+      "owners": [],
+      "never": [],
+      "note": "scripts/hive/grok-skills/workflow-compiler.md \u00b7 playbook on disk \u00b7 load \u2260 live"
+    }
+  },
+  "agents": {
+    "Big Boss": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail",
+        "calendar",
+        "github",
+        "skill.checkable-stop",
+        "skill.state-json",
+        "skill.hosted-neq-scheduled",
+        "skill.observe-pane",
+        "skill.assume-it-will-touch",
+        "skill.api-macro-vision",
+        "skill.channel-walk",
+        "skill.coverage-loop",
+        "skill.website-offer-funnel",
+        "skill.pipeline-stage-brief",
+        "skill.catalog-demand-match",
+        "skill.desk-wiki-before-work",
+        "skill.dark-factory",
+        "skill.skill-from-session",
+        "skill.actuate-tape-skill"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "on_demand"
+    },
+    "Day Planner": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail",
+        "calendar",
+        "n8n.voice-assistant-telegram",
+        "skill.checkable-stop",
+        "skill.hosted-neq-scheduled",
+        "skill.specialist-handoff"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "n8n_trigger_catalog_webhook",
+        "hive_send_report"
+      ],
+      "wake": "on_demand"
+    },
+    "Watchdog": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "github",
+        "n8n_trigger_catalog_webhook",
+        "skill.golden-test-loop",
+        "skill.checkable-stop",
+        "skill.verify-after-browser",
+        "skill.separate-verifier",
+        "skill.side-effect-not-essay",
+        "skill.observe-pane",
+        "skill.knowledge-audit",
+        "skill.dark-factory",
+        "skill.actuate-tape-skill"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "default"
+    },
+    "HITL Operator": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "n8n.elevenlabs-post-call",
+        "hitl_propose_action",
+        "skill.ask-principal",
+        "skill.send-removed",
+        "skill.confirm-then-actuate",
+        "skill.input-required-gate",
+        "skill.checkable-stop",
+        "skill.verify-after-browser",
+        "skill.sanitize-in-check-out",
+        "skill.vault-not-prompt",
+        "skill.assume-it-will-touch",
+        "skill.specialist-handoff"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "default"
+    },
+    "Money Desk": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "ce_list_actions",
+        "ce_lookup_lead",
+        "skill.token-receipt",
+        "skill.catalog-demand-match",
+        "skill.checkout-in-one-sitting"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "on_demand"
+    },
+    "Lead Hunter": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "ce_lookup_lead",
+        "skill.steal-usecases",
+        "skill.catalog-demand-match",
+        "skill.website-offer-funnel",
+        "skill.icp-runbook",
+        "skill.filter-then-llm"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "gmail"
+      ],
+      "wake": "on_demand"
+    },
+    "Product GTM": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "ce_list_actions",
+        "ce_lookup_lead",
+        "skill.website-offer-funnel",
+        "skill.outcome-offer-funnel",
+        "skill.paid-slice-funnel",
+        "skill.catalog-demand-match",
+        "skill.one-person-usecases",
+        "skill.mcp-on-private-demo",
+        "skill.checkout-in-one-sitting"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "twilio_number",
+        "n8n.on-demand-calling"
+      ],
+      "wake": "on_demand"
+    },
+    "Researcher": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "scorpion_register_outcome",
+        "skill.channel-walk",
+        "skill.social-source-ingest",
+        "skill.steal-usecases",
+        "skill.deep-video-learning",
+        "skill.capability-acquisition",
+        "skill.multimodal-youtube-learning",
+        "skill.researcher-research-to-system",
+        "skill.researcher-video-to-system",
+        "skill.cursor-video-watch",
+        "skill.analyze-video-watch-output",
+        "skill.catalog-demand-match",
+        "skill.filter-then-llm",
+        "skill.coverage-loop",
+        "skill.verify-after-browser",
+        "skill.sanitize-in-check-out",
+        "skill.knowledge-architecture"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "default"
+    },
+    "Forge": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "github",
+        "n8n_trigger_catalog_webhook",
+        "skill.verify-after-browser",
+        "skill.api-macro-vision",
+        "skill.vault-not-prompt",
+        "skill.cinematic-recipe",
+        "skill.mcp-on-private-demo",
+        "skill.forward-deployed-gap",
+        "skill.seedance-site",
+        "skill.dark-factory",
+        "skill.skill-from-session",
+        "skill.actuate-tape-skill",
+        "skill.roadblock-bank"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "default"
+    },
+    "Creative Studio": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "higgsfield",
+        "n8n.elevenlabs-post-call",
+        "skill.clip-factory",
+        "skill.cinematic-recipe",
+        "skill.motion-grade-pipeline",
+        "skill.higgsfield-ae-vectors",
+        "skill.script-beat-motion",
+        "skill.seedance-site"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "github",
+        "ce_list_actions",
+        "ce_lookup_lead"
+      ],
+      "wake": "on_demand"
+    },
+    "Consultant": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "skill.steal-usecases",
+        "skill.catalog-demand-match",
+        "skill.website-offer-funnel",
+        "skill.one-person-usecases",
+        "skill.forward-deployed-gap"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "on_demand"
+    },
+    "Librarian": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "skill.state-json",
+        "skill.filter-then-llm",
+        "skill.wiki-ingest",
+        "skill.knowledge-architecture",
+        "skill.knowledge-audit",
+        "skill.channel-walk",
+        "skill.coverage-loop",
+        "skill.desk-wiki-before-work",
+        "skill.skill-from-session",
+        "skill.actuate-tape-skill",
+        "skill.roadblock-bank"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "ce_list_actions",
+        "ce_lookup_lead"
+      ],
+      "wake": "on_demand"
+    },
+    "Wealth Manager": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "gmail"
+      ],
+      "wake": "cold"
+    },
+    "Personal CFO": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "cold"
+    },
+    "Career Strategist": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail",
+        "skill.interview-gym",
+        "skill.context-docs",
+        "skill.forward-deployed-gap"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "on_demand"
+    },
+    "Communications Manager": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "gmail",
+        "twilio_number",
+        "n8n.on-demand-calling",
+        "n8n.voice-assistant-telegram",
+        "skill.send-removed",
+        "skill.confirm-then-actuate",
+        "skill.input-required-gate",
+        "skill.sanitize-in-check-out",
+        "skill.filter-then-llm",
+        "skill.specialist-handoff"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial"
+      ],
+      "wake": "default"
+    },
+    "Publishing Engine": {
+      "use": [
+        "brief",
+        "browser",
+        "shell",
+        "delegate",
+        "higgsfield",
+        "skill.one-channel-deep",
+        "skill.clip-factory",
+        "skill.verify-after-browser",
+        "skill.sanitize-in-check-out",
+        "skill.voice-script-from-operator",
+        "skill.script-beat-motion",
+        "skill.checkout-in-one-sitting"
+      ],
+      "never": [
+        "vapi",
+        "n8n.outbound-calls",
+        "n8n.dentist-voice-agent",
+        "n8n.voice-assistant-2",
+        "auto-dial",
+        "github"
+      ],
+      "wake": "on_demand"
+    }
+  }
+}

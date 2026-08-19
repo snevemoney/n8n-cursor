@@ -1,0 +1,555 @@
+So Gemini's new file search API is awesome because it allows you to drop in a document.
+
+It generates those embeddings and then you're right away able to just chat with it and ask it questions and get answers back.
+
+So that functionality along with the fact that they're offering it for a super super cheap price is probably why you've been seeing it on your feeds lately.
+
+So today I'm going to be talking about how we can use it in Naden for our rag agents without having to build a huge massive data pipeline that looks like this because we're able to just drop in a file and get answers back.
+
+But I will say it's not completely magic.
+
+So everything that we're doing today, I'm going to try to be as honest as I can about it.
+
+So just to start off before we actually get into niten and start building things.
+
+What is Gemini file search?
+
+So how does it work?
+
+Basically you upload your files to Gemini.
+
+It automatically chunks and embeds them and then you can have your nitni agents using this as knowledge.
+
+So if you've ever built like a rag agent before with a vector database like pine cone or superbase, it's super super similar except for once again we're cutting out basically all of this data pipeline processing where we have to understand the file type, add metadata, maybe add context, split it up, run it through an embeddings model, and then put it into our vector store.
+
+Whereas in this example, we basically just upload the doc, we shoot it over to Google, and then it takes care of everything else.
+
+And then we can go ahead and just have an AI agent that's plugged into our Google store and it can start giving us answers right away.
+
+Why is it useful?
+
+You don't have to build your own search system or database because Gemini handles that storage and searching.
+
+And what do you need to know?
+
+You only need to know how to upload your files through Gemini file API.
+
+And you don't need all this special stuff and special technical setup.
+
+And real quick to hit on pricing, which is why this is pretty exciting.
+
+They only charge you for uploading or for your indexing or your embedding.
+
+So when you upload a file, you pay 15 cents for every 1 million tokens processed.
+
+And just to put that into perspective, right here I've got a 121page PDF and this was about 95,000 tokens.
+
+So not even a tenth of what would cost you 15.
+
+So it's really really affordable.
+
+And then also when you look at the storage, it stores everything as of right now for completely free regardless of how much you have in there.
+
+And then as far as querying it, there is some sort of limit when you get really really high on your queries, but basically all you'll be paying for on your queries is the chat model usage.
+
+So this table is assuming that you're using 100 GB of storage and 1 million queries per month.
+
+And so this is where with Gemini it would cost you nothing to store.
+
+It would cost you almost 12 bucks to index all of that but just one time.
+
+And then you might hit some sort of base fee just because you're doing so many queries per month and that's going to be like let's just call it 35 bucks for this first month.
+
+Now for something like Superbase where you do like a PG vector extension, it's still pretty affordable.
+
+It just takes a lot more on you for technical setup and kind of maintenance there.
+
+And then when you compare something like Pine Cone Assistant or OpenAI Vector Store, which is essentially the same value prop as Gemini File Search where you just drop in docs and then you can chat with them right away.
+
+These, as you can see, are charging you a lot more for storage.
+
+And then you've also got costs here for indexing and querying.
+
+And also with the Pine Cone Assistant, you get charged like 5 cents every hour that this thing is running.
+
+So over time, that also stacks up.
+
+And I did not include that cost in this table.
+
+And so once again, just a visualization, Gemini is super cheap when it comes to this file search API.
+
+You may be able to get cheaper if you go a different route, but considering how easy and quick it is to just set up a Gemini file search API and rag agent, that cost is justified.
+
+All right, so we're about to switch over and we're going to actually start looking at the Gemini file search.
+
+But I wanted to say at the end of this video, I am going to come back and just do a little bit of some final considerations and things to think about.
+
+So when we get into any end, there's going to be four HTTP requests that you guys will be looking at, and I'm going to walk through exactly how I set them up.
+
+The first one is going to be us actually creating that store.
+
+And so right now, I'm just going to refer to it as a folder, cuz I think that that just makes things a little easier to contextualize.
+
+So the first one we're going to do is we're going to make a folder.
+
+The next request we have to do is actually upload a file.
+
+And so we upload it to just like the Google Cloud environment, but that doesn't yet mean it's in the folder.
+
+So the third HTTP request that we have to make is we're going to take this file and we're going to move it into the folder that we created earlier in step one.
+
+And then finally, we have to set up the actual request to query it.
+
+So we're going to hook up an AI agent to the tool and then we'll be able to chat with it to get all of the information that is in this file, which will be in this folder that we created.
+
+All right, so here's what it looks like in NN.
+
+We've got the create store, we've got the upload file, and we have the query.
+
+And then after I show you guys how all of this works, we're going to run a quick evaluation to see how accurate the results actually are coming back.
+
+Okay, so I already have all of this built out for you guys.
+
+If you want to download it for completely free, so you can just plug in your own information, you can do so by joining my free school community.
+
+The link for that is down in the description.
+
+I also just recorded a full step-by-step breakdown of this in my plus community if you want to check that out where I do other live builds and we've got full courses in here as well.
+
+So if that interests you, go check it out.
+
+So anyways, the way that this works is we're setting up our HTTP requests.
+
+And the way that I knew how to set this up was by looking at the file search API documentation.
+
+And I'm going to be honest, this API documentation from Google.
+
+And most of Google's are not my favorite.
+
+They're not super intuitive.
+
+They're very confusing.
+
+And so I will show you guys where I found the operations that we need to do.
+
+But once again, you can download this workflow for free and just plug in your key information.
+
+So you can see this is our file search API.
+
+We have different scenarios like directly uploading to file search store.
+
+We can import files.
+
+We can learn how the chunking works.
+
+We can look at the metadata and citations and stuff like that.
+
+And also another cool tip that I saw from Mark Hashef is you can actually go ahead and view as markdown and then you could paste in all of this information to an LLM and it could help you set up some requests.
+
+It's definitely not perfect and you have to work with it a little bit.
+
+So that's why I'm here to just show you what to do.
+
+So the way that I went about this is I went down to the second one which is importing files and I kind of followed this order of operations.
+
+So the first thing that you can see what we have to do is we have to create a file search store.
+
+So what I did is I saw that this was a post request.
+
+I grabbed this whole endpoint right here and I'm going to throw this into this HTTP request right there.
+
+Now, I'm not going to dive into the nitty-gritties of setting up an HTTP request, but one thing that I know just because I've done it so many times is when you see a question mark in the URL, this basically just means that anything following that question mark is a query parameter.
+
+And so, you can see our query parameter is a key and then we need to go get a Gemini API key.
+
+So, if you're in this documentation page, you can click up here to get API key.
+
+Or you could go to Google AI Studio and then you'll find when you create your profile, you can create a key right here, which I will just go ahead and call test.
+
+Throw that in there.
+
+And then when I get this key, it will give me this value, which I can go ahead and copy and go back into edit.
+
+And you would just be pasting this right in here where I have my query parameter that says key, and then I've got that value.
+
+Now, that's one way you can do it.
+
+And I have the rest of the template set up so that you can do that.
+
+But a much better way to do it so that you don't have to go copy and paste your key every time is to create an authentication up here.
+
+So we know this is a query parameter.
+
+So I'm going to choose generic.
+
+I'm going to go to generic type and choose query.
+
+And then I'm going to create a new query off where I basically for the name just type in key for the value.
+
+Paste in that API key.
+
+And then I'm just going to name this Google demo 1119.
+
+And so I can save that.
+
+And now I know exactly what query off that this is.
+
+And I can use this every time rather than sending over these query parameters.
+
+So anyways, I've got my header content type in here.
+
+And then the most important thing that you need to do in this request is choose the name for your file store.
+
+So I'm going to call my file store YouTube- test.
+
+And then I'm just going to go ahead and execute this step.
+
+And you can see that we got this success message back from Google, which is basically saying, okay, here's the name of your file store.
+
+Here's the display name.
+
+And here's the time that we created it.
+
+And so right now I'm just going to pin this data so we can save it because we're going to have to come back and use this name in the next step.
+
+Okay, so we created our file store.
+
+The next thing we need to do is we need to upload the file to Google and then we have to move it into that file store.
+
+So real quick, what I'm going to do is just delete this connection.
+
+We're going to go ahead and pull up this form submission trigger which just makes me drop in a document.
+
+And I just dropped in this PDF which is the rules of golf.
+
+And it's like a 22page PDF or something like that.
+
+Now, let's go into this HTTP request and take a look at what we're doing.
+
+So, the way that I found out how to configure this one was back in the API documentation.
+
+You can see that after we created our file search store, we needed to initiate resumable upload to the store.
+
+So, I went ahead and grabbed this post request.
+
+I grabbed this URL right here.
+
+As you can see, it ends in files.
+
+And then I threw in right here this URL.
+
+And then we have our query parameter which I'm actually going to get rid of because as you guys saw we just set up a query off together which was Google demo 1119 right there.
+
+And then the last thing that we actually need to send over is the actual noden file.
+
+So right here for the body we're choosing naden binary file which is right over here.
+
+You can tell it's binary because you have schema table JSON and then binary.
+
+And that's where it shows up.
+
+And so all you have to do is copy whatever the name is right here of that binary file and then put it in there.
+
+So that's why I'm saying file.
+
+Those two things match up.
+
+And I can go ahead and execute this step.
+
+And what this is going to do is it's going to tell us that our file is now in the Google environment.
+
+So what it does is it temporarily holds this file, which is why you see an expiration time.
+
+So if you don't move it into a folder by this date, it will expire.
+
+So you can see we got a name, we got a mime type, we have a size, we have a URI, we have a state, we have a source, and that's just some metadata about this.
+
+And this is basically just our success message from Google.
+
+So moving on to the next one.
+
+What we have to do is actually move that file that's up in Google's cloud into our folder.
+
+So I'm going to go back once again into the API documentation.
+
+You can see that there's one right here which is import files into the right store.
+
+So I would basically grab this request.
+
+I then came into this HTTP request and pasted it right in here.
+
+And what you notice is that we have a variable to configure because right here you can see it's asking for our store name.
+
+Now the reason why we have to do it in the endpoint is because it didn't come after the question mark.
+
+So, it's not actually a query parameter.
+
+So, that's why we have to copy and paste the name of our file store in the actual URL.
+
+So, I'm going to go back into this first node where we got that.
+
+I'm going to copy this name right here of our file store and then open up this import file node and we're going to delete this and we're going to paste in the name of our file store right there.
+
+I'm going to go ahead and get rid of our query parameters because we already set that up together.
+
+We've got our headers we're sending over.
+
+And then finally for the JSON body, we just need to send over the name of the file that we just uploaded.
+
+So on this left-h hand side, we had the upload file operation and it gave us a name.
+
+I basically just dragged in that name right there.
+
+And now if we execute this step, we're going to get a success message from Google that's telling us that our file has been put into that folder.
+
+All right, so we made our folder, we uploaded the file, and then we moved that file into that folder.
+
+So now we're ready to actually test out the agent and see if it can understand what is in that PDF that we just gave it.
+
+So the way that this knowledgebased tool works is it is another HTTP request.
+
+So of course I went to the API documentation and I saw this request right here which is to generate content which just means it's going to get an answer back for us.
+
+So I grabbed the endpoint right here.
+
+You can see that it's using Gemini 2.5 flash as the model.
+
+I saw the header parameters.
+
+I saw it was a post and then I saw the actual body of the request that we need to send over.
+
+And what you'll notice is in the body, it asks us for a store name.
+
+So once again, what we'd want to do is we'd go all the way back up here.
+
+We would grab the name of the file store that we want to search in.
+
+And then we would open up this HTTP request and we would make sure that it goes right in here.
+
+And now it knows to look in that file store.
+
+Now, the other thing that we had to configure was this from AI function for the actual query that we're sending to the file store.
+
+And so what I did is I used the from AI function, which basically just means that the agent that controls this tool will make the query.
+
+And I told it that the query is the question that the user needs an answer to.
+
+So it will be filling in the information here.
+
+And I'll show you guys what I mean by that when we actually run a demo.
+
+But then finally for the actual prompt, I kept it really simple.
+
+I said you are a helpful rag agent.
+
+Your job is to answer the user's question using your knowledgebased tool to make sure all of your answers are grounded in truth.
+
+Please site your sources when you're giving your answers.
+
+When you are sending a query to the knowledgebased tool, only send over text, no punctuation, question marks, or new lines just to keep the JSON body from breaking.
+
+So here's the rules of golf PDF that I uploaded.
+
+Let's just go ahead and ask a basic question to see if it's working.
+
+So, I'm going to ask the agent, what happens if your club breaks during the round.
+
+All right, so I just shot that off.
+
+It's going to use its brain.
+
+It's going to call the knowledgebased tool, and then we should see a correct answer that also tells us where it got it from.
+
+Okay, so we just got this back.
+
+It says, "Short answer.
+
+If a club breaks during the round because of normal play, you may continue to use the damaged club, have it repaired, or replace it during the round.
+
+But if it breaks for non-normal reasons, you may not use that club for the remainder of the round, and you may not repair it until after the round." It showed us the source was from the knowledge base from this document and then rule 4 clubs.
+
+Okay, so that's how it handles one document in there.
+
+Let's go ahead and throw in another one and see what that's like.
+
+So, we already have this pipeline configured.
+
+I should be able to just pull up this form, drop in another file, which is completely different.
+
+This one's about Nvidia, and it should upload the file and import it into the correct store once again.
+
+Okay, so that was quick.
+
+It looks like it's already done.
+
+I'm just going to go ahead and ask some random question about Nvidia, and we will see if it is able to pull it.
+
+Okay, so I just asked it to give me a Q1205 fiscal summary for Nvidia.
+
+All right, so we got that back and we see, okay, here is a concise Q1 fiscal summary for Nvidia.
+
+We've got total revenue 26 billion, data center revenue 22 billion.
+
+We've got a gap gross margin.
+
+We've got some other stats like this.
+
+And you can see that this came from the Nvidia press release.
+
+Nvidia announces financial results for first quarter fiscal year 2025, April 28th, 2024.
+
+And if I go to the document that this actually pulled from, you can see that this is in fact correct.
+
+But you still of course want to know that this is grounded in truth.
+
+And you could prompt your agent to make sure they're always giving you like exact quotes and things like that.
+
+And so if I real quick just actually click into this knowledgebased tool, we can go ahead and see the output that it got.
+
+And what you'll see is first of all, we get a candidates array.
+
+And in this candidates array, we see the actual text of the real answer that the Gemini model was able to get to based on all of the data that it was looking through.
+
+But then from there, if we go further down, we can actually see grounding metadata.
+
+So this means these are all the actual chunks that it pulled in order to get to that conclusion that we just saw.
+
+This is an actual chunk that it pulled from its file store.
+
+And if we keep going down, we'll see more.
+
+We can see chunk two.
+
+And we can also see where each chunk came from as far as which folder it was in.
+
+Chunk three, chunk four. and we get all these different chunks.
+
+We're also able to see grounding supports.
+
+So, this will pull different explicit sentences and things like that out of the chunks and it will tell us where it started and where it ended.
+
+And you can go ahead and verify all of this stuff in your document as well.
+
+So, I just wanted to give you guys some quick insight of what the tool actually comes back with and then how your agents work together in order to give you the right answer.
+
+Now, of course, we actually want to test this.
+
+So, what I'm going to do is I'm going to upload one more file using this flow right here, and then I'm going to run this evaluation where we're testing this agent on these 10 different questions, and we're going to see how accurate it's able to answer them.
+
+Okay, so we've got three total PDFs in our store.
+
+We have the rules of golf, which is 22page PDF.
+
+We've got the Nvidia announcement, which was nine pages.
+
+And then we have Apple's 10K, which was 121 pages.
+
+And we've got 10 different questions across all three of these different PDFs. and we're going to go ahead and see how well it does.
+
+So, I'm running the evaluation right now.
+
+I will check back in with you guys when we get these results.
+
+Okay, so we just got that finished up.
+
+You can see the first run I actually had the wrong API key put in.
+
+So, it errored eight times in a row.
+
+But on the second run, things went much better.
+
+So, what we see here is that it got a 4.2 correctness, which is out of five.
+
+So, on these questions, it was able to get five, five, four, five.
+
+It had one tough one with a two, but these questions were really tough.
+
+And keep in mind that we dropped in basically almost 200 pages worth of PDFs and we didn't do anything special and hardly even any prompting.
+
+We basically just had the agent take its best shot at it.
+
+And these PDFs were about Apple, Nvidia, and golf.
+
+So they just really didn't have any correlation, but we shoved them all in the same store as well.
+
+So anyways, just to kind of wrap up here, we have some final considerations that I wanted to talk about when it comes to RAG in general as well as this specific Gemini file search API.
+
+And so the first three honestly just kind of fall under the umbrella of the fact that this is not magic.
+
+It's great that you can drop in these files, but what happens if you need to update a file and throw it back in?
+
+Now you have duplicate data because Google isn't really keeping a record of all of this data and making sure that things aren't duplicated or that old ones need to be updated and deleted, things like that.
+
+And if you keep on exploding your database with duplicate data, it's going to lower the quality of your agents responses.
+
+And you also have to remember that garbage in is garbage out.
+
+So, yes, Gemini's file search API does utilize some OCR and stuff like that to make sure it can understand what's actually going on in your documents, but if it is super messy or if it was scanned bad or if it just doesn't make sense going in, it's not going to make any sense going out.
+
+And so, sometimes you may need to do some pre-processing before you drop in those files to Gemini.
+
+Now, this one is also super important because sometimes you just don't want to do chunkbased retrieval.
+
+Semantic search is good for being quick and cost-effective when you need to find basically a needle in a hay stack.
+
+But if you need a context of the entire document or transcript or video or whatever it is, you should not be using chunk based retrieval unless you're getting really really granular with some metadata tagging and things like that.
+
+But ultimately, it's just not the best path.
+
+I did an example in my community where I basically had this document in there and I asked it, "How many total rules are in your PDF?" And it came back and said five.
+
+Because it actually couldn't look through the entire document in one swoop.
+
+It had to basically chunk it up and look at just individual chunks.
+
+But of course, if I asked about the last rule, which is rule 28, it would get it right.
+
+And then finally, just about security and privacy, your documents are being uploaded and stored on Google's servers.
+
+And so, if you're doing this, just make sure that you're not uploading anything that has sensitive information like PII because Google will process and index that data.
+
+So, it will no longer be private.
+
+And of course, every situation is different.
+
+So, just think about the rules or company regulations or industry regulations, things like GDPR, HIPPA, or CCPA.
+
+But anyways, that's going to do it for this one.
+
+I don't want the video to go too long.
+
+Just a reminder, if you want to download this workflow, you can do so for free by joining my free school community.
+
+The link for that is down in the description.
+
+And if this kind of stuff interests you and you want to dive deeper on rag or evaluations and things like that, then definitely check out my plus community.
+
+The link for that is also down in the description.
+
+We've got a great community of over 200 members who are building with naden and building businesses around AI automation every single day.
+
+We've also got full courses in here.
+
+We've got agent zero, which is the foundations for AI automation.
+
+We've got 10 hours to 10 seconds where you learn how to identify, design, and build time-saving automations.
+
+And then for our premium members, we've got one person AI agency and subs to sales.
+
+And we've got projects for everyone and tons of other resources in here.
+
+We also run one live Q&A every week, which are super fun.
+
+So, I'd love to see you guys in those calls in the communities.
+
+But that's going to do it for today's video.
+
+So, if you enjoyed or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.
+
+Thanks everyone.

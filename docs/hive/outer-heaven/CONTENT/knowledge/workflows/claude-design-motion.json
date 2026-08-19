@@ -1,0 +1,57 @@
+{
+  "workflow_id": "WF-claude-design-motion-v2",
+  "project_id": "claude-design-motion",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Feed real numbers",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "Lock a font",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "One icon language",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "Timed script",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T5",
+      "title": "Mark beats; one graphic",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T6",
+      "title": "Insert HITL",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-RDytbVDzMF4-01",
+    "K-RDytbVDzMF4-02",
+    "K-RDytbVDzMF4-03",
+    "K-RDytbVDzMF4-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "RDytbVDzMF4",
+  "words_read": 3785,
+  "tape_faithful": true
+}

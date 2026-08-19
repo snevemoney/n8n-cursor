@@ -1,0 +1,63 @@
+I just built a nano banana Photoshop AI agent.
+
+Okay, so you can see that our workflow is listening to us.
+
+I'm going to send a picture on Telegram.
+
+Okay, so I just shot that off and now you can see it's uploading that to Google Drive.
+
+The agent's going to see that and then it's going to ask us what we want to name that file in our Google Drive.
+
+There you go.
+
+It just responded with what would you like me to name that photo?
+
+And I'm shooting back a message that says call it Nate.
+
+And what it's going to do now is use this change name tool to change the name in our Google Drive to Nate.
+
+As you can see, if I switch over real quick to media, it just got called Nate.
+
+And originally, it would have been called today's date.
+
+So, now it's asking us what we want to do next.
+
+And I'm going to shoot off this picture of a bag of granola.
+
+And once again, it's going to ask us, what do we want to name this file?
+
+All right.
+
+So, shooting off this message that says to call that picture granola.
+
+And once again, we'll see it go here and change that picture to granola.
+
+And then we'll have it combine the images together.
+
+Okay.
+
+So, I've got Telegram open on my desktop now just to make this easier.
+
+And it's asking us what to do next.
+
+I'm shooting off this message that says, "Please combine the Nate and granola pictures to make a photorealistic image where the man is holding their granola while hiking on a mountain." So, if you remember over here, we have a raw file of granola.
+
+We have a smiling selfie of me, and it's going to put these together.
+
+Right here, you can see it's using its combined image tool, and it's going to use nano banana to make it look like I'm holding the granola on a mountain.
+
+So, I'll check in with you guys when that's finished up.
+
+But, you can see we got a response over here.
+
+It's combined the images.
+
+Now, let me click into this Google Drive link and we'll take a look.
+
+So, there we go.
+
+We've got the kind granola with all the spelling correct.
+
+We've got me and my face holding the granola while hiking on a mountain.
+
+If you want to watch the full breakdown, then click on that play button right here and I'll see you guys over there.

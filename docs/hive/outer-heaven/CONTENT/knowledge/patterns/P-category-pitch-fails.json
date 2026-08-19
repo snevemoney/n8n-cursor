@@ -1,0 +1,19 @@
+{
+  "pattern_id": "P-category-pitch-fails",
+  "version": 1,
+  "title": "VIEW A — category pitch fails (unspecified job)",
+  "steps": [
+    "If the sentence names a category not a build, do not outbound it.",
+    "Keep separate from 'don't lead with the word AI' (VIEW B)."
+  ],
+  "support_ids": [
+    "K-x-2088007687149601254-01"
+  ],
+  "dissent_ids": [],
+  "valid_when": "Custom automation / agency-shaped offer; SKU unknown; cold or outbound.",
+  "less_relevant_when": "Named ICP + named offer + Path A MUST (different machine).",
+  "confidence": "high he said this; single-tape until more compatible support accrues",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not merge with K-x-2088007687149601254-03."
+}

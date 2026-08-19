@@ -1,0 +1,2297 @@
+[
+  {
+    "start": "00:00",
+    "end": "00:04",
+    "text": "Really nice colors to be honest. Look at"
+  },
+  {
+    "start": "00:01",
+    "end": "00:07",
+    "text": "that. Wow. Oh, wow. Look at this. That"
+  },
+  {
+    "start": "00:04",
+    "end": "00:08",
+    "text": "is beautiful. I love that color"
+  },
+  {
+    "start": "00:07",
+    "end": "00:11",
+    "text": "explosion."
+  },
+  {
+    "start": "00:08",
+    "end": "00:12",
+    "text": "That is so cool. I can't believe this is"
+  },
+  {
+    "start": "00:11",
+    "end": "00:14",
+    "text": "made with one prompt. Let's take a look"
+  },
+  {
+    "start": "00:12",
+    "end": "00:15",
+    "text": "at the other one. Okay, so this is the"
+  },
+  {
+    "start": "00:14",
+    "end": "00:17",
+    "text": "car."
+  },
+  {
+    "start": "00:15",
+    "end": "00:19",
+    "text": "Oh, that's cool. Look at that. The tire"
+  },
+  {
+    "start": "00:17",
+    "end": "00:24",
+    "text": "starts spinning really fast as I scroll."
+  },
+  {
+    "start": "00:19",
+    "end": "00:26",
+    "text": "Nice. This is a beautiful car. Wow."
+  },
+  {
+    "start": "00:24",
+    "end": "00:27",
+    "text": "Oh, that is really cool. [music] I like"
+  },
+  {
+    "start": "00:26",
+    "end": "00:30",
+    "text": "this trail and just kind of following"
+  },
+  {
+    "start": "00:27",
+    "end": "00:34",
+    "text": "the camera, following the car."
+  },
+  {
+    "start": "00:30",
+    "end": "00:37",
+    "text": "Wow. Oh, that is nice. Woo."
+  },
+  {
+    "start": "00:34",
+    "end": "00:39",
+    "text": "All right, C dance 2.5, you win. With C"
+  },
+  {
+    "start": "00:37",
+    "end": "00:42",
+    "text": "dance 2.5 and Claude code, you can now"
+  },
+  {
+    "start": "00:39",
+    "end": "00:44",
+    "text": "generate incredibly beautiful 3D"
+  },
+  {
+    "start": "00:42",
+    "end": "00:45",
+    "text": "scrolling websites with one single"
+  },
+  {
+    "start": "00:44",
+    "end": "00:47",
+    "text": "prompt. So, in this video, I'm going to"
+  },
+  {
+    "start": "00:45",
+    "end": "00:49",
+    "text": "show you step by step how to do this,"
+  },
+  {
+    "start": "00:47",
+    "end": "00:51",
+    "text": "and I'm also going to give you this"
+  },
+  {
+    "start": "00:49",
+    "end": "00:53",
+    "text": "entire prompt pack completely for free,"
+  },
+  {
+    "start": "00:51",
+    "end": "00:55",
+    "text": "which gives you everything you need to"
+  },
+  {
+    "start": "00:53",
+    "end": "00:57",
+    "text": "know about C dance 2.5, about how to"
+  },
+  {
+    "start": "00:55",
+    "end": "00:59",
+    "text": "prompt it, and a bunch of different"
+  },
+  {
+    "start": "00:57",
+    "end": "01:01",
+    "text": "prompt examples that you can just copy"
+  },
+  {
+    "start": "00:59",
+    "end": "01:02",
+    "text": "and paste inside your Claude code to"
+  },
+  {
+    "start": "01:01",
+    "end": "01:04",
+    "text": "generate beautiful websites. I'm going"
+  },
+  {
+    "start": "01:02",
+    "end": "01:05",
+    "text": "to walk you through step by step, so"
+  },
+  {
+    "start": "01:04",
+    "end": "01:07",
+    "text": "regardless of your background, you'll be"
+  },
+  {
+    "start": "01:05",
+    "end": "01:09",
+    "text": "able to just follow me along. All right,"
+  },
+  {
+    "start": "01:07",
+    "end": "01:11",
+    "text": "let's get started. So, there's this"
+  },
+  {
+    "start": "01:09",
+    "end": "01:13",
+    "text": "website called awwwards.com,"
+  },
+  {
+    "start": "01:11",
+    "end": "01:14",
+    "text": "uh where you can see award-winning"
+  },
+  {
+    "start": "01:13",
+    "end": "01:16",
+    "text": "websites. So, this is a website called"
+  },
+  {
+    "start": "01:14",
+    "end": "01:18",
+    "text": "igloo.ink. This was like one of the most"
+  },
+  {
+    "start": "01:16",
+    "end": "01:20",
+    "text": "award-winning"
+  },
+  {
+    "start": "01:18",
+    "end": "01:22",
+    "text": "uh um websites of the year. So, you can"
+  },
+  {
+    "start": "01:20",
+    "end": "01:24",
+    "text": "see all of these 3D scroll animation"
+  },
+  {
+    "start": "01:22",
+    "end": "01:26",
+    "text": "actually exist in real life for"
+  },
+  {
+    "start": "01:24",
+    "end": "01:28",
+    "text": "websites. You guys can also check that"
+  },
+  {
+    "start": "01:26",
+    "end": "01:29",
+    "text": "out if you want, you know, examples of"
+  },
+  {
+    "start": "01:28",
+    "end": "01:31",
+    "text": "website that you want to build. The ones"
+  },
+  {
+    "start": "01:29",
+    "end": "01:33",
+    "text": "that we have created, like this Vanta"
+  },
+  {
+    "start": "01:31",
+    "end": "01:35",
+    "text": "one for instance, this is also uh kind"
+  },
+  {
+    "start": "01:33",
+    "end": "01:37",
+    "text": "of like a replica or a copy of an"
+  },
+  {
+    "start": "01:35",
+    "end": "01:39",
+    "text": "award-winning website, which is exactly"
+  },
+  {
+    "start": "01:37",
+    "end": "01:40",
+    "text": "what I did there. So, let me I really"
+  },
+  {
+    "start": "01:39",
+    "end": "01:42",
+    "text": "like this one, actually. So, let me"
+  },
+  {
+    "start": "01:40",
+    "end": "01:43",
+    "text": "actually go ahead and see what Jarvis"
+  },
+  {
+    "start": "01:42",
+    "end": "01:45",
+    "text": "says. So, I'm going to share my screen"
+  },
+  {
+    "start": "01:43",
+    "end": "01:46",
+    "text": "with Jarvis. By the way, for those of"
+  },
+  {
+    "start": "01:45",
+    "end": "01:48",
+    "text": "you who don't know Jarvis, this is my"
+  },
+  {
+    "start": "01:46",
+    "end": "01:49",
+    "text": "personal assistant, and this is my AI"
+  },
+  {
+    "start": "01:48",
+    "end": "01:51",
+    "text": "second brain. So, all of these details"
+  },
+  {
+    "start": "01:49",
+    "end": "01:53",
+    "text": "here"
+  },
+  {
+    "start": "01:51",
+    "end": "01:55",
+    "text": "uh are basically all the folders and"
+  },
+  {
+    "start": "01:53",
+    "end": "01:57",
+    "text": "files inside my computer. So, let me go"
+  },
+  {
+    "start": "01:55",
+    "end": "01:59",
+    "text": "go and share my screen here."
+  },
+  {
+    "start": "01:57",
+    "end": "02:01",
+    "text": ">> I can see your screen and I'm listening,"
+  },
+  {
+    "start": "01:59",
+    "end": "02:01",
+    "text": "sir. Just talk and feel free to cut me"
+  },
+  {
+    "start": "02:01",
+    "end": "02:03",
+    "text": "off."
+  },
+  {
+    "start": "02:01",
+    "end": "02:06",
+    "text": ">> Hey Jarvis, so I'm sharing my screen"
+  },
+  {
+    "start": "02:03",
+    "end": "02:08",
+    "text": "with you. This website that I created"
+  },
+  {
+    "start": "02:06",
+    "end": "02:10",
+    "text": "with C Dance 2.5. What do you think"
+  },
+  {
+    "start": "02:08",
+    "end": "02:11",
+    "text": "here? Roast it for me. Tell me what you"
+  },
+  {
+    "start": "02:10",
+    "end": "02:13",
+    "text": "like, what you don't like."
+  },
+  {
+    "start": "02:11",
+    "end": "02:15",
+    "text": ">> One moment, eyes on it, sir."
+  },
+  {
+    "start": "02:13",
+    "end": "02:19",
+    "text": "A rather handsome cinematic landing"
+  },
+  {
+    "start": "02:15",
+    "end": "02:23",
+    "text": "page, sir. Vanta real 03 the canyon with"
+  },
+  {
+    "start": "02:19",
+    "end": "02:26",
+    "text": "a black hypercar on salt flats alive 153"
+  },
+  {
+    "start": "02:23",
+    "end": "02:29",
+    "text": "mph dial top right and reserve as the"
+  },
+  {
+    "start": "02:26",
+    "end": "02:32",
+    "text": "sole call to action up top. The footer"
+  },
+  {
+    "start": "02:29",
+    "end": "02:34",
+    "text": "sells the film school angle 2.391"
+  },
+  {
+    "start": "02:32",
+    "end": "02:36",
+    "text": "one continuous run and the only"
+  },
+  {
+    "start": "02:34",
+    "end": "02:39",
+    "text": "interactive elements visible are that"
+  },
+  {
+    "start": "02:36",
+    "end": "02:41",
+    "text": "reserve link and a thin scroll indicator"
+  },
+  {
+    "start": "02:39",
+    "end": "02:43",
+    "text": "on the left. One honest note with a"
+  },
+  {
+    "start": "02:41",
+    "end": "02:46",
+    "text": "single CTA hiding in 10 px letter spaced"
+  },
+  {
+    "start": "02:43",
+    "end": "02:49",
+    "text": "gray type. The page is currently more"
+  },
+  {
+    "start": "02:46",
+    "end": "02:50",
+    "text": "mood board than conversion funnel."
+  },
+  {
+    "start": "02:49",
+    "end": "02:53",
+    "text": ">> Okay, that's a good point. Yeah, so"
+  },
+  {
+    "start": "02:50",
+    "end": "02:55",
+    "text": "Jarvis is pointing out the fact that"
+  },
+  {
+    "start": "02:53",
+    "end": "02:56",
+    "text": "uh there's only like one very small"
+  },
+  {
+    "start": "02:55",
+    "end": "02:58",
+    "text": "conversion here. So, you want to improve"
+  },
+  {
+    "start": "02:56",
+    "end": "02:59",
+    "text": "that. So, that's actually a good point,"
+  },
+  {
+    "start": "02:58",
+    "end": "03:00",
+    "text": "right? When you're creating these"
+  },
+  {
+    "start": "02:59",
+    "end": "03:02",
+    "text": "websites, especially if you're building"
+  },
+  {
+    "start": "03:00",
+    "end": "03:04",
+    "text": "it for a client or something like that,"
+  },
+  {
+    "start": "03:02",
+    "end": "03:06",
+    "text": "you want to make sure that, you know,"
+  },
+  {
+    "start": "03:04",
+    "end": "03:08",
+    "text": "obviously functionality is as important"
+  },
+  {
+    "start": "03:06",
+    "end": "03:10",
+    "text": "as uh the look and feel on the website"
+  },
+  {
+    "start": "03:08",
+    "end": "03:12",
+    "text": "as well. So, just like Jarvis pointed"
+  },
+  {
+    "start": "03:10",
+    "end": "03:15",
+    "text": "out, the CTA at the bottom here, that's"
+  },
+  {
+    "start": "03:12",
+    "end": "03:16",
+    "text": "very important. It's very small, but"
+  },
+  {
+    "start": "03:15",
+    "end": "03:18",
+    "text": "it's kind of hiding in plain sight or"
+  },
+  {
+    "start": "03:16",
+    "end": "03:20",
+    "text": "it's hiding underneath. You want to"
+  },
+  {
+    "start": "03:18",
+    "end": "03:22",
+    "text": "bring that up, right? That's a big point"
+  },
+  {
+    "start": "03:20",
+    "end": "03:23",
+    "text": "of, you know, website that if you"
+  },
+  {
+    "start": "03:22",
+    "end": "03:25",
+    "text": "weren't selling to clients, that's a big"
+  },
+  {
+    "start": "03:23",
+    "end": "03:27",
+    "text": "part of it. So, make sure you're taking"
+  },
+  {
+    "start": "03:25",
+    "end": "03:29",
+    "text": "uh make sure you're doing that."
+  },
+  {
+    "start": "03:27",
+    "end": "03:31",
+    "text": ">> Precisely, sir. A call to action buried"
+  },
+  {
+    "start": "03:29",
+    "end": "03:33",
+    "text": "at the bottom of the page is a shop door"
+  },
+  {
+    "start": "03:31",
+    "end": "03:35",
+    "text": "round the back of the building. Rule of"
+  },
+  {
+    "start": "03:33",
+    "end": "03:38",
+    "text": "thumb worth saying to camera, one"
+  },
+  {
+    "start": "03:35",
+    "end": "03:40",
+    "text": "primary CTA visible before any"
+  },
+  {
+    "start": "03:38",
+    "end": "03:42",
+    "text": "scrolling, repeated after each proof"
+  },
+  {
+    "start": "03:40",
+    "end": "03:44",
+    "text": "section, and in a color nothing else on"
+  },
+  {
+    "start": "03:42",
+    "end": "03:46",
+    "text": "the page is allowed to wear. Everything"
+  },
+  {
+    "start": "03:44",
+    "end": "03:47",
+    "text": "else is decoration. That button is the"
+  },
+  {
+    "start": "03:46",
+    "end": "03:49",
+    "text": "business."
+  },
+  {
+    "start": "03:47",
+    "end": "03:51",
+    "text": ">> Yep, good point, Jarvis, definitely. All"
+  },
+  {
+    "start": "03:49",
+    "end": "03:53",
+    "text": "right. So, let me stop sharing with"
+  },
+  {
+    "start": "03:51",
+    "end": "03:55",
+    "text": "Jarvis here. All right, so we're going"
+  },
+  {
+    "start": "03:53",
+    "end": "03:56",
+    "text": "to do all of this inside our Claude"
+  },
+  {
+    "start": "03:55",
+    "end": "03:58",
+    "text": "code. You can actually use Claude chat"
+  },
+  {
+    "start": "03:56",
+    "end": "04:00",
+    "text": "if you want as well, but I like using"
+  },
+  {
+    "start": "03:58",
+    "end": "04:01",
+    "text": "Claude code because it gives you all of"
+  },
+  {
+    "start": "04:00",
+    "end": "04:03",
+    "text": "the files and saves it on a local"
+  },
+  {
+    "start": "04:01",
+    "end": "04:05",
+    "text": "folder. So, that way if you need to make"
+  },
+  {
+    "start": "04:03",
+    "end": "04:06",
+    "text": "any changes, you'll be able to do that"
+  },
+  {
+    "start": "04:05",
+    "end": "04:08",
+    "text": "very easily. All right, so let's go"
+  },
+  {
+    "start": "04:06",
+    "end": "04:10",
+    "text": "ahead and first get started on the"
+  },
+  {
+    "start": "04:08",
+    "end": "04:11",
+    "text": "Claude code side. So, download the"
+  },
+  {
+    "start": "04:10",
+    "end": "04:13",
+    "text": "desktop app cuz I'm using the Claude"
+  },
+  {
+    "start": "04:11",
+    "end": "04:15",
+    "text": "desktop app. That's the easiest way to"
+  },
+  {
+    "start": "04:13",
+    "end": "04:17",
+    "text": "use this honestly and kind of keeps"
+  },
+  {
+    "start": "04:15",
+    "end": "04:19",
+    "text": "everything organized. And obviously, you"
+  },
+  {
+    "start": "04:17",
+    "end": "04:21",
+    "text": "have to have a pro account or a max"
+  },
+  {
+    "start": "04:19",
+    "end": "04:22",
+    "text": "account for Claude. So, once you log in"
+  },
+  {
+    "start": "04:21",
+    "end": "04:24",
+    "text": "and start a new session, it's going to"
+  },
+  {
+    "start": "04:22",
+    "end": "04:27",
+    "text": "look exactly like this. So, in order to"
+  },
+  {
+    "start": "04:24",
+    "end": "04:29",
+    "text": "generate our assets for the website,"
+  },
+  {
+    "start": "04:27",
+    "end": "04:30",
+    "text": "we're going to use the Higgs Field MCP."
+  },
+  {
+    "start": "04:29",
+    "end": "04:33",
+    "text": "Now, in order to connect the Higgs Field"
+  },
+  {
+    "start": "04:30",
+    "end": "04:34",
+    "text": "MCP to our Claude code, it's very, very"
+  },
+  {
+    "start": "04:33",
+    "end": "04:36",
+    "text": "simple, right? So, for those of you who"
+  },
+  {
+    "start": "04:34",
+    "end": "04:38",
+    "text": "are not familiar, Higgs Field basically"
+  },
+  {
+    "start": "04:36",
+    "end": "04:40",
+    "text": "gives you the ability to connect to all"
+  },
+  {
+    "start": "04:38",
+    "end": "04:43",
+    "text": "image models, all video models, and"
+  },
+  {
+    "start": "04:40",
+    "end": "04:45",
+    "text": "obviously, the C Dance 2.5 is the top"
+  },
+  {
+    "start": "04:43",
+    "end": "04:47",
+    "text": "model right now because it just got"
+  },
+  {
+    "start": "04:45",
+    "end": "04:50",
+    "text": "released because it creates up to 30"
+  },
+  {
+    "start": "04:47",
+    "end": "04:52",
+    "text": "seconds of continuous cinematic videos"
+  },
+  {
+    "start": "04:50",
+    "end": "04:54",
+    "text": "instead of other models where you had to"
+  },
+  {
+    "start": "04:52",
+    "end": "04:55",
+    "text": "kind of stitch everything together. Now,"
+  },
+  {
+    "start": "04:54",
+    "end": "04:57",
+    "text": "this is very important especially if"
+  },
+  {
+    "start": "04:55",
+    "end": "05:00",
+    "text": "you're creating a website that requires"
+  },
+  {
+    "start": "04:57",
+    "end": "05:01",
+    "text": "you to have a video with different"
+  },
+  {
+    "start": "05:00",
+    "end": "05:03",
+    "text": "frames. So, if it's a continuous"
+  },
+  {
+    "start": "05:01",
+    "end": "05:05",
+    "text": "30-second video, then the quality of"
+  },
+  {
+    "start": "05:03",
+    "end": "05:07",
+    "text": "your website becomes a lot better. So,"
+  },
+  {
+    "start": "05:05",
+    "end": "05:09",
+    "text": "I'll give you a quick example. This is"
+  },
+  {
+    "start": "05:07",
+    "end": "05:11",
+    "text": "kind of like one of those"
+  },
+  {
+    "start": "05:09",
+    "end": "05:12",
+    "text": "you know, infinite zoom in and zoom out"
+  },
+  {
+    "start": "05:11",
+    "end": "05:14",
+    "text": "websites that I created called"
+  },
+  {
+    "start": "05:12",
+    "end": "05:16",
+    "text": "Magnitude. So, you can see this is like"
+  },
+  {
+    "start": "05:14",
+    "end": "05:17",
+    "text": "a 30-second video that's kind of"
+  },
+  {
+    "start": "05:16",
+    "end": "05:19",
+    "text": "stitched together. So, look at how"
+  },
+  {
+    "start": "05:17",
+    "end": "05:20",
+    "text": "beautiful that is, right? So, I can zoom"
+  },
+  {
+    "start": "05:19",
+    "end": "05:22",
+    "text": "in and zoom out. It kind of goes back"
+  },
+  {
+    "start": "05:20",
+    "end": "05:25",
+    "text": "inside"
+  },
+  {
+    "start": "05:22",
+    "end": "05:27",
+    "text": "and as I scroll up and down, it goes in"
+  },
+  {
+    "start": "05:25",
+    "end": "05:30",
+    "text": "and out, right? So, as you can see, the"
+  },
+  {
+    "start": "05:27",
+    "end": "05:32",
+    "text": "quality of this video is incredibly high"
+  },
+  {
+    "start": "05:30",
+    "end": "05:34",
+    "text": "and it's only 720 pixels, which means"
+  },
+  {
+    "start": "05:32",
+    "end": "05:36",
+    "text": "that the the website is going to be able"
+  },
+  {
+    "start": "05:34",
+    "end": "05:38",
+    "text": "to load it a lot easier, right? So, as"
+  },
+  {
+    "start": "05:36",
+    "end": "05:40",
+    "text": "you can see, as I kind of scroll, it"
+  },
+  {
+    "start": "05:38",
+    "end": "05:43",
+    "text": "goes into this infinite zoom from this"
+  },
+  {
+    "start": "05:40",
+    "end": "05:45",
+    "text": "droplet all the way back to our galaxy,"
+  },
+  {
+    "start": "05:43",
+    "end": "05:48",
+    "text": "right? So, the reason why I said that C"
+  },
+  {
+    "start": "05:45",
+    "end": "05:49",
+    "text": "Dance 2.5 is important for this type of"
+  },
+  {
+    "start": "05:48",
+    "end": "05:50",
+    "text": "asset, for this type of video. And by"
+  },
+  {
+    "start": "05:49",
+    "end": "05:53",
+    "text": "the way, this is a video, it's just"
+  },
+  {
+    "start": "05:50",
+    "end": "05:54",
+    "text": "divided into multiple frames. So, inside"
+  },
+  {
+    "start": "05:53",
+    "end": "05:56",
+    "text": "a website, it kind of combines"
+  },
+  {
+    "start": "05:54",
+    "end": "05:59",
+    "text": "everything together. So, if you're using"
+  },
+  {
+    "start": "05:56",
+    "end": "06:01",
+    "text": "a high-quality video model that's"
+  },
+  {
+    "start": "05:59",
+    "end": "06:03",
+    "text": "generating this continuous shot, it"
+  },
+  {
+    "start": "06:01",
+    "end": "06:05",
+    "text": "makes the quality of the website a lot"
+  },
+  {
+    "start": "06:03",
+    "end": "06:06",
+    "text": "better. So, again, of course, this is"
+  },
+  {
+    "start": "06:05",
+    "end": "06:09",
+    "text": "just one example, right? We can apply"
+  },
+  {
+    "start": "06:06",
+    "end": "06:11",
+    "text": "this across any other, you know, product"
+  },
+  {
+    "start": "06:09",
+    "end": "06:13",
+    "text": "dimension. If you're creating something"
+  },
+  {
+    "start": "06:11",
+    "end": "06:15",
+    "text": "like a e-commerce website or some kind"
+  },
+  {
+    "start": "06:13",
+    "end": "06:17",
+    "text": "of a product, all of that becomes very,"
+  },
+  {
+    "start": "06:15",
+    "end": "06:19",
+    "text": "very important if you have a video model"
+  },
+  {
+    "start": "06:17",
+    "end": "06:20",
+    "text": "that's able to generate high-quality"
+  },
+  {
+    "start": "06:19",
+    "end": "06:21",
+    "text": "assets for you. And same thing for this"
+  },
+  {
+    "start": "06:20",
+    "end": "06:23",
+    "text": "one, something like this car, for"
+  },
+  {
+    "start": "06:21",
+    "end": "06:27",
+    "text": "instance, right? As you can see, this is"
+  },
+  {
+    "start": "06:23",
+    "end": "06:30",
+    "text": "also a one continuous video, right? So,"
+  },
+  {
+    "start": "06:27",
+    "end": "06:32",
+    "text": "and starting from, you know, the still"
+  },
+  {
+    "start": "06:30",
+    "end": "06:34",
+    "text": "image of this car and the tire spinning"
+  },
+  {
+    "start": "06:32",
+    "end": "06:36",
+    "text": "and kind of the camera follows it along,"
+  },
+  {
+    "start": "06:34",
+    "end": "06:38",
+    "text": "and it's just split into couple of"
+  },
+  {
+    "start": "06:36",
+    "end": "06:39",
+    "text": "different sections based on the"
+  },
+  {
+    "start": "06:38",
+    "end": "06:41",
+    "text": "requirement of this particular website."
+  },
+  {
+    "start": "06:39",
+    "end": "06:43",
+    "text": "So, you can see, everything is really"
+  },
+  {
+    "start": "06:41",
+    "end": "06:45",
+    "text": "well-made and well-designed. And by the"
+  },
+  {
+    "start": "06:43",
+    "end": "06:47",
+    "text": "way, this right here is similar to an"
+  },
+  {
+    "start": "06:45",
+    "end": "06:49",
+    "text": "award-winning website design, actually."
+  },
+  {
+    "start": "06:47",
+    "end": "06:52",
+    "text": "This is called Hubtown. This is a real"
+  },
+  {
+    "start": "06:49",
+    "end": "06:54",
+    "text": "website. This was one of the websites"
+  },
+  {
+    "start": "06:52",
+    "end": "06:55",
+    "text": "that won multiple awards. So, you can"
+  },
+  {
+    "start": "06:54",
+    "end": "06:58",
+    "text": "see, this is basically something that we"
+  },
+  {
+    "start": "06:55",
+    "end": "07:00",
+    "text": "can generate with our C-Dance 2.5 model"
+  },
+  {
+    "start": "06:58",
+    "end": "07:02",
+    "text": "and our Higgs field MCP. I mean, it's a"
+  },
+  {
+    "start": "07:00",
+    "end": "07:04",
+    "text": "really cool website, but this concept of"
+  },
+  {
+    "start": "07:02",
+    "end": "07:07",
+    "text": "the streak following along is pretty"
+  },
+  {
+    "start": "07:04",
+    "end": "07:09",
+    "text": "much the same thing as we just saw in"
+  },
+  {
+    "start": "07:07",
+    "end": "07:12",
+    "text": "the video here or in the website that we"
+  },
+  {
+    "start": "07:09",
+    "end": "07:13",
+    "text": "generated with our C-Dance 2.5 there."
+  },
+  {
+    "start": "07:12",
+    "end": "07:15",
+    "text": "So, you can see, these are websites that"
+  },
+  {
+    "start": "07:13",
+    "end": "07:18",
+    "text": "are already out there, and we're just"
+  },
+  {
+    "start": "07:15",
+    "end": "07:19",
+    "text": "using this as inspiration to build"
+  },
+  {
+    "start": "07:18",
+    "end": "07:21",
+    "text": "incredible websites similar to these."
+  },
+  {
+    "start": "07:19",
+    "end": "07:22",
+    "text": "All right, so, that's kind of a few"
+  },
+  {
+    "start": "07:21",
+    "end": "07:24",
+    "text": "examples I wanted to point out. All"
+  },
+  {
+    "start": "07:22",
+    "end": "07:25",
+    "text": "right, so, now let's go ahead and get"
+  },
+  {
+    "start": "07:24",
+    "end": "07:27",
+    "text": "started step by step. So, once you come"
+  },
+  {
+    "start": "07:25",
+    "end": "07:28",
+    "text": "into your Cloud Code, you're going to"
+  },
+  {
+    "start": "07:27",
+    "end": "07:30",
+    "text": "come to the bottom right here, click on"
+  },
+  {
+    "start": "07:28",
+    "end": "07:32",
+    "text": "the plus button here, cuz we need to add"
+  },
+  {
+    "start": "07:30",
+    "end": "07:34",
+    "text": "our MCP or connector. So, you're going"
+  },
+  {
+    "start": "07:32",
+    "end": "07:36",
+    "text": "to hover over the connectors here,"
+  },
+  {
+    "start": "07:34",
+    "end": "07:37",
+    "text": "you're going to go to manage connectors,"
+  },
+  {
+    "start": "07:36",
+    "end": "07:39",
+    "text": "and on top right here, you're going to"
+  },
+  {
+    "start": "07:37",
+    "end": "07:41",
+    "text": "click on add, and you're going to click"
+  },
+  {
+    "start": "07:39",
+    "end": "07:44",
+    "text": "on add custom connector, because we need"
+  },
+  {
+    "start": "07:41",
+    "end": "07:45",
+    "text": "to connect our Claude code to our Higgs"
+  },
+  {
+    "start": "07:44",
+    "end": "07:47",
+    "text": "field. And the way to do that is we're"
+  },
+  {
+    "start": "07:45",
+    "end": "07:48",
+    "text": "going to do it through our"
+  },
+  {
+    "start": "07:47",
+    "end": "07:50",
+    "text": "MCP here. So, you're going to go ahead"
+  },
+  {
+    "start": "07:48",
+    "end": "07:52",
+    "text": "and name it. So, I'm just going to name"
+  },
+  {
+    "start": "07:50",
+    "end": "07:53",
+    "text": "it Higgs field MCP."
+  },
+  {
+    "start": "07:52",
+    "end": "07:55",
+    "text": "Or just Higgs field. And this remote"
+  },
+  {
+    "start": "07:53",
+    "end": "07:56",
+    "text": "CRL, so go ahead and click on the link"
+  },
+  {
+    "start": "07:55",
+    "end": "07:58",
+    "text": "in the description. It's going to bring"
+  },
+  {
+    "start": "07:56",
+    "end": "07:59",
+    "text": "you right here. So, as you can see, I'm"
+  },
+  {
+    "start": "07:58",
+    "end": "08:01",
+    "text": "already on Claude. And by the way, you"
+  },
+  {
+    "start": "07:59",
+    "end": "08:03",
+    "text": "have to obviously sign up for"
+  },
+  {
+    "start": "08:01",
+    "end": "08:05",
+    "text": "Higgs field account. But go ahead and do"
+  },
+  {
+    "start": "08:03",
+    "end": "08:06",
+    "text": "that. And once you do that, click on the"
+  },
+  {
+    "start": "08:05",
+    "end": "08:08",
+    "text": "link in the description again. It should"
+  },
+  {
+    "start": "08:06",
+    "end": "08:11",
+    "text": "bring you exactly right here. Make sure"
+  },
+  {
+    "start": "08:08",
+    "end": "08:12",
+    "text": "you click on Claude and MCP. And then"
+  },
+  {
+    "start": "08:11",
+    "end": "08:13",
+    "text": "you're going to just copy this right"
+  },
+  {
+    "start": "08:12",
+    "end": "08:15",
+    "text": "here. So, then you're going to go back"
+  },
+  {
+    "start": "08:13",
+    "end": "08:16",
+    "text": "to your Claude code. And you're just"
+  },
+  {
+    "start": "08:15",
+    "end": "08:18",
+    "text": "going to basically paste this remote"
+  },
+  {
+    "start": "08:16",
+    "end": "08:19",
+    "text": "MCP. You're going to click on add. It's"
+  },
+  {
+    "start": "08:18",
+    "end": "08:21",
+    "text": "not going to allow me because I've"
+  },
+  {
+    "start": "08:19",
+    "end": "08:23",
+    "text": "already added. So, you can see a server"
+  },
+  {
+    "start": "08:21",
+    "end": "08:24",
+    "text": "with this URL already exists. So, but"
+  },
+  {
+    "start": "08:23",
+    "end": "08:26",
+    "text": "for you, it should be able to add it."
+  },
+  {
+    "start": "08:24",
+    "end": "08:27",
+    "text": "And once it gets added, then it's going"
+  },
+  {
+    "start": "08:26",
+    "end": "08:29",
+    "text": "to look something like this. And you're"
+  },
+  {
+    "start": "08:27",
+    "end": "08:30",
+    "text": "going to click on connect. And it's"
+  },
+  {
+    "start": "08:29",
+    "end": "08:34",
+    "text": "going to open an authentication, which"
+  },
+  {
+    "start": "08:30",
+    "end": "08:36",
+    "text": "is OAuth. Which basically means that you"
+  },
+  {
+    "start": "08:34",
+    "end": "08:37",
+    "text": "want your Higgs field to be connected to"
+  },
+  {
+    "start": "08:36",
+    "end": "08:39",
+    "text": "Claude. And it's just going to ask you"
+  },
+  {
+    "start": "08:37",
+    "end": "08:41",
+    "text": "for permission. You're going to click on"
+  },
+  {
+    "start": "08:39",
+    "end": "08:42",
+    "text": "allow. And then afterwards, when you"
+  },
+  {
+    "start": "08:41",
+    "end": "08:45",
+    "text": "come back to your Claude code session"
+  },
+  {
+    "start": "08:42",
+    "end": "08:47",
+    "text": "again and hover over the connectors, now"
+  },
+  {
+    "start": "08:45",
+    "end": "08:49",
+    "text": "you should see your Higgs field MCP"
+  },
+  {
+    "start": "08:47",
+    "end": "08:50",
+    "text": "installed and toggled on. So, make sure"
+  },
+  {
+    "start": "08:49",
+    "end": "08:52",
+    "text": "you check that first because otherwise,"
+  },
+  {
+    "start": "08:50",
+    "end": "08:53",
+    "text": "this is not going to work, right? All"
+  },
+  {
+    "start": "08:52",
+    "end": "08:55",
+    "text": "right. So, once you do that, now we can"
+  },
+  {
+    "start": "08:53",
+    "end": "08:57",
+    "text": "go ahead and start prompting this. Now,"
+  },
+  {
+    "start": "08:55",
+    "end": "08:59",
+    "text": "instead of prompting this, you know,"
+  },
+  {
+    "start": "08:57",
+    "end": "09:00",
+    "text": "five, six times in a row, I've already"
+  },
+  {
+    "start": "08:59",
+    "end": "09:02",
+    "text": "created this prompt pack for you guys"
+  },
+  {
+    "start": "09:00",
+    "end": "09:03",
+    "text": "that will make everything a lot easier"
+  },
+  {
+    "start": "09:02",
+    "end": "09:05",
+    "text": "because I went through a lot of testing."
+  },
+  {
+    "start": "09:03",
+    "end": "09:07",
+    "text": "So, I created everything to make sure"
+  },
+  {
+    "start": "09:05",
+    "end": "09:08",
+    "text": "are all of the prompts here and a guide"
+  },
+  {
+    "start": "09:07",
+    "end": "09:10",
+    "text": "for you guys. So, that way it makes a"
+  },
+  {
+    "start": "09:08",
+    "end": "09:12",
+    "text": "lot easier for you. So, that way you're"
+  },
+  {
+    "start": "09:10",
+    "end": "09:14",
+    "text": "not wasting your tokens, right? So, this"
+  },
+  {
+    "start": "09:12",
+    "end": "09:15",
+    "text": "is an entire prompt pack. I give you all"
+  },
+  {
+    "start": "09:14",
+    "end": "09:17",
+    "text": "of the details about the cost, the"
+  },
+  {
+    "start": "09:15",
+    "end": "09:18",
+    "text": "resolution, and everything you need to"
+  },
+  {
+    "start": "09:17",
+    "end": "09:21",
+    "text": "know about C-Dance and how to build a"
+  },
+  {
+    "start": "09:18",
+    "end": "09:22",
+    "text": "website, an entire kind of guide on"
+  },
+  {
+    "start": "09:21",
+    "end": "09:24",
+    "text": "that. And then also, a bunch of"
+  },
+  {
+    "start": "09:22",
+    "end": "09:26",
+    "text": "different examples, right? So, these are"
+  },
+  {
+    "start": "09:24",
+    "end": "09:28",
+    "text": "just prompt examples that you can copy"
+  },
+  {
+    "start": "09:26",
+    "end": "09:30",
+    "text": "and paste and test it out yourself. And"
+  },
+  {
+    "start": "09:28",
+    "end": "09:31",
+    "text": "to access this is very simple. So,"
+  },
+  {
+    "start": "09:30",
+    "end": "09:33",
+    "text": "you're going to click on the link in the"
+  },
+  {
+    "start": "09:31",
+    "end": "09:34",
+    "text": "description. It's a free community. So,"
+  },
+  {
+    "start": "09:33",
+    "end": "09:35",
+    "text": "once you click on that, it's going to"
+  },
+  {
+    "start": "09:34",
+    "end": "09:37",
+    "text": "bring you right here in the about page."
+  },
+  {
+    "start": "09:35",
+    "end": "09:39",
+    "text": "Just click on join. Again, it's a free"
+  },
+  {
+    "start": "09:37",
+    "end": "09:40",
+    "text": "community. Once you join, you're going"
+  },
+  {
+    "start": "09:39",
+    "end": "09:41",
+    "text": "to be brought in the community section"
+  },
+  {
+    "start": "09:40",
+    "end": "09:44",
+    "text": "here. You're going to go to the"
+  },
+  {
+    "start": "09:41",
+    "end": "09:45",
+    "text": "classroom section, YouTube resources,"
+  },
+  {
+    "start": "09:44",
+    "end": "09:48",
+    "text": "inside the Claude code folder, you will"
+  },
+  {
+    "start": "09:45",
+    "end": "09:50",
+    "text": "have access to this prompt packed, and a"
+  },
+  {
+    "start": "09:48",
+    "end": "09:51",
+    "text": "bunch of other"
+  },
+  {
+    "start": "09:50",
+    "end": "09:53",
+    "text": "free resources there if you're"
+  },
+  {
+    "start": "09:51",
+    "end": "09:54",
+    "text": "interested to check that out. Okay, so"
+  },
+  {
+    "start": "09:53",
+    "end": "09:56",
+    "text": "once you grab that, let's go ahead and"
+  },
+  {
+    "start": "09:54",
+    "end": "09:58",
+    "text": "get back to our Claude code here. So"
+  },
+  {
+    "start": "09:56",
+    "end": "09:59",
+    "text": "now,"
+  },
+  {
+    "start": "09:58",
+    "end": "10:00",
+    "text": "let's go ahead and actually I'm going to"
+  },
+  {
+    "start": "09:59",
+    "end": "10:03",
+    "text": "copy one of these prompts that are"
+  },
+  {
+    "start": "10:00",
+    "end": "10:05",
+    "text": "already in here. Let's see which one."
+  },
+  {
+    "start": "10:03",
+    "end": "10:07",
+    "text": "Okay, let's take this one. The reveal of"
+  },
+  {
+    "start": "10:05",
+    "end": "10:08",
+    "text": "a house that comes I like this is a good"
+  },
+  {
+    "start": "10:07",
+    "end": "10:10",
+    "text": "idea. So let's go ahead and just copy"
+  },
+  {
+    "start": "10:08",
+    "end": "10:12",
+    "text": "this. I'm just going to copy this entire"
+  },
+  {
+    "start": "10:10",
+    "end": "10:14",
+    "text": "prompt, go back to my Claude code here,"
+  },
+  {
+    "start": "10:12",
+    "end": "10:16",
+    "text": "and I'm just going to go ahead and paste"
+  },
+  {
+    "start": "10:14",
+    "end": "10:19",
+    "text": "this. Now before I enter, just make sure"
+  },
+  {
+    "start": "10:16",
+    "end": "10:21",
+    "text": "you're using either Opus 5 or Fable 5. I"
+  },
+  {
+    "start": "10:19",
+    "end": "10:23",
+    "text": "mean, Fable 5 is expensive, so maybe use"
+  },
+  {
+    "start": "10:21",
+    "end": "10:25",
+    "text": "Opus 5. So I'm just going to keep it at"
+  },
+  {
+    "start": "10:23",
+    "end": "10:27",
+    "text": "extra, but high if you want to keep it"
+  },
+  {
+    "start": "10:25",
+    "end": "10:28",
+    "text": "at high that or max, that works as well."
+  },
+  {
+    "start": "10:27",
+    "end": "10:30",
+    "text": "It doesn't really matter that much to be"
+  },
+  {
+    "start": "10:28",
+    "end": "10:32",
+    "text": "honest. So this is an entire prompt. So"
+  },
+  {
+    "start": "10:30",
+    "end": "10:33",
+    "text": "I'm going to go ahead and just enter"
+  },
+  {
+    "start": "10:32",
+    "end": "10:35",
+    "text": "this."
+  },
+  {
+    "start": "10:33",
+    "end": "10:37",
+    "text": "Okay, so now it's going to go ahead and"
+  },
+  {
+    "start": "10:35",
+    "end": "10:40",
+    "text": "I said build me an award-winning single"
+  },
+  {
+    "start": "10:37",
+    "end": "10:43",
+    "text": "property website for Halcyon, a"
+  },
+  {
+    "start": "10:40",
+    "end": "10:46",
+    "text": "fictional 28.5 million glass and"
+  },
+  {
+    "start": "10:43",
+    "end": "10:47",
+    "text": "travertine estate on a cliff headland."
+  },
+  {
+    "start": "10:46",
+    "end": "10:49",
+    "text": "The signature moment, the house"
+  },
+  {
+    "start": "10:47",
+    "end": "10:50",
+    "text": "detonates into slow motion, blah blah."
+  },
+  {
+    "start": "10:49",
+    "end": "10:52",
+    "text": "So it gives you all of the details,"
+  },
+  {
+    "start": "10:50",
+    "end": "10:55",
+    "text": "right? It It tells that use the"
+  },
+  {
+    "start": "10:52",
+    "end": "10:58",
+    "text": "Hicksfield MCP. You want to use the the"
+  },
+  {
+    "start": "10:55",
+    "end": "11:00",
+    "text": "seedance 2.5 model. It gives you gives"
+  },
+  {
+    "start": "10:58",
+    "end": "11:03",
+    "text": "gives gives it all of the details as far"
+  },
+  {
+    "start": "11:00",
+    "end": "11:05",
+    "text": "as the duration of the frame, the"
+  },
+  {
+    "start": "11:03",
+    "end": "11:06",
+    "text": "levels, right? So different scenes. It"
+  },
+  {
+    "start": "11:05",
+    "end": "11:09",
+    "text": "kind of describes all of that in the"
+  },
+  {
+    "start": "11:06",
+    "end": "11:11",
+    "text": "website itself and everything else that"
+  },
+  {
+    "start": "11:09",
+    "end": "11:12",
+    "text": "needs to be built here step by step. So"
+  },
+  {
+    "start": "11:11",
+    "end": "11:14",
+    "text": "let's go ahead and now let this thing"
+  },
+  {
+    "start": "11:12",
+    "end": "11:15",
+    "text": "finish. As you can see right here, it's"
+  },
+  {
+    "start": "11:14",
+    "end": "11:18",
+    "text": "going to go ahead and check to make sure"
+  },
+  {
+    "start": "11:15",
+    "end": "11:20",
+    "text": "that the connection to our Hicksfield"
+  },
+  {
+    "start": "11:18",
+    "end": "11:21",
+    "text": "MCP is working, and then afterwards it's"
+  },
+  {
+    "start": "11:20",
+    "end": "11:22",
+    "text": "going to go ahead and generate"
+  },
+  {
+    "start": "11:21",
+    "end": "11:24",
+    "text": "everything. So there you go. So it says"
+  },
+  {
+    "start": "11:22",
+    "end": "11:26",
+    "text": "using the Hicksfield MCP to generate the"
+  },
+  {
+    "start": "11:24",
+    "end": "11:28",
+    "text": "image batch, and it's going to go ahead"
+  },
+  {
+    "start": "11:26",
+    "end": "11:30",
+    "text": "and keep everything together, and at the"
+  },
+  {
+    "start": "11:28",
+    "end": "11:31",
+    "text": "end combine it, and give us a nice"
+  },
+  {
+    "start": "11:30",
+    "end": "11:32",
+    "text": "little website. So now let's go ahead"
+  },
+  {
+    "start": "11:31",
+    "end": "11:34",
+    "text": "and give give this a couple of minutes."
+  },
+  {
+    "start": "11:32",
+    "end": "11:35",
+    "text": "It's going to take a minute or two, so"
+  },
+  {
+    "start": "11:34",
+    "end": "11:37",
+    "text": "let's go ahead and give this a couple of"
+  },
+  {
+    "start": "11:35",
+    "end": "11:38",
+    "text": "minutes and we can come back to it. So,"
+  },
+  {
+    "start": "11:37",
+    "end": "11:40",
+    "text": "by the way, inside the classroom section"
+  },
+  {
+    "start": "11:38",
+    "end": "11:42",
+    "text": "here, I've a bunch of different other"
+  },
+  {
+    "start": "11:40",
+    "end": "11:45",
+    "text": "resources for you guys to take advantage"
+  },
+  {
+    "start": "11:42",
+    "end": "11:47",
+    "text": "of related to C dance 2.5 and other"
+  },
+  {
+    "start": "11:45",
+    "end": "11:48",
+    "text": "models there as well. And of course,"
+  },
+  {
+    "start": "11:47",
+    "end": "11:50",
+    "text": "other builds that I've done, so feel"
+  },
+  {
+    "start": "11:48",
+    "end": "11:51",
+    "text": "free to check that out. There's a bunch"
+  },
+  {
+    "start": "11:50",
+    "end": "11:53",
+    "text": "of different things there including how"
+  },
+  {
+    "start": "11:51",
+    "end": "11:54",
+    "text": "to build your AI second brain and"
+  },
+  {
+    "start": "11:53",
+    "end": "11:56",
+    "text": "everything else. All right, so let's go"
+  },
+  {
+    "start": "11:54",
+    "end": "11:58",
+    "text": "ahead and see what Claude All right, it"
+  },
+  {
+    "start": "11:56",
+    "end": "12:00",
+    "text": "looks like it's done. There you go. So,"
+  },
+  {
+    "start": "11:58",
+    "end": "12:02",
+    "text": "it looks like it built all of the images"
+  },
+  {
+    "start": "12:00",
+    "end": "12:04",
+    "text": "the assets and everything else. And now"
+  },
+  {
+    "start": "12:02",
+    "end": "12:07",
+    "text": "it says at the bottom here that um"
+  },
+  {
+    "start": "12:04",
+    "end": "12:09",
+    "text": "Halcyon is live at the localhost 4995."
+  },
+  {
+    "start": "12:07",
+    "end": "12:11",
+    "text": "So, let's go ahead and click on this."
+  },
+  {
+    "start": "12:09",
+    "end": "12:12",
+    "text": "All right, so it's loading. Oh, cool."
+  },
+  {
+    "start": "12:11",
+    "end": "12:14",
+    "text": "So, this is kind of that fictional"
+  },
+  {
+    "start": "12:12",
+    "end": "12:17",
+    "text": "property at the edge. So, as I scroll"
+  },
+  {
+    "start": "12:14",
+    "end": "12:19",
+    "text": "now, oh wow, that's beautiful. That's"
+  },
+  {
+    "start": "12:17",
+    "end": "12:22",
+    "text": "really cool. Look at this."
+  },
+  {
+    "start": "12:19",
+    "end": "12:25",
+    "text": "Nice. I like that explosion of glass and"
+  },
+  {
+    "start": "12:22",
+    "end": "12:28",
+    "text": "color. That's a very cool look."
+  },
+  {
+    "start": "12:25",
+    "end": "12:30",
+    "text": "Nice. Oh, that's really cool. Wow."
+  },
+  {
+    "start": "12:28",
+    "end": "12:31",
+    "text": "That's beautiful. I like these three"
+  },
+  {
+    "start": "12:30",
+    "end": "12:32",
+    "text": "level,"
+  },
+  {
+    "start": "12:31",
+    "end": "12:33",
+    "text": "right? So, as you scroll it kind of"
+  },
+  {
+    "start": "12:32",
+    "end": "12:36",
+    "text": "shows everything."
+  },
+  {
+    "start": "12:33",
+    "end": "12:39",
+    "text": "Nice. Very nice. Wow, that's actually"
+  },
+  {
+    "start": "12:36",
+    "end": "12:41",
+    "text": "very impressive."
+  },
+  {
+    "start": "12:39",
+    "end": "12:45",
+    "text": "Nice. And then at the bottom it has this"
+  },
+  {
+    "start": "12:41",
+    "end": "12:46",
+    "text": "like nice little spinning video here."
+  },
+  {
+    "start": "12:45",
+    "end": "12:49",
+    "text": "Very cool. Oh, you can actually drag"
+  },
+  {
+    "start": "12:46",
+    "end": "12:52",
+    "text": "this. Oh, that is cool."
+  },
+  {
+    "start": "12:49",
+    "end": "12:54",
+    "text": "It's like a 3D thing. Nice. Okay, very"
+  },
+  {
+    "start": "12:52",
+    "end": "12:55",
+    "text": "nice. Cool."
+  },
+  {
+    "start": "12:54",
+    "end": "12:56",
+    "text": "All right, and it gives you all of the"
+  },
+  {
+    "start": "12:55",
+    "end": "12:58",
+    "text": "details. So, there you go, right? You"
+  },
+  {
+    "start": "12:56",
+    "end": "12:59",
+    "text": "can see how"
+  },
+  {
+    "start": "12:58",
+    "end": "13:02",
+    "text": "uh very well made this is. And by the"
+  },
+  {
+    "start": "12:59",
+    "end": "13:06",
+    "text": "way, this is uh 720 pixels because right"
+  },
+  {
+    "start": "13:02",
+    "end": "13:09",
+    "text": "now C dance 2.0 only uh or C dance 2.5"
+  },
+  {
+    "start": "13:06",
+    "end": "13:12",
+    "text": "only supports um 720 pixels. So, it's a"
+  },
+  {
+    "start": "13:09",
+    "end": "13:13",
+    "text": "lot easier to load and therefore the"
+  },
+  {
+    "start": "13:12",
+    "end": "13:15",
+    "text": "website will be a little more efficient"
+  },
+  {
+    "start": "13:13",
+    "end": "13:18",
+    "text": "versus versus if you were to like use"
+  },
+  {
+    "start": "13:15",
+    "end": "13:20",
+    "text": "some kind of a 4K quality video asset,"
+  },
+  {
+    "start": "13:18",
+    "end": "13:21",
+    "text": "right? So, very cool. Again, very"
+  },
+  {
+    "start": "13:20",
+    "end": "13:23",
+    "text": "impressive. This is something like you"
+  },
+  {
+    "start": "13:21",
+    "end": "13:25",
+    "text": "can imagine you can use this as"
+  },
+  {
+    "start": "13:23",
+    "end": "13:28",
+    "text": "inspiration to create other website that"
+  },
+  {
+    "start": "13:25",
+    "end": "13:30",
+    "text": "has these 3D scrolling effects and kind"
+  },
+  {
+    "start": "13:28",
+    "end": "13:32",
+    "text": "of zoom in and zoom out. I really like"
+  },
+  {
+    "start": "13:30",
+    "end": "13:34",
+    "text": "these color explosions, but anyway, so"
+  },
+  {
+    "start": "13:32",
+    "end": "13:37",
+    "text": "feel free to check it out like I said"
+  },
+  {
+    "start": "13:34",
+    "end": "13:39",
+    "text": "all of the prompts are here. So test out"
+  },
+  {
+    "start": "13:37",
+    "end": "13:40",
+    "text": "a couple of them, you know, see which"
+  },
+  {
+    "start": "13:39",
+    "end": "13:42",
+    "text": "one you like. I mean there's portfolio"
+  },
+  {
+    "start": "13:40",
+    "end": "13:43",
+    "text": "websites, there's like real estate,"
+  },
+  {
+    "start": "13:42",
+    "end": "13:45",
+    "text": "there's"
+  },
+  {
+    "start": "13:43",
+    "end": "13:47",
+    "text": "you know, e-commerce related website and"
+  },
+  {
+    "start": "13:45",
+    "end": "13:49",
+    "text": "a bunch of different other ones and then"
+  },
+  {
+    "start": "13:47",
+    "end": "13:51",
+    "text": "also a guide on how to build a website"
+  },
+  {
+    "start": "13:49",
+    "end": "13:52",
+    "text": "properly. Okay, so again, all of this is"
+  },
+  {
+    "start": "13:51",
+    "end": "13:53",
+    "text": "going to be inside the community and by"
+  },
+  {
+    "start": "13:52",
+    "end": "13:56",
+    "text": "the way, if you're interested in"
+  },
+  {
+    "start": "13:53",
+    "end": "13:58",
+    "text": "grabbing Jarvis and other AI that's"
+  },
+  {
+    "start": "13:56",
+    "end": "14:00",
+    "text": "going to be inside the paid community"
+  },
+  {
+    "start": "13:58",
+    "end": "14:02",
+    "text": "where you can just come in and click on"
+  },
+  {
+    "start": "14:00",
+    "end": "14:03",
+    "text": "the AI assistant and AI employees. Right"
+  },
+  {
+    "start": "14:02",
+    "end": "14:06",
+    "text": "now we're in version 6 actually because"
+  },
+  {
+    "start": "14:03",
+    "end": "14:07",
+    "text": "now Jarvis can actually make phone calls"
+  },
+  {
+    "start": "14:06",
+    "end": "14:10",
+    "text": "because he has a phone number. I'm going"
+  },
+  {
+    "start": "14:07",
+    "end": "14:11",
+    "text": "to put that video at the end so that way"
+  },
+  {
+    "start": "14:10",
+    "end": "14:13",
+    "text": "if you guys want to check out and see"
+  },
+  {
+    "start": "14:11",
+    "end": "14:15",
+    "text": "the full demo of Jarvis, feel free to"
+  },
+  {
+    "start": "14:13",
+    "end": "14:17",
+    "text": "check that out. But again, this is a"
+  },
+  {
+    "start": "14:15",
+    "end": "14:19",
+    "text": "paid community cuz a lot of assets are"
+  },
+  {
+    "start": "14:17",
+    "end": "14:21",
+    "text": "there including a cloud code masterclass"
+  },
+  {
+    "start": "14:19",
+    "end": "14:23",
+    "text": "and then also a bunch of other stuff"
+  },
+  {
+    "start": "14:21",
+    "end": "14:25",
+    "text": "like the AI second brain that you can"
+  },
+  {
+    "start": "14:23",
+    "end": "14:27",
+    "text": "download and of course if you ever get"
+  },
+  {
+    "start": "14:25",
+    "end": "14:29",
+    "text": "stuck, we have tech support here. Our"
+  },
+  {
+    "start": "14:27",
+    "end": "14:31",
+    "text": "team and I are there to help you out"
+  },
+  {
+    "start": "14:29",
+    "end": "14:33",
+    "text": "no matter what question you have. So"
+  },
+  {
+    "start": "14:31",
+    "end": "14:35",
+    "text": "check out the paid community if not"
+  },
+  {
+    "start": "14:33",
+    "end": "14:37",
+    "text": "again, the free community has a bunch of"
+  },
+  {
+    "start": "14:35",
+    "end": "14:39",
+    "text": "stuff in there for you guys"
+  },
+  {
+    "start": "14:37",
+    "end": "14:41",
+    "text": "to take a look and take advantage of"
+  },
+  {
+    "start": "14:39",
+    "end": "14:42",
+    "text": "advantage of check it out. let me know"
+  },
+  {
+    "start": "14:41",
+    "end": "14:44",
+    "text": "in the link in the comments below if you"
+  },
+  {
+    "start": "14:42",
+    "end": "14:47",
+    "text": "have any questions. Thanks for watching"
+  },
+  {
+    "start": "14:44",
+    "end": "14:47",
+    "text": "and I'll see you on the next one."
+  }
+]

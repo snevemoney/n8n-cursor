@@ -1,0 +1,123 @@
+This guy remembers his credit card in his head, his full 20-digit credit card number, and he won't
+remember something we talked about 4 days ago. He's a special specimen. Yep, that's us. You might be
+wondering how we got here. Wait, who are we? [music] Oh yeah, so we wanted to mention how our weekly
+draws they run from Sunday to Sunday right so every like Sunday at 8:00 p.m. it restarts. We
+calculate the winner for the previous week and then we issue the number of tickets to each user for
+the next week. Exactly. Um, we wanted to test that last Sunday. I like call Luke at 7:55 p.m. Yo,
+hop on, open up your your simulator, put a timer, make sure you get the seconds in there so we know
+exactly when it hits 8 p.m. Didn't work like Yeah, we we obviously did not have enough time. Yeah.
+And unfortunately the the testing period is gonna have to wait till next weekend and we'll be more
+prepared at that time. Yeah, that's our debugging update. [music] Yo Luke, what do you think of
+these animations? I was uh going through and I found a cool sort of like pack. Okay. So, this one
+for like That's pretty good. Earning tickets sort of thing. Or this one for earning tickets. Okay.
+This one for like if you're the winner. Oh, wow. I like that spin. Like this for like when payout is
+completed or something. These are free? I think so. It says free here. Okay. I'll have to download
+it. Like I know we have a limit so it may count towards our limit but uh I think you can just like
+create a new account under a different email. We'll definitely make sure that we respect all um
+copyright laws and all that stuff. Oh Yeah yeah. It's it's copyright it's good. It's more the
+platform which have limits but [music] All right. So basically we uh I set up Posthog last night. Um
+Luke's going to get set up now and then if you want to just sort of go through what I did, check for
+any errors, make sure it's all all good, use the MCP server. Basically what Posthog is, it's an
+analytics tracking tool. So, uh, we'll be able to see, you know, what percentage of users who
+download the app then actually use it, what percent sign up, what percent come back every week. Uh,
+we can run some testing to make sure that any changes we make are having like a positive effect on
+the metrics that we're tracking. So, uh, yeah, really cool team. We were like two weeks late on
+their startup discount. actually. You had to be less than two years old and we incorporated like two
+years and 10 days ago. Sent them an email, they said it's fine. So, uh, we also get some like free
+credits and I think we can even ask for merch or something from them. So, Oh, merch. Yeah. I love
+merch. See, we've got the merch right now. Yeah. Yep. Of course. The only only hoodies we own. Mhm.
+[music] All right. So, exciting update. We saw a couple months ago that someone pretty high up at
+Wealthsimple had joined our waitlist. Finally, since we sent our first email out and whatnot to the
+waitlist members, I decided to reach out to him on LinkedIn just to connect and say, "Hey,
+appreciate you supporting us or at least that we're on your radar." I don't know if you want to come
+see Luke, but he was doing some research on the concept. Found our project. Thought it was pretty
+cool. So, we're going to have a meeting with him. So, to get to know about him. I've been watching
+some of his podcasts, learning about his stuff and uh where I worked before. I heard great things
+about him. Really excited stuff and excited to have that first sort of conversation with
+Wealthsimple and see where it leads to. Now, you might be thinking, who is this guy? That's me, the
+editor. I came late this day. I'm also the only one of the three core members who joined after the
+founding of the company. Here's how that happened. Let's tell them how we met. It's like we're we're
+breaking the fourth wall. Oh, we're breaking. We know they're there. Yo camera. But we're talking
+together. Hello people. So Luke and I, we've always been into poker. Like our group of friends since
+high school we were playing and then we discover people at McGill run these games. Yeah. So we show
+up and then we meet, you know, a bunch of awesome people there. Then we meet you. Shoutout Rob,
+Phillip, Shamir. Yeah. Yeah. All the OGs. Yeah. Emile. Obviously I'm like always sort of pitching
+the startup and I'm telling everyone about it and oh guys go go go join the waitlist. Businessman.
+Yeah. And then you're like okay yo like I've been wanting to be part of a startup. I remember you
+telling me that. Like I want to build something and I want to prove myself and we started talking
+and seemed like a good fit. I think I lost a lot of money in that game actually. Like the game that
+we were playing I think I was down like 150 bucks or something. I was really pissed. But then Ben,
+like you told me about this like cool like random side business and I was originally coming in as a
+developer to do code. Yeah. I came home to my girlfriend and then I told her about uh this like
+random guy that I met with a fintech company. He wants me to do some dev work for him. Yeah, I
+remember we like met up at the library a couple times, did some work together. I sort of like talked
+a bit about the vision and where I saw it and for a while I did a little bit of dev work and then we
+decided needed more growth. Yeah, we need more growth content and he put me on that. And anyway,
+that's what I have fun with. I like the camera. Luke and I we're too uh we're too shy. I mean, hey,
+we posted our first one. Yeah. That was my first video where I'm like actually in it. You know,
+Luke, too. He's in it. So, uh you obviously know as the company is more and more successful, it's
+going to be a lot easier. I'm a, I'm a bad cameraman. I missed the action, but the security guard
+just came in here and told us to kick us out. Uh even though we have a 24/7 deal to stay in this
+space. So, um Oh. Oh. Oh. Maybe not. Maybe not. I don't know. They tried to kick us out. They told
+us to leave. Nobody's stopping us. They're stopping us. We're leaving in 30 minutes. But uh but
+yeah, the boys are eating. Mine's cold at this point. some some frozen butter chicken. And yeah, so
+we're uh we're out of here for tonight, but we continue tomorrow. [music] Okay. So, here I'm going
+to purposely not sign in with Face ID. We're brought back to the sign in screen. Now, from here, I'm
+going to continue with Face ID. Oh, okay. Well, it's supposed to ask for my Face ID. So, let's go
+fix that. [music] the workstation. Got he's got Lodavo running. The app on the phone. Got some stuff
+running here. Create personal API. Oh, I should not be showing our API keys. Oh, I like that zoom
+in. [music] We're approaching our 8:00 p.m. test for the launch later in like two weeks. Um the the
+dev boys are stressing right now, so I'm filming. Yeah. Hopefully we uh make it. 20 minutes to go.
+[music] Isn't there a chance that neither of you win the ticket? No. How come? So, we have two we
+have two prizes. We have a weekly guaranteed prize of $100. Right. Which as long as there is a user,
+someone will win it. That is calculated by the ticket with the most matches. And if more tickets
+have the same number of matches, let's say me and Luke, we both have a ticket that has four out of
+seven matches. Yeah. Well, then one of us will be randomly chosen as the winner. Okay. So, I don't
+need to get everything right. I just need to get more right than anybody else. Or get lucky. Yeah.
+You just get lucky. And the $10K is for what? $10K is if you match all seven, then you win the grand
+prize. Talk about him again, please. Bro, why why why would you talk about Posthog again when we
+already filmed that last Friday? I forgot, man. See, that was This guy remembers his credit card in
+his head, his full 20-digit credit card number, and he won't remember something we talked about 4
+days ago. Obviously not. He's a special specimen. Obviously not. First official test run uh in 8
+minutes. Yeah hide all the fancy code. Hide all the all the. So, what's happening right now is it's
+almost 8:00 p.m. and at 8:00 p.m. on Sunday, we're going to get the seventh number of the draw and
+that's when the snapshot of everyone's tickets bank account is going to be taken so that the tickets
+are going to be frozen for the next week. Noo, you don't have to watch that. [music] I'm stressed
+like Yeah, I'm I'm good to start testing. Oh, well, we should delete our old users. Alright. Yeah.
+See, cuz I'm like I'm logged in. So, let's Do we have time? Yeah. Yeah. Go time. Go time. Let's go.
+Let's go. Let's go. Moment of truth. Yeah. Okay. Is the app app we have spent. Let's go. Gotta be
+quick. Slow McGill Wi-Fi. I'm setting up right now. So, I'm trying on the simulator. Oh, I'm going
+to put WAITLIST. Oh, sh** I'm going to get more tickets than you. Nice beautiful animation screen.
+First, create your account. You get the little introduction here. I already know how to do this. And
+then yeah. So link the first account Link both of them. This one I'm not going to link a bank
+account. I'm just going to enter your code and see if I got my tickets without linking an account.
+Okay. Let's try a weird birthday. Let's get a February 29th. Guys, what year was was it a leap year?
+I don't know. Aren't you like super smart? No, we're we're good. Like we already created enough
+accounts. I'm just I'm doing extra. Wait but Ben. Okay. So, it released the winning number this week
+early. I think it's glitching. Oh, revealing. What the Yo, can you film this? Just for like dev.
+Yeah. Why is it busting around? Yeah it's glitching. It was doing that on Luke's phone, but yeah,
+did you get the reveal? Yeah. And then it's going back and forth, eh? Okay. So, yeah. I don't know
+why the screen is moving like this. Why is it busting around, brother? Yeah, it's it's having
+trouble loading the uh the data from the API. So, it's like it's alternating between uh new screen I
+made a uh two days ago. Oh nice. It shows like your tickets breakdown. Oh, so we got the winner, eh?
+Oh sh** wrong way. So, so here "no winner this week". So, it properly says that. Huh? Oh, for that
+one. Okay. Yeah. What about for the every everyday winner? So No. No. So, like, so it's saying last
+week there were no users, so there's no winner this week. Okay. Now, we'll see in the back end, I
+guess. So, the front end is not displaying. It should say that we have like we each got I should
+have 100 tickets cuz I used the waitlist promo code. Right. It says zero. We'll go check the data.
+See if I actually do have 100. And it's just reading reading the data wrong. Yeah. Or if it just
+didn't register at all. Luke, you should open your logs. See what it said. I have no logs. What do
+you have no logs? You always have logs. Good. You want to get food? Yeah. Honestly, not bad. We know
+what needs to be fixed. We will investigate deeper, I guess. See like um if things are small issues
+or big issues, but uh hey at least we got to go through the whole- yeah we'll check the database
+after supper. Like front end, everything basically worked like someone was able to download the
+account the app create an account link their Plaid account. Yeah. And view home screen just with bad
+data. right? Yeah. The number got revealed early. Oh yeah. Pretty cool. We're capturing bro's
+disappointed face. Huh? I'm not disappointed. No, Be happy. I'm waiting for my one-time password.
+Progress. Progress. I'm very happy. Good. And now you get to go eat. We will talk about later if uh
+I guess about like investing into the company. Oh, we'll have to balance how much, you know, like
+there's no no one's forced to to put in, but also like then you can't complain if you get diluted.
+Tired, man. Hey, it's only 8:00, man. You got at least four more hours in you no? Uhh. This guy's
+like this guy's an early bird boy. Yeah. Yeah, I need a break. [music] Postgame interview. Good
+call. Hopefully to get uh beep partnered with us, but it's secret for now. Why are you so close,
+bro? Cut cut cut. [music]

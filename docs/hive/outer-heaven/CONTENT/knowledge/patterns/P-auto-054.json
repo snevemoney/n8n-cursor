@@ -1,0 +1,33 @@
+{
+  "pattern_id": "P-auto-054",
+  "version": 1,
+  "title": "model-ops / operate — six-fable-habits-why-don-t-act-prove-no-reasoning-less",
+  "steps": [
+    "Steal 1–4 + 6 into Grok/Cursor prompts. Habit 5 is Fable-only (on-tape).",
+    "Steal effort-matching + retract always-plan. Do not buy Fable because tape.",
+    "Steal into `golden-test-loop`. HITL still reviews.",
+    "On-tape only. Do not ask models for jailbreak/bio/private chain-of-thought.",
+    "Steal the until-I-say-go line. Hive: `send-removed` / `ask-principal`."
+  ],
+  "support_ids": [
+    "K-vcU85OrwuV0-01",
+    "K-vcU85OrwuV0-02",
+    "K-vcU85OrwuV0-04",
+    "K-vcU85OrwuV0-05",
+    "K-vcU85OrwuV0-06",
+    "K-vcU85OrwuV0-12",
+    "K-vcU85OrwuV0-13",
+    "K-vcU85OrwuV0-14",
+    "K-vcU85OrwuV0-15",
+    "K-vcU85OrwuV0-16"
+  ],
+  "dissent_ids": [
+    "K-vcU85OrwuV0-03"
+  ],
+  "valid_when": "domain=model-ops; stage=operate; Any model, his current experience.",
+  "less_relevant_when": "Caption-only — no shown loop this tape.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

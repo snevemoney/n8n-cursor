@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-four-blanks-before-build",
+  "version": 1,
+  "title": "Name bucket + KPI + today + 60-day target before building",
+  "steps": [
+    "Walk the constraint (first sigh).",
+    "Write four blanks or it is not a project.",
+    "Non-AI allowed if cheaper/safer."
+  ],
+  "support_ids": [
+    "K-LVAHYV4Xrto-01",
+    "K-vFepZE_wrfg-05",
+    "K-AO5aW01DKHo-01"
+  ],
+  "dissent_ids": [],
+  "valid_when": "Partner/outcomes offer. Hive `outcome-offer-funnel` / `four-blank-sku`. Clients parked.",
+  "less_relevant_when": "Order-taking demo with no KPI; tape 13%/McKinsey stats as FACT.",
+  "confidence": "high as the scope machine; stats UNVERIFIED",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not merge $ rows with Pi-m8R068r4. Speech≠behavior on Claude-unlock vs four blanks stays labeled."
+}

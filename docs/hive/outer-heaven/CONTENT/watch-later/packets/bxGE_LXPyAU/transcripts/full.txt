@@ -1,0 +1,827 @@
+So, I built another AI agent in just 2 hours, and someone actually paid me $2,600 for this one.
+
+Not $1,200, $2,600.
+
+And it really wasn't anything too complex or advanced.
+
+In fact, I actually built this with very little experience in n8n.
+
+And honestly, if I rebuild it today, it probably take me 30 minutes max.
+
+And what's crazy is I'm pretty sure that all of you guys could build something [music] just like this, too.
+
+So, in this video, I'm not only going to build it in front of you guys, but I'm also going to walk you through what the agent does, why someone paid me for it, what this means for anyone trying to get started, and how I'd sell my first AI agent if I was starting today from zero.
+
+So, what was the agent that I ended up selling, and how do we go about building it?
+
+Well, this is actually the exact wireframe that I presented to the client when we were talking about how the system would work.
+
+So, you can see it's really simple, and there are four main pieces, and then we're going to actually dive into n8n, and I'm going to build this right in front of you guys.
+
+But, let's go over what the system actually does.
+
+So, the first piece is to create the CRM entry.
+
+So, this gets triggered when the student would make a payment, they would automatically get a welcome email with a link to go create their account.
+
+It would send an internal notification over Slack to the team, and then we would go ahead and create that CRM entry for this student.
+
+Now, the second and third pieces were actually just checking in to see if that student had actually made an account or not, because you don't want to manually be chasing people down.
+
+So, for the second flow, this was follow-up number one, every single day this would go off, and it would go check the CRM, and it would see if any of those students that had paid had not yet made their accounts.
+
+If so, it would go ahead and shoot them a reminder email, and then it would update the CRM to basically say, "Hey, we followed up with this person one time." Now, flow number three is pretty similar, but this one is for a human escalation.
+
+So, every single day this would go off, it would check the CRM to see if anybody had already received one follow-up, and if they have, go ahead and warn the team internally on Slack to say, "Hey, this person, it's been 5 days, they haven't made their account, please go follow up with them manually." And then once again, we'd update the CRM to make sure that all of the students have accurate tags and statuses.
+
+And then the final flow down here for number four was the actual personalized kickoff.
+
+And what you'll notice is that this is actually the only time in this entire system that we're using AI.
+
+And I don't want to be unrealistic about results, that's why I was able to build this in 2 hours and get paid for it, because when you really need to spend more time on a system and refine it and and prompt it and test it is when you have a lot of AI.
+
+But, because of the way that I had set up these three flows with no AI, just as a basic automation, we knew right away that it was extremely robust.
+
+Anyways, as soon as the student would actually make their account, that's when this fourth one would get triggered.
+
+It would send their account details to an AI agent that would write a friendly, personalized welcome email.
+
+It would shoot that off to them, and then it would update the CRM with their accurate status, and send a notification to the team, and basically say, "Hey, student A has been fully onboarded, they've paid, they've made their account, they're ready to go." So, at high level, that's how the system works.
+
+I'm sure you guys may be wondering, how did we actually check in with certain statuses, and how do we make sure nothing was slipping through the cracks?
+
+So, let's hop into n8n, and I'm just going to build this in front of you guys.
+
+So, wireframing is super important, it helps you align with the client, and it also helps you hop into n8n and start building things right away, because you already know what it's going to look like.
+
+And this is actually something that I teach extensively in my program, so if you want to check that out, the link for that will be down in the description.
+
+Anyways, we know that the first flow is going to be triggered when the student submits a payment.
+
+So, for that, what I did in the actual build is we used a webhook, and we basically just had the payment processor send a notification to this n8n webhook, so it would trigger the workflow when someone had paid.
+
+I'm going to go ahead and use a tool called Postman to send over a mock payload to this webhook.
+
+So, I'm going to go into the webhook, choose post as the method, I'm going to copy this test URL right here, and I'm going to go ahead and execute the workflow, so now it's listening.
+
+I'm going to go into Postman, we're going to do a post request to that webhook URL, and we just need to send over a few things in the body.
+
+So, what we're sending over right here is first name, last name, email, and phone number.
+
+So, I'll go ahead and hit send, and if we go back into n8n, we should see that we just received that data.
+
+And you can see right over here on this right-hand side, we captured that body payload that we had just set up.
+
+So, I'm going to go ahead and pin this data, and we'll keep moving on the rest of the flow.
+
+So, the next step is to send them a welcome email.
+
+So, I would go ahead and add a Gmail node.
+
+We're going to use a send a message operation, and I'm going to go ahead and drag in the email that we got from them in order to shoot this off to them.
+
+For the subject, I said, "Welcome to AIS Academy," and we're going to make it a little more personalized by dragging in their first name right here.
+
+So, now it would come through as, "Welcome to AIS Academy, Nate." And then I just dropped in a body message, and if you open it up, you can see it says, "Hey Nate, welcome aboard.
+
+Click below to create your student account and start learning." And then this is where you would just drop some sort of link where they would actually go and create their account.
+
+Now, the last thing I like to do is go to the options, turn off the append n8n attribution, that way the email doesn't come through and say, "This email was automatically generated by n8n." So, I'm going to go ahead and fire that off, and we can go take a look real quick at what that looks like.
+
+There we go.
+
+This is what the email looks like.
+
+"Welcome to AIS Academy, Nate, welcome aboard." And then I would click on this and basically create my account.
+
+So, after that, what we want to do is we want to notify the internal team that someone just paid.
+
+So, I'm going to do a Slack operation.
+
+We're going to come all the way down here to send a message.
+
+I'm just going to choose what channel I want to send it to.
+
+In this case, I'm going to send it to a channel called YouTube Testing, and then we just need to configure the actual message we're sending over.
+
+Okay, so here's what I came up with.
+
+I have new student has paid on, and then I threw in the function for today's date.
+
+On the right-hand side, you can see it's coming through as today's date and also the exact time.
+
+And then I basically just dragged in from the webhook, I went all the way down to the payload that we received from earlier, and I dragged in the first name and the last name.
+
+So, now it says, "Nate Hurk is being onboarded now." And then just to keep it clean in Slack, I threw in, you know, squiggly line things, and when I shoot this off into Slack, you'll see why I did that.
+
+But, before I shoot this off, I also like to go ahead and add an option called include link to workflow, and turn that off.
+
+And that's basically just removing the message in Slack that would say, "Hey, this was generated by this n8n workflow." So, I'm going to go ahead and execute this step.
+
+We can see it got sent.
+
+And if I go to my Slack, you can see that it says, "New student has paid on this date, this time," and then we have Nate Hurk is being onboarded now.
+
+And then the line here is just basically to keep all these messages separate as you start to have them sort of stack up.
+
+All right.
+
+Now, the last step is to create them as an entry in the CRM.
+
+And for this, we're using a very fancy Google Sheet where we have information like their full name, their email, their phone number, status, payment date, first follow-up, human takeover, and then some other demographics that we get from them later when they actually create their account.
+
+So, what we're going to do is go back into n8n, and we're going to add a Google Sheet node.
+
+What we want to do is add a new row in sheet, which is called a pen row in sheet.
+
+So, once I choose that sheet, it asks me values to send over to that Google Sheet.
+
+And so, what we're going to do is go back to the webhook that triggered this flow.
+
+We're going to drag first name in right here for full name.
+
+I'm going to add a space, and we're going to drag in right here last name right there.
+
+And if you wanted to, you could break this down into your CRM as one column for first name and one column for your last name, but right now we're just going to do this to keep it simple.
+
+Then I would just drag in their email, their phone number, and here's where it gets interesting is with the status.
+
+So, in the CRM, I have four statuses.
+
+We have account creation, we have first follow-up sent, we have human notified, and then we have account created.
+
+And this is how we make sure we filter them out later if they don't qualify for a follow-up or human notification.
+
+So, what we want to do right now is just put them in the CRM with their information, and we want to tag them as account creation, just meaning we're we're waiting for them to create their account.
+
+So, in n8n, what I'm saying is when we create this row, we're going to set the status to account creation.
+
+And now we have to add three more things, which is about the payment date, the first follow-up, and the human takeover.
+
+So, what I did for payment date is I'm going to add today's date, which I can get to by doing two curly braces, hitting dollar sign now, and then I'm just going to do a dot format, which is basically just going to give us this eight-digit year.
+
+And now what I want to do for first follow-up and human takeover is have the first follow-up be 3 days after they paid, and then have the human takeover be 5 days after they paid.
+
+So, the way that we can get to that is I can copy this expression and put it into the first follow-up, and then I just need to make this be 3 days later.
+
+So, I can go ahead and paste in this cool function, which basically just says plus days equals three.
+
+And so, now you can see they paid on November 6th, and the first follow-up date is on November 9th.
+
+And then you guessed it, I can do the exact same thing down here for human takeover, except for instead of three, I will just add 5 days.
+
+And now we have November 6th, November 9th, and November 11th.
+
+And that's actually all that we need to do for now, because we're going to get this information later when they actually create their account.
+
+So, I can just go ahead and delete those parameters just to keep everything clean.
+
+And when I go ahead and execute this step, and we go back into our Google Sheets, you can see that it's going to throw in that data right there.
+
+We have the CRM entry created for Nate Hurk, we've got the status, and we have these dates that we need to follow up or tag for human takeover.
+
+All right.
+
+So, that right there was the first phase.
+
+Now, the second phase is we need to do our follow-up.
+
+So, we know that this goes off every single day, so I'm going to go ahead and add a scheduled trigger, and I'm going to have this run every single day in the afternoon, let's just call it 2:00 p.m.
+
+So, after that runs, what we have to do is go check in the CRM to see if there's anybody where their status is account creation still, and the first follow-up day is today.
+
+So, I'm going to go back into the workflow, I'm going to add a sheet node, and we're going do a get rows in sheet operation.
+
+And once I choose that sheet that we're looking at, we have to add two filters.
+
+The first filter is going to be making sure that the status column equals account creation.
+
+Because if the status column equals any of these other ones, then it's not eligible for a follow-up.
+
+So, we need to make sure that account creation is the status, and then we also need to check and see if the first follow-up date is today.
+
+Because we only want to send one follow-up, and we only want that to be 3 days after they had paid.
+
+And so, in production, what you would do is you come in here and just do the dollar sign now function to make it today's date, but right now we're just kind of simulating that it is 3 days after they paid, so I'm adding the plus 3 days.
+
+And now we have these two filters, where if I execute the step, it would only pull in any rows that have paid 3 days ago, and that need a follow-up now.
+
+Awesome.
+
+So, from there, we need to basically remind these people that they have to create their account.
+
+So, I'm going to go ahead and I'm going to email them once again.
+
+We're going to do a send message operation, and we're going to just configure our parameters.
+
+So, obviously, we want to send it to this person, and even if there are, you know, four entries right here or seven or 10, it will all be the same, and it will just blast out to all 10 people.
+
+All right.
+
+So, we've got their email, we have the subject, which says, "Don't forget to create your account." We've got the text, and then we have the full body, which says, "Hey Nate Hurk, we noticed your account after you paid.
+
+Make sure to get that taken care of so you can hit the ground running.
+
+Here's the link again." And then you would just throw in that link, and then say, "Cheers." So, I'm going to send that off, and we will go take a look to make sure that everything came through correctly.
+
+All right.
+
+So, here's that message.
+
+We got, "Don't forget to create your account.
+
+Hey Nate Hurk, blah blah blah." There's the link, and now they have gotten a reminder 3 days later with no human intervention needed.
+
+But, we're not done yet, because we have to update the CRM to basically say that we have reached out to them automatically.
+
+So, I'm going to go ahead and grab a sheet.
+
+We're going to do an update row rather than an append row, and then we're going to choose our document.
+
+Now, what this is saying is we need to match on some sort of column.
+
+It's asking us which row do you actually want to go update?
+
+And so, we're going to match on email or phone because that's like a unique identifier.
+
+So, we're matching on email, and all I need to do is grab the email of the person that triggered this workflow.
+
+So, we have nate@example.com.
+
+And remember, all we need to do is update certain rows.
+
+We don't need to update their full name, their phone.
+
+We do need to update their status.
+
+We don't need to update their payment date, but we do want to update first follow-up.
+
+So, I can get rid of everything else except for status and first follow-up.
+
+Because for status, what we want to do is basically put this as the status to say that the first follow-up has been sent.
+
+And then for the first follow-up column, we don't need this date anymore.
+
+So, I'm just going to mark it as NA.
+
+So, now you can see it's going to update the row where email equals this, and it's going to change the status to this, and it's going to change the first follow-up to that.
+
+So, I'll go ahead execute step.
+
+We'll go into the sheet, and we'll basically just watch this happen.
+
+Boom, that got switched here, and that got switched there.
+
+So, you can imagine if you have 20 plus rows in the CRM, you'd be able to really easily see based on the status where everyone's at.
+
+All right, so that's the first two phases.
+
+The third one is very similar to the second one right here.
+
+So, I'm actually just going to copy that trigger down here, and we're going to give that a quick run.
+
+But, what this is doing is it's checking to see if anyone has already received this email, and 2 days after that, they still haven't made their account.
+
+So, we're going to go ahead and grab a sheets node once again, which is going to be a get rows in sheet.
+
+And this time our filters are just a little bit different.
+
+So, the first filter is going to be we're checking if the status column equals first follow-up sent.
+
+Because you would only need human follow-up for someone that's already received that first automatic follow-up.
+
+And then the second one is just to check if the human follow-up date equals today, once again.
+
+So, we have human takeover date, and we want it to equal today, which would be 5 days after they paid, which is why in this simulated environment I'm doing now plus 5 days.
+
+So, I'm going to go ahead and give this a run, and we should pull in that record because it matches both of those two filters that we had set up, as you can see.
+
+All right, so this time, according to the wireframe, instead of actually sending them a reminder, we want to do a human escalation, and we're going to warn the team internally via Slack.
+
+So, I'm going to go ahead, and we're going to add a Slack node, and we're going to do a send a message operation.
+
+Now, once again, I'm going to choose that exact same channel.
+
+So, maybe this is like a specific channel that you guys have for onboarding or whatever it is.
+
+And so, for the message text, what I came up with was it has been 5 days since full name paid.
+
+So, since Nate Hurt paid, and they haven't yet created an account.
+
+Please reach out to assist.
+
+And then we do the same thing with the squiggly lines.
+
+So, I'm going to go ahead and shoot this off.
+
+We'll head into Slack, and we can see that we just got that new message.
+
+It has been 5 days since Nate Hurt has paid.
+
+Now, the last thing to do here is once again update that CRM.
+
+So, I'm going to go ahead and grab a sheet.
+
+It's going to be an update row, and we're going to do the exact same thing when it comes to matching.
+
+So, we're going to go ahead and match on email.
+
+Once again, it could be phone number.
+
+It just has to be a unique ID.
+
+So, you probably would want to be careful if you match on full name.
+
+It would probably work the majority of the time, but what if you do have two people with the same full name?
+
+Then it would get confused.
+
+So, I'm going to go ahead and grab this person's email to match.
+
+And then the only thing that we need to update once again is the status and the human takeover date.
+
+So, the next status would be human notified.
+
+So, that's exactly what I'm going to type in right here.
+
+And then for the human takeover, I'm going to do the same thing.
+
+I'm just going to do NA.
+
+I'm just going to write like escalated.
+
+So, now we can check the CRM to know that someone has basically been notified about this.
+
+So, I'll go ahead and execute that step.
+
+We'll flip back into the sheet, and we'll watch the magic happen.
+
+Boom, status has been updated, and human takeover has been changed to escalated.
+
+All right, so the first three workflows are already done, and you can see there's really not much room for error there.
+
+You might just want to make sure that you can test different actual runs and see that nothing is slipping through the cracks, but there's no AI here, which is what makes us very, very confident in this automation.
+
+Now, this final one, of course, is going to use AI, and it's a little bit more complex, but still not too bad at all.
+
+So, we know that the final one needs to get triggered when the account is actually created.
+
+So, whatever that looks like on your end, maybe that is another webhook, maybe it is a record in a different sort of CRM of your platform.
+
+For the sake of the example, let's just go ahead and use an n8n form trigger.
+
+So, this basically lets us just pop up an n8n form, and let me just go ahead and configure some of those details real quick.
+
+All right, so I got the form set up.
+
+It is called AIS account creation.
+
+It says fill in the details below to get your account set up.
+
+And now, let me just show you guys what fields they're actually filling in.
+
+We've got first name, we've got last name.
+
+We also wanted to include the email address once again because we need to match this data into the CRM.
+
+And once again, you could match on first and last name, but just in case, if you match on email address, you know that that's going to be unique.
+
+So, all that's required, we've got business name, we have team size, and this is going to be a drop-down.
+
+So, all these options for team size.
+
+We have the main goal for joining, and we have desired outcome in 90 days.
+
+And so, all of this information is going to be used to personalize that kickoff email, and potentially even match them with a mentor or a sales coach or whatever the actual offer is.
+
+And you can also see that we can get to this form by a URL.
+
+So, this could be the URL that you're sending off in those kickoff emails from earlier.
+
+But, anyways, when I go ahead and execute this step, it's going to pull up the actual form.
+
+So, let me fill in some fake details real quick so we can keep moving through the rest of the process.
+
+All right, so I just filled in some information.
+
+I'm going to go ahead and submit it, and you can see that we just captured that data here.
+
+So, once again, this would basically be the trigger of whenever someone actually goes ahead and creates that account.
+
+All right, so the next step that we need to do is we're going to feed that data into an AI agent that's basically just going to welcome them to the program or the course or whatever it is that the offer is.
+
+So, keep in mind as we're building this, you obviously need a good understanding of the specific onboarding process that you're helping to automate.
+
+So, some of this stuff might be the same with like some follow-up cadence, but a lot of this will just need to be tweaked to fit your use case or your client's use case.
+
+Anyways, I'm going to go ahead and grab an AI agent right here, and we need to do a few things.
+
+The first thing is configuring what does the agent actually look at?
+
+And to do that, we're going to change the user message to define below.
+
+I'm going to make this an expression, and I'm going to open this up.
+
+And basically, all I'm doing here is I'm typing in okay, here's the student, and I'm dragging in the first name, business name, and size.
+
+I'm dragging in business name and team size.
+
+Goal, I'm dragging in goal, and same thing for desired outcome in 90 days.
+
+And you can see on the right-hand side, all of those variables come through with whatever the person submitted when they submitted that form and created their account.
+
+And this is what the AI agent is going to be looking at to make that welcome email.
+
+And in order for it to know how to make that welcome email, we have to give it a system message.
+
+So, I'm going to go down here.
+
+I'm going to turn this into expression and open it up, and let me drop in a system message real quick.
+
+All right, so I said, "You are Mr.
+
+Friendly and Nice, an onboarding AI agent whose job is to warmly welcome new students who have just joined the program and created their account.
+
+You will be provided with information about the student, and your task is to generate a friendly welcome email formatted as a JSON object with two fields, subject and a body." And the reason why we're going to do that is because if you think back to earlier when we had to send a message, we were sending a subject as one field and a message as a separate field.
+
+So, we want the agent to generate a personalized subject as well as a personalized message, and those just have to be in two different fields.
+
+So, you'll see exactly what I mean after we do this.
+
+We then go on to say that your goal is to greet the student by name, make a light-hearted funny joke that compliments them or their business, express excitement about their journey, and reinforce that if they put in the work and use the program's resources, they can achieve their goal within 90 days, and ends with an upbeat motivational note.
+
+So, before we can actually run this agent and give it a test, we have to add two things.
+
+The first one is we have to actually give it an AI brain.
+
+So, I'm going to go ahead, and I'm going to grab an open router chat model.
+
+And for this, I'm going to go ahead and choose Claude Sonnet 4.5 just because I think it's awesome.
+
+And we also talked about how it needs to output a subject and a message.
+
+So, I'm going to go ahead in here and click on require specific output format, which gives us the ability to to connect an output parser.
+
+So, I'm going to grab a structured output parser.
+
+We're going to change this to define using JSON schema, and then I'm just going to paste in this schema right here, which will allow the agent to output a subject and a body as two independent fields.
+
+All right, so now if I go ahead and run this agent, we'll be able to see what that welcome email looks like.
+
+All right, so that's finished up.
+
+We can see that we have subject, "Welcome to the group, Nate.
+
+Time to up it your game," which is pretty clever because this business name right here is called Up It AI.
+
+And then we have the actual body, which I'm not going to read the whole thing right now, but it basically talks about our 90-day goals.
+
+It also ends with a nice motivational note down here with a PS.
+
+So, let us real quick pin this data so we don't lose it.
+
+And you can see here we have a subject and a body, and so that's the importance of having our structured output parser.
+
+And you'll know exactly what I mean when we head into this next step, which is sending that to the student.
+
+So, I'm going to go ahead and once again send a message in Gmail.
+
+You can see now it's super easy for us to drag in the subject right there, and then drag in the body right there, and we're already ready to go.
+
+I'm going to change the email type to text, and I'm going to go back to the form submission to grab their email address right there.
+
+And now, we should be basically good to go to send this off.
+
+So, let me go ahead and do that, and then we'll go check and see what that looks like in Gmail.
+
+All right, so here it is.
+
+"Welcome to the program, Nate.
+
+Time to up it your game.
+
+Hey Nate, welcome to the program.
+
+I couldn't help but notice your company name is Up It AI, and honestly, with goals like yours, you're about to take that name very literally.
+
+I mean, three x revenue in 90 days, blah blah blah." It talks about our team size.
+
+It talks about our goals.
+
+And then of course, it signs off with Mr.
+
+Friendly and Nice.
+
+And then we have a little PS down here.
+
+So, this is obviously where you would make sure that they're aware of, you know, how to take advantage of the program or how to schedule their first sales call or whatever it is that your program offers when you have this onboarding information.
+
+This is where you'd sort of get them up to date there.
+
+But, we're not done yet.
+
+We have to do two more things.
+
+Update the CRM once again, and then just basically let the team know that this person has created their account and they're fully ready to go.
+
+So, I'm going to add a Google Sheet once again.
+
+We're going to do a update row in sheet, and we're going to do the same thing where we're matching on an email address.
+
+So, now you can see why it was important in this flow that in the account creation, we also asked them for their email address.
+
+So, I can use that right there to match.
+
+And then as far as updating, we want to get rid of full name, phone.
+
+We do want to update the status.
+
+We don't need to update the payment date.
+
+Now, what you could do for first follow-up is you could also make both of these NA because if they already created their account, then both of these won't even matter anymore.
+
+And then we're also going to drag in their business name, their team size, their goal for joining, and then their 90-day desired outcome.
+
+And the status that we're going to make is just account created, which is the last one in our Google Sheet.
+
+So, I'm going to go ahead and shoot that off.
+
+We'll switch back in, and we'll watch all of this stuff get updated.
+
+Right there, we have NA, NA, account created status.
+
+And then we have the business information right over here.
+
+And once again, it was matching on the email because that's the unique ID.
+
+So, we're almost done.
+
+The final step is just to do an internal notification to the team.
+
+Tell them that we just finally got someone fully onboarded and they have created their account.
+
+So, I'm going to send that message to the exact same channel once again.
+
+We're going to do a simple text message, and let me just drop that in real quick.
+
+All right, so here's my message.
+
+If we open this up, you can see it says, "New client onboarded.
+
+Here's their name, here's their business name and size, here's their goal, and that a welcome email has been sent with next steps.
+
+And you can see the variables pop through over here with all of that real information.
+
+So, I'm going to go ahead and shoot that off.
+
+We'll go into Slack, and we can see we just got that message, new client onboarded with all of this correct information.
+
+And now, hopefully you can see why I wanted to add those quickly lines.
+
+It just helps keep each of these messages a little bit more separated.
+
+But, that is basically it.
+
+You can see we have this exact flow, and we basically built this together in like 30 minutes.
+
+So, when I was pretty new to N to N and I was testing out things a little bit more robustly and working with a CRM and working with different webhooks, hopefully you can understand why this only took me about 2 hours.
+
+And of course, what's really cool is because we wireframed it first, we got into N to N and could just build fast because we knew exactly what was going on.
+
+And you can see that these wireframes and the actual N to N flows are pretty much identical.
+
+So, this particular client did come inbound to me through my YouTube channel, but it was really small at the time.
+
+And I wasn't the only one building and posting.
+
+So, why did this business owner pay me $2,600 for a 2-hour job?
+
+Now, at the time, I wasn't even positioning myself as an expert.
+
+I was just building stuff for fun on N to N and just posting workflow demos and tutorials on YouTube.
+
+I think one of the keys there is that I wasn't trying to sell anything.
+
+Anyways, people started reaching out.
+
+They'd say things like, "Hey, I saw that workflow that you built.
+
+Do you think that something like this could work for my business?" And so, I wasn't trying to pitch anyone.
+
+I would just hop on calls.
+
+I'd talk about what they wanted to automate and help validate whether that idea was even possible.
+
+It honestly felt like I was just making friends with people who were interested in AI automation, and a lot of these people just kind of wanted to pick my brain.
+
+And that's exactly what happened here.
+
+A client reached out.
+
+They told me that their onboarding process was messy, and they wanted to do something more reliable.
+
+And then, we just kind of started brainstorming.
+
+And I think he realized that I definitely knew what I was talking about when it came to automation.
+
+I even remember telling him on that call, "Honestly, I don't think that this would take me very long to build." But, they didn't care.
+
+They weren't paying for my time or how many nodes I used.
+
+They were paying for the outcome because he had a problem, and he could see that I knew how to help him solve it.
+
+So, they were paying for the fact that they'd never have to manually onboard a client ever again.
+
+Their customers would have a smooth, professional experience, and their team would have peace of mind knowing that everything was being tracked and taken care of.
+
+So, that outcome is what made it worth the $2,600 to them, not the 2 hours that it took me to build.
+
+Now, I know what a lot of you guys are thinking right now is, "Well, how did you get to that $2,600 price tag?" So, let's actually break down the value here because that's what I really want you to understand.
+
+All right.
+
+So, let's say that the business gets five new clients a week, and each one of those onboardings takes about 30 minutes.
+
+That's 2 and 1/2 hours per week of manual, repetitive work.
+
+And honestly, that's being conservative.
+
+So, if that employee's time is worth $50 an hour, that's about $125 a week or $500 a month.
+
+Over the course of a year, that's $6,000 saved, and that's just in direct time costs.
+
+That doesn't even include the indirect ROI or what some would call intangible benefits, which could be happier clients, faster onboarding, better experience, fewer mistakes.
+
+And all four of those things I just mentioned typically turn into tangible benefits because of all of the stuff that it leads to, better retention, higher LTV, more capacity to sell, fewer refund requests, more referrals.
+
+And I think you guys see where I'm going with this.
+
+And honestly, my favorite part about a system like this is that it creates its own sort of flywheel, and it becomes extremely scalable.
+
+So, here's what I mean by that.
+
+When the system gets put into production and it starts to get used, the employees are immediately getting back some of that time.
+
+They're then able to use that time to do more revenue- generating activities or activities that actually bring in more customers.
+
+And as more customers get brought in and onboarded, the system gets used more, which inherently makes it more valuable because it's actually able to save more time and money, and they can use that to bring in more customers.
+
+So, it creates this loop where it's literally just helping itself.
+
+It's just this endless flywheel or a self-licking ice cream cone.
+
+So, if you think back to our initial ROI calculation from the example, which was $6,000 saved annually, realistically, we got there from looking at $125 saved a week.
+
+But, those weekly savings are going to increase over the course of the year.
+
+So, the weekly savings could go from 125 to start to 200 to 350 to $600 saved a week.
+
+So, hopefully now, it's super clear why they weren't just paying for those 2 hours of work.
+
+They were paying for peace of mind and for that growth.
+
+And this is the part that I think most people get wrong.
+
+They think that clients are paying for code or nodes or AI.
+
+They're not.
+
+You could also see in my workflow, there was only one AI step.
+
+So, they're paying for outcomes.
+
+They want time saved, they want money saved, and they want a better experience.
+
+This automation was extremely simple, very, very standard automation, and it was type of automation that's probably been around for years and years.
+
+It's actually very similar to what I was doing when I was still working full-time for Goldman as a business intelligence analyst.
+
+So, anyways, typically, my pricing rule of thumb is that you should always be able to clearly show how the system that you want to give them brings a 10x return on what they pay you.
+
+And that's how it becomes a no-brainer.
+
+So, if I told you right now, "Hey, give me $1,000 right [music] now, and I will give you back $10,000 in a month," I'm sure that's a trade that almost all of us would make.
+
+If your investment portfolio was up 10x over the course of a year, you'd be really happy.
+
+That's exactly how businesses think about automation.
+
+It's not a gamble on new technology.
+
+It's not a risk to save a dying business.
+
+It's an investment with measurable return.
+
+And you have to make sure that they see it like that.
+
+So, the reason I'm telling you guys all this is because I know a lot of you are building right now, but you're finding it hard to believe that someone will actually pay you good money for your agents or your workflows.
+
+So, this is proof that they actually will.
+
+You don't have to be a coder, you don't have to be a genius, don't have to be an expert.
+
+I don't come from a formal coding background, but when I started making YouTube videos and not even positioning myself as an expert, people just started to reach out.
+
+Even though, honestly, I looked pretty shy on camera, but that isn't what mattered.
+
+What mattered was I was showing what I was learning and being accessible to anyone who was curious about AI automation.
+
+And I think that transparency and accessibility is what built trust.
+
+At the end of the day, it's all about understanding how business owners think, being able [music] to speak their language, spot their pain points, and show them a system that directly solves those pain points.
+
+That's it.
+
+That's essentially the whole game.
+
+You don't need to go sell flashy AI agents or use all of these buzzwords.
+
+Just show real business owners how you can save them time, money, and focus.
+
+And if you can do that, we'll get paid.
+
+You could start by building a few example agents and posting them on LinkedIn or YouTube.
+
+You could build things like a simple outreach automation that personalizes messages, a customer support agent that answers FAQs, a personal productivity agent that summarizes meetings, or even a research assistant that gathers data automatically.
+
+Each one of those solves a business pain point, and even if you're not able to take that template and plug it in directly for a business, you're proving that you do know what you're talking about and you know how to customize things to drive value.
+
+So, how would I do this again from scratch?
+
+Well, if I had to start over today, here's exactly what I'd do.
+
+Step one is I would identify the problem.
+
+I would talk to friends, family members, business owners, and I would do research.
+
+I would try to figure out where time is wasted every week across different industries, looking for patterns, looking for recurring bottlenecks, manual tasks, data entry processes.
+
+That's where automation lives.
+
+Step two is I would pick the right tools.
+
+Personally, I'd use N to N.
+
+It's insanely customizable and doesn't require you to know how to code.
+
+It's a little intimidating at first, I know, but once you get in there, it's super powerful, and I think it's pretty easy to learn, and I think it's a great tool to learn right now.
+
+Step three is to prototype fast.
+
+Don't overthink it.
+
+Your goal isn't to build a perfect system right away.
+
+It's just to show that you know what you're doing.
+
+And the quicker you can show a real demo and explain the value of that system, the faster the people will trust you.
+
+So, build something simple, record a short Loom demo, and use that as your digital portfolio.
+
+Step four is you just have to start talking to people.
+
+Reach out, post online, have open conversations.
+
+You don't need to try to be salesy or go in with the mindset that you're pitching them something.
+
+Just figure out their problem and show them what's possible, and then price it based on time and money saved.
+
+Just remember that you have to anchor everything in ROI because when you can confidently show a 10x return on what you're charging, that's how you make it a no-brainer.
+
+And the truth is, it's not super easy to go talk to people and win their trust and have them hand you over money.
+
+I remember back in the day when I started hopping on discovery calls, I probably hopped on something like 25 before I even got the first person to entertain the idea of giving me money.
+
+But, it's all about the reps.
+
+As you do it more, you just understand more and more about how to talk to people and what they're actually looking for.
+
+And more importantly, you get more comfortable.
+
+And I think that's when you're able to get out of your own way, put the imposter syndrome aside, and just speak to what you know.
+
+Anyways, I know that we covered a ton of information today.
+
+So, what I've done is I've thrown all of this into a resource guide that you guys can reference whenever you need.
+
+You can get that for free in my free school community.
+
+The link for that will be down in the description.
+
+And if you're interested in diving deeper and connecting with over 2,500 members who are building businesses just like this with N to N, then definitely check out my plus community.
+
+The link for that will also be down in the description.
+
+I've also got a full course in there for our premium members where I talk about market research, discoveries, proposals, pricing, stuff like that.
+
+So, that's going to do it for today.
+
+If you enjoyed or you learned something new, please give me a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you in the next one.
+
+Thanks, everyone.

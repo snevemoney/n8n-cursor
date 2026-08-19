@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beat — research or drop · 14:30</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --paper: #0b1020; --ink: #f4efe4; --rule: #d7a13a; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #06080f; }
+    body {
+      display: grid;
+      place-items: center;
+      font-family: Fraunces, "Times New Roman", serif;
+      color: var(--ink);
+    }
+    .stage {
+      width: min(960px, calc(100vw - 32px));
+      aspect-ratio: 16 / 9;
+      background:
+        radial-gradient(120% 80% at 12% 0%, rgba(215, 161, 58, 0.16), transparent 46%),
+        linear-gradient(180deg, #12182c 0%, var(--paper) 55%);
+      border: 1px solid rgba(244, 239, 228, 0.12);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+    .rail {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.72;
+    }
+    .playhead {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 58px;
+      height: 2px;
+      background: rgba(244, 239, 228, 0.18);
+    }
+    .playhead i {
+      position: absolute;
+      left: 72%;
+      top: -5px;
+      width: 12px;
+      height: 12px;
+      background: var(--rule);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+    .num {
+      position: absolute;
+      left: 48px;
+      top: 92px;
+      font-size: clamp(92px, 16vw, 168px);
+      font-weight: 700;
+      line-height: 0.8;
+      letter-spacing: -0.04em;
+    }
+    .num small {
+      font-size: 0.28em;
+      font-weight: 500;
+      letter-spacing: 0;
+      margin-left: 0.08em;
+    }
+    .stamp {
+      position: absolute;
+      left: 56px;
+      top: 268px;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--rule);
+      border: 1px solid var(--rule);
+      padding: 4px 8px;
+    }
+    .quote {
+      position: absolute;
+      right: 48px;
+      bottom: 88px;
+      width: min(46ch, 52%);
+      font-size: clamp(22px, 3vw, 34px);
+      font-style: italic;
+      font-weight: 500;
+      line-height: 1.15;
+      text-align: right;
+    }
+    .meta {
+      position: absolute;
+      left: 48px;
+      bottom: 28px;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+    .levels {
+      position: absolute;
+      right: 48px;
+      top: 108px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      height: 72px;
+    }
+    .levels span {
+      width: 10px;
+      background: rgba(244, 239, 228, 0.22);
+      clip-path: polygon(0 8px, 100% 0, 100% 100%, 0 100%);
+    }
+    .levels span:nth-child(1) { height: 18px; }
+    .levels span:nth-child(2) { height: 28px; }
+    .levels span:nth-child(3) { height: 38px; }
+    .levels span:nth-child(4) { height: 50px; }
+    .levels span:nth-child(5) { height: 72px; background: var(--rule); }
+    .note {
+      position: absolute;
+      right: 48px;
+      top: 196px;
+      width: 220px;
+      text-align: right;
+      font-size: 13px;
+      line-height: 1.35;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <article class="stage" aria-label="Script beat graphic">
+    <div class="rail">
+      <span>RDytbVDzMF4</span>
+      <span>14:30</span>
+    </div>
+    <div class="playhead" aria-hidden="true"><i></i></div>
+    <div class="num">93<small>%</small></div>
+    <div class="stamp">Unverified</div>
+    <div class="levels" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <p class="note">Five levels. Fifth is the beat. Spoken as token savings @ 14:23. Tape OpenAI 700 / Claude 595 also UNVERIFIED.</p>
+    <p class="quote">Most people miss the research step, so they get inaccurate data.</p>
+    <p class="meta">Jack Roberts · insert HITL · one type · one icon language</p>
+  </article>
+</body>
+</html>

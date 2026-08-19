@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-061",
+  "version": 1,
+  "title": "offer-ladder / acquisition — rung-zero-is-hours-jumping-2-3-is-the-freeze",
+  "steps": [
+    "Steal ladder + hour-as-deposit. No new ICP. Mark tape $ UNVERIFIED.",
+    "Steal overwhelm-pace + clean leave. `ask-principal` on any pitch-up. Mark tape $ UNVERIFIED.",
+    "Steal warm-ladder. Do not hunt from this tape."
+  ],
+  "support_ids": [
+    "K-Pi-m8R068r4-01",
+    "K-Pi-m8R068r4-02",
+    "K-Pi-m8R068r4-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-ladder; stage=acquisition; 375k / 57% UNVERIFIED. Clients parked.",
+  "less_relevant_when": "Don’t quit the day job. Speech≠behavior (keep both; do not pick a winner): “first 10 clients” vs step 1 is unpaid friend",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

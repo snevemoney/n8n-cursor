@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-081",
+  "version": 1,
+  "title": "retrieval / build — file-kb-first-vector-later-native-calendar-ne-mcp-tape",
+  "steps": [
+    "Steal file-ground + tool-must-be-selected. Operate-never Vapi.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-zWLZ3bVVwD8-01",
+    "K-zWLZ3bVVwD8-12"
+  ],
+  "dissent_ids": [
+    "K-zWLZ3bVVwD8-02"
+  ],
+  "valid_when": "domain=retrieval; stage=build; Valid when the IF clause holds. Caption-only. Tape $ UNVERIFIED.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

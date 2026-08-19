@@ -1,0 +1,1585 @@
+So, Codex is an absolutely incredible super app.
+
+I've been using it a lot more lately, and I'm not saying that I'm ditching Claude Code.
+
+I still use them both regularly because they're both good at different things.
+
+So, today's video, I'm going to break down every single important thing that you need to know about Codex to be able to, you know, open up the app for the first time and then actually have finished automations and websites and whatever you want to do in Codex done by the end of this video.
+
+So, whether you've never opened up a tool like this before or if you're already kind of used to using Claude Code, I'm going to break down everything as simple as I can.
+
+So, first of all, if you fit in this bucket of someone that uses ChatGPT just on the web or uses Claude, you are going to get this really quick because what we're looking at right here is ChatGPT.
+
+We have the ability to make new chats, we can search through chats, we can have different projects, we can have all of our different chats over here, and then we talk to chat right here.
+
+And if I open up the Codex app, which is what we're going to be using today for the entire video, it looks pretty much the exact same.
+
+We have projects on the left, we have chats on the left, and then we can talk to ChatGPT right here.
+
+We use this toggle to change the model whether we want to use GPT 5.5, 5.4, or other models.
+
+We can change the speed, and then we can also change the intelligence.
+
+So, low, medium, high, or extra high.
+
+And I'll get into this stuff a little bit later in more depth.
+
+And this is also very similar to the Claude Code desktop app where we have the ability to chat with Claude right here, and then on the left-hand side we can see our chats and our projects.
+
+So, that is the interface.
+
+Don't get overwhelmed.
+
+So, I'm going to get you guys all familiar with the interface and go over all the settings that you need to know, and then I'm going to show you a full project from beginning to end building skills, connecting to things, building automations, and then deploying on some sort of website.
+
+So, buckle up.
+
+All right, so what actually is Codex?
+
+Codex is basically a massive super app.
+
+We can use ChatGPT same way you talk to it on the web, but now we work in projects, and Codex can create Excel sheets, read Excel sheets, look through all your local files.
+
+It can do basically anything on your computer including using the mouse and keyboard and clicking around and automating a browser.
+
+It also lets us build these reusable skills.
+
+We can build websites, we can build apps, we can build video games, and then we can automate and push all that stuff so that it actually runs while we're sleeping every night.
+
+So, the main difference here between web chat is that you're basically just talking.
+
+And you have these connectors in chat GPT now, so you can get a little bit more functionality.
+
+You can give that AI brain a bit more of like hands.
+
+But, in Codex, it can do everything.
+
+It's one of those things where Codex can do everything that chat can do, but chat cannot do nearly as much as what Codex can do.
+
+So, you might as well just switch over to something like Codex.
+
+And if you are curious about the Claude code versus Codex difference, they're different harnesses, right?
+
+So, they fundamentally work a little bit different, but very similarly.
+
+They also use different models.
+
+So, Claude code natively under the hood uses Opus and Sonnet and Haiku, and Codex under the hood uses the different chat GPT models.
+
+Now, I did do a full breakdown where I actually tested Opus 4.7 against GPT 5.5, and I got some really interesting results.
+
+So, if you guys want to check out this video next, I'll tag that right up here.
+
+I definitely think it's worth just at least skimming through.
+
+Because ultimately, these models have very different strengths is what I've noticed after playing with them non-stop.
+
+I really like Claude for being sort of like exploratory and brainstorming and helping me get creative and think through things and plan.
+
+But then, I really like Codex for being pragmatic.
+
+And it feels like it does better at following my plan if the plan grows longer and longer.
+
+And it's really good at executing, and it's really good at finding issues and troubleshooting things that sometimes Claude, for some reason, can't handle.
+
+So, I'm not in here saying that I love Codex more than Claude code.
+
+I'm saying that I'm using them both, and I'm learning more about both every day.
+
+And one other thing I really like about Codex is you can see my little pet down here, which I'll tell you guys how you get this later.
+
+But this pet, while you're working, it stays in the bottom of your screen, and it tells you what it's working on.
+
+So, it's really nice to be able to multitask and see what's happening inside of Codex.
+
+And the pet's kind of funny.
+
+And it's more than just having chats.
+
+It's the ability to have everything organized on your workspace.
+
+So, if you guys watch my recent video about Claude code operating system, or you've seen my executive assistant video, this is my heart two project, which is basically where I live inside of Claude code.
+
+And all of this is is a bunch of folders and files.
+
+I've got a bunch of files here.
+
+I've got a bunch of different folders.
+
+I've got settings.
+
+I've got skills.
+
+I've got agents.
+
+I've got projects.
+
+I've got all these things that I'm working on.
+
+And all this is is a bunch of local files.
+
+Which means I can have Codex work inside of this directory and do everything as well.
+
+All that we're doing when we're using these different models is we're organizing things into a structure.
+
+A structure that different agent harnesses can understand.
+
+And whether you want to use Codex or Claude Code or Cursor or, you know, Open Claw, whatever it is, they can all work out of that directory.
+
+As long as you have some sort of instructions and guidelines over what actually lives where.
+
+Okay, so basically what I'm going to be building with you guys today is a bit of a YouTube comment intelligence system.
+
+So we want to be able to pull in YouTube comments from my channel.
+
+We want to be able to have those be analyzed.
+
+We want a workbook in Excel.
+
+We want like some data visualization.
+
+And we want a dashboard that lives somewhere on the web so I could go check it on my phone if I'm out on a walk.
+
+And I'm going to show you how we ship and deploy all of that.
+
+So basically from zero to a working project is what I'm going to show you guys today.
+
+So, let me go ahead and open up the Codex app and show you guys how this works.
+
+Now real quick, what you have to do is have some sort of ChatGPT plan.
+
+The good news is if you're on free, you can still try out Codex.
+
+You have limited Codex access.
+
+But I would recommend just hopping on the $20 a month plan to get started.
+
+And if you're running into your limits pretty quickly, then maybe you want to upgrade to Pro.
+
+Now what else is really nice about ChatGPT subscription is you can plug it into Open Claw or Hermes Agent, which is really really nice.
+
+Because obviously it's so much more expensive to pay per token rather than being on some sort of subscription.
+
+And then you're just going to go ahead and go to Codex and then just download the app for your operating system.
+
+That's the way that we're going to be using it today.
+
+Ultimately, you will be getting more full functionality if you're using Codex in VS Code extension or in the terminal.
+
+But for the sake of the video, using the app is going to get you super far either way.
+
+There's just a few little things you want to keep in mind, which is why I'm making this YouTube video.
+
+All right, so let's go ahead and get started.
+
+So, on the left-hand side you can see I've got one project open, and this project is actually how I built the slide deck that you were looking at earlier.
+
+So, this slide deck I built right here in this project, and you can see because I'm in the app, Codex lets us basically navigate this right here in this little localhost browser.
+
+And this is also where if I said, "Hey, can you use browser use and test out this slide deck to make sure everything looks good and make sure it functionally like clicks and moves?" Then it would bring up a mouse over here, and we would see it move around, and we would see it click, which I'll show you guys later in the video.
+
+But anyways, what we're going to do is we're going to start a new project because over here you can see we have a bunch of random chats, which can still do things like building games and building automations and simulators.
+
+But what we want to do is we want to work inside of an actual project because these chats, any deliverable that we create doesn't really have a home, you know, it just lives somewhere random in our documents.
+
+But when we're working in a certain project, I can actually grab the local working directory, so I copy that, and if I go into my file explorer and paste that in, now I'm inside of the actual project that we're working on in Codex.
+
+So, now I can see different assets that live in this project, all these images.
+
+I can see different guides, and I can have a little bit more organization to this ongoing project in my business.
+
+All right, so we're going to start a new project.
+
+I'm going to click on new chat in the top, and then right here you can see I'm inside of the Codex 95% project, but we're going to go ahead and add a new project.
+
+So, that's going to open up a little um file explorer over here, and then you choose where you want this to live.
+
+So, for this example, I'm going to go to my desktop, I'm going to go into a folder called Codex YouTube, and I'm going to create a new folder inside of this folder just called um YouTube analytics demo.
+
+And we're going to go ahead and open up this folder and select that, and now you can see it's a new project over here on this left-hand side that we're going to be working in.
+
+Now, right here you can see I have something called full access.
+
+By default, you won't see this, it'll just be on default permissions.
+
+So, I'm going to kick off some sort of chat here, and then I'll show you how we actually get that set up.
+
+Real quick, guys, I know we're going over a ton of information in this video, so what I did is I threw all of this into a complete PDF resource guide that you can use and reference later.
+
+All you have to do to get that is join my free school community.
+
+The link for that is down in the description.
+
+And once you get in here, go to the classroom and click on all YouTube resources, and you'll be able to find all of my repos, all of my skills, resource guides, everything that I've ever dropped inside of here is completely free, and anything I've shown on YouTube is usually dropped in here.
+
+So, join the community, link in the description, and let's get back to the video.
+
+Thanks, guys.
+
+All right, so the first thing that I want to do in this project is I want it to be able to just kind of familiarize with self with my workspace and with who I am.
+
+And the way that I'm going to do that is I have a project locally.
+
+If I go to my um if I go to my desktop and I go into a project here called YouTube OS, I have like all of my transcripts right here from some YouTube videos.
+
+So, what I'm going to do is I'm not going to give it that file path.
+
+I'm just going to say, "Hey, in my desktop, look inside my YouTube OS folder, and just pull in 10 of my raw transcripts and analyze them." This is just to show you guys how good it's going to be at finding different files locally and being able to organize them, move them, delete them, whatever you want.
+
+In this case, I'm just telling it to read them.
+
+All right, so I want you to go onto my desktop, and I want you to look at a folder called YouTube OS, and I just want you to familiarize yourself with me.
+
+I make YouTube videos on AI automation, and inside of this folder, I have a bunch of my raw transcripts.
+
+So, I just want you to read through like 5 to 10 of those just to familiarize yourself with the type of content that I make.
+
+You shouldn't do any organization.
+
+I just want you to read those for context.
+
+Now, what's cool about this is Codex, once again, is an agent that lives locally.
+
+So, just because it's working inside of one project, which is our, you know, um YouTube sort of demo folder, that doesn't mean that it can't navigate anywhere else inside of your local files.
+
+And because we're telling it to do so, it's going to search.
+
+Right here, you can see it's searching inside of my desktop.
+
+And then it's going to find the YouTube OS, and it's going to drill down into that folder.
+
+And it's going to keep searching until it finds what it wants.
+
+Now, a quick warning.
+
+This is not the most effective use of Codex or of your tokens.
+
+The more effective use would be to say, "Hey, this is the folder right here with all my raw transcripts.
+
+I'm going to copy this path, and I'm now just going to give Codex this exact path, so it can just look in there instead of having to search for it on its own." But I just wanted to show you how it's able to do this.
+
+Because you can see right here, inside of my transcripts folder, I have one called raw, and that's the one that I wanted it to look at.
+
+And right here it says there are two files, raw and then processed.
+
+So it doesn't know which one to look through.
+
+So anyways, the more specific you can be with your prompting and with your pointing, the better.
+
+Now let's also, while this is running, talk about the model stuff over here.
+
+So right now you've noticed that we're on extra high.
+
+And I would say that extra high is probably overkill for that sort of job.
+
+For the most part, I'm using medium to do all of my planning and my brainstorming.
+
+And then every once in a while, if I'm doing a huge build or some massive scale, I'll switch to high.
+
+I'm honestly hardly using extra high unless I'm hitting some sort of bug or issue that it's not able to solve.
+
+Anyways, it has read nine transcripts, so it has a little bit of a better of an idea now about who we are.
+
+But just to show you guys, this is still the folder that we're working in, the YouTube Analytics Demo, and there's nothing that exists here.
+
+So even though it knows this, this knowledge only really lives in our overall ChatGPT memory, and in this specific chat window.
+
+If I opened up a new chat, it probably wouldn't still have the knowledge about this.
+
+So what I'd probably want to do is say, "What I want you to do is set up an agents.md file.
+
+This should have context about me and about what the goal of this project is.
+
+Ultimately, what we're going to do here is we're going to build a dashboard that's going to be pushed to Vercel, and it's going to have information about my channel and some analytics around the comments and stuff like that.
+
+So that's the end goal.
+
+We're going to have to connect to YouTube, we're going to have to pull in data, we're going to set up some skills and some automations.
+
+But I just want you to get us started here with a quick agents.md file.
+
+And now I'm going to go ahead and shoot that off." Now, why do we need to create an agents.md file?
+
+Well, if you're coming over from Cloud Code, you know that we always want to start a project with a Claude.md file.
+
+And this is just agents.md, it's the same thing, but Codex expects a different terminology.
+
+And what this agents file does is it's basically like it's onboarding doc.
+
+Every time you open up a new chat, it's first of all going to read the agents.md file and it's going to get organized with what is my goal, what is this user doing, and how do I help them as effectively as possible.
+
+So, this document has been created.
+
+If I click on open, we're going to be able to read it right here.
+
+And it's just a very simple markdown file.
+
+This is the project right here.
+
+This is about Nate's, Nate Herc does this.
+
+This is the project goal.
+
+This is the product direction.
+
+So, we're just giving it really important information that it needs to know about our project.
+
+And you can see now if I pull the file explorer over, it has created this agents markdown folder, which is exactly what we wanted.
+
+Sorry, not folder, file.
+
+Okay, so now that that's out of the way, I'm going to go ahead and close back out of that, and we're going to get started.
+
+So, what I'm going to do is I'm going to click on this button and I'm going to turn on plan mode.
+
+Plan mode is what I like to start with when I am creating some sort of plan.
+
+That basically means that Codex won't actually execute anything, it's just going to brainstorm and help you guys get clear on what you want to build before you actually build it.
+
+So, I always start with plan mode.
+
+Now, I'm just going to start yapping.
+
+And by the way, if you guys are curious about the tool I use for voice-to-text, check it out in the description, it's called Glido.
+
+I'm now an official member of the Glido team, which is super exciting.
+
+I've fully switched over from Whisper to Glido because it's faster, it's more private, and it is a way more agentic tool, and we've got a really cool vision.
+
+So, check it out in the description.
+
+Okay, so now that you understand that context, the first hurdle for us to overcome is how do you actually connect to my YouTube in order to be able to pull in my data.
+
+I want you to be able to specifically at this point be able to pull in a bunch of comments so that you can analyze them.
+
+So, help me figure out how we do that, and then explain it to me step-by-step.
+
+And that's really the mindset shift with tools like Codex or Claude Code is if you don't know something's possible, instead of defaulting to oh, I need to go to YouTube or oh, I want to book in a consulting call with an expert, just ask Codex or Claude Code.
+
+Ask it to do research and explain things to you.
+
+And that's basically how I learned everything that I know.
+
+So while this is running, I wanted to explain something real quick, which is called plugins.
+
+Plugins, MCP servers, skills, connectors, whatever you want to call them.
+
+We kind of have this interface inside of Codex to do stuff like this.
+
+And what you'll notice is there's a bunch of different plugins here.
+
+We've got hugging face, we've got Vercel, we've got GitHub, we've got Game Studio.
+
+We've got a bunch down here for design, Remotion, Figma, Hyperframes, Canva.
+
+We've got stuff for lifestyle, productivity, and this lets us basically connect to a lot of the tools that we already know and love.
+
+Google Drive, Slack, SharePoint, Teams, whatever you may need, a lot of that stuff is available here.
+
+And if you can't find it, you can go ahead and search.
+
+So like Slack, we have it right there.
+
+But look, if I search YouTube, there is no default plugin right here.
+
+And that's why I had to ask Codex, okay, so there's no plugin, how do I actually access YouTube data?
+
+And so it comes back here and it asks us some questions.
+
+It says for the first comment analysis milestone, which connection path should we plan around, API key, OAuth, or both?
+
+Um I'm just going to go with his recommendation cuz let's say I don't know what I need to do, and I'm going to click on API key.
+
+What should the first comment pull focus on?
+
+I'm just going to say recent videos.
+
+And now if it has any other questions, it'll go ahead and ask us those first.
+
+Now one thing you'll notice is because it already was searching through my other folders and projects, it did find an API key in a different project, but I'm still going to show you guys how you would get this set up because it comes back here with a plan, which we can go ahead and read.
+
+So what it wants to use is it it found an API key, so not full OAuth, and then it needs to actually convert everything.
+
+So what I'm just going to say is instead of implementing, I'm going to say, "I'm glad that you found that API key, but let's set up a fresh one because in my Google Cloud, I want to have a separate API key for Codex and a separate one for Claude code.
+
+So let's just go ahead and assume that we're going to create a complete new one from scratch." And now I'm able to shoot off those changes.
+
+Codex is going to review the plan and then edit it.
+
+And then once we're aligned on the plan, we'll go ahead and start executing.
+
+So now it's come back and it has okay, we're going to do a brand new Google Cloud API key.
+
+If you wanted to read through all of this step-by-step, you could, but I'm just going to go ahead and say submit, implement the plan.
+
+So, there's some stuff that we're going to have to do here.
+
+We're going to have to go into Google Cloud Console, and we're going to have to create this new project, um enable this API, and then grab the API key, and then get it configured inside of Codex.
+
+So, if this part of the tutorial isn't very interesting to you, you don't want to watch me get it set up, maybe you want to do some stuff first with the native plugins, which is much easier.
+
+Typically, these plugins you just basically sign in, the same way where you would open up Slack and sign in, or the same way you would open up Gmail and sign in, and that's a lot lot easier.
+
+Okay, so I have to go to Google Cloud and get everything set up in a project.
+
+If I didn't know exactly how to do this, it would tell me step-by-step as you guys saw on the plan, but what it's going to do is it created another file for us.
+
+So, it created this one called .env.local.
+
+So, what I'm going to do is head over to my Google Cloud Console.
+
+I'm signed in with my YouTube account, and I'm going to go ahead and create a new project.
+
+So, I'm going to call this one um Codex demo.
+
+I'm just going to go ahead and create this project, and once that's spun up, it's pretty simple.
+
+We just have to create a connection to YouTube Data API, and then we're going to create an API key.
+
+So, I'm going to select this project.
+
+The first thing I'm going to do is search up here at the top for YouTube Data, and we're going to grab the YouTube Data API v3, and then I'm going to go ahead and click enable.
+
+And once that has been enabled, it should pull up a new screen that looks like this, and then I'm going to go down here to credentials, and I'm going to just create a new API key.
+
+So, create API key.
+
+This is just going to be called Codex YouTube demo.
+
+And then right here for the restrictions, I'm just going to once again type in YouTube.
+
+We're going to check YouTube Data API v3, and then we're going to go ahead and create that API key.
+
+And it gives me this value that I'm going to go ahead and copy.
+
+So, I'm going to copy that, and then I'm going to pull in that file that it created, the .env.local, and I'm just going to open this file real quick with um my notepad, and here is where I'm going to put my YouTube API key.
+
+I'm just going to paste that in right there.
+
+Hit save and then I can close out of that because what we need to get next is we need to get our YouTube channel ID.
+
+I'm not actually going to do the uploads playlist.
+
+I don't think it needs that, but I am going to go find the YouTube channel ID.
+
+Oh, but this is actually cool.
+
+My YouTube channel ID is already in there and the playlist ID is already in there because it was able to just pull it from a different project.
+
+So obviously if you didn't have that already set up, it wouldn't do that, but it would explain to you exactly how to do that if you needed to.
+
+So now that we have that API key put in, let's just see if it works.
+
+Okay, so I've given you the API key in that local.env.
+
+Can you go ahead and test it to see if that connection works?
+
+And if not, then we'll have to make some changes.
+
+Okay, now while this is running, what you guys might notice when you hop into Codex is that it might pause a lot to actually ask you questions and like approve things.
+
+And that's what happens when you're on default permissions.
+
+So if you want to be able to change that, you're going to go up here to your settings.
+
+And then in general, you can see right here, auto review or full access.
+
+And this by default will be turned off.
+
+So if I turn this on, then when we're back in our chat, we now have the ability, see right here, this is exact example, allow network access and I want to say yeah, allow it.
+
+Or if I switch this to full access, now it's just going to do everything without asking for permission.
+
+So obviously it comes up as orange here because there's sometimes where you might not want full autonomous access.
+
+And I think it's best practice when you're first getting started and you're first building some automations to maybe just leave it on default.
+
+But once you start getting a hang of your skills and you start getting a hang of the flow, then moving to full access is going to save you a lot of time so that you can actually not have to baby sit it.
+
+But I had to call that out because, you know, we've seen horror stories of agents deleting databases or sending out mass emails and stuff like that.
+
+So you just want to be safe with it.
+
+I personally have never had any sort of problem like that.
+
+That usually comes from context rot or very vague instructions or or just not being super smart with your planning.
+
+So you can see what's happening here is it's trying it out, right?
+
+And it's running into some issues.
+
+But what's great about this agentic loop is that it's going to keep trying things until it actually goes through.
+
+There we go.
+
+You can see nice the key works for channel data, and I'm going to do one more test to make sure that I can pull comments from recent videos.
+
+So a big mindset shift when you're using any of these tools is to just let it run, let it try things, help steer in the right direction, ask questions, be curious, and just take a look at what it's doing because it tells you every single thing that it's trying.
+
+But now we can see I've tested the key.
+
+I can get comments from your recent videos, and it's completely working as expected.
+
+However, PowerShell's built-in web request had a local TLS issue, but Node and Python both connected cleanly.
+
+For the project, that's fine.
+
+We'll use Node and server-side code for the dashboard anyway.
+
+Now, here's something to think about.
+
+I don't really know what that means.
+
+But what I want to make sure is that that doesn't happen again, or I want to make sure that this project doesn't lose this knowledge because it it it it ran into a failure.
+
+And whenever you run into a failure, you want to treat that as golden knowledge because it means you have more data to make sure that it doesn't do it again.
+
+So all I'm going to say is, "Okay, thanks for testing that.
+
+I want to make sure that you don't ever run into that issue again, and I want to make sure that that knowledge is saved in this project.
+
+So can you just throw together a quick file somewhere in your memory, somewhere in this project to make sure that you already know that so that next time it doesn't happen again." And doing stuff like this, having this sort of habit, is how you actually make these systems get smarter over time rather than just feeling like you're always repeating yourself or that you're always running into the same issues.
+
+Another mindset shift for you right there.
+
+So here it decided to add this into the agents.md.
+
+Right now, I have no objections to that, but as your projects grow, you don't want to put everything in the agents.md because if that agents.md file gets really huge, it's going to use more of your tokens.
+
+Okay.
+
+So before we keep going, I did want to point out one other thing down here, which is this little bar.
+
+This shows you how much of your context window is currently filled up.
+
+Now, if If were using Claude Code and you're using Opus, you have a million.
+
+So, it's, you know, about four times as much as this in Codex.
+
+However, Codex automatically compacts just like Opus does and just like Cloud Code does.
+
+So, it's really nice.
+
+You don't have to worry about it too much, but you still want to be thinking about some general context management tips.
+
+I've got some videos on my channel about that that are agnostic to whatever tool you want to use.
+
+I'm not going to dive super deep into context window management in this video, but just wanted to point that out as well.
+
+Okay, so what's next?
+
+What I want to do is I want to show you guys that it's able to pull comments and that we're able to create an actual deliverable from it.
+
+So, let me just once again go back to plan mode.
+
+All right, so what I want you to do is pull in, you know, about 100 or 200 of my most recent comments and I want you to analyze them.
+
+I want you to find patterns and I want you to display all of this in a Excel sheet.
+
+And I want it to be a visual representation of this data that has interesting insights for me as a content creator so that I can keep making content that people want and I can keep answering questions that are coming up frequently.
+
+So, go ahead and do a plan for this and structure what the Excel sheet deliverable will look like.
+
+So, I shot that off.
+
+I'm going to let you guys know when we have a plan or if it asks me any questions.
+
+A couple questions here to make sure that it understands what we want.
+
+It's asking about the recent comments.
+
+I'm just going to say across recent videos.
+
+How many should we pull?
+
+Let's say 200.
+
+How should we classify and summarize the comments?
+
+I'm just going with all of its recommendations.
+
+Those were pretty good.
+
+And so, if I switch over to a different tab, let's say we're back on our slides, you can see my pet down here has a little one next to it.
+
+Well, the one's gone because I switched back into Codex, but that little one, if I would have hovered over it, it would show me what it's working on.
+
+So, now I can keep tabs on my workflow while I'm doing other things.
+
+And Codex makes multitasking really easy.
+
+Because of the fact that I could open up a new chat in this project and work on something else.
+
+Then I could open up a new chat in this project and work on something else.
+
+And it will color code and give you like a little blue dot or yellow dot on the side here if one of these sessions needs attention.
+
+So, anyways, here is the plan.
+
+What I would recommend is at this point you read through it.
+
+You make any changes to specific sections if you want, but for the sake of the video I'm just going to go ahead and submit that plan.
+
+But while this is running real quick, I wanted to show you a few other things that we can look at.
+
+So, if you do {slash} inside of this chat, there's things that you can actually look at.
+
+So, we've got auto review, code review, feedback, MCP, memories, model, personality, pet, plan mode, reasoning.
+
+There's all of these different skills that we can use like browser use, GitHub, Higgs Field, PDF, skill creator.
+
+The {slash} is going to open up a lot of different things for you.
+
+And of course, what you can do is you can also tag things.
+
+So, if I do an {at}, this is going to let us tag either specific plugins or specific files that live somewhere in this project.
+
+So, if you're ever trying to reference a specific plugin or something specific, then it's probably best to try using the {slash} or using the {at} to actually tag that in your chat.
+
+Now, the reason I wanted to bring up the {slash} is because you'll see one right here called {slash} personality, which if I shot that off, it would actually let it, you know, do something.
+
+So, what I can show you is I don't want to interrupt this main session.
+
+I could come up here and I could click on open side chat.
+
+And that opens up a different little conversation here that still lives in this chat, still lives in this project.
+
+So, if you're coming over from Cloud Code, this is pretty similar to {slash} by the way.
+
+So, what I can do over here is I can do {slash} personality.
+
+And now I can set if I want the personality to be friendly or pragmatic.
+
+And I guess I didn't actually need to switch over here because it just opens like this, but right now we're on friendly.
+
+I'm actually going to switch this to pragmatic.
+
+You can see this says concise, task-focused, and direct.
+
+And honestly, most of the time I'd probably prefer pragmatic.
+
+So, I'm usually working on pragmatic by default.
+
+But now that we've opened the side chat, let me just show you guys something else.
+
+Um, give me a quick update about my YouTube channel and, you know, the type of videos I've been making recently.
+
+Just to show you guys that, okay, if you have your agent working right here on something and you don't want to interrupt it, but you have some sort of side question that is relevant to this project or maybe relevant to something that you guys were working on earlier, you can ask over here.
+
+Because right here you can see it has the context of what we talked about already.
+
+And I could go back and forth a little bit, and then I could just close out of the side chat whenever I'm done.
+
+Okay, so that has been created.
+
+It pulled in 200 recent comments across three recent videos, and I could open it up right here in this dashboard sort of view right in CodaX, which is awesome.
+
+And I could actually make some follow-ups and chat with it right here, but it's a little bit finicky to be honest.
+
+So what I'm going to do is close out of that, and I'm just going to open up our folder again, which was right here.
+
+And you can see there's a lot more that lives in here now.
+
+Not only do we have our agents and our .env, but we have scripts, and we have outputs, and we have different nodes and modules, which has a lot of stuff.
+
+So if at any point this starts to feel a little bit unorganized and you don't understand the structure, all you have to do is come into CodaX and say, "Hey, help me like reorganize this, or maybe give me a document that helps me navigate it a little bit better." Because of course this lives in a local directory, and CodaX can touch it, read it, organize it, edit it.
+
+So if I go to the outputs and I go to the YouTube comment insights, we see all of these different stuff that it did.
+
+So it took some screenshots as you can see, but then it also created the actual Excel sheet.
+
+So I'll open this up right here, and we can take a look.
+
+All right, so we have YouTube comment insights, 200 newest public comments across recent Nate Hurt videos, generated May 5th, 11:00 a.m.
+
+So we can see the question rate, the content requested rate, top mention tools CodaCode.
+
+Uh-oh.
+
+We've got high priority stuff, top patterns, skip video, stuff like that.
+
+It even started to create some visuals here, which is awesome.
+
+So this is content category mix over here.
+
+It shows the mix between general feedback or questions with um actual values.
+
+So 55 were general feedback, 53 were questions.
+
+Some of these were access, positive feedback, tool comparison, pricing stuff.
+
+Over here we have different tools.
+
+So CodaCode, Higgs Field, CodaX API.
+
+And then over here we have some other stats as you can see.
+
+Now we have a bunch of different tabs as well.
+
+So we have creator insights.
+
+So ranked comment patterns and recommended creator actions.
+
+So I'm able to see the percentage breakdown of different types of comments and it also gives me recommended actions with priority scores.
+
+So, that's pretty cool.
+
+I also can see frequent questions.
+
+So, things that are coming up as patterns.
+
+It's giving me content ideas now as well because it's analyzing those comments.
+
+It's giving me nice reply opportunities and then it's giving me just the raw comments.
+
+So, this should be 200 rows of our actual comments that it pulled.
+
+204 as you can see because the first three or four were just nonsense.
+
+So, that is awesome.
+
+And what you guys might be thinking is okay, is this actually useful?
+
+Maybe not because we just said, "Hey, give me analytics." Right?
+
+If you guys remember my actual prompt, it was very, very vague.
+
+So, if we would have spent more time in the planning phase or if we had certain analytics that we're tracking very heavy or certain comments that we're really looking out for, we would give that to Codex as knowledge and it would make this actual, um, you know, insights, it would make it much more customized and tailored.
+
+So, now let's talk about how do we turn this into a skill?
+
+So, first of all, what is a skill?
+
+Well, a skill is basically a repeatable recipe.
+
+So, if I come back in here and I click on plugins, we saw all these plugins, right?
+
+These are actual like connections and potentially MCP servers and kind of like some other, you know, it's a package that people are able to install and use.
+
+But, skills are more of just like instructions.
+
+So, there's an image gen skill.
+
+There is a OpenAI doc skill.
+
+There's a GitHub review follow-up skill, a document skill.
+
+And these are all basically just markdown file instructions that tell Codex how to do something better.
+
+So, how to design a website better or how to, you know, give you a morning brief.
+
+And so, what we want to do is we want to turn this, exactly what we just did, into a skill.
+
+So, that anytime I say, "Hey, go give me more YouTube insights." It knows what endpoints to hit, it knows how to pull them in, it knows how to make the Excel sheet, it knows how to do all this.
+
+And the best way that I like to make skills is I just basically brainstorm with with Codex to do something and then after I get an output I like, I say, "Okay, turn that into a skill." So, this was the ultimate deliverable, right?
+
+So, what you just did is you helped me pull in data from my YouTube.
+
+You got comments, you ran an analysis, and you created me an awesome Excel sheet deliverable.
+
+I want you to turn that into a skill so that every time I say to grab my YouTube comments and give me some insights, you do this exact flow, and that makes it more consistent.
+
+So, I'm going to shoot off that message, and while it's doing that, just think about it like this.
+
+If someone asked you to create or not create If someone asked you to make them chocolate chip pancakes, you're going to open up your cookbook or pull up your phone, and you're going to read a recipe, and you're going to follow it to a T.
+
+You're going to follow the measurements, the ingredients, and the temperature, and the timing, and whatever.
+
+And then next time someone asked you to make chocolate chip cookies or pancakes, you would just use that same recipe, and they'd come out pretty much the exact same way.
+
+Because if you didn't use the recipe, you would just be guessing, and you'd be you'd be sort of measuring, and you'd be feeling, and it just wouldn't be consistent.
+
+And the cool thing is, now that you have this recipe to use, every time you use the recipe, you might be able to make it better.
+
+If one time you experiment, and you add some more chocolate chips, you either like that or you don't, you update the recipe.
+
+Maybe one time you realize that you're actually leaving too much raw batter inside.
+
+So, what do you do?
+
+You update the recipe to say, "Okay, you leave it on 4 minutes on each side rather than 3 and 1/2 minutes on each side." You're able to, each time you use the recipe, have it be updated, and that is the power of building these skills.
+
+And you can see that it's able to work backwards and reverse engineer a skill from our output.
+
+And what it does is it puts them in a file called the dot Codex, which kind of lives globally, which means whenever you're working inside of any Codex project, you're going to be able to use that skill.
+
+And all you have to do to call it is you'll do a slash command, and then you will just name the skill.
+
+So, if you guys remember, down here we have all these other ones.
+
+I could do slash browser use slash image gen slash PDF, and that's how I could be able to call them.
+
+The other way you can call them is you can actually just have them be natural language.
+
+So, just to show you guys another example, if I go to my Herc 2 project, and I know this is more optimized for cloud code, but we have a dot cloud folder, which is local.
+
+So, if I click into here, I can see I have a folder called skills, and all of these are my different skills that currently live inside of my AI OS.
+
+So, let's say here I have a morning coffee skill, and I'm going to open this up real quick in my notepad just to show you guys.
+
+All this is is a markdown file.
+
+We have the name of the skill, we have the description.
+
+So, here it says, "Use when someone asks for morning coffee to prep or plan their day." So, anytime in cloud code I say, "Hey, can you help me plan my day?" cloud code will grab this morning coffee skill, read it, and then execute it.
+
+And it says, "Okay, here's the context, here's the recurring meetings, here is the meeting prep, here are these different reference IDs, here's everything you need to know, and the order.
+
+So, step one, step two, step three.
+
+Here is what you do whenever Nate asks for a morning coffee skill." So, that is all that is happening right here.
+
+You can see it created this skill called YouTube comment insights, and it did this at the global level.
+
+What I mean by that is this lives locally in our directory directory that sits across any Codex project ever.
+
+So, if I open up this other project, I could use the skill, or we could put it locally in our project, which would mean I could only use the skill in this specific YouTube analytics demo project.
+
+And all you have to do to change that differentiation is say, "Hey, instead of putting that global, put that locally in this project." Or, instead of having that locally in this project, make that global.
+
+So, now if I do a slash and I do YouTube comment insights, we have this right here.
+
+YouTube comment insights analyze comments into an Excel report.
+
+Which is the skill that we just built together, so that is awesome.
+
+All right, so before we move on to the next step of this, I wanted to talk about pets real quick just because I know you guys are dying to understand how you can get this.
+
+It's really simple, you go to your settings, and then you're going to go to your appearance and scroll all the way down, and you can see right here we have pets.
+
+And we can choose between different ones.
+
+So, right now I'm just using the Codex pet, but I could choose Dewey, or CD, or Beasod, or Stacky.
+
+So, I'm just going to go ahead and switch this to Fireball for fun, and you can see down here it changes.
+
+And yes, it's kind of a fun little UI thing, but remember if I'm not inside of Codex and I'm in this dashboard over here, we can still see the pet and it will tell us when it's working on things and when it's done with things.
+
+So, it is a little bit practical as well.
+
+All right.
+
+So, now we have a deliverable.
+
+We have an Excel sheet and we're going to use that as the back end that basically powers this next section.
+
+So, I'm going to open up a new project because we're kind of starting a new goal, a new a new deliverable.
+
+So, I want to open up a new chat and this will still be able to access everything that's in this folder.
+
+So, I'm going to go ahead and switch over to plan mode here.
+
+Okay, so here's the idea I have.
+
+You have access to a file inside of this project and what I'm going to do is actually reference the exact file.
+
+So, I'm going to look for the YouTube comment insights right here and I'm going to tag that file.
+
+So, what I want you to do is create me a dashboard, spin this up on a local host, and I want it to have really nice UI elements and, you know, charts and graphics and things, so visualizing my data and I want to be able to see different insights about my YouTube comments.
+
+What I want you to do here is I want you to use GPT image 2 and create some really nice concepts of how this dashboard should look.
+
+And also, if you want to use it for maybe like a nice logo in the top or any of the other UI elements, utilize GPT image 2 to make this thing just look really polished and really aesthetic and really fun at the same time.
+
+So, that is the idea I have.
+
+I want you to help plan this out, ask me any questions you have about this, and then we'll go ahead and execute.
+
+And so also, this default switch to extra high again, I'm just going to go ahead and switch that back to medium and then shoot that off.
+
+And you can see down here the pet has started to think and it's talking a little bit.
+
+But, the reason why you want to be careful about which models you're using, there's two reasons.
+
+The first one is because sometimes if you chuck extra high at a task that's really simple, like over engineers it.
+
+And the second piece is because each of these cost you different amounts of your tokens or your session.
+
+Obviously, low cost the least and extra high cost the most.
+
+If you go over here to your settings and you click on rate limits remaining, it shows you how much of your session you have left and when it expires.
+
+So, every 5 hours it resets and right now I have 97% remaining and then every week it resets and right now I have 99% remaining there.
+
+And so, it's really nice to be able to keep tabs on that right here, but that's why you want to be careful about, you know, your context window management and your planning and your prompting and your model usage down here.
+
+In general though, I have seen that my session is lasting way longer in Codex than it is in Claude Code.
+
+And a big part of that is because ChatGPT 5.5 is really, really efficient with tokens, with output tokens and input tokens.
+
+And if you guys go watch that video that I was talking about, you will see that exact experiment and it's really interesting to understand and look at, but I've generally found that it's really efficient with tokens.
+
+Now, we have some feedback here.
+
+It says, "Which visual direction should guide the GPT image two concepts and the final dashboard UI?" Creator Ops, Playful Studio or Executive Clean.
+
+I'm just going to go with the recommendation.
+
+For this first version, how should the dashboard get its YouTube comment data?
+
+I'm going to say to use the existing output, which was the um Excel file.
+
+And then what should the first screen prioritize most?
+
+Reply and ideas, analytics overview.
+
+I'm actually going to go with analytics overview for this one.
+
+And by the way, if you're in the app and you want to get rid of the pet really quick, you can just do {slash} pet and then that will just tuck it away.
+
+Okay, so it came up with a plan pretty quickly.
+
+You can see here that I can expand this and read about it.
+
+So, we've got like a summary, we've got key changes, we've got all this other stuff and this is where we would once again iterate with Codex before we say, "Yep, go ahead and build that for me." But I'm just going to go ahead and say, "Yep, go ahead and build that for me." You can see that it's using the image generation for GPT image two, which is really, really solid.
+
+And here is one of the kind of versions that it came up with.
+
+And I've just found if If using Codex to build games or websites or whatever it is, it just helps to give it the ability to test things out and generate some concepts first before it actually designs the rest of the site.
+
+You can see this is the little logo that it came up with, which is kind of cool.
+
+It's got like a YouTube play button with some noise and some comments coming in.
+
+And what it's going to do is it's going to store all of these assets locally somewhere in this project, so that later if we wanted to spin up different versions of the dashboard or a different landing page, it would have access to all of these assets already.
+
+And this is super cool, guys.
+
+It has like this built-in verification loop where it's going to check its work before it actually gives you an output, which is pretty cool.
+
+So, it said the automated browser verification passed.
+
+I'm now doing one visual pass to see what else there might be, what other issues.
+
+And it found three issues when it did an actual visual scan.
+
+So, now it's fixing those.
+
+It says, "Okay, those UI fixes are in.
+
+I'm going to stop the server.
+
+I'm going to rebuild, and then I'm going to verify it one more time with screenshots." And then it comes back and says, "Okay, the second visual pass looks a lot better.
+
+Here is your dashboard to actually go ahead and test out." So, let's just real quick open this up right here locally in the explorer.
+
+And now we have our creator ops signal desk.
+
+So, I'm going to expand this a little bit.
+
+We see the logo up here that it made.
+
+We see 83% creator replies, 78 total likes.
+
+We can switch between overview, replies, ideas, questions, and the explorer.
+
+And this is really cool.
+
+It looks like every single comment has a link.
+
+So, if I click on this, does it actually take us Okay, no.
+
+It didn't actually sync up every single comment to a link.
+
+But it's cool that it showed us that because that gave us a nice idea of like, "Okay, cool.
+
+I do actually want a link." Now, you can actually go ahead and work that into the back end code where every single comment should be associated with a link so that I could open it up and respond to it.
+
+Or we could take it one step further and say, "Okay, what would it look like for me to be able to respond right in this dashboard?" And you actually fire off that API call to YouTube to respond on the right comment.
+
+Because that is 100% doable.
+
+You guys have seen how I've automated my comment section a little bit.
+
+Anyways, let's Let's take a look at the overview.
+
+We can see we have this really nice chart.
+
+We have some AI insights over here where I can click on work reply queue and that goes over to the replies.
+
+I could also click on more content ideas and that takes us to the ideas.
+
+We can look at top tool mentions, reply priority, common themes.
+
+We can also see the videos that are driving comments and this would obviously grow as we pull in more and more data.
+
+So let's say at this point we like this output and we want to actually deploy this because what you'll notice is this says that it's running on a localhost.
+
+So if I copy this link right here and I go to Chrome and I paste that in, it's going to pull up exactly what we saw, right?
+
+And it works and it looks fine.
+
+But if I gave you this localhost and you copy and pasted that into your own browser, you would get nothing because this lives locally.
+
+It's being served on a server from our codebase.
+
+So what I'm going to show you how to do now is how do you actually get this from a localhost to the web?
+
+And what we're going to do is we're going to use two tools.
+
+We're going to use The first tool is called GitHub and the second tool is called Vercel.
+
+So the first thing you're going to do is you're going to type in GitHub and you're going to go over here and you're going to make a profile.
+
+It's completely free to set up, pretty much completely free to maintain.
+
+Once you've created your GitHub, all you have to do is connect this to Codex and we're going to have Codex help us set up something called a repository which is basically just a collection of your files and folders.
+
+Remember how if we open up my file explorer and we look inside of our YouTube comment or sorry, YouTube analytics demo folder, all of these files and folders are important and all we have to do is get these off of our local machine or not off, they'll still live here locally.
+
+But we're going to get them into some sort of repository where I can access them publicly or if you wanted to share these with other people, they could access them as well.
+
+So it's kind of like having a Word doc locally but instead you're putting it on into Microsoft's cloud on OneDrive or something like that so that other people can use it and you could use it from a different machine.
+
+So that's the first step.
+
+So let's go back into Codex and what do you do when you don't exactly know how something works?
+
+You just ask.
+
+So this looks really good.
+
+What I want to do is I want to sync this code base for this specific dashboard to a GitHub repository.
+
+So, help me get that signed up.
+
+Help me get connected here to GitHub, and then I want you to help me create that actual repo and push everything into that repo.
+
+And it even mentioned that right here.
+
+Note, this folder is not currently a Git repo, so there is no diff and status to summarize.
+
+So, I'm going to shoot off that message, and now it's going to help us actually sync up to GitHub.
+
+Now, there is a difference between Git and GitHub.
+
+Really the same thing of version control and all this stuff, but Git is local and GitHub is on the cloud.
+
+And what's important here is that it says, "I'll avoid committing secrets, especially the .env.local." And so, that's why I told you to always paste your keys in that .env, not into some random file called secrets.
+
+It has to be in the .env because that dot in front of the word env basically tells Codex or Cloud Code or whatever you're using, it tells it to exclude this from any, you know, public commits.
+
+So, this point I've already set up the GitHub CLI.
+
+If you haven't, it would just say, "Hey, do you want to set this up?" And you'll say, "Yes." Very simple.
+
+And then you'll authenticate, which means it'll basically just pop up a browser tab and you'll sign in with the account you used to create GitHub, and then boom, you will be connected to GitHub in Codex.
+
+And while this is syncing up, let me show you guys the next tool we're going to use.
+
+This one is called Vercel.
+
+Now, Vercel has a pretty generous free tier.
+
+You can see I've got a few products on here.
+
+You're going to be able to get working on Vercel for free just to get started.
+
+And what Vercel does is it basically takes that code, it takes, you know, this exact website, which is on the back end, all this is it's code, and it takes this and it serves it on a actual URL, on an actual domain that anyone can access.
+
+And what's really cool about this is Vercel and GitHub have a really nice partnership.
+
+They actually like talk to each other.
+
+So, anytime I make a change to our GitHub repo, Vercel automatically picks that up and deploys it.
+
+So, I know there's three tools here, Codex, GitHub, and Vercel, but that doesn't mean we have to manage three places.
+
+All we have to do is manage Codex.
+
+So it said that it's created a private repo for us.
+
+If I open this up, I don't want to open this up here.
+
+And the reason why it doesn't show up here is because this is a private repo and over here I'm not signed in to GitHub.
+
+So if I open this up in a browser where I am signed in to GitHub, we can see YouTube Analytics Demo.
+
+This is a private repo and what's in here is all of the different folders and files that we've actually created to spin up this dashboard.
+
+And now what's really cool is if I go into Vercel and I go ahead and click on add new project, I can connect this to GitHub and it already is connected.
+
+So you would then just sign in and you would connect your Vercel to GitHub.
+
+And now you can import any of your repos.
+
+So right here you can see YouTube Analytics Demo 1 minute ago.
+
+I'm going to click on import.
+
+And that's literally that simple.
+
+I'm going to click on deploy and then in maybe 30 seconds we will have our YouTube Analytics Dashboard, but we'll have it up on a live URL.
+
+Awesome.
+
+So it says congratulations, you have deployed a new project and I'm going to go ahead and continue to dashboard.
+
+And this gives us a youtube-analytics-demo.vercel.app domain.
+
+And if you wanted to switch this off to your own domain, you certainly could.
+
+You would just basically have to move the DNS records over here.
+
+But I'm going to click on this so you guys can see that this is the exact same thing we were just looking at.
+
+Our replies, our ideas, our questions, our explorer, everything here is the same.
+
+Except for now I could take this URL and I could open it up on my phone.
+
+Or I could open it up on my laptop.
+
+Or you guys could open it up.
+
+And like I said, what's cool about that is we basically are able to then test in Codex.
+
+We can iterate right here.
+
+We can make changes.
+
+But just because we make changes doesn't mean that it's actually going to go live.
+
+So if I said, "Hey, I want you to change the entire background instead of blue to be red." And it would say, "Okay, cool.
+
+Here's the red background.
+
+Here's the localhost to test it out on." And if we like it, we say, "Okay, push those changes to our repo." And then as soon as we push those changes, Vercel would automatically deploy those onto the real URL.
+
+But if we said, "You know what?
+
+I don't like that.
+
+Just keep it as is." then our main production site never got touched.
+
+And that's how we keep a clean separation to test and to have something in production.
+
+Okay, awesome.
+
+So, what do we have now?
+
+We have a working project, and I'm opening up this folder just to show you how much we've actually done in the past, I don't know, 30 to 40 minutes together.
+
+And we've set up a bunch of different stuff.
+
+Now, what do I want to talk about next is automations.
+
+So, already over here you can see this tab called automations.
+
+Automate work by setting up scheduled chats.
+
+You can set up things like a status report, release prep.
+
+There's bunch of different things here that give you sort of some inspiration.
+
+But, what's really cool is you can turn all of your skills or any of your repeatable workflows into an automation that Codex will run without needing your oversight.
+
+So, I'm going to open up a new chat in our YouTube Analytics Demo project, and I'm going to go ahead and start chatting to Codex here.
+
+Okay, so we've just done a lot of stuff together.
+
+We built a skill that grabs YouTube comments from my YouTube, and it puts them into an Excel sheet after it does some analysis.
+
+And that's coming out really nice.
+
+And then we built a dashboard served on Vercel that actually displays visually all of those analytics and statistics from that Excel sheet.
+
+Now, what I want to do is I want to set up an automation that just refreshes this every week.
+
+So, let's just say every Sunday at 5:00 p.m., I want you to run the YouTube comments analytics skill.
+
+And then what I want you to do with that is update that data on that Excel sheet, you know, add more rows, update the statistics, and that will automatically sync to the GitHub repo.
+
+So, after you make those changes, you'll have to also reflect those changes onto the actual code base where the dashboard lives, and then you'll push those changes to GitHub so that they automatically get reflected in Vercel.
+
+So, a lot of moving pieces here, but basically high-level, you need to get more comments, redo the analysis, refresh the data into Excel, and that way I'm always getting a weekly report of what's going on with my YouTube comment replies.
+
+Okay, so honestly felt like a little bit of a messy prompt, but Codex should be able to do a good job of asking us any questions it has and making sure that it's able to actually set up this automation for us the way we want it.
+
+Now, something I want you guys to think about here is the way that I approach building AI automations and skills and stuff like this is remember when we talked about skills and I said every time you use it, it's going to get better cuz you can get feedback?
+
+You should honestly think of these automations in a similar way.
+
+You should think about it like you're teaching a kid to ride a bike.
+
+You're not going to just chuck a kid on a bike and say, "Okay, go have fun." You're going to start off by holding the handles and walking alongside the kid and saying, "Okay, you're leaning too much to the right.
+
+You need to lean more to the left and you need to center your weight and you need to make sure you're pedaling and you need to do all this." And slowly over time you'll start getting more trust and you'll take your hand off the handlebars and you'll start to walk a little bit farther behind.
+
+And eventually maybe you'll take off the training wheels and stuff like that.
+
+The point I'm making here is don't expect your automations or skills to be perfect on the first shot.
+
+That's just unrealistic.
+
+You should be expecting them to get better the more you use them because every time you use them you get more data.
+
+But look how quickly it set that up.
+
+It set up a weekly automation.
+
+It'll run every Sunday at 5:00 p.m. and it will just basically run inside of this project and it will run the YouTube comment insights workflow.
+
+It will regenerate the Excel workbook.
+
+It will preserve and merge comment rows.
+
+It will refresh the workbook.
+
+It will verify the dashboard and it will commit only those changes to our repo and it will push it to the right branch so that Vercel actually deploys all of that.
+
+And what you want to do is you come into the automations.
+
+You can see that we have this one which is Sunday at 5:00 p.m.
+
+We can click into it to see the actual prompt that it will submit to Codex.
+
+We could add some stuff here if we wanted, but we don't want to.
+
+This will get injected into a new Codex chat inside of our project.
+
+So, just as a test, if I click on run now, you can see that this starts a new chat right here.
+
+This injected that exact prompt that we looked at with the automation, the ID, the memory, the last run, and the actual prompt.
+
+And then it starts up this little progress sheet which is kind of like a to-do list and it's going to go down in this order.
+
+And we have the full Codex Agentic loop going on here.
+
+So, if you're used to Cloud Code, this is basically the same thing as running a local scheduled routine in Cloud Code or in Cloud Co-work.
+
+Now, the one thing you're going to have to think about here is because this is kind of a local cron, if you close out of the Codex app or if you turn off your PC or your laptop, this will stop running.
+
+In order for this to be truly 24/7 all the time, you would have to get this sort of Codex routine on the cloud somehow.
+
+And that's what Cloud Code just added with their cloud routines.
+
+Okay, so while this automation is running, and we know we're going to make sure that it's working as expected, and if not, we'll correct it a little bit.
+
+But, I realized that I wanted to show you guys a little bit more of that kind of computer use and and browser use functionality.
+
+So, if I go back into the actual um dashboard where it built it, which I believe was this one.
+
+Yep, it was this one.
+
+What I'm going to say here is before we kind of keep making changes, I want you to test the UI here.
+
+I want you to open up this um dashboard, and I want you to open it up in this app so I can watch you do it.
+
+I want you to use your browser use skill and click around.
+
+I want you to click on the buttons.
+
+I want you to try to break this thing.
+
+I want you to stress test it and QA it.
+
+And let me know what you find, what bugs you find, and what we might need to improve.
+
+And so, all I did here is I explained in natural language what I wanted, and we're going to be able to see it use the right skills.
+
+So, browser use is great for a lot of things.
+
+It's great for um QA-ing, like you just saw here, because it can find bugs and click around on things that typically it wouldn't be able to do.
+
+It's also really great for certain automations.
+
+So, maybe you don't have an API for something, and you want to be able to go in and download reports or go in and change some settings.
+
+I've done a few of those automations on my channel as well, and browser use can be really, really good for that.
+
+And you can even use it to just search the web, because you can use browser use in a way where it has like cookies, and it's able to remember your login info.
+
+So, you could log into something like school, where you'd have to get past the authentication, and then the browser can automate and control things.
+
+But anyways, what you see right here is the in-app browser open.
+
+And this little mouse right here, which kind of looks like the ChatGPT Alice logo, is going to click around.
+
+You guys already saw it switch from overview to replies.
+
+You can see it's moving around even more now.
+
+And as it's clicking these different links and moving around, it's going to start to document what might be wrong with this app.
+
+And then we can obviously say, "Okay, cool.
+
+Go make all of those changes for us." Right here, it found the thing with the YouTube link.
+
+So, it said they have the correct URLs, but the in-app browser did not visibly open the new tab after clicking.
+
+So, that's one of the things that we actually did notice ourselves.
+
+Now, browser use is pretty, I don't know, it can feel kind of subjective when you're looking at it.
+
+I mean, this is pretty cool to watch it move live.
+
+But that also happens in Cloud Code when I use like the Playwright CLI or something.
+
+But from my testing, Codex browser use has been much more smooth and much more intelligent than any other sort of browser use automations that I've built or used before.
+
+So, that is something that is really cool about Codex in this app here is that the browser use is really good.
+
+Now, you could obviously use it still from a CLI or whatever, but it is pretty good.
+
+And like I said, there's just so many really cool use cases with browser automation.
+
+If you want to check out a few more, even though this video was Cloud Code, you would set it up the exact same way in Codex.
+
+I'll tag a video right up here.
+
+I mean, I love this.
+
+It's literally going through the filters.
+
+You guys saw it had something else up here.
+
+It's changing these check boxes.
+
+It's changing the stuff.
+
+It did another search here, and it's really going to actually stress test this app to make sure that it didn't miss anything.
+
+And what else is really cool is you can build in this sort of QA check into skills or into the knowledge.
+
+So, next time when you're building another dashboard or next time you're building a game, before it ever comes back to you, it already does a few passes visually and, you know, from like a code perspective, but you can make sure that, "Hey, don't ever ever ever come back to me until you've stress tested with your own browser use." And that's how you can really just make this stuff smarter and smarter every day.
+
+All right, so it decided that it's done testing now.
+
+You can see that we have a bunch of things that passed, but it found a ton of improvements.
+
+It ended up finding six things.
+
+The external links for YouTube aren't really working.
+
+The empty explorer state is too bare.
+
+Search is too literal.
+
+Active tab state is mostly visual.
+
+And there's some other things that are just coming through awkward and little changes that we need to make to the UI.
+
+So, what's really cool now is I can say, "Okay, take all of these six changes and build a plan around exactly how you're going to solve those." And then once it comes back with its proper plan, we would go ahead and execute.
+
+But now that I showed you guys that, let's check back in on our actual automation that's running.
+
+You can see that it is still going through the checks.
+
+It's been about 10 minutes.
+
+So, I will just check back in with you guys once this has been fully committed and we'll see what changes we have on our actual live dashboard.
+
+Oh my goodness.
+
+So, this was pushing like 20 minutes, so I stopped it and said, "Why is it taking so long?" And it's because it couldn't overwrite a file that I had open.
+
+So, don't do that.
+
+But now we're going to go ahead and just keep this going.
+
+But honestly, there is a lesson there, which is sometimes it is nice to be able to watch it, especially before, like I said, before we know that this automation is really refined, because if it is going down the wrong path or it's hitting some sort of roadblock that you the human should be able to just be able to solve in like a quick 20 seconds, then stop it and ask a question or stop it and steer it in the right way, because it's going to help not only save you time, but it's also going to save you session limit.
+
+Because if it was just burning tokens trying things, when the fix was for me to just close out of the app, then, you know, you'd rather have stopped that earlier before it's going down multiple wrong paths.
+
+And another thing that I just noticed, which is really important to call out here, is that when you look at the automation, this automation is set up by default to run with GPT 5.2, which obviously we don't want.
+
+So, you're going to want to make sure that your model is set up correctly, that the reasoning is set up correctly, and all of this other stuff is set up correctly, because that is also a reason why that run was probably taking so long.
+
+So, I just went ahead and retriggered a new run using GPT 5.5, and I decided to try this one out using high.
+
+Now, you also might be curious about the speed thing, the difference between standard and fast.
+
+And honestly, I never really ever touch fast.
+
+I'm never working in something that's super time-sensitive where I need to go fast, because that also eats up your usage a lot quicker.
+
+But this is much more like it.
+
+We can actually see it thinking and now we're going to be able to get this back much quicker.
+
+Okay, so finally that has finished up.
+
+You can see that it was able to make changes to that Excel sheet.
+
+And it says that it analyzed 208 comments.
+
+Now, because we just did this, you know, earlier today, I'm curious if it actually analyzed 200 of the same or if it knew not to duplicate.
+
+And that's something that we'll want to take a look at.
+
+But let's actually head over to my GitHub real quick.
+
+This is the repo that we just set up, right?
+
+And if I go ahead and give this a refresh, we should now see that we have two commits.
+
+So, in the second commit, this shows we refreshed the comments.
+
+So, every single time that you make a change to this repo, it'll show that here.
+
+So, you can check at the version control and you can see what's going on.
+
+But what that means is because our GitHub repo here got a new commit, if we go to Vercel now and we look at this actual project, if I go to deployments, we should be able to see that this just picked up a new change.
+
+1 minute ago, it picked up this new deployment.
+
+So, now if we go to the dashboard and I give this a refresh, this has new data.
+
+So, this used to say 200 videos, or sorry, 200 comments, and now it says 208.
+
+So, that is just proof that we were able to actually get some fresh insights.
+
+Now, what's really nice is that it looks like it just basically added on eight new ones.
+
+It didn't like add on 200 and then 200 more and then eight more, because it realized that they were duplicated.
+
+And if we actually go and open up the actual source of truth, if I go into our repo, I go to outputs, I go to YouTube comment insights and I click on the Excel sheet that we accidentally had open earlier, we see that the dashboard is exactly the same, except for now we've analyzed eight extra comments instead of the original 200.
+
+But I wanted to show you guys what happened inside of this run.
+
+So, as you guys know, we ran into that issue where I had the Excel sheet open, right?
+
+That was the first mistake.
+
+The second mistake was that this was running with 5.2.
+
+So, we reset the automation, and now it's running with 5.5 high.
+
+But then what happened is this was running for quite a while again.
+
+So, I stopped it and said, "Hey, you've been running for a long time.
+
+Why is it taking so long?
+
+This is a very simple task." So, basically, I knew that something went wrong here.
+
+Because when we built this dashboard from scratch, it only took about 20 minutes.
+
+But updating it took 40 minutes or probably even longer.
+
+So, I knew something was going wrong.
+
+So, I stopped it, and I wanted to dig into it a little bit better.
+
+And it And I was able to find out that it was stuck on some process.
+
+So, I said, "What do you need from me in order to make sure that this doesn't happen again, and that you're able to just basically actually give us this deliverable that we're looking for?" And it had me make some confirmations.
+
+And then as soon as I did that, it took about 7 minutes, and then it was able to make all of those changes.
+
+So, the reason why I wanted to show you this is because once again, this stuff is not magic.
+
+You don't deploy something, and you just expect it to work perfectly.
+
+But what's really cool is I could say, "Awesome.
+
+So, everything worked as expected on the dashboard.
+
+The analytics have been updated.
+
+Now, I want you to dig into what you just did with this automation, and help me understand, are there any opportunities to streamline this automation?
+
+Are there any opportunities to make this better and more robust?
+
+Do you have any recommendations here?" And I'll go ahead and fire that off and see if there's any way that we can make this automation better.
+
+It's really important because there's this concept called dark code, which basically means you're writing a bunch of code when you do your vibe coding, but you don't actually know what's going on in the Python script or whatever language you're using there.
+
+And not to say that you need to understand every line of your code, but you need to understand fundamentally what it's doing and why.
+
+And if there are any opportunities to get rid of some code, or if you have to, you know, bake in some more guardrails in a certain place, or anything like that.
+
+So, it's basically looking at this to see if we can make it faster, or if we can make it safer.
+
+Now, ultimately, as long as it's working, I don't really care how fast it is.
+
+Because if this is running once a week, I don't care if it happens at 6:00 p.m. or 6:30 p.m. or even 7:00 p.m.
+
+As long as it's actually working.
+
+But sometimes speed is a big deal in your automations.
+
+So, it comes back and says, "Yes, this works, but it is still too agent orchestrated and too heavy for a weekly data refresh." So, we could add one repo script to basically run the builder.
+
+We could stop running the full next build for these sorts of updates.
+
+And it's giving us all these different insights that we could then go ahead and push to make our automation and our system better here.
+
+So, that's how you can kind of keep iterating upon it.
+
+Even if you yourself don't really know exactly how you would make this better, you can use the AI to figure out and brainstorm.
+
+Okay.
+
+So, what you guys saw here is we created this product from scratch, right?
+
+It was our YouTube analytics demo.
+
+We connected to YouTube, we set up a skill, we set up an automation, we set up a dashboard, we used some browser use, and now we have an actual system where every week it will pull in more comments, it will update our data, our Excel sheet, and then it pushes all of those changes to our actual live dashboard completely automatically.
+
+So, I hope you guys enjoyed seeing that flow from basically idea, setting up a project, all the way to the end.
+
+And just remember, what's really important is that this entire project, everything that we just did, is literally just a folder on your computer.
+
+And what that means is you can customize this folder to be used by OpenClaw or CloudCode or whatever you want.
+
+Any agent can work inside of this directory now.
+
+And if I wanted to explicitly do this inside of Codex, well, I could go ahead and click on view.
+
+I could open up the terminal.
+
+And now, because we're in this directory, I could call on Claude.
+
+And so, right here, I could be working with ClaudeCode inside of this actual repository.
+
+So, maybe right here I'm using Claude to help brainstorm, and it creates me a brainstorming file inside of this project somewhere.
+
+And then what I could do is I could just go back up here to Codex, and I could go ahead and tag that file.
+
+So, say, "Hey, here is a planning file, a brainstorm file that I just generated with Claude.
+
+I want you to be the one who actually takes this file and executes it for me." So, you can really start to play with these together and mix and match.
+
+Just like I've shown you before where we would build something with Cloud Code and then we would actually loop in Codex to do the review on it and to find like security bugs or any just like code-based functionality bugs inside of it.
+
+So, in my mind it's always about which tool is best for this specific use case, not which tool is best.
+
+All right, so I really hope that you guys enjoyed that.
+
+You should have a really good understanding of the interface of Codex.
+
+You should have a really good understanding of how you come in here, you connect to other tools, you use plugins, you start building skills.
+
+And really the next unlock is start building more and more skills.
+
+So, try to think about what are you doing on a daily basis?
+
+What are you doing on a weekly basis?
+
+And write down some of those things that are boring and repetitive and that you just wish happened when you slept.
+
+And then start to bring those into Codex and start to just brainstorm.
+
+And as you're going through this process, you're going to want to set up kind of your own AI operating system.
+
+So, I'm going to tag a video right up here that you guys should 100% go watch next.
+
+This one was kind of based on Cloud Code, but remember everything is just files and folders.
+
+So, if you follow the steps in this video, you will be able to replicate this in Codex, absolutely no problem.
+
+And what's really cool is every project that I've moved over from Cloud Code to Codex, I've said, "Hey, this is something I built with Cloud Code.
+
+Go ahead and analyze it and help me figure out what files you need to create in order to make this compatible with Codex." And all it's going to do is maybe change a few names and maybe change the cloud.md to the agent.md and it's really, really simple.
+
+It'll take like 30 seconds and then you have your project in Codex.
+
+So, anyways, I'll see you guys over there at that AI operating system video.
+
+Please give it a like if you enjoyed.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.

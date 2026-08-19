@@ -1,0 +1,66 @@
+{
+  "workflow_id": "WF-exec-coach-v1",
+  "project_id": "exec-coach",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Hunt parked; Path C brief only if Evens names our page",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T2",
+      "title": "Four blanks + numbered promise, not 'coaching site'",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T3",
+      "title": "Show a specific build, not 'we do AI coaching sites'",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "ICP-specific exec-coach atoms",
+      "coverage": "gap"
+    }
+  ],
+  "pattern_ids": [
+    "P-four-blanks-before-build",
+    "P-inbound-from-demonstrated-build",
+    "P-category-pitch-fails",
+    "P-own-os-before-outbound"
+  ],
+  "support_ids": [
+    "K-0WDkwMxj13s-02",
+    "K-0YXjEzFfft8-03",
+    "K-2J3uX8iRNng-02",
+    "K-3TdD8Qv5Tk8-03",
+    "K-5IM27lbCwjM-01",
+    "K-8C6iCpJ9HPo-01",
+    "K-8MEJen0nblQ-01",
+    "K-8ktcSaSTvxk-02",
+    "K-AO5aW01DKHo-03",
+    "K-B4p9O2P2a3c-03"
+  ],
+  "dissent_ids": [
+    "K-0YXjEzFfft8-04",
+    "K-0YXjEzFfft8-06",
+    "K-3XIGcM7VICc-06",
+    "K-8MEJen0nblQ-04",
+    "K-B4p9O2P2a3c-05",
+    "K-irg-2IfAjpo-04",
+    "K-pbrln2TVeh4-04",
+    "K-rMf-JuikR-Q-02",
+    "K-tDGiWn0flK8-02",
+    "K-tFFKuq2t0rI-04",
+    "K-x-2088007687149601254-01",
+    "K-x-2088007687149601254-03"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  }
+}

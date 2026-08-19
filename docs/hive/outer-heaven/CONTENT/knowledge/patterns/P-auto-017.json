@@ -1,0 +1,34 @@
+{
+  "pattern_id": "P-auto-017",
+  "version": 1,
+  "title": "agent-ops / build — width-vs-depth-is-the-real-split",
+  "steps": [
+    "Steal the ladder. Hive already has `hive-spawn-desks` / councils — do not install Claude workflows.",
+    "Steal bound-scope + confirm-before-width. Map `ask-principal` / `input-required-gate`. Operate-never: ultra code, desktop-wide crawl.",
+    "Steal pain-first. Disagreement with `XNQBCRcwXV4` (don’t sweep all skills) — this demo *is* a sweep; keep both rows.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-jZgcWCzxh1I-01",
+    "K-jZgcWCzxh1I-03",
+    "K-jZgcWCzxh1I-05",
+    "K-jZgcWCzxh1I-12",
+    "K-jZgcWCzxh1I-13",
+    "K-jZgcWCzxh1I-14",
+    "K-jZgcWCzxh1I-15",
+    "K-jZgcWCzxh1I-16",
+    "K-jZgcWCzxh1I-17"
+  ],
+  "dissent_ids": [
+    "K-jZgcWCzxh1I-02",
+    "K-jZgcWCzxh1I-04",
+    "K-jZgcWCzxh1I-06"
+  ],
+  "valid_when": "domain=agent-ops; stage=build; His mix is not app/PR-heavy.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

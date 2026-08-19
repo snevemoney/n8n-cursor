@@ -1,0 +1,30 @@
+{
+  "pattern_id": "P-auto-072",
+  "version": 1,
+  "title": "offer-pricing / acquisition — outreach-agent-fills-db-does-not-send",
+  "steps": [
+    "Steal draft-not-send. Hive: `send-removed` / `warm-draft-hitl`. Mark tape $ UNVERIFIED.",
+    "Steal the retrofit formula as a *later* machine. Do not quote $1,650 as FACT. Mark tape $ UNVERIFIED.",
+    "Steal no-CTA email. No new hunt / no new `icp_id`.",
+    "Steal sit-down costing. HITL price. $ UNVERIFIED.",
+    "Steal flywheel-vs-admin when ranking offers. Do not quote 4k/6k as FACT. Mark tape $ UNVERIFIED."
+  ],
+  "support_ids": [
+    "K-HNKlFTd1maM-01",
+    "K-HNKlFTd1maM-02",
+    "K-HNKlFTd1maM-03",
+    "K-HNKlFTd1maM-04",
+    "K-HNKlFTd1maM-05",
+    "K-HNKlFTd1maM-06",
+    "K-HNKlFTd1maM-07",
+    "K-HNKlFTd1maM-08",
+    "K-HNKlFTd1maM-09"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-pricing; stage=acquisition; 2024-ish n8n YouTube. Space later crowded (`eFOTQpbGcy8` / `vY0EzTP-7EA`).",
+  "less_relevant_when": "Agent 3 they admit priced on complexity. Agent 1 was random.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

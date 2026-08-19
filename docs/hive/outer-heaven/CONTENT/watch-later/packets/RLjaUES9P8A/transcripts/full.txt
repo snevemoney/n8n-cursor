@@ -1,0 +1,799 @@
+This could be one of the biggest comebacks in the AI space.
+
+Over the past years, OpenAI went from being the biggest AI company to becoming something kind of mid.
+
+And people who used AI to code basically forgot OpenAI existed, thanks to tools like Claude Code.
+
+But over the past few weeks, I've seen a lot of videos saying that OpenAI Codex is actually better than Claude Code.
+
+So, I've been trying Codex for the past month, and honestly, the results have been really impressive.
+
+But is Codex actually better than Claude Code?
+
+Today, we're going to answer that question by comparing them on features, price, and three specific use cases to see which one is better.
+
+And at the end, I'm going to give you my honest opinion on which tool you should be using right now.
+
+So, let's get into it.
+
+So, real quick, if you've never used Claude Code before, here's the gist.
+
+Claude Code is Anthropic's coding agent.
+
+Anthropic being the company behind Claude.
+
+The way it works is pretty simple.
+
+You give it a task, like fix this bug, or build me a new feature, or review this pull request.
+
+Claude Code goes off, it plans the work, it opens up your project, it edits your files, runs the commands, and it asks you for permission along the way based on your settings.
+
+And you can use it pretty much anywhere.
+
+There's a terminal version, there's a VS Code extension, and there's a full desktop app for Mac and Windows.
+
+And they've also got a web version in research preview where you can just run sessions from any browser or even your phone. hood, it's running Opus, which is Anthropic's currently smartest model.
+
+Or it can run Sonnet or Haiku as well.
+
+Opus and Sonnet are top-tier for coding work.
+
+Now, the part I really like about Claude Code is how customizable it is.
+
+It's less of a tool, and it's more of a workflow system that you can shape into your own engineering wish tools and automations.
+
+You've got skills that you can drop in.
+
+There's hooks, which are basically automated triggers that fire whenever something happens in your session.
+
+And then you've got things like sub-agents, which are specialist agents that Claude can spin up on its own to handle specific kinds of work.
+
+And we're going to dive deeper on all of this in just a sec.
+
+And now, Codex is OpenAI's coding agent.
+
+And quick clarification, this is not the old Codex model from 2021 that retired.
+
+The new Codex is a full agentic system, very similar shape to Claude Code, but with a few different opinions on how the work should flow.
+
+You can use Codex in, once again, terminal, desktop app for Mac and Windows, and a VS Code extension that works also with other IDEs like Cursor, and in their cloud version at chat.openai.com/codex.
+
+The models behind Codex are the GPT family of models and a GPT-Codex for coding specific work, and a faster, smaller one called GPT-Codex-Spark.
+
+And that one is still in research preview for pro users at the moment.
+
+And the thing that stands out about Codex is sort of like the unified shipping vibe.
+
+Where Cloud Code feels like a workflow system that you're building out, Codex feels more like a an opinionated machine designed to take you from agent is done all the way to the code is shipped to production.
+
+A good example here is the built-in Git work trees.
+
+Those are basically just like separate working copies of your project so that multiple tasks can run in parallel without overriding each other.
+
+So, the whole shape is tighter and more end-to-end out of the box.
+
+So, we'll get into the specifics of what each tool actually does best in just a minute.
+
+And by the way, Codex is also included in every paid and free ChatGPT plan right now.
+
+So, free, plus, pro, business, enterprise, if you're using ChatGPT, you've also got access to Codex.
+
+Whereas Cloud Code, you wouldn't be able to use for free.
+
+Now, before we get into where they're different, I want to plant the thesis of this video early because it's very important.
+
+It's which tool is best for the specific use case that is currently sitting in front of you.
+
+So, that's what I'm going to be discussing today.
+
+And one more thing I want to plant on top of that.
+
+After spending a lot of time with both of these tools, I've noticed that they each have kind of a different feel.
+
+So, Cloud Code to me feels more creative.
+
+It feels like it's better at brainstorming.
+
+It's better at like pushing back when I'm going down the wrong path.
+
+Whereas Codex feels really good at just like following my instructions and doing what I want.
+
+And honestly, it's also been sharper at like reviewing code and reviewing my plan and like finding bugs or gaps.
+
+So, none of that is backed by like hard, specific metrics or KPIs.
+
+It's just like the gut feeling that I get after spending lots of hours in both tools.
+
+But, I do think it matters and I'm going to come back to that at the end.
+
+With that out of the way, let's talk about how much these two have in common.
+
+Because honestly, after using them both heavily, the overlap is way bigger than most comparison videos admit.
+
+Both of them edit code on your local machine.
+
+Both have desktop apps.
+
+Both have VS Code extensions.
+
+They both run the command line.
+
+They both support MCP, which is the open protocol for hooking up external tools to your AI.
+
+They both support CLIs as well.
+
+They've got the same skills format where you drop a markdown file with a YAML front matter into a folder and agents can read through those, pick them up, and invoke them.
+
+Both tools have a plugin marketplace where you can browse and install community tools.
+
+They both have a cloud delegation option where you can fire off a task and walk away, and they also both have hooks and sub agents.
+
+So, the question stops being does my tool have feature X?
+
+The real question becomes which one gives me the better workflow for the way that I actually want to work.
+
+And that's where they start to diverge, which is what we're going to break down next.
+
+Let's talk about what each of these tools is uniquely better at.
+
+We'll start with Claude Code.
+
+The thing that sets it apart, in my opinion, is the depth of the customization.
+
+Claude Code right now has 30 different hook events.
+
+Hooks, again, are automated triggers that fire when something happens, like when you submit a prompt or when a tool runs or when a session starts or when a task gets created.
+
+Code X right now has about six hook events.
+
+So, if you want to fire automated behavior into every part of the agent's workflow, Claude Code gives you about 5x the granularity there.
+
+The next one is auto delegating sub agents.
+
+Both tools have sub agents, but Claude Code can spawn them on its own when a task needs it.
+
+Code X's docs specifically say that Code X won't spawn sub agents unless you explicitly ask.
+
+So, with Claude, you can just give it a complex task and it'll decide on its own to spin up a planner agent and maybe an explorer agent and a code reviewer agent, whatever is needed for that task.
+
+And that's really powerful by default. there's two of my favorite slash commands.
+
+Both still in research preview, but we have {slash} ultra plan and {slash} ultra review. {Slash} ultra plan takes the planning phase and it ships it to a cloud Claude Code session and it lets you review the plan in your browser with inline comments.
+
+And then you can send it back to your terminal for the actual execution.
+
+Ultra review spins up, once again, kind of like a cloud instance with multiple reviewer agents and it gives you a deep multi-agent code review with reproduced findings.
+
+You get three free runs of that on pro and max and then after that it's billed by run.
+
+And they're both insanely powerful for higher stakes work. {Slash} loop is another big one that I love.
+
+You can give Claude Code a recurring prompt that runs on a schedule or you can run it without a prompt and Claude will go into maintenance mode and just keep your project tidy.
+
+So, you could set up a loop to run a certain skill every single like 20 minutes and it will just loop through.
+
+It handles unfinished tasks, addresses comments on your PRs, fixes merge conflicts, stuff like that.
+
+It's super super useful.
+
+A couple more that don't get talked about enough.
+
+The first one is channels.
+
+That's an MCP server that pushes external events from Telegram or Discord or even iMessage into a running Claude Code session.
+
+So, you can literally text your agent from your phone.
+
+And then you've also got like dispatch or remote control.
+
+Then we have the Claude agent SDK, which is the same engine that powers Claude code exposed as a Python and TypeScript SDK.
+
+So, you can build your own agents on top of it.
+
+And we have enterprise off, which probably doesn't matter to you if you're solo, but it is a big deal for teams.
+
+Claude code supports Bedrock, Vertex AI, and Microsoft Foundry, which are the enterprise cloud platforms that big companies use to host their AI.
+
+Codex just doesn't have that level of off flexibility at the moment.
+
+So, if you want a customizable coding system you can shape into your own workflow, Claude code is in a class of its own right now.
+
+Okay, so flipping the script, what does Codex actually do better than Claude code?
+
+The first thing is the whole unified workflow shape.
+
+Codex is built around work trees from the ground up.
+
+Every thread you spin up can run in its own work tree without bumping into the main version of your project.
+
+Combine that with the fact that you can review, stage, commit, and push from the same desktop app, and you basically got a full shipping pipeline in one tool.
+
+Obviously, Claude code allows you to work with work trees as well.
+
+Codex just does a really good job of making that feel more native.
+
+The second thing is in the in-app browser.
+
+So, Codex inside the desktop app has a built-in browser that you can use to actually like look at the work that your agent just shipped.
+
+You can leave visual comments right on the page.
+
+If you've ever finished a feature and then you had to switch over to Chrome to check it out, this is just a much cleaner universal experience.
+
+Now, to be fair, it also has a feature called Claude in Chrome that gives you another type of functionality, but it just works differently.
+
+And Claude in Chrome is a browser extension that runs inside of Chrome itself, whereas Codex put the browser right inside the desktop app.
+
+So, the capability's there on both sides.
+
+Codex just keeps everything in one clean window.
+
+And it just does it a little bit better when you use the desktop app than the way that Claude code does it.
+
+But I think both of these platforms are everyday improving their desktop app experience.
+
+Now, the other one that's pretty big is computer use, which both tools once again have, but Codex's is really sharp.
+
+They've got this whole product QA use case where you tell Codex QA the app I just built, and Codex will open it up in the app, it will click around, it will find bugs, and it will log them with like, you know, severity ratings, expected versus actual behavior, the steps to reproduce, and a triage summary.
+
+And that's a really polished way to use computer use.
+
+And it's something that I haven't seen Claude code build out as a first-party flow yet.
+
+But especially when you realize that you can connect Codex and Claude Code to any of these like external tools, you can do a lot of the same functionality with both tools.
+
+Codex also has a GitHub integration, which is pretty interesting.
+
+I mean, obviously both tools can review pull requests and stuff, but Codex has like an @Codex mention model, and it's pretty smooth.
+
+You tag @Codex in a PR comment or an issue, and Codex spins up a cloud sandbox to handle that.
+
+There's basically zero setup involved.
+
+You just tag it and it runs.
+
+Now, this fifth thing in Codex is called /goal, which is experimental and gated behind a feature flag, but anyone can actually go turn on that flag and use /goal.
+
+This is for the work that's too big for a single prompt, but smaller than an open-ended backlog.
+
+You define a goal with a verifiable stopping condition, and Codex will just grind away until it's actually finished.
+
+And this could be like multiple multiple hours.
+
+And of course, as pretty much all of these features I'm talking about, you can do the same thing in Claude Code.
+
+You could maybe use the /loop, or you could use something like the Ralph Wiggum loop, or maybe like Karpathy's auto research.
+
+So, the capability's there on both sides, but Codex has just packaged this into one clean native /command, where in Claude Code you're stitching together a few different tools.
+
+All right.
+
+So, you literally can't make this stuff up.
+
+As soon as I finished recording that video, Claude Code just released /goal.
+
+So, now we have /goal natively within Codex and Claude Code.
+
+So, just want to give you guys a quick update.
+
+Back to the video.
+
+And then the last one, because Codex is built by OpenAI, you get access right inside of Codex to GPT Image 2.
+
+And GPT Image 2 is one of the strongest image generation models out there right now.
+
+So, if you're building a project that needs image generation, whether that's a game or a product markup, or maybe even a website, Codex can actually just generate those images for you right inside the app, whereas Anthropic doesn't actually have an image generation model at all.
+
+So, you would have to hook it up into some sort of third party tool.
+
+Okay, this next one is interesting because it's where the two companies really diverge philosophically.
+
+So, a lot of you have probably seen third party tools popping up like Open Claw or Hermes Agent, which is the open source agent that lets you wrap coding agents.
+
+They kind of blew up because they felt proactive.
+
+They have native crons, they have heartbeats, they can still use skills and stuff like that.
+
+The cool thing about Open Claw is that you can actually sign in with your ChatGPT subscription and just route your Codex usage through it.
+
+So, you don't have to pay separately for an open API key, which would be way more expensive.
+
+You can also do this with a Hermes agent.
+
+Sam Altman himself put out a tweet on May 2nd saying that you can now sign into Open Claw with your ChatGPT account and use your subscription there.
+
+So, OpenAI's CEO is publicly endorsing this.
+
+And that's a really permissive stance from OpenAI, and I bet they saw a massive spike in ChatGPT subscriptions after that announcement.
+
+Anthropic's stance is basically the opposite.
+
+The Claude agent SDK page on their docs literally says, "Unless previously approved, Anthropic does not allow third-party developers to offer Claude.ai login or rate limits for their products, including agents built on top of the agent SDK." So, in plain English, using your Claude subscription inside of a third-party tool like Open Claw or Hermes isn't allowed unless Anthropic specifically approves you.
+
+And that's one important thing to keep in mind because it changes the economics of your decision.
+
+So, if you live inside of these third-party agent tools a lot, then you're probably going to want to go with ChatGPT Codex.
+
+All right.
+
+So, let's talk about pricing real quick because this is actually a big part of the decision.
+
+Both tools are included with their parent subscription, which means you don't need to mess with a separate API key to start using either one.
+
+So, for Claude, you've got Claude Pro at 20 bucks a month, which includes Claude Code and the rest of Claude.
+
+Then you've got Claude Max 5X at 100 bucks a month, which gives you 5X the Pro usage.
+
+And then Claude Max 20X at 200 bucks a month for 20X usage.
+
+Pro is definitely enough to play around with Claude Code, but if you're using it seriously every day, you're going to want at least one of the Max plans.
+
+For Codex, it's included with ChatGPT free and then also plus at 20 bucks a month all the way up to ChatGPT Pro at 200 bucks a month for basically unlimited use.
+
+Not really, but it feels like it.
+
+But right now, OpenAI has a promo running where the $100 tier on OpenAI's side gets you 2X Codex usage through May 31st.
+
+So, if you're going to test out Codex heavily, that $100 tier is one of the best values in AI coding agent market right now.
+
+Now, on context windows.
+
+Opus and Sonic can run in Claude Code with 1 million tokens of context window.
+
+The latest GPT model in Codex runs at about 256,000 as the token context window.
+
+Now, the part that I want to flag that's more important than like just the raw price of your subscription is that a lot of people right now are complaining that they're hitting their Claude Code limits, whether that be session or weekly, way faster than they used to.
+
+And I've been hearing this from my community for weeks and on X for weeks.
+
+So, one of the things I tracked in the live test coming up is the actual token usage on each side.
+
+And honestly, the results didn't surprise me because as I've been playing around with these two tools, I have noticed that it seems like I'm able to do a lot more work in Codex before I'm hitting that limit compared to Cloud Code.
+
+So, we're going to go through those numbers together live after we run some of those experiments.
+
+So, the takeaway is if you're already paying for one of them, you've already got a top-tier coding agent, but I do think there's a lot of value in subscribing to both, playing around with them, and seeing which one you like better or if you like having both subscriptions for different types of work.
+
+So, quickly recap what we've covered.
+
+Cloud Code is a more customizable shape, deeper hooks, auto-delegating sub-agents, ultra plan, ultra review/loop, agent SDK.
+
+Codex is more unified shipping shape, work trees, in-app browser, it seems to follow directions better, sharper computer use, GPT image to access.
+
+Both tools have subscriptions, both tools have kind of different context windows, and third-party harnesses currently favor OpenAI ChatGPT.
+
+But, this is where most comparison videos stop, just listing features and calling it a day.
+
+So, here's what we're going to do.
+
+I'm going to give Cloud Code and Codex the exact same three prompts.
+
+A research report PDF with branding, a full landing page, and an interactive dashboard with real-feeling data.
+
+Same prompts, I'm going to put both tools side by side, so let's see what happens.
+
+All right, so here are the final results of Codex versus Claude, and we're going to come back to this and look at all of the actual breakdown in just a sec here.
+
+So, let's actually look at the outputs of all of these three different prompts.
+
+So, in this experiment, I did both of these or I used Cloud Code and Codex in their respective desktop apps.
+
+So, the first thing that we did was the research report.
+
+This was something that we could turn into a skill and it would give us a automation report for SMBs on like different automation tools.
+
+So, this is the prompt that I shot off to both Codex and Cloud Code.
+
+As you can see, this is the prompt inside of Codex with the logo, and this was the one inside of Cloud Code.
+
+So, let's take a look at the outputs.
+
+If I scroll down a little bit here, we should be able to see PDF, and if I click on that, we get to open this up in Cloud Code's desktop app, sort of like browser viewer.
+
+So, I'll just do it in here for now.
+
+You can see right off the bat, you know, the logo's up top, but this is a major issue, like that is hard to read, and then the spacing right here is not great either.
+
+But, this one's 15 pages, and as you scroll down it gets better.
+
+I think the header looks really clean, the table of contents looks nice.
+
+I'm not going to read and verify all of these facts.
+
+I just don't really feel like doing that right now.
+
+They're both pretty solid when it comes to doing research.
+
+And by the way, I didn't give it any API keys, so they're doing research using their native like web fetch and web search tools, whatever those are.
+
+So, it goes through executive summary, it goes through market overview, and you can see that this one is very like wordy.
+
+It's structured almost like it's trying to sort of like tell a story, and it's going over these different tools.
+
+We have a side-by-side comparison here, top three picks, Zapier, Lindy, make.com.
+
+And then at the end we have where the market is heading in the next 12 months with all the sources at the bottom here.
+
+And all of these are clickable links that I could go to, but not when I'm in the local host here.
+
+If I was to open this up in my browser, like you can see right here in my browser, I could actually then go ahead and click on these links and it would take me to that actual source.
+
+Now, here is Codex in the desktop app.
+
+Interestingly enough, you can't actually open PDFs right in here in the preview.
+
+So, we have to open this up on our browser.
+
+And this is Codex's version, so right off the bat it already looks better because we don't have some weird spacing on the title.
+
+The logo's there, but it kind of has this weird like you can tell it's a square image.
+
+So, the header, nice.
+
+I thought the header was better with Cloud Code.
+
+Table of contents looks perfectly fine.
+
+We've got an executive snapshot, and some of this spacing feels a little bit almost rushed, like it feels a bit squished together.
+
+Market overview, and then as we go into the platforms here, we basically just get a table for each tool.
+
+Also, the footer on this version isn't as cool either.
+
+So, Cloud Code went for more of like a I'm going to tell you a story, and I'm going to break it down with bullets.
+
+OpenAI Codex went for more of like a I'm just going to give you a table, like a consistent table breakdown for each of these different tools.
+
+You also notice that this research report is nine pages, whereas the other one was 15.
+
+We get our side-by-side comparison.
+
+We have our top three picks, which are Zapier, Lindy, and Relay.
+
+And Cloud Code's top three picks was Zapier, Lindy, and make.com, so kind of similar.
+
+And then we have where the market is heading over the next 12 months and a practical buying guide.
+
+And then we have all of our sources at the bottom, which once again, these are clickable links that work.
+
+Okay, so number two was our website, and we gave it the same exact prompt here with the Glido logo, and we told it to build us a landing page.
+
+We gave it the actual Glido site so it could go and look at it and maybe get some like, you know, inspiration.
+
+And then it comes back with an actual landing page here.
+
+And then of course in Codex we gave it the exact same prompts with the same logo.
+
+Now, here is the actual two landing pages.
+
+Which one do you think was which?
+
+This one on the left was Claude Code.
+
+So right off the bat they have similar feels, right?
+
+They have similar colors.
+
+You'll notice that OpenAI was able to put the logo up here, whereas for some reason, I don't know why, Claude Code didn't.
+
+That would be a very easy fix, but as we scroll down we can see that we've got sort of like an animation right here.
+
+Which we have like the kind of like dictation-looking thing.
+
+I like how this is a microphone that's pulsing rather than just this being like a G.
+
+I also like how this kind of like text cursor thing is blinking as well.
+
+And overall as we start to scroll down here, I genuinely like Claude Code's version better.
+
+Like even the font, it just feels a little bit less vibe coded.
+
+These logos are obviously wrong, except for GitHub looks correct.
+
+Gmail looks sort of correct but not really.
+
+We That would be an easy fix, but I like the sliding banner compared to just having these six boxes here.
+
+This next section I once again think that this looks better.
+
+We have some glow, we have some icons rather than just like these random letters.
+
+So overall, I am liking Claude Code's version here pretty much a lot better.
+
+Here's the pricing page, the difference is here.
+
+So I think that Claude takes the cake here.
+
+The logo thing would be a very very easy fix, and as far as like a base, I think Claude Code wins here.
+
+Okay, and the final one was a marketing analytics dashboard.
+
+I told it to make up all the data, but I pretty much gave it the same like required elements.
+
+So let me pull up both of these side by side, and just for proof, here is the same exact prompt inside of Codex.
+
+All right, so here are the two dashboards.
+
+Once again, I put Claude Code on the left, and right off the bat I already think that the Claude Code version just looks a lot better from a design perspective.
+
+Both of them are still functional.
+
+If I click on the different buttons, you can see the data will shift.
+
+And as the data moves and the numbers move and the charts move, we can still use our mouse to see the actual like numbers, so that is all working well.
+
+You'll notice here that we have orders and average order value, but here we just have revenue.
+
+We can come down here to channel breakdown and we can hover over the different elements and we get the data there.
+
+And even here, like the conversion funnel, right?
+
+The purchase funnel.
+
+This just looks way more generic and bland, but this one has almost like sort of a a gradient that goes across.
+
+And I just think in general, the fonts and the vibe, everything about Claude Code's version just looks better, even though from like a functional perspective, I think that they're the exact same.
+
+All right, and now the part that you guys probably care more about, which is like the actual metrics of cost, speed, tokens, stuff like that.
+
+So, we're using Codex with GPT-5.5 on high, and we're using Claude Code with Opus-4.7 on high.
+
+So, yes, this was like a Codex versus Claude Code video, but keep in mind that a lot of the actual performance is going to be determined by the underlying model that is powering the harness.
+
+So, when Opus-4.8 or 5 drops and GPT-6 drops, these numbers would obviously look a little bit different.
+
+So, let's look at some of the totals and the numbers.
+
+Kind of surprising.
+
+So, Codex, total time across three runs, was almost 26 minutes.
+
+And Claude, total time across three runs, was about 15 minutes.
+
+Total tokens were very similar.
+
+We had about 6 million, and you can see the breakdown.
+
+We're going to break it down by experiment in just a sec, but about 6 million tokens.
+
+What was interesting is that costed more with Claude Code.
+
+And we'll break down why once we look at the experiment level breakdown, but keep that in mind.
+
+And then, the average run, once again, Claude Code was faster here.
+
+And keep in mind, we had one Claude Code experiment that was like 2 minutes, and the Codex one was like 8.
+
+So, that was like an outlier, which kind of skewed the data.
+
+But, typically, I will say that I found that Codex is actually faster.
+
+And keep in mind with the with the token thing here, if you look at these two models side by side, GPT-5.5, Opus-4.7, they have similar input pricing, $5 for a million input tokens, but their output tokens, GPT-5.5 is five bucks more expensive.
+
+But, GPT-5.5 seems to be super efficient with output tokens, which is why in this experiment, Claude Code costed us more.
+
+Now, this is API billing.
+
+I'm on a subscription for both of these, so I'm not actually getting charged 11 bucks and 7 bucks, but this would actually factor in basically to like how fast your session limit is hit.
+
+So, let's keep scrolling down here.
+
+With the speed thing, we can obviously see that um this was the main outlier where Claude Code finished really quick, almost, you know, 2 minutes.
+
+And then, this one took Codex 8 minutes.
+
+But, I guess I stand corrected.
+
+I mean, in all of the results here, Claude Code was pretty much faster in all of them.
+
+For the input versus output tokens, we can see these charts might be a little bit hard to read because we have like input, we have cash, we have all this kind of stuff.
+
+But basically what happened was Claude Code was spending more output tokens than Codex in all of them, which is like the little highlighted sliver at the top.
+
+You can see Claude Code's output here was 83k, almost 84, and Codex's output was 18k.
+
+Over here, Codex's output was 20k, and Claude's output was 80k.
+
+And over here, Codex's output was 16k, and Claude's output was 41k.
+
+So, Claude's output tokens is always higher than Codex's, at least in these three examples and based on other testing I've done.
+
+It's not like a definitive every single time rule, but it is a consistent pattern.
+
+So, I think that, you know, we could look at the cost, obviously, but I think that this one chart is very interesting if I can somehow make this one like full screen.
+
+This chart.
+
+This is efficiency and time.
+
+So, the best place to be here would be bottom left.
+
+That means that you're very fast and you're very lean.
+
+And the worst place to be would be top right, because you're slow and heavy.
+
+So, on the x-axis we have total tokens, so more expensive as you go this way.
+
+And on the y-axis we have seconds, so slower as you go up.
+
+And it's really interesting because you can see here that we have two really great data points from Claude Code, which were experiments two and three.
+
+And then we also have this one, which is a clear outlier in the good direction, which was experiment one, which was our research report from Claude Code.
+
+And then we have kind of this like accurate little bundle of Codex, which it's pretty consistent, like they're all kind of in this general area.
+
+They're all kind of in the middle of this scatter plot.
+
+So, I thought that this was an interesting one to look at, and I would love to see what would happen if we would have ran like 100 experiments, where we would see like sort of the standard deviation and where we'd see the lines start to form for each of these tools.
+
+And I'm not going to read these out cuz I think that it would be boring, but here are the raw numbers.
+
+If you want to pause and take a look, you can certainly take a look through that.
+
+So, the way that we were actually able to get this data is we just ask either Claude Code or Codex to read its JSONL, which is like a session log, and it can pull the time, the tokens, the cash reads, all that kind of stuff.
+
+So, that's how I pulled the data.
+
+If you guys are ever curious about a session, just ask it to read the JSONL and pull that data for you.
+
+All right, so, we just ran Claude Code and Codex through these three live builds.
+
+Same prompt, both tools, three completely different kinds of work.
+
+And the honest takeaway before I dig into specifics is that this was not a clean sweep in either direction.
+
+I feel like Codex won at certain things and Claude won at others.
+
+So, starting with Claude code, the biggest standout for me was the dashboard test.
+
+Claude finished that build in just under 2 minutes.
+
+Codex took almost 8 minutes for the same exact prompt.
+
+So, Claude was roughly four times faster on the most complex of the [music] three tasks.
+
+The token side was even more surprising.
+
+On that same dashboard build, Claude used about 283,000 tokens total where Codex used about 1.64 million.
+
+So, almost six times more tokens on the Codex side for one build.
+
+On the visual side, Claude also won the dashboard in my opinion and the landing page.
+
+The dashboard came back in dark mode and all the date filters worked.
+
+The hover statuses in the revenue chart just felt cleaner and more polished.
+
+Whereas Codex's dashboard was functionally the same, but it just felt cheaper to look at.
+
+And the landing page was the same story.
+
+Yes, Claude actually did forget to drop in the logo on that landing page and the scrolling banner had like wrong logos and icons, but those are just mistakes that we could fix with one prompt.
+
+But the underlying design, the base that I wanted to start from, I think I liked Claude codes better.
+
+The pattern I noticed is that Claude has the way of planning the task tightly before it executes.
+
+And Codex tends to just grind through more iterations, which is why the input tokens stack up on its side for the more, you know, complex builds.
+
+So, for front-end work, especially anything with real interactivity and design polish, I think that Claude was the clear winner in that metric.
+
+Now, flipping over to Codex, the research report that it built was kind of a standout in my opinion.
+
+So, Codex finished in about 8 minutes and Claude took 8 minutes and 15 seconds.
+
+And Codex used about 2.8 million tokens versus Claude's 4.7 million.
+
+So, on the most research-heavy task of the three, Codex was both faster and more efficient on tokens.
+
+Codex was also significantly faster on the landing page build, 3 minutes flat versus Claude's 4 minutes and 39 seconds.
+
+So, if you're looking at pure speed, Codex typically tends to be faster.
+
+The other thing I noticed across all three tests is that Codex's output tokens are way leaner.
+
+And output tokens cost more than input tokens, so that is something important to keep in mind.
+
+And that's probably why on Codex I'm not hitting my session limit as quick as with Claude code.
+
+On every single build, Codex wrote about two to five x fewer output tokens than in So, Codex tends to just be more concise in what it writes back.
+
+It seems to be more efficient.
+
+On the visual side for the PDF, I liked Codex's a little bit better.
+
+It felt like it had better spacing, even though I thought the Claude could had a better header and a footer.
+
+It was honestly just a toss up, but if I had to send one to a client, I probably would have went with Codex's version by a small margin here.
+
+And obviously I didn't read through every single sentence of the actual data in the research report, but that was my quick analysis.
+
+All right, so given all that, let me give you my honest take on when to use each.
+
+I would say reach for Claude Code when you're working on complex front end, when visual design quality matters, when the task requires deep planning, when you want auto delegation, when you're building custom workflows with hooks and skills and channels, and when you need the Claude agent SDK to embed agents in your own product, or when you're in an enterprise environment that means Bedrock or Vertex off.
+
+Then I'd say to reach for Codex when the task is research heavy and pulling from the web, when you're, you know, producing structured documents like PDFs or reports, when you want a single desktop app that handles work trees and review and shipping, when you need to use slash goal for like long-running objectives, when you want to use @Codex on GitHub PRs, or when your project needs image generation built into the workflow.
+
+On top of those buckets, I want to come back to my observation from earlier because this is where it actually shapes my decision in practice.
+
+Like I said at the beginning of the video, Claude Code in my experience just feels more creative.
+
+It pushes back.
+
+I prefer it as my brainstorming partner.
+
+It catches things that I might not have thought of.
+
+So, when I'm in a planning phase or wrestling with a hard problem, that's usually when I will reach for Claude Code.
+
+But Codex now just feels really good at executing.
+
+It just feels like it obeys me better.
+
+It follows instructions, especially as you're working on a project that starts to run a little bit longer.
+
+You tell it what to do and it feels like it just does it.
+
+And of course, it's been sharpened on like catching things in the code and reviewing it and plugging holes.
+
+And that's why I say it's never like which tool is better, it's a matter of which tool is better for this specific task.
+
+A lot of people have been finding a ton of success with doing planning and brainstorming and strategy with Claude Code and then bringing in Codex to actually like just review the code or maybe even execute on that plan.
+
+And one more mindset piece I want to leave you with on top of all of this.
+
+Because you're working with coding agents, all you're really doing is you're making files that live inside of folders that live inside of more folders.
+
+You know, markdown files or JSON files or Python scripts or whatever it is, which means you're going to be pushing all of this stuff to GitHub.
+
+You can pull that exact same project into Cloud Code or Codex or OpenClaw or Hermes or whatever the next new tool is.
+
+You know, you're not locked into one environment just because you've been building on Cloud Code for the past 6 months.
+
+And if you ever want to move between tools, it's really not that hard.
+
+You know, you open the project in another agent and you say, "Hey, I built this project in Cloud Code and you are Codex.
+
+Just walk through it, understand it, and then just update anything that needs change." Or, you know, you could clone it and then have like a Cloud Code version of your project and a Codex version of your project or whatever it is.
+
+There's just a few small things you're going to have to swap like the claw.md will now be an agents.md.
+
+But the agent will figure out pretty much all of that for you.
+
+So, the real mindset is just to keep an open mind.
+
+You're building portable skills inside portable folders.
+
+So, whatever tool gives you the best workflow right now, just use that one.
+
+And that brings me back to the thesis I started this video with, which is it's not a matter of which tool is best, it's a matter of which tool is best for the specific use case in front of you.
+
+And some people also might disagree with that.
+
+It's just kind of like how do you like to work and what features do you need?
+
+And one last thing before I wrap, everything that walked through is of right now, mid-May 2026.
+
+Both of these tools have been shipping at really incredible speeds.
+
+You know, new models will drop, pricing tiers will shift, features that are in research preview will graduate or they will be, you know, redacted.
+
+So, if you're watching this video 3 months from now, just double-check some of the specifics on the actual docs that I mentioned today.
+
+You know, the architectural differences that I walked through are likely to hold up, but some of those exact numbers or stats might not.
+
+And I know that we just covered a ton of information in this video.
+
+So, I broke all of this down into a resource guide that you can access for completely free and you can find that in my free school community.
+
+The link for that is down in the description.
+
+That is going to do it for today.
+
+So, if you enjoyed the video or you learned something new, please give it a like.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys made it to the end of the video and I'll see you all in the next one.
+
+Thanks, everyone.

@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-005",
+  "version": 1,
+  "title": "agent-ops / build — different-products-not-a-kill",
+  "steps": [
+    "Do not treat a vendor launch as a stack change. Hive stack stays Cursor + Grok.",
+    "Steal “compare on named categories; don’t end on the hook.”"
+  ],
+  "support_ids": [
+    "K--6yUeJ3rkvg-01",
+    "K--6yUeJ3rkvg-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=build; 2025 Agent Kit launch discourse.",
+  "less_relevant_when": "If Kit later grows triggers/control, the split may date (he lists those as later categories — not scored on this clip).",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

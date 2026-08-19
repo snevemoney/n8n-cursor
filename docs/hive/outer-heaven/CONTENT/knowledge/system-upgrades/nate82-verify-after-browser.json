@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-verify-after-browser",
+  "type": "Agent infrastructure",
+  "discovery": "After a browser (or computer-use) action, observe state and compare expected instead of assuming success. Headed break-it; fail list is done.",
+  "applicability": "ALL browser-using agents",
+  "proposed_change": "action → observe state → compare expected → retry/escalate. Wired as skill verify-after-browser on the existing click-live-site job and on spawn notes when a desk actually clicks.",
+  "evidence": "CB5bG4mvnS0 · EuzYhzB0vbI · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "CB5bG4mvnS0",
+  "status": "WIRED",
+  "next": "IF Cursor \u2192 cursor-ide-browser. IF Grok Bot \u2192 Grok Bot web browser (do not call Cursor MCP). Same card ACT/EXPECTED/OBSERVED/COMPARE/NEXT. Playwright = Scorpion e2e only. 2026-08-14 parent-chat Cursor click on 127.0.0.1:8765/hive-dry-run-click.html COMPARE=match (OBSERVED: DRY-RUN-SIX OBSERVED: click landed). Status WIRED + Cursor-path DRY-RUN PASS, not accepted. Background Task agents cannot see this chat's tabs. No headed send/pay/publish. No Codex."
+}

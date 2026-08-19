@@ -1,0 +1,254 @@
+So, you've learned everything you can about Claude. You can build agents, automations, and complex
+systems, but what do you do now? Do you start an AI agency? Do you sell automations, or do you build
+software for work companies? There are so many different options out there, but 90% of those options
+aren't relevant to the average viewer of this channel. And I understand that most of you guys work
+normal jobs, you have corporate careers, and much prefer the security of being employed than, you
+know, the ups and [music] downs of being self-employed. But with the AI space changing like every
+single day, that security that most of you are used to is disappearing. So, in this video, I'll
+show you the best thing that you can do right now to make money with your Claude skills inside of
+your preferred career and the exact roadmap to do so. So, let's get into it. Before I give you the
+actual roadmap, there is one thing that you have to understand first, which is the AI space never
+stops moving. It does not sit still for a second. So, getting really good at Claude right now on
+its own means almost nothing long-term because the tools are going to change. So, what actually
+matters are the skills underneath the tool and learning how to take those skills and apply them
+to every new phase of AI as it shows up. And the reason that matters so much is because the AI space
+has never really had one fixed best job or one best business model. It keeps swapping them out every
+year or so. And every single time it does, a brand new window opens up for whoever is paying [music]
+attention. So, let me walk you through what I mean real quick. So, if you rewind about a year back
+when AI first really started blowing up, the first real paid gigs were pretty simple. You could
+be the person who set up one automation or one chatbot for a small business or [music] a team, and
+that alone was enough to get you paid pretty well. But obviously that shifted pretty quick. It became
+the whole AI systems phase, or what most people now are calling the AI automation agency phase.
+Everybody's, you know, trying to productize services, spinning up agencies, and selling done-for-you
+systems [music] left and right. But then it sort of shifted again, you know, over to the AI agent
+builder era. And this is where people stopped building those simple little automations, and they
+started building agents that can actually think and execute a ton of these repetitive tasks [music]
+that we all do every single day. And then we get to the newest phase, the agentic one. Gartner is
+projecting around $202 billion in spending on agentic AI in 2026 alone. So, if you just think about
+that for a second, companies are pouring that kind of money into AI [music] that doesn't just answer
+your questions, but it actually goes and does the work for you. And that seems to be the phase that
+we're currently sitting in right now. But the pattern that I really want you to catch there is that
+every single time one of these phases changed, the people who moved early, you know, were able to
+catch and ride the wave. And the people who stayed glued to the old phase ended up fighting just
+to survive in the new super crowded sort of race to the bottom market. It was never really about
+learning the specific tool, it was about understanding what the tools could actually do and what
+the value of that was to actual human people. And the crazy part is that the building itself is
+getting easier every single month. The barrier to entry keeps lowering. McKinsey found that around
+88% of organizations are now using AI somewhere in their business, but only about a third of them
+have actually turned that into real projects. So, just going to repeat that real quick. Almost everyone
+is using AI, but almost nobody is good at AI. And that gap right there is the entire opportunity.
+So, the next phase isn't some new flavor of builder. The value is shifting to the person who decides
+what to build in the first place, why you're even building it, and whether the thing actually worked.
+And that person is an AI consultant. Now, a consultant is really just the person who figures out
+what's actually wrong and then figures out how to fix it. So, instead of just sitting there and
+doing whatever they're told to do, think about it like a doctor versus a pharmacist. A pharmacist
+will basically just hand you exactly what you're asking for, but a doctor has to figure out what
+you actually need. So, builders are kind of like the pharmacists and consultants are the doctors.
+And the doctor is the one who gets paid the real money because clients never actually know what
+they need. They just know what hurts. So, your job isn't being the fastest person at the build,
+your job is naming the real problem in the first place. And of course, the money backs all of this
+up. AI consulting market is expected to grow past $64 billion by 2028, and there's a giant gap to
+fill here. Roughly 30% of company AI projects just get abandoned, and only about 6% of companies
+using AI are actually good at it. So, almost every business out there is pretty bad at this right
+now. And the important part is that they know they're bad at it. And this is exactly where the consultant
+walks right in to help. So, the best move that you can make right now is to become that consultant.
+But there are actually two completely different roads into that role. And the one that you take
+really comes down to the type of person that you are. So, road number one is the independent AI
+consultant. This is where you go into other businesses, you find their problems, and then you prescribe
+and build the AI solutions that fixes them. It's really just AI agency idea, but you're just framing
+yourself way more as a long-term partner rather than a team of scrappy devs who can build AI automations.
+Because instead of selling those automations, you're selling the actual solution to a specific problem.
+And full disclosure, this is pretty much the road that I went down myself, so it pretty well. But,
+road number two is more of the in-house AI consultant. And this is the door that I want to start
+talking about more on my channel, as I've realized not everyone wants to start their own consulting
+practice. So, instead of consulting a bunch of different companies from the outside, you basically
+just become the go-to AI person inside of one single company. And that company could even be the
+one that you're already working at right now. And of course, companies are starting to take this
+very seriously. They're starting to hire in-house AI leaders with real titles, things like a chief
+AI officer or a director of AI. And a lot of these roles are paying into the low to mid six figures.
+IBM actually just put out their 2026 CEO [music] study, and they found that 76% of organizations
+now have someone in a chief AI officer type of role. And that's up from just 26% 2 years ago. So,
+that nearly tripled in a record amount of time for a C-suite role. Now, I do want to be fair about
+that number for a second. That study only surveyed about 2,000 CEOs, and these were pretty massive
+companies. We're talking a median revenue of around $5.8 billion, and almost four out of five of
+them were publicly traded. So, that 76% number is really just, you know, giant enterprises racing
+to fill the seat first. and mid-size businesses, which is where most of you guys will try to be
+working and consulting for, I'm assuming, that market is still very much wide open. So, if anything,
+that tells me there is a ton of room left for the rest of us to just walk right in. And the cool
+part is that both of these roads are basically the same idea, meaning you diagnose the problem,
+you prescribe the [music] AI solution, and then you prove that it actually worked. The only real
+difference is whether you're doing that for a bunch of companies or just one. And it doesn't matter
+what tool you end up using as long as you can bring real results, which is why the skills matter
+so much more. The independent road is going to fit you if you want full ownership of your time,
+you like variety, and you don't mind doing things like sales calls and going out to find your own
+clients. The in-house road fits you better if you'd rather have stability, you want one place where
+you can go really deep, and you like the idea of a steady paycheck while you do it, and not having
+to like pivot out of your job and try to start your own business. So, I'm not sitting here telling
+you that one path is better than the other. It really comes down to your goals, your experience,
+what you want out of life, and you know, what you want out of this whole AI opportunity in the first
+place. And look, I get it. There's a million people out there telling you what to do with AI right
+now. So, before we keep going, I want to give you a little bit of context on why I'm even the one
+standing here telling you all [music] this, because I've kind of been on both sides of what we just
+talked about. I actually started full-time out of college at Goldman Sachs. And when AI first really
+started taking off, I was the guy on the team who was researching it on the side and who was obsessed
+with it, playing around with it in my free time, and even trying to like show my team and pitch
+it to my team. I genuinely wanted to be like the in-house AI person. I was kind of hoping I could
+like, you know, spearhead a new initiative or work on AI projects at Goldman. But, it's obviously
+a massive firm with a ton of regulation and a ton of change management issues, and the whole thing
+[music] just felt way too slow for what I wanted to do. So, that's when I ended up making a bet
+on myself and pivoting [music] out of that role. A little while after that, I was doing a lot of
+freelance work. I started my own AI agency called True Horizon with a couple of business partners,
+and we scaled that thing past $100,000 a month in under a year, and I ended up exiting it because
+[music] I just realized that I was way more passionate about educating and getting in front of people
+and helping as many people as I could figure out how to use this stuff for themselves, which basically
+led me to where I am now, building what is the largest AI automation community in the world. We've
+got over 400,000 members and all this happened in just under 2 years. Now, the reason I'm telling
+you guys this isn't to flex. It's basically just to say that I have a big community and I'm able
+to see what's actually happening in the market, and I still get to see what business owners are
+trying, what employers are trying, what aspiring entrepreneurs are trying. And I've noticed that
+there's a ton of content out there about how to start an AI business, but most of you guys aren't
+trying to do that or want to do that, or you think that's the only option. But, most of you might
+just want to advance in your career as an employee or maybe get a better job or promotion or more
+security. And almost nobody is putting out the stuff that actually helps you guys do that. Now,
+the other important thing I want you to hear is that I don't have a technical background. Like I
+came from marketing and analytics. I'm not an engineer and I never have been. And only reason this
+matters is because the barrier to entry on actually learning this stuff has basically dropped to
+zero. Like anyone can do this now. So, if you're sitting there wondering, can I even learn this?
+That's just not even a question you should be asking anymore. The answer is yes. The real question
+that matters is this. When someone asks you, why should I hire you over the person who watched the
+exact same amount [music] of YouTube tutorials and knows the exact same terminology and has the
+same experience as you. You have to think about how you answer that question. Because the people
+who win in this market aren't the ones who learned the most, they're the ones who can actually prove
+they can deliver real business results. So, that right there is the core question. It's also a big
+part of why we've been building something silently on our end to help you guys out with credibility,
+but more on that later. For now, just sit with that question for a sec because [music] no matter
+which of these roads you go down, that question is exactly what your entire path comes down to.
+And you will get asked that question. Now, the great thing is that no matter which of those two
+roads sounds more like you, becoming an AI consultant is probably the next natural step in your
+journey. And I want to break that down for a second because there are basically, in my mind, four
+types of people who are probably watching this right now. And this move makes sense for every single
+one of these four buckets. The first type is the person who's just building with Claude as a passion
+project. And hey, if that's you, there's nothing wrong with that. It's totally fine. But if you
+can actually monetize what you're doing in some way, it does two big things for you. First, it validates
+that you're actually good at this because it's probably the cheapest way to find out if your skills
+are good enough where someone's willing to pay for them. And second, it funds the hobby. You know,
+there's so many new AI tools and, you know, tokens are expensive and subscriptions are expensive.
+So, if you can have a little bit of extra cash coming in on the side, then you can just keep playing
+with this stuff and maybe keep experimenting with even more tools. Now, the second type of person
+is the aspiring entrepreneur. The person who actually wants to make real money with this and wants
+to build a business. And if that's you, you've built a skill in a market with massive demand and
+almost nobody who can deliver on it. So, just look at the numbers. The World Economic Forum projects
+that AI is going to create around 170 million new jobs by 2030. And even if you subtract, you know,
+all the roles that it's going to replace or change, that's still a net gain of about 80 million
+jobs. On top of that, roughly half of all tech job postings in the US already ask for AI skills,
+and that number doubled in just 1 year. So, you've got this giant wave of demand, and you've got
+barely anybody who can actually ride it. And what that means for you is that you don't have to be
+the best in the world, you just have to be the best one in the room. Now, the third type of person
+is the employee who just wants to level up at work. And this is the newest bucket of the bunch,
+and it's where that in-house road turns into an absolute cheat code. Because becoming your company's
+AI person protects your job. And on top of that, it basically works like a raise. PwC went through
+close to a billion job postings, and they found the pay premium for AI skills more than doubled
+in a single year, jumping from 21.5% all the way up to 56%. And the pay is only half of it. Another
+study put out a report where nearly two-thirds of employees admitted they had passed over someone
+for a promotion because their skills were outdated. So, the skills you already have are quietly
+becoming the thing that decides who moves up and who gets left behind. And the fourth type of person
+is someone who already owns a business. And for you, this one's almost too easy. You don't need
+to go hire some expensive consultant, and you don't need to go become one for hire either. You just
+consult your own business, you know, one process at a time. You already have the perfect first client,
+and it is you. There is one thing I want to call out that's pretty interesting because it changes
+how urgent all of this really is. And that's basically the label AI consultant. I think that it
+has an expiration date on it. Just like every other wave that we've talked about earlier, this one's
+also temporary. AI is going to seep into every single industry. It's going to fill the cracks, and
+it's going to seep into every single role out there. So, in a few years, nobody's probably going
+to be calling themselves an AI consultant anymore. It's just going to be consultant because every
+consultant is going to be using AI and has to be completely native with it. Because if they don't
+speak AI, they're really just not going to get business. So, just think about it like this. Somebody
+today, if they walked up to you and called themselves an Excel accountant, wouldn't that sound completely
+ridiculous? Because it's assumed that every accountant uses Excel. But if you rewind to when Excel
+maybe first came out, you might have a bunch of accountants that use Excel, but a bunch of them
+who still stick to the old way. So, maybe calling yourself, you know, an Excel accountant or listing
+that as one of your skills was important. It's a similar story with people who called themselves
+an internet marketer back when the internet first showed up. But now, that is just marketing. It's
+how everybody does it. So, that's exactly where we're sitting with AI right now. The label is the
+part that's temporary, but the edge is real, the skills are real, and the window to grab it is wide
+open right now. It just won't stay open this wide forever. Now, I know what some of you are probably
+thinking. To go become an AI consultant or the AI in-house person at your job, you have to go quit
+your job tomorrow, go build some massive personal brand, start making YouTube videos, and bet your
+entire life on it. But you really don't. The whole point of this video is that there is a much smarter,
+much lower risk way to do this. So, let me set up the operating principle that makes the whole road
+map work, and then walk you guys through the four steps that you can start tomorrow. Because most
+people are approaching this completely wrong, and the difference is exactly why most builders never
+become consultants. The wrong move here is just looking at your job, finding the repetitive stuff,
+and automating it. And don't get me wrong, that's obviously not a bad thing to do. It just isn't
+what makes you super valuable. Because if you automate something that isn't actually constraining
+the [music] business, you've just spent a week saving maybe, you know, 20 minutes on a task that
+nobody was even waiting on. Nobody cares as much. So, the real move is two things. First, every
+single project that you build has to target [music] an actual constraint of the business. Something
+that if you fix it, the business gets faster or makes more money or stops bleeding somewhere that
+it shouldn't be [music] bleeding. And second, every single project needs a clear KPI tied to it
+before you start building it. A specific number that you're actually trying to move, and that's
+your North Star for that specific project. So, constraint comes first and KPI comes second. And
+what's important about that is it's how you actually communicate the value in a way that nobody
+else in this market is currently communicating it. Because anyone can say, "Hey, you know, I built
+this AI agent." Almost nobody can say, "I built an AI agent that moved this specific number by this
+much for this specific business, which resulted in X percent more profit or, you know, X more customers,
+or whatever the metric might be." And that right there is what sets you apart. The full operating
+model behind this stuff lives in a book that I'm currently writing. But for the purposes of this
+road map, the rule is very simple. Constraint first, KPI second, build third. So, step one is to
+audit your own role. Sit down with that constraint lens that we just talked about and walk through
+your job. Instead of listing every repetitive thing you do, ask which one is actually slowing the
+team down or gating revenue or causing real pain somewhere downstream that nobody's currently solving.
+And that's your real list. Then for each item, write down the specific number you'd be trying to
+move if you fixed it, the specific metric. And that right there is your first project list, not
+the easy stuff, but the stuff that actually matters. Step two is to actually take on small projects.
+So, you pick one item off that list and you go scope out and build the solution for it. Then you
+go ask if you can implement it in just one area of the company, just one little corner of the business
+where you can actually test something, prove that it works, and show real results. Because those
+results, whatever they end up being, are basically your first case study. You can show it to your
+boss, you can show it to your team, you can put it on your portfolio, you can throw it up on LinkedIn,
+just so people start to notice. Step three is then to become an expert at solving problems, not
+just building. This is actually the most important step in the road map, because once you've done
+enough of those small builds, you start to see the patterns underneath them. You start to notice
+that businesses keep running into the same handful of problems over and over again. And that right
+there is the last skill that you need to become a real consultant. You stop being the person who
+just builds whatever they're handed, you're now the person who can walk into a situation, find the
+actual problem, design the system, and solve the problem. And the moment that happens, your coworkers
+start coming to you instead of the other way around. Then step four is to formalize it. Once you've
+shipped enough proof that the company actually needs this kind of person on the payroll, that's
+when you formalize it. You go to your boss or your leadership team with the evidence and you propose
+the role yourself. Most of you guys aren't going to find this job posted on LinkedIn, you're going
+to maybe create it from the inside out. And the only reason you can pull that off is because you
+spent steps one through three quietly building the case for it. And even if the organization isn't
+ready to have that role yet, when they are ready, inevitably, you want to be the first name that
+pops into their heads. So, that's the whole road map. Audit, build, pattern recognize, formalize.
+Four steps. And remember how I talked about AI seeping into everything? You don't have to go learn
+a completely new industry. Just think about what you already do on the day-to-day, what are you
+good at, and how can AI help you move faster and be smarter and better outputs at what you already
+do. And the cool part here is that it's not theoretical. I actually sat down with someone in my
+community who ran this exact play in real time. Her name is Alan. About a year ago, she had spent
+15 years as an email developer, so not super technical, no AI background. But her whole team was
+then let go and she had to figure out something new. So, she started learning an NN, she pivoted
+into cloud code, and while she was learning, she did the one thing that people skip, which is she
+built in public. She started two YouTube channels just showing off the stuff she was making. She
+posted her builds on LinkedIn. She recorded demos of every single thing that she had been working
+on. And the cool thing is she doesn't have thousands and thousands of subscribers and followers.
+She just has proof. So, when she applied for a head of AI role at a 15-person company called Young,
+the recruiter sent her an email with one question on it, which was, "What have you built?" And remember
+that is the exact question I told you decides who wins in this market. So, instead of her having
+to type up some long vague explanation, she just sent links. She just sent her case study. She sent
+real proof. And she was able to skip HR entirely, go straight to the CEO, and she got the job. [music]
+So, in a year from basically no AI to head of AI is really cool. If you guys want to see the full
+interview I did with her, I will tag that right up here so you guys can check that out. So, let
+me sum up this entire video in one breath. You don't have to quit your job. You don't have to build
+some massive personal brand. You don't even have to be super technical. The real move is to pick
+an actual constraint in your role or your company, tie to a KPI, build a solution, and then build
+a few more so you have a real track record. Then put that track record somewhere that people can
+actually see it, even if that's just a personal website where you build your own portfolio. Just
+something that you can send to people. So, if you want help running this whole playbook, the link
+in the description goes to my free school community. Everything we talked about in this video I've
+broken down into a free resource guide that you can access in there, as well as other courses, GitHub
+repos, skills, frameworks, and hundreds of thousands of people who are looking to stay ahead with
+AI. It's completely free. It is the first link in the description. But anyways, that's going to
+do it for today. If you guys enjoyed the video or you learned something new, please give it a like.
+It helps me out a ton. And as always, I appreciate you guys making it to the end of the video, and
+I'll see you on the next one. Peace out.

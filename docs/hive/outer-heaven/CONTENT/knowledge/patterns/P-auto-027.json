@@ -1,0 +1,26 @@
+{
+  "pattern_id": "P-auto-027",
+  "version": 1,
+  "title": "agi-judgment / strategy — his-agi-open-ended-go-figure-it-out",
+  "steps": [
+    "Steal the definition **as his**. Do not treat “AGI is here” as FACT.",
+    "Store as SOURCE-recount, not FACT. Pair with `lkR6mvqQQlk` (Mythos gated).",
+    "Keep all three. Do not collapse to “AGI therefore pause” or “AGI therefore sprint.”",
+    "Steal sincere+convenient. Do not treat pause politics as a hive task.",
+    "Steal judgment-as-the-job. Do not quote 100→100k as FACT. No new ICP."
+  ],
+  "support_ids": [
+    "K-NDeyhGnNECc-01",
+    "K-NDeyhGnNECc-02",
+    "K-NDeyhGnNECc-03",
+    "K-NDeyhGnNECc-04",
+    "K-NDeyhGnNECc-05"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agi-judgment; stage=strategy; Anthropic internal, possibly Mythos. **UNVERIFIED.**",
+  "less_relevant_when": "He grants lines ≠ better code. 16h = his Mythos guess.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

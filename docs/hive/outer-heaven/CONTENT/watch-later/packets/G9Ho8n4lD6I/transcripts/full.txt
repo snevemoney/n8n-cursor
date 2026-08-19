@@ -1,0 +1,59 @@
+Here's how to build your first voice agent with Vappy and Naden.
+
+I'm going to go ahead and click on create new assistant and we're going to do blank and I'm just going to call this one a booking agent.
+
+We'll go ahead and create that assistant.
+
+Basically, what I want this agent to do is let's say I'm running a car detailing company called Hercules Detailing.
+
+We are going to system prompt this thing so that someone could call the the phone number on hercules detailing.com and book in an appointment.
+
+So, this voice agent needs to be able to look at the calendar and it needs to be able to also create events.
+
+So, back in our Vappy dashboard, we're going to go over here on the left and click on tools.
+
+And we need to create those two tools.
+
+And I can go down here to Google calendar.
+
+And you can see there are two ones that are available.
+
+Create event and check availability.
+
+So, I'm actually going to use Chad Gabbt to help me with this prompt.
+
+Please help me create a system prompt for a voice AI agent.
+
+Its name is Nate and it is a booking assistant for a car detailing company called Hercules Detailing.
+
+So you can see we have an overview, we have a purpose, we have the service options, and the one thing I just want to make sure we have here is when to use each tool.
+
+So you can see it kind of talks about that right here.
+
+For now, let's just copy this code into Vappy and test it out. >> Hey, this is Nate from Hercules Detailing.
+
+How can I help you today? >> Hey Nate, I'm looking to schedule a full interior and exterior detailing today. >> Thanks for reaching out.
+
+Let me check availability for the rest of today so you can choose a time that works best for you.
+
+Hang tight.
+
+It looks like we have availability for today at the following times.
+
+400 p.m. until 6 p.m.
+
+Which time works best for you? >> Let's do the 5:00 p.m. slot. >> Got it.
+
+Let's book you for full interior and exterior detailing at 5:00 p.m. today.
+
+Could you please provide me with your email address so I can send you a confirmation?
+
+You're all set.
+
+I've booked your full interior and exterior detailing for today at 5:00 PM.
+
+A confirmation email has been sent to nate@acample.com.
+
+Thanks for choosing Hercules Detailing.
+
+If you want to watch the full breakdown, then click on that play button right here.

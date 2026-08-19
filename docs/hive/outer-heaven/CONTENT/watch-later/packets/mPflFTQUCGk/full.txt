@@ -1,0 +1,65 @@
+Here's how to use NINDN's new instance level MCP.
+
+You're going to go to your settings in your NAND and right here you should see MCP access.
+
+Just make sure you actually enable this and you toggle that on.
+
+All right, I'm going to start off with claude.
+
+What I'm going to do is I'm going to click on this little icon right here and I'm going to go to add connectors.
+
+Now in here you can see that NIN is already a native connector right now.
+
+So all I have to do is click connect.
+
+I'm going to give it access and now we have connected to NINDN.
+
+Now if it's your first time doing this you will have to basically just copy in your server URL and give it to Claude.
+
+But then it's as easy as that.
+
+So how many times have you had an AI help you write an email?
+
+Well, now instead of just writing it and then copy and pasting it, you can go ahead and just say we'll send that off now.
+
+Assuming that you have an editin workflow that's available in MCP that actually sends emails.
+
+So now that that email is written and I like it, I can basically say use Nitin to send that email to michael@dundermifflin.com.
+
+So what it does is it says let me search through your available workflows.
+
+So after it searched workflows, it found one and now it's asking to get workflow details.
+
+So I'm going to always allow this tool as well.
+
+So, it grabbed the details.
+
+It knows the three body fields that it needs, and it knows the web hook address and everything like that.
+
+So, I'm going to go ahead and always allow.
+
+And we didn't have to actually go in here and configure everything with this post request.
+
+Claude was able to just find it and do it.
+
+You can see that we got confirmation that the email has been sent.
+
+And if I head over to my email, you can see that it is right here.
+
+Okay.
+
+So, let's say I just finished that up and I have a really busy day.
+
+So, I have my to-do list right here in ClickUp where I have email Michael about PTO and that was due today and it's urgent and so I could context switch all the way back into ClickUp or I could just use my ClickUp task manager AI agent through MCP and I can talk to this thing in Claude and I can just ask Claude to do it cuz I'm right here and I can say use N to move my task called email Michael about PTO to complete.
+
+It found my ClickUp task manager.
+
+It got the details and now it's going to shoot that off.
+
+There you go.
+
+So, it says that it finished everything up.
+
+And now, if I open back up my ClickUp, we can see that this task was moved to complete.
+
+If you want to watch the full breakdown, then click on that play button right here.

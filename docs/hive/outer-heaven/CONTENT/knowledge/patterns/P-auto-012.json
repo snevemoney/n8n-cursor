@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-012",
+  "version": 1,
+  "title": "agent-ops / build — buzzword-retract-workflow-not-agent",
+  "steps": [
+    "Classify by loop, not by title.",
+    "Do not rewrite as an agency origin.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-tNOk29fs_aY-01",
+    "K-tNOk29fs_aY-03",
+    "K-tNOk29fs_aY-06",
+    "K-tNOk29fs_aY-07"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=build; Content-calendar style automation, scheduled, no tool-choosing loop described.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

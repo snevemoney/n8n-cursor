@@ -1,0 +1,52 @@
+{
+  "workflow_id": "WF-fde-career-v2",
+  "project_id": "fde-career",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Name the gap",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "List the mess",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "Buckets",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "Measure one number",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T5",
+      "title": "Clarify-first gym",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-vLlIBT0HSSc-01",
+    "K-vLlIBT0HSSc-02",
+    "K-vLlIBT0HSSc-03",
+    "K-vLlIBT0HSSc-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "vLlIBT0HSSc",
+  "words_read": 2292,
+  "tape_faithful": true
+}

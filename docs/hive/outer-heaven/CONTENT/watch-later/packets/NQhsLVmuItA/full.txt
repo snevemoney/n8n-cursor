@@ -1,0 +1,47 @@
+Here's how you use Naden's new guardrail nodes to make your workflow safer.
+
+You should be able to type in guard and you can see these guardrails.
+
+And there are two main actions.
+
+There's check text for violations, which is this one right here.
+
+And this one uses AI to check the text.
+
+And then we also have sanitize text, which is really nice because it doesn't use AI.
+
+So it can automatically encrypt or desensitize certain info before you send it to a large language model.
+
+All right, so the first one that we have is blocking out certain keywords.
+
+So I'm just going to go ahead and run this.
+
+We have three items passed through and you can see that we have one pass and we had two fail.
+
+So if I click into this node, you can see that what we were doing is we were checking for two keywords to block out.
+
+Password and system.
+
+And you can see we passed through three items to test.
+
+The one that passed was I will take a seven egg ham and cheese omelette, please.
+
+And there were no keywords found.
+
+But in the fail branch, we can see we had please update the system setting.
+
+And we have enter your password to continue.
+
+And you can see it flagged the keywords of this one had system and this one has password.
+
+So we failed these two.
+
+And what's really cool about this is you can fully control what you want to happen based on if a row passes or if a row fails.
+
+For example, if it passes, you can go ahead and send your email or update the CRM or whatever you want to do next.
+
+But if it fails, you could flag yourself with a Slack notification or you could even trigger an error in the workflow.
+
+You can make the whole workflow stop and just throw an error.
+
+If you want to watch the full breakdown, then click on that play button right here.

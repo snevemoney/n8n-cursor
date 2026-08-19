@@ -633,3 +633,56 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 - **Own store only.** HOLD remains on taking **other** ecom sellers as clients. Website / AI Partner lane **not** parked.
 - Day-1 method: **match existing Amazon.ca ASIN** (do not create a new catalog page). No ASINs in OM. No spend (inventory/ads/Professional = Tier 3).
 - Individual: **$1.49 CAD/item** + referral; Professional $29.99/mo = not today.
+
+### FACTS: X bookmarks ingest 2026-08-13 [hive-os]
+
+- **source:** Researcher · `~/.grokbot/research-packets/x-bookmarks/ingest-20260813.md`
+- **FACT:** 98 synced 2026-08-13 07:43 EDT. Delta vs Aug 12 16:52 = **2 IDs** (@adaviadavis YouTube RPM; @cyber__razz already packed).
+- **Do not overwrite** `research-packets/x-bookmarks/dossier.md` (Aug 12 full dump).
+- No live X API. Bookmark ≠ endorsement.
+
+### LESSONS: AI bookmarks true-read (2026-08-13) [hive-os · ai-partner-websites]
+
+- **source:** `~/.grokbot/research-packets/bookmarks-x-bookmarks-ai/FINDINGS.md` (true-read, not the Aug 12 34-cut)
+- **Working set = 42** AI-must-read · **library = 98**. Stop treating the old regex-34 as truth.
+- **DON’T (moat, all lanes):** quote $20k/$50k/$10k bookmark income; copy Etsy listings; run patio-postcard scrape (@everestchris6 — community note: video is fake); jailbreaks; watermark tricks; NSFW LoRAs; cold-mail scrapes.
+- **DO [hive-os]:** job cards before agents work (Karpathy wiki pattern — we already have Outer Heaven). Human only approves the dangerous step. Click the live site after deploy.
+- **DO [ai-partner-websites]:** cinematic recipe = big model + 3 loved motion sites + video-as-3D. $50k is a tweet, not our price.
+
+### LESSONS: Watch Later funnels = workflows (2026-08-13) [hive-os · ai-partner-websites]
+
+- **source:** `CONTENT/watch-later/WORKFLOWS.md` · skills in `scripts/hive/grok-skills/` + `~/.grokbot/skills/`
+- **FACT:** Operator language — workflow and funnel are the same machine (stages → hard step).
+- **Stack:** Cursor + Grok Bot only. Other AIs in those videos are on tape — do not install.
+- **Invoke:** `/website-offer-funnel` is a **router**. Named client = Path A (MUST + margin + private-book). Volume = Path B (`list-anneal` → 3–5 → A). Our Stripe/page = Path C. `lead-web-find` ≠ `list-anneal-funnel`.
+- **DON’T:** Claude Cowork/Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus as hive tools; IG OTP farms; auto-dial; quote YouTube $ as proof.
+- **DO:** One dump then short loops. One system per session. 50 → 60–70% list score. Preview ≠ custom domain. You send/pay/book.
+- **Steal (Watch Later 15 + X bookmarks AI 34):** one master `CONTENT/watch-later/STEAL_SHEET.md` + `business-types.json`. Skill `/steal-usecases`. After every L2 **or** bookmark true-read, append ICPs/machines — thesis-only is not done. Bookmarks = clusters tagged `x:{id}`. Do not fork `x-bookmarks/STEAL_SHEET.md`. One-person subset: `/one-person-usecases`. Do not quote YouTube $ or tweet $.
+- **Hunt ICPs (not new business-lanes.json rows):** `local-clinic` · `local-pro` · `restaurant` · `exec-coach` · `creator-longform` · `agency-delivery` · `industrial-smb` · `mktg-software` · `owner-coach-fitness` · `law-adj` · `us`.
+- **Kill ICPs:** OFM/IG farms · betting · auto-dial · auto-book-no-callback · generic landing mill · “I do AI.”
+
+### FACTS: Business types we take (2026-08-13) [ai-partner-websites · hive-os]
+
+- **source:** Watch Later 15 + X bookmarks AI 34 · `CONTENT/watch-later/STEAL_SHEET.md`
+- **FACT:** Hive hunts these `icp_id`s. Tag every prospect. Path A unless noted. Bookmarks added **machines**, not new ICPs.
+  - `local-clinic` → `review-to-book`
+  - `local-pro` → `private-book-install`
+  - `restaurant` → `missed-call-book` (no auto-voice book)
+  - `exec-coach` → `orchestrated-site-brief`
+  - `creator-longform` → `clip-factory`
+  - `agency-delivery` → `client-delivery-kit` (do not fork Client Pack SaaS this week)
+  - `industrial-smb` → `list-anneal` then Path A (no dialer)
+  - `mktg-software` → `list-anneal` (software, not agencies)
+  - `owner-coach-fitness` / `law-adj` → existing money-now book rails
+  - `us` → internal desk machines (wiki, slice, paid-slice)
+- **FACT:** This catalog is a hunt list. Do not add a `business-lanes.json` row from a YouTube or X ICP without operator yes.
+- **FACT (X bookmarks → machines, no new icp_id):** `cinematic-recipe` · `click-live-site` · `agent-job-card` · `motion-pipeline`. Doctrine: `DEEP_SUMMARIES.md` XB-1…XB-7. Kill: tweet $ as proof · jailbreak/watermark/NSFW · cold postcards · game studio this cycle · rebuild Claude inside Grok · 8k-node theater.
+
+### LESSONS: Rest-of-bookmarks (non-AI ~56/98) [hive-os · ai-partner-websites · amazon-own-store]
+
+- **source:** Researcher · `~/.grokbot/research-packets/x-bookmarks-rest-20260813/FINDINGS.md` · operator asked
+- **FACT:** library 98 (13:58 EDT re-sync of same 98; 0 new IDs vs 16:32 ingest). AI working set 42. Remainder ≠ buy list. Bookmark ≠ endorsement.
+- **DON’T (moat, all lanes):** productize fighting-game / dating / sleep-channel / Spotify-reupload as SKUs; copy CyberScrilla travel-wallet, burner-phone, or watermark-bypass into skills.
+- **Quarantine:** alexelorenzo $1 Ripple course · sandy4kad $20k station · 0xDeliriumm Anthropic-fired drama · NSFW LoRA.
+- **DO [ai-partner-websites / creative-themes]:** @aaatouketsu two AKIRA SOL AE tutorials + Photoshop paper-mockup = look-only cinematic refs. No Unreal/Blender hive stack.
+- **Beamhook** = operator Mac optional (media keys). **amazon-own-store:** zero product signal in this remainder. Day-1 still match existing ASIN, no spend.

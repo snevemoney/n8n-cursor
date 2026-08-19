@@ -1,0 +1,727 @@
+Okay, so we just got Grockbot, which is probably the easiest way that I found to be able to spin up teams of different AI agents that you can use from your phone on your computer.
+
+Everything stays synced and they're always on.
+
+It kind of feels like you've got Cloud Code, Codeex, and Hermes Agent all in your pocket.
+
+It's super easy to set up.
+
+So, let's just jump right in.
+
+So, what you're going to want to do is go to Google, type in Grockbot, and then click on this link and download this for Windows, for Apple, and for your iOS device, so everything stays synced together.
+
+Now, this is super cool.
+
+This is what it's going to look like.
+
+You can have a ton of different agents on the side and you can talk to each one individually and you can have them actually talking to each other which is super cool.
+
+Each of the bots have their own computer which is really cool.
+
+You can sign in to a session and it will keep that login.
+
+You can record yourself doing something on the bot's computer and then it will be able to just replicate it like a skill and there's so many other things.
+
+They get smarter over time.
+
+It's super cool.
+
+Now in order to try this out you are going to have to be on the cursor ultra plan.
+
+So get the ultra plan then you can download Grockbot and play around.
+
+Okay.
+
+So when you open the app this is kind of what it looks like.
+
+It's going to first walk you through like, "Hey, this is Grockbot." Create your first bot.
+
+You can, you know, give it a name and a color and a shape and all this.
+
+And then once you're actually in here and you've made a few, it's going to look like almost like an iMessage channel or like a Telegram channel.
+
+You have different bots that you can switch between.
+
+On the right hand side, you're going to have settings.
+
+You can give them a name, a title, a description, and then you can also look at their computers.
+
+So, right here, you can see that Klouse, my agent right here, is inside of my school community, logged in as me, and it's going through and it's liking posts that I wanted it to like.
+
+So, it's controlling this browser and I also can too though.
+
+If I wanted to come in here and I wanted to, for example, go to YouTube, I could log in as myself if I wanted to and then it would stay logged in.
+
+It's even making me do this little capsk thing.
+
+Wow, this thing is really not letting me in.
+
+Okay, there we go.
+
+Now I can finally get through to YouTube.
+
+You can see we can also open up right here a file manager.
+
+So, we could open up the terminal and we have this teach a task button which is where I could record myself doing something and then Grockbot would automatically turn that into a skill which is exactly what I did right here with this AIS skill that it created.
+
+And now it has this one called like 7-day challenge post on school.
+
+It went ahead and ran it.
+
+And I've also got this thing set up with my GitHub repo, my Herk 2 as you can see because that's where I've been building my AI operating system.
+
+So, if you guys are building your own second brains and AI operating systems, you can bring that into Grockbot and all of your agents that you build can automatically have that context so you're not starting over.
+
+But if you don't have an operating system, that's completely fine because when you create a new agent, it basically onboards you.
+
+It asks you some questions and it says, "Hey, what do you want me to do for you?" So, right here, you can see I've got Klaus.
+
+He is my executive assistant.
+
+I've got this dev who is an AI engineer.
+
+And what's cool is if I want Claus to help me like build a product, Claus will actually delegate work to my dev because it knows what they do.
+
+So basically when you have an agent, you give it a name, a title, and a description.
+
+And the description is basically almost like the same way agents use skills.
+
+They say, "Okay, cool.
+
+I have to do this task.
+
+Let me look at all the other agents and see if there's any agent whose description matches this task.
+
+And if so, I will just shoot them a message and then they will help me out with that instead." So each agent that you build can be very specialized to do very specific things.
+
+If I come here to click on new chat, I can start a chat with one of the bots.
+
+Or if I want to go ahead and create my own new bot.
+
+Now I have the ability to set this thing up however I want.
+
+You can see right here it says, "Hey, good to meet you.
+
+What do you want me around for?
+
+Research and writing, something specific, day-to-day work, whatever you want." So, let's just make this agent like my morning briefer.
+
+So, I just want you to help me every morning plan my day and look at what I have to do.
+
+And you can see it says, "Okay, cool.
+
+I'm checking what's already connected so I know where to pull tasks from." And the only thing that I've connected so far, if I go to the plugins, is GitHub.
+
+I need to connect things like Gmail, Google Calendar, Slack, Google Drive, ClickUp, all of these other things that I use, I need to connect.
+
+And it's just as simple as a little signin.
+
+But what's cool about that is if you connect GitHub for one agent, like my Clouse or my dev, then all of your different agents will be able to use that connection.
+
+So, they share those plugins.
+
+It asked me where my to-dos and calendar live, and I just went ahead and say Google Calendar and and Gmail.
+
+And now it's going to have me actually connect those plugins.
+
+It's asking me if I want to connect these.
+
+It says you'll get a quick sign in and then it's a onetime setup.
+
+So I'll click yes, connect both.
+
+And so it just pops up like this.
+
+And all you have to do is click authorize and then you just do your signin as you would in lots of other apps.
+
+Okay.
+
+So we just connected Gmail and calendar.
+
+And now it's asking when do we actually run these morning routine things.
+
+So it's weekday mornings by default.
+
+I'll pull today's calendar and anything important in Gmail.
+
+I'll just go ahead and say 7 a.m.
+
+Now what does this mean?
+
+This means that your agents can actually create routines.
+
+And because all of this is happening on the cloud, this will run even if my computer's off, even if my phone's off.
+
+You can see right here, created routine called morning day plan, which shows up right here in the agent section.
+
+So these are the instructions.
+
+Build Nate's morning plan and send it in the chat.
+
+Look up current MCP tools, calendar, Gmail.
+
+Pull today's calendar events.
+
+Pull actional Gmail items.
+
+Write a short description.
+
+Blah blah blah.
+
+And obviously, we could tweak this instruction if we wanted to.
+
+It asks if we want a sample.
+
+Yeah, I'll say run one right now.
+
+So, this is so cool because it makes it so easy to build automations, to have different agents.
+
+And as you can see in here, this one's still called new bot.
+
+If I click on it right here, I can give it a name.
+
+So, I'm just going to call this one coffee because it's a morning skill.
+
+I will just say my morning planner.
+
+And then you want to give this agent a super specific oneliner of what it actually does so that if Klouse or if my dev or other agents needed to use it, it would know to use this one.
+
+This agent looks in my Gmail and my calendar to help me plan my day every single weekday.
+
+And then if you also want to play with the way it looks, you can change the shape and the color in here.
+
+You could also generate it by describing it or you could upload some sort of image.
+
+And here's the cool part.
+
+Remember how earlier I showed you guys how Klouse has its own computer and right now it's open on school as you can see or YouTube.
+
+I guess coffee has its own screen and so does dev.
+
+So every time you're building things with different agents, they have their own computers and they can do their own things.
+
+It's very cool.
+
+Okay, so here is my sample for tomorrow. what I'm going to get in the morning.
+
+It's showing my day.
+
+It's showing the meetings I have.
+
+It says, "Here are things worth acting on from email.
+
+So, I've got this thing that I need to get back to.
+
+I've got this call on Thursday that I have to respond to.
+
+I have got this chat invite.
+
+Very cool." And then it's suggesting things like, "Use 7 to 9 planned day to clear this item that you have to skim this notes and prepare for that call." Awesome.
+
+Your afternoon is pretty stacked, so pick one of these things and shorten your lunch and gym or move the gym block.
+
+Cool.
+
+It even told me to protect my evening because I have a dinner reservation tomorrow night.
+
+So, that's super cool because think about this.
+
+I didn't tell it anything.
+
+All I said was help me plan my day.
+
+And once I iterate on this and say, "Hey, by the way, here are some things I liked about this.
+
+Here are some things I didn't like." It's going to get better and better and smarter over time.
+
+And think about how quick that whole skill and whole routine was for me to set up.
+
+All right, so I'm going to jump back over to Claus real quick.
+
+Take a look at this.
+
+I had it do the skill where it went through my free school community and liked posts that were for my 7-day challenge.
+
+And here's what it did after one run.
+
+It said, "Okay, here's the dry run.
+
+Here are the three posts that I liked.
+
+Shout out to you three community members.
+
+You guys are awesome." And then it said, "Hey, here's something I noticed.
+
+It's not very clear.
+
+I can't tell very clearly if they're liked or not already." And then it said, "Okay, cool." I went ahead and I put open the post before liking into the skill.
+
+So, without me even asking it to, after it ran the skill, it basically gave itself feedback on what worked and what didn't.
+
+And then it fixed itself.
+
+So, over time, it's going to get smarter every time it runs the skills.
+
+And it builds more context and more memory over time as you talk to it more and as you do more things.
+
+Now you guys saw how quickly and easy it was for me to create this routine over here with coffee.
+
+And what I did here is I ran this based on a schedule.
+
+So I ran this, you know, weekdays at 7 a.m.
+
+But what else you can do is you can run things here on actual triggers.
+
+So on a Slack message, on a GitHub event, on a Teams message.
+
+These are currently the triggers right now.
+
+Just the same way in N you had all these different, you know, Gmail triggers and things like that.
+
+I'm assuming that these are going to become much much more broad.
+
+Like there's going to be hundreds and hundreds of triggers in here.
+
+But right now, we're starting off with just these six.
+
+So, watch this.
+
+I'm going to create a new agent real quick.
+
+And I'm going to call this one sort of like my media agent.
+
+And I'm going to connect this agent to Slack.
+
+And so that it can basically notify me when there's things going on in the Slack channels that have to do with sponsorships or new videos or new opportunities, anything to do with the media side that I deal with in Slack with a few different teams. you're going to be helping me manage media, sponsorships, things like that, all within Slack.
+
+And so, you notice how I'm spinning up agents to do very, very specific things.
+
+Even on their website on Grockbot, it's basically showing you that agents should be doing one specific job.
+
+Sales outbound, talent scout, paid media, expense manager, if you try to make one mega agent do a ton of different things, it's just going to get confused and all there there's going to be all these routines.
+
+It won't be as good.
+
+But if you have each agent do one specific job very well and because you have good descriptions and because you have the ability for agents to talk to each other, the jobs are going to still get done.
+
+It's just the same way in Claude Code or Codeex.
+
+You like to have your main orchestrator and you like to have them basically delegate work to a bunch of different little sub agents.
+
+So here's the Slack card that popped up.
+
+I'm going to go ahead and authorize into Slack real quick.
+
+It's asking what Slack channels it should treat as home base.
+
+I'm going to ask it what channels can you actually see and read because if you're like me in Slack, you might be in a ton of different workspaces and channels and things like that.
+
+So, it's just worth seeing what it actually knows.
+
+Now, look at this.
+
+It basically was only able to see some of the stuff inside one workspace, but I have another email with some other channels I'm in, right?
+
+So, I said, "Hey, I want to connect another one." And it just lets you add another one.
+
+So, here we have a default connection, but now I also have one that I'm calling work.
+
+And I can sign in with a different account here so that I can use different channels.
+
+There we go.
+
+Now I've authenticated another Slack account and it should be able to see everything that I'm doing in there now, which is great.
+
+Now my Grockbot can see into all of these public channels as well as these private channels in DMs, which is just great.
+
+So what I want you to do is help me set up a routine that's on a Slack trigger.
+
+So, inside of the default Slack workspace, what I want you to do is when you get a message from the um YouTube testing Nate channel, I want that to trigger you to basically give me a notification on what happened.
+
+So, let's see if it's able to understand what I'm saying and create us a routine inside of its settings that's based on a trigger rather than a timebased routine.
+
+Okay, cool.
+
+So, it created a routine called YouTube testing Nate alerts.
+
+Perfect.
+
+You can see right here it says when to run on new messages in the YouTube testing Nate channel.
+
+So it founded the right channel.
+
+It created the right trigger and it set up the actual instruction.
+
+So before this works it says one setup step.
+
+So it actually fires.
+
+It's in that channel.
+
+You have to run /invite atcursor.
+
+So let me just copy this command.
+
+The channel listeners only hear channels the cursor slack app is in.
+
+So let me just go ahead and try that real quick.
+
+I'm inviting at cursor.
+
+There we go.
+
+It was just added.
+
+And now in here, let's say, hey, a new sponsorship deal has come in for $1,000 million billion dollars for um a YouTube video.
+
+The company is called Chipotle.
+
+Okay, so I shot that off.
+
+Let's see what's going on inside of Grockbot.
+
+Okay, so we're seeing that it's having the little new bot is working animation.
+
+It says newbot because I haven't named this yet.
+
+I haven't touched anything besides sending that message in Slack.
+
+Boom.
+
+New in YouTube testing.
+
+Nate, you posted that a Chipotle YouTube sponsorship deal came in for this much money.
+
+Cool.
+
+So, that's how you can see that that routine is working and that got set up so quickly.
+
+With Nitn, that might have taken me maybe 15 minutes.
+
+With Cloud Code, that might have taken me like 7 minutes.
+
+With this, this took like 2 minutes and one prompt.
+
+It's pretty insane.
+
+And remember, you just want to give your bots a name.
+
+I'll call this guy money.
+
+The title will be Slack Media.
+
+And the description is basically this agent is in charge of managing my Slack communication for media and sponsorships, things like that.
+
+Now, if you wanted to reference some of the skills or routines that this agent uses and giving it more context for other agents, that's perfectly fine.
+
+And it even acknowledged that I named it money and it said money works.
+
+I'll answer to that from here.
+
+Okay.
+
+So, what about skills?
+
+How do skills work in here?
+
+Well, if you do slash, you can run skills like slash commands.
+
+So, the only one that we've currently built, I believe, was that school one.
+
+So, if I type school, it says like 7-day challenge posts on school.
+
+And I could go ahead and use that skill if I want to.
+
+So, skills work across all the agents that you have.
+
+Same thing with plugins, but the computer sessions are different.
+
+And the descriptions of your agents are different.
+
+Okay, now watch this.
+
+I'm going to go to Klouse and let's pretend, you know, because this is kind of like my executive assistant.
+
+This is what I'm going to be assuming is like my router to different agents.
+
+I'm just going to be like, "Hey, I kind of forgot what's going on with one of our most recent YouTube videos, which you might be able to find in the Slack channels.
+
+U maybe you should just check in with money to see if he has any information about, you know, what's going on with our anthropic reel or just what's been going on with that." So, what this should do is it should basically tell Klaus that, you know, I'm just an executive assistant, but I can see that money is a Slack media agent.
+
+So, I'm going to go ahead and shoot a message off to Money to take care of that and then come back to me and I'll answer to Nate in this main session.
+
+There we go.
+
+It said pinging money about the enthropic reel.
+
+It said message money.
+
+And if I click into this, we can actually see the conversation.
+
+It's view only, but we can see what Claus said to Money.
+
+And we're going to be able to see Money responding to Klouse right here.
+
+Can you share the latest status from Slack or whatever you have?
+
+Any blockers, next steps, blah blah blah.
+
+Keep it tight.
+
+I'll relay it to him.
+
+So, there you go.
+
+You can see money just responded to Klouse.
+
+And then if I go back to the main Klouse and if I go back to my conversation with Klouse, it just responded right here.
+
+And what else is cool is if I go to my conversation with money, it says, "Hey, by the way, Klouse asked me about this." So, they're not going to be able to keep things secret.
+
+They're going to snitch on each other if they're, you know, being weird.
+
+But that's how that works.
+
+And I think that that is a super cool feature.
+
+And I think that that really encourages you to make sure that each agent is very specialized because they're able to easily talk to each other.
+
+So, at this point, I've built out these four agents.
+
+And what if I wanted to turn off my computer and go for a walk?
+
+Or maybe I'm even going on a vacation.
+
+Well, guess what?
+
+On my phone, I've got this exact same stuff.
+
+So, if I open up Klouse on my phone, I have the exact same messages and I can just say, "Hey there." And what's going to happen is that's going to come through there.
+
+I just sent it off.
+
+It comes through in real time.
+
+So, everything is completely synced because this is all in the cloud.
+
+You don't even have to worry about spinning up your own VPS or doing anything locally.
+
+It all is just syncing perfectly.
+
+The connectors still work.
+
+Um, all of their desktops still work.
+
+So, if I go in here and I go to the browser, remember how Klouse was over here on YouTube?
+
+I can come into here on my phone and I can also see what's going on in here and I can control this with my phone.
+
+So in right here on my phone I'm typing in um Nate Herk.
+
+I'm going to go ahead and search for Nate Herk videos on YouTube and I'm able to do this on my phone.
+
+So I'm controlling a cloud computer from my phone which is kind of being managed over here by Klouse.
+
+It's just very very cool that this is being set up so quickly for you.
+
+Okay, so let's talk about what else we've got in here and what are some actual limitations.
+
+So the first thing is how much am I going to use this?
+
+Will I actually use this?
+
+Well, if I'm sitting down at my desk and I am working on knowledge work, if I'm trying to build things, I will not be using this.
+
+I will be using my codeex, my claw code.
+
+That's what I like to drive with when I'm sitting down at my desk.
+
+Now, if I'm traveling, if I'm in the back of an Uber, if I'm on a vacation, if I'm sitting at a restaurant, this is what I'll be using because my phone syncs to it right away and it just keeps things super clean and super easy.
+
+That's kind of the way that I distinguish between Hermes agent right now and cloud code or codeex is I just like to use my Hermes when I'm on the go.
+
+And I think that using this on the go is honestly much better and much easier.
+
+Now obviously this on the back end is using a Grock model, right?
+
+It's not using my codec subscription or you know anthropics APIs.
+
+It's not using those models.
+
+So if you really really like the other models way more and if you notice that you don't like the way that the Grock models interact, then maybe you won't want to use this as much.
+
+But the way that I'm thinking about this is I'm not going to be building crazy software, crazy apps from here.
+
+I'm more so going to be doing things like checking in on things, communicating to the team, reviewing things, setting reminders, things like that.
+
+Just very general knowledge work.
+
+And obviously, I'm going to save my deep dive, like my deep I need to be in flow state for this kind of stuff.
+
+I'm going to be saving that for when I'm sitting down at my desk.
+
+Okay, so let's see what else we have when we think about like other settings and things.
+
+But real quick, I'm just going to send off this message to Klouse.
+
+I'm asking him to basically spin up a waiting list page and I told him to work with our AI engineer.
+
+So, it's looping in dev.
+
+They're going to get to work.
+
+Hopefully, we're able to see something on a local host on their cloud computer in a bit.
+
+While they're working on that, let's go over here to our settings.
+
+So, I'm going to click on my name.
+
+I can see that I have weekly usage.
+
+So, I've used 2%.
+
+This resets in 7 days.
+
+And we can also, you know, spend money.
+
+We talked about getting this on iOS.
+
+And if I go to the settings, let's see what else we have. your theme, your time zone, execution on local computer, you can change the permissions to be ask every time or never allow.
+
+You can set rules.
+
+So when Grockbot wants to do certain things, you should have it ask first or automatically allow.
+
+Wow, that prototype took like no time at all.
+
+Let's see if we can open this up.
+
+So if I click on local host, we have it right here.
+
+Get certified in a automation without the overwhelm.
+
+So this is interesting because it has good data, but it didn't correctly use like our brand guidelines and our logos.
+
+So, I wonder what the issue is there.
+
+I wonder if it's because it couldn't find it.
+
+I noticed that you didn't really use our brand guidelines as far as color scheme and logo.
+
+So, just wanted to know why you didn't do that.
+
+And you know what's interesting about this?
+
+It created this weightless page in our local host because this is on my Google Chrome.
+
+Whereas, if I wanted it to do it on its own local host, that's different.
+
+If it wanted it to do it on its computer, it would have to build that in a different way.
+
+So, as you guys know how local host works, that's only going to work on one local device.
+
+And that's kind of cool that it created it here locally for me on my actual desktop rather than doing it on their cloud computer.
+
+It could do that, but we just would have had to specify.
+
+And then cloud said, "Yeah, that's on me." When I briefed dev, I said to pick a sensible default if branding wasn't handy, and they assumed that AIS-ish was navy and indigo.
+
+I didn't point them at brand assets or Herku packaging.
+
+Do you want me to do that again?
+
+I'm just going to say yes, and we'll take a look at that version.
+
+But anyways, that's basically it.
+
+It's really just a matter of getting in here, connecting in some of your business context, and then just building out a bunch of essentially different skills.
+
+I would say different skills, different sub agents, and then just seeing how you can have them work together and just spin up your routines as quick as you can because they're super quick and easy to set up.
+
+If you want to take a look at all the other plugins, you just click on plugin.
+
+You can scroll through, you can search for them.
+
+If you want to connect certain custom ones, you certainly can.
+
+And you can also see all of your actual skills in here.
+
+These are skills that I have made.
+
+I've only made one so far.
+
+This is where we can update the name, the description, the instructions, and you can also go ahead and delete them.
+
+Now, look how cool this is.
+
+Klaus found the brand guidelines and then it messaged Dev and here is the new message and the chain between Klouse and Dev.
+
+They talked about the prototype.
+
+Dev delivered it and then Klaus came back and said, "Hey, here's the actual brand guidelines.
+
+Here's the logo and the brand guideline doc." And now Dev is saying, "Hey, I got this from Klouse.
+
+I have to restyle the weight list, blah blah blah." So, I think you guys get the point.
+
+They're talking to each other.
+
+We have routines set up. we can keep building these things really easily.
+
+And I think that this is just super cool that I'm able to continue my work on my phone super easily.
+
+Now, one thing that I think when you sort of look at tools like this is you don't want to get carried away or caught up in the hype of these tools because yes, they're cool and they're fun to play around with, but don't just start forcing all these agents and routines that you don't actually need.
+
+Really think about what is constraining your business.
+
+What are the pain points that you're feeling on the day-to-day?
+
+And does this tool solve some of those pain points?
+
+For me, I'm going to try to set up all of the Hermes agents that I have right in here.
+
+And I think it's going to feel more cohesive because they can talk to each other more easily than the way I have them setting up talking to each other in Hermes.
+
+But if you actually don't have a need, if you don't have a problem to solve with this tool, then it might just be a waste of time if you spent like all week playing with it.
+
+You know, I think it's cool and it's fun, but if you really want to talk about like if you need it, it's good to sort of think about that element, right?
+
+So, this should be done.
+
+I'm going to go into the weight list and I'm going to hard refresh.
+
+Boom.
+
+Okay, this looks way more on brand.
+
+There's still some design things that I don't love about it, but all I said was, "Hey, build me a super simple weight list form." I don't even know if this actually leads anywhere.
+
+We would have to like keep iterating.
+
+If we wanted the dev to actually make this go to ClickUp or something like that, we definitely could.
+
+But on a first pass, you can see that it was able to look inside of my repo.
+
+I had it had all the context of what's going on with this program and it built it out for me super quick.
+
+But anyways, that is going to do it for today.
+
+I hope that this showed you what's possible with this tool.
+
+As they release new updates, I'm going to be excited to cover them.
+
+Hopefully, we get some cool stuff.
+
+Hopefully, we get the automations and the routines to become easier and easier to build with different triggers.
+
+I'm super excited to see how this tool evolves.
+
+So, if you enjoyed or you learned something new, please give it a like.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+And I'll see you on the next one.
+
+Thanks everyone.

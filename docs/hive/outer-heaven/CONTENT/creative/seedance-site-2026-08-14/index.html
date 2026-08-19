@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plate wrap — evenslouis.ca preview</title>
+  <meta name="description" content="Local Path C preview. Award-ref scroll-scrub. Deploy stays Evens." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #e8eef6;
+      --mute: #8a97a8;
+      --void: #05070c;
+      --line: rgba(232, 238, 246, 0.12);
+      --cta: #ff2e00;
+      --cta-ink: #140400;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--void);
+      color: var(--ink);
+      font-family: Outfit, system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      background: var(--cta);
+      color: var(--cta-ink);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border-radius: 2px;
+    }
+    .cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+    .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 0 0;
+    }
+    .mark { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; }
+    .refs { font-size: 12px; color: var(--mute); letter-spacing: 0.04em; }
+
+    .hero {
+      min-height: 72vh;
+      padding: 48px 0 36px;
+    }
+    .kicker {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin: 0 0 18px;
+    }
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(42px, 7vw, 86px);
+      line-height: 0.95;
+      margin: 0 0 20px;
+      max-width: 14ch;
+    }
+    .lede {
+      max-width: 38ch;
+      color: var(--mute);
+      margin: 0 0 28px;
+    }
+    .motion {
+      margin: 22px 0 0;
+      font-size: 13px;
+      color: var(--mute);
+    }
+    .motion strong { color: var(--ink); font-weight: 500; }
+
+    .scrub {
+      position: relative;
+      height: 420vh;
+    }
+    .scrub-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .scrub-sticky canvas,
+    .scrub-sticky .poster {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .scrub-sticky canvas { z-index: 1; }
+    .scrub-sticky .poster { z-index: 0; }
+    .scrub-caption {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      z-index: 2;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-shadow: 0 1px 12px #000;
+    }
+
+    .proof { padding: 88px 0 120px; }
+    .proof h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 500;
+      margin: 0 0 16px;
+    }
+    .proof p { max-width: 48ch; color: var(--mute); }
+    .proof .cta { margin-top: 28px; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 28px 0 48px;
+      color: var(--mute);
+      font-size: 13px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .scrub { height: auto; }
+      .scrub-sticky { position: relative; height: 70vh; }
+      .scrub-sticky canvas { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="mark">evenslouis · local preview</div>
+      <div class="refs">Refs: Awwwards · igloo.ink · Hubtown</div>
+    </header>
+
+    <section class="hero">
+      <p class="kicker">Path C · not live · deploy stays Evens</p>
+      <h1>The door is in front of the mood.</h1>
+      <p class="lede">
+        Award-site taste, then one plate the page scrubs. Creative already holds Higgsfield.
+        This sitting uses the AE proof stills. The continuous 720p plate drops in later.
+      </p>
+      <a class="cta" href="https://evenslouis.ca/#contact">Start a project</a>
+      <p class="motion">Signature motion: <strong>glass burst / layer assemble</strong></p>
+    </section>
+  </div>
+
+  <section class="scrub" id="plate" aria-label="Scroll-scrub plate">
+    <div class="scrub-sticky">
+      <img class="poster" src="stills/01-reference-merged.png" alt="Assembled glass-and-light poster from the Higgsfield AE proof pack" />
+      <canvas id="plate-canvas" width="1920" height="1080" aria-hidden="true"></canvas>
+      <div class="scrub-caption" id="plate-caption">Frame 01 · assembled</div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="proof">
+      <h2>Proof, then the same ask.</h2>
+      <p>
+        The wrap is a video divided into frames — stand-ins tonight from the existing
+        Higgsfield AE proof pack (bg, light, glass, grain, merge). Same page when the
+        continuous ≤30s 720p plate exists. Contact is already live on evenslouis.ca.
+      </p>
+      <a class="cta" href="https://evenslouis.ca/#contact">Start a project</a>
+    </section>
+    <footer>
+      Local preview only. No Stripe on this page. Higgsfield generate is a later named step.
+      Mail: <a href="mailto:contact@evenslouis.ca">contact@evenslouis.ca</a>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var canvas = document.getElementById("plate-canvas");
+      var caption = document.getElementById("plate-caption");
+      if (reduce || !canvas) return;
+
+      var srcs = [
+        "stills/02-layer-bg.png",
+        "stills/03-layer-light.png",
+        "stills/04-layer-glass.png",
+        "stills/05-layer-grain.jpg",
+        "stills/01-reference-merged.png"
+      ];
+      var labels = [
+        "Frame 02 · void",
+        "Frame 03 · beam",
+        "Frame 04 · glass",
+        "Frame 05 · grain",
+        "Frame 01 · assembled"
+      ];
+      var frames = srcs.map(function (src) {
+        var img = new Image();
+        img.src = src;
+        return img;
+      });
+
+      var ctx = canvas.getContext("2d");
+      var section = document.getElementById("plate");
+
+      function progress() {
+        var rect = section.getBoundingClientRect();
+        var travel = section.offsetHeight - window.innerHeight;
+        if (travel <= 0) return 0;
+        return Math.min(1, Math.max(0, -rect.top / travel));
+      }
+
+      function draw() {
+        var p = progress();
+        var max = frames.length - 1;
+        var f = p * max;
+        var i = Math.floor(f);
+        var t = f - i;
+        var a = frames[i];
+        var b = frames[Math.min(i + 1, max)];
+        var w = canvas.width;
+        var h = canvas.height;
+        ctx.fillStyle = "#05070c";
+        ctx.fillRect(0, 0, w, h);
+        if (a && a.complete) {
+          ctx.globalAlpha = 1;
+          ctx.drawImage(a, 0, 0, w, h);
+        }
+        if (b && b.complete && t > 0) {
+          ctx.globalAlpha = t;
+          ctx.drawImage(b, 0, 0, w, h);
+        }
+        ctx.globalAlpha = 1;
+        caption.textContent = labels[Math.min(i, max)];
+      }
+
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          draw();
+          ticking = false;
+        });
+      }
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      frames.forEach(function (img) {
+        img.addEventListener("load", draw);
+      });
+      draw();
+    })();
+  </script>
+</body>
+</html>

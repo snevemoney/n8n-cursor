@@ -24,6 +24,28 @@ _spec.loader.exec_module(vc)
 
 SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
 MAX_BRIEF_CHARS = 4500
+JOB_CARD_MAX_CHARS = 800
+
+# Display name → job-cards filename slug
+AGENT_JOB_CARD_SLUG: dict[str, str] = {
+    "Big Boss": "big-boss",
+    "Day Planner": "day-planner",
+    "Watchdog": "watchdog",
+    "HITL Operator": "hitl-operator",
+    "Money Desk": "money-desk",
+    "Lead Hunter": "lead-hunter",
+    "Product GTM": "product-gtm",
+    "Researcher": "researcher",
+    "Forge": "forge",
+    "Creative Studio": "creative-studio",
+    "Consultant": "consultant",
+    "Librarian": "librarian",
+    "Wealth Manager": "wealth-manager",
+    "Personal CFO": "personal-cfo",
+    "Career Strategist": "career-strategist",
+    "Communications Manager": "communications-manager",
+    "Publishing Engine": "publishing-engine",
+}
 
 
 def _read_tail(path: Path, max_lines: int = 80) -> str:
@@ -101,6 +123,74 @@ def _cursor_chat_titles(root: Path, n: int = 10) -> list[str]:
     return titles
 
 
+def _hunt_stats_lines() -> list[str]:
+    script = ROOT / "scripts/hive/hunt-log-stats.py"
+    if not script.is_file():
+        return []
+    try:
+        out = subprocess.run(
+            [sys.executable, str(script), "--format", "text"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=str(ROOT),
+        )
+        if out.returncode != 0:
+            return []
+        return [ln.strip() for ln in out.stdout.splitlines() if ln.strip()][:6]
+    except (subprocess.TimeoutExpired, OSError):
+        return []
+
+
+def _catalog_stats_lines() -> list[str]:
+    path = ROOT / "docs/hive/outer-heaven/CONTENT/BUSINESS_CATALOG.json"
+    if not path.is_file():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        stats = data.get("stats") or {}
+        return [
+            f"catalog total={stats.get('total', '?')} operating={stats.get('operating', '?')} catalog={stats.get('catalog', '?')}"
+        ]
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def _tool_assignment_line(agent: str) -> str:
+    path = ROOT / "docs/hive/outer-heaven/CONTENT/AGENT_TOOL_INVENTORY.json"
+    if not path.is_file():
+        return ""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return ""
+    row = (data.get("agents") or {}).get(agent) or {}
+    use = ", ".join((row.get("use") or [])[:8])
+    never = ", ".join((row.get("never") or [])[:5])
+    if not use:
+        return ""
+    return f"Use: {use}. Never: {never}."
+
+
+def _operator_focus_line() -> str:
+    path = ROOT / "docs/hive/outer-heaven/CONTENT/OPERATOR_FOCUS.json"
+    if not path.is_file():
+        return ""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        icp = data.get("icp_id") or "(none)"
+        city = data.get("city") or ""
+        factory = data.get("factory") or "process"
+        loop = data.get("loop") or []
+        loop_s = "→".join(loop) if isinstance(loop, list) else str(loop)
+        return (
+            f"OPERATOR_FOCUS: factory={factory} loop={loop_s} "
+            f"icp_id={icp} city={city} Path C=ProofCheck"
+        )
+    except (json.JSONDecodeError, OSError):
+        return ""
+
+
 def _product_state_lines() -> list[str]:
     script = ROOT / "scripts/hive/product-state.py"
     if not script.is_file():
@@ -145,12 +235,39 @@ def _read_note(root: Path, rel: str, max_chars: int = 3000) -> str:
     return ""
 
 
+def _job_card_brief(root: Path, agent: str, max_chars: int = JOB_CARD_MAX_CHARS) -> str:
+    """Owns/never excerpt from CONTENT/job-cards/{slug}.md for brief injection."""
+    slug = AGENT_JOB_CARD_SLUG.get(agent)
+    if not slug:
+        return ""
+    text = _read_note(root, f"CONTENT/job-cards/{slug}.md", max_chars=8000)
+    if not text:
+        return ""
+    own = _extract_section(text, "You own", 380)
+    never = _extract_section(text, "You never", 380)
+    if not own and not never:
+        return ""
+    parts = []
+    if own:
+        parts.append(f"**You own:** {own.replace(chr(10), ' ')}")
+    if never:
+        parts.append(f"**You never:** {never.replace(chr(10), ' ')}")
+    tools = _extract_section(text, "Tools", 280)
+    if tools:
+        parts.append(f"**Tools:** {tools.replace(chr(10), ' ')}")
+    block = " ".join(parts)
+    if len(block) > max_chars:
+        block = block[: max_chars - 1] + "…"
+    return block
+
+
 def build_brief(
     *,
     agent: str = "Big Boss",
     project: str = "proofcheck",
     source: str = "auto",
     read_note: str | None = None,
+    include_hunt_stats: bool = False,
 ) -> dict:
     root = vc.read_root(source if source != "auto" else "auto")
     mem_path = root / "OPERATOR_MEMORY.md"
@@ -168,21 +285,36 @@ def build_brief(
         "graphHubs": _graph_hubs(root, 10),
         "recentCursorChats": _cursor_chat_titles(root, 10),
         "productState": _product_state_lines(),
+        "huntStats": _hunt_stats_lines() if include_hunt_stats or agent in ("Big Boss", "Lead Hunter") else [],
+        "catalogStats": _catalog_stats_lines(),
+        "operatorFocus": _operator_focus_line(),
         "captureFreshness": _capture_freshness(root),
     }
     if read_note:
         brief["noteExcerpt"] = _read_note(root, read_note)
+
+    job_card = _job_card_brief(root, agent)
+    brief["jobCard"] = job_card
+    brief["toolAssignment"] = _tool_assignment_line(agent)
 
     md_parts = [
         f"# Outer Heaven brief — {agent}",
         f"Project: {project} | Source: {root}",
         f"Capture: {brief['captureFreshness']}",
         "",
-        "## North stars",
-        brief["northStars"] or "(see OPERATOR_MEMORY.md)",
-        "",
-        "## Recent chronicle",
     ]
+    if job_card:
+        md_parts.extend(["## Job card", job_card, ""])
+    if brief.get("toolAssignment"):
+        md_parts.extend(["## Tools", brief["toolAssignment"], ""])
+    md_parts.extend(
+        [
+            "## North stars",
+            brief["northStars"] or "(see OPERATOR_MEMORY.md)",
+            "",
+            "## Recent chronicle",
+        ]
+    )
     for s in brief["chronicleRecent"]:
         md_parts.append(f"- {s}")
     if not brief["chronicleRecent"]:
@@ -194,6 +326,16 @@ def build_brief(
     md_parts.extend(["", "## Product state"])
     for ln in brief["productState"]:
         md_parts.append(f"- {ln}")
+    if brief.get("operatorFocus"):
+        md_parts.extend(["", "## Operator focus", brief["operatorFocus"]])
+    if brief.get("catalogStats"):
+        md_parts.extend(["", "## Catalog"])
+        for ln in brief["catalogStats"]:
+            md_parts.append(f"- {ln}")
+    if brief.get("huntStats"):
+        md_parts.extend(["", "## Hunt pipeline"])
+        for ln in brief["huntStats"]:
+            md_parts.append(f"- {ln}")
     if read_note and brief.get("noteExcerpt"):
         md_parts.extend(["", f"## Note: {read_note}", brief["noteExcerpt"]])
 
@@ -268,6 +410,7 @@ def main() -> int:
     ap.add_argument("--source", default="auto", choices=["auto", "cache", "vault", "mirror", "vps"])
     ap.add_argument("--read", metavar="REL_PATH", help="Optional vault-relative note to include")
     ap.add_argument("--format", default="markdown", choices=["markdown", "json"])
+    ap.add_argument("--hunt-stats", action="store_true", help="Include hunt-log-stats in brief")
     ap.add_argument("--publish", action="store_true", help="Write ~/.grokbot/shared-context.json")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
@@ -284,7 +427,7 @@ def main() -> int:
         text = fetch_vps_brief()
         if not text:
             print("VPS brief unavailable; falling back to local", file=sys.stderr)
-            brief = build_brief(agent=args.agent, project=args.project, read_note=args.read)
+            brief = build_brief(agent=args.agent, project=args.project, read_note=args.read, include_hunt_stats=args.hunt_stats)
         else:
             print(text)
             return 0
@@ -294,6 +437,7 @@ def main() -> int:
             project=args.project,
             source=args.source,
             read_note=args.read,
+            include_hunt_stats=args.hunt_stats,
         )
 
     if args.publish:

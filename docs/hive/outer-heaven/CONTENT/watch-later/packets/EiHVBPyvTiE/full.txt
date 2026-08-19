@@ -1,0 +1,49 @@
+Here's how you can build anything with Gemini 3 Pro and Naden.
+
+On the official release blog, it says, "A new era of intelligence." And that Gemini 3 is our most intelligent model that helps you bring any idea to life.
+
+And it is available to play with in Google AI Studio over here.
+
+As you can see, we have Gemini 3 Pro preview.
+
+And it's really cool because if you click over on the build section and go to gallery, you can see what you can do with Gemini 3 Pro.
+
+All right.
+
+So, I told you guys we had some different experiments that I have prepared.
+
+But first, what I want to do is just show you guys if you've never connected to Gemini before, how do you do it in edit?
+
+And there's a few different ways.
+
+So the first way is you go ahead and just type in Gemini and you can pull up the Google Gemini node itself.
+
+And now what's cool about this is you have different types of actions.
+
+You can analyze audio, you can analyze a document, you can upload files.
+
+And so if you choose one of these operations, what it's going to ask you to do is create a credential where you would basically need to go get a Gemini API key.
+
+You can see up in the top section right here, you have a button called get API key.
+
+And this will take you to Google AI Studio where you can go ahead and create a key and just put in your billing information right here.
+
+And so what that's going to do is it's going to give you an API key that looks like this.
+
+And you would just need to copy that and then go ahead and throw that right here into Nen.
+
+But you can also take the chat model approach.
+
+So let's say we're throwing in an AI agent.
+
+And when you have an AI agent, of course, you have to give it an AI model to use as a brain.
+
+And so when I click on chat model, you can go ahead and grab Google Gemini chat.
+
+And this is actually going to be the exact same API key and credential that you already set up here.
+
+So if you did this there, you'll have this all configured already as well.
+
+If you want to watch the full breakdown, then click on that play button right here.
+
+And I'll see you guys over there.

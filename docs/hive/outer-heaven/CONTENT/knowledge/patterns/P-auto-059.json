@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-059",
+  "version": 1,
+  "title": "model-ops / operate — family-roles-then-a-multi-agent-handoff",
+  "steps": [
+    "Steal the handoff chain; do not steal auto-send or the bench numbers as FACT.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-nQtogLs_dlg-01",
+    "K-nQtogLs_dlg-04",
+    "K-nQtogLs_dlg-05"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=model-ops; stage=operate; Those three tools/agents exist and send is allowed.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

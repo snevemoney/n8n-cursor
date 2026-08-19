@@ -1,0 +1,24 @@
+{
+  "fragment_id": "FRAG-RDytbVDzMF4-script-beat",
+  "version": 1,
+  "input": "Timestamped script (packet timed.txt or operator voice script)",
+  "steps": [
+    "Mark beats that explain",
+    "Source or drop every number",
+    "Lock one font + one icon style",
+    "One graphic per beat on disk",
+    "Package only; Evens inserts/publishes"
+  ],
+  "output": "Beat list + graphic files, or drop (no timestamps / decorative-only)",
+  "source_ids": [
+    "RDytbVDzMF4",
+    "K-RDytbVDzMF4-01",
+    "K-RDytbVDzMF4-03"
+  ],
+  "behavior_ids": [
+    "BEH-RDytbVDzMF4-script-beat"
+  ],
+  "valid_when": "A timed script exists and Evens wants motion on spoken moments.",
+  "less_relevant_when": "Page wrap (cinematic-recipe) or plate grade (motion-grade-pipeline).",
+  "knowledge_type": "declared"
+}

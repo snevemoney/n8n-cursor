@@ -1,0 +1,50 @@
+{
+  "workflow_id": "WF-agency-delivery-v1",
+  "project_id": "agency-delivery",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Hunt parked",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T2",
+      "title": "Log every meeting; deck optional + gated",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T3",
+      "title": "Human approves before deck",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Four blanks on their delivery KPI, not hours×$100",
+      "coverage": "need knowledge"
+    }
+  ],
+  "pattern_ids": [
+    "P-log-first-approve-deck-second",
+    "P-four-blanks-before-build",
+    "P-sanitize-then-check-pass-neq-send"
+  ],
+  "support_ids": [
+    "K--Q_P7HFydZk-01",
+    "K--Q_P7HFydZk-02",
+    "K--Q_P7HFydZk-03",
+    "K-9mqsVK6Iqoc-01",
+    "K-LVAHYV4Xrto-01"
+  ],
+  "dissent_ids": [
+    "K-AO5aW01DKHo-04",
+    "K-vDVSGVpB2vc-05"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  }
+}

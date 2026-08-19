@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-093",
+  "version": 1,
+  "title": "voice-agents / delivery — speech-to-speech-vision-is-the-product-tools-still-go-silent",
+  "steps": [
+    "Steal interrupt+vision as the bar; steal the silence scar. No Gemini/ElevenLabs buy.",
+    "Steal docs-then-two-demos. Operate-never: keys in chat, live voice widget, Google-trains-on-you as “free.”",
+    "Steal barge-in as the acceptance test. Hive: no voice agent to a client."
+  ],
+  "support_ids": [
+    "K-Qt3zMBH-FNg-01",
+    "K-Qt3zMBH-FNg-02",
+    "K-Qt3zMBH-FNg-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=voice-agents; stage=delivery; AI Studio UI.",
+  "less_relevant_when": "ElevenLabs (on-tape) hides the socket and keeps talking more easily. Speech≠behavior (keep both; do not pick a winner): ",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

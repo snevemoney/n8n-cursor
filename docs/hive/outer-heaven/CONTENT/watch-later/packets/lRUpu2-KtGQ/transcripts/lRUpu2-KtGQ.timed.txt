@@ -1,0 +1,722 @@
+[00:00] SpaceX just dropped Grokbot, the new AI
+[00:02] agent platform that lets you text
+[00:04] multiple agents at once to get work done
+[00:06] for you. And while everybody is talking
+[00:08] about it, I haven't seen many cool use
+[00:09] cases for this. So, in this video, I'm
+[00:11] going to show you five use cases that I
+[00:13] found where we can have multiple agents
+[00:16] literally texting each other in order to
+[00:18] accomplish tasks. Each agent is a
+[00:20] specialist for a given task in order to
+[00:22] complete work for you. So, by the end of
+[00:24] this video, you'll have a deep sense of
+[00:26] what you could do with Grokbot. Without
+[00:27] further ado, let's dive right in. All
+[00:29] right, so this first use case I'm going
+[00:30] to show is more of a basic one, but I
+[00:32] think this really applies to everybody.
+[00:34] So, I wanted to show this first. And
+[00:35] we're going to go from the most basic to
+[00:37] the most powerful use cases throughout
+[00:39] this video. And so, this first use case
+[00:41] is creating an inbox agent. And what
+[00:43] this does is every single day on a
+[00:46] scheduled trigger, it automatically
+[00:48] reads all of my emails in my Gmail
+[00:50] account, and then it's going to create a
+[00:51] high-priority briefing for me to analyze
+[00:54] every single morning. And you're
+[00:55] probably thinking, "Brock, what's so
+[00:56] cool about this? Because I already do
+[00:58] this inside of something like Claude
+[01:00] Cowerk." Well, I'm going to break that
+[01:01] down right now. Inside of Grokbot, we
+[01:04] can have multiple different agents
+[01:05] interacting with each other inside of
+[01:08] specific group chats that we configure.
+[01:10] So, for example, this inbox triage agent
+[01:13] is going to be communicating with
+[01:14] another agent that I created, which is
+[01:16] my chief of staff. What my chief of
+[01:18] staff does is it does basically all of
+[01:20] my admin-related tasks. So, once the
+[01:22] inbox agent goes and scrapes my email
+[01:25] for me, it's automatically going to flag
+[01:27] what's urgent, set the priority, and
+[01:29] then assign a teammate inside of my
+[01:32] ClickUp project management tool in order
+[01:34] for both me and my team to see what's
+[01:36] going on inside of my business. So, now
+[01:38] do we not only have one agent doing
+[01:40] tasks for me, but we have two that are
+[01:42] literally communicating with each other
+[01:43] in order to do different specialized
+[01:45] tasks within inside my business. We're
+[01:47] going to dive deeper into this later in
+[01:49] the video where I have different agents
+[01:50] interacting with each other to get my
+[01:52] work done for me. And we're really
+[01:53] moving to a point in time where we We
+[01:55] just have one group chat where we have
+[01:56] multiple different agents coordinating
+[01:58] with each other in order to basically do
+[02:00] our work for us. Now, first things
+[02:01] first, if you haven't downloaded
+[02:03] Grokbot, let me show you exactly how to
+[02:05] do that. So, there's going to be a link
+[02:06] in the description to sign up for this.
+[02:08] You can see it at this URL x.ai/bot.
+[02:11] You're just going to download this for
+[02:12] macOS or basically whatever operating
+[02:14] system you're using. As well as you
+[02:16] could download the app on your phone so
+[02:18] you could interact with this on the go,
+[02:20] which is actually one of the best
+[02:21] features about this whole release. Next,
+[02:23] once you download the app and you open
+[02:25] it up, this is what you're going to see.
+[02:26] For me personally, I have a couple of
+[02:29] different bots or so-called agents, if
+[02:31] you want to call them that, on the
+[02:32] left-hand side. And this functions
+[02:34] literally like any chat application. It
+[02:36] reminds me of Telegram and WhatsApp. And
+[02:38] basically, we just chat with these bots
+[02:40] like we are, you know, interacting with
+[02:42] a colleague. So, I have a couple ones
+[02:44] that I've created. I have a content bot.
+[02:45] I have an invoice agent. I have a chief
+[02:47] of staff. I have a video agent. I have
+[02:49] my inbox triage, which I'm going to show
+[02:51] you now. As well as I have a couple of
+[02:53] different group chats where multiple of
+[02:55] these agents are interacting with each
+[02:56] other in order to do specific work for
+[02:58] me. Now, if I pull up my inbox agent,
+[03:00] you can see that I had a conversation
+[03:02] with this yesterday. And I have my Gmail
+[03:04] configured so it's able to go and pull
+[03:06] from my emails as well as send emails on
+[03:08] my behalf. So, I just said, "Check my
+[03:10] emails from today." It went and pulled
+[03:12] from my email as well as my Google
+[03:14] Calendar and basically broke down
+[03:16] everything that needs a look, all my
+[03:17] money and receipts from my inbox, as
+[03:19] well as all the different collab
+[03:21] opportunities that are in my email. Now,
+[03:23] this is my agent in action. So, I gave
+[03:26] it this prompt right here. I just said,
+[03:28] "Hey, I want you to go and look inside
+[03:30] of my email inbox. From there, I want
+[03:31] you to add the top priority things to my
+[03:33] board inside of ClickUp as well as add
+[03:35] specific due dates there so we can make
+[03:37] sure to accomplish these things over the
+[03:39] next couple of days." Then, what it did
+[03:41] is it pulled through my email. It broke
+[03:42] down the nine different things that I
+[03:44] need to work on and then it added the
+[03:46] sense of urgency as well as the due date
+[03:49] for when this task needs to be
+[03:51] completed. Now, if you don't know what
+[03:52] ClickUp is, it's a project management
+[03:54] software and this is what I use to run
+[03:56] my team, to stay up-to-date on the
+[03:58] different projects that we're working on
+[03:59] inside multiple of my different
+[04:01] businesses. And the best part is, I have
+[04:02] my inbox agent going and finding all the
+[04:05] things that I need to do for the day and
+[04:07] automatically adding this to my ClickUp.
+[04:09] So, not only I could see what I need to
+[04:11] work on, but my entire team can see that
+[04:12] as well. Now, as you can see here, I
+[04:14] have this workspace configured that I
+[04:16] actually had Grok Bot go and build for
+[04:18] me and all of these tasks right here
+[04:21] were actually from my email. So, it
+[04:23] went, pulled everything from my email,
+[04:25] sent me a text saying, "Hey, here's
+[04:26] everything that, you know, is important
+[04:28] for you to do for the day." And then it
+[04:29] also added a due date for all these
+[04:31] different tasks along with a priority
+[04:33] level. Now, one of the best parts about
+[04:35] ClickUp is there's multiple different
+[04:37] views that I could, you know, basically
+[04:38] see this list in. So, I could come to
+[04:39] this board view and I could see
+[04:41] basically everything that I need to get
+[04:43] done automatically right here. For
+[04:44] example, I have my to-do list here, then
+[04:46] I have the tasks that are in progress.
+[04:48] So, I could come over here, drag this
+[04:49] into in progress. So, that way I could
+[04:51] see everything that's going on inside of
+[04:53] my business. All right, so for this next
+[04:54] use case, I'm going to show you how to
+[04:55] generate video and image assets just
+[04:58] like this directly from Grok Bot using a
+[05:00] video agent. I'm even going to share
+[05:02] with you a skill that allows you to
+[05:04] literally take images of something just
+[05:06] like this on your phone, upload it to
+[05:08] your AI agent and then get outputs just
+[05:10] like this. I mean, look at this. This is
+[05:11] pretty cool. I literally took a picture
+[05:13] of this Sun Bum bottle from my phone and
+[05:16] in just like 2 minutes it generated this
+[05:17] video for me and with this skill I'm
+[05:19] going to show you, we don't even have to
+[05:20] give it a prompt. As promised, here is
+[05:22] how to download the video skills for
+[05:24] free. There will be a link in the
+[05:25] description. Basically, you just come
+[05:27] here, you're going to name a fair price,
+[05:28] just put $0. If you want to
+[05:30] hypothetically pay me, just subscribe to
+[05:32] this channel for more content, then
+[05:33] click on I want this. From here, just
+[05:35] click on get and then we will now have
+[05:37] this zip file. So, go ahead and download
+[05:40] the zip file. Let's drag it onto our
+[05:42] desktop and then simply open up your
+[05:44] agent inside of Grok Bot, take this zip
+[05:46] file, upload it, and then just say
+[05:48] upload these skills, and then it will go
+[05:51] ahead and download those for you. Also,
+[05:53] I do want to mention you can obviously
+[05:55] add skills into Grok Bot, and in order
+[05:57] to access them, you just go and type
+[05:59] {slash}, and then we could see any of
+[06:01] these skills that we have created. So,
+[06:03] for example, we have this generate video
+[06:05] skill with Higgsfield right here, as
+[06:07] well as here is a skill called Exploding
+[06:09] Teardown, which is one of the two skills
+[06:11] that you just downloaded inside of that
+[06:12] zip file. If you don't know what a skill
+[06:14] is, a skill is basically a repeatable
+[06:16] workflow, and it's a markdown file
+[06:17] explaining exactly how to do something.
+[06:19] So, instead of us having to give a
+[06:20] really detailed prompt on how to
+[06:22] generate assets like the ones that I
+[06:24] showed you earlier on, it automatically
+[06:26] knows the exact style. So, whenever I
+[06:28] say generate a product video, it will
+[06:30] automatically just do it like that, the
+[06:31] exact same way every time. Now, the way
+[06:33] that we're going to do this is with a
+[06:35] plugin, so we're going to come down here
+[06:37] to plugins, and we need to make sure to
+[06:38] sign up with an account and install this
+[06:41] first. So, we're going to search for
+[06:42] plugins, and we're going to look up
+[06:44] Higgsfield. If you don't know what
+[06:45] Higgsfield is, it's an all-in-one
+[06:47] creative AI platform that has access to
+[06:49] all the best image and video models, so
+[06:51] that way we could generate basically any
+[06:53] asset that we can think of directly from
+[06:55] Grok Bot without us even having to leave
+[06:57] the platform. Now, I do want to be
+[06:59] transparent and mention pricing for
+[07:00] this. You do have to pay for Higgsfield,
+[07:02] and I know you could connect these
+[07:04] different video and image models
+[07:05] yourself, but personally, for the sake
+[07:07] of ease of use, I personally like to pay
+[07:09] for a plan on Higgsfield, so that way I
+[07:10] could access all of these without having
+[07:12] to configure each of them individually
+[07:14] and pay different subscription costs for
+[07:16] all the different models. Plus, whenever
+[07:17] a new model comes out, I automatically
+[07:19] have access to it. I just personally
+[07:21] like to use this for ease of use. Next,
+[07:23] once we have an account added, we're
+[07:25] just going to come to the Higgsfield
+[07:26] plugin, click add, and then we're just
+[07:28] going to need to authorize it from our
+[07:30] account inside of the Higgsfield
+[07:32] platform. And just like that, we now
+[07:33] have it enabled with 86 different tools,
+[07:36] so we could generate images, generate
+[07:38] video, audio, so many things that that
+[07:40] could do using the Higgsfield MCP, and
+[07:42] this is why I like to use it. Now, for
+[07:43] the fun part, let's come to the video
+[07:45] agent inside of Grok Bot on my phone
+[07:47] because I downloaded the mobile app.
+[07:49] Make sure to download it if you want to
+[07:51] do the same thing. And what I'm going to
+[07:52] do is I'm simply going to take a picture
+[07:54] of this camera right here, and then
+[07:56] we're going to turn this into an
+[07:57] advertisement using that skill. So, let
+[07:59] me get a good image like this. Let's
+[08:01] actually take a couple because obviously
+[08:03] we need to give it good reference
+[08:04] images, otherwise it's not going to, you
+[08:06] know, make it look like the same
+[08:07] product. And there we go. I just sent
+[08:08] off a very basic prompt. I said,
+[08:10] "Generate a product ad for this camera."
+[08:12] And since we created the product ad
+[08:14] skill, it's going to know exactly how to
+[08:16] generate it in the style like I just
+[08:17] showed you, just like this Sun Bum spray
+[08:19] bottle. And there's this little icon
+[08:21] here that is kind of blinking, and this
+[08:23] is our agent. Whenever this is moving
+[08:24] around, that is how we know that our
+[08:26] agent is actually working on a task. So,
+[08:29] let's let it do its thing, and we'll
+[08:30] come back to a video in the chat here.
+[08:32] And I do want to mention we will be able
+[08:33] to see this on our desktop app as well
+[08:35] since these two sync the different
+[08:36] conversations between the agents. All
+[08:38] right, so let's take a look at this
+[08:40] video that it generated. This is going
+[08:41] to be pretty cool.
+[08:43] Bam. So, it shows our camera coming
+[08:45] apart. I mean, this is pretty cool. We
+[08:46] could use this for like an animated
+[08:47] website or something. But again, this is
+[08:49] a part of that skill pack that I gave
+[08:51] you earlier on in this video for free.
+[08:53] Now, I want to quickly talk about
+[08:54] something that's really going to level
+[08:55] up your experience with Grok Bot or any
+[08:58] AI agent for that matter. Because a big
+[09:00] thing when we're creating these agents
+[09:01] is we need to make sure it's grabbing
+[09:03] the proper context. And sometimes it's
+[09:05] really hard for AI to go and scrape
+[09:08] different websites and get all the
+[09:09] context that we need or even scrape like
+[09:11] competitors content, for example. That's
+[09:13] something that AI just has a difficult
+[09:15] time doing. Well, I'm going to show you
+[09:16] how to use something called Firecrawl,
+[09:18] which is a way to basically equip our AI
+[09:20] agent with hands and able to go and
+[09:23] scrape this information for us. So, that
+[09:24] way our agent gets clean data that we
+[09:26] can interact with. And just to break
+[09:28] this down a little bit more so you can
+[09:29] understand why we would use this, I'm
+[09:31] going to talk about four different use
+[09:33] cases where Firecrawl is going to be
+[09:34] extremely helpful. So, an example is
+[09:37] something like price watching. Something
+[09:38] where we just have an agent that is
+[09:40] tracking competitors pricing daily and
+[09:42] it's able to scrape through their
+[09:44] website in order to notify us whenever
+[09:46] there's a changing to their pricing.
+[09:48] Another example is lead research. So, we
+[09:50] could pull company information before we
+[09:52] actually go and send out reach with our
+[09:54] AI agents. Next, this is one that I
+[09:56] personally use and I'm going to show you
+[09:58] here shortly and that is for content
+[10:00] research. For example, we're not able to
+[10:02] pull information from YouTube directly
+[10:05] inside of Grokbot, but I'm able to use
+[10:07] Firecrawl in order to go and scrape
+[10:09] YouTube and get competitor data for me
+[10:12] to stay up to date with my agent. Then,
+[10:14] using it to become an expert with
+[10:16] different documents. It's really good at
+[10:17] reading document sites and again, that's
+[10:19] something that AI just kind of struggles
+[10:20] with. So, first things first, we need to
+[10:22] make sure that we have a Firecrawl
+[10:24] account set up. So, if you don't have it
+[10:25] already, make sure to sign up in the
+[10:27] link below. It is actually really cheap.
+[10:29] I'm personally on the hobby plan, which
+[10:31] is I believe $19 per month and I never
+[10:33] run into any limits here. You could also
+[10:35] go for the free plan and work your way
+[10:37] up until you hit your limits there. Now,
+[10:39] in order to configure Firecrawl inside
+[10:41] of our agent inside of Grokbot, we're
+[10:43] just going to come over to plugins.
+[10:45] We're going to click on this. We're
+[10:46] going to search up Firecrawl and I'm
+[10:48] simply just going to click on add and
+[10:50] what it's going to do is it's going to
+[10:51] open up Firecrawl in my browser and I'm
+[10:53] just going to need to authorize it and
+[10:54] then it should be good to go and we
+[10:56] could use it for scraping. So, I'm just
+[10:58] going to give it this prompt here. Go
+[11:00] and scrape my YouTube videos with
+[11:01] Firecrawl. I added my link to my YouTube
+[11:03] I said, give me the titles and the
+[11:05] amount of views for my previous 10
+[11:06] videos. Now, what we're going to notice
+[11:08] is our agent says that YouTube blocked
+[11:10] the first scrape. So, now it's trying
+[11:12] Firecrawl's agent extractor for the
+[11:14] video list. So, this is one reason and
+[11:16] one way that Firecrawl really comes in
+[11:18] handy because otherwise, we're not able
+[11:19] to scrape YouTube. All right, and here
+[11:21] we go. We have an output. Here are my
+[11:23] last 10 videos. Shows the amount of
+[11:25] views. I guess it pulled short form
+[11:27] videos as well and it shows the title.
+[11:28] And then right here, this is why we're
+[11:30] using Firecrawl. It says, "Note,
+[11:31] YouTube's video page blocked a direct
+[11:33] scrape, so I used Fire Crawl on your
+[11:35] channel RSS plus each watch view."
+[11:38] Basically, went ahead and just was able
+[11:39] to pull this. That's one thing you'll
+[11:40] notice with Fire Crawl, it's just
+[11:41] working in the background, just helping
+[11:43] you enrich this data for certain things
+[11:45] that you wouldn't realize AI isn't able
+[11:47] to go and pull on its own. Now, this
+[11:49] next use case is one that I'm personally
+[11:50] going to be using quite a bit. I've
+[11:52] really been loving playing around with
+[11:53] this over the last day, and that is my
+[11:56] invoice agent. And not only am I just
+[11:58] going to use this invoice agent, but
+[11:59] this is going to be paired with my inbox
+[12:01] agent that I just showed you earlier on
+[12:03] in the video. Now, let me quickly break
+[12:04] down exactly how this is going to work.
+[12:06] So, I have my invoicing agent, and what
+[12:09] I'm going to do is I'm going to set an
+[12:10] auto trigger, which is one of the
+[12:12] coolest parts of Grok Bot, which I'm
+[12:14] going to explain in a little bit. And
+[12:15] what this means is whenever an invoice
+[12:18] email arrives, it's automatically going
+[12:20] to flag this automation, where it's
+[12:22] going to then draft a invoice in my
+[12:24] style, send the email to this client,
+[12:27] and then on top of that, it's going to
+[12:28] track this in ClickUp, so I can see
+[12:31] exactly what stage my payments are in
+[12:33] inside of ClickUp, as well as my entire
+[12:35] team can view that as well. Now, let me
+[12:37] show you exactly how to set this up, cuz
+[12:39] it's really easy to create a new bot or
+[12:41] an agent inside of Grok Bot. So, I'm
+[12:43] just going to click on create new, and
+[12:45] all I'm going to do is I'm going to come
+[12:46] down to message bot and just give it a
+[12:47] brain dump. All right, so here's the
+[12:49] prompt that I'm going to give it. I
+[12:50] basically said, "Create an invoice agent
+[12:52] that does these tasks. Works with the
+[12:54] inbox triage agent to scrape my emails,
+[12:56] keeps track of all invoices and owed
+[12:58] payments, generates invoices for me in a
+[13:01] specific style, and then tracks the
+[13:03] status of all invoices inside of my
+[13:05] ClickUp board called invoices and
+[13:07] payments." Then next, what I'm going to
+[13:09] do is I'm just going to upload a PDF
+[13:11] example of what I want this invoice to
+[13:13] look like, so that way it always
+[13:15] recreates it in this style with all of
+[13:17] my payment information, so I never need
+[13:19] to basically generate an invoice myself
+[13:21] again. So, here is an example right here
+[13:23] of an invoice that I wanted to recreate.
+[13:25] I really like the style, and now it when
+[13:27] I upload this as a reference, it's
+[13:28] always going to look exactly like this.
+[13:30] So, what I'm going to do now is simply
+[13:32] just send this off to my agent. And now,
+[13:34] as you could see, it's going and
+[13:35] crafting this invoice style, as well as
+[13:38] just setting up this entire agent. One
+[13:39] thing that you'll notice is we have this
+[13:41] little green icon. So, each of our bots
+[13:44] or agents we have basically have their
+[13:46] own icon, and whenever it's moving like
+[13:48] this, you could see on the left-hand
+[13:49] side, this basically just means that
+[13:51] it's working in real time. If it is
+[13:53] stagnant like some of these ones right
+[13:55] here, that means that it's not
+[13:56] performing any tasks. I think this is
+[13:57] really cool to kind of just see which of
+[13:59] the agents are working at any given
+[14:00] time. All right, so just a few minutes
+[14:02] later, it actually went ahead, generated
+[14:04] this invoice in the exact style. This is
+[14:06] great. We can go ahead and download this
+[14:07] directly onto our computer. Let me just
+[14:09] go ahead download that. And then now,
+[14:11] it's basically saying that this is done.
+[14:13] Say the word when you want to generate
+[14:15] the next invoice or want me to pull
+[14:17] what's owed from ClickUp. So, since this
+[14:19] is already connected to ClickUp, it's
+[14:21] able to go and pull the other invoices
+[14:23] that I've either sent or generated, so I
+[14:26] could see basically what needs to be
+[14:27] paid and what has been paid. Now, this
+[14:30] is really cool. We obviously have an
+[14:31] agent that has a specific style of
+[14:33] invoices that it's able to generate, but
+[14:35] where this gets really interesting is
+[14:37] when we come over here to create a
+[14:39] routine. This is where we could either
+[14:41] have this run on a schedule where every
+[14:43] single day this invoice agent will go
+[14:46] and scrape from my email inbox and then
+[14:48] identify what invoices we need to
+[14:49] generate. But also, I could click on
+[14:52] create invoice, and we can add a
+[14:53] specific trigger. So, what I mean by
+[14:55] this is we could basically connect this
+[14:57] to a Slack channel. So, whenever there
+[14:59] is a message related to invoices, it
+[15:02] will automatically trigger this agent.
+[15:04] Which this is the first time we've kind
+[15:05] of seen this from these AI agent
+[15:07] platforms. Before, we could do scheduled
+[15:09] tasks and whatnot in Cloud Co-work, but
+[15:11] we didn't really have the option to
+[15:13] allow automations to kick off from a
+[15:15] specific trigger or event that's
+[15:17] happening inside of our apps. Now, I
+[15:18] want to show you something really cool.
+[15:21] Now, if I come over to my inbox triage
+[15:23] agent, you can see there is this
+[15:24] conversation happening between the inbox
+[15:27] agent in the invoice agent. And I didn't
+[15:29] even have to go and tell it to go and do
+[15:31] this. It just automatically knew
+[15:33] intuitively that it needed to
+[15:34] communicate with other agent in order to
+[15:36] get this done. So, invoice agent said,
+[15:38] "Hey, Brock set me up as the agent.
+[15:40] Please hand me anything invoice or
+[15:42] payment related from our email triage."
+[15:44] So, it basically broke down everything
+[15:46] that it needs to flag for us. And then
+[15:48] the inbox triage agent went and pulled
+[15:50] through my email and found the specific
+[15:52] things that I need to, you know,
+[15:54] understand and be up to date with. All
+[15:56] right, so, what I'm going to do now is
+[15:57] create a group chat with the invoice
+[16:00] agent in my inbox agent. And what I'm
+[16:02] going to do is I'm just going to give it
+[16:03] a brain dump and say, "Hey, I want you
+[16:05] to go and check my emails from the past
+[16:07] day. Find any email that is invoice
+[16:09] related. If there are specific invoices
+[16:12] that we need to create, use the invoice
+[16:13] agent in order to generate the invoices.
+[16:15] Then, I want you to draft the reply with
+[16:18] the invoice in the email. As well as, I
+[16:21] want you to then add these to ClickUp in
+[16:24] order to track the process and the
+[16:26] status of all these different payments.
+[16:28] Now, to show you real quickly inside of
+[16:29] my email inbox, I went ahead and drafted
+[16:32] three different emails as demos because
+[16:34] I don't want to show like actual
+[16:35] invoices that I need to create just for
+[16:37] confidential reasons. What it did is it
+[16:39] pulled from my email inbox. And now you
+[16:41] can see basically all of the invoices
+[16:43] that we need to generate right here. So,
+[16:45] what it's going to do is now generate
+[16:46] the invoices, create the draft reply for
+[16:49] the email so I can just go and send it
+[16:50] myself. And it's then going to update
+[16:52] this inside of ClickUp so I can see the
+[16:53] status of all these. All right, and just
+[16:55] like that, we now have these emails
+[16:56] drafted. So, for example, if I click on
+[16:58] this one, you can see that it added this
+[17:00] reply email as well as even attached the
+[17:02] specific invoice and I can go ahead and
+[17:04] pull this up right here in the exact
+[17:06] style that we fed it. As well as, if I
+[17:08] come into my invoice and payments board
+[17:11] inside of ClickUp, we can now see that
+[17:13] all of these invoices have been
+[17:15] submitted. As well as, if I click on
+[17:16] this, it shows the client information
+[17:18] here. Shows the email thread. And now me
+[17:21] and my team can see exactly where we're
+[17:22] at in the invoicing process. All right,
+[17:24] so this next use case is going to be a
+[17:26] meeting agent. And this is one that has
+[17:28] been pretty fun to play around with
+[17:29] myself. And I see this being something
+[17:31] that is actually really helpful for a
+[17:33] lot of people. So let's quickly walk
+[17:35] through the process of how this works.
+[17:36] So first of all, we have a daily routine
+[17:38] that is set where at 5:00 p.m. every
+[17:40] single day, it's then going to use this
+[17:43] tool called Granola, which if you don't
+[17:44] know what Granola is, it's basically an
+[17:46] AI meeting note-taker. So it joins all
+[17:48] of my meetings, as well as I could just
+[17:50] give it a brain dump, and then it turns
+[17:52] everything into a specific action item
+[17:53] and a summary. So at 5:00 p.m. it's then
+[17:56] going to scrape all of the Granola
+[17:58] meetings and notes from the day. Then
+[18:00] it's going to find all the specific
+[18:01] action items from those notes, and then
+[18:03] it's going to add them to ClickUp and
+[18:06] assign the specific team member that
+[18:07] needs to complete these tasks along with
+[18:09] a due date. All right, so let me show
+[18:11] you the meeting agent in action. So I
+[18:13] went ahead, I created a new agent, and
+[18:16] then I just gave it this prompt right
+[18:17] here. I just said I want to create a
+[18:18] meeting agent. This uses the Granola
+[18:20] MCP. Every day at the end of the day,
+[18:22] 5:00 p.m. it's going to scrape Granola
+[18:24] to find new notes that were added from
+[18:25] either meetings or brain dumps that I
+[18:27] had. And then I basically just specified
+[18:30] for agency related stuff, I wanted to
+[18:31] add it to my agency board inside of
+[18:33] ClickUp. And if it's YouTube related, I
+[18:35] wanted to add it to my YouTube board.
+[18:37] Just so that way it knows exactly where
+[18:38] to populate these different tasks for me
+[18:41] and my team to go and grab inside of
+[18:43] ClickUp. Now if I come into my Granola
+[18:46] account, as you could see right here, we
+[18:48] have a couple of different things. We
+[18:49] have a few different meeting notes that
+[18:51] I've brain dumped inside of here. So
+[18:53] this will automatically populate with
+[18:55] actual meetings that I have on my Google
+[18:57] calendar. For example, you could see the
+[18:58] meetings I have, it's automatically
+[19:00] going to create these and turn them into
+[19:01] meeting notes. But also, I could just
+[19:03] have a brain dump on my phone, which is
+[19:05] what I just did for this one right here.
+[19:07] So if I click on this, you could see it
+[19:08] kind of broke down the key things that I
+[19:11] discussed in like a 2-minute brain dump,
+[19:13] and it shows the next steps here. So, it
+[19:15] shows that it needs to add these things
+[19:17] to our ClickUp board. So, let me go
+[19:19] ahead and check if this was done inside
+[19:21] of ClickUp now. All right, so just like
+[19:22] that, we now have these specific action
+[19:25] items added to my Loom board inside of
+[19:28] ClickUp. It went ahead and was able to
+[19:29] find which board it should go and add. I
+[19:31] didn't have to like specify it, which is
+[19:33] pretty cool. And then let's come back to
+[19:34] Grok Bot, and I just said, "Hey, I want
+[19:36] you to go into the Loom board in ClickUp
+[19:38] and add priority levels to these with
+[19:40] due dates." All right, now just like
+[19:42] that, we have specific due dates for
+[19:44] these given tasks as well as the
+[19:45] priority. So, it's able to analyze that
+[19:47] this right here is something that we
+[19:49] need to prioritize because we need to
+[19:51] align on this before we have a meeting
+[19:53] with somebody who's consulting for our
+[19:54] business. Now, I wanted to show this
+[19:56] meeting agent use case cuz I think this
+[19:58] could be really helpful for anybody that
+[20:00] has meetings. You could just plug in
+[20:01] Granola, where it automatically
+[20:03] transcribes and creates notes for those
+[20:04] meetings, and then you could
+[20:06] automatically route specific tasks to
+[20:08] ClickUp for you. I do want to quickly
+[20:10] show exactly how you could connect
+[20:11] Granola if you want to add it to your
+[20:13] Grok Bot, and it's really simple. You
+[20:15] could either come to the agent and just
+[20:17] say, "Hey, I want you to add Granola,"
+[20:18] and it will set it up for you, or you
+[20:20] could come right here to where it says
+[20:21] plugins. You could click on this, and
+[20:23] you could see I already have Granola
+[20:24] configured. You would just click add, it
+[20:26] would open it in your browser, and you
+[20:27] just have to authorize it from inside of
+[20:29] your account. It literally takes like 5
+[20:31] seconds to set it up. It's that simple.
+[20:33] Now, let's say you scroll through this
+[20:35] entire plugin marketplace, and you don't
+[20:37] see an app that you want to use that you
+[20:38] want to integrate your agent with. Well,
+[20:40] you can use something called a Zapier
+[20:41] MCP, which allows you to connect to
+[20:43] 9,000 plus different apps, and it's
+[20:45] really easy to set up. So, that way you
+[20:47] can work across more applications than
+[20:49] just the ones that Grok Bot allows you
+[20:51] to. For example, I have this MCP server
+[20:54] configured right here, which has about
+[20:56] like 25 different applications that I
+[20:57] can use. For example, there's some apps
+[21:00] in here that I cannot connect to
+[21:02] directly inside of Grok. So, I cannot
+[21:03] connect to school, which is where I have
+[21:05] my entire community, as well as Beehiiv
+[21:08] is another big one, which is where I run
+[21:10] my email newsletter. So, if I want to be
+[21:12] able to perform actions inside of
+[21:14] Beehiiv with my agents that I configure
+[21:16] inside of Grok Bot, I actually have to
+[21:18] be using Zapier MCP since it's not
+[21:20] accessible in this list right here. Now,
+[21:22] this is very simple to set up. First of
+[21:24] all, you just need to have a Zapier
+[21:25] account. You could sign up with the link
+[21:27] in the description, and then you're
+[21:28] going to come into your plugin
+[21:29] marketplace and then simply just look up
+[21:31] Zapier and then click on this add
+[21:33] button. It's going to ask you to
+[21:35] authorize your account from inside of
+[21:36] Zapier, and then it will show that it's
+[21:38] added right here. And in order to test
+[21:40] this out, let me just come into my inbox
+[21:42] agent and say, "Hey, I want you to use
+[21:43] the Zapier MCP to pull different stats
+[21:46] from my Beehiiv campaigns so I can
+[21:48] understand how many people I have on my
+[21:50] newsletter." And here we go. Went and
+[21:52] pulled from Beehiiv using the Zapier
+[21:53] MCP. It shows the newsletter size. It
+[21:55] shows my open rate as well as the
+[21:57] average click rate. And the cool part is
+[21:59] I could even have it go and perform
+[22:00] actions inside of Beehiiv for me since
+[22:02] it's now connected. These are some use
+[22:04] cases I've been finding for myself that
+[22:06] I think are pretty cool. Having multiple
+[22:08] agents that are able to interact with
+[22:09] each other and literally create group
+[22:10] chats, I think is a pretty cool concept.
+[22:12] If you guys got some value from this
+[22:13] video, leave a like, subscribe to the
+[22:15] channel for more content like this, and
+[22:16] I will see you in the next video.

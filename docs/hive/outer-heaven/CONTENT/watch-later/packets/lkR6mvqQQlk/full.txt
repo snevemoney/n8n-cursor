@@ -1,0 +1,285 @@
+Okay, so this morning, Mythos showed up on Anthropic's API for a few minutes and then it vanished.
+
+So naturally, people screenshotted it and my whole feed just lost it.
+
+You know, oh, it's dropping next week.
+
+It's over.
+
+So [snorts] before we start counting down to launch day, there's one line buried in Anthropic's own writing that flips this whole story on its head.
+
+So what I want to do today is catch you guys up on what Mythos actually is, what really happened this morning, and my honest bet on whether we'll ever get our hands on it.
+
+So let's get into it.
+
+So real quick, in case you haven't been following this whole Mythos saga, here's pretty much the short version.
+
+Mythos is basically the tier above Opus.
+
+So right now the best model that you can actually log in and use is Claude Opus 4.8.
+
+So Mythos apparently sits right on top of that.
+
+And in their own leaked draft, they called it a step change and the most powerful model they've ever built.
+
+So it's not like we're jumping from Opus 4.7 to Opus 4.8.
+
+This is an actual new model family entirely.
+
+And the thing that it's really, really weirdly good at is cybersecurity.
+
+So being able to find security holes and patch them, which is exactly why it's also a little scary because the same skill that finds holes so that you can fix them is also the same skill that can find holes so that you can break in and hack things.
+
+And that's exactly why the only people who have actually gotten to use Mythos so far are just a handful of big cybersecurity companies.
+
+Anthropic basically started rolling it out to them through a program called Project Glasswing to point Mythos at critical software and have it hunt down these security holes and patch them.
+
+And reportedly, it's really, really good at that.
+
+It's been able to dig up some pretty serious bugs in super old, widely used code that had just gone unnoticed for years.
+
+Though, to be fair, on the one public benchmark that we actually got, it was kind of neck and neck with a GPT model that we can already use publicly.
+
+So them saying, you know, "Scariest model ever." might be a little oversold.
+
+It might be a little bit of, you know, marketing and IPO hype.
+
+But we don't truly know.
+
+So anyways, that's what Mythos is.
+
+The real question is what actually happened this morning and why it sent everyone into a frenzy.
+
+So today, a Mythos identifier showed up live on the API.
+
+People grabbed their screenshots and then the identifier got pulled.
+
+And the case that it's coming soon, it's actually not crazy because if you look at how things have been rolling out, Mythos started out going to around 50 partners back in April when Project Glass Wing was announced.
+
+And then just a few days ago, that number jumped from 50 to 150 organizations across more than 15 countries.
+
+So, the circle of people getting access keeps getting bigger.
+
+You know, it's growing pretty fast.
+
+And then there's also things like the betting markets.
+
+You know, people are literally putting money down on when Mythos will go public.
+
+And the number that keeps getting passed around is somewhere around 2/3 odds that it shows up by the end of July.
+
+So, you know, within the next 2 months.
+
+And those odds have been climbing.
+
+So, this isn't just a couple of hype accounts on X that are yelling and saying, "Hey, you know, blah blah blah, here's what I think." There's actual money that's also riding on it, which is pretty interesting.
+
+But, if you look at only the leak plus the access widening plus the betting markets, you'd think, "Yeah, it's definitely coming soon." And that's the honest version of the hype because there is kind of a real case, but let me talk about why I'm not buying into it because it all comes back to what Anthropic actually said.
+
+So, Mythos was never, you know, a public product.
+
+It went out through Glass Wing, which was invite-only, so just the vetted partners and the government.
+
+And they locked it down on purpose because a model this good at hacking is a weapon if it's in the wrong hands, right?
+
+So, back in early April when Anthropic straight-up said, "We do not plan to make Mythos preview generally available." That was literally their own words, not mine.
+
+And it's the preview that we're talking about here.
+
+So, they're not promising this kind of power never reaches you.
+
+They're just saying that this one gated version, the thing that everyone's losing their minds over right now, isn't what's going public, at least not yet.
+
+Now, yeah, once again, to be fair, that statement is back from, you know, April, so a couple months ago, but nothing since has walked it back.
+
+And the leak this morning isn't Anthropic opening the doors either. but one thing that I have to be honest about that I am pretty skeptical about is that this leak is intentional or past leaks have been intentional because it's honestly a genius marketing play.
+
+You know, you do a quick leak.
+
+You don't actually have to release anything valuable.
+
+You pull it back in and then you just, you know, start eating your popcorn and watching the show because now you have all of these accounts on X that are jumping all over it.
+
+Everyone's talking about it.
+
+It's trending on Twitter.
+
+It's going to trend on LinkedIn and you've got all these people talking about your company and you didn't have to do anything.
+
+You hardly had to put any time.
+
+You had didn't have to spend any money.
+
+It's pretty genius if you think about it.
+
+So, I do think sometimes, not only Anthropic, I think that in general that's kind of just the culture now is sometimes people do things like that to build hype and anticipation because it sticks out different than if they were to put their own like hype video out, you know?
+
+So, if Anthropic flat out said they're not releasing it, then why does half the internet still think it's coming?
+
+Because there are some other forces that are pushing on this that we definitely want to address.
+
+So, I think the first one is money, you know, and the timing here is pretty incredible.
+
+On June 1st, so at the time of recording this video about 6 days ago, Anthropic confidentially filed to go public at a valuation of around $965 billion.
+
+So, basically right there knocking on the door of a trillion dollars.
+
+So, they're about to sell stock to the public and then 3 days later they drop this big dramatic report basically saying AI is starting to improve itself.
+
+I just did a video about this yesterday and they basically said the world might need to think about hitting the brakes and pausing.
+
+So, if you put those two things right next to each other, you're about to raise a huge giant pile of money and right before that you remind everyone that you're sitting on the most powerful, really scary AI model in the world.
+
+And that's a really good story to be telling while you're about to sell stock.
+
+I'm not saying the tech isn't real.
+
+I do think it is, but hype has a motive right now and that's definitely worth keeping in mind.
+
+So, that's force number one.
+
+Force number two is that the report itself, you know, the irony, it's too good to skip over.
+
+Because in that report, Anthropic is literally calling for the option to slow down frontier AI.
+
+Like a global agreement, like a treaty, where everybody can verify that everyone else is slowing down as well.
+
+Which, you know, it's a reasonable thing to ask for.
+
+I do think that there's the speed is kind of scary and there's a huge gap and it keeps getting wider and wider.
+
+You know, you're telling the world, "Hey, maybe we should all consider pausing." While you're quietly sitting on the scariest model anyone's ever built and you're handing it out to more and more people every single week and teasing that it's going to go public.
+
+You know, even some of the big leak accounts kind of looked at that and went, "Yeah, that's a little bit contradictory." And I mean, I completely agree.
+
+But, to be fair, once again, Anthropic's stance has actually been pretty consistent in basically saying, "Hey, we'll slow down if everyone slows down together, but we're not just going to unilaterally like give up our lead right now and hand that to someone else." Which also is fair.
+
+So, it's not just it's not just pure hypocrisy, but you can believe all that and you can still admit the timing is a little bit weird, right?
+
+Okay.
+
+So, force number three though, and this is probably the biggest one, is OpenAI.
+
+Because the other reason everyone expects Anthropic to make a move is that OpenAI's next model, the one that everyone's predicting is going to be GPT 5.6, is supposedly right around the corner.
+
+And these two companies, you guys probably know this, they are, you know, they tend to do things right on top of each other.
+
+They try to overshadow and stack on top.
+
+And that's just that's not me guessing, you know, we've seen these patterns.
+
+Like earlier this year, OpenAI shipped a new coding model within minutes of Anthropic shipping one.
+
+And, you know, on their pricing, just last month, OpenAI rolled out like the two free months of Codex to get people to switch over.
+
+And then Anthropic turned around and bumped everyone's Claude limits by 50% that same day or something like that.
+
+The point I'm trying to make is that they watch each other closely and neither one wants to get overshadowed.
+
+And they want to overshadow the other company.
+
+And those same betting markets that we talked about earlier, they actually like GPT 5.6's odds even more than Mythos.
+
+So, people are betting that it lands by the end of this month in June.
+
+And the odds on that are up, I think, north of 80% now.
+
+So, people are even more sure that OpenAI is going to ship a new model first.
+
+So, the bet that a lot of people are making is basically GPT 5.6 drops, and then Anthropic fires back within days so they don't get buried.
+
+Maybe even same day.
+
+The only real question is, what does Anthropic actually fire back with?
+
+Is that maybe an Opus 5 or 4.9?
+
+Or is that like the big daddy Mythos?
+
+So, is Claude Mythos coming?
+
+All right, here's where I land on it.
+
+And obviously, I could be completely wrong.
+
+I don't have any insider information.
+
+A public model that you can just log in and use called Mythos, I don't think that's happening anytime soon.
+
+And it might not ever happen under that name, at least not the way that we're picturing it right now.
+
+I mean, they kind of told us the plan.
+
+A leak doesn't change the plan.
+
+So, I mean, everyone waiting for a big Mythos button to show up in the app next week, I think they're going to be waiting a while.
+
+So, what do I actually think happens?
+
+I think the capabilities start to show up, but kind of quieter.
+
+You know, I think the stuff that makes Mythos Mythos, the stuff that makes it so special, those features sort of start to get baked into future versions of Opus.
+
+And once Anthropic decides the safety guardrails are solid enough, then that's when they we start to see some more stuff, right?
+
+So, I'm not sure if we'll get the model called Mythos or, you know, or maybe when we do get Mythos, it's not going to be the full most powerful one.
+
+It'll be kind of toned down.
+
+Now, the one thing that could really change that math is the OpenAI race because the single best reason for Anthropic to drop Mythos soon would be timing it to land right on top of GPT 5.6.
+
+If OpenAI shipped that, and then same day or day later, Anthropic drops Mythos, the whole feed is suddenly talking about Mythos.
+
+YouTube, LinkedIn, X, whatever you're on, everyone's testing Mythos and GPT 5.6 basically launches into an empty room.
+
+Now, people obviously would still come around, and if they're already loyal to Codex, they would use 5.6.
+
+So, it wouldn't get destroyed, but all of the hype on that one or two days or maybe for the first week would all be going towards Anthropic, which is obviously a massive win and another reason why I think that the Mythos timing might be glued to whenever OpenAI finally makes their move.
+
+But even with that temptation sitting right there, my money's still on the thing they actually drop being a new Opus, not a public Mythos.
+
+Now, in the long run, I do think that the capability itself probably does reach the general public eventually.
+
+So, the crowd isn't totally wrong in thinking that.
+
+I think that it's just too early and I think that they're too hung up on the name Mythos.
+
+So, let me give you three ways that this could potentially play out so that you guys can kind of like place your own bets, but we've kind of got the bull case, right?
+
+Which is very exciting.
+
+It's competitive pressure plus all that IPO momentum pushes Anthropic to put out some limited, paid, still kind of gated Mythos later this year.
+
+And even then, I'd bet it's a toned-down version, not the full power of Mythos they're sitting on so that they can keep a 5.1 and a 5.2 ready to roll out as soon as GPT drops something else.
+
+And if the preview price is any clue, touching it won't be cheap.
+
+Right now, Anthropic's charging Glasswing partners around $25 per million input tokens and 125 for output, which is five times what Opus cost you today, which I've seen already so many comments about how expensive Opus already is.
+
+So, that's the bullish case.
+
+The base case, which is the one that I'd probably put my money on right now, is that no public Mythos, the capability just folds into the next Opus sometime in the back half of this year or early next, and most people never even realize that that's happening.
+
+And then we get Mythos way down the line once people are feeling a lot more secure, once more partners through Project Glasswing have gotten this model and played around with it and things have been locked down, then the public gets Mythos.
+
+And then we have the bear case, which is that Mythos just stays locked up pretty much forever or it's, you know, you have to be a trusted partner in order to get access to Mythos like through project Glasswing and it stays more of a defensive security tool for these vetted partners forever.
+
+And then the public ends up just getting a watered-down slice of some of the features inside of it, maybe inside Opus or something, and given everything they've said about how dangerous it is, that one's not a crazy theory, either.
+
+At least I don't think.
+
+So anyways, zooming out, I think that Mythos is real and very powerful and it's almost certainly not the big public launch that the timeline seems to think it is right now, at least not yet.
+
+So the thing that you should actually be waiting for isn't a big Mythos launch, it's probably the next Opus model.
+
+And whether Open AI ships GPT-5.6 and if that forces Anthropic's hand to drop something else pretty quick after that.
+
+But anyways, that's going to do it for this one.
+
+So if you guys enjoyed the video or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video and I'll see you on the next one.
+
+Thanks, guys.

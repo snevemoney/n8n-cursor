@@ -1,0 +1,909 @@
+Today, we're going to be building this AI system that automates newsletter creation.
+
+The idea is that when the system goes off, it'll do some initial research to find good topics for the newsletter.
+
+Then, we'll do deeper research on those topics, write some sections, and then the editor agent will take all those sections and style it together in HTML and send it off to you for human approval.
+
+Like I said, I'm going to build this live right in front of you guys so I can explain what I'm doing and why I'm doing it.
+
+So, hopefully you guys find this one helpful.
+
+Let's get right into it.
+
+So, this is what the finished product will look like.
+
+You can see it's not too complicated.
+
+It's just a linear flow of nodes.
+
+There are three AI steps, which are these three different agents, and we'll break down what they're all doing.
+
+But high level, what the flow is is that we're going to do research, send that initial research into the planning agent to create topics.
+
+We'll then do deeper research on all of those topics, write those sections based on those topics, and then when we aggregate everything together, the editor agent will basically approve the final copy and push it over to us on Gmail.
+
+Anyways, this is kind of what the final product looks like and it's a really holistic newsletter and you could basically get this sent to you as a draft once a week or every single day or whatever it is.
+
+Send it out to your team, send it out to your email list, whatever you want to do.
+
+But this is going to cut down all the time of actually doing like the research and now that you have this draft here, you could basically just make your small tweaks and shoot it off.
+
+And just to get you guys inside my mindset, when I'm looking at building a system and I kind of know what I want as the end result, but I don't know how to get there exactly, what I do is I go to some sort of whiteboard program tool like Excal or Miro or whatever you want to call them.
+
+And you can see here I basically was brainstorming.
+
+Okay, so mine I'm going to have this be a weekly trigger.
+
+When this goes off, the first thing I want to happen is research over the past week to basically make sure that this newsletter goes off once a week and it's capturing all of the most recent news.
+
+Based on the research from the past week, I'm going to feed this into an AI step.
+
+So, in my mind, this green is indicating AI.
+
+So, this AI would read the initial research and create the title of the newsletter and topics for this edition.
+
+Then, we would have three different topics.
+
+So, we would do research on each of those three topics. we would pass the three topics with the research along to the next AI which will write each of the individual sections.
+
+So now we'll have three different newsletter sections written and then what we want to do is bring it all together.
+
+So we'll use an aggregate node to put it all together and then finally we'll feed it to a last AI which we call the editor AI.
+
+And this AI's job is to make sure it's HTML formatted, make sure it has an introduction and a conclusion and that everything flows and then it's basically done and we send off the draft and that's the end of the process.
+
+And because we're going to be building this together, I wanted to show you the tech stack is really lean.
+
+We're obviously going to use NIDAN as the main workflow builder.
+
+We're going to be using Tavi twice for different research steps.
+
+We're going to be using Gmail just to send the actual newsletter.
+
+And then Open Router is what we're using for all our AI models.
+
+We're probably going to stick with some GBT 5 models today just cuz it's new and it's fun to try it out.
+
+But you could also experiment on Open Router with some Google models or anthropic models or DeepSeek, whatever you want to use.
+
+Open Router has a ton of them in there.
+
+So, now that we understand what the system is that we're going to be building, let's head over to a fresh workflow in Naden and get started.
+
+And because we have our wireframe already diagrammed out, this is really easy.
+
+I already know exactly where I need to go.
+
+This first thing that we're going to do is grab a schedule trigger.
+
+And because I want mine to go off once a week, I'm going to change the interval to weeks.
+
+I'm going to have it go off one week in between.
+
+We'll do Sundays at midnight.
+
+That's fine by me.
+
+And this is basically how often the system would go off once we push it into production.
+
+So once we make it an active workflow, now this trigger would actually go off once a week on Sunday at midnight.
+
+I'm just going to turn this off because we don't want to do that yet.
+
+And now let's get started on the build.
+
+So I know that the first step that we want to happen after the trigger goes off is to do some research.
+
+So I'm going to click on this plus and I'm going to type in Tavi, which is the tool that we're going to use for research.
+
+If you don't see Tavi, what you're going to have to do is go to your admin panel or if you're self-hosting, update your end in a different way.
+
+And you'll have to make sure you're on 1 point I think it's 101 or higher and also that you have verified community nodes turned on.
+
+And then you'll spin back up your end and you should see Tavi.
+
+You'll install it.
+
+And then you're going to grab the search action.
+
+Now if you don't have a Tavi API key, you can start one up for free.
+
+You can get a,000 searches a month which will last you a long time.
+
+And once you come into here and create a new credential, you'll just go to tavly.com and then when you create an account, there'll be a button that says create an API key.
+
+You'll grab that API key and just put that right in there.
+
+Super simple.
+
+But now we have to make our actual search.
+
+So the query right here is where we enter your broad category or niche or topic of your, you know, newsletter.
+
+So let's say mine is AI adoption for small businesses.
+
+That's what I'm going to put right in here.
+
+And this is going to stay the same every single time this workflow goes off.
+
+Now I want to add some options.
+
+The first thing that I'm going to add is a topic.
+
+And these are all options that we can use to change the way that Tableau searches the web for us.
+
+So I'm going to go to topic and instead of doing general, I'm going to choose news because then it's like more looking for recent things and like headlines, stuff like that.
+
+From there, I'm going to also do time range.
+
+So I only want to search within the past week.
+
+That way we know it's all like things that are trending, things that are currently happening.
+
+And then you can see there's other things that we can do.
+
+I'm also going to turn on max results.
+
+You don't have to do this, but I'm just going to go with three for now. especially just because I'm doing a live build demo.
+
+So, these are the options that I currently want.
+
+I'm going to hit execute step.
+
+And now you can see we're going to get back three different URLs with kind of like some summarized content about small business AI adoption.
+
+So, we have the small business technology gap.
+
+We have SMB's hoham on AI versus automation, all this kind of stuff.
+
+And you can see the publish date.
+
+These are all coming from within the past week.
+
+So, we know our options are working.
+
+Now, real quick, just some workflow hygiene.
+
+I'm going to rename this node.
+
+I hit spacebar, by the way, when I clicked on it.
+
+And I'm just going to say initial research.
+
+This is just a good habit to get into so you can know what each node is doing.
+
+Uh, another good habit to get into is pinning data.
+
+So, I can click on this and hit P.
+
+And now we don't have to re-trigger that API call if we accidentally like refresh or whatever it is.
+
+Um, just to keep all that live data in there.
+
+Cool.
+
+So, we've done our initial research.
+
+Next is well, let's just go look at the di the the diagram of the wireframe here.
+
+The next thing to do is use AI to create titles and topics out of that initial research.
+
+So, I'm going to go back into the workflow.
+
+I'm going to grab an AI agent.
+
+And now, we need to do some configuration of this step here.
+
+The first thing I'm going to do real quick is add our chat model.
+
+So, I'm going to go to Open Router like we talked about.
+
+Same thing here.
+
+If you don't have an Open Router account, you'll go to open router.ai.
+
+You'll make an account.
+
+And when you create an API key, you basically just put that right in here.
+
+So very simple.
+
+Again, we're gonna actually go to GBT 5 mini for this step.
+
+And now what we need to do is a few other things.
+
+We need to configure what the agent looks at, what the agent instructions are, and then potentially an output format.
+
+So I'll show you guys what I mean by that.
+
+The first thing that we need to do is we need to give it basically like this is your message. this is what you're looking at.
+
+So instead of doing that here in the connected chat trigger node, we have to define that.
+
+And what we wanted to look at is pretty simple.
+
+We wanted to look at the research results from our Tavly node.
+
+So basically what I would do is I would say you know like here is article oops I cannot type today.
+
+Here's article one and then I would just basically like drag in here's the URL here's the title here is the content of article one.
+
+So you could do that.
+
+It's a bit more manual and you know obviously this looks weird because the variables are all smooshed together.
+
+You'd probably want to format it like this.
+
+And now that's article one.
+
+But what I'm going to do instead is I'm going to go to this resource pack which you guys can get in my free school community.
+
+I'm going to grab this function right here and I'm just going to paste that in here.
+
+And all that does is it's basically grabbing this array of results and it's just formatting it for us pretty much like natively.
+
+And that way our agent can read it and understand what it's looking at.
+
+And this is just going to be a lot easier and more dynamic than if we basically hardfixed in different variables and dragged them in.
+
+So in order to actually grab this resource pack and if you want to just download the actual automation rather than build it yourself, you can do that as well.
+
+You're going to go to my free school community.
+
+The link for that is down in the description.
+
+When you get in here, you're going to search for the title of the video or go to YouTube resources and find the post associated with this YouTube video.
+
+And when you click on it, there will be a JSON file to download.
+
+There will be a PDF. you can download all the resources that you need right from this post.
+
+So that's how you'll get everything and now that you have it, follow along with the rest of the video.
+
+So that's all that's going on here.
+
+But once again, you could manually drag the stuff in.
+
+So now that we have the agent is looking at our three articles, we need to tell it what to do with these three articles.
+
+And that's where we come down here and we add a system message.
+
+So real quick, I'm just going to make this an expression so we can open up full screen.
+
+And I'm also going to go back to the resource pack and I'm going to copy in this system message that I'll give you guys again in my free school community and paste that in.
+
+So all I'm saying here is that you are an expert newsletter planner.
+
+You will receive three articles from the past week.
+
+Your job is to come up with a creative and fun title as well as the main topics for the newsletter.
+
+So this AI is specialized in just this function.
+
+It would be way too overwhelming if we gave our agent all this research, all these articles and said, "Hey, just write a newsletter." So, I like to break it up in steps and have each AI do something very specialized.
+
+The instructions down here say that the newsletter should flow nicely, feel informative and holistic, and that the topic should be three to five words.
+
+So, what I'm going to do now is just hit execute step.
+
+And what we're going to see is that the agent's going to use its brain.
+
+Right now, in order to output the title and the three topics for us, there is one thing that we're going to have to do, but I just wanted to run this first to show you guys the difference here, and that is that we're going to require a specific output because what you see here is it did its job.
+
+It output a title and then it output different topics as you can see, but it's all in one field.
+
+Meaning, if we moved on to the next step, let me just add like a set node just to show you guys, it would all be in one variable.
+
+And if we dragged it in, we couldn't really separate it. like it's it's all together.
+
+So, what we want to do is just get it all separate.
+
+So, I'm going to go back into the resource pack.
+
+I'm going to copy the structured output parser JSON and then I'm going to turn on this option that says require specific output format.
+
+And now we are in even more control of the way the agent outputs information.
+
+So, I'm going to choose the structure output parser.
+
+This part's important.
+
+I'm going to change the type to define using JSON schema.
+
+And then just paste in that value that we got from that resource pack.
+
+And I can hit play on the agent right here.
+
+And this is going to do the exact same thing except for now it's going to put it in that format that we were looking for.
+
+And you guys will see the difference once this spins out.
+
+So you can see now we have these things are in different fields so we could actually drag them differently.
+
+So that's great.
+
+I'm also going to pin this data so we don't have to rerun our agent if something goes wrong.
+
+And we're going to move on to the next step.
+
+So what we're going to do now is we're going to use a node called split out.
+
+What this is going to do is it's going to take this list of topics.
+
+As you can see, we have topic one, two, and three.
+
+And we are going to just split them out.
+
+So now it went from one list, one item to three items out here.
+
+And this is nice because what we're going to do is we're going to use Tavi again to do research on each of these three things individually.
+
+So I'm just going to pin this data.
+
+I am going to grab another Tavi node.
+
+We're going to do another search.
+
+And I'm just going to drag in the um the topic into the query.
+
+So this is going to run Tavi three separate times.
+
+The first time it's going to run it for bridging the tech gap.
+
+The second time it's going to run it for SMB attitudes towards AI.
+
+And the third time it's going to run it for practical AI tools guide.
+
+Before we run this, we need to do some more options.
+
+So the first thing I'm going to do is for topic, we're going to leave that as general.
+
+So you actually don't even have to add that.
+
+It's general by default.
+
+Um you could play with the time range if you want.
+
+For for now, let's just say we're going to go just the past month.
+
+But the main important thing that I want to do is include raw content.
+
+I'm going to turn this on because you guys may have not noticed, but in this first step, we had include raw content turned off.
+
+And what that meant is that we were getting basically just like a summary from each article, but we weren't getting the actual raw content.
+
+And that's what we want to write the newsletter.
+
+So, here I'm going to make sure that's on.
+
+I'm going to change this name to research topics.
+
+Okay.
+
+My fingers are a little cold, so my typing has been awful.
+
+But anyways, we're going to execute the step.
+
+And you can see that there's three items going in.
+
+There's going to be three items coming out.
+
+So, there's going to be different research on all those topics like I already mentioned.
+
+Real quick, guys, a word from the sponsor of today's video, Hostinger.
+
+All end workflows need a place to reliably run 24/7 and scale up as you need to.
+
+And that's where Hostinger comes in.
+
+What we're looking at right here is Hostinger self-hosted naden with unlimited workflows, unlimited executions, community nodes, and a one-click installation.
+
+So, I'm going to show you guys how that works real quick.
+
+You'll click on choose your plan, and you can see they have different options based on the amount of storage and processing power that you need.
+
+Right now, we're going to go with KVM2, which is the most popular plan.
+
+On this panel, you can see how long do you want the period to run.
+
+You can get daily backups.
+
+You choose your server.
+
+And here's where you would choose NAND as your application.
+
+And of course, if you're getting a yearly plan, don't forget to use code Nate Herk right here, and you can get 10% off your NADN.
+
+Now that I've paid, I just have to set up a password, and we'll be all set.
+
+So, now that everything is spun up, you can see the overview right here.
+
+I just have to click on manage app to the right of end and it's just going to pull up our end right here.
+
+Just spun up my account and now you can see we have our self-hosted end right here.
+
+And that took minutes.
+
+So if you're like me, not super technical, especially when it comes to DevOps stuff, but you obviously know you need somewhere safe and reliable to host your ended workflows and have daily backups stuff like that, then use the link in the description to check out Hostinger.
+
+And don't forget to use code Nate Herk.
+
+So while this finishes up, we're going to pin it when it's done so we don't have to re-trigger the research.
+
+So I'm just going to come in here real quick and pin that data.
+
+And now you can see that we are getting um let's see schema might be the easiest but we're getting research on different topics.
+
+So the first one was bridging the tech tech gap and then the next two topics as well.
+
+So we have gotten our title and topics.
+
+We have done the research.
+
+Now we need to use AI again to write the actual newsletter sections.
+
+So I'm going to grab another AI agent right here.
+
+We are once again real quick going to connect open router.
+
+And actually a fun trick, you can just hook them up to the same model if you want them to use the same model.
+
+Obviously, if you want the agents to use different models, you would have to create a new one, but they're going to use the same one, so that's fine.
+
+I'm going to change this agent to let's see what I what I named him in here, the section writer agent.
+
+So, I'm just going to copy this actually, and I'm going to change this agent's name here.
+
+And now, same thing.
+
+We have to configure the user message, what the agent sees, and the system message, its instructions.
+
+So, I'm going to open this guy up.
+
+We're going to first of all change the user message to define below because we want to define what it looks at.
+
+And what do we want it to look at?
+
+We basically want it to look at all of the search results for the given topic as well as the query that it was given.
+
+So what I'm going to do here is basically just say um actually not query, I'm going to say topic.
+
+So basically I'm telling the the this agent you're going to write a section of a newsletter. here is the main topic or heading and then I'm going to give you these results down here.
+
+These are like the article results.
+
+So that is what we would give it.
+
+But we get this weird object object thing.
+
+So we'd have to like do a join expression to be able to see it.
+
+Or obviously you could drag in like you know here's the URL, here's the title, here is the raw content from that article, but we don't want to do it that way because it's not as variable.
+
+So, I'm going to go back to the resource pack and I'm just going to grab this JSON function, which is going to do the same thing as it did earlier, where it basically is just going to split out all of the research in a way that the agent can read really nicely.
+
+So, that's the only reason we're using a function there.
+
+Cool.
+
+So, it gets the topic and research.
+
+Once again, this agent's going to do it three times.
+
+So, the first time it's going to do bridging the tech gap.
+
+Second time it's going to do SMB attitudes towards AI.
+
+And the third time it's going to do practical AI tools guide.
+
+Now, we need to add another system message so it can actually see, okay, I'm getting this stuff.
+
+What do I do with it?
+
+So, of course, for the sake of time, I've already pre-written this.
+
+I'm going to grab this system message, which is actually pretty short.
+
+And once again, you guys will get this in my free school community.
+
+I'll show you guys later how you actually do that.
+
+Um, and what you do is you're going to come in here and you're going to hit paste.
+
+So, now we have this system message with an overview, which is that you are professional newsletter section writer.
+
+Your only task is to write one standalone section of a newsletter.
+
+Your instructions are to always include a clear section heading.
+
+Do not write an overall title, introduction, or conclusion.
+
+You're just writing one little section.
+
+Write in a professional, expert, and engaging tone in your if you reference facts, data, or quotes.
+
+You must site the source.
+
+Um, all this kind of stuff.
+
+And these prompts, keep in mind, are where you can really come in here and make this newsletter a lot more tailored towards your business, your ICP, you know, anything like that.
+
+This is where you can put your own spin on it.
+
+This one and the editor one for sure.
+
+But anyways, it's a good place to start.
+
+And now what I'm going to do is just hit execute step.
+
+And we don't need a structured output parser here.
+
+You could split them up in between like the header and the body, but we're going to combine it all together later either way.
+
+So I'm just going to go ahead and run this section writer agent right now.
+
+All right.
+
+So the section writer just finished up.
+
+We'll take a quick look.
+
+If we go to the table view, we can see that the first section comes out with this heading and then we have um different little pieces in here and it is using its sources.
+
+So that's good.
+
+Here is the second section which is SMB attitudes towards AI adoption.
+
+And then the third one comes out as well.
+
+So now that we have all that figured out, let me just move this back to the middle.
+
+What we need to do now is first of all, I'm just going to pin this so we don't lose it.
+
+And now we need to bring it all back together and then have an editor agent make it stylized with HTML.
+
+So it looks nice.
+
+So in order to get everything back together, we're going to do another data transformation node, which is called an aggregate.
+
+And this is going to bring our three items over here back into one.
+
+As you can see right here, we basically said 3 to one, bring it all together, and then we're going to stylize and edit.
+
+So all I have to do is say that we're going to just combine this field called output into one.
+
+So now we should be getting one item over here that has all three of those sections combined as you can see.
+
+Perfect.
+
+Now, I'm going to add another AI agent, which is our final AI agent.
+
+We're going to real quick go grab a chat model.
+
+And the reason I'm grabbing one myself is because for this writing, because it's like HTML and we want it to really sound nice, I'm going to use GBT5 rather than these other ones where I was using GPT5 Mini.
+
+So, we're going to use GBT5 here.
+
+I'm also going to call this guy real quick, the editor agent.
+
+And again, we have a couple things to set up. system message, user message, and we are we are going to again do a structured output parser.
+
+So, first of all, let's do the user message.
+
+We're not going to do this.
+
+You only do this if you use a chat trigger.
+
+So, we're not using a chat trigger.
+
+So, we're going to define below.
+
+What we wanted to look at are the three different sections.
+
+So, what you could do is you could basically go like, you know, here's section one, hit enter, here's section two, hit enter a few times, and then here's section three.
+
+There's nothing wrong with that and you certainly can.
+
+But just to get you guys more comfortable with like the way you can use functions to make things a bit more dynamic.
+
+You could drag in this array right here.
+
+And this is similar to what we were doing earlier.
+
+You can after the output type in join.
+
+And this basically joins together the items of the array.
+
+And then you can also in here specify what to do between each join.
+
+So let me find the good point right here.
+
+So the second output starts with SMB attitudes towards AI.
+
+So let me just find that real quick.
+
+Um we'll find it.
+
+We'll find it.
+
+We'll find it.
+
+Okay, I found it right here.
+
+SMB attitudes towards AI.
+
+And you can see that it basically starts right away like combined with the end of output one.
+
+So we don't want to do that.
+
+So if I come here and I type in a quote and do a new line symbol, it's going to space it out.
+
+And if I do one more, and if I do one more, it spaces it out even more.
+
+So now it's very clear where this second section basically starts.
+
+So that's what we're going to do here.
+
+That is what I did down here in the um what's it called?
+
+The resource pack.
+
+I have the sections with the three new lines after a join.
+
+So once again, you could also just grab this user message and then paste that in there and you will get the title and the sections.
+
+The reason why the title is being weird is because we grabbed the title back from the initial agent called the planning agent.
+
+And it's because I didn't name it planning agent.
+
+So if I literally just went back all the way over here, oops, and I just named this guy planning agent.
+
+That should have fixed it basically.
+
+So now it's green.
+
+You can see I fixed it.
+
+Now it knows what's a reference.
+
+So this editor agent is receiving the title as well as all of the sections of the newsletter.
+
+And now all it has to do is it has to understand I need to create the intro and the conclusion and like a sources section at the bottom.
+
+So that's where we're going to tell it to do that in the system message.
+
+So let me real quick just make this full screen.
+
+Go to our resource pack and I'm going to grab the system message.
+
+You can see this is the longest one out of all of the other ones that we've had today.
+
+And I'm just going to paste this in right here.
+
+I'm not going to read the whole thing.
+
+You guys obviously have access to the template.
+
+You can also pause the video as I scroll down if you want to be able to read the whole thing.
+
+But what we're doing here is we're defining its role.
+
+We're telling it what to do.
+
+And then we're giving it the structure of HTML so that it has like headings and bold and and clickable links and stuff like that.
+
+So that's how we're doing it here.
+
+And what I'm going to do now is before we actually run it, explain why we need a structured output parser.
+
+So I'm going to connect the structure output parser and then I'm going to explain why.
+
+Because what we're doing is we're having this editor agent output the title of the email as a subject. or in a subject field.
+
+And then it's going to output the actual content of the newsletter in a field called content.
+
+And the reason why we need to do this is because we're going to send the newsletter in Gmail.
+
+And we want to have two fields that we can drag off.
+
+The first one being the subject, the second one being the email body.
+
+So that's why we're doing a structured output parser here.
+
+This is probably going to take anywhere from 30 seconds to a minute and 30 seconds.
+
+So I will let this spin.
+
+We will configure the Gmail node and shoot that off and then we'll take a look at it together.
+
+So, all right.
+
+So, that run actually took like four minutes.
+
+I earlier when I was doing this, they weren't always taking that long.
+
+I don't know, maybe just the time of day.
+
+But either way, before we actually read it and see how it came out, I'm just going to pin this data real quick so we don't have to wait another four freaking minutes.
+
+And then I'm going to add a Gmail node.
+
+So, I'm going to grab this node.
+
+And what we're going to do is create a draft.
+
+So, if you don't have if you haven't connected your Gmail account, you're basically just going to sign in, create your account, and now, like I said, we have our subject and our message.
+
+And because we actually already, you know, separated them out with our structured output parser.
+
+Super easy.
+
+We just drag in the subject.
+
+We drag in the drag in the content.
+
+And now the only thing we have to do is change the email type to HTML because we formatted it as HTML or our editor agent did.
+
+And if we sent it as text, then it would not actually be formatted.
+
+It would just have this like weird -p-p2.
+
+It would just have that everywhere.
+
+So, we have it as email.
+
+And then also, you have options down here.
+
+So, you can send it to someone, you can attach things, you can send it to someone.
+
+I'm real quick just going to send it to Nate Herk8 Gmail, which is just like my test email for all this end stuff.
+
+And now that we have that set up, I can hit execute step.
+
+And this is just going to notify us that it was in fact sent.
+
+So, I'm going to head over to the Gmail and we're going to take a look at this newsletter draft.
+
+All right.
+
+So, in my drafts, here it is.
+
+You can see that we have our title from gap to growth small biz tech playbook.
+
+We have a quick little brief which is, you know, as of August 17th, 2025, many leaders are tackling the same challenge from different angles, closing tech gaps, turning cautious interest in AI into confident use, and giving teams a practical toolkit.
+
+This edition connects those threads with actionable steps, evidence on SMB attitudes, and a fast start guide to tools and governance.
+
+So, what you see here is that we have our three main source sections.
+
+We have bridging the gap, we have SMB attitudes, and we have practical tools guide.
+
+We also have a list down here at the bottom of sources.
+
+So, we know that all of this newsletter was written by real sources that have, you know, we can click into these right here and it will take us right to them and we can basically see why it wrote that.
+
+We have a quick little sign off.
+
+And then the thing to notice here is that we also have sources after each sentence.
+
+So, you can see where each sentence came from.
+
+If you don't like the way that it literally just says source, you could easily go back into the editor prompt and say, you know, hey, like maybe this source should be called Forbes because it came from Forbes.
+
+And this one should be called, that one's also Forbes.
+
+This one should be called Euro News because it came from there.
+
+All stuff that you can play with in the system prompt to make it tailored towards the way you want your newsletter to be written.
+
+So, I'm not going to read through this whole thing.
+
+I think you guys can see how this works.
+
+Um, it seems like it it's flowing very nice.
+
+You could obviously play with the different chat models.
+
+In the past when I've done newsletter creation, I've liked to use Claude because I really like the way that it writes.
+
+But GBT5 so far I've been very impressed with as well.
+
+You can see down here we've got a lot of different sources for different tools, different AI tools.
+
+Apologies if you hear the fire truck that's zooming down the street down there.
+
+But anyways, this is kind of what the final product looks like.
+
+And it's a really holistic newsletter.
+
+And you could basically get this sent to you as a draft once a week or every single day or whatever it is.
+
+Send it out to your team, send it out to your email list, whatever you want to do.
+
+But this is going to cut down all the time of actually doing like the research and now that you have this draft here, you could basically just make your small tweaks and shoot it off.
+
+So, in order to actually grab this resource pack and if you want to just download the actual automation rather than build it yourself, you can do that as well.
+
+You're going to go to my free school community.
+
+The link for that is down in the description.
+
+When you get in here, you're going to search for the title of the video or go to YouTube resources and find the post associated with this YouTube video.
+
+And when you click on it, there will be a JSON file to download.
+
+There will be a PDF. you can download all the resources that you need right from this post.
+
+So that's how you'll get everything and now that you have it, follow along with the rest of the video.
+
+So that is pretty much the whole system.
+
+You guys saw me build this entire thing.
+
+Hopefully I explained kind of like why I was doing things.
+
+I would basically now want to just select all these, hit P to unpin them if that works.
+
+I thought that did work.
+
+I don't know why it's not letting me do that.
+
+Well, I'll just do it the manual way.
+
+So I'm unpinning everything.
+
+I would save it.
+
+I would push this into production by making this active.
+
+So now this trigger would actually go off every single week and you pretty much have just built your first workflow.
+
+Now from here there's a lot of things you'd want to do next.
+
+The first one that I would recommend is have a log of all the newsletters that have gone out.
+
+That way you can you can track them when they've gone out.
+
+You can give feedback in like a Google sheet and that way you can see your feedback over time in order to make these changes in the different prompts of the agents if you don't like how something's happening.
+
+There's of course tons of other stuff that you can do from here to make this smarter.
+
+Not only do you want to log it so you can revisit the prompting and stuff, but you want to log so that you can have error handling in place.
+
+And you also want to be able to, you know, customize your HTML styling and human in the loop revision stuff like that.
+
+You could also actually change the workflow logic so that you're not just doing research on Tavi.
+
+Maybe you want to use Perplexity and Tableau and then bring those back together.
+
+Or maybe you want to use SER API and bring all that together.
+
+So now it's really up to you since you have this nice template to start from.
+
+Understand what happens in each step, how you're able to customize each step, and if you want to improve certain areas, you know, make it your own.
+
+So I've showed you guys the free community where you can download this exact template if you just want to plug it in right away and start playing with it or if you want to grab this resource pack, of course, with all the prompts that we use today.
+
+But if you're looking to take your skills further or you're looking for, you know, some more hands-on support, then definitely check out my plus community.
+
+The link for that is also down in the description.
+
+We've got a great community of members who are building with any every single day.
+
+They're sharing their learnings, their wins, their challenges, all this kind of stuff.
+
+We also have a classroom section with two full courses, agent zero, which is the foundations for beginners, and then 10 hours to 10 seconds where you learn how to identify, design, and build time-saving automations.
+
+So, if you like the whole way that I go about, you know, trying to understand the tech stack and wireframing and everything before you get into it, that's something that I talk about in this course as well.
+
+So, I'd love to see you guys in these communities.
+
+But that's going to do it for today.
+
+If you enjoyed the video or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you all in the next one.

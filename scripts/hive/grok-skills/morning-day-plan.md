@@ -1,19 +1,36 @@
-# Skill: morning-day-plan
+---
+name: morning-day-plan
+description: >-
+  Weekday plan from Calendar + Gmail plugins. CUT slider, three inbox
+  buckets, no-move-meeting. Draft only. Day Planner owns this machine.
+---
 
-**Description:** Pull today's calendar and actionable Gmail; write a short weekday day plan.
+# Morning day plan
 
-**Instructions:**
+**Owner:** Day Planner. **Stack:** Grok Calendar + Gmail plugins. Consume digests; do not fire webhooks.
 
-1. Use Grok **Google Calendar** plugin — list today's events with times; note conflicts and gaps.
-2. Use Grok **Gmail** plugin — find threads needing reply, deadlines, or pending invites (last 48h).
-3. Write a concise plan:
+## When
+Weekday morning, or Evens asks for today’s plan. Not a product build. Not a client send.
+
+## Steps
+1. **Calendar plugin** — list today’s events with times. Flag conflicts and gaps vs open agent jobs. Escalate; **do not move the meeting**.
+2. **Gmail plugin** — last 48h into three buckets only: **urgent** / **info** / **ignore**. First Gmail = read+draft.
+3. Write the plan:
    - Meetings (time-ordered)
-   - Top 3 actions for the operator
-   - One "protect evening" note if afternoon is stacked
-4. Do **not** send email or accept calendar invites — suggestions only.
-5. Optional register:
+   - Top 3 actions
+   - **CUT** slider — what we will not do today (protect deep work)
+   - One protect-evening note if afternoon is stacked
+4. Ladder: **visible → efficient → automatic**. Do not skip to automatic.
+5. Optional register (no webhook):
    ```bash
    python3 scripts/hive/grok-hive-tool.py --grok-agent "Day Planner" --tool scorpion_register_outcome --params '{"jobType":"ops.day_plan","status":"done","summary":"..."}'
    ```
 
-**Owner agent:** Day Planner
+## Stop
+Send, accept, move invite, pay, deploy, book, publish = operator.
+
+## Never
+- Send email or accept/move calendar invites
+- Fire `n8n_trigger_catalog_webhook` or `hive_send_report`
+- Invent `hive-operator-digest.json` fields when the file is missing
+- Build product or client deliverables from this desk

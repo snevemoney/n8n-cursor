@@ -1,0 +1,23 @@
+{
+  "pattern_id": "P-auto-084",
+  "version": 1,
+  "title": "safety / operate — folder-os-portable-secrets-handoff-before-dumb-zone",
+  "steps": [
+    "Steal folder-OS + handoff + CLI. No Hermes/OpenClaw port.",
+    "Steal no-send-tool + boring-script. No Vercel/Modal without HITL."
+  ],
+  "support_ids": [
+    "K-jdbOVepEtUE-03",
+    "K-jdbOVepEtUE-05"
+  ],
+  "dissent_ids": [
+    "K-jdbOVepEtUE-04",
+    "K-jdbOVepEtUE-06"
+  ],
+  "valid_when": "domain=safety; stage=operate; Hive: `send-removed` / `ask-principal`. Deploy/publish HITL. Same assume-touch as `RzLV8sfFdMM`.",
+  "less_relevant_when": "Cloud routine only when you truly need the agentic loop.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

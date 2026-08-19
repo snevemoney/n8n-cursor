@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-022",
+  "version": 1,
+  "title": "agent-ops / build — three-layers-a-handoff-note",
+  "steps": [
+    "Steal three-layer split + handoff note + overwrite warning. Do not create `.codex`.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-kB9iMD0EjT8-01",
+    "K-kB9iMD0EjT8-04",
+    "K-kB9iMD0EjT8-05"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=build; Valid when the IF clause holds. Caption-only. Tape $ UNVERIFIED.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

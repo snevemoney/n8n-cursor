@@ -1,0 +1,39 @@
+{
+  "capability_id": "CAP-x-2088007687149601254-inbound-from-demonstrated-build",
+  "name": "inbound-from-demonstrated-build",
+  "goal": "vague agency / category pitch → inbound request for a specific already-shown build",
+  "observed_workflow": [
+    "Refuse outbound “I can automate your business” / cold “AI consulting” (VIEW A)",
+    "Have or make one specific artifact (not a category)",
+    "Post that artifact (thread / video). Publish HITL",
+    "Wait for inbound “could you do THAT for me?”",
+    "IF you must enter a room: free work only in exchange for documented proof you can post (HITL)"
+  ],
+  "tools": ["X/Twitter (on tape)", "YouTube (on tape)"],
+  "agent_abilities": ["draft a proof post of a named hive machine (do not publish)"],
+  "triggers": ["a demonstrated build exists", "temptation to outbound a category"],
+  "state": "SKU unknown until inbound names the class of job they saw",
+  "guardrails": [
+    "send / pay / deploy / book / publish stay HITL",
+    "do not outbound the category",
+    "do not unpark clients or start a hunt",
+    "tape $ UNVERIFIED",
+    "VIEW A and VIEW B stay separate — VIEW B not installed from this clip",
+    "do not average with outbound-first tapes"
+  ],
+  "reproduce": "Dry-run only: pick one already-stolen machine and draft a proof post. Do not publish. Caption-honest; no invented clicks.",
+  "generalize": "Same primitive: specific artifact → public proof → inbound for that class. Notes only. Do not wire.",
+  "improve": "HITL spine already have (ask-principal, send-removed). Do not “improve” by auto-publish or free-work without Evens.",
+  "primitive_ids": ["PRIM-x-2088007687149601254-specific-artifact-inbound"],
+  "atom_ids": [
+    "K-x-2088007687149601254-01",
+    "K-x-2088007687149601254-02",
+    "K-x-2088007687149601254-04"
+  ],
+  "behavior_ids": ["BEH-x-2088007687149601254-demo-inbound"],
+  "source_video_id": "x-2088007687149601254",
+  "timestamp": "51:08-52:50",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

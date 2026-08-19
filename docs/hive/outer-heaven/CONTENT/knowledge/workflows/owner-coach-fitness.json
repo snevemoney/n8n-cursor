@@ -1,0 +1,64 @@
+{
+  "workflow_id": "WF-owner-coach-fitness-v1",
+  "project_id": "owner-coach-fitness",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Hunt parked",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T2",
+      "title": "Intake→book, not newsletter-as-offer",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T3",
+      "title": "Book clock/TZ; no public voice widget",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "ICP-specific fitness atoms",
+      "coverage": "gap"
+    }
+  ],
+  "pattern_ids": [
+    "P-book-clock-not-model",
+    "P-public-widget-is-a-credit-hose",
+    "P-dont-lead-with-word-AI",
+    "P-four-blanks-before-build"
+  ],
+  "support_ids": [
+    "K--Lo_SlSgtnA-01",
+    "K--cdexJWN8YA-01",
+    "K--cdexJWN8YA-03",
+    "K-0Ujdys4LqNs-02",
+    "K-0WDkwMxj13s-02",
+    "K-0YXjEzFfft8-03",
+    "K-2J3uX8iRNng-02",
+    "K-3TdD8Qv5Tk8-03",
+    "K-5IM27lbCwjM-01",
+    "K-5p5cV0yVDvQ-04"
+  ],
+  "dissent_ids": [
+    "K-3TdD8Qv5Tk8-06",
+    "K-3XIGcM7VICc-06",
+    "K-8MEJen0nblQ-04",
+    "K-B4p9O2P2a3c-05",
+    "K-B4p9O2P2a3c-06",
+    "K-BO-jFbN4p8Y-05",
+    "K-BO-jFbN4p8Y-06",
+    "K-irg-2IfAjpo-04",
+    "K-x-2088007687149601254-01",
+    "K-zWLZ3bVVwD8-02"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  }
+}

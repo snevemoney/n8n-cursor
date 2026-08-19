@@ -1,0 +1,67 @@
+Here's how you can build anything with Claude Sonnet 4.5 and N and N AI agents.
+
+Of course, we're not just going to be talking about it.
+
+I'm going to be showing you guys some stuff, too.
+
+So, we'll hop into N and N and we'll actually experiment with a few things with Sonnet 4.5 in N and N.
+
+Sonnet 4.5 was released on September 29th of 2025.
+
+And yeah, I know, it feels like a new foundational model is being dropped every single day.
+
+And if you've heard of Anthropic, you've heard of Claude, you've heard of Opus, they're all basically baked into Anthropic's Claude model family.
+
+They're all basically for different purposes.
+
+Haiku's faster, more affordable.
+
+Sonnet's a good balance.
+
+And then Opus is like a max power reasoning model.
+
+And as far as the cost, you can see the breakdown right here.
+
+Sonnet 4.5 is the exact same cost as Sonnet 4.
+
+So, of course, I wanted to show you guys some benchmarks.
+
+So, let's look at some of these tests.
+
+This first one is the SWE Bench Verified, which is kind of like a coding or software engineering exam.
+
+Sonnet 4.5 scored an industry-leading 77 to 82% on this exam.
+
+Now, this one I thought was pretty interesting.
+
+We've got finance, medicine, law, and STEM.
+
+And in orange at the top, we have Sonnet 4.5, which is outperforming pretty much all of the other Claude family models in these categories.
+
+So, it gives more accurate and expert-level advice on these topics, which is going to be really important when you're using AI agents.
+
+So, I'm telling the agent to do research on voice agents and then send it to Michael Scott.
+
+And you can see what's happening here is it's using Perplexity.
+
+It's also calling the contact agent.
+
+And now we'll see if it's able to pass that information into the email agent and send that email for us.
+
+So far, so good.
+
+You can see it was able to call the email agent as well.
+
+Okay, so you can see it actually finished up and it said that it did all of that stuff for us.
+
+Let's go take a look at the email.
+
+All right, so it was able to send this to the correct email for Michael Scott.
+
+We have AI voice agents are intelligent software systems that understand, interpret, and respond to human speech in real time, how they work.
+
+We have NLP, we have TTS, we have current applications, benefits, and latest developments, and then a sign-off from Nate.
+
+If you want to watch that full breakdown, then click on that play button right here.
+
+I'll see you guys over there.

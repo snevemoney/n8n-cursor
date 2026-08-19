@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-066",
+  "version": 1,
+  "title": "offer-positioning / acquisition — tool-pitch-loses-outcome-pitch-wins",
+  "steps": [
+    "Name the outcome before the agent.",
+    "Do not sell or resell template packs as the offer.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-wk8KV280fbg-01",
+    "K-wk8KV280fbg-02",
+    "K-wk8KV280fbg-06",
+    "K-wk8KV280fbg-07"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; Buyer thinks the artifact is the product.",
+  "less_relevant_when": "A custom outcome job is not a library.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

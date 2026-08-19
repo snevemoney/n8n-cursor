@@ -1,0 +1,62 @@
+{
+  "workflow_id": "WF-checkout-in-one-sitting-v2",
+  "project_id": "checkout-in-one-sitting",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Tease on the clock",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "Narrow offer",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "Thin site + path",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "Self-test",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T5",
+      "title": "Effort launch (draft)",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T6",
+      "title": "48h card count",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T7",
+      "title": "Kill or keep",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-I7mpF7_pnPM-01",
+    "K-I7mpF7_pnPM-02",
+    "K-I7mpF7_pnPM-03",
+    "K-I7mpF7_pnPM-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "I7mpF7_pnPM",
+  "words_read": 7720,
+  "tape_faithful": true
+}

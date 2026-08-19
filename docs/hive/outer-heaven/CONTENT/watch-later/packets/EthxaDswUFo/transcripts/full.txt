@@ -1,0 +1,735 @@
+So, we finally have GPT 5.6 Soul, Terra, and Luna.
+
+And the benchmarks are insanely impressive because it basically shows that Soul blows Opus and Fable out of the water and is significantly cheaper.
+
+So, I'm going to quickly flash a few of these benchmarks on screen right now, but I don't want to just talk about the benchmarks.
+
+I think that's extremely boring.
+
+I've been playing around with these models all day long.
+
+I've been putting them side by side, meaning GPT 5.6 and Fable 5, and I've been driving my day-to-day work with these two models.
+
+So, I can actually tell you which model do I like for which use cases and why.
+
+So, don't want to waste any of your time.
+
+Let's just get straight into today's video.
+
+Now, real quick before we hop in, I did want to call out that I do think that this landing page is pretty awesome.
+
+I love the Soul and the Terra and the Luna back here.
+
+And you can see that there's little fives and sixes kind of like drifting all over and inside of these planets as well, which I thought was a a nice touch.
+
+But anyways, let's get into what I actually did today.
+
+All right.
+
+So, I'm just going to walk you guys through some of the experiments I did.
+
+And then at the end, I'm going to actually talk about like the pros and cons of each and my overall consensus.
+
+So, the first thing I did, I have Claude on the left here with Fable 5.
+
+I've got Codex on the right here with GPT 5.6 Soul.
+
+And I gave them both the exact same prompts.
+
+So, I gave them both the {slash} goal, and I told them to build a genuinely fun, playable, open-world bike game that runs in the browser.
+
+I gave them these other rules.
+
+I'm not going to read off this whole prompt, but if you want to take a look, feel free.
+
+I gave them creative freedom, and I just wanted to see what they could come up with.
+
+Okay.
+
+So, I haven't played any of these yet, but I'm not going to tell you which one's which.
+
+We're going to see them both, and then I'll reveal.
+
+So, WASD to steer, space to bunny hop, Q and E for air tricks, shift for boost.
+
+Okay.
+
+Let's go ahead and drop in.
+
+Nice.
+
+Okay.
+
+So, we can move around.
+
+We have a city here.
+
+The camera's a little bit hard to maneuver with.
+
+Um you can't drive through the building, so that's good to know.
+
+Okay.
+
+Just got a little trick in the air there.
+
+So, this is honestly working pretty well.
+
+I don't love the actual way that this works, like the top-down birds-eye view.
+
+I don't think I like.
+
+It's a little bit hard to control.
+
+But hey, functionality-wise, the coins are working, the controls work.
+
+I just jumped over a building and I can bunny hop.
+
+Okay, cool.
+
+And it doesn't look too bad either considering this didn't take it very long.
+
+So, that was the first game.
+
+All right, and now here is the other version.
+
+Let's go ahead and see.
+
+It's pretty similar controls, so let's hop in here.
+
+Okay, so this one is more like a 3D almost more of like a POV sort of style.
+
+I can jump, I can spin.
+
+Oh, I don't know what just happened there.
+
+Um but I'm in a city.
+
+I've got the coin still.
+
+Let's see if I can go try to get on this ramp and see what the uh the physics of that look like.
+
+Wait, am I on the wrong side of the ramp?
+
+Yep, that was the wrong side of the ramp.
+
+But this definitely has more of like that I don't know, like more of a GTA vibe, like an open world game that you can actually like, I don't know, explore.
+
+It feels like the map is much bigger.
+
+I mean, this is definitely a clear winner.
+
+So, I think that we've decided that.
+
+All right, so in this example, the second one, which is the one I thought was the winner here, was Fable 5.
+
+So, that's on the left-hand side here.
+
+This took 21 minutes and 37 seconds, whereas the other side um GBT Soul took 23 minutes.
+
+So, similar on the timing here, but let's look at cost.
+
+So, this Fable run would have costed me about $14.22, whereas the GBT Soul run would have costed $4.50.
+
+Now, what I think is really interesting here is the output tokens.
+
+Fable outputted about 90,000 and Soul only outputted about 31,000.
+
+So, we've consistently seen that Codex and GBT are way more token efficient.
+
+And sometimes that's better and sometimes it's not.
+
+In this case, I would say that it wasn't better because Fable's output in my opinion was like not just a little bit better, it was significantly better.
+
+All right, so let's move on to the second test.
+
+So, this one was kind of similar.
+
+I just said, "Hey, {slash} goal, build me the most impressive interactive scroll-stopping website that you can imagine." So, I gave them complete creative freedom.
+
+I just wanted to see what the models did with that.
+
+So, let me pull up both versions once again.
+
+All right, so once again, not going to tell you which one is which.
+
+I want you to try to form your own opinion.
+
+This one also has sound with it, so I'll make sure the sound is turned on.
+
+So, what you can see here is 10 billion years.
+
+And as we scroll down, we're going to get like kind of a journey, but everything in the background is pretty interactive, so it's very like 3D.
+
+So, watch as I scroll down here.
+
+We start off with the cloud, not too much, but you can still see that there's, you know, like um responsiveness to my mouse movements.
+
+Then we have the collapse, and once again, we've got some cool like galaxy-looking very 3D.
+
+And basically that's the theme of this whole thing.
+
+It's telling the story I guess of like, you know, how we got to where we are.
+
+This is a pretty cool effect.
+
+Um first light.
+
+And um the swelling, so the fuel starts to run out.
+
+And then we had a big boom, so that was a a big noise here for um basically the supernova.
+
+This is a nice effect as well.
+
+And then, like I said, we just kind of keep going through with this sort of feel up until the very end where we are just at us.
+
+So, we have the word you.
+
+Pretty cool.
+
+So, that is what one of the models decided to do.
+
+Let's take a look at the other one.
+
+We have Vesper Archive.
+
+And as we go down, we have a similar sort of thing with sound.
+
+And it's kind of interesting because they had like a similar feel, right?
+
+Like a 3D sort of background that's interactive with my mouse, and it's telling some sort of story, it's telling some sort of journey.
+
+But they're both not bad.
+
+So far, I definitely think that the first one was a little bit had more of a wow factor for sure.
+
+It was a bit more immersive.
+
+This one tells a nice story, and it still it has some impressive features, but I think the first one so far was definitely on a different level.
+
+So, which one was Fable?
+
+Fable was the first one.
+
+So, once again, I think that Fable did a better job here.
+
+What you can see is Fable took 23 minutes, whereas Soul took almost 7 minutes.
+
+And if we go down to the actual cost, Fable was 19 bucks and 24 cents with 80,000 output tokens, and Soul was only a little over a dollar and output 20,000 tokens.
+
+So, it's interesting, like if we had Soul working enough to spend as much as Fable did, would Soul's output have been just as good if not better?
+
+Maybe.
+
+Soul is significantly cheaper on top of the fact that it typically spends less tokens in general just because of the harness and because of the way the model is trained, I guess.
+
+But yeah, I mean this was almost 20 times cheaper for Fable, but the question is is Fable's output was that 20 times better?
+
+And I don't necessarily think that it was.
+
+But just because we're going off of like the actual quality, I'm going to say that I would have taken Fable's output in this one as well.
+
+All right, so I did one more side-by-side experiment.
+
+This one's interesting.
+
+I gave it a different gold prompt and I said, "Design me five fundamentally different visual elements.
+
+They can be games, presentations, websites, simulations, whatever you want." I really wanted to see once again, what does the model do with the super ambiguous prompt?
+
+So, let me open up the different outputs right here and we'll go ahead and compare.
+
+This time I will go ahead and tell you which one is which as we're looking at them.
+
+All right.
+
+So, this one is Fable and this one is Soul.
+
+So, they each output one site and then we've got five different kind of like simulations or sister sites to go through.
+
+So, let's just start with Fable and go through all of them and then we'll go to Soul.
+
+So, this is what we got so far, the gallery, five self-contained worlds.
+
+Let's look at Singularity.
+
+So, I don't really know what's going on here.
+
+It says move to warp space time, hold to feed it, I guess, and then you hit space to detonate.
+
+So, if I hit space, we just blew something up, I guess.
+
+So, eh, I'm not really sure what they're going for here, but that's number one.
+
+We have second one which is called Terra, where we kind of like have this flight simulator almost where we can steer with our mouse.
+
+We use W or S to speed up or speed down.
+
+We can go up or down.
+
+We can change the time of day.
+
+So, as far as like the physics on this, it's not too bad.
+
+Um everything is kind of rendering in a bit strange.
+
+I'm not sure if they were doing that intentionally.
+
+Maybe that's like the vibe of this, but pretty cool, you know, not too bad.
+
+I don't love it, but eh, I mean for the fact that Fable just kind of wanted to do this and did it, it's all right.
+
+Okay, we've got Orbit, which is an arcade game, two rings, one input.
+
+So, I think it looks like we just click to switch rings.
+
+We're trying to collect the coins.
+
+Okay, we're trying to avoid those things is what it looks like.
+
+Um and that's how you get shattered.
+
+So, I mean it plays fine.
+
+It feels very responsive.
+
+I'm not sure.
+
+This is a bit of a bug though, huh?
+
+Um the menu is like taking over me actually playing.
+
+So, I'm playing right now, but the menu isn't going away.
+
+So, that's a bit of a bug.
+
+Let's go ahead to number four.
+
+We've got Ink Flow.
+
+Um click for new piece.
+
+I can change the palette.
+
+I can save them as a PNG.
+
+I think this is just a weird like a board button sort of thing.
+
+I don't know if you guys ever did board button.
+
+But, that's what this reminds me of, like just some very random thing.
+
+And the last one is The Descent.
+
+So, scroll from sunlit surface to challenge.
+
+Okay, so this is kind of like a story again.
+
+It's like an interactive story um where we're actually going underwater.
+
+The background's changing.
+
+We're seeing different creatures go through.
+
+Deeper than the Titanic.
+
+Um this pressure, the sunlight, the temperature, all of that's changing.
+
+So, kind of just another little journey experience.
+
+So, that was Fable.
+
+I will say nothing overwhelmingly impressive there, right?
+
+Let's go to Soul, which already I think this looks better.
+
+This honestly kind of looks like a claw design sort of output, but anyways, Impossible Objects, Five Tiny Worlds, No Frameworks.
+
+The first one is Aurora Orchestra.
+
+So, I guess we're just kind of playing here with the northern lights.
+
+Yeah, not sure exactly what's happening, but we can change the voice, we can change the sky, we can hold for intensity.
+
+We've got other ones in here, so we can change like the color of the northern lights, I suppose.
+
+Not sure what's going on here.
+
+That might be a bit of a bug.
+
+It seems like three and four don't actually work, but two and Oh, now two and one don't work at all either.
+
+Okay, so another little bug there.
+
+Let's go back to the gallery.
+
+Let's go to number two, Atlas of Lost Echoes.
+
+I've got a map.
+
+My cursor is showing where north is.
+
+What happens if I click on this?
+
+Sleeping Sea?
+
+Okay.
+
+Um I'm not really sure what we're doing here.
+
+In the bottom right, you can see it says echoes recovered.
+
+I guess I have to recover all five of these echoes.
+
+So, let's see if anything happens.
+
+Every place that misses us, Atlas complete.
+
+Keep exploring.
+
+Okay.
+
+So, not really sure what that is.
+
+Let's go ahead and go to the next one, the Glyph Heist.
+
+So, the grid is hiding contraband words.
+
+Type every signal before the trace completes.
+
+Okay, so this is just like a typing game, I guess.
+
+Um Am I getting points?
+
+Oh, yeah, the points are in the top left.
+
+Whoa, that's not even a word.
+
+Okay, so this is just like a typing game, I guess.
+
+I don't really see much like feedback.
+
+I'm just kind of typing and those are that's not a word either.
+
+I mean, I guess that's the point is it's trying to trip me up.
+
+Oops.
+
+Yeah, that's kind of the point, I guess.
+
+Okay.
+
+Eh, that's all right.
+
+Um I mean, kind of a cool vibe, right?
+
+Like the actual aesthetics.
+
+I don't think you're losing lives though.
+
+Like I don't know how this ever ends.
+
+Also, I already had a high score in here.
+
+So, definitely kind of buggy.
+
+Um and let's go ahead and go to I guess we got two left.
+
+So, this one This is just a slide deck, it looks like.
+
+It looks like there are five slides.
+
+Not bad though.
+
+I actually think that these are designed pretty well.
+
+This is interesting though cuz this definitely looks like a claw design to me.
+
+Like this definitely looks like something that Fable would whip up.
+
+I don't know why.
+
+The fonts and the color scheme just feels like a claw thing.
+
+Anyways, the last one we got here is a tide pool.
+
+So, life is waiting.
+
+Touch the water to begin.
+
+Okay, I just dropped in a bunch of seeds.
+
+We've got a population of 320, diversity of two.
+
+I can give them sunlight.
+
+I can give them fresh rain.
+
+So, this is very much like a simulation.
+
+Um this one already feels like it's like slowing down my computer.
+
+So, I don't know how much is going on back here, but not too bad.
+
+I like the ones that are simulations.
+
+I think they're kind of fun.
+
+So, yeah.
+
+Honestly, I don't even know what to say here.
+
+Like, I don't know which one to say I'm going to hand the crown to.
+
+I think I'm just going to go with Soul for this one because I think, in general, it had a bit of a better idea of like diversity and experience.
+
+The interesting thing here is when we take a look at the speed and the cost.
+
+So, I thought that this run would take the longest out of all of them because I was saying, "Hey, five very different things." I thought it would take maybe five times as long as the earlier ones, but this one was actually like the quickest on both fronts, which I thought was really interesting.
+
+This one took 15 minutes for Fable, and for Soul, this took 7 minutes, which I thought was really, really fast.
+
+And on the cost side, this costed Fable about 15 bucks with 65,000 output tokens.
+
+And on Soul, it took, once again, about a dollar and 22,000 output tokens.
+
+So, very, very interesting to me.
+
+All right, so those agentic experiments with um Cloud Code and with Codex, that was one thing.
+
+And that's typically how I'm going to be actually driving these two models.
+
+So, it was important for me to play around with stuff.
+
+And of course, all day I used it for just my general work.
+
+But I also wanted to try just explicitly over the API, just talking to the models.
+
+And a lot of these were kind of like a one-shot, "Hey, what's this?
+
+Give me an answer.
+
+What's this?
+
+Give me an answer." Rather than like an agentic loop with multi-step reasoning, but I wanted to see what it looked like for, you know, speed and cost as well.
+
+So, the record here, which is really interesting, is that Soul won 24 times and Fable won three times.
+
+There were also a lot of times when Fable refused to answer, like literally just wouldn't submit an answer.
+
+It refused, which I thought was interesting because, you know, there's the security guardrails are baked in pretty hard.
+
+But also, look at the spend.
+
+I mean, Soul won 24 to three for these kind of quick one-off tasks, and Soul cost at 16 bucks while Fable cost at 63 bucks.
+
+But, as far as like the actual capability, when Fable actually answered, it was pretty even.
+
+The reason why Soul dominated, apparently, is because Fable failed to answer a lot of the calls.
+
+But, as you can see over here, score when answering, Soul had 0.98, and Fable had 0.966.
+
+So, they are very similar models, and I think it's just a perfect example of like the unit economics.
+
+Based on this task, let's say the task is a five.
+
+Do you need a model that is a 10?
+
+Probably not.
+
+You only need a model that's maybe like a five or a six.
+
+So, in this case, with these quick one-shot, you know, API requests, probably stateless, Soul seems to crush Fable here.
+
+And from an input-output tokens perspective, Soul is basically half the cost of Fable.
+
+You know, half on the input, and then a little over half on the output, but it's basically half.
+
+And if you compare Soul to like Opus 4.8, they're pretty much the same.
+
+Same on the input, and then very similar on the output.
+
+So, that's pretty interesting to me.
+
+And I honestly feels like a better head-to-head comparison would have been Soul 5.6 versus Opus 4.8, rather than comparing Soul 5.6 and Fable 5.
+
+Like, I just think that they're not even on the same level as far as like a next-gen model.
+
+Think about the fact that Fable jumps to a five.
+
+Soul, which is apparently their most capable model, why would it not have been Soul 6?
+
+Like, why are we 5.6?
+
+Doesn't a model that should be so so good deserve a full step up if there's, you know, fundamentally something so different that makes it like a really powerful scary model, but they decided to only bump it up to Soul 5.6, which makes me wonder like, what are they cooking back there, and what are they maybe waiting to drop as their next GPT-6?
+
+Because I think that's when we have the next-gen model that I truly think actually goes head-to-head with Fable, because right now I do not think that Soul does.
+
+I'll talk about that a little bit more once we get into the next section, but let's look at this.
+
+So, score obviously Soul won here.
+
+But, score when answered, obviously, it was much closer.
+
+So, that's kind of like the reliability thing.
+
+Now, on the cost side, the API calls Soul was much cheaper, obviously.
+
+Nine bucks to about 14 bucks.
+
+But then, what's interesting is the gap here is not that big, right?
+
+The gap here is about five bucks.
+
+And if you think percentage-wise, relative, it's even less, like a smaller percentage than how wide this gap is when we get to the actual agentic reasoning with Claude Code as the harness and Codex as the harness, the gap in cost was just much, much bigger, which is really interesting.
+
+And overall, Fable is much more expensive than Soul.
+
+And I think the token thing is just so interesting because let's say that Fable and Soul cost the exact same from an input and output token perspective, Soul would have still been meaningfully cheaper because it just was more efficient with tokens.
+
+I don't know exactly why that is, but it just seems to be so much more efficient with tokens.
+
+It's probably has a lot to do with Codex, too, because when I've done Codex and Claude Code comparisons in the past, Codex has always been faster and more efficient with tokens.
+
+But anyways, just something I think's pretty interesting.
+
+This is also interesting on the speed side.
+
+So, over API, the median API latency from Soul was quicker than Fable.
+
+But the mean, so the average, was Fable being quicker.
+
+So, that means like Soul is a little bit more all over the board.
+
+Some runs were super, super long.
+
+Some runs might have been really, really quick.
+
+Whereas Fable was more consistently just kind of hovering around like the 20-second mark, and that's why its median was still higher than Soul, but its mean was lower than Soul, which I just think is pretty interesting.
+
+But then when we see the agentic builds, Fable was pretty much always going to be slower.
+
+So, after running these different types of tests, some were fun, some were for design, some were, you know, just via API, and then of course, my actual driving this on the day-to-day, here's where I landed.
+
+Overall, I feel like Fable is a better manager, and that's how I think of it.
+
+I think of it as a co-founder.
+
+I think of it as a manager.
+
+Soul is just a really, really good worker.
+
+Really good worker.
+
+Like I think that having Fable orchestrate a bunch of Soul agents would be amazing.
+
+I gave them each their are things that I would say like they are better than the other end.
+
+So, Soul is obviously better on price.
+
+It's much better on computer use.
+
+It's much better at playing devil's advocate because it feels like it's just a little more careful at finding the bugs and looking at things from different angles.
+
+I also gave it the verification because of the computer use and because of this whole devil's advocate and just like really being careful and really thinking about what did they say, what did the user tell me to do, and what am I going to do?
+
+And I'm going to do exactly that.
+
+Whereas sometimes Fable's a bit more like it'll push back a little bit more and it's almost like sometimes sassier.
+
+You know, like sometimes it's not just like I want to take a request and action it.
+
+I want to push back and be like a consultant here, which is good thing, right?
+
+That's why I said it's a manager.
+
+There's pros and cons to that.
+
+And then of course I gave Soul the speed.
+
+Now, Fable I said it's just much more creative.
+
+It feels more creative.
+
+It feels like it's better at writing.
+
+It feels like it's better at brainstorming.
+
+It feels like it's better at advising.
+
+It's really strategic.
+
+The knowledge work all day I still prefer Fable, but you know, it's just not the the cost I can't always justify it.
+
+It felt like it was better at making videos.
+
+If you saw I made two videos recently on YouTube.
+
+One was called like Fable 5 made this entire video and the other one I just dropped earlier today, which was called Soul made this entire video.
+
+So, go watch both of those.
+
+They each created YouTube videos for me completely from scratch and just see which one you thought was better.
+
+I liked Fable's better.
+
+I also said that Fable's better at not over engineering because Soul runs so many tests, which also is interesting when you think about the token thing, right?
+
+Like how can it be so efficient with tokens if it writes so many tests and sometimes it will overthink, especially when I had Soul on ultra.
+
+It was just going and going and going and going, which you know, sometimes good, sometimes bad.
+
+There's always pros and cons, but just pure capability, I mean you can't even argue Fable 5 is in another tier.
+
+It's just on another level and Soul is really good.
+
+I think it's more comparable to Opus 4.8.
+
+It's definitely better than GPT 5.5, but it just it's not a Fable 5.
+
+And honestly, I think if it was Fable 5 tier, it would be charged at Fable 5 tier.
+
+Like it would be priced that high and it's not.
+
+It's priced like Opus.
+
+So, overall, what I'd say is Fable is good for my reasoning and my judging, and then Soul is just shipping and executing AI model.
+
+And just so we kind of like put it into perspective, I kind of tried to like map out where I think that these top four models that, you know, we're talking about right now, sit.
+
+I've got GPT-5.5 and Opus just very, very similar.
+
+I would say because I drive most of my work with Opus, I would put GPT-5.5 just like a little bit behind.
+
+Soul is definitely in front of both of these.
+
+Like, that's very clear.
+
+It's a very, very good model.
+
+But, I still think there's a pretty large gap right here between, you know, Soul actually being to be on Fable's level.
+
+Like, there is still a pretty big gap here.
+
+So, that's the way I feel about it.
+
+Hopefully, all of this makes sense to you guys.
+
+Like I said, it's definitely one thing to look at the benchmarks, but really what you have to do is you have to get your hands dirty, you have to do actual work that you do on your day-to-day, and it's a feel thing.
+
+Because some people will probably come out the gate and say Soul is better than Fable, hands down.
+
+And some people will not agree with that at all.
+
+It's all about your use case and your feel, and the way that you instruct it, and the way that you've got your harness and your skill set up.
+
+So, everyone's a little different, but that is kind of my opinions after playing around with this model all day long.
+
+But, as always, if you guys enjoyed the video or you learned something new, please give it a like.
+
+Helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you all in the next one.
+
+Thanks, everyone.

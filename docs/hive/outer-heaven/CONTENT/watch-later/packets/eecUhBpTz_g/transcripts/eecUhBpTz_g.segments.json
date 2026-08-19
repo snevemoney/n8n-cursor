@@ -1,0 +1,3752 @@
+[
+  {
+    "start": "00:00",
+    "end": "00:05",
+    "text": "An AI dark factory is a repository that"
+  },
+  {
+    "start": "00:02",
+    "end": "00:06",
+    "text": "ships its own code. You just have to"
+  },
+  {
+    "start": "00:05",
+    "end": "00:08",
+    "text": "send in the spec for what you want to"
+  },
+  {
+    "start": "00:06",
+    "end": "00:10",
+    "text": "build next in your codebase. And what"
+  },
+  {
+    "start": "00:08",
+    "end": "00:11",
+    "text": "you get out of the factory is shipped"
+  },
+  {
+    "start": "00:10",
+    "end": "00:14",
+    "text": "code that has already been fully"
+  },
+  {
+    "start": "00:11",
+    "end": "00:16",
+    "text": "reviewed and validated. This is the"
+  },
+  {
+    "start": "00:14",
+    "end": "00:19",
+    "text": "ultimate evolution of AI coding"
+  },
+  {
+    "start": "00:16",
+    "end": "00:21",
+    "text": "harnesses. And because LLM's coding"
+  },
+  {
+    "start": "00:19",
+    "end": "00:23",
+    "text": "agents, and our own harnesses are"
+  },
+  {
+    "start": "00:21",
+    "end": "00:24",
+    "text": "getting better over time, we're starting"
+  },
+  {
+    "start": "00:23",
+    "end": "00:27",
+    "text": "to get to the point where this kind of"
+  },
+  {
+    "start": "00:24",
+    "end": "00:30",
+    "text": "setup is actually realistic and reliable"
+  },
+  {
+    "start": "00:27",
+    "end": "00:32",
+    "text": "for a large set of work. Now, obviously,"
+  },
+  {
+    "start": "00:30",
+    "end": "00:33",
+    "text": "this isn't reliable for everything yet."
+  },
+  {
+    "start": "00:32",
+    "end": "00:35",
+    "text": "But we're getting there. I'm seeing more"
+  },
+  {
+    "start": "00:33",
+    "end": "00:37",
+    "text": "and more companies create this kind of"
+  },
+  {
+    "start": "00:35",
+    "end": "00:39",
+    "text": "system. And so, in this video, I want to"
+  },
+  {
+    "start": "00:37",
+    "end": "00:41",
+    "text": "show you how you can build your own AI"
+  },
+  {
+    "start": "00:39",
+    "end": "00:43",
+    "text": "dark factory with a skill that I have"
+  },
+  {
+    "start": "00:41",
+    "end": "00:45",
+    "text": "for you that guides you through the"
+  },
+  {
+    "start": "00:43",
+    "end": "00:47",
+    "text": "entire process. You just have to give a"
+  },
+  {
+    "start": "00:45",
+    "end": "00:49",
+    "text": "PRD or some kind of larger spec document"
+  },
+  {
+    "start": "00:47",
+    "end": "00:51",
+    "text": "for what you want to create and then the"
+  },
+  {
+    "start": "00:49",
+    "end": "00:54",
+    "text": "skill is going to help you build the"
+  },
+  {
+    "start": "00:51",
+    "end": "00:56",
+    "text": "entire system. So, earlier this year, I"
+  },
+  {
+    "start": "00:54",
+    "end": "00:57",
+    "text": "started my own dark factory as an"
+  },
+  {
+    "start": "00:56",
+    "end": "00:59",
+    "text": "experiment. And this really is the"
+  },
+  {
+    "start": "00:57",
+    "end": "01:01",
+    "text": "genesis for everything that I have for"
+  },
+  {
+    "start": "00:59",
+    "end": "01:03",
+    "text": "you now. And it's a pretty cool"
+  },
+  {
+    "start": "01:01",
+    "end": "01:04",
+    "text": "application. It's an agentic chat app"
+  },
+  {
+    "start": "01:03",
+    "end": "01:06",
+    "text": "where you're able to ask the agent"
+  },
+  {
+    "start": "01:04",
+    "end": "01:08",
+    "text": "questions and it can search over my"
+  },
+  {
+    "start": "01:06",
+    "end": "01:09",
+    "text": "entire YouTube channel, even citing"
+  },
+  {
+    "start": "01:08",
+    "end": "01:11",
+    "text": "sources. And then if you're in the"
+  },
+  {
+    "start": "01:09",
+    "end": "01:12",
+    "text": "Dynamis community, it also searches"
+  },
+  {
+    "start": "01:11",
+    "end": "01:15",
+    "text": "through all my course and workshop"
+  },
+  {
+    "start": "01:12",
+    "end": "01:17",
+    "text": "content as well. And I built this entire"
+  },
+  {
+    "start": "01:15",
+    "end": "01:19",
+    "text": "thing without even looking at a line of"
+  },
+  {
+    "start": "01:17",
+    "end": "01:20",
+    "text": "code that it shipped. And I really did"
+  },
+  {
+    "start": "01:19",
+    "end": "01:23",
+    "text": "prove out the system here. I mean, this"
+  },
+  {
+    "start": "01:20",
+    "end": "01:25",
+    "text": "is a real application you can use right"
+  },
+  {
+    "start": "01:23",
+    "end": "01:27",
+    "text": "now. chat.dynamis.ai."
+  },
+  {
+    "start": "01:25",
+    "end": "01:28",
+    "text": "I'll link to it in the description. It's"
+  },
+  {
+    "start": "01:27",
+    "end": "01:30",
+    "text": "pretty awesome. I mean, it's not the"
+  },
+  {
+    "start": "01:28",
+    "end": "01:32",
+    "text": "most complicated app, but it really did"
+  },
+  {
+    "start": "01:30",
+    "end": "01:33",
+    "text": "prove out that you can build a system"
+  },
+  {
+    "start": "01:32",
+    "end": "01:36",
+    "text": "where you don't even have to be in the"
+  },
+  {
+    "start": "01:33",
+    "end": "01:37",
+    "text": "loop at all. And now, because coding"
+  },
+  {
+    "start": "01:36",
+    "end": "01:40",
+    "text": "agents have gotten better, we have new"
+  },
+  {
+    "start": "01:37",
+    "end": "01:42",
+    "text": "LLMs like Opus 5, Fable 5, new GPT and"
+  },
+  {
+    "start": "01:40",
+    "end": "01:43",
+    "text": "Grock models. This kind of system is"
+  },
+  {
+    "start": "01:42",
+    "end": "01:46",
+    "text": "even more realistic. Just letting the"
+  },
+  {
+    "start": "01:43",
+    "end": "01:49",
+    "text": "agent rip on any spec that you give it."
+  },
+  {
+    "start": "01:46",
+    "end": "01:51",
+    "text": "And so, all of the lessons I learned as"
+  },
+  {
+    "start": "01:49",
+    "end": "01:53",
+    "text": "I built this Dark Factory, I've encoded"
+  },
+  {
+    "start": "01:51",
+    "end": "01:55",
+    "text": "it in this skill. This is the star of"
+  },
+  {
+    "start": "01:53",
+    "end": "01:58",
+    "text": "the show for today because you give it a"
+  },
+  {
+    "start": "01:55",
+    "end": "02:00",
+    "text": "PRD and then it builds a dark factory"
+  },
+  {
+    "start": "01:58",
+    "end": "02:03",
+    "text": "based on all of the best practices I've"
+  },
+  {
+    "start": "02:00",
+    "end": "02:04",
+    "text": "established myself as I built my own."
+  },
+  {
+    "start": "02:03",
+    "end": "02:06",
+    "text": "And let me be clear, what we're doing"
+  },
+  {
+    "start": "02:04",
+    "end": "02:08",
+    "text": "here is not vibe coding. Yes, we're"
+  },
+  {
+    "start": "02:06",
+    "end": "02:10",
+    "text": "trusting the agent entirely to manage"
+  },
+  {
+    "start": "02:08",
+    "end": "02:12",
+    "text": "the codebase, but we're putting a lot of"
+  },
+  {
+    "start": "02:10",
+    "end": "02:14",
+    "text": "engineering effort up front building out"
+  },
+  {
+    "start": "02:12",
+    "end": "02:15",
+    "text": "the harness so the agent can plan"
+  },
+  {
+    "start": "02:14",
+    "end": "02:18",
+    "text": "properly. We're going to have a"
+  },
+  {
+    "start": "02:15",
+    "end": "02:20",
+    "text": "different agent critique the work of the"
+  },
+  {
+    "start": "02:18",
+    "end": "02:22",
+    "text": "primary builder. There is a lot that I"
+  },
+  {
+    "start": "02:20",
+    "end": "02:24",
+    "text": "put into designing this system that is"
+  },
+  {
+    "start": "02:22",
+    "end": "02:26",
+    "text": "encoded in the skill. Trust me, I have"
+  },
+  {
+    "start": "02:24",
+    "end": "02:28",
+    "text": "spent millions of tokens, months"
+  },
+  {
+    "start": "02:26",
+    "end": "02:31",
+    "text": "building this out, learning all the hard"
+  },
+  {
+    "start": "02:28",
+    "end": "02:33",
+    "text": "lessons so that you can have a much"
+  },
+  {
+    "start": "02:31",
+    "end": "02:35",
+    "text": "better starting point very quickly. And"
+  },
+  {
+    "start": "02:33",
+    "end": "02:37",
+    "text": "so, I'm not promising that this dark"
+  },
+  {
+    "start": "02:35",
+    "end": "02:39",
+    "text": "factory can ship production grade code"
+  },
+  {
+    "start": "02:37",
+    "end": "02:41",
+    "text": "for any codebase. We're not there yet"
+  },
+  {
+    "start": "02:39",
+    "end": "02:43",
+    "text": "for a lot of things, but this is"
+  },
+  {
+    "start": "02:41",
+    "end": "02:46",
+    "text": "definitely a starting point for you, a"
+  },
+  {
+    "start": "02:43",
+    "end": "02:47",
+    "text": "window into the future of AI coding. And"
+  },
+  {
+    "start": "02:46",
+    "end": "02:49",
+    "text": "this really is the highest level of"
+  },
+  {
+    "start": "02:47",
+    "end": "02:51",
+    "text": "autonomy you can possibly give your"
+  },
+  {
+    "start": "02:49",
+    "end": "02:53",
+    "text": "coding agent. I've covered this article"
+  },
+  {
+    "start": "02:51",
+    "end": "02:56",
+    "text": "before on my channel by Dan Shapiro."
+  },
+  {
+    "start": "02:53",
+    "end": "02:58",
+    "text": "It's the five levels of AI coding using"
+  },
+  {
+    "start": "02:56",
+    "end": "03:00",
+    "text": "our vehicle as an analogy. So level"
+  },
+  {
+    "start": "02:58",
+    "end": "03:02",
+    "text": "zero, it's like stick shift. It's the"
+  },
+  {
+    "start": "03:00",
+    "end": "03:05",
+    "text": "most manual possible. So we're using AI"
+  },
+  {
+    "start": "03:02",
+    "end": "03:07",
+    "text": "coding assistance, but only for spicy"
+  },
+  {
+    "start": "03:05",
+    "end": "03:08",
+    "text": "autocomplete. I love that word. So we're"
+  },
+  {
+    "start": "03:07",
+    "end": "03:10",
+    "text": "still writing most of the code"
+  },
+  {
+    "start": "03:08",
+    "end": "03:11",
+    "text": "ourselves. We're maybe just using our"
+  },
+  {
+    "start": "03:10",
+    "end": "03:14",
+    "text": "coding agent to fill in the blank once"
+  },
+  {
+    "start": "03:11",
+    "end": "03:15",
+    "text": "in a while or write a couple of"
+  },
+  {
+    "start": "03:14",
+    "end": "03:18",
+    "text": "functions. And then we get into level"
+  },
+  {
+    "start": "03:15",
+    "end": "03:20",
+    "text": "one and two where AI is more of a pair"
+  },
+  {
+    "start": "03:18",
+    "end": "03:22",
+    "text": "programmer maybe creating some of the"
+  },
+  {
+    "start": "03:20",
+    "end": "03:24",
+    "text": "boilerplate for us autonomously. It's"
+  },
+  {
+    "start": "03:22",
+    "end": "03:26",
+    "text": "only once we get to level three where we"
+  },
+  {
+    "start": "03:24",
+    "end": "03:28",
+    "text": "have our coding agent writing most of"
+  },
+  {
+    "start": "03:26",
+    "end": "03:30",
+    "text": "the code for us. We pretty much are"
+  },
+  {
+    "start": "03:28",
+    "end": "03:33",
+    "text": "hands off the wheel for the actual code"
+  },
+  {
+    "start": "03:30",
+    "end": "03:35",
+    "text": "writing. Now here we're still very much"
+  },
+  {
+    "start": "03:33",
+    "end": "03:37",
+    "text": "in the loop doing all of the planning"
+  },
+  {
+    "start": "03:35",
+    "end": "03:39",
+    "text": "with the agent and the validation at the"
+  },
+  {
+    "start": "03:37",
+    "end": "03:41",
+    "text": "end. This is where most of us are at and"
+  },
+  {
+    "start": "03:39",
+    "end": "03:43",
+    "text": "this is mostly where we should be. It"
+  },
+  {
+    "start": "03:41",
+    "end": "03:45",
+    "text": "really is the most reliable level for AI"
+  },
+  {
+    "start": "03:43",
+    "end": "03:48",
+    "text": "coding in general because you're still"
+  },
+  {
+    "start": "03:45",
+    "end": "03:50",
+    "text": "very much in the loop. But the sacrifice"
+  },
+  {
+    "start": "03:48",
+    "end": "03:52",
+    "text": "that we're making here is that we become"
+  },
+  {
+    "start": "03:50",
+    "end": "03:54",
+    "text": "the bottleneck still quite often when we"
+  },
+  {
+    "start": "03:52",
+    "end": "03:56",
+    "text": "have to be a part of the planning and"
+  },
+  {
+    "start": "03:54",
+    "end": "03:58",
+    "text": "validation. That is why we're interested"
+  },
+  {
+    "start": "03:56",
+    "end": "04:00",
+    "text": "in building our harness to the point"
+  },
+  {
+    "start": "03:58",
+    "end": "04:02",
+    "text": "where we can trust it to move to level"
+  },
+  {
+    "start": "04:00",
+    "end": "04:04",
+    "text": "four and even level five with the dark"
+  },
+  {
+    "start": "04:02",
+    "end": "04:06",
+    "text": "factory. So I'm not telling you to jump"
+  },
+  {
+    "start": "04:04",
+    "end": "04:08",
+    "text": "straight to this. You need to know how"
+  },
+  {
+    "start": "04:06",
+    "end": "04:10",
+    "text": "to work with AI coding assistants. build"
+  },
+  {
+    "start": "04:08",
+    "end": "04:13",
+    "text": "a system where you can trust it enough"
+  },
+  {
+    "start": "04:10",
+    "end": "04:15",
+    "text": "to ship things autonomously. And so here"
+  },
+  {
+    "start": "04:13",
+    "end": "04:17",
+    "text": "there's not even a driver's wheel,"
+  },
+  {
+    "start": "04:15",
+    "end": "04:19",
+    "text": "right? Like we can't even steer the"
+  },
+  {
+    "start": "04:17",
+    "end": "04:20",
+    "text": "agent for the individual plans and"
+  },
+  {
+    "start": "04:19",
+    "end": "04:22",
+    "text": "validation strategies. There's still a"
+  },
+  {
+    "start": "04:20",
+    "end": "04:25",
+    "text": "console to give our higher level"
+  },
+  {
+    "start": "04:22",
+    "end": "04:28",
+    "text": "direction like the PRD or spec document."
+  },
+  {
+    "start": "04:25",
+    "end": "04:29",
+    "text": "So we specify the destination. The agent"
+  },
+  {
+    "start": "04:28",
+    "end": "04:31",
+    "text": "figures out exactly how to get there,"
+  },
+  {
+    "start": "04:29",
+    "end": "04:33",
+    "text": "how to ship its own work, how to deploy."
+  },
+  {
+    "start": "04:31",
+    "end": "04:35",
+    "text": "There's so much that the agent is doing"
+  },
+  {
+    "start": "04:33",
+    "end": "04:37",
+    "text": "without our guidance at all, which is"
+  },
+  {
+    "start": "04:35",
+    "end": "04:39",
+    "text": "great because now we no longer become"
+  },
+  {
+    "start": "04:37",
+    "end": "04:42",
+    "text": "the bottleneck. You can ship things so"
+  },
+  {
+    "start": "04:39",
+    "end": "04:44",
+    "text": "incredibly quickly when you have an AI"
+  },
+  {
+    "start": "04:42",
+    "end": "04:45",
+    "text": "dark factory as a welloiled machine."
+  },
+  {
+    "start": "04:44",
+    "end": "04:47",
+    "text": "It's just that if you really want to be"
+  },
+  {
+    "start": "04:45",
+    "end": "04:49",
+    "text": "here, you better be sure you have a"
+  },
+  {
+    "start": "04:47",
+    "end": "04:51",
+    "text": "well-gineered harness to make things"
+  },
+  {
+    "start": "04:49",
+    "end": "04:52",
+    "text": "reliable at all. That's everything we're"
+  },
+  {
+    "start": "04:51",
+    "end": "04:54",
+    "text": "going to cover very quickly together"
+  },
+  {
+    "start": "04:52",
+    "end": "04:56",
+    "text": "here. Everything I've built into this"
+  },
+  {
+    "start": "04:54",
+    "end": "04:58",
+    "text": "skill so when you run it and it creates"
+  },
+  {
+    "start": "04:56",
+    "end": "05:00",
+    "text": "the dark factory, it takes all of the"
+  },
+  {
+    "start": "04:58",
+    "end": "05:01",
+    "text": "best practices that I've learned the"
+  },
+  {
+    "start": "05:00",
+    "end": "05:04",
+    "text": "hard way as I built my own dark factory"
+  },
+  {
+    "start": "05:01",
+    "end": "05:06",
+    "text": "this year. Cool. So with that, let's get"
+  },
+  {
+    "start": "05:04",
+    "end": "05:08",
+    "text": "into actually building our Dark Factory"
+  },
+  {
+    "start": "05:06",
+    "end": "05:09",
+    "text": "now with the skill that I have for you."
+  },
+  {
+    "start": "05:08",
+    "end": "05:11",
+    "text": "So I'll cover how you can install it,"
+  },
+  {
+    "start": "05:09",
+    "end": "05:12",
+    "text": "run it, and then we'll talk about the"
+  },
+  {
+    "start": "05:11",
+    "end": "05:14",
+    "text": "different things that it builds for you"
+  },
+  {
+    "start": "05:12",
+    "end": "05:15",
+    "text": "with the Dark Factory harness so you"
+  },
+  {
+    "start": "05:14",
+    "end": "05:17",
+    "text": "really know how it works. I think that's"
+  },
+  {
+    "start": "05:15",
+    "end": "05:19",
+    "text": "important that you don't just run this"
+  },
+  {
+    "start": "05:17",
+    "end": "05:21",
+    "text": "blindly. And so the skill that I have"
+  },
+  {
+    "start": "05:19",
+    "end": "05:23",
+    "text": "for you, it's within this repository"
+  },
+  {
+    "start": "05:21",
+    "end": "05:25",
+    "text": "that I created actually quite recently"
+  },
+  {
+    "start": "05:23",
+    "end": "05:27",
+    "text": "just to build a collection of all the"
+  },
+  {
+    "start": "05:25",
+    "end": "05:29",
+    "text": "skills that I use for my AI coding"
+  },
+  {
+    "start": "05:27",
+    "end": "05:30",
+    "text": "workflow. I'll link to a video right"
+  },
+  {
+    "start": "05:29",
+    "end": "05:32",
+    "text": "here where I cover all of these. And in"
+  },
+  {
+    "start": "05:30",
+    "end": "05:34",
+    "text": "fact, a lot of them I have built right"
+  },
+  {
+    "start": "05:32",
+    "end": "05:36",
+    "text": "into my dark factories for the different"
+  },
+  {
+    "start": "05:34",
+    "end": "05:39",
+    "text": "steps. And so installing this, if you're"
+  },
+  {
+    "start": "05:36",
+    "end": "05:41",
+    "text": "using Cloud Code, I have a marketplace"
+  },
+  {
+    "start": "05:39",
+    "end": "05:43",
+    "text": "plugin, just two commands to bring in"
+  },
+  {
+    "start": "05:41",
+    "end": "05:44",
+    "text": "all of these skills. And if you're using"
+  },
+  {
+    "start": "05:43",
+    "end": "05:47",
+    "text": "a different coding agent like Pi or"
+  },
+  {
+    "start": "05:44",
+    "end": "05:48",
+    "text": "Codeex, just point it at the URL for"
+  },
+  {
+    "start": "05:47",
+    "end": "05:50",
+    "text": "this GitHub repo that I'll have linked"
+  },
+  {
+    "start": "05:48",
+    "end": "05:52",
+    "text": "in the description, and you can ask it"
+  },
+  {
+    "start": "05:50",
+    "end": "05:54",
+    "text": "to install things and customize it to"
+  },
+  {
+    "start": "05:52",
+    "end": "05:56",
+    "text": "your coding agent. So very easy to"
+  },
+  {
+    "start": "05:54",
+    "end": "05:58",
+    "text": "install all of this. Or if you want, you"
+  },
+  {
+    "start": "05:56",
+    "end": "06:01",
+    "text": "can just take the build dark factory"
+  },
+  {
+    "start": "05:58",
+    "end": "06:03",
+    "text": "skill that we're covering here. So once"
+  },
+  {
+    "start": "06:01",
+    "end": "06:05",
+    "text": "you have this skill installed, typically"
+  },
+  {
+    "start": "06:03",
+    "end": "06:08",
+    "text": "what you'll do is you'll bring it into"
+  },
+  {
+    "start": "06:05",
+    "end": "06:10",
+    "text": "an empty folder. Now theoretically you"
+  },
+  {
+    "start": "06:08",
+    "end": "06:12",
+    "text": "can apply a dark factory onto an"
+  },
+  {
+    "start": "06:10",
+    "end": "06:14",
+    "text": "existing codebase to continue to build"
+  },
+  {
+    "start": "06:12",
+    "end": "06:16",
+    "text": "it out. I've just never tested that"
+  },
+  {
+    "start": "06:14",
+    "end": "06:18",
+    "text": "myself, so it could work, but usually I"
+  },
+  {
+    "start": "06:16",
+    "end": "06:20",
+    "text": "would recommend just building a dark"
+  },
+  {
+    "start": "06:18",
+    "end": "06:24",
+    "text": "factory to create an application from"
+  },
+  {
+    "start": "06:20",
+    "end": "06:26",
+    "text": "scratch based on a PRD. Now the PRD is"
+  },
+  {
+    "start": "06:24",
+    "end": "06:27",
+    "text": "the input into this skill. I am assuming"
+  },
+  {
+    "start": "06:26",
+    "end": "06:29",
+    "text": "that you already have some kind of"
+  },
+  {
+    "start": "06:27",
+    "end": "06:32",
+    "text": "process with skills or an AI coding"
+  },
+  {
+    "start": "06:29",
+    "end": "06:33",
+    "text": "framework to create that higher level"
+  },
+  {
+    "start": "06:32",
+    "end": "06:35",
+    "text": "plan document for what you want to"
+  },
+  {
+    "start": "06:33",
+    "end": "06:37",
+    "text": "create in the first place. And so you"
+  },
+  {
+    "start": "06:35",
+    "end": "06:39",
+    "text": "build that then you pass it into this"
+  },
+  {
+    "start": "06:37",
+    "end": "06:41",
+    "text": "skill. So with all that being said,"
+  },
+  {
+    "start": "06:39",
+    "end": "06:44",
+    "text": "usually what I do when I start a new"
+  },
+  {
+    "start": "06:41",
+    "end": "06:46",
+    "text": "dark factory is I copy in this skill as"
+  },
+  {
+    "start": "06:44",
+    "end": "06:48",
+    "text": "well as any other skills that I want to"
+  },
+  {
+    "start": "06:46",
+    "end": "06:51",
+    "text": "use within the harness. And then I'll"
+  },
+  {
+    "start": "06:48",
+    "end": "06:53",
+    "text": "also build the PRD or also copy that"
+  },
+  {
+    "start": "06:51",
+    "end": "06:55",
+    "text": "into the folder if I already have it."
+  },
+  {
+    "start": "06:53",
+    "end": "06:57",
+    "text": "And so you're starting with your skills"
+  },
+  {
+    "start": "06:55",
+    "end": "07:00",
+    "text": "and your PRD. That is it. And the very"
+  },
+  {
+    "start": "06:57",
+    "end": "07:01",
+    "text": "first thing that the skill does is it"
+  },
+  {
+    "start": "07:00",
+    "end": "07:03",
+    "text": "interviews you with a ton of questions"
+  },
+  {
+    "start": "07:01",
+    "end": "07:04",
+    "text": "to make sure you're on the same page"
+  },
+  {
+    "start": "07:03",
+    "end": "07:06",
+    "text": "with the application that you're"
+  },
+  {
+    "start": "07:04",
+    "end": "07:08",
+    "text": "building and the harness that you want"
+  },
+  {
+    "start": "07:06",
+    "end": "07:10",
+    "text": "to get there. And so it's going to ask"
+  },
+  {
+    "start": "07:08",
+    "end": "07:12",
+    "text": "things like how much autonomy do you"
+  },
+  {
+    "start": "07:10",
+    "end": "07:14",
+    "text": "really want for the factory? Maybe you"
+  },
+  {
+    "start": "07:12",
+    "end": "07:16",
+    "text": "do want to be in the loop a little bit."
+  },
+  {
+    "start": "07:14",
+    "end": "07:18",
+    "text": "It'll ask about the different skills or"
+  },
+  {
+    "start": "07:16",
+    "end": "07:20",
+    "text": "like what kind of AI coding workflow you"
+  },
+  {
+    "start": "07:18",
+    "end": "07:21",
+    "text": "want overall like this is my loop. I"
+  },
+  {
+    "start": "07:20",
+    "end": "07:23",
+    "text": "prime, plan, implement, validate,"
+  },
+  {
+    "start": "07:21",
+    "end": "07:25",
+    "text": "commit, PR. And it established that"
+  },
+  {
+    "start": "07:23",
+    "end": "07:27",
+    "text": "because I gave it an example of how I"
+  },
+  {
+    "start": "07:25",
+    "end": "07:29",
+    "text": "already work, right? So, it wants to"
+  },
+  {
+    "start": "07:27",
+    "end": "07:30",
+    "text": "build the harness similar to how you"
+  },
+  {
+    "start": "07:29",
+    "end": "07:32",
+    "text": "already work. So, it's easy for you to"
+  },
+  {
+    "start": "07:30",
+    "end": "07:34",
+    "text": "continue to evolve the dark factory if"
+  },
+  {
+    "start": "07:32",
+    "end": "07:36",
+    "text": "you want over time. It's also going to"
+  },
+  {
+    "start": "07:34",
+    "end": "07:38",
+    "text": "ask things like, what's the validation"
+  },
+  {
+    "start": "07:36",
+    "end": "07:39",
+    "text": "strategy for your application? How is it"
+  },
+  {
+    "start": "07:38",
+    "end": "07:41",
+    "text": "going to check its own work? It'll take"
+  },
+  {
+    "start": "07:39",
+    "end": "07:43",
+    "text": "a little bit to get through all these"
+  },
+  {
+    "start": "07:41",
+    "end": "07:44",
+    "text": "questions here, but we're building a"
+  },
+  {
+    "start": "07:43",
+    "end": "07:46",
+    "text": "large system here. It's worth being"
+  },
+  {
+    "start": "07:44",
+    "end": "07:49",
+    "text": "patient and getting specific, answering"
+  },
+  {
+    "start": "07:46",
+    "end": "07:51",
+    "text": "all the questions. Once the interview is"
+  },
+  {
+    "start": "07:49",
+    "end": "07:53",
+    "text": "done, then it's going to get into"
+  },
+  {
+    "start": "07:51",
+    "end": "07:55",
+    "text": "building out the full harness with you."
+  },
+  {
+    "start": "07:53",
+    "end": "07:57",
+    "text": "And it is so cool watching it rip"
+  },
+  {
+    "start": "07:55",
+    "end": "07:59",
+    "text": "through building the entire system that"
+  },
+  {
+    "start": "07:57",
+    "end": "08:01",
+    "text": "I'll explain to you in a little bit. And"
+  },
+  {
+    "start": "07:59",
+    "end": "08:02",
+    "text": "I built this diagram to really help"
+  },
+  {
+    "start": "08:01",
+    "end": "08:04",
+    "text": "break down the different components of"
+  },
+  {
+    "start": "08:02",
+    "end": "08:06",
+    "text": "the harness that you're creating here. I"
+  },
+  {
+    "start": "08:04",
+    "end": "08:08",
+    "text": "figured this would be a much better way"
+  },
+  {
+    "start": "08:06",
+    "end": "08:10",
+    "text": "to visualize things than just going"
+  },
+  {
+    "start": "08:08",
+    "end": "08:12",
+    "text": "through the coding agent logs as it"
+  },
+  {
+    "start": "08:10",
+    "end": "08:14",
+    "text": "builds a dark factory. Of course, if you"
+  },
+  {
+    "start": "08:12",
+    "end": "08:16",
+    "text": "want to see my actual dark factory, I'll"
+  },
+  {
+    "start": "08:14",
+    "end": "08:19",
+    "text": "link to my original experiment in the"
+  },
+  {
+    "start": "08:16",
+    "end": "08:21",
+    "text": "description. And I also did build a ton"
+  },
+  {
+    "start": "08:19",
+    "end": "08:23",
+    "text": "of dark factories with the skill to"
+  },
+  {
+    "start": "08:21",
+    "end": "08:25",
+    "text": "validate that I really encoded things"
+  },
+  {
+    "start": "08:23",
+    "end": "08:27",
+    "text": "properly from my original experiment."
+  },
+  {
+    "start": "08:25",
+    "end": "08:28",
+    "text": "So, I'll cover the structure with you"
+  },
+  {
+    "start": "08:27",
+    "end": "08:30",
+    "text": "here in just a second, but one thing I"
+  },
+  {
+    "start": "08:28",
+    "end": "08:32",
+    "text": "want to show you first is an example of"
+  },
+  {
+    "start": "08:30",
+    "end": "08:35",
+    "text": "something I built with a dark factory I"
+  },
+  {
+    "start": "08:32",
+    "end": "08:36",
+    "text": "created from the skill. So, I've been"
+  },
+  {
+    "start": "08:35",
+    "end": "08:38",
+    "text": "doing a lot of game development"
+  },
+  {
+    "start": "08:36",
+    "end": "08:40",
+    "text": "recently. I find it a really powerful"
+  },
+  {
+    "start": "08:38",
+    "end": "08:42",
+    "text": "way to test these dark factories cuz"
+  },
+  {
+    "start": "08:40",
+    "end": "08:44",
+    "text": "it's very easy to make things more and"
+  },
+  {
+    "start": "08:42",
+    "end": "08:46",
+    "text": "more complicated as I want to push the"
+  },
+  {
+    "start": "08:44",
+    "end": "08:48",
+    "text": "limits cuz I can just add more features"
+  },
+  {
+    "start": "08:46",
+    "end": "08:49",
+    "text": "to the game. The problem with a lot of"
+  },
+  {
+    "start": "08:48",
+    "end": "08:51",
+    "text": "other kinds of applications like the"
+  },
+  {
+    "start": "08:49",
+    "end": "08:53",
+    "text": "chat app I showed you earlier is you"
+  },
+  {
+    "start": "08:51",
+    "end": "08:54",
+    "text": "can't just add more and more and more"
+  },
+  {
+    "start": "08:53",
+    "end": "08:56",
+    "text": "because then the application just gets"
+  },
+  {
+    "start": "08:54",
+    "end": "08:58",
+    "text": "feature bloated. So I love building"
+  },
+  {
+    "start": "08:56",
+    "end": "09:00",
+    "text": "games. Now obviously this is still a"
+  },
+  {
+    "start": "08:58",
+    "end": "09:02",
+    "text": "pretty simple game because I've created"
+  },
+  {
+    "start": "09:00",
+    "end": "09:04",
+    "text": "so many different dark factories to test"
+  },
+  {
+    "start": "09:02",
+    "end": "09:06",
+    "text": "the skill in different ways. So I've"
+  },
+  {
+    "start": "09:04",
+    "end": "09:08",
+    "text": "definitely went wider versus deep for a"
+  },
+  {
+    "start": "09:06",
+    "end": "09:11",
+    "text": "single dark factory. But it still is a"
+  },
+  {
+    "start": "09:08",
+    "end": "09:12",
+    "text": "pretty neat game. So I can ring the horn"
+  },
+  {
+    "start": "09:11",
+    "end": "09:15",
+    "text": "here for this uh tower defense game that"
+  },
+  {
+    "start": "09:12",
+    "end": "09:16",
+    "text": "I built. And the animations actually"
+  },
+  {
+    "start": "09:15",
+    "end": "09:18",
+    "text": "look pretty cool. Here we have the"
+  },
+  {
+    "start": "09:16",
+    "end": "09:20",
+    "text": "enemies that start to come in and I can"
+  },
+  {
+    "start": "09:18",
+    "end": "09:22",
+    "text": "attack them with my weapon. We got some"
+  },
+  {
+    "start": "09:20",
+    "end": "09:23",
+    "text": "nice sound effects here that I have the"
+  },
+  {
+    "start": "09:22",
+    "end": "09:24",
+    "text": "volume turned down for cuz it's kind of"
+  },
+  {
+    "start": "09:23",
+    "end": "09:26",
+    "text": "annoying when I'm in the middle of"
+  },
+  {
+    "start": "09:24",
+    "end": "09:28",
+    "text": "talking. But yeah, it's pretty cool. So,"
+  },
+  {
+    "start": "09:26",
+    "end": "09:30",
+    "text": "I can upgrade my stats and then I can go"
+  },
+  {
+    "start": "09:28",
+    "end": "09:33",
+    "text": "into the next wave here. Like this is"
+  },
+  {
+    "start": "09:30",
+    "end": "09:34",
+    "text": "actually a pretty fun game. Uh"
+  },
+  {
+    "start": "09:33",
+    "end": "09:35",
+    "text": "definitely something I'd be interested"
+  },
+  {
+    "start": "09:34",
+    "end": "09:37",
+    "text": "in building out more cuz I just like"
+  },
+  {
+    "start": "09:35",
+    "end": "09:38",
+    "text": "building video games in the first place."
+  },
+  {
+    "start": "09:37",
+    "end": "09:40",
+    "text": "But anyway, I'm going to go ahead and"
+  },
+  {
+    "start": "09:38",
+    "end": "09:42",
+    "text": "close this now. That's an idea of the"
+  },
+  {
+    "start": "09:40",
+    "end": "09:44",
+    "text": "kind of thing that I built with a Dark"
+  },
+  {
+    "start": "09:42",
+    "end": "09:46",
+    "text": "Factory. But yeah, really you can create"
+  },
+  {
+    "start": "09:44",
+    "end": "09:48",
+    "text": "any kind of application you want. Just"
+  },
+  {
+    "start": "09:46",
+    "end": "09:50",
+    "text": "keep in mind that dark factories I still"
+  },
+  {
+    "start": "09:48",
+    "end": "09:52",
+    "text": "would consider experimental right now."
+  },
+  {
+    "start": "09:50",
+    "end": "09:54",
+    "text": "That level three is definitely where you"
+  },
+  {
+    "start": "09:52",
+    "end": "09:56",
+    "text": "want to be at for utmost reliability,"
+  },
+  {
+    "start": "09:54",
+    "end": "09:58",
+    "text": "but it's pretty crazy the kinds of"
+  },
+  {
+    "start": "09:56",
+    "end": "10:00",
+    "text": "things you can build with this system"
+  },
+  {
+    "start": "09:58",
+    "end": "10:02",
+    "text": "these days. So now, as promised, I want"
+  },
+  {
+    "start": "10:00",
+    "end": "10:05",
+    "text": "to show you how everything works under"
+  },
+  {
+    "start": "10:02",
+    "end": "10:07",
+    "text": "the hood with this diagram as our main"
+  },
+  {
+    "start": "10:05",
+    "end": "10:08",
+    "text": "reference point. And I want to do this"
+  },
+  {
+    "start": "10:07",
+    "end": "10:10",
+    "text": "because your system is useless unless"
+  },
+  {
+    "start": "10:08",
+    "end": "10:11",
+    "text": "you really understand it. So, if you're"
+  },
+  {
+    "start": "10:10",
+    "end": "10:13",
+    "text": "going to build the factory with the"
+  },
+  {
+    "start": "10:11",
+    "end": "10:15",
+    "text": "skill, it's worth understanding how"
+  },
+  {
+    "start": "10:13",
+    "end": "10:18",
+    "text": "these things work. And even if you don't"
+  },
+  {
+    "start": "10:15",
+    "end": "10:20",
+    "text": "take my skill to build the factory"
+  },
+  {
+    "start": "10:18",
+    "end": "10:21",
+    "text": "exactly as I do, hopefully there's still"
+  },
+  {
+    "start": "10:20",
+    "end": "10:23",
+    "text": "some pretty neat ideas that you can take"
+  },
+  {
+    "start": "10:21",
+    "end": "10:25",
+    "text": "in here if you want to build your"
+  },
+  {
+    "start": "10:23",
+    "end": "10:27",
+    "text": "factory your own way or just take some"
+  },
+  {
+    "start": "10:25",
+    "end": "10:29",
+    "text": "ideas for your own AI coding workflows."
+  },
+  {
+    "start": "10:27",
+    "end": "10:31",
+    "text": "The sponsor of today's video is"
+  },
+  {
+    "start": "10:29",
+    "end": "10:33",
+    "text": "Parallel, the web infrastructure layer"
+  },
+  {
+    "start": "10:31",
+    "end": "10:35",
+    "text": "for agents. It fills a need that I have"
+  },
+  {
+    "start": "10:33",
+    "end": "10:37",
+    "text": "for most AI agents that I build."
+  },
+  {
+    "start": "10:35",
+    "end": "10:39",
+    "text": "Parallel gives you a suite of APIs over"
+  },
+  {
+    "start": "10:37",
+    "end": "10:41",
+    "text": "their own web index, so your agent can"
+  },
+  {
+    "start": "10:39",
+    "end": "10:42",
+    "text": "always be grounded in the most"
+  },
+  {
+    "start": "10:41",
+    "end": "10:44",
+    "text": "up-to-date information with all of the"
+  },
+  {
+    "start": "10:42",
+    "end": "10:46",
+    "text": "enrichment and any kind of formatting"
+  },
+  {
+    "start": "10:44",
+    "end": "10:49",
+    "text": "that you need. But my favorite part of"
+  },
+  {
+    "start": "10:46",
+    "end": "10:51",
+    "text": "their entire platform is monitor. It's"
+  },
+  {
+    "start": "10:49",
+    "end": "10:53",
+    "text": "web search that's always on. So we"
+  },
+  {
+    "start": "10:51",
+    "end": "10:55",
+    "text": "specify some kind of query like watch"
+  },
+  {
+    "start": "10:53",
+    "end": "10:56",
+    "text": "for new releases of LLM for these"
+  },
+  {
+    "start": "10:55",
+    "end": "10:58",
+    "text": "companies. And then you tell it how"
+  },
+  {
+    "start": "10:56",
+    "end": "11:00",
+    "text": "often you want it to run the query and"
+  },
+  {
+    "start": "10:58",
+    "end": "11:02",
+    "text": "then it's going to give you a web hook"
+  },
+  {
+    "start": "11:00",
+    "end": "11:05",
+    "text": "that fires whenever there's anything new"
+  },
+  {
+    "start": "11:02",
+    "end": "11:07",
+    "text": "based on your query. So the event is the"
+  },
+  {
+    "start": "11:05",
+    "end": "11:09",
+    "text": "trigger. In this example right here,"
+  },
+  {
+    "start": "11:07",
+    "end": "11:10",
+    "text": "monitor sent a request to my web hook"
+  },
+  {
+    "start": "11:09",
+    "end": "11:12",
+    "text": "because there's an update to the chat"
+  },
+  {
+    "start": "11:10",
+    "end": "11:15",
+    "text": "GPT platform. And so I take that web"
+  },
+  {
+    "start": "11:12",
+    "end": "11:17",
+    "text": "hook and then I call their task API to"
+  },
+  {
+    "start": "11:15",
+    "end": "11:19",
+    "text": "do deep research with citation. So when"
+  },
+  {
+    "start": "11:17",
+    "end": "11:21",
+    "text": "something changes on the web, I get a"
+  },
+  {
+    "start": "11:19",
+    "end": "11:22",
+    "text": "briefing with citations instead of a"
+  },
+  {
+    "start": "11:21",
+    "end": "11:24",
+    "text": "link I have to go read. And then I can"
+  },
+  {
+    "start": "11:22",
+    "end": "11:26",
+    "text": "take this output and feed it into"
+  },
+  {
+    "start": "11:24",
+    "end": "11:28",
+    "text": "downstream AI systems. And also"
+  },
+  {
+    "start": "11:26",
+    "end": "11:30",
+    "text": "everything is priced per request, not"
+  },
+  {
+    "start": "11:28",
+    "end": "11:32",
+    "text": "token. And so when I build my agent, I"
+  },
+  {
+    "start": "11:30",
+    "end": "11:34",
+    "text": "can predict my price when I have it"
+  },
+  {
+    "start": "11:32",
+    "end": "11:36",
+    "text": "running on a schedule before I even turn"
+  },
+  {
+    "start": "11:34",
+    "end": "11:38",
+    "text": "it on. And it's free to get started."
+  },
+  {
+    "start": "11:36",
+    "end": "11:40",
+    "text": "I'll have a link in the description. So"
+  },
+  {
+    "start": "11:38",
+    "end": "11:42",
+    "text": "zooming in now, most of the dark factory"
+  },
+  {
+    "start": "11:40",
+    "end": "11:44",
+    "text": "is driven by a single workflow that"
+  },
+  {
+    "start": "11:42",
+    "end": "11:47",
+    "text": "handles each one of the specs that we"
+  },
+  {
+    "start": "11:44",
+    "end": "11:49",
+    "text": "feed into the system. So the scale is"
+  },
+  {
+    "start": "11:47",
+    "end": "11:51",
+    "text": "going to help you customize things when"
+  },
+  {
+    "start": "11:49",
+    "end": "11:53",
+    "text": "you go through the interview process."
+  },
+  {
+    "start": "11:51",
+    "end": "11:56",
+    "text": "But typically what I do is I set up my"
+  },
+  {
+    "start": "11:53",
+    "end": "11:58",
+    "text": "dark factory as a GitHub repository. And"
+  },
+  {
+    "start": "11:56",
+    "end": "12:00",
+    "text": "then each spec that I feed in is just in"
+  },
+  {
+    "start": "11:58",
+    "end": "12:03",
+    "text": "GitHub issue that I create. Like this is"
+  },
+  {
+    "start": "12:00",
+    "end": "12:05",
+    "text": "my list of closed issues in my primary"
+  },
+  {
+    "start": "12:03",
+    "end": "12:06",
+    "text": "dark factory experiment. You'll have to"
+  },
+  {
+    "start": "12:05",
+    "end": "12:07",
+    "text": "excuse the mess. There's a ton of"
+  },
+  {
+    "start": "12:06",
+    "end": "12:09",
+    "text": "rejections cuz I was testing different"
+  },
+  {
+    "start": "12:07",
+    "end": "12:11",
+    "text": "things. But like here's an example of"
+  },
+  {
+    "start": "12:09",
+    "end": "12:13",
+    "text": "what the factory accepted. And then it"
+  },
+  {
+    "start": "12:11",
+    "end": "12:15",
+    "text": "went through this workflow to build it"
+  },
+  {
+    "start": "12:13",
+    "end": "12:17",
+    "text": "out and end with that poll request for"
+  },
+  {
+    "start": "12:15",
+    "end": "12:20",
+    "text": "the final review and ship. That is all"
+  },
+  {
+    "start": "12:17",
+    "end": "12:21",
+    "text": "happening autonomously. And so we create"
+  },
+  {
+    "start": "12:20",
+    "end": "12:24",
+    "text": "something like a ticket or a GitHub"
+  },
+  {
+    "start": "12:21",
+    "end": "12:25",
+    "text": "issue and then it's going to feed into"
+  },
+  {
+    "start": "12:24",
+    "end": "12:27",
+    "text": "something that is hopefully like your"
+  },
+  {
+    "start": "12:25",
+    "end": "12:29",
+    "text": "current AI coding workflow. It's just"
+  },
+  {
+    "start": "12:27",
+    "end": "12:31",
+    "text": "going to be more autonomous for all the"
+  },
+  {
+    "start": "12:29",
+    "end": "12:34",
+    "text": "steps of planning, building, and testing"
+  },
+  {
+    "start": "12:31",
+    "end": "12:36",
+    "text": "and verifying. And the coding agent that"
+  },
+  {
+    "start": "12:34",
+    "end": "12:38",
+    "text": "you use under the hood is definitely"
+  },
+  {
+    "start": "12:36",
+    "end": "12:41",
+    "text": "going to dictate a lot of what this"
+  },
+  {
+    "start": "12:38",
+    "end": "12:42",
+    "text": "looks like when the harness is built."
+  },
+  {
+    "start": "12:41",
+    "end": "12:44",
+    "text": "And so this is another thing the skill"
+  },
+  {
+    "start": "12:42",
+    "end": "12:45",
+    "text": "guides you through is picking your"
+  },
+  {
+    "start": "12:44",
+    "end": "12:48",
+    "text": "coding agent and setting up things to"
+  },
+  {
+    "start": "12:45",
+    "end": "12:49",
+    "text": "run in what is called headless mode."
+  },
+  {
+    "start": "12:48",
+    "end": "12:51",
+    "text": "Pretty much every single coding agent"
+  },
+  {
+    "start": "12:49",
+    "end": "12:53",
+    "text": "supports this like claude, PI, AMP,"
+  },
+  {
+    "start": "12:51",
+    "end": "12:55",
+    "text": "client, codeex, because we don't want to"
+  },
+  {
+    "start": "12:53",
+    "end": "12:56",
+    "text": "interact with the coding agent oursel"
+  },
+  {
+    "start": "12:55",
+    "end": "12:59",
+    "text": "that defeats the point of the dark"
+  },
+  {
+    "start": "12:56",
+    "end": "13:00",
+    "text": "factory. We need it to run autonomously."
+  },
+  {
+    "start": "12:59",
+    "end": "13:02",
+    "text": "And so headless mode is basically the"
+  },
+  {
+    "start": "13:00",
+    "end": "13:04",
+    "text": "way to run your coding agent as sort of"
+  },
+  {
+    "start": "13:02",
+    "end": "13:06",
+    "text": "a background task for each one of the"
+  },
+  {
+    "start": "13:04",
+    "end": "13:09",
+    "text": "steps that we have here in our harness."
+  },
+  {
+    "start": "13:06",
+    "end": "13:11",
+    "text": "And so we file the issue, but that's the"
+  },
+  {
+    "start": "13:09",
+    "end": "13:13",
+    "text": "only thing we do. The factory is going"
+  },
+  {
+    "start": "13:11",
+    "end": "13:14",
+    "text": "to take that forward and invoke the"
+  },
+  {
+    "start": "13:13",
+    "end": "13:17",
+    "text": "coding agent for each step, however you"
+  },
+  {
+    "start": "13:14",
+    "end": "13:19",
+    "text": "have it set up. Now, personally, to"
+  },
+  {
+    "start": "13:17",
+    "end": "13:22",
+    "text": "drive the entire system, I am using"
+  },
+  {
+    "start": "13:19",
+    "end": "13:24",
+    "text": "Archon, my open- source harness builder."
+  },
+  {
+    "start": "13:22",
+    "end": "13:26",
+    "text": "And so, when I publicly shared building"
+  },
+  {
+    "start": "13:24",
+    "end": "13:28",
+    "text": "my Dark Factory earlier this year, I was"
+  },
+  {
+    "start": "13:26",
+    "end": "13:30",
+    "text": "doing a ton with Archon, building"
+  },
+  {
+    "start": "13:28",
+    "end": "13:32",
+    "text": "workflows using them. You can definitely"
+  },
+  {
+    "start": "13:30",
+    "end": "13:33",
+    "text": "use Archon if you want, but I don't want"
+  },
+  {
+    "start": "13:32",
+    "end": "13:35",
+    "text": "to assume you're going to be using my"
+  },
+  {
+    "start": "13:33",
+    "end": "13:37",
+    "text": "tool. That's why the skill more focuses"
+  },
+  {
+    "start": "13:35",
+    "end": "13:39",
+    "text": "on just helping you use the barebones"
+  },
+  {
+    "start": "13:37",
+    "end": "13:41",
+    "text": "coding agent that you already like. So,"
+  },
+  {
+    "start": "13:39",
+    "end": "13:42",
+    "text": "that's our primary workflow. Now let's"
+  },
+  {
+    "start": "13:41",
+    "end": "13:44",
+    "text": "talk about the automation that drives"
+  },
+  {
+    "start": "13:42",
+    "end": "13:46",
+    "text": "the queue so that we have our pipeline"
+  },
+  {
+    "start": "13:44",
+    "end": "13:48",
+    "text": "of handling all the spec files that we"
+  },
+  {
+    "start": "13:46",
+    "end": "13:50",
+    "text": "feed in as input. So this is a value"
+  },
+  {
+    "start": "13:48",
+    "end": "13:52",
+    "text": "that the interview will ask you about in"
+  },
+  {
+    "start": "13:50",
+    "end": "13:54",
+    "text": "the skill. You can customize this but"
+  },
+  {
+    "start": "13:52",
+    "end": "13:57",
+    "text": "every single 30 minutes I have this cron"
+  },
+  {
+    "start": "13:54",
+    "end": "13:59",
+    "text": "job that triggers and it triages all of"
+  },
+  {
+    "start": "13:57",
+    "end": "14:00",
+    "text": "our inputs right like for GitHub if you"
+  },
+  {
+    "start": "13:59",
+    "end": "14:02",
+    "text": "have it set up with GitHub it's going to"
+  },
+  {
+    "start": "14:00",
+    "end": "14:04",
+    "text": "look at all the GitHub issues and figure"
+  },
+  {
+    "start": "14:02",
+    "end": "14:05",
+    "text": "out what it should implement next and"
+  },
+  {
+    "start": "14:04",
+    "end": "14:07",
+    "text": "where we're at with each of them. And so"
+  },
+  {
+    "start": "14:05",
+    "end": "14:09",
+    "text": "there's a label that we apply to each"
+  },
+  {
+    "start": "14:07",
+    "end": "14:12",
+    "text": "one of the issues so that our dark"
+  },
+  {
+    "start": "14:09",
+    "end": "14:14",
+    "text": "factory is stateful between runs. And so"
+  },
+  {
+    "start": "14:12",
+    "end": "14:16",
+    "text": "if something is accepted, that means"
+  },
+  {
+    "start": "14:14",
+    "end": "14:18",
+    "text": "that the factory's decided, let's build"
+  },
+  {
+    "start": "14:16",
+    "end": "14:19",
+    "text": "this and it's just waiting to go into"
+  },
+  {
+    "start": "14:18",
+    "end": "14:22",
+    "text": "this full workflow within one of the"
+  },
+  {
+    "start": "14:19",
+    "end": "14:23",
+    "text": "next runs that we do every 30 minutes."
+  },
+  {
+    "start": "14:22",
+    "end": "14:25",
+    "text": "If something is in progress, that means"
+  },
+  {
+    "start": "14:23",
+    "end": "14:27",
+    "text": "it's already going through this process"
+  },
+  {
+    "start": "14:25",
+    "end": "14:29",
+    "text": "so we can move on. And then if something"
+  },
+  {
+    "start": "14:27",
+    "end": "14:31",
+    "text": "needs review, that means that this"
+  },
+  {
+    "start": "14:29",
+    "end": "14:33",
+    "text": "workflow has completed. We have the poll"
+  },
+  {
+    "start": "14:31",
+    "end": "14:35",
+    "text": "request open. And so now we need a"
+  },
+  {
+    "start": "14:33",
+    "end": "14:36",
+    "text": "coding agent to go through and review"
+  },
+  {
+    "start": "14:35",
+    "end": "14:38",
+    "text": "things, right? We want that separate"
+  },
+  {
+    "start": "14:36",
+    "end": "14:40",
+    "text": "session to review. So we don't have any"
+  },
+  {
+    "start": "14:38",
+    "end": "14:42",
+    "text": "bias from the primary builder. And so"
+  },
+  {
+    "start": "14:40",
+    "end": "14:44",
+    "text": "that review agent can approve things,"
+  },
+  {
+    "start": "14:42",
+    "end": "14:46",
+    "text": "which means it's going to be merged and"
+  },
+  {
+    "start": "14:44",
+    "end": "14:47",
+    "text": "automatically deployed. If it needs"
+  },
+  {
+    "start": "14:46",
+    "end": "14:49",
+    "text": "fixing, then we're going to go back into"
+  },
+  {
+    "start": "14:47",
+    "end": "14:51",
+    "text": "the builder agent and have it correct"
+  },
+  {
+    "start": "14:49",
+    "end": "14:53",
+    "text": "those things. And then I have this built"
+  },
+  {
+    "start": "14:51",
+    "end": "14:54",
+    "text": "in as a fail safe. I know for the most"
+  },
+  {
+    "start": "14:53",
+    "end": "14:57",
+    "text": "part we want the human out of the loop"
+  },
+  {
+    "start": "14:54",
+    "end": "14:58",
+    "text": "in the dark factory, but just as a fail"
+  },
+  {
+    "start": "14:57",
+    "end": "15:00",
+    "text": "safe, I made it so that you can, you"
+  },
+  {
+    "start": "14:58",
+    "end": "15:02",
+    "text": "know, specify during the interview"
+  },
+  {
+    "start": "15:00",
+    "end": "15:04",
+    "text": "process when you'd want something"
+  },
+  {
+    "start": "15:02",
+    "end": "15:05",
+    "text": "escalated to you. Of course, you can"
+  },
+  {
+    "start": "15:04",
+    "end": "15:07",
+    "text": "specify you never want something"
+  },
+  {
+    "start": "15:05",
+    "end": "15:09",
+    "text": "escalated. But coding agents, they"
+  },
+  {
+    "start": "15:07",
+    "end": "15:10",
+    "text": "sometimes get tripped up on things and"
+  },
+  {
+    "start": "15:09",
+    "end": "15:12",
+    "text": "they go through an infinite loop of"
+  },
+  {
+    "start": "15:10",
+    "end": "15:13",
+    "text": "trying to fix a problem, that kind of"
+  },
+  {
+    "start": "15:12",
+    "end": "15:15",
+    "text": "thing. You definitely want to intervene"
+  },
+  {
+    "start": "15:13",
+    "end": "15:17",
+    "text": "at least once in a while if you really"
+  },
+  {
+    "start": "15:15",
+    "end": "15:19",
+    "text": "want your dark factory to be reliable."
+  },
+  {
+    "start": "15:17",
+    "end": "15:21",
+    "text": "And so when this trigger happens every"
+  },
+  {
+    "start": "15:19",
+    "end": "15:24",
+    "text": "30 minutes, it goes through this"
+  },
+  {
+    "start": "15:21",
+    "end": "15:26",
+    "text": "priority of actions. And so first, it's"
+  },
+  {
+    "start": "15:24",
+    "end": "15:28",
+    "text": "going to prioritize anything that needs"
+  },
+  {
+    "start": "15:26",
+    "end": "15:30",
+    "text": "fixing. So it's going to trigger an"
+  },
+  {
+    "start": "15:28",
+    "end": "15:32",
+    "text": "agent to fix a PR. And the second"
+  },
+  {
+    "start": "15:30",
+    "end": "15:34",
+    "text": "priority is checking a pull request,"
+  },
+  {
+    "start": "15:32",
+    "end": "15:36",
+    "text": "like performing the review. If there's"
+  },
+  {
+    "start": "15:34",
+    "end": "15:38",
+    "text": "nothing in the PR list, then it's going"
+  },
+  {
+    "start": "15:36",
+    "end": "15:40",
+    "text": "to work on that next issue that is"
+  },
+  {
+    "start": "15:38",
+    "end": "15:41",
+    "text": "approved. Otherwise, if there's nothing"
+  },
+  {
+    "start": "15:40",
+    "end": "15:43",
+    "text": "there, it's going to triage and it's"
+  },
+  {
+    "start": "15:41",
+    "end": "15:45",
+    "text": "going to figure out if it should accept"
+  },
+  {
+    "start": "15:43",
+    "end": "15:48",
+    "text": "anything new to be worked on in the next"
+  },
+  {
+    "start": "15:45",
+    "end": "15:51",
+    "text": "run. And so I say here one or more jobs"
+  },
+  {
+    "start": "15:48",
+    "end": "15:53",
+    "text": "singular or plural. You can make it so"
+  },
+  {
+    "start": "15:51",
+    "end": "15:54",
+    "text": "that a lot of work happens in parallel."
+  },
+  {
+    "start": "15:53",
+    "end": "15:56",
+    "text": "Like maybe it's going to build a couple"
+  },
+  {
+    "start": "15:54",
+    "end": "15:58",
+    "text": "of issues and do a couple of code"
+  },
+  {
+    "start": "15:56",
+    "end": "16:01",
+    "text": "reviews within that single 30 minute"
+  },
+  {
+    "start": "15:58",
+    "end": "16:03",
+    "text": "trigger. This is a dial you can tweak"
+  },
+  {
+    "start": "16:01",
+    "end": "16:06",
+    "text": "just depending on how many tokens you"
+  },
+  {
+    "start": "16:03",
+    "end": "16:08",
+    "text": "want to spend with your dark factory. To"
+  },
+  {
+    "start": "16:06",
+    "end": "16:10",
+    "text": "keep things safe, typically I just have"
+  },
+  {
+    "start": "16:08",
+    "end": "16:12",
+    "text": "a couple of runs in parallel. Otherwise,"
+  },
+  {
+    "start": "16:10",
+    "end": "16:14",
+    "text": "you're going to hit hit your rate limits"
+  },
+  {
+    "start": "16:12",
+    "end": "16:15",
+    "text": "very very quickly. So just keep in mind"
+  },
+  {
+    "start": "16:14",
+    "end": "16:18",
+    "text": "that's something that you can definitely"
+  },
+  {
+    "start": "16:15",
+    "end": "16:20",
+    "text": "customize. And then when we get to the"
+  },
+  {
+    "start": "16:18",
+    "end": "16:21",
+    "text": "end here, we reach deployment. So for"
+  },
+  {
+    "start": "16:20",
+    "end": "16:23",
+    "text": "anything that is, you know, reviewed and"
+  },
+  {
+    "start": "16:21",
+    "end": "16:26",
+    "text": "approved and merged, then we're going to"
+  },
+  {
+    "start": "16:23",
+    "end": "16:28",
+    "text": "automatically deploy. It's important if"
+  },
+  {
+    "start": "16:26",
+    "end": "16:30",
+    "text": "merging never puts code in front of a"
+  },
+  {
+    "start": "16:28",
+    "end": "16:31",
+    "text": "user, like if your pull requests are"
+  },
+  {
+    "start": "16:30",
+    "end": "16:33",
+    "text": "merged, we don't actually deploy them"
+  },
+  {
+    "start": "16:31",
+    "end": "16:35",
+    "text": "autonomously. You built a PR generator,"
+  },
+  {
+    "start": "16:33",
+    "end": "16:37",
+    "text": "not a dark factory, right? Like we as a"
+  },
+  {
+    "start": "16:35",
+    "end": "16:40",
+    "text": "part of our harness, we need a strategy"
+  },
+  {
+    "start": "16:37",
+    "end": "16:41",
+    "text": "for deployment. And so the strategy that"
+  },
+  {
+    "start": "16:40",
+    "end": "16:44",
+    "text": "I've used myself that the skill also"
+  },
+  {
+    "start": "16:41",
+    "end": "16:45",
+    "text": "recommends is blue green deployment. If"
+  },
+  {
+    "start": "16:44",
+    "end": "16:46",
+    "text": "you come from an engineering background,"
+  },
+  {
+    "start": "16:45",
+    "end": "16:48",
+    "text": "you're familiar with this. But"
+  },
+  {
+    "start": "16:46",
+    "end": "16:50",
+    "text": "basically, we have two versions of the"
+  },
+  {
+    "start": "16:48",
+    "end": "16:53",
+    "text": "application at any given point. We have"
+  },
+  {
+    "start": "16:50",
+    "end": "16:54",
+    "text": "one that is live for the users right now"
+  },
+  {
+    "start": "16:53",
+    "end": "16:57",
+    "text": "and then we have the same version of the"
+  },
+  {
+    "start": "16:54",
+    "end": "16:58",
+    "text": "app that is on standby. The reason we"
+  },
+  {
+    "start": "16:57",
+    "end": "17:01",
+    "text": "want to do this is because then when we"
+  },
+  {
+    "start": "16:58",
+    "end": "17:03",
+    "text": "update our application, we update the"
+  },
+  {
+    "start": "17:01",
+    "end": "17:05",
+    "text": "one that's on standby and then we flip"
+  },
+  {
+    "start": "17:03",
+    "end": "17:07",
+    "text": "it over so that that version is now live"
+  },
+  {
+    "start": "17:05",
+    "end": "17:09",
+    "text": "for the users. That's important because"
+  },
+  {
+    "start": "17:07",
+    "end": "17:11",
+    "text": "if we only have one version of the"
+  },
+  {
+    "start": "17:09",
+    "end": "17:13",
+    "text": "application, then as we're updating it,"
+  },
+  {
+    "start": "17:11",
+    "end": "17:15",
+    "text": "we have to, you know, take down the app"
+  },
+  {
+    "start": "17:13",
+    "end": "17:17",
+    "text": "for a little bit. So there's downtime"
+  },
+  {
+    "start": "17:15",
+    "end": "17:19",
+    "text": "for the users. That's why we want to"
+  },
+  {
+    "start": "17:17",
+    "end": "17:20",
+    "text": "have this flip only once we have things"
+  },
+  {
+    "start": "17:19",
+    "end": "17:22",
+    "text": "updated in one version of the"
+  },
+  {
+    "start": "17:20",
+    "end": "17:23",
+    "text": "application. So just a small detail"
+  },
+  {
+    "start": "17:22",
+    "end": "17:24",
+    "text": "there for deployment. It's important to"
+  },
+  {
+    "start": "17:23",
+    "end": "17:27",
+    "text": "get this right though because we need"
+  },
+  {
+    "start": "17:24",
+    "end": "17:29",
+    "text": "the dark factory to actually go from"
+  },
+  {
+    "start": "17:27",
+    "end": "17:31",
+    "text": "spec all the way to shipped code, right?"
+  },
+  {
+    "start": "17:29",
+    "end": "17:33",
+    "text": "If we don't have the deployment, we"
+  },
+  {
+    "start": "17:31",
+    "end": "17:35",
+    "text": "don't truly have this right here. Cool."
+  },
+  {
+    "start": "17:33",
+    "end": "17:36",
+    "text": "So, with that, there are just two more"
+  },
+  {
+    "start": "17:35",
+    "end": "17:38",
+    "text": "things that I want to cover with how the"
+  },
+  {
+    "start": "17:36",
+    "end": "17:40",
+    "text": "Dark Factory operates, and I've saved"
+  },
+  {
+    "start": "17:38",
+    "end": "17:42",
+    "text": "the best for last here. These are the"
+  },
+  {
+    "start": "17:40",
+    "end": "17:44",
+    "text": "most important parts of the Dark Factory"
+  },
+  {
+    "start": "17:42",
+    "end": "17:46",
+    "text": "harness that I put the most effort into"
+  },
+  {
+    "start": "17:44",
+    "end": "17:48",
+    "text": "building and evolving. We have the"
+  },
+  {
+    "start": "17:46",
+    "end": "17:50",
+    "text": "guidance later so the agent can continue"
+  },
+  {
+    "start": "17:48",
+    "end": "17:52",
+    "text": "to operate as we actually want it to,"
+  },
+  {
+    "start": "17:50",
+    "end": "17:53",
+    "text": "even when it's fully autonomous. And"
+  },
+  {
+    "start": "17:52",
+    "end": "17:55",
+    "text": "then we have all the validation"
+  },
+  {
+    "start": "17:53",
+    "end": "17:56",
+    "text": "strategies to make sure that it is"
+  },
+  {
+    "start": "17:55",
+    "end": "17:58",
+    "text": "properly checking its work. We don't"
+  },
+  {
+    "start": "17:56",
+    "end": "18:00",
+    "text": "want bias to creep through. We don't"
+  },
+  {
+    "start": "17:58",
+    "end": "18:02",
+    "text": "want it to fake tests or say things are"
+  },
+  {
+    "start": "18:00",
+    "end": "18:04",
+    "text": "working when they really aren't. There's"
+  },
+  {
+    "start": "18:02",
+    "end": "18:06",
+    "text": "a lot that I've engineered for this. So,"
+  },
+  {
+    "start": "18:04",
+    "end": "18:08",
+    "text": "one of the first things the skill is"
+  },
+  {
+    "start": "18:06",
+    "end": "18:10",
+    "text": "going to build for you is the three core"
+  },
+  {
+    "start": "18:08",
+    "end": "18:12",
+    "text": "files for the guidance layer of the dark"
+  },
+  {
+    "start": "18:10",
+    "end": "18:14",
+    "text": "factory. And the first file is just your"
+  },
+  {
+    "start": "18:12",
+    "end": "18:15",
+    "text": "global rules. You've seen this a million"
+  },
+  {
+    "start": "18:14",
+    "end": "18:17",
+    "text": "times before. It's the constraints and"
+  },
+  {
+    "start": "18:15",
+    "end": "18:19",
+    "text": "conventions you always want your coding"
+  },
+  {
+    "start": "18:17",
+    "end": "18:22",
+    "text": "agent to follow when it's operating in"
+  },
+  {
+    "start": "18:19",
+    "end": "18:24",
+    "text": "your codebase. The next file is kind of"
+  },
+  {
+    "start": "18:22",
+    "end": "18:25",
+    "text": "similar. It might seem like they step on"
+  },
+  {
+    "start": "18:24",
+    "end": "18:27",
+    "text": "each other's toes, but there's a key"
+  },
+  {
+    "start": "18:25",
+    "end": "18:29",
+    "text": "distinction I want to make here. We have"
+  },
+  {
+    "start": "18:27",
+    "end": "18:31",
+    "text": "our factory rules. These are the"
+  },
+  {
+    "start": "18:29",
+    "end": "18:34",
+    "text": "boundaries we want our coding agent to"
+  },
+  {
+    "start": "18:31",
+    "end": "18:36",
+    "text": "follow specifically when it's operating"
+  },
+  {
+    "start": "18:34",
+    "end": "18:38",
+    "text": "more autonomously within the dark"
+  },
+  {
+    "start": "18:36",
+    "end": "18:40",
+    "text": "factory. So it is kind of the same thing"
+  },
+  {
+    "start": "18:38",
+    "end": "18:42",
+    "text": "with constraints and conventions, but"
+  },
+  {
+    "start": "18:40",
+    "end": "18:44",
+    "text": "we're even stricter there. So think"
+  },
+  {
+    "start": "18:42",
+    "end": "18:47",
+    "text": "about it this way. This is the test. You"
+  },
+  {
+    "start": "18:44",
+    "end": "18:48",
+    "text": "want to put things in your global rules"
+  },
+  {
+    "start": "18:47",
+    "end": "18:50",
+    "text": "when you would want your coding agent to"
+  },
+  {
+    "start": "18:48",
+    "end": "18:51",
+    "text": "know about that even if you're not"
+  },
+  {
+    "start": "18:50",
+    "end": "18:53",
+    "text": "operating in the dark factory. Like if"
+  },
+  {
+    "start": "18:51",
+    "end": "18:55",
+    "text": "you're just working with your coding"
+  },
+  {
+    "start": "18:53",
+    "end": "18:57",
+    "text": "agent as you normally do. But the things"
+  },
+  {
+    "start": "18:55",
+    "end": "19:00",
+    "text": "we have in the factory rules, these get"
+  },
+  {
+    "start": "18:57",
+    "end": "19:01",
+    "text": "stricter, we really need to make sure"
+  },
+  {
+    "start": "19:00",
+    "end": "19:03",
+    "text": "that the coding agent, for example,"
+  },
+  {
+    "start": "19:01",
+    "end": "19:04",
+    "text": "isn't trying to do too much work at once"
+  },
+  {
+    "start": "19:03",
+    "end": "19:06",
+    "text": "because if it's checking its own work"
+  },
+  {
+    "start": "19:04",
+    "end": "19:08",
+    "text": "and we're not in the loop at all, we"
+  },
+  {
+    "start": "19:06",
+    "end": "19:10",
+    "text": "really need to make sure that it's only"
+  },
+  {
+    "start": "19:08",
+    "end": "19:12",
+    "text": "handling bite-siz tasks one at a time."
+  },
+  {
+    "start": "19:10",
+    "end": "19:14",
+    "text": "Otherwise, reliability is going to slip."
+  },
+  {
+    "start": "19:12",
+    "end": "19:15",
+    "text": "So the things that go in here are the"
+  },
+  {
+    "start": "19:14",
+    "end": "19:17",
+    "text": "things that are strict enough where"
+  },
+  {
+    "start": "19:15",
+    "end": "19:19",
+    "text": "maybe you wouldn't even really want the"
+  },
+  {
+    "start": "19:17",
+    "end": "19:20",
+    "text": "agent to have those constraints and"
+  },
+  {
+    "start": "19:19",
+    "end": "19:22",
+    "text": "conventions if you're working with it"
+  },
+  {
+    "start": "19:20",
+    "end": "19:24",
+    "text": "normally. And so when you're working"
+  },
+  {
+    "start": "19:22",
+    "end": "19:26",
+    "text": "with your coding agent in the repo"
+  },
+  {
+    "start": "19:24",
+    "end": "19:28",
+    "text": "outside of the dark factory, it probably"
+  },
+  {
+    "start": "19:26",
+    "end": "19:31",
+    "text": "won't even read these. And then the last"
+  },
+  {
+    "start": "19:28",
+    "end": "19:33",
+    "text": "thing we have is our mission.md. And so"
+  },
+  {
+    "start": "19:31",
+    "end": "19:35",
+    "text": "this a lot of it is derived from the PRD"
+  },
+  {
+    "start": "19:33",
+    "end": "19:37",
+    "text": "you give as input to this skill, but"
+  },
+  {
+    "start": "19:35",
+    "end": "19:39",
+    "text": "it's the goals you have for your"
+  },
+  {
+    "start": "19:37",
+    "end": "19:41",
+    "text": "application, specifically what you want"
+  },
+  {
+    "start": "19:39",
+    "end": "19:42",
+    "text": "to build and then also things that are"
+  },
+  {
+    "start": "19:41",
+    "end": "19:44",
+    "text": "out of scope. Just as importantly, you"
+  },
+  {
+    "start": "19:42",
+    "end": "19:47",
+    "text": "want to specify what's out of scope"
+  },
+  {
+    "start": "19:44",
+    "end": "19:49",
+    "text": "because that way the agent knows what"
+  },
+  {
+    "start": "19:47",
+    "end": "19:50",
+    "text": "spec files it should accept or reject."
+  },
+  {
+    "start": "19:49",
+    "end": "19:52",
+    "text": "And this might be a question you've had"
+  },
+  {
+    "start": "19:50",
+    "end": "19:54",
+    "text": "at this point because you saw I accepted"
+  },
+  {
+    "start": "19:52",
+    "end": "19:55",
+    "text": "here. You saw I had a bunch of GitHub"
+  },
+  {
+    "start": "19:54",
+    "end": "19:57",
+    "text": "issues that are rejected. What does it"
+  },
+  {
+    "start": "19:55",
+    "end": "19:59",
+    "text": "even mean? Well, here's the thing. I"
+  },
+  {
+    "start": "19:57",
+    "end": "20:02",
+    "text": "wanted a mechanism in the factory for"
+  },
+  {
+    "start": "19:59",
+    "end": "20:05",
+    "text": "the coding agent to correct you, not"
+  },
+  {
+    "start": "20:02",
+    "end": "20:06",
+    "text": "just take the specs you feed in as the"
+  },
+  {
+    "start": "20:05",
+    "end": "20:09",
+    "text": "single source of truth. This has to be"
+  },
+  {
+    "start": "20:06",
+    "end": "20:10",
+    "text": "implemented cuz sometimes you forget"
+  },
+  {
+    "start": "20:09",
+    "end": "20:13",
+    "text": "what the goals and non- goals are based"
+  },
+  {
+    "start": "20:10",
+    "end": "20:15",
+    "text": "on your PRD, but the coding agent knows"
+  },
+  {
+    "start": "20:13",
+    "end": "20:17",
+    "text": "that because you encoded it in your"
+  },
+  {
+    "start": "20:15",
+    "end": "20:19",
+    "text": "mission.md right here. And so sometimes"
+  },
+  {
+    "start": "20:17",
+    "end": "20:20",
+    "text": "it'll look at a spec and say, \"Hey, this"
+  },
+  {
+    "start": "20:19",
+    "end": "20:22",
+    "text": "is something we probably shouldn't"
+  },
+  {
+    "start": "20:20",
+    "end": "20:24",
+    "text": "implement. It's out of scope for the"
+  },
+  {
+    "start": "20:22",
+    "end": "20:26",
+    "text": "application. You said it earlier.\" Or"
+  },
+  {
+    "start": "20:24",
+    "end": "20:27",
+    "text": "maybe you want to kind of build in like"
+  },
+  {
+    "start": "20:26",
+    "end": "20:29",
+    "text": "a reliability dial and the coding agent"
+  },
+  {
+    "start": "20:27",
+    "end": "20:30",
+    "text": "can figure out like, \"Oh, this spec is"
+  },
+  {
+    "start": "20:29",
+    "end": "20:32",
+    "text": "too complicated. We need to split it up"
+  },
+  {
+    "start": "20:30",
+    "end": "20:34",
+    "text": "first.\" Or maybe I want to work on it"
+  },
+  {
+    "start": "20:32",
+    "end": "20:36",
+    "text": "with you. I just wanted some kind of"
+  },
+  {
+    "start": "20:34",
+    "end": "20:39",
+    "text": "mechanism for the agent to have that"
+  },
+  {
+    "start": "20:36",
+    "end": "20:41",
+    "text": "autonomy to, you know, accept or reject"
+  },
+  {
+    "start": "20:39",
+    "end": "20:42",
+    "text": "things. And of course, the skill,"
+  },
+  {
+    "start": "20:41",
+    "end": "20:43",
+    "text": "especially in the interview process, is"
+  },
+  {
+    "start": "20:42",
+    "end": "20:45",
+    "text": "going to walk through it all with you"
+  },
+  {
+    "start": "20:43",
+    "end": "20:47",
+    "text": "and help you establish that. So every"
+  },
+  {
+    "start": "20:45",
+    "end": "20:49",
+    "text": "time you have a new spec that comes in"
+  },
+  {
+    "start": "20:47",
+    "end": "20:51",
+    "text": "when it's being triaged, the agent has"
+  },
+  {
+    "start": "20:49",
+    "end": "20:53",
+    "text": "the option to actually reject it. You"
+  },
+  {
+    "start": "20:51",
+    "end": "20:55",
+    "text": "can turn that off entirely if you want,"
+  },
+  {
+    "start": "20:53",
+    "end": "20:57",
+    "text": "but I find that really useful just to"
+  },
+  {
+    "start": "20:55",
+    "end": "20:59",
+    "text": "make sure that the agent can correct"
+  },
+  {
+    "start": "20:57",
+    "end": "21:01",
+    "text": "you, not just the other way around. And"
+  },
+  {
+    "start": "20:59",
+    "end": "21:02",
+    "text": "so with that, the very last thing I want"
+  },
+  {
+    "start": "21:01",
+    "end": "21:05",
+    "text": "to talk about with you here is the"
+  },
+  {
+    "start": "21:02",
+    "end": "21:07",
+    "text": "validation harness. And I really did"
+  },
+  {
+    "start": "21:05",
+    "end": "21:09",
+    "text": "save the best for last year. This is the"
+  },
+  {
+    "start": "21:07",
+    "end": "21:11",
+    "text": "most important thing as far as"
+  },
+  {
+    "start": "21:09",
+    "end": "21:14",
+    "text": "reliability goes in the entire Dark"
+  },
+  {
+    "start": "21:11",
+    "end": "21:16",
+    "text": "Factory. So, we really have two agents"
+  },
+  {
+    "start": "21:14",
+    "end": "21:18",
+    "text": "that are operating in the factory here."
+  },
+  {
+    "start": "21:16",
+    "end": "21:19",
+    "text": "We have the builder and we have the"
+  },
+  {
+    "start": "21:18",
+    "end": "21:22",
+    "text": "validator. And I've hinted at this"
+  },
+  {
+    "start": "21:19",
+    "end": "21:24",
+    "text": "already because the core workflow here"
+  },
+  {
+    "start": "21:22",
+    "end": "21:25",
+    "text": "ends with the pull request, but it"
+  },
+  {
+    "start": "21:24",
+    "end": "21:27",
+    "text": "doesn't end with the shipped code"
+  },
+  {
+    "start": "21:25",
+    "end": "21:30",
+    "text": "because we have this entire other"
+  },
+  {
+    "start": "21:27",
+    "end": "21:32",
+    "text": "process here for reviewing the PR. And"
+  },
+  {
+    "start": "21:30",
+    "end": "21:34",
+    "text": "this is really important because coding"
+  },
+  {
+    "start": "21:32",
+    "end": "21:37",
+    "text": "agents by themselves, they build up a"
+  },
+  {
+    "start": "21:34",
+    "end": "21:41",
+    "text": "lot of bias as they implement things."
+  },
+  {
+    "start": "21:37",
+    "end": "21:43",
+    "text": "And so we need a very separate review"
+  },
+  {
+    "start": "21:41",
+    "end": "21:45",
+    "text": "that looks at things with a critical eye"
+  },
+  {
+    "start": "21:43",
+    "end": "21:47",
+    "text": "and it doesn't know about how things"
+  },
+  {
+    "start": "21:45",
+    "end": "21:49",
+    "text": "were implemented or what the original"
+  },
+  {
+    "start": "21:47",
+    "end": "21:51",
+    "text": "plan was or anything because all that"
+  },
+  {
+    "start": "21:49",
+    "end": "21:52",
+    "text": "can carry bias to make the agent ignore"
+  },
+  {
+    "start": "21:51",
+    "end": "21:55",
+    "text": "things like just turn a blind eye to"
+  },
+  {
+    "start": "21:52",
+    "end": "21:57",
+    "text": "stuff or just get kind of lazy in the"
+  },
+  {
+    "start": "21:55",
+    "end": "21:59",
+    "text": "critique. So the coolest thing that I"
+  },
+  {
+    "start": "21:57",
+    "end": "22:00",
+    "text": "built in this entire validation harness"
+  },
+  {
+    "start": "21:59",
+    "end": "22:03",
+    "text": "is also unfortunately the most"
+  },
+  {
+    "start": "22:00",
+    "end": "22:05",
+    "text": "complicated. It's hold out scenarios. So"
+  },
+  {
+    "start": "22:03",
+    "end": "22:07",
+    "text": "I'm going to try to be as brief as I can"
+  },
+  {
+    "start": "22:05",
+    "end": "22:09",
+    "text": "explaining this. I could spend like a"
+  },
+  {
+    "start": "22:07",
+    "end": "22:11",
+    "text": "solid half hour talking about how these"
+  },
+  {
+    "start": "22:09",
+    "end": "22:13",
+    "text": "work and the ideas behind them. But"
+  },
+  {
+    "start": "22:11",
+    "end": "22:16",
+    "text": "essentially what we're doing here is we"
+  },
+  {
+    "start": "22:13",
+    "end": "22:18",
+    "text": "are creating a set of test scenarios"
+  },
+  {
+    "start": "22:16",
+    "end": "22:20",
+    "text": "that are entirely separate from the"
+  },
+  {
+    "start": "22:18",
+    "end": "22:22",
+    "text": "implementation details. So given the"
+  },
+  {
+    "start": "22:20",
+    "end": "22:24",
+    "text": "application itself at a high level, what"
+  },
+  {
+    "start": "22:22",
+    "end": "22:25",
+    "text": "does success look like? How are we"
+  },
+  {
+    "start": "22:24",
+    "end": "22:27",
+    "text": "supposed to be able to use this"
+  },
+  {
+    "start": "22:25",
+    "end": "22:30",
+    "text": "application? We're writing these before"
+  },
+  {
+    "start": "22:27",
+    "end": "22:31",
+    "text": "we actually perform the work. It is"
+  },
+  {
+    "start": "22:30",
+    "end": "22:34",
+    "text": "totally separate from the builder agent."
+  },
+  {
+    "start": "22:31",
+    "end": "22:36",
+    "text": "In fact, the builder agent can never see"
+  },
+  {
+    "start": "22:34",
+    "end": "22:38",
+    "text": "these hold out scenarios because"
+  },
+  {
+    "start": "22:36",
+    "end": "22:40",
+    "text": "otherwise it can try to design the app"
+  },
+  {
+    "start": "22:38",
+    "end": "22:43",
+    "text": "in a way just to make those scenarios"
+  },
+  {
+    "start": "22:40",
+    "end": "22:45",
+    "text": "pass. It's a way to make it so the"
+  },
+  {
+    "start": "22:43",
+    "end": "22:48",
+    "text": "builder is blind to how we're checking."
+  },
+  {
+    "start": "22:45",
+    "end": "22:50",
+    "text": "So it can't try to sort of hijack our"
+  },
+  {
+    "start": "22:48",
+    "end": "22:52",
+    "text": "testing scenarios. And so we know what"
+  },
+  {
+    "start": "22:50",
+    "end": "22:54",
+    "text": "success looks like. And then as we build"
+  },
+  {
+    "start": "22:52",
+    "end": "22:56",
+    "text": "the individual things with our builder"
+  },
+  {
+    "start": "22:54",
+    "end": "22:58",
+    "text": "agent, it has access to some testing"
+  },
+  {
+    "start": "22:56",
+    "end": "22:59",
+    "text": "like unit testing and integration"
+  },
+  {
+    "start": "22:58",
+    "end": "23:02",
+    "text": "testing because we want it to be able to"
+  },
+  {
+    "start": "22:59",
+    "end": "23:04",
+    "text": "iterate on its work to some degree. So"
+  },
+  {
+    "start": "23:02",
+    "end": "23:06",
+    "text": "we have that within the core workflow."
+  },
+  {
+    "start": "23:04",
+    "end": "23:08",
+    "text": "But then our validator has a whole extra"
+  },
+  {
+    "start": "23:06",
+    "end": "23:09",
+    "text": "suite of tests where it's running these"
+  },
+  {
+    "start": "23:08",
+    "end": "23:11",
+    "text": "things separate from the implementation."
+  },
+  {
+    "start": "23:09",
+    "end": "23:13",
+    "text": "So there's no bias there. And then any"
+  },
+  {
+    "start": "23:11",
+    "end": "23:14",
+    "text": "issues that come up from this, it's"
+  },
+  {
+    "start": "23:13",
+    "end": "23:16",
+    "text": "going to feed it back into the builder"
+  },
+  {
+    "start": "23:14",
+    "end": "23:18",
+    "text": "to correct things. And then it'll run"
+  },
+  {
+    "start": "23:16",
+    "end": "23:20",
+    "text": "all the tests again. So, also let me"
+  },
+  {
+    "start": "23:18",
+    "end": "23:22",
+    "text": "know in the comments if you'd want me to"
+  },
+  {
+    "start": "23:20",
+    "end": "23:24",
+    "text": "make a video going a lot further into"
+  },
+  {
+    "start": "23:22",
+    "end": "23:25",
+    "text": "these different validation approaches,"
+  },
+  {
+    "start": "23:24",
+    "end": "23:27",
+    "text": "especially with the hold out scenarios."
+  },
+  {
+    "start": "23:25",
+    "end": "23:29",
+    "text": "This really is what makes the Dark"
+  },
+  {
+    "start": "23:27",
+    "end": "23:31",
+    "text": "Factory reliable. Without it, there is"
+  },
+  {
+    "start": "23:29",
+    "end": "23:33",
+    "text": "no way that I'd even run this as an"
+  },
+  {
+    "start": "23:31",
+    "end": "23:36",
+    "text": "experiment. And just the core idea"
+  },
+  {
+    "start": "23:33",
+    "end": "23:38",
+    "text": "overall is to have a very clear"
+  },
+  {
+    "start": "23:36",
+    "end": "23:39",
+    "text": "separation here between the builder and"
+  },
+  {
+    "start": "23:38",
+    "end": "23:41",
+    "text": "the validator. You don't want them"
+  },
+  {
+    "start": "23:39",
+    "end": "23:43",
+    "text": "sharing information like you don't want"
+  },
+  {
+    "start": "23:41",
+    "end": "23:44",
+    "text": "the builder to know about your tests."
+  },
+  {
+    "start": "23:43",
+    "end": "23:46",
+    "text": "You don't want the validator to know"
+  },
+  {
+    "start": "23:44",
+    "end": "23:48",
+    "text": "about the plan. That way they can"
+  },
+  {
+    "start": "23:46",
+    "end": "23:51",
+    "text": "operate independently and together make"
+  },
+  {
+    "start": "23:48",
+    "end": "23:52",
+    "text": "your dark factory reliable. So with"
+  },
+  {
+    "start": "23:51",
+    "end": "23:54",
+    "text": "that, we've now covered all the"
+  },
+  {
+    "start": "23:52",
+    "end": "23:56",
+    "text": "components of the AI dark factory that"
+  },
+  {
+    "start": "23:54",
+    "end": "23:58",
+    "text": "the skill helps you build. So go ahead"
+  },
+  {
+    "start": "23:56",
+    "end": "23:59",
+    "text": "and just try the skill right now. You"
+  },
+  {
+    "start": "23:58",
+    "end": "24:00",
+    "text": "have to spend some time up front"
+  },
+  {
+    "start": "23:59",
+    "end": "24:02",
+    "text": "answering the questions, but after that"
+  },
+  {
+    "start": "24:00",
+    "end": "24:04",
+    "text": "it rips through everything for you and"
+  },
+  {
+    "start": "24:02",
+    "end": "24:06",
+    "text": "it's amazing to watch it work and see"
+  },
+  {
+    "start": "24:04",
+    "end": "24:08",
+    "text": "the kinds of things that you can create."
+  },
+  {
+    "start": "24:06",
+    "end": "24:10",
+    "text": "And you can really use any coding agent,"
+  },
+  {
+    "start": "24:08",
+    "end": "24:12",
+    "text": "any model, even use different providers"
+  },
+  {
+    "start": "24:10",
+    "end": "24:14",
+    "text": "and models for the different steps in"
+  },
+  {
+    "start": "24:12",
+    "end": "24:15",
+    "text": "the workflow here. There's a lot you can"
+  },
+  {
+    "start": "24:14",
+    "end": "24:17",
+    "text": "experiment with. I'm going to keep"
+  },
+  {
+    "start": "24:15",
+    "end": "24:19",
+    "text": "experimenting with my own AI dark"
+  },
+  {
+    "start": "24:17",
+    "end": "24:21",
+    "text": "factory and I'll also be continuing to"
+  },
+  {
+    "start": "24:19",
+    "end": "24:23",
+    "text": "evolve the skill for you as well. So"
+  },
+  {
+    "start": "24:21",
+    "end": "24:25",
+    "text": "stay tuned for more content on that. And"
+  },
+  {
+    "start": "24:23",
+    "end": "24:26",
+    "text": "so with that, if you appreciate this"
+  },
+  {
+    "start": "24:25",
+    "end": "24:28",
+    "text": "video, you're looking forward to more"
+  },
+  {
+    "start": "24:26",
+    "end": "24:30",
+    "text": "things on AI coding and the AI dark"
+  },
+  {
+    "start": "24:28",
+    "end": "24:32",
+    "text": "factory, I would really appreciate a"
+  },
+  {
+    "start": "24:30",
+    "end": "24:35",
+    "text": "like and a subscribe. And with that, I"
+  },
+  {
+    "start": "24:32",
+    "end": "24:35",
+    "text": "will see you in the next"
+  }
+]

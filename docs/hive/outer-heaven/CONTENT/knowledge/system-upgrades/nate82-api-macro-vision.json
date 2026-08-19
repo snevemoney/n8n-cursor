@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-api-macro-vision",
+  "type": "Agent infrastructure",
+  "discovery": "API first (fast/cheap/consistent) → deterministic pixel macro if the path never changes → vision browser last, headed, watched.",
+  "applicability": "ALL computer-use / browser jobs",
+  "proposed_change": "Intake must write the ladder choice before a vision agent is allowed. Wired as skill api-macro-vision on Forge slice-build / click-live-site. Then verify-after-browser.",
+  "evidence": "CB5bG4mvnS0 · timestamp UNKNOWN (caption-only)",
+  "source_video_id": "CB5bG4mvnS0",
+  "status": "WIRED",
+  "next": "Headed break-it on localhost forms only. No Codex. Keep X-browser-despite-API as a labeled exception."
+}

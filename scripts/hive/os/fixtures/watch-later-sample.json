@@ -1,0 +1,44 @@
+{
+  "playlistUrl": "https://www.youtube.com/playlist?list=WL",
+  "playlistId": "WL",
+  "scrapedAt": "2026-08-13T00:00:00+00:00",
+  "loggedIn": true,
+  "scrolledToEnd": true,
+  "pageTitle": "Watch later - YouTube",
+  "source": "fixture",
+  "notes": ["self-test fixture — not operator Watch Later"],
+  "items": [
+    {
+      "index": 1,
+      "title": "Claude Code desktop multi-agent workflow",
+      "channel": "Nate Herk",
+      "url": "https://www.youtube.com/watch?v=aaaaaaaaaaa",
+      "videoId": "aaaaaaaaaaa",
+      "duration": "18:42"
+    },
+    {
+      "index": 2,
+      "title": "Build a cinematic $50,000 landing page",
+      "channel": "Design Course",
+      "url": "https://www.youtube.com/watch?v=bbbbbbbbbbb",
+      "videoId": "bbbbbbbbbbb",
+      "duration": "22:10"
+    },
+    {
+      "index": 3,
+      "title": "n8n MCP connector tutorial",
+      "channel": "Cole Medin",
+      "url": "https://www.youtube.com/watch?v=ccccccccccc",
+      "videoId": "ccccccccccc",
+      "duration": "31:05"
+    },
+    {
+      "index": 4,
+      "title": "Spider-Man MCU recap night",
+      "channel": "Zaffy",
+      "url": "https://www.youtube.com/watch?v=ddddddddddd",
+      "videoId": "ddddddddddd",
+      "duration": "2:04:00"
+    }
+  ]
+}

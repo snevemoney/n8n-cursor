@@ -1,0 +1,26 @@
+{
+  "pattern_id": "P-auto-010",
+  "version": 1,
+  "title": "agent-ops / build — manager-sandwich-map-simplest-machine-prove-scar",
+  "steps": [
+    "Steal manager-loop + vending-first. No auto-send.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-jdbOVepEtUE-01",
+    "K-jdbOVepEtUE-12",
+    "K-jdbOVepEtUE-14",
+    "K-jdbOVepEtUE-15"
+  ],
+  "dissent_ids": [
+    "K-jdbOVepEtUE-02"
+  ],
+  "valid_when": "domain=agent-ops; stage=build; Claude Code on-tape. Hive: `golden-test-loop` / `context-docs`. No Claude switch.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

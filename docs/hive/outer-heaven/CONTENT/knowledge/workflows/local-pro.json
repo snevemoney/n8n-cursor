@@ -1,0 +1,70 @@
+{
+  "workflow_id": "WF-local-pro-v1",
+  "project_id": "local-pro",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Hunt stays parked",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T2",
+      "title": "Constraint = missed-call / buried book, not 'AI for trades'",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T3",
+      "title": "Book path: clock/TZ/notice scars; book HITL",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Draft-not-send if any outreach template",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T5",
+      "title": "HVAC-owner examples on tape are not a hunt list",
+      "coverage": "need knowledge"
+    }
+  ],
+  "pattern_ids": [
+    "P-book-clock-not-model",
+    "P-public-widget-is-a-credit-hose",
+    "P-sanitize-then-check-pass-neq-send",
+    "P-four-blanks-before-build",
+    "P-dont-lead-with-word-AI"
+  ],
+  "support_ids": [
+    "K--6yUeJ3rkvg-01",
+    "K--6yUeJ3rkvg-02",
+    "K--Lo_SlSgtnA-01",
+    "K--Lo_SlSgtnA-02",
+    "K--cdexJWN8YA-01",
+    "K--zL_trhnQaI-03",
+    "K-0Ujdys4LqNs-02",
+    "K-27Y44JYXZJ8-02",
+    "K-2OD14-0cot4-03",
+    "K-35WuZxbAY68-03"
+  ],
+  "dissent_ids": [
+    "K--cdexJWN8YA-04",
+    "K--cdexJWN8YA-05",
+    "K--cdexJWN8YA-06",
+    "K--zL_trhnQaI-04",
+    "K--zL_trhnQaI-05",
+    "K-0WDkwMxj13s-04",
+    "K-0WDkwMxj13s-05",
+    "K-0WDkwMxj13s-06",
+    "K-x-2088007687149601254-01",
+    "K-zWLZ3bVVwD8-02"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  }
+}

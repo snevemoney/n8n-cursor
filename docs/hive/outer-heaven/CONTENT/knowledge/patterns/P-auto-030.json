@@ -1,0 +1,23 @@
+{
+  "pattern_id": "P-auto-030",
+  "version": 1,
+  "title": "career / positioning — constraint-kpi-before-the-build-or-you-are-a-pharmacist",
+  "steps": [
+    "Steal constraint-KPI-build. `proof-30-60-90`. No new ICP.",
+    "Steal two-roads + sendable proof. Keep `iIfOprq2kCM` as sibling (more IBM / Path B). Do not unpark clients."
+  ],
+  "support_ids": [
+    "K--zL_trhnQaI-01",
+    "K--zL_trhnQaI-02"
+  ],
+  "dissent_ids": [
+    "K--zL_trhnQaI-04",
+    "K--zL_trhnQaI-05"
+  ],
+  "valid_when": "domain=career; stage=positioning; His book holds the “full operating model” — not on tape.",
+  "less_relevant_when": "Owner path = you are the first client.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

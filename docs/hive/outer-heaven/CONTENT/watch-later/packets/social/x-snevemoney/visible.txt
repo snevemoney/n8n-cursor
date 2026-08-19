@@ -1,0 +1,40 @@
+x:@snevemoney
+url: https://x.com/snevemoney
+source: api.fxtwitter.com 2026-08-14
+id: 514498939
+name: Evens
+description: write your own story
+location: Montréal, Québec
+website: null
+followers: 101
+following: 429
+likes: 3438
+tweets: 1770
+joined: 2012-03-04
+offer_on_profile: no
+not_evens: x.com/EvensLouis
+
+x:2055498546204332211 2026-05-16 author=snevemoney
+https://x.com/snevemoney/status/2055498546204332211
+😂😂😂😂
+quote_of: UpstateOVO (stranger text not ingested as HIS)
+
+x:1960715545180844416 2025-08-27 author=snevemoney
+https://x.com/snevemoney/status/1960715545180844416
+Please don’t
+quote_of: EverythingDCU_ (stranger text not ingested as HIS)
+
+x:1911151294233837824 2025-04-12 author=snevemoney
+https://x.com/snevemoney/status/1911151294233837824
+🤣🤣
+quote_of: truckdriverpleb (stranger text not ingested as HIS)
+
+x:1910012392538530004 2025-04-09 author=snevemoney
+https://x.com/snevemoney/status/1910012392538530004
+Insane
+quote_of: JimChuong (stranger text not ingested as HIS)
+
+x:1894541007636648097 2025-02-26 author=snevemoney
+https://x.com/snevemoney/status/1894541007636648097
+We never stood a chance.😂
+quote_of: DailyLoud (stranger text not ingested as HIS)

@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-052",
+  "version": 1,
+  "title": "model-eval / ops — manager-vs-worker-not-a-bench-crown",
+  "steps": [
+    "Steal manager/worker split. Hive: no Fable/Soul/Codex. Maps `2OD14-0cot4` gather-vs-apply.",
+    "Steal two-board eval (API vs agentic) + refusal-adjusted score. `golden-test-loop`. Mark tape $ UNVERIFIED.",
+    "Steal blind-then-reveal. Don’t treat vibe games as hive acceptance tests."
+  ],
+  "support_ids": [
+    "K-EthxaDswUFo-01",
+    "K-EthxaDswUFo-02",
+    "K-EthxaDswUFo-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=model-eval; stage=ops; Browser toys.",
+  "less_relevant_when": "Fund-Soul-to-Fable-budget is an unrun counterfactual he names. Tape $ UNVERIFIED.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,321 @@
+{
+  "source": "x-api-filtered",
+  "filter": "ai_related",
+  "filter_regex": "\\b(ai|a\\.i\\.|llm|gpt|chatgpt|claude|anthropic|openai|gemini|grok|xai|agent|agents|multi-?agent|autogen|langchain|langgraph|cursor|copilot|windsurf|devin|codex|n8n|zapier|make\\.com|automation|mcp|rag|vector|embedding|fine-?tun|prompt|transformer|neural|machine learning|deep learning|midjourney|stable diffusion|sora|runway|artificial intelligence|genai|generative)\\b",
+  "handle": "snevemoney",
+  "user_id": "514498939",
+  "parent_synced_at_utc": "2026-08-12T20:52:59Z",
+  "filtered_at_utc": "2026-08-12T20:54:14Z",
+  "filtered_at_local": "2026-08-12 16:54 EDT",
+  "parent_count": 98,
+  "count": 34,
+  "format": "structured",
+  "items": [
+    {
+      "id": "2086976486771155361",
+      "text": "@Polymarket Translate → back-translate\n\nTranslate the text into another language, then translate it back to English.\n\nThis almost always scrambles the original token pattern enough to break the watermark.\n\n🤷‍♂️\n\nNot sure why Claude is being low IQ here.",
+      "author_id": "1919158684807995392",
+      "created_at": "2026-08-11T00:42:23.000Z",
+      "url": "https://x.com/i/web/status/2086976486771155361",
+      "author_username": "1337_viking",
+      "author_name": "1337 Viking 🇺🇸"
+    },
+    {
+      "id": "2082070276112564256",
+      "text": "El CEO de Anthropic dándose cuenta de que Claude Fable 5 volvió hace 48 horas y un tipo lo uso para construir un sistema para crear sitios web cinematográficos de $50,000 y acaba de filtrar toda la estrategia gratis https://t.co/68FqDHmPo5 https://t.co/CTGLeL34km",
+      "author_id": "1444693617986129932",
+      "created_at": "2026-07-28T11:46:51.000Z",
+      "url": "https://x.com/i/web/status/2082070276112564256",
+      "author_username": "chesny",
+      "author_name": "Chesny"
+    },
+    {
+      "id": "2079674432038248611",
+      "text": "Claude Code on desktop now works with the iOS simulator.\n\nBuild and run your iOS app, and the simulator opens in a panel right next to your conversation. Available today in public beta. https://t.co/su4IguzPVb",
+      "author_id": "2024518793679294464",
+      "created_at": "2026-07-21T21:06:37.000Z",
+      "url": "https://x.com/i/web/status/2079674432038248611",
+      "author_username": "ClaudeDevs",
+      "author_name": "ClaudeDevs"
+    },
+    {
+      "id": "2077827886149439547",
+      "text": "I asked a Kimi K3 Max agent swarm to recreate macOS 27 with real Liquid Glass and native apps in web browser and it’s been going for 3 hours https://t.co/lC8dAPHkB5",
+      "author_id": "3239896262",
+      "created_at": "2026-07-16T18:49:06.000Z",
+      "url": "https://x.com/i/web/status/2077827886149439547",
+      "author_username": "mweinbach",
+      "author_name": "Max Weinbach"
+    },
+    {
+      "id": "2077489907350856038",
+      "text": "Claude Code artifacts can now call MCP connectors, letting you build dashboards and apps that can fetch information and take actions for each viewer on demand.\n\nAvailable on Pro, Max, Team, and Enterprise plans. Not available on publicly-shared artifacts. https://t.co/FcvtiOqv0J",
+      "author_id": "2024518793679294464",
+      "created_at": "2026-07-15T20:26:06.000Z",
+      "url": "https://x.com/i/web/status/2077489907350856038",
+      "author_username": "ClaudeDevs",
+      "author_name": "ClaudeDevs"
+    },
+    {
+      "id": "2077199463278395732",
+      "text": "Claude \"Puzzling\" while GPT 5.6 on GOD-MODE just bade a banger that's mindblowing.\n\nHere's the exact way to get a site like this, step by step:\n\n&gt; open the desktop app, pick Sol, reasoning on High. taste work never goes to small models\n\n&gt; drop it 3 sites with motion you love and https://t.co/BvJujhrb2t https://t.co/tGgpiLNpn6",
+      "author_id": "1519974714038534146",
+      "created_at": "2026-07-15T01:11:59.000Z",
+      "url": "https://x.com/i/web/status/2077199463278395732",
+      "author_username": "0xMiraqle",
+      "author_name": "Miraqle"
+    },
+    {
+      "id": "2076738496778445003",
+      "text": "I gave an AI blocks. It built me a castle.\n\n(full video below) https://t.co/2NLEGTmxSN",
+      "author_id": "9701462",
+      "created_at": "2026-07-13T18:40:16.000Z",
+      "url": "https://x.com/i/web/status/2076738496778445003",
+      "author_username": "techleadhd",
+      "author_name": "TechLead"
+    },
+    {
+      "id": "2077016770939122149",
+      "text": "Higgsfield MCP/Plugin for After Effects just got upgraded.\nPowered by Fable 5.\n\n1. Build your own AE plugins\n2. Drop in your reference and it decomposes into editable vector layers you can animate\n3. AI assistant that answers or does it for you\n4. Localize a project seamlessly https://t.co/WL4pqMgLEM",
+      "author_id": "1895453094361890816",
+      "created_at": "2026-07-14T13:06:01.000Z",
+      "url": "https://x.com/i/web/status/2077016770939122149",
+      "author_username": "higgsfield",
+      "author_name": "Higgsfield AI 🧩"
+    },
+    {
+      "id": "2075545587093807111",
+      "text": "The New GPT 5.6 Sol is insane.\n\n❤️‍🔥Just recorded a 21-min Full Tutorial on How To Build Premium, Cinematic Websites with GPT 5.6 Sol! https://t.co/rTMd8x40ZE",
+      "author_id": "893369654768529408",
+      "created_at": "2026-07-10T11:40:04.000Z",
+      "url": "https://x.com/i/web/status/2075545587093807111",
+      "author_username": "viktoroddy",
+      "author_name": "Viktor Oddy"
+    },
+    {
+      "id": "2075611333668540502",
+      "text": "Claude widget prototype for BUSY Bar 👀 \n\nIt shows your live usage limits and lets you approve or deny Claude requests straight from BUSY Bar.\n\nNot planned as an official app yet, but we wanted to try it out and see if people would actually use something like this. https://t.co/wsL7FcY1xa",
+      "author_id": "1597266884197552128",
+      "created_at": "2026-07-10T16:01:19.000Z",
+      "url": "https://x.com/i/web/status/2075611333668540502",
+      "author_username": "BusyFocusApp",
+      "author_name": "BUSY – Advanced Focus Timer"
+    },
+    {
+      "id": "2075635283211772279",
+      "text": "Claude Code on desktop now has an in-app browser.\n\nClaude can pull up docs, designs, or any other site. It can read, click through, and interact the same way it does with your local dev servers.\n\nIt's sandboxed and configurable: you choose whether sessions persist. https://t.co/Jbc21OP0vJ",
+      "author_id": "2024518793679294464",
+      "created_at": "2026-07-10T17:36:29.000Z",
+      "url": "https://x.com/i/web/status/2075635283211772279",
+      "author_username": "ClaudeDevs",
+      "author_name": "ClaudeDevs"
+    },
+    {
+      "id": "2075192866553413944",
+      "text": "When you've got so much control over the AI tools, \nyou start messing with them for fun🖱️\n\nImage: @midjourney v8.2\nAnimation: Seedance 2.0 on @runwayml\nUpscale: @topazlabs SPL 2.5\nEdit &amp; Color Grading: DaVinci Resolve\nTiming help: Fable 5 https://t.co/d9JE2tgVEU",
+      "author_id": "1709573202467229696",
+      "created_at": "2026-07-09T12:18:29.000Z",
+      "url": "https://x.com/i/web/status/2075192866553413944",
+      "author_username": "ibexdream",
+      "author_name": "ibexdream"
+    },
+    {
+      "id": "2074438871526379532",
+      "text": "this is f**king dangerous\n\nsomeone just figured out how to get fable 5 reasoning in opus 4.8 with one prompt \n\nyou have less than 24 hours to set this up as this takes away 20% of your usage limit \n\nhere is how:\n\n1) Paste the prompt and ask it to \"make an operating manual\"\n2) https://t.co/b5lzkGnbBd https://t.co/7yNWNzteFn",
+      "author_id": "1713062826175299584",
+      "created_at": "2026-07-07T10:22:22.000Z",
+      "url": "https://x.com/i/web/status/2074438871526379532",
+      "author_username": "Av1dlive",
+      "author_name": "Avid"
+    },
+    {
+      "id": "2074304050880012736",
+      "text": "Holy Shxt... Humans have officially become the bottleneck.\n\nI built a system around Andrej Karpathy's LLM Wiki.\n\nEvery employee's responsibilities, workflows, and operational context are captured in the LLM Wiki, allowing the system to understand how work is organized before https://t.co/p3OTflaPTf",
+      "author_id": "1707588370795515904",
+      "created_at": "2026-07-07T01:26:39.000Z",
+      "url": "https://x.com/i/web/status/2074304050880012736",
+      "author_username": "arrakis_ai",
+      "author_name": "CHOI"
+    },
+    {
+      "id": "2074589352273867128",
+      "text": "Any subject you can think of can now be fully automated. \n\nFrom research to publishing without leaving your Claude or Chatgpt. \n\nMaxfusion AI MCP handles it all... https://t.co/S22kiPE2vK https://t.co/MLDflFAQhN",
+      "author_id": "834775279629373440",
+      "created_at": "2026-07-07T20:20:20.000Z",
+      "url": "https://x.com/i/web/status/2074589352273867128",
+      "author_username": "OriSilver",
+      "author_name": "Ori Silver"
+    },
+    {
+      "id": "2074290108782534890",
+      "text": "Anthropic just revealed the secret sauce to their AI… turns out they have something similar to consciousness called the J-space.  https://t.co/7uP6g2bkJB",
+      "author_id": "807355480188141568",
+      "created_at": "2026-07-07T00:31:15.000Z",
+      "url": "https://x.com/i/web/status/2074290108782534890",
+      "author_username": "DramaAlert",
+      "author_name": "DramaAlert"
+    },
+    {
+      "id": "2074046218741678570",
+      "text": "btw AI agents can now vibe test your apps too 👀 https://t.co/kSRE2n3o06",
+      "author_id": "1076497351634812928",
+      "created_at": "2026-07-06T08:22:07.000Z",
+      "url": "https://x.com/i/web/status/2074046218741678570",
+      "author_username": "AdamKPx",
+      "author_name": "Adam KP"
+    },
+    {
+      "id": "2074158868142194898",
+      "text": "This site looks like it was built by a team of 3D developers\n\nIt wasn't. It's just video. And that's the part nobody expects\n\n&gt; he generated two frames with AI\n&gt; turned them into a clip with Seedance 2.0\n&gt; then gave it to Claude 4.8 to wrap into a full immersive scrollable https://t.co/thTUi1YAya https://t.co/yVeHkUSqkP",
+      "author_id": "3049366699",
+      "created_at": "2026-07-06T15:49:44.000Z",
+      "url": "https://x.com/i/web/status/2074158868142194898",
+      "author_username": "monokern",
+      "author_name": "monokern"
+    },
+    {
+      "id": "2074119000137601528",
+      "text": "I built a Claude skill that makes motion-style animation.\n\n&gt; Paste a reference image\n&gt; It generates frames with Nano Banana 2 \n&gt; and animates the video with Seedance 2.0\n\nEverything runs in Claude through the Arcads MCP\n\nComment \"Motion\", and I'll send you the skill https://t.co/4YQq5d3E7g",
+      "author_id": "1053259404928258048",
+      "created_at": "2026-07-06T13:11:19.000Z",
+      "url": "https://x.com/i/web/status/2074119000137601528",
+      "author_username": "rom1trs",
+      "author_name": "Romain Torres"
+    },
+    {
+      "id": "2074108067361280173",
+      "text": "Crazy impressive results using Claude Fable to build out a pose/depth previs for Seedance. \n\nThis was inspired by Josh Daws' build-- but of course I made a few tweaks I'll showcase on the channel later this week. \nAnother example below that shows why I think this is awesome: https://t.co/6FQ0UcdZkc",
+      "author_id": "1631716740190150676",
+      "created_at": "2026-07-06T12:27:52.000Z",
+      "url": "https://x.com/i/web/status/2074108067361280173",
+      "author_username": "TheoMediaAI",
+      "author_name": "Theoretically Media"
+    },
+    {
+      "id": "2074005214219432097",
+      "text": "Hey @grok remove the weakest one https://t.co/kPqfIzgEan",
+      "author_id": "1628213482037587968",
+      "created_at": "2026-07-06T05:39:10.000Z",
+      "url": "https://x.com/i/web/status/2074005214219432097",
+      "author_username": "KlassicKohli",
+      "author_name": "`"
+    },
+    {
+      "id": "2073378450459570257",
+      "text": "ANTHROPIC'S LEAD ENGINEER MAKING $2.2M/YEAR LEAKED THE COMPANY'S INTERNAL OBSIDIAN BRAIN - AND GOT FIRED THE SAME DAY\n\n00:07 a live neural network with 21 inputs, 10+ hidden layers, ReLU activation - thousands of connections firing in real time as the system processes every https://t.co/TA6FSWYjSd https://t.co/52IRTZqrPn",
+      "author_id": "1623421089777844227",
+      "created_at": "2026-07-04T12:08:38.000Z",
+      "url": "https://x.com/i/web/status/2073378450459570257",
+      "author_username": "0xDeliriumm",
+      "author_name": "Deliriumm"
+    },
+    {
+      "id": "2073306997064421677",
+      "text": "Codex+Godot游戏引擎不仅可以制作2D游戏，也可以制作3D游戏\n\n这是我做的一个3D游戏demo，其中建模、绑定模型骨架全部由AI完成，最后由Codex帮助我整合所有项目资源到Godot引擎运行\n\n下面是我完整的工作流： https://t.co/WNcjkTHWYo https://t.co/7G5aTGbk9F",
+      "author_id": "2010272176830840832",
+      "created_at": "2026-07-04T07:24:42.000Z",
+      "url": "https://x.com/i/web/status/2073306997064421677",
+      "author_username": "xingbugengming",
+      "author_name": "小奇说"
+    },
+    {
+      "id": "2073469967308030384",
+      "text": "Told Claude Fable 5 to make a Vampire Survivors clone in pure C++, no engine, no asset files\n\nEverything from sprites, sounds, graphics to music tracks is generated by code at runtime\n\nSource code is in the thread below https://t.co/SnRFR9vcWP",
+      "author_id": "1950465537818951681",
+      "created_at": "2026-07-04T18:12:18.000Z",
+      "url": "https://x.com/i/web/status/2073469967308030384",
+      "author_username": "Lentils80",
+      "author_name": "Lentils"
+    },
+    {
+      "id": "2073320835658772937",
+      "text": "A developer just killed the real estate walkthrough industry by scanned an entire house with his phone. Uploaded it.\n\nNow anyone on Earth can walk through it in a browser tab. No app. No VR. No agent. No appointment.\n\nClick → you’re inside. Every room. Every angle. Every shadow. https://t.co/QKuwzEwsiE",
+      "author_id": "1433898842865520644",
+      "created_at": "2026-07-04T08:19:42.000Z",
+      "url": "https://x.com/i/web/status/2073320835658772937",
+      "author_username": "bigaiguy",
+      "author_name": "Spencer Baggins"
+    },
+    {
+      "id": "2073250825858892241",
+      "text": "Claude Fable 5 just one shot this procedural creatures! 🤯\n\nBuilt a whole procedural 3D character generator in Three.js with:\n\n&gt; Ragdoll-like characters made from primitive shapes that merge into one seamless body  \n&gt; Custom vertex shader + SDF tech that removes all seams and https://t.co/xHjJvHFOan",
+      "author_id": "1956954573614313472",
+      "created_at": "2026-07-04T03:41:30.000Z",
+      "url": "https://x.com/i/web/status/2073250825858892241",
+      "author_username": "TimJayas",
+      "author_name": "Tim Jayas"
+    },
+    {
+      "id": "2072932020003496380",
+      "text": "ANTHROPIC DROPPED THEIR OWN OBSIDIAN BRAIN THAT MANAGES ALL COMPANY INNOVATIONS AND KNOWLEDGE FLOWS\n\n00:22 8,893 nodes, 4,729 links, 8,893 views - a knowledge graph so dense it looks like a galaxy when you zoom out\n\nMarginalia Collection, Glossary Backbone, Comparative Grammar https://t.co/6szF6FHZqt https://t.co/52IRTZqrPn",
+      "author_id": "1623421089777844227",
+      "created_at": "2026-07-03T06:34:41.000Z",
+      "url": "https://x.com/i/web/status/2072932020003496380",
+      "author_username": "0xDeliriumm",
+      "author_name": "Deliriumm"
+    },
+    {
+      "id": "2072001793492763022",
+      "text": "claude code and codex can now drive iOS features on a live device. \n\nno scripts. no selectors. no xcode. \n\none prompt",
+      "author_id": "1809037542957985792",
+      "created_at": "2026-06-30T16:58:18.000Z",
+      "url": "https://x.com/i/web/status/2072001793492763022",
+      "author_username": "tryrevyl",
+      "author_name": "Revyl"
+    },
+    {
+      "id": "2072980099050410259",
+      "text": "LTX 2.3 10-Eros 🥵 LoRA\n\nYou obviously know that 10 Eros is for NSFW gen.\n\nNow you can use it with base LTX2.3, then add the 10Eros LoRA the same way as all LoRAs.\n\n👇\nhttps://t.co/najJI1GDNB",
+      "author_id": "993747577085485056",
+      "created_at": "2026-07-03T09:45:44.000Z",
+      "url": "https://x.com/i/web/status/2072980099050410259",
+      "author_username": "SD_Tutorial",
+      "author_name": "Stable Diffusion Tutorials"
+    },
+    {
+      "id": "2072364163054395409",
+      "text": "I found a tool that turns a single character image into fully animated sprite sheets in seconds.\n\nAI just killed the most annoying part of game development. And honestly this is getting kind of crazy 👇\n\nAutoSprite uses AI to generate walk cycles, attacks, idles, and basically https://t.co/6g6kCmMAfx",
+      "author_id": "73847343",
+      "created_at": "2026-07-01T16:58:13.000Z",
+      "url": "https://x.com/i/web/status/2072364163054395409",
+      "author_username": "JafarNajafov",
+      "author_name": "Jafar Najafov"
+    },
+    {
+      "id": "2072498082819014925",
+      "text": "I Built an AI Game Development Toolkit &amp; Game Engine (and you can use it too) link in the comments\n\nThis has been my every waking hour for the last 5 months... I think it's coming along nicely, with a lot still planned, Basically: it's an ever-expanding toolkit to help make asset https://t.co/PTYCA4LKTd",
+      "author_id": "1463110433468928000",
+      "created_at": "2026-07-02T01:50:22.000Z",
+      "url": "https://x.com/i/web/status/2072498082819014925",
+      "author_username": "oldgamesnob",
+      "author_name": "DevDude"
+    },
+    {
+      "id": "2072687270709309589",
+      "text": "claude fable 5 can scrape thousands of sold homes and finds the patios with zero shade in 100°+ heat. then it mails the owner a postcard with the fix rendered into their own backyard\n\nhere's the system you can sell to contractors:\n\n- scrapes every home sold in the metro in the https://t.co/KAUNxVEvk4",
+      "author_id": "770268335783030784",
+      "created_at": "2026-07-02T14:22:08.000Z",
+      "url": "https://x.com/i/web/status/2072687270709309589",
+      "author_username": "everestchris6",
+      "author_name": "Chris"
+    },
+    {
+      "id": "2072255044544512004",
+      "text": "This guy built a space station of AI agents that made him $20,000 last month for $400 in costs\n\n20 agents live inside it. They don't leave until they generate $1,000,000,000.\n\nIn the center sits Ultron. A Hermes agent on GPT-5.5. His only job: keep the other agents working.\n\n3 https://t.co/H2g9Pjovu2 https://t.co/snMDXiZ3nl",
+      "author_id": "1842852733071843328",
+      "created_at": "2026-07-01T09:44:37.000Z",
+      "url": "https://x.com/i/web/status/2072255044544512004",
+      "author_username": "sandy4kad",
+      "author_name": "0.1%"
+    },
+    {
+      "id": "2071996301311381827",
+      "text": "Jacob Bank, former Google product lead: \n\n\"I built up this team of 40 AI marketing agents to work with me. I'm the only marketing person.\"\n\nIn a 15-minute talk, he shows what one person with the right setup now runs alone.\n\nForty agents. One human. His AI bill is $500 a month, https://t.co/GYjkaiWOW2 https://t.co/gYp19WiEAC",
+      "author_id": "1644401923787726849",
+      "created_at": "2026-06-30T16:36:28.000Z",
+      "url": "https://x.com/i/web/status/2071996301311381827",
+      "author_username": "Zephyr_hg",
+      "author_name": "Zephyr"
+    }
+  ]
+}

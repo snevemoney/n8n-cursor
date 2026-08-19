@@ -1,0 +1,13 @@
+{
+  "root": "/Users/evenslouis/.cursor/projects",
+  "glob": "*/agent-transcripts/*/*.jsonl",
+  "this_workspace": "/Users/evenslouis/.cursor/projects/Users-evenslouis-n8n-cursor/agent-transcripts",
+  "live_link": "/Users/evenslouis/.grokbot/outer-heaven/CURSOR_LIVE",
+  "processed_copies": "/Users/evenslouis/.grokbot/outer-heaven/CURSOR_CHATS",
+  "top_level_only": true,
+  "exclude_workspaces": ["hub-game-starter"],
+  "default_list_limit": 20,
+  "read_max_chars": 80000,
+  "ring": "FREE",
+  "note": "Live Cursor JSONL. Path + skill only — do not copy transcripts into git. Processed markdown copies stay in CURSOR_CHATS."
+}

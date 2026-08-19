@@ -1,0 +1,548 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.080 --> 00:00:05.120
+This guy remembers his credit card in his&nbsp;
+head, his full 20-digit credit card number,&nbsp;&nbsp;
+
+00:00:05.120 --> 00:00:11.040
+and he won't remember something we talked&nbsp;
+about 4 days ago. He's a special specimen. Yep,&nbsp;&nbsp;
+
+00:00:11.040 --> 00:00:16.015
+that's us. You might be wondering&nbsp;
+how we got here. Wait, who are we?
+
+00:00:16.015 --> 00:00:38.034
+[music]
+
+00:00:38.034 --> 00:00:44.880
+Oh yeah, so we wanted to mention how our weekly draws they run from&nbsp;
+Sunday to Sunday right so every like Sunday at&nbsp;&nbsp;
+
+00:00:44.880 --> 00:00:50.160
+8:00 p.m. it restarts. We calculate the winner for&nbsp;
+the previous week and then we issue the number of&nbsp;&nbsp;
+
+00:00:50.160 --> 00:00:56.320
+tickets to each user for the next week. Exactly.&nbsp;
+Um, we wanted to test that last Sunday. I like&nbsp;&nbsp;
+
+00:00:56.320 --> 00:01:03.680
+call Luke at 7:55 p.m. Yo, hop on, open up your&nbsp;
+your simulator, put a timer, make sure you get the&nbsp;&nbsp;
+
+00:01:03.680 --> 00:01:09.840
+seconds in there so we know exactly when it hits&nbsp;
+8 p.m. Didn't work like Yeah, we we obviously did&nbsp;&nbsp;
+
+00:01:09.840 --> 00:01:14.640
+not have enough time. Yeah. And unfortunately&nbsp;
+the the testing period is gonna have to wait&nbsp;&nbsp;
+
+00:01:14.640 --> 00:01:22.031
+till next weekend and we'll be more prepared at&nbsp;
+that time. Yeah, that's our debugging update.
+
+00:01:22.031 --> 00:01:32.040
+[music]
+
+00:01:32.040 --> 00:01:37.520
+Yo Luke, what do you think of these&nbsp;
+animations? I was uh going through and I found&nbsp;&nbsp;
+
+00:01:37.520 --> 00:01:43.280
+a cool sort of like pack. Okay. So, this&nbsp;
+one for like That's pretty good. Earning&nbsp;&nbsp;
+
+00:01:43.280 --> 00:01:49.920
+tickets sort of thing. Or this one for earning&nbsp;
+tickets. Okay. This one for like if you're the winner. Oh,&nbsp;&nbsp;
+
+00:01:49.920 --> 00:01:57.840
+wow. I like that spin. Like this for like when&nbsp;
+payout is completed or something. These are free?
+
+00:01:57.840 --> 00:02:02.560
+I think so. It says free here. Okay. I'll have&nbsp;
+to download it. Like I know we have a limit so&nbsp;&nbsp;
+
+00:02:02.560 --> 00:02:07.920
+it may count towards our limit but uh I think&nbsp;
+you can just like create a new account under
+
+00:02:07.920 --> 00:02:12.560
+a different email. We'll definitely make sure&nbsp;
+that we respect all um copyright laws and all&nbsp;&nbsp;
+
+00:02:12.560 --> 00:02:19.039
+that stuff. Oh Yeah yeah. It's it's copyright it's&nbsp;
+good. It's more the platform which have limits but
+
+00:02:19.039 --> 00:02:42.018
+[music]
+
+00:02:42.018 --> 00:02:49.040
+All right. So basically we uh I set up Posthog&nbsp;
+last night. Um Luke's going to get set up now and&nbsp;&nbsp;
+
+00:02:49.040 --> 00:02:53.520
+then if you want to just sort of go through what&nbsp;
+I did, check for any errors, make sure it's all&nbsp;&nbsp;
+
+00:02:53.520 --> 00:03:01.040
+all good, use the MCP server. Basically what Posthog is, it's an analytics tracking tool. So, uh,&nbsp;&nbsp;
+
+00:03:01.040 --> 00:03:05.600
+we'll be able to see, you know, what percentage of&nbsp;
+users who download the app then actually use it,&nbsp;&nbsp;
+
+00:03:05.600 --> 00:03:10.480
+what percent sign up, what percent come back&nbsp;
+every week. Uh, we can run some testing to make&nbsp;&nbsp;
+
+00:03:10.480 --> 00:03:14.480
+sure that any changes we make are having like&nbsp;
+a positive effect on the metrics that we're&nbsp;&nbsp;
+
+00:03:14.480 --> 00:03:19.760
+tracking. So, uh, yeah, really cool team. We were&nbsp;
+like two weeks late on their startup discount.&nbsp;&nbsp;
+
+00:03:19.760 --> 00:03:23.840
+actually. You had to be less than two years&nbsp;
+old and we incorporated like two years and 10&nbsp;&nbsp;
+
+00:03:23.840 --> 00:03:28.320
+days ago. Sent them an email, they said it's fine.&nbsp;
+So, uh, we also get some like free credits and I&nbsp;&nbsp;
+
+00:03:28.320 --> 00:03:34.640
+think we can even ask for merch or something from&nbsp;
+them. So, Oh, merch. Yeah. I love merch. See,&nbsp;&nbsp;
+
+00:03:34.640 --> 00:03:40.027
+we've got the merch right now. Yeah. Yep. Of&nbsp;
+course. The only only hoodies we own. Mhm.
+
+00:03:40.027 --> 00:03:54.040
+[music]
+
+00:03:54.040 --> 00:04:00.160
+All right. So, exciting update. We saw a couple&nbsp;
+months ago that someone pretty high up at Wealthsimple
+
+00:04:00.160 --> 00:04:03.840
+had joined our waitlist. Finally,&nbsp;
+since we sent our first email out and whatnot&nbsp;&nbsp;
+
+00:04:03.840 --> 00:04:09.280
+to the waitlist members, I decided to reach&nbsp;
+out to him on LinkedIn just to connect and say,&nbsp;&nbsp;
+
+00:04:09.280 --> 00:04:12.320
+"Hey, appreciate you supporting us or at&nbsp;
+least that we're on your radar." I don't&nbsp;&nbsp;
+
+00:04:12.320 --> 00:04:15.600
+know if you want to come see Luke, but he was&nbsp;
+doing some research on the concept. Found our&nbsp;&nbsp;
+
+00:04:15.600 --> 00:04:20.240
+project. Thought it was pretty cool. So,&nbsp;
+we're going to have a meeting with him. So,&nbsp;&nbsp;
+
+00:04:20.240 --> 00:04:24.400
+to get to know about him. I've been watching some&nbsp;
+of his podcasts, learning about his stuff and&nbsp;&nbsp;
+
+00:04:24.400 --> 00:04:28.880
+uh where I worked before. I heard great things&nbsp;
+about him. Really excited stuff and excited&nbsp;&nbsp;
+
+00:04:28.880 --> 00:04:33.032
+to have that first sort of conversation with&nbsp;
+Wealthsimple and see where it leads to.
+
+00:04:40.560 --> 00:04:47.120
+Now, you might be thinking, who is this guy?&nbsp;
+That's me, the editor. I came late this day.&nbsp;&nbsp;
+
+00:04:47.120 --> 00:04:51.760
+I'm also the only one of the three core members&nbsp;
+who joined after the founding of the company.&nbsp;&nbsp;
+
+00:04:51.760 --> 00:04:56.640
+Here's how that happened. Let's tell them how we&nbsp;
+met. It's like we're we're breaking the fourth&nbsp;&nbsp;
+
+00:04:56.640 --> 00:05:01.040
+wall. Oh, we're breaking. We know they're there. Yo camera.
+But we're talking together. Hello people. So Luke&nbsp;&nbsp;
+
+00:05:01.040 --> 00:05:05.840
+and I, we've always been into poker. Like our group&nbsp;
+of friends since high school we were playing and&nbsp;&nbsp;
+
+00:05:05.840 --> 00:05:11.120
+then we discover people at McGill run these games.&nbsp;
+Yeah. So we show up and then we meet, you know,&nbsp;&nbsp;
+
+00:05:11.120 --> 00:05:17.760
+a bunch of awesome people there. Then we meet you. Shoutout Rob,&nbsp;
+Phillip, Shamir. Yeah. Yeah. All the OGs.&nbsp;&nbsp;
+
+00:05:17.760 --> 00:05:21.120
+Yeah. Emile. Obviously I'm like always sort&nbsp;
+of pitching the startup and I'm telling everyone&nbsp;&nbsp;
+
+00:05:21.120 --> 00:05:26.880
+about it and oh guys go go go join the&nbsp;
+waitlist. Businessman. Yeah. And then you're like okay yo like I've&nbsp;&nbsp;
+
+00:05:26.880 --> 00:05:30.720
+been wanting to be part of a startup. I remember&nbsp;
+you telling me that. Like I want to build something&nbsp;&nbsp;
+
+00:05:30.720 --> 00:05:36.480
+and I want to prove myself and we started talking&nbsp;
+and seemed like a good fit. I think I lost a lot&nbsp;&nbsp;
+
+00:05:36.480 --> 00:05:40.560
+of money in that game actually. Like the game that&nbsp;
+we were playing I think I was down like 150 bucks&nbsp;&nbsp;
+
+00:05:40.560 --> 00:05:45.040
+or something. I was really pissed. But then Ben,&nbsp;
+like you told me about this like cool like random&nbsp;&nbsp;
+
+00:05:45.040 --> 00:05:50.640
+side business and I was originally coming in as a&nbsp;
+developer to do code. Yeah. I came home to my girlfriend&nbsp;&nbsp;
+
+00:05:50.640 --> 00:05:55.360
+and then I told her about uh this like random guy&nbsp;
+that I met with a fintech company. He wants me&nbsp;&nbsp;
+
+00:05:55.360 --> 00:05:58.800
+to do some dev work for him. Yeah, I remember&nbsp;
+we like met up at the library a couple times,&nbsp;&nbsp;
+
+00:05:58.800 --> 00:06:04.000
+did some work together. I sort of like talked a&nbsp;
+bit about the vision and where I saw it and for&nbsp;&nbsp;
+
+00:06:04.000 --> 00:06:08.240
+a while I did a little bit of dev work and&nbsp;
+then we decided needed more growth. Yeah,&nbsp;&nbsp;
+
+00:06:08.240 --> 00:06:11.760
+we need more growth content and he put me on&nbsp;
+that. And anyway, that's what I have fun with.&nbsp;&nbsp;
+
+00:06:11.760 --> 00:06:17.040
+I like the camera. Luke and I we're too uh we're&nbsp;
+too shy. I mean, hey, we posted our first one. Yeah. That&nbsp;&nbsp;
+
+00:06:17.040 --> 00:06:22.720
+was my first video where I'm like actually in&nbsp;
+it. You know, Luke, too. He's in it. So, uh you&nbsp;&nbsp;
+
+00:06:22.720 --> 00:06:26.007
+obviously know as the company is more and more&nbsp;
+successful, it's going to be a lot easier.
+
+00:06:28.640 --> 00:06:32.080
+I'm a, I'm a bad cameraman. I missed the action, but the&nbsp;
+security guard just came in here and told us to&nbsp;&nbsp;
+
+00:06:32.080 --> 00:06:39.520
+kick us out. Uh even though we have a 24/7 deal to&nbsp;
+stay in this space. So, um Oh. Oh. Oh. Maybe not.&nbsp;&nbsp;
+
+00:06:39.520 --> 00:06:43.920
+Maybe not. I don't know. They tried to kick us&nbsp;
+out. They told us to leave. Nobody's stopping us.&nbsp;&nbsp;
+
+00:06:43.920 --> 00:06:53.600
+They're stopping us. We're leaving in 30 minutes.&nbsp;
+But uh but yeah, the boys are eating. Mine's cold at this point.
+
+00:06:53.600 --> 00:06:57.760
+some some frozen butter chicken. And yeah,&nbsp;&nbsp;
+
+00:06:57.760 --> 00:07:04.040
+so we're uh we're out of here for&nbsp;
+tonight, but we continue tomorrow.
+
+00:07:04.040 --> 00:07:11.755
+[music]
+
+00:07:11.760 --> 00:07:20.080
+Okay. So, here I'm going to purposely not&nbsp;
+sign in with Face ID. We're brought back&nbsp;&nbsp;
+
+00:07:20.080 --> 00:07:28.160
+to the sign in screen. Now, from here,&nbsp;
+I'm going to continue with Face ID. Oh,&nbsp;&nbsp;
+
+00:07:28.160 --> 00:07:33.024
+okay. Well, it's supposed to ask for my&nbsp;
+Face ID. So, let's go fix that.
+
+00:07:33.024 --> 00:07:48.955
+[music]
+
+00:07:48.960 --> 00:07:57.920
+the workstation. Got he's got Lodavo&nbsp;
+running. The app on the phone. Got some stuff&nbsp;&nbsp;
+
+00:07:57.920 --> 00:08:04.010
+running here. Create personal API. Oh, I should&nbsp;
+not be showing our API keys. Oh, I like that zoom in.
+
+00:08:04.010 --> 00:08:14.018
+[music]
+
+00:08:14.018 --> 00:08:20.480
+We're approaching our 8:00 p.m. test for the&nbsp;
+launch later in like two weeks. Um the the&nbsp;&nbsp;
+
+00:08:20.480 --> 00:08:26.029
+dev boys are stressing right now, so I'm filming.&nbsp;
+Yeah. Hopefully we uh make it. 20 minutes to go.
+
+00:08:26.029 --> 00:08:35.829
+[music]
+
+00:08:35.840 --> 00:08:41.520
+Isn't there a chance that neither of you win&nbsp;
+the ticket? No. How come? So, we have two we&nbsp;&nbsp;
+
+00:08:41.520 --> 00:08:48.080
+have two prizes. We have a weekly guaranteed prize&nbsp;
+of $100. Right. Which as long as there is a user,&nbsp;&nbsp;
+
+00:08:48.080 --> 00:08:53.840
+someone will win it. That is calculated by the&nbsp;
+ticket with the most matches. And if more tickets&nbsp;&nbsp;
+
+00:08:53.840 --> 00:08:57.840
+have the same number of matches, let's say me&nbsp;
+and Luke, we both have a ticket that has four&nbsp;&nbsp;
+
+00:08:57.840 --> 00:09:01.760
+out of seven matches. Yeah. Well, then one of us&nbsp;
+will be randomly chosen as the winner. Okay. So,&nbsp;&nbsp;
+
+00:09:01.760 --> 00:09:06.000
+I don't need to get everything right. I just&nbsp;
+need to get more right than anybody else. Or&nbsp;&nbsp;
+
+00:09:06.000 --> 00:09:12.560
+get lucky. Yeah. You just get lucky. And the&nbsp;
+$10K is for what? $10K is if you match all seven,&nbsp;&nbsp;
+
+00:09:12.560 --> 00:09:19.760
+then you win the grand prize. Talk about&nbsp;
+him again, please. Bro, why why why would&nbsp;&nbsp;
+
+00:09:19.760 --> 00:09:24.880
+you talk about Posthog again when we already&nbsp;
+filmed that last Friday? I forgot, man. See,&nbsp;&nbsp;
+
+00:09:24.880 --> 00:09:30.480
+that was This guy remembers his credit card in&nbsp;
+his head, his full 20-digit credit card number,&nbsp;&nbsp;
+
+00:09:30.480 --> 00:09:35.360
+and he won't remember something we talked about 4&nbsp;
+days ago. Obviously not. He's a special specimen.
+
+00:09:35.360 --> 00:09:43.520
+Obviously not. First official test run uh in 8&nbsp;
+minutes. Yeah hide all the fancy code. Hide all the&nbsp;&nbsp;
+
+00:09:43.520 --> 00:09:49.280
+all the. So, what's happening right now is&nbsp;
+it's almost 8:00 p.m. and at 8:00 p.m. on Sunday,&nbsp;&nbsp;
+
+00:09:49.280 --> 00:09:53.600
+we're going to get the seventh number of the draw&nbsp;
+and that's when the snapshot of everyone's tickets&nbsp;&nbsp;
+
+00:09:53.600 --> 00:10:05.840
+bank account is going to be taken so that the&nbsp;
+tickets are going to be frozen for the next week.
+
+00:10:05.840 --> 00:10:09.920
+Noo, you don't have to watch that.
+
+00:10:09.920 --> 00:10:11.920
+[music]
+
+00:10:25.120 --> 00:10:32.400
+I'm stressed like Yeah, I'm I'm good to start&nbsp;
+testing. Oh, well, we should delete our old users.&nbsp;&nbsp;
+
+00:10:32.400 --> 00:10:37.200
+Alright. Yeah. See, cuz I'm like I'm logged in.&nbsp;
+So, let's Do we have time? Yeah. Yeah. Go time.&nbsp;&nbsp;
+
+00:10:37.200 --> 00:10:43.680
+Go time. Let's go. Let's go. Let's go. Moment of&nbsp;
+truth. Yeah. Okay. Is the app app we have spent. Let's&nbsp;&nbsp;
+
+00:10:43.680 --> 00:10:50.640
+go. Gotta be quick. Slow McGill Wi-Fi. I'm setting up&nbsp;
+right now. So, I'm trying on the simulator. Oh,&nbsp;&nbsp;
+
+00:10:50.640 --> 00:10:58.640
+I'm going to put WAITLIST. Oh,&nbsp;
+sh** I'm going to get more tickets than you.
+
+00:10:58.640 --> 00:11:03.920
+Nice beautiful animation screen. First,&nbsp;
+create your account. You get the little&nbsp;&nbsp;
+
+00:11:03.920 --> 00:11:16.560
+introduction here. I already know how to do&nbsp;
+this. And then yeah. So link the first account
+
+00:11:16.560 --> 00:11:22.960
+Link both of them.
+
+00:11:22.960 --> 00:11:25.520
+This one I'm not going to link a bank account.&nbsp;
+I'm just going to enter your code and see if I&nbsp;&nbsp;
+
+00:11:25.520 --> 00:11:32.480
+got my tickets without linking an account. Okay. Let's try a&nbsp;
+weird birthday. Let's get a February 29th. Guys,&nbsp;&nbsp;
+
+00:11:32.480 --> 00:11:39.760
+what year was was it a leap year? I don't&nbsp;
+know. Aren't you like super smart? No,&nbsp;&nbsp;
+
+00:11:39.760 --> 00:11:44.036
+we're we're good. Like we already created&nbsp;
+enough accounts. I'm just I'm doing extra. Wait but Ben.
+
+00:11:48.640 --> 00:11:53.760
+Okay. So, it released the winning number this week&nbsp;
+early. I think it's glitching. Oh, revealing.&nbsp;&nbsp;
+
+00:11:53.760 --> 00:11:59.200
+What the Yo, can you film this? Just for like dev.&nbsp;
+Yeah. Why is it busting around? Yeah it's glitching.&nbsp;&nbsp;
+
+00:11:59.200 --> 00:12:04.240
+It was doing that on Luke's phone, but yeah, did you get&nbsp;
+the reveal? Yeah. And then it's going back and forth,&nbsp;&nbsp;
+
+00:12:04.240 --> 00:12:08.880
+eh? Okay. So, yeah. I don't know why the screen&nbsp;
+is moving like this. Why is it busting around,&nbsp;&nbsp;
+
+00:12:08.880 --> 00:12:16.480
+brother? Yeah, it's it's having trouble loading&nbsp;
+the uh the data from the API. So, it's like it's&nbsp;&nbsp;
+
+00:12:16.480 --> 00:12:25.600
+alternating between uh new screen I made a uh two days ago. Oh nice.&nbsp;
+It shows like your tickets breakdown. Oh,&nbsp;&nbsp;
+
+00:12:25.600 --> 00:12:29.280
+so we got the winner, eh? Oh sh** wrong&nbsp;
+way. So, so here "no winner this week". So,&nbsp;&nbsp;
+
+00:12:29.280 --> 00:12:34.560
+it properly says that. Huh? Oh, for that&nbsp;
+one. Okay. Yeah. What about for the every&nbsp;&nbsp;
+
+00:12:34.560 --> 00:12:39.120
+everyday winner? So No. No. So, like, so&nbsp;
+it's saying last week there were no users,&nbsp;&nbsp;
+
+00:12:39.120 --> 00:12:44.560
+so there's no winner this week. Okay. Now, we'll&nbsp;
+see in the back end, I guess. So, the front end&nbsp;&nbsp;
+
+00:12:44.560 --> 00:12:49.040
+is not displaying. It should say that we have like&nbsp;
+we each got I should have 100 tickets cuz I used&nbsp;&nbsp;
+
+00:12:49.040 --> 00:12:53.280
+the waitlist promo code. Right. It says zero.&nbsp;
+We'll go check the data. See if I actually do&nbsp;&nbsp;
+
+00:12:53.280 --> 00:12:58.480
+have 100. And it's just reading reading the data wrong. Yeah.&nbsp;
+Or if it just didn't register at all. Luke,&nbsp;&nbsp;
+
+00:12:58.480 --> 00:13:02.800
+you should open your logs. See what it said.&nbsp;
+I have no logs. What do you have no logs? You&nbsp;&nbsp;
+
+00:13:02.800 --> 00:13:12.960
+always have logs. Good. You want to get food? Yeah.&nbsp;
+Honestly, not bad. We know what needs to be fixed.&nbsp;&nbsp;
+
+00:13:12.960 --> 00:13:20.000
+We will investigate deeper, I guess. See like&nbsp;
+um if things are small issues or big issues, but&nbsp;&nbsp;
+
+00:13:20.000 --> 00:13:26.880
+uh hey at least we got to go through the whole- yeah we'll check the database after supper.&nbsp;
+Like front end, everything basically worked like&nbsp;&nbsp;
+
+00:13:26.880 --> 00:13:33.520
+someone was able to download the account the app&nbsp;
+create an account link their Plaid account. Yeah.&nbsp;&nbsp;
+
+00:13:33.520 --> 00:13:45.760
+And view home screen just with bad data. right?
+Yeah. The number got revealed early. Oh yeah.
+
+00:13:45.760 --> 00:13:54.880
+Pretty cool. We're capturing bro's disappointed face.&nbsp;
+Huh? I'm not disappointed. No,&nbsp;&nbsp;
+
+00:13:54.880 --> 00:13:58.480
+Be happy. I'm waiting for my&nbsp;
+one-time password. Progress. Progress.&nbsp;&nbsp;
+
+00:13:58.480 --> 00:14:03.840
+I'm very happy. Good. And now you get to go&nbsp;
+eat. We will talk about later if uh I guess&nbsp;&nbsp;
+
+00:14:03.840 --> 00:14:07.680
+about like investing into the company. Oh,&nbsp;
+we'll have to balance how much, you know,&nbsp;&nbsp;
+
+00:14:07.680 --> 00:14:12.320
+like there's no no one's forced to to put&nbsp;
+in, but also like then you can't complain&nbsp;&nbsp;
+
+00:14:12.320 --> 00:14:16.720
+if you get diluted. Tired, man. Hey, it's only&nbsp;
+8:00, man. You got at least four more hours in&nbsp;&nbsp;
+
+00:14:16.720 --> 00:14:25.011
+you no? Uhh. This guy's like this guy's an&nbsp;
+early bird boy. Yeah. Yeah, I need a break.
+
+00:14:25.011 --> 00:14:28.639
+[music]
+
+00:14:28.640 --> 00:14:35.600
+Postgame interview. Good call.&nbsp;
+Hopefully to get uh beep partnered with us,&nbsp;&nbsp;
+
+00:14:35.600 --> 00:14:42.026
+but it's secret for now. Why are you so close, bro? Cut cut cut.
+
+00:14:42.026 --> 00:14:52.035
+[music]
+

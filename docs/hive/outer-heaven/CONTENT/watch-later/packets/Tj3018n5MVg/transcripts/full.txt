@@ -1,0 +1,293 @@
+So Stanford has a research method called storm, which has actually been shown in peer-reviewed testing to produce articles 25% more organized than the next best method.
+
+So I put all of those storm principles into my own Claude skill, which I'm going to give you guys for completely free, and you end up with the result that looks like this.
+
+It is an HTML briefing that has been put together by five different perspectives of agents, and it has been verified.
+
+Meaning if I scroll down to the bottom, you can see that the different perspectives are giving analysis on each parts of the report.
+
+But at the very bottom, you can see that we have different sources that have been confirmed, corrected, or demoted.
+
+Meaning on the first pass, the briefing would have had information in here that just wasn't correct.
+
+But because our skill works in all this verification, on V2, we can have a lot more faith in this output.
+
+So the whole idea of storm is that instead of just shooting off one prompt and having one angle of research, we are utilizing a bunch of different angles.
+
+Because if you just send off one prompt to Claude, there's going to be a bunch of blind spots in that research plan.
+
+So storm utilizes these five perspectives.
+
+We've got a practitioner, an academic, a skeptic, an economist, and a historian.
+
+And each angle finds a hole that the other angles miss.
+
+And this whole idea of having different agents kind of like role-play their own personalities and their own, you know, backgrounds with different areas of expertise, is really, really beneficial.
+
+If you've seen other videos where I've talked about something like the roast skill, or how I like to use agent teams to basically be a council, it's really, really helpful to identify different perspectives and, like I said, find holes that the other angles are going to miss.
+
+And so let me just show you a real quick example of why that's so beneficial.
+
+So Claude code natively has a feature called deep research, which launched with the dynamic workflows.
+
+So if you come into Claude and you do a deep research command like this, you will basically be able to enter a research topic and it will spin up a dynamic workflow, which will kick off hundreds of agents in the background.
+
+I think in this example, there was 103 different agents running.
+
+So this will give you a pretty solid deep research report.
+
+As you can see here at the bottom, it didn't actually give me any output, it just internalized all that.
+
+So I said, "Where's the report?" It gave me this markdown file, which is decent, but it's really not that thorough, and there's not as many sources as we'd like.
+
+There's only two up here, and then there's a few more unconfirmed down here at the bottom, as well as some open questions.
+
+And then I took this exact prompt that I asked in the deep research, and I put it into a Storm skill.
+
+So, I said, "Hey, Storm research, do this." And it said, "Okay, cool.
+
+Here's the topic.
+
+I'm going to run the Storm pipeline now.
+
+I ran these five agents." As you can see, the practitioner, the academic, the skeptic, the economist, and the historian were converging all of that stuff together, we're seeing where they disagree, and then we're going to run six more agents, which are going to verify all those facts that you just found.
+
+Verification's done, and now you have this HTML report, which is consistently going to look like this every time with a 60-second summary key findings.
+
+And all of these key findings are also ranked by reliability.
+
+You can see right here, reliability high, nine out of 10.
+
+This one was supported by the academic and the skeptic, and it was challenged by the practitioner and the economist.
+
+And it goes like this throughout the rest of the entire HTML report here.
+
+It also calls out the assumption that this briefing rests on and the missing six lens.
+
+All five lenses look at the firm from the owner's chair, adoption rates, productivity, ROI.
+
+None of them sat in the seat of the customer or the frontline employee.
+
+So, that's the missing sixth lens here, and I would then just say, "Okay, cool.
+
+Spin up that sixth lens, and run a V3 of this HTML report." And then it gives us really practical takeaways here.
+
+And what's cool about this is compared to something like the deep research, which is just going to basically give you a brain dump of a bunch of stats it found, the Storm research can really be tailored towards you.
+
+You can go into the skill and say, "Hey, here's what I'm doing.
+
+Here's my business.
+
+Here's what our goals are." Every time you run a Storm research report, make it tailored towards us, you know, what do we actually want to do differently now that you've understood all of this new data and research.
+
+And so, in this specific example with the deep research and the Storm, I put this into Codex, so a completely different AI model, and I said, "Hey, which one's better?" And it came back and said the HTML briefing is better.
+
+It's got better evidence quality, it's much stronger, it's got much stronger source diversity, it's got a much stronger thesis, It's more actionable.
+
+It's got better risk control, and it's better for video and content.
+
+So, in all six of these categories here, Codex thought that the HTML briefing was better, and I don't know the exact metrics here on cost, but the storm research was faster to run, and it was 100% cheaper because in this case we ran about What was this?
+
+Maybe 12 agents total, whereas the deep research report this time, this ran like over 100 agents.
+
+Maybe I should take a little easy on the steep research run because it did get hit by API rate limits, but that's also another point of like if you're going to spin up that many agents at one time, you might get rate limited.
+
+Whereas with the storm, you know it's always going to be your five personas.
+
+So, anyways, I think you guys now understand the value of this report.
+
+Let me show you real quick how this actually works and how to get the skill.
+
+So, there's basically four prompts.
+
+The first one is where we tell it to spin up the five different angles, right?
+
+We've got these five which I've talked about.
+
+That's prompt one.
+
+You would just enter in your research topic.
+
+And then when that comes back, you would enter in prompt two, which is the contradiction map.
+
+So, it's saying, "Hey, where do the perspectives contradict each other?
+
+Which one has good evidence?
+
+Which one has weak evidence?" And basically makes them analyze each other's outputs.
+
+And so, what we're doing here is we're basically just chaining together four prompts in a row, and then we're getting synthesis, and then we're getting the peer review.
+
+So, what I decided to do was I ran that on its own.
+
+It worked great.
+
+And I said, "Cool, package all of that into a skill so I can literally just give you a prompt, give you a topic, and you do that entire thing for me, and you're going to give me a consistent template so that every time I run this you're going to give me an HTML report that always looks like this." So, what that now looks like is in my dot Claude, I've got a bunch of skills as you can see.
+
+And if I go to my storm research skill and I open up the skill.md, this is what we've got.
+
+So, the storm research, it turns one topic into a verified multi-perspective HTML briefing.
+
+It simulates five expert lenses on the topic, maps where they contradict each other, synthesizes everything into a single self-contained HTML report, then adversarially peer reviews its own outputs, and verifies every citation against its primary source before delivering.
+
+You'll also notice that in the skill we have a report template HTML, so you guys I will also give you guys this for completely free.
+
+This is referenced in the skill and says, "Hey, once you find all the information, just put it in HTML and make sure it always looks like this." So, that's just for consistency on on my end, and I really enjoy that.
+
+So, I'm going to keep going down and explaining how this works, but if you guys do want to go ahead and grab these two resources, just head over to my free school community.
+
+The link for that is down in the description.
+
+All you have to do is get in here, click on classroom, and click on all YouTube resources, and you'll be able to find every single YouTube video and all of the resources that I've dropped associated with them.
+
+Once again, that's completely free to join.
+
+Once you have that skill, all you have to do is you can give that markdown file and the HTML file to Claude and say, "Hey, Claude, this is a skill called storm research.
+
+Put this in the .Claude folder, and then you're pretty much set up." And if you guys don't know what a skill is, it's basically just a prompt.
+
+This is basically just a master prompt that every time I say, "Hey, Claude, do storm research for me," it's going to invoke this skill, it's going to read the whole thing, and then just run it for you.
+
+So, it's very hands-off once you've basically installed them.
+
+And yes, this skill can work with codex or any other different type of agent you want.
+
+It's just that in Claude, it specifically has to be in the .Claude folder.
+
+But, you can see here I've got a folder called .codex or .agents, and you can put different skills in different types of folders based on the coding agent you're using.
+
+This currently is just a Claude code tutorial.
+
+So, anyways, from there, phase zero is to scope the topic.
+
+Sometimes, if you don't give it a specific enough topic, it will ask a few questions before it goes ahead and kicks off the storm.
+
+Then, it spins up the five expert lenses in parallel, and then we go into mapping the contradictions, synthesizing the report, and then the adversarial peer review verification, and that's where we get our output.
+
+So, let me just open up the Claude desktop app and start a new session here.
+
+And I'm just going to say, "Hey, Claude, please run a storm research for me on voice AI agents." And so, what you'll notice here is I didn't use a slash command, so it will still invoke the skill.
+
+And what you'll also notice is that this isn't very specific, so it might ask us some questions.
+
+Right here you can see it says, "Okay, running the skill storm research." So, that's how it went ahead and looks through storm research.
+
+And the argument that it's currently aware of is voice AI agents.
+
+It comes back and says, "Okay, so here's the topic, here is the reader." And it knows that I am an AI educator and I am deciding on potentially whether voice AI agents are worth a video or if it's just hype.
+
+So, the pipeline is now running.
+
+If I open up this, you can see it is going to kick off those five agents, the practitioner, the academic, the skeptic, and all of the other ones that we need.
+
+And what's really cool is you can click in and see what they're doing.
+
+So, if I click on the economist, for example, this is the prompt that our main session kicked off to this subagent.
+
+So, now we can see the subagent down here is browsing the web.
+
+It's using a tool.
+
+It's doing research.
+
+We can click on the academic.
+
+We can see this is the academic prompt.
+
+And once again, the academic subagent is, you know, doing all the stuff down here.
+
+Now, while this is running, let me quickly explain the difference between having subagents and having agent teams.
+
+So, subagents is basically where we have one main session.
+
+So, this session right here, this is Claude.
+
+This is who we're talking to.
+
+And all of these subagents are working for this main session.
+
+So, the main session talks to these five, but these five cannot talk to each other.
+
+And that is an important distinction because that's what you actually have in the agent team world.
+
+You can spin up teams of agents or councils of agents that can not only talk to your main session, but they can also talk to each other.
+
+And that's really cool because what I like to do is I like to spin up agent teams when I need help deciding on certain ideas or topics.
+
+And I'll have them not only do research for me, but then I'll have them debate with each other.
+
+So, they'll literally argue with each other until they reach some sort of consensus.
+
+Agent teams are much more expensive than subagents though.
+
+So, important distinction.
+
+I'll bring more videos on agent teams later, but if you do want to check out a deep dive, check out this video that I've tagged right up here.
+
+And also, if you want to check out another video where I've deep dived even more on subagents, then you can check out this video right up here.
+
+Now, you can see all of these subagents ran on Opus 4.8.
+
+If you don't want to do that, you don't have to.
+
+You can have all of these sub-agents run on Haiku or Sonnet if you like.
+
+But in this case, I liked for them to run on Opus.
+
+But all five lenses are in, so now it's going to go ahead and look at the contradictions.
+
+So you can see it's reading that file, which is the report template.
+
+It's running these agents in the background, and now it's going to start verifying all of those different citations and stats and the different things that our initial passive agents had come up with.
+
+Also, I know in this video I have switched between the Claude desktop app a little bit with VS Code.
+
+If you guys have been watching me for a while, you know that I typically do like to do most of my work in VS Code.
+
+Um Claude basically works the exact same way in both.
+
+It's just a difference of UI, really.
+
+But the reason I chose to show some of this video today in the desktop app is because I thought it's cool to show the actual agents running in here.
+
+But you can see that our report has come back, so let me actually just open this up in a browser.
+
+You can see this is the V2 version, so everything has been verified.
+
+If I scroll all the way to the bottom, you can see the sources were either demoted, corrected, or confirmed, so that is great.
+
+We've got our 60-second summary.
+
+We've got our key findings, which obviously once again are ranked by reliability.
+
+So what I would recommend for you guys to do is go grab the skill, put it into your own Claude, and play with it a little bit.
+
+Make it a little bit more tailored towards you.
+
+Maybe you can play with the HTML report if you want it to look a certain way.
+
+But then do it on a topic that you do know a lot about and that's important to you in your business.
+
+And then just read through it and see where you need to improve it or change it up a little bit.
+
+And maybe you even want to add a sixth lens or a seventh lens.
+
+Maybe for me and my workflow, it would be helpful to add like a beginner in AI because that's a lot of people that we're teaching our beginners in AI.
+
+Or maybe it would be good for me to add to the skill a content creator or something like that.
+
+So I guess the reason why I'm saying that is because I think what you should take away overall from the video is, yes, go grab the Storm skill and test it out, but it's also less about this specific skill and this specific Stanford method being the best for everybody, but I think the theories that you can pull out of it like the idea that the more perspectives you have doing research and contradicting each other, the better and more holistic research you're actually going to get.
+
+Basically, just the whole idea of if you don't have subject matter expertise, see if you can borrow it in some way.
+
+See if you can go ahead and kill your own blind spots, find the gaps in your knowledge, and go use agents to create little experts all over so that you've got this council of agents that have different expertise and different knowledge that that have your back, no matter what you're doing.
+
+So, I know this was a quick one today, but hopefully you guys enjoyed it or you learned something new.
+
+If you did, please give it a like.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys made it to the end of the video, and I'll see you on the next one.
+
+Thanks, guys.

@@ -1,0 +1,29 @@
+{
+  "pattern_id": "P-auto-083",
+  "version": 1,
+  "title": "safety / operate — two-nodes-ai-check-vs-no-ai-sanitize",
+  "steps": [
+    "Steal sanitize-before-model + check-before-leave. Hive: still HITL send.",
+    "Steal “test the miss.” Don’t treat secret-keys as a password wall.",
+    "Steal tune-then-wire-the-fail. No auto-stop as enough for send.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-oWdJMJp2HgM-01",
+    "K-oWdJMJp2HgM-02",
+    "K-oWdJMJp2HgM-03",
+    "K-oWdJMJp2HgM-09",
+    "K-oWdJMJp2HgM-10",
+    "K-oWdJMJp2HgM-11",
+    "K-oWdJMJp2HgM-12",
+    "K-oWdJMJp2HgM-13"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=safety; stage=operate; His OpenRouter check path. Version pin.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

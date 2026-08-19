@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-092",
+  "version": 1,
+  "title": "voice-agents / build — normalize-then-gate-never-post-a-dirty-number",
+  "steps": [
+    "Steal normalize-then-gate. No Vapi.",
+    "Steal two-request + poll-until + voicemail split. `inbox-to-task-routing` analog, HITL."
+  ],
+  "support_ids": [
+    "K-BO-jFbN4p8Y-01",
+    "K-BO-jFbN4p8Y-02"
+  ],
+  "dissent_ids": [
+    "K-BO-jFbN4p8Y-04",
+    "K-BO-jFbN4p8Y-05",
+    "K-BO-jFbN4p8Y-06"
+  ],
+  "valid_when": "domain=voice-agents; stage=build; US +1 hardcoded later. Global = country field or no hardcode.",
+  "less_relevant_when": "If the form already forces E.164, the node is thinner — not said as skip.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

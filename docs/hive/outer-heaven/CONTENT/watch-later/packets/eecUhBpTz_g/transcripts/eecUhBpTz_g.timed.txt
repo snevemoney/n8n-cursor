@@ -1,0 +1,750 @@
+[00:00] An AI dark factory is a repository that
+[00:02] ships its own code. You just have to
+[00:05] send in the spec for what you want to
+[00:06] build next in your codebase. And what
+[00:08] you get out of the factory is shipped
+[00:10] code that has already been fully
+[00:11] reviewed and validated. This is the
+[00:14] ultimate evolution of AI coding
+[00:16] harnesses. And because LLM's coding
+[00:19] agents, and our own harnesses are
+[00:21] getting better over time, we're starting
+[00:23] to get to the point where this kind of
+[00:24] setup is actually realistic and reliable
+[00:27] for a large set of work. Now, obviously,
+[00:30] this isn't reliable for everything yet.
+[00:32] But we're getting there. I'm seeing more
+[00:33] and more companies create this kind of
+[00:35] system. And so, in this video, I want to
+[00:37] show you how you can build your own AI
+[00:39] dark factory with a skill that I have
+[00:41] for you that guides you through the
+[00:43] entire process. You just have to give a
+[00:45] PRD or some kind of larger spec document
+[00:47] for what you want to create and then the
+[00:49] skill is going to help you build the
+[00:51] entire system. So, earlier this year, I
+[00:54] started my own dark factory as an
+[00:56] experiment. And this really is the
+[00:57] genesis for everything that I have for
+[00:59] you now. And it's a pretty cool
+[01:01] application. It's an agentic chat app
+[01:03] where you're able to ask the agent
+[01:04] questions and it can search over my
+[01:06] entire YouTube channel, even citing
+[01:08] sources. And then if you're in the
+[01:09] Dynamis community, it also searches
+[01:11] through all my course and workshop
+[01:12] content as well. And I built this entire
+[01:15] thing without even looking at a line of
+[01:17] code that it shipped. And I really did
+[01:19] prove out the system here. I mean, this
+[01:20] is a real application you can use right
+[01:23] now. chat.dynamis.ai.
+[01:25] I'll link to it in the description. It's
+[01:27] pretty awesome. I mean, it's not the
+[01:28] most complicated app, but it really did
+[01:30] prove out that you can build a system
+[01:32] where you don't even have to be in the
+[01:33] loop at all. And now, because coding
+[01:36] agents have gotten better, we have new
+[01:37] LLMs like Opus 5, Fable 5, new GPT and
+[01:40] Grock models. This kind of system is
+[01:42] even more realistic. Just letting the
+[01:43] agent rip on any spec that you give it.
+[01:46] And so, all of the lessons I learned as
+[01:49] I built this Dark Factory, I've encoded
+[01:51] it in this skill. This is the star of
+[01:53] the show for today because you give it a
+[01:55] PRD and then it builds a dark factory
+[01:58] based on all of the best practices I've
+[02:00] established myself as I built my own.
+[02:03] And let me be clear, what we're doing
+[02:04] here is not vibe coding. Yes, we're
+[02:06] trusting the agent entirely to manage
+[02:08] the codebase, but we're putting a lot of
+[02:10] engineering effort up front building out
+[02:12] the harness so the agent can plan
+[02:14] properly. We're going to have a
+[02:15] different agent critique the work of the
+[02:18] primary builder. There is a lot that I
+[02:20] put into designing this system that is
+[02:22] encoded in the skill. Trust me, I have
+[02:24] spent millions of tokens, months
+[02:26] building this out, learning all the hard
+[02:28] lessons so that you can have a much
+[02:31] better starting point very quickly. And
+[02:33] so, I'm not promising that this dark
+[02:35] factory can ship production grade code
+[02:37] for any codebase. We're not there yet
+[02:39] for a lot of things, but this is
+[02:41] definitely a starting point for you, a
+[02:43] window into the future of AI coding. And
+[02:46] this really is the highest level of
+[02:47] autonomy you can possibly give your
+[02:49] coding agent. I've covered this article
+[02:51] before on my channel by Dan Shapiro.
+[02:53] It's the five levels of AI coding using
+[02:56] our vehicle as an analogy. So level
+[02:58] zero, it's like stick shift. It's the
+[03:00] most manual possible. So we're using AI
+[03:02] coding assistance, but only for spicy
+[03:05] autocomplete. I love that word. So we're
+[03:07] still writing most of the code
+[03:08] ourselves. We're maybe just using our
+[03:10] coding agent to fill in the blank once
+[03:11] in a while or write a couple of
+[03:14] functions. And then we get into level
+[03:15] one and two where AI is more of a pair
+[03:18] programmer maybe creating some of the
+[03:20] boilerplate for us autonomously. It's
+[03:22] only once we get to level three where we
+[03:24] have our coding agent writing most of
+[03:26] the code for us. We pretty much are
+[03:28] hands off the wheel for the actual code
+[03:30] writing. Now here we're still very much
+[03:33] in the loop doing all of the planning
+[03:35] with the agent and the validation at the
+[03:37] end. This is where most of us are at and
+[03:39] this is mostly where we should be. It
+[03:41] really is the most reliable level for AI
+[03:43] coding in general because you're still
+[03:45] very much in the loop. But the sacrifice
+[03:48] that we're making here is that we become
+[03:50] the bottleneck still quite often when we
+[03:52] have to be a part of the planning and
+[03:54] validation. That is why we're interested
+[03:56] in building our harness to the point
+[03:58] where we can trust it to move to level
+[04:00] four and even level five with the dark
+[04:02] factory. So I'm not telling you to jump
+[04:04] straight to this. You need to know how
+[04:06] to work with AI coding assistants. build
+[04:08] a system where you can trust it enough
+[04:10] to ship things autonomously. And so here
+[04:13] there's not even a driver's wheel,
+[04:15] right? Like we can't even steer the
+[04:17] agent for the individual plans and
+[04:19] validation strategies. There's still a
+[04:20] console to give our higher level
+[04:22] direction like the PRD or spec document.
+[04:25] So we specify the destination. The agent
+[04:28] figures out exactly how to get there,
+[04:29] how to ship its own work, how to deploy.
+[04:31] There's so much that the agent is doing
+[04:33] without our guidance at all, which is
+[04:35] great because now we no longer become
+[04:37] the bottleneck. You can ship things so
+[04:39] incredibly quickly when you have an AI
+[04:42] dark factory as a welloiled machine.
+[04:44] It's just that if you really want to be
+[04:45] here, you better be sure you have a
+[04:47] well-gineered harness to make things
+[04:49] reliable at all. That's everything we're
+[04:51] going to cover very quickly together
+[04:52] here. Everything I've built into this
+[04:54] skill so when you run it and it creates
+[04:56] the dark factory, it takes all of the
+[04:58] best practices that I've learned the
+[05:00] hard way as I built my own dark factory
+[05:01] this year. Cool. So with that, let's get
+[05:04] into actually building our Dark Factory
+[05:06] now with the skill that I have for you.
+[05:08] So I'll cover how you can install it,
+[05:09] run it, and then we'll talk about the
+[05:11] different things that it builds for you
+[05:12] with the Dark Factory harness so you
+[05:14] really know how it works. I think that's
+[05:15] important that you don't just run this
+[05:17] blindly. And so the skill that I have
+[05:19] for you, it's within this repository
+[05:21] that I created actually quite recently
+[05:23] just to build a collection of all the
+[05:25] skills that I use for my AI coding
+[05:27] workflow. I'll link to a video right
+[05:29] here where I cover all of these. And in
+[05:30] fact, a lot of them I have built right
+[05:32] into my dark factories for the different
+[05:34] steps. And so installing this, if you're
+[05:36] using Cloud Code, I have a marketplace
+[05:39] plugin, just two commands to bring in
+[05:41] all of these skills. And if you're using
+[05:43] a different coding agent like Pi or
+[05:44] Codeex, just point it at the URL for
+[05:47] this GitHub repo that I'll have linked
+[05:48] in the description, and you can ask it
+[05:50] to install things and customize it to
+[05:52] your coding agent. So very easy to
+[05:54] install all of this. Or if you want, you
+[05:56] can just take the build dark factory
+[05:58] skill that we're covering here. So once
+[06:01] you have this skill installed, typically
+[06:03] what you'll do is you'll bring it into
+[06:05] an empty folder. Now theoretically you
+[06:08] can apply a dark factory onto an
+[06:10] existing codebase to continue to build
+[06:12] it out. I've just never tested that
+[06:14] myself, so it could work, but usually I
+[06:16] would recommend just building a dark
+[06:18] factory to create an application from
+[06:20] scratch based on a PRD. Now the PRD is
+[06:24] the input into this skill. I am assuming
+[06:26] that you already have some kind of
+[06:27] process with skills or an AI coding
+[06:29] framework to create that higher level
+[06:32] plan document for what you want to
+[06:33] create in the first place. And so you
+[06:35] build that then you pass it into this
+[06:37] skill. So with all that being said,
+[06:39] usually what I do when I start a new
+[06:41] dark factory is I copy in this skill as
+[06:44] well as any other skills that I want to
+[06:46] use within the harness. And then I'll
+[06:48] also build the PRD or also copy that
+[06:51] into the folder if I already have it.
+[06:53] And so you're starting with your skills
+[06:55] and your PRD. That is it. And the very
+[06:57] first thing that the skill does is it
+[07:00] interviews you with a ton of questions
+[07:01] to make sure you're on the same page
+[07:03] with the application that you're
+[07:04] building and the harness that you want
+[07:06] to get there. And so it's going to ask
+[07:08] things like how much autonomy do you
+[07:10] really want for the factory? Maybe you
+[07:12] do want to be in the loop a little bit.
+[07:14] It'll ask about the different skills or
+[07:16] like what kind of AI coding workflow you
+[07:18] want overall like this is my loop. I
+[07:20] prime, plan, implement, validate,
+[07:21] commit, PR. And it established that
+[07:23] because I gave it an example of how I
+[07:25] already work, right? So, it wants to
+[07:27] build the harness similar to how you
+[07:29] already work. So, it's easy for you to
+[07:30] continue to evolve the dark factory if
+[07:32] you want over time. It's also going to
+[07:34] ask things like, what's the validation
+[07:36] strategy for your application? How is it
+[07:38] going to check its own work? It'll take
+[07:39] a little bit to get through all these
+[07:41] questions here, but we're building a
+[07:43] large system here. It's worth being
+[07:44] patient and getting specific, answering
+[07:46] all the questions. Once the interview is
+[07:49] done, then it's going to get into
+[07:51] building out the full harness with you.
+[07:53] And it is so cool watching it rip
+[07:55] through building the entire system that
+[07:57] I'll explain to you in a little bit. And
+[07:59] I built this diagram to really help
+[08:01] break down the different components of
+[08:02] the harness that you're creating here. I
+[08:04] figured this would be a much better way
+[08:06] to visualize things than just going
+[08:08] through the coding agent logs as it
+[08:10] builds a dark factory. Of course, if you
+[08:12] want to see my actual dark factory, I'll
+[08:14] link to my original experiment in the
+[08:16] description. And I also did build a ton
+[08:19] of dark factories with the skill to
+[08:21] validate that I really encoded things
+[08:23] properly from my original experiment.
+[08:25] So, I'll cover the structure with you
+[08:27] here in just a second, but one thing I
+[08:28] want to show you first is an example of
+[08:30] something I built with a dark factory I
+[08:32] created from the skill. So, I've been
+[08:35] doing a lot of game development
+[08:36] recently. I find it a really powerful
+[08:38] way to test these dark factories cuz
+[08:40] it's very easy to make things more and
+[08:42] more complicated as I want to push the
+[08:44] limits cuz I can just add more features
+[08:46] to the game. The problem with a lot of
+[08:48] other kinds of applications like the
+[08:49] chat app I showed you earlier is you
+[08:51] can't just add more and more and more
+[08:53] because then the application just gets
+[08:54] feature bloated. So I love building
+[08:56] games. Now obviously this is still a
+[08:58] pretty simple game because I've created
+[09:00] so many different dark factories to test
+[09:02] the skill in different ways. So I've
+[09:04] definitely went wider versus deep for a
+[09:06] single dark factory. But it still is a
+[09:08] pretty neat game. So I can ring the horn
+[09:11] here for this uh tower defense game that
+[09:12] I built. And the animations actually
+[09:15] look pretty cool. Here we have the
+[09:16] enemies that start to come in and I can
+[09:18] attack them with my weapon. We got some
+[09:20] nice sound effects here that I have the
+[09:22] volume turned down for cuz it's kind of
+[09:23] annoying when I'm in the middle of
+[09:24] talking. But yeah, it's pretty cool. So,
+[09:26] I can upgrade my stats and then I can go
+[09:28] into the next wave here. Like this is
+[09:30] actually a pretty fun game. Uh
+[09:33] definitely something I'd be interested
+[09:34] in building out more cuz I just like
+[09:35] building video games in the first place.
+[09:37] But anyway, I'm going to go ahead and
+[09:38] close this now. That's an idea of the
+[09:40] kind of thing that I built with a Dark
+[09:42] Factory. But yeah, really you can create
+[09:44] any kind of application you want. Just
+[09:46] keep in mind that dark factories I still
+[09:48] would consider experimental right now.
+[09:50] That level three is definitely where you
+[09:52] want to be at for utmost reliability,
+[09:54] but it's pretty crazy the kinds of
+[09:56] things you can build with this system
+[09:58] these days. So now, as promised, I want
+[10:00] to show you how everything works under
+[10:02] the hood with this diagram as our main
+[10:05] reference point. And I want to do this
+[10:07] because your system is useless unless
+[10:08] you really understand it. So, if you're
+[10:10] going to build the factory with the
+[10:11] skill, it's worth understanding how
+[10:13] these things work. And even if you don't
+[10:15] take my skill to build the factory
+[10:18] exactly as I do, hopefully there's still
+[10:20] some pretty neat ideas that you can take
+[10:21] in here if you want to build your
+[10:23] factory your own way or just take some
+[10:25] ideas for your own AI coding workflows.
+[10:27] The sponsor of today's video is
+[10:29] Parallel, the web infrastructure layer
+[10:31] for agents. It fills a need that I have
+[10:33] for most AI agents that I build.
+[10:35] Parallel gives you a suite of APIs over
+[10:37] their own web index, so your agent can
+[10:39] always be grounded in the most
+[10:41] up-to-date information with all of the
+[10:42] enrichment and any kind of formatting
+[10:44] that you need. But my favorite part of
+[10:46] their entire platform is monitor. It's
+[10:49] web search that's always on. So we
+[10:51] specify some kind of query like watch
+[10:53] for new releases of LLM for these
+[10:55] companies. And then you tell it how
+[10:56] often you want it to run the query and
+[10:58] then it's going to give you a web hook
+[11:00] that fires whenever there's anything new
+[11:02] based on your query. So the event is the
+[11:05] trigger. In this example right here,
+[11:07] monitor sent a request to my web hook
+[11:09] because there's an update to the chat
+[11:10] GPT platform. And so I take that web
+[11:12] hook and then I call their task API to
+[11:15] do deep research with citation. So when
+[11:17] something changes on the web, I get a
+[11:19] briefing with citations instead of a
+[11:21] link I have to go read. And then I can
+[11:22] take this output and feed it into
+[11:24] downstream AI systems. And also
+[11:26] everything is priced per request, not
+[11:28] token. And so when I build my agent, I
+[11:30] can predict my price when I have it
+[11:32] running on a schedule before I even turn
+[11:34] it on. And it's free to get started.
+[11:36] I'll have a link in the description. So
+[11:38] zooming in now, most of the dark factory
+[11:40] is driven by a single workflow that
+[11:42] handles each one of the specs that we
+[11:44] feed into the system. So the scale is
+[11:47] going to help you customize things when
+[11:49] you go through the interview process.
+[11:51] But typically what I do is I set up my
+[11:53] dark factory as a GitHub repository. And
+[11:56] then each spec that I feed in is just in
+[11:58] GitHub issue that I create. Like this is
+[12:00] my list of closed issues in my primary
+[12:03] dark factory experiment. You'll have to
+[12:05] excuse the mess. There's a ton of
+[12:06] rejections cuz I was testing different
+[12:07] things. But like here's an example of
+[12:09] what the factory accepted. And then it
+[12:11] went through this workflow to build it
+[12:13] out and end with that poll request for
+[12:15] the final review and ship. That is all
+[12:17] happening autonomously. And so we create
+[12:20] something like a ticket or a GitHub
+[12:21] issue and then it's going to feed into
+[12:24] something that is hopefully like your
+[12:25] current AI coding workflow. It's just
+[12:27] going to be more autonomous for all the
+[12:29] steps of planning, building, and testing
+[12:31] and verifying. And the coding agent that
+[12:34] you use under the hood is definitely
+[12:36] going to dictate a lot of what this
+[12:38] looks like when the harness is built.
+[12:41] And so this is another thing the skill
+[12:42] guides you through is picking your
+[12:44] coding agent and setting up things to
+[12:45] run in what is called headless mode.
+[12:48] Pretty much every single coding agent
+[12:49] supports this like claude, PI, AMP,
+[12:51] client, codeex, because we don't want to
+[12:53] interact with the coding agent oursel
+[12:55] that defeats the point of the dark
+[12:56] factory. We need it to run autonomously.
+[12:59] And so headless mode is basically the
+[13:00] way to run your coding agent as sort of
+[13:02] a background task for each one of the
+[13:04] steps that we have here in our harness.
+[13:06] And so we file the issue, but that's the
+[13:09] only thing we do. The factory is going
+[13:11] to take that forward and invoke the
+[13:13] coding agent for each step, however you
+[13:14] have it set up. Now, personally, to
+[13:17] drive the entire system, I am using
+[13:19] Archon, my open- source harness builder.
+[13:22] And so, when I publicly shared building
+[13:24] my Dark Factory earlier this year, I was
+[13:26] doing a ton with Archon, building
+[13:28] workflows using them. You can definitely
+[13:30] use Archon if you want, but I don't want
+[13:32] to assume you're going to be using my
+[13:33] tool. That's why the skill more focuses
+[13:35] on just helping you use the barebones
+[13:37] coding agent that you already like. So,
+[13:39] that's our primary workflow. Now let's
+[13:41] talk about the automation that drives
+[13:42] the queue so that we have our pipeline
+[13:44] of handling all the spec files that we
+[13:46] feed in as input. So this is a value
+[13:48] that the interview will ask you about in
+[13:50] the skill. You can customize this but
+[13:52] every single 30 minutes I have this cron
+[13:54] job that triggers and it triages all of
+[13:57] our inputs right like for GitHub if you
+[13:59] have it set up with GitHub it's going to
+[14:00] look at all the GitHub issues and figure
+[14:02] out what it should implement next and
+[14:04] where we're at with each of them. And so
+[14:05] there's a label that we apply to each
+[14:07] one of the issues so that our dark
+[14:09] factory is stateful between runs. And so
+[14:12] if something is accepted, that means
+[14:14] that the factory's decided, let's build
+[14:16] this and it's just waiting to go into
+[14:18] this full workflow within one of the
+[14:19] next runs that we do every 30 minutes.
+[14:22] If something is in progress, that means
+[14:23] it's already going through this process
+[14:25] so we can move on. And then if something
+[14:27] needs review, that means that this
+[14:29] workflow has completed. We have the poll
+[14:31] request open. And so now we need a
+[14:33] coding agent to go through and review
+[14:35] things, right? We want that separate
+[14:36] session to review. So we don't have any
+[14:38] bias from the primary builder. And so
+[14:40] that review agent can approve things,
+[14:42] which means it's going to be merged and
+[14:44] automatically deployed. If it needs
+[14:46] fixing, then we're going to go back into
+[14:47] the builder agent and have it correct
+[14:49] those things. And then I have this built
+[14:51] in as a fail safe. I know for the most
+[14:53] part we want the human out of the loop
+[14:54] in the dark factory, but just as a fail
+[14:57] safe, I made it so that you can, you
+[14:58] know, specify during the interview
+[15:00] process when you'd want something
+[15:02] escalated to you. Of course, you can
+[15:04] specify you never want something
+[15:05] escalated. But coding agents, they
+[15:07] sometimes get tripped up on things and
+[15:09] they go through an infinite loop of
+[15:10] trying to fix a problem, that kind of
+[15:12] thing. You definitely want to intervene
+[15:13] at least once in a while if you really
+[15:15] want your dark factory to be reliable.
+[15:17] And so when this trigger happens every
+[15:19] 30 minutes, it goes through this
+[15:21] priority of actions. And so first, it's
+[15:24] going to prioritize anything that needs
+[15:26] fixing. So it's going to trigger an
+[15:28] agent to fix a PR. And the second
+[15:30] priority is checking a pull request,
+[15:32] like performing the review. If there's
+[15:34] nothing in the PR list, then it's going
+[15:36] to work on that next issue that is
+[15:38] approved. Otherwise, if there's nothing
+[15:40] there, it's going to triage and it's
+[15:41] going to figure out if it should accept
+[15:43] anything new to be worked on in the next
+[15:45] run. And so I say here one or more jobs
+[15:48] singular or plural. You can make it so
+[15:51] that a lot of work happens in parallel.
+[15:53] Like maybe it's going to build a couple
+[15:54] of issues and do a couple of code
+[15:56] reviews within that single 30 minute
+[15:58] trigger. This is a dial you can tweak
+[16:01] just depending on how many tokens you
+[16:03] want to spend with your dark factory. To
+[16:06] keep things safe, typically I just have
+[16:08] a couple of runs in parallel. Otherwise,
+[16:10] you're going to hit hit your rate limits
+[16:12] very very quickly. So just keep in mind
+[16:14] that's something that you can definitely
+[16:15] customize. And then when we get to the
+[16:18] end here, we reach deployment. So for
+[16:20] anything that is, you know, reviewed and
+[16:21] approved and merged, then we're going to
+[16:23] automatically deploy. It's important if
+[16:26] merging never puts code in front of a
+[16:28] user, like if your pull requests are
+[16:30] merged, we don't actually deploy them
+[16:31] autonomously. You built a PR generator,
+[16:33] not a dark factory, right? Like we as a
+[16:35] part of our harness, we need a strategy
+[16:37] for deployment. And so the strategy that
+[16:40] I've used myself that the skill also
+[16:41] recommends is blue green deployment. If
+[16:44] you come from an engineering background,
+[16:45] you're familiar with this. But
+[16:46] basically, we have two versions of the
+[16:48] application at any given point. We have
+[16:50] one that is live for the users right now
+[16:53] and then we have the same version of the
+[16:54] app that is on standby. The reason we
+[16:57] want to do this is because then when we
+[16:58] update our application, we update the
+[17:01] one that's on standby and then we flip
+[17:03] it over so that that version is now live
+[17:05] for the users. That's important because
+[17:07] if we only have one version of the
+[17:09] application, then as we're updating it,
+[17:11] we have to, you know, take down the app
+[17:13] for a little bit. So there's downtime
+[17:15] for the users. That's why we want to
+[17:17] have this flip only once we have things
+[17:19] updated in one version of the
+[17:20] application. So just a small detail
+[17:22] there for deployment. It's important to
+[17:23] get this right though because we need
+[17:24] the dark factory to actually go from
+[17:27] spec all the way to shipped code, right?
+[17:29] If we don't have the deployment, we
+[17:31] don't truly have this right here. Cool.
+[17:33] So, with that, there are just two more
+[17:35] things that I want to cover with how the
+[17:36] Dark Factory operates, and I've saved
+[17:38] the best for last here. These are the
+[17:40] most important parts of the Dark Factory
+[17:42] harness that I put the most effort into
+[17:44] building and evolving. We have the
+[17:46] guidance later so the agent can continue
+[17:48] to operate as we actually want it to,
+[17:50] even when it's fully autonomous. And
+[17:52] then we have all the validation
+[17:53] strategies to make sure that it is
+[17:55] properly checking its work. We don't
+[17:56] want bias to creep through. We don't
+[17:58] want it to fake tests or say things are
+[18:00] working when they really aren't. There's
+[18:02] a lot that I've engineered for this. So,
+[18:04] one of the first things the skill is
+[18:06] going to build for you is the three core
+[18:08] files for the guidance layer of the dark
+[18:10] factory. And the first file is just your
+[18:12] global rules. You've seen this a million
+[18:14] times before. It's the constraints and
+[18:15] conventions you always want your coding
+[18:17] agent to follow when it's operating in
+[18:19] your codebase. The next file is kind of
+[18:22] similar. It might seem like they step on
+[18:24] each other's toes, but there's a key
+[18:25] distinction I want to make here. We have
+[18:27] our factory rules. These are the
+[18:29] boundaries we want our coding agent to
+[18:31] follow specifically when it's operating
+[18:34] more autonomously within the dark
+[18:36] factory. So it is kind of the same thing
+[18:38] with constraints and conventions, but
+[18:40] we're even stricter there. So think
+[18:42] about it this way. This is the test. You
+[18:44] want to put things in your global rules
+[18:47] when you would want your coding agent to
+[18:48] know about that even if you're not
+[18:50] operating in the dark factory. Like if
+[18:51] you're just working with your coding
+[18:53] agent as you normally do. But the things
+[18:55] we have in the factory rules, these get
+[18:57] stricter, we really need to make sure
+[19:00] that the coding agent, for example,
+[19:01] isn't trying to do too much work at once
+[19:03] because if it's checking its own work
+[19:04] and we're not in the loop at all, we
+[19:06] really need to make sure that it's only
+[19:08] handling bite-siz tasks one at a time.
+[19:10] Otherwise, reliability is going to slip.
+[19:12] So the things that go in here are the
+[19:14] things that are strict enough where
+[19:15] maybe you wouldn't even really want the
+[19:17] agent to have those constraints and
+[19:19] conventions if you're working with it
+[19:20] normally. And so when you're working
+[19:22] with your coding agent in the repo
+[19:24] outside of the dark factory, it probably
+[19:26] won't even read these. And then the last
+[19:28] thing we have is our mission.md. And so
+[19:31] this a lot of it is derived from the PRD
+[19:33] you give as input to this skill, but
+[19:35] it's the goals you have for your
+[19:37] application, specifically what you want
+[19:39] to build and then also things that are
+[19:41] out of scope. Just as importantly, you
+[19:42] want to specify what's out of scope
+[19:44] because that way the agent knows what
+[19:47] spec files it should accept or reject.
+[19:49] And this might be a question you've had
+[19:50] at this point because you saw I accepted
+[19:52] here. You saw I had a bunch of GitHub
+[19:54] issues that are rejected. What does it
+[19:55] even mean? Well, here's the thing. I
+[19:57] wanted a mechanism in the factory for
+[19:59] the coding agent to correct you, not
+[20:02] just take the specs you feed in as the
+[20:05] single source of truth. This has to be
+[20:06] implemented cuz sometimes you forget
+[20:09] what the goals and non- goals are based
+[20:10] on your PRD, but the coding agent knows
+[20:13] that because you encoded it in your
+[20:15] mission.md right here. And so sometimes
+[20:17] it'll look at a spec and say, "Hey, this
+[20:19] is something we probably shouldn't
+[20:20] implement. It's out of scope for the
+[20:22] application. You said it earlier." Or
+[20:24] maybe you want to kind of build in like
+[20:26] a reliability dial and the coding agent
+[20:27] can figure out like, "Oh, this spec is
+[20:29] too complicated. We need to split it up
+[20:30] first." Or maybe I want to work on it
+[20:32] with you. I just wanted some kind of
+[20:34] mechanism for the agent to have that
+[20:36] autonomy to, you know, accept or reject
+[20:39] things. And of course, the skill,
+[20:41] especially in the interview process, is
+[20:42] going to walk through it all with you
+[20:43] and help you establish that. So every
+[20:45] time you have a new spec that comes in
+[20:47] when it's being triaged, the agent has
+[20:49] the option to actually reject it. You
+[20:51] can turn that off entirely if you want,
+[20:53] but I find that really useful just to
+[20:55] make sure that the agent can correct
+[20:57] you, not just the other way around. And
+[20:59] so with that, the very last thing I want
+[21:01] to talk about with you here is the
+[21:02] validation harness. And I really did
+[21:05] save the best for last year. This is the
+[21:07] most important thing as far as
+[21:09] reliability goes in the entire Dark
+[21:11] Factory. So, we really have two agents
+[21:14] that are operating in the factory here.
+[21:16] We have the builder and we have the
+[21:18] validator. And I've hinted at this
+[21:19] already because the core workflow here
+[21:22] ends with the pull request, but it
+[21:24] doesn't end with the shipped code
+[21:25] because we have this entire other
+[21:27] process here for reviewing the PR. And
+[21:30] this is really important because coding
+[21:32] agents by themselves, they build up a
+[21:34] lot of bias as they implement things.
+[21:37] And so we need a very separate review
+[21:41] that looks at things with a critical eye
+[21:43] and it doesn't know about how things
+[21:45] were implemented or what the original
+[21:47] plan was or anything because all that
+[21:49] can carry bias to make the agent ignore
+[21:51] things like just turn a blind eye to
+[21:52] stuff or just get kind of lazy in the
+[21:55] critique. So the coolest thing that I
+[21:57] built in this entire validation harness
+[21:59] is also unfortunately the most
+[22:00] complicated. It's hold out scenarios. So
+[22:03] I'm going to try to be as brief as I can
+[22:05] explaining this. I could spend like a
+[22:07] solid half hour talking about how these
+[22:09] work and the ideas behind them. But
+[22:11] essentially what we're doing here is we
+[22:13] are creating a set of test scenarios
+[22:16] that are entirely separate from the
+[22:18] implementation details. So given the
+[22:20] application itself at a high level, what
+[22:22] does success look like? How are we
+[22:24] supposed to be able to use this
+[22:25] application? We're writing these before
+[22:27] we actually perform the work. It is
+[22:30] totally separate from the builder agent.
+[22:31] In fact, the builder agent can never see
+[22:34] these hold out scenarios because
+[22:36] otherwise it can try to design the app
+[22:38] in a way just to make those scenarios
+[22:40] pass. It's a way to make it so the
+[22:43] builder is blind to how we're checking.
+[22:45] So it can't try to sort of hijack our
+[22:48] testing scenarios. And so we know what
+[22:50] success looks like. And then as we build
+[22:52] the individual things with our builder
+[22:54] agent, it has access to some testing
+[22:56] like unit testing and integration
+[22:58] testing because we want it to be able to
+[22:59] iterate on its work to some degree. So
+[23:02] we have that within the core workflow.
+[23:04] But then our validator has a whole extra
+[23:06] suite of tests where it's running these
+[23:08] things separate from the implementation.
+[23:09] So there's no bias there. And then any
+[23:11] issues that come up from this, it's
+[23:13] going to feed it back into the builder
+[23:14] to correct things. And then it'll run
+[23:16] all the tests again. So, also let me
+[23:18] know in the comments if you'd want me to
+[23:20] make a video going a lot further into
+[23:22] these different validation approaches,
+[23:24] especially with the hold out scenarios.
+[23:25] This really is what makes the Dark
+[23:27] Factory reliable. Without it, there is
+[23:29] no way that I'd even run this as an
+[23:31] experiment. And just the core idea
+[23:33] overall is to have a very clear
+[23:36] separation here between the builder and
+[23:38] the validator. You don't want them
+[23:39] sharing information like you don't want
+[23:41] the builder to know about your tests.
+[23:43] You don't want the validator to know
+[23:44] about the plan. That way they can
+[23:46] operate independently and together make
+[23:48] your dark factory reliable. So with
+[23:51] that, we've now covered all the
+[23:52] components of the AI dark factory that
+[23:54] the skill helps you build. So go ahead
+[23:56] and just try the skill right now. You
+[23:58] have to spend some time up front
+[23:59] answering the questions, but after that
+[24:00] it rips through everything for you and
+[24:02] it's amazing to watch it work and see
+[24:04] the kinds of things that you can create.
+[24:06] And you can really use any coding agent,
+[24:08] any model, even use different providers
+[24:10] and models for the different steps in
+[24:12] the workflow here. There's a lot you can
+[24:14] experiment with. I'm going to keep
+[24:15] experimenting with my own AI dark
+[24:17] factory and I'll also be continuing to
+[24:19] evolve the skill for you as well. So
+[24:21] stay tuned for more content on that. And
+[24:23] so with that, if you appreciate this
+[24:25] video, you're looking forward to more
+[24:26] things on AI coding and the AI dark
+[24:28] factory, I would really appreciate a
+[24:30] like and a subscribe. And with that, I
+[24:32] will see you in the next

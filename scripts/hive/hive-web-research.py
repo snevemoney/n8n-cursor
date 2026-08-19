@@ -157,26 +157,102 @@ def _youtube_timedtext(video_id: str) -> str | None:
     return None
 
 
-def _youtube_ytdlp(video_id: str) -> str | None:
-    url = f"https://www.youtube.com/watch?v={video_id}"
+def _parse_ytdlp_json3(raw: str) -> tuple[str, list[dict[str, Any]]]:
     try:
-        proc = subprocess.run(
-            ["yt-dlp", "--skip-download", "--write-auto-sub", "--sub-lang", "en", "--sub-format", "vtt", "-o", "-", url],
-            capture_output=True,
-            text=True,
-            timeout=90,
-        )
-    except FileNotFoundError:
-        return None
-    if proc.returncode != 0 or not proc.stdout.strip():
-        return None
-    lines = []
-    for line in proc.stdout.splitlines():
-        if line.startswith("WEBVTT") or "-->" in line or not line.strip():
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return "", []
+    segments: list[dict[str, Any]] = []
+    for event in data.get("events") or []:
+        if event.get("aAppend") == 1:
             continue
-        lines.append(re.sub(r"<[^>]+>", "", line).strip())
-    text = " ".join(lines).strip()
-    return text or None
+        segs = event.get("segs") or []
+        text = "".join(s.get("utf8", "") for s in segs).replace("\n", " ").strip()
+        if not text:
+            continue
+        start_ms = int(event.get("tStartMs") or 0)
+        end_ms = start_ms + int(event.get("dDurationMs") or 0)
+        segments.append(
+            {
+                "start": format_ts(start_ms // 1000),
+                "end": format_ts(max(start_ms // 1000, end_ms // 1000)),
+                "text": text,
+            }
+        )
+    if not segments:
+        return "", []
+    deduped: list[dict[str, Any]] = []
+    for seg in segments:
+        if deduped and deduped[-1]["text"] == seg["text"]:
+            continue
+        deduped.append(seg)
+    transcript = " ".join(s["text"] for s in deduped).strip()
+    return transcript, deduped
+
+
+def _youtube_ytdlp_fetch(video_id: str) -> tuple[str | None, list[dict[str, Any]] | None]:
+    url = f"https://www.youtube.com/watch?v={video_id}"
+    import tempfile
+
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            out_tpl = str(Path(tmp) / "%(id)s")
+            for sub_format in ("json3", "vtt"):
+                proc = subprocess.run(
+                    [
+                        "yt-dlp",
+                        "--skip-download",
+                        "--write-auto-sub",
+                        "--sub-lang",
+                        "en",
+                        "--sub-format",
+                        sub_format,
+                        "-o",
+                        out_tpl,
+                        url,
+                    ],
+                    capture_output=True,
+                    text=True,
+                        timeout=180,
+                )
+                if proc.returncode != 0:
+                    continue
+                if sub_format == "json3":
+                    json_files = sorted(Path(tmp).glob("*.json3"))
+                    if not json_files:
+                        continue
+                    transcript, segments = _parse_ytdlp_json3(
+                        json_files[0].read_text(encoding="utf-8", errors="replace")
+                    )
+                    if transcript:
+                        return transcript, segments
+                else:
+                    vtt_files = sorted(Path(tmp).glob("*.vtt"))
+                    if not vtt_files:
+                        continue
+                    raw = vtt_files[0].read_text(encoding="utf-8", errors="replace")
+                    lines = []
+                    for line in raw.splitlines():
+                        if (
+                            line.startswith("WEBVTT")
+                            or "-->" in line
+                            or line.startswith("Kind:")
+                            or line.startswith("Language:")
+                            or not line.strip()
+                        ):
+                            continue
+                        lines.append(re.sub(r"<[^>]+>", "", line).strip())
+                    text = " ".join(lines).strip()
+                    if text:
+                        return text, None
+    except FileNotFoundError:
+        return None, None
+    return None, None
+
+
+def _youtube_ytdlp(video_id: str) -> str | None:
+    transcript, _ = _youtube_ytdlp_fetch(video_id)
+    return transcript
 
 
 def _youtube_transcript_api(video_id: str) -> str | None:
@@ -341,7 +417,10 @@ def youtube_research(url: str) -> dict[str, Any]:
     if not video_id:
         return {"ok": False, "type": "youtube", "url": url, "error": "Could not parse YouTube video id"}
 
-    transcript = _youtube_transcript_api(video_id) or _youtube_timedtext(video_id) or _youtube_ytdlp(video_id)
+    transcript = _youtube_transcript_api(video_id) or _youtube_timedtext(video_id)
+    ytdlp_segments: list[dict[str, Any]] | None = None
+    if not transcript:
+        transcript, ytdlp_segments = _youtube_ytdlp_fetch(video_id)
     meta: dict[str, Any] = {"ok": True, "type": "youtube", "url": url, "videoId": video_id}
     if not transcript:
         meta.update(
@@ -359,7 +438,7 @@ def youtube_research(url: str) -> dict[str, Any]:
     summary_hint = " ".join(words[:120])
     if len(words) > 120:
         summary_hint += "…"
-    segments = _youtube_transcript_segments(video_id)
+    segments = _youtube_transcript_segments(video_id) or ytdlp_segments
     md = youtube_metadata(video_id)
     meta.update(
         {
@@ -367,7 +446,7 @@ def youtube_research(url: str) -> dict[str, Any]:
             "transcriptWordCount": len(words),
             "excerpt": transcript[:2500],
             "summaryHint": summary_hint,
-            "fullTranscript": transcript[:80000],
+            "fullTranscript": transcript,
             "transcriptSegments": segments,
             "metadata": md,
             "analysis_level": 2 if segments else 1,

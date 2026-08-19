@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-002",
+  "version": 1,
+  "title": "agent-eval / ops — tool-covers-a-model-weakness",
+  "steps": [
+    "When a workflow needs numbers, attach a dedicated compute tool and watch whether it is called.",
+    "Treat first score as a baseline, not the lesson."
+  ],
+  "support_ids": [
+    "K-NWbh5ZoEHkA-01",
+    "K-NWbh5ZoEHkA-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-eval; stage=ops; Live arena / eval with a visible score.",
+  "less_relevant_when": "If the model is not asked to compute, the tool stays idle.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

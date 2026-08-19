@@ -1,0 +1,53 @@
+Here's how to use Gemini's new file search API in N&.
+
+So Gemini's new file search API is awesome because it allows you to drop in a document.
+
+It generates those embeddings and then you're right away able to just chat with it and ask it questions and get answers back.
+
+So today I'm going to be talking about how we can use it in NIDN for our rag agents without having to build a huge massive data pipeline that looks like this because we're able to just drop in a file and get answers back.
+
+So when we get into NIDAN, there's going to be four HTTP requests that you guys will be looking at and I'm going to walk through exactly how I set them up.
+
+The first one is going to be us actually creating that store.
+
+And so right now I'm just going to refer to it as a folder cuz I think that that just makes things a little easier to contextualize.
+
+The next request we have to do is actually upload a file.
+
+And so we upload it to just like the Google Cloud environment, but that doesn't yet mean it's in the folder.
+
+So the third HTTP request that we have to make is we're going to take this file and we're going to move it into the folder that we created earlier in step one.
+
+And then finally, we have to set up the actual request to query it.
+
+So, we're going to hook up an AI agent to the tool and then we'll be able to chat with it to get all of the information that is in this file which will be in this folder that we created.
+
+Okay, so we created our file store.
+
+The next thing we need to do is we need to upload the file to Google and then we have to move it into that file store.
+
+And I just dropped in this PDF which is the rules of golf and it's like a 22page PDF or something like that.
+
+All right, so we made our folder, we uploaded the file and then we moved that file into that folder.
+
+So now we're ready to actually test out the agent and see if it can understand what is in that PDF that we just gave it.
+
+So I'm going to ask the agent what happens if your club breaks during the round.
+
+All right, so I just shot that off.
+
+It's going to use its brain.
+
+It's going to call the knowledgebased tool and then we should see a correct answer that also tells us where it got it from.
+
+Okay, so we just got this back.
+
+It says short answer.
+
+If a club breaks during the round because of normal play, you may continue to use the damaged club, have it repaired, or replace it during the round.
+
+It showed us the source was from the knowledge base from this document.
+
+And then rule four, clubs.
+
+If you want to watch the full breakdown, then click on that play button right here, and I'll see you guys over

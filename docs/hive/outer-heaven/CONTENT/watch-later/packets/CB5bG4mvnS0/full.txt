@@ -1,0 +1,437 @@
+Codex's browser use is probably the best that I've ever tried before.
+
+It can literally do anything on a browser or on your actual local computer.
+
+And if you need to be signed in for something, you just sign in once and Codex will save it.
+
+So, the possibilities are endless.
+
+You can actually automate anything now.
+
+Let me show you guys how to set it up, how easy it is, and a few good use cases.
+
+All right.
+
+So, I'm using the Codex desktop app, which is just honestly the main way that I like to drive Codex.
+
+It's super, super slick.
+
+And we get the browser to pop up on the right-hand side, which I'll show you guys in a sec.
+
+So, luckily we live in a world now where most tools that we need to use have an API guy.
+
+So, it's much easier to just connect Codex through the API.
+
+Or, if we just go to the plugins, there's hundreds of plugins in here.
+
+But, every once in a while we don't have an API, and you can do that with browser use.
+
+But, before I show you an automation like that, let's just take a look at this example where you might be building a website.
+
+You might be building some sort of app.
+
+And you need a browser, an agent, to actually test through things.
+
+If you guys watched a recent video I did on like building an AI SaaS in one day, then this was actually from that demo where I had a browser agent get spun up and test the heck out of our app.
+
+And it did 85 focused auto- mation checks with real browser workflow testing, which means it was clicking around, it was typing things, it was hitting buttons, and it was trying to break the app.
+
+And it found a ton of bugs, and then we were able to just fix them.
+
+So, in this example, I have a super simple website spun up here on the localhost.
+
+It's a form submission, as you can see.
+
+And there's a few issues before we actually go ahead and start testing this thing.
+
+You can see like this spacing is weird.
+
+This thing is overlapping.
+
+And so, what you can do is you can click on this annotate button, and that lets you choose very specific elements to actually change.
+
+So, I can click right here on this phone number box, and I can describe, "Hey, this is kind of like overlapping.
+
+It's out of bounds.
+
+It's covering up the company box.
+
+So, I need you to fix this." And then, when you shoot that off, it actually goes over here into your chat.
+
+And then, you can make another annotation like, "Okay.
+
+So, this whole box isn't really aligned on the same Y axis as number one and number three.
+
+So, you need to fix that as well." And then, those annotations are saved over here, and we can just go ahead and shoot them off.
+
+So, that's kind of like a lovable style or like a cloud design style thing that you can do with the in-app browser in Codex.
+
+What else is really cool about this is that you can actually just drive this thing.
+
+So, you can go to Google, you can search for Grand Canyon images, you can go to all, you can go to different links if you want.
+
+You can use the browser right here while you have Codex open.
+
+But, of course, Codex can also just take control of it.
+
+Now, we can see right here is my mouse, but also this is what Codex's mouse looks like.
+
+And that's how you know it's now sort of getting ready to take control of the browser.
+
+Okay, so now that those changes have been made, let's actually start testing out our UI.
+
+I want to see things that maybe me as a human, I would maybe go through here and test like five or six edge cases, but we can see how Codex can do it way quicker and way more.
+
+Okay, so you have the UI open.
+
+I want to make sure that there are no bugs.
+
+I want to make sure that this thing can't break.
+
+So, what I want you to do is use your browser use and just test the heck out of this thing.
+
+Try different things, try your best to break it, and let me know what bugs you find and what things we need to fix.
+
+And so, by the way, while this is running, there's a difference between browser use being headless or headed.
+
+Headless means it's running in the background, so you can keep working in the foreground, and you won't actually see it going on, but it can run a lot of things in the background.
+
+But, if you want it to be headed, that's basically where you're able to see it.
+
+So, we're probably going to be able to see some things right here, but if you wanted this to just work for a few hours for you headless in the background, you could ask it to do so, and then it wouldn't disturb whatever work you're doing.
+
+So, if you ever hear that terminology, that's what it means.
+
+So, there you go.
+
+You can see that the mouse is moving around right now.
+
+It tried to click continue, and then it says first name is required, enter a valid email address, and enter a 10-digit phone number.
+
+And now you can see it just entered in some information and it was able to hit continue.
+
+And it's just going to keep going through this QA check.
+
+We're validating that some of these fields are required options and that the continue button won't actually let it move on without filling those in.
+
+And by the way, the reason you're seeing some of these UI bugs is because I asked this chat to like make there be a few UI things to fix because I wanted to show you guys the annotations.
+
+So, just ignore that.
+
+Mainly, what I'm trying to show you guys now is the actual browser use QA function.
+
+So, here you can see as it's clicking around, as it's trying to navigate this UI, it already said the core click path mostly works, but I've confirmed two real data integrity problems already, which is that obviously invalid contact data does get through, and changing the country code to UK resets to US when you return to edit.
+
+I'm now testing keyboard submission and restart behavior, which often exposes bypasses the click path misses.
+
+So, think about it like this, no matter what you get, you're going to want to test it, but would you rather have something that has been not tested at all, or would you rather have something that has been tested 100 times already by an AI agent?
+
+Especially if you tell the agent to try to break it, it's going to find some things that need to be fixed.
+
+No matter how good you are at trying to predict edge cases, when you push an app into production and users start using it, people are weird, people are unpredictable, so they're going to do things.
+
+And so, this agent is able to hopefully simulate weird humans and just find things that you might not have thought of.
+
+You can see here, it even switched this to mobile view to still make sure that everything's working.
+
+And look at this, in mobile it found a few failures in responsiveness.
+
+So, that isn't something that I yet had tested.
+
+Okay, so this thing finished up now, and you can see that we have a bunch of things that passed, but a bunch of things that also failed.
+
+So, it was able to find all of these bugs because it was testing the UI, and it didn't even do it that long.
+
+If we wanted to make this even harder, we could do a slash goal, and we could say, "Hey, don't stop until you've tried 100 different unique scenarios of, you know, UI edge cases, and then come back to me." But, it still found a lot of things that were broken, and now all we'd have to do is say, "Okay, cool, go implement those changes.
+
+Go fix all those bugs." Okay, so let me show you guys another example.
+
+This is when you maybe have some sort of platform where you want to be able to like download statements or something, but they don't have an API.
+
+So, you can actually interact with it with Codex's browser use because it basically uses vision and then AI to analyze like what it's looking at and where to click.
+
+And I would I just want to show you how easy it actually is to build these.
+
+All I said was, "Hey, you know, I want to build the skill, blah blah blah, what would be helpful?" And you could record a quick Loom, you could send screenshots with arrows, but you actually don't have to.
+
+You can basically just describe pretty clearly what you need to do.
+
+So, what happened here is it opened up Relay, I signed in, and it saved that session.
+
+Now, I said, "Okay, in the Relay dashboard, you're signed in.
+
+What I need you to do is go to the dashboard, click on accounts, find the statements, um, click on these two accounts, download them as CSVs, and then put them into this folder.
+
+And it was able to do that on one shot.
+
+I didn't have to give it any feedback, and it downloaded them and saved that whole flow as a skill.
+
+Now, this is super helpful because now I could, at the end of the month, just set this up as a scheduled routine because I could set a scheduled routine here and say, "Hey, use this skill on the most recent, you know, month statement in Relay." And for the most part, Codex is going to save your sessions when you're logged in.
+
+However, there are some limitations like the fact that Relay is going to pretty much boot you out because it's, you know, it's a banking platform.
+
+It's going to be secure and boot you out.
+
+So, look at this here.
+
+I asked it to do this again, and it said, "Hey, Relay is open at the login screen, but you have to sign in again." Now, what's really interesting that you can do is you can actually open up your settings.
+
+You can have a password manager inside of Codex.
+
+And you can see this goes to your browser, and now you can go to import them so that Codex can actually fill that out for you.
+
+And that way you're not putting it into the chat history or anything like that.
+
+You're saving it more securely.
+
+So, all you have to do for that is create a CSV file that looks like this.
+
+I've got the name, the URL, the username, the password, and any notes, which in this case are empty.
+
+I imported that here, right here as a file, a CSV file, and now we have relay.com password.
+
+Go ahead and try this again in the password manager for the in-app Codex browser.
+
+You should be able to log in now.
+
+And then run the skill on June.
+
+All right, so over here now you can see the browser has taken control, and it is going to put in my email and my password.
+
+Now, if this asks me for a two-factor authentication code from my phone or something, then I'm obviously not going to be able to do that.
+
+I'd have to do that manually.
+
+But hey, if I was on a Mac and my text went there and I used computer use to do that, technically you would be able to automate that whole thing, but I would say you probably want to be careful about stuff like that.
+
+But as you can see, it was able to pull the passwords from my password manager, paste those in, and now it should be able to log in to Relay for me.
+
+You can see here that the mouse has moved over to accounts.
+
+It's then going over to statements, and it's going to be able to download these two statements for us.
+
+So, you can see it's pretty cool that it was able to figure all this out.
+
+Remember, I've only ran this skill once and all I did was instruct it with natural language to do this.
+
+Now, realistically, is that the way you should do it, especially with something like a bank account?
+
+No.
+
+What you should do is have it do the skill, you sit here and watch it, and have it do that like at least 10 times where you're very closely watching it to make sure nothing goes wrong, and you're making sure the script in the skill is super strict.
+
+Because at the end of the day, it's using vision, it's using AI, and that's how it's deciding what to click and what to do.
+
+So, really the way that I think about it is when you want to automate something, your first call should always be to go for an API.
+
+Like, that's what you want to do.
+
+It's the fastest, it's usually the cheapest, it's usually just the most consistent.
+
+Now, if there's no API, that's where you would maybe say, "Okay, cool.
+
+Well, now let me see if I could use like a deterministic, you know, like a macro script, right?" And that's where you'd basically be able to have, yes, you know, it'd be more of a browser use because you have a mouse that's clicking around, but it's not like your mouse needs reasoning.
+
+Your mouse doesn't need to look at the screen, figure out where to click, and based on the next UI that pops up, where do I click again?
+
+This is basically more like, "Okay, I have to click on this pixel, then this pixel, then this pixel every single time." That's something that you could do for much cheaper and much safer by just programming a macro.
+
+And that's not that hard either.
+
+You just ask Claude or Codex, "Hey, help me figure out how to make like a deterministic macro script to just click on these pixels in that order every single time." But, if you can't do that every single time because there is an element of vision or reasoning, then you need to come in here and you need to do something like some browser use.
+
+And luckily, Codex has your back.
+
+I've tested a lot of different apps and different CLIs and different things for browser use, and so far Codex is just really solid.
+
+So, as you can see now, in my downloads, this is the statements that it just downloaded as a zip file, and it basically took these and it put it into my Hercule project.
+
+If I go in here and I scroll down to statements, and I go to probably June, yes, June, you can see right here it put those in here in the correct spot.
+
+Okay, so that was an example where we needed to save a password somewhere, right?
+
+But I've done this with things like school, I've done this with things like X, I've even done this with things like Instagram that don't make you constantly resign in because it saves that session.
+
+So let me show you another example.
+
+I'm going to go over here to YouTube and I'm going to grab the URL from the video that I uploaded earlier today.
+
+I'm going to go back into Codex, paste in that URL and say, "I need you to turn this YouTube video into an X article for me and then use browser use to go ahead and um format it and put it into an X article as a draft and then I will go ahead and review it." So I know some of you guys are probably thinking, "Why don't you just use X's API for that?" You can, but it's a little bit weird with the formatting.
+
+It's also weird with sometimes adding things like media or thumbnails for some reason, at least with my testing that I used to do, and it's also it charges you, right?
+
+Because you have to pay X per usage in order to do something like that.
+
+And so because this is just part of my Codex subscription, I can just run this skill and it will go ahead and format everything for me and take care of it.
+
+I even have the skill worked out where it can go ahead and open up my YouTube videos and it can take screenshots of specific moments and put those into the article, too, where it makes sense.
+
+So obviously this is a bit of a loaded process because it has to do a few steps before it actually has the article ready to put into X.
+
+So while that's happening, let's just open up a new chat and let's see if our X session is there. "Can you open up a browser?
+
+I want to see it right here in the app and just go to X and scroll around a little bit and show me if there's anything new that has just come out um like in the AI space.
+
+Just scroll on my X feed." And so because this was a brand new session, we can actually see if X is already signed in and if it's able to interact with things.
+
+Cool.
+
+So it just opened up X.
+
+Let me get my mouse out of here.
+
+You can see clearly that this is already signed in as me and my feed is visible and now it is going ahead and it's starting to scroll on the X page.
+
+So just start to think about already, how could you create some sort of skills out of this and then schedule these as tasks?
+
+So, maybe every morning if you wanted it to scroll through Instagram and things like that, or scroll through your own profile, or mark things as read or unread, you could totally go ahead and do that, no problem, because you can set up the schedule tasks right in here and use browser use skills that you've already set up.
+
+So, you can see the two things that it already noticed was Grok Bot and Grok 4.6.
+
+So, this is an interesting case though, because there is an API, but using the browser use is actually cheaper.
+
+So, that's why in this case we decided to do it and test it out.
+
+Now, what about computer use that you guys have also probably heard?
+
+These are basically the same thing.
+
+It's still going to use vision.
+
+It's still going to use AI, but the difference here is that the browser is basically things that are on the internet, or things that you would type into a browser like Chrome, but the computer use are things that might be on your actual computer.
+
+So, changing your computer settings, opening up desktop apps of things.
+
+So, let's go back into Codex.
+
+While we're waiting for this X article to finish up, let's see how this is going.
+
+It is still breaking down and turning it into an article.
+
+Let's see if we can do some computer use.
+
+So, one thing you have to do though is you have to go to plugins, and you'll have to actually install computer use, which is just as simple as typing in computer use and hitting install, like literally 2 seconds.
+
+And then, Hey Codex, I need you to use computer use to open up my desktop app for Glydo, and I just want you to go to the settings and turn on the ability for it to allow and use like Bluetooth devices.
+
+So, just go ahead and get that set up for me.
+
+And so, this is a little bit different, right?
+
+Because it's not going to open up your in-app browser.
+
+It's going to actually kind of show your screen being taken over.
+
+It said, "I'll stop if Windows asks for an admin password or presents a security sensitive permission that it can't safely interpret." It shouldn't run into any of that, but it's good that it sort of has that guardrail baked in.
+
+Interesting.
+
+Okay, so it said, "Bluetooth access is a privacy permission, so the computer use won't let me actually do that." But, what it said it's going to do is open up Glydo.
+
+As you can see, I didn't open that up.
+
+It opened up Glydo for me.
+
+And it doesn't look like on my recording you guys can actually see this right now, but my screen kind of has like a big blue hue around the edges.
+
+So, you will clearly know if Codex is using your computer.
+
+And there you go.
+
+You can see that it actually turned on the include Bluetooth devices button.
+
+Now, I think it got confused because I think at first it thought that I was messing with my actual computer settings rather than like an in-app setting.
+
+So, it thought that that was a security thing.
+
+But, it looks like it figured that out on the way.
+
+And I think the computer use thing is pretty interesting because you can remote into your Codex from your phone.
+
+So, I can control all of these sessions on my phone.
+
+And what I could do is on my phone I could say, "Hey, computer use, go ahead and change my settings or go ahead and do something on a desktop app that's on my PC that I'm actually not sitting in front of." And then you could control your computer from your phone.
+
+So, anyways, we're back in the session where it's creating that X article.
+
+You can see that it is actually creating some thumbnails for the actual article.
+
+So, hopefully we're getting close to the point where it's going to actually open up X and start to put stuff in there.
+
+But, I'll check with you guys when we get there.
+
+Okay, so it just decided to open up X.
+
+You can see that it's going to the drafts in my signed in X and then it's going to I'll go ahead and format this new article and then we'll take a look.
+
+It's clicking on the plus button.
+
+Man, I think it even just like resized the page a little bit.
+
+It was getting a little picky.
+
+In goes the title.
+
+And then it just pasted in the entire content of the article.
+
+Now, it's uploading this thumbnail which I don't think looks very good.
+
+That part of the skill has not been refined at all.
+
+But, it's still cool that it was able to make that thumbnail and then go ahead and put it in there.
+
+So, I literally just have to make sure that it looks okay and I like it and I can publish it.
+
+Now, I know what a lot of you guys are probably thinking when it comes to this browser use stuff.
+
+It's like, "What's the point, Nate?
+
+Like, where's the value?" And honestly, I understand where you're coming from.
+
+And that's why I wanted to show you guys this piece where it's like pretty much API will handle 95% of your automation things that you need.
+
+And then a lot of the browser use opportunities might just be a script.
+
+But, then when you need it, if you have this in your back pocket, it's good.
+
+And you also might think, "Okay, cool.
+
+But, like, how much time does this really save?" This probably saves me like maybe 5 to 10 minutes.
+
+Like, realistically.
+
+But, what's cool about it is that I can basically have this pipeline now where I have a bunch of these browser use skills, and so when I need to do something, I just open up Codex, I shoot off that skill, and I can go back to the other task that I was working on.
+
+It kind of just like helps you do more without context switching as much.
+
+And as you start to stack more and more of these pipelines and combine them together, you can get some really cool things to happen when you start to chain together these skills.
+
+And look, this one actually did it.
+
+It basically did the thing where I said it opened up the YouTube video, it took screenshots of it, and now it's going ahead and it's planting some screenshots from my video in the article.
+
+So, if that doesn't prove the capabilities of this thing being intelligent, take screenshots, look at the page, know where to click, know what to do, then I don't know what else will.
+
+Besides the fact that I've had this thing play chess, I've had it play games, I've had it set a world record on Tetris, it can do a lot of cool things.
+
+Look at this.
+
+You can see that it even took the image and drug it all the way down to where it actually fits in the article.
+
+I haven't actually seen it do that before live.
+
+That was pretty cool.
+
+And this thing is just still going at it.
+
+But that is going to do it for today's video.
+
+Hope you guys enjoyed it.
+
+Hope you learned something new, and if you did, please give it a like.
+
+It helps me out a ton.
+
+As always, I appreciate you guys making it to the end of the video, and I'll see you on the next one.
+
+Thanks, everyone.

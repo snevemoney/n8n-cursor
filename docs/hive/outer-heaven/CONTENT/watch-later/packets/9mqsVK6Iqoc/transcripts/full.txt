@@ -1,0 +1,47 @@
+Here's how to build your first inbox agent in Nitn.
+
+We know that we have to start this process with a Gmail trigger.
+
+So, I'm going to click on add first step.
+
+I'm going to type in Gmail and click on this button right here.
+
+And you can see right now automatically this pops up with triggers.
+
+There's 26 different actions we can take, but it knows that there's nothing else on our workflow yet and it has to start with a trigger.
+
+So, it prompts us to click on the onssage received trigger and then the event here is going to be a message received.
+
+Okay, cool.
+
+So now according to our wireframe as you can see the next step is we need to set up our AI classifier node to read the subject and body of that email and classify it in one of these four categories.
+
+So to do that I'm going to click on the plus right after the Gmail trigger and I'm going to type text classifier as you can see right here.
+
+So anyways this was a customer support email example.
+
+I'm going to go ahead and hit execute step.
+
+And what happens is we get an error.
+
+And the reason why is because we need to connect AI to this node.
+
+And we currently haven't connected AI.
+
+Now, if I go back into the text classifier and I hit execute step, it's actually going to work.
+
+And AI just read this email.
+
+And look what it did.
+
+It output it in the customer support branch.
+
+You can see we have one item.
+
+And then finance, billing, high priority, and promotion.
+
+We have no items.
+
+So you can see now it sent it down the right path just like we talked about in our wireframe of having the AI send it down a particular path.
+
+If you want to watch the full breakdown, then click on that play button right here.

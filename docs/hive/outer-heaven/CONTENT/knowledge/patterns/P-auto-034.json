@@ -1,0 +1,32 @@
+{
+  "pattern_id": "P-auto-034",
+  "version": 1,
+  "title": "content-ops / build — claude-is-the-interface-higgsfield-is-the-factory",
+  "steps": [
+    "Steal show-the-prompt + style-name. Operate-never vendor.",
+    "Steal reference-lock + generation log. No overnight 100.",
+    "Steal winner→skill + why-didn’t-you-fire. No Blotato. No sleep-generate.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-xn6Z5PYyAIE-01",
+    "K-xn6Z5PYyAIE-03",
+    "K-xn6Z5PYyAIE-05",
+    "K-xn6Z5PYyAIE-12",
+    "K-xn6Z5PYyAIE-13",
+    "K-xn6Z5PYyAIE-14",
+    "K-xn6Z5PYyAIE-15"
+  ],
+  "dissent_ids": [
+    "K-xn6Z5PYyAIE-02",
+    "K-xn6Z5PYyAIE-04",
+    "K-xn6Z5PYyAIE-06"
+  ],
+  "valid_when": "domain=content-ops; stage=build; Higgsfield on-tape. Hive: `clip-factory` / `product-ad-from-photo` / `cinematic-recipe` — no Higgsfield.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

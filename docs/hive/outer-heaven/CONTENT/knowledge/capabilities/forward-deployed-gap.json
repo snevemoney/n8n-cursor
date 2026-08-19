@@ -1,0 +1,50 @@
+{
+  "capability_id": "CAP-vLlIBT0HSSc-forward-deployed-gap",
+  "name": "forward-deployed-gap",
+  "goal": "demo works / their world does not → measured messy install or clarify-first case study",
+  "observed_workflow": [
+    "Name the gap in one sentence",
+    "List legacy / data / compliance / process",
+    "Build only measured messy installs (or a parked replica)",
+    "Translate to their language",
+    "Career gym only if Evens asked: 45-min vague case → clarify first",
+    "No employer send. No unpark"
+  ],
+  "tools": [
+    "existing Path A delivery skills (parked)",
+    "interview-gym (receipts, keep separate)"
+  ],
+  "agent_abilities": [
+    "name the gap",
+    "score a case-study gym"
+  ],
+  "triggers": [
+    "Evens names a delivery sitting",
+    "Evens asks for an FDE case study"
+  ],
+  "state": "gap named or still in the demo",
+  "guardrails": [
+    "clients parked — not a hunt",
+    "job application / employer email = Evens",
+    "tape $ / 1165% / 40% pass UNVERIFIED",
+    "no DataCamp purchase from this tape"
+  ],
+  "reproduce": "Dry-run: write the gap sentence for one parked Path A replica. Do not unpark.",
+  "generalize": "Delivery shape, not a Palantir clone desk.",
+  "improve": "Do not improve by applying to Anthropic/Palantir.",
+  "primitive_ids": [
+    "PRIM-vLlIBT0HSSc-demo-vs-mess"
+  ],
+  "atom_ids": [
+    "K-vLlIBT0HSSc-01",
+    "K-vLlIBT0HSSc-03"
+  ],
+  "behavior_ids": [
+    "BEH-vLlIBT0HSSc-forward-deployed-gap"
+  ],
+  "source_video_id": "vLlIBT0HSSc",
+  "timestamp": "00:47-10:50",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

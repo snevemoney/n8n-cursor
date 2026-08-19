@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-056",
+  "version": 1,
+  "title": "model-ops / operate — your-use-case-the-benchmark-chart",
+  "steps": [
+    "Steal local-pain test. `golden-test-loop`.",
+    "Steal watch-the-port. No hive Opus cutover."
+  ],
+  "support_ids": [
+    "K-q5lg3npxjAc-02",
+    "K-q5lg3npxjAc-05"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=model-ops; stage=operate; Day-one social proof is engagement-biased — he says so.",
+  "less_relevant_when": "Honesty evals he still recites (Mythos / half of 4.7) — keep as *their* numbers, UNVERIFIED.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

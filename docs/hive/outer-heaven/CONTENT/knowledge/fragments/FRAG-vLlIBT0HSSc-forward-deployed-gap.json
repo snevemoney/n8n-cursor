@@ -1,0 +1,24 @@
+{
+  "fragment_id": "FRAG-vLlIBT0HSSc-forward-deployed-gap",
+  "version": 1,
+  "input": "A named delivery sitting or Evens-asked career gym",
+  "steps": [
+    "Write the gap sentence",
+    "List legacy / data / compliance / process",
+    "Measured messy install or parked replica",
+    "Clarify-first case study if career gym",
+    "Hard step HITL; no employer send"
+  ],
+  "output": "Gap card + one measured number or NONE, or an explicit still-in-demo",
+  "source_ids": [
+    "vLlIBT0HSSc",
+    "K-vLlIBT0HSSc-01",
+    "K-vLlIBT0HSSc-03"
+  ],
+  "behavior_ids": [
+    "BEH-vLlIBT0HSSc-forward-deployed-gap"
+  ],
+  "valid_when": "Evens named delivery or gym. Clients otherwise parked.",
+  "less_relevant_when": "Core-product-only SWE loop or a Palantir application.",
+  "knowledge_type": "declared"
+}

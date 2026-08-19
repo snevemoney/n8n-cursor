@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-token-receipt",
+  "type": "Agent infrastructure",
+  "discovery": "A billed run writes tokens + duration + correctness. Tape $ stays UNVERIFIED. COST without a receipt is a vibe.",
+  "applicability": "ALL billed runs",
+  "proposed_change": "Token receipt card on coverage-loop COST and Money Desk PASS/HOLD. Wired as skill token-receipt via hive-state.py receipt onto last_run.",
+  "evidence": "CLUSTER-money SU-token-receipt · EuzYhzB0vbI loop cost · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "EuzYhzB0vbI",
+  "status": "WIRED",
+  "next": "correctness=pass only after Watchdog grades. Do not fill unit-econ from tape $."
+}

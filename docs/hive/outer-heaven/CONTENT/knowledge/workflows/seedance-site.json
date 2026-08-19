@@ -1,0 +1,62 @@
+{
+  "workflow_id": "WF-seedance-site-v2",
+  "project_id": "seedance-site",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Award refs + signature motion",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "Connector on before generate",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "One continuous \u226430s 720p plate",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "Split frames; page scrubs",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T5",
+      "title": "CTA roast",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T6",
+      "title": "Click the preview",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T7",
+      "title": "Deploy HITL",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-gt8k4bA01Mo-01",
+    "K-gt8k4bA01Mo-02",
+    "K-gt8k4bA01Mo-03",
+    "K-gt8k4bA01Mo-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "gt8k4bA01Mo",
+  "words_read": 3259,
+  "tape_faithful": true
+}

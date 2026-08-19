@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-atom",
+  "title": "Hive atomic knowledge unit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "concept",
+    "claim",
+    "reasoning",
+    "mechanism",
+    "evidence",
+    "conditions",
+    "exceptions",
+    "action",
+    "confidence",
+    "evidence_type",
+    "knowledge_type",
+    "modality",
+    "evidence_status",
+    "source_video_id",
+    "timestamp",
+    "speaker",
+    "domain",
+    "stage",
+    "objective",
+    "requires",
+    "before",
+    "conflicts_with",
+    "supports",
+    "layer_tag"
+  ],
+  "properties": {
+    "id": { "type": "string", "description": "Stable id, e.g. K-ySl-SyboPa4-01" },
+    "version": { "type": "integer", "minimum": 1, "description": "Increments as more sources accrue. Never freeze at v1." },
+    "concept": { "type": "string" },
+    "claim": { "type": "string" },
+    "reasoning": { "type": "string" },
+    "mechanism": { "type": "string" },
+    "evidence": { "type": "string" },
+    "conditions": { "type": "string" },
+    "exceptions": { "type": "string" },
+    "action": { "type": "string" },
+    "confidence": { "type": "string" },
+    "evidence_type": {
+      "type": "string",
+      "enum": ["quote", "demo", "metric", "anecdote", "failure", "edit-signal", "unknown"]
+    },
+    "knowledge_type": {
+      "type": "string",
+      "enum": ["declared", "demonstrated", "implicit", "synthesis"]
+    },
+    "modality": {
+      "type": "string",
+      "enum": ["speech", "screen", "click", "navigation", "visual", "timing", "failure", "edit-signal"]
+    },
+    "evidence_status": {
+      "type": "string",
+      "enum": ["observed", "transcript-implied", "unobserved", "UNKNOWN"]
+    },
+    "source_video_id": { "type": "string" },
+    "timestamp": { "type": "string", "description": "VTT time or UNKNOWN" },
+    "speaker": { "type": "string" },
+    "creator_id": { "type": "string" },
+    "domain": { "type": "string" },
+    "stage": { "type": "string" },
+    "objective": { "type": "string" },
+    "requires": { "type": "array", "items": { "type": "string" } },
+    "before": { "type": "array", "items": { "type": "string" } },
+    "conflicts_with": { "type": "array", "items": { "type": "string" } },
+    "supports": { "type": "array", "items": { "type": "string" } },
+    "layer_tag": { "type": "string", "enum": ["SOURCE", "INFERENCE", "SYNTHESIS"] },
+    "sequence_id": { "type": "string" },
+    "sequence_index": { "type": "integer", "minimum": 0 },
+    "implicit_technique": { "type": "boolean" }
+  }
+}

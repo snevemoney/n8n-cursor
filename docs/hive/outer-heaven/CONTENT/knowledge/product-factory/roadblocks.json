@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "updated": "2026-08-15",
+  "roadblocks": [
+    {
+      "id": "rb-catalog-webhook-paths-2026-08-12",
+      "date": "2026-08-12",
+      "symptom": "Hive catalog webhook paths + responseMode needed a restore.",
+      "cause": "n8n catalog path/url/responseMode drifted from the one-pagers. Chat is index-only (no transcript on disk).",
+      "never_again": "Compare path/url/responseMode to CONTENT/n8n-learning/one-pagers before fire. Day Planner catalog webhook stays blocked on Path C. Not a live product-pay webhook.",
+      "related_primitive": null,
+      "source": "docs/hive/outer-heaven/CURSOR_CHATS/unknown-workspace/20260812-fix-hive-restore-catalog-webhook-paths-responsem-bc-4538b.md",
+      "status": "recorded"
+    },
+    {
+      "id": "rb-task-tabs-vanish-2026-08-15",
+      "date": "2026-08-15",
+      "symptom": "Task/subagent browser tab list empty. Watch blocked unless parent already holds a tab.",
+      "cause": "Subagent / Task `cursor-ide-browser` tabs vanish. Parent chat only.",
+      "never_again": "Watch in the parent chat on a living tab. Do not spawn a watch Task. Do not open a new tab when Evens forbids it.",
+      "related_primitive": null,
+      "source": "docs/hive/outer-heaven/CONTENT/watch-later/packets/social/x-2088359756096532965/PACKET.md",
+      "status": "open"
+    },
+    {
+      "id": "rb-pro-work-copy-vs-code-2026-08-14",
+      "date": "2026-08-14",
+      "symptom": "/pro/work BUILD copy \u2260 code. ProofCheck case says team proof-docs; code is nursing claim-verify.",
+      "cause": "Case PROBLEM/RESULT hardcoded as em-dash. Scored from vault labels / BUILD line, not the repo.",
+      "never_again": "Score Path C from code. Do not deploy the BUILD line. /pro = CE login; /work = the only catalog; /pro/work aliases /work.",
+      "related_primitive": "login",
+      "source": "docs/hive/outer-heaven/CONTENT/job-cards/WORK-AS-BUSINESSES-2026-08-14.md",
+      "status": "open"
+    },
+    {
+      "id": "rb-no-shared-pay-2026-08-14",
+      "date": "2026-08-14",
+      "symptom": "No shared pay layer. ProofCheck: no Stripe. QuickMarket: demo $5, no real Stripe.",
+      "cause": "Each SKU would rebuild checkout. Foundation was desks-only.",
+      "never_again": "Reuse payments in primitives.json. proposeCharge only. No live keys. Status stays stub until Evens names pay.",
+      "related_primitive": "payments",
+      "source": "docs/hive/outer-heaven/CONTENT/job-cards/FACTORY-VS-STARTUPIDEASPOD-2026-08-15.md",
+      "status": "open"
+    },
+    {
+      "id": "rb-caption-only-neq-watched",
+      "date": "2026-08-14",
+      "symptom": "Caption-only packets treated as watched; clicks invented between frames.",
+      "cause": "full.txt / auto-captions without watch.json on a living tab.",
+      "never_again": "Caption-only \u2260 watched. No invented clicks. Parent-only watch \u2192 packets/{id}/watch.json.",
+      "related_primitive": "social-share",
+      "source": "scripts/hive/grok-skills/cursor-video-watch.md",
+      "status": "open"
+    },
+    {
+      "id": "rb-merge-neq-ship",
+      "date": "2026-08-15",
+      "symptom": "Merge / preview / GRADE=pass treated as a ship.",
+      "cause": "Factory process without a named HITL deploy flip.",
+      "never_again": "Merge \u2260 ship. Watchdog GRADE is not deploy. Evens flips pay / deploy / publish.",
+      "related_primitive": "promotion",
+      "source": "docs/hive/outer-heaven/CONTENT/job-cards/MATRIX-PROCESS-2026-08-15.md",
+      "status": "open"
+    },
+    {
+      "id": "rb-card-click-needed-enter-2026-08-15",
+      "date": "2026-08-15",
+      "symptom": "Catalog/CTA click focused the Next Link; Enter then navigated. /pro/work thumbs were broken alts.",
+      "cause": "next/link preventDefault + soft nav; /pro/_next/image 400s the same /screenshots src that /_next/image serves on /work.",
+      "never_again": "Marketing CTAs are real <a href> via SiteLink/siteHref. Screenshot thumbs use domain-root /screenshots, not the /pro image optimizer.",
+      "related_primitive": null,
+      "source": "docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ce-pro-work/RUN.md",
+      "status": "recorded"
+    },
+    {
+      "id": "rb-pro-work-duplicate-catalog-2026-08-15",
+      "date": "2026-08-15",
+      "symptom": "/pro/work served a second catalog (thumbs via /pro/_next/image 400). Evens named /work = real, /pro/work = duplicate.",
+      "cause": "CE deploy NEXT_PUBLIC_BASE_PATH=/pro still compiles src/app/work. Same page tree, two URLs.",
+      "never_again": "/work is the only public catalog. 308 /pro/work and /pro/work/* to /work. Do not redirect /pro (CE login). One page tree. click-live ce-pro-work is an alias of evenslouis-ca.",
+      "related_primitive": "promotion",
+      "source": "docs/hive/outer-heaven/CONTENT/job-cards/WORK-AS-BUSINESSES-2026-08-14.md",
+      "status": "open"
+    }
+  ]
+}

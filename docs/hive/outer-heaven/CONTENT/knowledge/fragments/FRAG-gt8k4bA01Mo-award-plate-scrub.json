@@ -1,0 +1,24 @@
+{
+  "fragment_id": "FRAG-gt8k4bA01Mo-award-plate-scrub",
+  "version": 1,
+  "input": "1–3 award-site refs + a named signature motion",
+  "steps": [
+    "Confirm connector already authorized (hive Higgsfield)",
+    "Generate one continuous ≤30s 720p plate",
+    "Wrap scroll-scrub; prefers-reduced-motion → poster",
+    "Roast CTA before scroll on the host URL",
+    "verify-after-browser; deploy HITL"
+  ],
+  "output": "Preview URL with plate + visible CTA, or an explicit fail (stitched plate / buried CTA / localhost-only)",
+  "source_ids": [
+    "gt8k4bA01Mo",
+    "K-gt8k4bA01Mo-01",
+    "K-gt8k4bA01Mo-03"
+  ],
+  "behavior_ids": [
+    "BEH-gt8k4bA01Mo-award-plate-scrub"
+  ],
+  "valid_when": "Job is a cinematic / premium motion page. Not a world-engine.",
+  "less_relevant_when": "Interactive WASD world (iRBs8PCBCaA classify).",
+  "knowledge_type": "declared"
+}

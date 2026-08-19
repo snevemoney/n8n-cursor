@@ -1,0 +1,433 @@
+All right.
+
+So, we've got our sales data AI agent right here and it's hooked up to all of these tools so that it can query through our sales database.
+
+So, I'm going to open up the chat and I'm going to ask it how much total revenue have we made from our Bluetooth speaker.
+
+And so, what it's going to do is use these tools right here and it used the product name query to look at all of the times that we've sold a Bluetooth speaker.
+
+And then it just used its calculator tool to figure out that total.
+
+So, it just finished up.
+
+If I open up the chat, you can see we got the answer.
+
+Total revenue from Bluetooth speaker was $546.
+
+It calculated this by retrieving all sales rows for Bluetooth speaker and then it summed each row's total revenue and that's why it used its calculator and got to the answer 546 which is correct.
+
+And so you may have never seen this node before.
+
+These are data tables that are stored natively within n and it looks like this right here.
+
+You can see this is the data table and these are the different products and the quantities and price and revenue.
+
+And this is what it just searched through in order to answer our question accurately.
+
+And once again, these are natively in edit.
+
+So our agent didn't have to go over the internet or make an API call somewhere to get to this data.
+
+It lives right here within our environment in a new tab right here called data tables.
+
+So that's what we're going to be talking about today.
+
+As always, you guys will get this workflow as well as the two example data sets for completely free so that you can get in here and get your hands dirty and just start playing around with it to understand how it works.
+
+But let's get into the video.
+
+So here's what the data tables tab looks like in Nitn.
+
+I'm recording this video before it's been actually rolled out to everyone.
+
+So if you don't see this right now, all you're going to have to do is make sure you update your Nitn to the latest version.
+
+And then you should see data tables.
+
+It's right here in my home screen.
+
+I've got my workflows, my credentials, my executions, and then I have my data tables.
+
+And all I have to do to create a new one is click on this little drop down, click on create data table.
+
+I'll call this one demo with a backslash or maybe a forward slash.
+
+And then what we have is two default columns which is a created at time and an updated at time.
+
+And then if we want to add different columns we would just type in over here to add a column.
+
+And then we have to choose a data type.
+
+So we have string, number, boolean or date.
+
+Once I add that column, I'm then able to add a row and then I can just fill in the data right here.
+
+Or I meant to type Nate actually.
+
+Or instead of manually filling stuff in, you can import other data sheets in NAD.
+
+So let's say I have this contact sheet that I'm using in Google Sheets, but I want to move it to NADN.
+
+Let me show you guys how we do that.
+
+So here we are back in Nitn and we have these orange nodes.
+
+You would just hit tab or click on the plus in the top right.
+
+And if you search data tables, you can now see we have this new node which says permanently save data across workflow executions in a table.
+
+And if I open that up, we have the functions that are pretty similar to Google Sheets like deleting a row, getting a row, inserting a row, updating, or upserting.
+
+So, just to show you guys how this works, we're going to pull in my contacts from this Google sheet and we're going to import them into this contacts data table in Nit.
+
+So, real quick, I'm just going to delete all of these rows.
+
+And keep in mind, you can see down here, the last row starts at ID 20.
+
+And when I delete these, it's going to look like it resets, but when we write in more rows, it's going to start at 21 because this data table just remembers.
+
+But that's a very minimal detail.
+
+Like I said, let's just run this real quick, and then I'll show you what's going on.
+
+So you can see that happened really really quick.
+
+We're pulling in all of the rows from my contacts sheet and then we're writing them into a data table and you can just choose from a list.
+
+You'll notice there's no credential section because we're not going to the internet.
+
+We're just natively grabbing this from Nadn.
+
+And then we just have to map our columns.
+
+So the name I dragged over name, the email number, notes, all that kind of stuff.
+
+You just have to make sure that the data types match up.
+
+Otherwise it won't let you insert these values.
+
+So now that we've done that, if I go back into my end data table for contacts and I hit refresh, we should see those contact rows have come into our instance.
+
+So hopefully you guys can see how this opens up a few opportunities.
+
+We're not going to be able to dive into all the use cases today, but let me show you guys one that you could think about.
+
+So we've got our contact data in NADN.
+
+And so what we could do is basically use something like this where where we're going to respond to an email.
+
+But before we respond to the email, we want to look up that contact and filter through all of our data, all of our contacts for just the one we're looking for.
+
+So I'm going to pull in a new email from our Gmail trigger.
+
+We can see the email that this is coming from is upitiggmail.com.
+
+And we have Nate Herklman.
+
+So what I'm going to do next is we're using a get rows from data table node, but we're using a filter and we're saying we only want to pull back rows that match this specific condition.
+
+And the condition is that the email must equal the email that triggered this whole flow over here.
+
+So I basically just came down and dragged that right in here.
+
+And now when I execute this, we're only going to get the row for Nate Herklman with that email.
+
+And now what I can do is I can feed the notes right here about this person into the AI agent that's going to make the email.
+
+So if I go to the next step, I'm just going to execute this real quick, but let's look at what the user prompt is.
+
+So the AI agent is looking at the user prompt which is the email subject, the email body, the name of this person and the notes about this person and this stuff is coming from the data table.
+
+So it can see that the subject was I need help.
+
+The email body is hey I need help with my business.
+
+Any suggestions from Nate Hkelman who is a founder into AI automation likes detail cautious on commitments.
+
+Um this actually pulled from chat GBT about me when I said hey I need a quick notes for a contact database.
+
+So interesting.
+
+Anyways, then of course our system message is just to write a friendly email that's personalized.
+
+And you can see it responds by saying, "Hey Nate, thanks for reaching out.
+
+I'd love to help you with your business.
+
+Since you're into AI automation and appreciate a detailed approach, we can explore some tailored solutions that fit your needs without making you feel rushed into any commitments.
+
+So, like I said, super super simple use case, but the key here was showing you guys that you're able to filter and have conditions when you're pulling back rows from your data set, which is going to be very important as your database grows and grows.
+
+Otherwise, you're going to be passing in hundreds, potentially thousands of rows into the AI, and all you're doing there is adding more tokens, which may cause the AI to hallucinate a little more.
+
+And the main reason is that it's just going to be more expensive.
+
+And of course, it doesn't have to be this.
+
+We took the linear deterministic approach here, but you could also add data table tools like we'll see in a future example where you can choose from a certain data table and then you can have all these rows like inserting stuff, filtering through things, adding conditions, updating rows, deleting rows.
+
+So everything that you would typically do with Google Sheets, but now it is quicker and it's in Naden.
+
+Cool.
+
+So let's go on to a different example here.
+
+Let me just grab my manual trigger and move that over there.
+
+So now we're going to do the sales data.
+
+So I've got a sales data sheet right here in Google Sheets.
+
+You can see it's 20 rows.
+
+We have three total products to look through.
+
+We have three total days to look through.
+
+We've got prices, quantities, and total revenue, stuff like that.
+
+And we're going to first of all get this into our NAND data table.
+
+So in my sales data table and NN, I'm just going to go ahead and make sure we delete all of these rows.
+
+I want nothing in here just to show you guys how easy it is to write everything in.
+
+So back in our workflow, all I have to do now is execute this workflow.
+
+We're going to pull in all 20 rows and read them or sorry and write them into our data table in NEN.
+
+So I should be able to refresh this.
+
+And now we see our sales data.
+
+And then because we have this AI agent hooked up to it and we have different tools, it should be able to answer the majority of our questions by using a combination of these tools and the calculator.
+
+So let's do a few examples and I'll show you what's going on within the tools.
+
+All right.
+
+So, if I ask it this first question, which is how many products were sold on September 15th this year, what it should be doing is going to this date query tool, and it should only pull back rows where date equals September 15th.
+
+And then it's probably going to use its calculator to actually make sure it's doing that math correctly.
+
+So, you can see it got the answer of 10, which is correct.
+
+And you can see what it did is it retrieved all sales records for 2025, 9,15, which is September 15th.
+
+There were six total transactions, and it summarized them all using a calculator.
+
+So it was 2 + 1 plus 3 blah blah blah which equal 10.
+
+So if I click into the data query tool that it decided to use, you can see the reason why this works is because we have the condition which is the date sold equals the value that the AI fills in.
+
+And the AI filled in the value right here, which is exactly how we see it in our sales data table because we told it this is basically the format of dates.
+
+And one thing I wanted to call out real quick is that you can see this is set up as a string.
+
+It's not the actual date data type.
+
+And the reason why we did that is because in our sales data in Google Sheets, it was formatted like this.
+
+And the hyphens basically make it a string.
+
+So that's why it's a string here.
+
+But anyways, like I said, it found that here through here all had date equal 9:15 and then it just added up these quantities.
+
+So let's do another quick example.
+
+How many wireless headphones have we sold?
+
+It's going to do a product name query because it has the product name.
+
+There you go.
+
+You can see it just hit it.
+
+I can actually click into this real quick.
+
+You can see it filled out the condition right here as wireless headphones.
+
+So, that's what it's looking for.
+
+We could go ahead and verify that all of the rows that it pulled back, you can see the product name has to equal wireless headphones.
+
+And then what it did is it would just add up all of these quantities sold.
+
+And it got the answer 12, which is correct.
+
+All right.
+
+And for one last question, this one's a little trickier.
+
+What's the average number of product ID BS002 that we're selling per day?
+
+So, it used the product ID query and it's basically going to look at all three days, figure out how many were sold on each day, and then find the average of that.
+
+You can see it just hit the calculator.
+
+So, I think it's about to give us our answer.
+
+The answer we are looking for is four, and we're about to get it.
+
+Okay, so the summary for product ID, it says data used all sales rows for this product ID.
+
+Total number sold was 12.
+
+There were three different days, so 12 divided by 3 is four units a day, which is correct.
+
+So, I know we're going a little bit fast through this, but you'll be able to download this entire workflow, as well as all of the Google sheet resources that you need right here for completely free.
+
+All you have to do is join my free school community.
+
+The link for that is down in the description.
+
+And when you get there, you'll go to YouTube resources.
+
+And when you find the post associated with this video, let's say it was this one, you can see that there are JSON files here, and you just need to download those and import them.
+
+And then there'll also be links to make a copy of these spreadsheets if you want to play around with them in Naden data tables.
+
+And the reason I bring that up is because I'm not going to dive into this entire system prompt, but I'll just show you real quick what I said.
+
+Basically, you're a master sales data analyst.
+
+You have these tools.
+
+Here's what you use each one for.
+
+And then what I did was I gave it the valid names that go into each category.
+
+So for product names, I gave it the three products.
+
+For the date, I told it the format that it needs to structure its dates as.
+
+And then for product IDs, I gave it the three product IDs as well, just so for the sake of the example, we could see how the filtering works.
+
+Okay, so for the last example that we're going to do is I just have a code node right here that basically just outputs 400 items.
+
+It just counts from 1 to 400.
+
+And what I want to do is we're just going to see the difference in speed because of the fact that we're not going over the internet to make this API call.
+
+So, we have this sheet right here just called test and it just has one column called number.
+
+And all I'm going to do is we're going to execute this and then we're going to see how long this node takes to write 400 rows in.
+
+So, we'll execute it.
+
+We can see it's spinning, it just wrote in all of the data.
+
+So, we can see if I scrolled all the way down to 400, we can see there it is.
+
+And now, if we go into the node, we can see right here that it executed in 2,00 milliseconds.
+
+280.
+
+So 280 milliseconds.
+
+Now watch what happens when we connect it to our nit end data table.
+
+Connected to a data table called test.
+
+We're writing in the same exact data.
+
+So when I execute this one, you can see oh that honestly seemed pretty similar.
+
+Let's see how that was.
+
+That was 2511 milliseconds, which is really interesting because almost all of my previous examples the data table has been faster.
+
+Okay, so that was pretty interesting to me.
+
+We're going to do it again with 60.
+
+My hypothesis was maybe when it's less, Google Sheets always has kind of like more time, but with bulk functions, it's quicker.
+
+I don't know.
+
+We'll see.
+
+So, we're going to run this with 60.
+
+Google Sheets just took 1,700 milliseconds.
+
+Now, we're going to go to our end data table, run it again, and that was a lot quicker that time.
+
+And this one took 300 milliseconds.
+
+And now, just to confirm my hypothesis one more time, we're going to do it again with 20.
+
+So 20 to Google Sheets took us a total of 1,700 milliseconds once again.
+
+So that might just be kind of like its floor.
+
+But when we go to end data tables, that was instant.
+
+Like that took 97 milliseconds.
+
+So that was interesting.
+
+If you have tons and tons in the hundreds, it's going to be similar.
+
+Naden may even be a little slower, but with the majority of your writes and especially if you're doing one row or two rows, which actually, let's just try it real quick.
+
+Sorry, this is just too fun.
+
+So we're going to try two rows.
+
+Google Sheets has taken a minute.
+
+It took 1,600 milliseconds.
+
+And if we go to end data tables, that's going to be instant.
+
+That took 11 milliseconds.
+
+So you guys can see when you have less, the end data tables is going to be basically instant.
+
+But if you have a large number, like the first time we did 400, it's going to be pretty comparable.
+
+So yeah, hope you guys found this one interesting.
+
+Just wanted to make a quick video showing you guys how you can use these data tables and kind of the difference between using something like these and Google Sheets.
+
+Another thing that I was thinking of is you may run into rate limits with Google Sheets because you're making an API call.
+
+So if you're spamming it too often, you may actually get rate limited and you might have to work in like weights or retries.
+
+But I don't see that happening with end because once again it's all staying internal.
+
+So don't forget you guys can grab this whole workflow as well as the two sets of test data if you want to just play around with stuff so that you can basically mimic this workflow and see how it works.
+
+All you have to do for that is join my free school community.
+
+The link for that's down in the description, completely free.
+
+And if you're looking for some more structured guidance and to take your learnings a little further, then definitely check out my plus community.
+
+The link for that is also down in the description.
+
+We've got a community of over 200 members who are building and earning with NAND.
+
+We have a full classroom section with agent zero for the beginners.
+
+We've got 10 hours and 10 seconds where we dive into NAND.
+
+And then we have a new course called Oneperson AI Automation Agency, which is a bonus for annual members.
+
+And it's all about laying the foundation for building a scalable AI automation business.
+
+So, I'd love to see you guys in this community.
+
+But that is going to do it for today's video.
+
+If you enjoyed or you learned something new, please give it a like.
+
+Definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+See you in the next one.
+
+Thanks everyone.

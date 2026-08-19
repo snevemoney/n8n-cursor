@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-workflow",
+  "title": "Compiled project workflow (layer 5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workflow_id",
+    "project_id",
+    "version",
+    "status",
+    "steps",
+    "pattern_ids",
+    "support_ids",
+    "dissent_ids",
+    "provenance",
+    "audits"
+  ],
+  "properties": {
+    "workflow_id": { "type": "string" },
+    "project_id": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "status": { "type": "string", "enum": ["compiled", "audit-fail", "draft"] },
+    "steps": { "type": "array", "items": { "type": "object" } },
+    "pattern_ids": { "type": "array", "items": { "type": "string" } },
+    "support_ids": { "type": "array", "items": { "type": "string" } },
+    "dissent_ids": { "type": "array", "items": { "type": "string" } },
+    "provenance": {
+      "type": "string",
+      "const": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT"
+    },
+    "audits": {
+      "type": "object",
+      "required": ["coverage", "context_misuse", "contradiction"],
+      "properties": {
+        "coverage": { "type": "string" },
+        "context_misuse": { "type": "string" },
+        "contradiction": { "type": "string" }
+      }
+    }
+  }
+}

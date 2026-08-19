@@ -1,0 +1,29 @@
+{
+  "pattern_id": "P-auto-006",
+  "version": 1,
+  "title": "agent-ops / build — front-is-gather-production-url-is-the-send",
+  "steps": [
+    "Steal test-vs-prod. `warm-draft-hitl` — do not auto-email.",
+    "Steal iterate-the-look. No Wix/Base44 install.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-tFFKuq2t0rI-01",
+    "K-tFFKuq2t0rI-05",
+    "K-tFFKuq2t0rI-12",
+    "K-tFFKuq2t0rI-14",
+    "K-tFFKuq2t0rI-15"
+  ],
+  "dissent_ids": [
+    "K-tFFKuq2t0rI-02",
+    "K-tFFKuq2t0rI-06"
+  ],
+  "valid_when": "domain=agent-ops; stage=build; 21st.dev / Base44 / Wix on-tape. Hive `website-offer-funnel` Path C, not Base44.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

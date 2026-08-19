@@ -1,0 +1,18 @@
+tt:@evenslouistv
+url: https://www.tiktok.com/@evenslouistv
+source: owner-session OBSERVED 2026-08-14 CHANNEL_WALK + public HTML wall this pass
+display: evens
+bio: Yo.
+following: 142
+followers: 389
+likes: 94.2K
+website: none observed
+offer_on_profile: no
+pinned_title_observed: iPhone 14 vs 13
+pinned_likes_observed: ~2.8M
+pinned_video_id: UNKNOWN
+pinned_caption: UNKNOWN
+public_grid: unavailable (login wall / title said private)
+not_evens: tiktok.com/@evenslouis
+yt_about_other_tiktok_unconfirmed: tiktok.com/@snevemoneydaily
+tape_dollars: UNVERIFIED

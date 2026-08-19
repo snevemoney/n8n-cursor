@@ -1,0 +1,923 @@
+It has never been so easy to build whatever you want.
+
+And so in today's video, I'm going to show you guys how easy it is to build a voice agent with just your natural language using Cloud Code with 11 Labs.
+
+So, let me show you guys a quick example.
+
+I had this crazy idea where I was thinking, "Okay, I've got a ton of YouTube videos, exactly 400 actually.
+
+And all of these YouTube videos, there's a lot of different tools, there's a lot of different things that I've mentioned.
+
+And some people in my audience might be confused and might want to just have a nice way to like chat with those YouTube videos." So, my crazy idea was, "Okay, what if I just built a voice agent that people could talk to and it had been trained on all of my YouTube transcripts ever." And so, that's exactly what I was able to build in about 15 minutes.
+
+I told Cloud Code the idea and it figured out how to do everything.
+
+Pull the transcripts, connect to 11 Labs, put this on my website, and just prompt everything and build the tools that it needed.
+
+So, let me show you guys a quick demo.
+
+I'm going to hit start call on this website and then start the call. >> Hey, I'm Nate's AI trained on his YouTube content.
+
+Ask me anything about Cloud Code, agents, or what he's been building. >> Hey, I'm curious, what are probably like the best scraping tools that Nate might have talked about on his channel? >> Give me one sec while I look that up.
+
+Nate talks a lot about Firecrawl as a powerful scraping tool.
+
+It's super versatile and can do things like scrape entire web pages, map out a site's architecture, crawl through different pages, and even search the web to turn pages into structured data.
+
+He often uses it with Cloud Code through an MCP server to automate these tasks. >> Okay, so let's say that I wanted to build my first workflow ever in Cloud Code.
+
+What would be maybe a good use case that I could use Firecrawl with to build some sort of automation? >> That's a great question.
+
+A fantastic first workflow would be to scrape job listings from a website and put them into a structured format like an Excel sheet.
+
+Nate has shown how Firecrawl can easily grab all the job details from multiple pages and Cloud Code can then organize that data for you.
+
+It's a practical way to see the power of Firecrawl and Agentic Workflows in action.
+
+All right, so I'm going to go ahead and end that conversation, but what you guys basically just saw there is I was able to get all of the YouTube transcript knowledge into this voice agent, and then I'm able to just talk to it.
+
+And it seamlessly fits in right here on my website.
+
+So, if anyone comes here, they would be able to actually start a call and talk to it.
+
+It's not actually going to be live.
+
+I'm going to take this down, but this was just for the demo.
+
+Because if you've ever built a voice agent before with without using Claude Code, it's a lot of manual configuration.
+
+Because you go into the Eleven Labs platform, you've got your agent right here, and you have to manually configure the system prompt.
+
+You have to create the first message.
+
+For the knowledge base, do you want to drop this in as just a document, or do you want to give it different tools, and do you want to have it be able to query like, you know, a Superbase vector store, or uh Pinecone vector store, or maybe even Notebook LM.
+
+Like, how do you want all the data to come together at the end of the day?
+
+But now, just by brainstorming with Claude Code and giving it some sort of, you know, high-level idea, it will go ahead and do the research and figure out the best method for you, and then it will go ahead and build a voice agent in Eleven Labs and configure it all up.
+
+So, that's exactly what we're going to do today as a live demo with Claude Code and Eleven Labs.
+
+So, before we get into the live demo, let's just actually talk about what's going on with a voice agent.
+
+So, it is a loop.
+
+It's not magic.
+
+So, a visitor, let's say, comes to a website, calls the AI agent, and the agent listens through your microphone.
+
+The LLM on the back end is able to get that message, transcribe it into text, read it, and then either come back with the next message, or read the database, or, you know, hit some sort of tool call, and then come back to the end user with some sort of answer.
+
+And then, the loop pretty much just runs again.
+
+Now, there are four kind of main pieces inside of every voice agent.
+
+We have the persona, which is basically the system prompt.
+
+So, if I go back into my Eleven Labs dashboard, this system prompt right here, where we're saying, "Hey, you're Nate's AI assistant.
+
+You are on his website.
+
+You have information about all this." This is the persona.
+
+We could tell it to be rude.
+
+We could tell it to be, you know, conversational like Nate himself.
+
+We could tell it to tell jokes after every single sentence, and it would do so.
+
+And that is us basically setting the persona of our voice agent.
+
+Then we also have the voice.
+
+So, you can pick from all the different voices.
+
+If I go over here to creative and I go to I guess we could have done it on the other side, but voices.
+
+You can see there's a bunch of voices.
+
+There's training voices.
+
+There's different ones like iconic voices.
+
+And you guys might have noticed that that one sounded like me.
+
+What I did is I used my actual professional voice clone, which is trained on like 4 hours of my voice.
+
+And then we have knowledge.
+
+So, this is where, you know, you would give your agent information about your business or information about, you know, the customer database or whatever it needs.
+
+Whether that is something that it can communicate to the client.
+
+So, for in my example, YouTube transcript data.
+
+Or maybe this agent is a customer support agent and it needs to be able to look up someone's order and then tell them, you know, like the status of it.
+
+So, there's different ways to give it knowledge, but that's an essential part of a voice agent.
+
+And then you also have tools, which we would go ahead and configure in your 11 Labs voice agent.
+
+So, for example, with this assistant that we were just looking at, if I go to tools, you can see there is a tool right here that says list GitHub repos, but there's tons of different tools you can add.
+
+You can add an MCP server.
+
+You could have it do a direct basically API call.
+
+You could even have your 11 Labs agent call on, you know, a tool that you've already built in N and N or a Python script or a Zapier automation.
+
+Whatever it is, your agent should be able to actually call it.
+
+And you don't have to set this up manually.
+
+You know, normally you'd come in here and you'd add a tool and you'd have to configure everything, but Cloud Code reads the 11 Labs documentation, understands everything about 11 Labs agents, and then just does it all for you.
+
+So, those are the four pieces.
+
+Code beats clicks.
+
+Basically just validating that it's so much better to just build a voice agent by speaking into your computer rather than going onto the dashboard and clicking and clicking and saving and maybe forgetting to save things and maybe making a mistake with the endpoints or something.
+
+But all we have to do now is just talk to Claude.
+
+So, there are three different ways typically to think about a voice agent.
+
+You can either do it in the dashboard. so if I come over here and if I was building this agent, I could test it.
+
+So, if I go zoom out a little bit, we could test the agent and talk to it right here.
+
+The other way is we could embed that into a website.
+
+So, as you guys saw here, there's a little button to start a call, and that would trigger our AI agent.
+
+So, that's kind of called a website widget.
+
+And then you could also hook this up to a phone.
+
+So, you could connect your Twilio, you could pair that voice agent that we're building with a phone number, and then you could have that voice agent either call people from that number or if someone calls that number, the voice agent would pick up.
+
+So, those are the three main ways.
+
+Today, we're going to be specifically looking at the embed, but there is multiple ways that you can actually build and connect voice agents.
+
+And the funny thing about the widget, and it's not too funny, but it's kind of cool, is it's literally just one little block.
+
+If you see here, I click on the widget tab, all it says is, "Okay, add the following snippet to the pages where you want the conversation widget to be." And I would just copy this, give it to Cloud Code and say, "Hey, put this onto my website." It's as simple as that.
+
+So, with all that out of the way, let's go ahead and just jump into a real quick live build of a voice agent.
+
+Okay, so the first thing that we're going to do is we're going to open up Cloud Code.
+
+Now, you could use this in the desktop app like you're seeing right here.
+
+I personally don't love using the desktop app.
+
+I actually prefer to use VS Code, which is just an IDE.
+
+It's completely free to download.
+
+Just go to Google, search Visual Studio Code, and download that.
+
+And then when you open it up, it should look something like this.
+
+What you're going to want to do is open up a project.
+
+So, open up a blank project on your desktop or your documents or wherever, and then open that up in here.
+
+You can see what I have right now is just a very simple project, and all we've done in here is we've built a website or a simple landing page.
+
+So, this is my simple landing page here.
+
+It is for an AI kind of like consultancy or transformation partner, and I had Cloud just spin this up because this is where we're going to be embedding our voice agent widget in today's example.
+
+If you don't already have a website, then don't worry, you don't need one.
+
+You can still follow along, and you'll still be able to build a voice agent.
+
+It's just that I want to show you guys how you can actually get that embedded at the end of the tutorial.
+
+So, we're in this project.
+
+We are going to open up Claude Code.
+
+So, I'm basically just going to click on this little button right here in the top right, which opens up Claude Code.
+
+Now, if this is your first time in VS Code, what you're going to have to do is go over to the extensions right here, click on that, search for Claude Code, and then go ahead and install Claude Code.
+
+This will basically allow you to open up the little extension.
+
+Now, once you install this, it's going to prompt you to log in.
+
+You have to have a paid account of uh Claude in order to access Claude Code.
+
+So, sign up for your subscription and then log in right here and then you'll open up Claude Code like this.
+
+Now, here is where I said it gets pretty cool because all I have to do is come down to the bottom right, click on plan mode, which basically means that Claude is going to help us think through what we want.
+
+And as humans, we're very good at knowing the end goal, but we don't always know the way to get there, right?
+
+So, all I have to do is speak to it and it's going to help ask me questions and guide us in the right way.
+
+So, "Hey Claude Code, what I've got for you is a bit of a project.
+
+So, I have a website, which is called Neural.
+
+It is inside of this project and it's basically just our landing page.
+
+We run an AI consultancy and this is our landing page.
+
+And what I want to do is I want to embed a voice agent widget onto my website.
+
+I want this agent to have information about the business.
+
+I want it to be able to answer questions from, you know, prospective clients.
+
+But ultimately, what I want it to do is try to push people to book in a discovery call.
+
+That's kind of your job.
+
+So, you're kind of like a salesperson, a sales agent on my website.
+
+So, what I want you to do is help me figure out, how do I embed you onto the website?
+
+I want to use 11 Labs.
+
+And then, how do I actually prompt you in the right way to, you know, be a salesperson?
+
+And then, how do I actually connect you to cal.com, which is where I'm using kind of like my booking.
+
+It's synced to my calendar, so it should show people available slots.
+
+And how can I give you access to that tool so that you can actually just go go and book meetings for people.
+
+They would give you like maybe their email and their full name, and then you would just go ahead and use the cal.com tool and book a call for them.
+
+So, that's kind of the high-level goal that I have for you.
+
+Help me figure out the best way to do this and ask me any questions that you have if I didn't explain anything clear enough.
+
+So, that is the prompt that we're going to send off.
+
+If you guys are curious about how I was able to dictate and the text appears, then check out the link in the description.
+
+It is an amazing tool and it's changed the way that I work.
+
+And by the way, you may notice that currently I'm using Whisper, and I'm actually pointing people towards Glydo.
+
+Glydo is much faster, it's private, I fully switched over, but Windows support is coming in like a week or so.
+
+So, that's why right now you're seeing Whisper.
+
+But, that's why I have officially joined the Glydo team because the product is truly so much better.
+
+Anyways, like I said, this is going to go ahead and start brainstorming.
+
+If you want to check out the superpower skill, it's also completely free.
+
+Um just go to Google and search Cloud Code Superpowers and you'll have to download that, but it's super easy.
+
+And I like to use it for brainstorming.
+
+But, now I'm just going to check in with you guys if it comes back with any questions so I can show you the way that we answer those.
+
+All right, so here's some questions that we have.
+
+What's the current state of your Eleven Labs setup?
+
+Well, in Eleven Labs, let's go to our agents and let's just pretend that we don't have any currently configured, and we want to build a new one.
+
+So, I would basically just go into Cloud Code and I would say nothing.
+
+Or I guess I would say I have an account but no agent yet. cal.com, what's the current state of your cal.com setup?
+
+I have an account and event type ready.
+
+Yep, that's exactly what we've got.
+
+How do you want the agent to actually create the cal.com booking?
+
+Direct from Eleven Labs to cal.com.
+
+That's what I want to do.
+
+You could, like I said earlier, have Eleven Labs call an end-to-end workflow, and the end-to-end workflow books the event, but that's just too many pieces.
+
+So, we're going to go straight from Eleven Labs to cal.com, and I'm going to shoot off those answers.
+
+And so, just in case you guys are curious, cal.com is basically like the same thing as Calendly.
+
+It syncs to your Google calendar or, you know, your Microsoft calendar, whatever you want it to be, and it'll show people available slots they can book in.
+
+So, we can actually give our 11 Labs agent access to this and it can just book in calls for people instead of having us have to do that manually.
+
+We got some more questions here.
+
+So, how should the widget appear on the page?
+
+Default floating bubble, that's perfect.
+
+What voice persona do you want for the agent?
+
+We're just going to go with a warm professional B2B sales tone, that's perfect.
+
+And data fields, beyond full name and email, which are required to book, what should the agent capture during the conversation?
+
+Company name would be great.
+
+The problem they're trying to solve would be great.
+
+Team size and role, that would also be great.
+
+And if there's anything else I want, I could just go ahead and add other and I could type more.
+
+But for now, I'm good with those three things.
+
+So, hopefully you guys see the value so far.
+
+It's going to do all the research.
+
+It's going to figure out how to make these two tools talk to each other, or I guess three technically.
+
+And it's going to ask me all the questions that I need to make this agent behave the way that I actually want it to.
+
+All right.
+
+So, what happens now is it comes back with a plan for us to review.
+
+So, neural voice sales agent plus cal.com booking.
+
+It's going to give us some context and it's going to show us the architecture of what it's actually setting up.
+
+So, let's see what it's going to do.
+
+It's going to first of all do some cal.com prep.
+
+So, we're going to have to go get our API key and we're going to have to give it to Cloud Code so it can actually, you know, do that.
+
+And then we're going to have to give it the ID of the actual event type that we want it to use.
+
+If you guys remember back in Cal, we had a few different events.
+
+So, we probably want to give it the ID for this 30-minute event.
+
+And then it's going to have to make sure that there's proper authentication between 11 Labs and cal.com.
+
+Hopefully, it's able to take care of all of that for us.
+
+And then it's going to go ahead and build the agent.
+
+It's going to pick a voice.
+
+It's going to pick an LLM.
+
+It's going to set up the first message.
+
+It's going to system prompt it.
+
+It's going to do all of that for us.
+
+And then it's going to configure the tools.
+
+It looks like there's going to be two.
+
+It has to add one to check availability and then it has to add one to actually book in a call.
+
+So, that's great.
+
+It's going to take care of all that.
+
+Here is the system prompt that it's actually already drafted up, which is fine for now.
+
+And then the last step will be to wire the widget into the site.
+
+So, that's what we've got.
+
+I'm going to go ahead and go back to the main conversation, and I'm just going to go ahead and accept those edits because all of that looks good to me.
+
+And by the way, you guys might be wondering why am I using 11 Labs over some of the other things out there?
+
+Well, I have my voice clone in 11 Labs, and I think it's the best professional voice clone you can get.
+
+I also really do like the interface.
+
+As much as we want to stay in Cloud Code, when I come into 11 Labs, I just feel like I know where everything is, and I like the way that it all works, and it makes it super easy with that widget embed.
+
+So, that's why I'm using 11 Labs in today's video.
+
+And if you want to check out 11 Labs, just go ahead and click that link in the description, and it'll send you right over here.
+
+And at this point, I'm going to put this agent in bypass permissions mode so I can just go ahead and start banging out this plan, but it looks like it wants something real quick.
+
+The order of operations matters here.
+
+Steps 1 through 6 are all dashboard work in cal.com and 11 Labs that only you can do.
+
+We could actually have it do it if we gave it like computer use.
+
+But anyways, step seven, the only code change needs your agent ID before I can make it useful.
+
+All right, so tell me exactly what you need from me.
+
+If you need API keys, then create a .env file, and I'll drop everything in there.
+
+But just walk me through step by step, what do you actually need from me right now?
+
+I want it to make my job as easy as possible.
+
+Okay, it's kind of funny.
+
+It wanted me to go do everything.
+
+So, I said, "Hey, I want you to do everything." So, you know, figure it out.
+
+And now it comes back and says, "Okay, you're right.
+
+I actually can do a lot of this.
+
+So, here's what I need from you." You can see it's created a .env file, and we need to go get our Cal API key and our 11 Labs API key.
+
+So, let's go ahead and do that real quick and let it know that that job has been done.
+
+So, first I'm going to go to Cal, and I'm going to go to my settings, and I'm going to click on API keys down here at the bottom, and I'm going to create a new key.
+
+This is going to be called demo.
+
+I'm going to delete this later, so I don't really care, and I'm going to create that, copy this, and then go back into Cloud Code.
+
+And if I click on the .env, it created these placeholders for us.
+
+So, all I have to do is paste in that API key, hit control S, and that is now saved.
+
+And now for 11 Labs, I go back into my 11 Labs dashboard, and I come into my settings, and I go to developers.
+
+You can see there's an API keys tab here as well.
+
+I can go ahead and create this key, call this one demo, and go ahead and create that key.
+
+However, I didn't select any permissions, so it says you're creating an API key with no permissions, so it won't be able to do anything.
+
+So, what you have to do is give it access to things.
+
+Or, I could just turn off the restricting, so basically saying, "Hey, this key can do anything." which is fine for this sake.
+
+And you could also set a monthly sort of like spend limit, which is pretty cool.
+
+But, I'm going to go ahead and create that key.
+
+I'm going to copy this API key, go back into Cloud Code, paste it in there, hit control S to save it, and then I can close out of that.
+
+And now that we have those two things configured, Cloud Code, I just dropped in this API keys, keep going.
+
+And now you can see that it's going to just move its way through this to-do list.
+
+It'll pause, and it will ask us for something if it needs us, but hopefully it should be able to knock out most of these without our input.
+
+Because we took the time and effort already to explain what we want, and align on the plan before we started to let it actually go build anything.
+
+All right, so just a few minutes later, apparently everything is live.
+
+We have been verified into calendar.
+
+It's going to use the 30-minute slot, which is fine.
+
+And it's also suggesting that we rename that call neural diagnostic, because right now in our calendar, it is just called like 30-minute call or something like that.
+
+Yeah, it's just called 30-minute meeting.
+
+So, it's telling us it's using this one, and it wants us to rename that, which is a good tip.
+
+It also created an 11 Labs agent.
+
+So, if I go into my dashboard here for the agents, and I click on agents, right here we see neural diagnostic.
+
+So, this is the one that it just built with a full system prompt, and if I click on tools, we should see that we have two tools set up, which is awesome.
+
+We haven't yet tested them.
+
+We're going to have to see if they work, but everything looks like it has actually been configured.
+
+So, it's saying that this is now live on the site, at least the local host version, and it wants us to test it.
+
+So, let's go ahead and open up the site, give this a hard refresh, and right there in the bottom you can see that we have this widget.
+
+So, I'm going to click on start call, and let's just test this thing out.
+
+Hey, what's going on? >> Hey, just here to answer any questions about Neural or what we do.
+
+Are you looking into AI automation for your team, or did something specific catch your eye? >> Okay, so I went ahead and ended that call because I don't love that voice.
+
+It was Adam, and I just didn't like the way he was speaking.
+
+Also, for some reason the first message didn't come through.
+
+So, I clicked on the button, and then I had to just wait, and I was like, "Okay, why isn't it speaking?" And then I had to start talking, and then it came back.
+
+So, at this point what you're going to do is you're going to keep iterating.
+
+You know, it's not going to be perfect on the first try.
+
+So, I'm going to go back into this.
+
+I'm going to do a real quick session handoff, which basically is just going to give us a message to clear the context and put the message back in just because I want to keep my context clean, so it's able to, you know, we don't get into context rot territory or anything like that.
+
+This is basically a skill I built to just give me a summary of where we're at, what's important to remember.
+
+If you guys want to check that out, join my free school community.
+
+All my skills and all my resources are in there.
+
+Okay, so we just tested out the agent on the site, and it looks good.
+
+It works for the most part okay.
+
+A couple things I noticed.
+
+First of all, change the voice.
+
+I don't like this voice.
+
+It sounds a bit too enthusiastic.
+
+It sounds too AI.
+
+The second thing is when I click on start a call, it doesn't actually give me a first message.
+
+For some reason it makes me start the conversation even though in the dashboard it looks like you did configure a first message, but we're not actually getting that to come through.
+
+So, I haven't yet tested out the tools, but I just wanted to make these quick changes to the actual prompt.
+
+Um so, yeah, go ahead and implement those changes, and then I'll go ahead and test it again.
+
+And it's really that simple.
+
+You iterate by saying, "Hey, here's what I liked.
+
+Here's what I didn't like.
+
+Go figure it out for me." So, it's really having trouble with that first message thing.
+
+And it's funny because on my other site, in this one, when I did this, it one-shotted the the first message.
+
+It had no issues.
+
+Maybe it's something going on behind the scenes.
+
+But, you know, I don't want to be the one to have to dig through the documentation to figure that out.
+
+So, I'm having it do that research.
+
+It's going to look up everything that it needs to find out in order to fix this.
+
+So, hopefully I'll check in with you guys in just a second and this issue will be fixed.
+
+But, that's just an important mindset thing to go through here is because Cloud Code has the ability to reason and do research, if something isn't working, be specific about what's not working, and you know, give it context, but it's going to be able to go do the research to figure out how to troubleshoot that specific issue. >> Hey, this is Neural.
+
+What brought you in today? >> Hey Neural, I was wondering if I could book a call. >> Got it.
+
+Just to clarify, today is April 28th, 2026, and it's currently about 7:55 p.m.
+
+UTC, which is around 2:55 p.m. >> Okay, so that was better, right?
+
+Um we need to change some things because it was getting the current time wrong.
+
+And also, we need to prompt it better to actually understand that it needs to confirm how you spell people's names and how you spell their emails because it wasn't formatting the emails right.
+
+So, every single time that you talk to this thing, you're probably going to notice a few things that you need to improve on.
+
+So, I'm basically just going to give it that feedback, same way I told you guys what's missing, and then we'll test it again, and we'll hopefully see that it's better.
+
+Now, the other thing you're going to have to pay attention to when it comes to availability is your actual booking.
+
+So, whether you do that on Calendly or cal.com, the booking has a certain sort of like limit.
+
+So, if I come in here and I go to availability, you can see it's only going to give me availability between 9:00 a.m. and 5:00 p.m. on weekdays.
+
+So, if I wanted to be able to change this, I would have to edit that availability.
+
+So, let's just say for the sake of the demo, we're just going to say that we're available from 9:00 a.m. to 9:00 p.m.
+
+And I'm just going to copy these times throughout the entire week.
+
+Like I said, just for the sake of the demo, and we're going to go ahead and save that.
+
+Okay, so I've got it making some changes here.
+
+It's going to speak only in Central Time Zone because that's what I'm in.
+
+It's going to speak a little bit more concise, which I just wanted it to speak more concise.
+
+It's also going to validate that it's spelling back the name and the email correctly cuz obviously it has to have the email correct in order to book the correct type of appointment.
+
+It moved the temperature down a little bit just to make the outputs a little bit more um consistent and I think it was because I asked it to make it more concise.
+
+And then it also made sure the tools were working.
+
+So, what I ended up doing is saying, "Hey, I don't like it spelling it out NATO phonetics because it was it was just taking too long." So, I also have it making that change.
+
+And once that has gone through, which looks like it is now through, we're going to go back into the app.
+
+I'm going to give it another hard refresh and let's try one more time to do a booking.
+
+And hopefully at this point we would be like, "Okay, cool.
+
+We like this agent." So, I'm going to give it a call. >> Hey, this is Nerual.
+
+What brought you in today? >> Hey Nerual, I own a construction company, 500 employees.
+
+We're looking to automate our proposal generation.
+
+It's very manual and I want to book a call with your team.
+
+Like I said, I'm the the founder and the owner of this company called Sandbox Construction. >> Got it.
+
+Want me to grab you 30 minutes on the team's calendar?
+
+It's a fit or no fit call, no pressure.
+
+They'll listen to what you're running and tell you straight whether we can help. >> Yeah, let's go ahead and grab a a time.
+
+Can you let me know what slots are available for today? >> Sure.
+
+What's your full name and what time zone are you in? >> My name is Nate Hurk, spelled h e r k.
+
+I'm in Central Time Zone. >> Let me confirm, n a t e, Nate, h e r k, Hurk.
+
+Did I get that right? >> Yep, that's right. >> Great.
+
+And what's your work email?
+
+Spell it out character by character for me.
+
+Let me confirm, n a t e, h e r k, 88@gmail.com.
+
+Did I get that right? >> Yep. >> Perfect.
+
+And what specifically are you trying to solve with the proposal generation?
+
+What's manual about it today? >> Yeah, we're basically just handwriting all the proposals and we're also quoting everything manually.
+
+So, I want to have, you know, AI be able to help us with taking raw requirements and turning that into a proposal that we can just shoot off to our clients. >> Got that.
+
+And what's the size of the team handling proposals right now?
+
+Or what's your role in the process? >> The team is 500 people and my role is just I kind of oversee it. >> I've got one slot left today, 6:30 p.m.
+
+Central.
+
+Does that work? >> Yeah, I mean, that works, but I would love to be able to do, you know, 7:30 p.m.
+
+Central.
+
+Is that not available? >> Not showing anything at 7:30 p.m. today.
+
+Want me to check tomorrow or another day this week? >> Okay.
+
+So, what we notice here is the flow is working a little bit better.
+
+Honestly, I think it's asking me too many questions because it's making it a little bit tough to demo, but um there should be open slots.
+
+You can see the calendar's open from like 4:00 p.m. all the way to 9:00 p.m.
+
+Which if we go back to our calendar event, we should have availability all the way from 9:00 a.m. to 9:00 p.m.
+
+So, what I want to do is I want to figure out why is the calendar tool not working the way it should be.
+
+So, I'm going to go ahead and do another session handoff.
+
+I'm going to clear the context so we can ask Claude Code to help us debug this issue.
+
+So, this is what I said.
+
+I said, "I need you to help me figure out what's going on with the tool call." Because the check availability tool just said, "Hey, we only have 6:30 p.m. available, but we should see 4:00 p.m. all the way to 9:00 p.m.
+
+So, there's a couple things that could be going wrong here, right?
+
+Calendly.com could be returning only 6:30, which would be something's wrong on Calendly.com.
+
+Or the agent's not using the tool correctly and maybe it's only querying a very limited scope.
+
+Or Calendly.com returned several slots, but the agent is misreading the output.
+
+So, there's basically three different pieces or three different areas where something could be going wrong and we need to figure out which one of those happened so we can fix it.
+
+You know, we could come into our actual dashboard and we could click on tools and we could look at this endpoint and we could figure out what's going on.
+
+What else is cool is we can see all of the actual conversations we've had.
+
+So, we can track all these, what times they were.
+
+We can actually listen to them as well and read the transcript, and that is what helps us have more visibility in order to debug and optimize these over time.
+
+Okay, so apparently, the agent found the issue.
+
+So, there's two problems.
+
+One of them is a real bug, unfortunately.
+
+So, turn 16 in the transcript, we can see what actually happened with the check availability, and the agent constructed this as UTC rather than central time.
+
+So, the search window was off.
+
+So, what it needs to do is change the actual parameter in order to be querying at the right spot, and then hopefully, we should be able to fix that.
+
+There is another observation that the system prompt says to just read back two or three slots, but that's not really the main issue.
+
+The main issue was that the actual tool call was being conducted wrong.
+
+So, while this is fixing it, let's just go back to the dashboard and talk about how we got there, right?
+
+We could have either manually came in here and inspected everything and try to figure it out, but did you guys see how easy it was for Cloud Code to find that?
+
+And all I had to do was explain my experience, what I experienced that went wrong.
+
+Now, some of you guys may have heard that demo, and you might be curious about like the latency and stuff.
+
+That's where you'd want to come in here and play around with different models and different prompting.
+
+And I've also noticed when I'm testing this on a website with a local host, it's just the latency is a little bit worse than when it's actually kind of like a live widget, so keep that in mind.
+
+But, there's other things that you can do.
+
+If you guys remember here, we were basically seeing the live transcript, and if you don't like that, you don't have to have that.
+
+That's just something that my Cloud Code here added in.
+
+But, when you come to the widget, you can configure a lot of different things with the interface.
+
+You can change the color.
+
+You can see that send text while on call.
+
+You can have a real-time transcript.
+
+There's lots of things that you can do when you configure this actual widget.
+
+Like I said, it can be a different image if you want.
+
+It can be a different color.
+
+Lots of things you can do here.
+
+Okay, so anyways, what broke?
+
+We just saw what broke, and and now apparently this is fixed.
+
+So, we're going to do another hard refresh, and we're going to try to fly through another demo because this this dude Neural really likes to yap, but let's see if that's fixed. >> Hey, this is Nerol.
+
+What brought you in today? >> Okay, I don't want you to ask me any questions.
+
+I just want you to book a call for me.
+
+Just right now, please book a call.
+
+My name is Nate Hurk, h e r k.
+
+My email is natehurk88@gmail.com, n a t e h e r k 88 and gmail.com.
+
+And I want availability for tonight.
+
+I need to get something in urgently.
+
+Just please don't ask me questions and let me book a call. >> I have tonight at 6:30 p.m., 7:00 p.m., 7:30 p.m., 8:00 p.m., or 8:30 p.m.
+
+Central.
+
+Which works for you? >> Let's go ahead and do 7:00 p.m.
+
+Central. >> You're all set for 7:00 p.m.
+
+Central tonight.
+
+You'll get a confirmation email at natehurk88@gmail.com with the video link. >> Okay, so that actually worked.
+
+You can see that that was completely debugged.
+
+And the reason you guys might be wondering like why was 4:30 or 5:00 not available?
+
+Well, I'm assuming that was in Cal.
+
+So, if I come into Cal and I go to um limits, there's probably something right here.
+
+Minimum notice is 2 hours.
+
+So, if right now is 4:30, it's going to make the first available slot 6:30 because that's 2 hours later.
+
+So, that worked perfectly.
+
+It found the right availability and it booked in this um meeting with the right email as you can see.
+
+And also in my natehurk88@gmail.com, I just got this notification.
+
+So, this would have accurately sent an email to any client that booked a call right in here.
+
+So, that all worked perfect.
+
+There's obviously some things that I don't love about the prompting and about maybe the appearance.
+
+And this is where you would start to sort of iterate on that kind of stuff.
+
+But from a technical perspective, this worked as expected.
+
+The tools are working, you know, the creation is working and that is what is the most important for the sake of this demo was me showing you guys how we got that set up without me having to go read any API documentation or do anything manually inside of this actual agent's configuration in 11 Labs.
+
+And now what you would do at this point is you would basically just publish that website.
+
+So, I'm not going to go over that in today's video, but all you'd have to do is sync this website to a GitHub URL or GitHub repo, and then you would sync that GitHub repo with Vercel.
+
+So, I've made multiple videos where I've gone over this.
+
+I will tag one of those right up here if you guys want to see that process, but it's super simple.
+
+So, now let's talk about who pays because there's definitely some things that you want to be considered of when you put a widget on your website.
+
+That widget is synced with your 11 Labs account.
+
+So, every time someone talks to it, you are going to be eating that cost.
+
+Unless, of course, you have some sort of authentication or it's an app and they put in their API key, then it's obviously going to charge them.
+
+But, if you just leave that on your website and someone has really malicious intent and just talks to it for 24 hours a day, that is going to come back and eat your credits.
+
+So, that's something you want to think about.
+
+So, there's things that you can do when it comes to security.
+
+So, one of them is just locking the host name, right?
+
+This widget can only appear on natehurk.com, not anywhere else.
+
+In case someone inspected the code, stole that HTML widget, which is very doable, you know, cuz the widget is basically just this.
+
+If someone stole this and put it on their site, boom, they have a voice agent that's that's yours.
+
+So, you could come into security and you could lock it down by domains.
+
+You could add the host for an allow list.
+
+And also, I believe in the widget there's settings down here for um allow domains right here.
+
+And once again, yes, you can do it in here, but you can also say, "Hey Claude code, help me lock this down.
+
+I don't want people to abuse this." There's some other things to think about as well.
+
+So, knowledge base grounding.
+
+Feed the agent real docs, otherwise it's just going to make up things, right?
+
+The conversation cap.
+
+So, maybe you want to set a max duration ceiling per call.
+
+So, that's kind of like a budget guardrail or maybe, you know, like a max minute.
+
+Or maybe if you wanted to get really technical, you would have to have people authorize in in order to make a call.
+
+You could also set up a rate limit.
+
+So, if If page is public, throttle.
+
+Just to make sure that the widget isn't being abused a thousand times per second by the internet.
+
+And then, like I said about latency earlier, if you're using a premium voice with a really smart LLM, there's just going to be more latency.
+
+And that's just how it works.
+
+So, figure out the trade-off that you want [snorts] on your website.
+
+And once again, now that you've set up this voice agent, you could use it wherever you want.
+
+So, what we just showed off was having it on a website like this, for example.
+
+But now that we have this agent, we have the tools configured, we have the prompting configured, we have the the voice, the personality, we have everything set up, we could also just hook this up to a phone.
+
+So, not only could people come to Neural and talk to our agent right here, but if we hook this up to a phone, a phone number, then if they call Neural, then we could also have the agent pick up.
+
+So, that's what makes this thing pretty powerful.
+
+It's the same engine behind the scenes.
+
+It's just a different door.
+
+So, that's what I wanted to share with you guys today.
+
+Hopefully you saw, you know, we iterated maybe four or five times, and this took me, you know, maybe 45 minutes to do this demo for you guys.
+
+But think about if you spent five hours sitting down, testing this thing, and just iterating, and just using your natural language.
+
+By the end of the day, you would have a really solid voice agent ready to go, and you didn't have to deal with any of those headaches of API documentation, or, you know, configuring things together manually.
+
+We built it in code, we now could push that with one command, we could embed that on a real domain, and then we would have to talk and brainstorm with Claude code about how do we lock this down, how do we make this safe, how do we make sure we're not going to blow through a thousand credits overnight.
+
+There's lots of different ways to do it, and all depends on your specific scenario.
+
+So, that is going to do it for today.
+
+I hope you guys enjoyed the video.
+
+If you did, or you learned something new, please give it a like, it helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I will see you all in the next one.
+
+Thanks, everyone.

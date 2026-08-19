@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "ids": {
+    "monotonic": true,
+    "next_run_id": 19
+  },
+  "profile": {
+    "operator": "Evens",
+    "stack": [
+      "cursor",
+      "grok"
+    ],
+    "clients": "parked",
+    "hard_step": "hitl"
+  },
+  "jobs": [
+    {
+      "id": "coverage-loop",
+      "name": "coverage-loop",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "Nate-82 system-upgrade board WIRED this session"
+    },
+    {
+      "id": "dry-run-six",
+      "name": "dry-run-six",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "six fixtures scored 2026-08-14; clients parked"
+    },
+    {
+      "id": "knowledge-use",
+      "name": "knowledge-use",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "graph+patterns+12 workflows; Path A parked; no send"
+    },
+    {
+      "id": "click-live-evenslouis",
+      "name": "click-live-evenslouis",
+      "status": "done",
+      "desk": "watchdog",
+      "updated": "2026-08-14",
+      "note": "headed CTA path pass; money-spine gap; form not sent"
+    },
+    {
+      "id": "channel-walk-social-2026-08-14",
+      "name": "channel-walk-social-2026-08-14",
+      "status": "done",
+      "desk": "watchdog",
+      "updated": "2026-08-14",
+      "note": "HIS: X @snevemoney YT @Snevemoney TT @evenslouistv FB evens.louis IG @evenslouis_ + @snevemoney_; Reddit skip; no site offer on profiles"
+    },
+    {
+      "id": "matrix-social-channel",
+      "name": "matrix-social-channel",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "skills wired; Path C clip-factory + demand-validate gate active; Path A parked; no send"
+    },
+    {
+      "id": "path-c-social-2026-08-14",
+      "name": "path-c-social-three-jobs",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "bios+HIS packets/atoms; pick TT @evenslouistv; clip preview HITL; no publish"
+    },
+    {
+      "id": "his-stats-2026-08-14",
+      "name": "his-stats-2026-08-14",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "OBSERVED card STATS-2026-08-14.md + canvas. TT 389/94.2k likes; YT 17 subs/11169 views/90 vids; X 101/429; IG 209/812/6. FB+IG@snevemoney_+Studio UNKNOWN. Site 200 + healthz + pixel 1413012380573952."
+    },
+    {
+      "id": "x-bookmarks-ai-2026-08-14",
+      "name": "x-bookmarks-ai",
+      "status": "done",
+      "desk": "researcher",
+      "updated": "2026-08-14",
+      "note": "98 scanned, 37 AI, 6 wired, 0 unread"
+    },
+    {
+      "id": "dry-run-six-bookmark-skills",
+      "name": "dry-run-six-bookmark-skills",
+      "status": "done",
+      "desk": "watchdog",
+      "updated": "2026-08-14",
+      "note": "6 WIRED bookmark skills fixture dry-run; GRADE not accept-forever; no Studio"
+    },
+    {
+      "id": "yt-wl-ai-2026-08-14",
+      "name": "yt-wl-ai",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "6 packets+LEARNED+24 atoms; WIRED script-beat-motion + forward-deployed-gap; merges on existing; caption-only; not the 476"
+    },
+    {
+      "id": "tape-wire-2026-08-14",
+      "name": "tape-wire-last-mile",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-14",
+      "note": "TAPE-WIRE-NOTES + TBTU + 5 skills + 153 workflows. Dry-run UNTESTED."
+    },
+    {
+      "id": "product-factory-foundation",
+      "name": "product-factory-foundation",
+      "status": "done",
+      "desk": "parent",
+      "updated": "2026-08-15",
+      "note": "primitives + roadblocks + Path C promotion hook. Pay HITL. Speed MISS."
+    }
+  ],
+  "product_factory": {
+    "primitives": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/primitives.json",
+    "roadblocks": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/roadblocks.json",
+    "promotion": "docs/hive/outer-heaven/CONTENT/knowledge/product-factory/PROMOTION.md",
+    "updated": "2026-08-15"
+  },
+  "last_run": {
+    "id": 18,
+    "job": "login-primitive-slice",
+    "desk": "forge",
+    "at": "2026-08-15",
+    "done_check": "LoginPrimitive adapter on ProofCheck AuthContext + three maestro YAML flows + RUN.md pending + ProofCheck localhost:8080",
+    "stop_kind": "cap",
+    "token_receipt": {
+      "tokens": "unknown",
+      "duration": "this session",
+      "correctness": "untested"
+    }
+  },
+  "log": [
+    {
+      "id": 1,
+      "job": "nate82-system-upgrades",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "remaining UPG-nate82 SYSTEM_UPGRADE rows WIRED or honestly skipped",
+      "stop_kind": "metric"
+    },
+    {
+      "id": 2,
+      "job": "nate82-system-upgrades",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "UPG-nate82 rows WIRED or honestly skipped",
+      "stop_kind": "metric"
+    },
+    {
+      "id": 3,
+      "job": "dry-run-six",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "six fixtures scored PASS/FAIL/HOLD; fixture1 cap=3 halt; no send/pay/deploy/book/publish",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 4,
+      "job": "knowledge-use",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "graph edges+INDEX; 111 patterns; 12 workflows compiled; desk artifacts; 3-pass audit written; chronicle appended",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 5,
+      "job": "click-live-site",
+      "desk": "forge",
+      "at": "2026-08-14",
+      "done_check": "API/macro written; observe+verify cards on disk; Path C facts; us.md+chronicle; headed COMPARE=miss; no Stripe; no ICP",
+      "stop_kind": "needs-input"
+    },
+    {
+      "id": 6,
+      "job": "click-live-evenslouis",
+      "desk": "watchdog",
+      "at": "2026-08-14",
+      "done_check": "headed home-/work-/autoflow-/#contact OBSERVED; GRADE pass-with-gaps; no send",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 7,
+      "job": "channel-walk-social-2026-08-14",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "6 rows present|absent|login-wall|blocked; confirmed handles only; artifact on disk; no hunt",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 8,
+      "job": "matrix-social-channel",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "inventory table written; skills wired on owning desks; parked-workflow list; no send/Normand/n8n-prod",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 9,
+      "job": "channel-walk-social-2026-08-14",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "false handles NOT-EVENS; 6 rows (5 CURSOR-BROWSER-NOT-LOGGED-IN, Reddit skip); no HIS handle confirmed; offer unknown",
+      "stop_kind": "cap + done-check"
+    },
+    {
+      "id": 10,
+      "job": "channel-walk-social-2026-08-14",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "logged-in me on X YT TT; IG not logged in; FB contradiction kept",
+      "stop_kind": "needs-input"
+    },
+    {
+      "id": 11,
+      "job": "path-c-social-2026-08-14",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "bios 6 handles; packets tt+ig+x; atoms 6/0 fail; one-channel TT; clip preview; steal+walk updated",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 12,
+      "job": "his-stats-2026-08-14",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "STATS-2026-08-14.md sourced; canvas; Studio UNKNOWN labeled; HIS only",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 13,
+      "job": "x-bookmarks-ai-2026-08-14",
+      "desk": "researcher",
+      "at": "2026-08-14",
+      "done_check": "every AI bookmark classified wired|merged|skipped; 6 skills wired; dump ended at 98",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 14,
+      "job": "dry-run-six-bookmark-skills",
+      "desk": "watchdog",
+      "at": "2026-08-14",
+      "done_check": "log written; 6 ACT/GRADE rows; no Studio",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 15,
+      "job": "yt-wl-ai-2026-08-14",
+      "desk": "researcher",
+      "at": "2026-08-14",
+      "done_check": "card YT-WL-AI-2026-08-14.md; 0 today-AI OBSERVED; no wire; yellow attach WL tab",
+      "stop_kind": "cap + done-check"
+    },
+    {
+      "id": 16,
+      "job": "yt-wl-ai-2026-08-14",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "4 must-ingest each packet+LEARNED+atoms+decision; 2 near-top same; 2 MERGE-only; 2 skills WIRED",
+      "stop_kind": "cap+done-check"
+    },
+    {
+      "id": 17,
+      "job": "tape-wire-2026-08-14",
+      "desk": "parent",
+      "at": "2026-08-14",
+      "done_check": "last-mile written; 153 LEARNED TBTU; 5 skills WIRED; 153 workflows; 17 desk cards; TAPE-WIRE-NOTES scoreboard",
+      "stop_kind": "cap"
+    },
+    {
+      "id": 18,
+      "job": "login-primitive-slice",
+      "desk": "forge",
+      "at": "2026-08-15",
+      "done_check": "LoginPrimitive adapter on ProofCheck AuthContext + three maestro YAML flows + RUN.md pending + ProofCheck localhost:8080",
+      "stop_kind": "cap"
+    }
+  ]
+}

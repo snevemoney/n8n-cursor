@@ -1,0 +1,523 @@
+[00:00] Claude design can now build beautiful
+[00:02] motion graphics. But 99% of those
+[00:05] designs look generic and AI slop. But I
+[00:08] just found a new system inside Claude
+[00:12] design that easily builds unique designs
+[00:14] and fits into any workflow. So you can
+[00:17] avoid the slop, save more time, and get
+[00:20] better designs faster. So, if you
+[00:22] haven't already, grab that [music]
+[00:23] beautiful coffee and let's dive straight
+[00:26] in. Now, the first thing to understand
+[00:28] about Claude design is obviously we can
+[00:31] do this in the online app, we can do
+[00:33] this in the Claude app. It's not just
+[00:34] the fact that we can go ahead in the
+[00:36] selection menu here, for example, go
+[00:38] ahead and choose the animation, pick a
+[00:39] design system, and have it animate
+[00:41] something. But we can also get it, if we
+[00:44] were to go ahead and actually take real
+[00:47] data, real numbers, and animate them. So
+[00:49] we can give it any data set. So let's
+[00:52] say, for example, that we're talking
+[00:53] about AI model performance in this
+[00:56] video. And not only am I going to show
+[00:57] you in this video, by the way, exactly
+[00:59] how to animate it in ways that you
+[01:01] haven't seen before with Claude. I'm
+[01:02] going to show you how I'm personally
+[01:04] using it in a systematized way that will
+[01:06] work for any social media platform, for
+[01:08] your business, anyway. It's really
+[01:09] cool. So, will Disney capture
+[01:11] our hearts with animation? How do we
+[01:13] bring it to life? Well, one of the
+[01:14] things we can do is just give data to
+[01:16] Claude and give it a prompt. And so, for
+[01:17] example, you could come here and say,
+[01:19] "I'd like it to animate for me the
+[01:22] OpenAI model and DeepSeek and Claude,
+[01:24] all the different models, in an animated
+[01:26] bar chart with multi-colors, add their
+[01:28] logos in, and make it beautiful and
+[01:31] interactive." And I'm going to give you
+[01:32] some specific numbers and data. And then
+[01:34] down here, we could give it as much data
+[01:36] as we wanted to. We could say, "OpenAI
+[01:38] is 700 and Claude is 595." And
+[01:41] basically, this Claude here, the Claude
+[01:44] design, will animate this. So you end up
+[01:46] with something that looks like this. X,
+[01:48] Perplexity, Hugging Face, Claude,
+[01:50] Mistral, Meta, Gemini, DeepSeek,
+[01:52] Anthropic, and OpenAI. I mean, this
+[01:53] beautiful multi-caloric gradient on
+[01:56] OpenAI. And look at this, even the word
+[01:58] actually matches exactly the gradient
+[02:01] that we have down below that. And you
+[02:03] can go back and forth with this and play
+[02:04] around with it. I'd encourage you to do
+[02:06] that until you get your desired design
+[02:08] style. But when this is done, we can
+[02:10] codify this as an asset and we can
+[02:13] literally come up to Claude and just
+[02:14] say, "Hey, when I'm building a chart, I
+[02:17] want you to use this exact style for all
+[02:19] future bar charts." So, level one of the
+[02:22] five levels of covering is essentially
+[02:24] using data. Now, before I can show you
+[02:26] level two, we have to talk about the
+[02:28] single greatest design skill. This is
+[02:31] Dr. Slop. This is the master king of the
+[02:34] Slop universe. I am talking about the
+[02:37] font. This is the biggest giveaway. Now,
+[02:39] check this out. This very presentation
+[02:41] I'm using right now, I actually did
+[02:42] three versions of it. I have one with
+[02:44] what's called a coffin font. This one
+[02:46] here is Poppins and this one here is
+[02:48] Montserrat. Now, Claude itself, when you
+[02:50] just give it a prompt, whether you're
+[02:52] using design
+[02:54] or something else, will use a generic
+[02:56] font. But what we can do is say, "Hey, I
+[02:58] want this font or I want that font
+[03:00] instead." And honestly, just changing
+[03:02] the font to something like Montserrat or
+[03:03] Poppins, glacial indifference, there's
+[03:05] so many different fonts we can use,
+[03:07] drastically changes the perception. So,
+[03:09] let's say that you find a website that
+[03:11] you like or you found a font, but you
+[03:13] have no idea what it is. Well, one of
+[03:14] the things that we can do, and let's say
+[03:15] I'm on ClickUp, I actually met the
+[03:17] founder in Montenegro, very, very, very
+[03:19] cool guy, very inspirational story. What
+[03:21] we're going to do is come over to
+[03:22] Ficrawl, drop in the URL and under
+[03:24] format, come down and check on branding.
+[03:26] I used Ficrawl for all my internet
+[03:27] search, I love it. But if you come and
+[03:29] start scraping, this will actually
+[03:31] extract
+[03:32] all of the different typographies and
+[03:35] font styling that we can use to consider
+[03:37] for our system. Now, what I'm most
+[03:39] interested in here is actually the font.
+[03:41] So, you can see I can come down here, I
+[03:43] saved us 93% of our tokens, which is
+[03:45] ridiculous. Look at this, 22 cents,
+[03:47] that's wild. I come down to branding,
+[03:49] not only do I have logos, but I can
+[03:51] actually see down here I've got the
+[03:52] font, which is this. So, one of the
+[03:54] things I can say to Claude is, "Hey, go
+[03:56] ahead and build me a design system using
+[03:59] this font or something similar." And a
+[04:01] huge hack for you guys, the design
+[04:03] experts do not want to know about this,
+[04:05] but I'm going to pull pull the peel the
+[04:06] veil off and show you. There is a really
+[04:08] cool website chat called
+[04:09] fonts.inuse.com. So, essentially, this
+[04:11] is an amazing website, and effectively,
+[04:13] it just shows you like, you know, when
+[04:14] you see really beautiful designs like I
+[04:16] have here, some paprika
+[04:19] because I'm in Hungary, and we love
+[04:20] paprika in Hungary. It's part of the
+[04:21] deal. They say this when you come in,
+[04:22] you got to love it. Essentially, you see
+[04:24] things or packages that looks really
+[04:26] cool, but you don't really know what the
+[04:28] actual font and design is. Well,
+[04:30] websites like this just let you browse
+[04:31] real-life use cases, find it, and then
+[04:33] literally, what you can do is screenshot
+[04:35] this. You can even say some of these
+[04:36] fonts are available for free online, and
+[04:38] you can just directly use them and say
+[04:40] Claude, "It is so, so cool." You can
+[04:42] literally even take a screenshot, and
+[04:43] all you would do is come down like this
+[04:45] and say, "Hey, to Claude, let's come
+[04:46] down here like so." And just give this a
+[04:48] little bit of a screenshot. You can come
+[04:49] down and you can drop this in and say,
+[04:51] "Hey, I want you to build for me a
+[04:52] beautiful advert for my business, and I
+[04:55] really love this font. Could you check
+[04:57] all available free fonts for me to see
+[04:59] if you can find something as close as
+[05:00] possible to this, if not this one
+[05:02] itself?" Now, you can also buy the font,
+[05:04] which I'd highly recommend if you are
+[05:05] going to do lots of design for a
+[05:07] particular brand. It's the easiest way
+[05:08] to elevate it, but there are so many
+[05:10] free options. Well, you can check out
+[05:11] Google Fonts. There's a website called
+[05:13] Font Share, we can see all of these
+[05:14] beautiful fonts, which are available for
+[05:16] free. So, you can come down and have a
+[05:17] look like I think one of the fonts that
+[05:18] I use is Swiss it. I highly recommend
+[05:21] it. Obviously, I use it. My designer
+[05:22] actually built this for me, which is
+[05:23] cool. Again, this is a great website.
+[05:25] Another one here as well is Open
+[05:26] Foundry. This is really cool for some
+[05:29] nice kind of like off-static gorgeous
+[05:30] fonts. Obviously, I'll time stamp
+[05:32] everything down below, so if you wanted
+[05:33] that, feel free to skip. But this really
+[05:35] is just one of the coolest ways to do
+[05:36] it. You got Typewolf as well. This is um
+[05:39] I think this just shows you gorgeous
+[05:40] fonts. I'm not sure these are all free,
+[05:41] but you can go ahead and check them. So,
+[05:43] now we understand how to use data and
+[05:45] fonts. Take this us to level two. And by
+[05:47] the way, each level is more epic and
+[05:49] beneficial than the last one. On level
+[05:51] five, you're going to really love this
+[05:52] one. So, the idea with this is that we
+[05:54] can actually take code itself and bring
+[05:57] in other design assets to really improve
+[06:00] its quality because it can generate
+[06:02] beautiful graphics like this. I use it,
+[06:04] for example, to build up my entire code
+[06:06] code operating system. It helped me to
+[06:08] build up my entire design operating
+[06:10] system, as well. It can build things.
+[06:12] But, one of its limitations really is
+[06:14] the ability to create beautiful
+[06:16] graphical icons. And icons can really
+[06:18] elevate the level of it. I did it in my
+[06:20] first tech startup. And And by the way,
+[06:22] if you don't know who I am, I'm Jack. I
+[06:24] built and sold my last tech startup with
+[06:25] like a gazillion customers. Now, I share
+[06:27] you how to stuff that works while still
+[06:29] building my own AI startup. So, I love
+[06:31] this stuff. I do this stuff every day.
+[06:33] And one of the cool ways you can elevate
+[06:35] your designs in level two is using
+[06:37] icons. I There's a lot of different
+[06:39] options. There's icon A, there's flat
+[06:41] icon. But, what I recommend you can do
+[06:43] here, and some of them are free, by the
+[06:45] way, but if you just give them
+[06:46] attribution, is find a design style that
+[06:47] you think looks really cool. So, for
+[06:49] example, you have this travel pack here.
+[06:51] And what you can actually do is just
+[06:52] download the entire pack. I'm on these
+[06:54] guys' pay plan. I think it's like $8. By
+[06:56] the way, again, not sponsored. I'm just
+[06:57] telling you the stuff that I use. You
+[06:59] can download all of them. And then, what
+[07:00] we can do is then integrate these icons
+[07:03] into any kind of animation or graphic.
+[07:05] And this is an example. I just gave it
+[07:07] the packs and said, "Hey, design me
+[07:08] something interesting." Now, check this
+[07:10] out. This is just something on travel.
+[07:11] So, this didn't have to be a trip. And
+[07:13] you can just see that the level and
+[07:14] quality of this design is just way
+[07:17] better. Like, it's not I didn't I didn't
+[07:18] really give this any sophisticated
+[07:19] prompts. But, how much better and crisp
+[07:22] and premium does this look in your
+[07:25] videos, in your assets, in your
+[07:26] presentations? And you just give it
+[07:28] these logos. And in fact, there are
+[07:29] hundreds of these logos on so many
+[07:31] different websites that you could use.
+[07:33] Like, and And a lot of cases, you can
+[07:34] search for stuff. Like, again, and I did
+[07:36] this in my last tech startup, which is
+[07:37] I'm just telling you all the sources I
+[07:38] did. Like, let's say we're doing
+[07:40] something around Christmas, right? Like,
+[07:41] a Christmas presentation, we can
+[07:43] actually go ahead and find icons. Now, I
+[07:46] recommend that basically each
+[07:47] presentation, you use one style, so try
+[07:50] to keep it to one style rather than
+[07:51] jumping around, but you can see just how
+[07:53] beneficial this is. Now, this takes us
+[07:55] squarely onto level three, where we take
+[07:57] it to a complete new level. Let me show
+[08:00] you what I mean when I say that. So, you
+[08:01] got generating the art as well. Now,
+[08:03] here's a cool thing we can do. Now,
+[08:04] imagine this. We're not just having
+[08:05] Claude using his existing assets and
+[08:07] applying motion, but what we can do here
+[08:09] for our animations, which is really
+[08:10] interesting, is take a prompt, we can
+[08:13] actually go and use different resources.
+[08:15] We can actually go to existing websites
+[08:17] that have built not just icons, but
+[08:20] beautiful interactive graphics that make
+[08:22] your graphics look unbelievable. Now,
+[08:25] some things that we can do is add in
+[08:26] images to our designs, which are great.
+[08:28] But, you can go through to websites like
+[08:30] this. Lordicon animations itself has
+[08:31] this incredible like repo of beautiful
+[08:34] animations and graphics, and where
+[08:36] relevant, you can basically add them in.
+[08:38] It's like a search engine for really
+[08:39] gorgeous things. People have always used
+[08:41] them in their websites, but you can
+[08:43] actually use them in Claude design if
+[08:45] you want to. Now, the best part is the
+[08:47] fact that you can actually get free
+[08:49] ones. Obviously, they will have
+[08:50] different licenses and you have to check
+[08:51] that, but you can see you've got this
+[08:53] beautiful fire thing here, which is
+[08:54] cool. This is free under the Creative
+[08:55] Commons license, which is cool. You've
+[08:57] got the rocket, you've got like loads of
+[09:00] cool things. You've even got, for
+[09:01] example, and I really like this one
+[09:02] here, like this pack of like astronauts
+[09:05] and stuff like that. And what you can do
+[09:07] is actually find these from websites
+[09:08] like this and integrate them inside of
+[09:10] Claude design. So, for example, check
+[09:12] this out. Imagine this in an Instagram
+[09:14] style reel, and I've laid out like that,
+[09:15] for example, and you could literally
+[09:16] scroll and show different things. With
+[09:18] the fire, we've got like all these
+[09:20] different things. Again, using these
+[09:22] assets, which is incredible, and it's
+[09:24] not something that you can accomplish
+[09:26] with Claude by itself, which I think is
+[09:28] absolutely fantastic. And these just
+[09:30] look gorgeous and beautiful, and you can
+[09:31] imagine this on Instagram carousels. You
+[09:34] could imagine this on so many different
+[09:36] platforms that you can grab this. And
+[09:38] all you literally need to do when you
+[09:39] get them effectively is you find one
+[09:41] that you like, you come down, you can
+[09:42] download the Lottie JSON like so, and
+[09:44] then you just create a library, create a
+[09:46] repository, and share it with Claude.
+[09:48] Lottie has a free plan and a paid plan.
+[09:50] You can play around with that and see
+[09:51] all of the details. But we can even take
+[09:53] this another step forward and use an
+[09:55] image. So for example, if I come over to
+[09:57] my Claude design operating system here,
+[09:59] I'm going to go down and let's I just
+[10:01] get that little image here. So I'm going
+[10:02] to come over to Let's do 16 by 9 2K. I'm
+[10:05] going to create two images for this and
+[10:06] we'll do Nano Banana Pro. Let's do Nano
+[10:08] Banana Pro 2. And I might say something
+[10:10] like, "Hey, design for me a gorgeous
+[10:13] kind of beautiful illustration of the
+[10:16] galaxy, please." All right? Something
+[10:18] gorgeous, maybe kind of Ghibli style,
+[10:20] something familiar, something fantastic.
+[10:22] Come down here. I see it's cost four
+[10:24] credits or if I can come down I can see,
+[10:26] you know, the price that'll be like 12
+[10:27] cents to do or a couple credits with
+[10:29] XField. Come down and let's go ahead and
+[10:31] generate that for me. And what's going
+[10:32] to be really interesting here as well as
+[10:34] it's generating it's called is that we
+[10:35] can grab any image that we want to and
+[10:37] literally bring that into any Claude
+[10:40] design system. And again, you can get
+[10:42] Claude from your own computer to
+[10:44] directly create this in here. And by the
+[10:47] way, if all of this is sounding like I'm
+[10:49] speaking Spanish, I'm going to put a
+[10:50] link down below for my full Claude Code
+[10:52] Masterclass inside the community. It has
+[10:54] everything from foundations and setup,
+[10:57] building websites, power features,
+[10:58] memory systems, agents, essentially all
+[11:01] the stuff, like many things that I've
+[11:03] never shared on my channel that will
+[11:04] take you from zero to interstellar. Plus
+[11:06] the community, we hang out and we have a
+[11:08] great time. So here, we've got this here
+[11:10] for example. Let's say that we like
+[11:12] this. Well, let's go ahead, copy this
+[11:13] image, and then we can share it with the
+[11:14] Claude design. And as you can see, guys,
+[11:16] you can now add it into any image. I
+[11:18] just gave it to Claude design. I was
+[11:19] like, "Hey, add this into the end." And
+[11:22] as you can see, once it pops up, you're
+[11:23] now going to go ahead and see this image
+[11:25] added in. And I really think that
+[11:26] imagery and animation and icons plus the
+[11:30] the of the graphics and the editing that
+[11:31] Claude can do is really how you separate
+[11:33] this out, plus the fonts, plus the data.
+[11:36] It just takes it to a completely new
+[11:39] level. But then it leads us on to one of
+[11:41] the limitations, which is this these
+[11:42] designs are beautiful, but if we can't
+[11:45] do anything with them, what's the value?
+[11:46] And this is where level four comes in
+[11:49] and we take it to a completely new level
+[11:50] here, no pun intended of course. And as
+[11:52] I did that, we can actually give Claude
+[11:55] a video. So, let's say that we record a
+[11:57] video together. And I There's two ways
+[11:58] we can do this. One is we do everything
+[11:59] manually. Level two though is that
+[12:01] Claude can actually go ahead and process
+[12:04] that video for us. So, to do this, all
+[12:06] you're going to do is the below, which
+[12:07] is, "Hey there Claude, there is a video
+[12:10] I just recorded on my desktop. I want
+[12:12] you to go to that video and I want you
+[12:14] to get the full transcript for that
+[12:16] video and do an RTF, please, and share
+[12:18] that with me in a HTML file." Now, RTF
+[12:22] basically means that every word that you
+[12:24] say is mapped to a timestamp. And the
+[12:26] reason why this is so beneficial is
+[12:28] because we can then have Claude in step
+[12:30] five do something very incredible with
+[12:32] it that really takes designs to a
+[12:34] completely new level. Now, we don't even
+[12:36] have to upload the video, we could point
+[12:38] it to a YouTube video, we could point it
+[12:40] to any file on our desktop and it will
+[12:43] go ahead and do that for us. And as you
+[12:45] can see, we now have the file for the
+[12:46] design genius script, which is coming
+[12:48] out I think yesterday. And look at this,
+[12:50] we've got effectively everything on here
+[12:51] and it explains all of the detail and
+[12:53] it's got everything there timestamped.
+[12:55] And then I've opened this up in a new
+[12:56] file, so you can see it and everything
+[12:58] I've said here is linked down by the
+[12:59] minute. And then there's a file
+[13:01] underneath this that literally has every
+[13:02] word connected with every single minute
+[13:05] and second that it was said. And then
+[13:06] once we have that, we can go on to step
+[13:08] five. So, not only can Claude actually
+[13:10] watch, it can build and integrate all of
+[13:12] this together in an incredible system.
+[13:15] Which just means that you basically
+[13:16] record the short-form content or the
+[13:18] long-form content and Claude will not
+[13:20] only basically timestamp that, it can do
+[13:23] many other things. So, here you can
+[13:24] actually activate a skill and I'll put a
+[13:26] link for it down below it so you can
+[13:28] grab it, and it does all that stuff for
+[13:29] you automatically. So, hey, use the
+[13:31] skill to get the full transcript, and
+[13:33] what I want you to do is identify parts
+[13:36] of the video, as per your skill, that
+[13:38] essentially explain where a animation
+[13:41] would be valuable. This is a YouTube
+[13:42] video. I want you to do some research
+[13:44] with Firecrawl to find interesting
+[13:47] insights and statistics that might be
+[13:49] beneficial, basically mirroring exactly
+[13:52] what it is that I say. I select the
+[13:54] moments within the script, then go ahead
+[13:56] and create with me some beautiful
+[13:58] animations and graphics for those exact
+[14:00] things, and then save them for me on my
+[14:01] desktop. Then, literally, you can enter
+[14:04] that in, and Claude will do the work for
+[14:05] you. And the reason that we're using
+[14:07] Firecrawl here is because it's going to
+[14:08] enrich the information and the data. If
+[14:11] you're doing this on Instagram or
+[14:13] YouTube, it's very viable to go ahead
+[14:15] and get actual insights, and Firecrawl
+[14:17] is like the cheapest way I found I'm
+[14:19] using myself to actually go and get
+[14:21] information from online. Like, this
+[14:23] saved us 93 tokens because what it does,
+[14:25] instead of bringing all the HTML, it
+[14:27] just brings the relevant things. Most
+[14:30] people miss the research step, so they
+[14:32] get inaccurate data. But, by having this
+[14:34] enrichment cycle, where, actually, I'm
+[14:37] talking about, like I did earlier. So,
+[14:38] for example, I might say, "Hey, AI
+[14:40] models are getting better from X all the
+[14:43] way to OpenAI." Now,
+[14:45] where's he going to get these numbers
+[14:46] from? Because I don't explicitly mention
+[14:48] them in the video. So, what needs to
+[14:50] happen is there needs to be a research
+[14:52] agent that's saying, "Hey, what did Jack
+[14:54] say?" How could an ask questions like,
+[14:56] "How could I make this better? How could
+[14:57] I show this visually?" That's where
+[14:59] Firecrawl comes in. It grabs that data,
+[15:01] and it does it in the cheapest way
+[15:02] possible. It cuts out all the HTML, and
+[15:05] you can obviously get branding and all
+[15:06] of that kind of thing. Beautiful. And
+[15:08] then we get a full extract like this.
+[15:09] Now, the cool thing is that you can
+[15:11] actually build a Claude skill like this
+[15:13] that does anything that you want it to.
+[15:14] So, it could be for Instagram Reels,
+[15:16] could be for YouTube. This one for me,
+[15:17] its basic premise is to find
+[15:19] opportunities. So, this is what I did uh
+[15:22] for a exclusive training inside my
+[15:23] community, which is cool. And basically,
+[15:25] it's Look at this. This is what it's
+[15:26] found, and it suggested, "Hey, this is
+[15:30] where I think we should add in clips
+[15:31] into your long-form content." And this
+[15:33] is an example of one that it did for me
+[15:35] just off the back. So, let's just give
+[15:36] it a quick watch and see what it did.
+[15:39] One question, three models. So, I'll be
+[15:41] talking up, blah blah blah. There's one,
+[15:42] two, three. No one copies homework.
+[15:44] Again, so I'm talking here, and then
+[15:46] this is all running in the background,
+[15:48] which is cool. And then it just brings
+[15:50] up these different graphics that you can
+[15:51] see, and we can go anything we wanted.
+[15:53] That's just Let's just one shot, but you
+[15:54] get the idea of the thing it can kind of
+[15:55] generate. Then it's kind of suggested
+[15:57] six different ways we could do this. And
+[16:00] it's actually given me a breakdown of
+[16:01] everything I've said in my video, how
+[16:03] I'm fast I'm talking, which is extremely
+[16:05] fast, as you can see in this one, and
+[16:07] then a full transcript as well. And then
+[16:09] you can say to Claude, "Hey, go ahead
+[16:11] and build me that." And it will actually
+[16:13] insert those into the video if you want
+[16:15] to, or it'll just give you the clips.
+[16:17] But knowing how to use Claude with
+[16:19] motion design is one thing. But if you
+[16:21] don't know how to use Claude's most
+[16:22] powerful design creation skill, you're
+[16:25] leaving too much value on the table. So,
+[16:27] the next thing we're going to do is
+[16:28] learn how to do that in this video right
+[16:31] here.

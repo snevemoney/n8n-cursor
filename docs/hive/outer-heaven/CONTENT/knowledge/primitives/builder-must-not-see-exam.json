@@ -1,0 +1,25 @@
+{
+  "primitive_id": "PRIM-eecUhBpTz_g-builder-must-not-see-exam",
+  "name": "BUILDER-MUST-NOT-SEE-EXAM",
+  "loop": [
+    "write hold-out success tests before the bite",
+    "hide them from the builder",
+    "builder implements from spec only",
+    "other session / other desk grades",
+    "fix open misses before next build",
+    "named deploy strategy — flip HITL"
+  ],
+  "obvious_demo": "Cole dark factory + separate validator",
+  "other_applications": [
+    "Notes only: Watchdog GRADE",
+    "Do not auto-wire headless deploy"
+  ],
+  "capability_ids": [
+    "CAP-eecUhBpTz_g-spec-queue-holdout"
+  ],
+  "source_video_id": "eecUhBpTz_g",
+  "timestamp": "13:52-23:48",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}
