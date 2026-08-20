@@ -53,9 +53,9 @@ Desks: use the Vercel preview URL from the PR, not `:3006`.
 
 ## Preview deploy
 
-```bash
-cd apps/cinematic-ai-partner-green
-npx vercel
-```
+Desks: open a **public preview URL**, not `localhost:3005` / `:3006`.
 
-Or set the Vercel project root to `apps/cinematic-ai-partner-green`. Not a production domain.
+- Vercel (same recipe as the blue known-good): `cd apps/cinematic-ai-partner-green && npx vercel --yes`
+- Durable snapshot in this PR: `preview-site/` (static export, relative assets)
+
+Do not attach evenslouis.ca. Not a production domain.
