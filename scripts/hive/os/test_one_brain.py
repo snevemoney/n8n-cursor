@@ -120,6 +120,17 @@ class OneBrainTest(unittest.TestCase):
         self.assertEqual(recs[0]["session_id"], "sess-2")
         self.assertFalse(recs[0]["emitted"])
 
+    def test_trigger_check_cli(self) -> None:
+        proc = subprocess.run(
+            [sys.executable, str(SCRIPT), "trigger-check"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        payload = json.loads(proc.stdout)
+        self.assertEqual(payload["trigger_check"], "pass")
+
 
 if __name__ == "__main__":
     unittest.main()

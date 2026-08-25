@@ -54,6 +54,14 @@ python3 scripts/hive/os/cursor-chat-sessions.py read --id <uuid>
 
 If that CLI is not on this branch, do not invent a dump. Leave the transcript on disk.
 
+## Prove the trigger
+
+```
+python3 scripts/hive/os/one-brain.py trigger-check
+```
+
+That rehearses the exact `sessionStart` / `sessionEnd` JSON Cursor sends. Live Composer proof is still Settings → Hooks after this branch is checked out on the Mac.
+
 ## Create the Automation
 
 1. Open https://cursor.com/automations/new

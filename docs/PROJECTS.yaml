@@ -38,7 +38,20 @@ projects:
       - "mcp/side-hustle/**"
       - "tools/mcp-servers/**"
       - "scripts/n8n-*.sh"
+      - "scripts/hive/**"
       - "docs/workflows/**"
+      - ".cursor/**"
+    allow_globs:
+      - "apps/n8n-cursor/**"
+      - "workflows/**"
+      - "mcp/side-hustle/**"
+      - "tools/mcp-servers/**"
+      - "scripts/n8n-*.sh"
+      - "scripts/hive/**"
+      - "docs/workflows/**"
+      - "docs/PROJECTS.yaml"
+      - ".cursor/**"
+      - ".github/workflows/**"
     excluded_paths:
       - "apps/lightningflow/**"  # Keep separate from main app
       - "packages/lf-sdk/**"     # Main app SDK

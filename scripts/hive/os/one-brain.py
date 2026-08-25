@@ -533,6 +533,83 @@ def cmd_automation() -> int:
     return 0
 
 
+def cmd_trigger_check() -> int:
+    """Rehearse sessionStart/sessionEnd JSON the way Cursor sends it."""
+    import tempfile
+
+    cfg = load_cfg()
+    repo = ROOT
+    start = repo / ".cursor/hooks/one-brain-start.sh"
+    stop = repo / ".cursor/hooks/one-brain-stop.sh"
+    hooks = json.loads((repo / ".cursor/hooks.json").read_text(encoding="utf-8"))
+    if hooks.get("version") != 1:
+        raise SystemExit("hooks.json version must be 1")
+    if not start.is_file() or not stop.is_file():
+        raise SystemExit("hook scripts missing")
+    if not os.access(start, os.X_OK) or not os.access(stop, os.X_OK):
+        raise SystemExit("hook scripts must be executable")
+    with tempfile.TemporaryDirectory() as td:
+        env = os.environ.copy()
+        env["ONE_BRAIN_OS"] = td
+        start_in = json.dumps(
+            {
+                "session_id": "trigger-check-live",
+                "is_background_agent": False,
+                "composer_mode": "agent",
+            }
+        )
+        start_proc = subprocess.run(
+            ["bash", str(start)],
+            input=start_in,
+            text=True,
+            capture_output=True,
+            cwd=str(repo),
+            env=env,
+        )
+        if start_proc.returncode != 0:
+            raise SystemExit(f"sessionStart hook failed: {start_proc.stderr}")
+        start_out = json.loads(start_proc.stdout)
+        if "ONE BRAIN" not in start_out.get("additional_context", ""):
+            raise SystemExit("sessionStart did not inject the one-brain card")
+        if start_out.get("env", {}).get("HIVE_ONE_BRAIN_SESSION") != "trigger-check-live":
+            raise SystemExit("sessionStart did not set HIVE_ONE_BRAIN_SESSION")
+        stop_in = json.dumps(
+            {
+                "session_id": "trigger-check-live",
+                "reason": "completed",
+                "duration_ms": 1,
+                "is_background_agent": False,
+            }
+        )
+        stop_proc = subprocess.run(
+            ["bash", str(stop)],
+            input=stop_in,
+            text=True,
+            capture_output=True,
+            cwd=str(repo),
+            env=env,
+        )
+        if stop_proc.returncode != 0:
+            raise SystemExit(f"sessionEnd hook failed: {stop_proc.stderr}")
+        stop_out = json.loads(stop_proc.stdout)
+        if stop_out.get("emitted") is not False:
+            raise SystemExit("sessionEnd must write a receipt only")
+    print(
+        json.dumps(
+            {
+                "trigger_check": "pass",
+                "sessionStart": "card+env",
+                "sessionEnd": "receipt-only",
+                "hooks": "version-1",
+                "note": "script contract only — Composer Hooks tab is the live proof",
+                "morning_cron": cfg["morning_cron"],
+                "morning_tz": cfg["morning_tz"],
+            }
+        )
+    )
+    return 0
+
+
 def cmd_self_test() -> int:
     import tempfile
     import unittest
@@ -642,6 +719,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("status", help="Alias of wake")
     sub.add_parser("capture", help="Run local Mac capture cycle")
     sub.add_parser("automation", help="Print Cursor Automation spec")
+    sub.add_parser("trigger-check", help="Rehearse sessionStart/sessionEnd JSON")
     sub.add_parser("self-test", help="Isolated unit tests")
     return ap
 
@@ -665,6 +743,8 @@ def main() -> int:
         return cmd_capture()
     if args.cmd == "automation":
         return cmd_automation()
+    if args.cmd == "trigger-check":
+        return cmd_trigger_check()
     return cmd_self_test()
 
 
