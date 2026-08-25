@@ -8,39 +8,35 @@ send: removed
 clock: parked
 ---
 
-# HITL inbox — Cloud-host fix sitting
+# HITL inbox — after PR 48 + Watchdog hold-outs
 
-Format only. Evens is the only person who merges, Saves, or Activates. Yellow `grokbot_orphans` = **8**. Continue. Do not restore.
+Format only. Evens is the only person who Saves or Activates. Yellow `grokbot_orphans` = **8**. Continue. Do not restore.
 
 **SSOT:** `desk-missions-now/hitl/INBOX.md`. Doctrine: `desk-missions-now/CLOUD-HOST.md`.
 
+## Closed this sitting
+
+- **[PR 48](https://github.com/snevemoney/n8n-cursor/pull/48) merged** onto `main` (`48982b9d187337b276a90a9e0d113167246e1c53`). Do **not** merge [PR 47](https://github.com/snevemoney/n8n-cursor/pull/47).
+- **Hold-outs written** by Watchdog: `desk-missions-now/watchdog/hold-outs/X80ljdCPM_U.md`. No Forge attempt. No signal GRADE.
+
 ## Open cards
 
-### 1. Merge the Cloud-host fix — not PR 47
+### 1. Next sitting = Forge attempt (OBSERVED only)
 
-ACTION: Merge the `fix/hive-cloud-checkout` PR onto `main`. Leave [PR 47](https://github.com/snevemoney/n8n-cursor/pull/47) **closed / unmerged**.  
-WHY: Cloud only sees `origin/main`. PR 47 is the invent (`factory-os-train-plane`). This fix is the real pick + SSOT pack.  
-AGENT: Evens  
-RISK: Merging 47 sends the next TRAIN into hold-outs for a fake id  
-REVERSIBILITY: High while 47 is closed  
+ACTION: Next Cloud TRAIN (or say **attempt**) = Forge writes `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` OBSERVED only. Do not GRADE in that sitting. Do not rewrite hold-outs.  
+WHY: Stage machine: hold-outs exist + no attempt → Forge attempts. GRADE is the 10:00 Watchdog job / a later sitting.  
+AGENT: Cloud TRAIN / Evens if he says attempt  
+RISK: Same-run GRADE · paper-PROVEN · remint `eval-then-wrap-tools`  
+REVERSIBILITY: High before GRADE  
 EVENS: leftover
 
-### 2. Re-paste TRAIN prompt after merge (optional if editor is stale)
+### 2. Re-paste TRAIN prompt if the live editor is stale
 
 ACTION: If the live Hive daily TRAIN Automation still says “untracked checkout expected,” paste `hitl/pastes/01-hive-daily-train.md` from `main`. Do not Activate extra jobs unless you ask.  
 WHY: Actuate order is files-on-main → then Automation.  
 AGENT: Evens  
 RISK: Stale prompt keeps teaching Cloud to invent  
 REVERSIBILITY: High — paste only  
-EVENS: leftover
-
-### 3. TRAIN-2 is already named
-
-ACTION: Do nothing except merge. Next Cloud TRAIN sitting = Watchdog hold-outs for **`X80ljdCPM_U`**, then stop. No Forge in that sitting.  
-WHY: Packet `full.txt` + ACTION TRACE land on `main` with this fix.  
-AGENT: Evens  
-RISK: Opening hold-outs for the invented slug · re-training `kwSVtQ7dziU`  
-REVERSIBILITY: High  
 EVENS: leftover
 
 ### Always-include (until Evens closes)
@@ -52,6 +48,6 @@ EVENS: leftover
 
 ## NEVER
 
-Send / pay / deploy / book / publish · merge PR 47 · hold-outs for `factory-os-train-plane` · remint 325 · restore `grokbot_orphans` · claim 90% actuated · paper-PROVEN.
+Send / pay / deploy / book / publish · merge PR 47 · hold-outs for `factory-os-train-plane` · remint 325 · restore `grokbot_orphans` · claim 90% actuated · paper-PROVEN · Forge+GRADE same sitting.
 
 [[GOAL-GAP-BOARD]] · [[HIVE-AUTOMATION-PACK]] · [[CLOUD-HOST]]

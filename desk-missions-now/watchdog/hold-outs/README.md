@@ -12,6 +12,6 @@ Watchdog writes the hidden exam **before** Forge attempts. Builder never fills G
 
 ## Next exam
 
-After Evens merges the Cloud-host fix: `{id}` = `X80ljdCPM_U`. Write that file in the Watchdog-first sitting, then stop. No Forge in that sitting.
+`{id}` = `X80ljdCPM_U` — **filed** `X80ljdCPM_U.md` (Watchdog, 2026-08-25). Next Cloud TRAIN = Forge OBSERVED only. Do not rewrite this exam. Do not GRADE in the attempt sitting.
 
 TRAIN-1 leftover (Mac archive): Forge authored `SIGNAL-TRAIN-1.md` for `kwSVtQ7dziU`. Do not rewrite it. Do not re-train that id.
