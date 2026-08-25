@@ -3,7 +3,7 @@ tags: [os, factory, hitl, automation, pack]
 at: 2026-08-25
 desk: hitl-operator
 machine: dark-factory
-status: unsent · SSOT locked · not claimed Active
+status: unsent · Watchdog GRADE editor opened · Cloud web = none · not claimed Active
 send: removed
 clock: parked
 ---
@@ -40,12 +40,12 @@ CRON-EXCEPTION: only if Evens types one
 
 | Name | Trigger | Tools / MCP allow-list | Tools / MCP deny | Web | Memories | Paste on disk |
 |------|---------|------------------------|------------------|-----|----------|---------------|
-| **Hive daily TRAIN** | Daily `0 9 * * *` | **GitHub** (file write / draft PR) · repo checkout · `signal-retrieve.py` only if present **and** theme matches | Slack · Gmail send · Stripe · Hostinger · GitHub PR comment / request-reviewers · `cursor-ide-browser` · Playwright · `browser-use` | **NO this plugin** — Cloud cannot spawn local `uvx`. Built-in Cloud browse if any, else skip live URL. Retrieve stays local. | `memories.md` + `memories/forge.md` | `pastes/01-hive-daily-train.md` |
-| **Watchdog GRADE sitting** | Daily `0 10 * * *` | **GitHub** (write GRADE / hold-outs only) · `separate-verifier.md` | Slack · Gmail send · Stripe · Hostinger · PR comment · edit Forge files · any browser | **NO** — disk hold-outs + attempt. Headed OBSERVED = UNKNOWN unless the waiting row already has it. | `memories.md` + `memories/watchdog.md` | `pastes/02-watchdog-grade.md` |
-| **Researcher next-row pick** | Daily `0 8 * * *` | **GitHub** (write `NEXT-TRAIN-PICK.md`) · retrieve-on-match if script exists | Slack · ledger flip · 1803 walk · Gmail send · Stripe · Hostinger · PR comment · `cursor-ide-browser` · Playwright · `browser-use` | **NO this plugin** — local `uvx` stdio only. Persist = GitHub. Built-in Cloud browse if any, else skip URL confirm. | `memories.md` + `memories/researcher.md` | `pastes/03-researcher-next-row.md` |
-| **Goal/gap board refresh** | Daily `0 18 * * *` | **GitHub** (write `GOAL-GAP-BOARD.md` only) | Slack · GRADE · TRAIN · Gmail send · Stripe · Hostinger · PR comment · any browser | **NO** — OBSERVED from disk. | `memories.md` + `memories/hitl-operator.md` | `pastes/04-goal-gap-board.md` |
-| **Factory-OS Grok reader reminder** | Daily `0 11 * * *` | **GitHub** (write `FACTORY-OS-NEXT.md`) · read tracked `cursor-chat-sessions` as sibling shape | Slack · implement reader on Cloud · copy `/workspace` · Gmail send · Stripe · Hostinger · mint · any browser | **NO** — Mac-only Grok path. Web cannot see `~/Library/Application Support/Grok Bot/`. | `memories.md` + `memories/forge.md` | `pastes/05-factory-os-reminder.md` |
-| **HITL Operator inbox** | Daily `0 17 * * *` | **GitHub** (write `INBOX.md` only) | Slack · execute Save/copy/pay · Gmail send · Stripe · Hostinger · PR comment · any browser | **NO** — format leftovers. Never click. | `memories.md` + `memories/hitl-operator.md` | `pastes/06-hitl-inbox.md` |
+| **Hive daily TRAIN** | Daily `0 9 * * *` | **GitHub** (file write / draft PR) · repo checkout · `signal-retrieve.py` only if present **and** theme matches | Slack · Gmail send · Stripe · Hostinger · GitHub PR comment / request-reviewers · `cursor-ide-browser` · Playwright · `browser-use` | **none** | `memories.md` + `memories/forge.md` | `pastes/01-hive-daily-train.md` |
+| **Watchdog GRADE sitting** | Daily `0 10 * * *` | **GitHub** (write GRADE / hold-outs only) · `separate-verifier.md` | Slack · Gmail send · Stripe · Hostinger · PR comment · edit Forge files · any browser | **none** | `memories.md` + `memories/watchdog.md` | `pastes/02-watchdog-grade.md` |
+| **Researcher next-row pick** | Daily `0 8 * * *` | **GitHub** (write `NEXT-TRAIN-PICK.md`) · retrieve-on-match if script exists | Slack · ledger flip · 1803 walk · Gmail send · Stripe · Hostinger · PR comment · `cursor-ide-browser` · Playwright · `browser-use` | **none** | `memories.md` + `memories/researcher.md` | `pastes/03-researcher-next-row.md` |
+| **Goal/gap board refresh** | Daily `0 18 * * *` | **GitHub** (write `GOAL-GAP-BOARD.md` only) | Slack · GRADE · TRAIN · Gmail send · Stripe · Hostinger · PR comment · any browser | **none** | `memories.md` + `memories/hitl-operator.md` | `pastes/04-goal-gap-board.md` |
+| **Factory-OS Grok reader reminder** | Daily `0 11 * * *` | **GitHub** (write `FACTORY-OS-NEXT.md`) · read tracked `grok-chat-sessions` / `cursor-chat-sessions` as sibling shape | Slack · implement reader on Cloud · copy `/workspace` · Gmail send · Stripe · Hostinger · mint · any browser | **none** | `memories.md` + `memories/forge.md` | `pastes/05-factory-os-reminder.md` |
+| **HITL Operator inbox** | Daily `0 17 * * *` | **GitHub** (write `INBOX.md` only) | Slack · execute Save/copy/pay · Gmail send · Stripe · Hostinger · PR comment · any browser | **none** | `memories.md` + `memories/hitl-operator.md` | `pastes/06-hitl-inbox.md` |
 
 **Whole-instance deny (every job):** Slack tool / Slack notify · Stripe / pay · Hostinger deploy · Gmail send · Vercel publish · n8n-as-host · Trigger.dev · Cole L4–5 · unsupervised `/goal` · default-17 · invent TRAIN slugs.
 
@@ -129,7 +129,9 @@ CRON-EXCEPTION: only if Evens types one
 
 | Job | Agent does | Evens does |
 |-----|------------|------------|
-| All six | Files on this PR / `main` after merge | **Merge this fix, not PR 47.** Then re-paste prompts if the live TRAIN editor still has the old “untracked expected” line. Activate stays HITL. |
+| Hive daily TRAIN | **Not opened again.** Two Inactive rows already on Mine. Do not create a third TRAIN. | Use the newer TRAIN row. |
+| Watchdog GRADE sitting | **Opened now** — GitHub (`mcp.server.name: github`) · Memories on · `snevemoney/n8n-cursor` `main` · cron `0 10 * * *` · Web = none · no Slack · no browser-use. Glass holds **one** draft. | **Save this Watchdog.** Then say **next** for the remaining four. |
+| Researcher / Goal-gap / Factory-OS reminder / HITL inbox | Ready on disk (`pastes/03`–`06`). Not opened — one editor at a time. | After Watchdog Save, say next. |
 | Slack daily / Untitled | Left unused | Do not hijack |
 
 `open_automation` cannot create, enable, or list. Mine **Tools** icons ≠ repo checkout.
