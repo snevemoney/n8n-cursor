@@ -21,7 +21,7 @@ Yellow orphans = **8** (named in `memories.md`). Continue.
 | **`/workspace` missing** | Grok remotion trees MISSING on the Mac. SIGNAL_INDEX `/workspace` transcripts here = **0**. | TRIAGE any `/workspace` path. Copy stays Evens. | Still missing. Do not invent packets. | Never fabricate HOW THEY BUILT |
 | **16 steal/caption leftovers** | Ledger `steal_gap` **16**. 1803 is a count, not a to-do. | Prefer steal_gap + packet + `full.txt` + ACTION TRACE **on this checkout**. Else TRIAGE. | TRAIN-2 named: `X80ljdCPM_U` (packet committed on the Cloud-host fix). | Do not flip `COVERAGE_LEDGER.json` |
 | **Consultant dark** | Default five skips Consultant. | Wake only if TASK is consult-vs-build / doctor-vs-pharmacist / audit-first. | Still cold. Not a bug. | Do not “fix dark” by waking 17 |
-| **Hold-outs Watchdog-first** | TRAIN-1 leftover: Forge wrote the exam. This sitting: Watchdog wrote `watchdog/hold-outs/X80ljdCPM_U.md`. | Watchdog writes hold-outs before Forge. GRADE only in a later sitting. | **OBSERVED 2026-08-25:** Watchdog authored hidden exam for `X80ljdCPM_U`. No Forge attempt. No signal GRADE. Next Cloud TRAIN = Forge OBSERVED only. | Builder does not fill GRADE |
+| **Hold-outs Watchdog-first** | Watchdog wrote `watchdog/hold-outs/X80ljdCPM_U.md`. Forge attempt now on disk. | Watchdog writes hold-outs before Forge. GRADE only in a later sitting. | **OBSERVED 2026-08-25:** Forge attempt `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` (OBSERVED only). No signal GRADE this sitting. Next = Watchdog GRADE. | Builder does not fill GRADE |
 | **Retrieve default-off** | `scripts/hive/os/signal-retrieve.py` on `main` after merge. | Retrieve only if TASK matches a domain → ≤3 refs. No match → NONE. | Default-off still the law. | Never dump SIGNAL_INDEX |
 | **Factory OS / Grok chat reader** | `forge/FACTORY-OS-NEXT.md` stub on SSOT. Cloud cannot see Grok persistence. | Reminder / draft brief only on Cloud. | Named gap. REMINDER stub present. | No buyer surface this week |
 | **Hive Automations pack** | Six named jobs + `CLOUD-HOST.md` on SSOT. Slack leftover unused. | Evens Saves each job. MCP cannot enable. | [PR 48](https://github.com/snevemoney/n8n-cursor/pull/48) merged `48982b9d1`. Invented slug retired. 90% not actuated. | Do not hijack Slack daily |
@@ -31,6 +31,6 @@ Yellow orphans = **8** (named in `memories.md`). Continue.
 **TRIAGE decoy:** `karpathy-wiki-nate-herk` — no ACTION TRACE heading.  
 **Retired invent:** `factory-os-train-plane` — PR 47. Do not merge. Do not hold-out.
 
-**Last OBSERVED (2026-08-25 · Watchdog hold-outs):** [PR 48](https://github.com/snevemoney/n8n-cursor/pull/48) merged (`48982b9d1`). Hidden exam `desk-missions-now/watchdog/hold-outs/X80ljdCPM_U.md` Watchdog-authored. No Forge. No signal GRADE. Next sitting = Forge OBSERVED only. Yellow orphans = 8, continue.
+**Last OBSERVED (2026-08-25 · Forge attempt):** `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` landed OBSERVED only. TASK = eval-then-wrap existing host tools; no remint; no GRADE. Next sitting = Watchdog GRADE (separate run). Yellow orphans = 8, continue.
 
 [[CLOUD-HOST]] · [[HIVE-AUTOMATION-PACK]] · [[memories]] · [[SIGNAL-TRAIN-LOOP]]

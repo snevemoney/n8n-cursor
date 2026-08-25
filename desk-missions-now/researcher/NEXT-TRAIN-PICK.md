@@ -3,7 +3,7 @@ tags: [os, factory, researcher, signal-train]
 at: 2026-08-25
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · not attempted
+status: named pick · TRAIN · Forge attempted · waiting Watchdog GRADE
 send: removed
 clock: parked
 ---
@@ -26,7 +26,9 @@ clock: parked
 
 **Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
 
-**Next stage (one sitting):** Watchdog hold-outs **first** → `desk-missions-now/watchdog/hold-outs/X80ljdCPM_U.md` → **stop**. No Forge attempt in that sitting. No GRADE in that sitting.
+**This stage (done):** Forge attempt → `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` (OBSERVED only). Hold-outs were not rewritten.
+
+**Next stage (one sitting):** Watchdog **GRADE** vs existing hold-outs → **stop**. Do not re-attempt. Do not GRADE in a Forge sitting.
 
 Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
 

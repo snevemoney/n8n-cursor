@@ -8,7 +8,7 @@ send: removed
 clock: parked
 ---
 
-# HITL inbox — after PR 48 + Watchdog hold-outs
+# HITL inbox — after Forge attempt `X80ljdCPM_U`
 
 Format only. Evens is the only person who Saves or Activates. Yellow `grokbot_orphans` = **8**. Continue. Do not restore.
 
@@ -16,17 +16,16 @@ Format only. Evens is the only person who Saves or Activates. Yellow `grokbot_or
 
 ## Closed this sitting
 
-- **[PR 48](https://github.com/snevemoney/n8n-cursor/pull/48) merged** onto `main` (`48982b9d187337b276a90a9e0d113167246e1c53`). Do **not** merge [PR 47](https://github.com/snevemoney/n8n-cursor/pull/47).
-- **Hold-outs written** by Watchdog: `desk-missions-now/watchdog/hold-outs/X80ljdCPM_U.md`. No Forge attempt. No signal GRADE.
+- **Forge attempt landed:** `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` (OBSERVED only). Hold-outs were not rewritten. No signal GRADE in this sitting.
 
 ## Open cards
 
-### 1. Next sitting = Forge attempt (OBSERVED only)
+### 1. Next sitting = Watchdog GRADE
 
-ACTION: Next Cloud TRAIN (or say **attempt**) = Forge writes `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` OBSERVED only. Do not GRADE in that sitting. Do not rewrite hold-outs.  
-WHY: Stage machine: hold-outs exist + no attempt → Forge attempts. GRADE is the 10:00 Watchdog job / a later sitting.  
-AGENT: Cloud TRAIN / Evens if he says attempt  
-RISK: Same-run GRADE · paper-PROVEN · remint `eval-then-wrap-tools`  
+ACTION: Separate Cloud Watchdog GRADE sitting vs `desk-missions-now/watchdog/hold-outs/X80ljdCPM_U.md`. Write `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (or the GRADE path that sitting names). Do not re-attempt. Do not rewrite hold-outs.  
+WHY: Attempt is on disk. GRADE is a different run (`separate-verifier`).  
+AGENT: Cloud Watchdog GRADE / Evens if he says GRADE  
+RISK: Same-run GRADE · paper-PROVEN · Forge re-attempt  
 REVERSIBILITY: High before GRADE  
 EVENS: leftover
 
