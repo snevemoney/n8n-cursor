@@ -9,7 +9,7 @@ clock: parked
 
 # FACTORY-OS-NEXT
 
-**Status:** REMINDER · not started on Cloud  
+**Status:** REMINDER on Cloud · Mac CLI landed this sitting  
 **Date:** 2026-08-25  
 **SSOT:** `desk-missions-now/forge/FACTORY-OS-NEXT.md` (this file). Doctrine: `desk-missions-now/CLOUD-HOST.md`.
 
@@ -17,9 +17,11 @@ clock: parked
 
 First Factory OS bite = hive CLI to list/read Grok desk threads (sibling of `cursor-chat-sessions`). Not a remint. `skill-from-session` stays the mint gate.
 
+**Mac HOST (this sitting):** `python3 scripts/hive/os/grok-chat-sessions.py list --limit 5` · `read --id`. Skill: `scripts/hive/grok-skills/grok-chat-sessions.md`. Persistence folder exists on this Mac. Cloud still cannot see it.
+
 ## Why Cloud must not implement
 
-Grok persistence is Mac-local (`~/Library/Application Support/Grok Bot/`). This checkout cannot see it. Do not pretend you listed threads. Do not invent a reader. Do not SSH. Do not copy `/workspace`.
+Grok persistence is Mac-local (`~/Library/Application Support/Grok Bot/`). This checkout cannot see it. Do not pretend you listed threads. Do not re-implement the reader on Cloud. Do not SSH. Do not copy `/workspace`. Reminder job stays reminder-only.
 
 ## Never this sitting
 
