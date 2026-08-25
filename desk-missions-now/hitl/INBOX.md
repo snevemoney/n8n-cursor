@@ -8,7 +8,7 @@ send: removed
 clock: parked
 ---
 
-# HITL inbox — after Forge attempt `X80ljdCPM_U`
+# HITL inbox — after Watchdog GRADE `X80ljdCPM_U`
 
 Format only. Evens is the only person who Saves or Activates. Yellow `grokbot_orphans` = **8**. Continue. Do not restore.
 
@@ -16,17 +16,17 @@ Format only. Evens is the only person who Saves or Activates. Yellow `grokbot_or
 
 ## Closed this sitting
 
-- **Forge attempt landed:** `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` (OBSERVED only). Hold-outs were not rewritten. No signal GRADE in this sitting.
+- **Watchdog GRADE landed:** `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` = **pass**. Hold-outs and Forge attempt were not rewritten. Not paper-PROVEN.
 
 ## Open cards
 
-### 1. Next sitting = Watchdog GRADE
+### 1. Next sitting = Researcher pick or HITL leftover
 
-ACTION: Separate Cloud Watchdog GRADE sitting vs `desk-missions-now/watchdog/hold-outs/X80ljdCPM_U.md`. Write `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (or the GRADE path that sitting names). Do not re-attempt. Do not rewrite hold-outs.  
-WHY: Attempt is on disk. GRADE is a different run (`separate-verifier`).  
-AGENT: Cloud Watchdog GRADE / Evens if he says GRADE  
-RISK: Same-run GRADE · paper-PROVEN · Forge re-attempt  
-REVERSIBILITY: High before GRADE  
+ACTION: Do **not** start TRAIN-3 unless Evens names an id. Next legal move is a Researcher pick (real packet + `full.txt` + ACTION TRACE already on `main`) **or** a HITL leftover (re-paste / Save). Do not flatten this PASS into a new bite.  
+WHY: TRAIN-2 GRADE closed this id. An unnamed next row reopens the invent hole.  
+AGENT: Researcher next-row / Evens  
+RISK: Cloud writes hold-outs for an invent · re-grades `X80ljdCPM_U` · remint  
+REVERSIBILITY: High before a new id is named  
 EVENS: leftover
 
 ### 2. Re-paste TRAIN prompt if the live editor is stale
@@ -44,9 +44,10 @@ EVENS: leftover
 - Slack leftover “Summarize changes daily” — unused. Do not hijack. Do not delete unless Evens said delete.
 - `/workspace` remotion trees MISSING on the Mac. Copy stays Evens. Do not invent packets.
 - Factory-OS Grok chat reader = next named human-run bite, not a Cloud invent slug.
+- Skill `.md` missing on `main` (`eval-then-wrap-tools` · `golden-test-loop` · `send-removed` · `ask-principal`) is leftover sync — do not remint 325 to close it.
 
 ## NEVER
 
-Send / pay / deploy / book / publish · merge PR 47 · hold-outs for `factory-os-train-plane` · remint 325 · restore `grokbot_orphans` · claim 90% actuated · paper-PROVEN · Forge+GRADE same sitting.
+Send / pay / deploy / book / publish · merge PR 47 · hold-outs for `factory-os-train-plane` · remint 325 · restore `grokbot_orphans` · claim 90% actuated · paper-PROVEN · start TRAIN-3 unless Evens names it.
 
 [[GOAL-GAP-BOARD]] · [[HIVE-AUTOMATION-PACK]] · [[CLOUD-HOST]]

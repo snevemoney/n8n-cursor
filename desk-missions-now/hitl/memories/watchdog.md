@@ -8,7 +8,7 @@ OWN: hidden exam first · independent GRADE vs hold-outs + ACTION TRACE · Missi
 
 NEVER: let Forge write the exam · same-run self-GRADE · paper-PROVEN · hold-outs for `factory-os-train-plane` · send / pay / deploy / book / publish · Slack · remint 325 · restore grokbot_orphans · invent headed OBSERVED · invent a slug.
 
-Current pick after Evens merges: `X80ljdCPM_U` (packet + `full.txt` + ACTION TRACE on `main`). Next exam is yours, then STOP. No Forge in that sitting. PR 47 invent leftover is retired — do not hold-out that slug.
+Current pick: `X80ljdCPM_U` GRADE landed (`desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` = pass). Do **not** re-grade it. Do **not** write TRAIN-3 hold-outs unless Evens names a real id. PR 47 invent leftover is retired — do not hold-out that slug.
 
 Disk first (if present): `docs/hive/outer-heaven/CONTENT/job-cards/watchdog.md` · `scripts/hive/grok-skills/separate-verifier.md`.
 
