@@ -58,6 +58,12 @@ Missing brief / packet / script on this checkout → **TRIAGE** + `EVENS:` lefto
 
 `factory-os-train-plane` is not a packet, not a YouTube id, not a TRAIN row. PR 47 invented it. Do not merge that pick. Do not write hold-outs for it.
 
+## This stretch (Evens 2026-08-25)
+
+This stretch = **build the system** (Factory OS / dark-factory process). **Not** a sold product, not Path C emit, not a buyer site, not a virtual-CTO SKU.
+Grill already: this week Factory OS, no buyer surface. Do not drift into Path A/C / buyer surface / website SKU.
+Next work = host hygiene (Mine one-of-each GitHub jobs, files on `origin/main`, Grok reader on Mac, TRAIN only if Evens names an id). Not a new public surface.
+
 ## Yellow
 
 `grokbot_orphans` = **8**. Named, continue. Do not restore.

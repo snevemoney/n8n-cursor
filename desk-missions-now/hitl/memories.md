@@ -59,6 +59,9 @@ Skip already-PASS TRAIN-1 kwSVtQ7dziU. TRIAGE decoy: karpathy-wiki-nate-herk (no
 4823 catalog HTTP was GOOD. That is not the walkthrough. Do not reopen color leftovers on a TRAIN day.
 
 This week Factory OS, no buyer surface. Named gap: Grok chat reader CLI. Cloud cron cannot see ~/Library/Application Support/Grok Bot/ — reminder / draft only (forge/FACTORY-OS-NEXT.md).
+This stretch = build the system (Factory OS / dark-factory process). Not a sold product, not Path C emit, not a buyer site, not a virtual-CTO SKU.
+Grill already: this week Factory OS, no buyer surface. Do not drift into Path A/C / buyer surface / website SKU.
+Next work = host hygiene (Mine one-of-each GitHub jobs, files on origin/main, Grok reader on Mac, TRAIN only if Evens names an id). Not a new public surface.
 
 lightningflow.online and n8ncloud.tech are dead. No uptime goals. No mint 325. No remint. No hand-edit ~/.grokbot. Clock parked.
 

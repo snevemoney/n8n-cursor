@@ -33,4 +33,6 @@ Yellow orphans = **8** (named in `memories.md`). Continue.
 
 **Last OBSERVED (2026-08-25 · Watchdog GRADE):** `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` = **pass** vs hold-outs + ACTION TRACE. Leftovers named (skill `.md` missing on main · retrieve holes · caption UNKNOWN). Next sitting = Researcher pick or HITL leftover. Do not start TRAIN-3 unless Evens names it. Yellow orphans = 8, continue.
 
+**Last OBSERVED (2026-08-25 · Evens lock):** This stretch = build the system (Factory OS / dark-factory). Not Path A/C, not a buyer site, not a virtual-CTO SKU. Next = host hygiene (Mine one-of-each, files on origin/main, Grok reader on Mac, TRAIN only if Evens names an id). Yellow orphans = 8, continue.
+
 [[CLOUD-HOST]] · [[HIVE-AUTOMATION-PACK]] · [[memories]] · [[SIGNAL-TRAIN-LOOP]]
