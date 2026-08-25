@@ -96,11 +96,13 @@ Current TRAIN packet on `main`: `X80ljdCPM_U`.
 
 | Who | Demonstrated | Local path | Slug | run? |
 |-----|--------------|------------|------|------|
-| Nate eval | Same prompt, two brains, a score, then wrap tools. Native node can lie. | `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/LEARNED.md` | `eval-then-wrap-tools` | **WIRED**. n8n-as-host = **on-tape-never** |
+| Karpathy | Macro-action + metric → named workers → trusted check → human keeps the few bits. | `docs/hive/outer-heaven/CONTENT/watch-later/packets/kwSVtQ7dziU/LEARNED.md` | `golden-test-loop` | **WIRED**. TRAIN-1 leftover PASS — do not remint. |
+| Nate eval | Same prompt, two brains, a score, then wrap tools. Native node can lie. | `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/LEARNED.md` | `eval-then-wrap-tools` | **WIRED**. n8n-as-host = **on-tape-never**. TRAIN-2 leftover PASS — do not remint. |
+| Same-prompt tape | Verify-until is the story. Your stop condition is the product. | `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/LEARNED.md` | `golden-test-loop` | **skip** as a model bakeoff. Steal the stop, not the vendor. |
 
-**Local paths (1):** `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/LEARNED.md`
+**Local paths (5):** `docs/hive/outer-heaven/CONTENT/watch-later/packets/kwSVtQ7dziU/LEARNED.md` · `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/LEARNED.md` · `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/LEARNED.md` · `scripts/hive/grok-skills/golden-test-loop.md` · `scripts/hive/grok-skills/eval-then-wrap-tools.md`
 
-**ids:** `yt:X80ljdCPM_U`
+**ids:** `yt:kwSVtQ7dziU` · `yt:X80ljdCPM_U` · `yt:2J3uX8iRNng`
 
 ## vault-wiki
 
