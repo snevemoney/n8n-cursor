@@ -3,7 +3,7 @@ tags: [os, factory, researcher, signal-train]
 at: 2026-08-25
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · waiting Watchdog GRADE
+status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
 send: removed
 clock: parked
 ---
@@ -26,11 +26,11 @@ clock: parked
 
 **Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
 
-**This stage (done):** Forge attempt → `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` (OBSERVED only). Hold-outs were not rewritten.
+**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
 
-**Next stage (one sitting):** Watchdog **GRADE** vs existing hold-outs → **stop**. Do not re-attempt. Do not GRADE in a Forge sitting.
+**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
 
-Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
+Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
 
 Yellow `grokbot_orphans` = 8. Continue.
 
