@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/one-brain-start.sh",
+        "timeout": 15
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": ".cursor/hooks/one-brain-stop.sh",
+        "timeout": 15
+      }
+    ]
+  }
+}

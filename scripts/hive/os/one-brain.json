@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "machine": "shared truth + thin handoff. not a transcript dump.",
+  "hot_max_chars": 500,
+  "context_max_chars": 1800,
+  "chat_list_limit": 5,
+  "ask_chars": 80,
+  "sessions_file": "one-brain-sessions.jsonl",
+  "default_close_skill": "said",
+  "default_close_kind": "activity",
+  "morning_cron": "0 7 * * 1-5",
+  "morning_tz": "America/New_York",
+  "close_desk_hint": "after last sitting, Mac still on",
+  "never": [
+    "dump all Cursor JSONL",
+    "commit *.jsonl transcripts",
+    "send / pay / deploy / book / publish",
+    "15-minute chat sync",
+    "laptop-off Cloud Agent reading ~/.cursor"
+  ]
+}
