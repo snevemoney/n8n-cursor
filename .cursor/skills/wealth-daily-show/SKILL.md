@@ -17,6 +17,8 @@ Load `scripts/hive/grok-skills/wealth-daily-show.md` and follow it.
 
 Wired loop: `new-episode.sh` → `voice-pack-ready.sh` (SKIP_TTS or `generate_audio_batch` ≤12) → typecheck may run while TTS is in flight → one background `render-juno-day.sh` (lockfile refuses a second writer). Do not open Studio. Do not scoop the dirty checkout.
 
+**Since cap (2026-08-25 → reset 2026-08-26):** Aug 26 Juno mp4 is Mac-local only; V2 is PR 64 (not merged); Cloud cannot render; no fake scores / Next-NVDA. See SSOT “Since cap / current truth.”
+
 Automation paste: `desk-missions-now/wealth/pastes/01-wealth-daily-show.md`. Hard step: send / pay / deploy / book / publish stay Evens.
 
 Grok `/` copy: `~/.grokbot/skills/wealth-daily-show/SKILL.md` (generated from SSOT).

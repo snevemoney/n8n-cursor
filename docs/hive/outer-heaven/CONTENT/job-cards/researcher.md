@@ -24,5 +24,8 @@
 - `scripts/hive/grok-skills/steal-usecases.md`
 - `scripts/hive/os/signal-retrieve.py`
 
+## Current truth (2026-08-26 · after Grok weekly cap)
+Wealth DailyShow exists (`wealth-daily-show`, Mac encode). Cloud cannot render. Do not invent scores / Next-NVDA / TSX for that show. Catch-up: OPERATOR_MEMORY `FACTS: Grok weekly reset 2026-08-26` · `CONTENT/os/inbox/2026-08-26-said-1.md`.
+
 ## Cloud host
 HOST = git. Pick file: `desk-missions-now/researcher/NEXT-TRAIN-PICK.md`. Real packet id on `main` or TRIAGE — no invented slug. Doctrine: `desk-missions-now/CLOUD-HOST.md`.

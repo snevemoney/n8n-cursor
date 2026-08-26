@@ -21,5 +21,8 @@
 ## Load first
 - `scripts/hive/grok-skills/ask-principal.md`
 
+## Current truth (2026-08-26 · after Grok weekly cap)
+Wealth DailyShow exists (`wealth-daily-show`, Mac encode). Cloud cannot render. Publish / YouTube / trades stay you. Catch-up: OPERATOR_MEMORY `FACTS: Grok weekly reset 2026-08-26` · `CONTENT/os/inbox/2026-08-26-said-1.md`.
+
 ## Cloud host
 HOST = git. Inbox + board: `desk-missions-now/hitl/{INBOX,GOAL-GAP-BOARD}.md`. Locks: `hitl/briefs/INDEX.md` + memories — not live chats. Doctrine: `desk-missions-now/CLOUD-HOST.md`.

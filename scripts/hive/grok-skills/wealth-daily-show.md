@@ -31,6 +31,18 @@ Missing path on that SHA → STOP and report the SHA. Paths exist + this host is
 
 Daily show home is **`origin/main` on the Mac**. Do not scoop the dirty researcher checkout.
 
+## Since cap / current truth (2026-08-26)
+
+Grok weekly-capped **2026-08-25**; limit reset **2026-08-26**. Load this before running a day.
+
+- **V1 watch (Mac local):** `apps/portfolio-brief-remotion/out/daily-2026-08-26-vo-juno.mp4` — 71MB, 6:08, 1920×1080, 30fps, AAC, Juno. **Not on origin/main.** Main episode is Aug 25 (`out/daily-2026-08-25-vo-juno.mp4`). Do not invent Aug 26 onto main.
+- **V2:** PR https://github.com/snevemoney/n8n-cursor/pull/64 · `wealth/daily-v2` — **open, not merged**. Five acts MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION. Formulas only on the prediction board; else UNKNOWN. Funnel for empty Next-NVDA — do not fabricate candidates. Remember yesterday when a prior episode exists. Stills may live in the V2 worktree `out/engine-qa-v2/`. Evens wants V2 viz, not a redesign.
+- **Host-gate:** Cloud / `/workspace` abort is “wrong host,” not a missing tree. Encode is Mac only.
+- **Glass:** automation `8e8d7b8c-a119-11f1-b532-320a589b8025` **Wealth daily show** → connect **`main`**. API cannot Save. Cloud Run ≠ mp4.
+- **Dirty checkout:** `hive/desk` @ `35fcac97` + ~2500 uncommitted paths. Do not dump onto PRs. No `cursor/*` remotes.
+- **Credits (this sitting, live):** Reid 5.1 + Nora 5.1 + Juno Aug25 28.6 + Juno Aug26 27.2 = **66.0**. Remaining **891.5**, plan free. Juno default. `get_cost` first. No `use_unlim`.
+- Never invent scores / prices / Next-NVDA / TSX / weights.
+
 ## Card
 
 ```
