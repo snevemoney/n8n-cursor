@@ -24,5 +24,8 @@
 - `scripts/hive/grok-skills/click-live-site.md`
 - `CONTENT/website-building/cinematic/PLAYBOOK.md`
 
+## Current truth (2026-08-26 · after Grok weekly cap)
+Wealth DailyShow exists (`wealth-daily-show`, Mac encode). Cloud cannot render. Grade after a named bite. Catch-up: OPERATOR_MEMORY `FACTS: Grok weekly reset 2026-08-26` · `CONTENT/os/inbox/2026-08-26-said-1.md`.
+
 ## Cloud host
 HOST = git. Living desk files: repo-root `desk-missions-now/` on `origin/main`. Doctrine: `desk-missions-now/CLOUD-HOST.md`. Do not write Cloud artifacts under `docs/hive/.../dry-runs/`.

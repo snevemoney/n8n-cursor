@@ -53,11 +53,11 @@ Company this week is Path C ProofCheck (nursing claim-verify → report → fina
 
 ## Wake / allow / deny / done / yellow
 
-**WAKE (default, on the loop — not the product):** Forge · Watchdog · HITL Operator · Researcher · Communications Manager.
+**WAKE (default, on the loop — not the product):** Forge · Watchdog · HITL Operator · Researcher · Communications Manager. Wealth product exists (`wealth-daily-show`); Cloud cannot render — still not on this five.
 
 **On demand:** Big Boss, Day Planner, Librarian, Money Desk, Lead Hunter, Product GTM, Creative Studio, Consultant, Career Strategist, Publishing Engine — only if Evens names them.
 
-**COLD unless Evens names them:** Wealth Manager · Personal CFO.
+**COLD unless Evens names them:** Wealth Manager · Personal CFO. Wealth has a real Mac product (~7min Juno DailyShow). Cloud / Grok box cannot encode.
 
 **Exception (all 17):** Evens says “all desks” **or** `coverage-loop --video-id`. That is a tape walk, not default factory wake. Cite `hive-spawn-desks`.
 

@@ -686,3 +686,12 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 - **Quarantine:** alexelorenzo $1 Ripple course · sandy4kad $20k station · 0xDeliriumm Anthropic-fired drama · NSFW LoRA.
 - **DO [ai-partner-websites / creative-themes]:** @aaatouketsu two AKIRA SOL AE tutorials + Photoshop paper-mockup = look-only cinematic refs. No Unreal/Blender hive stack.
 - **Beamhook** = operator Mac optional (media keys). **amazon-own-store:** zero product signal in this remainder. Day-1 still match existing ASIN, no spend.
+
+### FACTS: Grok weekly reset 2026-08-26 [hive-os]
+
+- **source:** Operator + Cursor catch-up | 2026-08-26 | confidence high
+- **GAP:** Grok Bot last weekly-capped **2026-08-25** (Watchdog last Grok activity ~10:01 UTC; Cursor continue-here pack that day). Limit reset **2026-08-26**. Desks wake empty — this FACT + `CONTENT/os/inbox/2026-08-26-said-1.md` is the packet.
+- **Wealth V1 (Mac):** `apps/portfolio-brief-remotion` DailyShow + Morning60. Watch `out/daily-2026-08-26-vo-juno.mp4` is **local only**. `origin/main` has Aug 25. Do not invent Aug 26 onto main.
+- **Wealth V2:** PR 64 `wealth/daily-v2` **open, not merged**. Five acts. Formulas or UNKNOWN. No fake Next-NVDA / scores / TSX.
+- **Host:** Cloud cannot render Remotion. Mac encode. Glass `8e8d7b8c-a119-11f1-b532-320a589b8025` → connect **main**; API cannot Save. Dirty `hive/desk` @ `35fcac97` is not a PR dump.
+- **Default wake:** still the five. Wealth cold unless Evens names it — product is real (~7min Juno). Watchdog grades Forge after a named bite. Publish / YouTube / trades HITL.
