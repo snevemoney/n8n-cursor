@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-observe-pane",
+  "type": "Agent infrastructure",
+  "discovery": "One pane of named jobs — working / yellow-needs-input / done. Approval on side effects. Operator is a manager, not a tab-hunter.",
+  "applicability": "ALL desks",
+  "proposed_change": "Jobs live on state.json. Yellow = ask-principal. Wired as skill observe-pane on hive-spawn-desks via hive-state.py set-job. Glance ≠ approve.",
+  "evidence": "ZAaxx3qyT8g · xsAOpqjebOo · 62Rfe1w9NBc · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "ZAaxx3qyT8g",
+  "status": "WIRED",
+  "next": "Do not install Pixel Agents / Claude dashboard. A green row is not a hard-step close."
+}

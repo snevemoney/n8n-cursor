@@ -1,0 +1,459 @@
+[00:00] Really nice colors to be honest. Look at
+[00:01] that. Wow. Oh, wow. Look at this. That
+[00:04] is beautiful. I love that color
+[00:07] explosion.
+[00:08] That is so cool. I can't believe this is
+[00:11] made with one prompt. Let's take a look
+[00:12] at the other one. Okay, so this is the
+[00:14] car.
+[00:15] Oh, that's cool. Look at that. The tire
+[00:17] starts spinning really fast as I scroll.
+[00:19] Nice. This is a beautiful car. Wow.
+[00:24] Oh, that is really cool. [music] I like
+[00:26] this trail and just kind of following
+[00:27] the camera, following the car.
+[00:30] Wow. Oh, that is nice. Woo.
+[00:34] All right, C dance 2.5, you win. With C
+[00:37] dance 2.5 and Claude code, you can now
+[00:39] generate incredibly beautiful 3D
+[00:42] scrolling websites with one single
+[00:44] prompt. So, in this video, I'm going to
+[00:45] show you step by step how to do this,
+[00:47] and I'm also going to give you this
+[00:49] entire prompt pack completely for free,
+[00:51] which gives you everything you need to
+[00:53] know about C dance 2.5, about how to
+[00:55] prompt it, and a bunch of different
+[00:57] prompt examples that you can just copy
+[00:59] and paste inside your Claude code to
+[01:01] generate beautiful websites. I'm going
+[01:02] to walk you through step by step, so
+[01:04] regardless of your background, you'll be
+[01:05] able to just follow me along. All right,
+[01:07] let's get started. So, there's this
+[01:09] website called awwwards.com,
+[01:11] uh where you can see award-winning
+[01:13] websites. So, this is a website called
+[01:14] igloo.ink. This was like one of the most
+[01:16] award-winning
+[01:18] uh um websites of the year. So, you can
+[01:20] see all of these 3D scroll animation
+[01:22] actually exist in real life for
+[01:24] websites. You guys can also check that
+[01:26] out if you want, you know, examples of
+[01:28] website that you want to build. The ones
+[01:29] that we have created, like this Vanta
+[01:31] one for instance, this is also uh kind
+[01:33] of like a replica or a copy of an
+[01:35] award-winning website, which is exactly
+[01:37] what I did there. So, let me I really
+[01:39] like this one, actually. So, let me
+[01:40] actually go ahead and see what Jarvis
+[01:42] says. So, I'm going to share my screen
+[01:43] with Jarvis. By the way, for those of
+[01:45] you who don't know Jarvis, this is my
+[01:46] personal assistant, and this is my AI
+[01:48] second brain. So, all of these details
+[01:49] here
+[01:51] uh are basically all the folders and
+[01:53] files inside my computer. So, let me go
+[01:55] go and share my screen here.
+[01:57] >> I can see your screen and I'm listening,
+[01:59] sir. Just talk and feel free to cut me
+[02:01] off.
+[02:01] >> Hey Jarvis, so I'm sharing my screen
+[02:03] with you. This website that I created
+[02:06] with C Dance 2.5. What do you think
+[02:08] here? Roast it for me. Tell me what you
+[02:10] like, what you don't like.
+[02:11] >> One moment, eyes on it, sir.
+[02:13] A rather handsome cinematic landing
+[02:15] page, sir. Vanta real 03 the canyon with
+[02:19] a black hypercar on salt flats alive 153
+[02:23] mph dial top right and reserve as the
+[02:26] sole call to action up top. The footer
+[02:29] sells the film school angle 2.391
+[02:32] one continuous run and the only
+[02:34] interactive elements visible are that
+[02:36] reserve link and a thin scroll indicator
+[02:39] on the left. One honest note with a
+[02:41] single CTA hiding in 10 px letter spaced
+[02:43] gray type. The page is currently more
+[02:46] mood board than conversion funnel.
+[02:49] >> Okay, that's a good point. Yeah, so
+[02:50] Jarvis is pointing out the fact that
+[02:53] uh there's only like one very small
+[02:55] conversion here. So, you want to improve
+[02:56] that. So, that's actually a good point,
+[02:58] right? When you're creating these
+[02:59] websites, especially if you're building
+[03:00] it for a client or something like that,
+[03:02] you want to make sure that, you know,
+[03:04] obviously functionality is as important
+[03:06] as uh the look and feel on the website
+[03:08] as well. So, just like Jarvis pointed
+[03:10] out, the CTA at the bottom here, that's
+[03:12] very important. It's very small, but
+[03:15] it's kind of hiding in plain sight or
+[03:16] it's hiding underneath. You want to
+[03:18] bring that up, right? That's a big point
+[03:20] of, you know, website that if you
+[03:22] weren't selling to clients, that's a big
+[03:23] part of it. So, make sure you're taking
+[03:25] uh make sure you're doing that.
+[03:27] >> Precisely, sir. A call to action buried
+[03:29] at the bottom of the page is a shop door
+[03:31] round the back of the building. Rule of
+[03:33] thumb worth saying to camera, one
+[03:35] primary CTA visible before any
+[03:38] scrolling, repeated after each proof
+[03:40] section, and in a color nothing else on
+[03:42] the page is allowed to wear. Everything
+[03:44] else is decoration. That button is the
+[03:46] business.
+[03:47] >> Yep, good point, Jarvis, definitely. All
+[03:49] right. So, let me stop sharing with
+[03:51] Jarvis here. All right, so we're going
+[03:53] to do all of this inside our Claude
+[03:55] code. You can actually use Claude chat
+[03:56] if you want as well, but I like using
+[03:58] Claude code because it gives you all of
+[04:00] the files and saves it on a local
+[04:01] folder. So, that way if you need to make
+[04:03] any changes, you'll be able to do that
+[04:05] very easily. All right, so let's go
+[04:06] ahead and first get started on the
+[04:08] Claude code side. So, download the
+[04:10] desktop app cuz I'm using the Claude
+[04:11] desktop app. That's the easiest way to
+[04:13] use this honestly and kind of keeps
+[04:15] everything organized. And obviously, you
+[04:17] have to have a pro account or a max
+[04:19] account for Claude. So, once you log in
+[04:21] and start a new session, it's going to
+[04:22] look exactly like this. So, in order to
+[04:24] generate our assets for the website,
+[04:27] we're going to use the Higgs Field MCP.
+[04:29] Now, in order to connect the Higgs Field
+[04:30] MCP to our Claude code, it's very, very
+[04:33] simple, right? So, for those of you who
+[04:34] are not familiar, Higgs Field basically
+[04:36] gives you the ability to connect to all
+[04:38] image models, all video models, and
+[04:40] obviously, the C Dance 2.5 is the top
+[04:43] model right now because it just got
+[04:45] released because it creates up to 30
+[04:47] seconds of continuous cinematic videos
+[04:50] instead of other models where you had to
+[04:52] kind of stitch everything together. Now,
+[04:54] this is very important especially if
+[04:55] you're creating a website that requires
+[04:57] you to have a video with different
+[05:00] frames. So, if it's a continuous
+[05:01] 30-second video, then the quality of
+[05:03] your website becomes a lot better. So,
+[05:05] I'll give you a quick example. This is
+[05:07] kind of like one of those
+[05:09] you know, infinite zoom in and zoom out
+[05:11] websites that I created called
+[05:12] Magnitude. So, you can see this is like
+[05:14] a 30-second video that's kind of
+[05:16] stitched together. So, look at how
+[05:17] beautiful that is, right? So, I can zoom
+[05:19] in and zoom out. It kind of goes back
+[05:20] inside
+[05:22] and as I scroll up and down, it goes in
+[05:25] and out, right? So, as you can see, the
+[05:27] quality of this video is incredibly high
+[05:30] and it's only 720 pixels, which means
+[05:32] that the the website is going to be able
+[05:34] to load it a lot easier, right? So, as
+[05:36] you can see, as I kind of scroll, it
+[05:38] goes into this infinite zoom from this
+[05:40] droplet all the way back to our galaxy,
+[05:43] right? So, the reason why I said that C
+[05:45] Dance 2.5 is important for this type of
+[05:48] asset, for this type of video. And by
+[05:49] the way, this is a video, it's just
+[05:50] divided into multiple frames. So, inside
+[05:53] a website, it kind of combines
+[05:54] everything together. So, if you're using
+[05:56] a high-quality video model that's
+[05:59] generating this continuous shot, it
+[06:01] makes the quality of the website a lot
+[06:03] better. So, again, of course, this is
+[06:05] just one example, right? We can apply
+[06:06] this across any other, you know, product
+[06:09] dimension. If you're creating something
+[06:11] like a e-commerce website or some kind
+[06:13] of a product, all of that becomes very,
+[06:15] very important if you have a video model
+[06:17] that's able to generate high-quality
+[06:19] assets for you. And same thing for this
+[06:20] one, something like this car, for
+[06:21] instance, right? As you can see, this is
+[06:23] also a one continuous video, right? So,
+[06:27] and starting from, you know, the still
+[06:30] image of this car and the tire spinning
+[06:32] and kind of the camera follows it along,
+[06:34] and it's just split into couple of
+[06:36] different sections based on the
+[06:38] requirement of this particular website.
+[06:39] So, you can see, everything is really
+[06:41] well-made and well-designed. And by the
+[06:43] way, this right here is similar to an
+[06:45] award-winning website design, actually.
+[06:47] This is called Hubtown. This is a real
+[06:49] website. This was one of the websites
+[06:52] that won multiple awards. So, you can
+[06:54] see, this is basically something that we
+[06:55] can generate with our C-Dance 2.5 model
+[06:58] and our Higgs field MCP. I mean, it's a
+[07:00] really cool website, but this concept of
+[07:02] the streak following along is pretty
+[07:04] much the same thing as we just saw in
+[07:07] the video here or in the website that we
+[07:09] generated with our C-Dance 2.5 there.
+[07:12] So, you can see, these are websites that
+[07:13] are already out there, and we're just
+[07:15] using this as inspiration to build
+[07:18] incredible websites similar to these.
+[07:19] All right, so, that's kind of a few
+[07:21] examples I wanted to point out. All
+[07:22] right, so, now let's go ahead and get
+[07:24] started step by step. So, once you come
+[07:25] into your Cloud Code, you're going to
+[07:27] come to the bottom right here, click on
+[07:28] the plus button here, cuz we need to add
+[07:30] our MCP or connector. So, you're going
+[07:32] to hover over the connectors here,
+[07:34] you're going to go to manage connectors,
+[07:36] and on top right here, you're going to
+[07:37] click on add, and you're going to click
+[07:39] on add custom connector, because we need
+[07:41] to connect our Claude code to our Higgs
+[07:44] field. And the way to do that is we're
+[07:45] going to do it through our
+[07:47] MCP here. So, you're going to go ahead
+[07:48] and name it. So, I'm just going to name
+[07:50] it Higgs field MCP.
+[07:52] Or just Higgs field. And this remote
+[07:53] CRL, so go ahead and click on the link
+[07:55] in the description. It's going to bring
+[07:56] you right here. So, as you can see, I'm
+[07:58] already on Claude. And by the way, you
+[07:59] have to obviously sign up for
+[08:01] Higgs field account. But go ahead and do
+[08:03] that. And once you do that, click on the
+[08:05] link in the description again. It should
+[08:06] bring you exactly right here. Make sure
+[08:08] you click on Claude and MCP. And then
+[08:11] you're going to just copy this right
+[08:12] here. So, then you're going to go back
+[08:13] to your Claude code. And you're just
+[08:15] going to basically paste this remote
+[08:16] MCP. You're going to click on add. It's
+[08:18] not going to allow me because I've
+[08:19] already added. So, you can see a server
+[08:21] with this URL already exists. So, but
+[08:23] for you, it should be able to add it.
+[08:24] And once it gets added, then it's going
+[08:26] to look something like this. And you're
+[08:27] going to click on connect. And it's
+[08:29] going to open an authentication, which
+[08:30] is OAuth. Which basically means that you
+[08:34] want your Higgs field to be connected to
+[08:36] Claude. And it's just going to ask you
+[08:37] for permission. You're going to click on
+[08:39] allow. And then afterwards, when you
+[08:41] come back to your Claude code session
+[08:42] again and hover over the connectors, now
+[08:45] you should see your Higgs field MCP
+[08:47] installed and toggled on. So, make sure
+[08:49] you check that first because otherwise,
+[08:50] this is not going to work, right? All
+[08:52] right. So, once you do that, now we can
+[08:53] go ahead and start prompting this. Now,
+[08:55] instead of prompting this, you know,
+[08:57] five, six times in a row, I've already
+[08:59] created this prompt pack for you guys
+[09:00] that will make everything a lot easier
+[09:02] because I went through a lot of testing.
+[09:03] So, I created everything to make sure
+[09:05] are all of the prompts here and a guide
+[09:07] for you guys. So, that way it makes a
+[09:08] lot easier for you. So, that way you're
+[09:10] not wasting your tokens, right? So, this
+[09:12] is an entire prompt pack. I give you all
+[09:14] of the details about the cost, the
+[09:15] resolution, and everything you need to
+[09:17] know about C-Dance and how to build a
+[09:18] website, an entire kind of guide on
+[09:21] that. And then also, a bunch of
+[09:22] different examples, right? So, these are
+[09:24] just prompt examples that you can copy
+[09:26] and paste and test it out yourself. And
+[09:28] to access this is very simple. So,
+[09:30] you're going to click on the link in the
+[09:31] description. It's a free community. So,
+[09:33] once you click on that, it's going to
+[09:34] bring you right here in the about page.
+[09:35] Just click on join. Again, it's a free
+[09:37] community. Once you join, you're going
+[09:39] to be brought in the community section
+[09:40] here. You're going to go to the
+[09:41] classroom section, YouTube resources,
+[09:44] inside the Claude code folder, you will
+[09:45] have access to this prompt packed, and a
+[09:48] bunch of other
+[09:50] free resources there if you're
+[09:51] interested to check that out. Okay, so
+[09:53] once you grab that, let's go ahead and
+[09:54] get back to our Claude code here. So
+[09:56] now,
+[09:58] let's go ahead and actually I'm going to
+[09:59] copy one of these prompts that are
+[10:00] already in here. Let's see which one.
+[10:03] Okay, let's take this one. The reveal of
+[10:05] a house that comes I like this is a good
+[10:07] idea. So let's go ahead and just copy
+[10:08] this. I'm just going to copy this entire
+[10:10] prompt, go back to my Claude code here,
+[10:12] and I'm just going to go ahead and paste
+[10:14] this. Now before I enter, just make sure
+[10:16] you're using either Opus 5 or Fable 5. I
+[10:19] mean, Fable 5 is expensive, so maybe use
+[10:21] Opus 5. So I'm just going to keep it at
+[10:23] extra, but high if you want to keep it
+[10:25] at high that or max, that works as well.
+[10:27] It doesn't really matter that much to be
+[10:28] honest. So this is an entire prompt. So
+[10:30] I'm going to go ahead and just enter
+[10:32] this.
+[10:33] Okay, so now it's going to go ahead and
+[10:35] I said build me an award-winning single
+[10:37] property website for Halcyon, a
+[10:40] fictional 28.5 million glass and
+[10:43] travertine estate on a cliff headland.
+[10:46] The signature moment, the house
+[10:47] detonates into slow motion, blah blah.
+[10:49] So it gives you all of the details,
+[10:50] right? It It tells that use the
+[10:52] Hicksfield MCP. You want to use the the
+[10:55] seedance 2.5 model. It gives you gives
+[10:58] gives gives it all of the details as far
+[11:00] as the duration of the frame, the
+[11:03] levels, right? So different scenes. It
+[11:05] kind of describes all of that in the
+[11:06] website itself and everything else that
+[11:09] needs to be built here step by step. So
+[11:11] let's go ahead and now let this thing
+[11:12] finish. As you can see right here, it's
+[11:14] going to go ahead and check to make sure
+[11:15] that the connection to our Hicksfield
+[11:18] MCP is working, and then afterwards it's
+[11:20] going to go ahead and generate
+[11:21] everything. So there you go. So it says
+[11:22] using the Hicksfield MCP to generate the
+[11:24] image batch, and it's going to go ahead
+[11:26] and keep everything together, and at the
+[11:28] end combine it, and give us a nice
+[11:30] little website. So now let's go ahead
+[11:31] and give give this a couple of minutes.
+[11:32] It's going to take a minute or two, so
+[11:34] let's go ahead and give this a couple of
+[11:35] minutes and we can come back to it. So,
+[11:37] by the way, inside the classroom section
+[11:38] here, I've a bunch of different other
+[11:40] resources for you guys to take advantage
+[11:42] of related to C dance 2.5 and other
+[11:45] models there as well. And of course,
+[11:47] other builds that I've done, so feel
+[11:48] free to check that out. There's a bunch
+[11:50] of different things there including how
+[11:51] to build your AI second brain and
+[11:53] everything else. All right, so let's go
+[11:54] ahead and see what Claude All right, it
+[11:56] looks like it's done. There you go. So,
+[11:58] it looks like it built all of the images
+[12:00] the assets and everything else. And now
+[12:02] it says at the bottom here that um
+[12:04] Halcyon is live at the localhost 4995.
+[12:07] So, let's go ahead and click on this.
+[12:09] All right, so it's loading. Oh, cool.
+[12:11] So, this is kind of that fictional
+[12:12] property at the edge. So, as I scroll
+[12:14] now, oh wow, that's beautiful. That's
+[12:17] really cool. Look at this.
+[12:19] Nice. I like that explosion of glass and
+[12:22] color. That's a very cool look.
+[12:25] Nice. Oh, that's really cool. Wow.
+[12:28] That's beautiful. I like these three
+[12:30] level,
+[12:31] right? So, as you scroll it kind of
+[12:32] shows everything.
+[12:33] Nice. Very nice. Wow, that's actually
+[12:36] very impressive.
+[12:39] Nice. And then at the bottom it has this
+[12:41] like nice little spinning video here.
+[12:45] Very cool. Oh, you can actually drag
+[12:46] this. Oh, that is cool.
+[12:49] It's like a 3D thing. Nice. Okay, very
+[12:52] nice. Cool.
+[12:54] All right, and it gives you all of the
+[12:55] details. So, there you go, right? You
+[12:56] can see how
+[12:58] uh very well made this is. And by the
+[12:59] way, this is uh 720 pixels because right
+[13:02] now C dance 2.0 only uh or C dance 2.5
+[13:06] only supports um 720 pixels. So, it's a
+[13:09] lot easier to load and therefore the
+[13:12] website will be a little more efficient
+[13:13] versus versus if you were to like use
+[13:15] some kind of a 4K quality video asset,
+[13:18] right? So, very cool. Again, very
+[13:20] impressive. This is something like you
+[13:21] can imagine you can use this as
+[13:23] inspiration to create other website that
+[13:25] has these 3D scrolling effects and kind
+[13:28] of zoom in and zoom out. I really like
+[13:30] these color explosions, but anyway, so
+[13:32] feel free to check it out like I said
+[13:34] all of the prompts are here. So test out
+[13:37] a couple of them, you know, see which
+[13:39] one you like. I mean there's portfolio
+[13:40] websites, there's like real estate,
+[13:42] there's
+[13:43] you know, e-commerce related website and
+[13:45] a bunch of different other ones and then
+[13:47] also a guide on how to build a website
+[13:49] properly. Okay, so again, all of this is
+[13:51] going to be inside the community and by
+[13:52] the way, if you're interested in
+[13:53] grabbing Jarvis and other AI that's
+[13:56] going to be inside the paid community
+[13:58] where you can just come in and click on
+[14:00] the AI assistant and AI employees. Right
+[14:02] now we're in version 6 actually because
+[14:03] now Jarvis can actually make phone calls
+[14:06] because he has a phone number. I'm going
+[14:07] to put that video at the end so that way
+[14:10] if you guys want to check out and see
+[14:11] the full demo of Jarvis, feel free to
+[14:13] check that out. But again, this is a
+[14:15] paid community cuz a lot of assets are
+[14:17] there including a cloud code masterclass
+[14:19] and then also a bunch of other stuff
+[14:21] like the AI second brain that you can
+[14:23] download and of course if you ever get
+[14:25] stuck, we have tech support here. Our
+[14:27] team and I are there to help you out
+[14:29] no matter what question you have. So
+[14:31] check out the paid community if not
+[14:33] again, the free community has a bunch of
+[14:35] stuff in there for you guys
+[14:37] to take a look and take advantage of
+[14:39] advantage of check it out. let me know
+[14:41] in the link in the comments below if you
+[14:42] have any questions. Thanks for watching
+[14:44] and I'll see you on the next one.

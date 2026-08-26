@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-sanitize-in-check-out",
+  "type": "Agent infrastructure",
+  "discovery": "Two nodes: no-AI sanitize before the model; AI/keyword check after. Stock secret-keys miss a password line. Pass ≠ send.",
+  "applicability": "ALL paths that send text into a model or out to a human/DB",
+  "proposed_change": "Inbound redact → model → outbound check → fail halt; pass still HITL. Wired as skill sanitize-in-check-out on inbox-to-task-routing + Comms/HITL. Fixture includes the password miss.",
+  "evidence": "oWdJMJp2HgM · NQhsLVmuItA · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "oWdJMJp2HgM",
+  "status": "WIRED",
+  "next": "Run sanitize-check.py --fixture before claiming a new inbound path. Do not treat pass as send-OK. Do not buy the Guardrail node."
+}

@@ -1,0 +1,703 @@
+AI is real and it's not going away.
+
+Just like social media replaced newspapers and billboards and Netflix replaced cable, AI will change and replace millions of jobs including yours unless you learn six important skills.
+
+These six AI skills will future-proof your career so that you don't have to try and start a business if you don't want to or switch careers if you don't want to.
+
+So, these six skills are going to apply no matter what job title you hold or whatever career you're pursuing.
+
+And I can guarantee you the last skill in this video [music] will surprise you because it's the most unique skill, but it does work.
+
+So, let's just get started with skill number one, the AI person.
+
+So, becoming the AI person.
+
+I know that that sounds like super obvious because this is an AI video, but I think that a lot of people misunderstand what that actually means.
+
+If you're watching this, you probably feel like you're on the beginning side of AI.
+
+And honestly, you probably are [music] because there's so much happening right now.
+
+There's always new models, there's always new tools, there's always new agents and workflows, new benchmarks, all of this kind of stuff coming out every single week.
+
+But I bet if you went and you talked to [music] your friends or your family or just a lot of the people that you work with, they probably already think of you as an AI person.
+
+Or if they don't, you want them to.
+
+And that's the point.
+
+Being the AI person is relative.
+
+It doesn't mean that you're the best AI engineer in the world or that you understand every single AI model and the architecture behind it.
+
+You guys probably think of me as an AI person, but in reality, I feel overwhelmed every single day by how much I still don't know.
+
+But just remind yourself it's all relative.
+
+It just means that inside of your circle, you know more than the other people.
+
+And that matters way more than you might think.
+
+I've seen this happen over and over in my communities.
+
+People start picking up AI almost like a hobby.
+
+So, they're playing with Claude.
+
+Maybe they're testing out Codex.
+
+Maybe they're messing around with Google VO3.
+
+Building little tools or little AI side projects.
+
+Automating parts of their job.
+
+Just running a bunch of experiments.
+
+And then what happens is they start showing people and that's usually all it takes.
+
+They show someone at work, "Hey, look at this thing I built this weekend." Or "Hey, I used Claude to clean up this process." Or "Hey, I figured out a way to make this task, which normally takes me 3 hours, only take me 20 minutes because of AI." And all of a sudden, that person becomes known as the AI person. [music] And the reason this is so powerful is because companies are about to have a ton of like AI moments.
+
+They're going to get access to a new model.
+
+Or they're going to spin up a new internal product.
+
+Or maybe they're going to want to build a little AI task force internally. [music] And when that happens, someone's going to say, "We need someone to lead this." You want someone in the meeting to say, "Actually, I know someone who's really into this stuff." Or something like, "We should ask Nate.
+
+You know, he's told me that he's been playing around with all these AI tools." That's how these opportunities open up before there's a formal job title.
+
+And that's how people get pulled into better projects.
+
+That's how people become more valuable without quitting their job and starting from [music] zero.
+
+And the data backs this up.
+
+So, IBM's 2026 CEO study found that 85% of CEOs said that all functional leaders have to become technology experts in their own domain.
+
+Not just the CTO, not just the engineers, not just the IT team, everybody.
+
+So, whether you're in marketing, sales, finance, [music] ops, legal, customer success, whatever you're in, this applies to you.
+
+And the thing to remember here is that it's not just in one department.
+
+It's not like cybersecurity where you kind of have like a new team and then you're done.
+
+It's going to seep into every single role and every vertical, whether you like it or not.
+
+And I know some of you are probably thinking, "Okay, but my role doesn't really need AI." And that's your mistake.
+
+Your role will need AI because every single role will.
+
+So, instead of trying to switch careers or learn a completely new job, just take a look at your role.
+
+Take a look at what you already do and ask yourself, "How do I become faster and better and more useful at this specific task in this specific role with AI?" So, I mean, think about it.
+
+If you were an accountant when Excel came out and you basically just said, "You know what?
+
+I'm good.
+
+I like the way I do this.
+
+I'm going to keep doing all of this on paper and with a calculator." You were done.
+
+Like, that was probably your last day at that company if you said something like that.
+
+If you made kind of like that stubborn statement.
+
+The people who learned Excel first were just faster.
+
+They got through spreadsheet in a fraction of the time that it used to take them.
+
+Let's just say from two spreadsheets a week to 10.
+
+That's just random numbers, right?
+
+But that new level of output became the baseline.
+
+And AI is like that, but it's a lot bigger.
+
+Cuz right now, being the AI person feels like an edge.
+
+But in a few years, it's just going to be the new normal.
+
+So, the advantage isn't waiting until someone's forced to learn it.
+
+The advantage is becoming the new normal while most people still think it's optional.
+
+So, practically, how do you actually do this?
+
+Well, I would say you pick one main AI tool and actually get pretty good with it.
+
+So, as of May 2026, recording this video, for me, that's Claude.
+
+And I use Claude for my general knowledge work and to build automations.
+
+But, the exact tool isn't the point.
+
+The point is, you need one tool that you're not just messing around with.
+
+You're using a tool to actually deliver some sort of ROI.
+
+And then you can pick one workflow in your current job.
+
+You can take something that you already do every week, and then figure out how you can use AI to make it better or faster.
+
+Document what changed.
+
+How long did it take before?
+
+How long after?
+
+What got better?
+
+What still needed human judgment?
+
+Now, obviously, be smart.
+
+Like, don't expose company data or break any regulations.
+
+Don't try to automate something at work without getting like permission about it.
+
+And if your company has guidelines, and you can't use Claude, then that's actually another opportunity for you to look at.
+
+Because you can go dig into what those regulations are, and you can figure out which tools you actually could use.
+
+And that alone shows that you care.
+
+But, I just want you guys to remember that you don't need to change careers.
+
+You can just find the AI native version of the career that you [music] already have.
+
+So, that's skill number one.
+
+Become the AI person.
+
+But, skill number two is where a lot of people are going to mess this whole thing up.
+
+Because the more you use AI, the more tempting it gets to just trust the output and say like, "That's good enough." And that's where skill number two comes in, which is taste and judgment.
+
+As AI gets better, it gets easier and easier to just trust the first thing that it gives you.
+
+And I saw this joke the other day that was, on one side, we had a person with a bullet point, and they were using AI to turn that bullet point into like a super professional structured email to send to the team.
+
+And then on the other side, we had that team, and they were using AI to turn that structured email into just one bullet point.
+
+Now, it's funny, but it does also kind of create the perfect image of where work is going if we're not careful.
+
+You know, everyone's transforming things, but is everyone reading it?
+
+And that's dangerous, because when you first start using AI, you review everything, right?
+
+Like, you read every word.
+
+You double-check the claims.
+
+You make sure it sounds like you.
+
+But, the outputs start getting pretty good, and then you get more comfortable with it, and you just kind of let your guard down.
+
+And that's the trap.
+
+And sometimes, a giveaway is really small, like em dashes.
+
+You know, AI is notorious for putting em dashes in everything, because it's been, you know, trained on so many white papers and formal documents.
+
+And so, like for me, I've basically never manually written or typed an em dash in my entire life.
+
+So, if something goes out from me with five em dashes in it, people who know me are going to look at that and be like, "Okay, Nate obviously didn't write this.
+
+This [music] is AI." And the problem is the second they think that, it changes the way that they interpret that entire message.
+
+They start wondering, "Did this person actually read this?
+
+Is any of this true?
+
+How much of this is actually them?" And that's where taste comes in.
+
+And just to be clear, I'm not saying that I don't use AI to write or that you shouldn't.
+
+I think everyone should.
+
+It's just about taste.
+
+But anyways, this issue comes up for me all the time with video.
+
+So, AI helps me make motion graphics that are honestly way better than what I could do by hand.
+
+They're way faster, they're cleaner, they're more polished.
+
+But it doesn't always get right where the motion graphics should come in or how long they should stay on screen or the visuals and like what's explaining and if it's distracting or if it's helpful.
+
+And that is still my job to watch the whole video back and give feedback.
+
+And that's going to be true in every field.
+
+AI can write the sales email, you still need to know if it'll annoy the prospect.
+
+AI can draft you the HR memo, [music] but you still need to know if it'll make the employees feel weird.
+
+So, how do you actually build this skill?
+
+First, you should study the best work in your field.
+
+If you're in sales, study great sales emails.
+
+If you're in marketing, study great landing pages.
+
+Next, start saving examples.
+
+So, build a library of stuff that you actually like and stuff [music] that sounds like you.
+
+And when something's good, don't just say, "Cool, that's good." and just copy and paste it somewhere else.
+
+Ask it why.
+
+Ask what made it good and ask what makes it clear and ask what makes it trustworthy.
+
+And tell it why you think it's good and tell it what you like about it.
+
+Third, every time you correct AI, you feed that correction back into the system.
+
+So, the feedback loop is for good things, but also for bad things.
+
+If AI writes something and you change five things, say, "Hey, here are five things that I changed.
+
+Here's why." Update your instructions so that next time it's closer.
+
+And that's how you actually train the system to better understand your [music] taste.
+
+Because at the end of the day, AI can generate the work.
+
+Taste is deciding what deserves your name.
+
+Because remember, if you produce something with AI, your name is signed to it.
+
+Whether that is something that's really, really good and the whole team loves it, you will get credit for it.
+
+Or, if it's something that's bad, you will take the blame.
+
+It doesn't matter if AI wrote it, doesn't matter if you wrote it for that piece of [music] work because your name is assigned to it.
+
+So, now the question is, how do you actually get AI to produce better work in the first place?
+
+Because if you're just typing prompts and just crossing your fingers, then you're leaving a lot on the table.
+
+So, that's skill number three and it's something that you can apply the second you close out of this video.
+
+And that skill is becoming a context engineer.
+
+So, you might have heard the term prompt engineer.
+
+This was a huge thing a couple of years ago.
+
+The whole idea of prompt engineering was that if you wanted a better output from an AI model, you had to give it a good prompt.
+
+You had to give it a role, clear instructions.
+
+You had to tell it the end state.
+
+You had to give it examples.
+
+You had to tell it what to do and what explicitly not to do.
+
+But, prompt engineering is getting less important over time because the models are just getting so much better on their own.
+
+Even Andrej Karpathy, who's one of the goats of AI and actually just joined Anthropic, called context engineering the delicate art and science of filling the context window with just the right information.
+
+So, translation in layman's terms, prompts are how you ask, context is what your AI actually knows.
+
+And context engineering is way more durable than prompting because no matter how good the models get, they still need to know what's actually in your brain.
+
+So, what's going on in your business, what's on your calendar, what your priorities are, stuff like that.
+
+So, here's my personal example.
+
+I've built what I call my AI operating system or my AI OS.
+
+And basically, it has pretty much all the context that's in my head.
+
+It can see my meeting transcripts.
+
+It can see all my YouTube videos.
+
+It can read through my DMs and channels and click up in Slack.
+
+It can pull my emails.
+
+It honestly knows what's going on in my world better than I do because it can recall everything instantly and perfectly, and I can't do that.
+
+So, it's kind of like this running joke that if someone couldn't get a hold of me, they should just message my AI OS and it would actually give them an answer that's better and faster than waiting for me to respond.
+
+And that's the point you want to get to where an AI has so much context about you that you can say something like that.
+
+So, how do you actually start that?
+
+Well, the simplest move, stop opening Claude or ChatGPT in a blank chat.
+
+Instead, spin up a custom GPT or spin up a Claude project and feed it real context from whatever you're working on.
+
+So, say you're running a marketing campaign for a new product launch.
+
+Don't just open up a fresh chat every time you need help with ideas.
+
+Spin up a project, drop in documents with your product details, your marketing calendar, add copy that's worked well in the past, add copy that's flopped in the past.
+
+Now, the AI is actually working with that context, not generic best practices.
+
+And the analogy I keep coming back to here is a summer intern.
+
+When a new intern shows up at the company, you have to sit them down and kind of onboard them, right?
+
+Like you have to explain what the business does, walk them through who's on the team and who does what.
+
+You have to tell them what current projects matter.
+
+And only after they have all that context can they actually contribute in a meaningful way.
+
+And AI is the exact same.
+
+And without the context, it's just a smart intern who's guessing.
+
+And remember, the context you're giving, for the most part, is data that's not publicly accessible.
+
+The context about your subject matter expertise, your brain, your IP, that's what makes the outputs unique.
+
+If everyone's using that same model and asking for the same things, then everyone's outputs will look the exact same.
+
+So, your context is really, really important.
+
+So, just remember, garbage in, garbage out.
+
+If you give your AI bad data and no context, then you're going to get a very generic output.
+
+So, that's skill number three, become a context engineer.
+
+Now, skill number four is one of the most underrated skills on the entire list.
+
+And in the AI era, it might be the biggest separator between the people who win and the people who get left behind.
+
+And it's iteration speed.
+
+Now, if skill number two was about knowing what good looks like, this skill is about getting there as fast as possible.
+
+So, the two skills kind of work hand-in-hand.
+
+But, this one stands on its own because in the era of AI, the people who iterate fastest [music] are the ones who win.
+
+If you can move fast without sacrificing quality, you're just going to outperform everybody.
+
+Because every iteration is more data.
+
+Every iteration is a chance to learn what's working and what's not, and a chance to make your skills and your agents and your prompts and your context, all of it, better.
+
+The analogy I always go back to here [music] is like you're teaching a kid to ride a bike.
+
+You can't just chuck a kid on a bike and say, "Have fun." and expect them to go ride a mile.
+
+That's not how it works. [music] You would put them on the bike, you'd maybe put one hand on their back, you'd hold the handle, and you'd start walking with them.
+
+You would feel if they were leaning left and correct them.
+
+You'd say, "Hey, you know, shift your weight over to the right a little bit." You're helping them calibrate.
+
+And after each run up and down the driveway, you continue to calibrate.
+
+You continue to iterate and adjust.
+
+And the more time that that kid spends on the bike with your guidance, the more that you can start to slowly let go.
+
+And eventually, you take off the training wheels.
+
+And one day, you give them a little push and they just ride.
+
+And they're pedaling and they are doing great.
+
+And that's exactly how building with AI works.
+
+You very rarely can just one-shot something.
+
+You use the data and you feed it [music] back in and you make it better.
+
+And the thing is, once you've taught one kid to ride a bike, teaching the next kid is easier.
+
+And teaching the third kid is easier.
+
+And by the time you're teaching your 15th kid how to ride a bike, you've pretty much got the process down to a science.
+
+And now, obviously, every use case is different, right?
+
+Like some agents are more complex than others, and and they don't always get built the same.
+
+But, the idea of your process in building agents gets better every time.
+
+So, hopefully, you guys get the point that I'm trying to make here.
+
+Remember earlier that little example I said of like, let's say people are typically producing two spreadsheets a week, and then after Excel, they move that baseline up to 10.
+
+The faster you can iterate, the faster you're going to be able to produce things, which means your new baseline is going to be higher than everyone else's baseline as far as like units of output.
+
+So, how do you actually train yourself to be able to iterate and move faster?
+
+This part may sound silly, but the first thing I think is to master keyboard shortcuts.
+
+And stop using your mouse for every little thing.
+
+And honestly, stop typing everything, right?
+
+Like use voice input.
+
+It's way faster than typing.
+
+And we actually have a voice-to-text tool called Glydo that I use literally every day.
+
+So, if you want to check it out, link's in the description.
+
+But, the bigger move is rapid prototyping.
+
+Don't sit there trying to plan the perfect [music] version.
+
+Just build the ugly version fast.
+
+See what breaks, fix it, and iterate.
+
+That's the whole idea of getting out of POC, or a proof of concept.
+
+Now, there's another half to this skill that's just as important, which is knowing when to stop iterating.
+
+Because when you're building AI tools, it can feel like there's no such thing as a finished product.
+
+I've been there.
+
+There's always a nice-to-have.
+
+There's always one more feature you could add.
+
+So, what you have [music] to do is give yourself a North Star.
+
+You have to tie one automation to one very specific business metric.
+
+And you have to define what done is.
+
+You have to define what done looks like before you even start building.
+
+So, if it's a customer support automation, tickets resolved per day.
+
+If it's a sales automation, maybe it's qualified appointments set per week.
+
+If it's an ops automation, maybe it's refund percentage going down by X percent. [music] So, pick the metric, build until you hit it, and once you hit it, move into maintenance mode.
+
+Obviously, over time, you can probably find ways to improve it and maybe improve the metrics even more, but the heavy lifting is done.
+
+So, whether you're building automations for yourself or for a client, a clear definition of done is what keeps you from scope creeping on yourself.
+
+And that's skill number four, iteration speed.
+
+Now, skill number five is going to feel a little bit different, and it's inspired by Iron Man.
+
+So, this skill is building your own Jarvis.
+
+So, you guys have seen Iron Man, right?
+
+Tony Stark doesn't sit at his computer typing prompts into Jarvis all day.
+
+Jarvis is already always there.
+
+He runs in the background, and he notices things, and he pings Tony when something needs attention.
+
+He'll even kick off tasks before Tony even asks.
+
+Now, this is different from skill three.
+
+Context engineering was about teaching your AI what you know.
+
+Skill number five is about teaching your AI to act on what it knows without you having to be the trigger.
+
+So, here's the way I think about this.
+
+Imagine you build an automation that only runs when you explicitly fire it off.
+
+That's great.
+
+It's going to make you a lot more productive, but if you are not around to trigger it, nothing happens.
+
+Now, imagine you build a system that fires on its own while you're in a meeting, while you're on a walk, while you're taking a nap on the beach.
+
+That's real leverage. move here is to do an audit of your day.
+
+What things do you do every week that get triggered by something predictable?
+
+Meaning, maybe a specific type of email coming in, or every Monday morning, or every Wednesday evening, or every time a new lead lands in your CRM.
+
+Every one of those triggers is something that you can actually hand to a system and tell it to do X, Y, and Z when A or B happens.
+
+But, here's the catch.
+
+The second you take yourself out of a loop, the risk obviously goes up because you're not sitting there watching it and making sure nothing goes wrong.
+
+There's no catching the mistake before it reaches a customer or pulls the wrong data or sends the wrong message to the wrong list. moment you remove yourself from the process, [music] a system has to be pretty air-tight and pretty battle-tested, which is exactly why a lot of people screw this up.
+
+The second they hear Jarvis or an always-on personal AI assistant, their brain jumps straight to building an AI agent for basically every function.
+
+Whether that's a new email or an end-of-week report, a lot of people just jump straight to an AI agent.
+
+So, the real skill here is knowing when something needs an AI agent versus when it just needs a simple workflow that doesn't even use AI at all.
+
+So, I think about this like a vending machine versus a slot machine.
+
+A vending machine is deterministic.
+
+You put in a quarter, you hit E4, you get a Coke.
+
+Same input, same output, every single time.
+
+A slot machine is not deterministic.
+
+You pull the lever, sometimes you win, sometimes you lose, sometimes nothing.
+
+So, AI agents are slot machines.
+
+And essentially, like every time you talk to an AI, it's almost like you're gambling.
+
+Like, not really when you put the right harness and context in place, but you never know what's going to come out the other side.
+
+Agents are really powerful when you need deep reasoning and you need, you know, variability, but they cost more, they fail more often in unexpected ways, so they introduce more risk.
+
+But, if you you a simple, you know, if this, then that, that's a workflow.
+
+And that's just a vending machine.
+
+Predictable, it's really cheap, and it doesn't break.
+
+So, if your task is something like every morning at 9:00 a.m., pull last week's revenue from Stripe and post that in Slack, that does not need an agent.
+
+A simple workflow could do that in 5 minutes and basically never fail.
+
+But, if your task was something like read these incoming customer emails and understand what they actually want and draft a tailored response, now you need some AI in there because the input is messy and there's reasoning and you have to generate some sort of content.
+
+And honestly, this is the elite version of being the AI person that we talked about at the start.
+
+Because in a world where everyone is shouting AI, AI, AI, a person who can actually step back and say, "Hey, we don't actually need AI here.
+
+We can solve this cheaper, faster, and with way less risk." That person stands out way more than the one who's cramming AI into every single task.
+
+So, being the person that has that take signals that you actually understand the business problem, not just the AI hype.
+
+When you're building your Jarvis, ask yourself two questions for every task that you want to automate.
+
+First one, do I actually need to be the one triggering this or can the system fire this off on its own?
+
+And second, does the step actually need AI or could a simple Python script or no-code workflow do it at a fraction of the cost with less risk?
+
+And what you want to do is default to the simplest thing that gets the job done.
+
+Because the people who win in the AI era aren't the ones who are building the fanciest agents with hundreds of tools and hundreds of sub-agents, they're the ones building systems that run quietly in the background, costing them almost nothing, and doing real work whether they're there or not.
+
+So, that's skill number five.
+
+But, the final skill I can guarantee is something that you've never heard of, at least not in this context.
+
+I'm talking about unemployment insurance.
+
+And no, I don't literally mean taking out insurance, rather I mean creating your own insurance.
+
+This might be a bit of a hot take.
+
+Not everyone's going to agree with me on this, but I'm bringing it up because I'm really confident this is going to become way more normal over the next few years.
+
+And the skill is building multiple income streams using AI so that no single employer or client can take you out.
+
+The old career model was basically like one job, one income, a 401k, maybe a few investments, but basically all your eggs were in one basket.
+
+And if you got fired, you were kind of back on the hunt.
+
+You were polishing your resume, applying to 100 jobs, hoping somebody bit.
+
+And this new model that I'm am about that I see emerging is job stacking.
+
+Your day job plus a couple of AI powered side income streams.
+
+I've already seen a ton of people running multiple remote jobs, you know, part-time gigs, side projects, and stacking that all to equal way more income than they'd ever make at just one full-time job.
+
+I'm not saying that every one of you guys should just go quit your full-time job and do this.
+
+I'm saying that it's already happening and it's about to become way more common because AI lets one person do work that used to take a team of five.
+
+Now, the thing I want to hammer home here, you don't have to stack five income streams in completely different domains.
+
+That's how people end up burnt out and broke.
+
+The better version is one passion with multiple branches.
+
+I'm a really, really strong believer that to be successful at anything in life, you have to enjoy it.
+
+You have to have at least some kind of passion for it.
+
+If you're chasing AI for the wrong reasons or you're going after something because someone said there's a lot of money in it, then people are going to be able to see right through that and it's going to be really hard to be successful.
+
+So, what I want you to take out of this is to figure out what motivates you, figure out what you're actually passionate about, and that's where your North Star comes from.
+
+I've got a few different income streams myself and what's cool about it is that they all stem off of my same North Star, same theme, same expertise, just packaged in a few different ways.
+
+For example, you've got your career, that's your foundation.
+
+Your expertise about that career packaged into maybe a course or a niche newsletter or blog or micro SaaS or maybe even some consulting on the side.
+
+It's the same domain, but it just takes different shapes and that's how you avoid the biggest trap with this whole idea, which is distraction.
+
+When you're starting, just pick one and go hard until you have momentum under you and then you can sort of branch out.
+
+Now, a couple quick caveats to mention here is, once again, be smart, check your employment contract, watch out for non-competes, disclose whatever you're doing on the side if your company requires it.
+
+Like, don't do anything sketchy and don't burn your day job chasing the side thing [music] and be safe.
+
+But, how do you practically do this?
+
+Well, honestly, this really depends on who you are as a person.
+
+But, if I had to give a default move, I would say building in public.
+
+Experiment with AI tools, build small things and share what you're learning.
+
+Document the wins and losses.
+
+Build a tiny brand around the work you're already doing because the second you start posting, you become discoverable.
+
+That's how opportunities show up, clients show up, job offers show up.
+
+People want to work with the people actually doing the work.
+
+And this is also something interesting to think about.
+
+The world is shifting in a way where humans are using AI for almost everything, right?
+
+Which means when humans go to search the internet for something, they're probably going to do that through some sort of AI interface.
+
+Which means [music] if you don't exist basically at all somewhere where an AI can find you and find information about you, then it's going to be a lot tougher to be discovered.
+
+Now, if building in public isn't your thing, that's fine.
+
+You just have to find your own version.
+
+Maybe it's a quiet consulting practice, niche newsletter that doesn't require your face.
+
+Maybe it's a product that you build and sell without ever showing up on camera.
+
+Medium is completely up to you, but the point is you start building something that's actually yours.
+
+So, those are the six skills that I'd recommend learning and developing to future-proof yourself in the AI era.
+
+I'm a strong believer in adaptation and survival of the fittest.
+
+So, as long as you keep up with the changes and developments in the space that matter for your North Star, your ability to earn and live will always be protected.
+
+And I know that we covered a ton of information in this video, so I put all of this into a free resource guide, which you can access for completely free inside of my free school community.
+
+The link for that is down in the description.
+
+If you guys enjoyed the video or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+But as always, I appreciate you guys making it to the end of the video, and I'll see you on the next one.
+
+Thanks, guys.

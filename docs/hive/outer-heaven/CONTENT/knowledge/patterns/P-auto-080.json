@@ -1,0 +1,30 @@
+{
+  "pattern_id": "P-auto-080",
+  "version": 1,
+  "title": "retrieval / build — pick-retrieval-by-the-human-gesture",
+  "steps": [
+    "Steal the four-way chooser. Keep other RAG rows unflattened.",
+    "Steal the three knobs. Don’t jam a hive wiki into a prompt because Arena.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-kOKavHnlPik-01",
+    "K-kOKavHnlPik-03",
+    "K-kOKavHnlPik-10",
+    "K-kOKavHnlPik-11",
+    "K-kOKavHnlPik-12",
+    "K-kOKavHnlPik-13",
+    "K-kOKavHnlPik-14"
+  ],
+  "dissent_ids": [
+    "K-kOKavHnlPik-04"
+  ],
+  "valid_when": "domain=retrieval; stage=build; Tiny tables (20/50) and two short transcripts. Not a scale study.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

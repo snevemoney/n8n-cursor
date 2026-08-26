@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hive dry-run click target</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; line-height: 1.4; }
+    #observed { display: none; margin-top: 1rem; padding: 0.75rem; border: 2px solid #1a7f37; }
+    button { font-size: 1rem; padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Hive dry-run click target</h1>
+  <p>Local 127.0.0.1 only. Cannot send / pay / deploy / book / publish.</p>
+  <p id="pre">Expected after click: the green box appears with the observed token.</p>
+  <button id="reveal" type="button">Reveal observed copy</button>
+  <p id="observed">DRY-RUN-SIX OBSERVED: click landed</p>
+  <script>
+    document.getElementById("reveal").addEventListener("click", function () {
+      document.getElementById("observed").style.display = "block";
+    });
+  </script>
+</body>
+</html>

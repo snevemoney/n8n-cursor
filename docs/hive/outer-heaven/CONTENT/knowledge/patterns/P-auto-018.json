@@ -1,0 +1,23 @@
+{
+  "pattern_id": "P-auto-018",
+  "version": 1,
+  "title": "agent-ops / build — goal-needs-objective-done-overnight-is-optional-theater",
+  "steps": [
+    "Steal objective-done `/goal`. Do not run 48h unattended spend.",
+    "Steal rewind-over-argue + teams-vs-subs. No Claude teams spend."
+  ],
+  "support_ids": [
+    "K-vfWTyEreOEc-03",
+    "K-vfWTyEreOEc-05"
+  ],
+  "dissent_ids": [
+    "K-vfWTyEreOEc-04",
+    "K-vfWTyEreOEc-06"
+  ],
+  "valid_when": "domain=agent-ops; stage=build; Keep unflattened vs overnight-warn tapes.",
+  "less_relevant_when": "Ambiguous goals (5x MRR ultra plan) are planning theater; he cancelled those runs.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

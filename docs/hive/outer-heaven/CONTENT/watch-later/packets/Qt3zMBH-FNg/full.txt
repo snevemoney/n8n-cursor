@@ -1,0 +1,507 @@
+Hey, so I think that these scissors are broken.
+
+These two different pieces came apart.
+
+Do you know how I might be able to fix this?
+
+I see.
+
+It looks like these are designed to come apart for cleaning.
+
+If you align the rivet on one blade with the slot on the other, they should slide back together securely.
+
+Can you give that a try?
+
+There we go.
+
+I think I got it working.
+
+Perfect.
+
+That's exactly how they connect.
+
+They look like they're working just fine now.
+
+Hey, so I was just scrolling through my school community and I was curious if, you know, you were able to see these different posts and specifically the one about the Claude usage limits.
+
+Yes, I can see the different posts in the AI Automation Society community.
+
+I see one from Vishal Chojnic titled Claude limits me four times in 20 hours.
+
+Anyone else facing this?
+
+Is that the one you were referring to?
+
+Yeah, wow.
+
+I scrolled past that really quick and you were still able to pull that out.
+
+All right, so Google just dropped Gemini 3.1 flash live, which is their latest voice model that has a lot of upgrades.
+
+In fact, you can even see right here in this video, they're calling it their biggest upgrade yet.
+
+The whole idea is that this is way more human because it's no longer doing speech to text and then text to speech.
+
+It's just straight-up speech to speech and it can also see things as you guys saw in that quick demo beforehand.
+
+So this model is said to have improved precision, lower latency, and just more fluid, natural interactions.
+
+Now this first benchmark is about multi-step function calling, which it has outperformed the previous Gemini 2.5 flash model by about 19% here as you can see.
+
+And here's another one called audio multi challenge where it's not only outperforming the previous Gemini models, but also different models from different providers.
+
+One thing that I think is really cool is this is apparently a huge step up when it comes to the agent being able to listen in noisy environments like if you're on the side of the road or if you're in a noisy restaurant or workspace, which obviously if you're in a real-world environment and you want to set up voice agents for a business, that's probably really important.
+
+So here's a quick example and I'm going to call out some of the benefits.
+
+So we know that it's speech to speech, we know that there is less latency, and we know that it can work in noisy environments.
+
+So there's the first one.
+
+You might hear, you know, on the side of the road things like traffic, things like horns.
+
+I can look you up with your registration plate and post code instead.
+
+Could you provide those for me, please?
+
+Whoa.
+
+Oh.
+
+And it's still able to be unfazed by stuff like that.
+
+It also has a higher level of accuracy when it comes to alphanumeric strings.
+
+And because it's interpreting speech rather than speech being transcribed into text, there's way more contextual awareness because the audio is coming through and it can understand things like sarcasm or stress or frustration, which is obviously very important if you're setting up something like a customer support bot or maybe like a sales type of agent.
+
+Now because of the reasoning and thinking and the tool calling ability, there's also this cool demo here where this person is talking to Gemini 3.1 flash and the talking leads to things actually happening.
+
+So in this case, they're basically vibe coding, which is their voice.
+
+They're saying to zoom in, they're saying to change the background, they're saying to do all these things.
+
+And on the side panel, the agent is actually coding as well.
+
+And I think it's really cool because I could definitely see a world where at some point our operating systems basically just work with voice.
+
+So if you want to try this out, you can do it for completely free.
+
+Just go to Google AI Studio and then come to the screen that looks like this.
+
+And all you have to do is in the top right, you just have to find the model.
+
+So by default when you get in here, it might just be on all or whatever.
+
+You're going to go over here to live and then you're going to click on Gemini 3.1 flash live preview.
+
+Now yes, there are some prices down here, but you'll notice when I click on this, you can see that it says no API key.
+
+So that means I'm on a free plan right now.
+
+I've not given it any billing information and I could later switch to a paid API key to unlock higher quota and more features, but right now you can get in here and just play around with it for completely free.
+
+Now the first thing I noticed when I started talking to this thing is that it is way quicker and that it actually lets you interrupt it.
+
+So a lot of times with other voice agents, you get into this awkward like game of chicken of like who's going to speak or if you try to interrupt it, you guys both sort of like say, "Oh, sorry.
+
+No, you go.
+
+You go." And it's just like weird.
+
+But in this case, and I'll I'll show you guys, when I start talking over it, it just stops like immediately and it feels a lot more human.
+
+So I'm basically just going to go ahead and just do the talk.
+
+Earlier you guys saw that I could do a webcam or share screen, but for right now I'm just going to go ahead and talk.
+
+Now it is listening to me right now.
+
+Hey Gemini, how's it going?
+
+Can you hear me?
+
+Yes, I can hear you clearly.
+
+Things are going well here.
+
+Just ready to chat or help with whatever you need.
+
+How are you doing?
+
+Yeah, I mean the voice sounds really good.
+
+The latency is good.
+
+Um once again, how are you doing?
+
+I'm doing great. >> Actually, you know what?
+
+I don't really care about how you're doing.
+
+Can you just tell me a little bit more about the voice model?
+
+Sure, I can tell you about it.
+
+It Okay, so I was just a little rude, but basically what I was trying to show you is how fast it is and when I interrupted it, how fast it stopped talking, which I think was really impressive.
+
+Now what you can do in here in Google AI Studio is basically just build your own little voice agents right in here because we're able to set up system instructions.
+
+So right here we can create instructions and we can save them.
+
+So let's say in this one I'm calling this my coach and in here I can give it tone and style instructions.
+
+So I can say, "You are my personal um fitness coach.
+
+You will help me get on a plan to eat healthier, build muscle, stuff like that.
+
+And you also have a very strong Scottish accent." So that is the new prompt here.
+
+This has been saved and we can create new ones.
+
+And now if I go ahead and talk to my coach, let's hear it.
+
+Hey there, I'm thinking about taking a break from the gym for about 3 weeks.
+
+What do you think about that?
+
+3 weeks, eh?
+
+Well, it depends on why you're taking the break.
+
+If it's for rest and recovery, >> Wow, you got a pretty strong accent out of nowhere.
+
+Aye, well.
+
+Sometimes it just comes out stronger than you can.
+
+But back to your break.
+
+What's the reason behind it?
+
+Are you feeling burned out or is there something else going on?
+
+Okay, that was funny.
+
+I just had to show you guys though um how you're able to really quickly change a lot of the stuff about these agents.
+
+But yeah, let me just go ahead and do one more webcam example.
+
+Hey Gemini, how's it going?
+
+Just wanted to make sure you can see me and that we can have a conversation.
+
+I can see you.
+
+You're in a room with light gray walls, a shelf behind you with some trophies and a microphone in front of you.
+
+Everything looks good from my end.
+
+Ready to chat.
+
+What's on your mind?
+
+What kind of microphone do you think I have?
+
+That looks like a Shure MV7.
+
+Probably connected to that Rode arm.
+
+Is that right?
+
+Yeah, that is.
+
+You can see right here I've got the Rode and you can see right here this is the Shure M7.
+
+Well, actually I don't even know if this is an MV7, but you probably know better than I do.
+
+Based on the design and the logo, it definitely looks like an MV7.
+
+I mean, I just think it's really cool because you think about like, okay, you know, there's still some flaws, but where is this headed?
+
+And where might we be able to at some point have like agents that we can talk to almost like it's a Zoom call and we can see them and they can talk to us and it's just way more real feeling.
+
+And what other doors does that actually open?
+
+And then with the whole screen sharing thing in vision, think about like where we're also headed with computer use and the fact that now when the agent can actually take over your screen and take control of your browser and click on things, but it can also watch over you and you can talk to it at the same time.
+
+Like at some point, we really might be able to just like throw out our keyboards, throw out our our mice and just be able to sit here, look at our screens and talk and things will just be happening and happening and like you can be so productive in that way.
+
+Now there are some other things you can do in here.
+
+You can see you can change the voice.
+
+If I end the session, we can change the voice right here.
+
+There's different ones to choose from.
+
+You can change the media resolution and you can also change whether they are low, medium, or high thinking or just no thinking at all, which is the default.
+
+You can also come in here and play with the session context.
+
+So there's a lot bigger max context as well as target context.
+
+And down here you can see that we have a few other things.
+
+We have function calling that you can turn on.
+
+You have automatic function response.
+
+And then we also have grounding with Google search, which means when you're talking to it, it will do Google search on the back end to answer your questions.
+
+Now what you might notice in here is, okay, giving it tools, giving it functions, that's awesome because you might want it to do things in your calendar or, you know, look at the emails or look at the support tickets or whatever it is.
+
+And so if we go ahead and try to turn this on and we click on edit, we can basically define different functions.
+
+But we would have to give it those actual, you know, code snippets or whatever it is.
+
+So if we go to the API documentation for examples, this is where we could understand how we can actually give our voice agent here in Gemini hands, basically, tools.
+
+And that's where the Gemini live API comes in because this lets us actually connect this voice model to different things like our websites or potentially even phone numbers and other things like that so that we're not just stuck to using it right here in Google AI Studio.
+
+Now in here you can see that it goes over some really nice use cases like e-commerce, you know, shopping assistants, even gaming, interactive NPCs, next-gen interfaces, healthcare, financial services, education.
+
+And something I think is really cool is multilingual support.
+
+So it has over 70 supported languages, which means not only could you talk to it in a different language, but this thing could be a really good real-time translator, which could be a very important use case.
+
+Now all of this kind of stuff right here, the API documentation and, you know, the different SDKs or ADKs that you can actually use, this is where Claude code really comes in and makes this thing powerful because without Claude code or, you know, a different type of coding assistant or, you know, agent, you're kind of stuck to using Gemini 3.1 flash live in Google AI Studio.
+
+And so if you wanted to connect it to something else, you would have to be pretty technical to understand how to do that because of the way that this thing actually works on the back end with web sockets.
+
+Now what I did is I gave my Claude code project all of this documentation and I had it do research and I had it figure out how this stuff works so that it could help me embed this into other things and it could help me set up tool calls and stuff like that.
+
+So, let me show you two quick examples of what I was able to do with Claude code and this new model.
+
+Okay, so here's the first really simple example where we have this embedded into a fake website.
+
+This is called Apex.
+
+It's just like a keyboard website.
+
+Obviously, this thing looks very vibe coded and it is and I just wanted to do a really quick demo.
+
+So, let's pretend that I wanted to embed this on my product website, right?
+
+I have this little button down here that I can now click on and I get a Gemini 3.1 flash agent.
+
+So, opens up.
+
+Hey, so can you tell me a little bit about Apex?
+
+Like the brand and what I can do here?
+
+Welcome to Apex.
+
+We make premium mechanical keyboards with great switches, customizable features, and durable builds.
+
+Okay, cool.
+
+So, I don't really know that much about keyboards, but could you help me figure out which one might be best for me out of these four options?
+
+I'd love to help.
+
+To give you the best recommendation, are you looking for something for gaming, typing, or office work? >> Uh no, I'm really just going to be working in my office, but I might be doing some traveling.
+
+For office work and travel >> Actually, you know what?
+
+I'm just going to go with the 60% mode, but can you tell me about the uh the shipping and how long is this going to take?
+
+Great choice.
+
+Free standard shipping takes 5 to 7 business Okay, so I was interrupting it there and I was just showing you that you can give it knowledge and that it feels super super conversational.
+
+So, the second example is Arya and obviously this is, you know, a very ugly interface, but I just wanted to show you guys what you can do.
+
+So, this one is one where I actually gave it tools.
+
+So, it's able to look at my ClickUp and it's able to look at my calendar.
+
+So, this is obviously just a few examples, but showing you how you can build some functions around this in case you wanted to have your agent do things rather than just be conversational.
+
+So, I'm going to start talking to Arya.
+
+Hey there, how are you doing today?
+
+Hey, I'm doing pretty well.
+
+Thanks for asking.
+
+Just here ready to help with whatever you need.
+
+Yeah, so the first thing I need you to do is can you look at my calendar for tomorrow?
+
+Sure thing.
+
+For tomorrow, Saturday, March 28th, you have two things scheduled.
+
+First, you've got a walk from 9:00 a.m. to 10:00 a.m. and then a meeting from 12:30 p.m. to 1:30 p.m.
+
+Anything you'd like to add or look into more about those?
+
+Yeah, can you block off 3:00 p.m. to 5:00 p.m. and call it my research block?
+
+Done.
+
+I've added a research block to your calendar for tomorrow from 3:00 p.m. to 5:00 p.m.
+
+Anything else?
+
+Awesome.
+
+Yeah, so for that research block, if you could go into my ClickUp and look up my research queue and see anything that I currently have to do.
+
+And also, if you could go ahead and add another to-do in here called Microsoft.
+
+I can definitely do that.
+
+First, I need to navigate to your lists.
+
+Which workspace should I check?
+
+Up at AI or Root Rise Media?
+
+Yeah, the Up at AI space and it will be in um an Up at AI consulting space.
+
+You're looking for a research queue.
+
+All right, I've got it.
+
+In your Up at AI consulting space, I found the research queue list.
+
+Currently, you have one task in there called Chipotle.
+
+I've also gone ahead and added a new task named Microsoft to that list.
+
+Anything else?
+
+Okay, so I went ahead and stopped that and I just wanted to show you guys that that works, right?
+
+But what you will notice is that there was pauses while it was actually calling those functions and that is a current limitation of this model.
+
+A lot of times what you want to do with voice agents is you want to have them keep talking as they are calling a function because they call the function and they have to wait for the response, right?
+
+And you can usually prompt them and have them working out so that they talk, so there's not awkward silences.
+
+But right now with this Gemini 3.1 flash live, it doesn't do that and I think that's just a matter of time till obviously it it can, but it's it's basically like you've got your asynchronous or synchronous.
+
+So, that is one thing that you will need to keep in mind right now with this model is that when you call a function, the agent will not be speaking.
+
+It's just going to stop and it's going to wait till it gets a response.
+
+And also keep in mind that both of these sites and integrations were made in under 30 minutes with me just spinning up two different Claude sessions and saying, "Hey, in this one I want you to build me, you know, this use case and in this one I want you to build me this use case.
+
+Here are my API keys.
+
+Have at it." The point is once you actually sit down and you give it a structured plan and you iterate and iterate with Claude code, you can get way better outputs than this.
+
+So, this is the project that I created just to spin up a few demos, right?
+
+And what I did basically is I opened up a fresh project of Claude code.
+
+I threw in the documentation like, you know, this API documentation, this one, the function calling.
+
+I gave it all this this in information and then I just said, "Hey, I want you to analyze all this." And what you even could do is say, "Hey, create a resource guide in this folder called, you know, Gemini flash.md and just store all of this information so later you can reference it." And then from there, I just started asking it questions.
+
+How does this work?
+
+What can you do?
+
+What should we do as a demo?
+
+And then it was able to help me come up with these two use cases that are kind of different.
+
+And you can see that everything has been organized into this project.
+
+So, what I'm going to do is drop this exact folder, this whole project into my free school community.
+
+The link for that is down in the description.
+
+It's completely free.
+
+So, you guys can grab this and just kind of analyze it and ask questions about it.
+
+Now, along with that, I'll also attach a resource guide that basically says, "Hey, here's what the project does.
+
+Here's all the things you need to know about it.
+
+Here's where to find the things and stuff like that." Really, the best way to learn is just to get your hands dirty and to ask a ton of questions.
+
+Now that we're in here though, there are a few things that I wanted to tell you guys about.
+
+The first one is kind of about the pricing.
+
+So, yes, it is free, but what you'll notice is that if we're in the studio, you can see that it says "Switch to a paid API key to unlock higher quota and more features." So, what does that actually mean?
+
+So, here's what that pricing could look like once you start paying.
+
+It's still really really cheap, which is great.
+
+But what's the difference?
+
+So, obviously it's free or it's paper token, but on the free tier, your data is used by Google to improve the products.
+
+On the paid tier, it's not.
+
+So, you're getting enterprise grade privacy.
+
+Your rate limits on the free tier are much lower.
+
+Um I think you can only have like three active sessions going on or something like that.
+
+You get obviously way more flexibility here if you are paying.
+
+You also get things like context caching and batch API.
+
+So, what does all that pricing and token stuff mean practically?
+
+So, for a 10-minute call, you're roughly going to be paying maybe about 14 cents.
+
+You have a different charge for your input tokens and a different charge for your output tokens.
+
+But of course, if you're just playing around and you're testing things, definitely just stay on the free tier.
+
+Now, I will be honest.
+
+Using a platform like 11 Labs or something else like that makes it so much easier to actually just embed a widget on a website because 11 Labs server basically manages all of that and just puts it onto your site.
+
+So, both of these two demos right here are local hosts and they're local hosts because it's really easy for me to then just connect the web socket with Gemini to my machine and it all talks to each other really nice and it works.
+
+So, if I wanted to then push this website to for sale or, you know, somewhere live or if I already have a website that is live and I wanted to push, you know, this little widget onto that site, it's not just super super simple the same way that it would be with something like 11 Labs.
+
+It's still doable and Claude code will definitely be able to get you there if you give it the right planning information and, you know, you give it the right documentation, but I will just say it's not as simple, it's not one click of a button the same way that 11 Labs is.
+
+So, that is what I wanted to end off this video talking about.
+
+So, like we just talked about, 11 Labs basically handles everything.
+
+They host everything and it makes that persistent web socket connection easier so you could basically just embed it anywhere.
+
+But with Gemini live, it requires a persistent server process and this isn't stuff I understood, right?
+
+This is stuff that I had it Claude code research for me based on all the documentation and figuring out how it works.
+
+So, that's really the mindset shift here is a lot of things you're not going to understand and you need to understand them enough to understand how do you communicate things and what do you need to look into and how do you make things safe?
+
+But when I'm teaching myself things, I just have Claude code or Perplexity or some AI research it.
+
+I prompt them in a way to make sure that it's not hallucinating.
+
+I always, you know, am fact-checking things as well, but you just adopt this mindset of being genuinely curious and that's how you can push this stuff a lot farther.
+
+So, basically the point that I'm trying to communicate here is Gemini's 3.1 flash model is awesome and if you come into the playground in the studio, you can do a lot of cool stuff here with it.
+
+If you want to start to think about how you can embed it somewhere else or, you know, customize your own tools and stuff, Claude code helps you get there way faster, way easier with natural language.
+
+And then finally, if you want to push this all onto like a live production phone number or a live production website, Claude code once again will get you there, but you do have to go back and forth a little bit more and you have to be thinking about how you actually transfer over things like your keys and your connections and a few things like that.
+
+Anyways, that is going to do it for today's video.
+
+So, if you guys learned something new or if you enjoyed, please give it a like.
+
+It helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.
+
+Thanks, everyone.

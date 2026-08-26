@@ -1,0 +1,23 @@
+{
+  "pattern_id": "P-auto-035",
+  "version": 1,
+  "title": "content-ops / build — manager-delegates-sub-workflows-own-binary",
+  "steps": [
+    "Steal router + binary-sub + error-log. No Blotato/Apify install. No auto-post.",
+    "Steal “execute workflow, prompt upstream.” Operate-never: auto-post + scrape actors."
+  ],
+  "support_ids": [
+    "K-jBanaNBY-sM-01",
+    "K-jBanaNBY-sM-05"
+  ],
+  "dissent_ids": [
+    "K-jBanaNBY-sM-02",
+    "K-jBanaNBY-sM-06"
+  ],
+  "valid_when": "domain=content-ops; stage=build; Keep vs `AYsg5gAMWyo` first-frame / Key; `Vm8QOo9MiC4` Sora poll.",
+  "less_relevant_when": "Create-doc lives on the **main** agent (didn’t fit a bucket).",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

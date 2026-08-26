@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-071",
+  "version": 1,
+  "title": "offer-positioning / acquisition — investment-not-expense-frame",
+  "steps": [
+    "Put the return on one page before the workflow tour.",
+    "Steal the field list and the two-audience talk (customer + orders). Do not auto-send."
+  ],
+  "support_ids": [
+    "K-D-OOsl8C4Ns-01",
+    "K-D-OOsl8C4Ns-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; There is an orders team and a CRM; quote can be generated from the inquiry.",
+  "less_relevant_when": "Auto-send of the quote is not specified as the hard step — do not assume send.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

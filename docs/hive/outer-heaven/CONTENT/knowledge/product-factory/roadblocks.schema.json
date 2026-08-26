@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-product-factory-roadblocks",
+  "title": "Roadblock bank (one JSON row after a mess; not an essay)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "updated", "roadblocks"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "updated": { "type": "string" },
+    "roadblocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "date",
+          "symptom",
+          "cause",
+          "never_again",
+          "related_primitive",
+          "source",
+          "status"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "date": { "type": "string" },
+          "symptom": { "type": "string" },
+          "cause": { "type": "string" },
+          "never_again": { "type": "string" },
+          "related_primitive": {
+            "type": ["string", "null"],
+            "enum": ["login", "payments", "social-share", "promotion", null]
+          },
+          "source": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["open", "recorded", "stale"]
+          }
+        }
+      }
+    }
+  }
+}

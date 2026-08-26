@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-036",
+  "version": 1,
+  "title": "content-ops / publishing — paste-sources-then-chat-may-beat-an-automation",
+  "steps": [
+    "Ask “is a trigger needed?” before building.",
+    "Steal source-pin + apply-to-us. Do not steal Poppy."
+  ],
+  "support_ids": [
+    "K-HbsbqMQE-lI-01",
+    "K-HbsbqMQE-lI-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=content-ops; stage=publishing; Human is present; volume is low.",
+  "less_relevant_when": "If you need fire-and-forget on every upload, then n8n calling Poppy is the other path — he names it and still calls it m",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

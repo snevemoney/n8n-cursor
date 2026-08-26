@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-095",
+  "version": 1,
+  "title": "workflow-build / build-verify — approve-the-plan-then-audit-the-leftover-six",
+  "steps": [
+    "Steal plan-then-audit. No n8n-cloud. Keys never in a Set node.",
+    "Steal “don’t trust the changelog, open the node.” Keep as a *second* builder-scar row next to include-answer."
+  ],
+  "support_ids": [
+    "K-TDHFkKSTJ30-01",
+    "K-TDHFkKSTJ30-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=workflow-build; stage=build-verify; His Tavily HTTP + Perplexity native. Caption-only: do not invent clicks. Clients parked.",
+  "less_relevant_when": "Invoice-style linear presets map variables better — except the parse agent with no live input. Caption-only: do not inve",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-opportunity",
+  "title": "New capability / possible product-service",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "opportunity_id",
+    "what_became_possible",
+    "source_video_id",
+    "status"
+  ],
+  "properties": {
+    "opportunity_id": { "type": "string" },
+    "what_became_possible": { "type": "string" },
+    "leverage": { "type": "string" },
+    "possible_product_service": { "type": "string" },
+    "may_improve_desks": { "type": "array", "items": { "type": "string" } },
+    "may_be_standalone": { "type": "boolean" },
+    "capability_id": { "type": "string" },
+    "source_video_id": { "type": "string" },
+    "tape_dollars": { "type": "string", "const": "UNVERIFIED" },
+    "new_icp_id": { "type": "null", "description": "Do not invent an icp_id from a tape." },
+    "status": { "type": "string", "const": "UNTESTED" }
+  }
+}

@@ -1,0 +1,701 @@
+So, I don't know what's going on up here, but I just told Claude Code to spin up five different sub agents, and they all have different personalities.
+
+One is going to be a complete beginner, one will be a software engineer, one will be a business owner, one will be a publisher.
+
+And it comes back and it says, "Okay, I'm kicking off all five now, each with a distinct persona and lens.
+
+These will run in parallel." You can see that this is now running four agents, the fifth one's about to spin up, and on the bottom, if I click into a different session, so we've got the main, or we've got like the beginner, and I enter this conversation, we can actually see what's going on here.
+
+Meaning, if I scroll up, I can see the actual prompt that session kicked off to this sub agent.
+
+So, here we have Linda, 58 years old, a retired elementary school teacher, you are a complete beginner to AI.
+
+And then we see the actual task, which is to read all the chapters and give a bit of a review.
+
+And so, all of the other sub agents probably have a very similar prompt.
+
+If I go to like the enterprise exec, so same exact prompt, except for here, you're role-playing as David, 52, a COO at a 12,000 person Fortune 500 financial services company.
+
+So, anyways, the point being, what we can do is have our main session up here, and the main session can delegate to as many different sub agents as we want, and all the sub agents can have different chat models, different personas, different skills, different subject matter expertise.
+
+And if you watch my video where I ranked all of my favorite Claude Code features, sub agents ranked number six.
+
+So, today what I'm going to do is I'm going to tell you guys exactly how to use them, what they are, when you need to use them, and how you can use them better than 99% of people using Claude Code.
+
+So, let's not waste any time and get straight into today's video.
+
+Okay, so what is a sub agent?
+
+You guys just saw a demo.
+
+We have a main chat, so right here is where I said, "Hey, can you spin up five different sub agents?" And what it did is it right here kicked off five different ones, and then it comes back with an overall review.
+
+Apparently, I need to do some work on this book because I only got about an eight.
+
+More info on my book will be coming soon.
+
+But anyways, the main session is basically the orchestrator.
+
+It says, "Okay, cool.
+
+So, I am the one who's actually talking to Nate, but what I can do is I can spin up a bunch of sub agents I can only talk to me, and I can assign them work.
+
+Go read these files, go do this research, go fix that bug, and then you you back to me with a report of what you did, and I'll communicate that back to Nate.
+
+So, there are a ton of different reasons why these sub-agents are useful and why they exist.
+
+So, let's just start with this first one, which is that it keeps your context clean.
+
+So, let's say I'm in Claude Code, right?
+
+And I'm just talking, "Hello, how are you doing?
+
+What's going on?
+
+Let's build something, right?" Like, maybe we're doing research, maybe we're building an app, whatever it is.
+
+You start to fill up your context window, which you guys can see right here with my status line.
+
+You can see right now we're about 48,000 tokens in, 5% of the way up.
+
+And so, as this starts to fill up, it starts to get polluted with information.
+
+But, if you kick something off to a sub-agent, as you guys saw earlier, it's a completely fresh chat.
+
+So, just to show you guys another real quick visual demo, I'm in the desktop app, which is a little bit, you know, easier to see and it's visually more pleasing than the terminal sometimes.
+
+But, let's say I said, "Hey Claude Code, go ahead and kick off a sub-agent to do some research for me about a product called fireflies.ai." And so, this is my main session, you know, I can talk to this thing, it'll help me do research on different tools.
+
+And then, what happens is it kicks off a researcher agent to do the research.
+
+And what's cool is right now you'll notice I'm using Opus, right?
+
+Which is obviously the most expensive model.
+
+But, we can have the sub-agent kick off and do research with Haiku or Sonnet.
+
+So, we're getting this research for cheaper and we're getting a fresh context.
+
+So, if I click on this agent here, you can see this is basically the prompt that the main agent sent over to the sub-agent, which was, "Hey, research fireflies.ai, give us what it is, core features, how it works, pricing, give us all the stuff." And now, this agent is the one over here searching the web and creating its opinions, rather than our main session.
+
+So, this helps preserve your main context in case you're ever doing a ton of research or reading a ton of stuff that you don't want to fill up your main context window, right?
+
+So, that's one thing.
+
+There's also built-in sub-agents, which is the one we just saw, right?
+
+That was like basically a built-in Claude Code research agent that will You've probably seen it get invoked automatically without you even asking it to be invoked.
+
+And then, you've got custom sub-agents that you're actually able to build yourself.
+
+And if you guys remember earlier in the demo, when we spun up those different agents, I said, "Hey, one should be a software engineer, one should be a beginner, blah blah blah.
+
+You remember those all said general purpose.
+
+So, those were still built in native, generic agents that just had a prompt.
+
+So, that doesn't mean that we built those custom agents.
+
+That was just a general purpose agent that Claude code prompted differently.
+
+If we wanted to actually build a custom agent, that would be a markdown file.
+
+So, if I open up my VS Code, you guys know in the .claud folder, we have different things.
+
+And the one you probably know the best is called skills.
+
+So, in the skills folder, let's just take a look at real quick my agent builder skill.
+
+What this is is it's a markdown file.
+
+This lives as markdown so that I could send it to you guys, I could put it in my community, I could send it to my team.
+
+And all you have to do is put this is put this markdown file in their .claud in a skills folder, and then they're able to use it.
+
+And so, a sub-agent is the exact same actual tangible thing as a skill.md file.
+
+It's just called something else.
+
+You know, we've got the YAML front matter up here, and then we have the instructions of what the skill does and the actual steps to take.
+
+So, if I open up my agents folder, also in my .claud, you can see I've got a different a couple different agents here, right?
+
+So, this one, let's just look at is called the clickup-searcher.md.
+
+And that's an agent that's called clickup searcher.
+
+We've got the YAML front matter up here, name clickup searcher, we've got the description, we've got the model which I've defined here, we've got the color, which means if I actually use the clickup searcher agent, it shows the color.
+
+So, actually let me just show you.
+
+Can you go ahead and use the clickup searcher agent to show me what we've talked about today in the weekly commitments channel?
+
+And so, what you'll notice is I invoked that with completely natural language.
+
+I'll have the clickup searcher agent pull today's messages and then right here I can see the green color.
+
+So, that's all it means when you actually assign an agent a color.
+
+It's just so you can actually see it right there.
+
+And down here, you know, earlier, right here is where it said general purpose, what it says now is clickup searcher, and that's how we know that that's a custom agent that we built ourselves.
+
+So, anyways, those are the two differences.
+
+And like I said, it's just one markdown file.
+
+And what this is called up here, the YAML front matter, that's called progressive disclosure, which basically means if you say, "Hey, go do X, Y, and Z for me, Claude Code will naturally go search through your sub-agents and your skills to see if you have any sub-agents or skills to use.
+
+And so, for the rest of this video, I'm just going to say sub-agents, not skills, but they both work with this kind of progressive disclosure um process.
+
+But, the idea is that Claude Code is able to read just the front matter, just the name and the description, and then decide does this apply to this prompt?
+
+If so, I'll pull in the sub-agent and I'll run all of the extra stuff and read it.
+
+But, otherwise, I'm not going to waste my tokens by reading everything if I'm not going to end up invoking that sub-agent.
+
+So, that's why we have the YAML front matter, and that's why that's very important.
+
+Besides the fact that it also defines things like tools, model, and then there's tons of other levers you can pull there, but not going to dive into that right now.
+
+So, anyways, settings up top, and then your instructions go below that.
+
+And these are the four that I think matter the most.
+
+The name, obviously, so you can reference the sub-agent.
+
+The description is really important.
+
+This is basically the trigger, and this is how you can make sure that your sub-agents are getting invoked without you actually saying, "Hey, go invoke this X, Y, and Z sub-agent." So, the more precise that your descriptions are, the more often Claude Code will actually trigger them, and you won't get misfires.
+
+Misfires basically meaning you want it to invoke a sub-agent, but it doesn't, or you don't want it to invoke a sub-agent, but it does.
+
+And so, sometimes the only way that you can really make sure that you're tuning the actual front matter so that you're not getting these misfires, you just have to test it out.
+
+And you just have to use it more and more, and then like when it doesn't fire and you think it should, you just think about, "Okay, why didn't that happen?" And then you update the description, and then same thing if it's the opposite way around.
+
+And then if you go to the actual Claude Code documentation on the sub-agents, you can see all of the different things that you can actually put in the front matter.
+
+You can put tools like we just mentioned, but you can also put disallowed tools.
+
+So, if you don't want it to ever write or edit files, you can put that so that these sub-agents are explicitly read-only.
+
+You can also define things like which MCP servers it's allowed to use, and you can even give it skills.
+
+So, basically, any setting that you want to configure for your custom sub agents, you can pretty much do.
+
+Just come to the documentation, have Cloud Code read the documentation, and say, "Hey, I want to set up a sub agent that does X, Y, and Z.
+
+It should not be able to do X, Y, and Z.
+
+It should be able to look at this data, not look at this data." And it will help you build the right YAML front matter.
+
+So, how do you actually write a great sub agent?
+
+So, obviously, not having a weak description, so having, you know, a very precise type of description.
+
+You can even say something like use proactively if you want it to fire off, you know, pretty generously.
+
+And then, after you have the actual front matter not dialed in, it's all about the body.
+
+The body is the way that the sub agent actually works, what skills it invokes.
+
+Because, yes, sub agents can invoke skills, and skills can invoke sub agents.
+
+So, keep that in mind.
+
+They work together.
+
+They're not, um, you know, competitors.
+
+And you have to have that same idea, once again, that that you have to iterate.
+
+It's not going to be perfect on the first try.
+
+Every time you use your sub agent, you have the opportunity to give it feedback on what it didn't do well and how to make that better.
+
+And then, what it did really well and how to make sure that it does it every time.
+
+And real quick, what's the difference between a skill and a sub agent?
+
+Well, honestly, at their core, they're very similar.
+
+Because you're able to define, "Do X, Y, and Z in this order.
+
+You know, here's a prompt, here's a persona, whatever." But the main difference really is that one has a clean context window and one doesn't.
+
+And you can run a ton of different sub agents in parallel in, you know, independent sessions, as we saw earlier.
+
+Whereas the skill is typically more of something that I'm kind of triggering in my main session all the time.
+
+But once again, that doesn't mean that I don't have a great LinkedIn research skill that I hand off to sub agents to use.
+
+You know what I mean?
+
+So, really, I think of it as kind of like the parallel use and the clean context window.
+
+And of course, the ability to use a different model.
+
+Now, there is something that I'm going to show you guys real quick in Cloud Code, which is like it allows you to build agents very easily with a slash command.
+
+You can also do it with natural language, but, um, I'll show you that in a sec.
+
+Before we show you that, I did want to kind of go over this real quick, which is project level versus global level sub agents.
+
+And this is the same, you know, if you understand how the Claude code like settings files work or the Claude code like hooks and skills, MCP servers even, it's all the same.
+
+You always have project level stuff or you have global level stuff.
+
+So, project level stuff is basically what lives in your project in that repo.
+
+So, right here we're in my Herc 2 project and anything that you see inside of my dot Claude right here is project level.
+
+So, all of these agents are product project level, all of these skills are project level, and then I've got other sub agents and other skills that are global.
+
+So, for example, if I say, "Hey, where does my session handoff skill live?" That's going to find that globally because if I go to my skills, there's no skill in here called session handoff, as you guys can see.
+
+But right here, the session handoff skill lives in your global skills directory at the, you know, the user level.
+
+And so, global ones are usable by every product on your machine.
+
+So, no matter which project or repo I'm working in, I can always use that session handoff skill or I can always use that, you know, sub agent that I've built, and it belongs to me.
+
+So, if I share this GitHub repo to someone, they won't get that skill or they won't get that sub agent.
+
+It's not a big deal because you can easily say, "Oh, you know, you accidentally made that sub agent globally, but I actually want it in this project.
+
+Can you just move it?" And because it's just a markdown file, they move super easily.
+
+Or you can even have them both, you know, you can have them in both spots.
+
+But the reason why I wanted to explain that before I showed you this is because if, you know, you have to choose.
+
+So, if you do a {slash} agents, you can look at what agents are currently running if you've got a bunch of sub agents.
+
+You can go to your library and you can see a bunch of different built-in agents down here like Claude, Claude code guide, explore, plan.
+
+And then you can also look at your project level agents.
+
+So, for example, we could look at, you know, the AI trend hunter.
+
+We can look at carousel planner.
+
+You'll notice that some of these have different models like all of these are Sonnet, but then some of these have different project memory, you know, this one has project memory, this one has none.
+
+But anyways, what I wanted to show you guys, if you go to create a new agent, you choose here if it's a personal or global or if it's a project.
+
+So, let's just make a new project one right now.
+
+In order to create it, we can generate with Claude or we can do manual configuration.
+
+So, I would probably come in here and choose generate with Claude.
+
+And then you basically just describe what this agent should do and when it should be used.
+
+And it says to be comprehensive for the best results.
+
+Create me a sub-agent that criticizes all of my work.
+
+I basically want to be able to hand it off ideas and I want it to not agree with me, but I want it to criticize it.
+
+I want it to roast it.
+
+I want it to play devil's advocate and look for every possible hole in the plan and what could go wrong and give me back basically that report.
+
+I want this thing to be invoked whenever I say "Roast my plan" or "Review my plan." Anything like that.
+
+So that's my prompt.
+
+Obviously that's pretty concise.
+
+So like if you really had a good sub-agent use case, you probably want to give it some more detail and some more nuance there.
+
+But I just want to show you how it's able to generate this file from the description.
+
+And because I chose project level, it's going to create that in the agents folder within my .claude.
+
+So in a sec here, we'll see an agent pop up.
+
+It'll probably be called like um devil's advocate.md or roast agent.md, something like that.
+
+Oh, but before that, it also says what tools do we want it to be able to use?
+
+So like for example, in this one, maybe I only want it to go with read-only tools.
+
+So I could say just read-only and then, you know, we could look at some of the advanced options, too, which would be all these MCP servers and a bunch of other things.
+
+And even like individual tools, whoops, even individual tools like bash, cron create, cron delete.
+
+Like you can get really granular here.
+
+But in this case, I'm just going to go ahead and hit continue with read-only tools.
+
+And then we're able to choose the model.
+
+And in this case, we're going to go with haiku, but you can also inherit from the parent.
+
+So if the parent's running on haiku, all of the agents that all of that sub-agent will be inherited or same thing with opus or sonnet.
+
+And then finally, we can choose our background color.
+
+I'm just going to go ahead and choose pink.
+
+And then we get to choose the memory.
+
+So whether that's project, none, user, or local.
+
+And so really for the sub-agents that I'd be creating and the ones that I'd recommend you guys do, I'd probably just say project scope unless you want all these sub-agents to be completely completely innocent, wake up completely blind, no memory at all, then you would choose none.
+
+But as far as between project, user, and local, I'm probably just going to always choose project.
+
+All right, there we go.
+
+So, I'm going to go ahead and save this new agent, and you can see it just popped up right here.
+
+It's called the plan roster.
+
+And what happens when you create them with Claude is it makes this huge because it doesn't yet understand what you might say and how you want it to trigger.
+
+So, my first recommendation would be trim this down a little bit because once again, this is part of the progressive disclosure.
+
+So, there's no need for the description to be so long.
+
+So, I'm literally going to delete all of this.
+
+I mean, it's good to look at, but I'm going to delete all of this up to here.
+
+And really in my case, this is good enough, right?
+
+Use this agent when Nate wants an adversarial critique of an idea, plan, strategy, blah blah blah.
+
+Trigger on phrases like roast my plan or review my plan.
+
+We've got the tools, the model, the color, the memory, and the name.
+
+So, now I'm just going to open up a new session of Claude, and um let's real quick just say So, I've got this plan, and I want to create an ice cream stand in you know, uh Chicago.
+
+I want to create this ice cream stand on Oak Street Beach.
+
+And I don't yet have a refrigerator, and I want to sell the ice cream all day long for about you know, 20 bucks a pop.
+
+And it's just a little a little piece of ice cream.
+
+So, um go ahead and roast my plan.
+
+This is actually interesting.
+
+So, I created a skill called roast, and it's going to use that instead.
+
+So, it defaults to that because it thinks that it's good enough.
+
+And in the skill, the roast skill, I actually have it spinning up five different sub-agents.
+
+So, that's a good demo.
+
+I didn't mean for this to happen.
+
+These are all general purpose sub-agents that live within my roast skill.
+
+But, I'm going to go ahead and cancel that.
+
+I'm going to run this prompt again, but this time I'm going to explicitly tell it to not use a skill.
+
+But, like I said, that's a good example of showing you that in the skill, you can have it fire off a bunch of sub-agents.
+
+Anyways, the whole reason why the roasting thing is so top of mind is because Claude code and AI in general can be a little bit of a sycophant and it can just be a yes-man.
+
+So, having things worked out like a roast skill or like a plan roster sub-agent is pretty helpful.
+
+Okay, so look what happened here.
+
+It did not invoke our roast our plan roaster sub agent.
+
+So, what I'm going to say is go ahead and take a look within our dot Claude agents folder.
+
+We've got a sub agent called plan roaster.md and you didn't invoke it here.
+
+And I'm not sure exactly why.
+
+Go ahead and read the description of that and and look back at my prompt and help me understand why did you not fire off the sub agent so we can make this better because that exact prompt is something where I'd want you to use that that sub agent.
+
+And so, that's really the way that I think about um iterating on my descriptions both for skills and for sub agents.
+
+Just just understanding like why didn't it fire or why did it fire and how do we then rework the description?
+
+I do think there's a little bit of, you know, foul play here because my roast skill got invoked earlier and it's probably like defaulting to those skills before a sub agent.
+
+So, you know, maybe that wasn't the best example, but I guess it's good that it happened so I can show you guys the way that you might think about improving your YAML front matter.
+
+Okay.
+
+So, completely my fault.
+
+I didn't close out the front matter.
+
+So, good tip, you have to close off the quotes if you open them up, right?
+
+That can break your JSON, it can break other things as well.
+
+So, it will break your YAML front matter.
+
+It said the problem wasn't judgment, it was mechanical.
+
+It also said, "Hey, you know, you do have a roast skill, so maybe there was a little bit of, you know, cloudiness there." So, I completely get that, but it went ahead and it updated the description.
+
+You can see it made it a little bit longer, but there's still collision between the roast skill and the plan roaster, right?
+
+They both get invoked kind of similarly.
+
+So, really the best thing to do here is you would combine the skill to say, "Hey, whenever you run the skill, you also invoke the plan roaster agent instead." But for the sake of the demo, I am just going to actually be way more specific about what to use.
+
+So, there goes our prompt.
+
+Once again, the copy and pasting out of the terminal is horrible.
+
+So, usually if I want to copy and paste something from the terminal, I will tell it to write it to a text file or I will just use it in a desktop app.
+
+But either way, I was way more explicit here.
+
+You can see I said use the plan roaster subagent not the roast skill.
+
+And now it's initializing our pink plan roaster subagent and what I can do is I can go down to the section down here.
+
+I can open up this other terminal and we can see the exact prompt that got sent over to our plan roaster, which was roast this business plan hard.
+
+Here it is in full.
+
+I want to create an ice cream stand in Chicago, blah blah blah.
+
+So it's basically exactly what I said.
+
+Tear it apart, hit every flaw, the missing refrigerator, the absurd $20 price.
+
+And then the subagent already finished up, so it sent us back to the main session.
+
+And now the main terminal is going to interpret what the plan roaster subagent said and then give us the rundown.
+
+And what you'll notice here is the the plan roaster took 22.8K tokens, but those 22.8K tokens did not pollute our main session.
+
+All we got was basically this much, which is pretty awesome.
+
+So anyways, that's a real quick, a little bit of sloppy example, but hopefully it showed you guys the different elements to play with and you know, the way that you think about using these subagents, but that's what it looks like in Cloud Code.
+
+The way that I like to think about these is the same way that I've thought about AI since the beginning of my YouTube channel, which is your AI, you know, it's very fun and cool to have one mega personal assistant agent that can do everything, but really the best way to do it is to have each AI be a specialist.
+
+And that's where your main general ones can be pretty good at, you know, a jack-of-all-trades because of skills, right?
+
+You invoke a skill and now it's good at LinkedIn posts.
+
+Now it's good at doing research.
+
+Now it's good at scripting videos, whatever.
+
+But really the subagents are actual specialists.
+
+They have subject matter expertise.
+
+So you can have one that's a security auditor.
+
+You can have one that does tests.
+
+You can have one that writes docs.
+
+You can have one that's an expert with databasing, whether that's the architecture or the queries or anything like that.
+
+And you can just silo basically this assembly line or parallel work of a bunch of agents that are good at one thing and really, really good at that one thing.
+
+And the other thing that's cool about that is you can borrow subject matter expertise from other people.
+
+This is just one of the hundreds of thousands of examples out there, but there's a GitHub repo which I'll link in the description.
+
+And this one's called awesome Cloud Code subagents.
+
+So if you scroll down here, you can see there's a bunch of subagents that you can use and in different categories, right?
+
+You've got an API designer, a back-end developer, a GraphQL architect.
+
+We've got other language specialists like TypeScript or SQL.
+
+You know, you can scroll through and find a lot of these custom, same way that you look for skills from other people, custom subagents that other people have already built and they maybe know a lot more about CLI developing than you do.
+
+So, they put all their subject matter expertise into a subagent and now you can just use that because all it is is a markdown file.
+
+Now, yes, because everything's open source and because all these markdown files are out there, you want to be careful, right?
+
+Like if you're downloading a file or you're putting it into your system, just make sure there's no prompt injections in there.
+
+Make sure there's nothing, you know, malicious.
+
+And you can even do it by having maybe a subagent that verifies open source repos and it's read-only.
+
+It can never send data.
+
+It can never do anything.
+
+And all it does is verifies that there's nothing malicious inside of that markdown file.
+
+So, anyways, we looked a little bit about how Claude picks out the agents.
+
+It can be automatic and it can automatically invoke things when you are like looking through your code base or whether you are doing research, it'll automatically chuck some out there.
+
+You can also have them very proactively use subagents if you have things like that in the description, so it fires frequently.
+
+You can also list them explicitly by name.
+
+You know, you can tag the agent name or you can say, "Hey, use the plan roster subagent like I just did in that example." And you can also launch a session as a subagent.
+
+If you do Claude with a flag of the subagent's name, it'll actually put you right in a terminal right away with one of those subagents.
+
+And honestly, I never do this, but it's nice to know that that feature exists.
+
+So, once again, just wanted to hit on the point that you can do read-only subagents, which is pretty cool, just by using tool restrictions and giving them only certain things.
+
+It's always nice to have basically the mindset of if my AI could touch data or could read data, I have to assume that it will.
+
+Even if I never prompt it, I have to assume that it will.
+
+And that's the difference between a permission layer being explicit tools that it's allowed to use and explicit MCP services it's allowed to use and just prompting and saying, "Hey, don't do that." or "You don't need to read that.
+
+Don't worry about it.
+
+There's a big difference between those types of permission layers.
+
+And then of course, you have the ability to save a ton of money here.
+
+Let's say you have to read a 300-page research report and just get, you know, maybe three fun facts from it or just get a summary.
+
+There's probably no reason, unless it's a really, really, you know, technical report, to use Opus for that.
+
+Probably not even Sonnet.
+
+So, delegate that to a Haiku sub-agent to read everything and then send back just a small summary to your main session.
+
+And that's how you have the system where you have your smart boss, which is the Opus model that you talk to on the day-to-day, that just works with a bunch of little Haiku agents.
+
+It's going to save you a lot of money.
+
+It's going to keep things moving faster.
+
+And that's the way that you want to start utilizing these things.
+
+Another way that you can also keep them from getting out of control is you can have a max turns set on these sub-agents.
+
+So, maybe they're starting to do loops of research or they're doing loops of reviewing through a code base.
+
+You can say, "Hey, max turns equals 10." Honestly, I don't use this very often because most of my sub-agent delegation is research or very specific workflows where it doesn't really I'm not worried about a loop and I'm keeping my hands on either way.
+
+But that is once again, just another nice lever to pull.
+
+So then, after we've seen all these benefits, hopefully it's starting to become a little bit more clear.
+
+But a lot of people might also still wonder, "Okay, so when do you actually use a sub-agent?
+
+When is it really better to?" So, one core question you can think about is, "Is this about to dump a pile of stuff into my chat that I'll never read again?" If that's ever yes, delegate it to a sub-agent.
+
+If it's no, then maybe you keep it in line.
+
+But there's also some other things to think about, too, right?
+
+So, let's look at some signals.
+
+If you're about to read a lot of files, do some sub-agents.
+
+If you're going to spit out a wall of output, maybe do sub-agents.
+
+If it's a job that you keep repeating, build a custom sub-agent for it.
+
+If it is independent stuff and you can run a ton of things in parallel, like, you know, maybe you have 15 chapters of a book and you want each chapter to be reviewed and like it doesn't have to be in chronological order, all of them can be reviewed at the same time, then that that's parallel.
+
+And then you can go ahead and do those independent jobs.
+
+And also, if you want like an unbiased reviewer, because once again, sub agents can wake up no context, completely fresh, no memory, and you can get an honest review.
+
+Now, you don't need a sub agent if you're just doing a quick edit, if the steps depend on each other, right?
+
+So, if it's like 1 2 3 then 4, if the agents need to talk to each other, then that's when you would need more of like an agent team or a different type of orchestration.
+
+I've made a video on agent teams before.
+
+Um they are more expensive than sub agents because they're they're talking and stuff like that, but they share task list and everything.
+
+Sub agents do not work that way.
+
+It's just a one-to-one relationship between sub agent and main session, not like a one-to-many.
+
+If you've got five sub agents running, they cannot talk to each other.
+
+You would also skip them if you need the sub agent to have like the context of the entire conversation, or if it needs to ask you a question, because you don't get really get to talk to the sub agents, you know, the main agent is the orchestrator.
+
+Now, there's also something to think about, which is a fairly newer feature.
+
+It was with with the release of Opus 4.8, which is the dynamic workflows.
+
+And what that does is it spins up a workflow that typically delegates to a ton of different sub agents in parallel.
+
+So, remember the idea is that the main chat is the orchestrator, and you've got a bunch of different sub agents running, whether that's three or whether that's 40.
+
+A lot of times, if you're asking for a big project, and it decides to use a dynamic workflow, then all that's doing is it's creating a bunch of sub agents, and it's delegating to them all at one time.
+
+So, I made a video about those.
+
+I will tag that right up here if you want to check out the dynamic workflows video.
+
+You'll see an example I did where it spun up 41 sub agents at the same time and just ran them.
+
+I've also done some examples, not on video, but like when I was testing it out, where I did some workflows, and one of them spun up like 210 sub agents at the same time, which was great, but it ate through my context or sorry, it ate through my session limit like crazy.
+
+So, you definitely want to be careful when you're spinning up dynamic workflows.
+
+They actually then, a few days after this came out, they said, "Hey, we changed the trigger word for dynamic workflows from workflow to to ultra code." You can still say to use a workflow for this, but when you're clearly referring to something else, Claude won't kick off a dynamic workflow.
+
+So, you want to make Make that you are being very careful about when you kick off those dynamic workflows because like I said, they are expensive.
+
+So anyways, that is pretty much all of the stuff that I wanted to talk about here with sub agents.
+
+So the whole thing on one slide just to do a quick recap.
+
+If it's just one quick thing, you don't need a sub agent, right?
+
+Just because this feature is awesome, which it really is a great feature, that doesn't mean to force it.
+
+Because sometimes if you're forcing too many sub agents, you're going to get worse results.
+
+So play around with them, understand the benefits, and start to kick them off when you really do need them.
+
+If you want to share them with your team, keep them in your projects, keep them in your repo.
+
+If you want to keep sub agents just for you that you can use across any project, then put them in your home folder, kind of, you know, make them globally or personally.
+
+You can save a lot of money by having cheap workers with one smart lead.
+
+You can get better results by letting a fresh agent review your work or do work in parallel.
+
+If you want to do a giant parallel job, go ahead and check out a dynamic workflow.
+
+Just be careful of your session limit.
+
+And if you're not sure if it's a pile of stuff that you're never going to reread, then go ahead and spin off a sub agent.
+
+Whether you are using Cloud Code in the terminal or whether you're using it in the desktop app or even the VS Code extension in VS Code or, you know, on the web, wherever you're using Cloud Code, everywhere that you use Cloud Code can run sub agents.
+
+And the principles that I just talked about are always the same.
+
+This is where they live, that's how you invoke them, they're always YAML front matter, and those are pretty much the best practices.
+
+So, I know we covered a ton of information.
+
+If you guys want to download this exact slide deck, all you have to do is join my free school community.
+
+The link for that is down in the description.
+
+Once you join here, all you have to do is click on the classroom, click on all YouTube resources, and then you'll be able to find everything that I've dropped in here for free.
+
+GitHub repos, skills, templates, slide decks, whatever you want, it's all in there for free.
+
+But, that is going to do it for today.
+
+So if you guys enjoyed the video or you learned something new, then please give it a like, it helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video, and I'll see you on the next one.
+
+Thanks, guys.

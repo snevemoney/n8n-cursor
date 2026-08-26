@@ -1,0 +1,891 @@
+I just built this AI voice receptionist that can do pretty much anything.
+
+All of the backend automations are happening thanks to this Naden MCP server that has seven different custom workflows that I built out in NAND.
+
+So, in today's video, I'm going to be showing you guys how I configured Vappy on the front end and Naden on the back end and more importantly showing you guys how you can replicate or customize this system.
+
+Not only am I giving you guys the system prompt and all the workflows that you'll see today for completely free, I'm also chucking in this 15-page resource guide that walks through the entire configuration and pretty much everything that you need to know about this system.
+
+So let's hop into a live demo and then let's walk through the build.
+
+All right, so on the lefth hand side we have Vappy.
+
+This is Kylie, our Hercules detailing AI receptionist.
+
+And on the right hand side we have our MCP server with these seven custom workflows that we built out in Naden.
+
+So before we give Kylie a call, I'm going to pull up the calendar on the lefth hand side and the CRM on the right hand side so that we can see all of this updating and happening in real time.
+
+We're going to do two scenarios.
+
+I'm going to call in as a new user and have an account created and book an appointment.
+
+And then I'm going to call back and I'm going to ask if I can change that appointment.
+
+All right.
+
+So, we're gonna go ahead and give Kylie a ring and we'll see how this works. >> Hi, this is Kylie with Hercules Detailing.
+
+Can I please have your email so I can look you up in the system? >> Yeah, I'm actually a new caller, so I won't be in the system. >> Welcome.
+
+Super glad you called Hercules Detailing today.
+
+Uh, all I need is your email address, your full name, and phone number to get you set up.
+
+Just let me know those details.
+
+Don't worry, I'll confirm them with you so we get everything perfect.
+
+Go ahead whenever you're ready. >> Sure.
+
+Yeah, my email is nateample.com.
+
+My name is Nate Herk.
+
+That's spelled with a K at the end.
+
+And then my phone number is 3334445678. >> Awesome.
+
+Thanks for that, Nate.
+
+Just to confirm, your email is nateample.com.
+
+Your full name is Natek with a K at the end and phone number is 3334445678.
+
+Right?
+
+If that all looks good to you, give me one second to send that in and get your profile set up. >> All set, Nate.
+
+You're officially in our system.
+
+Super easy.
+
+Now, what can I help you with today?
+
+Are you looking to book an appointment?
+
+Have a question.
+
+Or is there anything else on your mind? >> Yeah, I'm just looking to schedule an interior detailing for tomorrow. >> Great choice.
+
+Interior detailing will have your car feeling fresh.
+
+Just give me one second and I'll check our availability for tomorrow real quick and let you know what times are open. >> Sounds good. >> Okay, here's the scoop.
+
+All right, here's what tomorrow looks like.
+
+We do have some time slots already taken.
+
+One in the morning from 10:15 to 11:15 and another from 2 to 3, but every other hourlong slot during the day is open.
+
+Just letting you know what time you'd like to come in for your interior detailing.
+
+Appointments last one hour.
+
+So you can pick any time slot outside of the 10:15 11:15 and two three windows.
+
+What works best for you? >> Yeah, let's do an 8 a.m. slot. >> Give me one second to process that for you.
+
+All right, Nate, you're all set for an interior detailing appointment tomorrow at 8 a.m.
+
+Your spot is reserved and ready to go.
+
+If you need to change anything or have any questions about your appointment or our services, seriously, just let me know. >> Anything else you'd like help with? >> Nope, that's it.
+
+Thank you so much. >> Sweet. >> All right, so just had to hang up on her there.
+
+So, we can see that all that updated in real time.
+
+And if I now go to the call log, if we just give this a sec, this should trigger over a summary of the call, as you can see, as well as the outcome, which was appointment got booked.
+
+And the summary was that we set up an account.
+
+And now we've booked in an appointment for 8 a.m.
+
+So now we're going to run another example where I call in and I ask if I can move this appointment.
+
+So I'm going to go ahead and give Kylie another ring. >> Hi, this is Kylie with Hercules Detailing.
+
+Can I please have your email so I can look you up in the system?
+
+Yeah, it's nateample.com. >> Awesome.
+
+Thanks, Nate.
+
+Let me check on that real quick and see what we've got for you in the system.
+
+Just give me a sec.
+
+All right, Nate.
+
+Looks like I found you.
+
+Welcome back.
+
+What can I help with today? >> Yeah, I just want to actually move my appointment.
+
+I was going to see if I could just bump it an hour later. >> Cool.
+
+No problem at all.
+
+Let me check on that real quick so we don't double book anyone.
+
+I want to see what's available for you around that time.
+
+Give me just a second.
+
+All right, Nate, here's the scoop.
+
+After bumping your appointment an hour later to 9:00 a.m., it looks like that time is totally open for you.
+
+No conflicts at all in the calendar, so you're in the clear.
+
+Um, just to confirm, you're moving your interior detailing appointment, right?
+
+Ready for me to update it to 9:00 a.m. for you?
+
+Let me know. and I'll get it all sorted out. >> Yeah, that's perfect.
+
+Let's go ahead and do it. >> Give me one sec to process that for you. >> Boom.
+
+It's done.
+
+Your interior detailing appointment is now officially moved to December 7th at 9:00 a.m. and it'll run until 10:00 a.m.
+
+You're all set.
+
+Anything else you want to update or ask about while I got you online?
+
+Nope, that's it.
+
+Thank you so much for your help today. >> You got it, Nate.
+
+Thanks for call. >> All right, hang up on her again.
+
+And now let's just give it one sec and we will see that that call comes in and it should say that everything was updated.
+
+As you can see, there we go.
+
+We just got that call log and we can see the outcome here was that the appointment got rescheduled.
+
+And once again, in the appointment log, we can see under the notes that this appointment was moved to 9:00 a.m. instead.
+
+All right, so now that you guys have seen a live demo or maybe I guess heard a live demo, let's jump into how I went about building this thing from completely scratch.
+
+All right, so I'm sitting here editing this and I just wanted to say something really quick.
+
+The idea of these systems is to make them as good as possible so you can make the experience for the caller as good as possible.
+
+But I still think that the AI systems, whether that's inbound or outbound, should start off the conversation by saying, "Hey, I am Kylie, an AI assistant for Hercules Detailing." because it'll just never be perfect, you know, with interruptions or with like little just kind of etiquette things.
+
+So, I think that you should always have an AI caller tell the human that, hey, I'm an AI caller.
+
+But anyways, let's get back to the video.
+
+All right, so in a voice agent, there's really two main pieces.
+
+You've got the front end, which is like the voice AI, and you configure it in something like Vappy, which is what we're doing here today.
+
+And then you have the back end, which are some of the actual automations that are taking place.
+
+And as you guys know, we're using these seven edited workflows that are being communicated to Vappy with this MCP server trigger.
+
+So, if you've never heard of Vappy before or the idea of a voice agent is very foreign to you, then I would definitely recommend checking out this video, which is kind of a prerequisite.
+
+It's like a 40-minute full beginner's guide, and then hop into this video.
+
+So, I'll tag that right up there.
+
+So, I'm going to break down with you guys exactly how I went ahead and built this and how you should go ahead and think about building a voice agent system.
+
+And it all starts with some sort of wireframe or flowchart because there's so much conditional logic.
+
+There's so many different scenarios that could play out, especially in a voice conversation.
+
+So having all of this at least roughly identified as far as if X do Y, if A do B, and you have all this on paper, it's going to make your job so much easier when you get into Vappy and you start system prompting this thing.
+
+So before we get into Vappy or End, I'm going to walk you guys through my wireframe.
+
+I'm going to walk you guys through my thought process with the actual backend automations and then we're just going to take it step by step and we're going to see all of the different scenarios play out.
+
+Okay, so starting up here at the beginning, we know that what's going to start the process is an inbound call.
+
+So we have a number on our website or whatever it is and a user is going to call the number.
+
+Now, I'm not saying that this is the optimal flow for like an AI receptionist, but this is just what I wanted to do.
+
+So I wanted to have Kylie start off by asking them for their email so she could see if they already exist in the CRM.
+
+And so I knew we'd have to be doing some sort of CRM tool to look up the client.
+
+From there, I knew that there were going to be two paths.
+
+They either exist in the database or they don't yet exist.
+
+And so if they exist, we'll gather personal info.
+
+And if they don't exist, we'll go ahead and create a CRM entry for them.
+
+Now, that was basically step one.
+
+And then after that, we merge back into the same path, which is to gather intent.
+
+And right here we can see that we gather intent.
+
+Whether that's something general that Kylie, the AI receptionist, will be able to handle or if it's something more specialized like transferring to sales or transferring to customer support.
+
+After intent is gathered and if we know that it's going to stick with Kylie, we have a few different things that could happen.
+
+So we know that we could have a caller asking questions.
+
+And if that happens, we need Kylie to answer questions with real truthful information.
+
+So we're going to give her a knowledge base, which is a real document.
+
+And that might be a loop of, you know, five or six questions.
+
+The other scenarios are that they might want to do something with appointments.
+
+So that could be booking, it could be changing, or it could be deleting.
+
+And so there's a few dependencies here.
+
+If they want to book an appointment, we first have to check availability.
+
+If they want to change an appointment, we first have to look up the appointment to change it, but also check availability.
+
+If they want to delete an appointment, we have to look it up first in order to be able to delete it.
+
+And then after all of these actions have been taken, we want to use the CRM to actually add activity back into that log.
+
+And so sort of after this loop of you know intent being handled then we will go ahead and end the call and that's where we want to log the call into our call logger system.
+
+So that's kind of the flow that we've built out today.
+
+And now let's talk about what I was thinking after I did this.
+
+And I was like okay well let's actually think about how these tools will work because VAP is going to have to pass over certain variables to each tool and those are all going to be different.
+
+So how do I want to think about doing that?
+
+So my first thought was I was going to have two editin workflows.
+
+One would be a CRM tool and one would be an appointment tool.
+
+And each of these would have a web hook with an intent check at the beginning.
+
+So CRM could be the intent to look up an appointment or to add activity or to look up a client or to add a new client.
+
+And then similarly for appointment, the intent could be checking availability or to create change or delete an event.
+
+And so the reason I needed to do this was I needed to start thinking about what variables will need to be sent over to each of these kind of like subflows in order for Vapian to be on the same page.
+
+But as I started to build this out, I realized I might be over complicating things because with Vapian Nadn, when you have it sending to a web hook, you have to respond to that web hook.
+
+And so it just became complicated.
+
+And I realized that what I could do is just have an MCP server in NAND that has access to all the correct workflows and it would be taken care of really quickly.
+
+So I know that a lot of this may just seem confusing because it's all just little colored boxes and squares and rectangles.
+
+So let's start to get into Vappy and Niten and let me show you guys how all of this stuff actually works.
+
+Okay, so here we are in Vappy.
+
+We have our model, which is kind of the first thing, which is OpenAI GBT 4.1.
+
+I found that 4.1 was a lot smarter and better at following instructions than 4 was.
+
+We've got the first message, which is Kylie saying, "Hey, this is Kylie.
+
+Can I please have your email so I can look you up in the system?" We've got the system prompt, which the hard thing about system prompts with the voice AI is that it's just prompting and testing and prompting and testing, and that's really the only way to do it.
+
+And this is probably the 50th version of the system prompt that I've done.
+
+But the cool thing about Vap and system prompting is when you click on generate, you can actually have it edit certain things in your prompt.
+
+And it makes it really easy to iterate upon your current version.
+
+Because if I say something like make Kylie super sarcastic, it'll go ahead and edit my entire system prompt.
+
+And then it will also show me exactly where it made changes.
+
+So you can see what it crossed out and what it added.
+
+And then I can go ahead and either refine those edits or I can just accept the changes or discard.
+
+So I'm just going to go ahead and discard because that was just to show you guys what that looks like.
+
+So we talked about how we have the front end with Vappy and we have the back end with Naden.
+
+So how do we actually connect these two things?
+
+Well in Vapy we have a tool for our AI assistant called NADN.
+
+And you can also see in our system prompt there are instances where we say something like use the NIAN tool to check the CRM.
+
+Use the NADN tool to check for availability.
+
+And so that NIDAN tool looks like this.
+
+It is our MCP server with all seven of these workflows that we also built out in NIDN.
+
+And so I know this seems like a lot.
+
+We're going to run through all of it, don't worry.
+
+But these seven workflows, I just wanted to real quick show you what they look like.
+
+So, here is the client lookup tool.
+
+Here is the new client CRM.
+
+Here is the check availability.
+
+Here is the book event.
+
+Here is the update appointment.
+
+Here is the lookup appointment.
+
+And then here is our delete appointment.
+
+And what you'll probably notice as I'm flipping through a lot of these tools is some of these are very simple.
+
+Like this one's literally just one node and this one's two and this one's one.
+
+This is the only one that really kind of has like multiple conditional checks.
+
+But that's what's so cool about this is that each tool has one very specific function.
+
+And so it's just basically up to Vappy and the MCP server to figure out which one to call and then it can get answers back so quick.
+
+Because one thing I see a lot that really kind of makes me cringe when people are building voice agents and using NN is building an NN AI agent in the back end to actually make decisions and to do things because what you're doing there is you're doubling the amount of reasoning and cost and latency because what happens is Vappy right here this entire system prompt this is an AI agent in itself because it has to use a brain to understand what to do.
+
+And so if you use a brain to understand what to do to trigger another brain that needs to understand what to do, then you're just like, like I said, you're just doubling the amount of reasoning and potential errors.
+
+So by having Vappy control everything very clearly and then having that send over to an MCP server that just makes one very quick request and we keep it on the guard rails because it's just a very standard workflow.
+
+You'll notice in all of these backend workflows, there's no AI going on at all.
+
+That's how we can really keep these voice agents running fast and doing what we actually want them to do.
+
+But anyways, there's so much to dive into here.
+
+So, let's go ahead and talk to the assistant and just play out that first scenario, which is creating a new account.
+
+And I'll show you guys how that actually works in Naden.
+
+And I obviously could call her on my phone, but I'm just going to talk to her in this environment so we can all see the transcript and everything.
+
+It makes it a lot easier.
+
+All right.
+
+So, you can see it called the client lookup tool in NAN.
+
+And then it called the new client tool in NAND.
+
+So, let's go ahead and hop over real quick to Vappy.
+
+You can see that if I click on executions here, we have two new ones.
+
+So the first action that it took was the lookup.
+
+And if I click into here and I go to the view subexecution, you can see that what happened here was it sent over mike@dm.com.
+
+It looked him up in the CRM and it realized and it realized that there's no record for Mike.
+
+So nothing was output which is why it gets sent down this next path which basically filters it down this way and then it sends back this message to Vappy which says this is a new client.
+
+They don't exist in the CRM.
+
+So after Vappy saw that and confirmed all of our details, it went ahead and triggered off the new client CRM tool.
+
+So when I click into this subexecution, you can see that Vappy sent all of these details to NADN and then NADN went ahead and logged it in the CRM and that is how we got this new entry right here.
+
+So I know you guys are probably wondering how does the server trigger actually know which of the tools to call for the given scenario.
+
+Well, Vappy will send over some sort of context and some sort of information, but then in all of the tools, what you can see is we have a really easy description that shows when do you call each tool and what do you do?
+
+And it's able to use all of this context to understand which of these is actually the best tool for my given scenario.
+
+And so all of the stuff going on as far as like having them say something before they call a tool and confirming all these details, of course, all of that is in the system prompt and that's going to be attached in here.
+
+The full system prompt that I'm using right now in this video is attached in this document.
+
+So you guys can go ahead and read through it and play around with it if you want.
+
+So I know it may feel like we're going through this stuff kind of fast.
+
+So if you guys want to see the full live step-by-step build, which was like 2 hours of me actually building the system, then I drop stuff like this all the time in my plus group, which you can check out down below, link in the description.
+
+So the question is, how did Vapy actually call NADN?
+
+Well, we had to give it access to a tool.
+
+So you can see if I click on tools right here, you can see that one of the tools that we have is called NADN.
+
+And on this left-h hand side, if I click on tools, you can see that this is the Naden tool that I actually configured.
+
+So the way that you can do this is you click on create tool, you go to MCP as far as the integration, and then it pulls up a screen like this for you to configure.
+
+I went ahead and called my tool NN and then it asks for a server URL.
+
+So, if I go back into the edit and flow with our MCP server trigger, basically I clicked into this.
+
+I grabbed the production URL and I copy and pasted this right here into the server URL.
+
+Now, the last thing you have to do to actually make this work is you have to send over an API key from NIN.
+
+So, in the headers, you're going to add a header right here.
+
+You're going to put the name as authorization and for the actual value, you're going to do capital B bearer space and then paste in your Naden API key.
+
+And the way that you go ahead and get your API key from nitn is by going to your settings which will be in the bottom left.
+
+And then you click on nitn API.
+
+And then you should be able to create a key right here.
+
+And that value that you get is what you paste in here after the space.
+
+And then you just want to go ahead and switch it from streamable HTTP to server sent events.
+
+And then this basically gives the connection for Vappy to call this tool and it will be able to look through and use all of the workflows that you hook up to that server trigger.
+
+But of course, what you cannot forget to do is tell it in the system prompt when and how to use that tool.
+
+So right here you can see we have our identity style response guidelines.
+
+But then when we move into more of the conditional logic flow, we have tasks and goals.
+
+So we have the initial greeting and you can see it says greet the caller warmly and ask for their email to look up their profile using the NAND tool.
+
+And so that's how it knows to call it and to send over their email.
+
+I said convert the email to lowercase before using it in the CRM lookup with the NAND tool.
+
+I also made sure that I said before calling the tool you must say something like let me check on that real quick to avoid silences because otherwise they're just going to call the tool and there's going to be like 5 seconds of silence while they're waiting.
+
+And then moving on to number two you can see the CRM lookup logic.
+
+I said use the end tool to check the CRM.
+
+Before you call the tool you must say something.
+
+If the client exists you do this.
+
+So you acknowledge them.
+
+If the client's new basically say that we're going to set you up an account.
+
+We're going to use the end tool.
+
+Make sure to confirm the spelling of their name before logging it. confirm the information is correct before you call the tool.
+
+And so that's as far as we just saw in the demo.
+
+So now we have intent gathering in action and appointment management and a few other things later.
+
+So let's go ahead and do another example and we're going to book an appointment and then I'll walk through how all of that worked.
+
+Okay, so let's walk through the edit in workflows that just happened again.
+
+So we called in as mikedm.com and it did a client lookup but this time it was successful.
+
+So let's go see what that looked like in edit in.
+
+So here was the first execution where the MCP server trigger called the client lookup tool.
+
+You can see that it sent over miked dm and this is what that subexecution looks like.
+
+So it looked up the email mike@dm.com and it came back with a record which means we send it down the true branch which basically says that they already exist in the CRM and from there we go ahead and look up their email in the CRM to see if they have any appointments and currently they do not have any appointments in the log which is why it goes down this false branch which basically says the client exists however he or she has no previous appointments.
+
+And if they did have appointments, it would go up this way and then Vappy would be able to see that.
+
+Now, after that, what happened in Vappy is we looked to book an appointment.
+
+So, first Kylie had to look up and check availability and then she had to confirm the time and then go book the event.
+
+So, let's go take a look at those two tool calls.
+
+So, the first one was checking availability.
+
+It called the check availability tool.
+
+And here's what that subexcription looks like where it basically sends over the current time and then the end of the day.
+
+So, it said 12:08, which is right now when I made the call.
+
+And then it's saying what times between now and the end of today are available.
+
+And that's what we go ahead and search in the get many events.
+
+So you can see that there are no events from now until the end of the day which is why nothing returns.
+
+And the if node is checking if anything comes back because if there are events it will basically send it up the true branch and then Vappy will see the booked times.
+
+But because there's nothing it comes here and then it says the entire day is available.
+
+And then of course once the time has been confirmed we go ahead and call this book event tool which sends over the start time and the end time. the email and the actual event summary for the event to book.
+
+And that subexecution is very simple.
+
+We're basically passing that information into calendar to create an event.
+
+And then we're passing it into our Google sheet to create a new row in the appointment log.
+
+So now if I was to switch over to the CRM and click on the appointment log, we can see that we just got a new appointment booked here with the event ID, the email, the type, and the date, as well as the notes saying that appointment has been booked.
+
+So now to put that all together, the tools have been called, the things have happened, but how did we actually get that to happen in the system prompt?
+
+So what we did is we told it exactly what to do for each scenario.
+
+And right here, we skipped over the intent gathering as far as like transferring or handing off.
+
+So I'll do that example next.
+
+But for appointment management, what we said is for all of these actions, you first have to check availability.
+
+You're going to call the end tool to assess appointment availability.
+
+If it returns the entire day is available, inform the client accordingly.
+
+If it provides specific time slots, then just know that those are busy times.
+
+If checking availability for today, then send over the current time up until 235959, which as you can see in the check availability tool, it sent over 1208, which was the current time when I made that call.
+
+And that's how it knew that there are no events from now until the end of the day.
+
+And apparently Hercules Detailing is open 24 hours.
+
+But then we also said if checking for a specific date, so for like tomorrow or days in the future, use a 24-hour format and check from the beginning of the day all the way up until the end of the day.
+
+Only tell the caller what other times are available.
+
+Don't tell them what they're titled.
+
+After a time has been confirmed, inform the client that appointments last 1 hour.
+
+And so, as you can see here, I'm just basically giving it really, really specific guidelines as far as like follow this script.
+
+So, if you think of like an actual call center where humans are making the calls, they typically have a a script with all this conditional logic of what to say and when.
+
+And that's really what we're doing here.
+
+So, let's real quick go ahead and do a quick example with updating or deleting an appointment.
+
+And then we'll jump back to how you can transfer or handoff calls.
+
+Okay.
+
+So, I just finished talking to Kylie.
+
+She started by looking us up in the CRM.
+
+I said that I wanted to push the appointment back 1 hour.
+
+So, first she checked on the availability.
+
+She then said that okay, that's open.
+
+So, then she wanted to look up our appointment to actually move it.
+
+She called me buddy, which I didn't love, but she said that it is available.
+
+And then when I confirmed I want to move it back an hour, she went ahead and used the update appointment tool.
+
+So, let's go take a look at Niten and what it actually did there.
+
+All right.
+
+So, here are the four executions that it had.
+
+We're not going to look at the first one cuz it's just a client lookup again.
+
+The second one is where it went ahead and checked availability for the rest of today.
+
+And then if we go to this one which is the lookup appointment, let's see what's going on in this subexecution.
+
+So here what we see is Vappy sent over the after time and the before time.
+
+And what that does is it gets any events that are within that window.
+
+And so it comes back with our event because what it's looking for is this event ID so that it can actually go ahead and update it later.
+
+So it takes that event ID that we just saw and then it calls the update appointment tool.
+
+And you can see that's what it passed over right here as well as the new start time and end time.
+
+So let's click into the subexecution here.
+
+So it's really pretty simple.
+
+It takes that information.
+
+It creates that new calendar event and then it goes ahead and updates that row in the Google sheet because we're able to match on the event ID which is a unique identifier.
+
+And that's why if you remember in our appointment log, this originally said appointment booked and now it updated the date and it also changed the notes to saying we had this rescheduled or this one was moved.
+
+And this is what the delete appointment workflow looks like, which is the exact same except for instead of updating an event, we're just deleting it.
+
+So it would basically send over the event ID and then we would delete it through that.
+
+And then we would do the same thing in this Google sheet where we're matching on the event ID.
+
+And then we're just changing the notes to say cancelled.
+
+Okay.
+
+So in our wireframe, we've seen all of this.
+
+We've seen the different paths.
+
+We've seen pretty much all of these different options for booking appointments and the CRM tool.
+
+But what we haven't yet seen is transferring calls and the knowledge base.
+
+So, let's first do this and then we'll go ahead and take a look at this. >> Hi, this is Kylie with Hercules Detailing.
+
+Can I please have your email so I can look you up in the system? >> Nope.
+
+I don't want to give you my email.
+
+I just want to talk to the customer support department because I'm furious. >> Totally get it.
+
+If you'd rather not share your email, that's all good.
+
+Would you like me to transfer you to our customer support team right now so you can chat with them directly? >> Yes, please.
+
+I think you'll >> Hello, I am customer support. >> Okay, so as you can see right there, we had a angry customer.
+
+They didn't want to give their email, but that was fine.
+
+Kylie just basically said, "Okay, I'll transfer you." And then we used a tool called Handoff, which if you remember, and I go to the tools that this assistant has access to.
+
+The other one that it has access to is called Handoff.
+
+So the way that we actually configured this was back in the lefth hand side.
+
+We're going to click on tools, and you can see that we have a tool called handoff.
+
+So when you go ahead and create a new one, you see that you have transfer call.
+
+But what transfer call lets you do is this lets you actually put in a phone number if you wanted to transfer this to a human.
+
+So you could add a destination and put in a phone number.
+
+But when you do handoff, what this lets you do is it lets you hand it off to a different internal Vappy Assistant.
+
+So you can see here that what I'm doing is I added a destination to send it over to a Vappy Assistant and I was able to choose that I wanted to send it to our customer support specialized agent.
+
+And what's cool is you can have multiple different destinations within one handoff tool.
+
+So this handoff tool could send one to customer support, it could send a different path to sales, another one to Alex.
+
+And basically when Vappy calls this tool, it figures out which of the ones to hand off to.
+
+And it's able to understand that because right here it says hand off to this assistant when the caller requests customer support or has a customer support related inquiry.
+
+And so orchestrating all of these different AI systems together, it's all about context.
+
+So this is basically how it knows to hand off to customer support.
+
+And if I go back into our MCP in Nitn, you can see that each of these different tools has a description.
+
+So that's how the server knows based on the request coming in, which one of these tools am I going to call?
+
+Okay.
+
+So the final thing that we have yet to look at is the knowledge base and the ability for Kylie to just answer general questions.
+
+So let's say you have a document like this, which is Hercules detailing, policies, and FAQs.
+
+You've got stuff like business hours, location, contact, email, all of this kind of stuff.
+
+And so what you do is you can take this as a PDF.
+
+You can go into Vappy and you can go down here to more and click on files and you can upload a file right here.
+
+So you can see that I dropped in the Hercules detailing policies and FAQ.
+
+And now if I go back into our actual assistant, the AI receptionist at the end of the model, you can see that we have the ability to add files.
+
+And I've added the Hercules detailing policies in FAQ.
+
+And then what else I do is in here in the system prompt right here for general question handling.
+
+I said for general questions about location, business hours, general policies, FAQs, use only the information from the Hercules detailing policies and FAQ using the default query tool.
+
+Do not make up any of your information.
+
+And so it's interesting because the default query tool just means that it's looking at this file even though you don't give it access to a tool called default query tool.
+
+So, let's go ahead and ask a question where it would have to use that file.
+
+And you'll see what I mean in this little interface over here how it calls the default query tool. >> Can I please have your email so I can look you up in the system? >> Yeah, I don't really want to provide my email right now.
+
+I just want to ask about the different services that you offer if you have like different tiers or what else you guys offer just besides a detailing. >> No worries at all.
+
+You're totally welcome to just ask questions.
+
+Um, let the info on and I'll make it um super easy.
+
+I promise.
+
+Just give me a sec.
+
+All right, here's a quick scoop.
+
+We got three names of that we need.
+
+One, >> okay, so I had to cut her off, but you can see that she was able to use the default query tool and was able to answer us with all of this information because we gave her a source of truth file.
+
+Okay, so now that you've seen this entire flow, before we actually dive into the log call operation, I just wanted to zoom back in to why I actually made the decision to switch from two workflows to an MCP server. because now we have like a 50,000 foot view of how this works.
+
+So if I wanted to send data and have different tools for each of the different like operations, we would have to do a lot more prompting because we'd have to specify in this case use this tool, in this case use that tool.
+
+But also, if we wanted to add those as tools, we would basically be doing this custom tool operation and we'd be naming it.
+
+We'd be giving it a description.
+
+We would be configuring the web hook address to send it over to, but we would also be defining the parameters.
+
+So if you remember when we want to do something like create an appointment we need email time and summary but if we want to change it we have to get e event ID email time and summary and if we want to delete it we just send over event ID and so there's all these different parameters that we would have to configure and say hey Vappy when you call this tool send over these three things when you call this tool send over those five things and that means if we ever wanted to change something in the backend or you know whatever other scenario we would have to make updates in two spots.
+
+But because we have an MCP server where all we'd have to do is configure how these workflows take inputs, the server trigger basically is able to find all of the inputs and the schemas and just send over what we need because Vappy understands the use case in our assistant once again because we prompted it right with everything that it needs to know.
+
+So hopefully that all makes more sense now that we've seen all the tools in action.
+
+All right.
+
+So, now that we've gone through this entire flow and seen some different scenarios, how does it actually log this information in our call logger?
+
+Because remember in our CRM, we have clients appointment log and then we also have a call log where we can see all of the different times of the calls and the summaries and the outcomes.
+
+So, first of all, in our AI receptionist, I could click on these three dots and I could go to call logs, which is great for visibility and for being able to do a lot of testing because it's going to let you actually listen to all of the different calls and you can see what happened in them and like what tools they called.
+
+But the way that you can get all that detail sent to some sort of like actual external logger is if we go to the advanced section and we go all the way down here to messaging.
+
+And if I open up messaging, you can see that there is something called server settings.
+
+And this is where I gave it an edit in web hook to log our information.
+
+So this is the web hook.
+
+You can see that it's active.
+
+So what I did is I opened up the web hook and I grabbed the production URL.
+
+Even though when you click into it, it looks like it's open on the test, but if it's active, it will be pulling the production.
+
+So I grabbed this.
+
+I copied this right here into our server settings.
+
+And then if I scroll down a little bit more, you can see that we have client messages and we have server messages.
+
+So right now I'm just worried about server messages because it says these are messages that will be sent to the server URL configured which is what we just put up here which is our NN web hook.
+
+And so in here by default there will be some more things selected but all I wanted to do was end of call report because you can also see that other things can be sent over like the transcript like the tool calls things like that.
+
+But the end of call report is going to give us these things up above that we configure.
+
+It's going to be in the analysis section.
+
+It'll give us the summary and it will give us any of this structured data that we want it to send over.
+
+So for the summary, it's really simple.
+
+I said you are an expert notetaker.
+
+Your job is to summarize the transcript in two to three sentences.
+
+So you can customize what type of summary you want.
+
+But if you're actually looking for key pieces of information, you can use structured data to basically like pluck out certain things that you want.
+
+So in our case, we're only sending over an outcome as you can see, which is like one of these types of things.
+
+But maybe in your call logging, you also want to get plucked out like the email of the person or the type of appointment they booked or the time of the appointment they booked.
+
+And that's why we have all of that being logged already in the appointment log.
+
+But you could do that as well here in the call log because all you'd have to do is basically tell it, I need you to pick out these different variables and then send them over in these different properties.
+
+And you could add as many as you want here.
+
+And so this stuff will automatically be sent to the correct URL if you fill one out here.
+
+And so if I go into Hercules detailing receptionist end of call report and I click on executions, what that's going to do is it's going to show us the payload that Vappy sends over here.
+
+So with that most recent call, if I click on the payload and we see all of this nasty stuff, but what I can do is just go to schema and what I want to look at is the body.
+
+And this is where we're getting our summary sent over as well as the structured data that we configured which is called outcome.
+
+So the summary is that the customer called Hercules Detailing to inquire about services in different tiers. the AI began explaining the three main tiers and the outcome was that customer inquired about services.
+
+So really like the same way that you want to have a log for your automations to see what happened and what was called, you can do that with your voice agents as well.
+
+And basically we just write that into our Google sheet with the following three fields.
+
+So the last thing I wanted to talk about was how I connected this to a phone number.
+
+So, in Vappy, if you want to create a phone number, you can grab a free Vappy one, and it's up to 10 per account, which is great.
+
+And this is a US phone number, but you can also import other ones if you already have phone numbers that you want to hook up.
+
+Now, once you have a phone number in Vapy, it's up to you to assign it to something.
+
+So, in here, all I did was I assigned it to an inbound phone number and I plugged it in to the AI receptionist.
+
+You can see that when you do that, you could add a fallback destination or you could also make it an outbound phone number if you wanted to have different assistants calling outbound.
+
+If you guys want to see a tutorial of an outbound voice agent, then let me know some use cases and I will definitely make a tutorial on that for you guys.
+
+But I've got a feeling that this video is running pretty long as is and I don't want to make it any longer.
+
+So, what I have to wrap up with is just telling you guys how you can access all of these workflows as well as this document that has all the workflows and the system prompts in it and everything like that.
+
+So, you're going to join my free school community.
+
+The link for that is down in the description.
+
+And once you get in here, all you have to do is go to YouTube resources or search for the title of the video or you can go to free nad templates.
+
+And once you get to a post associated with the video, let's say it's this one.
+
+You will be able to see right here the PDF will be attached as well as the JSON or in this case it'll be maybe a zip file with a bunch of different JSON workflows.
+
+And then you can just basically configure everything, point it to Vappy, and start testing it all out.
+
+And if you want to access unlimited support and connect with over 200 members who are building with NNN every day and building businesses with NNN every day, then definitely check out my plus community.
+
+The link for that is also down in the description.
+
+Like I said earlier, I posted the full live 2-hour step-by-step build of me making this AI voice receptionist system in this community already.
+
+And we also have a full classroom section with tons of other projects that are live.
+
+We have agent zero, which is the foundations for beginners.
+
+We've got 10 hours and 10 seconds where you learn how to identify, design, and build time-saving automations.
+
+We've got one person AI agency and we've got subs to sales.
+
+So, I'd love to see you guys in this community in the live calls.
+
+But that's going to do it for today.
+
+So, I hope that you guys enjoyed the video.
+
+If you did, please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you all making it to the end of the video.
+
+I'll see you on the next one.
+
+Thanks everyone.

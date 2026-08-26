@@ -1,0 +1,485 @@
+Today we have a really exciting one.
+
+We're going to be going over the winning submission from our first community hackathon that took home $5,000.
+
+And in this interview with the winner, we found out that he'd only been playing around with this kind of stuff for about 6 months now, and he's still in high school.
+
+So, I hope that's inspiring to you guys.
+
+There were hundreds of people that participated in this hackathon, and this is the one that we crown the winner.
+
+So, let's dive into the actual build.
+
+All right, guys.
+
+So, today I'm here with Azim.
+
+He was the winner of the first hackathon within our paid community, AI Automation Society Plus.
+
+This was a hackathon that was 3 weeks long and all that they were told was that they needed to build a voice agent and the backend integration needed to be ended in.
+
+Like I said, he was the winner of the $5,000 and the first place prize for this hackathon.
+
+So, he's going to walk us through what he built, how he thought of it, and what he plans to do with this winning solution.
+
+So, I'll hand it over to you real quick if you want to give a quick intro, talk about the tech stack you used, and what the voice agent does, and then we'll just dive into a demo.
+
+Hey guys, this is Zane here.
+
+So, as Nate mentioned, I took part of the August AAS plus hackathon, and I delivered a mental health web app.
+
+It was powered by a customcoded bold new web app, 9 workflows as the back end, and VP for hosting divorce agents. >> Cool.
+
+Yeah, Azim, real quick before we hop in, I'd be curious like what is your background like as far as how technical were you and how long you've been playing with Bolt, NAN, stuff like that? >> Yeah, so with NAN and voice agents, I got started around 6 months ago.
+
+I had pretty much no prior technical experience.
+
+I just learned my way through courses and YouTube videos like yours.
+
+I still remember two months ago I was just sitting and watching your videos and bold on you was something that was pretty much new to me.
+
+Before I used it to buy code myself a website, but other than that, my experience with it was pretty limited.
+
+That is super awesome.
+
+I hope that that's inspiring for everyone watching that wants to get started building solutions and maybe is looking to monetize their knowledge.
+
+Everyone thinks the answer is an AI agency, but apparently the answer is to do an AI plus. definitely is. >> Okay, cool.
+
+So, I think let's hop over to the web app.
+
+Let's take a look at how it works and then just kind of dive in. >> For sure. >> Yeah.
+
+So, over here is the web app.
+
+We can just go ahead and sign up right now. >> So, it looks like when you do your little onboarding, you've got full name, email address, phone number, time zone, and then you create a password.
+
+And then where does this account information get stored on the back end? >> Yeah, for that back end, I not only use Bolt, I also use Google Firebase.
+
+So, that's good for simple authentication with the email and password.
+
+That's also where people's user ids and other such information get stored. >> Cool.
+
+So that information gets stored.
+
+So the conversations they're having with these AI therapists is very tailored towards them. >> Yeah. >> Awesome.
+
+Awesome.
+
+Cool.
+
+So yeah, let's get me signed up. >> And yeah, over here sent that email verification. >> Let me go sign in and get that verified.
+
+Okay.
+
+So now we're getting to the next stage of the onboarding where it's going to ask us some questions.
+
+So this first one is what brings you here today?
+
+Tell us about your current situation and what you'd like support with.
+
+So, it looks like there's five total questions and the point of these is just to make the profile very tailored so that people when they come here for mental health support, they can have conversations with it what feels more like a human. >> Exactly.
+
+So, it's not some generic voice agent or some bot. >> Awesome.
+
+I love that.
+
+Yeah.
+
+Let's get me on boarded and then we'll check back in with everyone. >> Cool. >> Okay.
+
+So, looks like we're going to complete setup >> and then we will give this voice agent a call or it will give us a call.
+
+Either or.
+
+Okay.
+
+Cool.
+
+So on the main screen, users will be able to start a session.
+
+They can view progress or they can customize those settings of their AI companion.
+
+But yeah, let's just start talking to the AI companion.
+
+Okay, so now it's connecting to the therapist.
+
+Is this going to trigger a call to me? >> Yeah, exactly.
+
+So over here it said expect to receive a call soon and within just a minute should get a call. >> Okay, sweet.
+
+So it hit an NN workflow and the NN workflow is going to trigger off that call API or is it hitting Vappy or what's going on right now? >> Yeah, so it's going to hit the N workflow.
+
+Then it's going to use the details you just gave to create a personalized agent.
+
+So every time you want to get a call, it keeps personalizing your agent further and further and then it triggers VP, which places an outbound call to you.
+
+Okay, >> sweet.
+
+Well, I'm getting that right now.
+
+So I'm going to go ahead and answer it.
+
+Put it on speaker phone. >> I'm sorry.
+
+Could you repeat that?
+
+Of >> course, Nate.
+
+I just wanted to say hi and let you know I'm here whenever you want to talk.
+
+How are things feeling for you today? >> Yeah, well, thanks for checking in.
+
+I'm feeling pretty stressed because there's a lot that's going on at work.
+
+Whatever you need, I'm here. >> Yeah, I appreciate that.
+
+You know, I've never talked to an AI companion before, so I don't know how comfortable I currently feel with sharing details about my personal life to you, but yeah, let's just do like a let's just take some deep breaths. >> Absolutely, Nate.
+
+I'm glad you No rush.
+
+Nothing together.
+
+Inhale gently through your nose.
+
+Hold for a moment and exhale slowly through your mouth.
+
+Let's do it a couple more times.
+
+Inhale.
+
+Hold.
+
+You know, no need to rush.
+
+Just notice how your body feels with each breath.
+
+If you want, we can keep going a bit longer here and chat about anything else. >> Yeah, I'm feeling a lot better now.
+
+Thank you.
+
+Let's end the conversation for today, but I will check in another time. >> Really glad like there's no want to talk again.
+
+I'll be here to listen and feel like it. >> Awesome.
+
+Yeah.
+
+I think the first thing I notice is that it sounds really nice.
+
+And in this case, we didn't put a preference for a gender, but I got a male.
+
+And I noticed that he was actually kind of pausing and it felt very natural and the voice was very good and it wasn't aggressive at all, you know?
+
+So, I think that was pretty cool.
+
+So, after that conversation, do you think that there's any insights that will be populated here or once the call is ended, what else goes on in the back? >> Yeah.
+
+Once the call ends, a separate AI agent takes the transcript and the summary of the call and then it condenses it and updates your user profile.
+
+From there, it's able to personalize future calls cuz now it has information about your last call as well as your overall history with the agent. >> Okay, super cool.
+
+So, the more and more you use this thing, the smarter and smarter it's going to get about you and helping you out with your problems.
+
+So, at this point, I think we've seen the way that this has all kind of come together from that front-end user experience.
+
+I'd love to dive into some of those initial end-to-end workflows that are doing things and helping you out with with the onboarding with triggering the calls and everything like that. >> Yeah, for sure.
+
+Let's go ahead and dive into that. >> Absolutely.
+
+Let's just kind of take them in chronological order and see what you did. >> Yeah.
+
+So, here I am inside my N workspace.
+
+As you can see here, these were nine N workflows and also the nine biggest pains of my life.
+
+But I'm glad that I sorted them out.
+
+So first, why don't we just start with the onboarding form web hook and see how your data was logged.
+
+So over here, this onboarding form web hook workflow is actually quite simple.
+
+The first node we have here is a regular web hook node.
+
+It's designed so that as soon as somebody completes their onboarding and fills out that form, the data all gets captured and sent over to here.
+
+After that is done, we have a code node extracting the exact fields we need.
+
+And then that's passed over to these two N agents.
+
+So the first AI agent we have over here is the profile manager.
+
+Essentially it manages your main profile with one Google sheet tool where it maps all of the foreign details to your newly created profile.
+
+After that it gets passed on to this AI agent over here which can make customizations to your profile based on each of the preferences you picked.
+
+So in this case if Nate decided to pick the morning and evening preference, this would have went ahead and added him to these sheets.
+
+And overall it's just a pretty simple setup for anyone that's never done like a web app like with bolt or lovable sending data to an end to end workflow like Azim said it was it's a pretty simple web hook and all you have to do is you just actually drop that web hook URL to bolt and say when the user clicks on this button send data here and so that's a really cool way to link a custom frontend with a custom backend and then obviously the possibilities are endless.
+
+So this is a really nice setup here, Azim.
+
+The data gets sent to these different two AI agents that log information about the user so that later it can look up that information to make sure that the call is tailored towards them.
+
+So super cool.
+
+Let's take a look at the next workflow.
+
+So as you can see here, this is the monitor workflow that just initiated that call to Nate. >> Yeah.
+
+Okay.
+
+So this is the one that kind of launches calls and then stores information. >> Exactly.
+
+And this one is for the on demand calling.
+
+So that's when you click the button inside.
+
+This runs with exact calls that you make yourself. >> Okay.
+
+Cool.
+
+Cool.
+
+So you know what I love about this and we'll take a look and we'll zoom in a little bit in a sec.
+
+But you guys can see here that this is a pretty linear flow where there's a lot of conditional checks.
+
+There's a few agents every once in a while, but it doesn't seem very autonomous.
+
+And I like the way you design this because it keeps you in control pretty much the whole way.
+
+And by the way, we're not going to be able to dive into every single node and all the configurations in this video.
+
+But if you guys do want to access all of the templates that Azim's built here and check out what a $5,000 voice agent build looks like, then you can download this template in the community, which I will link down below as well.
+
+But yeah, Azim, let's go ahead and zoom in a little bit and you don't have to go into every single node, but just kind of at a high level, let's take sections of the workflow and you can explain what they're >> Yeah.
+
+So with the last workflow, we're going to start with another web hook.
+
+And this web hook is activated as soon as somebody fills out the form to receive a call.
+
+After the information is extracted, we have a small segment over here that's actually responsible that's for checking the safety of the user's query.
+
+So if the safety check finds that somebody is an emergency or a crisis, it's going to go ahead and route this to an emergency response path, which in the real world would alert emergency services so they can take proper action to help that person.
+
+Nice.
+
+I think that was a really cool thing that you added in there.
+
+So then what happens if the AI decides that there's no emergency?
+
+It goes up this northern branch.
+
+What is this one doing? >> Yeah.
+
+So these two northern branches, they're pretty much the same thing except for the caution score, which is a bit different.
+
+But regardless, they're going to lead down this main path, which leads this mental health AI over here.
+
+It gets the data of the person that placed the call using their user ID, and it searches with that user ID inside of the Google sheet to retrieve all of their information. >> Awesome.
+
+So if you guys remember in that onboarding flow, the two agents were logging data into the Google sheet and now Azim is able to use that Google sheet later when it needs to pull back information about the user that it's going to talk to.
+
+Very nice.
+
+So from here it looks like we go off into different paths.
+
+At a high level, what is each of the paths doing? >> Yeah.
+
+So put simply, my struggles did not stop here.
+
+I eventually realized that I would have to route new users and also existing users.
+
+So if the person is a new user, we're going to write the agent prompt and then we're going to use this separate AI agent to actually create the assistant inside of Appy.
+
+If the person is an existing user, we're first going to have to get their current assistant inside of Appy.
+
+Next, it would pass on these details to another prompt writer, but this time it's going to update that prompt.
+
+And then it's essentially going to update or recreate that assistant with a new prompt.
+
+Love it.
+
+So, we're always making sure that the voice agent that is going to call the person is just super super customized for them. >> Exactly. >> Okay, cool.
+
+So, now this section of the workflow near the end, is this basically like after a call has been finished, we're kind of like writing back data or what's going on over here? >> Yeah, so before we actually get the data, we have to place the call.
+
+So this is why we have two AI agents over here that are actually making the call using the HTTP requests and they also dynamically fetch the available phone numbers so that there's no mixup and that we always have a phone number to call with.
+
+Cool.
+
+Okay.
+
+And so over here is exact path that actually fetches the call.
+
+So as you can see here, another request is going to get that call.
+
+Then it's going to perform some routing to make sure that the call has actually ended.
+
+After that, it's going to send an ended notification to the user back inside of the web app.
+
+Next, it's going to get the current user data again.
+
+And after getting that current user data, it's going to send it over to another AI agent, which will combine the current data and the call we received from the summary and transcript.
+
+And then finally, that is updated.
+
+We marked the phone number available again.
+
+And that's where the route essentially ends.
+
+Okay, I love that.
+
+So, there was a few things going on here that was really smart.
+
+So, you had a polling check to make sure that the call was actually finished.
+
+And it was going to check every 30 seconds to see if the call was finished.
+
+Another thing you were doing is you were marking off a number as unavailable if a user was having a conversation with an agent that was occupying that number.
+
+And then when the call's done, you go ahead and you change that phone number back to available.
+
+So, some cool error handling guardrails here to make sure that the workflow is performing as you had designed it to.
+
+Yeah.
+
+So, super cool stuff.
+
+And this was like you said kind of the main master agent that's behind all of the calling. >> Yeah, practically.
+
+But even with that, we have three more workflows that are pretty similar to this one.
+
+And they are set up for each of their preferences.
+
+So if a person wants to get called in the morning, in the evening or on Sundays, there's going to be a schedule trigger with a workflow that looks very similar to this.
+
+And it's going to perform pretty much the same.
+
+Gotcha.
+
+Okay. because this is the ondemand calling, but if we set up like, hey, I want this agent to call me every morning at 8 a.m., it's going to be a different trigger, but it's essentially the same flow that happens. >> That's totally right. >> Awesome.
+
+I love that.
+
+So, I don't think we have to dive into those two flows because we've kind of seen how they work.
+
+How about you show us a different workflow that we haven't really looked at yet that is doing something on the back end as well.
+
+All right.
+
+So, this one looks like it is triggered by a web hook and this is called on preference changed and it looks like we have a profile manager.
+
+So, I'm assuming when someone on the front end web app goes to their profile to change, you know, what they're stressed about or why they want to talk, this profile manager will go basically grab their user ID and update the sheet and change the preferences.
+
+Exactly.
+
+So, as usual, we have a web hook trigger over here is going to receive the information.
+
+The user ID is going to be extracted and then it passes it over to this master agent which controls two agents that are going to adjust the overall profile as well as each of the preference profiles.
+
+So for every preference you have, you actually have subprofile.
+
+So it changes that too.
+
+Super cool.
+
+Okay.
+
+Yeah, I like how you were able to split up the two different types of profile changes or preference changes by two sub aents because now each one is very clear on what it is actually changing.
+
+So yeah, super simple flow here, but super effective and it gives the users on the front end the ability to constantly be changing their profile and the way that they want to speak with this AI companion.
+
+So super awesome.
+
+And then looks like we've got one more flow which you can go and pull up.
+
+We didn't get to cover all nine today.
+
+Like I said, you guys can check out Azim's YouTube channel which we'll link at the end of the video as well as join Automation Society Plus if you want to dive into the workflows themselves.
+
+But this is the last one we're going to cover today which is a weekly report.
+
+So Z, why don't you go ahead and let us know what this one's doing. >> Yeah, so this is more of a workflow that's in progress, but either way, it lays out the framework that we would use in a real world web app.
+
+Every hour from 8:00 a.m. to 6:00 p.m. on a Friday, we would get all of the users, and then it would cycle through each user and then extract information from every preference profile they actually have.
+
+And after that's done, we would send it off to an email sender.
+
+In the real world, this wouldn't obviously use a simple Gmail note.
+
+It would use a dedicated CRM of some sort, but just to demonstrate the concept.
+
+We would have an AI agent over here doing this.
+
+And then we would have it marking the appropriate status and all of that.
+
+Awesome.
+
+So, one thing I wanted to point out here is that because Azim understood that this flow was going to happen in the same order every time, meaning it's going to check all four of those preference sheets and then send an email, it wouldn't make much sense to make all of those a tool given to an agent because then you're giving it more possibility to actually mess up.
+
+So, because Azim keeps this flow, but also the majority of his flows, I've noticed very linear, he is in control the entire way, and there's a lot more guard rails in place.
+
+So, this was a really well-designed workflow and I think all of the other ones were also really welldesigned.
+
+So, hats off to you and hopefully you guys can see why Azim won this hackathon.
+
+So, I know we didn't spend a ton of time on the front-end web app side of things just because a lot of you guys are coming here for editing content.
+
+So, I wanted to dive into those workflows with Azim, but you can see it's a really nice looking web app.
+
+He built it with Bolt.
+
+And I wanted to hand it over to you, real quick.
+
+What are your plans with Seolassium in this web app? seem was just an idea that was born out of an announcement I saw in AI Automation Society Plus just around 3 weeks ago.
+
+But now that you asked that question, I'm not really sure about the answer myself.
+
+Obviously, to deploy something like this, we would need things like HIPPA compliance, data protection, and many other features that we would actually need to make this available to the public.
+
+So, just because of that, I think it would require some sort of larger scale funding to really get this idea going and help people at no charge.
+
+But that's pretty much what has been on my mind. >> I absolutely love that.
+
+And I know we were chatting a little earlier and you mentioned that you do have an agency where you want to build voice agents for clients.
+
+And even something like this just to show them, hey, this is like a passion project that I've worked on.
+
+This is, you know, you can go ahead and give it a quick call if you want to see the type of voice agents I can build.
+
+Ultimately, even if this web app isn't making you money or you don't launch it as a product, it still will have a lot of net positives that come out of it.
+
+So, really great work and I'm glad that we were able to have you on today.
+
+Thanks for showing us those flows.
+
+Where can people find you if they want to work with you, look at some other stuff you've worked on and stuff like that.
+
+Yeah.
+
+So, besides appearing as a guest on Nate's channel, which I'm really grateful for, by the way, I also do have my own YouTube where I show and share voice agent builds like these.
+
+So, people are always welcome to check that out and even schedule things like consultations.
+
+I've recently been building my own school community.
+
+Whether you're a voice agent builder, a business owner, or somebody else, I always drop a bunch of voice agent templates in there, offer one-on-one calls and chats, and just a bunch of resources that anyone looking into voice AI can find helpful.
+
+Cool.
+
+Awesome.
+
+Well, we'll have all of the links to Azim's communities, YouTube channel, all that kind of stuff will be down in the description for you guys.
+
+Once again, if you guys do want to check out all of the templates that Azim used to win our hackathon, then you can do so by joining the plus group.
+
+The link for that will be down in the description.
+
+If you enjoyed the video or you found it helpful, don't forget to leave a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+See you on the next one.

@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-065",
+  "version": 1,
+  "title": "offer-positioning / acquisition — random-price-anchored-on-last-sale",
+  "steps": [
+    "Record both machines; do not flatten “random” into “always price from hours.”",
+    "Use as a *frame* only; do not quote as FACT.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-ySl-SyboPa4-01",
+    "K-ySl-SyboPa4-02",
+    "K-ySl-SyboPa4-05",
+    "K-ySl-SyboPa4-06"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; Buyer accepts $50/hr and the 2–3 hour claim.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

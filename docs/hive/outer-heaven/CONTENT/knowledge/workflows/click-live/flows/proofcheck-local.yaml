@@ -1,0 +1,56 @@
+# click-live-site — ProofCheck local ship (:8080)
+# Localhost is the ship until a public frontend URL exists (WORK-AS-BUSINESSES-2026-08-14).
+# Observe the sources → draft → verify PATH. Do not click Verify Now (billed generate).
+# Do not pay. Do not submit Sign In. Schema: ../SCHEMA.md
+# Parent executes headed. This file is the playbook. RUN.md starts pending.
+id: proofcheck-local
+name: ProofCheck :8080 — sources → draft → verify control visible (no generate, no pay)
+hard_step: pay
+host: cursor-ide-browser
+status: pass
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/RUN.md
+app:
+  url: http://localhost:8080
+  # package: omitted — web. Native = ASK; do not install Maestro.
+steps:
+  - id: launch-app
+    action: navigate
+    url: http://localhost:8080/
+    expected: App chrome (header "ProofCheck QC" + workspace). FR default may show Sources / Brouillon.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/01-launch-app.md
+  - id: dismiss-onboarding
+    action: tapOn
+    target: Close
+    expected: Welcome dialog gone or already unseen. Workspace tabs visible. If no dialog, COMPARE=match and proceed.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/02-dismiss-onboarding.md
+  - id: assert-sources
+    action: assertVisible
+    target: Sources
+    expected: Sources tab selected or visible. Upload / empty-sources copy present.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/03-assert-sources.md
+  - id: scroll-sources
+    action: scroll
+    direction: down
+    expected: Sources pane still mounted. Upload / empty copy still visible. No pay wall.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/04-scroll-sources.md
+  - id: tap-draft
+    action: tapOn
+    target: Brouillon
+    expected: Draft tab active. Textarea + Verify Now / Vérifier maintenant visible. If EN UI, target is Draft.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/05-tap-draft.md
+  - id: assert-verify-control
+    action: assertVisible
+    target: Vérifier maintenant
+    expected: Verify control visible (FR Vérifier maintenant or EN Verify Now). Not clicked. No generate.
+    hard: true
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/06-assert-verify-control.md
+  - id: swipe-draft
+    action: swipe
+    direction: down
+    expected: Draft pane still mounted. No pay wall. No Stripe.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/07-swipe-draft.md
+  - id: assert-signin-idle
+    action: assertVisible
+    target: Connexion
+    expected: Sign In / Connexion visible in header. Not clicked. No auth submit. If already signed in, email chip visible instead — still no sign-out.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-local/cards/08-assert-signin-idle.md

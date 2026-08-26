@@ -1,0 +1,243 @@
+So, I've built hundreds of AI agents and AI workflows, which means I've made hundreds of mistakes building my AI agents and my AI workflows.
+
+So, in this video, I'm going to be talking about the four different layers of the AI systems pyramid.
+
+And for each layer, I'll talk about when you would actually use it and a real example that I either use or have built in the past.
+
+I also teach and coach thousands of people who are building AI systems for businesses.
+
+So, this isn't just a gut feeling.
+
+This is actually what I'm seeing in the space as one of the most common issues.
+
+So, I don't want to waste any time.
+
+Let's get straight into the video.
+
+So here is the pyramid that I was referring to where you can see we have four different layers.
+
+We have custom GPTs or cloud projects or things similar to those at the bottom as the foundation and we move all the way up to the top with our AI agents.
+
+And as we move up the pyramid we increase in complexity, cost and maintenance.
+
+So we've got the custom GPTs, we've got simple workflow automation with no AI, we have AI workflows and then we have AI agents up top.
+
+And really the most important thing to understand is that all of these are great and they have their use cases, but it just kind of comes back to this idea of becoming a problem solver, not an AI agent builder.
+
+And this is something that I talk about a lot in my plus community.
+
+If you want to check it out, the link for that is down in the description.
+
+A lot of times people will come to you and they think they need AI or they know they need to start using AI, but they don't know exactly how.
+
+And they'll tell you what's going on.
+
+But your job isn't to say, "Here's what I will do with AI." Your job is to say, okay, let's actually understand the root of this problem and what is the most efficient solution that we can implement right away that will give you quick win that will, you know, keep your cost low and keep everything simple.
+
+And a lot of times the answer could just be a simple automation or a cloud project or maybe a SAS product that already exists out there.
+
+All right, so let's go ahead and start with this bottom layer.
+
+What actually is this bottom layer?
+
+Well, a custom GPT or project or gym is a conversational AI assistant that you're able to preconfigure with your own specific instructions, knowledge base, and voice.
+
+So, you can almost think of it as an intern who knows your company because you give it a prompt, you give it data, and then you ask it to help you out with things.
+
+And the defining characteristic here is that it's entirely reactive, meaning it doesn't scale a ton because it only actually works when you trigger it or when you initiate a conversation with it.
+
+And so there's a lot of use cases where people are telling me about how they do something manually and typically they will be triggered by a certain event and they will need to do something and they might need some sort of like back and forth loop or the ability to iterate.
+
+So for example with me every time I make an end YouTube tutorial if you guys have seen those in the past and I drop my templates in the community I typically have a sticky note in there that's like a setup guide.
+
+And this is a super repetitive process because it happens every time I post a YouTube video.
+
+So I needed to make some sort of system to help me do this quicker.
+
+But if I built an automation for it, it could effectively do the same thing, but I would still end up doing a lot of revision and it might be more manual than if I just set up a custom GPT and I gave it instructions about how to do the setup guide and different links that I like to use and things like that.
+
+And then if I need revisions, I'm already in that interface and I can just tweak it until I get something.
+
+And now that process for me is super quick and easy.
+
+All right, moving on to the second layer.
+
+This is simple workflow automation.
+
+So this is when you have a series of steps connected together that run automatically on some sort of trigger that follow pure if then conditional logic with zero AI intelligence.
+
+The defining characteristic here is that it's completely predictable.
+
+It's got the same trigger.
+
+It's got the same sequence and you have basically the same output.
+
+So it's a very deterministic flow with a predictable input and predictable sequence of steps and then predictable output.
+
+Now that doesn't mean we can't have something intelligent in here like polling.
+
+But once again, that polling check right here is based on did it either succeed or error.
+
+And that's black and white.
+
+There's no element of reasoning in there.
+
+And these are a step up from a custom GBT because these can run in the background while you sleep.
+
+It could be triggered when a meeting recording has been finished or it could be triggered every morning at 6 a.m.
+
+Things like that.
+
+Now, just one more step up from that is an AI workflow, which basically holds the same principle of a set amount of steps or a set sequence of steps in the same order every single time.
+
+But now we're able to use AI in there for a little bit of reasoning or output.
+
+So even though there's AI to do some planning and to do some writing and editing, it still happens in the same order where it goes 1 2 3 4 5 6 7 8 9 10.
+
+Now, another use case of adding AI into a workflow is maybe you need AI to understand which way to switch.
+
+So, like in this example, and here's another quick little setup guide.
+
+You can see that the AI right here classifies the incoming email and decides if it is going to be support or finance or priority or promotion.
+
+And that is because it would be really hard for traditional logic or code to be able to read the body of an email and the subject and then push it down one of these paths.
+
+It would really only be able to do that if it was looking for a specific keyword to trigger it.
+
+But in this case, we actually need AI to read and understand and then shoot it off in the right direction.
+
+But this is still a workflow because there's no full autonomy and decision-m.
+
+It's basically just one very narrow use case of AI and then we go right back into our traditional sequence of steps.
+
+So the defining characteristic here is fixed path with intelligent decisions.
+
+The workflow always follows the same structure, but AI makes contextawware choices within that structure.
+
+And actually, what I've seen when we've worked with businesses and when we've helped people work with businesses is that the majority of automations can be simple and they don't even need any AI.
+
+And I'm talking like 50% of automations that you could go in and build for a business right away.
+
+But then you start to get a little bit more complex or maybe on your traditional automations, you want to make them a little bit more, you know, increase the functionality.
+
+And that's where you may just need to add a little AI step at the end or in the beginning or something like that.
+
+But when you're just getting started with a business and you're helping them get more automation ready, the AI agent is almost never the right call to start off with right away.
+
+And even just helping teams integrate custom GPTs and Gemini gems and things like that into their daily workflow will also drive a ton of efficiency.
+
+So finally, let's take a look at an AI agent example.
+
+So what this actually is is an autonomous system that can work toward a goal by perceiving its environment, making decisions, calling tools, handling exceptions, and adapting its approach because it is basically fully autonomous here.
+
+So as you can see with the defining characteristic, true agency and autonomy.
+
+You give it a goal and it figures out I have these five tools, which ones do I use and in what order do I use them to achieve said goal?
+
+So in this case, this was a marketing team that I did for a YouTube video.
+
+And you can see that it got a request from a human via Telegram and it used its brain to understand, okay, I have these three content creation tools.
+
+I have these two image creation tools and I have this database tool.
+
+Which ones do I need to use?
+
+And it had full autonomy based on its system prompt and input to help it work towards its end goal.
+
+But it's actually interesting if you were paying attention. this create image tool or maybe it was the edit image tool is actually this one right here where we hooked it up to call on this tool.
+
+And the reason why I'm saying that it's interesting is because even though we give the agent autonomy to call on its tools once it chose the right path we basically wanted it to stay super predictable and that helped with the agents performance a lot more because its tools are workflows or AI workflows. the way that I architected that to have all of these be fixed.
+
+This almost makes it seem a little bit more like an AI workflow here where the AI does the reasoning and then shoots it down a fixed path.
+
+But the only difference is after it would go down this path, it's done.
+
+But in this example, it could go back and forth as many times as it wanted.
+
+So I know it can be a little overwhelming.
+
+So I made this really simple diagram to help you understand what should you actually be looking to build based on your problem at hand.
+
+So the first question would be, do I need to be in the loop every time?
+
+If yes, custom GPT is the answer.
+
+If no, move on to question two, which is, are the steps 100% logic- based?
+
+Meaning, could I have a simple filter or a simple code?
+
+Or is there a very explicit black and white thing that tells me which way to go?
+
+If yes, build a workflow?
+
+If no, then come down here to question three, which is, is the order of operations fixed?
+
+Is it predictable?
+
+If yes, you're going to go with an AI workflow.
+
+If no, if you need some more autonomy and decision-m and flexibility, then you want to go with an AI agent.
+
+Now, I wanted to end off with one example of maybe even a time where you would come down to question three and your answer would be yes, but you still might want an AI agent instead.
+
+And so, here's a really simple example where we have a customer support agent or customer support flow.
+
+And what happens is it receives an email and it has to use its brain to understand, okay, here's the email I have.
+
+I have a database I can look through and then I need to reply to the incoming email with accurate information.
+
+And so when I think about that process as far as like how would I do that manually, I would one read the email, I would two check the knowledge base and then I would three write a response.
+
+And it really should happen in that sequence every single time.
+
+Which is why this could also be a workflow where we read the email, we search the knowledge base.
+
+We even do something fancy here where we filter to keep just the best responses.
+
+But anyways, then we write the email and then we respond to it.
+
+But the difference here is sometimes you may not need to search the knowledge base.
+
+In that case, you would just be wasting time and tokens where you could just reply right away.
+
+Or sometimes you need to search the knowledge base three or four or five times before you're confident.
+
+And in that case, the agent up here would be better as well.
+
+The point I'm trying to make is that it's never just a clear black and white logic flowchart like this.
+
+It depends on the situation and it depends on how you would want the manual process to be done.
+
+And then the other tough pill to swallow at times is just the fact that you don't know what you don't know.
+
+Sometimes all the signs might be pointing to using a custom GPT, but then you might have to just scale up after a few months of usage to an AI workflow.
+
+Or you might have an AI agent and then realize later you have to scale that down after you've actually had time to let it get some runs and let it collect some feedback.
+
+But once again, if you have that problem solving mindset, it shouldn't be an issue.
+
+And if you love to think about solving problems and wanting to understand what is the best ways to solve these problems, then like I said, I talk about this kind of stuff a lot in my plus community, the link for that is down in the description.
+
+We've got a great community of over 3,000 members who are building businesses and automations with Naden every single day.
+
+And we have a classroom section where we break down lots of other stuff.
+
+Agent zero 10 hours to 10 seconds, one person agency course.
+
+We've got a lot of projects in here which are like live NAM builds and things like that.
+
+Um, and we also do a live call per week.
+
+So, I would love to see you guys in those calls in the community.
+
+But that's going to do it for today.
+
+So, if you enjoyed the video or you learned something new, then please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.
+
+Thanks, everyone.

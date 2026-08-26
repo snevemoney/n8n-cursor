@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-060",
+  "version": 1,
+  "title": "offer-delivery / delivery — research-write-dont-send",
+  "steps": [
+    "Steal the don’t-send boundary.",
+    "Tag UNVERIFIED; read `HNKlFTd1maM` for the other three."
+  ],
+  "support_ids": [
+    "K-ECfusvK5tEU-01",
+    "K-ECfusvK5tEU-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-delivery; stage=delivery; Client has a list and a place to plug copy.",
+  "less_relevant_when": "Do not treat $23k as a per-agent or hive FACT.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

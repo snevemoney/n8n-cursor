@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-side-effect-not-essay",
+  "type": "Agent infrastructure",
+  "discovery": "Chat-refine can leave the system prompt unchanged. OAuth connected ≠ tool called. Check the external side effect and diff v1/v2 text.",
+  "applicability": "ALL wrapper / it-learned UIs",
+  "proposed_change": "Ship check = side effect + prompt diff + (if URL) click-live-site. Wired as skill side-effect-not-essay on Watchdog golden-test-loop / click-live-site smoke.",
+  "evidence": "27Y44JYXZJ8 · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "27Y44JYXZJ8",
+  "status": "WIRED",
+  "next": "Watchdog fills CLAIM / SIDE-EFFECT / DIFF. Forge must not self-certify the essay."
+}

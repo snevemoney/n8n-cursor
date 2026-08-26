@@ -1,0 +1,245 @@
+So, I listened to the creator of Claude Code explain why Claude has gotten worse and how to actually fix that.
+
+And I learned something that sounds really weird, but more skills and more system prompts are probably breaking your system.
+
+So, I dug deeper into this and I started doing some testing and I found that there are three super important things that everyone has to be doing right now.
+
+It's super easy to do and you don't need any technical experience to actually implement this stuff.
+
+So, I don't want to waste any time.
+
+Let's just get straight to the video.
+
+So, let's just start off with some real quick context on what they're actually doing behind the scenes at Anthropic. >> Let's talk a bit about the new release.
+
+You actually deleted over 80% of the system prompt from Claude Code. >> Yes. >> Tell us more about that. >> I think something that a lot of people might not realize is um Claude Code as a product and as a harness is just always changing.
+
+We're always adding stuff.
+
+We're always deleting stuff.
+
+Every time that a new model comes out, we delete a bunch of the system prompt, change a bunch of the system prompt, we change the set of tools all the time, we change the prompts for the tools all the time.
+
+And the reason is every model is very different.
+
+So, something that you did for one model maybe 3 months ago, it just might not translate at all to the next model.
+
+And so, one thing about Opus 5 is it's just really intelligent.
+
+And a lot of the stuff in the system prompt was correcting for these behaviors that the model should have known, but uh it didn't.
+
+Now, Opus 5 just does it. >> So, that's interesting.
+
+It makes you think a little bit, but I just wanted to sort of lay the foundation of they're doing that at Anthropic.
+
+They are treating each different model as like a different completely different personality, different flaws, different strengths, and different ways that you should prompt it.
+
+And so, whenever a new model drops, one of the things that I tell you guys is like, "Hey, run you this model through your skills.
+
+Make sure they all still work.
+
+Make sure they all still feel good." And for some reason with Opus 5, it's just felt degraded to the point where I'm actually going back to 4.8 every once in a while when I need to do something and I'm just getting better results.
+
+But, I never really thought about, "Hmm, maybe if I just got rid of some of my instructions and got out of the model's way, it is actually just more intelligent now and it could handle those things." So, take a look at this next clip. >> Yeah, and and for people that aren't building agentic products, but you're using Claude code, every 6 months delete your Claude MD.
+
+Delete your skills.
+
+Delete your hooks.
+
+See what the model does and it might surprise you.
+
+And actually for Opus 5, this is something we really do recommend is just try deleting all of these things because the model might really just not need all those instructions that you needed for past models. >> So, when you think about that for a sec, I feel like that almost sounds counterintuitive because what we've been told is, "Hey, you know, if everyone has access to the same model," or something this is something I say a lot, "then wouldn't everybody be getting the same results?" And to an extent that is very true.
+
+But, if Boris is basically saying, "Hey, remove your skills, remove your own system prompts and just see what's possible," it's a different way to think about it because the the the immediate thing that I think about is like, "Okay, let's say that I was teaching um a 10-year-old, a college student, and someone that's been in the workforce for 10 years how to do something, how to do something like create a slide deck.
+
+I would probably give the 10-year-old the most specific instructions.
+
+I would say, "Hey, here's exactly what you should be looking for.
+
+Here are the 10 slides to make.
+
+Here's what the title should look like.
+
+Here's the color.
+
+Here's the way that the text should be formatted." I would be super specific and I basically wouldn't give that 10-year-old any freedom really to just kind of go experiment because if it's a high-stakes thing, we want to just steer it.
+
+But, as you work your way up the chain in, I guess, like intelligence and experience, what if you gave that same instruction set to the person who's been working for 10 years and has made hundreds of slide decks?
+
+You're going to get in their way.
+
+They're not going to be able to actually use their subject matter expertise and their intelligence to put their own spin on it.
+
+And so, I'm not saying that it's always the case, but I think that there is an element of like removing some of the some of the like kind of instructions and constraints on a model.
+
+They call this unhobbling the model, which I'll play a clip from in just a minute here.
+
+But, take a look at this example I ran.
+
+So, after I watched this interview, I made a duplicate of my repo and I took away the Claude MD and I took away all my skills and I just started using it a little bit to see how it worked and it was okay but what my gut is telling me about that is when we're doing something like we have you know an AI operating system and we have the Claude MD which is kind of routing around to hey here is Nate's business context here are where all these files live here where the wikis live that's important we still need that context of hey Mr.
+
+Claude code here's where you find your things but when it comes to actual tasks maybe you just get out of the way a little bit and that's where your skills aren't as important or your skills are changed and so what I mean by this is take a look.
+
+Here is an output I ran where I took this YouTube video this interview that we're watching I gave that URL to Claude and say hey make me a YouTube resource guide like the resource guides that I make for you guys when I have other videos and so what this did is it broke it down right it created a nine page resource guide it's formatted nicely it has like these colors it has like these little blocks and it has my also like my header right it's got that header image it's got my YouTube channel links right here at the bottom it links to AI S Plus.
+
+So those are things that are like very specific so those are things that it's like my preferences and my styles.
+
+Now look at this version this is one on a fresh session where I gave it basically the same prompt but it had no skills or no context to work from and here's what it created obviously it doesn't look as good right it just looks a bit messier it doesn't have nice formatting there's no header but I think that this is a better output because I didn't tell it specifically hey for a resource guide do this this and this here's how you break it down.
+
+This actually broke this down into ideas which I thought was really nice and each idea has a timestamp.
+
+So here we have prompts are disposable here we have rebuild from observation all of these main ideas that it covers we have timestamps so arguably I like the content of this version better which had no skills no Claude MD but what I would do is I would bake this into a skill and say hey by the way make the resource guide however you want however you see fit but what I want you to do is take this image and put it in the header and link to my YouTube channel at the top and link to AI S Plus at the bottom.
+
+So those are the areas where I think it's less in my mind about deleting all your skills, it's more about really thinking about them, and maybe making versions of them that aren't as specific.
+
+And real quick, as I'm editing this video, there's one other thing I wanted to throw out there that I think is super important to think about, which is you can't just take advice you see from Boris Cherney or from some other YouTuber or from me or from someone in the community and just blanket statement apply it to your work.
+
+It just doesn't work like that.
+
+Because what my gut's telling me is a lot of this advice that Boris is going to tell you, or that you might see Andrej Karpathy tweet about, a lot of their advice is coming from the perspective of someone who's like in the weeds designing harnesses, working on massive code bases every day, training models.
+
+That's not what I do.
+
+I don't know if that's what you do or not, but you should probably be taking advice from people who are using the AI systems the same way you want to.
+
+For me, that's generally bunch of research, knowledge work, um creating documents, creating deliverables, but not as much like building software.
+
+That's not what I'm doing on the day-to-day.
+
+So, I just wanted to throw that out there.
+
+I think that Boris has some really good advice here, but the reason why I didn't actually go out and sweep delete all of my stuff is because based on my findings and my testings, that wouldn't be as valuable to me as just kind of like reworking them.
+
+I think people that are building products and software have like these all of these skills to like build and to orchestrate, and maybe that's where those skills should be completely deleted because the model and the harness just does that better now.
+
+But as you saw from this demo, like I still need the skills to say, "Hey, you're going to grab this image.
+
+You're going to put that there.
+
+Um you're going to use these color schemes cuz that's like our brand guidelines." That sort of stuff is still important context for my systems, for my knowledge work.
+
+So, just something important to keep in mind.
+
+And Boris seems to completely agree.
+
+Let me show you guys this next clip. >> Yeah, so hobbling is this idea in a research that the model is doing something and you're just getting in the way.
+
+There There's this kind of like way of thinking about it that I really like.
+
+It's very useful when you're building product.
+
+And um it it it's called product overhang.
+
+And the the idea is the model is able to do all sorts of things with today's models, not a future model, but today's model, that we have not yet realized.
+
+And there are so many capabilities the model has like this that people are not aware of.
+
+So, there's a couple things that I will think about.
+
+One is you should give the model slightly harder tasks than what you think it can do.
+
+I think a a really common mistake that I see is people are using Claude code, they're using Claude, and they they just give it like way overly specific instructions.
+
+They're like, I want you to do this, but I want you to do it in this way, this way, this way.
+
+You must do like one, then two, then three, then four.
+
+And for modern models, that's actually really not the way to do it.
+
+You want to go a little bit higher level.
+
+You want to describe the task, you want to describe the guardrails, you want to describe like the exit criteria, and then just go with the model cook, and come back in a little bit.
+
+And I think it'll it'll surprise you.
+
+Like, and again, like this is just not something that would have worked 6 months ago, but it does work today. >> So, if you weren't convinced when I said that earlier, hopefully you're convinced now that you've heard Boris Cherny say that.
+
+And I think that there's so many things that go into this, right?
+
+There's obviously the balance of using your Claude at MD in a way that doesn't hobble the model.
+
+Same thing with your skills.
+
+And then there's also the balance of actually getting an output that you like, because I think a lot of us get frustrated when we ask Claude to do something, it comes back, and the output's just very mediocre.
+
+But maybe that was on you.
+
+Maybe it was your job to say, "Hey, here is what good looks like." Because if it doesn't know what good looks like, how does it actually create something that's good?
+
+So, like Boris said, you give it a high-level goal, you set the standard, and say basically, "Don't stop until you're done, until you've hit the standard." So, when you think of setting a slash goal when you're using these AI agents, you're not just saying, "Hey, here's what good looks like." You're also saying, "Here are X, Y, and Z things that you do in order to prove that this has been reached." And you keep iterating on that until you've actually proven it.
+
+You verify yourself so that I don't have to verify.
+
+For example, something that I've been throwing at the end of my slash goals after I've given it all the standards and the verification methods, I basically say like, "I'm not looking for a prototype or proof-of-concept.
+
+I'm looking for you to give me something that has been tested and iterated on 10 times and has been fully QA'd and that's ready to go to market tomorrow." That makes it a little bit more emotional.
+
+And sometimes when I prompt things with emotion, seems to do better.
+
+But let's take a look at what Boris said about verification. >> I I think the skill nowadays is less about prompt engineering and more about figuring out how do you give Claude a hard task that seems a little bit too hard.
+
+And then how do you make it possible for Claude to verify its work along the way?
+
+And the verification, I think, is probably the single most important thing that people do not get right virtually. >> It's really, really interesting to see how the creator of Claude code is thinking about this because the more that I get into the space and the more that I talk to people that are starting to get into the space, the more I realize that the skills that are transferring over here, it obviously doesn't matter.
+
+They're tool agnostic.
+
+If you want to use Claude code, Hermes, Agent Cortex, whatever it is.
+
+The tools that are the skills that really are important is managing AI agents.
+
+And when I say managing, I mean a similar way to when you manage people.
+
+Now, I haven't been managing people for very long, right?
+
+But what I do know is that good managers don't just micromanage, right?
+
+They're not saying, "This is what you should do.
+
+This is how you do it.
+
+Go do it." They get out of their people's way.
+
+They check in with them.
+
+They review.
+
+They have judgment.
+
+They have taste.
+
+But they also let those people use their brains.
+
+Like they were hired for a reason.
+
+And so essentially, you should be thinking about all these agents and all these sessions that you're spinning up, you're using them for a reason.
+
+Outsource the thinking to them.
+
+Let them think and let them come up with ideas, but give them an ability to have other agents play devil's advocate.
+
+Give them an ability to check their own work and verify.
+
+Outsource some of the thinking, but never outsource the understanding.
+
+At the end of the day, you're still like the founder of these agents and you are driving the vision, but they're able to help you so much.
+
+So So I could talk about this all day.
+
+I think that this is super interesting.
+
+If you guys want to check out this interview, it was like a 35-minute interview on the Y Combinator YouTube channel.
+
+I will leave a link to it in the description as well.
+
+These were just some of the key highlights that I wanted to pull out and break down.
+
+And let me know if you guys enjoy this type of video, if you enjoy this type of breakdown.
+
+And hopefully you found it valuable, you learned something new, and there's something that you want to try.
+
+If you did, please give it a like, it helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+And I'll see you on the next one.

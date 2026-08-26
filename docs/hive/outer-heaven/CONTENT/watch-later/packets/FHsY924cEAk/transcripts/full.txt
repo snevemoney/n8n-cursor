@@ -1,0 +1,243 @@
+So, there are certain things that smart YouTubers like myself do with Claude that almost every
+beginner messes up on. And this is stuff that used to take myself or my team hours after every
+upload. And now, it takes about 10 minutes. And by the way, this is coming from someone with over a
+million subscribers, and last year I made $477,000 from AdSense alone. And what you do after you hit
+publish matters just as much as what you do before. And I'm going to show you the exact prompts I
+use live right in front of you. So, if you appreciate me making this type of content and you want me
+to make more in the future, then let me know by gently cheesing that like button, and let's jump in
+right now. Now, before we begin, some of the skills or prompts that I talk about in this video will
+be given away. It'll be the third link in the description and the pinned comment below, so you can
+click down there, get those, and follow along if you'd like. All right, so number one, the very
+first thing that I do after I uploading is I audit my title. Because here's the thing about YouTube,
+your title is doing two jobs at once. It has to, one, get the click, and it also has to be found in
+search. So, most people only think about one thing, and that is the reason that most of their videos
+die, and then they never get views in the future. So, just like this one as an example, you can see
+right here. So, obviously with this one, you would want to take your title, you want to put it into
+Claude with a prompt like this, and you can see what it comes up with. Clickability six out of 10,
+SEO five out of 10. So, this is a score for both versions, and it gives you five rewrites that you
+can actually choose from. But, I'm not just going to grab the first one that I see. I'm going to be
+looking for one that does both, right? I call this the Moneyball method. I've talked about this in
+other videos, but what you really want is you want a searchable keyword near the front, but the rest
+of the title needs to be very attractive so that it can get the click on the homepage. So, the way I
+think about this, getting promoted on the homepage is like hitting a home run, because you could
+potentially get millions of views. And you want your title to be attractive so that it can actually
+get promoted on the homepage. But, if that doesn't work, you want to at least make sure that you hit
+the ball and get on base, right? That's why I call it the Moneyball method because of their
+obsession with getting on base in the movie Moneyball. And the way that you hit the ball or get on
+base is you make sure that your title is SEO friendly, not SEO optimized, SEO friendly. Because if
+you SEO optimize your title and you just stuff it with a bunch of different keywords, there's pretty
+much a 0% chance that it's ever going to get promoted in browse. Plus, even when people search stuff
+and they see it, it's not going to be a very attractive title to click on. And if you haven't seen
+the movie Moneyball, by the way, it's great. So, Brad Pitt plays Billy Jean, and he is the GM of a
+broke baseball team that couldn't afford the big star players. So, everyone else is out there
+chasing the flashy guys, the ones who look the part, the ones who swing for the fences and they hit
+a bunch of home runs. But, Billy did the opposite. He looked at the data and built his whole team
+around one boring stat that nobody cared about, which was getting on base. Singles, walks, the
+unsexy stuff that just keeps the runners moving and keeps scoring points. And it worked. That team
+went on one of the longest winning streaks in baseball history despite having a much lower salary
+cap than so many of the other professional baseball teams that they were facing. So, here's how that
+maps to your title. The searchable keyword at the front, that is your on base, right? It's the
+singles, the steady search traffic that shows up every single day, whether the video pops off or
+not. And that traffic is honestly worth more in many cases because they have what's known as search
+intent, meaning they are actively searching for a solution to their problem. But, the hook that's
+the rest of the sentence, that is your home run. That is the swing for the fences that might make
+the video go viral. So, a weak title will do one of those. A great title does both. It gets on base
+every single time and it can hit it out of the park. Now, additionally, on top of that, your title
+needs to be congruent with your thumbnail and the entire niche of your channel. And if you want to
+go deeper on titles, idea selection, niche selection exact, which is basically picking videos that
+actually win before you even hit record, that is exactly what I'm going to be breaking down in the
+free workshop that I'm doing this week. And when you show up, I'm going to be handing you the niche
+validator pro tool for free. That is a super powerful cloud skill that's been trained on thousands
+of hours of coaching. So, click the link in the description and the pin comment below to check that
+out. So, yeah, put your your title in here, use the AI, and it'll tell you how clickable, as well as
+how SEO-friendly your title is. All right, next we're going to talk about an SEO-optimized
+description. Now, now this is one of those tiny things that quietly helps your video get found and
+almost nobody does it. So, here's what I'm going to do. I'm going to grab the full transcript right
+off the video. You can find that in your description at the very bottom and I'm going to paste it
+into Claude. And then I'm going to use this prompt right here. And boom, it is done in seconds. So,
+you copy it and you paste it in your description and you're good to go. Now, here's the key. And
+most people get this wrong. You don't put this at the very top. You put it just under your most
+important links, the ones that you actually want people clicking so that those stay above the fold.
+And think of this like an old-school newspaper, right? Stick with me here. The big headline always
+goes at the top, above the fold, because that's all anybody sees before they decide to pick it up.
+But the boring stuff, that goes below the fold, down where only the curious ones bother to look. So,
+your YouTube description works the exact same way. Obviously, you want people clicking on your links
+because that's how you can actually make money on YouTube. So, the links you want clicked go above
+the fold. But the rest of it, the SEO-optimized description, you do want to put it pretty close to
+the top. So, this stuff is going to tuck in right under it. So, small move here, but it makes a big
+difference, especially when you're a smaller channel and every click counts. But next, let's talk
+about chapters. Now, I'll be real with you, the timestamps are hit or miss. On some channels, they
+help. On others, they actually hurt your watch time. So, test it, don't just assume. But with that
+being said, here's how you do it. So, what you want to do is you want to copy the transcript of your
+video. Now, you can just copy the normal transcript or ideally you want to copy the transcript with
+timestamps. Now, if you go to the bottom of your description and you go to show transcript, of
+course, that way you can just copy the transcript. But you can also copy the transcript with or
+without timestamps using various different plugins. VidIQ is one of them that I use and you can use
+that to copy it with or without the timestamps. Now, if you copy it with the timestamps, then this
+prompt can actually label all of the chapters with the timestamp. But if you copy it without the
+timestamp, then you're going to have to label the chapters with the timestamp yourself. But, either
+way, I'm going to go ahead and do it here. And uh there it is. Clean chapters formatted exactly how
+YouTube wants them. And this one is already done for me by the last prompt. So, I'm just going to go
+ahead and grab it. Now, another thing you want to do is go into your settings and uncheck automatic
+chapters. And then just give the timestamp for each one, right? Now, one thing you want to do here
+is don't give away what's in it. Just tease it, right? It's kind of the same energy as the title.
+You want them curious enough to jump to that part, but not satisfied enough to skip it, right? And
+that's it. But, then this prompt should do a pretty good job doing that. And that's pretty much it.
+Don't overthink this one. Seriously, just move on. With that being said, make sure you split test
+your videos with and without timestamps. We have found that some types of channels actually get
+lower watch time when they put timestamps in. All right, next section is going to be tags. Now, I'm
+not going to lie to you and tell you that tags are some magical hack because they're not. Uh we
+probably spend about 30 seconds on ours. But, it's 30 seconds, it's free, and it doesn't hurt, so
+why not? So, I'm going to go ahead and paste this prompt here. And then you just got to answer the
+questions. Give it some information. And there it is. 15 tags ready to copy. Now, heads up, YouTube
+makes you paste these in one by one. Uh kind of annoying, I know. Um so, here's a little move
+that'll save you a ton of time. Go into your upload defaults and save your tags right there. That
+way, they're already loaded on every new video, and you never have to do this again. And you set it
+once, then you forget it. Copy, paste, and then move on with your life, right? Don't overthink the
+small stuff. With that being said, all the goofballs that say that, "Oh, you shouldn't put tags in
+your videos." Yeah, you should because even if it doesn't make a difference now, which it probably
+doesn't make a lot of a difference, but it probably does make a bit of a difference, what if
+something changes in the future, right? It takes you 30 seconds to put tags in. And you just have to
+do it one time and then just save it for the future. So, there's literally no reason to not do tags.
+And if And if it just makes it 1% easier for YouTube to figure out what your channel is about or for
+advertisers to figure out what your channel is about, then obviously it's worth it to do it. But
+with that being said, definitely don't overthink this. Spend a little bit of time doing it. Make
+sure you got your upload default set, and then you're good to go. All right, the next one is one of
+my favorites, and that is the pinned comment. So, we do this on every single video every single
+time, and this is the one of the ones that I think makes a huge difference, okay? And here's why it
+matters. Not everyone reads the description, but almost everyone reads the comments. So, a good
+pinned comment can boost the clicks on your links significantly. So, I'm just going to go ahead and
+paste this prompt here, and I'm going to let Claude generate the pinned comment for the video. So,
+yeah, it basically opens a conversation and it points to the link. Two jobs in one comment. Now, you
+might be noticing, "Well, Shane, you don't do that on your videos. Why are you telling us to do it
+on ours when you don't do it on yours?" Well, the reason I don't do it on my videos anymore is
+because I don't need extra engagement. I have a 1.5 million subscriber channel, and I have tons of
+people who comment on my videos all the time. However, whenever I start a new channel, this is
+exactly what I do, and I also recommend it for other people who have a new channel as well. Now, one
+thing you need to do, which does kind of suck, is you need to pin this comment right when the video
+goes live. And I highly recommend replying to comments right when the video goes live as well.
+Obviously, you would reply to comments on the video itself, but even reply to other comments on
+other videos on your channel right when the video goes live as well because they're going to see a
+little red notification at the top right, and they're probably going to go and click on that and see
+that you just uploaded a video and be much more likely to watch it. And after a period of time,
+people are going to notice that you publish videos at the same time, which by the way, you should
+definitely be doing that, but also they're going to notice that you actually reply to comments right
+after the video is posted as well. And this is especially important in that first hour. And so,
+basically, what this will do is it will kind of almost be like an event, like a party every single
+time you upload a video. People will grow to expect you to be there and answer the questions. So, I
+did this a lot when I first started on YouTube. Of course, I typically don't do it anymore just
+because there's way too many comments, but it is super valuable and super effective for a smaller
+channel. Now, by the way, sometimes people get really mad and you're like, "Wow, you can't even take
+5 seconds to respond to comments." And I remember my brother Zach even said that, right? I remember
+when he posted his very first video, he goes, "Bro, watch me. I'm going to reply to every single
+comment on my channel." And you know what? He did. For a while, until that video took off, and then
+the comments started rolling in faster than he could type. Hundreds of them a day. And he had to
+wave the white flag. But, here's the thing, that was a good problem to have, right? That's the
+problem that you want. He showed up early, the algorithm noticed, and then that first video did
+800,000 views. So, the free engagement stacked up right when it mattered the most, and then
+everything else snowballed from there. And YouTube loves that stuff, trust me. It will reward you
+for that because it really creates a sense of community, right? When you're actually responding to
+your comments and and interacting with people, it really does create a sense of community. Now, of
+course, I do respond to some comments, especially if it's a particularly clever comment or a really
+good question, I'll respond to it. But, when you first begin, you want to respond to every single
+comment every single time. So, don't just post and ghost, all right? Show up for that first hour,
+reply till you literally can't keep up. It is one of the cheapest growth hacks out there. Or, of
+course, you could just hire somebody else to do it for you if you're a business owner. All right,
+next is the community tab, and they call it the post tab now. I don't know why they changed that, I
+thought the community tab was great. But, the second your video goes live, you can post it here and
+drive a chunk of your own audience straight to it, and this is insanely effective for a brand new
+channel. So, you want to go ahead and use this prompt right here. You want to fill in your
+information, and it's going to spit out the exact post that you're going to use with some really
+nice copy that creates intrigue and curiosity, and is probably going to make a lot of people click.
+Now, you can make this even better with one small move, which is just very simply dropping your
+video's thumbnail right into the post as well, because pictures in general tend to do better than
+just text. And yeah, you're just going to go ahead and copy it in there, and then you can paste the
+photo if you want. And you see the vibe here, it really does have that new upload energy, right? It
+has a little bit of urgency, and that's all you really need, right? Don't overthink the wording, but
+at the same time, you do want to alert people right when your video goes live, because some of them
+are going to click and watch your video and it builds that party feeling right when your video goes
+live, which you really want. Because when people watch your video right when it drops, that is one
+of the strongest signals that you can send the algorithm. It tells YouTube this thing's got heat, so
+you should push it. All right, next section is the first hour comment replies. So, I kind of
+mentioned this already with the pinned comment, but not only do you want to reply to people the
+first hour, but in many cases, they may reply to your reply and then you want to reply to their
+reply of your reply of your video. If that makes sense. Because this will count as even more
+engagement than if just one person comments on your video. So, instead of one engagement, it could
+end up being three or five. So, keep replying until they stop. Now, one thing you can do is you can
+just screenshot the comments, drop it into Claude, and then use this prompt as well. Or you can just
+copy the actual comment itself and drop it into Claude and use it, too. I recommend screenshotting
+it, especially if you have multiple different comments on your video. So, yeah, I'm going to paste
+the prompt right there, put the comment in, and boom, it gives me a conversational reply. Uh sounds
+human, not robotic. And you can just copy and paste it right in. All right, so the next section is
+all about repurposing. Now, YouTube loves it when you send traffic from other platforms back to your
+video. Even a little bit, right? They reward you for it with more impressions. So, I take that same
+transcript and I find the best moments to clip. So, what you want to do is you want to take the
+transcript of your video, ideally with the timestamps, and then find the best moments to clip. And
+you can just do a simple prompt like this. And like I said before, the really good stuff is going to
+be in the description and the pinned comment below, but a simple prompt like this will suffice. And
+it gives me three clip suggestions. First one is the subscribers more money clip. And I can tell you
+from experience that this is really good. Now, the second is the $7 skin test. And the last one is
+your thumbnail is attracting broke teenagers, right? So, all three of these are good. They're also
+giving directions on the exact places to clip. And then you can hand it to your editor or you can
+cut it yourself, doesn't really matter. One of the easiest ways to do this is with Descript. Uh is
+really good for making clips. And there are automatic options with Descript as well as Opus Clips,
+but I believe those are paid. So, if you don't want to pay, you can just use these instead and just
+do it manually. But then you can syndicate this content to YouTube Shorts, to Instagram, to TikTok.
+There's even other platforms you can do it on as well. All right, next is your thumbnail text,
+right? Now, I've got one hard rule here, and it's non-negotiable. If your thumbnail has words on it,
+those words have to tell people what the video is about without reading the title. Now, there are
+some advanced YouTubers that do not have to follow this rule because they know what the hell they're
+doing, okay? Uh but beginners should follow this rule 100% of the time. Now, this does not mean
+repeat the words that you have in your title in the thumbnail. In fact, you absolutely should not do
+that. However, it does mean that you should be able to tell what the video is about just from the
+thumbnail alone without even looking at the title. And here's a dead simple way to test this, right?
+Cover up the title with your thumb, literally right now on your last upload, and then can you still
+tell what the video is about, right? Just from the thumbnail alone. If yes, you nailed it. If you're
+squinting and guessing, it failed. So, you need to go fix it. And think about it like a billboard on
+the highway, right? And stick with me here. You've got people flying past at 70 mph. You get half a
+second of their attention, and if they can't get it in that half second, they're already gone. So,
+your thumbnail is that billboard. Your title is just the fine print that nobody slows down to read.
+And the thumbnail does the heavy lifting, but the title backs it up, and it doesn't rescue it. So,
+keep the words short, four words max, and make those few words earn their spot. So, I'm going to
+paste this prompt right here, and there you go. It's going to spit out five text options. All of
+them short, all of them punchy. And notice what I did here, every single one passes the rule that we
+just talked about. Four words or less, tells you what the video is about without the title. But if
+you look at number two and three, uh 1,500 subs, six figures, and 2 million subs still broke, those
+are the ones that I'm going to be testing first. Why? Because they've got specific numbers, and the
+math doesn't add up in your head. So, how does 1,500 subs make six figures? How is 2 million subs
+broke? That gap, that is what stops the scroll. That's what makes the thumb hover, and you want to
+tap that, right? So, specific numbers beat vague hype almost every single time. So, don't just grab
+the first one, pick the two that make people go, "Wait, what?" and let them fight it out. All right,
+now the last thing is your end screen pitch. At the end of every video, you should be telling people
+exactly what to watch next, every single time with no exceptions. Think about Netflix, right? You
+already know where I'm going with this. The episode ends right where it gets good, then the next one
+auto plays before you can even reach for your remote, and that is why you accidentally watch six
+episodes in a row. Your end screen is that auto play. Build the cliffhanger, then point them
+straight to the next one. Don't lose them in the last 5 seconds. You worked too hard for that view.
+So, you can paste your whole transcript in here, if you'd like, and then you can use this prompt
+right here and put the next video title. And it's going to make some copy for your end screen
+transition that's going to be irresistible for them, and they're going to have to click on the next
+video. And it's going to do it in a way that contextually makes sense with the video that you just
+made. Now, in this particular example, I didn't actually give it any contextual information cuz I
+didn't copy the other video, and I didn't even put the name of the next video. But, you can
+definitely do that, and it'll be even better. But, I think this one is pretty self-explanatory. So,
+look, here's the truth. The people winning on YouTube right now aren't smarter than you, they're not
+more talented than you, they just have a system, and now so do you. And 99% of you are just going to
+take this free content and run with it, and that's fine. I like to give away more value than I
+receive, and that's why I make these types of videos. And that is also why I'm hosting my live
+training this week, where I'll show you guys exactly how to grow and make money on YouTube. And when
+you attend, you get the niche validator pro, both the ChatGPT and the Claude versions, for free.
+Plus, you get to ask me your questions live on Zoom at the very end, and we'll give you a step-by-
+step guide for getting started on YouTube and building your personal brand. So, click the link in
+the description and the pinned comment below to attend that. But, for the 1% of you who are dead
+serious, right? You're either business owners or you want to treat YouTube like a business. If that
+is you, I'm opening up three to five spots to work directly with myself and my team, and you can
+access those by clicking the link in the description and the pinned comment below. Now, this is for
+people who want high-touch one-on-one coaching, or they want us to just do the work for them. And
+obviously, this is a lot of work for us, so it's going to cost some money. So, only book the call if
+you're very serious about growing and making money on YouTube, and we look forward to talking with
+you. If you want to see an example of someone who worked with us and got incredibly good results,
+you can click right here to see an example from Sean. See what I did there? That's the end screen.
+But yeah, Sean worked with us and this is a video of me interviewing him and talking about his
+experience working with us and how we helped him get to $500,000 in a single month. So yeah, click
+right there to

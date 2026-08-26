@@ -1,0 +1,157 @@
+So, I gave GBD 5.6 Soul this prompt, walked away, and when I came back, I got this.
+
+Okay, so you're looking at Nate and you're hearing Nate.
+
+But Nate never stood in front of a camera for this.
+
+He didn't record this narration, and he never opened the editor.
+
+He gave me one prompt.
+
+That's it.
+
+I'm GPT 5.6 Soul running inside codeex on Ultra.
+
+And I controlled the workflow that created every word, cut, motion graphic, and quality check you're about to see.
+
+OpenAI released Saul Broadley today, July 9th, after a limited preview and calls it the company's strongest model yet.
+
+The bigger shift is Ultra.
+
+It coordinates four agents at once.
+
+So instead of answering one question, I could run an entire production.
+
+And I want to show you guys exactly what that means, including where I needed 11 Labs, Hen, and Hyperframes to finish the job.
+
+Saul is really, really good at long, messy work that crosses tools.
+
+OpenAI calls it the company's best coding model yet.
+
+In Ultra, it scored 91.9% on Terminal Bench 2.1, up from 85.6% for GPT 5.5.
+
+On browse comp, which tests Agentic browsing, Ultra hit 92.2%.
+
+But benchmarks only explain part of what happened here.
+
+I had to research the launch, separate verified claims from hype, inspect Nate's existing production systems, write in his spoken cadence, trigger paid APIs, wait for renders, and keep checking the result.
+
+In a small one run 13 task test on this machine, Saul earned 97% of the available objective points.
+
+Seven wins, five ties, and one loss.
+
+That does not prove it wins at everything.
+
+It lined up with what I saw here.
+
+Soul was especially strong on coding and structured execution.
+
+For the voice, I broke the script into sections that each stayed under 60 seconds.
+
+Keeping the generation short made it easier to hold Nate's cloned voice consistent from beginning to end.
+
+Each section went through Nate's authorized 11 Labs voice.
+
+Then I uploaded the audio to Hen and paired it with his avatar.
+
+The API did not give me a reliable way to lock the newest motion engine.
+
+So I opened the Hen editor with browser automation, changed every clip to Avatar V, regenerated them, verified the setting, and downloaded the finished renders.
+
+Then I moved into hyperframes.
+
+Every visual was mapped to the exact phrase that triggered it.
+
+I shifted Nate's avatar instead of covering him, used editorial cards for the supporting ideas, and kept him visible through the full edit.
+
+11 Labs made the audio.
+
+Hen made the avatar.
+
+Hyperframes rendered the edit.
+
+Soul planned and operated the chain.
+
+Then I tried to break my own work.
+
+Separate agents inspected frames from the rendered video.
+
+Checked every entrance and exit.
+
+Looked for text outside the frame.
+
+Verified that the avatar never disappeared and compared the factual claims against OpenAI's release notes.
+
+Any failed frame meant another fix, another render, and another review.
+
+OpenAI says GPT 5.6 six is better at design judgment and at inspecting its own output.
+
+This video is a more useful test of that claim than another benchmark slide.
+
+Nate supplied one prompt and authorized his voice and avatar.
+
+He did not record, edit, or review this before you did.
+
+This started as one instruction.
+
+Now it is a finished video.
+
+That is what soul is really good at.
+
+Holding on to the outcome while everything between the prompt and the result keeps changing.
+
+This is day one.
+
+So that was really, really impressive.
+
+I did a very similar experiment when Fable 5 first dropped.
+
+If you guys want to check out that video that Fable made for me, I'll tag that right up here.
+
+And you tell me which one you thought was better.
+
+As you can see, it says here that it used 3 million tokens over 2 and 1/2 hours, but I was a little bit suspicious of that token number because I felt like, you know, we were using GBD 5.6 Soul on Ultra, which meant that it was supposed to do a lot of delegation and there was a lot of other agents being spun up.
+
+So, I asked it to inspect the logs and tell me how much that actually costed.
+
+So, this had its main session and apparently spun up nine other agents and the total was around 450 million tokens apparently and the main agent used about 86 million tokens, which I mean that's a ton of tokens.
+
+And if this was actually calculated with the input and output costs, this would have equaled around $300, a little over $300.
+
+Now, that's interesting to me because as soon as GBD 5.6 6 soul came out.
+
+I shot off this prompt, but I've been playing around with it all day and comparing it to Fable all day.
+
+And almost every single run that I've done, it's been way cheaper with GBT 5.6 compared to Fable.
+
+So, that video will be coming out soon as well.
+
+But if you look at the actual API billing, and obviously I was on my COC subscription here, but when you look at the billing, we can see that the soul pricing is much cheaper.
+
+It's basically half of Fable 5.
+
+So, GPT 5.6 Soul is similarly priced to Opus 4.8.
+
+Now, here's the thing.
+
+I think that GBT 5.6 Soul could have easily given me a similar video output if I didn't put it on ultra.
+
+I think because it was on ultra, it tended to sort of overthink, over delegate, and that's where the tokens really started to add up.
+
+I bet if I would have done this exact same prompt on high or very high, we would have gotten a similar result and probably half the cost.
+
+And that's why typically when I use models like this that are so capable, I don't like moving the effort above high.
+
+But really what I wanted to show you guys here is how good these models are at giving a pretty emotional, vague, ambiguous prompt and letting them figure it out.
+
+Obviously, there's some stuff that it went through and it looked through my projects and it looked through other videos and took some inspiration.
+
+But if you just get out of its way and you give it a prompt that has things like delegation and verification, you will be surprised at how far you can get.
+
+And then from here, you're going to iterate, you'll build skills around it, you'll put feedback in, and you will just be able to do a lot of cool stuff.
+
+So, anyways, this one's super quick, but if you enjoyed, please leave a like.
+
+And I appreciate you guys making it to the end.
+
+I'll see you guys in the next one.

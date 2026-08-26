@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-064",
+  "version": 1,
+  "title": "offer-positioning / acquisition — category-pitch-fails",
+  "steps": [
+    "Do not outbound the category. Keep this atom separate from “don’t lead with the word AI.”",
+    "Show one demonstrated machine. Do not condense the hive into “we do agents.”",
+    "HITL gate via ask-principal. Not a lead-hunter job."
+  ],
+  "support_ids": [
+    "K-x-2088007687149601254-01",
+    "K-x-2088007687149601254-02",
+    "K-x-2088007687149601254-04"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; Already-business-owner rooms. Evens must allow unpaid work. Publish / send stay HITL. Clients parked.",
+  "less_relevant_when": "Do not unpaid-stranger-work to “test Fazio.” Do not unpark a client. Do not auto-publish the proof.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

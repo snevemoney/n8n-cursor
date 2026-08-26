@@ -1,0 +1,33 @@
+{
+  "pattern_id": "P-auto-013",
+  "version": 1,
+  "title": "agent-ops / build — teams-are-for-peer-talk-bounce-not-for-a-bucket-brigade",
+  "steps": [
+    "Steal talk-vs-return. Hive: `hive-spawn-desks` already covers crew; do not enable Claude teams.",
+    "Steal goal-first + named recipients + inspect spawn text.",
+    "Steal inheritance warning + file territory + clean shutdown. Operate-never: bypass teams.",
+    "Apply only when the condition matches. Hard steps HITL.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-vDVSGVpB2vc-01",
+    "K-vDVSGVpB2vc-03",
+    "K-vDVSGVpB2vc-04",
+    "K-vDVSGVpB2vc-11",
+    "K-vDVSGVpB2vc-12",
+    "K-vDVSGVpB2vc-13",
+    "K-vDVSGVpB2vc-14",
+    "K-vDVSGVpB2vc-15",
+    "K-vDVSGVpB2vc-16"
+  ],
+  "dissent_ids": [
+    "K-vDVSGVpB2vc-02",
+    "K-vDVSGVpB2vc-05"
+  ],
+  "valid_when": "domain=agent-ops; stage=build; Experimental flag. Sonnet in the demos.",
+  "less_relevant_when": "A “research team” that is mostly sequential still produced a long doc — he used a team anyway.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

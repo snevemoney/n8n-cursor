@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-037",
+  "version": 1,
+  "title": "data-tables / ops — in-instance-table-sheets-verbs-without-the-wire",
+  "steps": [
+    "Steal in-instance store for small/hot data. Do not migrate hive to n8n-cloud.",
+    "Steal filter-then-LLM. Hive: `inbox-to-task-routing` shape; no auto-send. Mark tape $ UNVERIFIED.",
+    "Steal “enum + format in the tool prompt.” Don’t hardcode a live catalog.",
+    "Steal size-dependent pick. Do not quote ms as FACT."
+  ],
+  "support_ids": [
+    "K-QCjMBOEhpLE-01",
+    "K-QCjMBOEhpLE-02",
+    "K-QCjMBOEhpLE-03",
+    "K-QCjMBOEhpLE-04"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=data-tables; stage=ops; Demo-sized enum (3 products). Won’t scale without a lookup tool.",
+  "less_relevant_when": "400-row write was **slower** than Sheets once. Keep that fail.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

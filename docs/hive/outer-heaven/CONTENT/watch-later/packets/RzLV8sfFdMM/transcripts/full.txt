@@ -1,0 +1,1379 @@
+What would you say by the end of this podcast [music] that everyone will have learned from you? >> The main thing that I want to talk about today is how we can be the director [music] of our coding agents.
+
+Everyone is hearing nowadays how large language models can support up to 1 million tokens in their context.
+
+That's like the Harry Potter book five times over.
+
+Large language models have what's called the dumb zone.
+
+With Opus right now, it's usually around 250,000 tokens and I feel like it gets into the dumb zone. >> It definitely comes with a false sense of security with people now thinking that they have the million. >> With coding agents, you spend more time planning than you actually do building. >> Without the verification checks, maybe it's 65 or 70, but now you can get something that is 92 on the first pass. >> If you tell it never to to wipe a database, it's still going to do that.
+
+If you don't allow it to delete a folder, it can still write a script to do that. >> Recently something did happen to us.
+
+The agent was trying to be proactive and it actually saw something on its task list, but it misinterpreted it and it ended up sending an email to our entire list with a discount code and it was not supposed to go out.
+
+If you have the mindset that anything that the agent can read or can touch, you have to assume that it will even if you never ask it to.
+
+That assumption is what's going to save you from having your database deleted.
+
+All right, Cole.
+
+Thank you so much for being here today.
+
+I'm so excited to dig in. >> I'm excited to be here.
+
+Yeah, thanks for bringing me on your podcast, Nate.
+
+I'm looking forward to this. >> Absolutely.
+
+Yeah, it's been a a long time since we've talked, so I'm excited to hear what you've been up to and to hear kind of like the sauce that you're going to drop on everyone today.
+
+So real quick, what would you say by the end of this podcast that everyone will have learned from you? >> Yeah, so the main thing that I want to talk about today is how we can really be the director of our coding agents and specifically Claude Code cuz that's what most people use right now.
+
+That's what I use.
+
+But really it's creating that system where you have your your way of working with Claude Code that evolves itself over time.
+
+And we're going to talk about more than just using it to code.
+
+Really I use my Claude Code as my second brain I like to call it.
+
+I know Nate kind of calls it as AIOS.
+
+Everyone has their term for it, but really like using Cloud Code as the tool to make your business AI native.
+
+We're going to get into all of that.
+
+And just some high-level strategies that honestly you can start applying today. >> I love that.
+
+Yeah, I'm I'm super excited to dig in because, you know, I don't come from a formal software engineering background, and I think that I would I would guess that the majority of my audience doesn't either.
+
+But obviously with the the products being called Cloud Code, I think a lot of people that I bring that up to who aren't super deep in the AI space, they obviously think that it's a tool that is for coders, and you need to understand code in order to use it.
+
+So, um I love that framing.
+
+And real quick before we jump in, you know, me and you have we've known each other for quite a bit, I feel like, you know, right when I kind of quit my job and started on this space, you were one of the main channels that I followed and I still follow to stay up to date and to to learn about how to work with AI in the right way.
+
+And um we've kind of just been able to see each other grow and and, you know, check in.
+
+So, I'm really excited to dive in, but I wanted to make sure you got a chance to real quick give everyone a quick intro if they haven't seen your channel before on what you do.
+
+And um yeah, what you're up to. >> Yeah, sounds good.
+
+You know, before I give an intro though, I kind of want to share something a little bit about what you're talking about.
+
+Like when we first met, it's funny cuz I I actually remember I had um about 50,000 subscribers when Nate first reached out to me, and he had like 10,000.
+
+And now it's a little bit different.
+
+I have like 200,000, and you're you're almost 800,000 now, right?
+
+Like it's pretty crazy.
+
+Um it's been really cool to see you grow, how fast you've grown.
+
+But yeah, we were both like smaller channels at the time.
+
+Um so yeah, it's it's been a long time wild journey.
+
+Uh yeah, anyway, as far as what I actually do, so like Nate said, I come from a software engineering background.
+
+So, I've been an engineer my entire life ever since I was 8 years old actually.
+
+I I started with this language called Scratch.
+
+It's developed by MIT.
+
+So, I was just like building video games as a kid, like Super Mario Bros. and Pokémon, like really cliché stuff.
+
+Um but that that's what got me to the world of coding.
+
+And so I took that through high school, college, got my bachelor's in computer science, and um then I had just like a software engineering job in a Fortune 500 company, and it was great, but I always wanted to be an entrepreneur.
+
+And so, when generative AI started really become a big thing at the end of 2022 with the release of chat GPT, you know, when it took the world by storm, that's when I knew like, "Okay, this is where I want to go all in." cuz there's like a really big opportunity for a software engineer specifically to build agentic applications.
+
+And so, I started doing a lot of that like for my company and for friends with their startups, pretty much dedicating all day and all night to it for a very long time, like over a year.
+
+And so, it got to the point, well, I know, a year might not feel like a long time, but in the AI space, a year is a long time. >> Oh, yeah. >> So, like it it got to the point where like, "Okay, I got some things to teach people." So, that's why I started my YouTube channel.
+
+So, originally, it was like really, really technical.
+
+Like I was there like writing line by line.
+
+I wasn't even using AI coding assistants back then, just showing how to build AI agents with like, you know, LangChain and LangGraph at the time.
+
+And now that's evolved to a lot of different things like I I do a lot of like focusing on AI coding assistants, which is why we're talking about that today.
+
+Um and yeah, I quit my my full-time job like 3 months after starting my YouTube channel, which I think is about the same for you, Nate. >> Yeah. >> Um cuz it's crazy like how fast when you when you do it right and and you're teaching people valuable things like how fast a channel can explode.
+
+And so, now now what I'm up to is I have my AI community um similar to Nate, where I've got course content, weekly workshops that I do.
+
+I've also been doing some more enterprise-level training.
+
+So, coming into a team and doing like a 4-hour session, helping them adopt a full system for using AI coding assistants so they can really have it as like a standard for the team.
+
+You know, get get away [clears throat] from vibe coding to really have a structured approach and helping them actually bring that into their existing processes and tech stack and things like that.
+
+So, that's been pretty awesome.
+
+And so, like really like that and everything I teach in the community, I'm bringing a lot of that here to uh what we're going to be chatting about today. >> 100%.
+
+Real quick, guys, quick break to tell you about today's sponsor, ClickUp.
+
+ClickUp is the software to replace all software, which I think is pretty funny, but very true.
+
+If you guys have been following me for a while, you know that I've been using ClickUp for a long, long time.
+
+Everything that I do with my team lives in ClickUp, all of our communication, all of our project management, all of our chats, and everything I was doing with my clients back when I was running the agency day-to-day, we were also inviting them to a ClickUp.
+
+So, it had replaced Slack for us, and it had also replaced our project management tools.
+
+So, if you're already using ClickUp, you have to try this new feature called Brain 2.
+
+But, if you don't use ClickUp already, then Brain 2 is an amazing reason to try out ClickUp.
+
+It's kind of like a supercomputer that can do a ton of cool stuff, and I'll talk about it in a sec, they have super agents in here.
+
+But, you can switch between the different chat models that you probably already use and love.
+
+Right here, you can see that I've used Brain myself to look through everything that's going on in our projects, and then create me a monthly presentation for the team.
+
+So, what that could look like is me asking Brain to create an investor presentation pitch deck for our text-to-speech startup called Glydo, and I told it to just use mock data, but make sure that it's professional and engaging.
+
+And just like that, we have the deck, which I can open up full screen right here.
+
+We've got the voice AI platform that makes every brain sound human.
+
+And as I start to navigate through here, you can see that we also have animations in here.
+
+So, it's not just a static, you know, slide deck.
+
+We get to actually go through, and we feel the animations.
+
+And think about the fact that this was just a one-sentence prompt.
+
+If we really started to put more and more data into this thing, it would be really, really solid.
+
+And this right here is just one of the many use cases of Brain 2.
+
+So, it's not just a chatbot, like I said, it can do things, and you can build your own super agents in here.
+
+And what I think is really cool about the super agents is they're 24/7 agents, you can tag them in ClickUp, you know, you can at message them, and they'll wake up and respond to you, and they can search through everything, which is why, in my opinion, it's a lot cooler that ClickUp is doing this compared to something like chucking an open claw or Hermes agent into ClickUp, because these agents already have full context and can search through everything.
+
+So, right now, because you're watching this video, you can claim this super awesome offer that is on screen right now by using the link in the description.
+
+Now, let's Let's back to the video.
+
+Yeah, well, I am just I'm so glad that that we both took the leap cuz it's it's you know, it's not an easy decision, but um your brain just gets it.
+
+And so, it's been great to see, you know, the consistency in what you've been up to, but I think that if you think back to, I don't know, 5, 10 years ago when people were going out to get their, you know, CS degrees and stuff, it's like that was such a safe bet at the time, you know?
+
+And I don't think a lot of people were predicting how much how quick that was going to flip as far as like, you know, that graphic of what is AI being applied to.
+
+And right now, it's just majority is coding and software engineering.
+
+And obviously, everything's going to catch up, but um it's just great that you were able to, you know, make that pivot and be ahead of the curve.
+
+And now, now here we are.
+
+So, um being able to us have this conversation, one of us coming from like a non-technical background completely, and one of us coming from a technical background, it's going to be really cool.
+
+So, yeah, let's just jump right in. >> Yeah, sounds good.
+
+Cool.
+
+So, for for what I have prepared for today, um you'll see like you'll see it shine through that I come from a technical background.
+
+But but really, what it comes down to is like I'm going to bring these concepts into using Claude code for far more than just coding, like I alluded to at the start.
+
+And so, I think um you know, for me, like I I really enjoy leaning on my technical expertise because a lot of the ways that you'll use an AI coding assistant for your ops, your AIOS, your second brain, whatever you want to call it, um it you are going to be borrowing from software engineering principles, whether you realize it or not.
+
+So, a lot of times, just as you learn how to use these tools effectively, and you're just learning best practices from Nate's YouTube or Anthropic's blog or Boris Cherney or whoever, like they're bringing software engineering principles and a lot of like product management manager principles as well.
+
+And so, yeah, like some of the examples that I have here um that we'll cover, like they're a little technical, um but that's really just like to illustrate how how I started using this tool, and then of course, I'll like generalize things a lot as well.
+
+And um give some specific examples, too.
+
+Um so, if you if you want, Nate, I can just like dive right into the >> Yeah, let's >> first part that we have here.
+
+Okay, cool.
+
+Yeah, so I got like just quick over I mean, we'll go pretty quick through this cuz I want to keep this pretty casual, and I know you you do as well, Nate, but just like a few different pillars here of how we can go from simply using Claude code to what a lot of people call vibe coding, you know, prompting and praying where you're you're pulling that lever like a slot machine, getting to the point where we're really directing it and having that system for reliable and repeatable results.
+
+And um it really can be simpler than you would think, right?
+
+Like most of what people do that you really shouldn't do is you throw in a request, and you don't do much of the planning up front or the validation after.
+
+Like those are the two things that I really want to talk about here, and that applies to uh writing any code or any kind of application.
+
+It applies to evolving your system like as you're creating skills and integrations for Claude code, or even just using it to automate things in your business.
+
+Um and so, yeah, the approach is you always want to plan with context, build out that thing that you're looking to do, and then have an approach for verifying.
+
+Like as high-level as I can possibly keep it.
+
+And then the other like kind of golden nugget here is every time you go through this loop with Claude code, any kind of agentic workflow or thing that you're building, there's always going to be an opportunity at the end to evolve your system.
+
+And we'll talk about what that means in a little bit here, but like really that comes down to there's going to be something in the way you work with Claude code that you can improve so that next time it's going to be better. >> Mhm. >> And I'm I'm being high-level here on purpose cuz I'll get into some more examples.
+
+But a lot of people don't think about doing this, right?
+
+They kind of like get to the point where it's like, "Okay, my application works.
+
+Like this website looks good.
+
+Or it's now able to automate creating invoices." Like whatever it is, and they're like, "All right, we're done.
+
+Like let's next time I want to create an invoice, I'm just going to go through the same process again." But like really there are going to be those problems that come up over time where you can engineer so that they happen less often, right?
+
+That that system evolution is kind of what I like to call it. >> Yeah. >> So you're having you're having it learn just like you would an employee, right? >> Absolutely. >> Yeah.
+
+My my second brain, I literally call it my co-founder, right?
+
+So I want it to like learn me better over time and how I like to work, how I want it to work as well. >> Mhm.
+
+Yeah, and I think this four-step kind of framework or whatever you want to call it, it yes, when you kind of maybe look at it like this, it might feel like it's a technical software engineering thing, but if you just relate that back to the same way you would maybe like, let's just say build a treehouse.
+
+Like you would plan that thing out first.
+
+You would draw it out.
+
+You would understand how much wood you need and where.
+
+You would get the right gear, and then once you've built it, you're not just going to put your kids on it.
+
+You're going to like test it.
+
+You're going to make sure that thing's not going to fall.
+
+So um it's just a great way to think about it, and especially if you think about some of the the pitfalls that these models have with like the sycophancy, essentially just being a yes man.
+
+If you say, "Hey, you know, I want to do this.
+
+Does that look good?" And they're just going to say, "Yeah, it does." Without really looking over the plan.
+
+And then on the verification side, you know, sometimes they do tell you something's done, but it's not.
+
+So having your own method of doing that as well really important. >> Yeah. >> By the way, guys, I know we are diving into a ton of information in this episode.
+
+So what I did is I broke all of this down into a free resource guide that you can access for completely free by joining the free school community.
+
+The link for that is down in the description.
+
+Also, if you want to check out some of the key moments from this episode and all future podcasts on my channel, then go ahead and check out the AI Automation Society YouTube channel where we're going to be posting some of the best moments from the podcast over there.
+
+I'll link that YouTube channel in the description of this video as well.
+
+Anyways, thanks, guys.
+
+Let's get back to the podcast. >> Yeah, verification really comes down to prove to me it's actually done and working. >> Mhm. >> Right?
+
+And so like for any kind of coding task, that's things like unit tests and linting and like that's where it gets a little bit more technical, but like really you can apply that to anything.
+
+Um like I This is the example that I'm going to spoil right now.
+
+Um I used Claude Code to generate this entire diagram. >> I had a feeling you did, yeah. >> Yeah, yeah, yeah.
+
+So, I have I have a skill.
+
+It's like Excalidraw diagram skill.
+
+I've covered it on my YouTube channel, actually.
+
+So, I use it to build this whole thing.
+
+And um I was going to talk about this example a bit more right here when we really get into like verifying the work.
+
+Um but I think it's just such a good like non There's nothing to do with coding here.
+
+It's just creating a diagram.
+
+But as far as far as verification goes, I actually have it take the Excalidraw diagram and render a PNG.
+
+So, there's like an integration that I built into the skill for Claude Code, so it can render it as an image.
+
+And as a lot of you know, like Claude Code is able to understand images incredibly well now.
+
+For like the last year, it's been so good.
+
+And it's um even viewing like a like if I zoom out here, like there's quite a bit of context.
+
+But like it can pick out the tiniest piece of text in a larger image like this.
+
+And so, I have it look at that and then figure out like if there's any kind of like padding or spacing issues, like if there's any sort of overlap.
+
+And And trust me, there was.
+
+Like it had to iterate a couple times to build something this big.
+
+Um but then the the point is like it is able to iterate by itself.
+
+So, we don't really care about the initial mess-ups that it has.
+
+As long as it like does that by itself, we just care about that that last thing it hands back to us when it says it's done. >> Absolutely. >> this If we have the step when it says it's done, then like it actually is, or at least it's closer.
+
+I mean, it's still probably not going to be perfect, but you get the idea.
+
+Yeah. >> Yeah, 100%.
+
+I've done something pretty similar with my video editing pipeline with the motion graphics it adds.
+
+And sometimes things would be out of bounds, but like you said, the whole idea is it's almost never going to be 100% on that first pass.
+
+But without the verification checks, maybe it's 65 or 70.
+
+But now you can get something that is 92 on the first pass. >> Right.
+
+Exactly.
+
+Yeah.
+
+Yeah, it's it's good.
+
+So, I mean, verification, validation, whatever you want to call it.
+
+Like, that is one of the biggest things that I'm focusing on right now for any kind of application or automation that I'm creating.
+
+I want some kind of harness for the coding agent to be able to validate its own work.
+
+It's a lot of code to validate its own work.
+
+And for some things like website design, it's actually pretty easy.
+
+There's a lot of tools out there.
+
+Maybe you've heard of Playwright or Vercel's agent browser for it to really just spin up the site, right?
+
+You can run the command to start the website and then it can visit it just as a user would.
+
+Take screenshots along the way to prove things to you or even just view the the UI itself.
+
+It's pretty easy.
+
+For other kinds of things that you'll build, it can be kind of hard to have the agent really verify its own work effectively.
+
+One like really simple example, kind of silly example, I In my spare time, like I've I've always loved like video games as a kid.
+
+I mean, like I talked about with Scratch, I mean, I was building like Pokémon and and Mario Bros. and stuff.
+
+And so, like I've actually like been doing a little bit of just trying to I mean, I hate to admit it, but vibe code video games, right?
+
+It's just a hobby.
+
+I'm not trying to like do something too crazy.
+
+It's more just like having it run in the background for fun.
+
+But like one of the things I've had to think about is like how do I build a harness for the coding agent to be able to actually play the video game.
+
+It's a bit trickier cuz it can't Like coding agents, they need time to think, right?
+
+So, if you have a game that's running at 60 frames per second, it's not really going to be able to react to things the way that human would.
+
+So, thinking about a system where it can basically like slow down the frame rate.
+
+I know it's kind of like a silly example, but it's just like that's one of the biggest things you have to engineer for for anything is like how would the agent actually verify that as a user would?
+
+Cuz just like looking at the code it creates or the skill it builds for you, like that's not enough for it to just do that sort of like review, high-level review, which is good, but like you need a way for it to really like use the application or whatever you're making as you would. >> Yeah, absolutely.
+
+And real quick for anyone that might not have heard the term harness before, what is your kind of quick definition of that? >> Yeah, no, that's good.
+
+I appreciate you calling me out.
+
+Yeah. >> It gets It gets [laughter] technical. >> Right, yeah.
+
+So, um usually when people talk about harnesses, they're talking about something more like what I was going to talk about a bit here at the end.
+
+Um so, what I'm talking about as far as like validation is more like I mean, it's it's kind of I I have to think about like how to actually explain what a harness is.
+
+Really, it's it's the wrapper around the large language model, the tools and context that it has access to, so it knows what it's working on and how to work on it effectively.
+
+So, if we think of like a harness for AI coding, Claude Code is actually a harness, right?
+
+Like it when you download Claude Code and you run it, it loads a system prompt on top of Claude as a large language model, it gives it the tools so it can run commands and create files on your computer.
+
+Um that's what really makes it a harness.
+
+And And then, when I was giving the example of like a harness for testing, it's more like um giving it a system where it's like, "Okay, these are the commands I can run to start the game and then like slow down the frame rate so that I can interact with it frame by frame and like really stop and analyze and think before I take another action." So, it You can think of it kind of like a So, I mean, maybe I will just jump ahead here.
+
+You can think of the harness [laughter] as the thing that just wraps the model.
+
+And then, there's also that that component of the harness that you get to build yourself.
+
+I call it the AI layer.
+
+And so, for Claude Code, that's like your Claude.md and your skills and your hooks and any kind of MCP servers that you're bringing in to connect it to your other platforms like your CRM or your task management software, right?
+
+That's that's building on top of the harness.
+
+So, it's kind of like the large language model is the reasoning.
+
+It's It's the brain at the center.
+
+And then, you pick the tool like Claude Code or Codex or whatever, and then you can sort of like build the context and integrations on top. >> Absolutely.
+
+I love it.
+
+Yeah, well said.
+
+I think something something fun anyone listening should try real quick is if you go to an AI model and ask it to explain an AI harness or an agent harness, I would be willing to bet it does the whole car analogy where the engine is the AI model [laughter] and the car is the harness.
+
+So, let me know if you guys run that and and see if that's what you get. >> [laughter] >> Sounds good.
+
+I mean, we could we could test it right now.
+
+No, no.
+
+We won't we don't need to do it right now.
+
+But yeah, that's that's your homework for today. >> Yeah. >> [laughter] >> Yeah.
+
+Yeah, cool.
+
+Um yeah, so we're I mean, we we talked about like validation a lot.
+
+Um planning is the other thing that I really want to hit on cuz most people don't do enough of it. >> [clears throat] >> And it takes it takes patience.
+
+And this is like one of those um software engineering disciplines that I like to bring into um even when I'm talking to someone who is not writing code or who isn't technical.
+
+Cuz you have to spend I mean, with coding agents, you spend more time planning than you actually do building because you you really put a lot of your effort up front into the plan and then you use that to delegate as much of the coding as you possibly can or for a lot of us all of the coding to the AI coding assistant.
+
+And so, its success is really just dependent on how good is your plan.
+
+Usually, you have some kind of like a lot of people like using markdown, right?
+
+I use markdown a lot.
+
+So, I'll have like a single markdown document that outlines um you know, like the goal, what are we building here?
+
+What does success actually look like?
+
+And like of course with that comes the validation strategy um that we've already talked about.
+
+So, how does it know that's uh the work is done and working well?
+
+And then um not to get like too technical here, but especially more for any kind of like coding task, you're going to have like the integration points, right?
+
+Like if you're building on top of an existing automation or application or website, whatever, like what are the parts of the code base that we actually have to touch?
+
+And so, if you are more technical, you can sort of evaluate like make sure it's understanding is correct of like, okay, what files are we really going to create and edit here?
+
+Not that you need that.
+
+Um and then once you have that plan, then this is kind of what my workflow looks like.
+
+And then this is for anything.
+
+So you you do some kind of like context loading up front, any sorts of like documents that your agent needs related to the task at hand.
+
+And then I'll typically have it do some kind of research, usually using sub agents for that.
+
+So if I'm building a new application, maybe I'll have one sub agent research what's a good tech stack for this.
+
+What's a good like approach are people that have built similar applications, right?
+
+So like especially if you're not as technical, that could be really useful for it to just gather a lot of information and then propose a plan to you.
+
+And so that's when you you create the plan with the coding agent.
+
+And this is also where usually you want to have the coding agent ask you a lot of questions.
+
+Like I know Nate, you just put out a video today on Matt Pocock's grill me skill, which is really good.
+
+Like you need to make sure that you that the coding agent is not assuming a ton of things about what you want it to do.
+
+Like the workflow you want to build, the skill you want to build, whatever.
+
+And so having it ask you a lot of questions to clarify those things is good.
+
+So that way you can be confident that once you have that final plan, like this is about this is what we're going to go and do now, that both you and the coding agent are aligned on what's actually going to be done and and how you're going to validate it. >> Absolutely.
+
+Yeah, I love it.
+
+When you do that, are you typically using in Cloud Code plan mode or are you kind of planning but not in plan mode? >> Yeah, usually I don't use plan mode. >> Okay. >> It's it's good, but plan mode like puts Cloud Code into a bit of a different behavior that I'd rather be able to control my control more myself.
+
+So my skill for planning is like instructions for how I want it to ask me questions and then just like generally how I want to go about researching and organizing things into a plan.
+
+And so like I want to define the sections.
+
+If you don't, then you're just using Cloud Code's plan mode.
+
+Like it'll build something actually pretty much like this.
+
+But I just like having that more that that higher level of control.
+
+I think that's a theme that you get a lot through my content in general is that I I like to have control and customizability cuz in the end that's how you get the best results.
+
+It's just it's kind of like that learning curve to get to the point.
+
+Like for example, I I don't use open claw or Hermes.
+
+I have my own second brain that literally is just built directly on top of Claude code.
+
+And I'm a big proponent of that even though those other open source tools are very powerful because you're running something that you don't understand and it's harder for you to like really take as your own and it's not like a foundational component that you can create your own system on top of.
+
+So you're more like adopting someone else's system and these tools have done a really really good job making it easy to extend and and really make your own.
+
+But like in the end building something from the ground up is always going to give you the most control even though that can be pretty daunting. >> Yeah, I hear you.
+
+Yeah, that's interesting.
+
+It I mean it it really does make sense.
+
+I always love you know, that's something I just say a lot which is a very simple theory is just to be genuinely curious to understand what's going on especially when I don't understand what these lines of Python code that it that just got written mean, you know, and the whole idea of dark code.
+
+And I guess what do you think about that whole idea cuz I know you talk a lot about vibe coding and and preaching understanding things at their core.
+
+So when someone is generating automations or code that they don't understand how to read how do they actually feel secure and safe about that?
+
+Yeah, that's a really good question. >> Pretty loaded too. >> [laughter] >> No no, it's it's good.
+
+I I welcome it.
+
+So I'll I'll answer in two ways.
+
+I'll answer first by saying that like maybe not everyone loves to hear this but I can if you are using AI coding assistant to write code cuz you're building your second brain, you're creating automations, whatever it is, I would recommend at least trying to get to the point where you can understand the code.
+
+And really at first that can be as simple as just asking Claude Code or whatever coding agent to explain what it just wrote.
+
+Because code can look pretty intimidating, but when you get over that like initial hump, like it kind of reads like English.
+
+And maybe that's just me being extremely ignorant because I've lived and breathed it since I was 8 years old, but it starts like as long as you understand that like this is a class, this is a while loop, this is a if statement, like it starts to read like English.
+
+You're like, okay, I understand when this part of the code is going to execute now.
+
+You're just asking your coding agent constantly.
+
+And so I mean like in Claude Code there's the slash by the way feature.
+
+So like you can always just kind of have a side car conversation where it's like, hey, help me understand like what the heck is going on right here.
+
+And then it doesn't have to to dilute your main context and just kind of like keep throwing context at Claude Code.
+
+If you can have that separate conversation for your own understanding and then go back to the main task at hand without it being affected.
+
+So I would recommend that.
+
+And then, you know, someone is really not inclined to learn how to code, like that's just not your goal.
+
+You want to use Claude Code to automate things and not have to like engineer applications.
+
+I totally get that as well.
+
+Really comes down to your validation strategies what's going to dictate how confident you can really be in what is created.
+
+So if you're spending a lot of time and this is why I say like whenever you're building something with Claude Code, the way that you don't vibe code is that you sandwich the delegation of the coding between the planning and the validation process that you're heavily involved with.
+
+Right?
+
+Like the only reason I'm ever going to say, all right, Claude, go rip through this is because I made sure I created a really detailed spec and I've defined like this is how you're going to tell me that you're done and how you can be confident that you actually are. >> I love it.
+
+Very well said.
+
+Nothing to Nothing to add there. >> Cool.
+
+All right, sounds good.
+
+Yeah.
+
+Um yeah, as far as like creating that plan with the coding agent, the most important thing is to manage the context.
+
+Like what your coding agent is going to really be paying attention to at the start of any kind of planning session.
+
+So, the the thing here is that attention is scarce.
+
+And so, there's a big misconception right now for a lot of people where they think that like it doesn't really matter how much you throw at a coding agent because everyone is hearing nowadays how like large language models can support up to 1 million tokens in their context when they're like, "Oh, that That's like the Harry Potter book five times over." I forget the exact >> [laughter] >> but people like always throw like some some analogy where it just like makes it pretty obvious where it's like 1 million tokens is an insane amount of information.
+
+And it actually is, but there's two massive caveats here.
+
+The first one is that that context will go way faster than you think.
+
+Cuz if it's reading through um a bunch of skills that you set up for it or a bunch of code, that can be tens of hundreds of thousands of tokens very quickly.
+
+And then the other thing is uh large language models have what's called the dumb zone.
+
+And so, you have the the little bit of context up front.
+
+Maybe I can just draw like a quick little analogy here.
+
+So, if like this is Oh, that is a fat marker.
+
+Um All right.
+
+Okay, I'm I give up already.
+
+I'm not going [laughter] to try that.
+
+Okay, so you you you have to imagine this with me here, but imagine you have a box that represents the the LLM's context window.
+
+You have that initial part at the start of the conversation up to the first, you know, 100 or 200,000 tokens where the large language model feels very sharp, or at least it feels like it's at its best.
+
+Once the conversation surpasses that first 100, 200,000 tokens, obviously it depends on the model.
+
+When you reach the dumb zone, you get to the point where it just feels like it's overloaded with information and it starts missing things and making mistakes that seem so obvious to you.
+
+Or like the kind of thing where you're like, if I had had a fresh context here, like there's no way it would have made that mistake.
+
+Like it writes a really bad line of code or it doesn't use a skill that you thought it should have known to use, right?
+
+Like that kind of thing if it's in the middle of a larger workflow.
+
+And so that that's why I say attention is scarce.
+
+Like don't don't get to under that false notion that you don't really have to care about how much you give it.
+
+Like if you're trying to have it handle a larger workflow, you still have to you have to be very careful like what you give it up front versus what you allow it to discover when it actually needs.
+
+Like that's one of the most important things with skills with Claude is you're giving it procedures and best practices, but it gets to decide like, okay, now I need to rely on this process or this information.
+
+So you're not just dumping a bunch of things up front.
+
+A lot of people do that like even with MCP servers back in the day.
+
+They would they would connect their like 20 MCP servers to Claude code and each one of them was was filling the context with like 20,000 tokens up front of information cuz it has like all of the tool calls or the tools that come with the MCP server.
+
+And so their large language model would always act super dumb.
+
+And so they're like, I'm using the latest Opus, like why am I getting terrible results?
+
+And it's really it comes down to just how much of the context is filled right away. >> Yeah.
+
+Oh my gosh, it drives me nuts.
+
+It it truly drives me crazy when you hear people blaming the model when it really is kind of a skills problem.
+
+And we see this at you know, when you look at these studies and surveys too about business adoption where it really is these people either have not yet felt the ROI because they can't they don't know enough about how to use it truly. >> Right. >> And also people claiming that they have the skills to, but they're just not doing it.
+
+And like the adoption is then another problem.
+
+But I mean, obviously I'm not doing heavy heavy coding, building software and and apps.
+
+But, you know, we're doing some pretty cool things.
+
+And I've seen some people do some really awesome things.
+
+And it's just >> Yeah. >> there's a lot of things like, you know, if you kind of think about your your diagram that you had, you got the model in the middle, you got the agent hardness around that, and then obviously a huge layer is what you put in there as well.
+
+And the way that you manage your stuff.
+
+And I think that the 1 million context window, specifically for, you know, like let's just say Opus 4.8 at the moment, obviously it's great, but it definitely comes with a false sense of security.
+
+But people now thinking that they have the million.
+
+But when and I know this might be outdated by next month or 2 months away.
+
+But let's say you right now when you're in Cloud Code, when do you typically do your compact or a session handoff and clear, and when do you get out of there? >> Yeah, so with Opus right now, it's usually around 250,000 tokens that I feel like it gets into the dumb >> That's my exact number, too. >> Oh, really?
+
+Okay, yeah, yeah.
+
+Good.
+
+Cool.
+
+So, and that, by the way, is like really subjective.
+
+Like, I'm not going to um bet a million dollars on on like the on Boris Cherny or someone saying like, you know, it's also 250,000 like >> Quarter million is clean, right? >> Yeah, it just it it sounds good.
+
+And it is like pretty accurate, I would say.
+
+Like, Opus 4.7 was around like 200,000.
+
+And then like Sonnet 4.6 is like honestly probably only like 100 125,000.
+
+Um like it as you go to these smaller models, like the dumb zone becomes a pretty small amount of context relative to like what it theoretically can handle.
+
+You just never want to get to that point. >> So, then with the dumb zone thing, I've also heard stuff about the model being really good at remembering things that are at the front and the very end.
+
+And the middle is where it loses.
+
+So, where does that play into the whole dumb zone conversation? >> Yeah, so basically that issue is just amplified the more you get into the dumb zone.
+
+Yeah, and um yeah, as far as like I mean we don't have to get into like the super technical details for how the attention mechanism works for LLMs, [laughter] but yeah, you could think of it I mean like the analogy I always like to use is the needle in the haystack problem.
+
+Yeah.
+
+Like if you have that like little piece of information that you want the agent to remember in the middle of a massive conversation, it's like trying to find a needle in the haystack.
+
+Like you can't expect the model to just cuz of the way that large language models are engineered, um you can't expect it to like always be able to pick out that little piece of information. >> 100% yeah. >> Yeah, I wish it could.
+
+That would be nice.
+
+If there wasn't such thing as a dumb zone, it would make it much more convenient for us to hand it massive tasks and let it just rip through things, but a lot of the reason we have to create a harness.
+
+And like a lot of the things I'm focusing on right now on my channel and just like generally what I'm building is creating harnesses that build a workflow that combine multiple coding agent sessions together.
+
+And so basically it's like one model does the planning and then my orchestrator will like automatically take that handoff document, like the plan, and then feed it into another agent for implementation.
+
+And then when the implementation is done, it'll create like an execution report and then it'll hand that off to the next agent to validate things and do a code review.
+
+And it might sound like like that's a lot of engineering and it is, but it's very necessary right now because if you're trying to do any kind of like real work for like production grade software or building an automation that's like critical for your business, you can't just throw the whole thing at a single Claude code session unless you can like confidently build it in that um that zone that you have before you get to the dumb zone.
+
+And most of the time you just can't do that or at least you can't really trust that's going to be the case cuz you never know how much it's going to have to iterate on something.
+
+Mhm.
+
+So, that's why I'm really like I guess you could say bullish right now on um harness engineering, which is like building a the workflow that orchestrates many coding agent sessions to handle a larger task.
+
+And like a really basic example of that kind of harness is the Ralph loop.
+
+It went like super viral the start of this year.
+
+So I feel I feel like even if you haven't heard too much about harness engineering, you probably have at least heard of the Ralph loop.
+
+And that's like really like the foundation of that kind of harness, right?
+
+Like the Ralph loop is stringing together multiple coding agent sessions.
+
+I I wish I had one of my diagrams up for this right now.
+
+I wish I had to explain it verbally, but like, you know, basically, you have the first Claude code session read in your larger spec for like a bigger automation you want to build.
+
+And then it'll define like the the task list.
+
+Like first phase is this, second phase is this, and then it'll have many coding agents handle one phase at a time.
+
+But it'll like do it all automatically in a loop.
+
+That's why it's called a Ralph loop.
+
+Cuz like agent one will do phase one, and then it'll write up its little report, like it's handoff to the second agent that'll continue the work.
+
+And like the main reason the Ralph loop matters is because you can't have one agent handle that larger task without it getting into the dumb zone and like, you know, halfway through phase two.
+
+Right?
+
+Like you have to break things up. >> Yeah.
+
+So it sounds like from like a a high-level view, the idea or kind of the mindset that you've got like this assembly line, and you have an agent doing something.
+
+Each agent kind of does one thing really well, and hands over their input to the next agent in a way where the agent has enough context to understand what has been done and what is left to do, and what its current job is. >> Yeah.
+
+Exactly.
+
+Yeah, assembly line is a really good analogy.
+
+And I mean that that applies to a lot more than than just writing code.
+
+Like like one example that comes to mind when I think about like cuz I know that I've been talking about like coding as an example for a lot of things, but um I I work with a lot of companies that are in sort of like the like B2B side of things.
+
+And when you're B2B, like you do a lot of um creating quotes, like estimates, right?
+
+Like you have um construction company or uh like I've worked with companies in the print industry, where like they'll have like a request for like, "All right, make me like 100,000 flyers or whatever." And like for those companies, one of the biggest opportunities for them to use AI is to use something like Claude to help them take in a request and automatically create an estimate, like a quote for how much that uh job's going to cost.
+
+Cuz that's like a really, really laborious job.
+
+Like more than you would think.
+
+Like when I when I've talked to these companies, like it's crazy how much work goes into that because they have to like take the request and they have to understand like how much labor goes into this, the parts, obviously like depending on the industry.
+
+And then they have to do research on like the latest prices for things and making sure they're getting it from the right vendor.
+
+Like there is so much that goes into that.
+
+And so like that kind of thing uh is it's like a really good example.
+
+Like nothing to do with creating code, still using something like Claude code.
+
+Cuz you can use coding agents for this to go through that larger workflow of like looking at their inventory, looking at prices, comparing vendors, um all based on what's going to be needed to accomplish that task, like that remodel, that the 100,000 flyers for whatever that request is from the other company, and then creating that estimate.
+
+And then understanding how the company works, like what kind of padding they want on top of um based on the uh the labor and the costs of for the parts or whatever.
+
+Like there's a lot that goes into that.
+
+And so like that's the kind of thing where like you'd build a workflow, where you have one agent that's going to research inventory, one agent that's going to look at uh prices and and compare prices for parts, and then one agent that's going to draft the PDF, and then maybe another one that's going to make it look good.
+
+I mean, I'm kind of stretching the example here, but you get the idea of like you actually don't have just one agent handle the entire thing for something that big.
+
+And you are going to be doing a lot of planning.
+
+Right?
+
+Like you're going to plan, you're going to have a validation at the end.
+
+So like what kind of calculations can I do at the end to make sure that like this job has the the margin that we want on it for example. >> Yeah.
+
+Yeah, and I think I think back to one of our biggest failures back when I was still kind of in the day-to-day of running in the agency was that exact use case.
+
+Was having to look through tons and tons of examples, past quotes, past client work, past proposals, and and needing to generate these quotes with so many different factors that go into it. >> Yeah. >> And that was one of our biggest failures because me personally, I underscoped that build.
+
+And we went into it not realizing how much actually is necessary to get to an accurate quote.
+
+So that was a great lesson for me to learn not only about the importance of asking enough questions and scoping, but just in the way that you split up the work.
+
+And I think, you know, obviously Cole mentioned he's he's talked a lot of these examples have been kind of wrong coding, but I don't really do much coding.
+
+I mean, at the end of the day these automations are code, so yes, it's coding.
+
+But I'm not doing like software.
+
+I'm not building products, but every one of these theories that we talked about in these mindsets and frameworks has, you know, up directly applies to the knowledge work is kind of what I like to call it of of what I do on the day-to-day and what probably most of you guys need to do that gives you an insane amount of leverage right away in cloud code.
+
+And I think that when you think about your job or you think about some of your responsibilities, it's not just one responsibility.
+
+It is you can drill that down into so many little subtasks.
+
+Like Cole just said, like one agent does the research, one agent does the PDF generation, all these little strings of subtasks that flow up together to actually make the overall responsibility, which might be 10 little tasks that get strung together.
+
+So, when you can actually break down a process by just writing it down or or, you know, flowing it out on on a piece of paper, it makes things a lot more clear. >> Right.
+
+Yeah.
+
+Yeah, and one thing I want to say here is that a lot of people, they want to simplify it down to just using sub-agents.
+
+So, they're like, "For this this larger workflow, what if I just have my main Claude code dish out a bunch of tasks to sub-agents?" And like, that can work for some things.
+
+I do love using sub-agents, especially when I'm initially planning any kind of automation or or application. >> [clears throat] >> But, it's hard to really make those communicate well with each other.
+
+Like, we've talked a lot about handoffs here.
+
+A lot of times, one agent, when it's taking that next step in a workflow, it has to understand the work that was done with the by the previous one.
+
+Whether that's work, you know, actually writing code, or if it's just doing research, or if it's pulling information from your CRM, for example.
+
+Like, it has to have that kind of handoff document, and it's really difficult to um do that well with sub-agents.
+
+Claude Claude has tried their hand at doing something with agent teams.
+
+So, they they That's kind of like the step above sub-agents, where they can really communicate with each other.
+
+But, uh that is like really unrefined.
+
+It's a really good idea, but it's really unrefined, and it's very expensive, like token-heavy. >> Yeah. >> And so, yeah, like I mean, that's actually what I'm working on.
+
+So, there's a open-source project that I'm working on called Arkon, and that's really the problem it's solving.
+
+It's how can you be more like The word I use is deterministic.
+
+Like, how can we build the AI model, like build Claude code into a system, instead of having Claude code trying to orchestrate everything?
+
+Cuz that's when it becomes difficult for communication, and everything becomes very token-heavy.
+
+Right?
+
+So, like the way that I like to put it is we want to um pick when the AI model works in a workflow, instead of having it drive the whole thing. >> Mhm.
+
+Yeah.
+
+Yeah.
+
+How do you make such an autonomous non-deterministic system as deterministic as possible? >> Pretty much.
+
+Yep.
+
+Yep.
+
+As deterministic as possible.
+
+I wish I could say make it deterministic. >> [laughter] >> That's never going to happen.
+
+Unfortunately, that is fundamentally impossible. >> Yeah.
+
+I love it.
+
+Yeah, completely agree with you there. >> Cool.
+
+Yeah.
+
+Um so, I mean really we we've talked about most of the other things I have in the diagram here.
+
+Like we've talked about verification, making sure that it's able to check its own work.
+
+And um yeah, I mean like the the main thing here is we don't really care about what it does it's for on its first pass.
+
+If we build a system where it's able to iterate, that's all we really care about.
+
+As long as it doesn't take billions of tokens to get to that final stage.
+
+But like when I'm whenever I'm using Claude code for something, I'm never optimizing for speed.
+
+I mean at least like I don't want it to be unrealistically slow, but any kind of task I have for it, I don't really care if it's something that I have to have it work through for a half hour or an hour and a half.
+
+Like I'll send off that request and it'll just go to another Claude code session for whatever else I have to work on.
+
+Or I'll do something, believe it or not, without an agent for a little bit.
+
+Like if I have to record a video.
+
+Um well, I mean maybe I'm using an agent in the video, but you get the point.
+
+But anyway, like the the point is that I don't really care how long it takes because I just care getting the best results possible. >> Mhm. >> Um and so, yeah, that's why like I I spend a lot of time engineering systems for coding agents to check their own work, whether it's browser automation for a website or the silly example I gave earlier, like a way for it to sort of like play a video game as a human would.
+
+And that's like a really fascinating problem for me to solve right now.
+
+It's just like that verification layer at the end for a coding agent, which um also extends the things like security as well.
+
+And so, like that's not something as interesting to talk about right now, but like security is pretty important to me.
+
+It's something that um Vine coders get very burned for.
+
+If you hear those horror stories like at least once a month of you know, like their super bass private or secret key getting leaked in their JavaScript files and things like that because they're just completely vibe coding.
+
+Like I mean that's like the simplest example, but yeah, like that kind of part of verification is really important as well. >> Yeah, and on that whole element of security and what could go wrong, when you think about sort of like the permission layer that you're putting around your agents, I see a lot of false sense of security once again where people think that their prompts are a good enough permission layer.
+
+When really that permission layer needs to be scoped keys or you actually can't touch this at all because I think I was talking to my team and we kind of got to this conclusion of if you have the mindset that anything that the agent can read or can touch, it will.
+
+Like you have to assume that it will even if you never ask it to, that assumption is what's going to save you from having your database deleted. >> Yes. >> [laughter] >> And that's funny you bring up that example specifically cuz I was just about to say like if you tell it never to to wipe a database, it's still going to do that.
+
+Like there was a a story that went viral like a month or two ago was someone like really high up at meta that had their database wiped.
+
+I'm still not convinced that's real.
+
+I feel like they might have just been I don't know cuz people get so much attention when they have stupid stories like that.
+
+But but anyway >> Conspiracy theories with Cole. >> [laughter] >> Right.
+
+Yeah, right.
+
+Yeah, but like it is it is definitely possible and I do know some stories of that actually happening just to a smaller extent.
+
+It just feels so weird that or it sounds so stupid that it's like their actual production database was wiped, but I mean even if you have a test database wiped, it can still be a bummer if that slows you down a lot.
+
+And so so yeah, it is super important.
+
+You never want to assume that just because you tell an agent to not do something, it never will.
+
+I mean it's the same thing like if you tell a kid to not do something, they just might not listen.
+
+I mean, even even adults. >> There actually recently something did happen to us, which is kind of why we started talking about this. >> Okay. >> We had this this incident where the agent had the right intentions.
+
+It was trying to be proactive, and it actually saw something on its task list, but it misinterpreted it.
+
+And it ended up sending an email to our entire list with a discount code, and it was like not supposed to go out.
+
+So, we had to like change the code, update the page.
+
+We emailed out an apology.
+
+So, if you guys are on the email list, and you got that, that's what happened.
+
+But it's just like, you know, I wasn't mad at the person who was kind of responsible for the agent.
+
+It was just a really good opportunity for us to think about, okay, why did this happen?
+
+And, you know, she wrote up a case study.
+
+We sent it to the whole team, and everyone was like, okay, that's a really really good reminder of how careful you have to be.
+
+Because, you know, if you connect to an MCP server, and you don't limit the permissions, it has everything, you know? >> Yeah.
+
+Yep.
+
+No, that's good.
+
+Yeah, the the main way that I restrict actions from my coding agent is with hooks.
+
+So, like Cloud Code hooks is a really good way cuz um basically a hook in Cloud Code is a little piece of code that you can run whenever a certain event happens in the tool.
+
+So, whenever you start a session, whenever you end a session, right before Cloud Code uses a tool, you can run some kind of code that does a security check.
+
+I mean, there's a lot of other things, but like I love using hooks for security.
+
+And so, what you can do in Cloud is every time it's about to invoke a tool, like it wants to write out to a file, or make some requests to the web, you can uh check against that command to make sure it's not trying to mess with a folder you don't want it to touch, or run some kind of command you don't want it to run.
+
+And there's a lot of different ways you can check for that that we don't have to get into right now.
+
+Um but that's like one of my favorite ways to make sure it's like not reading my environment variables, or it's not running a a delete command for a database.
+
+Um and it it it's really hard to make sure you're you're covering all the loopholes cuz there's a lot of things that coding agents can do >> Yeah. >> to get around those kind of checks as well.
+
+A lot of people have false false sense of security around that as well.
+
+So you kind of have that like first false sense of security where it's like, "Well, I told it to never delete my database." And then you have the second level where it's like, "I block all delete SQL statements." But then there's that third level that you have to like make sure you're engineering for.
+
+Um like for example, a coding agent if you if you don't allow it to call the like delete like remove command to delete a folder, it can still write a script to do that.
+
+So it just has to do two steps like write the script and then run the script and then it's still able to remove a file or folder on your computer.
+
+So it's I mean they're less likely to do that so it's still like you're getting there if you are at least have like that that second false sense of security but like you got to be really safe and you got to like it's it's actually a tough problem to solve. >> Yeah, I mean AGI is it's it's scary. >> [laughter] >> Yeah. >> But I would love to see and maybe you've already got one out but I would love to see a a Cole Hooks masterclass because I actually just recorded one and I don't use hooks that much to be honest.
+
+Like I really don't.
+
+I think my my main hook that I have is just to give me a noise notification when it's done or when it needs me.
+
+But yeah, like I have under utilized hooks for sure and I'm not sure if that's because they're mainly valuable when you're doing heavy coding but I would assume that there's a lot of things that I could be doing in my day-to-day where hooks would be really good and I need to definitely look into a little bit more how I can be utilizing them but anyways. >> Yeah.
+
+Yeah, I I definitely should do a masterclass on hooks cuz there's a lot of ways that I use them.
+
+Um yeah, since we're on the topic like one of the really interesting way to use hooks is you can use them to automatically suggest like you can have Claude code like automatically suggest ways to improve your AI layer.
+
+Like make your rules better, make your skills better.
+
+And a lot a lot of tools like Hermes and Open Claude, they kind of do this.
+
+I don't think they like explicitly use hooks, but like Open Claude for example, every like 10 20 turns, I think it's configurable, it will like kind of compact your conversation and store it as a memory, right?
+
+So that you have [clears throat] like the whole like daily log thing with the uh memory.md file.
+
+Like all that comes from what's essentially a Claude code hook.
+
+Like so with the way I use Claude code with my second brain is uh every time I have a memory compaction, which I try to avoid those.
+
+I don't want to get that far in a conversation, um or I end a session, it automatically creates a summary of the conversation, puts that in a daily log, and then I have a process every day.
+
+It's basically like Claude code dreaming, where it's going to look at the daily log and then extract any like really important things to store and sort of like promote to my primary memory file.
+
+Like here are the decisions that I've made recently or like things that I'm actively working on and where I'm at them.
+
+So like hook hooks actually drives the whole thing.
+
+Like this terminal that that this like the second time it's popped up, um that's actually a hook that just fired there.
+
+So I'm just like testing some other things.
+
+I forgot to turn it off, which is unfortunate, but actually now it made for a good illustration cuz I had I had a hook run as I'm talking about it.
+
+So I'm just testing something else right now. >> Yeah, just just yet another way to make these non-deterministic things as deterministic as possible.
+
+So what do we have next after this verify the work section? >> Yeah.
+
+So really this is the last thing cuz we've already talked about the the harness, but the the last and honestly probably the most important thing is the system evolution that I talked about just a little bit earlier.
+
+And and really the the mindset here is what Like I this is I out of everything that makes it so you're really directing Claude code instead of just being a user of it, the building the system is the most important thing.
+
+So, anytime there's an issue that comes up, instead of just fixing the issue and moving on, it's an opportunity for you to, with the help of the coding agent, with the help of Claude Code, figuring out like what could we make better so that this doesn't happen again.
+
+Like maybe there's a new rule that we can add in our claw.md or there's a new document that we can give it when we're in our planning process, or there's maybe an update to our skill that we can make.
+
+And I'm being kind of general on purpose here because there's a million different ways that we can improve our system.
+
+And so, this is kind of like the example that you gave, Nate, where you had that email go out, or at least it went out to way more people than it should have.
+
+And so, you wrote up that report of like, here's what happened, here's what we can do better.
+
+And so, it's kind of doing that, but like for the agent, so that going forward, it has that rule so it it doesn't do that thing anymore.
+
+Like maybe it didn't run all the validation you wanted it to.
+
+So, now you just like make sure that like that's a part of the rule where it's like, this you make sure you don't forget this validation, kind of as a silly example.
+
+But, that way every bug becomes a permanent upgrade.
+
+So, once you have this kind of system in place, you actually almost welcome bugs.
+
+Like I want something to go wrong because then I can make sure it never happens again.
+
+Right?
+
+Like I almost have I almost feel kind of nervous when everything is going too well cuz then it's like, oh shoot, I have no way to like make my agent better right now.
+
+So, it's it can kind of become nice. >> Yeah, absolutely. >> Yeah, so it can get better over time. >> I've got an interesting question for you.
+
+So, I completely agree.
+
+Every single time that you have a failure, you should look at that as data and an opportunity to improve the system.
+
+Now, what what about before you get those failures?
+
+How do you think about, to your best to the best of your ability, finding those edge cases or predicting what edge cases might happen and trying to build in guardrails before the whole testing part? >> Well, it can never be perfect, which is why I lean on this so much, but generally, when you're looking out for edge cases, Um I mean, Cloud Code is actually pretty good at it.
+
+It's not going to cover like nearly all the edge cases, but even just asking it like, "How could this go wrong?" is a question that sometimes people are are honestly like nervous to even ask.
+
+But, it's a a really good question.
+
+Once you're done with the implementation, and like this is a part of like my code review skill that I have built in where it's like, "Ask yourself, what could go wrong here?" And then try to engineer a scenario where you're really testing that.
+
+Like, if I'm building an automation where I think there might be an edge case where it doesn't handle this kind of input correctly, I'm going to as a part of my agent's code review have it like create that like it'll invoke the application with that input, like a webhook or whatever, and try to break it and see what happens.
+
+And if it does break, then I mean, that's obviously going to be like going back here a part of our verification where um it'll then uh address that thing and then do the test again, right?
+
+Like, iterate.
+
+Like, you find a problem, fix it, and then also retest, right?
+
+Don't forget the retest cuz maybe your fix didn't actually address the problem. >> Mhm.
+
+Yeah.
+
+Well, I think, you know, something that I've realized after responding to YouTube comments, Q&As in the community, chatting to you, and and just seeing what's going on when people are learning these kinds of tools is that you really at you know, at the simplest way to describe it, you just have to treat it like your best friend who is the smartest person in the world.
+
+Meaning, you know, treat it like a mentor.
+
+It's not going to laugh at you if you ask it something stupid. >> Yeah. >> need to be curious and you need to ask ask the questions that you are wondering in your head.
+
+And I think when you kind of get over that that idea that it can teach you anything, and it can for the most part, especially if you ask it right, it can help you figure out the majority of your problems when you have, you know, that that sort of uneasiness because maybe you don't understand what it did.
+
+So, that's like a huge mindset shift for anyone I've talked to that is like trying to get into it and doesn't understand it.
+
+If they, you know, maybe they text me a question or they drop a question, it's just like the response can a lot of times be "Have you asked Claude code that?" >> [laughter] >> I know.
+
+Yeah, I feel bad saying that, but like yeah, it comes it comes to that a lot.
+
+Um yeah, where it's like now you should have just I mean you usually how I can be more helpful is like telling them what to ask exactly.
+
+Like give it give [clears throat] it this link, give it that thing, and then here's how I'd ask it.
+
+But yeah, a lot of times it does come down to that.
+
+And I mean you can't you can't just ask Claude for everything cuz of like the sycophancy you mentioned earlier.
+
+Sometimes if you're asking it for its opinion, like asking a large English model for its opinion is a really slippery slope. >> Yeah. >> But but what you can [laughter] what you can ask it for is to like understand how something works.
+
+Like that's when it can do a really good job.
+
+So like going back to the example earlier, if you're not technical, but you want to try to actually be able to understand the automations and things that it's building for you, like that's a really good thing to ask it cuz it's not going to like there's no sycophancy there, right?
+
+It's not just trying to appease you.
+
+It's it's just helping you understand.
+
+The way to appease you is to explain the thing, right? >> Yeah. >> So like that that's a really good case, just trying to understand anything.
+
+And then like what we were talking about just here with verification, like trying to find edge cases, if there's anything where there's like actual empirical data, like there is a way to verify that like this this automation doesn't handle this input well.
+
+I mean there's no room for sycophancy there.
+
+It's like it it either works or it doesn't, and there's not really like any kind of gray area or opinion. >> Right. >> So if you think there might be an edge case, or it thinks there might be, it can test it, and then it's it's black or white. >> Right.
+
+So I want to hear what you think about this because you briefly mentioned the agent teams earlier, and >> Yeah. >> I actually find myself using them quite a bit for mainly one specific use case, and I want to hear what you think about it.
+
+So really the time when I reach for agent teams is when I am trying to help, you know, I'm trying to decide something, but I don't want to just ask for Claude code's opinion, like you just said. >> Yeah. >> And so what I'll do a lot is I'll spin up like a debate panel or like a war room. >> Nice. >> And I will say, you know, like one of you guys is a CEO, one is a beginner, one is a college student, and just like a bunch of different personas, sometimes even like seven.
+
+And I will just have them all do independent research, form their own opinions, and then I'll have them debate.
+
+And then I'll just be able to read the debate, and I'll be able to sometimes I'll say like keep debating until you all come to some sort of consensus. >> Nice. >> do that quite a bit, and that doesn't mean whatever the agent team spits out I do, but sometimes it's just really great for me to read through all those opinions.
+
+But I want to see do you do you like that?
+
+Do you think that's a major flaw?
+
+Like what what thoughts do you have about that? >> I do actually like that.
+
+Uh I've I've never done that before. >> done that.
+
+You should definitely try it. >> I No, I yeah, I feel like tonight I literally got to try that.
+
+That's really cool. >> Yeah, I like that idea a lot.
+
+Cuz so something that I have done experimentation with that's sort of similar, I call it adversarial development.
+
+Where basically after a Claude code finishes building something, I'll have a separate Claude code session um where I prompt it specifically to play the devil's advocate.
+
+Like I want you to be mean to the other Claude code session to like really make sure that it's not just being happy-go-lucky when there are actually some some problems that need to be surfaced.
+
+And like that works really well.
+
+So just generally like pitting large language models against each other >> Mhm. >> is a good idea.
+
+Um I wish I had tried that before.
+
+So yeah, I'll I'll give that a shot.
+
+I think that that's that's a really good use for agent teams.
+
+Cuz at that point at at that point it's like you're not relying on it getting the perfect answer.
+
+Like it it's very token heavy, and the communications aren't really perfect, so that's why I don't really recommend agent teams when you're trying to do like deep development or like building any kinds of like complex automations.
+
+But when it's more like research and just like forming a consensus, I I think that it does really it would do really well for that.
+
+I'll try it out. >> Cool.
+
+Yeah, let me know if you try it out and what you think, but I've never >> Yeah. >> really talked about that or made a video because I know people would go do it and then be like, "You just killed my 5-hour limit." >> [laughter] >> Right.
+
+Yeah. >> Fortunately. >> So, um >> How much of your limit does it use when you typically do it? >> on the 200 buck 200 bucks a month plan, anywhere from, you know, 4% to to 10 sometimes, like, you know, >> It's not too bad. >> It's not too bad, but, you know, if if you if you say something like a "Don't stop until everyone agrees" and they just keep going, then it you could you could run into some some trouble, but to close this off here, I have to ask, I just did a video about my favorite features in Cloud Code, and I prefaced that whole video and basically said, "This is not a list of the best features or, you know, the most used or the the most useful.
+
+These are basically the way that I use Cloud Code on my day-to-day, the ones that I like the most." And I I had like a a numbered list of 12 at the top.
+
+But, I would love to hear from you to put you on the spot.
+
+If you had like a top three based on cuz I I'm assuming we use Cloud Code very differently.
+
+What would you say are like your top three favorites? >> Hm.
+
+Yeah, so, uh hooks is definitely Maybe not like my favorite favorite, but probably the one that like most people wouldn't put in their top three.
+
+And that's because of what I've been doing with it for security and then the whole um integration with the second brain.
+
+So, it's able to basically like extract summaries and like remember things over time. >> definitely need a hooks cool video. >> Yeah, I honestly, I should just do that next week. >> Yeah, we definitely need it. >> Yeah.
+
+Okay.
+
+Yeah, thanks, Nate.
+
+Yeah, so, yeah, hooks hooks is definitely number one. >> Okay. >> And then, uh here, I'll cuz I I mentioned some of the things here.
+
+Like, I mean, really, when I there's kind of two different sorts of Cloud Code features.
+
+You have like the components of the AI layer, like rule skills, hooks, and then you just have like general capabilities of the harness, like, um agent teams and slash by the way and and um dispatch or like dynamic workflows, things like that, right?
+
+So, either like it's something that you use or it's something that you build on top of.
+
+Um sub-agents would be probably like number two.
+
+Um just because like I said, there's dangers to using sub-agents.
+
+But just using them to like sprawl out and research a ton of different things, I use it for that all of the time.
+
+And especially when I'm working on more complex code bases or building out larger automations, I'm using sub-agents to basically like extract context from certain parts of my system.
+
+Right?
+
+Like you're responsible for getting a grounding here of like how we're going to have to mess with the front end in this application, how we're going to have to mess with the back end.
+
+Um and then I honestly probably like my number of one.
+
+So I guess like hooks would be two and sub-agents would be three.
+
+Probably my my number one is skills, even though it's like super super cliche. >> That was my pick. >> it Yeah, it's got to be skills.
+
+Yeah. >> Yeah, like skills skills dictate everything.
+
+Skill I have a skill for making this diagram.
+
+I have a skill for scripting my YouTube videos.
+
+I have a skill for building PowerPoints.
+
+I have a skill for um I mean if you could literally name anything. >> Yeah. >> Yeah, it's just any kind of reusable prompt, you just make it as a skill. >> Mhm. >> And Claude Code has done a really good job continuing to evolve just like the way you can parameterize things.
+
+Like they have like um path scope skills now and you can like set if this one is to be invoked only by you or if the agent can decide to do it as well.
+
+Um and then like talking about like verification like getting back to here, like having that browser automation skill so it knows how to use a CLI.
+
+Um like that's a whole 'nother thing is like that the skill plus CLI combination is just really really powerful.
+
+Cuz basically any platform or tool you want your coding agent to be able to use, it's either going to be an MCP server and like those are still good, but honestly I would have think is even better, like more token efficient, is having a CLI so it has access to your CRM or GitHub or whatever through the CLI.
+
+And then the skill it tells it how to use that CLI and then more it more specifically like how you want it to use that like what how did you want to this CLI to be integrated in your workflow.
+
+So like that combination I'm leaning on that for everything.
+
+It's like my Archon tool I was talking about earlier like it is a CLI that has a skill that comes with it.
+
+So like if you want those more deterministic workflows where you get to pick like when do we have the LLM when are we just running code then like you build that as a workflow and then now Archon with its skill and its CLI becomes a tool that my second brain can call upon whenever it wants to dispatch one of those workflows to go handle a GitHub issue or run this automation whatever it is. >> Very cool.
+
+I love it.
+
+Yeah, I love the list.
+
+My top three were skills as number one. >> Okay. >> Number two I had status line. >> [laughter] >> Oh, nice.
+
+I respect that. >> of life thing, you know, just seeing the model, the effort, the window.
+
+I love that.
+
+And then my number three was routines.
+
+I love the the cloud routines.
+
+I I just think it's so cool that you know, I know I know we've got the SDK and whatnot, but it's just nice to be able to schedule something that is just my cloud code going and yeah, I think those are my top three and I'm sure they'll they'll move around, but yeah, I appreciate you sharing yours.
+
+It was interesting to hear.
+
+I'm glad that hooks made the list.
+
+So I'll definitely be keeping my eye out for that video though. >> Sounds good.
+
+Yeah, all right.
+
+What do you use routines for? >> Um well, I've got one going now that is a a trading bot.
+
+I had that originally going with an open claw agent, but I switched it over to routines just to see how how it would do there.
+
+But then other things just like it's actually doing worse there.
+
+Yeah, it's doing worse there right now, but I don't know if it's I mean the market and everything as well, but I think open claw had just out of the box it had better memory capabilities for that sort of thing.
+
+So >> Yeah, makes sense. >> Um but then you know, just your other standard stuff like checking in on the team and giving me updates throughout the week and um end of week reports.
+
+Just very, very simple things, but nice to throw the routines in there.
+
+So, >> [snorts] >> yeah, I really appreciate you walking us through all this stuff today.
+
+Is there anything else that you want to leave everyone with? >> Uh that's a good question.
+
+Yeah, I I would I would say that no matter how technical you are, really what it comes down to is you can think of yourself like the product manager for Claude Code.
+
+So, you don't necessarily have to describe how to build something, but it's important for you to shape the vision, right?
+
+Like what are we going to build?
+
+And then uh a lot of people are calling this intent engineering now.
+
+I mean, it's kind of another buzzword.
+
+It's basically like you want to you want to give like the why.
+
+Like Claude Code, this is why we're building this thing cuz that really actually ends up shaping the how quite well.
+
+So, if like that's a big part of your planning process, that's going to take you far.
+
+And like it it it seems kind of silly cuz you really start to get into the sort of like the personification of Claude Code when you're you're telling it why you're doing things, but like it actually makes a difference.
+
+You kind of have to like get over yourself and be like it's kind of cringe to treat it like a person, but like that actually is how you get the best results.
+
+So, just just do it.
+
+It actually helps a lot and make good plans and good specs going into whatever you're building with Claude or automating. >> Great tip.
+
+Great tip.
+
+I actually did just yesterday read in the Claude docs on how to prompt 4.8 that it said that.
+
+It said to give it the context for why you're doing something and it will probably do a better job.
+
+So, that's awesome.
+
+Cole, where can people find you if they want to watch more of your stuff or get in touch? >> Yeah, so YouTube channel is the main place for me to put all my content.
+
+So, you can just search my name, Cole Medin.
+
+Uh it is not spelled as you think.
+
+It's m e d i n.
+
+Sounds like Medin.
+
+Everyone says it wrong.
+
+Um but yeah, that's that's my YouTube channel and then uh also doing a lot of posting on LinkedIn as well.
+
+Same name, obviously. >> There we go.
+
+Yeah, I think for the first multiple months I knew you, I thought it was Cole Medin and I was saying I was saying Medin all the time. >> Nice.
+
+Yeah. >> Good to know everyone cleared up it's Cole Medin. >> That's right.
+
+Yeah, it's a Swedish last name.
+
+And yeah, Nate, there's there's people that said it way worse than you.
+
+Like someone called me Melden live on stage at a chess tournament in high school.
+
+Like it's it's been worse. >> Oh man, yeah.
+
+I don't know a lot of people have hallucinated the L in there.
+
+I've noticed that.
+
+I'm not sure why. >> Yeah.
+
+Yeah, I've had a lot of people spell it to me as Melden.
+
+Or Medlin. >> Oh, wow.
+
+Okay, cuz I that's actually a one-time thing for me.
+
+That's surprising. >> No, I've gotten that a lot for some reason, but Anyways, yeah, thank you so much for hopping on, Cole.
+
+I was here to not only chat with you, but I also learned a lot as well.
+
+So, thank you so much as always.
+
+It's a pleasure to get to speak with you, and hopefully we can do it again soon. >> Yeah, sounds good.
+
+I appreciate it.
+
+Thank you as well, Nate.
+
+This was awesome. >> Absolutely. >> chatting with you. >> Awesome, there we go.
+
+All right, take it easy, Cole. >> Have a good one. >> Thanks so much for watching today's episode.
+
+I hope that you guys enjoyed.
+
+Don't forget that I broke all of this down into a free resource guide that you can access for completely free using the link in the description to join our free school community.
+
+I'll see you guys in there.
+
+Thanks so much.

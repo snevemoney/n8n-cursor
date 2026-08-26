@@ -1,0 +1,52 @@
+{
+  "workflow_id": "WF-interview-never-rules-wat-v1",
+  "project_id": "interview-never-rules-wat",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Load desk wiki + this workflow",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Run deep-video-learning",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T3",
+      "title": "THINK/BEHAVE/TRICKS/USE",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Dry-run without hard steps",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T5",
+      "title": "Watchdog grades",
+      "coverage": "have hive skill"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-AO5aW01DKHo-01",
+    "K-AO5aW01DKHo-02",
+    "K-AO5aW01DKHo-03",
+    "K-AO5aW01DKHo-04"
+  ],
+  "dissent_ids": [
+    "K-AO5aW01DKHo-05",
+    "K-AO5aW01DKHo-06"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "AO5aW01DKHo",
+  "words_read": 5774
+}

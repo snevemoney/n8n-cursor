@@ -1,0 +1,2617 @@
+[
+  {
+    "start": "00:00",
+    "end": "00:05",
+    "text": "Claude design can now build beautiful"
+  },
+  {
+    "start": "00:02",
+    "end": "00:08",
+    "text": "motion graphics. But 99% of those"
+  },
+  {
+    "start": "00:05",
+    "end": "00:12",
+    "text": "designs look generic and AI slop. But I"
+  },
+  {
+    "start": "00:08",
+    "end": "00:14",
+    "text": "just found a new system inside Claude"
+  },
+  {
+    "start": "00:12",
+    "end": "00:17",
+    "text": "design that easily builds unique designs"
+  },
+  {
+    "start": "00:14",
+    "end": "00:20",
+    "text": "and fits into any workflow. So you can"
+  },
+  {
+    "start": "00:17",
+    "end": "00:22",
+    "text": "avoid the slop, save more time, and get"
+  },
+  {
+    "start": "00:20",
+    "end": "00:23",
+    "text": "better designs faster. So, if you"
+  },
+  {
+    "start": "00:22",
+    "end": "00:26",
+    "text": "haven't already, grab that [music]"
+  },
+  {
+    "start": "00:23",
+    "end": "00:28",
+    "text": "beautiful coffee and let's dive straight"
+  },
+  {
+    "start": "00:26",
+    "end": "00:31",
+    "text": "in. Now, the first thing to understand"
+  },
+  {
+    "start": "00:28",
+    "end": "00:33",
+    "text": "about Claude design is obviously we can"
+  },
+  {
+    "start": "00:31",
+    "end": "00:34",
+    "text": "do this in the online app, we can do"
+  },
+  {
+    "start": "00:33",
+    "end": "00:36",
+    "text": "this in the Claude app. It's not just"
+  },
+  {
+    "start": "00:34",
+    "end": "00:38",
+    "text": "the fact that we can go ahead in the"
+  },
+  {
+    "start": "00:36",
+    "end": "00:39",
+    "text": "selection menu here, for example, go"
+  },
+  {
+    "start": "00:38",
+    "end": "00:41",
+    "text": "ahead and choose the animation, pick a"
+  },
+  {
+    "start": "00:39",
+    "end": "00:44",
+    "text": "design system, and have it animate"
+  },
+  {
+    "start": "00:41",
+    "end": "00:47",
+    "text": "something. But we can also get it, if we"
+  },
+  {
+    "start": "00:44",
+    "end": "00:49",
+    "text": "were to go ahead and actually take real"
+  },
+  {
+    "start": "00:47",
+    "end": "00:52",
+    "text": "data, real numbers, and animate them. So"
+  },
+  {
+    "start": "00:49",
+    "end": "00:53",
+    "text": "we can give it any data set. So let's"
+  },
+  {
+    "start": "00:52",
+    "end": "00:56",
+    "text": "say, for example, that we're talking"
+  },
+  {
+    "start": "00:53",
+    "end": "00:57",
+    "text": "about AI model performance in this"
+  },
+  {
+    "start": "00:56",
+    "end": "00:59",
+    "text": "video. And not only am I going to show"
+  },
+  {
+    "start": "00:57",
+    "end": "01:01",
+    "text": "you in this video, by the way, exactly"
+  },
+  {
+    "start": "00:59",
+    "end": "01:02",
+    "text": "how to animate it in ways that you"
+  },
+  {
+    "start": "01:01",
+    "end": "01:04",
+    "text": "haven't seen before with Claude. I'm"
+  },
+  {
+    "start": "01:02",
+    "end": "01:06",
+    "text": "going to show you how I'm personally"
+  },
+  {
+    "start": "01:04",
+    "end": "01:08",
+    "text": "using it in a systematized way that will"
+  },
+  {
+    "start": "01:06",
+    "end": "01:09",
+    "text": "work for any social media platform, for"
+  },
+  {
+    "start": "01:08",
+    "end": "01:11",
+    "text": "your business, anyway. It's really"
+  },
+  {
+    "start": "01:09",
+    "end": "01:13",
+    "text": "cool. So, will Disney capture"
+  },
+  {
+    "start": "01:11",
+    "end": "01:14",
+    "text": "our hearts with animation? How do we"
+  },
+  {
+    "start": "01:13",
+    "end": "01:16",
+    "text": "bring it to life? Well, one of the"
+  },
+  {
+    "start": "01:14",
+    "end": "01:17",
+    "text": "things we can do is just give data to"
+  },
+  {
+    "start": "01:16",
+    "end": "01:19",
+    "text": "Claude and give it a prompt. And so, for"
+  },
+  {
+    "start": "01:17",
+    "end": "01:22",
+    "text": "example, you could come here and say,"
+  },
+  {
+    "start": "01:19",
+    "end": "01:24",
+    "text": "\"I'd like it to animate for me the"
+  },
+  {
+    "start": "01:22",
+    "end": "01:26",
+    "text": "OpenAI model and DeepSeek and Claude,"
+  },
+  {
+    "start": "01:24",
+    "end": "01:28",
+    "text": "all the different models, in an animated"
+  },
+  {
+    "start": "01:26",
+    "end": "01:31",
+    "text": "bar chart with multi-colors, add their"
+  },
+  {
+    "start": "01:28",
+    "end": "01:32",
+    "text": "logos in, and make it beautiful and"
+  },
+  {
+    "start": "01:31",
+    "end": "01:34",
+    "text": "interactive.\" And I'm going to give you"
+  },
+  {
+    "start": "01:32",
+    "end": "01:36",
+    "text": "some specific numbers and data. And then"
+  },
+  {
+    "start": "01:34",
+    "end": "01:38",
+    "text": "down here, we could give it as much data"
+  },
+  {
+    "start": "01:36",
+    "end": "01:41",
+    "text": "as we wanted to. We could say, \"OpenAI"
+  },
+  {
+    "start": "01:38",
+    "end": "01:44",
+    "text": "is 700 and Claude is 595.\" And"
+  },
+  {
+    "start": "01:41",
+    "end": "01:46",
+    "text": "basically, this Claude here, the Claude"
+  },
+  {
+    "start": "01:44",
+    "end": "01:48",
+    "text": "design, will animate this. So you end up"
+  },
+  {
+    "start": "01:46",
+    "end": "01:50",
+    "text": "with something that looks like this. X,"
+  },
+  {
+    "start": "01:48",
+    "end": "01:52",
+    "text": "Perplexity, Hugging Face, Claude,"
+  },
+  {
+    "start": "01:50",
+    "end": "01:53",
+    "text": "Mistral, Meta, Gemini, DeepSeek,"
+  },
+  {
+    "start": "01:52",
+    "end": "01:56",
+    "text": "Anthropic, and OpenAI. I mean, this"
+  },
+  {
+    "start": "01:53",
+    "end": "01:58",
+    "text": "beautiful multi-caloric gradient on"
+  },
+  {
+    "start": "01:56",
+    "end": "02:01",
+    "text": "OpenAI. And look at this, even the word"
+  },
+  {
+    "start": "01:58",
+    "end": "02:03",
+    "text": "actually matches exactly the gradient"
+  },
+  {
+    "start": "02:01",
+    "end": "02:04",
+    "text": "that we have down below that. And you"
+  },
+  {
+    "start": "02:03",
+    "end": "02:06",
+    "text": "can go back and forth with this and play"
+  },
+  {
+    "start": "02:04",
+    "end": "02:08",
+    "text": "around with it. I'd encourage you to do"
+  },
+  {
+    "start": "02:06",
+    "end": "02:10",
+    "text": "that until you get your desired design"
+  },
+  {
+    "start": "02:08",
+    "end": "02:13",
+    "text": "style. But when this is done, we can"
+  },
+  {
+    "start": "02:10",
+    "end": "02:14",
+    "text": "codify this as an asset and we can"
+  },
+  {
+    "start": "02:13",
+    "end": "02:17",
+    "text": "literally come up to Claude and just"
+  },
+  {
+    "start": "02:14",
+    "end": "02:19",
+    "text": "say, \"Hey, when I'm building a chart, I"
+  },
+  {
+    "start": "02:17",
+    "end": "02:22",
+    "text": "want you to use this exact style for all"
+  },
+  {
+    "start": "02:19",
+    "end": "02:24",
+    "text": "future bar charts.\" So, level one of the"
+  },
+  {
+    "start": "02:22",
+    "end": "02:26",
+    "text": "five levels of covering is essentially"
+  },
+  {
+    "start": "02:24",
+    "end": "02:28",
+    "text": "using data. Now, before I can show you"
+  },
+  {
+    "start": "02:26",
+    "end": "02:31",
+    "text": "level two, we have to talk about the"
+  },
+  {
+    "start": "02:28",
+    "end": "02:34",
+    "text": "single greatest design skill. This is"
+  },
+  {
+    "start": "02:31",
+    "end": "02:37",
+    "text": "Dr. Slop. This is the master king of the"
+  },
+  {
+    "start": "02:34",
+    "end": "02:39",
+    "text": "Slop universe. I am talking about the"
+  },
+  {
+    "start": "02:37",
+    "end": "02:41",
+    "text": "font. This is the biggest giveaway. Now,"
+  },
+  {
+    "start": "02:39",
+    "end": "02:42",
+    "text": "check this out. This very presentation"
+  },
+  {
+    "start": "02:41",
+    "end": "02:44",
+    "text": "I'm using right now, I actually did"
+  },
+  {
+    "start": "02:42",
+    "end": "02:46",
+    "text": "three versions of it. I have one with"
+  },
+  {
+    "start": "02:44",
+    "end": "02:48",
+    "text": "what's called a coffin font. This one"
+  },
+  {
+    "start": "02:46",
+    "end": "02:50",
+    "text": "here is Poppins and this one here is"
+  },
+  {
+    "start": "02:48",
+    "end": "02:52",
+    "text": "Montserrat. Now, Claude itself, when you"
+  },
+  {
+    "start": "02:50",
+    "end": "02:54",
+    "text": "just give it a prompt, whether you're"
+  },
+  {
+    "start": "02:52",
+    "end": "02:56",
+    "text": "using design"
+  },
+  {
+    "start": "02:54",
+    "end": "02:58",
+    "text": "or something else, will use a generic"
+  },
+  {
+    "start": "02:56",
+    "end": "03:00",
+    "text": "font. But what we can do is say, \"Hey, I"
+  },
+  {
+    "start": "02:58",
+    "end": "03:02",
+    "text": "want this font or I want that font"
+  },
+  {
+    "start": "03:00",
+    "end": "03:03",
+    "text": "instead.\" And honestly, just changing"
+  },
+  {
+    "start": "03:02",
+    "end": "03:05",
+    "text": "the font to something like Montserrat or"
+  },
+  {
+    "start": "03:03",
+    "end": "03:07",
+    "text": "Poppins, glacial indifference, there's"
+  },
+  {
+    "start": "03:05",
+    "end": "03:09",
+    "text": "so many different fonts we can use,"
+  },
+  {
+    "start": "03:07",
+    "end": "03:11",
+    "text": "drastically changes the perception. So,"
+  },
+  {
+    "start": "03:09",
+    "end": "03:13",
+    "text": "let's say that you find a website that"
+  },
+  {
+    "start": "03:11",
+    "end": "03:14",
+    "text": "you like or you found a font, but you"
+  },
+  {
+    "start": "03:13",
+    "end": "03:15",
+    "text": "have no idea what it is. Well, one of"
+  },
+  {
+    "start": "03:14",
+    "end": "03:17",
+    "text": "the things that we can do, and let's say"
+  },
+  {
+    "start": "03:15",
+    "end": "03:19",
+    "text": "I'm on ClickUp, I actually met the"
+  },
+  {
+    "start": "03:17",
+    "end": "03:21",
+    "text": "founder in Montenegro, very, very, very"
+  },
+  {
+    "start": "03:19",
+    "end": "03:22",
+    "text": "cool guy, very inspirational story. What"
+  },
+  {
+    "start": "03:21",
+    "end": "03:24",
+    "text": "we're going to do is come over to"
+  },
+  {
+    "start": "03:22",
+    "end": "03:26",
+    "text": "Ficrawl, drop in the URL and under"
+  },
+  {
+    "start": "03:24",
+    "end": "03:27",
+    "text": "format, come down and check on branding."
+  },
+  {
+    "start": "03:26",
+    "end": "03:29",
+    "text": "I used Ficrawl for all my internet"
+  },
+  {
+    "start": "03:27",
+    "end": "03:31",
+    "text": "search, I love it. But if you come and"
+  },
+  {
+    "start": "03:29",
+    "end": "03:32",
+    "text": "start scraping, this will actually"
+  },
+  {
+    "start": "03:31",
+    "end": "03:35",
+    "text": "extract"
+  },
+  {
+    "start": "03:32",
+    "end": "03:37",
+    "text": "all of the different typographies and"
+  },
+  {
+    "start": "03:35",
+    "end": "03:39",
+    "text": "font styling that we can use to consider"
+  },
+  {
+    "start": "03:37",
+    "end": "03:41",
+    "text": "for our system. Now, what I'm most"
+  },
+  {
+    "start": "03:39",
+    "end": "03:43",
+    "text": "interested in here is actually the font."
+  },
+  {
+    "start": "03:41",
+    "end": "03:45",
+    "text": "So, you can see I can come down here, I"
+  },
+  {
+    "start": "03:43",
+    "end": "03:47",
+    "text": "saved us 93% of our tokens, which is"
+  },
+  {
+    "start": "03:45",
+    "end": "03:49",
+    "text": "ridiculous. Look at this, 22 cents,"
+  },
+  {
+    "start": "03:47",
+    "end": "03:51",
+    "text": "that's wild. I come down to branding,"
+  },
+  {
+    "start": "03:49",
+    "end": "03:52",
+    "text": "not only do I have logos, but I can"
+  },
+  {
+    "start": "03:51",
+    "end": "03:54",
+    "text": "actually see down here I've got the"
+  },
+  {
+    "start": "03:52",
+    "end": "03:56",
+    "text": "font, which is this. So, one of the"
+  },
+  {
+    "start": "03:54",
+    "end": "03:59",
+    "text": "things I can say to Claude is, \"Hey, go"
+  },
+  {
+    "start": "03:56",
+    "end": "04:01",
+    "text": "ahead and build me a design system using"
+  },
+  {
+    "start": "03:59",
+    "end": "04:03",
+    "text": "this font or something similar.\" And a"
+  },
+  {
+    "start": "04:01",
+    "end": "04:05",
+    "text": "huge hack for you guys, the design"
+  },
+  {
+    "start": "04:03",
+    "end": "04:06",
+    "text": "experts do not want to know about this,"
+  },
+  {
+    "start": "04:05",
+    "end": "04:08",
+    "text": "but I'm going to pull pull the peel the"
+  },
+  {
+    "start": "04:06",
+    "end": "04:09",
+    "text": "veil off and show you. There is a really"
+  },
+  {
+    "start": "04:08",
+    "end": "04:11",
+    "text": "cool website chat called"
+  },
+  {
+    "start": "04:09",
+    "end": "04:13",
+    "text": "fonts.inuse.com. So, essentially, this"
+  },
+  {
+    "start": "04:11",
+    "end": "04:14",
+    "text": "is an amazing website, and effectively,"
+  },
+  {
+    "start": "04:13",
+    "end": "04:16",
+    "text": "it just shows you like, you know, when"
+  },
+  {
+    "start": "04:14",
+    "end": "04:19",
+    "text": "you see really beautiful designs like I"
+  },
+  {
+    "start": "04:16",
+    "end": "04:20",
+    "text": "have here, some paprika"
+  },
+  {
+    "start": "04:19",
+    "end": "04:21",
+    "text": "because I'm in Hungary, and we love"
+  },
+  {
+    "start": "04:20",
+    "end": "04:22",
+    "text": "paprika in Hungary. It's part of the"
+  },
+  {
+    "start": "04:21",
+    "end": "04:24",
+    "text": "deal. They say this when you come in,"
+  },
+  {
+    "start": "04:22",
+    "end": "04:26",
+    "text": "you got to love it. Essentially, you see"
+  },
+  {
+    "start": "04:24",
+    "end": "04:28",
+    "text": "things or packages that looks really"
+  },
+  {
+    "start": "04:26",
+    "end": "04:30",
+    "text": "cool, but you don't really know what the"
+  },
+  {
+    "start": "04:28",
+    "end": "04:31",
+    "text": "actual font and design is. Well,"
+  },
+  {
+    "start": "04:30",
+    "end": "04:33",
+    "text": "websites like this just let you browse"
+  },
+  {
+    "start": "04:31",
+    "end": "04:35",
+    "text": "real-life use cases, find it, and then"
+  },
+  {
+    "start": "04:33",
+    "end": "04:36",
+    "text": "literally, what you can do is screenshot"
+  },
+  {
+    "start": "04:35",
+    "end": "04:38",
+    "text": "this. You can even say some of these"
+  },
+  {
+    "start": "04:36",
+    "end": "04:40",
+    "text": "fonts are available for free online, and"
+  },
+  {
+    "start": "04:38",
+    "end": "04:42",
+    "text": "you can just directly use them and say"
+  },
+  {
+    "start": "04:40",
+    "end": "04:43",
+    "text": "Claude, \"It is so, so cool.\" You can"
+  },
+  {
+    "start": "04:42",
+    "end": "04:45",
+    "text": "literally even take a screenshot, and"
+  },
+  {
+    "start": "04:43",
+    "end": "04:46",
+    "text": "all you would do is come down like this"
+  },
+  {
+    "start": "04:45",
+    "end": "04:48",
+    "text": "and say, \"Hey, to Claude, let's come"
+  },
+  {
+    "start": "04:46",
+    "end": "04:49",
+    "text": "down here like so.\" And just give this a"
+  },
+  {
+    "start": "04:48",
+    "end": "04:51",
+    "text": "little bit of a screenshot. You can come"
+  },
+  {
+    "start": "04:49",
+    "end": "04:52",
+    "text": "down and you can drop this in and say,"
+  },
+  {
+    "start": "04:51",
+    "end": "04:55",
+    "text": "\"Hey, I want you to build for me a"
+  },
+  {
+    "start": "04:52",
+    "end": "04:57",
+    "text": "beautiful advert for my business, and I"
+  },
+  {
+    "start": "04:55",
+    "end": "04:59",
+    "text": "really love this font. Could you check"
+  },
+  {
+    "start": "04:57",
+    "end": "05:00",
+    "text": "all available free fonts for me to see"
+  },
+  {
+    "start": "04:59",
+    "end": "05:02",
+    "text": "if you can find something as close as"
+  },
+  {
+    "start": "05:00",
+    "end": "05:04",
+    "text": "possible to this, if not this one"
+  },
+  {
+    "start": "05:02",
+    "end": "05:05",
+    "text": "itself?\" Now, you can also buy the font,"
+  },
+  {
+    "start": "05:04",
+    "end": "05:07",
+    "text": "which I'd highly recommend if you are"
+  },
+  {
+    "start": "05:05",
+    "end": "05:08",
+    "text": "going to do lots of design for a"
+  },
+  {
+    "start": "05:07",
+    "end": "05:10",
+    "text": "particular brand. It's the easiest way"
+  },
+  {
+    "start": "05:08",
+    "end": "05:11",
+    "text": "to elevate it, but there are so many"
+  },
+  {
+    "start": "05:10",
+    "end": "05:13",
+    "text": "free options. Well, you can check out"
+  },
+  {
+    "start": "05:11",
+    "end": "05:14",
+    "text": "Google Fonts. There's a website called"
+  },
+  {
+    "start": "05:13",
+    "end": "05:16",
+    "text": "Font Share, we can see all of these"
+  },
+  {
+    "start": "05:14",
+    "end": "05:17",
+    "text": "beautiful fonts, which are available for"
+  },
+  {
+    "start": "05:16",
+    "end": "05:18",
+    "text": "free. So, you can come down and have a"
+  },
+  {
+    "start": "05:17",
+    "end": "05:21",
+    "text": "look like I think one of the fonts that"
+  },
+  {
+    "start": "05:18",
+    "end": "05:22",
+    "text": "I use is Swiss it. I highly recommend"
+  },
+  {
+    "start": "05:21",
+    "end": "05:23",
+    "text": "it. Obviously, I use it. My designer"
+  },
+  {
+    "start": "05:22",
+    "end": "05:25",
+    "text": "actually built this for me, which is"
+  },
+  {
+    "start": "05:23",
+    "end": "05:26",
+    "text": "cool. Again, this is a great website."
+  },
+  {
+    "start": "05:25",
+    "end": "05:29",
+    "text": "Another one here as well is Open"
+  },
+  {
+    "start": "05:26",
+    "end": "05:30",
+    "text": "Foundry. This is really cool for some"
+  },
+  {
+    "start": "05:29",
+    "end": "05:32",
+    "text": "nice kind of like off-static gorgeous"
+  },
+  {
+    "start": "05:30",
+    "end": "05:33",
+    "text": "fonts. Obviously, I'll time stamp"
+  },
+  {
+    "start": "05:32",
+    "end": "05:35",
+    "text": "everything down below, so if you wanted"
+  },
+  {
+    "start": "05:33",
+    "end": "05:36",
+    "text": "that, feel free to skip. But this really"
+  },
+  {
+    "start": "05:35",
+    "end": "05:39",
+    "text": "is just one of the coolest ways to do"
+  },
+  {
+    "start": "05:36",
+    "end": "05:40",
+    "text": "it. You got Typewolf as well. This is um"
+  },
+  {
+    "start": "05:39",
+    "end": "05:41",
+    "text": "I think this just shows you gorgeous"
+  },
+  {
+    "start": "05:40",
+    "end": "05:43",
+    "text": "fonts. I'm not sure these are all free,"
+  },
+  {
+    "start": "05:41",
+    "end": "05:45",
+    "text": "but you can go ahead and check them. So,"
+  },
+  {
+    "start": "05:43",
+    "end": "05:47",
+    "text": "now we understand how to use data and"
+  },
+  {
+    "start": "05:45",
+    "end": "05:49",
+    "text": "fonts. Take this us to level two. And by"
+  },
+  {
+    "start": "05:47",
+    "end": "05:51",
+    "text": "the way, each level is more epic and"
+  },
+  {
+    "start": "05:49",
+    "end": "05:52",
+    "text": "beneficial than the last one. On level"
+  },
+  {
+    "start": "05:51",
+    "end": "05:54",
+    "text": "five, you're going to really love this"
+  },
+  {
+    "start": "05:52",
+    "end": "05:57",
+    "text": "one. So, the idea with this is that we"
+  },
+  {
+    "start": "05:54",
+    "end": "06:00",
+    "text": "can actually take code itself and bring"
+  },
+  {
+    "start": "05:57",
+    "end": "06:02",
+    "text": "in other design assets to really improve"
+  },
+  {
+    "start": "06:00",
+    "end": "06:04",
+    "text": "its quality because it can generate"
+  },
+  {
+    "start": "06:02",
+    "end": "06:06",
+    "text": "beautiful graphics like this. I use it,"
+  },
+  {
+    "start": "06:04",
+    "end": "06:08",
+    "text": "for example, to build up my entire code"
+  },
+  {
+    "start": "06:06",
+    "end": "06:10",
+    "text": "code operating system. It helped me to"
+  },
+  {
+    "start": "06:08",
+    "end": "06:12",
+    "text": "build up my entire design operating"
+  },
+  {
+    "start": "06:10",
+    "end": "06:14",
+    "text": "system, as well. It can build things."
+  },
+  {
+    "start": "06:12",
+    "end": "06:16",
+    "text": "But, one of its limitations really is"
+  },
+  {
+    "start": "06:14",
+    "end": "06:18",
+    "text": "the ability to create beautiful"
+  },
+  {
+    "start": "06:16",
+    "end": "06:20",
+    "text": "graphical icons. And icons can really"
+  },
+  {
+    "start": "06:18",
+    "end": "06:22",
+    "text": "elevate the level of it. I did it in my"
+  },
+  {
+    "start": "06:20",
+    "end": "06:24",
+    "text": "first tech startup. And And by the way,"
+  },
+  {
+    "start": "06:22",
+    "end": "06:25",
+    "text": "if you don't know who I am, I'm Jack. I"
+  },
+  {
+    "start": "06:24",
+    "end": "06:27",
+    "text": "built and sold my last tech startup with"
+  },
+  {
+    "start": "06:25",
+    "end": "06:29",
+    "text": "like a gazillion customers. Now, I share"
+  },
+  {
+    "start": "06:27",
+    "end": "06:31",
+    "text": "you how to stuff that works while still"
+  },
+  {
+    "start": "06:29",
+    "end": "06:33",
+    "text": "building my own AI startup. So, I love"
+  },
+  {
+    "start": "06:31",
+    "end": "06:35",
+    "text": "this stuff. I do this stuff every day."
+  },
+  {
+    "start": "06:33",
+    "end": "06:37",
+    "text": "And one of the cool ways you can elevate"
+  },
+  {
+    "start": "06:35",
+    "end": "06:39",
+    "text": "your designs in level two is using"
+  },
+  {
+    "start": "06:37",
+    "end": "06:41",
+    "text": "icons. I There's a lot of different"
+  },
+  {
+    "start": "06:39",
+    "end": "06:43",
+    "text": "options. There's icon A, there's flat"
+  },
+  {
+    "start": "06:41",
+    "end": "06:45",
+    "text": "icon. But, what I recommend you can do"
+  },
+  {
+    "start": "06:43",
+    "end": "06:46",
+    "text": "here, and some of them are free, by the"
+  },
+  {
+    "start": "06:45",
+    "end": "06:47",
+    "text": "way, but if you just give them"
+  },
+  {
+    "start": "06:46",
+    "end": "06:49",
+    "text": "attribution, is find a design style that"
+  },
+  {
+    "start": "06:47",
+    "end": "06:51",
+    "text": "you think looks really cool. So, for"
+  },
+  {
+    "start": "06:49",
+    "end": "06:52",
+    "text": "example, you have this travel pack here."
+  },
+  {
+    "start": "06:51",
+    "end": "06:54",
+    "text": "And what you can actually do is just"
+  },
+  {
+    "start": "06:52",
+    "end": "06:56",
+    "text": "download the entire pack. I'm on these"
+  },
+  {
+    "start": "06:54",
+    "end": "06:57",
+    "text": "guys' pay plan. I think it's like $8. By"
+  },
+  {
+    "start": "06:56",
+    "end": "06:59",
+    "text": "the way, again, not sponsored. I'm just"
+  },
+  {
+    "start": "06:57",
+    "end": "07:00",
+    "text": "telling you the stuff that I use. You"
+  },
+  {
+    "start": "06:59",
+    "end": "07:03",
+    "text": "can download all of them. And then, what"
+  },
+  {
+    "start": "07:00",
+    "end": "07:05",
+    "text": "we can do is then integrate these icons"
+  },
+  {
+    "start": "07:03",
+    "end": "07:07",
+    "text": "into any kind of animation or graphic."
+  },
+  {
+    "start": "07:05",
+    "end": "07:08",
+    "text": "And this is an example. I just gave it"
+  },
+  {
+    "start": "07:07",
+    "end": "07:10",
+    "text": "the packs and said, \"Hey, design me"
+  },
+  {
+    "start": "07:08",
+    "end": "07:11",
+    "text": "something interesting.\" Now, check this"
+  },
+  {
+    "start": "07:10",
+    "end": "07:13",
+    "text": "out. This is just something on travel."
+  },
+  {
+    "start": "07:11",
+    "end": "07:14",
+    "text": "So, this didn't have to be a trip. And"
+  },
+  {
+    "start": "07:13",
+    "end": "07:17",
+    "text": "you can just see that the level and"
+  },
+  {
+    "start": "07:14",
+    "end": "07:18",
+    "text": "quality of this design is just way"
+  },
+  {
+    "start": "07:17",
+    "end": "07:19",
+    "text": "better. Like, it's not I didn't I didn't"
+  },
+  {
+    "start": "07:18",
+    "end": "07:22",
+    "text": "really give this any sophisticated"
+  },
+  {
+    "start": "07:19",
+    "end": "07:25",
+    "text": "prompts. But, how much better and crisp"
+  },
+  {
+    "start": "07:22",
+    "end": "07:26",
+    "text": "and premium does this look in your"
+  },
+  {
+    "start": "07:25",
+    "end": "07:28",
+    "text": "videos, in your assets, in your"
+  },
+  {
+    "start": "07:26",
+    "end": "07:29",
+    "text": "presentations? And you just give it"
+  },
+  {
+    "start": "07:28",
+    "end": "07:31",
+    "text": "these logos. And in fact, there are"
+  },
+  {
+    "start": "07:29",
+    "end": "07:33",
+    "text": "hundreds of these logos on so many"
+  },
+  {
+    "start": "07:31",
+    "end": "07:34",
+    "text": "different websites that you could use."
+  },
+  {
+    "start": "07:33",
+    "end": "07:36",
+    "text": "Like, and And a lot of cases, you can"
+  },
+  {
+    "start": "07:34",
+    "end": "07:37",
+    "text": "search for stuff. Like, again, and I did"
+  },
+  {
+    "start": "07:36",
+    "end": "07:38",
+    "text": "this in my last tech startup, which is"
+  },
+  {
+    "start": "07:37",
+    "end": "07:40",
+    "text": "I'm just telling you all the sources I"
+  },
+  {
+    "start": "07:38",
+    "end": "07:41",
+    "text": "did. Like, let's say we're doing"
+  },
+  {
+    "start": "07:40",
+    "end": "07:43",
+    "text": "something around Christmas, right? Like,"
+  },
+  {
+    "start": "07:41",
+    "end": "07:46",
+    "text": "a Christmas presentation, we can"
+  },
+  {
+    "start": "07:43",
+    "end": "07:47",
+    "text": "actually go ahead and find icons. Now, I"
+  },
+  {
+    "start": "07:46",
+    "end": "07:50",
+    "text": "recommend that basically each"
+  },
+  {
+    "start": "07:47",
+    "end": "07:51",
+    "text": "presentation, you use one style, so try"
+  },
+  {
+    "start": "07:50",
+    "end": "07:53",
+    "text": "to keep it to one style rather than"
+  },
+  {
+    "start": "07:51",
+    "end": "07:55",
+    "text": "jumping around, but you can see just how"
+  },
+  {
+    "start": "07:53",
+    "end": "07:57",
+    "text": "beneficial this is. Now, this takes us"
+  },
+  {
+    "start": "07:55",
+    "end": "08:00",
+    "text": "squarely onto level three, where we take"
+  },
+  {
+    "start": "07:57",
+    "end": "08:01",
+    "text": "it to a complete new level. Let me show"
+  },
+  {
+    "start": "08:00",
+    "end": "08:03",
+    "text": "you what I mean when I say that. So, you"
+  },
+  {
+    "start": "08:01",
+    "end": "08:04",
+    "text": "got generating the art as well. Now,"
+  },
+  {
+    "start": "08:03",
+    "end": "08:05",
+    "text": "here's a cool thing we can do. Now,"
+  },
+  {
+    "start": "08:04",
+    "end": "08:07",
+    "text": "imagine this. We're not just having"
+  },
+  {
+    "start": "08:05",
+    "end": "08:09",
+    "text": "Claude using his existing assets and"
+  },
+  {
+    "start": "08:07",
+    "end": "08:10",
+    "text": "applying motion, but what we can do here"
+  },
+  {
+    "start": "08:09",
+    "end": "08:13",
+    "text": "for our animations, which is really"
+  },
+  {
+    "start": "08:10",
+    "end": "08:15",
+    "text": "interesting, is take a prompt, we can"
+  },
+  {
+    "start": "08:13",
+    "end": "08:17",
+    "text": "actually go and use different resources."
+  },
+  {
+    "start": "08:15",
+    "end": "08:20",
+    "text": "We can actually go to existing websites"
+  },
+  {
+    "start": "08:17",
+    "end": "08:22",
+    "text": "that have built not just icons, but"
+  },
+  {
+    "start": "08:20",
+    "end": "08:25",
+    "text": "beautiful interactive graphics that make"
+  },
+  {
+    "start": "08:22",
+    "end": "08:26",
+    "text": "your graphics look unbelievable. Now,"
+  },
+  {
+    "start": "08:25",
+    "end": "08:28",
+    "text": "some things that we can do is add in"
+  },
+  {
+    "start": "08:26",
+    "end": "08:30",
+    "text": "images to our designs, which are great."
+  },
+  {
+    "start": "08:28",
+    "end": "08:31",
+    "text": "But, you can go through to websites like"
+  },
+  {
+    "start": "08:30",
+    "end": "08:34",
+    "text": "this. Lordicon animations itself has"
+  },
+  {
+    "start": "08:31",
+    "end": "08:36",
+    "text": "this incredible like repo of beautiful"
+  },
+  {
+    "start": "08:34",
+    "end": "08:38",
+    "text": "animations and graphics, and where"
+  },
+  {
+    "start": "08:36",
+    "end": "08:39",
+    "text": "relevant, you can basically add them in."
+  },
+  {
+    "start": "08:38",
+    "end": "08:41",
+    "text": "It's like a search engine for really"
+  },
+  {
+    "start": "08:39",
+    "end": "08:43",
+    "text": "gorgeous things. People have always used"
+  },
+  {
+    "start": "08:41",
+    "end": "08:45",
+    "text": "them in their websites, but you can"
+  },
+  {
+    "start": "08:43",
+    "end": "08:47",
+    "text": "actually use them in Claude design if"
+  },
+  {
+    "start": "08:45",
+    "end": "08:49",
+    "text": "you want to. Now, the best part is the"
+  },
+  {
+    "start": "08:47",
+    "end": "08:50",
+    "text": "fact that you can actually get free"
+  },
+  {
+    "start": "08:49",
+    "end": "08:51",
+    "text": "ones. Obviously, they will have"
+  },
+  {
+    "start": "08:50",
+    "end": "08:53",
+    "text": "different licenses and you have to check"
+  },
+  {
+    "start": "08:51",
+    "end": "08:54",
+    "text": "that, but you can see you've got this"
+  },
+  {
+    "start": "08:53",
+    "end": "08:55",
+    "text": "beautiful fire thing here, which is"
+  },
+  {
+    "start": "08:54",
+    "end": "08:57",
+    "text": "cool. This is free under the Creative"
+  },
+  {
+    "start": "08:55",
+    "end": "09:00",
+    "text": "Commons license, which is cool. You've"
+  },
+  {
+    "start": "08:57",
+    "end": "09:01",
+    "text": "got the rocket, you've got like loads of"
+  },
+  {
+    "start": "09:00",
+    "end": "09:02",
+    "text": "cool things. You've even got, for"
+  },
+  {
+    "start": "09:01",
+    "end": "09:05",
+    "text": "example, and I really like this one"
+  },
+  {
+    "start": "09:02",
+    "end": "09:07",
+    "text": "here, like this pack of like astronauts"
+  },
+  {
+    "start": "09:05",
+    "end": "09:08",
+    "text": "and stuff like that. And what you can do"
+  },
+  {
+    "start": "09:07",
+    "end": "09:10",
+    "text": "is actually find these from websites"
+  },
+  {
+    "start": "09:08",
+    "end": "09:12",
+    "text": "like this and integrate them inside of"
+  },
+  {
+    "start": "09:10",
+    "end": "09:14",
+    "text": "Claude design. So, for example, check"
+  },
+  {
+    "start": "09:12",
+    "end": "09:15",
+    "text": "this out. Imagine this in an Instagram"
+  },
+  {
+    "start": "09:14",
+    "end": "09:16",
+    "text": "style reel, and I've laid out like that,"
+  },
+  {
+    "start": "09:15",
+    "end": "09:18",
+    "text": "for example, and you could literally"
+  },
+  {
+    "start": "09:16",
+    "end": "09:20",
+    "text": "scroll and show different things. With"
+  },
+  {
+    "start": "09:18",
+    "end": "09:22",
+    "text": "the fire, we've got like all these"
+  },
+  {
+    "start": "09:20",
+    "end": "09:24",
+    "text": "different things. Again, using these"
+  },
+  {
+    "start": "09:22",
+    "end": "09:26",
+    "text": "assets, which is incredible, and it's"
+  },
+  {
+    "start": "09:24",
+    "end": "09:28",
+    "text": "not something that you can accomplish"
+  },
+  {
+    "start": "09:26",
+    "end": "09:30",
+    "text": "with Claude by itself, which I think is"
+  },
+  {
+    "start": "09:28",
+    "end": "09:31",
+    "text": "absolutely fantastic. And these just"
+  },
+  {
+    "start": "09:30",
+    "end": "09:34",
+    "text": "look gorgeous and beautiful, and you can"
+  },
+  {
+    "start": "09:31",
+    "end": "09:36",
+    "text": "imagine this on Instagram carousels. You"
+  },
+  {
+    "start": "09:34",
+    "end": "09:38",
+    "text": "could imagine this on so many different"
+  },
+  {
+    "start": "09:36",
+    "end": "09:39",
+    "text": "platforms that you can grab this. And"
+  },
+  {
+    "start": "09:38",
+    "end": "09:41",
+    "text": "all you literally need to do when you"
+  },
+  {
+    "start": "09:39",
+    "end": "09:42",
+    "text": "get them effectively is you find one"
+  },
+  {
+    "start": "09:41",
+    "end": "09:44",
+    "text": "that you like, you come down, you can"
+  },
+  {
+    "start": "09:42",
+    "end": "09:46",
+    "text": "download the Lottie JSON like so, and"
+  },
+  {
+    "start": "09:44",
+    "end": "09:48",
+    "text": "then you just create a library, create a"
+  },
+  {
+    "start": "09:46",
+    "end": "09:50",
+    "text": "repository, and share it with Claude."
+  },
+  {
+    "start": "09:48",
+    "end": "09:51",
+    "text": "Lottie has a free plan and a paid plan."
+  },
+  {
+    "start": "09:50",
+    "end": "09:53",
+    "text": "You can play around with that and see"
+  },
+  {
+    "start": "09:51",
+    "end": "09:55",
+    "text": "all of the details. But we can even take"
+  },
+  {
+    "start": "09:53",
+    "end": "09:57",
+    "text": "this another step forward and use an"
+  },
+  {
+    "start": "09:55",
+    "end": "09:59",
+    "text": "image. So for example, if I come over to"
+  },
+  {
+    "start": "09:57",
+    "end": "10:01",
+    "text": "my Claude design operating system here,"
+  },
+  {
+    "start": "09:59",
+    "end": "10:02",
+    "text": "I'm going to go down and let's I just"
+  },
+  {
+    "start": "10:01",
+    "end": "10:05",
+    "text": "get that little image here. So I'm going"
+  },
+  {
+    "start": "10:02",
+    "end": "10:06",
+    "text": "to come over to Let's do 16 by 9 2K. I'm"
+  },
+  {
+    "start": "10:05",
+    "end": "10:08",
+    "text": "going to create two images for this and"
+  },
+  {
+    "start": "10:06",
+    "end": "10:10",
+    "text": "we'll do Nano Banana Pro. Let's do Nano"
+  },
+  {
+    "start": "10:08",
+    "end": "10:13",
+    "text": "Banana Pro 2. And I might say something"
+  },
+  {
+    "start": "10:10",
+    "end": "10:16",
+    "text": "like, \"Hey, design for me a gorgeous"
+  },
+  {
+    "start": "10:13",
+    "end": "10:18",
+    "text": "kind of beautiful illustration of the"
+  },
+  {
+    "start": "10:16",
+    "end": "10:20",
+    "text": "galaxy, please.\" All right? Something"
+  },
+  {
+    "start": "10:18",
+    "end": "10:22",
+    "text": "gorgeous, maybe kind of Ghibli style,"
+  },
+  {
+    "start": "10:20",
+    "end": "10:24",
+    "text": "something familiar, something fantastic."
+  },
+  {
+    "start": "10:22",
+    "end": "10:26",
+    "text": "Come down here. I see it's cost four"
+  },
+  {
+    "start": "10:24",
+    "end": "10:27",
+    "text": "credits or if I can come down I can see,"
+  },
+  {
+    "start": "10:26",
+    "end": "10:29",
+    "text": "you know, the price that'll be like 12"
+  },
+  {
+    "start": "10:27",
+    "end": "10:31",
+    "text": "cents to do or a couple credits with"
+  },
+  {
+    "start": "10:29",
+    "end": "10:32",
+    "text": "XField. Come down and let's go ahead and"
+  },
+  {
+    "start": "10:31",
+    "end": "10:34",
+    "text": "generate that for me. And what's going"
+  },
+  {
+    "start": "10:32",
+    "end": "10:35",
+    "text": "to be really interesting here as well as"
+  },
+  {
+    "start": "10:34",
+    "end": "10:37",
+    "text": "it's generating it's called is that we"
+  },
+  {
+    "start": "10:35",
+    "end": "10:40",
+    "text": "can grab any image that we want to and"
+  },
+  {
+    "start": "10:37",
+    "end": "10:42",
+    "text": "literally bring that into any Claude"
+  },
+  {
+    "start": "10:40",
+    "end": "10:44",
+    "text": "design system. And again, you can get"
+  },
+  {
+    "start": "10:42",
+    "end": "10:47",
+    "text": "Claude from your own computer to"
+  },
+  {
+    "start": "10:44",
+    "end": "10:49",
+    "text": "directly create this in here. And by the"
+  },
+  {
+    "start": "10:47",
+    "end": "10:50",
+    "text": "way, if all of this is sounding like I'm"
+  },
+  {
+    "start": "10:49",
+    "end": "10:52",
+    "text": "speaking Spanish, I'm going to put a"
+  },
+  {
+    "start": "10:50",
+    "end": "10:54",
+    "text": "link down below for my full Claude Code"
+  },
+  {
+    "start": "10:52",
+    "end": "10:57",
+    "text": "Masterclass inside the community. It has"
+  },
+  {
+    "start": "10:54",
+    "end": "10:58",
+    "text": "everything from foundations and setup,"
+  },
+  {
+    "start": "10:57",
+    "end": "11:01",
+    "text": "building websites, power features,"
+  },
+  {
+    "start": "10:58",
+    "end": "11:03",
+    "text": "memory systems, agents, essentially all"
+  },
+  {
+    "start": "11:01",
+    "end": "11:04",
+    "text": "the stuff, like many things that I've"
+  },
+  {
+    "start": "11:03",
+    "end": "11:06",
+    "text": "never shared on my channel that will"
+  },
+  {
+    "start": "11:04",
+    "end": "11:08",
+    "text": "take you from zero to interstellar. Plus"
+  },
+  {
+    "start": "11:06",
+    "end": "11:10",
+    "text": "the community, we hang out and we have a"
+  },
+  {
+    "start": "11:08",
+    "end": "11:12",
+    "text": "great time. So here, we've got this here"
+  },
+  {
+    "start": "11:10",
+    "end": "11:13",
+    "text": "for example. Let's say that we like"
+  },
+  {
+    "start": "11:12",
+    "end": "11:14",
+    "text": "this. Well, let's go ahead, copy this"
+  },
+  {
+    "start": "11:13",
+    "end": "11:16",
+    "text": "image, and then we can share it with the"
+  },
+  {
+    "start": "11:14",
+    "end": "11:18",
+    "text": "Claude design. And as you can see, guys,"
+  },
+  {
+    "start": "11:16",
+    "end": "11:19",
+    "text": "you can now add it into any image. I"
+  },
+  {
+    "start": "11:18",
+    "end": "11:22",
+    "text": "just gave it to Claude design. I was"
+  },
+  {
+    "start": "11:19",
+    "end": "11:23",
+    "text": "like, \"Hey, add this into the end.\" And"
+  },
+  {
+    "start": "11:22",
+    "end": "11:25",
+    "text": "as you can see, once it pops up, you're"
+  },
+  {
+    "start": "11:23",
+    "end": "11:26",
+    "text": "now going to go ahead and see this image"
+  },
+  {
+    "start": "11:25",
+    "end": "11:30",
+    "text": "added in. And I really think that"
+  },
+  {
+    "start": "11:26",
+    "end": "11:31",
+    "text": "imagery and animation and icons plus the"
+  },
+  {
+    "start": "11:30",
+    "end": "11:33",
+    "text": "the of the graphics and the editing that"
+  },
+  {
+    "start": "11:31",
+    "end": "11:36",
+    "text": "Claude can do is really how you separate"
+  },
+  {
+    "start": "11:33",
+    "end": "11:39",
+    "text": "this out, plus the fonts, plus the data."
+  },
+  {
+    "start": "11:36",
+    "end": "11:41",
+    "text": "It just takes it to a completely new"
+  },
+  {
+    "start": "11:39",
+    "end": "11:42",
+    "text": "level. But then it leads us on to one of"
+  },
+  {
+    "start": "11:41",
+    "end": "11:45",
+    "text": "the limitations, which is this these"
+  },
+  {
+    "start": "11:42",
+    "end": "11:46",
+    "text": "designs are beautiful, but if we can't"
+  },
+  {
+    "start": "11:45",
+    "end": "11:49",
+    "text": "do anything with them, what's the value?"
+  },
+  {
+    "start": "11:46",
+    "end": "11:50",
+    "text": "And this is where level four comes in"
+  },
+  {
+    "start": "11:49",
+    "end": "11:52",
+    "text": "and we take it to a completely new level"
+  },
+  {
+    "start": "11:50",
+    "end": "11:55",
+    "text": "here, no pun intended of course. And as"
+  },
+  {
+    "start": "11:52",
+    "end": "11:57",
+    "text": "I did that, we can actually give Claude"
+  },
+  {
+    "start": "11:55",
+    "end": "11:58",
+    "text": "a video. So, let's say that we record a"
+  },
+  {
+    "start": "11:57",
+    "end": "11:59",
+    "text": "video together. And I There's two ways"
+  },
+  {
+    "start": "11:58",
+    "end": "12:01",
+    "text": "we can do this. One is we do everything"
+  },
+  {
+    "start": "11:59",
+    "end": "12:04",
+    "text": "manually. Level two though is that"
+  },
+  {
+    "start": "12:01",
+    "end": "12:06",
+    "text": "Claude can actually go ahead and process"
+  },
+  {
+    "start": "12:04",
+    "end": "12:07",
+    "text": "that video for us. So, to do this, all"
+  },
+  {
+    "start": "12:06",
+    "end": "12:10",
+    "text": "you're going to do is the below, which"
+  },
+  {
+    "start": "12:07",
+    "end": "12:12",
+    "text": "is, \"Hey there Claude, there is a video"
+  },
+  {
+    "start": "12:10",
+    "end": "12:14",
+    "text": "I just recorded on my desktop. I want"
+  },
+  {
+    "start": "12:12",
+    "end": "12:16",
+    "text": "you to go to that video and I want you"
+  },
+  {
+    "start": "12:14",
+    "end": "12:18",
+    "text": "to get the full transcript for that"
+  },
+  {
+    "start": "12:16",
+    "end": "12:22",
+    "text": "video and do an RTF, please, and share"
+  },
+  {
+    "start": "12:18",
+    "end": "12:24",
+    "text": "that with me in a HTML file.\" Now, RTF"
+  },
+  {
+    "start": "12:22",
+    "end": "12:26",
+    "text": "basically means that every word that you"
+  },
+  {
+    "start": "12:24",
+    "end": "12:28",
+    "text": "say is mapped to a timestamp. And the"
+  },
+  {
+    "start": "12:26",
+    "end": "12:30",
+    "text": "reason why this is so beneficial is"
+  },
+  {
+    "start": "12:28",
+    "end": "12:32",
+    "text": "because we can then have Claude in step"
+  },
+  {
+    "start": "12:30",
+    "end": "12:34",
+    "text": "five do something very incredible with"
+  },
+  {
+    "start": "12:32",
+    "end": "12:36",
+    "text": "it that really takes designs to a"
+  },
+  {
+    "start": "12:34",
+    "end": "12:38",
+    "text": "completely new level. Now, we don't even"
+  },
+  {
+    "start": "12:36",
+    "end": "12:40",
+    "text": "have to upload the video, we could point"
+  },
+  {
+    "start": "12:38",
+    "end": "12:43",
+    "text": "it to a YouTube video, we could point it"
+  },
+  {
+    "start": "12:40",
+    "end": "12:45",
+    "text": "to any file on our desktop and it will"
+  },
+  {
+    "start": "12:43",
+    "end": "12:46",
+    "text": "go ahead and do that for us. And as you"
+  },
+  {
+    "start": "12:45",
+    "end": "12:48",
+    "text": "can see, we now have the file for the"
+  },
+  {
+    "start": "12:46",
+    "end": "12:50",
+    "text": "design genius script, which is coming"
+  },
+  {
+    "start": "12:48",
+    "end": "12:51",
+    "text": "out I think yesterday. And look at this,"
+  },
+  {
+    "start": "12:50",
+    "end": "12:53",
+    "text": "we've got effectively everything on here"
+  },
+  {
+    "start": "12:51",
+    "end": "12:55",
+    "text": "and it explains all of the detail and"
+  },
+  {
+    "start": "12:53",
+    "end": "12:56",
+    "text": "it's got everything there timestamped."
+  },
+  {
+    "start": "12:55",
+    "end": "12:58",
+    "text": "And then I've opened this up in a new"
+  },
+  {
+    "start": "12:56",
+    "end": "12:59",
+    "text": "file, so you can see it and everything"
+  },
+  {
+    "start": "12:58",
+    "end": "13:01",
+    "text": "I've said here is linked down by the"
+  },
+  {
+    "start": "12:59",
+    "end": "13:02",
+    "text": "minute. And then there's a file"
+  },
+  {
+    "start": "13:01",
+    "end": "13:05",
+    "text": "underneath this that literally has every"
+  },
+  {
+    "start": "13:02",
+    "end": "13:06",
+    "text": "word connected with every single minute"
+  },
+  {
+    "start": "13:05",
+    "end": "13:08",
+    "text": "and second that it was said. And then"
+  },
+  {
+    "start": "13:06",
+    "end": "13:10",
+    "text": "once we have that, we can go on to step"
+  },
+  {
+    "start": "13:08",
+    "end": "13:12",
+    "text": "five. So, not only can Claude actually"
+  },
+  {
+    "start": "13:10",
+    "end": "13:15",
+    "text": "watch, it can build and integrate all of"
+  },
+  {
+    "start": "13:12",
+    "end": "13:16",
+    "text": "this together in an incredible system."
+  },
+  {
+    "start": "13:15",
+    "end": "13:18",
+    "text": "Which just means that you basically"
+  },
+  {
+    "start": "13:16",
+    "end": "13:20",
+    "text": "record the short-form content or the"
+  },
+  {
+    "start": "13:18",
+    "end": "13:23",
+    "text": "long-form content and Claude will not"
+  },
+  {
+    "start": "13:20",
+    "end": "13:24",
+    "text": "only basically timestamp that, it can do"
+  },
+  {
+    "start": "13:23",
+    "end": "13:26",
+    "text": "many other things. So, here you can"
+  },
+  {
+    "start": "13:24",
+    "end": "13:28",
+    "text": "actually activate a skill and I'll put a"
+  },
+  {
+    "start": "13:26",
+    "end": "13:29",
+    "text": "link for it down below it so you can"
+  },
+  {
+    "start": "13:28",
+    "end": "13:31",
+    "text": "grab it, and it does all that stuff for"
+  },
+  {
+    "start": "13:29",
+    "end": "13:33",
+    "text": "you automatically. So, hey, use the"
+  },
+  {
+    "start": "13:31",
+    "end": "13:36",
+    "text": "skill to get the full transcript, and"
+  },
+  {
+    "start": "13:33",
+    "end": "13:38",
+    "text": "what I want you to do is identify parts"
+  },
+  {
+    "start": "13:36",
+    "end": "13:41",
+    "text": "of the video, as per your skill, that"
+  },
+  {
+    "start": "13:38",
+    "end": "13:42",
+    "text": "essentially explain where a animation"
+  },
+  {
+    "start": "13:41",
+    "end": "13:44",
+    "text": "would be valuable. This is a YouTube"
+  },
+  {
+    "start": "13:42",
+    "end": "13:47",
+    "text": "video. I want you to do some research"
+  },
+  {
+    "start": "13:44",
+    "end": "13:49",
+    "text": "with Firecrawl to find interesting"
+  },
+  {
+    "start": "13:47",
+    "end": "13:52",
+    "text": "insights and statistics that might be"
+  },
+  {
+    "start": "13:49",
+    "end": "13:54",
+    "text": "beneficial, basically mirroring exactly"
+  },
+  {
+    "start": "13:52",
+    "end": "13:56",
+    "text": "what it is that I say. I select the"
+  },
+  {
+    "start": "13:54",
+    "end": "13:58",
+    "text": "moments within the script, then go ahead"
+  },
+  {
+    "start": "13:56",
+    "end": "14:00",
+    "text": "and create with me some beautiful"
+  },
+  {
+    "start": "13:58",
+    "end": "14:01",
+    "text": "animations and graphics for those exact"
+  },
+  {
+    "start": "14:00",
+    "end": "14:04",
+    "text": "things, and then save them for me on my"
+  },
+  {
+    "start": "14:01",
+    "end": "14:05",
+    "text": "desktop. Then, literally, you can enter"
+  },
+  {
+    "start": "14:04",
+    "end": "14:07",
+    "text": "that in, and Claude will do the work for"
+  },
+  {
+    "start": "14:05",
+    "end": "14:08",
+    "text": "you. And the reason that we're using"
+  },
+  {
+    "start": "14:07",
+    "end": "14:11",
+    "text": "Firecrawl here is because it's going to"
+  },
+  {
+    "start": "14:08",
+    "end": "14:13",
+    "text": "enrich the information and the data. If"
+  },
+  {
+    "start": "14:11",
+    "end": "14:15",
+    "text": "you're doing this on Instagram or"
+  },
+  {
+    "start": "14:13",
+    "end": "14:17",
+    "text": "YouTube, it's very viable to go ahead"
+  },
+  {
+    "start": "14:15",
+    "end": "14:19",
+    "text": "and get actual insights, and Firecrawl"
+  },
+  {
+    "start": "14:17",
+    "end": "14:21",
+    "text": "is like the cheapest way I found I'm"
+  },
+  {
+    "start": "14:19",
+    "end": "14:23",
+    "text": "using myself to actually go and get"
+  },
+  {
+    "start": "14:21",
+    "end": "14:25",
+    "text": "information from online. Like, this"
+  },
+  {
+    "start": "14:23",
+    "end": "14:27",
+    "text": "saved us 93 tokens because what it does,"
+  },
+  {
+    "start": "14:25",
+    "end": "14:30",
+    "text": "instead of bringing all the HTML, it"
+  },
+  {
+    "start": "14:27",
+    "end": "14:32",
+    "text": "just brings the relevant things. Most"
+  },
+  {
+    "start": "14:30",
+    "end": "14:34",
+    "text": "people miss the research step, so they"
+  },
+  {
+    "start": "14:32",
+    "end": "14:37",
+    "text": "get inaccurate data. But, by having this"
+  },
+  {
+    "start": "14:34",
+    "end": "14:38",
+    "text": "enrichment cycle, where, actually, I'm"
+  },
+  {
+    "start": "14:37",
+    "end": "14:40",
+    "text": "talking about, like I did earlier. So,"
+  },
+  {
+    "start": "14:38",
+    "end": "14:43",
+    "text": "for example, I might say, \"Hey, AI"
+  },
+  {
+    "start": "14:40",
+    "end": "14:45",
+    "text": "models are getting better from X all the"
+  },
+  {
+    "start": "14:43",
+    "end": "14:46",
+    "text": "way to OpenAI.\" Now,"
+  },
+  {
+    "start": "14:45",
+    "end": "14:48",
+    "text": "where's he going to get these numbers"
+  },
+  {
+    "start": "14:46",
+    "end": "14:50",
+    "text": "from? Because I don't explicitly mention"
+  },
+  {
+    "start": "14:48",
+    "end": "14:52",
+    "text": "them in the video. So, what needs to"
+  },
+  {
+    "start": "14:50",
+    "end": "14:54",
+    "text": "happen is there needs to be a research"
+  },
+  {
+    "start": "14:52",
+    "end": "14:56",
+    "text": "agent that's saying, \"Hey, what did Jack"
+  },
+  {
+    "start": "14:54",
+    "end": "14:57",
+    "text": "say?\" How could an ask questions like,"
+  },
+  {
+    "start": "14:56",
+    "end": "14:59",
+    "text": "\"How could I make this better? How could"
+  },
+  {
+    "start": "14:57",
+    "end": "15:01",
+    "text": "I show this visually?\" That's where"
+  },
+  {
+    "start": "14:59",
+    "end": "15:02",
+    "text": "Firecrawl comes in. It grabs that data,"
+  },
+  {
+    "start": "15:01",
+    "end": "15:05",
+    "text": "and it does it in the cheapest way"
+  },
+  {
+    "start": "15:02",
+    "end": "15:06",
+    "text": "possible. It cuts out all the HTML, and"
+  },
+  {
+    "start": "15:05",
+    "end": "15:08",
+    "text": "you can obviously get branding and all"
+  },
+  {
+    "start": "15:06",
+    "end": "15:09",
+    "text": "of that kind of thing. Beautiful. And"
+  },
+  {
+    "start": "15:08",
+    "end": "15:11",
+    "text": "then we get a full extract like this."
+  },
+  {
+    "start": "15:09",
+    "end": "15:13",
+    "text": "Now, the cool thing is that you can"
+  },
+  {
+    "start": "15:11",
+    "end": "15:14",
+    "text": "actually build a Claude skill like this"
+  },
+  {
+    "start": "15:13",
+    "end": "15:16",
+    "text": "that does anything that you want it to."
+  },
+  {
+    "start": "15:14",
+    "end": "15:17",
+    "text": "So, it could be for Instagram Reels,"
+  },
+  {
+    "start": "15:16",
+    "end": "15:19",
+    "text": "could be for YouTube. This one for me,"
+  },
+  {
+    "start": "15:17",
+    "end": "15:22",
+    "text": "its basic premise is to find"
+  },
+  {
+    "start": "15:19",
+    "end": "15:23",
+    "text": "opportunities. So, this is what I did uh"
+  },
+  {
+    "start": "15:22",
+    "end": "15:25",
+    "text": "for a exclusive training inside my"
+  },
+  {
+    "start": "15:23",
+    "end": "15:26",
+    "text": "community, which is cool. And basically,"
+  },
+  {
+    "start": "15:25",
+    "end": "15:30",
+    "text": "it's Look at this. This is what it's"
+  },
+  {
+    "start": "15:26",
+    "end": "15:31",
+    "text": "found, and it suggested, \"Hey, this is"
+  },
+  {
+    "start": "15:30",
+    "end": "15:33",
+    "text": "where I think we should add in clips"
+  },
+  {
+    "start": "15:31",
+    "end": "15:35",
+    "text": "into your long-form content.\" And this"
+  },
+  {
+    "start": "15:33",
+    "end": "15:36",
+    "text": "is an example of one that it did for me"
+  },
+  {
+    "start": "15:35",
+    "end": "15:39",
+    "text": "just off the back. So, let's just give"
+  },
+  {
+    "start": "15:36",
+    "end": "15:41",
+    "text": "it a quick watch and see what it did."
+  },
+  {
+    "start": "15:39",
+    "end": "15:42",
+    "text": "One question, three models. So, I'll be"
+  },
+  {
+    "start": "15:41",
+    "end": "15:44",
+    "text": "talking up, blah blah blah. There's one,"
+  },
+  {
+    "start": "15:42",
+    "end": "15:46",
+    "text": "two, three. No one copies homework."
+  },
+  {
+    "start": "15:44",
+    "end": "15:48",
+    "text": "Again, so I'm talking here, and then"
+  },
+  {
+    "start": "15:46",
+    "end": "15:50",
+    "text": "this is all running in the background,"
+  },
+  {
+    "start": "15:48",
+    "end": "15:51",
+    "text": "which is cool. And then it just brings"
+  },
+  {
+    "start": "15:50",
+    "end": "15:53",
+    "text": "up these different graphics that you can"
+  },
+  {
+    "start": "15:51",
+    "end": "15:54",
+    "text": "see, and we can go anything we wanted."
+  },
+  {
+    "start": "15:53",
+    "end": "15:55",
+    "text": "That's just Let's just one shot, but you"
+  },
+  {
+    "start": "15:54",
+    "end": "15:57",
+    "text": "get the idea of the thing it can kind of"
+  },
+  {
+    "start": "15:55",
+    "end": "16:00",
+    "text": "generate. Then it's kind of suggested"
+  },
+  {
+    "start": "15:57",
+    "end": "16:01",
+    "text": "six different ways we could do this. And"
+  },
+  {
+    "start": "16:00",
+    "end": "16:03",
+    "text": "it's actually given me a breakdown of"
+  },
+  {
+    "start": "16:01",
+    "end": "16:05",
+    "text": "everything I've said in my video, how"
+  },
+  {
+    "start": "16:03",
+    "end": "16:07",
+    "text": "I'm fast I'm talking, which is extremely"
+  },
+  {
+    "start": "16:05",
+    "end": "16:09",
+    "text": "fast, as you can see in this one, and"
+  },
+  {
+    "start": "16:07",
+    "end": "16:11",
+    "text": "then a full transcript as well. And then"
+  },
+  {
+    "start": "16:09",
+    "end": "16:13",
+    "text": "you can say to Claude, \"Hey, go ahead"
+  },
+  {
+    "start": "16:11",
+    "end": "16:15",
+    "text": "and build me that.\" And it will actually"
+  },
+  {
+    "start": "16:13",
+    "end": "16:17",
+    "text": "insert those into the video if you want"
+  },
+  {
+    "start": "16:15",
+    "end": "16:19",
+    "text": "to, or it'll just give you the clips."
+  },
+  {
+    "start": "16:17",
+    "end": "16:21",
+    "text": "But knowing how to use Claude with"
+  },
+  {
+    "start": "16:19",
+    "end": "16:22",
+    "text": "motion design is one thing. But if you"
+  },
+  {
+    "start": "16:21",
+    "end": "16:25",
+    "text": "don't know how to use Claude's most"
+  },
+  {
+    "start": "16:22",
+    "end": "16:27",
+    "text": "powerful design creation skill, you're"
+  },
+  {
+    "start": "16:25",
+    "end": "16:28",
+    "text": "leaving too much value on the table. So,"
+  },
+  {
+    "start": "16:27",
+    "end": "16:31",
+    "text": "the next thing we're going to do is"
+  },
+  {
+    "start": "16:28",
+    "end": "16:33",
+    "text": "learn how to do that in this video right"
+  },
+  {
+    "start": "16:31",
+    "end": "16:33",
+    "text": "here."
+  }
+]

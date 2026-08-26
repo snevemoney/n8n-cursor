@@ -1,0 +1,65 @@
+Here's how to build an AI agent that calls people while you sleep.
+
+So, pretend that you have a website.
+
+And in this case, let's pretend the business is an AI automation agency of some sort.
+
+And on your website, you've got a form submission.
+
+And when someone submits a form, this workflow is basically automatically going to call them and qualify them, ask them a few more questions, see what their intent is, and then log all of that information so that you know way more about this prospect before you actually make your outreach.
+
+So typically what you'd probably see in practice is a form submission like we have at UPAI and then once they hit submit all that data gets sent to a web hook in NAND and that would trigger this whole workflow.
+
+But for the sake of the demo and just so I can give you guys a template that works we are going to just be using a native NAN form submission trigger.
+
+So I'm going to go ahead and execute workflow.
+
+It's going to open up this form that you guys can see and let me fill this in real quick with some mock data and then we'll fire it off and we'll hear the agent call me and we'll listen to the conversation.
+
+Okay, so here is the form submission.
+
+We've got Richard.
+
+We've got the phone number, the email, the company name, the role, the request, and the company size.
+
+So, I'm going to fire this off.
+
+We'll see the workflow start running, and we're going to see this HTTP request right here, which is says call lead.
+
+And what that's going to do is it just triggered off a phone call, as you can see.
+
+And so, now I'm going to answer it, and we're going to talk to this agent.
+
+Hello. >> Hey, this is Elliot, an AI agent calling from up.
+
+Is this Richard with Greengrass?
+
+Yes, this is Richard. >> Great.
+
+Thank you for filling out the form.
+
+I was just going over it and um I had some questions to see if you'd be a good fit for our services.
+
+You're looking to automate lead generation for your gardening business, Green Grass.
+
+Correct. >> Yep, that's right. >> Perfect.
+
+Can you tell me what specifically prompted your interest in exploring automation solutions now? >> Yeah, over the holidays, business just really started to slow down.
+
+And when I stopped doing the outreach myself, it just felt like I took my foot off the gas.
+
+And I would love for us to be able to have a system where we're constantly having, you know, a flow of leads coming in. >> Absolutely.
+
+I understand the need to maintain, you know, a steady flow of leads even during slower periods.
+
+Um, how soon are you looking to implement an automation solution for this? >> I'd love to get something up and running within the next month.
+
+And there you can see that the row just popped up which was Richard calling from green grass.
+
+The request was automating lead generation for my gardening business.
+
+We've got the company size, the interest, the motivation, the urgency, the past experience, the budget, the intent, and the status has been marked off as complete.
+
+So, this agent was able to qualify them, get all of this information that we wouldn't have initially got from the form that he filled out, and now we have a lot more information to actually go reach out to Richard and start working with their business.
+
+If you want to watch the full breakdown, then click on that play button right here, and I'll see you guys over

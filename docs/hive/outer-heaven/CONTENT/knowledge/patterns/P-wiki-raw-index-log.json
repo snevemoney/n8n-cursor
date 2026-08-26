@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-wiki-raw-index-log",
+  "version": 1,
+  "title": "Raw → wiki pages → index → log. Do not dump the corpus.",
+  "steps": [
+    "Drop sources in raw/. Ingest to pages with backlinks.",
+    "Index is TOC. Log is ingest history. Schema routes.",
+    "Ingest cheap; reason expensive. Ingest pairs that mention each other."
+  ],
+  "support_ids": [
+    "K-hQvwMj7IJe4-01",
+    "K-hQvwMj7IJe4-02",
+    "K-hQvwMj7IJe4-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "Hive `wiki-ingest` / `context-docs`. Cursor+Grok. No second wiki app.",
+  "less_relevant_when": "8k-node Obsidian theater; Serop anti-OS; Fable spend.",
+  "confidence": "high as SOP; '5 minutes' is setup not a filled wiki",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "conflicts_with i4Q8wHZNPBU / brB-hSiV2iU / vcU85OrwuV0 stay labeled (video-level dissent)."
+}

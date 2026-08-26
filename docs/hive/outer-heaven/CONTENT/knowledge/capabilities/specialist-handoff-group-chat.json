@@ -1,0 +1,52 @@
+{
+  "capability_id": "CAP-lRUpu2-KtGQ-specialist-handoff",
+  "name": "specialist-handoff-group-chat",
+  "goal": "two specialists → classify WAKE → handoff sentence → draft → Evens sends",
+  "observed_workflow": [
+    "Name the specialist (inbox / invoice / meeting / video)",
+    "One dump + one reference artifact",
+    "Classify WAKE: scheduled vs event",
+    "Group chat only after two specialists; write the handoff",
+    "Gmail: read + draft. Send-removed",
+    "Product still → product-ad-from-photo. Publish HITL"
+  ],
+  "tools": [
+    "Gmail read-only",
+    "Higgsfield (on desk)",
+    "ClickUp / Zapier / Firecrawl (on-tape; ask-principal)"
+  ],
+  "agent_abilities": [
+    "draft specialist handoff",
+    "classify WAKE"
+  ],
+  "triggers": [
+    "inbox triage",
+    "invoice mail",
+    "product photo ad"
+  ],
+  "state": "draft exists; send not executed",
+  "guardrails": [
+    "send / pay / publish stay HITL",
+    "no parallel ClickUp install",
+    "Claude Cowork on-tape only",
+    "do not quote $19 as FACT"
+  ],
+  "reproduce": "Dry-run: write one inbox→invoice handoff sentence. Do not send.",
+  "generalize": "Hive 17 desks already are the specialists.",
+  "improve": "Do not improve by Gmail send-on-behalf.",
+  "primitive_ids": [
+    "PRIM-lRUpu2-KtGQ-specialist-handoff"
+  ],
+  "atom_ids": [
+    "K-lRUpu2-KtGQ-01",
+    "K-lRUpu2-KtGQ-03"
+  ],
+  "behavior_ids": [
+    "BEH-lRUpu2-KtGQ-specialist-handoff"
+  ],
+  "source_video_id": "lRUpu2-KtGQ",
+  "timestamp": "00:41-17:22",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

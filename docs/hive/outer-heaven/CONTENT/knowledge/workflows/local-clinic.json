@@ -1,0 +1,75 @@
+{
+  "workflow_id": "WF-local-clinic-v1",
+  "project_id": "local-clinic",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Keep hunt parked until Evens tags icp_id",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T2",
+      "title": "Offer sentence = outcome, not 'AI' / not category",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T3",
+      "title": "Four blanks for Review-to-book Install",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Warm-draft thank-you + book link (template only, no send)",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T5",
+      "title": "Do not run on-tape dentist scrape / outreach",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T6",
+      "title": "Google-review mining → thank-you path (ICP-specific atom)",
+      "coverage": "gap"
+    }
+  ],
+  "pattern_ids": [
+    "P-dont-lead-with-word-AI",
+    "P-category-pitch-fails",
+    "P-four-blanks-before-build",
+    "P-sanitize-then-check-pass-neq-send",
+    "P-book-clock-not-model"
+  ],
+  "support_ids": [
+    "K--6yUeJ3rkvg-01",
+    "K--6yUeJ3rkvg-02",
+    "K--Lo_SlSgtnA-02",
+    "K--cdexJWN8YA-02",
+    "K--zL_trhnQaI-03",
+    "K-0WDkwMxj13s-02",
+    "K-0YXjEzFfft8-03",
+    "K-27Y44JYXZJ8-01",
+    "K-2J3uX8iRNng-02",
+    "K-2OD14-0cot4-03"
+  ],
+  "dissent_ids": [
+    "K--cdexJWN8YA-04",
+    "K--cdexJWN8YA-05",
+    "K--cdexJWN8YA-06",
+    "K--zL_trhnQaI-04",
+    "K--zL_trhnQaI-05",
+    "K-0WDkwMxj13s-04",
+    "K-0WDkwMxj13s-05",
+    "K-0WDkwMxj13s-06",
+    "K-x-2088007687149601254-01",
+    "K-zWLZ3bVVwD8-02"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  }
+}

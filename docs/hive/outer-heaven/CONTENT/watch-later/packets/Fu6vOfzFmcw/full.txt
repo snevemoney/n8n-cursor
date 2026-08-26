@@ -1,0 +1,63 @@
+Here's how you build a simple rag pipeline in NADN.
+
+So the first thing we're going to build is the pipeline that takes a new doc that we drop into a Google Drive folder and it puts it into a vector database.
+
+So super simple, we're going to start off here by grabbing a Google Drive node and we're going to grab a trigger that is on changes involving a specific folder.
+
+So after you connect your Google Drive account, you want to choose the folder that you're going to be looking in.
+
+And then what are we watching for?
+
+We're watching for a new file being created in this folder.
+
+And I hit fetch test event.
+
+We should now see that that folder has arrived or sorry, not the folder, the file.
+
+So, I'm going to grab another Google Drive node.
+
+We're going to do download file and I'm going to change the file we're looking for to be by ID.
+
+And then all I have to do here is find the ID of the file that triggered this workflow.
+
+We've got what we want and now it's as simple as that.
+
+I'm just going to add a superbase step.
+
+We're going to add a superbase vector store.
+
+And now I'm just going to run this and this is going to put that policy and FAQ document into our Superbase.
+
+Cool.
+
+So it says five items should be there.
+
+So we should refresh this and see five items.
+
+Oh, they popped up right there.
+
+Real quick before we build that next pipeline.
+
+I'm just going to build a really, really quick AI agent so we can validate that it is able to read this document.
+
+Okay, so set that up real quick.
+
+I'm just going to ask it what is our shipping policy.
+
+Shoot that off and we should get an answer from the vector database.
+
+I didn't even give the agent a prompt or anything.
+
+We just hooked it up to a tool and look how smart this guy is.
+
+So, we've got our shipping policy.
+
+Orders are processed within one to two business days.
+
+Standard shipping takes 3 to seven business days.
+
+And you can see right here that it is correct.
+
+If you want to watch the full video, then click on that play button right here.
+
+I'll see you guys over there.

@@ -1,0 +1,17 @@
+So, we built these four AI agents and got paid $23,000 total by four separate businesses, and they weren't anything too complex or advanced.
+
+In fact, I actually started selling agents just like this a few months after starting out.
+
+So, I'm confident that you could build and sell something just like them.
+
+In this video, I'm going to walk you guys through what each agent actually did, how much we charged per agent, the exact process we followed to sell our agents, and how you can sell your first agent step by step.
+
+And stay to the end because that's when I go through the most expensive agent out of the four.
+
+All right, let's start with the first agent I sold, which was a personalized outreach agent.
+
+Basically, it let my client drop in a list of contacts, however many he wanted, and the system would automatically research each person and their company, then generate a personalized outreach message and follow-up message for them.
+
+This agent didn't actually send the messages or run the campaigns.
+
+It simply filled up the database with ready to go customized researchbacked messages that he could then plug into an email or DM sequence.

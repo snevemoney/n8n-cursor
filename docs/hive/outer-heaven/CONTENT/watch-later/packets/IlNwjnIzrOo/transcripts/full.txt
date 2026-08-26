@@ -1,0 +1,65 @@
+I just built this ultimate media agent that can do anything.
+
+Okay, so we talked to our agent through Telegram and on this lefth hand side you can see I'm going to send over an image and what the agent's going to do is first of all process this into our Google Drive environment.
+
+So here you can see the agent's pretty eager to help us out.
+
+It's asking us about how we want to name this and also if we want to change any sharing settings.
+
+So here you can see I just sent off this message that says to just name it speaker.
+
+What it's going to do is it's going to go to our Google Drive agent right here and that is the one that has the right tools to actually change the name.
+
+As you can see, this tool right here is called change name.
+
+Okay, so it just responded to us and of course it's logging all of its actions, which I'll show you guys later.
+
+But if I pull back up Telegram, it says that it renamed the file to speaker.
+
+I can click on this link right here and we should see that exact picture that I just uploaded.
+
+And you can see it exists in our folder called media.
+
+It is called speaker and it's right here.
+
+So now what I'm going to do is send off this other message that says, "Please edit that image.
+
+Turn it into a studio looking image.
+
+It should be energetic, colorful, and highlight the feeling of listening to music on a speaker." Whatever that means. the media team will figure it out.
+
+As you can see, just as we predicted, the creative agent is using its edit image tool.
+
+So, I'll check back in with you guys once we get that final product back.
+
+All right, look at that.
+
+The agent actually ended up creating three different images for us.
+
+So, we have a couple different styles that we can choose from, which is pretty cool.
+
+All right, so just fired off this new message where I said, "Actually, what I want you to do is take that first preview file." So, this was the one that we liked the best.
+
+And then I said, "Turn that into a video. create a VFX ad with music and lights that sync to the beat as an advertisement for a JBL speaker.
+
+Real quick, wanted to update you guys.
+
+The creative agent has full autonomy to use its tools to help us out with our media.
+
+And you can see it's going to turn that image into a video, but it also wanted to try out creating its own video with just text.
+
+So, I'm not too confident how good this one will be, but we'll definitely take a look.
+
+All right, so that just finished up.
+
+I'm very, very impressed.
+
+So, this first one is the one that was actually the image turned into video.
+
+So, let's click into this real quick.
+
+We'll hear the audio.
+
+If you want to see how you can set up this exact system for free, then click on that play button right here to watch the full video.
+
+And I'll see you guys over there.

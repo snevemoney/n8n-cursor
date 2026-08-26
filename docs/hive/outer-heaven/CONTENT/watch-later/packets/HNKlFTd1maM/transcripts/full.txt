@@ -1,0 +1,377 @@
+So, we built these four AI agents and got paid $23,000 total by four separate businesses, and they weren't anything too complex or advanced.
+
+In fact, I actually started selling agents just like this a few months after starting out.
+
+So, I'm confident that you could build and sell something just like them.
+
+In this video, I'm going to walk you guys through what each agent actually did, how much we charged per agent, the exact process we followed to sell our agents, and how you can sell your first agent a step by step.
+
+And stay to the end because that's when I go through the most expensive agent out of the four.
+
+All right, let's start with the first agent I sold, which was a personalized outreach agent.
+
+Basically, it let my client drop in a list of contacts, however many he wanted, and the system would automatically research each person and their company, then generate a personalized outreach message and follow-up message for them.
+
+This agent didn't actually send the messages or run the campaigns.
+
+It simply filled up the database with ready to go, customized, researchbacked messages that he could then plug into an email or DM sequence.
+
+Super simple, but insanely valuable.
+
+I ended up charging $1,650 for this build.
+
+And honestly, that number was pretty random.
+
+At the time, I had already sold another agent for 1,200, so that was kind of my baseline.
+
+And I thought to myself, okay, this one's a bit more.
+
+Let's try 1650.
+
+I was clearly a beginner, and I wasn't even thinking about ROI back then.
+
+But if you actually do calculate the ROI, it still was a total no-brainer for him.
+
+I think he got a great deal because he was spending 2 to three hours per week crafting personalized messages and doing all that research himself.
+
+So, let's say his time was worth 50 bucks an hour.
+
+That's around $400 a month.
+
+With the system, he instantly got that time back, which means in about four months, he's made his money back.
+
+And every month after that, it's pure ROI.
+
+Over the course of a year, that's nearly $5,000 saved.
+
+And that doesn't even count the opportunity cost of having those extra hours back every week to actually grow the business instead of writing repetitive outreach.
+
+Now, how did I actually sell this?
+
+Well, the client found me on YouTube because I had built something similar on my channel just for fun.
+
+And he emailed me saying that he wanted something similar.
+
+We hopped on a couple of calls.
+
+I scoped out the build.
+
+I told him I could do it.
+
+He said yes.
+
+It was that simple.
+
+The crazy part is at this stage I wasn't positioning myself as a freelancer or saying that I did paid work.
+
+I just happened to have my email address in the description of the videos and I was posting builds online because I was excited about learning.
+
+But because I was putting myself out there, people started reaching out and that's how I was able to close this deal and my other first ones.
+
+So that was the first agent.
+
+Soon after that, things started moving a lot faster.
+
+I'd quit my job.
+
+I started getting more inbound traction and I realized I couldn't keep doing everything solo.
+
+That's when I decided to team up with my co-founders and we started building what's now our AI business, True Horizon AI.
+
+And this was a big turning point because up until then, I was just throwing out random numbers for pricing, like that $1,650 outreach agent.
+
+But once I had a team, we started taking this more seriously, and we realized we needed to get a system for pricing rather than just throwing out a number.
+
+That way, instead of guessing, we could actually sit down with a client, break down how much time or money a process was costing them, and show them exactly how an automation would save that time or money. and then we could price the system in a way that made sense for both sides.
+
+That made selling way easier because clients could see in black and white that it wasn't an expense, it was an investment with a measurable return.
+
+And that's how we ended up landing the second agent that I'm going to show you guys.
+
+So once I started working with my business partners Milan and Tyler, we launched True Horizon AI.
+
+We started getting our internal systems in place and we landed one of our first products together.
+
+This one was a type of sales agent.
+
+The idea here was simple but really impactful.
+
+The agent could handle customer inquiries, generate quotes, and automatically enter everything into the CRM.
+
+It would talk to both the customer and the orders team, generate an accurate quote, and then log all the important details like name, email, phone number, location, and even a summary of the conversation back into the CRM.
+
+The value proposition here was clear.
+
+The system would cut down manual data entry, reduce errors, and free up the business owner's time so he could focus on growth rather than repetitive administrative work.
+
+And because it streamlined operations, it also gave him a foundation to scale without hiring more staff.
+
+And that was a huge deal for him because hiring wasn't something he could yet afford to do. but he still needed to grow his business.
+
+So for this project, we charged $4,000 and the client was happy to pay that because we weren't just automating a small task.
+
+We were removing hours of repetitive work, setting up a system he could scale with, and helping him avoid the cost of extra headcount.
+
+Now, let's talk about the sales process.
+
+It started with me hopping on an initial discovery call to scope things out.
+
+From there, I brought in my co-founders, Milan, our CEO, and Tyler, our CTO, to make sure there weren't any crazy technical requirements that we were overlooking and that we had the bandwidth to actually deliver on this project.
+
+After that, Milan and I ran a second discovery call with the client and then Milan closed the deal on the third call.
+
+Looking back, we definitely didn't have our processes nailed down yet.
+
+For example, we forgot to collect baseline data, which meant we couldn't build a strong case study to show the ROI afterward.
+
+At the same time, we were getting flooded with inbound requests, but didn't have solid SOPs or systems to handle them.
+
+So, for delivery of this build, Milan, our CEO, ended up doing a lot of the heavy lifting himself and then transitioned into more of an account management role once we brought on a developer to help finish things out.
+
+But I want to be clear, you don't need a co-founder or a full team to land a $4,000 project.
+
+What this really shows is that the jump from freelancer to consultant to trying to run an agency is tough.
+
+There are growing pains, and even though you might be able to charge more, you'll still be figuring out internal systems along the way.
+
+This third agent that we built was essentially a personal assistant for a business owner and his team.
+
+It could provide quick access to internal data sources, streamline task management, and improve team productivity, all directly inside Slack, which was where the company lived most of the day.
+
+The value prop here was all about productivity, centralizing data retrieval, automating routine admin tasks, and enabling faster communication without switching between tools.
+
+Now, when it came to pricing, this one was trickier.
+
+With sales or outreach agents, it's easy to calculate how much time you're saving.
+
+But with something like a personal assistant, the value is a little more variable because those small admin tasks don't happen on a set cadence.
+
+So, it's harder to directly tie them to ROI.
+
+So, we ended up charging $6,000 for this project.
+
+And even though we tried to back that number with some ROI calculations, the truth is we priced more on complexity of the build rather than the actual long-term value.
+
+Valuebased pricing is obviously the way to go and something that we didn't learn right away.
+
+And when you really break it down in terms of value, I actually think that we should have charged more for the sales agent than we did for this personal assistant agent.
+
+If you think about the way that the usage and leverage of a system actually compounds with a process like a sales agent compared to a personal assistant administrative agent, it becomes very clear because if the sales agent converts those leads, the business grows and as the business grows, more leads come through.
+
+So the usage of the system grows and this creates like this flywheel where the ROI of the system actually exponentially scales.
+
+And that's something that's not as clear with a personal assistant because as the business grows, does the personal assistant usage grow?
+
+Maybe it does, maybe it doesn't, but it doesn't scale in the same way.
+
+And that's an important lesson because pricing in this space is hard and it takes time, data, and experience to get it right.
+
+Looking back, I know we were pricing too low because our close rate was insanely high.
+
+If you're closing over 50% of your proposals, it means your clients are realizing that they're getting a steal, and this is the market telling you that you need to charge more.
+
+It means that you're rarely getting push back on your pricing, which is a strong signal that you're doing it too low.
+
+So, anyways, the sales process for this project looked a lot like the previous one.
+
+Milan and I ran the discovery calls.
+
+We brought in Tyler, our CTO, to doublech checkck the technical scope and then we closed the deal.
+
+But this is where our growing pains really showed because in order to deliver this build, our CTO ended up being the one in the weeds developing the workflow.
+
+And that's not how a CTO should spend their time.
+
+He should be managing a team of engineers and innovating, which is what Tyler's passionate about and does best, not being stuck in the weeds of a build connecting nodes to an agent.
+
+So this process was another reminder that scaling a team doesn't automatically make things easier.
+
+It actually gives you more things to manage, more moving pieces, and more chances for inefficiency.
+
+But by the time we got to our next agent, we were in a much better place.
+
+We had stronger SOPs, better systems.
+
+And because of that, we were finally able to charge double what we just charged for this one.
+
+Finally, the fourth agent we sold was a full AI concierge.
+
+This one was designed to support a client's business by helping their members with everything they needed.
+
+Onboarding, finding and starting events, managing guest passes, offering support, and even keeping a running conversation history across all the members.
+
+In other words, it acted like a virtual secretary, a single point of contact that could handle the day-to-day tasks of guiding users and keeping the business running smoothly.
+
+And because the company was launching a new offer, our AI concierge was critical in helping them get it off the ground quickly without hiring more staff.
+
+This was also right around the time that MCP servers started to become a big deal online and we were able to transition the scope and architect to incorporate this new technology which was another value lever for us to pull here by showing the client that we stay bleeding edge and are always looking for the newest technology.
+
+This was by far one of the more complex systems that we had built up to this point and that's why we charged $12,000.
+
+The client could clearly see the value because the agent was basically filling the role of an intern or assistant but at a fraction of the long-term cost of hiring.
+
+The good news was by this point our internal systems were finally catching up to the size of the projects we were landing.
+
+We had a dedicated account manager keeping the client communication smooth.
+
+Our CEO was in the right spot, focusing on sales strategy, operations, and growth.
+
+And our CTO was finally managing a team of engineers instead of being stuck building by himself.
+
+And for me, I finally had more freedom to spend time creating YouTube videos and focusing on the front end of the business instead of being buried in client projects.
+
+So this project wasn't just a win because of the $12,000 price tag.
+
+It was proof that we had gone from scrappy freelancers to consultants, then to building a business with real systems that could handle bigger and more valuable clients, and now looking to scale our operations.
+
+All right, so we've walked through the four agents that we sold.
+
+Now, the question is, how do you actually do this yourself?
+
+This is the exact road map I've followed as a freelancer, then when I built my own agency, and now with my co-founders at True Horizon as we started to move up market.
+
+And it's the same road map you can follow to start landing your first real AI automation clients.
+
+Step one, diagnose the problem.
+
+Prescribe a solution.
+
+The very first step is learning to think like a problem solver.
+
+The value isn't in the fact that you know how to wire up nodes in your AI workflow.
+
+The value is your brain and your ability to understand how a business runs, where it's leaking time or money, and where an automation can fix that.
+
+For example, don't pitch, I can build you an AI chatbot.
+
+Instead, say your team spends 15 hours a week answering repetitive client questions.
+
+I can build a system that cuts that down to almost zero, freeing them up to close more deals.
+
+That shift takes you from just being a builder to being a business partner.
+
+Number two, pick simple tools.
+
+Once you've identified the problem, the tools are just the way you solve it.
+
+For 90% of use cases, simple building blocks like Naden, vector databases, and an AI model or two will get the job done.
+
+But don't over complicate the step.
+
+Many freelancers underpric because they think in terms of technical effort.
+
+Clients don't care if it takes you 2 hours or 20.
+
+They care about the outcome.
+
+Selling workflows and templates may have worked when the space first started up, but if your value is defined by the templates you give out, it's all becoming commoditized.
+
+You should leverage templates to help you build quicker and smarter, but the value is how you were able to customize them to fit the client's needs.
+
+Step three is to multiply the hours saved by the hourly rate by 4 weeks, and that's how you get to monthly savings, and then just times that by 12 to get to annual savings.
+
+So, number four is to package and anchor your offers.
+
+Don't just blurt out a number.
+
+Try creating tiered packages like a starter plan, a growth plan, and a scale plan so clients can self- select and always lead with the highest anchor.
+
+So, for example, our scale package is 25,000 and it includes these functionalities, but most clients actually go with the growth package at 12K that has these functionalities.
+
+Suddenly, that 12K feels like the smart middle option.
+
+Packaging makes you look professional.
+
+Anchoring makes your pricing logical, and together they stop clients from comparing you to hourly freelancers.
+
+Number five, avoid the traps.
+
+There are a couple of silent killers that you need to watch out for.
+
+One of them is underpricing.
+
+It attracts the wrong clients and makes it nearly impossible to raise your rates later.
+
+Number two is under scoping.
+
+Saying yes to just one more feature without rescoping will destroy your margins and always define exactly what's included and create a change request process for anything outside the scope.
+
+Number three is chasing small retainers too early.
+
+One $10,000 project is often more profitable and better for your mental health and business reputation than five $2,000 a month retainers.
+
+Stability comes from having a lead pipeline, not from having retainers.
+
+And just another quick reminder to raise your rates regularly.
+
+If your close rate is way above 40 to 50%, it's a clear signal that you're underpricing.
+
+For B2B consulting services, a 20 to 30% close rate is considered strong.
+
+So, if you're not receiving any friction or push back, you're going down a bad path where your CLV or customer lifetime value is going to be way too low.
+
+Number six, we have prototype and QA.
+
+Now that you've priced and packaged the deal, it's time to build.
+
+But don't overthink it.
+
+Prototype fast. get a working version live, then test.
+
+At True Horizon, we follow a simple QA cycle, which is one week of internal QA.
+
+We run it through a sample and a real data set.
+
+We stress test it with edge cases, and we fix issues before the client sees anything.
+
+And then we give the client a week to QA, where he or she will test it in the real world, give us feedback, and then we're able to iterate and make those adjustments.
+
+The QA process does two things.
+
+One, it protects you from edge case failures, and two, it shows your client that you're professional, reliable, and looking out for their business.
+
+Number seven, building long-term partnerships.
+
+Finally, just remember this.
+
+You're not selling one-off automations.
+
+You're building relationships.
+
+Your early projects position you in the client's mind as either the cheap freelancer or the strategic AI partner.
+
+Long-term value comes from collecting data and case studies from every project, turning one project into multiple by showing measurable ROI, offering ongoing optimization or expansion once trust is established, and building relationships with more than just one person in the customer's organization.
+
+When you can clearly demonstrate this system saves you 10 times what you paid me, clients stop thinking about cost and start thinking about how else they can work with you.
+
+So if you want to follow the same path, here's the road map.
+
+Spot the problem, pick simple tools, price based on ROI, package an anchor, avoid the traps, prototype, and build long-term partnerships.
+
+That's the exact framework that I've used to find success selling a agents.
+
+And it's the same one that we will still use today at True Horizon.
+
+So that's going to do it for today.
+
+I'm going to have this full resource pack in my free school community if you guys want to access that.
+
+It just basically goes over everything that I just talked about here so you can reference that later.
+
+And if you're looking to go even deeper with this kind of stuff and you also want to connect with other people who are building businesses with NN, then definitely check out my plus group.
+
+The link for that is also down in the description.
+
+And by the time you're watching this, we just dropped a full course called automation to monetization where I talk about how you can actually start to monetize your AI skills now that you are not just advanced in edited end, but you're also becoming advanced in AI implementation and becoming a problem solver for these businesses.
+
+And trust me, these businesses desperately need someone to help them out with their AI implementation road maps.
+
+If you guys enjoyed or you learned something new, please give it a like.
+
+Definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.
+
+Thanks everyone.

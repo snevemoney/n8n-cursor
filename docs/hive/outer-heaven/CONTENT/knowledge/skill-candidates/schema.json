@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-skill-candidate",
+  "title": "Desk skill candidate (part, not whole-clone)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidate_id",
+    "desk_slug",
+    "fragment",
+    "source_video_id",
+    "status",
+    "do_not_auto_install"
+  ],
+  "properties": {
+    "candidate_id": { "type": "string" },
+    "desk_slug": {
+      "type": "string",
+      "enum": [
+        "big-boss",
+        "hitl-operator",
+        "communications-manager",
+        "lead-hunter",
+        "product-gtm",
+        "researcher",
+        "librarian",
+        "creative-studio",
+        "consultant",
+        "forge",
+        "personal-cfo",
+        "wealth-manager",
+        "money-desk",
+        "publishing-engine",
+        "day-planner",
+        "career-strategist",
+        "watchdog"
+      ]
+    },
+    "fragment": {
+      "type": "string",
+      "description": "The part this desk could gain. Not the whole YouTuber workflow."
+    },
+    "capability_id": { "type": "string" },
+    "primitive_id": { "type": "string" },
+    "source_video_id": { "type": "string" },
+    "status": { "type": "string", "enum": ["UNTESTED", "WIRED"] },
+    "do_not_auto_install": { "type": "boolean", "const": true }
+  }
+}

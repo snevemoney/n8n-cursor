@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-076",
+  "version": 1,
+  "title": "rag / ops — assistant-hides-the-pipeline-http-fromai-is-the-glue",
+  "steps": [
+    "Steal “managed assistant + agent-chosen query.” Do not buy Pinecone because tape.",
+    "Steal highlights-flag + prompt-to-surface. `info-gain-cite`.",
+    "Steal the 3-way + fee caveat. `golden-test-loop`."
+  ],
+  "support_ids": [
+    "K-QojPKL96Dx4-01",
+    "K-QojPKL96Dx4-02",
+    "K-QojPKL96Dx4-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=rag; stage=ops; $0.05/h active. Key shown once.",
+  "less_relevant_when": "Do not flatten into “Pinecone wins RAG.”",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

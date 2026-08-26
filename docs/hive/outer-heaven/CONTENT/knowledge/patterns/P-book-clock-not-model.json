@@ -1,0 +1,23 @@
+{
+  "pattern_id": "P-book-clock-not-model",
+  "version": 1,
+  "title": "Book tools fail on timezone/notice, not 'AI'. Book stays HITL.",
+  "steps": [
+    "Debug calendar payload, tool args, agent read — in that order.",
+    "Set now+TZ; respect min-notice windows.",
+    "Confirm name/email. Do not auto-book."
+  ],
+  "support_ids": [
+    "K--cdexJWN8YA-02",
+    "K-zWLZ3bVVwD8-03"
+  ],
+  "dissent_ids": [
+    "K-zWLZ3bVVwD8-02"
+  ],
+  "valid_when": "Intake→book / private-book-install. Hive: no Vapi, no ElevenLabs, no auto-book.",
+  "less_relevant_when": "Voice-vendor auto-book (operate-never). Caption-only UI path.",
+  "confidence": "high as the scar family; vendors on-tape are operate-never",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Native-calendar tape ≠ n8n-MCP tape. Keep zWLZ3bVVwD8 vs y-cq_Qo4zVo unflattened."
+}

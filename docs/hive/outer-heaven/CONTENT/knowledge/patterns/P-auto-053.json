@@ -1,0 +1,24 @@
+{
+  "pattern_id": "P-auto-053",
+  "version": 1,
+  "title": "model-eval / ops — fugu-is-a-conductor-api-not-a-better-llm",
+  "steps": [
+    "Steal the two orchestration questions. Do not install Sakana.",
+    "Steal the contrast row. Do not flatten Fusion/Fugu/Claude-subs. Mark tape $ UNVERIFIED.",
+    "Steal “tie + latency + $” as the kill test. Do not quote $50/$10 as FACT. Mark tape $ UNVERIFIED.",
+    "Steal cheapest-that-holds-quality. Hive: Cursor+Grok, no Sakana."
+  ],
+  "support_ids": [
+    "K-GpSqBjW6hR4-01",
+    "K-GpSqBjW6hR4-02",
+    "K-GpSqBjW6hR4-03",
+    "K-GpSqBjW6hR4-04"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=model-eval; stage=ops; Fusion “dropped the other week” — dated.",
+  "less_relevant_when": "Claude Code already does intra-lab version. Tape $ UNVERIFIED.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,25 @@
+{
+  "primitive_id": "PRIM-RDytbVDzMF4-script-beat-graphic",
+  "name": "SCRIPT-BEAT-THEN-GRAPHIC",
+  "loop": [
+    "timestamped script exists",
+    "mark beats that explain (not decorate)",
+    "source or drop every number",
+    "lock one font + one icon style",
+    "one graphic per beat on disk",
+    "insert / publish HITL"
+  ],
+  "obvious_demo": "Claude Design motion graphics on a talking-head script",
+  "other_applications": [
+    "Notes only: Path C clip overlays",
+    "Do not auto-insert into a live video"
+  ],
+  "capability_ids": [
+    "CAP-RDytbVDzMF4-script-beat-motion"
+  ],
+  "source_video_id": "RDytbVDzMF4",
+  "timestamp": "12:06-16:16",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

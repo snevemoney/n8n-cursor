@@ -67,6 +67,18 @@ else
   bad "analyze-video-watch.py --self-test"
 fi
 
+if python3 scripts/hive/scrape-youtube-watch-later.py --self-test >/dev/null; then
+  ok "scrape-youtube-watch-later.py --self-test"
+else
+  bad "scrape-youtube-watch-later.py --self-test"
+fi
+
+if python3 scripts/hive/researcher-research-implement.py watchlater --self-test >/dev/null; then
+  ok "researcher watchlater --self-test"
+else
+  bad "researcher watchlater --self-test"
+fi
+
 if python3 scripts/hive/hive-web-research.py packet --question "JIT smoke" --agent Forge --tier quick --dry-run >/dev/null 2>&1; then
   ok "hive-web-research.py packet --dry-run"
 else

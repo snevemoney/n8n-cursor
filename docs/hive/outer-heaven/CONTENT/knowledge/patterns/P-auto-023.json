@@ -1,0 +1,25 @@
+{
+  "pattern_id": "P-auto-023",
+  "version": 1,
+  "title": "agent-ops / guardrail — instance-mcp-search-execute-anything-marked-available",
+  "steps": [
+    "Learn the shape. Operate-never: turn this on for hive / always-allow execute.",
+    "Steal “description + least-privilege toggle.” Never always-allow send.",
+    "Steal manual-enable + description-as-schema. Operate-never: no-auth MCP to ChatGPT."
+  ],
+  "support_ids": [
+    "K-5p5cV0yVDvQ-01",
+    "K-5p5cV0yVDvQ-02",
+    "K-5p5cV0yVDvQ-03"
+  ],
+  "dissent_ids": [
+    "K-5p5cV0yVDvQ-05",
+    "K-5p5cV0yVDvQ-06"
+  ],
+  "valid_when": "domain=agent-ops; stage=guardrail; A send workflow was MCP-available. Dunder-Mifflin is a demo address.",
+  "less_relevant_when": "Assigned-trigger path still exists (he uses it when ChatGPT OAuth dies and for Vapi).",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

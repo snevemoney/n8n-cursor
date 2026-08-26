@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-state-json",
+  "type": "Agent infrastructure",
+  "discovery": "Durable facts and run logs belong in a typed store the next run can read — not only the chat. Filter one row into the model; do not dump the store. IDs may be monotonic (delete ≠ reset).",
+  "applicability": "ALL desks that wake more than once",
+  "proposed_change": "Hive state.json with typed fields + last-run log. Wired as skill state-json on coverage-loop via hive-state.py log-run. Pair with filter-then-llm.",
+  "evidence": "tDGiWn0flK8 · QCjMBOEhpLE · lcNN3X9gXls · gb5TlGw6Uks · 27Y44JYXZJ8 · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "tDGiWn0flK8",
+  "status": "WIRED",
+  "next": "Next coverage-loop iteration must log-run one key. Do not migrate hive SSOT to n8n Data tables. Do not dump log[] into the prompt."
+}

@@ -1,0 +1,49 @@
+{
+  "workflow_id": "WF-safe-hours-then-constraint-v1",
+  "project_id": "safe-hours-then-constraint",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Load desk wiki + this workflow",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Run deep-video-learning",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T3",
+      "title": "THINK/BEHAVE/TRICKS/USE",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Dry-run without hard steps",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T5",
+      "title": "Watchdog grades",
+      "coverage": "have hive skill"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-eFOTQpbGcy8-01",
+    "K-eFOTQpbGcy8-02"
+  ],
+  "dissent_ids": [
+    "none \u2014 caption-only speech\u2260behavior stays on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "eFOTQpbGcy8",
+  "words_read": 2689
+}

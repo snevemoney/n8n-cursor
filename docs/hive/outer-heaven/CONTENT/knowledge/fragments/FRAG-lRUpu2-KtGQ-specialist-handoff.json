@@ -1,0 +1,24 @@
+{
+  "fragment_id": "FRAG-lRUpu2-KtGQ-specialist-handoff",
+  "version": 1,
+  "input": "Two named specialist jobs + one reference artifact",
+  "steps": [
+    "Classify WAKE (schedule vs event)",
+    "Write the handoff sentence",
+    "Draft only (send-removed)",
+    "Product photo → existing Higgsfield skill",
+    "Evens sends / publishes"
+  ],
+  "output": "Draft + handoff card, or refuse (ClickUp install / Gmail send)",
+  "source_ids": [
+    "lRUpu2-KtGQ",
+    "K-lRUpu2-KtGQ-01",
+    "K-lRUpu2-KtGQ-03"
+  ],
+  "behavior_ids": [
+    "BEH-lRUpu2-KtGQ-specialist-handoff"
+  ],
+  "valid_when": "Inbox / invoice / product-ad sitting on existing stack.",
+  "less_relevant_when": "Omni-bot request or new ClickUp without Evens.",
+  "knowledge_type": "declared"
+}

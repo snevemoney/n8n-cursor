@@ -1,0 +1,54 @@
+{
+  "workflow_id": "WF-cron-idea-brand-stop-before-publish-v1",
+  "project_id": "cron-idea-brand-stop-before-publish",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Load desk wiki + this workflow",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Run deep-video-learning",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T3",
+      "title": "THINK/BEHAVE/TRICKS/USE",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Dry-run without hard steps",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T5",
+      "title": "Watchdog grades",
+      "coverage": "have hive skill"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-tNOk29fs_aY-01",
+    "K-tNOk29fs_aY-02",
+    "K-tNOk29fs_aY-03",
+    "K-tNOk29fs_aY-04"
+  ],
+  "dissent_ids": [
+    "K-tNOk29fs_aY-05",
+    "K-tNOk29fs_aY-06",
+    "K-tNOk29fs_aY-07",
+    "K-tNOk29fs_aY-08"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "tNOk29fs_aY",
+  "words_read": 367
+}

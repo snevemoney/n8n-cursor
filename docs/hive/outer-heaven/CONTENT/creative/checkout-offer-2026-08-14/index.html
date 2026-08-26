@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Path C offer draft — clock running</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Outfit:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --void: #0c0d10;
+      --ink: #f3f1ea;
+      --mute: #9a9588;
+      --cta: #ff2e00;
+      --cta-ink: #140400;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--void);
+      color: var(--ink);
+      font-family: Outfit, system-ui, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+    }
+    main { width: min(640px, 100%); }
+    .clock {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 28px;
+    }
+    .clock b { color: var(--ink); font-weight: 600; }
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(40px, 8vw, 64px);
+      font-weight: 500;
+      line-height: 0.95;
+      margin: 0 0 18px;
+    }
+    p { color: var(--mute); max-width: 38ch; margin: 0 0 28px; }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 22px;
+      background: var(--cta);
+      color: var(--cta-ink);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .fine {
+      margin-top: 28px;
+      font-size: 13px;
+      color: var(--mute);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="clock">
+      <span>Path C · sitting clock</span>
+      <b>Tease → site → checkout → launch</b>
+    </div>
+    <h1>A landing that sells before it scrolls.</h1>
+    <p>
+      One promise: software that runs the business, shown as a plate the page scrubs.
+      Contact is already live. Stripe is a later flip — not a $1 charge tonight.
+    </p>
+    <a class="cta" href="https://evenslouis.ca/#contact">Start a project</a>
+    <p class="fine">
+      Draft only. No live Stripe. Distro copy stays a draft. Evens pays / publishes / sends.
+      Mail: <a href="mailto:contact@evenslouis.ca" style="color:inherit">contact@evenslouis.ca</a>
+    </p>
+  </main>
+</body>
+</html>

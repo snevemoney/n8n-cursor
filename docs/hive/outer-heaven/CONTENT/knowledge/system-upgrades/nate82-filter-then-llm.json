@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-filter-then-llm",
+  "type": "Agent infrastructure",
+  "discovery": "Deterministic narrow (email = from, workflow = name) then LLM. Dumping hundreds of rows is tokens + hallucination. Types/formats are the tool contract.",
+  "applicability": "ALL retrieval-into-prompt paths",
+  "proposed_change": "Require a filter key before a table/store is passed to a model. Wired as skill filter-then-llm on inbox-to-task-routing and hive-state.py get --key.",
+  "evidence": "QCjMBOEhpLE · lcNN3X9gXls · HN0oWxbF2bM · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "QCjMBOEhpLE",
+  "status": "WIRED",
+  "next": "Do not stand up n8n tables as hive SSOT. Do not dump state.json log[] into the model."
+}

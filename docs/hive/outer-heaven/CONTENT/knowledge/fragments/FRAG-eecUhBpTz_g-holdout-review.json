@@ -1,0 +1,24 @@
+{
+  "fragment_id": "FRAG-eecUhBpTz_g-holdout-review",
+  "version": 1,
+  "input": "A written spec + done-when",
+  "steps": [
+    "Write hold-outs the builder must not see",
+    "Builder implements from spec only",
+    "Other session / Watchdog grades",
+    "Fix open misses before next bite",
+    "Named deploy; Evens flips"
+  ],
+  "output": "GRADE from a non-builder, or fail (builder saw exam / self-scored / merge-without-deploy-strategy)",
+  "source_ids": [
+    "eecUhBpTz_g",
+    "K-eecUhBpTz_g-01",
+    "K-eecUhBpTz_g-03"
+  ],
+  "behavior_ids": [
+    "BEH-eecUhBpTz_g-spec-queue-holdout"
+  ],
+  "valid_when": "A factory / auto-loop / builder-grades-builder proposal exists.",
+  "less_relevant_when": "Single HITL slice with Watchdog already scoring.",
+  "knowledge_type": "declared"
+}

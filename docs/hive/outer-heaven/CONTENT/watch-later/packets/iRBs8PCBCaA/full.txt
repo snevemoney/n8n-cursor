@@ -1,0 +1,133 @@
+So, in 2026, you will be hearing a lot about spatial intelligence, world models, and media understanding.
+
+In other words, AI that can understand the physical world, but also generate it with photorealistic quality.
+
+Not only is this tech important for robotics, but a whole slew of media and entertainment applications.
+
+What these companies mean is that these AI video generators, by virtue of predicting the next frame, just like a text model predicts the next token, by predicting the next frame, you have to understand a lot about the real world, the physics that govern it, how entities move and behave within it.
+
+And all of these models, as they've started scaling them up, are showing signs of having this type of understanding.
+
+In other words, if you drop a boulder into an ocean, how should it ripple and like how would it create waves within it? >> [music] >> Or a person that's walking and jumps up against a wall, how they would clash against it and fall down.
+
+Now, this is really novel because these models aren't computing physics like they would inside of a game engine, where maybe you're doing ragdoll physics to figure out how does this character like mash up against a wall?
+
+They are understanding it implicitly because they've seen enough diversity of data, aka all of internet-scale video data, such as YouTube, and are able to approximate these kind of physical interactions.
+
+So, we've seen these models just getting better and better at doing exactly this.
+
+Now, they're not perfect, as you probably have noticed.
+
+So, for example, a gymnast trying to do these complex, you know, physical movements with her body, you'll notice the orientation of the head will change.
+
+Or if you have a horse that's trotting along, the front and back legs would swap together.
+
+So, clearly, these models have a while to go, but what happens when you can start predicting the next frame, but do that in real real time at 15, 20, 30 frames per second.
+
+Suddenly, you start getting a model like Genie 3.
+
+Now, Genie 3 is fundamentally an autoregressive model, except instead of predicting like the next token like a large language model would, it's like predicting the next frame, right?
+
+So, while we don't know exactly what the underpinnings are, we can speculate that essentially Genie 3 treats like visual patches sort of as these tokens that are predicted sequentially, and that gives you a lot of the spatial and temporal coherence.
+
+Like physics becomes an emergent property that comes out of it, but you get a degree of consistency for free.
+
+And this is really powerful because essentially like given a bunch of frames that have been predicted, the next frame can be predicted based on the action that the user gave and all prior frames that have already been generated to make sure everything looks cohesive.
+
+Now, this is in contrast to diffusion models where everything is sort of predicted at once.
+
+Basically, treat a video generation as this like single three-dimensional block.
+
+Think of it like the height, the width, and then the time axis, right?
+
+Like the temporal aspect.
+
+And then these models use essentially like diffusion transformers to like simultaneously denoise the whole stack, if you will.
+
+And this gives you amazing consistency within the generation because since you're doing the denoising all at once, like you're not going to have like completely weird artifacts that you might have seen in previous models where each of the key frames were generated individually and then you sort of like interpolate between them.
+
+Now, this also helps with consistency of these offline generated videos because like every patch of the video sees every other patch.
+
+So, if you have like a basketball that's flying across the scene, like all the frames are being generated with the movement of that basketball in mind so that it's coherent across the generation.
+
+Now, of course, this doesn't work for real-time scenarios, and the advantage of having this autoregressive approach is like you could have like a seemingly infinite length generation, right?
+
+This is why video diffusion models are capped at 5 seconds, 10 10 15 seconds, 20, 30 seconds tops, after which you have to go do another extended generation where you take the last frame and go back doing the whole process again.
+
+Whereas with this auto-regressive paradigm, such as Genie-3, you could just keep predicting the next frame till infinity.
+
+The question then becomes is how do you have some notion of visual spatial memory?
+
+Like how does the model remember what was in that generation?
+
+And hey, I left the ball over here, so the ball should exactly be over here when I look back at it.
+
+Well, right now, you'll notice a lot of these models have a rolling context window.
+
+Essentially, all the frames that were generated, it's keeping that in memory and is able to look back at it.
+
+But after a certain point, the size of that just explodes and is far outside of the context window.
+
+So what you do is just handle in a rolling fashion.
+
+Like as new frames keep getting generated, you get rid of the previous ones and push them outside of the context window.
+
+Meaning that it remembers everything that happened, let's say in the last minute or so, and it's true and consistent to that.
+
+Basically, like a video game where you have NPCs or other physics effects or damage that's taken place, it'll remember exactly where it is when you walk back to it.
+
+The difference here is it's remembering absolutely everything that it saw cuz it's got all of the frames in the context [music] window to look back at.
+
+Now this auto-regressive architecture for video generation not only lets you create things in near real time and keep predicting the next frame up to infinity to create theoretically unlimited length videos, it also lets the user inject input into what should be happening.
+
+Now of course, when you do traditional diffusion-based video generation, like you're in this place where you have to prompt out all the action that happens, right?
+
+In this case, as you go along, you could change the action.
+
+So at the simplest level, think of it like instead of the Genie-3 demos where you're just using WSAD and just sort of using keyboard controls as the input, what if you took your tracked camera phone using ARKit ARCore and sent the 3D position, the 3D pose of this camera, and use that as the input so you're literally controlling the action as it plays out in real time and recording that to disk.
+
+I suspect you'll start seeing expanses like this next year.
+
+You can start doing things like the promptable events that Genie 3 showcased.
+
+You're like, "Hey, a character walks in through the right.
+
+Oh, an explosion drops on the left." And then you can suddenly see that video react in real time to these key-framed events that you're popping into the world.
+
+Now, I'm anchoring, of course, to video generation, but if you take a step back, we're essentially creating a new type of engine, an engine that's trained on all the audio-visual data on the internet, but then a lot of synthetic training data from traditional game engines like Unity and Unreal.
+
+And effectively, if you have the ability to prompt this thing with image, audio, video, and these kind of promptable events, you can create whatever you want.
+
+Dare I say, you can create a world model.
+
+Or the one thing that I think maybe a reach for 2026, but will certainly happen in 2027, is the ability to control agents within these models, right?
+
+Now, we saw this with Seema agent, where Google had created this agent that can use Genie 3 and like navigate and do things inside of it.
+
+What I'm describing is the feeling of a director being on a sound stage and asking its talent to do do interesting things.
+
+In other words, when can we have real-time video generation with embodied characters within them, where you're asking them to do things and they're intelligently not only reasoning about the environment and how to navigate it, but how to give you the best performance possible.
+
+I think 2026 might be a stretch for this, but that is my dream and hope where things will get to for 2027.
+
+And think about it, you kind of need this.
+
+If we're talking about world models and video models, if they're running in real time, essentially being these new kind of world [music] engines, we need the ability to have a bunch of concurrent entities or agents within them doing stuff and you can coherently capture them from different angles.
+
+We're not quite there yet, but that's the future that I'm super excited about.
+
+So, to wrap things up, you'll be hearing a lot about spatial intelligence and world models in the new year.
+
+Video generation is going to start becoming real time.
+
+And that's where the next level of opportunity is for all these AI model companies.
+
+They want to go beyond just media and entertainment and unlock a new category of robotics and simulation.
+
+And if you want to understand why are world models so important for simulation, stick around for my next video.
+
+For now, if you want to know how world models operate and why the hell is everyone talking about them, be sure to check out this video.
+
+Belavo signing off and I'll see you all in the next one.
+
+Cheers.

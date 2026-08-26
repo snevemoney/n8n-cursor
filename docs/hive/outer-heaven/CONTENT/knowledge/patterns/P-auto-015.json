@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-015",
+  "version": 1,
+  "title": "agent-ops / build — activity-log-skin-seeing-the-work",
+  "steps": [
+    "Steal the *gap* (count vs decision). Do not install Pixel Agents.",
+    "Steal manager loop. Hive already has HITL stop (`ask-principal`)."
+  ],
+  "support_ids": [
+    "K-62Rfe1w9NBc-01",
+    "K-62Rfe1w9NBc-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=agent-ops; stage=build; He already multitasks Claude. Windows-only today.",
+  "less_relevant_when": "Entertainment is a real first point — he says so. Don’t pretend it’s only ops.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

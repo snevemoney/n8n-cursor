@@ -1,0 +1,21 @@
+{
+  "pattern_id": "P-dont-lead-with-word-AI",
+  "version": 1,
+  "title": "VIEW B — don't lead with the word AI (operator-heard)",
+  "steps": [
+    "IF prospect is normal SMB / local / operator → lead with outcome, not 'AI'.",
+    "IF prospect is AI-native → VIEW B may not apply; VIEW A still can."
+  ],
+  "support_ids": [
+    "K-x-2088007687149601254-03"
+  ],
+  "dissent_ids": [
+    "K-x-2088007687149601254-01"
+  ],
+  "valid_when": "Prospect is a normal SMB / local / operator.",
+  "less_relevant_when": "AI-native buyer; creator/ads buyer who wants the AI trend.",
+  "confidence": "low as SOURCE (absent on clip); medium as operator-heard",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Not on X-clip speech. Do not promote to SOURCE. Do not rewrite VIEW A as this."
+}

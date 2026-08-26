@@ -1,0 +1,57 @@
+{
+  "workflow_id": "WF-specialist-handoff-v2",
+  "project_id": "specialist-handoff",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Name two specialists",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "Dump + reference",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "Classify WAKE",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "Write the handoff",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T5",
+      "title": "Draft only",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T6",
+      "title": "Evens sends",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-lRUpu2-KtGQ-01",
+    "K-lRUpu2-KtGQ-02",
+    "K-lRUpu2-KtGQ-03",
+    "K-lRUpu2-KtGQ-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "lRUpu2-KtGQ",
+  "words_read": 5332,
+  "tape_faithful": true
+}

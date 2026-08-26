@@ -1,0 +1,28 @@
+# click-live-site — ProofCheck friend-demo QC bugs (2026-08-15)
+# Title/OG + Close + language label. Do not click Vérifier maintenant. No pay.
+id: proofcheck-qc-bugs-2026-08-15
+name: ProofCheck :8080 — title/OG, Close first pointer, language label
+hard_step: pay
+host: cursor-ide-browser
+status: running
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/proofcheck-qc-bugs-2026-08-15/RUN.md
+app:
+  url: http://localhost:8080
+steps:
+  - id: assert-title-og
+    action: assertVisible
+    target: document title ProofCheck QC
+    expected: html lang=fr · title/og ProofCheck QC · no lovable.dev image
+  - id: dismiss-onboarding
+    action: tapOn
+    target: Close
+    expected: Bienvenue gone on first pointer click. Escape still works if needed.
+  - id: assert-language-label
+    action: assertVisible
+    target: FR | EN
+    expected: Toggle shows current language (FR when chrome is Sources / Brouillon / Connexion).
+  - id: assert-verify-idle
+    action: assertVisible
+    target: Vérifier maintenant
+    expected: Verify control visible, not clicked. No generate.
+    hard: true

@@ -1,0 +1,431 @@
+So NIN released their data tables which means we can store data in NN and we can have our agents use it without having to make some sort of external API call to a Google Sheets or an Air Table.
+
+So if you haven't watched my previous video about data tables where I show off how they work and what you can do with them, then I would definitely recommend checking that out first and then come back to this video.
+
+I'll tag that one right up here because today what we're going to be going over is some secret use cases for these data tables and how you can use them to make your agents smarter and smarter.
+
+So I don't want to waste any time.
+
+I've prepared three different hacks for you.
+
+So let's get into the video.
+
+So the first hack that we're going to be looking at today is using data tables to store your models and prompts for your AI agents.
+
+Now what do I mean by this?
+
+Let's take a look at a super simple research agent example.
+
+So I'm actually just going to go ahead and run this AI agent, we will see it use its chat model.
+
+It's going to use its system prompt and it's going to do some research using perplexity.
+
+And you can see before we get to the agent step, we have a end data table.
+
+So if I click into this, you can see what it's doing is it's pulling from our data table called models and prompts. and we're matching on a condition of workflow equals research agent.
+
+So what this means is we have a data table in end that looks like this and we have different workflows and in those workflows we're storing chat models, user prompts and system prompts.
+
+So the benefit here is we can have a front-end environment like this data table where we can control the system prompts and the chat models for all of our workflows.
+
+Maybe you have a client who doesn't like to be in this environment because he or she's worried they might break something.
+
+But you can give them access to this data table and say, "Hey, all you have to do is change the chat model for the respective agent and it will update in the workflow." And it's really really simple.
+
+We do the filter to grab the right row and then in the actual research agent, we just drag in the user prompt, which as you can see is coming from the data table, we're saying that we want to do research on this industry, which is dentists.
+
+So, if all of a sudden we wanted to do research on a different industry, we could just change that right here in the user prompt rather than going and digging through different workflows.
+
+You can also see we have our system prompt down here, which is just a variable, but when we open it up, we can see it as a full system prompt, and it's telling this AI agent to use the perplexity tool to do its research.
+
+So, imagine you wanted to download this workflow and share it with someone else, but you wanted to keep your system prompt private because in today's world, a lot of the IP of a workflow or a template lives in the system prompt itself.
+
+And so this way if you shared the template, people would get access to this variable, but they wouldn't be actually getting this system prompt that you spent time on.
+
+And then finally, we're passing over a dynamic chat model into open router because once again, it's using the variable that is coming from the data table.
+
+So just to show you guys how we could change something like that, I'm going to go back into my data table.
+
+I'm going to copy anthropic claude 3.7 sonnet and paste that in there instead.
+
+And then for the system prompt, I'm going to change from use the perplexity tool to use the tavly tool.
+
+And so real quick, you can see that's saving.
+
+We go back into nitn and I'm just going to run this workflow once again.
+
+We should see the new variables being pulled in.
+
+We can already see it's calling tavly instead of perplexity.
+
+If I click on the open router, we can see it's now using anthropic cloud 3.7 sonnet.
+
+And if we go into the research agent, we can see that the prompt has been updated now to use the tavly tool.
+
+And you actually may have noticed that it's using perplexity as well.
+
+That is just because claw 3.7 sonnet maybe is a bit more powerful and it decided that it needs to do more research using its other tools in order to have the best report.
+
+And that's the power of autonomous agents.
+
+And so you don't only have to do that with agents.
+
+You could also pass variables through to nodes like this.
+
+So let me go ahead and run this second workflow down here and we'll break down what's going on.
+
+So this is a newsletter system that I built.
+
+I actually did a step-by-step on YouTube of this build.
+
+You can see that this is a more complex process because there's more nodes.
+
+And there's another step over here where we pull in data variables besides just over here.
+
+So, real quick, let's look at this first one.
+
+We're doing the same thing.
+
+We're matching a condition where workflow has to equal newsletter in parenthesis planning agent.
+
+And that pulls in one row where we have a chat model, we have a user prompt, and we have a system prompt.
+
+And this time we're actually passing the user prompt into this Tavi research node.
+
+So, we're having this query, so the topic of our newsletter be dynamic.
+
+And if we went into our data table, we would be able to change the topic of our newsletter right here.
+
+So that's why we're using that here because the user prompts for this agent needs to be dynamic, meaning it needs to be the output of the previous research step.
+
+But once again, we're using the system prompt coming from the data table.
+
+As you can see, we just have a variable, but we're getting the actual system prompt.
+
+And then of course, we're passing in the chat model variable to both the planning agent and the section writer agent.
+
+Right in here, you can see we're passing over GPT5 mini.
+
+So the point I'm trying to make here is you can use your frontends like this to control the behavior of your workflow without having to get into the workflow.
+
+And of course it's good to have all of your system prompts saved in case something happens.
+
+And this is also your intellectual property.
+
+And then we move on to the editor agent.
+
+And this data table is pulling in workflow newsletter editor agent instead of planning agent.
+
+And we're getting a model.
+
+We have no user prompt.
+
+And we have a system prompt.
+
+And that all gets fed over here.
+
+You can see of course the model goes right there.
+
+And then the system prompt is going down here.
+
+So that was the first hack I wanted to show you guys.
+
+And then here's just a little bonus.
+
+You can have your databases sync up.
+
+So let's say you have this init because it's easy.
+
+It's right there.
+
+But you'd also feel more comfortable storing it in something like a Google sheet as well.
+
+I completely get that.
+
+And also it's super easy to make sure that these are syncing every single day.
+
+So let's say in this top scenario, our end database is our primary front end.
+
+We would every day get rows from our end table.
+
+We would clear the whole Google sheet and then we would write all of the original rows back into the Google sheet.
+
+And that way the both databases are always synced up.
+
+And then same thing, let's say you wanted Google Sheets to be your front end, you could do it down here where you're deleting the rows from the end data table.
+
+You're getting rows from the Google sheet and then you're putting those back into the data table and they're always going to be matching up.
+
+And that actually is one limitation right now of these ended data tables is they're not great for a front end because it's hard to do things like I couldn't copy all these rows and paste them in or in our columns we only have these four variable types.
+
+It'd be really nice if we had drop downs or like pills because the issue with the model is you would have to type this in exactly right every single time rather than in Google Sheets.
+
+You can see for the model I did a little drop down.
+
+So the user would be able to choose from these models and we've already basically hardcoded those in.
+
+So I have no chance of misspelling because all I'd have to do is switch them around like that.
+
+But anyways, just wanted to show you guys how you could use that and how it could be beneficial for you and your agents.
+
+All right, so moving on to hack number two.
+
+We have using data tables to store your agent logs and your agent actions.
+
+It's super important to store this information when you have a workflow in production because you need to see how often it's failing, why it's failing, and also what it's doing well so that you can continuously tweak the system.
+
+So, it just gets better and better because you'll notice once you start logging your executions, you'll identify patterns and patterns are beautiful because that means you're doing something good or it means you can build a guardrail to protect against those edge case patterns.
+
+So, you've probably seen in a few of my other videos, it doesn't have to be an agent this big and complex, but in a few videos I've had the agent logging all of its actions in a Google sheet.
+
+So, just to show you a quick example of this Ultimate Media Agent, if you want to see this video, I'll tag it right up here. we were logging its executions in this sheet with timestamp, the workflow, the input, the output, the actions, the tokens, and the total tokens that it used.
+
+And so all I would have to do is make an end data table with those exact same columns up here as you can see.
+
+And now we can just hook it up in our media agent right here and literally just replace the Google sheet nodes here with a data table node.
+
+The key here is that inside the agent itself, you turn on this option.
+
+So if you don't see this, you click on add option and then return intermediate steps.
+
+And you have to make sure that that is toggled on.
+
+And that's what's going to let the agent output not just an output, but also intermediate steps.
+
+So let's give this a run.
+
+We'll see the logs come to our end data table.
+
+And I'll also show you guys what I mean by the intermediate steps over here.
+
+Okay, so the agent's listening for us.
+
+I'm going to open up Telegram and ask it to create a calendar event for today at 3 p.m. for lunch with Michael Scott.
+
+So here you go.
+
+It's going to call a few different tools.
+
+It needs to call the contact agent to get Michael Scott's info and then it's going to call the calendar agent to create that event and we'll be able to see all of that in the agent logs.
+
+So, I'll check back in with you guys once this agent is done doing its task.
+
+Okay, there you go.
+
+So, you can see it just finished up.
+
+Hold on, I'm taking a drink of water.
+
+And if I switch over to my Google calendar, you can see that we have lunch with Michael Scott and we invited his actual email in our contact database.
+
+And then if we go to our end data table and I hit refresh, we should see a new record with a time stamp.
+
+Right here we have our workflow, we have the input, we have the output, and we also have the actions, tokens, how many total tokens it was.
+
+And yes, yesterday I did test with the exact same input.
+
+But anyways, what we have here is the actions.
+
+So we can actually see every single tool that it called.
+
+Let me just make this bigger.
+
+So we can see the first thing it did was call its think tool.
+
+And that's where it basically is able to write down some information of what it should do next.
+
+After it used its think tool and it made a plan of action, it decided to use its contact agent tool.
+
+And we can actually see the input that it sent to the tool and the output that it got, which was the contact info for Michael Scott is this.
+
+Here is his email right there.
+
+We can see it then called the think tool again because it said, okay, now I have the email.
+
+What do I do?
+
+And then after that, it decided, okay, I have to use the calendar agent.
+
+And in the calendar agent, we were able to create that event, lunch with Michael Scott at 300 p.m.
+
+And so, normally your agents won't output all of this information.
+
+We also are able to see the token information and what prompt model was used.
+
+And we're able to do all this because once again in the agent we have return intermediate steps turned on.
+
+And that is where we get not only this output right here, but we get all of these intermediate steps.
+
+And these are the actions that we were just looking at together in that end data table where it calls different tools and tells us how many tokens each tool used.
+
+It's a cool little tip.
+
+It's pretty hidden.
+
+So, it took me a while to find that, but once I did, it was a game changer because now we have records of everything the agent's doing, and we're able to tweak the prompt, tweak the tools, and make the systems better and better over time.
+
+We do have the code node here that's basically cleaning up the stuff and it's helping us with our token count.
+
+But, I have a full video where I dove into like how I actually did this.
+
+If you want to watch that, I will tag it right up here.
+
+Also, one more quick bonus for you guys.
+
+On the same notion of tracking your agent actions, you can also track all of your errors in a Nitend data table as well because currently I have my error handler going to a Google sheet that looks like this.
+
+Ignore those errors.
+
+Something was going on with the chat model that day.
+
+But anyways, now instead of going to Google Sheets, I could have a data table right here that's called my error logger.
+
+And I could then see across all my workflows in NN itself which ones are erroring and what time and what's happening.
+
+And all I would have to do is create a new data table.
+
+So, I'd create a new one.
+
+I would call it an error logger.
+
+And then I would just make sure it had the same columns as my current error logger.
+
+So, date, time, error message, error node.
+
+I'd probably also add one up front for what workflow it actually came from.
+
+We could even just add a new one down here for a data table and we would write data into it.
+
+So, now we're getting our errors logged in two places.
+
+And we could also add like a Slack notification or a Telegram notification, whatever we want.
+
+But then in your actual active workflow, you would just go up here to your settings and then you would change the error workflow. or if you already have one and you're just editing it, then you can keep everything the same.
+
+But now we have an error workflow hooked up so that whenever this active workflow keyword active workflow errors, it will automatically send data to your Google sheet or to your newly created error logger in NIDEN.
+
+And real quick, just to show you guys how you can access your workflow variables, you can see on this lefth hand side, we've got variables in context.
+
+So we've got now, we've got today, we have certain global variables.
+
+You can also get the execution ID and you can get the workflow ID and name as well.
+
+So that's how you could throw some of this stuff in your error logger so you get more detail.
+
+All right, let's move on to the final hack which really isn't the third, it's more like the fourth or fifth.
+
+Running evals on your AI agents with NAD data tables.
+
+So if you've never used NIDN's evaluation feature, what this does is it lets you pass a ton of data sets through your agents.
+
+You can give it the sample input and the expected output and the evaluation will basically determine how good your workflow is.
+
+And you're able to track over time with different variables of different prompts, different models, different tools, all this kind of stuff.
+
+And then you're able to track your scores over time and see if your workflows are actually getting better or if you're hurting them.
+
+So, I made a full video on evaluations.
+
+If you haven't seen that, I'll tag it right up here.
+
+Tagging so many videos.
+
+But yeah, anyways, typically you would hook up a Google sheet and you would run the data set through the workflow and then it would write it back to a Google sheet.
+
+It would look like this.
+
+Once again, I said you have an input expected answer.
+
+You have your actual answer that your system delivers and then a correctness score.
+
+So what I did was I made the exact same column names in this end and end data table.
+
+Input expected answer, actual answer, and score.
+
+And now we're able to hook that end data set up to our agent for rag evaluation rather than going through a Google sheet.
+
+So to show you how this works and what this looks like, I will execute this real quick and it's going to start processing this rag agent.
+
+And then right here is the actual valuation step where it's assigning a correctness score.
+
+So we're pulling in from a end data set.
+
+You can see this is coming from our data table called eval.
+
+It's pulling in the input and the expected answer.
+
+The agent is now going to look in its knowledge base and it's going to create an answer.
+
+And then this step is evaluating how close the agent's answer is to the expected answer.
+
+Wow.
+
+So you can see the agent has called its knowledge base three times and it's called the calculator tool twice.
+
+So hopefully it's cooking up a good answer.
+
+We're moving on to this evaluation step where now you can see this is the expected answer and it's okay.
+
+Moved on to the next one.
+
+I'm going to go back into the execution and show you guys what I meant by that.
+
+So here was the expected answer for that first run which was Tesla's operating income declined by 42%.
+
+And then if we go to the actual answer, we got Tesla's operating income declined by 42%.
+
+And so it looks at these, it compares how similar they are, and it outputs a correctness score of five.
+
+And if we go into our end data table, you can see if I refresh, it's going to start to write back the results right here.
+
+So we can actually evaluate how well it's doing.
+
+So right now, it's running through the second set of evals, and it will update the row right here.
+
+So if I give this one a quick refresh, we should see that the second one has finished, and this time it got a four.
+
+So my point being, if you really want your agents to get better and better over time or your workflows to get better and better over time, you have to be running evaluations.
+
+But the key is when you're running your evaluations, actually knowing run 33, what did I do in run 33?
+
+What chat model did I use?
+
+What prompt did I use?
+
+What tools did I have?
+
+And every single time you do another run, only change one variable.
+
+Isolate one variable so you know how it actually affects the workflow.
+
+But you can see it's a really cool feature because we get a ton of metrics like the average tokens they took, the average time it took, and the correctness score.
+
+So you can really try to optimize for speed, cost, and quality.
+
+So anyways, that was a quick one today, but I hope that these tips were helpful and hopefully it sparked some ideas in your head of how you can use Eniden's new native data tables.
+
+If you're looking for a community of people to brainstorm that kind of stuff with or you're looking for some more structured guidance, then definitely check out my plus community.
+
+The link for that is down in the description. got a great community of over 200 members who are building with nodn every day and building businesses with nodn every day.
+
+And we've also got a classroom section with three full courses.
+
+Agent zero is the foundations for AI automation and beginners.
+
+10 hours to 10 seconds is where we dive into nodn and we learn how to identify and design scalable systems.
+
+And then we have one person AI agency which is our new course for annual members and we lay the foundation for building a scalable AI automation business.
+
+So I'd love to see you guys in this community.
+
+But that's going to do it for today.
+
+If you found the video helpful or you enjoyed, please give it a like.
+
+Definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+We'll see you in the next one.
+
+Thanks, everyone.

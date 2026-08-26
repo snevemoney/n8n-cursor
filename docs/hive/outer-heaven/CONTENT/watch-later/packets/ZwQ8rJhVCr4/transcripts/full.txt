@@ -1,0 +1,69 @@
+If your agents aren't giving you accurate answers, watch this video.
+
+So, here's the workflow that we're going to be looking at today.
+
+We've got, like I said, different examples.
+
+We have one where we're using filters.
+
+We have one where we're doing a SQL query.
+
+We have a few with full context.
+
+And then we have the final one which is using a vector database.
+
+So, the first example that we have is filters.
+
+So, if I shoot off this query to the agent that says, "How many Bluetooth speakers did we sell on September 16th this year?" here.
+
+What it's going to do is use its product name query most likely in order to filter out every single row in the database that doesn't have product name equals Bluetooth speakers.
+
+And then what it did was a date query to make sure it's also filtering out any of those rows where the date is not September 16th.
+
+So that just finished up and it said you sold five Bluetooth speakers on September 16th.
+
+But it's also important to know because something similar typically happens over here with a SQL agent.
+
+So this time our database is being held in Postgress in Sububase and it is sales data.
+
+So similar type of table but it's different fields and examples and also this one is 50 rows rather than just 20 just for the sake of a different example.
+
+So I'm shooting off what are our three highest earning products.
+
+So, it said that it ran the top three products by revenue and then it got total revenue by summing it all up.
+
+And its results were AI automation course 34.93, which is right here, consulting call 33383 right here, and then workflow template 1659, which is right there.
+
+And it also gave us percentages of our total revenue, which is pretty cool.
+
+Okay, so moving on to the full context method.
+
+So, let's say we have these two documents that we want our agent to read.
+
+And typically we would just maybe chunk this up and throw it in a vector database.
+
+But we all know what could happen when you do that.
+
+So this method is just the idea that you let the agent read the entire document every time rather than just looking for a specific chunk that it needs.
+
+Okay.
+
+So I am asking this agent to give me a chronological breakdown of the agent in 2 hours video.
+
+So it gave us our opening hook, what I did, the text stack, the personal context, lead genen, sales moment, all of this stuff.
+
+And it did this in order because, like I said, it read the whole thing.
+
+And when we click on the AI agent, we can see that this only took 4,000 tokens out of GBT5 Mini's 400,000 context window limit.
+
+And that segus nice into the final one, of course, which is our chunk based retrieval with vector search.
+
+And so what I already did is I put these two documents, the same ones we were just looking at over here, into Superbase.
+
+As you can see here, these are our vectors from those two transcripts.
+
+And now we're going to talk to the agent and we're going to see basically the difference in the way that it responds, but also how much cheaper and faster it is.
+
+So if I first of all ask it that same question, which was give me a chronological breakdown of the agent in 2 hours video, we're going to notice that it's faster and cheaper, but we're also of course going to notice that it's not as accurate because it doesn't understand order right now.
+
+If you want to watch the full breakdown, then click on that play button right here, and I'll see you guys over

@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-031",
+  "version": 1,
+  "title": "claude-code / ops — plan-sandwich-code-prove-done-then-evolve",
+  "steps": [
+    "Steal sandwich + prove-done + bug→rule. No OpenClaw.",
+    "Steal dumb-zone split + skill+CLI. No Hermes memory clone as hive default.",
+    "Steal assume-touch + hook-gate + case-study-the-blast. No auto-send."
+  ],
+  "support_ids": [
+    "K-RzLV8sfFdMM-01",
+    "K-RzLV8sfFdMM-02",
+    "K-RzLV8sfFdMM-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=claude-code; stage=ops; Claude Code on-tape. Hive: `golden-test-loop` / `context-docs` — no Claude Code switch.",
+  "less_relevant_when": "Cole skips plan mode for control; Nate uses routines/status line. Speech≠behavior (keep both; do not pick a winner): “ne",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

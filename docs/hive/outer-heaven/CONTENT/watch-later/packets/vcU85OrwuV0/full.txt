@@ -1,0 +1,283 @@
+So we've all waited long enough.
+
+Fable 5 is finally coming back to us.
+
+And it's an incredible model.
+
+It's the strongest one that I've ever used, hands down.
+
+I've built things like my second brain, my AI operating system.
+
+So obviously I've been playing around with this model a ton, and I've been trying to figure out the best way to use it so that you can actually use it efficiently and you're not paying for tokens for no reason.
+
+I've looked at what people have said on X.
+
+I've listened to Anthropic engineers.
+
+And also I've read through this entire documentation right here on the best practices for prompting Claude Fable 5.
+
+So today what I did is I distilled all of this into the six most simple and effective things that you should be doing right now when you are prompting Claude Fable 5 to get the most out of it.
+
+But it's certainly not a cheap model.
+
+It costs double Opus at $10 per million input tokens and $50 per million output tokens.
+
+And the other thing is it won't always be on your Claude plan.
+
+And they're calling this a promotional period and you can only use up to 50% of your weekly limits with Claude Fable 5 at no extra cost.
+
+But then after that you would have to switch to usage credits.
+
+Unfortunately, the promotional period ends July 7th.
+
+So we only have like six days.
+
+And part of that is 4th of July weekend.
+
+Come on.
+
+Anyways, it will pretty much work anywhere though.
+
+Claude desktop app, VS Code, in Claude Code, you know, wherever you want to use it.
+
+You can see right here, I just got this message that Claude Fable 5 is back.
+
+And if I go to /model, we can see that we do have access to Fable.
+
+Once again, thank you so much.
+
+I'm glad that you're back.
+
+And because this certainly isn't cheap and I want to be able to test it a ton for you guys, then I hope you'll forgive me for pausing for a quick message from today's sponsor.
+
+Real quick guys, a message from the sponsor of today's video, HyperAgent.
+
+HyperAgent has helped me fix a major problem that AI has.
+
+It's a yes man.
+
+Ask it about your idea and it tells you you're a genius.
+
+So on HyperAgent, built by the Airtable team, I built a council of agents.
+
+A handful of different AI agents, each with its own persona, each running on its own Claude machine with a real browser and tools to go do actual research.
+
+So I can just simply drop an idea in Slack and they will tear into it.
+
+One of them will play the skeptical investor.
+
+One will dig up what competitors are already doing.
+
+One will stress test the numbers.
+
+They'll all go pull real data and come back to me with actual brutally honest feedback, not something like, "Looks great, Nate." It'll tell me where stuff is weak and why and how to fix it.
+
+So, by the time they're done, I've got a sharper idea and the receipts to back it.
+
+And that's the part I love because it's not just one chatbot nodding along, but it's a team that disagrees with me on purpose.
+
+And I built the whole thing myself in just an afternoon.
+
+So, if you want to build your own council, link's in the description with free credits.
+
+So, go get roasted.
+
+Let's get back to the video.
+
+So, the first thing to understand about Claude Fable 5 is that it is obviously built a little bit different than Opus and, you know, GPT.
+
+So, there's different things that it does really good.
+
+It follows short, clear direction better than older models do because it's just better at reasoning.
+
+And if you spend some time playing with it, it just feels like when you ask it to do something, it just feels like it knows what you're talking about and understands it a little bit better.
+
+Okay, so here are the six habits, six things to do.
+
+I've tagged each of these if they are sort of like any model or fable specific.
+
+So, this first one is any model.
+
+To give it the why.
+
+Give it the context behind why you're doing something.
+
+Anthropic says that Fable does better when it understands your intent.
+
+So, the context lets it connect your task to the right information instead of guessing what you meant.
+
+So, instead of saying something like, "Write me an email to a client about the delay." Say, "I'm working on this bigger task and here's who it's for.
+
+What they need is blah blah blah.
+
+And with that in mind, can you help me write an email to this client about the delay?" And if you have your second brain and your whole AI OS set up in the right way, that will also prompt it to look through specific context files to make sure that it has the right information that it needs to make all of these emails or whatever you're doing feel more specific.
+
+The next thing, which I've also found in general works better for all AI models, is to specifically negative prompt.
+
+Specifically tell it what not to do.
+
+Think about it like this.
+
+AI is trained on a ton of data.
+
+So, it literally at its core is trying to predict the next word that makes the most sense.
+
+And sometimes it will try to get creative and it will try to do things that you didn't ask for.
+
+And sometimes that's good, but a lot of times it's not.
+
+So, explain what not to do.
+
+If you look through this page, prompting Claude Fable 5, when you start to go through here, you will see that they do that.
+
+Right here.
+
+When you have information to act on, act.
+
+Do not do this.
+
+If you are weighing a choice, give a recommendation, but do not do this.
+
+Here's another example.
+
+Don't add features.
+
+Don't do this.
+
+Don't do this.
+
+Don't do this.
+
+Don't do this.
+
+Do the simplest thing that works well.
+
+The way I like to think about that is if you were explaining a task to an intern, you would tell them specific things to not do because they don't understand the process yet.
+
+They're trying to learn it.
+
+So, instead of saying something like take a look at this problem and handle it, you might say, "When I'm describing a problem or asking a question, the deliverable is your assessment.
+
+Report what you find and stop.
+
+Don't fix, send, edit, or delete anything until I say go." I feel like the models have actually evolved a little bit cuz I used to find that negative prompting didn't work as well than just being very specific about what I wanted it to do.
+
+But lately, the more I've been negative prompting, the more I've found that it tends to work pretty well.
+
+So, if you guys want to access this full guide where you can see this full write-up, you can do so by joining my free school community.
+
+The link for that will be down in the description.
+
+All you have to do is go in here, go to the classroom, and click on all YouTube resources, and you'll find everything in there.
+
+Okay, the next one also works for any model.
+
+This is to let it act once it has enough.
+
+So, stop it over planning.
+
+I actually don't even very often use plan mode inside of Claude Code anymore.
+
+I know that's something that I used to say, "Always start in plan mode." But I don't do that anymore.
+
+I basically have my own plan mode that I have it go through until it's ready to act.
+
+So, instead of saying research everything and make a full plan before you do anything, you can say more stuff like, "When you have enough information to act, then act." If you guys remember, that is basically the example that we read right here, which is the first thing that Claude Fable 5 doc says because individual requests on hard tasks can run for many minutes at higher effort settings, especially when the task requires gathering context, building, self-verifying, essentially just building a plan.
+
+And another big piece of this here is thinking about the different effort levels.
+
+You know, you can do low, medium, high, extra high.
+
+You've got all these different effort levels and you want to make sure that you're matching the effort levels to the correct task.
+
+They recommend to use high as the default for most tasks.
+
+Use X high for the most capability sensitive workloads and medium or low for routine work.
+
+And it's quite interesting because if you look at Fable 5 versus Opus 4.8 with different reasoning levels as well as the cost, you can see that they get into this area where they're similar but Fable 5 on low, even though it's similar to Opus 4.8 on X high and max, is cheaper.
+
+So, really starting to experiment with different effort levels and feeling when you need to use certain ones is going to be a very important skill along with understanding what tasks to use what model for in general because if you're using Fable 5 for everything, that is almost 100% overkill, especially when you're getting into the usage credit territory of Fable 5, you really don't need it for that many things.
+
+You probably more realistically only need to reach for Fable like 5 to 15% of the time.
+
+Number four, which I think is probably the most important one, is to make it prove it.
+
+And this is for any model, like I said, once again.
+
+Sometimes models will tell you that they're done, but they're not.
+
+Or maybe they are done, but they haven't verified things.
+
+The whole point is, if you were to give work to a human and they come back with, you know, something, some output, you would have to review that yourself.
+
+You want to get it to the point where you trust this person or this model so much because you've baked in these verification loops that when it hands you something, you probably still should check it, but you don't feel like you have to as much because you know that it already has checked its own work two, three, four, maybe even five times and it's tested and fully verified that everything's working the way that it should be.
+
+So, instead of just asking, is this done and is it working?
+
+You could say, before you tell me something is done, point to the result that proves it.
+
+Only report work you can show evidence for.
+
+If something isn't verified, say so plainly instead of guessing.
+
+And this is something that would be really good to work into all your skills, all of your agents, all of your, you know, Claude and M.D. files, rather than always just throwing this at the end of every prompt.
+
+Okay, number five, and this one is more Fable specific, which is stop asking it to show its reasoning.
+
+On Fable 5, a standing explain your reasoning line, especially in the system prompt, can trigger a refusal, and it can hand your task to Opus 4.8.
+
+If you guys didn't know, and I'll cover this a little bit more at the end of this video, but because Fable 5 has concerns of, you know, jailbreaking, and it's already a a lesser model of Mythos 5, we have to be careful about making sure that we don't trigger Opus.
+
+Because basically, there's a bunch of safety guardrails into Fable that will route it to a less capable model like Opus if it thinks that the intent of your request might be malicious or anything like that.
+
+So, for some reason, if you are trying to get Fable to show its reasoning, it might revert you down to Opus 4.8.
+
+So, that's why we put this one in here that is a Fable specific prompting rule.
+
+And then number six is to say less, not more, which kind of sounds a little bit counterintuitive, because typically we've thought the more context that you give these models, the better.
+
+But because Fable is so intelligent now, and especially if you have it wrapped up in a good environment with, you know, context and tools and skills and everything like that, a short instruction can now steer just as well as spelling out most of the rules by name.
+
+And this is not a contradiction with tip one.
+
+Adding the why, if you remember back here, give it the why, give it the context, still doesn't mean to bloat everything out.
+
+So, instead of saying like, "Hey, rule one is be concise, rule two is do this, rule three is do this," just say more something like, "Lead with the outcome, keep it simple, and pause only when the work truly needs me." And that's how you can start to wrap all of these other tricks into your system files, your memory files, your Claude 3 files, and your skills, and all of your prompts moving forward so that you can make sure you're getting the most out of this incredible model, Claude Fable 5.
+
+So, I wanted to wrap up here with what I talked about very briefly, which is what happens when Fable hands off to Opus 4.8 or whatever model in the future it ends up handing off to if this is still the case.
+
+Fable will run a quick safety check before it goes ahead and answers your request.
+
+If it realizes that it might be within a certain bucket, then it will push that to Opus 4.8.
+
+If it looks like anything that has to do with hacking or dangerous biology or asking the model to reveal its own private reasoning, then it might shoot that off.
+
+And when that happens, it won't show you.
+
+It will silently route to Opus.
+
+If you are building on the API, it will send back a response that shows you that was Opus, but otherwise you may not notice it.
+
+Luckily, when you do it, it should be routing to Opus 4.8 so you're not paying as much as Fable.
+
+Otherwise, that would be pretty bad.
+
+And so just be aware of that.
+
+You can avoid it by obviously doing something like this that I mentioned, but also, you know, not asking it to help you do things that are clearly malicious or suspicious.
+
+So, please feel free to go ahead and go to this documentation and read through it.
+
+It has a lot of golden nuggets.
+
+But that's going to do it for this one, so hopefully you guys enjoyed it or learned something new.
+
+If you're interested in learning more about those agent loops kind of verification that I was talking about earlier, then definitely check out this video right here.
+
+I pretty much explain it.
+
+I give it some examples and I think that doing this technique with Fable 5 will be super awesome.
+
+So, hopefully I see you guys over there.
+
+Otherwise, thanks for making it to the end of the video and thanks everyone.

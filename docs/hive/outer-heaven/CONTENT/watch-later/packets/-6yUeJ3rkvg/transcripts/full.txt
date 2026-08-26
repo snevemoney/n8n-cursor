@@ -1,0 +1,55 @@
+OpenAI just killed Nadn.
+
+Or did they really?
+
+Because they just dropped their agent kit.
+
+We may be seeing that narrative right now online.
+
+But today I am here to actually compare agent kit and nen and talk about the future of both of these agent builders.
+
+So like I said, today we're going to be comparing agent kit with nitn across different categories to answer the question, is agent kit going to kill n?
+
+And in short, my answer is no.
+
+And I also want to be really clear that I don't think openai's goal was to compete with nodn.
+
+When we really start to dive into Agent Kit and compare these two platforms, you can tell they're just fundamentally different and they were built for different audiences.
+
+I think that Agent Kit is built for teams and consumers that are really integrated into OpenAI's environment.
+
+And they're not looking to build super super custom robust AI automations and autonomous systems.
+
+They're looking to build some really quick and easy workflows that's going to save themselves time and maybe even some conversational agents internally for their team.
+
+Now, NN of course was built to be completely everything.
+
+It's super powerful.
+
+It was honestly built for developers.
+
+It's a little bit more technical, but because of that, you have the ability to truly do anything.
+
+So, the categories that we're going to look at today are ease of use, triggers, agent tools, model support, UI chat components, and deployment and control.
+
+So, starting off with the first category, we have ease of use.
+
+So, anyways, we have some templates down here that we could look at, but I'm just going to go ahead and create a new flow so we can get familiarized with this environment.
+
+You can see that once you have this start, you have to drag the circle to say where does this go next, just like end where you'd connect your nodes together.
+
+And we have an AI agent right here which we're able to name.
+
+We're able to give it instructions.
+
+We can include chat history.
+
+We can choose the model, the reasoning, we can give it tools.
+
+And we have an output format section where we can do text, JSON or widget, which we'll talk a little bit about later.
+
+But what I'm immediately seeing off the bat is this whole interface is a lot less intimidating than nin.
+
+And I can also on the lefth hand side see everything I have available to me.
+
+If you want to watch the full breakdown, click on that play button right here.

@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-040",
+  "version": 1,
+  "title": "guardrails / ops — two-guardrail-kinds-ai-check-vs-non-ai-sanitize",
+  "steps": [
+    "Prefer non-AI sanitize for secrets; use AI-check when the rule is semantic.",
+    "Design the fail path (notify or halt) before going live."
+  ],
+  "support_ids": [
+    "K-NQhsLVmuItA-01",
+    "K-NQhsLVmuItA-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=guardrails; stage=ops; You named the keywords.",
+  "less_relevant_when": "Benign text containing “system” will fail (his example is a setting update).",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

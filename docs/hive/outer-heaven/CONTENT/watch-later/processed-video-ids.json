@@ -1,0 +1,28 @@
+{
+  "batch1_scraped_at": "2026-08-13T19:51:57+00:00",
+  "batch1_count": 15,
+  "next_offset": 15,
+  "default_batch_size": 15,
+  "playlist_count_claimed": 1803,
+  "processed_video_ids": [
+    "13eo8dWa1Gw",
+    "TL8V41Ea6oM",
+    "sboNwYmH3AY",
+    "eMPWBunaOic",
+    "kwSVtQ7dziU",
+    "IVx8OSMbTss",
+    "EzQAgnjTq2k",
+    "hGdG-04TkDs",
+    "IWdvG9Up8Mc",
+    "whIp1SOahOM",
+    "nS2FrgXN-EY",
+    "mjg_JUMar04",
+    "ESIxitOLYoQ",
+    "I7mpF7_pnPM",
+    "f4mI3d-nTrI"
+  ],
+  "workflows_doc": "WORKFLOWS.md",
+  "scrape_snippet": "scripts/hive/os/fixtures/watch-later-browser-scrape.js",
+  "browser_mcp": "cursor-ide-browser",
+  "glass_tab_hint": "playlist?list=WL — attach tab or navigate; lock before CDP"
+}

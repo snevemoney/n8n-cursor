@@ -1,0 +1,38 @@
+{
+  "video_id": "x-2088359756096532965",
+  "video_url": "https://x.com/startupideaspod/status/2088359756096532965",
+  "sampling_interval_sec": 10,
+  "host": "cursor-ide-browser",
+  "tab": "d739e2",
+  "duration_sec": 220.625,
+  "played": true,
+  "frames": [
+    {
+      "timestamp": "00:34",
+      "description": "X tweet tab locked. Video playing (unmuted, 1920x1080). On-screen: slide BUILD THE FACTORY, THEN THE PRODUCT — Option 1 build the thing vs Option 2 build the factory; PRODUCTS box AI First Index 16 dimensions F500; THE FACTORY = own dev-tool layer / dark headless factory. Two speaker bubbles."
+    },
+    {
+      "timestamp": "00:45",
+      "description": "Same factory slide still up. currentTime advancing. Play control gone (player live). Auto-captions track en (auto-generated) present."
+    },
+    {
+      "timestamp": "01:58",
+      "description": "Seeked/paused at 118s. Caption gap 116–129 (no cues after payments). Slide still BUILD THE FACTORY, THEN THE PRODUCT. Woman presenter visible. Did not click the moviescout ad player below."
+    },
+    {
+      "timestamp": "02:36",
+      "description": "Paused at 156s (humans / heavy-handed beat). Same four-quadrant slide. Two circular speaker feeds on the right of the slide."
+    }
+  ],
+  "transcript": [
+    {"start": "00:00", "end": "00:16", "text": "And the third that very few people are talking about, but is probably one of biggest arbitrage opportunities because of how good the models are now, is to instead of building out the thing, build the factory for."},
+    {"start": "00:16", "end": "00:43", "text": "What do you mean by that? So let's say you want a product and we just released there something called AI First Index I run with all my Fortune 500 clients where interview their executives evaluate how AI first they are across like 16 different dimensions. And we decided through a combination of humans and AI to create a product for the public to be able to benchmark themselves on how AI first they are as individuals."},
+    {"start": "00:43", "end": "01:14", "text": "In that process I could have done one of two things. I could have gone Claude Code or Codex. Could've said hey interview me, get my AI First Index reports that I've used with previous clients, find every single workshop I have ever done with clients, build out the product, and then we iterate for several hours days until something is perfect and we release it. That is option one."},
+    {"start": "01:14", "end": "01:56", "text": "Option two is realizing that's probably not going to be the only product you build. It's like what dev tool companies did for engineering but you're creating dev tools that level for yourself. You are going to the kernel level. Instead of just building that product we instead built out a mini and very beginner software factory where we were building primitives like obviously we have to deal with login obviously we have to deal with payments."},
+    {"start": "01:56", "end": "02:09", "text": "[auto-caption gap 1:56–2:09 — no cues. Tweet text lists social sharing, promotion, memory, webhook. Not heard as captions.]"},
+    {"start": "02:09", "end": "02:26", "text": "Obviously there's going to be explosive opportunities that comes out of this. Why not take advantage of that now. And so it is like a measure twice cut once kind. But the measurement is building out the foundation layer so that the next product that you build, the next iteration, is so much faster."},
+    {"start": "02:31", "end": "02:45", "text": "And we are building these loops, these optimizing loops, again that aren't super autonomous and are very heavy handed with humans. But that is the arbitrage opportunity on products like that's already the products that profitable."},
+    {"start": "02:52", "end": "03:07", "text": "Faster speeds than I built the first one. That's crazy. And like no one is talking about this. The dark headless factory."},
+    {"start": "03:08", "end": "03:41", "text": "But that is what I want. But you know maybe it's for how you want to run your content engine. Maybe it is how you want to deal with net new leads. Like think of the factory behind the one singular task instead of one singular task. That is one of biggest ways to rethink work in AI age."}
+  ]
+}

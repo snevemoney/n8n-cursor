@@ -1,0 +1,1217 @@
+[
+  {
+    "start": "00:00",
+    "end": "00:04",
+    "text": "So, in 2026, you will be hearing a lot"
+  },
+  {
+    "start": "00:02",
+    "end": "00:07",
+    "text": "about spatial intelligence, world"
+  },
+  {
+    "start": "00:04",
+    "end": "00:10",
+    "text": "models, and media understanding. In"
+  },
+  {
+    "start": "00:07",
+    "end": "00:12",
+    "text": "other words, AI that can understand the"
+  },
+  {
+    "start": "00:10",
+    "end": "00:15",
+    "text": "physical world, but also generate it"
+  },
+  {
+    "start": "00:12",
+    "end": "00:17",
+    "text": "with photorealistic quality. Not only is"
+  },
+  {
+    "start": "00:15",
+    "end": "00:19",
+    "text": "this tech important for robotics, but a"
+  },
+  {
+    "start": "00:17",
+    "end": "00:22",
+    "text": "whole slew of media and entertainment"
+  },
+  {
+    "start": "00:19",
+    "end": "00:22",
+    "text": "applications."
+  },
+  {
+    "start": "00:31",
+    "end": "00:35",
+    "text": "What these companies mean is that these"
+  },
+  {
+    "start": "00:33",
+    "end": "00:37",
+    "text": "AI video generators, by virtue of"
+  },
+  {
+    "start": "00:35",
+    "end": "00:39",
+    "text": "predicting the next frame, just like a"
+  },
+  {
+    "start": "00:37",
+    "end": "00:41",
+    "text": "text model predicts the next token, by"
+  },
+  {
+    "start": "00:39",
+    "end": "00:44",
+    "text": "predicting the next frame, you have to"
+  },
+  {
+    "start": "00:41",
+    "end": "00:46",
+    "text": "understand a lot about the real world,"
+  },
+  {
+    "start": "00:44",
+    "end": "00:48",
+    "text": "the physics that govern it, how entities"
+  },
+  {
+    "start": "00:46",
+    "end": "00:50",
+    "text": "move and behave within it. And all of"
+  },
+  {
+    "start": "00:48",
+    "end": "00:52",
+    "text": "these models, as they've started scaling"
+  },
+  {
+    "start": "00:50",
+    "end": "00:54",
+    "text": "them up, are showing signs of having"
+  },
+  {
+    "start": "00:52",
+    "end": "00:56",
+    "text": "this type of understanding. In other"
+  },
+  {
+    "start": "00:54",
+    "end": "00:59",
+    "text": "words, if you drop a boulder into an"
+  },
+  {
+    "start": "00:56",
+    "end": "01:00",
+    "text": "ocean, how should it ripple and like how"
+  },
+  {
+    "start": "00:59",
+    "end": "01:00",
+    "text": "would it create waves within it?"
+  },
+  {
+    "start": "01:00",
+    "end": "01:03",
+    "text": ">> [music]"
+  },
+  {
+    "start": "01:00",
+    "end": "01:05",
+    "text": ">> Or a person that's walking and jumps up"
+  },
+  {
+    "start": "01:03",
+    "end": "01:07",
+    "text": "against a wall, how they would clash"
+  },
+  {
+    "start": "01:05",
+    "end": "01:09",
+    "text": "against it and fall down. Now, this is"
+  },
+  {
+    "start": "01:07",
+    "end": "01:12",
+    "text": "really novel because these models aren't"
+  },
+  {
+    "start": "01:09",
+    "end": "01:13",
+    "text": "computing physics like they would inside"
+  },
+  {
+    "start": "01:12",
+    "end": "01:16",
+    "text": "of a game engine, where maybe you're"
+  },
+  {
+    "start": "01:13",
+    "end": "01:17",
+    "text": "doing ragdoll physics to figure out how"
+  },
+  {
+    "start": "01:16",
+    "end": "01:19",
+    "text": "does this character like mash up against"
+  },
+  {
+    "start": "01:17",
+    "end": "01:21",
+    "text": "a wall? They are understanding it"
+  },
+  {
+    "start": "01:19",
+    "end": "01:23",
+    "text": "implicitly because they've seen enough"
+  },
+  {
+    "start": "01:21",
+    "end": "01:24",
+    "text": "diversity of data, aka all of"
+  },
+  {
+    "start": "01:23",
+    "end": "01:27",
+    "text": "internet-scale video data, such as"
+  },
+  {
+    "start": "01:24",
+    "end": "01:30",
+    "text": "YouTube, and are able to approximate"
+  },
+  {
+    "start": "01:27",
+    "end": "01:31",
+    "text": "these kind of physical interactions. So,"
+  },
+  {
+    "start": "01:30",
+    "end": "01:34",
+    "text": "we've seen these models just getting"
+  },
+  {
+    "start": "01:31",
+    "end": "01:36",
+    "text": "better and better at doing exactly this."
+  },
+  {
+    "start": "01:34",
+    "end": "01:37",
+    "text": "Now, they're not perfect, as you"
+  },
+  {
+    "start": "01:36",
+    "end": "01:40",
+    "text": "probably have noticed. So, for example,"
+  },
+  {
+    "start": "01:37",
+    "end": "01:41",
+    "text": "a gymnast trying to do these complex,"
+  },
+  {
+    "start": "01:40",
+    "end": "01:44",
+    "text": "you know, physical movements with her"
+  },
+  {
+    "start": "01:41",
+    "end": "01:46",
+    "text": "body, you'll notice the orientation of"
+  },
+  {
+    "start": "01:44",
+    "end": "01:48",
+    "text": "the head will change. Or if you have a"
+  },
+  {
+    "start": "01:46",
+    "end": "01:50",
+    "text": "horse that's trotting along, the front"
+  },
+  {
+    "start": "01:48",
+    "end": "01:52",
+    "text": "and back legs would swap together. So,"
+  },
+  {
+    "start": "01:50",
+    "end": "01:55",
+    "text": "clearly, these models have a while to"
+  },
+  {
+    "start": "01:52",
+    "end": "01:57",
+    "text": "go, but what happens when you can start"
+  },
+  {
+    "start": "01:55",
+    "end": "02:01",
+    "text": "predicting the next frame, but do that"
+  },
+  {
+    "start": "01:57",
+    "end": "02:03",
+    "text": "in real real time at 15, 20, 30 frames"
+  },
+  {
+    "start": "02:01",
+    "end": "02:05",
+    "text": "per second."
+  },
+  {
+    "start": "02:03",
+    "end": "02:08",
+    "text": "Suddenly, you start getting a model like"
+  },
+  {
+    "start": "02:05",
+    "end": "02:10",
+    "text": "Genie 3. Now, Genie 3 is fundamentally"
+  },
+  {
+    "start": "02:08",
+    "end": "02:11",
+    "text": "an autoregressive model, except instead"
+  },
+  {
+    "start": "02:10",
+    "end": "02:13",
+    "text": "of predicting like the next token like a"
+  },
+  {
+    "start": "02:11",
+    "end": "02:14",
+    "text": "large language model would, it's like"
+  },
+  {
+    "start": "02:13",
+    "end": "02:16",
+    "text": "predicting the next frame, right? So,"
+  },
+  {
+    "start": "02:14",
+    "end": "02:18",
+    "text": "while we don't know exactly what the"
+  },
+  {
+    "start": "02:16",
+    "end": "02:21",
+    "text": "underpinnings are, we can speculate that"
+  },
+  {
+    "start": "02:18",
+    "end": "02:23",
+    "text": "essentially Genie 3 treats like visual"
+  },
+  {
+    "start": "02:21",
+    "end": "02:25",
+    "text": "patches sort of as these tokens that are"
+  },
+  {
+    "start": "02:23",
+    "end": "02:26",
+    "text": "predicted sequentially, and that gives"
+  },
+  {
+    "start": "02:25",
+    "end": "02:28",
+    "text": "you a lot of the spatial and temporal"
+  },
+  {
+    "start": "02:26",
+    "end": "02:30",
+    "text": "coherence. Like physics becomes an"
+  },
+  {
+    "start": "02:28",
+    "end": "02:32",
+    "text": "emergent property that comes out of it,"
+  },
+  {
+    "start": "02:30",
+    "end": "02:33",
+    "text": "but you get a degree of consistency for"
+  },
+  {
+    "start": "02:32",
+    "end": "02:35",
+    "text": "free. And this is really powerful"
+  },
+  {
+    "start": "02:33",
+    "end": "02:36",
+    "text": "because essentially like given a bunch"
+  },
+  {
+    "start": "02:35",
+    "end": "02:39",
+    "text": "of frames that have been predicted, the"
+  },
+  {
+    "start": "02:36",
+    "end": "02:41",
+    "text": "next frame can be predicted based on the"
+  },
+  {
+    "start": "02:39",
+    "end": "02:43",
+    "text": "action that the user gave and all prior"
+  },
+  {
+    "start": "02:41",
+    "end": "02:45",
+    "text": "frames that have already been generated"
+  },
+  {
+    "start": "02:43",
+    "end": "02:47",
+    "text": "to make sure everything looks cohesive."
+  },
+  {
+    "start": "02:45",
+    "end": "02:49",
+    "text": "Now, this is in contrast to diffusion"
+  },
+  {
+    "start": "02:47",
+    "end": "02:51",
+    "text": "models where everything is sort of"
+  },
+  {
+    "start": "02:49",
+    "end": "02:54",
+    "text": "predicted at once. Basically, treat a"
+  },
+  {
+    "start": "02:51",
+    "end": "02:55",
+    "text": "video generation as this like single"
+  },
+  {
+    "start": "02:54",
+    "end": "02:57",
+    "text": "three-dimensional block. Think of it"
+  },
+  {
+    "start": "02:55",
+    "end": "02:59",
+    "text": "like the height, the width, and then the"
+  },
+  {
+    "start": "02:57",
+    "end": "03:00",
+    "text": "time axis, right? Like the temporal"
+  },
+  {
+    "start": "02:59",
+    "end": "03:02",
+    "text": "aspect. And then these models use"
+  },
+  {
+    "start": "03:00",
+    "end": "03:05",
+    "text": "essentially like diffusion transformers"
+  },
+  {
+    "start": "03:02",
+    "end": "03:07",
+    "text": "to like simultaneously denoise the whole"
+  },
+  {
+    "start": "03:05",
+    "end": "03:08",
+    "text": "stack, if you will. And this gives you"
+  },
+  {
+    "start": "03:07",
+    "end": "03:10",
+    "text": "amazing consistency within the"
+  },
+  {
+    "start": "03:08",
+    "end": "03:11",
+    "text": "generation because since you're doing"
+  },
+  {
+    "start": "03:10",
+    "end": "03:14",
+    "text": "the denoising all at once, like you're"
+  },
+  {
+    "start": "03:11",
+    "end": "03:16",
+    "text": "not going to have like completely weird"
+  },
+  {
+    "start": "03:14",
+    "end": "03:17",
+    "text": "artifacts that you might have seen in"
+  },
+  {
+    "start": "03:16",
+    "end": "03:19",
+    "text": "previous models where each of the key"
+  },
+  {
+    "start": "03:17",
+    "end": "03:21",
+    "text": "frames were generated individually and"
+  },
+  {
+    "start": "03:19",
+    "end": "03:22",
+    "text": "then you sort of like interpolate"
+  },
+  {
+    "start": "03:21",
+    "end": "03:24",
+    "text": "between them. Now, this also helps with"
+  },
+  {
+    "start": "03:22",
+    "end": "03:26",
+    "text": "consistency of these offline generated"
+  },
+  {
+    "start": "03:24",
+    "end": "03:28",
+    "text": "videos because like every patch of the"
+  },
+  {
+    "start": "03:26",
+    "end": "03:30",
+    "text": "video sees every other patch. So, if you"
+  },
+  {
+    "start": "03:28",
+    "end": "03:32",
+    "text": "have like a basketball that's flying"
+  },
+  {
+    "start": "03:30",
+    "end": "03:34",
+    "text": "across the scene, like all the frames"
+  },
+  {
+    "start": "03:32",
+    "end": "03:36",
+    "text": "are being generated with the movement of"
+  },
+  {
+    "start": "03:34",
+    "end": "03:38",
+    "text": "that basketball in mind so that it's"
+  },
+  {
+    "start": "03:36",
+    "end": "03:40",
+    "text": "coherent across the generation. Now, of"
+  },
+  {
+    "start": "03:38",
+    "end": "03:41",
+    "text": "course, this doesn't work for real-time"
+  },
+  {
+    "start": "03:40",
+    "end": "03:43",
+    "text": "scenarios, and the advantage of having"
+  },
+  {
+    "start": "03:41",
+    "end": "03:45",
+    "text": "this autoregressive approach is like you"
+  },
+  {
+    "start": "03:43",
+    "end": "03:47",
+    "text": "could have like a seemingly infinite"
+  },
+  {
+    "start": "03:45",
+    "end": "03:49",
+    "text": "length generation, right? This is why"
+  },
+  {
+    "start": "03:47",
+    "end": "03:51",
+    "text": "video diffusion models are capped at 5"
+  },
+  {
+    "start": "03:49",
+    "end": "03:53",
+    "text": "seconds, 10 10 15 seconds, 20, 30"
+  },
+  {
+    "start": "03:51",
+    "end": "03:55",
+    "text": "seconds tops, after which you have to go"
+  },
+  {
+    "start": "03:53",
+    "end": "03:57",
+    "text": "do another extended generation where you"
+  },
+  {
+    "start": "03:55",
+    "end": "03:59",
+    "text": "take the last frame and go back doing"
+  },
+  {
+    "start": "03:57",
+    "end": "04:00",
+    "text": "the whole process again. Whereas with"
+  },
+  {
+    "start": "03:59",
+    "end": "04:03",
+    "text": "this auto-regressive paradigm, such as"
+  },
+  {
+    "start": "04:00",
+    "end": "04:06",
+    "text": "Genie-3, you could just keep predicting"
+  },
+  {
+    "start": "04:03",
+    "end": "04:08",
+    "text": "the next frame till infinity."
+  },
+  {
+    "start": "04:06",
+    "end": "04:10",
+    "text": "The question then becomes is how do you"
+  },
+  {
+    "start": "04:08",
+    "end": "04:12",
+    "text": "have some notion of visual spatial"
+  },
+  {
+    "start": "04:10",
+    "end": "04:15",
+    "text": "memory? Like how does the model remember"
+  },
+  {
+    "start": "04:12",
+    "end": "04:16",
+    "text": "what was in that generation? And hey, I"
+  },
+  {
+    "start": "04:15",
+    "end": "04:18",
+    "text": "left the ball over here, so the ball"
+  },
+  {
+    "start": "04:16",
+    "end": "04:19",
+    "text": "should exactly be over here when I look"
+  },
+  {
+    "start": "04:18",
+    "end": "04:21",
+    "text": "back at it. Well, right now, you'll"
+  },
+  {
+    "start": "04:19",
+    "end": "04:23",
+    "text": "notice a lot of these models have a"
+  },
+  {
+    "start": "04:21",
+    "end": "04:25",
+    "text": "rolling context window."
+  },
+  {
+    "start": "04:23",
+    "end": "04:27",
+    "text": "Essentially, all the frames that were"
+  },
+  {
+    "start": "04:25",
+    "end": "04:28",
+    "text": "generated, it's keeping that in memory"
+  },
+  {
+    "start": "04:27",
+    "end": "04:30",
+    "text": "and is able to look back at it. But"
+  },
+  {
+    "start": "04:28",
+    "end": "04:32",
+    "text": "after a certain point, the size of that"
+  },
+  {
+    "start": "04:30",
+    "end": "04:34",
+    "text": "just explodes and is far outside of the"
+  },
+  {
+    "start": "04:32",
+    "end": "04:36",
+    "text": "context window. So what you do is just"
+  },
+  {
+    "start": "04:34",
+    "end": "04:38",
+    "text": "handle in a rolling fashion. Like as new"
+  },
+  {
+    "start": "04:36",
+    "end": "04:39",
+    "text": "frames keep getting generated, you get"
+  },
+  {
+    "start": "04:38",
+    "end": "04:41",
+    "text": "rid of the previous ones and push them"
+  },
+  {
+    "start": "04:39",
+    "end": "04:43",
+    "text": "outside of the context window. Meaning"
+  },
+  {
+    "start": "04:41",
+    "end": "04:45",
+    "text": "that it remembers everything that"
+  },
+  {
+    "start": "04:43",
+    "end": "04:47",
+    "text": "happened, let's say in the last minute"
+  },
+  {
+    "start": "04:45",
+    "end": "04:49",
+    "text": "or so, and it's true and consistent to"
+  },
+  {
+    "start": "04:47",
+    "end": "04:51",
+    "text": "that. Basically, like a video game where"
+  },
+  {
+    "start": "04:49",
+    "end": "04:53",
+    "text": "you have NPCs or other physics effects"
+  },
+  {
+    "start": "04:51",
+    "end": "04:55",
+    "text": "or damage that's taken place, it'll"
+  },
+  {
+    "start": "04:53",
+    "end": "04:57",
+    "text": "remember exactly where it is when you"
+  },
+  {
+    "start": "04:55",
+    "end": "04:59",
+    "text": "walk back to it. The difference here is"
+  },
+  {
+    "start": "04:57",
+    "end": "05:00",
+    "text": "it's remembering absolutely everything"
+  },
+  {
+    "start": "04:59",
+    "end": "05:02",
+    "text": "that it saw cuz it's got all of the"
+  },
+  {
+    "start": "05:00",
+    "end": "05:05",
+    "text": "frames in the context [music] window to"
+  },
+  {
+    "start": "05:02",
+    "end": "05:06",
+    "text": "look back at."
+  },
+  {
+    "start": "05:05",
+    "end": "05:08",
+    "text": "Now this auto-regressive architecture"
+  },
+  {
+    "start": "05:06",
+    "end": "05:10",
+    "text": "for video generation not only lets you"
+  },
+  {
+    "start": "05:08",
+    "end": "05:12",
+    "text": "create things in near real time and keep"
+  },
+  {
+    "start": "05:10",
+    "end": "05:14",
+    "text": "predicting the next frame up to infinity"
+  },
+  {
+    "start": "05:12",
+    "end": "05:17",
+    "text": "to create theoretically unlimited length"
+  },
+  {
+    "start": "05:14",
+    "end": "05:19",
+    "text": "videos, it also lets the user inject"
+  },
+  {
+    "start": "05:17",
+    "end": "05:20",
+    "text": "input into what should be happening. Now"
+  },
+  {
+    "start": "05:19",
+    "end": "05:22",
+    "text": "of course, when you do traditional"
+  },
+  {
+    "start": "05:20",
+    "end": "05:23",
+    "text": "diffusion-based video generation, like"
+  },
+  {
+    "start": "05:22",
+    "end": "05:25",
+    "text": "you're in this place where you have to"
+  },
+  {
+    "start": "05:23",
+    "end": "05:27",
+    "text": "prompt out all the action that happens,"
+  },
+  {
+    "start": "05:25",
+    "end": "05:29",
+    "text": "right? In this case, as you go along,"
+  },
+  {
+    "start": "05:27",
+    "end": "05:31",
+    "text": "you could change the action. So at the"
+  },
+  {
+    "start": "05:29",
+    "end": "05:32",
+    "text": "simplest level, think of it like instead"
+  },
+  {
+    "start": "05:31",
+    "end": "05:34",
+    "text": "of the Genie-3 demos where you're just"
+  },
+  {
+    "start": "05:32",
+    "end": "05:36",
+    "text": "using WSAD and just sort of using"
+  },
+  {
+    "start": "05:34",
+    "end": "05:38",
+    "text": "keyboard controls as the input, what if"
+  },
+  {
+    "start": "05:36",
+    "end": "05:41",
+    "text": "you took your tracked camera phone using"
+  },
+  {
+    "start": "05:38",
+    "end": "05:44",
+    "text": "ARKit ARCore and sent the 3D position,"
+  },
+  {
+    "start": "05:41",
+    "end": "05:45",
+    "text": "the 3D pose of this camera, and use that"
+  },
+  {
+    "start": "05:44",
+    "end": "05:48",
+    "text": "as the input so you're literally"
+  },
+  {
+    "start": "05:45",
+    "end": "05:50",
+    "text": "controlling the action as it plays out"
+  },
+  {
+    "start": "05:48",
+    "end": "05:52",
+    "text": "in real time and recording that to disk."
+  },
+  {
+    "start": "05:50",
+    "end": "05:54",
+    "text": "I suspect you'll start seeing expanses"
+  },
+  {
+    "start": "05:52",
+    "end": "05:55",
+    "text": "like this next year. You can start doing"
+  },
+  {
+    "start": "05:54",
+    "end": "05:57",
+    "text": "things like the promptable events that"
+  },
+  {
+    "start": "05:55",
+    "end": "05:58",
+    "text": "Genie 3 showcased. You're like, \"Hey, a"
+  },
+  {
+    "start": "05:57",
+    "end": "06:00",
+    "text": "character walks in through the right."
+  },
+  {
+    "start": "05:58",
+    "end": "06:02",
+    "text": "Oh, an explosion drops on the left.\" And"
+  },
+  {
+    "start": "06:00",
+    "end": "06:05",
+    "text": "then you can suddenly see that video"
+  },
+  {
+    "start": "06:02",
+    "end": "06:07",
+    "text": "react in real time to these key-framed"
+  },
+  {
+    "start": "06:05",
+    "end": "06:08",
+    "text": "events that you're popping into the"
+  },
+  {
+    "start": "06:07",
+    "end": "06:10",
+    "text": "world. Now, I'm anchoring, of course, to"
+  },
+  {
+    "start": "06:08",
+    "end": "06:12",
+    "text": "video generation, but if you take a step"
+  },
+  {
+    "start": "06:10",
+    "end": "06:15",
+    "text": "back, we're essentially creating a new"
+  },
+  {
+    "start": "06:12",
+    "end": "06:17",
+    "text": "type of engine, an engine that's trained"
+  },
+  {
+    "start": "06:15",
+    "end": "06:18",
+    "text": "on all the audio-visual data on the"
+  },
+  {
+    "start": "06:17",
+    "end": "06:20",
+    "text": "internet, but then a lot of synthetic"
+  },
+  {
+    "start": "06:18",
+    "end": "06:23",
+    "text": "training data from traditional game"
+  },
+  {
+    "start": "06:20",
+    "end": "06:25",
+    "text": "engines like Unity and Unreal. And"
+  },
+  {
+    "start": "06:23",
+    "end": "06:27",
+    "text": "effectively, if you have the ability to"
+  },
+  {
+    "start": "06:25",
+    "end": "06:29",
+    "text": "prompt this thing with image, audio,"
+  },
+  {
+    "start": "06:27",
+    "end": "06:31",
+    "text": "video, and these kind of promptable"
+  },
+  {
+    "start": "06:29",
+    "end": "06:34",
+    "text": "events, you can create whatever you"
+  },
+  {
+    "start": "06:31",
+    "end": "06:36",
+    "text": "want. Dare I say, you can create a world"
+  },
+  {
+    "start": "06:34",
+    "end": "06:38",
+    "text": "model. Or the one thing that I think"
+  },
+  {
+    "start": "06:36",
+    "end": "06:40",
+    "text": "maybe a reach for 2026, but will"
+  },
+  {
+    "start": "06:38",
+    "end": "06:43",
+    "text": "certainly happen in 2027, is the ability"
+  },
+  {
+    "start": "06:40",
+    "end": "06:44",
+    "text": "to control agents within these models,"
+  },
+  {
+    "start": "06:43",
+    "end": "06:46",
+    "text": "right? Now, we saw this with Seema"
+  },
+  {
+    "start": "06:44",
+    "end": "06:49",
+    "text": "agent, where Google had created this"
+  },
+  {
+    "start": "06:46",
+    "end": "06:50",
+    "text": "agent that can use Genie 3 and like"
+  },
+  {
+    "start": "06:49",
+    "end": "06:53",
+    "text": "navigate and do things inside of it."
+  },
+  {
+    "start": "06:50",
+    "end": "06:55",
+    "text": "What I'm describing is the feeling of a"
+  },
+  {
+    "start": "06:53",
+    "end": "06:57",
+    "text": "director being on a sound stage and"
+  },
+  {
+    "start": "06:55",
+    "end": "06:59",
+    "text": "asking its talent to do do interesting"
+  },
+  {
+    "start": "06:57",
+    "end": "07:01",
+    "text": "things. In other words, when can we have"
+  },
+  {
+    "start": "06:59",
+    "end": "07:03",
+    "text": "real-time video generation with embodied"
+  },
+  {
+    "start": "07:01",
+    "end": "07:05",
+    "text": "characters within them, where you're"
+  },
+  {
+    "start": "07:03",
+    "end": "07:06",
+    "text": "asking them to do things and they're"
+  },
+  {
+    "start": "07:05",
+    "end": "07:08",
+    "text": "intelligently not only reasoning about"
+  },
+  {
+    "start": "07:06",
+    "end": "07:10",
+    "text": "the environment and how to navigate it,"
+  },
+  {
+    "start": "07:08",
+    "end": "07:12",
+    "text": "but how to give you the best performance"
+  },
+  {
+    "start": "07:10",
+    "end": "07:14",
+    "text": "possible. I think 2026 might be a"
+  },
+  {
+    "start": "07:12",
+    "end": "07:16",
+    "text": "stretch for this, but that is my dream"
+  },
+  {
+    "start": "07:14",
+    "end": "07:19",
+    "text": "and hope where things will get to for"
+  },
+  {
+    "start": "07:16",
+    "end": "07:21",
+    "text": "2027. And think about it, you kind of"
+  },
+  {
+    "start": "07:19",
+    "end": "07:23",
+    "text": "need this. If we're talking about world"
+  },
+  {
+    "start": "07:21",
+    "end": "07:25",
+    "text": "models and video models, if they're"
+  },
+  {
+    "start": "07:23",
+    "end": "07:27",
+    "text": "running in real time, essentially being"
+  },
+  {
+    "start": "07:25",
+    "end": "07:29",
+    "text": "these new kind of world [music] engines,"
+  },
+  {
+    "start": "07:27",
+    "end": "07:31",
+    "text": "we need the ability to have a bunch of"
+  },
+  {
+    "start": "07:29",
+    "end": "07:34",
+    "text": "concurrent entities or agents within"
+  },
+  {
+    "start": "07:31",
+    "end": "07:36",
+    "text": "them doing stuff and you can coherently"
+  },
+  {
+    "start": "07:34",
+    "end": "07:37",
+    "text": "capture them from different angles."
+  },
+  {
+    "start": "07:36",
+    "end": "07:39",
+    "text": "We're not quite there yet, but that's"
+  },
+  {
+    "start": "07:37",
+    "end": "07:41",
+    "text": "the future that I'm super excited about."
+  },
+  {
+    "start": "07:39",
+    "end": "07:42",
+    "text": "So, to wrap things up, you'll be hearing"
+  },
+  {
+    "start": "07:41",
+    "end": "07:44",
+    "text": "a lot about spatial intelligence and"
+  },
+  {
+    "start": "07:42",
+    "end": "07:46",
+    "text": "world models in the new year. Video"
+  },
+  {
+    "start": "07:44",
+    "end": "07:48",
+    "text": "generation is going to start becoming"
+  },
+  {
+    "start": "07:46",
+    "end": "07:50",
+    "text": "real time. And that's where the next"
+  },
+  {
+    "start": "07:48",
+    "end": "07:52",
+    "text": "level of opportunity is for all these AI"
+  },
+  {
+    "start": "07:50",
+    "end": "07:54",
+    "text": "model companies. They want to go beyond"
+  },
+  {
+    "start": "07:52",
+    "end": "07:56",
+    "text": "just media and entertainment and unlock"
+  },
+  {
+    "start": "07:54",
+    "end": "07:58",
+    "text": "a new category of robotics and"
+  },
+  {
+    "start": "07:56",
+    "end": "08:00",
+    "text": "simulation. And if you want to"
+  },
+  {
+    "start": "07:58",
+    "end": "08:02",
+    "text": "understand why are world models so"
+  },
+  {
+    "start": "08:00",
+    "end": "08:04",
+    "text": "important for simulation, stick around"
+  },
+  {
+    "start": "08:02",
+    "end": "08:06",
+    "text": "for my next video. For now, if you want"
+  },
+  {
+    "start": "08:04",
+    "end": "08:08",
+    "text": "to know how world models operate and why"
+  },
+  {
+    "start": "08:06",
+    "end": "08:10",
+    "text": "the hell is everyone talking about them,"
+  },
+  {
+    "start": "08:08",
+    "end": "08:12",
+    "text": "be sure to check out this video. Belavo"
+  },
+  {
+    "start": "08:10",
+    "end": "08:15",
+    "text": "signing off and I'll see you all in the"
+  },
+  {
+    "start": "08:12",
+    "end": "08:15",
+    "text": "next one. Cheers."
+  }
+]

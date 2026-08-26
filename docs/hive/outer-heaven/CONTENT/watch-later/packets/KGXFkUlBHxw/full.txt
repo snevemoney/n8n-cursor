@@ -1,0 +1,555 @@
+All right, imagine you just ho topped off a call and now you have to send out some sort of deliverable, whether that's meeting minutes or a proposal or something like that, which is actually a big part of my job when I was still working full-time.
+
+All of that can be automated now.
+
+So, in today's video, I'm going to be going over this workflow and we're going to pretend you're in the scenario where you're hopping off a call with a potential client and now you want to follow up with a slide deck proposal.
+
+So, let me just go ahead and do a live run of this system so we can all understand what we're going to be walking through today.
+
+So, this workflow has two parts.
+
+The first part up here is just logging the meeting once the meeting actually ends. and it logs it in a Google sheet which we'll be looking at which is going to look like this that has the date, the title, the attendees, the gist of the meeting, the ID and then a status.
+
+And then the second part of the workflow is the actual slide deck creation.
+
+So after a new meeting gets logged in our Google sheet, we'll go ahead and pull in those details.
+
+We will get human approval right here to see if we want to have a slide deck generated or not because we don't always need that.
+
+And if we do, then we'll go ahead and pass it over to the proposal generator agent, which will shoot off an API call to Gamma and deliver us a ready to go slide deck that is super professional.
+
+So, if that sounds like a use case you might be interested in understanding, then let's go ahead and jump into it.
+
+And I'm going to start off up here with this first workflow.
+
+So, the very first question you might be asking yourself is why did I split this up into two workflows?
+
+And the reason I did this is just because I'm thinking about scalability.
+
+I'm thinking about how I can build off of this system.
+
+Because when a meeting ends, you might want to do different things based on who the meeting was with.
+
+And if I was to bake in this part of the flow into the gamma creation workflow, then it would just be a little tougher to separate out later or to route off to different paths.
+
+For example, if you look at something like this, you can see that in part one of the workflow, we have a few different paths up here.
+
+And then also in part two of the workflow, we have a couple extra paths down there.
+
+And this helps me think about, okay, later I might be able to add different paths.
+
+And it's just a little easier, at least for me, to keep track.
+
+So anyways, let's go ahead and run this first workflow.
+
+So what happens here is we have a web hook and this web hook is given to Fireflies.
+
+So basically whenever a Fireflies call is done, it's going to trigger this end web hook.
+
+So let me just go ahead and give this workflow a run so we can see how it works.
+
+So it just did a quick wait.
+
+Now it's going to grab the info from Fireflies as far as like the title, the transcript, things like that.
+
+Then we're going to do an if to see if all of that stuff exists, and I'll explain that in a sec.
+
+We clean up the JSON from Fireflies in order to get the attendees.
+
+And then we log the information in the Google sheet.
+
+And then it pops up over here like this where we have our title, we have our attendees, we have the gist, we have a status, and then we have the ID of that meeting.
+
+So let's just break it down node by node.
+
+The web hook, how do we do this?
+
+Well, in here we have a test URL and a production URL.
+
+So what I would do in practice is I would grab this production URL.
+
+I would head into Fireflies and I would go to my settings.
+
+I would go to the developer settings.
+
+And then right here, I throw in my web hook address in this little box.
+
+And then I check this on which says transcription complete.
+
+So this basically means as soon as a meeting is finished and Fireflies was in there and it has processed the transcript it will send the data to and it end right here.
+
+But it's actually pretty interesting because in this web hook all we actually get in the body are a few things that aren't actually that helpful.
+
+We get the meeting ID which is great.
+
+We get the event type which says transcription complete but we don't really get the transcript or the title or anything else that's useful.
+
+And so that's why we actually have to make this next request to the Fireflies node to get the transcript.
+
+And so here's something that's interesting that you would only really understand if you play around with Fireflies a little bit.
+
+And that's why I had to add the weight here.
+
+So basically when the transcript is done and if we make that request right away to Fireflies, we don't have the AI summary stuff.
+
+So let me just show you what that looks like.
+
+We put in the meeting ID that we got from the web hook and we say, "Hey Fireflies, get me all the info for this meeting ID." And that comes back with a lot of stuff. we get a sentences array which has basically all of the different sentences set in the meeting.
+
+So that's essentially our transcript that we're going to have to clean up later.
+
+But that's how we get all of our transcripts.
+
+And if you scroll down now, you can see we have the title, we have the host email, we have, you know, all this other stuff.
+
+We have keywords.
+
+And here's where we have like AI generated summaries because Fireflies uses AI to help, you know, make some action items and things like that.
+
+So all of these action items, bullet points, overviews, bullet gist, summary, all of these things right here are AI generated.
+
+And so that's why we had to have the wait here and the if here because if you search Fireflies right away as soon as the transcript's done, the AI generated stuff isn't always done yet.
+
+So what we do is we have a wait, we check in on Fireflies.
+
+We go to this if node, which we're basically just doing a polling check where I'm saying, does the AI summary, does the AI gist exist?
+
+If true, we're good and we move down the rest of the path.
+
+But if false, we will go back, we'll wait, and then we'll check again.
+
+So we basically have this infinite loop called polling where we basically keep checking in on Fireflies until we know for sure that the AI summary stuff is done and then we can move on to the rest of the process.
+
+And then we have this code node where we're basically taking the incoming JSON and we just want to output the array of speakers.
+
+So in this case it was just a test Fireflies meeting I did and it was just me.
+
+But if you had multiple people in that meeting speaking, you would be able to log that information so that you can see right here who was on that call.
+
+And so for those of you who are curious about the way that I actually write these code nodes because you can see we have some more later where we have to do some data cleaning up.
+
+This is exactly what I do and it's really simple.
+
+I will come into the code node and I will take the JSON of the incoming data.
+
+So I literally will copy this the entire JSON.
+
+I will come to Claude and I'll paste in there and I'll just say I need you to help me write an Nin code node.
+
+I paste it in the incoming JSON.
+
+I need you to output every time the array of speakers and pretty much just shoot that off.
+
+And what it does is it can understand and now it can read the structure of the incoming code that it needs to work with.
+
+And it's not always perfect on the first try, but this is what I do.
+
+And then I copy it.
+
+I paste it into N.
+
+I paste it into here.
+
+I'd run it.
+
+And then I if it worked, great.
+
+But if it doesn't, I would say, okay, here's what you gave me.
+
+Here's what it did.
+
+Here's why it's not correct.
+
+And I just have to go back and forth a few times.
+
+And that's how I always write my code notes.
+
+Anyways, then the last step is of course to come into the Google sheet.
+
+We're appending a new row and I'm writing over the current date and time, the title of the meeting, the attendees, the gist, which was the AI generated gist.
+
+And then we're setting the status to NA.
+
+And then we put the ID in here for tracking purposes because later you might need to reference this meeting.
+
+And the only really unique identifier you have could be the meeting ID.
+
+All right.
+
+So, our meeting has been logged in our Google sheet.
+
+Now, what's next?
+
+Well, the second workflow gets triggered when there's a new row added to that Google sheet.
+
+So, this is why we pin this data here as if we just basically added this row and now we have to process it.
+
+So, I'm just going to do the same thing.
+
+I'm going to go ahead and run this whole workflow and then we will break it down.
+
+So, what we're doing here is we are sending off a request once again to get the meeting info.
+
+But I just did a quick limit where I'm basically saying only keep the last item because on the off chance where maybe you have two meetings end at the same time or something weird like that, we only want to actually process one of them.
+
+So that's just a quick guardrail right there.
+
+Now after we get the meeting info, as you guys remember, we get all this raw data about like the transcript and all this AI summary stuff like that.
+
+Then we go ahead and do a cleanup.
+
+So this is another time we're doing a code node except for this time we're not only getting the speakers, we're also getting the full transcript.
+
+And this was a little bit more tricky of a code node to work with.
+
+It's still not too difficult.
+
+But the reason why I say it's a little trickier is because what I wanted to do is I wanted to make sure it was like speaker Nate Herk and then it didn't say Nate Herk again until the next person spoke because otherwise you might have like the speaker for every single sentence that they said and then it just looks not super clean.
+
+So now we cleaned up that code node.
+
+But after we clean up this data, we go to a Slack node which is a send and wait message.
+
+So, if I hop into Slack, you can see right here that we got a message from the Herkbot that says, "Your meeting green grass proposal has just concluded.
+
+Would you like to generate a proposal?" And so, this is where I can say yes or no.
+
+And so, if I click yes and then we go back into the workflow, you can see it goes up the true path and now we we send it over here to the proposal generator agent.
+
+And if I was to have said no, it just would have gone down here and it would have updated the status in here to generation declined.
+
+But because we approved it, it will basically make the slide deck and then it will later update that row and just say generated.
+
+Okay.
+
+So now the proposal agent is working its magic.
+
+And I'm not going to read this entire um system prompt.
+
+You guys will of course as always be able to download this exact workflow for free by grabbing it in my free school community.
+
+The link for that is down in the description.
+
+But let me just go over high level what this is doing.
+
+So we've got a role which is that you are an expert senior AI solutions consultant and sales engineer for up.
+
+Your role is to analyze a raw transcript from a discovery or sales call and transform it into a polished high-converting client ready business proposal.
+
+So we give it the objective which is to use the call transcript.
+
+We give it some important constraints like this is fully client-f facing.
+
+Do not include follow-up questions.
+
+Do not mention automation AI generation or that this was system produced.
+
+Make confident assumptions if specific data is missing.
+
+Use clear placeholders.
+
+Blah blah blah.
+
+And once again the assumption is not that you would ever automatically send this to the client.
+
+The assumption is that you would just get 90% of the way there.
+
+You can make your tweaks and then you send it off as a human.
+
+We go over some tone and style and then I go over the proposal structure because AI is going to generate something random every time.
+
+But the more structure you can give it, the better.
+
+So I go over the title page, what that should look like.
+
+I go over the executive summary.
+
+I go over the problem and challenge up at AAI proposed solution, return on investment, soft and intangible benefits, implementation road map, and then success metrics.
+
+And finally we have at the end a little bit of advocation for ourselves.
+
+Why choose up at AI?
+
+So what it does is you can see it outputs a full basically block of text which we want to transform into a prettyl looking gamma slide deck with pictures and with headings and with icons and things like that.
+
+So that's exactly what we do next.
+
+We go to our gamma API call.
+
+So here we are in the HTTP request.
+
+I'm not going to walk through every single little filter here and show you guys exactly what everything's doing, but I'm going to walk over exactly how I set this up and how you can customize this to your liking.
+
+So, obviously, step one is you need to go to Gamma's API documentation, and you're going to go to the generate API parameters explained because this is basically what lets you send over a block of text to Gamma, and it will work its magic and make that slide deck for you.
+
+So what I actually did when I was building this workflow, I copied this curl request which has a ton of stuff in the JSON body and then I just started to fill in some things.
+
+So of course I had to fill in my API key which I went ahead and did as a header off right here.
+
+We have our method as post.
+
+We have the URL.
+
+We have the header of content type is application JSON.
+
+And now we have the monster of this JSON body which looks super intimidating but it's really really simple.
+
+And let me explain why that is.
+
+So once again, what I did is I copied in this body and then I decided, okay, I'm going to go line by line and I'm just going to understand is each field required, is it optional, what does it do, and do I need to change anything?
+
+And if you're having trouble understanding that, what I would do is I would just paste this link into chatgbt or claude or whatever, and say, explain to me exactly how I would set up my request if I want these different types of things in my slide deck.
+
+All right, so let's break it down.
+
+The first parameter that we see is input text.
+
+And you can see this is where I put the output of the AI agent, which is our entire chunk of text that we want turned into a slide deck.
+
+I went to the documentation and I saw, okay, input text is required.
+
+What is it?
+
+This is the content used to generate your gamma, including text and image URLs.
+
+So I was like, okay, I know what that does.
+
+Cool.
+
+The next thing we have is text mode.
+
+So then I would go into the documentation and I would scroll down and see text mode.
+
+Okay, this is required.
+
+It determines how your input text is modified, if at all.
+
+I can choose between generate, condense, or preserve. and these are the different options and what they actually mean.
+
+So I was like, "Okay, cool.
+
+Well, I'm going to go ahead and choose preserve because I want all of this text that our AI agent just works so hard on to be preserved." And so that's really the flow.
+
+That's all I do is I go one by one and understand format.
+
+What are my options?
+
+What do I want?
+
+Theme ID.
+
+What are my options?
+
+What do I want?
+
+Theme ID is interesting because in gamma you can set up your own custom themes.
+
+So if I go to my themes here and so like let's say I wanted to use my AAS plus theme here, I would just click on the three dots and I would click on copy theme ID for API.
+
+And then that's what I pasted in right here.
+
+This is my theme ID.
+
+And you can see we have options for text.
+
+We can do amount detailed tone.
+
+We can do audience.
+
+We have options for image.
+
+We can do the source.
+
+We can choose the model.
+
+And so now you can see that this is basically just like selecting different filters for like if you were online shopping and things like that.
+
+It's really simple even though it might look a bit intimidating when you stare at it like this.
+
+Now there's two other things I wanted to point out.
+
+The first one is that I like to do a replace function whenever I send over an API call because if the AI agent decides to put in some new lines or to put in some quotation marks, it would break this body.
+
+So this replace function just basically makes sure that that will never happen.
+
+And then the thing I wanted to do at the bottom as well is I wanted to share this automatically.
+
+So I'm sharing this as view or comment access.
+
+And I'm going to automatically send this to one of my emails, internal emails every time just so I can, you know, get a quick link to it rather than having to go search through my Gamma.
+
+So that is pretty much how we set up the Gamma API call.
+
+And then what happens is two final things as far as notification and logging.
+
+The first one is that we just get a message in our Slack.
+
+And if you see right here, Herkbot says, "Your gamma deck is being generated.
+
+You should receive an email shortly." And then after that, we log it back into the Google sheet where we basically just update that row.
+
+As you can see, we're no longer doing an append function.
+
+We're doing an update function.
+
+And we're just changing the status here to generated.
+
+And then after that, we're hitting that Google sheet and we're updating a row.
+
+So you can see instead of appending a row, we're updating one.
+
+And we're matching on the meeting ID once again, which is our unique identifier.
+
+And you can see that we're just changing the status to generated.
+
+So back in our actual meeting logger, we should see that this first row that we were looking at, it now shows us that the status is generated.
+
+So, here's that email that I just got which says, "Nate Herk has invited you to comment on automated vendor onboarding and document management on Gamma." So, we're going to go ahead and open that up.
+
+And here it is.
+
+So, I'm not going to read every single line, but let's just go through and make sure that we have a structure that we like.
+
+And once again, you would always be able to come back and tweak your system prompt.
+
+So, we've got our automated vendor onboarding and document management for Greengrass prepared by Nate Herk prepared by UpAI.
+
+So, we start off with an executive summary which shows the problem that Greengrass is currently facing. the proposal solution that UpAI is proposing and then by implementing the solution, Green Grass will recapture approximately 350 plus productivity hours annually.
+
+So we've got 350 plus hours saved, 28K cost savings and hopefully a 0% error rate.
+
+We then move on to the problem.
+
+So, this is basically just diving into a bit deeper the manual process that was scoped out in the discovery phase and the sales phase, things like that, and just kind of highlighting that pain as well as highlighting it as far as hours per week, daily requests, hourly costs, and kind of turning that pain into something a bit more tangible.
+
+Then we move into the uppi solution of intelligent automation.
+
+So, we have four different parts here.
+
+You can see centralized intake, intelligent data processing, smart document routing, compliance automation, and then we also have how the system actually works.
+
+So we dive into a little bit more the proposed solution.
+
+If we keep going down now, we can see the return on investment.
+
+So we can see the financial impact, which is a weekly time saved, a weekly cost savings, and then annual operational savings with green highlight, which I thought was pretty nice.
+
+And then we've got a little bit of a graphic over here to show with automation and without automation.
+
+And here's one part where I want to point out, you probably would want to edit this graph a little bit because I'm not actually sure what this is showing and the colors aren't really matching up.
+
+So, like I said, it gets you 90% of the way there.
+
+Saves you a lot of time, but it's not perfect.
+
+So, make sure you're not just sending it off to a client right away.
+
+Then, if you remember from the system prompt, we want to move into some intangible benefits here, like some data accuracy, compliance, elimination of operator fatigue, enhanced vendor experience.
+
+We then move into an implementation road map.
+
+So right here, our AI proposal consultant agent decided that this was going to be a four-week development cycle.
+
+Maybe that's true, maybe that's not, but at least it's broken down here to show and to sort of visualize what this could look like.
+
+And then we end off with our um wide shoes up at AI slide.
+
+So we put in some information here.
+
+This is where you would maybe put in some case studies from your business or maybe what could be cool is you even give this agent access to a database of past projects and it would search through to find one that's the most relevant and then it could use those results and those case studies into this final slide.
+
+So the proposal feels a lot more tailored towards this specific client.
+
+All right.
+
+So, now that we've seen an example output from the system, let's talk about what is going on right here in this second path and what's going on in these set nodes in the middle here, which you may have been wondering about.
+
+So, the idea is that we can drop in a meeting ID at any time if we want a proposal generated.
+
+So, in case you accidentally decline it up here or you didn't want it in the moment, but now you realize you want to go back and generate a, you know, a slide deck, you can do so.
+
+So, because everything's being logged in this Google sheet, let's say that we actually declined this generation.
+
+And now, if I actually do want one, I can go ahead and copy this meeting ID.
+
+I can go back into the workflow and we can run it on a form submission.
+
+So, once again, this form submission could be embedded in your Slack or in some sort of website or something else.
+
+But right here, we're just doing it in NN where I would basically paste in the meeting ID.
+
+Once I submit that, it's going to run the same workflow where it grabs the meeting info.
+
+It cleans everything up and then we pass it to the exact same, you know, final stages, which is generating the proposal with the agent, hitting the gamma API, and then the notification with the update in status.
+
+So, what we're doing here is we're standardizing the inputs.
+
+And before I actually dive into these two nodes to show you how that works, let's real quick just hop into my trusty Excal here so I can help you guys understand like what do I mean by standardizing these inputs.
+
+Okay, so we basically have two parts of the automation.
+
+We have part one and part two.
+
+Part one is basically like getting the meeting info and part two is transforming that meeting info doing something with it.
+
+So in part one we have two paths.
+
+We could take route A which is the form submission or we could take route B which is the natural trigger.
+
+And what happens is in part two of the automation, these nodes and all of these nodes to come need elements from path A or path B.
+
+But it's more difficult to have the AI agent over here say, okay, I'm going to go look in both of those nodes, but one of them isn't always executed because there's no execution where both of these paths could run at the same time.
+
+It would be two separate executions.
+
+So essentially what we want to do is make sure that these nodes are dynamic enough to reference either if A ran or if B ran.
+
+And that's where we feed it into a set node and we're just going to call this C, which is basically A or B.
+
+And now that we have everything standardized in this one set node, the rest of our nodes in phase two of this workflow can actually just reference the variables from here rather than trying to look into different nodes that may or may not exist.
+
+So in practicality here, what we're standardizing is the transcript and the meeting ID because we need the transcript for the AI agent and we need the meeting ID later to update that status again in our Google sheet.
+
+So in the proposal agent when we give it the transcript, we're able to say, "Hey, just go grab JSON.transcript, which is coming from right here." But what this node is grabbing is the actual transcript from either the cleaned up code node over here or the cleaned up code node over here.
+
+And so that's why this is able to be super dynamic and then feed in those variables to the rest of the flow.
+
+And so hopefully that makes a little bit more sense.
+
+Now, if it still doesn't, then what I would recommend for you to do is download the workflow for free in my free school community and then just get in here and run both paths and just look at the differences and understand if you didn't have this node, the workflow would break because if you configured a workflow to only account for path B, it would work fine.
+
+But then if you add path A, it would no longer be able to reference both variables dynamically.
+
+So anyway, same flow would happen from here on out.
+
+We get another Slack message that says that our gamma deck is being generated.
+
+We get another email that says that we can go look at our gamma deck.
+
+And then we get another gamma deck which is similar in structure as far as title, executive summary, current challenges, operational impact, you know, all this kind of stuff.
+
+But of course, it's a bit different because at the end of the day, it's AI on both sides on the proposal generation side, but also on the gamma slide deck creation side.
+
+So, it's always going to be a little bit random, like I said, which is why you want to continuously refine your system prompt until you really like the way that you're getting your outputs.
+
+But anyways, I don't want this video to go too long, but if you're interested in diving deeper into these types of automations and understanding how to build this kind of stuff step by step, then definitely check out my plus community.
+
+The link for that is down in the description.
+
+We've got a great community of over 3,000 members who are building with Nadin every day, building businesses with nitin every day, and we've got a full course with different types of material and live projects and things like that.
+
+So, it's a great place to learn Nen and AI automation.
+
+We also run one live call per week, so I'd love to see you guys in those calls in the community.
+
+But that's going to do it for today.
+
+So, if you enjoyed or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.
+
+Thanks so much everyone.

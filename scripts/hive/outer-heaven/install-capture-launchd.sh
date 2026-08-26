@@ -38,7 +38,7 @@ fi
 [[ -f "$TEMPLATE" ]] || { echo "Missing template: $TEMPLATE" >&2; exit 1; }
 
 mkdir -p "$HOME/Library/LaunchAgents"
-sed -e "s|REPLACE_REPO|$ROOT|g" -e "s|REPLACE_VAULT|$VAULT|g" "$TEMPLATE" > "$PLIST_DEST"
+sed -e "s|REPLACE_REPO|$ROOT|g" -e "s|REPLACE_VAULT|$VAULT|g" -e "s|REPLACE_HOME|$HOME|g" "$TEMPLATE" > "$PLIST_DEST"
 chmod 644 "$PLIST_DEST"
 
 launchctl bootout "gui/$(id -u)/${LABEL}" 2>/dev/null || true

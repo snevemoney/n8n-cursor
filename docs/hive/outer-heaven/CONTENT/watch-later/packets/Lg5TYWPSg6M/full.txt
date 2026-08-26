@@ -1,0 +1,547 @@
+All right.
+
+So, I've sold over 100 AI automation systems and I've priced a ton of those wrong.
+
+I've undercharged, I've underscoped, and I've just thrown out random numbers that were kind of a guess and I couldn't explain when someone actually asked me like, "Hey, where'd you get that number from?" So, in this video, I'm going to talk about everything that I know about pricing AI solutions.
+
+I'm going to walk you through one real build that I sold, every single number, and by the end of this video, you'll be able to take any project, turn the client's own numbers into a price that you can actually defend, and then get paid in stages so you're never carrying much more than, you know, 30 days of unpaid work.
+
+And if you don't know who I am, my name is Nate.
+
+I've been teaching hundreds of thousands of people how to build AI agents and how to implement them into businesses as well, and I scaled my agency to over $100,000 a month and then I sold it.
+
+With our business, we got to the point where the minimum to work with us was a $20,000 a month retainer.
+
+And I'm assuming that sort of engagement is where a lot of you guys want to end up getting to.
+
+So, let's not waste any time and let's just jump straight into today's video.
+
+Okay, so this example was an appointment setting agent.
+
+The business had employees manually setting these meetings, and this was about 20 leads a week, each one taking roughly an hour of a human's time.
+
+And those employees were costing the business about 40 bucks an hour all in.
+
+So, 20 hours a week at $40 an hour is about 800 bucks a week.
+
+And if you multiply that by 52, which is 52 weeks in the year, that's $41,600 annualized.
+
+And before I said anything to the client about price, I walked them through the entire solution, you know, how the agent would work, what testing looked like, how it would change their speed to lead and their lead quality.
+
+But I also had to ask them a ton of questions through what we call the discovery phase because some clients want to talk about price right away.
+
+But the honest answer to them is, you know, in order for me to give you an accurate ballpark estimate of what this is going to cost, I really need to understand more in depth the complexity of the system and how it will actually look once it's fully integrated into your actual business processes.
+
+Then I priced the build right around 13% of what that annual number was, which came out to 5,500 bucks.
+
+So, the business would basically be paying $5,500 for a system that over the course of the year was going to give them back $41,600, which comes out to about a 7.5 multiple on their initial investment.
+
+Now, typically I like to say the golden rule is that you need to be able to show the client that their investment is going to 10x over the course of the year because that math makes it really hard to say no to.
+
+So, in this specific example, where I accounted for that extra 2.5x that we were missing that would put us at 10 was the baseline.
+
+So, right now the baseline was about 20 leads a week, but as the business earned more time back because of the system and this whole process gets more streamlined, that baseline of leads per week would probably start to increase, right?
+
+It would go to 21 and then 23 and then 27.
+
+And that's where we are earning them even more money back.
+
+Now, obviously something like that is a projection and you can't just go in there and say that you can guarantee that.
+
+So, be careful about making any guarantees or trying to tie revenue to those specific results or anything like that.
+
+But, the general idea is that as the system gets used more, the business will grow, which in turn utilizes the system even more.
+
+So, you create this really cool like flywheel.
+
+And then on top of the build, we set up a standard maintenance plan.
+
+So, this was 400 bucks a month.
+
+And I want to be clear what that actually is because a lot of people kind of misinterpret this word maintenance.
+
+So, that $400 a month isn't for me to bolt on new features every month.
+
+It's just me guaranteeing that the build keeps doing what we agreed that it would do.
+
+Meaning if something breaks or an API changes or you know, maybe a new model releases or some weird edge cases show up that need a little tweak in order to keep the system living up to the functionality of the scope, that would be on me and that's covered by the client's retainer fee.
+
+But, new functionality is a completely separate conversation.
+
+So, with maintenance retainers, I always keep the numbers super simple and standard across all projects.
+
+And at this point in my career, our maintenance package was 400 bucks a month.
+
+You just do want to be careful though because if you're delivering a system that's, you know, let's say $30,000, if maintenance on that solution is going to cost you and your team more than 400 bucks a month, meaning you would be like losing money on giving away that package, then obviously you can't charge that.
+
+But I think that with well-designed automations and well-built automations, it really shouldn't be too time-consuming for you to maintain them.
+
+Because once again, there's a big difference between maintaining and adding minor feature enhancements and adding, you know, more functionality.
+
+Now, a big mistake that I made in this specific project was that once I was in production, what I should have done was gone back and measured how valuable this thing truly was.
+
+And I didn't do that.
+
+So, I had no after state.
+
+I had no transformation number.
+
+And what ended up happening is that cost me on the next conversation when I tried to win more business.
+
+So, make sure you're capturing the baseline up front, which in this case was, you know, like 20 leads a week, and the speed to lead time because that was taking the humans, you know, time.
+
+And then, you follow up after a month, and after 2 months, and after 3 months, and you prove to them that those numbers are moving in the direction that the business wants because of your system.
+
+And I know that this might kind of feel like bragging, but it's not, you know, because if you don't put a spotlight on those numbers, even if your automations really, really are helping the business, the business owner might not actually feel that and won't acknowledge that.
+
+So, it's really important that you're the one surfacing that stuff.
+
+Okay.
+
+So, the obvious question is, why not just bill hourly and be done with it?
+
+And I want to give a quick shout-out here.
+
+A pricing guy named Jonathan Stark came and spoke at AI's Live, and he made some really amazing points on this topic.
+
+So, I'm going to talk about some of the things that he brought up.
+
+But really, the problem with hourly is that it pays you more to be slow.
+
+I mean, picture two people on your team.
+
+You're billing them the same, 150 bucks an hour.
+
+Your best developer and your slowest one.
+
+Some new feature comes in, and your best guy knocks that out in a day, so you bill 1 day.
+
+But your slow guy takes 3 days, so you bill 3 days.
+
+You just made three times the money off of a worse, slower employee.
+
+And if your best guy gets faster, then you're going to make less money off of him.
+
+So, getting good at the job actually cut your income.
+
+It's all about incentives.
+
+Would you want to hire someone who is incentivized to work slower in order to get more money out of you?
+
+Probably not.
+
+I wouldn't want to.
+
+But now think about that in, you know, 2026.
+
+You get really good with cloud code or whatever tool you're using, and you can do something in an afternoon that used to take you a week.
+
+And if you're hourly pricing, then that afternoon, because you move so fast, just slashed your income.
+
+So, I'm not saying hourly's never okay.
+
+I think for your first two or three projects, when you've got, you know, nothing to point at, not a bunch of proof, then billing hourly is a safer ask.
+
+It's a It's a easier ask for the business owner, and it's a good place to start.
+
+Maybe just like 100 bucks an hour.
+
+But after that, quit billing hourly.
+
+By the way, guys, if you want to access this completely free resource, which is like a 27-page doc on pricing your AI services, then you can grab that, like I said, for completely free by joining my free school community.
+
+The link for that is down in the description.
+
+All you have to do is jump in here, click on classroom, go to all YouTube resources, and then find the resource in there.
+
+I promise you guys it's in there.
+
+But let's get back to the video.
+
+So, if you're not pricing off hours, then what are you pricing off of?
+
+Well, there's three things to keep straight.
+
+So, those three words are cost, value, and price.
+
+So, your cost is the floor, the number that you'd walk away if, you know, it was below that.
+
+Their value is the ceiling, the most that this whole thing is even worth to them in the business.
+
+And the price is any number between the two of those that you guys can land on.
+
+Now, on an AI build, that gap is pretty enormous, because whatever it cost you to build the thing and harden it, their ceiling is a higher.
+
+They now don't need to make.
+
+And just remember this, cost doesn't justify price, price justifies cost.
+
+And Jonathan made a really great example of a landscaper here.
+
+So, let's imagine a landscaper mows your lawn every single week for 100 bucks.
+
+Then one week he shows up, he does the same job he's always done on the same exact lawn he's always mowed, and now he tells you it's 200 bucks because he bought a fancy new truck and his costs went up.
+
+That's not how it works.
+
+Nobody accepts that.
+
+Cost doesn't justify price.
+
+Price justifies cost.
+
+Okay, so the client's ceiling is the number you're actually pricing off and you get one conversation to find it.
+
+So as you're getting to know the business and getting to know about the automations that they need, you're trying to uncover scope just as much as you're trying to uncover the value to the business.
+
+So you open by letting them dump everything.
+
+You know, tell me everything you know about this, what you've tried in the past, what's worked, where it keeps getting stuck.
+
+And your job is to just listen, repeat, and poke.
+
+And just run that LRP framework to get as much information as you can.
+
+Take a ton of notes and then you pivot.
+
+Ask them about what happens after we're done with this project.
+
+You know, what is the best case scenario and what actually changes for the business once this thing is successfully up and running.
+
+And then you run three buckets of questions.
+
+Why this?
+
+Why now?
+
+And why me?
+
+So why this is checking that what they asked for actually gets them the outcome that they want because a lot of the time it doesn't.
+
+And because they, you know, walked in asking for an AI agent, but the real fix might be a really simple deterministic script and a Slack notification.
+
+Then you ask why now and this is about urgency because if a window is closing or if a competitor's breathing down their neck, then that's real money to you.
+
+And then why me is the kind of uncomfortable one, but you literally ask them, you know, why wouldn't you just do this internally?
+
+Couldn't you vibe code this?
+
+Couldn't you hand it to an intern?
+
+And the reason you want to do this is because these questions or that question specifically surfaces objections that are already in their head.
+
+So either you can hear it now while you're on the call with them and you can answer those objections and handle them or it's going to kill the deal later down the line when they're reading your proposal or talking with their team.
+
+And when they give you a real answer like, yeah, you know, my nephew probably could build this, you don't argue.
+
+You you yeah, he probably could get a version of this up and running, but what I'd want to know is who's going to watch it at 2:00 in the morning when the model updates?
+
+And, you know, who's going to help you scale this when you have way more throughput than you're expecting?
+
+And when it gets a bit more complex?" And then what you do is you stop and you just let them answer, because their answer is the actual reason that they're looking to hire someone.
+
+And if you find that you're in a situation where they just keep pushing you for a number, if they keep pushing for a price before you can ask these questions and before you can really dive in, don't blurt one out.
+
+And honestly, if they keep pushing you for a price and all they want is to get a quote out of you so they can compare you across a few different other vendors, then I would say that's probably a red flag and you just want to get out of that engagement, because the hard truth is some people are just looking for the cheapest labor.
+
+They're not really looking for a consultant or partner, and that's how you want to position yourself.
+
+And there's unfortunately not much you can do to change that person's mind, besides telling them, "Hey, you know, what I bring to the table is different.
+
+I bring a different level of expertise, and you know, that's where you really want to leverage your proof." But ultimately, some people know that they could go to Upwork and get much cheaper labor, and that's just what they're going to do.
+
+So, don't take it personally.
+
+Okay.
+
+So, the obvious problem with a lot of this is that a lot of clients won't just hand you the numbers.
+
+Like, they don't want to tell you salaries and exact bottom line numbers and things like that.
+
+And they don't have to.
+
+So, start with three questions.
+
+How long does this take you today?
+
+How many people touch it?
+
+And what happens when it goes wrong?
+
+These are all sizing questions.
+
+They measure the ceiling, not the build.
+
+Then, you keep stacking proxy questions on top.
+
+Like, you know, "Oh, how many locations do you have?
+
+Or how many of these come in on your busiest days?" That kind of stuff.
+
+And I know some of you are on a job marketplace where you have to put a number in your proposal before you even get a chance to talk to that person.
+
+And you can still kind of do a version of this.
+
+The job post almost always tells you things like volume or head count, or you can figure out some complexity there, how often the thing happens.
+
+You size it off that, and say your assumption out loud.
+
+Something like, you know, "Oh, I've priced this assuming that there's about 200 of these a month, and you know, if that's off, let's hop on a 15-minute call and I can adjust the price and we can rework the scope a little bit.
+
+But that basically just turns the cold price into a reason for them to hop on a call and talk to you.
+
+And here's a quick check.
+
+If you can't land on a number, if you feel like you don't understand the value enough to accurately give a number, then that's probably a signal that you're not ready to write that proposal yet.
+
+You need more information.
+
+Okay, so now you've got that value number.
+
+From that total annualized value number, first year annualized, what I like to do is pick somewhere between 10% and 20% of that number as my starting point.
+
+So, you say your price.
+
+You assume the next sentence out of their mouth is "Can you walk me through how you got to that price?" And you basically have to answer that confidently.
+
+You have to say, "Okay, yeah, this is a customer support automation.
+
+It takes a rep an hour a day manually and an hour of that rep's time is about 50 bucks, right?
+
+Like that's how much it's costing the business." Over a year, that equals about $12,000 to the business.
+
+So, 10% of that $12,000 is $1,200.
+
+So, the build is 1,200 bucks.
+
+So, conservatively, you will be 10x your investment of that $1,200 just in the first year.
+
+And when you go to write this up, don't just send one price.
+
+What I've always done is tiered packages, so you can have like a starter, a growth, and a scale, or whatever you want to call them.
+
+And before you get anywhere near the options, the top of that proposal is three short paragraphs and none of them are about you or your pricing.
+
+They're about where the business is right now in their words with their numbers in it.
+
+Where they said they wanted to be and why you're the person that can help them get to where they want to be because of your AI expertise and your systems.
+
+So, you would then take the first year value.
+
+Let's for now just call it 100 grand to keep numbers even.
+
+You could say option one is 10%, so $10,000.
+
+Option two is 25%, so 25,000.
+
+And option three is 50%, 50 grand.
+
+And I'm just kind of throwing out rough numbers here.
+
+But obviously, as you move up those tiers, you have to have different sort of, you know, value.
+
+It still has to make sense.
+
+You have to have more functionality or you have to have different types of results tied to it, right?
+
+But the middle one is kind of the one that's designed to win because the bottom one looks thin, the top one maybe makes them wince a little bit, and the middle one looks more correct.
+
+And what this does psychologically is really interesting because if you give them one number, their decision is, "Hmm, should we work with this person?" But if you give them three numbers, their decision is more around, "How should we work with this person?
+
+You know, like which one of these deals should we take?" Okay.
+
+So, one of the most profitable automations that I've ever seen was one of the simplest because all it did was it took a construction crew's daily phone orders and converted them into the text format that the crew already used.
+
+That was it.
+
+It was super simple.
+
+It only saved like 45 minutes a day, but it helped them avoid around $12,000 a month in scheduling errors.
+
+And that second number isn't freed up hours like the earlier example was with the appointment setter.
+
+It's hard dollars that they were losing every single month because of errors, because of the inconsistency of humans, which is why the saving 45 minutes a day was worth so much more here.
+
+And the reason I'm telling you guys this is because typically a good place to start is by thinking about the hours you're saving.
+
+But as you get a little bit more comfortable and you have a little bit more experience behind you, you start to think about the bottom line impact of the entire business.
+
+If you think back to the earlier example about the appointment setting agent, we basically only attributed the value to the time we were saving, to the time we were buying back the business.
+
+But what if we would have thought about how much does a converted appointment actually make the business?
+
+So, all of these um appointments that we're helping set with our system, what if each of those closed sales was worth $5,000?
+
+We could have valued that system way higher.
+
+And if we would have communicated in that way, we probably could have charged way more for that automation.
+
+So, like I said, as you get more experience, start to think more about that.
+
+But once again, it's your job to communicate that value because the business owner isn't just going to see that like that immediately.
+
+Okay.
+
+Now, I want to talk about underscoping.
+
+This is the number one mistake that I made when I first got started.
+
+And then what this caused was, you know, timelines to get pushed and arguing about milestones, right?
+
+So, here's how I structure this kind of stuff so that that never happens.
+
+Now, this video specifically isn't about scoping.
+
+That's a different topic entirely, but this is kind of more about setting up the milestones in the correct way.
+
+So, what I would do, let's say we have a $9,000 project and we want to split this up into major milestones.
+
+So, let's say we have one milestone at the halfway point and one milestone, you know, once this thing has been pushed into production.
+
+And I like to think about those as far as like, what do we think we could deliver in 30 days?
+
+So, each milestone is 30 days apart and that's where you're going to get paid is essentially every 30 days.
+
+Then, what you do is you could split this into three payments if we have two major milestones.
+
+One to get started, the second one after the first milestone has been hit, and the final one after the final milestone has been hit.
+
+But, this only works if each milestone itself cannot be argued with.
+
+It has to be so objective.
+
+It can't be subjective, right?
+
+Like, there can be no ambiguity there, which we run into a lot.
+
+So, you know, here's what an objective one could sound like.
+
+At this milestone, there's an AI system in the business owner's hands, a POC, a proof of concept, that they can actually talk to.
+
+And when the owner sends it a question, the agent pulls from the database and responds within a minute.
+
+All of that stuff is provable and it's very simple to write down and the client could go prove it itself.
+
+It's not claiming that the database is perfectly optimized yet.
+
+It's not even saying that all the answers are perfect or correct.
+
+It's just saying that it works and it pulls there and it responds and that's objective.
+
+Now, a subjective milestone maybe could be something that's obviously easy to argue like, oh, the inbox agent is working as expected.
+
+Okay, what's expected?
+
+You and the client could potentially go back and forth on that for weeks and you're not going to get paid and it's just going to get frustrating.
+
+And then what else could happen is they start to ask for things that weren't on the original list because it's so ambiguous.
+
+And they might say, you know, can you add this?
+
+Can you add this?
+
+That's not, you know, this is a milestone.
+
+I need this functionality.
+
+And so, what you want to do there is if they do start to try to scope creep, this is actually a great sign because it means that they're excited and it means that they're already starting to imagine working with you more.
+
+So, the way that I handle this, I don't say, oh, no, right?
+
+Like, I say, yeah, it's a great idea and I could could see how this would add value to the system.
+
+Let's go ahead and throw this on the backlog for our version two of the project.
+
+And as you get more ideas, you can just add more stuff to the backlog.
+
+Because I just want to make sure that we're hitting the milestones that we've already set as quick as possible for you guys, so that we can deliver as much value to the business as possible.
+
+Okay.
+
+Now, let's talk about what you do if they see the numbers that you've presented, your price, and they don't like them.
+
+And they're saying, "Oh, you know, this is way more expensive than I thought it was going to be.
+
+I didn't really have a good gauge.
+
+This is not in our budget." So, what you want to do is say something like, "Okay, it sounds like 20 grand isn't in the budget right now.
+
+Why don't we just like reduce the scope a little bit and start with a smaller project?
+
+And once this is working and winning you guys back some time and some more business, then we can move on to the next piece together cuz we've kind of already got it scoped out." And that's how you can avoid teaching them that your price has moved down every time that they frown.
+
+And you're also not devaluing the work that you would be doing.
+
+You're just reducing the scope, and that keeps it pretty fair.
+
+And the last thing that I wanted to address here was the other costs that typically go along with these systems, which are API costs or cloud subscriptions and, you know, token usage, things like that.
+
+Now, I have always said client's account, client's card every single time.
+
+Your fee is for design, consulting, building, testing.
+
+Now, the tokens are a utility bill, and utility bills go in the client's name.
+
+I used to start off by running everything under my own billing and invoicing them each month, and it just got super messy.
+
+I was babysitting the billing.
+
+I had to follow up with clients.
+
+Obviously, I built agencies to do that, but still it wasn't fun.
+
+And it also left them with no idea what they were paying for and potentially misaligned, you know, some trust.
+
+And what else you should do is probably give them an expected monthly run cost in the proposal with the volume assumption next to it.
+
+Now, obviously not a guarantee, but an estimate of how much this thing will typically cost per month when it's fully in production and how ideally the system starts to get used more and more over time, like month over month.
+
+So, the costs are probably going to scale up a little bit month over month as well.
+
+Now, one thing that you do want to think about in your pricing is that there are typically a decent amount of testing costs that go into the system.
+
+At least if you're doing it right, you're spending a lot of money testing before you push anything into production for a client.
+
+And these testing costs could genuinely be anywhere from 100 bucks to a few thousand dollars based on how rigorous your Evals and your QA process is, which I think should be pretty, pretty rigorous.
+
+So, I would usually just factor that in to our final price by just bumping it up by like a thousand or two or three thousand dollars, depending on the size of the automation and how much testing you think is going to go into it.
+
+Obviously, the more AI that's in there, the more autonomy, the more testing you're going to have to do.
+
+And the whole thing, the way I feel about pricing right now is that even the biggest firms, McKinsey, Salesforce, everyone's trying to figure out this AI pricing thing and no one has the right golden answer.
+
+And I think that a lot of people might disagree with some of the things that I'm saying here, and that's okay.
+
+But, I didn't feel like it was a great feeling to say, "Hey, you know, Mr. and Mrs.
+
+Client, can you please go ahead and give us this API key and this one and this one and this one?" And then before we're even giving them any sort of POC or showing them any value, we're already spending a few hundred of their dollars just testing the system.
+
+I just don't think that's a very good way to kick off a partnership.
+
+So, basically what I meant by that is in the testing, we paid for everything, and then when we moved everything into production, we swapped out their API keys for, you know, compute and whatever else it was that was costing us.
+
+Okay, so if you take one single thing out of this into your next discovery or sales call, make it this one.
+
+Before you say any number at all, get the client to tell you what the problem is costing them.
+
+In their own words, just have them say it out loud.
+
+And then once that number is on the table in their language, your price is just a fraction of a number that they have already stated.
+
+So, what you're selling is the result, and the bill is just how it gets delivered.
+
+Okay, so I just did a ton of talking, and um what I'm going to do is I've wrapped everything up that I talked about and some more into a full pricing masterclass document in my free school community.
+
+So, if you guys want to access that, once once completely free, just use the link in the description to join that community and grab the resource.
+
+But anyways, that is going to do it for this one.
+
+If you guys enjoyed, you learned something new, please give it a like.
+
+It helps me out a ton.
+
+And always, I appreciate you guys making it to the end of the video.
+
+So, I'll see you on the next one.
+
+Thanks, everyone.

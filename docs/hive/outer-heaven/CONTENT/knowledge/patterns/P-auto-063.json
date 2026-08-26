@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-063",
+  "version": 1,
+  "title": "offer-positioning / acquisition — metric-first-one-problem-loop",
+  "steps": [
+    "Steal metric-first + prove-delta + next-task question. No Claude consultant ICP. No Skool.",
+    "Apply only when the condition matches. Hard steps HITL."
+  ],
+  "support_ids": [
+    "K-vY0EzTP-7EA-01",
+    "K-vY0EzTP-7EA-06"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; Access to a real week of tasks; approved tools.",
+  "less_relevant_when": "Agency-window-closing is a hook; he still sells agency courses in the CTA. **Do not flatten.**",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,44 @@
+{
+  "pattern_id": "P-auto-067",
+  "version": 1,
+  "title": "offer-positioning / acquisition — diagnose-solve-value-price",
+  "steps": [
+    "Steal the four-move. HITL price. Pedagogy $ UNVERIFIED.",
+    "Rewrite pitches to T/M/F. Do not hunt new ICP from niche list.",
+    "Steal: do not use view-count as offer-quality. Hive clip-factory ≠ Path A offer.",
+    "Steal LRP questions. `ask-principal` before any send.",
+    "Steal 90-min + camera. Do not stitch five vendors."
+  ],
+  "support_ids": [
+    "K-w9-gfaV5vlM-01",
+    "K-w9-gfaV5vlM-03",
+    "K-w9-gfaV5vlM-05",
+    "K-w9-gfaV5vlM-07",
+    "K-w9-gfaV5vlM-09",
+    "K-w9-gfaV5vlM-10",
+    "K-w9-gfaV5vlM-12",
+    "K-w9-gfaV5vlM-13",
+    "K-w9-gfaV5vlM-20",
+    "K-w9-gfaV5vlM-21",
+    "K-w9-gfaV5vlM-22",
+    "K-w9-gfaV5vlM-23",
+    "K-w9-gfaV5vlM-24",
+    "K-w9-gfaV5vlM-25",
+    "K-w9-gfaV5vlM-26",
+    "K-w9-gfaV5vlM-27"
+  ],
+  "dissent_ids": [
+    "K-w9-gfaV5vlM-02",
+    "K-w9-gfaV5vlM-04",
+    "K-w9-gfaV5vlM-06",
+    "K-w9-gfaV5vlM-08",
+    "K-w9-gfaV5vlM-11",
+    "K-w9-gfaV5vlM-14"
+  ],
+  "valid_when": "domain=offer-positioning; stage=acquisition; Buyer will quantify. You can demo a POC.",
+  "less_relevant_when": "Do not average with a conflicting rule on another tape. Clients parked.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

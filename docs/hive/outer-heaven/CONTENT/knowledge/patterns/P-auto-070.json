@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-auto-070",
+  "version": 1,
+  "title": "offer-positioning / acquisition — inbound-from-a-public-similar-build",
+  "steps": [
+    "Ship the build in public with a reachable address; wait for “I want something similar.”",
+    "On inbound-similar, spend the calls on scope, not on “I am a freelancer.”"
+  ],
+  "support_ids": [
+    "K-5IM27lbCwjM-01",
+    "K-5IM27lbCwjM-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=offer-positioning; stage=acquisition; Inbound already wants the analog.",
+  "less_relevant_when": "Cold outbound will not be “that simple.”",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

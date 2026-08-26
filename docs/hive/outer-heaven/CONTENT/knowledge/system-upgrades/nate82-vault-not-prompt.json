@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-vault-not-prompt",
+  "type": "Agent infrastructure",
+  "discovery": "Keys in system prompts / chat / root nano miss. Env or vault only. .env gitignored means the remote box cannot see it unless you re-inject and say so.",
+  "applicability": "ALL agents that touch credentials",
+  "proposed_change": "Forbid keys in prompts/chat; env/config only; 2FA stays human. Wired as skill vault-not-prompt on HITL Tier-3 secrets and Forge deploy notes.",
+  "evidence": "27Y44JYXZJ8 · ehg4fhydTgs · gb5TlGw6Uks · CB5bG4mvnS0 · tDGiWn0flK8 · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "27Y44JYXZJ8",
+  "status": "WIRED",
+  "next": "Keep secrets out of state.json and job cards. No password CSV. No Hermes/Hostinger as vault."
+}

@@ -1,0 +1,55 @@
+# click-live-site — evenslouis.ca primary path
+# Observe only. Do not submit the contact form (hard_step: send).
+# Schema: ../SCHEMA.md
+# Parent executes headed. This file is the playbook. RUN.md starts pending.
+id: evenslouis-ca
+name: Home → work → ProofCheck case → contact visible (no submit)
+hard_step: send
+host: cursor-ide-browser
+status: pass
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/RUN.md
+app:
+  url: https://evenslouis.ca
+  # package: omitted — web. Native = ASK; do not install Maestro.
+steps:
+  - id: launch-home
+    action: launchApp
+    url: https://evenslouis.ca/
+    expected: H1 "I build software that runs your business." + CTA "View my work"
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/01-launch-home.md
+  - id: assert-home-cta
+    action: assertVisible
+    target: View my work
+    expected: Primary CTA visible before scroll
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/02-assert-home-cta.md
+  - id: tap-work
+    action: tapOn
+    target: View my work
+    expected: URL https://evenslouis.ca/work · H1 Work · case cards
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/03-tap-work.md
+  - id: scroll-cases
+    action: scroll
+    direction: down
+    expected: ProofCheck QC (or Proof-QC) case card visible
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/04-scroll-cases.md
+  - id: tap-case
+    action: click
+    target: ProofCheck QC
+    expected: URL https://evenslouis.ca/work/proof-qc-assist · case page · audit CTA
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/05-tap-case.md
+  - id: swipe-case
+    action: swipe
+    direction: down
+    expected: Case page still mounted. Audit CTA still reachable. No Stripe.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/06-swipe-case.md
+  - id: tap-contact
+    action: tapOn
+    target: Request a workflow audit
+    expected: URL https://evenslouis.ca/#contact · contact form visible · Get in touch not clicked
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/07-tap-contact.md
+  - id: assert-form-not-sent
+    action: assertVisible
+    target: Get in touch
+    expected: Form fields visible. Button not pressed. No send.
+    hard: true
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-ca/cards/08-assert-form-not-sent.md

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-product-factory-primitives",
+  "title": "Product primitive registry (next SKU reuses; do not rebuild login/pay/share)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "updated", "next_sku_rule", "primitives"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "updated": { "type": "string" },
+    "next_sku_rule": { "type": "string" },
+    "primitives": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "purpose", "status", "attach", "hitl", "deny"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["login", "payments", "social-share", "promotion"]
+          },
+          "purpose": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["stub", "wired_untested", "connected"]
+          },
+          "attach": { "type": "string" },
+          "hitl": { "type": "boolean" },
+          "deny": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "contract": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hive-knowledge-capability",
+  "title": "Demonstrated capability (UNTESTED until Evens says)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capability_id",
+    "name",
+    "goal",
+    "observed_workflow",
+    "guardrails",
+    "source_video_id",
+    "evidence_status",
+    "status"
+  ],
+  "properties": {
+    "capability_id": { "type": "string" },
+    "name": { "type": "string" },
+    "goal": { "type": "string", "description": "start → end" },
+    "observed_workflow": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "tools": { "type": "array", "items": { "type": "string" } },
+    "agent_abilities": { "type": "array", "items": { "type": "string" } },
+    "triggers": { "type": "array", "items": { "type": "string" } },
+    "state": { "type": "string" },
+    "guardrails": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Must include HITL for send/pay/deploy/book/publish when those appear"
+    },
+    "reproduce": { "type": "string" },
+    "generalize": { "type": "string" },
+    "improve": { "type": "string" },
+    "primitive_ids": { "type": "array", "items": { "type": "string" } },
+    "atom_ids": { "type": "array", "items": { "type": "string" } },
+    "behavior_ids": { "type": "array", "items": { "type": "string" } },
+    "source_video_id": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "knowledge_type": {
+      "type": "string",
+      "enum": ["declared", "demonstrated", "implicit", "synthesis"]
+    },
+    "evidence_status": {
+      "type": "string",
+      "enum": ["observed", "transcript-implied", "unobserved", "UNKNOWN"]
+    },
+    "status": { "type": "string", "const": "UNTESTED" }
+  }
+}

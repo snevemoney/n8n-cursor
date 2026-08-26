@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-016",
+  "version": 1,
+  "title": "agent-ops / build — copy-paste-claude-before-claude-code",
+  "steps": [
+    "Steal describe-then-smallest-slice. Do not install Claude as hive stack.",
+    "Learn the four. Operate-never: unsupervised overnight spend; Claude as hive OS."
+  ],
+  "support_ids": [
+    "K-pbrln2TVeh4-01",
+    "K-pbrln2TVeh4-05"
+  ],
+  "dissent_ids": [
+    "K-pbrln2TVeh4-06"
+  ],
+  "valid_when": "domain=agent-ops; stage=build; His Vulcan story; no demo on this tape.",
+  "less_relevant_when": "Later he sells Claude Code as the product. Keep both eras.",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

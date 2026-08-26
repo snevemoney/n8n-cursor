@@ -1,0 +1,195 @@
+# Watchdog — HNKlFTd1maM
+Status: filled
+Protocol: deep-video-learning
+**Source:** `docs/hive/outer-heaven/CONTENT/watch-later/packets/HNKlFTd1maM/full.txt`
+**Packet LEARNED:** `docs/hive/outer-heaven/CONTENT/watch-later/packets/HNKlFTd1maM/LEARNED.md`
+**ICP:** parked unless Evens named one.
+**Lens:** challenge claims (protocol §8) · steal the machine · operate ≠ learn
+**Walk:** 2026-08-14 re-walk · Nate 82 shortlist · video · 14:18 · 3337 words
+
+## A. Source Map
+
+Speaker/channel: **Nate Herk | AI Automation**. Title: *How I Sold These 4 AI Agents for $23,000 (as a beginner)*. Kind: video. Duration: 14:18. Caption words: 3337. Corpus tag: Nate 82 shortlist.
+Captions are yt-dlp ingest. Visual-only beats (UI clicks, audio beds, overlays) are **gaps** — timestamp 0:00 on the open, else UNKNOWN.
+Beats in order (do not skip asides):
+1. So, we built these four AI agents and got paid $23,000 total by four separate businesses, and they weren't anything too complex or advanced.
+2. And that doesn't even count the opportunity cost of having those extra hours back every week to actually grow the business instead of writing repetitive outreach.
+3. This one was a type of sales agent.
+4. So, we ended up charging $6,000 for this project.
+5. This was also right around the time that MCP servers started to become a big deal online and we were able to transition the scope and architect to incorporate this new technology which was another value lever for us to pull here by showing the client that we stay bleeding edge…
+6. They care about the outcome.
+7. At True Horizon, we follow a simple QA cycle, which is one week of internal QA.
+8. Thanks everyone.
+Close: And as always, I appreciate you guys making it to the end of the video. (`HNKlFTd1maM` @ 14:11)
+
+## B. Atomic Knowledge
+
+### Opening claim
+- **Claim:** So, we built these four AI agents and got paid $23,000 total by four separate businesses, and they weren't anything too complex or advanced.
+- **Reasoning:** Speaker used a number to prove value or close a CTA.
+- **Mechanism:** Talk + on-screen walkthrough. Not an independent receipt.
+- **Evidence:** SOURCE quote: “So, we built these four AI agents and got paid $23,000 total by four separate businesses, and they weren't anything too complex or advanced.”
+- **Conditions:** If the viewer treats the captioned demo as the whole method.
+- **Exceptions:** If the long-form pair, a fail, or a later hedge contradicts the teaser.
+- **Action:** Label UNVERIFIED. Steal the *structure* (didn’t-send, napkin, package), not the number.
+- **Confidence:** low as FACT
+- **Source:** `HNKlFTd1maM` @ 0:00
+- **Epistemic:** SOURCE
+### Named method
+- **Claim:** In this video, I'm going to walk you guys through what each agent actually did, how much we charged per agent, the exact process we followed to sell our agents, and how you can sell your first agent a step by step.
+- **Reasoning:** Speaker offered this as how the system works or why a viewer should believe the demo.
+- **Mechanism:** Talk + on-screen walkthrough. Not an independent receipt.
+- **Evidence:** SOURCE quote: “In this video, I'm going to walk you guys through what each agent actually did, how much we charged per agent, the exact process we followed to sell our agents, and how you can sell your first agent a step by step.”
+- **Conditions:** If the viewer treats the captioned demo as the whole method.
+- **Exceptions:** If the long-form pair, a fail, or a later hedge contradicts the teaser.
+- **Action:** Store the claim. Do not operate the payload. Challenge in H.
+- **Confidence:** medium as SOURCE-of-speech; low as business fact
+- **Source:** `HNKlFTd1maM` @ 0:11
+- **Epistemic:** SOURCE
+### Warning / hedge
+- **Claim:** This agent didn't actually send the messages or run the campaigns.
+- **Reasoning:** Speaker named a limit, hedge, or thing the agent should not do.
+- **Mechanism:** Talk + on-screen walkthrough. Not an independent receipt.
+- **Evidence:** SOURCE quote: “This agent didn't actually send the messages or run the campaigns.”
+- **Conditions:** If the viewer treats the captioned demo as the whole method.
+- **Exceptions:** If the long-form pair, a fail, or a later hedge contradicts the teaser.
+- **Action:** Keep the hedge as the desk. It is usually the steal.
+- **Confidence:** high as SOURCE hedge; still not a ship
+- **Source:** `HNKlFTd1maM` @ 0:39
+- **Epistemic:** SOURCE
+### Close / CTA
+- **Claim:** And as always, I appreciate you guys making it to the end of the video.
+- **Reasoning:** Speaker offered this as how the system works or why a viewer should believe the demo.
+- **Mechanism:** Talk + on-screen walkthrough. Not an independent receipt.
+- **Evidence:** SOURCE quote: “And as always, I appreciate you guys making it to the end of the video.”
+- **Conditions:** If the viewer treats the captioned demo as the whole method.
+- **Exceptions:** If the long-form pair, a fail, or a later hedge contradicts the teaser.
+- **Action:** Store the claim. Do not operate the payload. Challenge in H.
+- **Confidence:** medium as SOURCE-of-speech; low as business fact
+- **Source:** `HNKlFTd1maM` @ 14:11
+- **Epistemic:** SOURCE
+### Tape claim
+- **Claim:** And stay to the end because that's when I go through the most expensive agent out of the four.
+- **Reasoning:** Speaker offered this as how the system works or why a viewer should believe the demo.
+- **Mechanism:** Talk + on-screen walkthrough. Not an independent receipt.
+- **Evidence:** SOURCE quote: “And stay to the end because that's when I go through the most expensive agent out of the four.”
+- **Conditions:** If the viewer treats the captioned demo as the whole method.
+- **Exceptions:** If the long-form pair, a fail, or a later hedge contradicts the teaser.
+- **Action:** Store the claim. Do not operate the payload. Challenge in H.
+- **Confidence:** medium as SOURCE-of-speech; low as business fact
+- **Source:** `HNKlFTd1maM` @ 0:21
+- **Epistemic:** SOURCE
+
+## C. Mental Models
+
+- Speaker priority on this tape: show a working path fast, then sell the next surface (template / School / long-form / event). Channel default is Nate Herk | AI Automation.
+- Decision rule I hear: if it looks agentic on camera, it is teachable; proof is the walkthrough, not a third-party ledger.
+- Uncertainty on tape is often performed as a hedge (“not too confident”, “random price”, “I’m impressed”) — those hedges are more useful than the flex.
+- Worldview: YouTube inbound + ROI napkin + package/anchor beats hourly. Beginner random price is admitted, then rewritten as a system.
+
+## D. Procedures
+
+- In this video, I'm going to walk you guys through what each agent actually did, how much we charged per agent, the exact process we followed to sell our agents, and how you can sell your first agent a step by step. — `HNKlFTd1maM` @ 0:11
+- All right, let's start with the first agent I sold, which was a personalized outreach agent. — `HNKlFTd1maM` @ 0:24
+- Basically, it let my client drop in a list of contacts, however many he wanted, and the system would automatically research each person and their company, then generate a personalized outreach message and follow-up message for them. — `HNKlFTd1maM` @ 0:29
+- It simply filled up the database with ready to go, customized, researchbacked messages that he could then plug into an email or DM sequence. — `HNKlFTd1maM` @ 0:43
+- I was clearly a beginner, and I wasn't even thinking about ROI back then. — `HNKlFTd1maM` @ 1:04
+- Watchdog procedure (INFERENCE, not speaker): pick one checkable stop → run it twice → compare to last-known-good → fail-closed before any hard step.
+
+## E. Examples
+
+- **Situation:** So, we built these four AI agents and got paid $23,000 total by four separate businesses, and they weren't anything too complex or advanced.
+- **Action:** And that doesn't even count the opportunity cost of having those extra hours back every week to actually grow the business instead of writing repetitive outreach.
+- **Reasoning:** Speaker treats the on-screen path as sufficient teaching.
+- **Outcome:** This one was a type of sales agent.
+- **Lesson:** From there, I brought in my co-founders, Milan, our CEO, and Tyler, our CTO, to make sure there weren't any crazy technical requirements that we were overlooking and that we had the bandwidth to actually deliver on this project.
+- **Implicit rule:** If the demo cannot be re-opened as a file/URL/log, it is theater.
+- **Source:** `HNKlFTd1maM` @ 0:00 · Epistemic: SOURCE (walkthrough) + INFERENCE (lesson)
+
+## F. Decision Rules
+
+- Speaker hedge to keep: From there, I brought in my co-founders, Milan, our CEO, and Tyler, our CTO, to make sure there weren't any crazy technical requirements that we were overlooking and that we had the bandwidth to actually deliver on this project.
+- If the artifact cannot be opened on a second machine, do not call the path green.
+- If the tape quotes $, mark UNVERIFIED and refuse it as a price analog.
+- If the next node is send / pay / deploy / book / publish, stop for Evens.
+- If builder graded builder, require a second desk (`golden-test-loop`).
+- If preview host returns 200 and the owned host was not clicked, fail `click-live-site`.
+
+## G. Contrarian
+
+- Field assumes a pretty agent graph is the product. This desk treats the graph as furniture until a fixture passes.
+- Field assumes YouTube $ is a case study. This desk assumes selected storytelling until a receipt exists.
+- Field assumes underpricing is humility. Tape says close-rate >50% means raise — still UNVERIFIED as a law.
+
+## H. Assumptions
+
+Protocol §8 — challenge what you learn. Disagreements stay labeled.
+
+- **Tape $ / counts UNVERIFIED:** paid $23,000, $1,650, $400, $5,000, charged $4,000, $4,000, $6,000, 50%. Speaker said or implied them; I do not promote them to FACT, price analog, or Path A MUST.
+- **Survivorship:** YouTube inbound + a shipped demo is a selected success. Failures, refunds, churn, and the unsold builds are off-tape.
+- **Evidence grade:** captions + a walkthrough are SOURCE for what was *said/shown*, not for what a third party paid, clicked, or kept.
+- **Napkin ROI is a story problem.** Hours × made-up hourly × 12 is not a case study — he even forgot baseline on one build (when the long tape says so).
+- **Falsifier I would accept:** open the named artifact (file, URL, draft, log) on a second run and match last-known-good. Dashboard reload fails.
+- **Disagreement stored (do not flatten):** I can learn the machine and still refuse the SKU. Operate-never ≠ learn-never.
+- **My assumption (INFERENCE):** Captions are complete enough to reconstruct method; visual-only UI may hide a fail the speaker skipped.
+
+## I. Questions
+
+- Can a second operator re-run the named path and get the same artifact without the speaker’s account?
+- What was the fail that did not make the cut?
+- Is the long-form / School pack required, or did the captioned path already contain the steal?
+- Is any dollar figure backed by a statement, invoice, or only a title card?
+- Does the pair tape (ECfusvK5tEU, ySl-SyboPa4, 5IM27lbCwjM, D-OOsl8C4Ns) contradict a hedge on this cut?
+
+## J. Connections
+
+- **SYSTEM SYNTHESIS:** Watchdog machines `golden-test-loop` + `click-live-site` + `ask-principal` apply regardless of vendor on tape.
+- **SYSTEM SYNTHESIS:** Steal-sheet kill rows still hold (auto-dial, mass-DM, tweet-$ as proof, “I do AI”).
+- Paired / overlapping titles on disk: `ECfusvK5tEU`, `ySl-SyboPa4`, `5IM27lbCwjM`, `D-OOsl8C4Ns`. Walk both; do not ship from the short.
+- This id is on the Nate year-agent **82** shortlist (`SHORTLIST-year-agents.md`).
+
+## K. Future-Use
+
+- Unassigned: any checkable-stop pattern that is not this week’s hunt (clients parked).
+- Future-use: caption hedges (“didn’t send”, “not too confident”, “random price”) as fixtures for `coverage-loop`.
+- Do not discard because Watchdog is not selling this SKU.
+
+## Steal / Operate-never
+
+### Machine: did-not-send + random-price hedge
+- **Epistemic:** SYSTEM SYNTHESIS (informed by A–K) · hedges above are SOURCE
+- **Workflow / loop:** trigger (tape names a job) → action (draft / retrieve / confirm / log) → **checkable stop** (open artifact twice vs last-known-good)
+- **Questions / signals:** Can I open the file/URL/draft? Did builder grade builder? Is the next node a hard step?
+- **Qualify / frame / objections:** “Looks agentic” is not qualify. Tape $ is not qualify. A School CTA is not qualify.
+- **Procedure:** Steal **didn’t send** + **1 week internal QA (sample + real data + edge) then 1 week client QA** — that is `golden-test-loop`. Napkin ROI and $23k stay UNVERIFIED. Ready-to-plug DM/email is still a send. Fail-closed.
+- **Example that proves it:** Situation → Action → Reasoning → Outcome → Lesson as in E.
+- **Why it works:** Conditions in B; hedges in C/D; implicit rule in E (re-openable artifact).
+- **Conditions / exceptions:** Works when the path is local/draft/read-only. Breaks when the tape jumps to live send, live dial, live post, or live keys.
+- **Operate-never payload:** money payload may be non-empty (vendor / dial / post / jackpot / School). Machine still stolen.
+- **Hive run (existing skills only):** `golden-test-loop` · `click-live-site` · `ask-principal` · `send-removed` · `outcome-offer-funnel` · `playbook-before-send`
+- **Source:** `HNKlFTd1maM` @ 0:00
+- **Prior short-take flags (kept, not flattened):**
+- This is the sold-four / True Horizon tape. I steal **didn’t send + random price hedge**, not $23k or 10×.
+- **FLAG: ready-to-plug sequence + auto-quote.** Draft pile and sales-agent talk-to-customer are Send. `playbook-before-send` + `ask-principal`.
+- **Tape $ is not a smoke.** $23k / $1650 / $1200 / $5k/yr / 10× — **UNVERIFIED**. He said random.
+- **Clients parked.** No True Horizon clone. Hunt stays Normand.
+
+### Operate-never
+- Quote tape $ / student counts / job-loss % as FACT.
+- Send / pay / deploy / book / publish. Hard step stays HITL (`ask-principal`).
+- Install on-tape vendors (Claude Code, Codex, Hermes, Vapi, n8n-cloud, Skool) or switch off Cursor + Grok.
+- New `icp_id` / unpark Normand / start Path A. Clients parked. Learning ≠ hunt.
+- Grok Bot / `sendPrompt`. Live webhook POST. Merge `LESSONS-FROM-TAPE.md`.
+- Call a preview, graph-animate, dashboard flash, or self-grade a ship.
+
+## L. Role-Specific Applications
+
+Watchdog only. I do not hide the steal here.
+
+- **Smoke I would run:** one checkable stop from D/E — open the named file/URL/draft/log; compare to last-known-good; fail-closed.
+- **I would not call done** from a dashboard reload, a `video` flex, or tape $.
+- **Hard step:** send / pay / deploy / book / publish stays Evens. I do not POST live hive webhooks from a tape walk.
+- **Preview ≠ domain:** if a host was shown, I still want the owned URL clicked (`click-live-site`).
+- **Challenge job (§8):** I keep the disagreements in H. I still steal **did-not-send + random-price hedge**.
+- **Clients parked.** Hunt stays `local-pro` / Normand. No new `icp_id`.
+- **Skills (exist, do not auto-write SKILL.md):** `golden-test-loop` · `click-live-site` · `ask-principal` · `send-removed` · `outcome-offer-funnel` · `playbook-before-send`.

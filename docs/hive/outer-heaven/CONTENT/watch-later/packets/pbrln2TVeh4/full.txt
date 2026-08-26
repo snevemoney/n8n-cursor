@@ -1,0 +1,305 @@
+Right now, a brand new group of millionaires is being created by AI.
+
+There's a company called Vulcan building software that runs inside government agencies, and it looks like the work of a hundred engineers, but it isn't.
+
+Most of their team can't even write a single line of code.
+
+They just built the whole company describing what they wanted inside of Claude.
+
+And this isn't the only million-dollar business being run with Claude.
+
+I spent a week with a room full of seven-figure founders doing the same thing, and even I run my own businesses using Claude every single day.
+
+So, in this video, I'll show you why Claude is breaking the business space and how people with zero coding background are building real companies with Claude code.
+
+So, let's get into it.
+
+So, real quick, in case you're not super deep into the AI space, let me give you guys some context on Claude.
+
+Claude is the AI built by a company called Anthropic.
+
+And on the surface, it may just kind of look like another ChatGPT competitor, but 2 weeks ago, Anthropic raised [music] $65 billion in a single funding round.
+
+And that round values the company at $965 billion, [music] so just short of a trillion dollars, and they actually just passed OpenAI, the company behind ChatGPT, for the first time ever.
+
+And it's not just investor hype, either, because the revenue backs it up.
+
+Their run rate just hit $47 billion.
+
+At the end of 2024, that number was $1 billion.
+
+So, that's 47 times growth in about a year and a half.
+
+And run rate basically just means businesses are paying them at a pace of $47 billion a year. [music] So, the smartest, richest investors on the planet just bet that kind of money on this one company, and companies like Vulcan are a big reason why.
+
+Okay, so, what actually makes Claude code different from every other tool that's out there?
+
+Because there are a lot of tools.
+
+So, first, think about what it would look like to start a software company over the last decade or so.
+
+Let's say you had a great idea for an [music] app or a product.
+
+To actually build it, you needed engineers, and engineers are not cheap.
+
+We're talking multiple full-time salaries before you even [music] have a first version to show anybody.
+
+So, unless you had a pile of money sitting around, or you wanted to take out a big loan, or you could somehow convince investors to fund something that doesn't yet [music] exist, you were just kind of stuck, and that idea might just sit in your notes app.
+
+And that's how a lot of good ideas have died, [music] which is what makes Vulcan so crazy, because government software is the kind of thing that should have taken a whole floor of engineers. [music] And remember, this is the company from the intro that I mentioned, three founders, two of them couldn't write code, one of them, Tanner Jones, hadn't touched code since a JavaScript class that he took in high school.
+
+And their first prototype wasn't even built with Claude Code because Claude Code didn't exist yet.
+
+They built the whole thing in the regular Claude app, basically just copying and pasting code out of the chat until they had something that worked.
+
+And that little copy-paste prototype turned into a real product that won a Virginia state contract, reportedly, at around 10% of the price the established [music] consulting firms had quoted.
+
+Then the governor signed an executive order requiring every single state agency to run the kind of AI regulatory review that Vulcan had built.
+
+The way Vulcan puts it, Virginia required their product by law.
+
+And they claim the work is already saving Virginians over a billion dollars a year.
+
+And Tanner, the guy who hadn't coded since high school, basically put it like this, if you understand language and you understand critical thinking, you can use Claude Code really well.
+
+So basically, the new skill is just being able to describe exactly what you want and thinking critically about what comes back.
+
+And that's it.
+
+That's the bar now.
+
+Anyone can do it.
+
+Okay, so back to the question from earlier, what actually makes Claude Code different?
+
+I'd boil it down to four things.
+
+Number one, it does the work.
+
+You describe what you want in plain English and it builds exactly that, a full app from one sentence, a website, automating some repetitive task you hate doing every single week.
+
+And we're talking it'll do this in minutes, not months.
+
+Number two, it's agentic.
+
+And all that really means is that it takes action on its own towards a goal instead of just answering your questions like a chatbot.
+
+So it'll build the thing and then it'll test the thing and then it'll find the bug and then it'll fix the bug.
+
+And with a regular sort of chatbot, you're kind of the one still stuck doing all of the in between.
+
+Number three, it can work in parallel.
+
+You can have several different Claude agents running at the same time, even while you sleep, because they don't sleep.
+
+And number four, it remembers things.
+
+And this is the one that I feel most in my own business because everything I do runs through Claude.
+
+It knows my business, it knows my team, it knows my priorities, it knows my past failures.
+
+And at this point, honestly, it has a better memory than I do.
+
+Like it'll literally remind me things that I have to do and things that I might have forgot about.
+
+So it's really good.
+
+And when you stack all four of those things together, the gap between having an idea and having a real product basically disappears.
+
+So, there's this program called Y Combinator, probably the most famous startup accelerator in the world.
+
+Twice a year what they do is they take in a batch of new startups, they give them money and mentorship, and they help those startups grow.
+
+And some of those startups have turned into big companies, Airbnb, Stripe, DoorDash, tons more, companies you guys probably know and have used this month.
+
+And in YC's newest batch, over than half of the startups are building with Claude.
+
+It is the most used AI in the entire batch.
+
+A year earlier, that spot belonged to OpenAI with over like 90%.
+
+So, the founders starting companies right now aren't debating which tool is the best.
+
+They've basically picked Claude.
+
+And the same gap is opening up inside normal jobs and small [music] businesses, too.
+
+The people using Claude for their repetitive work are just getting more done, and they're the ones getting handed the bigger projects and the bigger opportunities.
+
+And then, the people doing everything manually, they just can't compete with that speed.
+
+It just, you know, makes me think of the cliche saying, which is AI isn't going to take your job, it'll be someone who knows how to use AI.
+
+And we've watched this exact movie before.
+
+Think about the early internet.
+
+The people who learned some basic HTML and got their businesses online or understood how to run, you know, Facebook ads.
+
+People who did that early grabbed insanely cheap attention while their competitors were still buying newspaper ads.
+
+And that head start compounded for like a decade.
+
+It's the same window that we're seeing right now.
+
+The people winning with Claude aren't smarter than you, they just started before you.
+
+Time is your biggest advantage right now.
+
+And being AI native today, like I said, is a real advantage, but in two years, it's just going to be the baseline.
+
+Everyone's going to be AI native.
+
+So, let's get into how you can actually start right now.
+
+Four steps, and you can do all of this today.
+
+Step one, get on a paid Claude plan, because that's what gets you access to Claude code.
+
+The entry-level plan is just 20 bucks a month, totally fine to start with.
+
+You can always upgrade later if you need to, and just think about this like not even another, you know, subscription like your Netflix or your DoorDash or whatever other subscriptions you have.
+
+This is the cheapest employee that you will ever hire.
+
+Step two, pick one real task, not [music] 10, just pick one.
+
+Something you keep putting off, something that's repetitive, something that you might normally outsource to a freelancer and pay someone else to do.
+
+Organizing receipts, putting together a weekly report, sorting through emails, maybe even doing your taxes, stuff like that.
+
+Or, if you've got that notes app of a bunch of ideas that you've wanted to [music] create to, you know, launch a new business, use those ideas.
+
+That one task is your first [music] real project.
+
+And then step three, you open up Claude Code and you describe that task as clearly as you can, what it [music] is, how you do it today, and what a win looks like.
+
+But before you actually let it build anything, make it argue with you.
+
+Make it brainstorm with you and make it play devil's advocate because these AI models kind of lean sycophantic. [music] They want to please you.
+
+So, if you come in excited with your idea, Claude wants to make you more excited.
+
+Claude wants to hype you up and start building, even if the idea has holes in it.
+
+Planning is so, so important.
+
+What I do is I make Claude look at everything from every angle first.
+
+I literally run a pattern in my own business that I call [music] the roast, where Claude spins up a little council, a bunch of little sub-agents, and one of them makes a strong case for my idea, one of them looks at all the holes and tells me my idea sucks, one of them gathers evidence and just purely looks at it from an objective logic, research point of view.
+
+There's a bunch of little personalities in this council and they give me a full rundown.
+
+And remember how earlier I talked about the memory?
+
+All of these little members of the council also know what's currently working in my business and they know what's going on.
+
+So, they're able to use that context when they're running this council, which makes it even better.
+
+But the point is that every single point has to be backed by something real, not just vibes.
+
+And then at the end of that, it gives me basically one clean verdict.
+
+It says, "Go, the idea is good." Or it'll say, "Reshape." Or it'll say, "Just kill it." And only if the idea survives, or maybe you have to reshape it a little bit, then you move into the actual build, which is step four.
+
+And sometimes you've got a big project.
+
+All you have to do is break it down piece by piece, and then you just start from the beginning and take baby steps.
+
+You don't ask it to do the whole thing.
+
+You start with the smallest version that actually works and you grow [music] it from there.
+
+And when Claude tells you it's done, don't just take its word for it.
+
+Make it prove that it's done.
+
+Have it [music] run the thing on a real example and show you the output.
+
+Verification is one of the most important elements of building with AI.
+
+Basically, just think about it, if this was a human giving you work to review, what would you look at?
+
+Or what would you do to verify that this work is done and that it's good?
+
+And then you just ask the AI to verify it by doing those things.
+
+It can literally control a browser.
+
+So, anything that you can do on a computer to verify something, the AI can do as well.
+
+And every day they get better.
+
+However, the AI is right now, it's the worst it will ever be.
+
+Now, your first version is probably going to come back maybe like 60 or 70% right.
+
+And that's completely normal.
+
+You don't treat those misses like failure.
+
+You treat that like golden data.
+
+You treat that like feedback.
+
+Tell it what you liked and what was wrong in plain English, and then you let it fix its own work.
+
+And over time it gets better and better because you're building skills around it and it's improving its memory.
+
+And if it ever does something that you don't understand, you literally just ask it to explain it to you.
+
+You treat this thing like a mentor.
+
+You treat this thing like your best friend who is also the smartest person in the world.
+
+That's how you actually learn this stuff.
+
+And every rep after that gets better because like I said earlier, this thing remembers.
+
+And when that first task works, pick the next one.
+
+And that's literally how I ended up running my entire business through Claude, one task at a time.
+
+And if you guys want a shortcut for all of this, I put everything in my free school community.
+
+The link for that is down in the description.
+
+If you've never opened Claude before, there's a 7-day challenge in there that walks you through your first task step-by-step.
+
+The row skill that I mentioned earlier, that's in there as well for completely free.
+
+And it's literally just a file that you drop into Claude and it runs that whole console for you automatically.
+
+And then maybe you probably want to open it up and customize it a little bit for your own use case, but once again, you can ask Claude to do that.
+
+And then when you're ready to go deeper, inside of my free school community, there's also a free course on building what I call an AI operating system, which is basically the full version of everything I've been talking about in this video and it is how I run all of my businesses through Claude code.
+
+Completely non-technical, you don't have to know how to code.
+
+You just have to know how to think clearly.
+
+And look, the window that we just talked about is real.
+
+But you don't need to build the next Vulcan [music] this weekend.
+
+Just 20 bucks for the subscription and one task.
+
+That's the whole barrier to entry right now.
+
+That will put you ahead of 95% of people in the world right now.
+
+But anyways, that is going to do it for this one.
+
+So, if you guys enjoyed or you learned something new, please give it a like.
+
+It definitely helps me out a ton.
+
+I've got tons of videos on my channel about how to actually build with Claude code.
+
+So, just go dive in.
+
+And as always, I appreciate you guys making it to the end of the video.
+
+I'll see you on the next one.
+
+Thanks, everyone.

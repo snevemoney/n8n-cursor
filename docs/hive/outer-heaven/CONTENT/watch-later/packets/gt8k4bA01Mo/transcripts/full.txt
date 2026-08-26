@@ -1,0 +1,461 @@
+Really nice colors to be honest.
+
+Look at that.
+
+Wow.
+
+Oh, wow.
+
+Look at this.
+
+That is beautiful.
+
+I love that color explosion.
+
+That is so cool.
+
+I can't believe this is made with one prompt.
+
+Let's take a look at the other one.
+
+Okay, so this is the car.
+
+Oh, that's cool.
+
+Look at that.
+
+The tire starts spinning really fast as I scroll.
+
+Nice.
+
+This is a beautiful car.
+
+Wow.
+
+Oh, that is really cool. [music] I like this trail and just kind of following the camera, following the car.
+
+Wow.
+
+Oh, that is nice.
+
+Woo.
+
+All right, C dance 2.5, you win.
+
+With C dance 2.5 and Claude code, you can now generate incredibly beautiful 3D scrolling websites with one single prompt.
+
+So, in this video, I'm going to show you step by step how to do this, and I'm also going to give you this entire prompt pack completely for free, which gives you everything you need to know about C dance 2.5, about how to prompt it, and a bunch of different prompt examples that you can just copy and paste inside your Claude code to generate beautiful websites.
+
+I'm going to walk you through step by step, so regardless of your background, you'll be able to just follow me along.
+
+All right, let's get started.
+
+So, there's this website called awwwards.com, uh where you can see award-winning websites.
+
+So, this is a website called igloo.ink.
+
+This was like one of the most award-winning uh um websites of the year.
+
+So, you can see all of these 3D scroll animation actually exist in real life for websites.
+
+You guys can also check that out if you want, you know, examples of website that you want to build.
+
+The ones that we have created, like this Vanta one for instance, this is also uh kind of like a replica or a copy of an award-winning website, which is exactly what I did there.
+
+So, let me I really like this one, actually.
+
+So, let me actually go ahead and see what Jarvis says.
+
+So, I'm going to share my screen with Jarvis.
+
+By the way, for those of you who don't know Jarvis, this is my personal assistant, and this is my AI second brain.
+
+So, all of these details here uh are basically all the folders and files inside my computer.
+
+So, let me go go and share my screen here. >> I can see your screen and I'm listening, sir.
+
+Just talk and feel free to cut me off. >> Hey Jarvis, so I'm sharing my screen with you.
+
+This website that I created with C Dance 2.5.
+
+What do you think here?
+
+Roast it for me.
+
+Tell me what you like, what you don't like. >> One moment, eyes on it, sir.
+
+A rather handsome cinematic landing page, sir.
+
+Vanta real 03 the canyon with a black hypercar on salt flats alive 153 mph dial top right and reserve as the sole call to action up top.
+
+The footer sells the film school angle 2.391 one continuous run and the only interactive elements visible are that reserve link and a thin scroll indicator on the left.
+
+One honest note with a single CTA hiding in 10 px letter spaced gray type.
+
+The page is currently more mood board than conversion funnel. >> Okay, that's a good point.
+
+Yeah, so Jarvis is pointing out the fact that uh there's only like one very small conversion here.
+
+So, you want to improve that.
+
+So, that's actually a good point, right?
+
+When you're creating these websites, especially if you're building it for a client or something like that, you want to make sure that, you know, obviously functionality is as important as uh the look and feel on the website as well.
+
+So, just like Jarvis pointed out, the CTA at the bottom here, that's very important.
+
+It's very small, but it's kind of hiding in plain sight or it's hiding underneath.
+
+You want to bring that up, right?
+
+That's a big point of, you know, website that if you weren't selling to clients, that's a big part of it.
+
+So, make sure you're taking uh make sure you're doing that. >> Precisely, sir.
+
+A call to action buried at the bottom of the page is a shop door round the back of the building.
+
+Rule of thumb worth saying to camera, one primary CTA visible before any scrolling, repeated after each proof section, and in a color nothing else on the page is allowed to wear.
+
+Everything else is decoration.
+
+That button is the business. >> Yep, good point, Jarvis, definitely.
+
+All right.
+
+So, let me stop sharing with Jarvis here.
+
+All right, so we're going to do all of this inside our Claude code.
+
+You can actually use Claude chat if you want as well, but I like using Claude code because it gives you all of the files and saves it on a local folder.
+
+So, that way if you need to make any changes, you'll be able to do that very easily.
+
+All right, so let's go ahead and first get started on the Claude code side.
+
+So, download the desktop app cuz I'm using the Claude desktop app.
+
+That's the easiest way to use this honestly and kind of keeps everything organized.
+
+And obviously, you have to have a pro account or a max account for Claude.
+
+So, once you log in and start a new session, it's going to look exactly like this.
+
+So, in order to generate our assets for the website, we're going to use the Higgs Field MCP.
+
+Now, in order to connect the Higgs Field MCP to our Claude code, it's very, very simple, right?
+
+So, for those of you who are not familiar, Higgs Field basically gives you the ability to connect to all image models, all video models, and obviously, the C Dance 2.5 is the top model right now because it just got released because it creates up to 30 seconds of continuous cinematic videos instead of other models where you had to kind of stitch everything together.
+
+Now, this is very important especially if you're creating a website that requires you to have a video with different frames.
+
+So, if it's a continuous 30-second video, then the quality of your website becomes a lot better.
+
+So, I'll give you a quick example.
+
+This is kind of like one of those you know, infinite zoom in and zoom out websites that I created called Magnitude.
+
+So, you can see this is like a 30-second video that's kind of stitched together.
+
+So, look at how beautiful that is, right?
+
+So, I can zoom in and zoom out.
+
+It kind of goes back inside and as I scroll up and down, it goes in and out, right?
+
+So, as you can see, the quality of this video is incredibly high and it's only 720 pixels, which means that the the website is going to be able to load it a lot easier, right?
+
+So, as you can see, as I kind of scroll, it goes into this infinite zoom from this droplet all the way back to our galaxy, right?
+
+So, the reason why I said that C Dance 2.5 is important for this type of asset, for this type of video.
+
+And by the way, this is a video, it's just divided into multiple frames.
+
+So, inside a website, it kind of combines everything together.
+
+So, if you're using a high-quality video model that's generating this continuous shot, it makes the quality of the website a lot better.
+
+So, again, of course, this is just one example, right?
+
+We can apply this across any other, you know, product dimension.
+
+If you're creating something like a e-commerce website or some kind of a product, all of that becomes very, very important if you have a video model that's able to generate high-quality assets for you.
+
+And same thing for this one, something like this car, for instance, right?
+
+As you can see, this is also a one continuous video, right?
+
+So, and starting from, you know, the still image of this car and the tire spinning and kind of the camera follows it along, and it's just split into couple of different sections based on the requirement of this particular website.
+
+So, you can see, everything is really well-made and well-designed.
+
+And by the way, this right here is similar to an award-winning website design, actually.
+
+This is called Hubtown.
+
+This is a real website.
+
+This was one of the websites that won multiple awards.
+
+So, you can see, this is basically something that we can generate with our C-Dance 2.5 model and our Higgs field MCP.
+
+I mean, it's a really cool website, but this concept of the streak following along is pretty much the same thing as we just saw in the video here or in the website that we generated with our C-Dance 2.5 there.
+
+So, you can see, these are websites that are already out there, and we're just using this as inspiration to build incredible websites similar to these.
+
+All right, so, that's kind of a few examples I wanted to point out.
+
+All right, so, now let's go ahead and get started step by step.
+
+So, once you come into your Cloud Code, you're going to come to the bottom right here, click on the plus button here, cuz we need to add our MCP or connector.
+
+So, you're going to hover over the connectors here, you're going to go to manage connectors, and on top right here, you're going to click on add, and you're going to click on add custom connector, because we need to connect our Claude code to our Higgs field.
+
+And the way to do that is we're going to do it through our MCP here.
+
+So, you're going to go ahead and name it.
+
+So, I'm just going to name it Higgs field MCP.
+
+Or just Higgs field.
+
+And this remote CRL, so go ahead and click on the link in the description.
+
+It's going to bring you right here.
+
+So, as you can see, I'm already on Claude.
+
+And by the way, you have to obviously sign up for Higgs field account.
+
+But go ahead and do that.
+
+And once you do that, click on the link in the description again.
+
+It should bring you exactly right here.
+
+Make sure you click on Claude and MCP.
+
+And then you're going to just copy this right here.
+
+So, then you're going to go back to your Claude code.
+
+And you're just going to basically paste this remote MCP.
+
+You're going to click on add.
+
+It's not going to allow me because I've already added.
+
+So, you can see a server with this URL already exists.
+
+So, but for you, it should be able to add it.
+
+And once it gets added, then it's going to look something like this.
+
+And you're going to click on connect.
+
+And it's going to open an authentication, which is OAuth.
+
+Which basically means that you want your Higgs field to be connected to Claude.
+
+And it's just going to ask you for permission.
+
+You're going to click on allow.
+
+And then afterwards, when you come back to your Claude code session again and hover over the connectors, now you should see your Higgs field MCP installed and toggled on.
+
+So, make sure you check that first because otherwise, this is not going to work, right?
+
+All right.
+
+So, once you do that, now we can go ahead and start prompting this.
+
+Now, instead of prompting this, you know, five, six times in a row, I've already created this prompt pack for you guys that will make everything a lot easier because I went through a lot of testing.
+
+So, I created everything to make sure are all of the prompts here and a guide for you guys.
+
+So, that way it makes a lot easier for you.
+
+So, that way you're not wasting your tokens, right?
+
+So, this is an entire prompt pack.
+
+I give you all of the details about the cost, the resolution, and everything you need to know about C-Dance and how to build a website, an entire kind of guide on that.
+
+And then also, a bunch of different examples, right?
+
+So, these are just prompt examples that you can copy and paste and test it out yourself.
+
+And to access this is very simple.
+
+So, you're going to click on the link in the description.
+
+It's a free community.
+
+So, once you click on that, it's going to bring you right here in the about page.
+
+Just click on join.
+
+Again, it's a free community.
+
+Once you join, you're going to be brought in the community section here.
+
+You're going to go to the classroom section, YouTube resources, inside the Claude code folder, you will have access to this prompt packed, and a bunch of other free resources there if you're interested to check that out.
+
+Okay, so once you grab that, let's go ahead and get back to our Claude code here.
+
+So now, let's go ahead and actually I'm going to copy one of these prompts that are already in here.
+
+Let's see which one.
+
+Okay, let's take this one.
+
+The reveal of a house that comes I like this is a good idea.
+
+So let's go ahead and just copy this.
+
+I'm just going to copy this entire prompt, go back to my Claude code here, and I'm just going to go ahead and paste this.
+
+Now before I enter, just make sure you're using either Opus 5 or Fable 5.
+
+I mean, Fable 5 is expensive, so maybe use Opus 5.
+
+So I'm just going to keep it at extra, but high if you want to keep it at high that or max, that works as well.
+
+It doesn't really matter that much to be honest.
+
+So this is an entire prompt.
+
+So I'm going to go ahead and just enter this.
+
+Okay, so now it's going to go ahead and I said build me an award-winning single property website for Halcyon, a fictional 28.5 million glass and travertine estate on a cliff headland.
+
+The signature moment, the house detonates into slow motion, blah blah.
+
+So it gives you all of the details, right?
+
+It It tells that use the Hicksfield MCP.
+
+You want to use the the seedance 2.5 model.
+
+It gives you gives gives gives it all of the details as far as the duration of the frame, the levels, right?
+
+So different scenes.
+
+It kind of describes all of that in the website itself and everything else that needs to be built here step by step.
+
+So let's go ahead and now let this thing finish.
+
+As you can see right here, it's going to go ahead and check to make sure that the connection to our Hicksfield MCP is working, and then afterwards it's going to go ahead and generate everything.
+
+So there you go.
+
+So it says using the Hicksfield MCP to generate the image batch, and it's going to go ahead and keep everything together, and at the end combine it, and give us a nice little website.
+
+So now let's go ahead and give give this a couple of minutes.
+
+It's going to take a minute or two, so let's go ahead and give this a couple of minutes and we can come back to it.
+
+So, by the way, inside the classroom section here, I've a bunch of different other resources for you guys to take advantage of related to C dance 2.5 and other models there as well.
+
+And of course, other builds that I've done, so feel free to check that out.
+
+There's a bunch of different things there including how to build your AI second brain and everything else.
+
+All right, so let's go ahead and see what Claude All right, it looks like it's done.
+
+There you go.
+
+So, it looks like it built all of the images the assets and everything else.
+
+And now it says at the bottom here that um Halcyon is live at the localhost 4995.
+
+So, let's go ahead and click on this.
+
+All right, so it's loading.
+
+Oh, cool.
+
+So, this is kind of that fictional property at the edge.
+
+So, as I scroll now, oh wow, that's beautiful.
+
+That's really cool.
+
+Look at this.
+
+Nice.
+
+I like that explosion of glass and color.
+
+That's a very cool look.
+
+Nice.
+
+Oh, that's really cool.
+
+Wow.
+
+That's beautiful.
+
+I like these three level, right?
+
+So, as you scroll it kind of shows everything.
+
+Nice.
+
+Very nice.
+
+Wow, that's actually very impressive.
+
+Nice.
+
+And then at the bottom it has this like nice little spinning video here.
+
+Very cool.
+
+Oh, you can actually drag this.
+
+Oh, that is cool.
+
+It's like a 3D thing.
+
+Nice.
+
+Okay, very nice.
+
+Cool.
+
+All right, and it gives you all of the details.
+
+So, there you go, right?
+
+You can see how uh very well made this is.
+
+And by the way, this is uh 720 pixels because right now C dance 2.0 only uh or C dance 2.5 only supports um 720 pixels.
+
+So, it's a lot easier to load and therefore the website will be a little more efficient versus versus if you were to like use some kind of a 4K quality video asset, right?
+
+So, very cool.
+
+Again, very impressive.
+
+This is something like you can imagine you can use this as inspiration to create other website that has these 3D scrolling effects and kind of zoom in and zoom out.
+
+I really like these color explosions, but anyway, so feel free to check it out like I said all of the prompts are here.
+
+So test out a couple of them, you know, see which one you like.
+
+I mean there's portfolio websites, there's like real estate, there's you know, e-commerce related website and a bunch of different other ones and then also a guide on how to build a website properly.
+
+Okay, so again, all of this is going to be inside the community and by the way, if you're interested in grabbing Jarvis and other AI that's going to be inside the paid community where you can just come in and click on the AI assistant and AI employees.
+
+Right now we're in version 6 actually because now Jarvis can actually make phone calls because he has a phone number.
+
+I'm going to put that video at the end so that way if you guys want to check out and see the full demo of Jarvis, feel free to check that out.
+
+But again, this is a paid community cuz a lot of assets are there including a cloud code masterclass and then also a bunch of other stuff like the AI second brain that you can download and of course if you ever get stuck, we have tech support here.
+
+Our team and I are there to help you out no matter what question you have.
+
+So check out the paid community if not again, the free community has a bunch of stuff in there for you guys to take a look and take advantage of advantage of check it out. let me know in the link in the comments below if you have any questions.
+
+Thanks for watching and I'll see you on the next one.

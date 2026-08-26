@@ -1,0 +1,18 @@
+{
+  "fragment_id": "FRAG-x-2088007687149601254-demo-inbound",
+  "version": 1,
+  "input": "A specific already-built artifact (not a category sentence)",
+  "steps": [
+    "Confirm the artifact is named and showable",
+    "Draft a proof post of that one build (do not publish)",
+    "HITL publish",
+    "Collect inbound “that, for me” — do not hunt",
+    "If no artifact yet and Evens allows a room: free work ↔ documented postable proof (HITL)"
+  ],
+  "output": "Inbound request for the same class of job, or an explicit gap (no artifact / no HITL)",
+  "source_ids": ["x-2088007687149601254", "K-x-2088007687149601254-02", "K-x-2088007687149601254-04"],
+  "behavior_ids": ["BEH-x-2088007687149601254-demo-inbound"],
+  "valid_when": "SKU is unknown or the live sentence is a category. A showable build exists or Evens allows free-work-for-proof.",
+  "less_relevant_when": "Named ICP + named offer + Path A MUST already exists (outbound-first tapes). Do not average.",
+  "knowledge_type": "declared"
+}

@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-nate82-hosted-neq-scheduled",
+  "type": "Agent infrastructure",
+  "discovery": "Cloud sandbox ≠ always-on. Managed agents as taped had no cron. Routines had ≥1h + stateless clone. Local file/cookie jobs stay local. Run-now before schedule.",
+  "applicability": "ANY 24/7 or laptop-off proposal",
+  "proposed_change": "Classify wake primitive (event / cadence / human-run) before approving always-on; default no new host. Wired as skill hosted-neq-scheduled on Big Boss intake, Day Planner cadence, and coverage-loop /loop.",
+  "evidence": "27Y44JYXZJ8 · ehg4fhydTgs · hN58VkYLie4 · UGIZnh6HNLc · timestamps UNKNOWN (caption-only)",
+  "source_video_id": "27Y44JYXZJ8",
+  "status": "WIRED",
+  "next": "Refuse Anthropic routines / managed agents / Trigger.dev. Keep the split as a Big Boss intake question. Do not flatten routines-have-schedule vs managed-agents-do-not."
+}

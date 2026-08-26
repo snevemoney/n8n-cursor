@@ -1,0 +1,20 @@
+{
+  "pattern_id": "P-public-widget-is-a-credit-hose",
+  "version": 1,
+  "title": "Public unpaid widget is a credit hose. No auto-book.",
+  "steps": [
+    "Caller doesn't pay; you do.",
+    "Lock domain, cap minutes, throttle.",
+    "Hive: private-book-install HITL — no public voice widget."
+  ],
+  "support_ids": [
+    "K--cdexJWN8YA-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "Any book/voice surface. Hive no ElevenLabs / no Vapi.",
+  "less_relevant_when": "App with user-supplied key (who pays flips).",
+  "confidence": "high as the money rule; single-tape",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Localhost latency ≠ prod."
+}

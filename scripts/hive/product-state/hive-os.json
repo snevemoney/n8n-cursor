@@ -1,0 +1,33 @@
+{
+  "project_id": "hive-os",
+  "display_name": "Hive / agent automation platform",
+  "lifecycle": "beta",
+  "agent_state": "READY",
+  "owner_agent": "Big Boss",
+  "priority": "P2",
+  "blocked": false,
+  "requires_human": false,
+  "offer_validated": false,
+  "next_milestone": "first pilot loop complete",
+  "dependencies": [
+    "operator"
+  ],
+  "allowed_agents": [
+    "Big Boss",
+    "Watchdog",
+    "Forge",
+    "Librarian",
+    "Researcher"
+  ],
+  "suppressed_agents": [],
+  "expected_output": "Operating lane hive-os from catalog lane__hive-os",
+  "definition_of_done": "pilot PASS + first revenue or proof URL live",
+  "catalog_id": "lane__hive-os",
+  "parent_model_id": "hive-os",
+  "lane_id": "hive-os",
+  "resources": {
+    "repo": "n8n-cursor"
+  },
+  "last_action": "catalog-lane-upgrade 2026-08-14",
+  "next_action": "Money Desk sets KPI baseline"
+}

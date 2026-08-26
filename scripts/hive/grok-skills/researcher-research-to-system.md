@@ -6,7 +6,7 @@
 
 **Parent skill.** Type-specific add-ons:
 - Video → `researcher-video-to-system.md`
-- X bookmarks → section below + `CONTENT/x-bookmarks/learnings-implement.md` as example output
+- X bookmarks → section below + `CONTENT/x-bookmarks/learnings-implement.md` as theme-table example. Steal + deep merge into the **same** master files as Watch Later (do not fork `x-bookmarks/STEAL_SHEET.md`).
 
 **CLI:**
 
@@ -19,6 +19,10 @@ python3 scripts/hive/researcher-research-implement.py bookmarks --filter ai --wr
 
 # Web dossier / packet
 python3 scripts/hive/researcher-research-implement.py dossier --question "TOPIC" --write
+
+# YouTube Watch Later (native logged-in browser scrape JSON)
+python3 scripts/hive/scrape-youtube-watch-later.py --from-json PATH --write-dir docs/hive/outer-heaven/CONTENT/watch-later
+python3 scripts/hive/researcher-research-implement.py watchlater --from-json PATH --write --mirror-repo
 ```
 
 ---
@@ -29,6 +33,7 @@ python3 scripts/hive/researcher-research-implement.py dossier --question "TOPIC"
 |---------------|---------------|
 | "Watch this video" / URL | video |
 | "Find my X bookmarks" / "AI bookmarks" | bookmarks |
+| "Scrape Watch Later" / "my YouTube queue" | watchlater |
 | "Research X" / "Look into Y" / "What's the state of Z" | dossier |
 | "Break down what you found" | **always** — any type |
 | "Implement this" | **always** — system pass required |
@@ -44,10 +49,11 @@ Use the right source — **execute tools**, don't ask operator to paste data you
 | Type | Sources (in order) |
 |------|-------------------|
 | **Video** | Grok watch → `researcher-research-implement.py video` |
+| **Watch Later** | Native **logged-in** YouTube tab `playlist?list=WL` → JSON → `researcher-research-implement.py watchlater`. Signed-out cloud Chrome = **0 items, do not invent**. |
 | **X bookmarks** | `~/.grokbot/x-bookmarks.json` or `CONTENT/x-bookmarks/ai-only.json` (sync via `~/.grokbot/scripts/x-bookmarks-sync.sh` if stale) |
 | **Web / topic** | `hive-web-research.py dossier` or `packet` |
 | **Papers** | `hive-web-research.py papers --query` |
-| **Social** | Grok browser read-only; label UNVERIFIED |
+| **Social** | `social-source-ingest` (IG/X/Reddit/FB/TikTok public text → packet). YouTube = `channel-walk`. Label UNVERIFIED |
 
 Budget: `python3 scripts/hive/os/knowledge-policy.py --hierarchy Researcher`
 
@@ -80,8 +86,31 @@ Full item list, raw counts, methodology.
 ```
 
 **Video** uses **Chapters** instead of Themes (timestamps).  
+**Watch Later** uses **Themes/clusters** (same family as bookmarks; full ITEMS_LEDGER + batches/). Signed-out scrape → blocker FINDINGS, empty ledger.  
 **Bookmarks** uses **Themes/clusters** (e.g. Claude Code, MCP, cinematic sites, agent hype).  
 **Dossier** uses **Findings by source** with confidence labels.
+
+### 2b. Steal sheet (mandatory)
+
+Thesis-only is **not done**. **Any source** (video, Watch Later, X bookmarks, dossier) that names an ICP, numbered offer, or delivery machine:
+
+1. Load `scripts/hive/grok-skills/steal-usecases.md`
+2. Write/append packet `STEAL_SHEET.md` (who + machine + Path A/B/C + hive skills + kill)
+3. Merge into the **one** master: `docs/hive/outer-heaven/CONTENT/watch-later/STEAL_SHEET.md` + `business-types.json`
+4. Tag sources `yt:{videoId}` or `x:{tweetId}`. Bookmarks = **cluster** rows, not one row per tweet
+5. Sellable rows → `usecase-to-sku`. New `icp_id` → OPERATOR_MEMORY FACTS
+6. $ on tape/tweet = UNVERIFIED. Stack = Cursor + Grok only
+
+Do **not** create `CONTENT/x-bookmarks/STEAL_SHEET.md`. **Every later video/bookmark batch must append the master.**
+
+### 2c. Deep summaries (mandatory)
+
+Do not flatten a doctrine into a SKU. After steal:
+
+1. Write/append packet + `CONTENT/watch-later/DEEP_SUMMARIES.md` — the **whole argument** (economics, role, failure modes, close), not just machines
+2. Videos = per-video (video 8 pattern: paradox / orchestration / illusion of progress). Bookmarks = **clusters**, not 98 essays
+3. Theme tables (`learnings-implement.md`) ≠ this file. CHAPTERS stays Means-for-Evens
+4. Do **not** create `CONTENT/x-bookmarks/DEEP_SUMMARIES.md`
 
 ### 3. System implementation (agents adapt)
 
@@ -93,7 +122,9 @@ Same as video skill — fill `IMPLEMENTATION_MAP.md`:
 | `agent-doctrine-lanes.py` | behavior change for any of 17 |
 | `grok-skills/*.md` | new procedure |
 | `business-lanes.json` | new business model |
-| `CONTENT/x-bookmarks/learnings-implement.md` | bookmark-derived implementables |
+| `CONTENT/watch-later/STEAL_SHEET.md` + `business-types.json` | steal ICPs / machines from **any** source (one catalog) |
+| `CONTENT/watch-later/DEEP_SUMMARIES.md` | whole-argument summaries (videos + bookmark clusters) |
+| `CONTENT/x-bookmarks/learnings-implement.md` | bookmark theme table + P0–P2 (not a second steal sheet) |
 | Reprovision agents | after repo edits |
 
 ### 4. Hand off
@@ -146,7 +177,35 @@ python3 scripts/hive/researcher-research-implement.py bookmarks --filter ai --wr
 ```
 
 Cluster bookmarks into themes; reference `learnings-implement.md` pattern for P0–P2 table.  
+Then **§2b + §2c**: merge ICPs/machines and cluster doctrine into the **master** steal sheet + `DEEP_SUMMARIES.md` (same files as Watch Later).  
 Working set for daily signal = **AI-only**, not full 98.
+
+---
+
+## YouTube Watch Later (specific)
+
+**Private playlist** (`https://www.youtube.com/playlist?list=WL`). Requires the **operator's logged-in YouTube tab**. Cloud Chrome / signed-out native browser will show a blank page — that is **not** an empty queue.
+
+### Acquire
+
+1. Use the **already-open** YouTube tab (do not start a logged-out session).
+2. Confirm Watch Later rows render (`ytd-playlist-video-renderer` count > 0). If Sign in CTA is visible, **stop** and write `loggedIn: false`, `items: []`.
+3. Scroll until the list stops growing. Dump JSON (`title`, `channel`, `url`, `videoId`, `duration`, `index`).
+4. Normalize: `python3 scripts/hive/scrape-youtube-watch-later.py --from-json PATH --write-dir …`
+
+### Full read pass
+
+Same as bookmarks: `ITEMS_LEDGER.md` + `batches/` + `coverage.json`. Then:
+
+```bash
+python3 scripts/hive/researcher-research-implement.py watchlater --from-json PATH --write --mirror-repo
+```
+
+Repo mirror: `docs/hive/outer-heaven/CONTENT/watch-later/`
+
+After L2 chapters: **§2b steal sheet** — append every ICP/machine to `STEAL_SHEET.md`. **§2c** — whole argument into `DEEP_SUMMARIES.md`. Thesis-only or SKU-only = not done.
+
+**Never** invent videos. **Never** substitute subscriptions, Gmail YouTube mail, or the public homepage for Watch Later.
 
 ---
 
@@ -155,14 +214,20 @@ Working set for daily signal = **AI-only**, not full 98.
 - Reply "I found some interesting bookmarks" without theme breakdown + counts  
 - Skip implementation map  
 - Treat one business lane as the whole company  
-- Invent bookmarks not in synced JSON  
+- Invent bookmarks not in synced JSON
+- Invent Watch Later videos when the browser session is signed out
 - Copy hype literally (40-agent marketing swarms → sober 17-agent OS narrative)
+- Stop at thesis after L2 or a bookmark true-read — steal ICPs/machines into the **master** `STEAL_SHEET.md` (`steal-usecases`)
+- Fork a second steal/deep file under `x-bookmarks/`
 
 ---
 
 ## Related
 
 - `researcher-video-to-system.md`
-- `CONTENT/x-bookmarks/README.md`
+- `steal-usecases.md` — mandatory after L2 **or** bookmark true-read
+- `CONTENT/watch-later/STEAL_SHEET.md` + `business-types.json` — **one** catalog (yt + x)
+- `CONTENT/watch-later/DEEP_SUMMARIES.md` — whole argument (videos + bookmark clusters)
+- `CONTENT/x-bookmarks/README.md` · `learnings-implement.md` (theme table only)
 - `hive-web-research.py`
 - `ai-native-operator-doctrine.md`

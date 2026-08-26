@@ -1,0 +1,51 @@
+{
+  "workflow_id": "WF-per-step-model-router-v1",
+  "project_id": "per-step-model-router",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Load desk wiki + this workflow",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Run deep-video-learning",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T3",
+      "title": "THINK/BEHAVE/TRICKS/USE",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Dry-run without hard steps",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T5",
+      "title": "Watchdog grades",
+      "coverage": "have hive skill"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-2OD14-0cot4-01",
+    "K-2OD14-0cot4-02",
+    "K-2OD14-0cot4-03",
+    "K-2OD14-0cot4-04"
+  ],
+  "dissent_ids": [
+    "K-2OD14-0cot4-05"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "2OD14-0cot4",
+  "words_read": 3855
+}

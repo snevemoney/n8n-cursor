@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-log-first-approve-deck-second",
+  "version": 1,
+  "title": "Log every meeting; deck is optional and gated",
+  "steps": [
+    "Ended meeting → log row.",
+    "Human approves before a deck is generated.",
+    "Name the batch-collision rule (last item)."
+  ],
+  "support_ids": [
+    "K--Q_P7HFydZk-01",
+    "K--Q_P7HFydZk-02",
+    "K--Q_P7HFydZk-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "Agency delivery kit / meeting-to-artifact. Human will click.",
+  "less_relevant_when": "No meeting source; Client Pack SaaS fork (kill).",
+  "confidence": "high for the split; deck quality unseen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not invent the Gamma output. Fireflies is on-tape, not a required hive vendor."
+}

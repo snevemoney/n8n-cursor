@@ -1,0 +1,75 @@
+Here's how I generate proposal decks for my clients automatically.
+
+All right, imagine you just ho topped off a call and now you have to send out some sort of deliverable, whether that's meeting minutes or a proposal or something like that, which is actually a big part of my job when I was still working full-time.
+
+All of that can be automated now.
+
+So, in today's video, I'm going to be going over this workflow, and we're going to pretend you're in the scenario where you're hopping off a call with a potential client, and now you want to follow up with a slide deck proposal.
+
+So, let me just go ahead and do a live run of this system so we can all understand what we're going to be walking through today.
+
+So, this workflow has two parts.
+
+The first part up here is just logging the meeting once the meeting actually ends.
+
+And it logs it in a Google sheet which we'll be looking at which is going to look like this that has the date, the title, the attendees, the gist of the meeting, the ID, and then a status.
+
+And then the second part of the workflow is the actual slide deck creation.
+
+So after a new meeting gets logged in our Google sheet, we'll go ahead and pull in those details.
+
+We will get human approval right here to see if we want to have a slide deck generated or not, cuz we don't always need that.
+
+And if we do, then we'll go ahead and pass it over to the proposal generator agent, which will shoot off an API call to Gamma and deliver us a ready to go slide deck that is super professional.
+
+So if that sounds like a use case you might be interested in understanding, then let's go ahead and jump into it and I'm going to start off up here with this first workflow.
+
+So what happens here is we have a web hook and this web hook is given to Fireflies.
+
+So basically whenever a Fireflies call is done, it's going to trigger this end web hook.
+
+So let me just go ahead and give this workflow a run so we can see how it works.
+
+So, it just did a quick wait.
+
+Now, it's going to grab the info from Fireflies as far as like the title, the transcript, things like that.
+
+Then, we're going to do an if to see if all of that stuff exists, and I'll explain that in a sec.
+
+We clean up the JSON from Fireflies in order to get the attendees, and then we log the information in the Google sheet.
+
+And then, it pops up over here like this where we have our title, we have our attendees, we have the gist, we have a status, and then we have the ID of that meeting.
+
+All right, so our meeting has been logged in our Google sheet.
+
+Now, what's next?
+
+Well, the second workflow gets triggered when there's a new row added to that Google sheet.
+
+So, this is why we pin this data here as if we just basically added this row and now we have to process it.
+
+So, I'm just going to do the same thing.
+
+I'm going to go ahead and run this whole workflow and then we will break it down.
+
+So, what we're doing here is we are sending off a request once again to get the meeting info.
+
+But I just did a quick limit where I'm basically saying only keep the last item because on the off chance where maybe you have two meetings end at the same time or something weird like that, we only want to actually process one of them.
+
+So, that's just a quick guardrail right there.
+
+Now, after we get the meeting info, as you guys remember, we get all this raw data about like the transcript and all this AI summary stuff like that.
+
+Then, we go ahead and do a cleanup.
+
+So, this is another time we're doing a code node, except for this time we're not only getting the speakers, we're also getting the full transcript.
+
+And this was a little bit more tricky of a code node to work with.
+
+It's still not too difficult, but the reason why I say it's a little trickier is because what I wanted to do is I wanted to make sure it was like speaker Nate Herk and then it didn't say Nate Herk again until the next person spoke.
+
+Because otherwise, you might have like the speaker for every single sentence that they said and then it just looks not super clean.
+
+So, now we cleaned up that code node.
+
+If you want to watch the full breakdown, then click on that play button right here.

@@ -1,0 +1,49 @@
+{
+  "workflow_id": "WF-stable-query-three-sources-pin-the-plan-v1",
+  "project_id": "stable-query-three-sources-pin-the-plan",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Load desk wiki + this workflow",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Run deep-video-learning",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T3",
+      "title": "THINK/BEHAVE/TRICKS/USE",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Dry-run without hard steps",
+      "coverage": "HITL only"
+    },
+    {
+      "id": "T5",
+      "title": "Watchdog grades",
+      "coverage": "have hive skill"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-0Ujdys4LqNs-01",
+    "K-0Ujdys4LqNs-02"
+  ],
+  "dissent_ids": [
+    "none \u2014 caption-only speech\u2260behavior stays on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "0Ujdys4LqNs",
+  "words_read": 398
+}

@@ -1,0 +1,47 @@
+Here's how to automate anything with cloud code and trigger.dev.
+
+So, before we jump into building, let's just get on the same page.
+
+We use cloud code to describe what we want in plain English.
+
+This could be saying something as simple as, I want to monitor YouTube for new AI videos and send me a daily summary.
+
+Cloud Code will then say, okay, well, to do this, I need X, Y, and Z from you. [music] So, it turns a vague request into an actual working automation.
+
+And that actual automation or that agent is code, and that is basically a project, and that's like a file.
+
+And then what we need to do is get that out of our local cloud code environment on our laptop or our desktop and put that into trigger.dev on the cloud so that these can actually run all the time.
+
+All right, so I'm in my ClickUp and what I'm going to do is add a new task and I'm just going to go ahead and say Nvidia.
+
+And now that that has been processed, we're going to have to wait in here and we'll see the ClickUp research polar start up and then it will basically say, okay, cool.
+
+I found a new task and I'm going to send that to the company researcher agent.
+
+So right here we can see that that got picked up and it got sent to the researcher.
+
+And if I open the researcher which is currently executing you can see it live running right now.
+
+Claude is calling it search web tool and it called it twice.
+
+It actually decided I'm going to invoke it one more time to make sure I get a comprehensive research report.
+
+Now it's using a read URL tool and there we go.
+
+After about 45 seconds it has finished.
+
+So now if I open up ClickUp and we go to Nvidia we can see that this is now marked as complete.
+
+And when I click on it over here, we can see that we got a full research brief about Nvidia.
+
+And so now if I come into this task and I say at UPAI, how is their stock doing?
+
+It has to come in here and it has to read the context to make sure it knows who is they.
+
+In this case, when I just said, how is their stock doing?
+
+And if I go back to runs, you can see that the follow-up responder is now executing.
+
+If I click into it, we should be able to watch it actually looking at this task, searching the web, and we should be able to scroll down and see that we just got a response right here from Upet AI.
+
+If you want to watch the full breakdown, then click on that play button right here.

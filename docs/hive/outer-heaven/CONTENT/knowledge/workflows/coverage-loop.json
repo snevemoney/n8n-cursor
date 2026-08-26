@@ -1,0 +1,71 @@
+{
+  "workflow_id": "WF-coverage-loop-v1",
+  "project_id": "coverage-loop",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Confirm atoms exist; do not re-emit",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Graph + versioned patterns",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T3",
+      "title": "Compile one workflow per live job, not 147→1",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T4",
+      "title": "Desk non-HITL artifacts",
+      "coverage": "need knowledge"
+    },
+    {
+      "id": "T5",
+      "title": "Three audits + state.json + chronicle",
+      "coverage": "have hive skill"
+    }
+  ],
+  "pattern_ids": [
+    "P-wat-sop-md-one-job-tools",
+    "P-plan-then-assets-then-bypass",
+    "P-wiki-raw-index-log",
+    "P-tape-dollars-unverified"
+  ],
+  "support_ids": [
+    "K--6yUeJ3rkvg-01",
+    "K--6yUeJ3rkvg-02",
+    "K--Lo_SlSgtnA-02",
+    "K--cdexJWN8YA-02",
+    "K--nG-9vlSkho-01",
+    "K--zL_trhnQaI-03",
+    "K-0WDkwMxj13s-01",
+    "K-27Y44JYXZJ8-02",
+    "K-2J3uX8iRNng-03",
+    "K-2OD14-0cot4-01"
+  ],
+  "dissent_ids": [
+    "K--cdexJWN8YA-04",
+    "K--cdexJWN8YA-05",
+    "K--cdexJWN8YA-06",
+    "K--zL_trhnQaI-04",
+    "K--zL_trhnQaI-05",
+    "K-0WDkwMxj13s-04",
+    "K-0WDkwMxj13s-05",
+    "K-0WDkwMxj13s-06",
+    "K-3GAxd90fEE4-04",
+    "K-3GAxd90fEE4-05",
+    "K-tDGiWn0flK8-02",
+    "K-tDGiWn0flK8-04"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  }
+}

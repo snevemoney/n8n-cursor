@@ -1,0 +1,51 @@
+{
+  "capability_id": "CAP-RDytbVDzMF4-script-beat-motion",
+  "name": "script-beat-motion",
+  "goal": "timestamped script → beats → sourced numbers → one graphic per beat on disk",
+  "observed_workflow": [
+    "Read timed transcript",
+    "Mark beats that explain",
+    "Research or drop unsourced numbers",
+    "Lock one font + one icon/Lottie style",
+    "Generate one graphic per beat; save",
+    "Insert / publish HITL"
+  ],
+  "tools": [
+    "timed captions already on packet",
+    "Higgsfield (optional still)",
+    "Claude Design / Firecrawl (on-tape operate-never)"
+  ],
+  "agent_abilities": [
+    "mark beats from timed.txt",
+    "filter-then-llm research"
+  ],
+  "triggers": [
+    "timestamped script exists",
+    "Evens wants motion on spoken moments"
+  ],
+  "state": "beats listed; numbers sourced|research|drop",
+  "guardrails": [
+    "publish HITL",
+    "do not invent chart numbers",
+    "Claude Design / Firecrawl-as-required operate-never",
+    "do not auto-insert into a live video"
+  ],
+  "reproduce": "Dry-run on an existing packet timed.txt: list 3 beats + drop unsourced numbers. No billed vision.",
+  "generalize": "Same primitive for Path C overlays. Not a page wrap.",
+  "improve": "Do not improve by installing Claude Design.",
+  "primitive_ids": [
+    "PRIM-RDytbVDzMF4-script-beat-graphic"
+  ],
+  "atom_ids": [
+    "K-RDytbVDzMF4-01",
+    "K-RDytbVDzMF4-03"
+  ],
+  "behavior_ids": [
+    "BEH-RDytbVDzMF4-script-beat"
+  ],
+  "source_video_id": "RDytbVDzMF4",
+  "timestamp": "12:06-16:16",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "UNTESTED"
+}

@@ -1,0 +1,21 @@
+{
+  "pattern_id": "P-tape-dollars-unverified",
+  "version": 1,
+  "title": "Tape / tweet dollars are UNVERIFIED. Do not quote as ours.",
+  "steps": [
+    "Mark every on-tape $ as UNVERIFIED.",
+    "Do not fill unit-econ or rungs from a reel.",
+    "Do not analog student 200–300k or $1,650 as hive FACT."
+  ],
+  "support_ids": [
+    "K-x-2088007687149601254-05",
+    "K-HNKlFTd1maM-02"
+  ],
+  "dissent_ids": [],
+  "valid_when": "Any compile that touches a tape metric.",
+  "less_relevant_when": "Never — this is a standing hive rule.",
+  "confidence": "high as policy; dollars UNVERIFIED",
+  "demonstration_count": 0,
+  "creator_count": 2,
+  "exceptions": "None that make the dollars FACT."
+}

@@ -1,0 +1,22 @@
+{
+  "pattern_id": "P-auto-047",
+  "version": 1,
+  "title": "knowledge-ops / ops — lowest-level-that-kills-the-pain-router-before-pile",
+  "steps": [
+    "Steal router+lowest-level. No Claude/Obsidian religion.",
+    "Steal question→shape. Don’t vector the whole vault.",
+    "Steal evergreen-vs-fetch + ordered lookup. `wiki-ingest` · `send-removed` analog for ingest."
+  ],
+  "support_ids": [
+    "K-DTCyvo6cC54-01",
+    "K-DTCyvo6cC54-02",
+    "K-DTCyvo6cC54-03"
+  ],
+  "dissent_ids": [],
+  "valid_when": "domain=knowledge-ops; stage=ops; Claude names on-tape. Hive `context-docs`.",
+  "less_relevant_when": "A real CRM might justify L4 — he says his work doesn’t. Speech≠behavior (keep both; do not pick a winner): “knows everyt",
+  "confidence": "medium — single-tape support cluster; not frozen",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Do not average with dissent_ids. Caption-only. Tape $ UNVERIFIED."
+}

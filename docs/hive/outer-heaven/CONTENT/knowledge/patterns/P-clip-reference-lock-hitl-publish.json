@@ -1,0 +1,23 @@
+{
+  "pattern_id": "P-clip-reference-lock-hitl-publish",
+  "version": 1,
+  "title": "Clip / gen factory: reference-lock + log. Human ships.",
+  "steps": [
+    "Lock the reference ('appear exactly') or gens invent the SKU.",
+    "Log prompt / model / URL / status.",
+    "Publish stays HITL. No overnight 100. No Higgsfield as hive stack."
+  ],
+  "support_ids": [
+    "K-xn6Z5PYyAIE-01",
+    "K-xn6Z5PYyAIE-03"
+  ],
+  "dissent_ids": [
+    "K-xn6Z5PYyAIE-02"
+  ],
+  "valid_when": "Hive `clip-factory` / `cinematic-recipe` / `product-ad-from-photo`. Path C or named creator.",
+  "less_relevant_when": "Short-form-only creator; mass-DM content agency; caption-only click path.",
+  "confidence": "high as the scar; '5 minutes' dissent kept",
+  "demonstration_count": 0,
+  "creator_count": 1,
+  "exceptions": "Keep vs AYsg5gAMWyo first-frame. Tape $ UNVERIFIED."
+}

@@ -1,0 +1,62 @@
+{
+  "workflow_id": "WF-plan-mode-objective-v2",
+  "project_id": "plan-mode-objective",
+  "version": 2,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Plan + unknowns",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T2",
+      "title": "Explain-don\u2019t-recommend",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T3",
+      "title": "Folder survives the thread",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T4",
+      "title": "Blank global",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T5",
+      "title": "Session \u2192 named skill",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T6",
+      "title": "Objective done-when",
+      "coverage": "tape-faithful"
+    },
+    {
+      "id": "T7",
+      "title": "Watchdog grades",
+      "coverage": "tape-faithful"
+    }
+  ],
+  "pattern_ids": [],
+  "support_ids": [
+    "K-U6k4MeVks_Y-01",
+    "K-U6k4MeVks_Y-02",
+    "K-U6k4MeVks_Y-03",
+    "K-U6k4MeVks_Y-04"
+  ],
+  "dissent_ids": [
+    "caption-only speech\u2260behavior on LEARNED"
+  ],
+  "provenance": "WORKFLOW \u2192 PATTERN \u2192 ATOMS \u2192 TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "U6k4MeVks_Y",
+  "words_read": 11335,
+  "tape_faithful": true
+}

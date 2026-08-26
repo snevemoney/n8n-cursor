@@ -4,6 +4,7 @@
 Usage:
   python3 scripts/hive/researcher-research-implement.py video --youtube-url URL --title "T" --write
   python3 scripts/hive/researcher-research-implement.py bookmarks --filter ai --write
+  python3 scripts/hive/researcher-research-implement.py watchlater --from-json PATH --write
   python3 scripts/hive/researcher-research-implement.py dossier --question "TOPIC" --write
 """
 from __future__ import annotations
@@ -74,6 +75,16 @@ def _load_hive_web_research():
     return mod
 
 
+def _load_watchlater_module():
+    spec = importlib.util.spec_from_file_location(
+        "researcher_watchlater_implement", HIVE / "researcher-watchlater-implement.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def implementation_map_md(title: str, slug: str, research_type: str) -> str:
     return f"""# Implementation map: {title}
 
@@ -88,6 +99,8 @@ Researcher: complete this table, then edit repo files and reprovision agents.
 | 1 | | docs/hive/outer-heaven/OPERATOR_MEMORY.md (LESSONS) | Librarian | pending |
 | 2 | | scripts/hive/agent-doctrine-lanes.py | all 17 | pending |
 | 3 | | scripts/hive/grok-skills/ or CONTENT/x-bookmarks/learnings-implement.md | varies | pending |
+| 4 | Steal ICPs/machines (not thesis-only) | CONTENT/watch-later/STEAL_SHEET.md + business-types.json | Researcher, GTM, Consultant | pending |
+| 5 | Whole-argument deep summary (not SKU-only) | CONTENT/watch-later/DEEP_SUMMARIES.md | Researcher | pending |
 
 ## Reprovision checklist
 
@@ -327,6 +340,8 @@ def bookmarks_findings_md(
             "| Priority | Action | Owner agent(s) | Hive target |",
             "|----------|--------|----------------|-------------|",
             "| P0 | _Researcher fills from themes_ | | CONTENT/x-bookmarks/learnings-implement.md |",
+            "| P0 | Steal ICPs/machines into the **one** master sheet (not a second catalog) | Researcher, GTM, Consultant | CONTENT/watch-later/STEAL_SHEET.md |",
+            "| P0 | Whole-argument deep summary (clusters, not one essay per tweet) | Researcher | CONTENT/watch-later/DEEP_SUMMARIES.md |",
             "",
             "## Quarantine / ignore",
             "",
@@ -508,6 +523,28 @@ def run_dossier(
     return result
 
 
+def run_watchlater(args: argparse.Namespace) -> int:
+    wl = _load_watchlater_module()
+    if args.self_test:
+        return wl.self_test()
+    scrape, _path = wl.load_scrape_from_path(args.from_json)
+    result = wl.run(
+        scrape=scrape,
+        write=args.write,
+        slug=args.slug,
+        batch_size=max(1, args.batch_size),
+        mirror_repo=args.mirror_repo,
+    )
+    if args.json:
+        slim = {k: v for k, v in result.items() if k != "findingsMarkdown"}
+        print(json.dumps(slim, indent=2))
+    elif not args.write:
+        print(result.get("findingsMarkdown", ""))
+        print("\n---\n")
+        print(result.get("implementationMap", ""))
+    return 0 if result.get("ok") else 3
+
+
 def run_video(args: argparse.Namespace) -> int:
     video_mod = _load_video_module()
     if args.watch_json:
@@ -559,6 +596,15 @@ def main() -> int:
     dp.add_argument("--write", action="store_true")
     dp.add_argument("--json", action="store_true")
 
+    wp = sub.add_parser("watchlater", help="YouTube Watch Later → themed findings")
+    wp.add_argument("--from-json", type=Path)
+    wp.add_argument("--slug")
+    wp.add_argument("--batch-size", type=int, default=25)
+    wp.add_argument("--write", action="store_true")
+    wp.add_argument("--mirror-repo", action="store_true")
+    wp.add_argument("--json", action="store_true")
+    wp.add_argument("--self-test", action="store_true")
+
     args = ap.parse_args()
 
     if args.cmd == "video":
@@ -593,6 +639,9 @@ def main() -> int:
             print("\n---\n")
             print(result.get("implementationMap", ""))
         return 0
+
+    if args.cmd == "watchlater":
+        return run_watchlater(args)
 
     return 1
 
