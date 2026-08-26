@@ -65,3 +65,15 @@ Send / pay / deploy / book / publish = operator. This skill never closes a hard 
 ## Never
 
 Until-satisfied · looks-good · arm `/loop` without Evens naming the interval · unsupervised `/goal` · raise your own cap · flatten write-loops vs one-terminal · Claude Cowork/Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus
+
+## Build gates (2026-08-16 · cc-five-tools-chase)
+
+Before any code: **need it? · exists already? · library does it? · least code last.** Gates travel as this section, never as a plugin (ponytail 103k* — steal the ladder, skip the harness access).
+
+## Webapp done-check (2026-08-16 · business-operations-and-beautiful-webapps)
+
+Any webapp bite (public, Path A client, Path C ours, local agentic OS) → run `cinematic-recipe` or the sitting is **not done**. seedance / slop roast / worlds stay available, not required to close. Watchdog GRADE on the first real webapp sitting (not this merge).
+
+## Labeled merge (shard 1 · 2026-08-17)
+Labeled merge, not a new skill. Caption-only. Claude `/goal` operate-never.
+- `ZAaxx3qyT8g` — Already sourced. Metric-not-vibe board. `/goal` without a metric is a weak stop.

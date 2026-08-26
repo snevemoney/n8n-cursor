@@ -23,3 +23,6 @@
 - `scripts/hive/grok-skills/slice-build.md`
 - `scripts/hive/grok-skills/click-live-site.md`
 - `CONTENT/website-building/cinematic/PLAYBOOK.md`
+
+## Cloud host
+HOST = git. Living desk files: repo-root `desk-missions-now/` on `origin/main`. Doctrine: `desk-missions-now/CLOUD-HOST.md`. Do not write Cloud artifacts under `docs/hive/.../dry-runs/`.

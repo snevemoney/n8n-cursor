@@ -139,3 +139,23 @@ Do / don’t and implicit shortcuts — see §D Procedures and Stolen machines. 
 
 ### USE
 Each trick lands as a desk **action** on Cursor + Grok Bot (not a quote). Operate-never on their vendors. Reproduce card: `job-cards/takes/_knowledge-use/{{slug}}.md`.
+
+## HOW THEY BUILT
+- product/tool/workflow/website: **build** (not a landing machine we lack).
+- steps they showed: stolen machine `eval-then-wrap-tools` — see §D / Stolen machines.
+- tools they used (on-tape vs we already have): on-tape vendors operate-never. Ours: `golden-test-loop`, `send-removed`, `ask-principal`.
+- what we can emit from our factory: system-upgrade `eval-then-wrap-tools` + labeled merges. No website-assets. No duplicate mint.
+
+## ACTION TRACE
+- timestamps — UNKNOWN (caption-only; no watch.json this sit)
+- state transitions — see LEARNED stolen machine `eval-then-wrap-tools`
+- UNKNOWN blockers: clicks / on-screen prompts / tape $ — BLOCKING? no for hive remap
+
+## CAPABILITY CARD
+CAPABILITY: eval-then-wrap-tools
+SOURCE: `X80ljdCPM_U` Nate Herk (caption-only)
+DEMONSTRATED OUTCOME: spoken machine; hive remap this sit
+PREREQUISITES: existing hive skills listed above
+WORKFLOW: eval the job → wrap existing tools (not install a new stack)
+SKILL CANDIDATES: golden-test-loop, send-removed, ask-principal (merge, do not mint duplicate)
+SYSTEM UPGRADE CANDIDATES: UPG-X80ljdCPM_U-eval-then-wrap-tools

@@ -1,0 +1,11 @@
+{
+  "root": "~/Library/Application Support/Grok Bot/sand-client-persistence",
+  "key_prefix": "sand.client.slice.",
+  "replica_infix": ".transcript.replicas.",
+  "roster_suffix": ".roster.last-roster",
+  "default_list_limit": 20,
+  "read_max_chars": 80000,
+  "ask_limit": 160,
+  "ring": "FREE",
+  "note": "Mac HOST only. Live Grok Bot desk threads. Path + skill only — do not copy blobs into git. Cloud cron cannot see this folder."
+}

@@ -1,0 +1,59 @@
+{
+  "identity": "dark editorial wealth terminal — atmosphere only, never a data substitute",
+  "plates": [
+    {
+      "beatId": "overnight",
+      "file": "plates/overnight.png",
+      "caption": "Void terminal before a prior tape exists. No invented overnight prints.",
+      "usedOnScenes": ["delta"]
+    },
+    {
+      "beatId": "global-tape",
+      "file": "plates/global-tape.png",
+      "caption": "Earth-night liquidity. No invented index or FX digits.",
+      "usedOnScenes": ["worldTape"]
+    },
+    {
+      "beatId": "us-session",
+      "file": "plates/us-session.png",
+      "caption": "US session atmosphere. Numbers stay on the typed tape.",
+      "usedOnScenes": ["tape"]
+    },
+    {
+      "beatId": "canada-sleeve",
+      "file": "plates/canada-sleeve.png",
+      "caption": "CAD sleeve mood. Locked for a sourced CA lane — unused until a CA scene exists. No fake TSX digits.",
+      "usedOnScenes": []
+    },
+    {
+      "beatId": "gpu-demand",
+      "file": "plates/gpu-demand.png",
+      "caption": "Causal / GPU-demand metaphor. No chip logos, no scores.",
+      "usedOnScenes": ["network"]
+    },
+    {
+      "beatId": "concentration",
+      "file": "plates/concentration.png",
+      "caption": "Overlapping shadows — same factor, several lines.",
+      "usedOnScenes": ["concentration"]
+    },
+    {
+      "beatId": "unknown",
+      "file": "plates/unknown.png",
+      "caption": "What we cannot claim tonight. Fog, not a fake answer.",
+      "usedOnScenes": ["unknowns"]
+    },
+    {
+      "beatId": "empty-scout",
+      "file": "plates/empty-scout.png",
+      "caption": "Empty chair until a sourced non-book name exists.",
+      "usedOnScenes": ["opportunityScout", "nextNvda"]
+    },
+    {
+      "beatId": "decision-desk",
+      "file": "plates/decision-desk.png",
+      "caption": "Capital-plan desk. Folders stay blank of prices.",
+      "usedOnScenes": ["capitalPlan"]
+    }
+  ]
+}

@@ -30,6 +30,7 @@ VERIFIER: Watchdog (default) — no Send / Pay
 HYPOTHESIS: <what should be true>
 LABELED: <fixture or last-known-good>
 MISS: <per-row or none>
+MISSING-PIECE-HUNTER: <required pass — see below>
 GRADE: pass | fail
 ```
 
@@ -57,9 +58,34 @@ GRADE: <Watchdog only>
 
 If Forge writes GRADE, the path fails.
 
+## Missing Piece Hunter (required Watchdog pass)
+
+Assume reproduction **will fail**. Before GRADE=pass, list what the reconstruction overlooked. This is pass 7 of the adversarial coverage — not a new skill.
+
+Write a **Missing Piece Hunter** section on the GRADE (template: `CONTENT/knowledge/workflows/dry-runs/GRADE.md`):
+
+```
+## Missing Piece Hunter
+Assume fail. What did 1–6 miss?
+
+- overlooked prerequisites / hidden setup:
+- permissions / files / prompts / versions:
+- visual-only steps (no speech):
+- cuts / edits that skip a setup:
+- manual interventions the operator did off-mic:
+- UNKNOWN blockers (KNOWN / OBSERVED / UNKNOWN / HYPOTHESES / BLOCKING?):
+```
+
+Do not invent the missing piece. UNKNOWN is a valid row. A GRADE without this section is incomplete on a demonstration / reproduce sitting. GRADE=pass still is not a hard-step close.
+
 ## Stop
 
 Send / pay / deploy / book / publish = operator. Verifier is read-only.
+
+## Labeled merge (shard 3 · 2026-08-17)
+Labeled merge, not a new skill. Caption-only Nate tapes. $ UNVERIFIED. Claude/Codex/Gemini/Vapi/Sora/Gamma/Base44/Hermes = operate-never.
+- `8IUWeF3B-hk` — Already a source on this skill. Hypothesis + labeled set + per-row miss. Subjective rerun is not eval. Re-assert only; do not remint.
+Do not mint a duplicate skill. Do not file `website-assets` unless Evens names a landing machine we lack.
 
 ## Never
 

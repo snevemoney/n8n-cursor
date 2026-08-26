@@ -20,3 +20,6 @@
 
 ## Load first
 - `scripts/hive/grok-skills/ask-principal.md`
+
+## Cloud host
+HOST = git. Inbox + board: `desk-missions-now/hitl/{INBOX,GOAL-GAP-BOARD}.md`. Locks: `hitl/briefs/INDEX.md` + memories — not live chats. Doctrine: `desk-missions-now/CLOUD-HOST.md`.

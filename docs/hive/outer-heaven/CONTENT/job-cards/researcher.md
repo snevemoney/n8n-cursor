@@ -22,3 +22,7 @@
 ## Load first
 - `scripts/hive/grok-skills/researcher-research-to-system.md`
 - `scripts/hive/grok-skills/steal-usecases.md`
+- `scripts/hive/os/signal-retrieve.py`
+
+## Cloud host
+HOST = git. Pick file: `desk-missions-now/researcher/NEXT-TRAIN-PICK.md`. Real packet id on `main` or TRIAGE — no invented slug. Doctrine: `desk-missions-now/CLOUD-HOST.md`.

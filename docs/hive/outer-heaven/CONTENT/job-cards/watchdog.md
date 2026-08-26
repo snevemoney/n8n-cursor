@@ -22,3 +22,7 @@
 ## Load first
 - `scripts/hive/grok-skills/click-live-site.md`
 - `scripts/hive/grok-skills/paid-slice-funnel.md` (preview ≠ domain)
+- `scripts/hive/grok-skills/separate-verifier.md`
+
+## Cloud host
+HOST = git. Hold-outs + GRADE live under repo-root `desk-missions-now/watchdog/`. Never hold-out `factory-os-train-plane`. Doctrine: `desk-missions-now/CLOUD-HOST.md`.
