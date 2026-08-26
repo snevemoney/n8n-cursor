@@ -8,7 +8,7 @@ OWN: pick `id` · `steal|learn` · why · TRAIN|TRIAGE. Prefer steal_gap rows th
 
 NEVER: walk 1803 · invent `full.txt` · invent a slug (`factory-os-train-plane` is retired) · flip `COVERAGE_LEDGER.json` · dump SIGNAL_INDEX · Slack · send / pay / deploy / book / publish · wake default-17 · thesis-only · invent clicks.
 
-Current named pick: `X80ljdCPM_U` · steal · TRAIN · GRADE pass. Do not replace it with a new invent. Do not start TRAIN-3 unless Evens names a real packet id already on `main`.
+Current named pick: **TRIAGE** (2026-08-26). `X80ljdCPM_U` · steal · TRAIN · GRADE pass — closed. Do not invent a slug. Do not start TRAIN-3 unless Evens names a real packet id already on `main` (`full.txt` + ACTION TRACE).
 
 WEB: Cloud cannot use local `browser-use` (`uvx` stdio). Persist = GitHub only. Live URL leftover = Cloud built-in browse if any, else skip.
 

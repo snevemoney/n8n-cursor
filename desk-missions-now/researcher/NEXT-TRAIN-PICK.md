@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-08-26
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: TRIAGE · coverage hole · no unused TRAIN row · halt
 send: removed
 clock: parked
 ---
@@ -14,21 +14,32 @@ clock: parked
 
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
-| **steal \| learn** | steal |
-| **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
-| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **id** | **TRIAGE** — no unused TRAIN-eligible packet on this checkout. No invented slug. |
+| **steal \| learn** | n/a — no named TASK |
+| **Verdict** | **TRIAGE** |
+| **Spoken machine** | none — Evens did not name a TRAIN-3 id |
+| **full.txt** | unused row: **none**. Only `X80ljdCPM_U/full.txt` is on disk (already TRAIN-2 PASS). |
+| **ACTION TRACE** | unused TRAIN pair: **none**. See coverage hole. |
+| **Skip?** | yes — no walkable unused `full.txt` + ACTION TRACE pair |
+| **Retrieve** | **NONE** — TASK not named; no domain match. Did not run `signal-retrieve.py`. |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** TRAIN-2 `X80ljdCPM_U` is already Watchdog GRADE **pass**. Doctrine: do not start TRAIN-3 unless Evens names a real packet id already on `main`. This checkout has no leftover steal_gap row with both `full.txt` and LEARNED `## ACTION TRACE`.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**Coverage hole (OBSERVED this checkout):**
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+| Path | `full.txt` | ACTION TRACE | Status |
+|------|------------|--------------|--------|
+| `packets/X80ljdCPM_U/` | yes | yes | TRAIN-2 PASS — skip |
+| `packets/kwSVtQ7dziU/` | MISSING | LEARNED present | TRAIN-1 PASS — skip |
+| `packets/2J3uX8iRNng/` | **MISSING-ON-CHECKOUT** (LEARNED cites it; file not here) | yes (`## ACTION TRACE`) | leftover only — **not** named TRAIN-3 |
+| `karpathy-wiki-nate-herk` | — | no | TRIAGE decoy — skip |
+| `factory-os-train-plane` | — | — | retired invent — never mint / never hold-out |
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+**Do not use `factory-os-train-plane`.** Do not mint a slug. Do not invent `full.txt`. Do not write Watchdog hold-outs. Do not Forge-attempt. Do not GRADE.
+
+**This stage (done):** Researcher Stage 1 pick = **TRIAGE + coverage hole**. Halt.
+
+**Next stage (one sitting):** Evens leftover — commit a real unused packet (`full.txt` + ACTION TRACE) to `main`, **or** name an id. Until then: host hygiene / HITL leftover (re-paste / Save). Do **not** start TRAIN-3. Do not re-grade `X80ljdCPM_U`. Do not remint.
 
 Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
 

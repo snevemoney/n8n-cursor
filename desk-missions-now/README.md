@@ -14,4 +14,4 @@ Doctrine: [`CLOUD-HOST.md`](CLOUD-HOST.md).
 
 Do **not** write Cloud artifacts under `docs/hive/outer-heaven/CONTENT/knowledge/workflows/dry-runs/desk-missions-now/`. That path is leftover. Do not create a third tree.
 
-Current TRAIN pick: `researcher/NEXT-TRAIN-PICK.md` · id `X80ljdCPM_U`. Never `factory-os-train-plane`.
+Current pick: `researcher/NEXT-TRAIN-PICK.md` · **TRIAGE** (2026-08-26 coverage hole). `X80ljdCPM_U` is TRAIN-2 PASS — do not remint. Never `factory-os-train-plane`.
