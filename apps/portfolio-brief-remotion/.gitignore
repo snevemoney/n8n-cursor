@@ -1,0 +1,8 @@
+node_modules
+out
+.DS_Store
+*.log
+*.mp4
+public/voice/**/*.wav
+public/voice/**
+!public/voice/README.md
