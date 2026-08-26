@@ -16,7 +16,10 @@
     "new-episode": "bash scripts/new-episode.sh",
     "still": "remotion still src/index.ts DailyShow out/poster.png --frame=90",
     "still:qa": "bash scripts/qa-stills.sh",
+    "still:qa-v2": "bash scripts/qa-stills-v2.sh",
     "still:pack": "bash scripts/still-pack.sh",
+    "check:formulas": "npx tsx src/data/formulas.check.ts",
+    "check:scenes": "npx tsx src/engine/selectScenes.check.ts",
     "check:delta": "npx tsx src/data/delta.check.ts",
     "check:voice": "npx tsx src/voice/scriptFromReport.check.ts",
     "typecheck": "tsc --noEmit"

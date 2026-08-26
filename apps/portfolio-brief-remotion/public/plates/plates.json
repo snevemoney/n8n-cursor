@@ -35,7 +35,7 @@
       "beatId": "concentration",
       "file": "plates/concentration.png",
       "caption": "Overlapping shadows — same factor, several lines.",
-      "usedOnScenes": ["concentration"]
+      "usedOnScenes": ["concentration", "lookThrough"]
     },
     {
       "beatId": "unknown",
@@ -47,7 +47,7 @@
       "beatId": "empty-scout",
       "file": "plates/empty-scout.png",
       "caption": "Empty chair until a sourced non-book name exists.",
-      "usedOnScenes": ["opportunityScout", "nextNvda"]
+      "usedOnScenes": ["opportunityScout", "nextNvda", "opportunityRadar"]
     },
     {
       "beatId": "decision-desk",

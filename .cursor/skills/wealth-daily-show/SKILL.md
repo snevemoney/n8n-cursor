@@ -10,6 +10,8 @@ description: >-
 
 Load `scripts/hive/grok-skills/wealth-daily-show.md` and follow it.
 
+**V2 visual systems:** MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION, plus a sourced yesterday-delta. Screens show evidence; voice interprets. Formulas in `apps/portfolio-brief-remotion/src/data/formulas.ts` — missing inputs stay UNKNOWN. Do not invent scores, Next-NVDA names, or fake price paths. Full law is in the SSOT file.
+
 **Owner:** Wealth Manager (cold unless Evens names the desk or Enables the Glass row).  
 **Host:** Mac only. Cloud / `/workspace` abort: `Remotion is on origin/main but this host cannot render.`  
 **Engine:** `apps/portfolio-brief-remotion` · `DailyShow` + optional `Morning60`.  

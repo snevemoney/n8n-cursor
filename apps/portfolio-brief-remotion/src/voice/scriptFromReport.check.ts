@@ -47,8 +47,11 @@ if (!report.markets?.ca) {
 }
 
 if (report.nextNvda.length === 0) {
-  const next = full.cues.find((c) => c.sceneId === 'next-nvda');
-  assert(Boolean(next && /no next-nvda/i.test(next.lines.join(' '))), 'empty Next-NVDA sleeve must be spoken as empty');
+  const radar = full.cues.find((c) => c.sceneId === 'opportunity-radar');
+  assert(Boolean(radar && /no name passed|no next-nvda/i.test(radar.lines.join(' '))), 'empty sleeve must be spoken as empty');
+  const board = full.cues.find((c) => c.sceneId === 'prediction-board');
+  assert(Boolean(board), 'prediction board must have a cue');
+  assert(!/91\s*\/\s*100|58\s*\/\s*100/i.test(board?.lines.join(' ') ?? ''), 'must not read invented board scores');
 }
 
 function WORDS_HINT(frames: number): number {

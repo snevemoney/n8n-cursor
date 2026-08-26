@@ -59,7 +59,7 @@ export const DeltaOpen: React.FC<{report: DailyReport; chapter: string}> = ({rep
         <div style={{...mono, color: color.gold, fontSize: 16, letterSpacing: 1.8}}>
           OVERNIGHT DELTA · VS {delta.priorDate}
         </div>
-        <h1 style={{...display, fontSize: 64, maxWidth: 1500, margin: '14px 0 0'}}>What changed</h1>
+        <h1 style={{...display, fontSize: 64, maxWidth: 1500, margin: '14px 0 0'}}>What changed since yesterday</h1>
       </Rise>
       {chips.length === 0 ? (
         <Rise delay={8}>

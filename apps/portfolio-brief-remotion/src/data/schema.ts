@@ -77,8 +77,21 @@ export type Metric = z.infer<typeof MetricSchema>;
 export const ConsensusSchema = z.object({
   rows: z.array(z.object({label: z.string(), value: z.string()})),
   note: z.string().optional(),
+  /** Sourced street / guide / whisper only. Missing whisper → label UNKNOWN, do not draw a zone. */
+  range: z
+    .object({
+      metric: z.string(),
+      unit: z.string().optional(),
+      consensus: z.number().optional(),
+      guide: z.number().optional(),
+      whisper: z.number().optional(),
+      low: z.number().optional(),
+      high: z.number().optional(),
+    })
+    .optional(),
 });
 export type Consensus = z.infer<typeof ConsensusSchema>;
+export type ConsensusRange = NonNullable<Consensus['range']>;
 
 export const OptionsBandSchema = z.object({
   movePct: z.number(),
@@ -118,6 +131,10 @@ export const NetworkNodeSchema = z.object({
   polarity: PolaritySchema,
   x: z.number(),
   y: z.number(),
+  /** Sourced weight/importance only. Omit → equal size, no fake weights. */
+  importance: z.number().optional(),
+  /** Sourced note already on the tape (capex, financing). Omit → no chip. */
+  evidence: z.string().optional(),
 });
 export type NetworkNode = z.infer<typeof NetworkNodeSchema>;
 
@@ -205,6 +222,15 @@ export const NameBlockSchema = z.object({
     })
     .optional(),
   scores: z.array(ScoreFieldSchema).optional(),
+  /** Daily/normalized path. Omit unless the episode has a real series — never interpolate from two YTD scalars. */
+  priceSeries: z
+    .array(
+      z.object({
+        label: z.string(),
+        points: z.array(z.number()),
+      }),
+    )
+    .optional(),
 });
 export type NameBlock = z.infer<typeof NameBlockSchema>;
 
@@ -349,6 +375,19 @@ export const UnknownItemSchema = z.object({
 });
 export type UnknownItem = z.infer<typeof UnknownItemSchema>;
 
+/** Board row. Values come from named formulas only — never LLM-fill. */
+export const PredictionRowSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  value: z.number().optional(),
+  unit: z.string().optional(),
+  change: z.number().optional(),
+  formulaId: z.string(),
+  inputs: z.array(z.string()),
+  status: z.enum(['ok', 'unknown']).optional(),
+});
+export type PredictionRow = z.infer<typeof PredictionRowSchema>;
+
 export const DailyReportSchema = z.object({
   meta: DailyMetaSchema,
   market: MarketTapeSchema,
@@ -356,6 +395,8 @@ export const DailyReportSchema = z.object({
   holdings: z.array(HoldingSchema),
   portfolio: PortfolioBlockSchema.optional(),
   names: z.array(NameBlockSchema),
+  /** Optional. Render still runs `buildPredictionBoard` — this is not a place to paste decorative scores. */
+  predictions: z.array(PredictionRowSchema).optional(),
   ecosystem: z
     .object({
       headline: z.string().optional(),

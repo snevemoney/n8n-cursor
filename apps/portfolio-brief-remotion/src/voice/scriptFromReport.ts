@@ -267,6 +267,27 @@ const linesForKind = (
       return linesForCalendar(report, ctx);
     case 'holdings':
       return linesForHoldings(report);
+    case 'lookThrough': {
+      const overlap = report.holdings.filter((h) => (h.overlapWith?.length ?? 0) > 0).length;
+      const lines = ['Look-through is the overlap, not the labels.'];
+      if (overlap > 0) {
+        lines.push(sentence(`${wordsCount(overlap)} lines already list the same names underneath`));
+      }
+      if (report.holdings.every((h) => h.weight === undefined)) {
+        lines.push('Weights stay unknown. We will not draw a fake stack.');
+      }
+      return lines;
+    }
+    case 'relativePerf': {
+      const withYtd = report.holdings.filter((h) => h.ytd !== undefined);
+      if (withYtd.length === 0) return ['No sourced year-to-date prints to rank tonight.'];
+      return [sentence(`${wordsCount(withYtd.length)} sourced year-to-date prints. The bars do the ranking.`)];
+    }
+    case 'predictionBoard':
+      return [
+        'The board only scores what a named formula can compute.',
+        'The rest stay unknown. We will not fill a decorative number.',
+      ];
     case 'concentration': {
       const p = report.portfolio;
       if (!p) return [];
@@ -279,10 +300,16 @@ const linesForKind = (
     case 'nameCold':
       return name ? linesForNameCold(name) : [];
     case 'streak': {
-      if (!name) return [];
-      const lines: string[] = [];
-      if (name.streakHeadline) lines.push(speakReady(name.streakHeadline));
-      if (name.streakNote) lines.push(speakReady(name.streakNote.replace(/^Useful for the system:\s*/i, '')));
+      if (!name?.streak?.length) return [];
+      const red = name.streak.filter((d) => d < 0).length;
+      const lines = [
+        sentence(`${wordsCount(red)} red sessions in a ${wordsCount(name.streak.length).toLowerCase()}-session window`),
+      ];
+      if (name.streakNote) {
+        lines.push(speakReady(name.streakNote.replace(/^Useful for the system:\s*/i, '')));
+      } else {
+        lines.push('That streak is the penalty. The fundamental tape is a different question.');
+      }
       return lines;
     }
     case 'fundamentals': {
@@ -384,6 +411,19 @@ const linesForKind = (
         return ['No Next-NVDA candidate named today. We will not invent one.'];
       }
       return report.nextNvda.map((c) => speakReady(`${c.ticker}: ${c.thesis}`));
+    case 'opportunityRadar': {
+      const named = report.nextNvda.length + (report.opportunities?.candidates.length ?? 0);
+      if (named === 0) {
+        return [
+          'No name passed the Next-NVDA bar tonight.',
+          'No close fails on the book. We will not invent a scout.',
+        ];
+      }
+      return [
+        sentence(`${wordsCount(named)} names on the scout tape. Zero passed`),
+        'Closest fails stay on screen. We will not invent a winner.',
+      ];
+    }
     case 'opportunityScout': {
       const rows =
         scene.opportunityLimit === undefined
