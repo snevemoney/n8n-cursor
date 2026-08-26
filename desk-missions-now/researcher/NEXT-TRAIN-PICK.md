@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-08-26
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: named pick · TRIAGE · none-qualify · Evens leftover · halt
 send: removed
 clock: parked
 ---
@@ -14,21 +14,29 @@ clock: parked
 
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
-| **steal \| learn** | steal |
-| **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
-| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **id** | `TRIAGE` (none-qualify — no unused TRAIN-eligible packet on this checkout) |
+| **steal \| learn** | n/a |
+| **Verdict** | **TRIAGE** |
+| **Spoken machine** | none named — no next TRAIN candidate |
+| **full.txt** | **MISSING-ON-CHECKOUT** for any next id |
+| **ACTION TRACE** | **MISSING-ON-CHECKOUT** for any next TRAIN packet |
+| **Skip?** | yes — no walkable leftover here |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** This Cloud checkout has one TRAIN-complete packet and it is already used. `X80ljdCPM_U` has `full.txt` plus LEARNED ACTION TRACE and Watchdog GRADE pass — do not repeat it. `kwSVtQ7dziU` is TRAIN-1 PASS; its LEARNED is here but the cited `full.txt` is a Mac path, not this tree. `2J3uX8iRNng` has LEARNED plus `## ACTION TRACE` (`same-prompt-bench`) and no `full.txt` on disk, so it is not TRAIN-eligible. Ledger `COVERAGE_LEDGER.json` is MISSING-ON-CHECKOUT. No steal_gap row with packet + `full.txt` + ACTION TRACE remains unused. Do not invent a slug. Do not start TRAIN.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**Observed packets (this checkout only):**
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+| id | full.txt | ACTION TRACE | Status |
+|----|----------|--------------|--------|
+| `X80ljdCPM_U` | yes (4440 words) | yes | TRAIN-2 PASS — skip |
+| `kwSVtQ7dziU` | no (LEARNED cites Mac path) | yes | TRAIN-1 PASS — skip |
+| `2J3uX8iRNng` | **MISSING-ON-CHECKOUT** | yes (`same-prompt-bench`) | not TRAIN — do not propose as TRAIN |
+| `karpathy-wiki-nate-herk` | not on this checkout | no (decoy) | skip |
+| `factory-os-train-plane` | never a packet | n/a | retired invent — never write hold-outs |
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+**This stage (done):** Researcher propose-only. Verdict **TRIAGE**. Coverage hole written. Retrieve skipped (no named theme from a TRAIN candidate). Ledger not flipped. TASK not attempted.
+
+**EVENS leftover:** Run this pick on the Mac **or** commit the next unused packet (`full.txt` + LEARNED `## ACTION TRACE`) to `origin/main`. Then name that real id. Do not start TRAIN-3 until Evens names it. HITL leftover (not this agent): connect `browser-use` on cursor.com first; do not start OAuth inside Automations.
 
 Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
 
