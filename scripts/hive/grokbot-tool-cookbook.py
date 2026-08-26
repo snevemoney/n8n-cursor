@@ -222,9 +222,11 @@ Never delete CHRONICLE entries.
 """.strip(),
     "Wealth Manager": f"""
 1. {BRIEF_CMD.format(agent="Wealth Manager")}
-Portfolio review from operator-provided holdings context.
+Default machine: scripts/hive/grok-skills/wealth-daily-show.md
+Research in Grok browser. Higgsfield plugin = Juno. Remotion on THIS Grok desktop (computer + shell).
+Desk mp4: $HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4 — attach in chat.
 Social/YouTube = hypothesis only until filings verified (knowledge-policy hierarchy).
-No autonomous trading — L4 human only.
+No autonomous trading — L4 human only. Cursor /workspace is not a Remotion host.
 """.strip(),
     "Personal CFO": f"""
 1. {BRIEF_CMD.format(agent="Personal CFO")}

@@ -19,9 +19,9 @@ Evens is the visionary. Each desk coworks. Parent does not write 17 hats.
 
 ## When
 
-**Default wake (no video-id):** spawn the five on the loop — Forge, Watchdog, HITL Operator, Researcher, Communications Manager. Wealth product exists (`wealth-daily-show`, Mac encode); Cloud cannot render. Do not add Wealth to this five.
+**Default wake (no video-id):** spawn the five on the loop — Forge, Watchdog, HITL Operator, Researcher, Communications Manager. Wealth product exists (`wealth-daily-show`, Grok desktop encode); Cursor Cloud `/workspace` cannot render. Do not add Wealth to this five.
 
-**When Evens names Wealth Manager:** spawn that desk only (or with the five if he also asked for the factory loop). Wake prompt must name skill `wealth-daily-show` and the default product: **~7min `DailyShow` + Higgsfield Juno** → `out/daily-YYYY-MM-DD-vo-juno.mp4`. Load `docs/hive/outer-heaven/CONTENT/job-cards/wealth-manager.md` + `scripts/hive/grok-skills/wealth-daily-show.md` + catch-up `CONTENT/os/inbox/2026-08-26-said-1.md`. Cloud / `/workspace` abort. If Higgsfield `balance` session expired: do not loop `mcp_auth`; local `say` fallback. Publish / YouTube / trades stay HITL.
+**When Evens names Wealth Manager:** spawn that desk only (or with the five if he also asked for the factory loop). Wake prompt must name skill `wealth-daily-show` and the default product: **~7min `DailyShow` + Higgsfield Juno on the Grok desktop** → `$HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4`. Load `docs/hive/outer-heaven/CONTENT/job-cards/wealth-manager.md` + `scripts/hive/grok-skills/wealth-daily-show.md` + catch-up `CONTENT/os/inbox/2026-08-26-said-1.md`. Cursor Cloud `/workspace` abort. Remotion runs on the Grok computer (or Evens Mac if this sitting is Mac Cursor shell) — not a Lambda/VPS. If Higgsfield `balance` session expired: do not loop `mcp_auth`; local `say` fallback only if that host has it. Publish / YouTube / trades stay HITL.
 
 **COLD unless named:** Personal CFO. Wealth stays off the default five even though the product is real.
 

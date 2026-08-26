@@ -1,32 +1,32 @@
-# Mac Remotion host-gate. Source from scripts/ after cd to the remotion root.
-# Cloud / /workspace / non-Darwin → abort. Do not invent a missing tree.
-# Allowed: /Users/evenslouis/n8n-cursor and Mac worktrees under /Users/evenslouis/.
+# Remotion host-gate. Source from scripts/ after cd to the remotion root.
+#
+# Accept: this desk's Grok desktop computer (npm + a real checkout) and
+# Evens' Mac. Reject: Cursor Cloud /workspace and other headless clones
+# with no node/npm. "Mac only" is not the product law.
+# Do not invent a missing tree when origin/main has the engine.
+
+wealth_host_is_cursor_cloud() {
+  local here="${1:-}"
+  [[ "${here}" == /workspace ]] || [[ "${here}" == /workspace/* ]]
+}
+
+wealth_host_has_node() {
+  command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1
+}
 
 wealth_host_gate() {
-  local here uname_s
+  local here
   here="$(pwd -P)"
-  uname_s="$(uname -s 2>/dev/null || echo unknown)"
 
-  if [[ "${here}" == /workspace* ]] || [[ "${here}" == /home/ubuntu* ]]; then
-    echo "Remotion is on origin/main but this host cannot render." >&2
+  if wealth_host_is_cursor_cloud "${here}"; then
+    echo "Cursor Cloud /workspace is not a Remotion host. Run on this Grok desktop (computer + shell) or Evens Mac." >&2
     exit 3
   fi
 
-  if [[ "${uname_s}" != "Darwin" ]]; then
-    echo "Remotion is on origin/main but this host cannot render." >&2
+  if ! wealth_host_has_node; then
+    echo "This host has no node/npm — not a Remotion host. Open the Grok desktop computer (or Evens Mac) and run scripts/desk-checkout.sh." >&2
     exit 3
   fi
 
-  case "${here}" in
-    /Users/evenslouis/n8n-cursor|/Users/evenslouis/n8n-cursor/*|/Users/evenslouis/n8n-cursor-worktrees/*)
-      return 0
-      ;;
-  esac
-
-  if [[ "${here}" == /Users/* ]]; then
-    return 0
-  fi
-
-  echo "Remotion is on origin/main but this host cannot render." >&2
-  exit 3
+  return 0
 }

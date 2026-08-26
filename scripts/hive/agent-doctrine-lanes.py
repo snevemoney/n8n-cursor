@@ -90,7 +90,8 @@ DOCTRINE_BY_AGENT: dict[str, str] = {
     ),
     "Wealth Manager": (
         "DOCTRINE: Cheap read / expensive decide — filings/SEC before social/video hypotheses; "
-        "no autonomous trades (L4 human); thesis = receipts not vibes."
+        "default emit is the ~7min Higgsfield Juno DailyShow on this Grok desktop (`wealth-daily-show`); "
+        "no autonomous trades (L4 human); publish / YouTube HITL; thesis = receipts not vibes."
     ),
     "Personal CFO": (
         "DOCTRINE: One number baseline — runway months, savings rate target; advise-only; "

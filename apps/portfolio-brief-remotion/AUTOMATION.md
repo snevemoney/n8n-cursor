@@ -8,4 +8,4 @@ This is **not** an Active Cursor automation. No YouTube. No billed schedule unti
 
 Default product: ~7min `DailyShow` + Higgsfield Juno → `out/daily-YYYY-MM-DD-vo-juno.mp4`.
 
-Do **not** hijack Hive daily TRAIN. Do **not** call `open_automation` without a real `automationId` (ghost rows). Cloud Agent VMs cannot render Remotion or see Mac `:3333` — this job is **Mac Cursor**.
+Do **not** hijack Hive daily TRAIN. Do **not** call `open_automation` without a real `automationId` (ghost rows). Cursor Cloud `/workspace` cannot render Remotion. The product host is the **Grok desktop computer** (or Evens Mac). Do not wait for Cursor.

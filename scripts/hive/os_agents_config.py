@@ -266,12 +266,12 @@ AGENT_CARDS: dict[str, AgentCard] = {
     "Wealth Manager": {
         "title": "Portfolio intelligence",
         "lane": "life",
-        "job": "Portfolio review, thesis tracking, benchmark vs S&P, opportunity research.",
-        "runs_when": "Market open days, sharp drawdowns, Friday review, or Big Boss capital ask.",
-        "solves": "Reactive investing — evidence-based watchlists without autonomous trades.",
-        "handoff_to": "Researcher (deep dive), HITL Operator (any trade — L4 human only).",
+        "job": "Trading-day Daily Wealth show: research book + GLOBAL/US/CA + unknowns + opportunities → ~7min DailyShow with Higgsfield Juno on this Grok desktop (`wealth-daily-show`). Thesis tracking stays inside that loop.",
+        "runs_when": "Evens names Wealth Manager, Enables the Wealth daily show automation, market-open review, sharp drawdown, Friday review, or Big Boss capital ask.",
+        "solves": "Reactive investing — a watchable 7min tape with sourced prints on the Grok desk, not a thesis-only note. No autonomous trades.",
+        "handoff_to": "Researcher (deep dive), HITL Operator (any trade — L4 human only). Publishing Engine only after Evens watches.",
         "hitl_level": "L4",
-        "suppression_note": "No autonomous trading — execution always human on /pro or broker.",
+        "suppression_note": "No autonomous trading — execution always human on /pro or broker. No YouTube. Higgsfield session expired → say so, do not loop mcp_auth. Cursor /workspace is not a Remotion host.",
         "research_capabilities": "strict hierarchy: SEC/filings → official → datasets → analysis; social/video = hypothesis only",
     },
     "Personal CFO": {

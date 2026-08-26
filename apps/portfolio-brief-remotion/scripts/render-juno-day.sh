@@ -1,7 +1,8 @@
 #!/bin/bash
 # Render DailyShow with Higgsfield Juno voicePack → out/daily-YYYY-MM-DD-vo-juno.mp4
 #
-# Higgsfield is NOT this script's job. Desk lands wavs, then this renders.
+# Higgsfield is NOT this script's job. Desk lands wavs, then this renders
+# on THIS computer (Grok desktop or Evens Mac). Cursor Cloud /workspace abort.
 # Refuses if another render is already writing the same output (lock + pgrep).
 # Do not open Studio. Leave --concurrency unset.
 set -euo pipefail

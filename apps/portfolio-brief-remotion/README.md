@@ -4,7 +4,7 @@ Remotion engine for a personal daily market show. Research lands in a typed epis
 
 - **Format:** 1920×1080 · 30 fps
 - **Compositions:** `DailyShow` (~7:03 / 12705 frames, default product) and `Morning60` (~74s commute, optional). `PortfolioBrief` is a DailyShow alias.
-- **Default VO:** Higgsfield **Juno** (`full-higgs-juno`) → `out/daily-YYYY-MM-DD-vo-juno.mp4`. Local macOS `say` is the fallback if the Higgsfield session expired.
+- **Default VO:** Higgsfield **Juno** (`full-higgs-juno`) → `$HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4` on the Grok desktop (Evens Mac optional). Local `say` is the fallback only if that host has it.
 - **Automation draft (Inactive):** `AUTOMATION.md` → `desk-missions-now/wealth/WEALTH-DAILY-AUTOMATION.md`
 - **Numbers:** only fields on the episode (or formulas in `src/data/compute.ts` / `delta.ts`). No decorative scores. Do not invent TSX / FX / scout prints.
 
@@ -15,7 +15,7 @@ Wealth Manager desk SSOT: `scripts/hive/grok-skills/wealth-daily-show.md` (Curso
 1. Research the **book** (existing holdings).
 2. Research **GLOBAL + US + CA tape** from filings / IR / index pages. Omit a lane if you have no source.
 3. Write `markets` + `opportunities` (candidates that are not already in the book).
-4. Stub → fill → typecheck → still pack → **Higgsfield Juno** (desk MCP; `get_cost` first, `use_unlim` false) → `bash scripts/render-juno-day.sh YYYY-MM-DD`. Morning60 is optional. Local `say` (`render-voice.sh`) only if Higgsfield session expired — do not loop `mcp_auth`.
+4. On **this desktop** (`scripts/desk-checkout.sh` pulls `origin/main`): stub → fill → typecheck → still pack → **Higgsfield Juno** (desk plugin; `get_cost` first, `use_unlim` false) → `bash scripts/render-juno-day.sh YYYY-MM-DD`. Morning60 is optional. Local `say` (`render-voice.sh`) only if Higgsfield session expired **and** this host has `say` — do not loop `mcp_auth`.
 
 ### New stock (holding)
 
