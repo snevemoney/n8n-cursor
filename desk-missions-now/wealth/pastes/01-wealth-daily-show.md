@@ -3,14 +3,14 @@ tags: [os, wealth, automation, paste]
 at: 2026-08-26
 job: Wealth daily show
 desk: wealth-manager
-status: unsent · paste for New Automation · Inactive until Evens Enables
+status: draft update · existing row 8e8d7b8c-a119-11f1-b532-320a589b8025 · Inactive until Evens Enables
 ---
 
 # Paste — Wealth daily show
 
 **Name:** `Wealth daily show`  
 **Trigger:** Off until Evens Enables. Optional later: weekday after US cash open (America/Toronto). No Slack.  
-**Host:** Mac Cursor (not Cloud VM).  
+**Host:** Mac Cursor only (`/Users/evenslouis/n8n-cursor` + npm + Remotion + Higgsfield). Cloud / `/workspace` abort.  
 **Repo:** this Mac checkout `/Users/evenslouis/n8n-cursor`  
 **Tools allow:** Higgsfield MCP · Shell · (optional GitHub file write, not merge)  
 **Tools deny:** Slack · Gmail send · Stripe · Hostinger · YouTube · `browser-use` as a Cloud workaround · headed send/pay
@@ -25,13 +25,28 @@ WHO
 - Operator: Evens. Factory level 3. Machine: wealth-daily-show.
 - Hand off to Watchdog only if Evens asks for GRADE. GRADE is still untested — do not paper-PROVEN.
 
-READ FIRST
+HOST GATE (do this first — before research, episode, Higgsfield, or Remotion)
+1) Run exactly:
+   git fetch origin main && git rev-parse origin/main
+   Then confirm these three paths exist on that SHA:
+   - apps/portfolio-brief-remotion
+   - scripts/hive/grok-skills/wealth-daily-show.md
+   - docs/hive/outer-heaven/CONTENT/job-cards/wealth-manager.md
+   Commands: git ls-tree -d --name-only origin/main apps/portfolio-brief-remotion ; git cat-file -e origin/main:scripts/hive/grok-skills/wealth-daily-show.md && echo SKILL_OK ; git cat-file -e origin/main:docs/hive/outer-heaven/CONTENT/job-cards/wealth-manager.md && echo CARD_OK
+   If any path is missing on the SHA you just printed: STOP. Report that SHA. Do not invent a Remotion tree.
+2) This job must run on Mac Cursor (local n8n-cursor with npm + Remotion + Higgsfield).
+   If this host is Cloud / /workspace / Linux VM / not /Users/evenslouis/n8n-cursor: ABORT immediately.
+   Say: "Remotion is on origin/main at SHA <sha> but this host cannot render. Run on Mac."
+   Do NOT tell Evens the tree / skill / job card is missing if origin/main has those three paths. The host is Cloud. That is the report.
+   Do NOT invent 2026-08-26 holdings. Do NOT render a 7min video on Cloud. Do NOT YouTube. Do NOT loop Higgsfield mcp_auth.
+
+READ FIRST (Mac only, after HOST GATE passes)
 1) docs/hive/outer-heaven/CONTENT/job-cards/wealth-manager.md
 2) scripts/hive/grok-skills/wealth-daily-show.md
 3) apps/portfolio-brief-remotion/src/data/schema.ts
 4) latest file under apps/portfolio-brief-remotion/src/data/episodes/
 
-YOU DO ONE EPISODE
+YOU DO ONE EPISODE (Mac only)
 Default product is the ~7min DailyShow with Higgsfield Juno, not a thesis-only note.
 1) Research the book Evens already owns. Do not invent a holding.
 2) Research GLOBAL + US + CA tape from public filings / IR / index pages. Omit a lane if unread.
@@ -54,7 +69,7 @@ ALLOW
 Episode file · loadEpisode.ts · public/voice/{date}/full-higgs-juno/ · out/daily-*-vo-juno.mp4 · stills · this prompt
 
 DENY
-YouTube / publish / schedule · trades / orders · send / pay / deploy / book · Slack · hijack Hive daily TRAIN · loop mcp_auth · invent tickers / TSX / scores · rebuild Remotion · hand-edit ~/.grokbot
+YouTube / publish / schedule · trades / orders · send / pay / deploy / book · Slack · hijack Hive daily TRAIN · loop mcp_auth · invent tickers / TSX / scores · rebuild Remotion · hand-edit ~/.grokbot · Cloud render · fabricate a remotion tree
 
 YELLOW
 grokbot_orphans = 8. Named, do not restore.
