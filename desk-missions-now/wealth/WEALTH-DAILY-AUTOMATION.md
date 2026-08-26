@@ -58,6 +58,12 @@ After a run: watch `out/daily-YYYY-MM-DD-vo-juno.mp4`. Upload stays you.
 
 `automationId`: **none returned**. `open_automation` only prefills the form. Extra Saves = ghost rows. Do not reopen this sitting.
 
+## Engine on git
+
+Engine is on `wealth/daily-show-engine` @ `43ec8c028`.  
+PR: https://github.com/snevemoney/n8n-cursor/pull/61  
+`origin/main` still missing the tree until Evens merges that PR. A Cloud/`origin/main` checkout will keep saying Remotion trees are MISSING until merge. After merge, re-run on the **Mac** with Higgsfield attached — do not invent a 2026-08-26 book in this sitting.
+
 ## Fallback
 
 If Higgsfield `balance` session expired: do **not** loop `mcp_auth`. Local `say` via `scripts/render-voice.sh` + `scripts/render-day.sh`. Say so. Artifact is `out/daily-YYYY-MM-DD.mp4`, not `-vo-juno`.
