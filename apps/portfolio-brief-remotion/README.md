@@ -100,7 +100,9 @@ src/data/compute.ts             derived fields only (spreads, streak counts)
 src/data/delta.ts               diffEpisodes(prev, curr) → DeltaTape
 src/data/view.ts                world-tape lanes + visible opportunities
 src/data/episodes/2026-08-25.ts first episode
-src/engine/selectScenes.ts      cut: 'full' | 'morning60'
+src/data/formulas.ts            named prediction-board functions (UNKNOWN if inputs missing)
+src/engine/selectScenes.ts      five acts: MARKET → PORTFOLIO → DEEP DIVE → RADAR → ACTION
+src/viz/                        reusable charts (heatmap, range bar, lollipop, look-through)
 src/voice/scriptFromReport.ts   one spoken beat per scene (from report + plan)
 src/voice/VoiceTrack.tsx        Remotion <Sequence> + <Audio>, mute if file missing
 src/primitives/                 data-driven scene kinds

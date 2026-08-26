@@ -65,7 +65,13 @@ Automation paste: `desk-missions-now/wealth/pastes/01-wealth-daily-show.md`. Do 
 - Prior episode under `src/data/episodes/` (first day = “no prior tape”)
 - Write: episode file + one `loadEpisode.ts` line + Juno pack + `out/daily-YYYY-MM-DD-vo-juno.mp4`
 
-Sacred files stay read-only. Numbers only from sourced research or `compute.ts` / `delta.ts`.
+Sacred files stay read-only. Numbers only from sourced research or `compute.ts` / `delta.ts` / `formulas.ts`.
+
+## V2 visual systems (DailyShow)
+
+Every full episode maps, in order: **MARKET** (tape / world / calendar) → **PORTFOLIO** (holdings, concentration, look-through, relative YTD, prediction board) → **DEEP DIVE** (NVDA + AAPL: causal network, streak heatmap, consensus range) → **OPPORTUNITY RADAR** (funnel → 0 passed; closest fails only from `opportunities.candidates` / `nextNvda`) → **ACTION** (unknowns, risks, Today’s Capital Plan). Plus a short **WHAT CHANGED SINCE YESTERDAY** beat from `diffEpisodes` — first episode says so; never fake a delta.
+
+Screens show evidence; voice interprets. Scene headlines are short labels (“Seven sessions”, “Look-through”), not the Juno sentence. Prediction-board rows are named formulas in `src/data/formulas.ts`. Missing inputs → UNKNOWN. Do not invent prices, 0–100 scores, Next-NVDA names, TSX prints, weights, or whisper zones. Two YTD scalars → lollipop, not a fake daily path. A 7-print streak → those 7 cells, not a invented 21-day grid. Node size is equal unless the episode supplies `importance`. Evidence chips only from sourced notes already on the tape.
 
 ## New tickers (data only)
 

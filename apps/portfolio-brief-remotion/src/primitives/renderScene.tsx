@@ -10,7 +10,12 @@ import {CausalNetwork} from './CausalNetwork';
 import {CommandCenter} from './CommandCenter';
 import {ComparisonBars} from './ComparisonBars';
 import {Concentration} from './Concentration';
+import {ConsensusScreen} from './ConsensusScreen';
 import {DeltaOpen} from './DeltaOpen';
+import {LookThrough} from './LookThrough';
+import {OpportunityRadar} from './OpportunityRadar';
+import {PredictionBoard} from './PredictionBoard';
+import {RelativePerf} from './RelativePerf';
 import {Interpretation} from './Interpretation';
 import {KineticOpen} from './KineticOpen';
 import {Leaderboard} from './Leaderboard';
@@ -54,6 +59,12 @@ const sceneBody = (scene: PlannedScene, report: DailyReport): React.ReactNode =>
       return <Leaderboard report={report} chapter={scene.chapter} />;
     case 'concentration':
       return <Concentration report={report} chapter={scene.chapter} />;
+    case 'lookThrough':
+      return <LookThrough report={report} chapter={scene.chapter} />;
+    case 'relativePerf':
+      return <RelativePerf report={report} chapter={scene.chapter} />;
+    case 'predictionBoard':
+      return <PredictionBoard report={report} chapter={scene.chapter} />;
     case 'nameCold':
       return <NameCold name={requireName(report, scene)} chapter={scene.chapter} />;
     case 'streak':
@@ -75,17 +86,8 @@ const sceneBody = (scene: PlannedScene, report: DailyReport): React.ReactNode =>
       if (!block) return null;
       return <ComparisonBars name={name} chapter={scene.chapter} block={block} />;
     }
-    case 'consensus': {
-      const name = requireName(report, scene);
-      return (
-        <MetricBento
-          name={name}
-          chapter={scene.chapter}
-          metrics={(name.consensus?.rows ?? []).map((r) => ({label: r.label, value: r.value}))}
-          note={name.consensus?.note}
-        />
-      );
-    }
+    case 'consensus':
+      return <ConsensusScreen name={requireName(report, scene)} chapter={scene.chapter} />;
     case 'options':
       return <OptionsBand name={requireName(report, scene)} chapter={scene.chapter} />;
     case 'narrative':
@@ -108,6 +110,8 @@ const sceneBody = (scene: PlannedScene, report: DailyReport): React.ReactNode =>
       return <ScoutBoard report={report} chapter={scene.chapter} />;
     case 'opportunityScout':
       return <OpportunityBoard report={report} chapter={scene.chapter} limit={scene.opportunityLimit} />;
+    case 'opportunityRadar':
+      return <OpportunityRadar report={report} chapter={scene.chapter} />;
     case 'scoutCard':
       return <ScoutCard report={report} chapter={scene.chapter} />;
     case 'unknowns':

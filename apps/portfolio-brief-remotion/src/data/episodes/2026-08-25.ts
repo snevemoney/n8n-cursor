@@ -183,6 +183,7 @@ const raw = {
           {label: 'Next-quarter EPS', value: '~$2.37'},
         ],
         note: 'Expected gross margin around 75%. Guidance quality will matter more than the print.',
+        range: {metric: 'This quarter revenue', unit: 'B', low: 92.2, high: 92.3},
       },
       options: {
         movePct: nvdaOptionsMove,
@@ -247,8 +248,8 @@ const raw = {
         nodes: [
           {id: 'labs', label: 'OpenAI / Anthropic / xAI / Meta', polarity: 'confirmed' as const, x: 0.08, y: 0.22},
           {id: 'demand', label: 'GPU demand', polarity: 'confirmed' as const, x: 0.3, y: 0.22},
-          {id: 'spend', label: 'Big Tech DC spend', polarity: 'confirmed' as const, x: 0.5, y: 0.22},
-          {id: 'financing', label: 'Customer financing', polarity: 'concern' as const, x: 0.3, y: 0.78},
+          {id: 'spend', label: 'Big Tech DC spend', polarity: 'confirmed' as const, x: 0.5, y: 0.22, evidence: '$730B+ DC spend'},
+          {id: 'financing', label: 'Customer financing', polarity: 'concern' as const, x: 0.3, y: 0.78, evidence: 'Up to $105B OpenAI lease'},
           {id: 'nvda', label: 'NVDA', polarity: 'neutral' as const, x: 0.62, y: 0.5},
           {id: 'supply', label: 'TSM / HBM', polarity: 'inference' as const, x: 0.82, y: 0.18},
           {id: 'margins', label: 'Margins', polarity: 'confirmed' as const, x: 0.82, y: 0.5},

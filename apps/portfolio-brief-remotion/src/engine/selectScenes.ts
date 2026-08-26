@@ -1,7 +1,10 @@
 import {deltaChangeCount, diffEpisodes} from '../data/delta';
+import {holdingsWithYtd} from '../data/compute';
 import type {DailyReport, NameBlock} from '../data/schema';
 import {calendarItems, featuredScout, hasWorldTape, visibleOpportunities, worldTapeLanes} from '../data/view';
 import {durationClamp, sec} from './timing';
+
+export type ActId = 'MARKET' | 'PORTFOLIO' | 'DEEP DIVE' | 'OPPORTUNITY RADAR' | 'ACTION';
 
 export type SceneKind =
   | 'open'
@@ -11,6 +14,9 @@ export type SceneKind =
   | 'calendar'
   | 'holdings'
   | 'concentration'
+  | 'lookThrough'
+  | 'relativePerf'
+  | 'predictionBoard'
   | 'nameCold'
   | 'streak'
   | 'fundamentals'
@@ -27,6 +33,7 @@ export type SceneKind =
   | 'scenarios'
   | 'nextNvda'
   | 'opportunityScout'
+  | 'opportunityRadar'
   | 'scoutCard'
   | 'unknowns'
   | 'risks'
@@ -51,6 +58,7 @@ export type PlannedScene = {
   comparisonKey?: ComparisonKey;
   opportunityLimit?: number;
   unknownLimit?: number;
+  act?: ActId;
 };
 
 export type ScenePlan = {
@@ -64,31 +72,33 @@ const push = (
   scene: Omit<PlannedScene, 'chapter'> & {chapter?: string},
   chapterFor: (label: string) => string,
   label: string,
+  act?: ActId,
 ) => {
   scenes.push({
     ...scene,
+    act: scene.act ?? act,
     chapter: scene.chapter ?? chapterFor(label),
   });
 };
 
-const nameScenes = (name: NameBlock, chapterFor: (label: string) => string): PlannedScene[] => {
+const sessionLabel = (n: number): string => {
+  const named = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+  if (n === 21) return '21 sessions';
+  return `${named[n] ?? String(n)} sessions`;
+};
+
+const isDeepName = (name: NameBlock): boolean => {
+  const t = name.ticker.toUpperCase();
+  return t === 'NVDA' || t === 'AAPL';
+};
+
+const nameScenes = (name: NameBlock, chapterFor: (label: string) => string, act: ActId): PlannedScene[] => {
   const scenes: PlannedScene[] = [];
   const t = name.ticker;
+  const deep = isDeepName(name);
 
-  if (name.price !== undefined || name.holdNote || name.rating) {
-    if (name.price !== undefined || name.dayPct !== undefined || name.holdNote) {
-      push(
-        scenes,
-        {
-          id: `${t}-cold`,
-          kind: 'nameCold',
-          ticker: t,
-          durationInFrames: sec(10),
-        },
-        chapterFor,
-        `${t} · PRINT`,
-      );
-    }
+  if (deep && name.network && name.network.nodes.length > 0) {
+    push(scenes, {id: `${t}-network`, kind: 'network', ticker: t, durationInFrames: sec(18)}, chapterFor, 'Chain', act);
   }
 
   if (name.streak && name.streak.length > 0) {
@@ -101,8 +111,19 @@ const nameScenes = (name: NameBlock, chapterFor: (label: string) => string): Pla
         durationInFrames: durationClamp(sec(8) + name.streak.length * sec(0.8), sec(10), sec(16)),
       },
       chapterFor,
-      `${t} · STREAK`,
+      sessionLabel(name.streak.length),
+      act,
     );
+  }
+
+  if (name.consensus && name.consensus.rows.length > 0) {
+    push(scenes, {id: `${t}-consensus`, kind: 'consensus', ticker: t, durationInFrames: sec(16)}, chapterFor, 'Consensus', act);
+  }
+
+  if (name.price !== undefined || name.holdNote || name.rating) {
+    if (name.price !== undefined || name.dayPct !== undefined || name.holdNote) {
+      push(scenes, {id: `${t}-cold`, kind: 'nameCold', ticker: t, durationInFrames: sec(10)}, chapterFor, `${t} print`, act);
+    }
   }
 
   if (name.fundamentals && name.fundamentals.length > 0) {
@@ -115,22 +136,18 @@ const nameScenes = (name: NameBlock, chapterFor: (label: string) => string): Pla
         durationInFrames: durationClamp(sec(8) + name.fundamentals.length * sec(1.5), sec(12), sec(18)),
       },
       chapterFor,
-      `${t} · FUNDAMENTALS`,
+      'Fundamentals',
+      act,
     );
   }
 
   if (name.vsSpx && name.vsSpx.bars.length > 0) {
     push(
       scenes,
-      {
-        id: `${t}-vsspx`,
-        kind: 'comparison',
-        ticker: t,
-        comparisonKey: 'vsSpx',
-        durationInFrames: sec(10),
-      },
+      {id: `${t}-vsspx`, kind: 'comparison', ticker: t, comparisonKey: 'vsSpx', durationInFrames: sec(10)},
       chapterFor,
-      `${t} · VS S&P`,
+      'Vs S&P',
+      act,
     );
   }
 
@@ -145,50 +162,17 @@ const nameScenes = (name: NameBlock, chapterFor: (label: string) => string): Pla
         durationInFrames: durationClamp(sec(8) + name.returns.bars.length * sec(1.2), sec(10), sec(16)),
       },
       chapterFor,
-      `${t} · RETURNS`,
-    );
-  }
-
-  if (name.consensus && name.consensus.rows.length > 0) {
-    push(
-      scenes,
-      {
-        id: `${t}-consensus`,
-        kind: 'consensus',
-        ticker: t,
-        durationInFrames: sec(14),
-      },
-      chapterFor,
-      `${t} · CONSENSUS`,
+      'Returns',
+      act,
     );
   }
 
   if (name.options) {
-    push(
-      scenes,
-      {
-        id: `${t}-options`,
-        kind: 'options',
-        ticker: t,
-        durationInFrames: sec(10),
-      },
-      chapterFor,
-      `${t} · OPTIONS`,
-    );
+    push(scenes, {id: `${t}-options`, kind: 'options', ticker: t, durationInFrames: sec(10)}, chapterFor, 'Options', act);
   }
 
   if (name.narrative) {
-    push(
-      scenes,
-      {
-        id: `${t}-narrative`,
-        kind: 'narrative',
-        ticker: t,
-        durationInFrames: sec(16),
-      },
-      chapterFor,
-      `${t} · NARRATIVE`,
-    );
+    push(scenes, {id: `${t}-narrative`, kind: 'narrative', ticker: t, durationInFrames: sec(16)}, chapterFor, 'Narrative', act);
   }
 
   if (name.interpretation && name.interpretation.chips.length > 0) {
@@ -201,7 +185,8 @@ const nameScenes = (name: NameBlock, chapterFor: (label: string) => string): Pla
         durationInFrames: durationClamp(sec(10) + name.interpretation.chips.length * sec(2), sec(12), sec(18)),
       },
       chapterFor,
-      `${t} · READ`,
+      'Read',
+      act,
     );
   }
 
@@ -215,50 +200,21 @@ const nameScenes = (name: NameBlock, chapterFor: (label: string) => string): Pla
         durationInFrames: durationClamp(sec(8) + name.actionMatrix.rows.length * sec(3), sec(12), sec(20)),
       },
       chapterFor,
-      `${t} · ACTION`,
+      `${t} if/then`,
+      act,
     );
   }
 
-  if (name.network && name.network.nodes.length > 0) {
-    push(
-      scenes,
-      {
-        id: `${t}-network`,
-        kind: 'network',
-        ticker: t,
-        durationInFrames: sec(16),
-      },
-      chapterFor,
-      `${t} · CHAIN`,
-    );
+  if (!deep && name.network && name.network.nodes.length > 0) {
+    push(scenes, {id: `${t}-network`, kind: 'network', ticker: t, durationInFrames: sec(16)}, chapterFor, 'Chain', act);
   }
 
   if (name.catalyst) {
-    push(
-      scenes,
-      {
-        id: `${t}-catalyst`,
-        kind: 'catalyst',
-        ticker: t,
-        durationInFrames: sec(14),
-      },
-      chapterFor,
-      `${t} · CATALYST`,
-    );
+    push(scenes, {id: `${t}-catalyst`, kind: 'catalyst', ticker: t, durationInFrames: sec(14)}, chapterFor, 'Catalyst', act);
   }
 
   if (name.action) {
-    push(
-      scenes,
-      {
-        id: `${t}-act`,
-        kind: 'nameAction',
-        ticker: t,
-        durationInFrames: sec(8),
-      },
-      chapterFor,
-      `${t} · HOLD`,
-    );
+    push(scenes, {id: `${t}-act`, kind: 'nameAction', ticker: t, durationInFrames: sec(8)}, chapterFor, 'Hold', act);
   }
 
   const deepDive =
@@ -277,7 +233,8 @@ const nameScenes = (name: NameBlock, chapterFor: (label: string) => string): Pla
         durationInFrames: durationClamp(sec(8) + (name.metrics?.length ?? 0) * sec(1.2), sec(10), sec(14)),
       },
       chapterFor,
-      `${t}`,
+      t,
+      act,
     );
   }
 
@@ -298,7 +255,13 @@ const pushDelta = (scenes: PlannedScene[], report: DailyReport, previous: DailyR
   const durationInFrames = delta.hasPrior
     ? durationClamp(sec(10) + deltaChangeCount(delta) * sec(0.6), sec(10), sec(14))
     : sec(12);
-  push(scenes, {id: 'delta', kind: 'delta', durationInFrames}, chapterFor, delta.hasPrior ? 'DELTA' : 'FIRST TAPE');
+  push(
+    scenes,
+    {id: 'delta', kind: 'delta', durationInFrames},
+    chapterFor,
+    delta.hasPrior ? 'What changed' : 'First book',
+    'MARKET',
+  );
 };
 
 const pushWorldAndCalendar = (
@@ -306,6 +269,7 @@ const pushWorldAndCalendar = (
   report: DailyReport,
   chapterFor: (label: string) => string,
   opts: {calendarMax: number; tapeMax?: number},
+  act: ActId = 'MARKET',
 ) => {
   if (hasWorldTape(report)) {
     const lanes = worldTapeLanes(report).length;
@@ -317,7 +281,8 @@ const pushWorldAndCalendar = (
         durationInFrames: durationClamp(sec(10) + lanes * sec(2), sec(12), opts.tapeMax ?? sec(16)),
       },
       chapterFor,
-      'WORLD TAPE',
+      'World tape',
+      act,
     );
   }
   const items = calendarItems(report);
@@ -330,32 +295,56 @@ const pushWorldAndCalendar = (
         durationInFrames: durationClamp(sec(8) + items.length * sec(2), sec(10), opts.calendarMax),
       },
       chapterFor,
-      'CALENDAR',
+      'Calendar',
+      act,
     );
   }
 };
 
-const pushOpportunity = (
+const pushRadar = (
   scenes: PlannedScene[],
   report: DailyReport,
   chapterFor: (label: string) => string,
   limit?: number,
 ) => {
-  const rows = visibleOpportunities(report);
-  const shown = limit === undefined ? rows : rows.slice(0, limit);
   push(
     scenes,
-    {
-      id: 'opportunity-scout',
-      kind: 'opportunityScout',
-      opportunityLimit: limit,
-      durationInFrames: shown.length === 0 ? sec(8) : durationClamp(sec(8) + shown.length * sec(3), sec(10), sec(16)),
-    },
+    {id: 'opportunity-radar', kind: 'opportunityRadar', opportunityLimit: limit, durationInFrames: sec(14)},
     chapterFor,
-    'OPPORTUNITY',
+    'Funnel',
+    'OPPORTUNITY RADAR',
   );
+  if (report.nextNvda.length > 0) {
+    push(
+      scenes,
+      {
+        id: 'next-nvda',
+        kind: 'nextNvda',
+        durationInFrames: durationClamp(sec(8) + report.nextNvda.length * sec(3), sec(10), sec(18)),
+      },
+      chapterFor,
+      'Next NVDA',
+      'OPPORTUNITY RADAR',
+    );
+  }
+  const rows = visibleOpportunities(report);
+  const shown = limit === undefined ? rows : rows.slice(0, limit);
+  if (shown.length > 0) {
+    push(
+      scenes,
+      {
+        id: 'opportunity-scout',
+        kind: 'opportunityScout',
+        opportunityLimit: limit,
+        durationInFrames: durationClamp(sec(8) + shown.length * sec(3), sec(10), sec(16)),
+      },
+      chapterFor,
+      'Scout',
+      'OPPORTUNITY RADAR',
+    );
+  }
   if (featuredScout(report)) {
-    push(scenes, {id: 'scout-card', kind: 'scoutCard', durationInFrames: sec(10)}, chapterFor, 'SCOUT');
+    push(scenes, {id: 'scout-card', kind: 'scoutCard', durationInFrames: sec(10)}, chapterFor, 'Scout', 'OPPORTUNITY RADAR');
   }
 };
 
@@ -376,7 +365,8 @@ const pushUnknowns = (
       durationInFrames: durationClamp(sec(8) + shown.length * sec(2), sec(8), limit === undefined ? sec(16) : sec(8)),
     },
     chapterFor,
-    'UNKNOWNS',
+    'Unknowns',
+    'ACTION',
   );
 };
 
@@ -384,21 +374,22 @@ const selectFull = (report: DailyReport, previous: DailyReport | null): PlannedS
   const scenes: PlannedScene[] = [];
   const chapterFor = chapterFactory();
 
-  pushDelta(scenes, report, previous, chapterFor);
-
   scenes.push({
     id: 'open',
     kind: 'open',
     chapter: 'OPEN',
     durationInFrames: sec(14),
+    act: 'MARKET',
   });
+
+  pushDelta(scenes, report, previous, chapterFor);
 
   const tapeHas =
     report.market.spxClose !== undefined ||
     report.market.note !== undefined ||
     report.market.nextCalendar !== undefined;
   if (tapeHas) {
-    push(scenes, {id: 'tape', kind: 'tape', durationInFrames: sec(12)}, chapterFor, 'TAPE');
+    push(scenes, {id: 'tape', kind: 'tape', durationInFrames: sec(12)}, chapterFor, 'Tape', 'MARKET');
   }
 
   pushWorldAndCalendar(scenes, report, chapterFor, {calendarMax: sec(16)});
@@ -412,16 +403,31 @@ const selectFull = (report: DailyReport, previous: DailyReport | null): PlannedS
         durationInFrames: durationClamp(sec(8) + report.holdings.length * sec(1.5), sec(12), sec(20)),
       },
       chapterFor,
-      'HOLDINGS',
+      'Holdings',
+      'PORTFOLIO',
     );
   }
 
   if (report.portfolio?.concentrationThesis) {
-    push(scenes, {id: 'concentration', kind: 'concentration', durationInFrames: sec(14)}, chapterFor, 'CONCENTRATION');
+    push(scenes, {id: 'concentration', kind: 'concentration', durationInFrames: sec(14)}, chapterFor, 'Concentration', 'PORTFOLIO');
   }
 
-  for (const name of report.names) {
-    scenes.push(...nameScenes(name, chapterFor));
+  if (report.holdings.length > 0) {
+    push(scenes, {id: 'look-through', kind: 'lookThrough', durationInFrames: sec(14)}, chapterFor, 'Look-through', 'PORTFOLIO');
+  }
+
+  if (holdingsWithYtd(report.holdings).length > 0) {
+    push(scenes, {id: 'relative', kind: 'relativePerf', durationInFrames: sec(12)}, chapterFor, 'Relative', 'PORTFOLIO');
+  }
+
+  push(scenes, {id: 'prediction-board', kind: 'predictionBoard', durationInFrames: sec(14)}, chapterFor, 'Board', 'PORTFOLIO');
+
+  for (const name of report.names.filter((n) => !isDeepName(n))) {
+    scenes.push(...nameScenes(name, chapterFor, 'PORTFOLIO'));
+  }
+
+  for (const name of report.names.filter(isDeepName)) {
+    scenes.push(...nameScenes(name, chapterFor, 'DEEP DIVE'));
   }
 
   if (report.scenarios.length > 0) {
@@ -433,26 +439,16 @@ const selectFull = (report: DailyReport, previous: DailyReport | null): PlannedS
         durationInFrames: durationClamp(sec(10) + report.scenarios.length * sec(3), sec(12), sec(18)),
       },
       chapterFor,
-      'SCENARIOS',
+      'Scenarios',
+      'DEEP DIVE',
     );
   }
 
-  push(
-    scenes,
-    {
-      id: 'next-nvda',
-      kind: 'nextNvda',
-      durationInFrames: report.nextNvda.length === 0 ? sec(8) : durationClamp(sec(8) + report.nextNvda.length * sec(3), sec(10), sec(18)),
-    },
-    chapterFor,
-    'NEXT NVDA',
-  );
-
-  pushOpportunity(scenes, report, chapterFor);
+  pushRadar(scenes, report, chapterFor);
   pushUnknowns(scenes, report, chapterFor);
 
   if (report.risks && report.risks.length > 0) {
-    push(scenes, {id: 'risks', kind: 'risks', durationInFrames: sec(16)}, chapterFor, 'RISKS');
+    push(scenes, {id: 'risks', kind: 'risks', durationInFrames: sec(16)}, chapterFor, 'Risks', 'ACTION');
   }
 
   push(
@@ -463,7 +459,8 @@ const selectFull = (report: DailyReport, previous: DailyReport | null): PlannedS
       durationInFrames: durationClamp(sec(18) + report.capitalPlan.ifThen.length * sec(2), sec(20), sec(28)),
     },
     chapterFor,
-    'CAPITAL PLAN',
+    'Capital plan',
+    'ACTION',
   );
 
   scenes.push({
@@ -471,6 +468,7 @@ const selectFull = (report: DailyReport, previous: DailyReport | null): PlannedS
     kind: 'close',
     chapter: 'CLOSE',
     durationInFrames: report.close.followThrough && report.close.followThrough.length > 0 ? sec(16) : sec(12),
+    act: 'ACTION',
   });
 
   return scenes;
@@ -487,10 +485,17 @@ const selectMorning60 = (report: DailyReport, previous: DailyReport | null): Pla
     kind: 'open',
     chapter: 'OPEN',
     durationInFrames: sec(8),
+    act: 'MARKET',
   });
 
   pushWorldAndCalendar(scenes, report, chapterFor, {calendarMax: sec(10), tapeMax: sec(12)});
-  pushOpportunity(scenes, report, chapterFor, 2);
+  push(
+    scenes,
+    {id: 'opportunity-radar', kind: 'opportunityRadar', opportunityLimit: 2, durationInFrames: sec(8)},
+    chapterFor,
+    'Funnel',
+    'OPPORTUNITY RADAR',
+  );
   pushUnknowns(scenes, report, chapterFor, 2);
 
   push(
@@ -501,7 +506,8 @@ const selectMorning60 = (report: DailyReport, previous: DailyReport | null): Pla
       durationInFrames: durationClamp(sec(12) + Math.min(2, report.capitalPlan.ifThen.length) * sec(2), sec(14), sec(16)),
     },
     chapterFor,
-    'CAPITAL PLAN',
+    'Capital plan',
+    'ACTION',
   );
 
   return scenes;
@@ -515,15 +521,37 @@ export function selectScenes(report: DailyReport, options: SelectScenesOptions =
   return {scenes, totalFrames, cut};
 }
 
+export function chromeLabel(scene: PlannedScene): string {
+  if (!scene.act) return scene.chapter;
+  const label = scene.chapter.includes('  ') ? scene.chapter.split('  ').slice(1).join('  ') : scene.chapter;
+  return `${scene.act} · ${label}`;
+}
+
 export function chapterAt(frame: number, scenes: PlannedScene[]): string {
+  const scene = sceneAt(frame, scenes);
+  if (!scene) return 'CLOSE';
+  return chromeLabel(scene);
+}
+
+export function sceneAt(frame: number, scenes: PlannedScene[]): PlannedScene | undefined {
   let acc = 0;
   for (const s of scenes) {
     acc += s.durationInFrames;
-    if (frame < acc) return s.chapter;
+    if (frame < acc) return s;
   }
-  return scenes[scenes.length - 1]?.chapter ?? 'CLOSE';
+  return scenes[scenes.length - 1];
 }
 
 export function findScene(plan: ScenePlan, kind: SceneKind, ticker?: string): PlannedScene | undefined {
   return plan.scenes.find((s) => s.kind === kind && (ticker === undefined || s.ticker === ticker));
+}
+
+export function actsInOrder(plan: ScenePlan): ActId[] {
+  const seen: ActId[] = [];
+  for (const s of plan.scenes) {
+    if (s.act && seen[seen.length - 1] !== s.act && !seen.includes(s.act)) {
+      seen.push(s.act);
+    }
+  }
+  return seen;
 }

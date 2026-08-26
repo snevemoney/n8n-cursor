@@ -88,3 +88,57 @@ export function hasWorldTape(report: DailyReport): boolean {
 export function calendarItems(report: DailyReport) {
   return report.markets?.calendar?.items ?? [];
 }
+
+export type FunnelGate = {
+  id: string;
+  label: string;
+  count: number;
+  unknown?: boolean;
+};
+
+export type FunnelFail = {
+  ticker: string;
+  reason: string;
+};
+
+export type FunnelModel = {
+  gates: FunnelGate[];
+  passed: number;
+  closestFails: FunnelFail[];
+};
+
+/**
+ * Next-NVDA sleeve funnel from sourced fields only.
+ * No invented universe size, no ANET/PLTR/VRT, no pass scores.
+ */
+export function opportunityFunnel(report: DailyReport): FunnelModel {
+  const book = bookTickers(report);
+  const universe = report.meta.universe.length;
+  const named = [
+    ...report.nextNvda.map((c) => ({ticker: c.ticker, reason: c.thesis, inBook: book.has(c.ticker.toUpperCase())})),
+    ...(report.opportunities?.candidates ?? []).map((c) => ({
+      ticker: c.ticker,
+      reason: c.whatKillsIt || c.thesis,
+      inBook: book.has(c.ticker.toUpperCase()),
+    })),
+  ];
+  const uniqueNamed = new Map<string, (typeof named)[number]>();
+  for (const row of named) {
+    uniqueNamed.set(row.ticker.toUpperCase(), row);
+  }
+  const scouts = [...uniqueNamed.values()];
+  const outsideBook = scouts.filter((s) => !s.inBook);
+  const visible = visibleOpportunities(report);
+
+  return {
+    gates: [
+      {id: 'universe', label: 'Universe (book)', count: universe},
+      {id: 'named', label: 'Named on scout tape', count: scouts.length},
+      {id: 'outside', label: 'Not already in book', count: outsideBook.length},
+      {id: 'visible', label: 'Visible after dupe filter', count: visible.length},
+      {id: 'passed', label: 'Passed Next-NVDA bar', count: 0},
+    ],
+    passed: 0,
+    closestFails: scouts.map((s) => ({ticker: s.ticker, reason: s.reason})),
+  };
+}

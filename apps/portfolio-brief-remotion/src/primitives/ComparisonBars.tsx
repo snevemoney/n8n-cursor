@@ -2,6 +2,8 @@ import React from 'react';
 import {signedPct} from '../data/compute';
 import type {ComparisonBlock, NameBlock} from '../data/schema';
 import {color, fonts} from '../engine/theme';
+import {LollipopCompare} from '../viz/LollipopCompare';
+import {NormalizedPriceLines} from '../viz/NormalizedPriceLines';
 import {Stage} from '../chrome/Stage';
 import {Bar, ChapterFromLabel, Panel, display, mono} from './ui';
 
@@ -45,19 +47,26 @@ export const ComparisonBars: React.FC<{
       {block.headline ? (
         <h2 style={{...display, fontSize: 48, maxWidth: 1400, margin: '0 0 36px'}}>{block.headline}</h2>
       ) : null}
+      {name.priceSeries && name.priceSeries.some((s) => s.points.length >= 2) ? (
+        <NormalizedPriceLines series={name.priceSeries} />
+      ) : null}
       <div style={{display: split ? 'grid' : 'block', gridTemplateColumns: '1fr 1fr', gap: 40}}>
         <div style={{display: 'flex', flexDirection: 'column', gap: 22, maxWidth: split ? undefined : 1100}}>
-          {block.bars.map((b, i) => (
-            <Bar
-              key={b.label}
-              label={b.label}
-              valueLabel={b.valueLabel ?? signedPct(b.pct, Math.abs(b.pct) >= 10 ? 1 : 2)}
-              pct={b.pct}
-              max={max}
-              color={barTone(b.tone)}
-              delay={i * 6}
-            />
-          ))}
+          {block.bars.length === 2 ? (
+            <LollipopCompare rows={block.bars.map((b) => ({label: b.label, pct: b.pct}))} />
+          ) : (
+            block.bars.map((b, i) => (
+              <Bar
+                key={b.label}
+                label={b.label}
+                valueLabel={b.valueLabel ?? signedPct(b.pct, Math.abs(b.pct) >= 10 ? 1 : 2)}
+                pct={b.pct}
+                max={max}
+                color={barTone(b.tone)}
+                delay={i * 6}
+              />
+            ))
+          )}
         </div>
         {split ? (
           <Panel>
