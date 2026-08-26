@@ -1,8 +1,13 @@
 #!/bin/bash
 # Copy the latest episode as a stub and register YYYY-MM-DD.
-# Copied numbers are NOT live — overwrite from today's research.
+# Copied numbers are NOT live — overwrite from today's sourced tape only.
+# Do not scoop hive vault / watch-later / CURSOR_CHATS into the episode.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "${SCRIPT_DIR}/.."
+# shellcheck source=./_host-gate.sh
+source "${SCRIPT_DIR}/_host-gate.sh"
+wealth_host_gate
 
 DATE="${1:-}"
 if [[ ! "${DATE}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
@@ -71,5 +76,5 @@ else:
 load.write_text(body, encoding="utf-8")
 print(f"wrote {dest_path}")
 print(f"registered {new_date} in src/data/loadEpisode.ts")
-print("overwrite stub numbers from research, then: npm run typecheck && EPISODE_ID=" + new_date + " bash scripts/qa-stills.sh && bash scripts/still-pack.sh && bash scripts/render-voice.sh " + new_date + " && bash scripts/render-morning.sh " + new_date + " && bash scripts/render-day.sh " + new_date)
+print("overwrite stub from sourced tape, then: bash scripts/voice-pack-ready.sh " + new_date + " (SKIP_TTS or Higgsfield batch ≤12). Typecheck may run while TTS is in flight. When last wav lands: bash scripts/render-juno-day.sh " + new_date + " (one render; lock refuses a second). Do not open Studio.")
 PY

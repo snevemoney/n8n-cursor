@@ -2,8 +2,13 @@
 # Local macOS `say` → public/voice/{episode}/{cut}/{scene}.wav + cues.json
 # Default voice: Reed (English (US)). Override: VOICE=Samantha
 # No paid TTS. If say fails, stop.
+# Skip when on-disk cues.json hash + wav count already match printCues.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "${SCRIPT_DIR}/.."
+# shellcheck source=./_host-gate.sh
+source "${SCRIPT_DIR}/_host-gate.sh"
+wealth_host_gate
 
 DATE="${1:-}"
 if [[ ! "${DATE}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
@@ -49,6 +54,33 @@ payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 voice = payload["voice"]
 rate = str(payload["sayRateWpm"])
 episode_id = payload["episodeId"]
+
+
+def _safe(scene: str) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]", "-", scene) + ".wav"
+
+
+def pack_matches(cut_name: str, script) -> bool:
+    outdir = Path("public/voice") / episode_id / cut_name
+    cues_path = outdir / "cues.json"
+    if not cues_path.is_file():
+        return False
+    disk = json.loads(cues_path.read_text(encoding="utf-8"))
+    expected = [{"file": _safe(c["sceneId"]), "lines": c["lines"], "sceneId": c["sceneId"]} for c in script["cues"]]
+    got = [
+        {"file": c.get("file") or _safe(c["sceneId"]), "lines": c["lines"], "sceneId": c["sceneId"]}
+        for c in disk.get("cues") or []
+    ]
+    if expected != got:
+        return False
+    return all((outdir / row["file"]).is_file() for row in expected)
+
+
+if pack_matches("full", payload["cuts"]["full"]) and pack_matches(
+    "morning60", payload["cuts"]["morning60"]
+):
+    print(f"SKIP_TTS local say packs already match printCues for {episode_id}")
+    raise SystemExit(0)
 
 
 def wav_seconds(path: Path):
