@@ -1,17 +1,15 @@
 #!/bin/bash
 # Render DailyShow with Higgsfield Juno voicePack → out/daily-YYYY-MM-DD-vo-juno.mp4
 #
-# Higgsfield is NOT this script's job. The Wealth Manager desk calls MCP
-# (generate_audio get_cost first, use_unlim false, Juno preset
-# a3ce02fe-4d3e-55bc-b4d4-a4801b9acdb4) and lands wavs in
-# public/voice/YYYY-MM-DD/full-higgs-juno/ (or full-higgs-juno-YYYY-MM-DD).
-# Grok Mac ExternalShell / Cursor Shell then runs this after wavs land.
-#
-# If the Juno pack is missing: exit 2 and print the fallback. Do not call
-# Higgsfield. Do not loop mcp_auth. Optional FALLBACK=say runs local macOS
-# say + render-day.sh (artifact is out/daily-YYYY-MM-DD.mp4, not -vo-juno).
+# Higgsfield is NOT this script's job. Desk lands wavs, then this renders.
+# Refuses if another render is already writing the same output (lock + pgrep).
+# Do not open Studio. Leave --concurrency unset.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "${SCRIPT_DIR}/.."
+# shellcheck source=./_host-gate.sh
+source "${SCRIPT_DIR}/_host-gate.sh"
+wealth_host_gate
 
 DATE="${1:-}"
 if [[ ! "${DATE}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
@@ -59,6 +57,30 @@ fi
 
 mkdir -p out
 OUT="out/daily-${DATE}-vo-juno.mp4"
+LOCKDIR="out/.lock-daily-${DATE}-vo-juno"
+
+if pgrep -f "remotion render src/index.ts DailyShow ${OUT}" >/dev/null 2>&1; then
+  echo "refuse: another remotion render is writing ${OUT}" >&2
+  exit 4
+fi
+
+if [[ -d "${LOCKDIR}" ]]; then
+  oldpid=""
+  if [[ -f "${LOCKDIR}/pid" ]]; then
+    oldpid="$(cat "${LOCKDIR}/pid")"
+  fi
+  if [[ -n "${oldpid}" ]] && kill -0 "${oldpid}" 2>/dev/null; then
+    echo "refuse: render already writing ${OUT} (pid ${oldpid})" >&2
+    exit 4
+  fi
+  rm -rf "${LOCKDIR}"
+fi
+
+mkdir "${LOCKDIR}"
+echo $$ > "${LOCKDIR}/pid"
+cleanup() { rm -rf "${LOCKDIR}"; }
+trap cleanup EXIT
+
 npx remotion render src/index.ts DailyShow "${OUT}" \
   --props="{\"episodeId\":\"${DATE}\",\"voicePack\":\"${PACK}\"}"
 ls -lh "${OUT}"

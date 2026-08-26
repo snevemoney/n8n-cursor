@@ -1,26 +1,22 @@
 ---
 name: wealth-daily-show
 description: >-
-  Trading-day routine for Wealth Manager: research book + GLOBAL/US/CA
-  + unknowns + opportunities → DailyReport → ~7min DailyShow with
-  Higgsfield Juno. Morning60 optional. New tickers are data, not new .tsx.
-  Publish stays HITL. Cursor plus Grok Bot.
+  Trading-day wake for Wealth Manager: Mac host-gate, then book + tape
+  research → DailyReport → Higgsfield Juno batch (or skip if wavs match)
+  → one locked render-juno-day.sh. Cloud aborts. Publish stays HITL.
 ---
 
 # Wealth daily show (Cursor)
 
 Load `scripts/hive/grok-skills/wealth-daily-show.md` and follow it.
 
-**Owner:** Wealth Manager (cold unless Evens names the desk).  
-**Engine:** `apps/portfolio-brief-remotion` · `DailyShow` (~7:03 / 12705 frames) + optional `Morning60` (~74s).  
-**Card:** `DONE-CHECK` episode + stills + still-pack + Higgsfield Juno pack (`full-higgs-juno`) + `out/daily-YYYY-MM-DD-vo-juno.mp4` · `CAP` 1 day · `COST` Higgsfield Juno (`get_cost` first, `use_unlim` false) or local `say` if session expired · HITL watch/publish = Evens.
+**Owner:** Wealth Manager (cold unless Evens names the desk or Enables the Glass row).  
+**Host:** Mac only. Cloud / `/workspace` abort: `Remotion is on origin/main but this host cannot render.`  
+**Engine:** `apps/portfolio-brief-remotion` · `DailyShow` + optional `Morning60`.  
+**Card:** `DONE-CHECK` episode + Juno pack (or named say fallback) + `out/daily-YYYY-MM-DD-vo-juno.mp4` · `CAP` 1 day · `COST` Higgsfield Juno (`get_cost` first, `use_unlim` false) or local `say`.
 
-Default product is the **7min Juno DailyShow**, not a thesis-only note. After stills the desk calls Higgsfield MCP (Juno preset `a3ce02fe-4d3e-55bc-b4d4-a4801b9acdb4`); Remotion is `bash scripts/render-juno-day.sh YYYY-MM-DD` on the Mac. If `balance` session expired: do **not** loop `mcp_auth` — fall back to `render-voice.sh` local say and say so.
+Wired loop: `new-episode.sh` → `voice-pack-ready.sh` (SKIP_TTS or `generate_audio_batch` ≤12) → typecheck may run while TTS is in flight → one background `render-juno-day.sh` (lockfile refuses a second writer). Do not open Studio. Do not scoop the dirty checkout.
 
-New stock = `universe` + `holdings[]` → optional `names[]` → optional `nextNvda[]`.  
-New opportunity (not a holding) = `opportunities.candidates[]`.  
-Required every episode: `unknowns[]` (“we don’t know X; we would need Y”). Never a new scene file. Never invent a score or TSX print.
+Automation paste: `desk-missions-now/wealth/pastes/01-wealth-daily-show.md`. Hard step: send / pay / deploy / book / publish stay Evens.
 
-Automation draft (Inactive until Evens Enables): `desk-missions-now/wealth/WEALTH-DAILY-AUTOMATION.md`. Do not hijack Hive daily TRAIN. Hard step: send / pay / deploy / book / publish stay Evens.
-
-Grok `/` copy: `~/.grokbot/skills/wealth-daily-show/SKILL.md` (generated).
+Grok `/` copy: `~/.grokbot/skills/wealth-daily-show/SKILL.md` (generated from SSOT).
