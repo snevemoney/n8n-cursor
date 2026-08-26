@@ -255,16 +255,19 @@ Never delete CHRONICLE; no receipt text memorization.""",
         ),
     },
     "Wealth Manager": {
-        "name": "Portfolio review",
+        "name": "Daily Wealth show",
         "schedule": "daily_eod",
         "enabled": True,
         "prompt": routine_prompt(
             "Wealth Manager",
-            """Portfolio analysis (OBSERVE + ADVISE — no trades L4):
-1. Review holdings vs S&P benchmark
-2. Thesis check per position; flag deterioration
-3. Register outcome wealth.review
-Never autonomous trading.""",
+            """Default machine: scripts/hive/grok-skills/wealth-daily-show.md
+One trading-day episode (OBSERVE + ADVISE — no trades L4, no YouTube):
+1. Research the book + GLOBAL/US/CA tape in the Grok browser. Required unknowns[] + opportunities. No invented scores / Next-NVDA / TSX.
+2. On THIS Grok desktop (computer + shell — not Evens Mac, not Cursor /workspace): bash apps/portfolio-brief-remotion/scripts/desk-checkout.sh → $HOME/n8n-cursor origin/main.
+3. Write + register DailyReport in apps/portfolio-brief-remotion. V2 five-act required (MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION).
+4. Higgsfield plugin Juno (get_cost first, use_unlim false). If balance session expired: do not loop mcp_auth; say so.
+5. This desktop: bash scripts/render-juno-day.sh YYYY-MM-DD → $HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4. Attach the file in this Grok chat.
+Morning60 optional. New tickers are data only. Never autonomous trading. Publish HITL. Do not overwrite Evens Mac daily-2026-08-26-vo-juno.mp4.""",
         ),
     },
     "Personal CFO": {

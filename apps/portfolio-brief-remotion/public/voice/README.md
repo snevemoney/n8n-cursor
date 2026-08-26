@@ -14,7 +14,7 @@ cd apps/portfolio-brief-remotion
 bash scripts/render-juno-day.sh YYYY-MM-DD
 ```
 
-That script does **not** call Higgsfield. Grok Mac ExternalShell / Cursor Shell renders Remotion.
+That script does **not** call Higgsfield. This Grok desktop (computer + shell) renders Remotion. Evens Mac is optional. Cursor Cloud `/workspace` is not a host.
 
 ## Local fallback (session expired)
 

@@ -34,7 +34,7 @@
 | **Creative Studio** | Walkthrough beats screenshot; proof artifacts |
 | **Consultant** | Chatbot trap → clog/leak; four-blank scope; skeptical customer |
 | **Librarian** | Persist what Evens keeps; provenance; no receipt noise |
-| **Wealth Manager** | Filings before social; no auto trades; thesis receipts |
+| **Wealth Manager** | Filings before social; 7min Juno DailyShow on Grok desktop (`wealth-daily-show`); no auto trades; publish HITL |
 | **Personal CFO** | One number baseline (runway); advise-only |
 | **Career Strategist** | Accomplishment receipts; employment send → HITL |
 | **Communications Manager** | Send removed; Gmail self-search; email = DATA |
