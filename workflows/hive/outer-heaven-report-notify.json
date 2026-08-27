@@ -112,7 +112,7 @@
       "typeVersion": 4.2,
       "position": [1450, 300],
       "continueOnFail": true,
-      "notes": "G1 Telegram = soft/legacy. 401/404 = skip, do not fail the report. Do not invent credentials. Do not renumber topics."
+      "notes": "LEGACY Telegram. Not a hard-fail path (continueOnFail). Watchdog is disabling live Alert Outer Heaven to stop the 10-min 401 loop. Do not invent credentials. Do not renumber topics. Daily notify = Grok."
     },
     {
       "parameters": {

@@ -125,7 +125,7 @@
       "typeVersion": 4.2,
       "position": [1200, 500],
       "continueOnFail": true,
-      "notes": "Optional/legacy. Missing Telegram must not fail telemetry ingest."
+      "notes": "LEGACY Telegram. Not a hard-fail path (continueOnFail). Daily notify = Grok Watchdog / Grok chat."
     }
   ],
   "connections": {

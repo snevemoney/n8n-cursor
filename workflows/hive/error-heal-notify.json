@@ -68,7 +68,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [950, 400],
-      "notes": "No-send Grok/event-bus note. Not Telegram HTTP. Not a Scorpion-required call. Notify owner is Grok Watchdog."
+      "notes": "No-send Grok/event-bus note. Not Telegram HTTP. Not a Scorpion-required call. Watchdog is disabling live Alert Outer Heaven to stop the 10-min 401 loop. Notify = Grok Watchdog / Grok chat."
     },
     {
       "parameters": {
@@ -155,7 +155,7 @@
     "instanceId": "hive-ops",
     "status": "REPO_JSON_FILLED_FROM_FACT_SHAPE",
     "liveIdHint": "RbQEZ8LYInOIsWoK",
-    "notes": "Alert is no-send Grok/event-bus. Telegram HTTP omitted. Scorpion register-outcome is legacy optional audit — not required. Daily notify = Grok Watchdog / Grok chat. No new secrets. Do not import/activate from this PR."
+    "notes": "Alert is no-send Grok/event-bus (not a hard-fail path). Telegram HTTP omitted — Watchdog disabling live Alert Outer Heaven (10-min 401 loop). Scorpion register-outcome is optional audit only, continueOnFail, never the sink. Daily notify = Grok. No new secrets. Do not import/activate."
   },
   "tags": [
     { "name": "hive" },

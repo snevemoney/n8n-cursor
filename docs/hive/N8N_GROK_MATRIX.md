@@ -6,10 +6,10 @@ n8n **fills gaps** (webhooks, VPS cron, telemetry ingest, smokes, error-heal, ro
 
 **Daily OS notify:** Grok Watchdog / Grok chat. n8n does not page the operator.
 
-**Sinks (locked 2026-08-27):**
-- **Grok Watchdog / Grok chat** — notify (only)
-- **Scorpion register-outcome** — **legacy optional audit**. Not the preferred sink. Not required. Failure must not fail the job.
-- **Telegram** — **legacy**. Do not fail on missing Telegram. Do not add new Telegram send paths. Do not renumber topics. Do not wipe souls.
+**Lock 2026-08-27 — do not invert:**
+- **Notify (only):** Grok Watchdog / Grok chat.
+- **Scorpion register-outcome:** optional **audit trail** only. Never required. Never the Error Heal sink. Never the matrix notify sink. Failure must not fail the job. Do not invent credentials.
+- **Telegram:** **legacy**. Watchdog is **disabling live Alert Outer Heaven** to stop the **10-min 401 loop**. Do not fail on missing Telegram. Do not add new Telegram send paths. Do not renumber topics. Do not wipe souls.
 
 **n8n role:** webhooks + cron + gap-fill on `https://evenslouis.ca/n8n` and `https://evenslouis.ca/webhook/*`. **n8ncloud.tech is dead.**
 
@@ -31,7 +31,7 @@ n8n **fills gaps** (webhooks, VPS cron, telemetry ingest, smokes, error-heal, ro
 | `hive-outer-heaven-report-notify` / `outer-heaven-report-notify.json` | **update-in-place** | Webhook gap-fill; Telegram/Scorpion both legacy |
 | `hive-ce-lead-notify` / `ce-lead-notify.json` | **update-in-place** | G2 CE webhook; HITL; no client send |
 | `hive-founder-signal` / `founder-signal-ingest.json` | **update-in-place** | Ingest webhook; Scorpion audit optional |
-| `hive-error-heal-notify` / `error-heal-notify.json` | **update-in-place** | Alert = no-send Grok/event-bus note. No Telegram send. Scorpion not required. |
+| `hive-error-heal-notify` / `error-heal-notify.json` | **update-in-place** | Alert = no-send Grok/event-bus note. No Telegram send (Watchdog disabling live Alert Outer Heaven — 10-min 401 loop). Scorpion register optional audit, not required. |
 | `hive-creative-pivot` / `creative-pivot-notify.json` | **update-in-place** | HITL heuristic webhook |
 | `hive-telemetry-ingest` / `telemetry-ingest.json` | **gap-to-add** | Watchdog ingest webhook (JSON only, `active: false`) |
 | `hive-disk-alert` / `disk-alert.json` | **gap-to-add** | Report-only cron/webhook stub; no prune/delete; not activated |
@@ -60,7 +60,7 @@ n8n role = **webhook / cron / gap-fill** only. Notify owner is always **Grok Wat
 |------------|----------|----------|--------------|
 | **Big Boss** | Founder loop; reads Grok brief | **legacy** (cron/webhook) | `VOqRWrgrP2Wmoriq` (daily digest cron), `Tut13ZH74cL1VYb8` (founder-signal webhook). Notify: Grok. |
 | **Day Planner** | Morning day plan, calendar | **none** (Grok Calendar) | `hive-operator-digest` stub — **leave-archived**. Do not rebuild day-plan in n8n. |
-| **Watchdog** | Smoke, telemetry, router, disk report; **daily notify** | **legacy** + **gap** | `TyxDfyLVDtxgqHfC` (G3 smoke webhook), `5d1c6bbb-555f-42b2-919d-309d2b4f748d` (router), `cEQpuN8Fh5jTrA9l` (telemetry JSON), disk-alert JSON. Notify: Grok chat — not Telegram, not Scorpion-as-OS. |
+| **Watchdog** | Smoke, telemetry, router, disk report; **daily notify** | **legacy** + **gap** | `TyxDfyLVDtxgqHfC` (G3 smoke webhook), `5d1c6bbb-555f-42b2-919d-309d2b4f748d` (router), `cEQpuN8Fh5jTrA9l` (telemetry JSON), disk-alert JSON. Notify: Grok chat. Disabling live Alert Outer Heaven (Telegram 401 loop). Scorpion is not the sink. |
 | **HITL Operator** | Gates HITL rows | **legacy** (gate) | error-heal `RbQEZ8LYInOIsWoK`, creative-pivot `ZK6R6e0EqK9AX1qo`, CE `131918c7-1ca3-4205-8d42-cfc802c19a30`. |
 | **Money Desk** | Finance snapshot | **none** | Revenue-sensor script-first. No n8n money path. |
 | **Lead Hunter** | CE / pipeline | **legacy** (webhook) | `131918c7-1ca3-4205-8d42-cfc802c19a30` (G2 CE). Building mode — no sell. Notify: Grok. |
@@ -86,13 +86,13 @@ n8n role = **webhook / cron / gap-fill** only. Notify owner is always **Grok Wat
 |-------|----------------------|
 | n8n is the daily OS / Grok does not exist | Daily OS = Grok Bot (17) + Cursor. n8n = webhooks/cron/gap-fill only. |
 | Call `n8ncloud.tech` | Dead. Only `https://evenslouis.ca/n8n` and `https://evenslouis.ca/webhook/*`. |
-| Telegram hive report is required | Telegram is **legacy**. Do not fail. Do not add new Telegram send. Do not renumber topics. |
-| **Scorpion register is the preferred notify sink** | **Locked:** Scorpion is **legacy optional audit**. Daily notify = **Grok Watchdog / Grok chat**. |
+| Telegram hive report is required | Telegram is **legacy**. Watchdog disabling live **Alert Outer Heaven** to stop the **10-min 401 loop**. Do not fail. Do not add send. |
+| **Scorpion register is the notify / Error Heal sink** | **Locked:** Scorpion = **optional audit trail only**. Never required. Never the notify sink. Daily notify = **Grok Watchdog / Grok chat**. |
 | Daily digest Merge `combine` + `multiplex` | `Wait For Both Fetches` **`mode=append`** (PR #82 kept). |
 | Golden-path register required for smoke OK | Register-outcome optional; G3 webhook still matters; 401 on Scorpion is not a notify failure. |
 | Router path `hive-ecosystem-router` + 4 routes | Path `hive-ecosystem-route`; catalog routes including telemetry + disk-alert. |
 | CE webhook `hive-ce-lead` | Catalog path `hive-ce-lead-notify`. G2 still matters. No selling / no client send. |
-| Error Heal Alert = Telegram or Scorpion HTTP | **No Telegram send. Scorpion not required.** Alert = no-send Grok/event-bus note. |
+| Error Heal Alert = Telegram or Scorpion HTTP | Repo Alert = no-send Grok/event-bus note. Live Telegram Alert Outer Heaven is being disabled (401 loop). Scorpion not required. |
 | `hive-disk-alert` planned/404 | Report-only JSON added. No prune/delete. Not activated. |
 | `hive-telemetry-ingest` missing repo JSON | JSON added (`active: false`). |
 | Philanthropy :3002 / OpenClaw :18789 required | **HOLD.** Not hard-fail gates. |

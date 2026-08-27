@@ -112,7 +112,7 @@
       "typeVersion": 4.2,
       "position": [1450, 300],
       "continueOnFail": true,
-      "notes": "Optional operator alert only. Not a client send path. Do not renumber topics."
+      "notes": "LEGACY Telegram. Not a hard-fail path (continueOnFail). Not a client send. Daily notify = Grok. Do not renumber topics."
     },
     {
       "parameters": {

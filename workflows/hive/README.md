@@ -6,10 +6,10 @@ n8n **webhooks / cron / gap-fill** for the Grok-first hive matrix. Not a second 
 
 **Daily OS notify:** Grok Watchdog / Grok chat.
 
-**Sinks (locked):**
-- Grok Watchdog / Grok chat — notify
-- Scorpion register-outcome — **legacy optional audit** (not required, not preferred)
-- Telegram — **legacy** (do not fail; do not add new send paths; do not renumber topics)
+**Lock 2026-08-27:**
+- **Notify (only):** Grok Watchdog / Grok chat
+- **Scorpion register-outcome:** optional **audit trail** only — never required, never the Error Heal or matrix notify sink. Leave `continueOnFail` nodes in place; do not promote them.
+- **Telegram:** **legacy**. Watchdog is **disabling live Alert Outer Heaven** to stop the **10-min 401 loop**. Do not fail. Do not add send paths. Do not renumber topics.
 
 **n8n host:** `https://evenslouis.ca/n8n` and `https://evenslouis.ca/webhook/*`. **n8ncloud.tech is dead.**
 
