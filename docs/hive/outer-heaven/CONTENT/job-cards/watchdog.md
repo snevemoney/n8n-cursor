@@ -24,8 +24,8 @@
 - `scripts/hive/grok-skills/paid-slice-funnel.md` (preview ≠ domain)
 - `scripts/hive/grok-skills/separate-verifier.md`
 
-## Current truth (2026-08-26 · after Grok weekly cap)
-Wealth DailyShow exists (`wealth-daily-show`, Mac encode). Cloud cannot render. Grade Forge after a named bite — do not self-score. Catch-up: OPERATOR_MEMORY `FACTS: Grok weekly reset 2026-08-26` · `CONTENT/os/inbox/2026-08-26-said-1.md`.
+## Current truth (2026-08-27 · parent Cursor has the factory)
+Wealth DailyShow exists (`wealth-daily-show`, Grok desktop Remotion · PR 68 / `e68f6f3f`). V2 on main. Cursor Cloud `/workspace` abort. Evens Mac optional. This desk stood down — parent Cursor owns the factory. Grade Forge after a named bite — do not self-score. Catch-up: `CONTENT/os/inbox/2026-08-27-said-3.md`.
 
 ## Cloud host
 HOST = git. Hold-outs + GRADE live under repo-root `desk-missions-now/watchdog/`. Never hold-out `factory-os-train-plane`. Doctrine: `desk-missions-now/CLOUD-HOST.md`.

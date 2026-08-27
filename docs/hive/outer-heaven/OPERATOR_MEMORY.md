@@ -695,3 +695,24 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 - **Wealth V2:** PR 64 `wealth/daily-v2` **open, not merged**. Five acts. Formulas or UNKNOWN. No fake Next-NVDA / scores / TSX.
 - **Host:** Cloud cannot render Remotion. Mac encode. Glass `8e8d7b8c-a119-11f1-b532-320a589b8025` → connect **main**; API cannot Save. Dirty `hive/desk` @ `35fcac97` is not a PR dump.
 - **Default wake:** still the five. Wealth cold unless Evens names it — product is real (~7min Juno). Watchdog grades Forge after a named bite. Publish / YouTube / trades HITL.
+
+### FACTS: Evens merged DailyShow V2 2026-08-26 [hive-os]
+
+- **source:** GitHub PR 64 · mergedAt 2026-08-26T20:36:20Z | confidence high
+- **OVERRIDE:** Packet `said-1` / job cards copied from `89ea244f` still say PR 64 is open. Evens already merged it. V2 SHA `6bad96631`.
+- **Still true:** V1 Aug 26 mp4 is Evens-Mac local only. Dirty `hive/desk` is not a scoop. No invented scores. Publish / YouTube / trades HITL.
+- **Load:** `CONTENT/os/inbox/2026-08-26-said-2.md` after said-1.
+
+### FACTS: PR 68 Grok desktop Remotion 2026-08-26 [hive-os]
+
+- **source:** GitHub PR 68 · mergedAt 2026-08-26T20:52:41Z · SHA `e68f6f3f` | confidence high
+- **OVERRIDE:** said-1 / said-2 / job-card copies that still say “Mac only” or “Mac encode.” Grok desktop is a Remotion host. Evens Mac is optional. Cursor Cloud `/workspace` abort.
+- **Machine:** `wealth-daily-show` — research → V2 five-act DailyReport → Higgsfield Juno → `desk-checkout.sh` + `render-juno-day.sh` → `$HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4` attached in Grok chat.
+- **Still true:** Evens Mac `out/daily-2026-08-26-vo-juno.mp4` stays untouched. Dirty `hive/desk` is not a scoop. No invented scores. Publish / YouTube / trades HITL.
+
+### FACTS: Parent Cursor takes the factory 2026-08-27 [hive-os]
+
+- **source:** Operator — “continue whats going on with the agents let them know youll take it from here.” | confidence high
+- **FACT:** Forge, Watchdog, HITL Operator, Researcher, Communications Manager, Wealth Manager stood down. Parent Cursor has the factory. No 17-desk swarm.
+- **Load:** `CONTENT/os/inbox/2026-08-27-said-3.md` after said-1 / said-2.
+- **DON’T:** Remotion / Higgsfield / YouTube / Glass Enable / scoop dirty `hive/desk` / reopen Serena / `skills-sync.py --write` against dirty `/Users/evenslouis/n8n-cursor`.

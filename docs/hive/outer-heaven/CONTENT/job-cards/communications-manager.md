@@ -18,8 +18,8 @@
 ## Default machine
 - `warm-draft-hitl` · `playbook-before-send`
 
-## Current truth (2026-08-26 · after Grok weekly cap)
-Wealth DailyShow exists (`wealth-daily-show`, Mac encode). Cloud cannot render. Draft only — send stays HITL. Catch-up: OPERATOR_MEMORY `FACTS: Grok weekly reset 2026-08-26` · `CONTENT/os/inbox/2026-08-26-said-1.md`.
+## Current truth (2026-08-27 · parent Cursor has the factory)
+Wealth DailyShow exists (`wealth-daily-show`, Grok desktop Remotion · PR 68 / `e68f6f3f`). V2 on main. Cursor Cloud `/workspace` abort. Evens Mac optional. This desk stood down — parent Cursor owns the factory. Draft only — send stays HITL. Catch-up: `CONTENT/os/inbox/2026-08-27-said-3.md`.
 
 ## Load first
 - `scripts/hive/grok-skills/outbound-playbook-funnel.md`
