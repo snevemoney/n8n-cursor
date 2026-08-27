@@ -14,11 +14,12 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [200, 400],
-      "webhookId": "hive-golden-path-smoke"
+      "webhookId": "hive-golden-path-smoke",
+      "notes": "G3 Scorpion/smoke still matters. JSON SSOT path is hive-golden-path-smoke (not hive-smoke-notify). Canonical https://evenslouis.ca/webhook/hive-golden-path-smoke — never n8ncloud.tech."
     },
     {
       "parameters": {
-        "jsCode": "// Normalize inbound payload and build Scorpion-compatible register body\n// Scorpion /api/services/register requires:\n//   serviceName (string, min 1)\n//   version (string, min 1)\n//   host (string, min 1)\n//   port (number, int, 1-65535)\n//   protocol (enum: 'http' | 'https' | 'grpc')\n//   status? ('healthy' | 'unhealthy' | 'unknown')\n//   metadata? (Record<string, string>)\n//   tags? (string[])\nconst body = $json.body || $json;\n\nconst serviceName = body.serviceName || body.service_name || body.name || 'hive-golden-path-smoke';\nconst version = body.version || body.ver || '1.0.0';\nconst host = body.host || body.hostname || 'evenslouis.ca';\nconst port = Number(body.port) || 443;\nconst protocol = body.protocol || 'https';\nconst status = body.status || 'healthy';\n\nconst metadata = {\n  correlationId: body.correlationId || body.correlation_id || `gp_${Date.now()}`,\n  source: body.source || 'hive-golden-path',\n  goal: body.goal || 'smoke-test-registration',\n  summary: body.summary || `Golden path smoke from ${serviceName}`,\n  jobType: body.jobType || body.job_type || 'maintenance',\n  triggeredAt: new Date().toISOString()\n};\n\nconst tags = body.tags || ['hive', 'golden-path', 'smoke-test'];\n\nreturn [{\n  json: {\n    registerPayload: {\n      serviceName,\n      version,\n      host,\n      port,\n      protocol,\n      status,\n      metadata,\n      tags\n    },\n    originalInput: body\n  }\n}];"
+        "jsCode": "// G3 golden-path smoke → Scorpion register (Watchdog already smokes this path).\n// Daily OS = Grok Bot + Cursor. n8n is legacy webhook glue, not a second daily OS.\n// Lane: hive-os. G1 Telegram is soft/legacy — this workflow does not send Telegram.\nconst body = $json.body || $json;\n\nconst correlationId = body.correlationId || body.correlation_id || `gp_${Date.now()}`;\nconst message = body.message || body.summary || 'Golden path smoke';\nconst serviceName = body.serviceName || body.service_name || body.name || 'hive-golden-path-smoke';\n\nconst registerPayload = {\n  correlationId,\n  jobType: body.jobType || body.job_type || 'hive.golden_path.smoke',\n  goal: body.goal || 'G3 smoke-test registration',\n  source: body.source || 'hive-golden-path',\n  status: body.status || 'healthy',\n  registerTo: 'scorpion',\n  summary: message,\n  metadata: {\n    lane: 'hive-os',\n    serviceName,\n    version: body.version || '1.0.0',\n    host: 'evenslouis.ca',\n    triggeredAt: new Date().toISOString(),\n    telegramRequired: 'false',\n    g1Telegram: 'soft-legacy',\n    g3Smoke: 'required-legacy'\n  }\n};\n\nreturn [{\n  json: {\n    registerPayload,\n    originalInput: body\n  }\n}];"
       },
       "id": "build-register-payload",
       "name": "Build Register Payload",
@@ -29,7 +30,20 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://evenslouis.ca/api/services/register",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "json",
         "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
@@ -42,11 +56,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [700, 400],
-      "continueOnFail": true
+      "continueOnFail": true,
+      "notes": "Preferred sink — same path Grok Watchdog smokes. X-Hive-Secret from existing HIVE_WEBHOOK_SECRET. No new secret value."
     },
     {
       "parameters": {
-        "jsCode": "// Evaluate registration result\nconst result = $input.first().json;\nconst statusCode = result.statusCode || result.code || 200;\nconst success = statusCode >= 200 && statusCode < 300;\n\nif (!success) {\n  return [{\n    json: {\n      registered: false,\n      statusCode,\n      error: result.message || result.error || 'Registration failed',\n      hint: 'Check payload shape matches Scorpion /api/services/register Zod schema: serviceName, version, host, port (int), protocol (http|https|grpc).',\n      sentPayload: $('Build Register Payload').first().json.registerPayload\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    registered: true,\n    serviceId: result.data?.id || result.id || null,\n    message: result.data?.message || result.message || 'OK'\n  }\n}];"
+        "jsCode": "// Evaluate registration result. Missing Telegram is irrelevant here.\nconst result = $input.first().json;\nconst statusCode = result.statusCode || result.code || 200;\nconst success = statusCode >= 200 && statusCode < 300;\nconst sent = $('Build Register Payload').first().json.registerPayload;\n\nif (!success) {\n  return [{\n    json: {\n      registered: false,\n      statusCode,\n      error: result.message || result.error || 'Registration failed',\n      hint: 'Watchdog smokes POST https://evenslouis.ca/scorpion/api/hive/register with X-Hive-Secret (existing HIVE_WEBHOOK_SECRET). 401 = operator HITL — do not invent credentials.',\n      sentPayload: sent\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    registered: true,\n    serviceId: result.data?.id || result.id || null,\n    correlationId: sent.correlationId,\n    message: result.data?.message || result.message || 'OK'\n  }\n}];"
       },
       "id": "evaluate-result",
       "name": "Evaluate Result",
@@ -105,11 +120,14 @@
   "staticData": null,
   "id": "TyxDfyLVDtxgqHfC",
   "meta": {
-    "instanceId": "hive-ops"
+    "instanceId": "hive-ops",
+    "notes": "G3 smoke. Daily OS is Grok, not n8n. Host evenslouis.ca only. No Telegram required. No n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },
     { "name": "golden-path" },
-    { "name": "priority-1" }
+    { "name": "hive-os" },
+    { "name": "g3-smoke" },
+    { "name": "legacy-fallback" }
   ]
 }

@@ -16,7 +16,8 @@
       "name": "Daily 8AM Schedule",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [200, 400]
+      "position": [200, 400],
+      "notes": "Legacy VPS cron fallback. Daily OS is Grok Bot Day Planner / Big Boss morning brief — do not treat this workflow as the daily OS."
     },
     {
       "parameters": {
@@ -30,6 +31,10 @@
             {
               "name": "Content-Type",
               "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
             }
           ]
         }
@@ -53,6 +58,10 @@
             {
               "name": "Content-Type",
               "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
             }
           ]
         }
@@ -66,25 +75,18 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combinationMode": "multiplex",
-        "options": {
-          "clashHandling": {
-            "values": {
-              "resolveClash": "preferInput2"
-            }
-          }
-        }
+        "mode": "append"
       },
       "id": "merge-wait",
       "name": "Wait For Both Fetches",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [700, 400]
+      "position": [700, 400],
+      "notes": "Barrier only so both fetches finish. Must stay mode=append (not combine/multiplex) — Fields-to-Match crash on newer n8n. Build Digest reads named fetches."
     },
     {
       "parameters": {
-        "jsCode": "// Build Digest — defensively handles missing node outputs\n// Uses try/catch to prevent ExpressionError when upstream nodes fail or race\nlet missions = [];\nlet goldenPaths = [];\n\ntry {\n  const missionsOutput = $('Fetch 24h Missions').all();\n  if (missionsOutput && missionsOutput.length > 0) {\n    const raw = missionsOutput[0].json;\n    missions = Array.isArray(raw) ? raw : (raw.data || raw.missions || raw.items || []);\n  }\n} catch (e) {\n  missions = [];\n}\n\ntry {\n  const gpOutput = $('Fetch Golden Paths').all();\n  if (gpOutput && gpOutput.length > 0) {\n    const raw = gpOutput[0].json;\n    goldenPaths = Array.isArray(raw) ? raw : (raw.data || raw.goldenPaths || raw.paths || raw.items || []);\n  }\n} catch (e) {\n  goldenPaths = [];\n}\n\nconst now = new Date().toISOString();\nconst missionsCount = missions.length;\nconst gpCount = goldenPaths.length;\n\nconst missionsSection = missionsCount > 0\n  ? missions.map((m, i) => `${i + 1}. ${m.title || m.name || 'Untitled'} — ${m.status || 'unknown'}`).join('\\n')\n  : '(No missions in last 24h or fetch failed)';\n\nconst gpSection = gpCount > 0\n  ? goldenPaths.map((gp, i) => `${i + 1}. ${gp.name || gp.title || 'Untitled'} — ${gp.status || 'active'}`).join('\\n')\n  : '(No golden paths returned or fetch failed)';\n\nconst digest = [\n  `🐝 HIVE DAILY OPERATIONAL DIGEST`,\n  `Generated: ${now}`,\n  ``,\n  `📋 MISSIONS (last 24h): ${missionsCount}`,\n  missionsSection,\n  ``,\n  `🏆 GOLDEN PATHS: ${gpCount}`,\n  gpSection,\n  ``,\n  `---`,\n  `End of digest.`\n].join('\\n');\n\nreturn [{\n  json: {\n    digest,\n    missionsCount,\n    goldenPathsCount: gpCount,\n    generatedAt: now,\n    fetchErrors: {\n      missions: missions.length === 0 ? 'possible fetch failure or empty' : null,\n      goldenPaths: goldenPaths.length === 0 ? 'possible fetch failure or empty' : null\n    }\n  }\n}];"
+        "jsCode": "// Build Digest — defensively handles missing node outputs\n// Uses try/catch to prevent ExpressionError when upstream nodes fail or race\n// Lane: hive-os. Daily OS = Grok Bot + Cursor. This n8n digest is a legacy fallback feed.\n// Telegram is optional/legacy (G1 soft). Do not fail the run if Telegram is missing.\n// Philanthropy :3002 and OpenClaw :18789 are HOLD — not hard-fail gates.\nlet missions = [];\nlet goldenPaths = [];\n\ntry {\n  const missionsOutput = $('Fetch 24h Missions').all();\n  if (missionsOutput && missionsOutput.length > 0) {\n    const raw = missionsOutput[0].json;\n    missions = Array.isArray(raw) ? raw : (raw.data || raw.missions || raw.items || []);\n  }\n} catch (e) {\n  missions = [];\n}\n\ntry {\n  const gpOutput = $('Fetch Golden Paths').all();\n  if (gpOutput && gpOutput.length > 0) {\n    const raw = gpOutput[0].json;\n    goldenPaths = Array.isArray(raw) ? raw : (raw.data || raw.goldenPaths || raw.paths || raw.items || []);\n  }\n} catch (e) {\n  goldenPaths = [];\n}\n\nconst now = new Date().toISOString();\nconst missionsCount = missions.length;\nconst gpCount = goldenPaths.length;\nconst correlationId = `digest-${Date.now()}`;\n\nconst missionsSection = missionsCount > 0\n  ? missions.map((m, i) => `${i + 1}. ${m.title || m.name || 'Untitled'} — ${m.status || 'unknown'}`).join('\\n')\n  : '(No missions in last 24h or fetch failed)';\n\nconst gpSection = gpCount > 0\n  ? goldenPaths.map((gp, i) => `${i + 1}. ${gp.name || gp.title || 'Untitled'} — ${gp.status || 'active'}`).join('\\n')\n  : '(No golden paths returned or fetch failed)';\n\nconst digest = [\n  `HIVE DAILY OPERATIONAL DIGEST (legacy n8n fallback)`,\n  `Lane: hive-os · Daily OS: Grok Bot 17 + Cursor`,\n  `Generated: ${now}`,\n  ``,\n  `MISSIONS (last 24h): ${missionsCount}`,\n  missionsSection,\n  ``,\n  `GOLDEN PATHS: ${gpCount}`,\n  gpSection,\n  ``,\n  `Telegram = optional/legacy. Prefer Scorpion register + Grok Watchdog.`,\n  `End of digest.`\n].join('\\n');\n\nreturn [{\n  json: {\n    digest,\n    missionsCount,\n    goldenPathsCount: gpCount,\n    generatedAt: now,\n    correlationId,\n    lane: 'hive-os',\n    registerPayload: {\n      correlationId,\n      jobType: 'hive.daily_operational_digest',\n      goal: 'State-of-hive digest for Grok / Scorpion (n8n is not the daily OS)',\n      source: 'hive.daily-operational-digest',\n      status: 'done',\n      registerTo: 'scorpion',\n      summary: `digest missions=${missionsCount} goldenPaths=${gpCount}`,\n      metadata: {\n        lane: 'hive-os',\n        telegramRequired: 'false',\n        philanthropyHold: 'true',\n        openclawHold: 'true'\n      }\n    },\n    fetchErrors: {\n      missions: missions.length === 0 ? 'possible fetch failure or empty' : null,\n      goldenPaths: goldenPaths.length === 0 ? 'possible fetch failure or empty' : null\n    }\n  }\n}];"
       },
       "id": "build-digest",
       "name": "Build Digest",
@@ -94,10 +96,79 @@
     },
     {
       "parameters": {
-        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "method": "POST",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "json",
-        "jsonBody": "={\n  \"chat_id\": \"{{ $env.HIVE_TELEGRAM_CHAT_ID }}\",\n  \"text\": {{ JSON.stringify($json.digest) }},\n  \"parse_mode\": \"Markdown\",\n  \"message_thread_id\": {{ $env.HIVE_DIGEST_TOPIC_ID || 'null' }}\n}",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "register-scorpion",
+      "name": "Register Scorpion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 400],
+      "continueOnFail": true,
+      "notes": "Preferred sink. Same X-Hive-Secret env as Watchdog smoke-notify. No new secret. Grok Watchdog already smokes this register path."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Telegram is LEGACY / optional (G1 soft). Missing token must NOT fail the digest.\nconst token = $env.TELEGRAM_BOT_TOKEN;\nconst chatId = $env.HIVE_TELEGRAM_CHAT_ID;\nif (!token || token === '' || token === 'undefined' || token === 'null' || !chatId) {\n  return [{\n    json: {\n      ...$json,\n      telegramSkipped: true,\n      telegramReady: false,\n      telegramHint: 'Telegram hive report is optional. Prefer Scorpion register / Grok. Do not fail. Do not renumber Telegram topics.'\n    }\n  }];\n}\nreturn [{\n  json: {\n    ...$json,\n    telegramSkipped: false,\n    telegramReady: true,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
+      },
+      "id": "telegram-preflight",
+      "name": "Telegram Preflight",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "ready-check",
+              "leftValue": "={{ $json.telegramReady }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "token-check",
+      "name": "Telegram Ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1700, 400]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $json._telegram.token }}/sendMessage",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $json._telegram.chatId }}\",\n  \"text\": {{ JSON.stringify($json.digest) }},\n  \"parse_mode\": \"Markdown\",\n  \"message_thread_id\": {{ $env.HIVE_DIGEST_TOPIC_ID || 'null' }}\n}",
         "options": {
           "timeout": 10000
         }
@@ -106,18 +177,9 @@
       "name": "Send Digest Telegram",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, 400],
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "jsCode": "// Preflight: verify TELEGRAM_BOT_TOKEN is set before attempting send\nconst token = $env.TELEGRAM_BOT_TOKEN;\nif (!token || token === '' || token === 'undefined') {\n  return [{\n    json: {\n      error: true,\n      message: 'TELEGRAM_BOT_TOKEN env var is not set. Configure in n8n Settings > Variables.',\n      skipped: true\n    }\n  }];\n}\nreturn $input.all();"
-      },
-      "id": "telegram-preflight",
-      "name": "Telegram Preflight",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1050, 250]
+      "position": [1950, 300],
+      "continueOnFail": true,
+      "notes": "G1 Telegram golden path = soft/legacy. continueOnFail. Do not renumber topics. Do not wipe souls."
     }
   ],
   "connections": {
@@ -153,6 +215,13 @@
     "Build Digest": {
       "main": [
         [
+          { "node": "Register Scorpion", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Register Scorpion": {
+      "main": [
+        [
           { "node": "Telegram Preflight", "type": "main", "index": 0 }
         ]
       ]
@@ -160,8 +229,16 @@
     "Telegram Preflight": {
       "main": [
         [
-          { "node": "Send Digest Telegram", "type": "main", "index": 0 }
+          { "node": "Telegram Ready?", "type": "main", "index": 0 }
         ]
+      ]
+    },
+    "Telegram Ready?": {
+      "main": [
+        [
+          { "node": "Send Digest Telegram", "type": "main", "index": 0 }
+        ],
+        []
       ]
     }
   },
@@ -171,11 +248,14 @@
   "staticData": null,
   "id": "VOqRWrgrP2Wmoriq",
   "meta": {
-    "instanceId": "hive-ops"
+    "instanceId": "hive-ops",
+    "notes": "Lane hive-os. Daily OS = Grok Bot + Cursor. n8n is legacy cron fallback. Telegram optional. Merge Wait For Both Fetches must stay mode=append. Canonical host https://evenslouis.ca — never n8ncloud.tech. Do not activate-all from this PR."
   },
   "tags": [
     { "name": "hive" },
     { "name": "digest" },
-    { "name": "priority-1" }
+    { "name": "hive-os" },
+    { "name": "legacy-fallback" },
+    { "name": "g1-telegram-soft" }
   ]
 }

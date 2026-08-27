@@ -4,7 +4,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "hive-ecosystem-router",
+        "path": "hive-ecosystem-route",
         "options": {
           "responseMode": "responseNode"
         }
@@ -14,11 +14,12 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [200, 400],
-      "webhookId": "hive-ecosystem-router"
+      "webhookId": "hive-ecosystem-route",
+      "notes": "Catalog path hive-ecosystem-route. Canonical https://evenslouis.ca/webhook/hive-ecosystem-route. Never n8ncloud.tech. n8n fills bus gaps — not a second daily OS."
     },
     {
       "parameters": {
-        "jsCode": "// Extract signal type from payload and determine route\nconst body = $json.body || $json;\nconst signalType = body.signalType || body.signal_type || body.type || 'unknown';\nconst source = body.source || 'unknown';\n\nconst ROUTE_MAP = {\n  'founder-signal': 'https://evenslouis.ca/webhook/hive-founder-signal',\n  'ops-alert': 'https://evenslouis.ca/webhook/hive-ops-alert',\n  'ce-lead': 'https://evenslouis.ca/webhook/hive-ce-lead',\n  'golden-path': 'https://evenslouis.ca/webhook/hive-golden-path-smoke'\n};\n\nconst targetUrl = ROUTE_MAP[signalType] || null;\n\nreturn [{\n  json: {\n    ...body,\n    _routing: {\n      signalType,\n      source,\n      targetUrl,\n      resolved: targetUrl !== null,\n      routeMap: Object.keys(ROUTE_MAP)\n    }\n  }\n}];"
+        "jsCode": "// Master router — Watchdog owns ops routing.\n// Daily OS = Grok Bot + Cursor. n8n only fans out to hive webhooks on evenslouis.ca.\n// Philanthropy :3002 and OpenClaw :18789 are HOLD — never route there as hard-fail gates.\n// Prefer catalog `route` key; keep signalType as a legacy alias.\nconst body = $json.body || $json;\nconst routeKey = body.route || body.signalType || body.signal_type || body.type || 'unknown';\nconst source = body.source || body.sourceRepo || 'unknown';\nconst correlationId = body.correlationId || body.correlation_id || `eco-${Date.now()}`;\n\nconst ROUTE_MAP = {\n  'golden-path-smoke': 'https://evenslouis.ca/webhook/hive-golden-path-smoke',\n  'golden-path': 'https://evenslouis.ca/webhook/hive-golden-path-smoke',\n  'error-heal': 'https://evenslouis.ca/webhook/hive-error-heal',\n  'outer-heaven-report': 'https://evenslouis.ca/webhook/hive-outer-heaven-report',\n  'market-signal': 'https://evenslouis.ca/webhook/hive-market-signal',\n  'ce-lead-notify': 'https://evenslouis.ca/webhook/hive-ce-lead-notify',\n  'ce-lead': 'https://evenslouis.ca/webhook/hive-ce-lead-notify',\n  'founder-signal': 'https://evenslouis.ca/webhook/hive-founder-signal',\n  'meta-critique': 'https://evenslouis.ca/webhook/hive-meta-critique',\n  'predictive-construct': 'https://evenslouis.ca/webhook/hive-predictive-construct',\n  'chronicle-ingest': 'https://evenslouis.ca/webhook/hive-chronicle-ingest',\n  'telemetry-ingest': 'https://evenslouis.ca/webhook/hive-telemetry-ingest',\n  'disk-alert': 'https://evenslouis.ca/webhook/hive-disk-alert',\n  'ops-alert': 'https://evenslouis.ca/webhook/hive-error-heal'\n};\n\nconst targetUrl = ROUTE_MAP[routeKey] || null;\nconst forwardBody = {\n  correlationId,\n  sourceRepo: body.sourceRepo || source,\n  lane: body.lane || 'hive-os',\n  ...(body.payload && typeof body.payload === 'object' ? body.payload : {}),\n  ...(body.payload ? {} : Object.fromEntries(Object.entries(body).filter(([k]) => !['route', 'signalType', 'signal_type', 'type', '_routing'].includes(k))))\n};\n\nreturn [{\n  json: {\n    ...body,\n    correlationId,\n    _routing: {\n      routeKey,\n      source,\n      targetUrl,\n      resolved: targetUrl !== null,\n      routeMap: Object.keys(ROUTE_MAP),\n      forwardBody,\n      hostsForbidden: ['n8ncloud.tech', '127.0.0.1:3002', '127.0.0.1:18789']\n    }\n  }\n}];"
       },
       "id": "resolve-route",
       "name": "Resolve Route",
@@ -57,9 +58,22 @@
       "parameters": {
         "method": "POST",
         "url": "={{ $json._routing.targetUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "json",
-        "jsonBody": "={{ JSON.stringify(Object.fromEntries(Object.entries($json).filter(([k]) => k !== '_routing'))) }}",
+        "jsonBody": "={{ JSON.stringify($json._routing.forwardBody) }}",
         "options": {
           "timeout": 10000,
           "redirect": {
@@ -74,11 +88,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [950, 300],
-      "continueOnFail": true
+      "continueOnFail": true,
+      "notes": "Same X-Hive-Secret as smoke-notify. 404 on planned/unimported targets is a soft error. Do not hard-fail on Telegram, Philanthropy, or OpenClaw."
     },
     {
       "parameters": {
-        "jsCode": "// Handle forward result — surface soft errors for unregistered/inactive webhooks\nconst input = $input.first().json;\nconst statusCode = input.statusCode || input.code || null;\nconst error = input.error || input.message || null;\n\nif (statusCode === 404 || error) {\n  return [{\n    json: {\n      forwarded: false,\n      error: `Target webhook returned ${statusCode || 'error'}: ${error || 'Not Found'}. The target workflow may be inactive or not yet imported in n8n.`,\n      hint: 'Operator: import and activate the target workflow (e.g. hive-founder-signal-ingest) in n8n UI.',\n      originalPayload: input\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    forwarded: true,\n    response: input\n  }\n}];"
+        "jsCode": "// Soft-handle unregistered/inactive/HOLD targets. Never fail the hive on Telegram or down hosts.\nconst input = $input.first().json;\nconst routing = $('Resolve Route').first().json._routing || {};\nconst statusCode = input.statusCode || input.code || null;\nconst error = input.error || input.message || null;\n\nif (statusCode === 401) {\n  return [{\n    json: {\n      forwarded: false,\n      error: `Target returned 401. Operator HITL — do not invent credentials. Use existing HIVE_WEBHOOK_SECRET as X-Hive-Secret.`,\n      hint: 'Philanthropy :3002 and OpenClaw :18789 are HOLD. Telegram is optional/legacy.',\n      targetUrl: routing.targetUrl,\n      correlationId: routing.forwardBody && routing.forwardBody.correlationId\n    }\n  }];\n}\n\nif (statusCode === 404 || error) {\n  return [{\n    json: {\n      forwarded: false,\n      error: `Target webhook returned ${statusCode || 'error'}: ${error || 'Not Found'}. Target may be inactive, planned, or not yet imported.`,\n      hint: 'Watchdog/operator import HITL. Do not activate-all. Do not treat as a second daily OS.',\n      targetUrl: routing.targetUrl,\n      originalPayload: routing.forwardBody\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    forwarded: true,\n    response: input,\n    correlationId: routing.forwardBody && routing.forwardBody.correlationId\n  }\n}];"
       },
       "id": "handle-forward-result",
       "name": "Handle Forward Result",
@@ -88,7 +103,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// No matching route found\nconst routing = $json._routing || {};\nreturn [{\n  json: {\n    forwarded: false,\n    error: `No route found for signalType '${routing.signalType}'. Known routes: ${(routing.routeMap || []).join(', ')}`,\n    hint: 'Check signalType field in the inbound payload.'\n  }\n}];"
+        "jsCode": "const routing = $json._routing || {};\nreturn [{\n  json: {\n    forwarded: false,\n    error: `No route found for '${routing.routeKey}'. Known routes: ${(routing.routeMap || []).join(', ')}`,\n    hint: 'Pass catalog `route` (preferred) or legacy signalType. Email/calendar/day-plan stay on Grok — not routed here.'\n  }\n}];"
       },
       "id": "no-route-handler",
       "name": "No Route Found",
@@ -164,11 +179,13 @@
   "staticData": null,
   "id": "5d1c6bbb-555f-42b2-919d-309d2b4f748d",
   "meta": {
-    "instanceId": "hive-ops"
+    "instanceId": "hive-ops",
+    "notes": "Watchdog router. Fills hive-matrix gaps only. No email/calendar/day-plan routes (Grok owns those). No client send. Never n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },
     { "name": "router" },
-    { "name": "priority-1" }
+    { "name": "hive-os" },
+    { "name": "legacy-fallback" }
   ]
 }

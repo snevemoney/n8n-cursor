@@ -4,7 +4,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "hive-ce-lead",
+        "path": "hive-ce-lead-notify",
         "options": {
           "responseMode": "responseNode"
         }
@@ -14,11 +14,12 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [200, 400],
-      "webhookId": "hive-ce-lead"
+      "webhookId": "hive-ce-lead-notify",
+      "notes": "G2 CE still matters. HITL on /pro. Building mode — no selling, no client send, until operator says so. Catalog path hive-ce-lead-notify."
     },
     {
       "parameters": {
-        "jsCode": "// Build CE Lead alert message\nconst body = $json.body || $json;\n\nconst leadId = body.leadId || body.id || `lead_${Date.now()}`;\nconst source = body.source || 'unknown';\nconst name = body.name || body.leadName || 'Anonymous';\nconst email = body.email || 'N/A';\nconst score = body.score || body.leadScore || 0;\nconst channel = body.channel || 'direct';\nconst notes = body.notes || body.message || '';\n\nconst text = [\n  `🎯 NEW CE LEAD`,\n  ``,\n  `Lead: ${name}`,\n  `Email: ${email}`,\n  `Score: ${score}`,\n  `Source: ${source}`,\n  `Channel: ${channel}`,\n  notes ? `Notes: ${notes}` : '',\n  ``,\n  `ID: ${leadId}`,\n  `Time: ${new Date().toISOString()}`\n].filter(Boolean).join('\\n');\n\nreturn [{ json: { text, leadId, name, score } }];"
+        "jsCode": "// CE lead → Scorpion register (preferred). Telegram optional. No client outreach.\n// Lane: hive-os (CE surface). Operator is in building mode — register + HITL only.\nconst body = $json.body || $json;\n\nconst leadId = body.leadId || body.id || `lead_${Date.now()}`;\nconst correlationId = body.correlationId || leadId;\nconst source = body.source || 'client-engine';\nconst name = body.name || body.leadName || 'Anonymous';\nconst email = body.email || 'N/A';\nconst score = body.score || body.leadScore || 0;\nconst status = body.status || 'new';\nconst notes = body.notes || body.message || '';\n\nconst text = [\n  `CE LEAD (HITL — building mode, no selling)`,\n  ``,\n  `Lead: ${name}`,\n  `Email: ${email}`,\n  `Score: ${score}`,\n  `Status: ${status}`,\n  `Source: ${source}`,\n  notes ? `Notes: ${notes}` : '',\n  ``,\n  `ID: ${leadId}`,\n  `Review on /pro (Tier 3). Do not send client email from n8n or Grok without HITL.`,\n  `Time: ${new Date().toISOString()}`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    leadId,\n    name,\n    score,\n    correlationId,\n    registerPayload: {\n      correlationId,\n      jobType: 'ce.lead.received',\n      goal: 'Register CE lead for HITL review — no auto-sell',\n      source,\n      status: 'need_hitl',\n      registerTo: 'scorpion',\n      summary: `CE lead ${name} ${email} status=${status}`,\n      metadata: {\n        lane: 'hive-os',\n        leadId,\n        selling: 'hold',\n        telegramRequired: 'false',\n        g2Ce: 'required-legacy'\n      }\n    }\n  }\n}];"
       },
       "id": "build-alert",
       "name": "Build Alert",
@@ -28,13 +29,45 @@
     },
     {
       "parameters": {
-        "jsCode": "// Preflight: verify TELEGRAM_BOT_TOKEN is configured\nconst token = $env.TELEGRAM_BOT_TOKEN;\nif (!token || token === '' || token === 'undefined' || token === 'null') {\n  return [{\n    json: {\n      sent: false,\n      error: 'TELEGRAM_BOT_TOKEN is not set or empty. This causes HTTP 404 from Telegram API.',\n      hint: 'Operator: Set TELEGRAM_BOT_TOKEN in n8n Settings > Variables. The token format is 123456789:ABCdefGHI...',\n      originalMessage: $json.text\n    }\n  }];\n}\n\nconst chatId = $env.HIVE_CE_LEAD_CHAT_ID || $env.HIVE_TELEGRAM_CHAT_ID;\nif (!chatId) {\n  return [{\n    json: {\n      sent: false,\n      error: 'HIVE_CE_LEAD_CHAT_ID (or HIVE_TELEGRAM_CHAT_ID) is not set.',\n      hint: 'Operator: Set the chat_id env var in n8n Settings > Variables.',\n      originalMessage: $json.text\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...$json,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
+        "method": "POST",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "register-scorpion",
+      "name": "Register Scorpion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "continueOnFail": true,
+      "notes": "Preferred sink. No client email. Same X-Hive-Secret as smoke-notify."
+    },
+    {
+      "parameters": {
+        "jsCode": "const token = $env.TELEGRAM_BOT_TOKEN;\nconst chatId = $env.HIVE_CE_LEAD_CHAT_ID || $env.HIVE_TELEGRAM_CHAT_ID;\nif (!token || token === '' || token === 'undefined' || token === 'null' || !chatId) {\n  return [{\n    json: {\n      sent: false,\n      telegramReady: false,\n      leadId: $json.leadId,\n      error: 'Telegram optional/legacy — skipped. Lead stays on Scorpion / Grok HITL.',\n      hint: 'Do not fail G2 CE on missing Telegram. Do not send client email.'\n    }\n  }];\n}\nreturn [{\n  json: {\n    ...$json,\n    telegramReady: true,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
       },
       "id": "telegram-preflight",
       "name": "Telegram Preflight",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 400]
+      "position": [950, 400]
     },
     {
       "parameters": {
@@ -47,7 +80,7 @@
           "conditions": [
             {
               "id": "ready-check",
-              "leftValue": "={{ $json._telegram?.ready }}",
+              "leftValue": "={{ $json.telegramReady }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -61,7 +94,7 @@
       "name": "Token Ready?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [950, 400]
+      "position": [1200, 400]
     },
     {
       "parameters": {
@@ -77,13 +110,14 @@
       "name": "Telegram Alert",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, 300],
-      "continueOnFail": true
+      "position": [1450, 300],
+      "continueOnFail": true,
+      "notes": "Optional operator alert only. Not a client send path. Do not renumber topics."
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"received\": true,\n  \"leadId\": \"{{ $json.leadId || '' }}\",\n  \"notified\": {{ $json._telegram?.ready || false }}\n}",
+        "responseBody": "={\n  \"received\": true,\n  \"leadId\": \"{{ $json.leadId || '' }}\",\n  \"hitl\": true,\n  \"selling\": \"hold\",\n  \"telegramOptional\": true,\n  \"notified\": {{ $json.telegramReady || false }}\n}",
         "options": {
           "responseCode": 200
         }
@@ -92,12 +126,12 @@
       "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1450, 300]
+      "position": [1700, 300]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ $json }}",
+        "responseBody": "={{ Object.assign({}, $json, { received: true, hitl: true, selling: 'hold', telegramOptional: true }) }}",
         "options": {
           "responseCode": 200
         }
@@ -106,7 +140,7 @@
       "name": "Respond Skipped",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1200, 550]
+      "position": [1450, 550]
     }
   ],
   "connections": {
@@ -118,6 +152,13 @@
       ]
     },
     "Build Alert": {
+      "main": [
+        [
+          { "node": "Register Scorpion", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Register Scorpion": {
       "main": [
         [
           { "node": "Telegram Preflight", "type": "main", "index": 0 }
@@ -155,12 +196,14 @@
   "staticData": null,
   "id": "131918c7-1ca3-4205-8d42-cfc802c19a30",
   "meta": {
-    "instanceId": "hive-ops"
+    "instanceId": "hive-os",
+    "notes": "G2 CE. HITL. Building mode — no selling / no client send. Telegram optional. Never n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },
     { "name": "ce-lead" },
-    { "name": "telegram" },
-    { "name": "priority-1" }
+    { "name": "hive-os" },
+    { "name": "g2-ce" },
+    { "name": "g1-telegram-soft" }
   ]
 }

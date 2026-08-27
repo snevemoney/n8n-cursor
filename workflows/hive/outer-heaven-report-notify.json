@@ -14,11 +14,12 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [200, 400],
-      "webhookId": "hive-outer-heaven-report"
+      "webhookId": "hive-outer-heaven-report",
+      "notes": "Librarian notify glue. Prefer outer-heaven-brief.py for reads. OpenClaw :18789 and Philanthropy :3002 are HOLD — not hard-fail gates. Never n8ncloud.tech."
     },
     {
       "parameters": {
-        "jsCode": "// Build Outer Heaven report message\nconst body = $json.body || $json;\n\nconst reportId = body.reportId || body.id || `oh_${Date.now()}`;\nconst title = body.title || body.subject || 'Outer Heaven Report';\nconst status = body.status || 'info';\nconst content = body.content || body.message || body.report || '';\nconst source = body.source || 'outer-heaven';\nconst severity = body.severity || body.level || 'normal';\n\nconst emoji = {\n  critical: '🚨',\n  high: '⚠️',\n  normal: '📊',\n  low: 'ℹ️',\n  info: '📊'\n}[severity] || '📊';\n\nconst text = [\n  `${emoji} OUTER HEAVEN REPORT`,\n  ``,\n  `Title: ${title}`,\n  `Status: ${status}`,\n  `Severity: ${severity}`,\n  `Source: ${source}`,\n  content ? `\\nDetails:\\n${content}` : '',\n  ``,\n  `ID: ${reportId}`,\n  `Time: ${new Date().toISOString()}`\n].filter(Boolean).join('\\n');\n\nreturn [{ json: { text, reportId, title, severity } }];"
+        "jsCode": "// Outer Heaven report — register to Scorpion first. Telegram is optional/legacy.\n// Do not require OpenClaw or Philanthropy. Do not wipe souls. Do not renumber Telegram topics.\nconst body = $json.body || $json;\n\nconst reportId = body.reportId || body.id || body.correlationId || `oh_${Date.now()}`;\nconst title = body.title || body.subject || 'Outer Heaven Report';\nconst status = body.status || 'info';\nconst content = body.content || body.message || body.report || '';\nconst source = body.source || 'outer-heaven';\nconst severity = body.severity || body.level || 'normal';\n\nconst text = [\n  `OUTER HEAVEN REPORT`,\n  ``,\n  `Title: ${title}`,\n  `Status: ${status}`,\n  `Severity: ${severity}`,\n  `Source: ${source}`,\n  content ? `\\nDetails:\\n${content}` : '',\n  ``,\n  `ID: ${reportId}`,\n  `Time: ${new Date().toISOString()}`,\n  `Telegram optional. OpenClaw/Philanthropy HOLD.`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    reportId,\n    title,\n    severity,\n    registerPayload: {\n      correlationId: reportId,\n      jobType: 'hive.outer_heaven.report',\n      goal: title,\n      source,\n      status: status === 'info' ? 'done' : status,\n      registerTo: 'scorpion',\n      summary: content || title,\n      metadata: {\n        lane: 'hive-os',\n        severity,\n        telegramRequired: 'false',\n        openclawHold: 'true',\n        philanthropyHold: 'true'\n      }\n    }\n  }\n}];"
       },
       "id": "build-report",
       "name": "Build Report",
@@ -28,13 +29,45 @@
     },
     {
       "parameters": {
-        "jsCode": "// Preflight: verify TELEGRAM_BOT_TOKEN is configured\nconst token = $env.TELEGRAM_BOT_TOKEN;\nif (!token || token === '' || token === 'undefined' || token === 'null') {\n  return [{\n    json: {\n      sent: false,\n      error: 'TELEGRAM_BOT_TOKEN is not set or empty. This causes HTTP 404 from Telegram API (the /bot<empty>/sendMessage path does not exist).',\n      hint: 'Operator: Set TELEGRAM_BOT_TOKEN in n8n Settings > Variables. Format: 123456789:ABCdefGHI...',\n      originalMessage: $json.text\n    }\n  }];\n}\n\nconst chatId = $env.HIVE_OUTER_HEAVEN_CHAT_ID || $env.HIVE_TELEGRAM_CHAT_ID;\nif (!chatId) {\n  return [{\n    json: {\n      sent: false,\n      error: 'HIVE_OUTER_HEAVEN_CHAT_ID (or HIVE_TELEGRAM_CHAT_ID) is not set.',\n      hint: 'Operator: Set the chat_id env var in n8n Settings > Variables.',\n      originalMessage: $json.text\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...$json,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
+        "method": "POST",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "register-scorpion",
+      "name": "Register Scorpion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "continueOnFail": true,
+      "notes": "Preferred sink for Grok / Watchdog. Same X-Hive-Secret as smoke-notify. No new secret."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Telegram is LEGACY / optional. Missing token or 401 is not a workflow failure.\nconst token = $env.TELEGRAM_BOT_TOKEN;\nconst chatId = $env.HIVE_OUTER_HEAVEN_CHAT_ID || $env.HIVE_TELEGRAM_CHAT_ID;\nif (!token || token === '' || token === 'undefined' || token === 'null' || !chatId) {\n  return [{\n    json: {\n      sent: false,\n      telegramReady: false,\n      reportId: $json.reportId,\n      error: 'Telegram hive report skipped (legacy/optional). Prefer Scorpion register / Grok.',\n      hint: 'Do not fail. Do not invent tokens. Do not renumber Telegram topics.'\n    }\n  }];\n}\nreturn [{\n  json: {\n    ...$json,\n    telegramReady: true,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
       },
       "id": "telegram-preflight",
       "name": "Telegram Preflight",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 400]
+      "position": [950, 400]
     },
     {
       "parameters": {
@@ -47,7 +80,7 @@
           "conditions": [
             {
               "id": "ready-check",
-              "leftValue": "={{ $json._telegram?.ready }}",
+              "leftValue": "={{ $json.telegramReady }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -61,7 +94,7 @@
       "name": "Token Ready?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [950, 400]
+      "position": [1200, 400]
     },
     {
       "parameters": {
@@ -77,13 +110,14 @@
       "name": "Send Outer Heaven Telegram",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, 300],
-      "continueOnFail": true
+      "position": [1450, 300],
+      "continueOnFail": true,
+      "notes": "G1 Telegram = soft/legacy. 401/404 = skip, do not fail the report. Do not invent credentials. Do not renumber topics."
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"received\": true,\n  \"reportId\": \"{{ $json.reportId || '' }}\",\n  \"notified\": {{ $json._telegram?.ready || false }}\n}",
+        "responseBody": "={\n  \"received\": true,\n  \"reportId\": \"{{ $json.reportId || '' }}\",\n  \"registered\": true,\n  \"telegramOptional\": true,\n  \"notified\": {{ $json.telegramReady || false }}\n}",
         "options": {
           "responseCode": 200
         }
@@ -92,12 +126,12 @@
       "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1450, 300]
+      "position": [1700, 300]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ $json }}",
+        "responseBody": "={{ Object.assign({}, $json, { received: true, telegramOptional: true }) }}",
         "options": {
           "responseCode": 200
         }
@@ -106,7 +140,7 @@
       "name": "Respond Skipped",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1200, 550]
+      "position": [1450, 550]
     }
   ],
   "connections": {
@@ -118,6 +152,13 @@
       ]
     },
     "Build Report": {
+      "main": [
+        [
+          { "node": "Register Scorpion", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Register Scorpion": {
       "main": [
         [
           { "node": "Telegram Preflight", "type": "main", "index": 0 }
@@ -155,12 +196,14 @@
   "staticData": null,
   "id": "e39875ba-a355-43f2-9dd6-dc0e4bcda2ef",
   "meta": {
-    "instanceId": "hive-ops"
+    "instanceId": "hive-ops",
+    "notes": "Librarian. Prefer Scorpion register + Grok. Telegram optional. OpenClaw/Philanthropy HOLD. Never n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },
     { "name": "outer-heaven" },
-    { "name": "telegram" },
-    { "name": "priority-1" }
+    { "name": "hive-os" },
+    { "name": "g1-telegram-soft" },
+    { "name": "legacy-fallback" }
   ]
 }

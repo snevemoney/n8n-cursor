@@ -1,0 +1,168 @@
+{
+  "name": "Hive Telemetry Ingest",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hive-telemetry-ingest",
+        "options": {
+          "responseMode": "onReceived"
+        }
+      },
+      "id": "telemetry-webhook",
+      "name": "Telemetry Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "hive-telemetry-ingest",
+      "notes": "Watchdog CIA ingest. Live id hint cEQpuN8Fh5jTrA9l. Canonical https://evenslouis.ca/webhook/hive-telemetry-ingest. Never n8ncloud.tech."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Unified telemetry. Register to Scorpion. CRITICAL may propose error-heal (HITL).\n// Telegram optional. Philanthropy/OpenClaw HOLD — not gates.\nconst body = $json.body || $json;\nconst correlationId = body.correlationId || body.correlation_id || `tel-${Date.now()}`;\nconst eventType = body.event_type || body.eventType || 'INFO';\nconst severity = (body.severity || 'INFO').toUpperCase();\nconst isCritical = severity === 'CRITICAL' || eventType === 'TEST_FAILURE' || eventType === 'CREATIVE_PIVOT';\nconst repositoryName = body.repository_name || body.repo || 'n8n-cursor';\nconst context = body.context || {};\n\nreturn [{\n  json: {\n    correlationId,\n    eventType,\n    severity,\n    isCritical,\n    repositoryName,\n    context,\n    hive_state: body.hive_state || {},\n    timestamp: body.timestamp || new Date().toISOString(),\n    registerPayload: {\n      correlationId,\n      jobType: 'hive.telemetry.ingested',\n      goal: 'Watchdog telemetry sink',\n      source: 'hive-telemetry-ingest',\n      status: isCritical ? 'need_hitl' : 'done',\n      registerTo: 'scorpion',\n      summary: `${severity} ${eventType} ${repositoryName}`,\n      metadata: {\n        lane: 'hive-os',\n        eventType,\n        severity,\n        telegramRequired: 'false'\n      }\n    },\n    healPayload: {\n      correlationId,\n      statusCode: 500,\n      route: context.file_path || 'telemetry',\n      error: context.error_message || `${severity} ${eventType}`,\n      repo: repositoryName,\n      service: 'hive-telemetry'\n    }\n  }\n}];"
+      },
+      "id": "normalize-event",
+      "name": "Normalize Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": { "timeout": 10000 }
+      },
+      "id": "audit-sink-register",
+      "name": "Audit Sink Register",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "continueOnFail": true,
+      "notes": "Preferred sink. Same X-Hive-Secret as smoke-notify."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "crit",
+              "leftValue": "={{ $json.isCritical }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "critical-check",
+      "name": "CRITICAL?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [950, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evenslouis.ca/webhook/hive-error-heal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.healPayload) }}",
+        "options": { "timeout": 10000 }
+      },
+      "id": "trigger-self-heal",
+      "name": "Trigger Self-Heal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 300],
+      "continueOnFail": true,
+      "notes": "HITL propose only. continueOnFail if heal is inactive."
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $env.HIVE_TELEGRAM_CHAT_ID }}\",\n  \"text\": {{ JSON.stringify('CRITICAL telemetry ' + $json.correlationId + ' — see Scorpion. Telegram optional.') }}\n}",
+        "options": { "timeout": 8000 }
+      },
+      "id": "urgent-telegram",
+      "name": "Urgent Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 500],
+      "continueOnFail": true,
+      "notes": "Optional/legacy. Missing Telegram must not fail telemetry ingest."
+    }
+  ],
+  "connections": {
+    "Telemetry Webhook": {
+      "main": [[{ "node": "Normalize Event", "type": "main", "index": 0 }]]
+    },
+    "Normalize Event": {
+      "main": [[{ "node": "Audit Sink Register", "type": "main", "index": 0 }]]
+    },
+    "Audit Sink Register": {
+      "main": [[{ "node": "CRITICAL?", "type": "main", "index": 0 }]]
+    },
+    "CRITICAL?": {
+      "main": [
+        [
+          { "node": "Trigger Self-Heal", "type": "main", "index": 0 },
+          { "node": "Urgent Telegram", "type": "main", "index": 0 }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "id": "cEQpuN8Fh5jTrA9l",
+  "active": false,
+  "meta": {
+    "instanceId": "hive-ops",
+    "notes": "Watchdog telemetry gap fill. JSON only — do not activate from this PR. Prefer Scorpion register. Telegram optional."
+  },
+  "tags": [
+    { "name": "hive" },
+    { "name": "telemetry" },
+    { "name": "hive-os" },
+    { "name": "g3-smoke" },
+    { "name": "legacy-fallback" }
+  ]
+}
