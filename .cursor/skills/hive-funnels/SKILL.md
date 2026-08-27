@@ -7,6 +7,7 @@ description: >-
   channel-walk / @nateherk, or deep video learning / study this
   tape, or capability acquisition / what became possible, or
   checkable-stop / until satisfied / loop cap, or
+  pre-gate / post-log / can-act wrap, or
   verify-after-browser / after a click / assume the click
   worked, or cursor-video-watch / watch this video /
   frames+transcript, or state-json / last-run store, or
@@ -95,6 +96,7 @@ Load the matching file in `scripts/hive/grok-skills/` and follow it. Grok `/` co
 | Spawn desks here | `hive-spawn-desks` | Default five: Forge, Watchdog, HITL Operator, Researcher, Communications Manager. All 17 only if Evens says all desks or `coverage-loop --video-id`. Study = `deep-video-learning`. Never Grok Bot / `sendPrompt` |
 | Loop the agents / coverage / until they can do them all | `coverage-loop` | One model or one tape: teach → spawn (parent) → steal → atoms → capability last-mile (WIRE distinct or labeled merge + named workflow + reproduce card) → score → wire one → dry-run → next. Remap-as-done forbidden. 24/7 ≠ auto-money. Channel / new YouTube URL starts at `channel-walk`. Load `checkable-stop` first |
 | Loop / until satisfied / no written stop | `checkable-stop` | Write DONE-CHECK + CAP + COST before the loop. Until-satisfied is a weak stop. Wired job = `coverage-loop` |
+| Pre-gate / post-log / can-act wrap | `pre-gate-post-log` | PRE before tool (exit 2 ≠ RUN). POST after (always 0). Watchdog. Grok notify. How-to: pre before tool, post after. |
 | After a browser/UI click | `verify-after-browser` | IF Cursor → `cursor-ide-browser`. IF Grok Bot → Grok Bot web browser (do not call Cursor MCP). Same card: ACT → EXPECTED → OBSERVED → COMPARE → NEXT. Wired job = `click-live-site`. Caption-only: no invented clicks |
 | Watch this video / cursor-video-watch / frames+transcript | `cursor-video-watch` | IF Cursor → `cursor-ide-browser` on a living YouTube tab (parent chat) → `packets/{id}/watch.json`. IF Grok Bot → Grok computer watch (do not call Cursor MCP). THEN `analyze-video-watch-output`. Same card either way. |
 | After a mess / never-again | `roadblock-bank` | One JSON row in `CONTENT/knowledge/product-factory/roadblocks.json`. Not a blog. Filter then write. |
