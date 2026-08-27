@@ -11,7 +11,7 @@
         "correlationId": "string (required)",
         "message": "string (required)"
       },
-      "note": "G3 smoke. JSON SSOT path is hive-golden-path-smoke (not hive-smoke-notify). Daily OS is Grok, not n8n. Prefer Scorpion register. Do not live-POST from docs."
+      "note": "G3 smoke webhook. Daily notify is Grok Watchdog / Grok chat. Scorpion register-outcome is optional audit. Do not live-POST from docs."
     },
     {
       "name": "hive-outer-heaven-report-notify",
@@ -46,7 +46,7 @@
         "repo": "string (default n8n-cursor)",
         "service": "string (optional)"
       },
-      "note": "Secret 7 self-heal: registers ops.self_heal.proposed need_hitl; Forge opens PR, operator merges. Alert Outer Heaven 401 = operator HITL — do not invent credentials. Same X-Hive-Secret as smoke-notify."
+      "note": "Secret 7 self-heal webhook. Alert is no-send Grok/event-bus note — not Telegram, Scorpion not required. Forge PR; operator merges."
     },
     {
       "name": "hive-market-signal-ingest",
@@ -111,7 +111,7 @@
         "status": "string (default new)",
         "source": "string (default client-engine)"
       },
-      "note": "G2 CE still matters. Register Scorpion ce.lead.received; Telegram optional/legacy. Building mode — no selling / no client send. Route key ce-lead-notify."
+      "note": "G2 CE webhook. Daily notify is Grok Watchdog / Grok chat. Scorpion audit optional. Building mode — no selling / no client send. Route key ce-lead-notify."
     },
     {
       "name": "hive-founder-signal",
@@ -226,7 +226,7 @@
         "context": "object",
         "hive_state": "object (optional)"
       },
-      "note": "Watchdog telemetry CIA ingest. Repo JSON: workflows/hive/telemetry-ingest.json (do not activate from PR). Prefer Scorpion register; Telegram optional."
+      "note": "Watchdog telemetry webhook. Repo JSON: workflows/hive/telemetry-ingest.json (do not activate). Daily notify is Grok Watchdog / Grok chat."
     },
     {
       "name": "hive-daily-operational-digest",
@@ -235,7 +235,7 @@
       "authHeader": "internal",
       "registerTo": "scorpion",
       "inputSchema": {},
-      "note": "Cron daily State of the Hive digest. Prefer Scorpion register + Grok. Telegram optional/legacy. Merge Wait For Both Fetches must be mode=append."
+      "note": "Cron gap-fill digest. Daily notify is Grok Watchdog / Grok chat. Scorpion audit optional. Merge Wait For Both Fetches must be mode=append."
     },
     {
       "name": "hive-operator-digest",

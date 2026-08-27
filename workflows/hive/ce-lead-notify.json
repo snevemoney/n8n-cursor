@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// CE lead → Scorpion register (preferred). Telegram optional. No client outreach.\n// Lane: hive-os (CE surface). Operator is in building mode — register + HITL only.\nconst body = $json.body || $json;\n\nconst leadId = body.leadId || body.id || `lead_${Date.now()}`;\nconst correlationId = body.correlationId || leadId;\nconst source = body.source || 'client-engine';\nconst name = body.name || body.leadName || 'Anonymous';\nconst email = body.email || 'N/A';\nconst score = body.score || body.leadScore || 0;\nconst status = body.status || 'new';\nconst notes = body.notes || body.message || '';\n\nconst text = [\n  `CE LEAD (HITL — building mode, no selling)`,\n  ``,\n  `Lead: ${name}`,\n  `Email: ${email}`,\n  `Score: ${score}`,\n  `Status: ${status}`,\n  `Source: ${source}`,\n  notes ? `Notes: ${notes}` : '',\n  ``,\n  `ID: ${leadId}`,\n  `Review on /pro (Tier 3). Do not send client email from n8n or Grok without HITL.`,\n  `Time: ${new Date().toISOString()}`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    leadId,\n    name,\n    score,\n    correlationId,\n    registerPayload: {\n      correlationId,\n      jobType: 'ce.lead.received',\n      goal: 'Register CE lead for HITL review — no auto-sell',\n      source,\n      status: 'need_hitl',\n      registerTo: 'scorpion',\n      summary: `CE lead ${name} ${email} status=${status}`,\n      metadata: {\n        lane: 'hive-os',\n        leadId,\n        selling: 'hold',\n        telegramRequired: 'false',\n        g2Ce: 'required-legacy'\n      }\n    }\n  }\n}];"
+        "jsCode": "// CE lead webhook. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Telegram = legacy. No client outreach.\n// Lane: hive-os (CE surface). Operator is in building mode — register + HITL only.\nconst body = $json.body || $json;\n\nconst leadId = body.leadId || body.id || `lead_${Date.now()}`;\nconst correlationId = body.correlationId || leadId;\nconst source = body.source || 'client-engine';\nconst name = body.name || body.leadName || 'Anonymous';\nconst email = body.email || 'N/A';\nconst score = body.score || body.leadScore || 0;\nconst status = body.status || 'new';\nconst notes = body.notes || body.message || '';\n\nconst text = [\n  `CE LEAD (HITL — building mode, no selling)`,\n  ``,\n  `Lead: ${name}`,\n  `Email: ${email}`,\n  `Score: ${score}`,\n  `Status: ${status}`,\n  `Source: ${source}`,\n  notes ? `Notes: ${notes}` : '',\n  ``,\n  `ID: ${leadId}`,\n  `Review on /pro (Tier 3). Do not send client email from n8n or Grok without HITL.`,\n  `Time: ${new Date().toISOString()}`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    leadId,\n    name,\n    score,\n    correlationId,\n    registerPayload: {\n      correlationId,\n      jobType: 'ce.lead.received',\n      goal: 'Register CE lead for HITL review — no auto-sell',\n      source,\n      status: 'need_hitl',\n      registerTo: 'scorpion',\n      summary: `CE lead ${name} ${email} status=${status}`,\n      metadata: {\n        lane: 'hive-os',\n        leadId,\n        selling: 'hold',\n        telegramRequired: 'false',\n        g2Ce: 'required-legacy'\n      }\n    }\n  }\n}];"
       },
       "id": "build-alert",
       "name": "Build Alert",
@@ -57,7 +57,7 @@
       "typeVersion": 4.2,
       "position": [700, 400],
       "continueOnFail": true,
-      "notes": "Preferred sink. No client email. Same X-Hive-Secret as smoke-notify."
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. No client email."
     },
     {
       "parameters": {
@@ -197,7 +197,7 @@
   "id": "131918c7-1ca3-4205-8d42-cfc802c19a30",
   "meta": {
     "instanceId": "hive-os",
-    "notes": "G2 CE. HITL. Building mode — no selling / no client send. Telegram optional. Never n8ncloud.tech."
+    "notes": "G2 CE webhook. HITL. Building mode — no selling / no client send. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Telegram = legacy. Never n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },

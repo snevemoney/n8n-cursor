@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// G3 golden-path smoke → Scorpion register (Watchdog already smokes this path).\n// Daily OS = Grok Bot + Cursor. n8n is legacy webhook glue, not a second daily OS.\n// Lane: hive-os. G1 Telegram is soft/legacy — this workflow does not send Telegram.\nconst body = $json.body || $json;\n\nconst correlationId = body.correlationId || body.correlation_id || `gp_${Date.now()}`;\nconst message = body.message || body.summary || 'Golden path smoke';\nconst serviceName = body.serviceName || body.service_name || body.name || 'hive-golden-path-smoke';\n\nconst registerPayload = {\n  correlationId,\n  jobType: body.jobType || body.job_type || 'hive.golden_path.smoke',\n  goal: body.goal || 'G3 smoke-test registration',\n  source: body.source || 'hive-golden-path',\n  status: body.status || 'healthy',\n  registerTo: 'scorpion',\n  summary: message,\n  metadata: {\n    lane: 'hive-os',\n    serviceName,\n    version: body.version || '1.0.0',\n    host: 'evenslouis.ca',\n    triggeredAt: new Date().toISOString(),\n    telegramRequired: 'false',\n    g1Telegram: 'soft-legacy',\n    g3Smoke: 'required-legacy'\n  }\n};\n\nreturn [{\n  json: {\n    registerPayload,\n    originalInput: body\n  }\n}];"
+        "jsCode": "// G3 golden-path smoke webhook. Scorpion register-outcome is optional audit.\n// Daily OS = Grok Bot + Cursor. n8n is legacy webhook glue, not a second daily OS.\n// Lane: hive-os. G1 Telegram is soft/legacy — this workflow does not send Telegram.\nconst body = $json.body || $json;\n\nconst correlationId = body.correlationId || body.correlation_id || `gp_${Date.now()}`;\nconst message = body.message || body.summary || 'Golden path smoke';\nconst serviceName = body.serviceName || body.service_name || body.name || 'hive-golden-path-smoke';\n\nconst registerPayload = {\n  correlationId,\n  jobType: body.jobType || body.job_type || 'hive.golden_path.smoke',\n  goal: body.goal || 'G3 smoke-test registration',\n  source: body.source || 'hive-golden-path',\n  status: body.status || 'healthy',\n  registerTo: 'scorpion',\n  summary: message,\n  metadata: {\n    lane: 'hive-os',\n    serviceName,\n    version: body.version || '1.0.0',\n    host: 'evenslouis.ca',\n    triggeredAt: new Date().toISOString(),\n    telegramRequired: 'false',\n    g1Telegram: 'soft-legacy',\n    g3Smoke: 'required-legacy'\n  }\n};\n\nreturn [{\n  json: {\n    registerPayload,\n    originalInput: body\n  }\n}];"
       },
       "id": "build-register-payload",
       "name": "Build Register Payload",
@@ -57,11 +57,11 @@
       "typeVersion": 4.2,
       "position": [700, 400],
       "continueOnFail": true,
-      "notes": "Preferred sink — same path Grok Watchdog smokes. X-Hive-Secret from existing HIVE_WEBHOOK_SECRET. No new secret value."
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. continueOnFail. No new secret."
     },
     {
       "parameters": {
-        "jsCode": "// Evaluate registration result. Missing Telegram is irrelevant here.\nconst result = $input.first().json;\nconst statusCode = result.statusCode || result.code || 200;\nconst success = statusCode >= 200 && statusCode < 300;\nconst sent = $('Build Register Payload').first().json.registerPayload;\n\nif (!success) {\n  return [{\n    json: {\n      registered: false,\n      statusCode,\n      error: result.message || result.error || 'Registration failed',\n      hint: 'Watchdog smokes POST https://evenslouis.ca/scorpion/api/hive/register with X-Hive-Secret (existing HIVE_WEBHOOK_SECRET). 401 = operator HITL — do not invent credentials.',\n      sentPayload: sent\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    registered: true,\n    serviceId: result.data?.id || result.id || null,\n    correlationId: sent.correlationId,\n    message: result.data?.message || result.message || 'OK'\n  }\n}];"
+        "jsCode": "// Scorpion register-outcome is legacy optional audit — do not fail G3 smoke on 401/5xx.\n// Daily notify is Grok Watchdog / Grok chat. Telegram is not used here.\nconst result = $input.first().json;\nconst statusCode = result.statusCode || result.code || 200;\nconst success = statusCode >= 200 && statusCode < 300;\nconst sent = $('Build Register Payload').first().json.registerPayload;\n\nreturn [{\n  json: {\n    ok: true,\n    webhook: 'hive-golden-path-smoke',\n    notify: 'grok-watchdog-chat',\n    registered: !!success,\n    auditOptional: true,\n    statusCode,\n    correlationId: sent.correlationId,\n    message: success ? (result.data?.message || result.message || 'OK') : (result.message || result.error || 'Scorpion audit skipped/failed — not a notify failure'),\n    hint: '401 on Scorpion register-outcome is operator HITL only if you care about audit. Do not invent credentials. Do not treat Scorpion as OS.'\n  }\n}];"
       },
       "id": "evaluate-result",
       "name": "Evaluate Result",
@@ -74,7 +74,7 @@
         "respondWith": "json",
         "responseBody": "={{ $json }}",
         "options": {
-          "responseCode": "={{ $json.registered ? 200 : 422 }}"
+          "responseCode": 200
         }
       },
       "id": "respond-webhook",
@@ -121,7 +121,7 @@
   "id": "TyxDfyLVDtxgqHfC",
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "G3 smoke. Daily OS is Grok, not n8n. Host evenslouis.ca only. No Telegram required. No n8ncloud.tech."
+    "notes": "G3 smoke webhook. Daily notify = Grok Watchdog / Grok chat. Scorpion register-outcome is optional audit. Telegram unused. Never n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },

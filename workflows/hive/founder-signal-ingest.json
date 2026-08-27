@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Founder signal ingest. Lane hive-os. Register to Scorpion; do not rebuild day-plan here.\nconst body = $json.body || $json;\n\nconst signal = {\n  signalId: body.signalId || body.id || body.correlationId || `sig_${Date.now()}`,\n  signalType: body.signalType || body.type || 'founder-signal',\n  source: body.source || 'ecosystem-router',\n  title: body.title || body.subject || 'Untitled Signal',\n  content: body.content || body.message || body.text || body.description || '',\n  priority: body.priority || 'normal',\n  metadata: body.metadata || {},\n  receivedAt: new Date().toISOString(),\n  lane: body.lane || 'hive-os'\n};\n\nreturn [{\n  json: {\n    ...signal,\n    registerPayload: {\n      correlationId: signal.signalId,\n      jobType: 'hive.founder_signal.ingested',\n      goal: signal.title,\n      source: signal.source,\n      status: 'done',\n      registerTo: 'scorpion',\n      summary: signal.content || signal.title,\n      metadata: {\n        lane: signal.lane,\n        signalType: signal.signalType,\n        telegramRequired: 'false'\n      }\n    }\n  }\n}];"
+        "jsCode": "// Founder signal ingest. Lane hive-os. Do not rebuild day-plan here. Notify is Grok.\nconst body = $json.body || $json;\n\nconst signal = {\n  signalId: body.signalId || body.id || body.correlationId || `sig_${Date.now()}`,\n  signalType: body.signalType || body.type || 'founder-signal',\n  source: body.source || 'ecosystem-router',\n  title: body.title || body.subject || 'Untitled Signal',\n  content: body.content || body.message || body.text || body.description || '',\n  priority: body.priority || 'normal',\n  metadata: body.metadata || {},\n  receivedAt: new Date().toISOString(),\n  lane: body.lane || 'hive-os'\n};\n\nreturn [{\n  json: {\n    ...signal,\n    registerPayload: {\n      correlationId: signal.signalId,\n      jobType: 'hive.founder_signal.ingested',\n      goal: signal.title,\n      source: signal.source,\n      status: 'done',\n      registerTo: 'scorpion',\n      summary: signal.content || signal.title,\n      metadata: {\n        lane: signal.lane,\n        signalType: signal.signalType,\n        telegramRequired: 'false'\n      }\n    }\n  }\n}];"
       },
       "id": "normalize-signal",
       "name": "Normalize Signal",
@@ -57,7 +57,7 @@
       "typeVersion": 4.2,
       "position": [700, 400],
       "continueOnFail": true,
-      "notes": "Preferred sink. Import/activate stays Watchdog/operator HITL — this JSON is not an activate-all."
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. Import HITL only."
     },
     {
       "parameters": {
@@ -104,7 +104,7 @@
   "id": "Tut13ZH74cL1VYb8",
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "Lane hive-os. Daily OS is Grok, not n8n. Register preferred over Telegram. Import HITL — do not activate from this PR."
+    "notes": "Lane hive-os. Webhook gap-fill. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Import HITL — do not activate from this PR."
   },
   "tags": [
     { "name": "hive" },

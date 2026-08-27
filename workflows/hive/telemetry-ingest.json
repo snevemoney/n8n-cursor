@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Unified telemetry. Register to Scorpion. CRITICAL may propose error-heal (HITL).\n// Telegram optional. Philanthropy/OpenClaw HOLD — not gates.\nconst body = $json.body || $json;\nconst correlationId = body.correlationId || body.correlation_id || `tel-${Date.now()}`;\nconst eventType = body.event_type || body.eventType || 'INFO';\nconst severity = (body.severity || 'INFO').toUpperCase();\nconst isCritical = severity === 'CRITICAL' || eventType === 'TEST_FAILURE' || eventType === 'CREATIVE_PIVOT';\nconst repositoryName = body.repository_name || body.repo || 'n8n-cursor';\nconst context = body.context || {};\n\nreturn [{\n  json: {\n    correlationId,\n    eventType,\n    severity,\n    isCritical,\n    repositoryName,\n    context,\n    hive_state: body.hive_state || {},\n    timestamp: body.timestamp || new Date().toISOString(),\n    registerPayload: {\n      correlationId,\n      jobType: 'hive.telemetry.ingested',\n      goal: 'Watchdog telemetry sink',\n      source: 'hive-telemetry-ingest',\n      status: isCritical ? 'need_hitl' : 'done',\n      registerTo: 'scorpion',\n      summary: `${severity} ${eventType} ${repositoryName}`,\n      metadata: {\n        lane: 'hive-os',\n        eventType,\n        severity,\n        telegramRequired: 'false'\n      }\n    },\n    healPayload: {\n      correlationId,\n      statusCode: 500,\n      route: context.file_path || 'telemetry',\n      error: context.error_message || `${severity} ${eventType}`,\n      repo: repositoryName,\n      service: 'hive-telemetry'\n    }\n  }\n}];"
+        "jsCode": "// Unified telemetry webhook. CRITICAL may propose error-heal (HITL). Notify is Grok Watchdog.\n// Telegram optional. Philanthropy/OpenClaw HOLD — not gates.\nconst body = $json.body || $json;\nconst correlationId = body.correlationId || body.correlation_id || `tel-${Date.now()}`;\nconst eventType = body.event_type || body.eventType || 'INFO';\nconst severity = (body.severity || 'INFO').toUpperCase();\nconst isCritical = severity === 'CRITICAL' || eventType === 'TEST_FAILURE' || eventType === 'CREATIVE_PIVOT';\nconst repositoryName = body.repository_name || body.repo || 'n8n-cursor';\nconst context = body.context || {};\n\nreturn [{\n  json: {\n    correlationId,\n    eventType,\n    severity,\n    isCritical,\n    repositoryName,\n    context,\n    hive_state: body.hive_state || {},\n    timestamp: body.timestamp || new Date().toISOString(),\n    registerPayload: {\n      correlationId,\n      jobType: 'hive.telemetry.ingested',\n      goal: 'Watchdog telemetry sink',\n      source: 'hive-telemetry-ingest',\n      status: isCritical ? 'need_hitl' : 'done',\n      registerTo: 'scorpion',\n      summary: `${severity} ${eventType} ${repositoryName}`,\n      metadata: {\n        lane: 'hive-os',\n        eventType,\n        severity,\n        telegramRequired: 'false'\n      }\n    },\n    healPayload: {\n      correlationId,\n      statusCode: 500,\n      route: context.file_path || 'telemetry',\n      error: context.error_message || `${severity} ${eventType}`,\n      repo: repositoryName,\n      service: 'hive-telemetry'\n    }\n  }\n}];"
       },
       "id": "normalize-event",
       "name": "Normalize Event",
@@ -55,7 +55,7 @@
       "typeVersion": 4.2,
       "position": [700, 400],
       "continueOnFail": true,
-      "notes": "Preferred sink. Same X-Hive-Secret as smoke-notify."
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. continueOnFail."
     },
     {
       "parameters": {
@@ -156,7 +156,7 @@
   "active": false,
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "Watchdog telemetry gap fill. JSON only — do not activate from this PR. Prefer Scorpion register. Telegram optional."
+    "notes": "Watchdog telemetry webhook gap-fill. JSON only — do not activate. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Telegram = legacy."
   },
   "tags": [
     { "name": "hive" },

@@ -55,7 +55,7 @@
       "typeVersion": 4.2,
       "position": [700, 400],
       "continueOnFail": true,
-      "notes": "Preferred sink. Same X-Hive-Secret as smoke-notify. No new secret."
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. continueOnFail."
     },
     {
       "parameters": {
@@ -138,7 +138,7 @@
     "instanceId": "hive-ops",
     "status": "REPO_JSON_FILLED_FROM_FACT_SHAPE",
     "liveIdHint": "ZK6R6e0EqK9AX1qo",
-    "notes": "HITL. Prefer Scorpion register. Telegram optional. Do not activate from this PR."
+    "notes": "HITL webhook. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Telegram = legacy. Do not activate from this PR."
   },
   "tags": [
     { "name": "hive" },

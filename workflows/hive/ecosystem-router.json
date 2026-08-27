@@ -180,7 +180,7 @@
   "id": "5d1c6bbb-555f-42b2-919d-309d2b4f748d",
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "Watchdog router. Fills hive-matrix gaps only. No email/calendar/day-plan routes (Grok owns those). No client send. Never n8ncloud.tech."
+    "notes": "Watchdog router (webhook gap-fill). Daily notify = Grok Watchdog / Grok chat. Scorpion is not the notify OS. No email/calendar/day-plan routes. No client send. Never n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },

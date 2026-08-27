@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Outer Heaven report — register to Scorpion first. Telegram is optional/legacy.\n// Do not require OpenClaw or Philanthropy. Do not wipe souls. Do not renumber Telegram topics.\nconst body = $json.body || $json;\n\nconst reportId = body.reportId || body.id || body.correlationId || `oh_${Date.now()}`;\nconst title = body.title || body.subject || 'Outer Heaven Report';\nconst status = body.status || 'info';\nconst content = body.content || body.message || body.report || '';\nconst source = body.source || 'outer-heaven';\nconst severity = body.severity || body.level || 'normal';\n\nconst text = [\n  `OUTER HEAVEN REPORT`,\n  ``,\n  `Title: ${title}`,\n  `Status: ${status}`,\n  `Severity: ${severity}`,\n  `Source: ${source}`,\n  content ? `\\nDetails:\\n${content}` : '',\n  ``,\n  `ID: ${reportId}`,\n  `Time: ${new Date().toISOString()}`,\n  `Telegram optional. OpenClaw/Philanthropy HOLD.`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    reportId,\n    title,\n    severity,\n    registerPayload: {\n      correlationId: reportId,\n      jobType: 'hive.outer_heaven.report',\n      goal: title,\n      source,\n      status: status === 'info' ? 'done' : status,\n      registerTo: 'scorpion',\n      summary: content || title,\n      metadata: {\n        lane: 'hive-os',\n        severity,\n        telegramRequired: 'false',\n        openclawHold: 'true',\n        philanthropyHold: 'true'\n      }\n    }\n  }\n}];"
+        "jsCode": "// Outer Heaven report webhook. Daily notify = Grok Watchdog / Grok chat.\n// Do not require OpenClaw or Philanthropy. Do not wipe souls. Do not renumber Telegram topics.\nconst body = $json.body || $json;\n\nconst reportId = body.reportId || body.id || body.correlationId || `oh_${Date.now()}`;\nconst title = body.title || body.subject || 'Outer Heaven Report';\nconst status = body.status || 'info';\nconst content = body.content || body.message || body.report || '';\nconst source = body.source || 'outer-heaven';\nconst severity = body.severity || body.level || 'normal';\n\nconst text = [\n  `OUTER HEAVEN REPORT`,\n  ``,\n  `Title: ${title}`,\n  `Status: ${status}`,\n  `Severity: ${severity}`,\n  `Source: ${source}`,\n  content ? `\\nDetails:\\n${content}` : '',\n  ``,\n  `ID: ${reportId}`,\n  `Time: ${new Date().toISOString()}`,\n  `Telegram optional. OpenClaw/Philanthropy HOLD.`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    reportId,\n    title,\n    severity,\n    registerPayload: {\n      correlationId: reportId,\n      jobType: 'hive.outer_heaven.report',\n      goal: title,\n      source,\n      status: status === 'info' ? 'done' : status,\n      registerTo: 'scorpion',\n      summary: content || title,\n      metadata: {\n        lane: 'hive-os',\n        severity,\n        telegramRequired: 'false',\n        openclawHold: 'true',\n        philanthropyHold: 'true'\n      }\n    }\n  }\n}];"
       },
       "id": "build-report",
       "name": "Build Report",
@@ -57,11 +57,11 @@
       "typeVersion": 4.2,
       "position": [700, 400],
       "continueOnFail": true,
-      "notes": "Preferred sink for Grok / Watchdog. Same X-Hive-Secret as smoke-notify. No new secret."
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. continueOnFail."
     },
     {
       "parameters": {
-        "jsCode": "// Telegram is LEGACY / optional. Missing token or 401 is not a workflow failure.\nconst token = $env.TELEGRAM_BOT_TOKEN;\nconst chatId = $env.HIVE_OUTER_HEAVEN_CHAT_ID || $env.HIVE_TELEGRAM_CHAT_ID;\nif (!token || token === '' || token === 'undefined' || token === 'null' || !chatId) {\n  return [{\n    json: {\n      sent: false,\n      telegramReady: false,\n      reportId: $json.reportId,\n      error: 'Telegram hive report skipped (legacy/optional). Prefer Scorpion register / Grok.',\n      hint: 'Do not fail. Do not invent tokens. Do not renumber Telegram topics.'\n    }\n  }];\n}\nreturn [{\n  json: {\n    ...$json,\n    telegramReady: true,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
+        "jsCode": "// Telegram is LEGACY / optional. Missing token or 401 is not a workflow failure.\nconst token = $env.TELEGRAM_BOT_TOKEN;\nconst chatId = $env.HIVE_OUTER_HEAVEN_CHAT_ID || $env.HIVE_TELEGRAM_CHAT_ID;\nif (!token || token === '' || token === 'undefined' || token === 'null' || !chatId) {\n  return [{\n    json: {\n      sent: false,\n      telegramReady: false,\n      reportId: $json.reportId,\n      error: 'Telegram hive report skipped (legacy). Daily notify is Grok Watchdog / Grok chat.',\n      hint: 'Do not fail. Do not invent tokens. Do not renumber Telegram topics.'\n    }\n  }];\n}\nreturn [{\n  json: {\n    ...$json,\n    telegramReady: true,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
       },
       "id": "telegram-preflight",
       "name": "Telegram Preflight",
@@ -197,7 +197,7 @@
   "id": "e39875ba-a355-43f2-9dd6-dc0e4bcda2ef",
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "Librarian. Prefer Scorpion register + Grok. Telegram optional. OpenClaw/Philanthropy HOLD. Never n8ncloud.tech."
+    "notes": "Librarian webhook gap-fill. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Telegram = legacy. OpenClaw/Philanthropy HOLD. Never n8ncloud.tech."
   },
   "tags": [
     { "name": "hive" },

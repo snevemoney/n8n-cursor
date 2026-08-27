@@ -37,7 +37,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// REPORT ONLY. No prune. No delete. No n8n_data wipe. No docker volume rm.\n// Watchdog VPS script is the sensor; this n8n row registers the alert for Grok.\nconst body = ($json && ($json.body || $json)) || {};\nconst diskPct = Number(body.diskPct || body.disk_pct || body.percent || 0);\nconst host = body.host || 'evenslouis.ca';\nconst correlationId = body.correlationId || `disk-${Date.now()}`;\nconst level = diskPct >= 90 ? 'CRITICAL' : diskPct >= 85 ? 'WARN' : 'INFO';\n\nconst summary = diskPct\n  ? `VPS disk ${diskPct}% on ${host} — operator prune required if >=90. n8n must not delete.`\n  : `hive-disk-alert stub tick — no df from this node. Prefer scripts/hive/hive-watchdog.sh disk check.`;\n\nreturn [{\n  json: {\n    correlationId,\n    diskPct,\n    host,\n    level,\n    prune: false,\n    delete: false,\n    registerPayload: {\n      correlationId,\n      jobType: 'hive.disk.alert',\n      goal: 'Report disk pressure to Scorpion / Grok Watchdog — no prune',\n      source: 'hive-disk-alert',\n      status: level === 'CRITICAL' ? 'need_hitl' : 'done',\n      registerTo: 'scorpion',\n      summary,\n      metadata: {\n        lane: 'hive-os',\n        diskPct: String(diskPct || 'unknown'),\n        prune: 'never',\n        delete: 'never',\n        telegramRequired: 'false',\n        philanthropyHold: 'true',\n        openclawHold: 'true'\n      }\n    }\n  }\n}];"
+        "jsCode": "// REPORT ONLY. No prune. No delete. No n8n_data wipe. No docker volume rm.\n// Watchdog VPS script is the sensor; this n8n row registers the alert for Grok.\nconst body = ($json && ($json.body || $json)) || {};\nconst diskPct = Number(body.diskPct || body.disk_pct || body.percent || 0);\nconst host = body.host || 'evenslouis.ca';\nconst correlationId = body.correlationId || `disk-${Date.now()}`;\nconst level = diskPct >= 90 ? 'CRITICAL' : diskPct >= 85 ? 'WARN' : 'INFO';\n\nconst summary = diskPct\n  ? `VPS disk ${diskPct}% on ${host} — operator prune required if >=90. n8n must not delete.`\n  : `hive-disk-alert stub tick — no df from this node. Prefer scripts/hive/hive-watchdog.sh disk check.`;\n\nreturn [{\n  json: {\n    correlationId,\n    diskPct,\n    host,\n    level,\n    prune: false,\n    delete: false,\n    registerPayload: {\n      correlationId,\n      jobType: 'hive.disk.alert',\n      goal: 'Report disk pressure for Grok Watchdog — no prune',\n      source: 'hive-disk-alert',\n      status: level === 'CRITICAL' ? 'need_hitl' : 'done',\n      registerTo: 'scorpion',\n      summary,\n      metadata: {\n        lane: 'hive-os',\n        diskPct: String(diskPct || 'unknown'),\n        prune: 'never',\n        delete: 'never',\n        telegramRequired: 'false',\n        philanthropyHold: 'true',\n        openclawHold: 'true'\n      }\n    }\n  }\n}];"
       },
       "id": "build-report",
       "name": "Build Disk Report",
@@ -73,7 +73,7 @@
       "typeVersion": 4.2,
       "position": [700, 400],
       "continueOnFail": true,
-      "notes": "Preferred sink. Same X-Hive-Secret as smoke-notify. No new secret. No Telegram required."
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. continueOnFail. Report-only — no prune/delete."
     },
     {
       "parameters": {
