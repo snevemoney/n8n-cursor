@@ -20,7 +20,7 @@ Provision: `python3 scripts/hive/grokbot-setup-routines.py --core --force-update
 | Creative Studio | weekly_monday | Creative lane check |
 | Consultant | weekly_monday | Consulting ladder prep |
 | Librarian | daily_morning_730 | Memory consolidation |
-| Wealth Manager | daily_eod | Daily Wealth show |
+| Wealth Manager | weekdays_9 | Daily Wealth show |
 | Personal CFO | weekly_monday | Personal finance check |
 | Career Strategist | weekly_monday | Career development check |
 | Communications Manager | daily_morning | Inbox triage |

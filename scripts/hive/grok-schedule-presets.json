@@ -32,6 +32,11 @@
       "engine": "cron",
       "cron": "0 8 * * *"
     },
+    "weekdays_9": {
+      "label": "Weekdays 09:00",
+      "engine": "cron",
+      "cron": "0 9 * * 1-5"
+    },
     "daily_midday": {
       "label": "Daily 12:00",
       "engine": "cron",
