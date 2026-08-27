@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSystemAutomation } from '@/lib/system-automation';
 import { getNotificationManager } from '@/lib/notification-manager';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { parsePagination, paginate } from '@/lib/api-pagination';
 import { z } from 'zod';
 
 /**
@@ -14,6 +15,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const isHomepage = searchParams.get('homepage') === 'true';
   
   const notificationManager = getNotificationManager();
+  const pagination = parsePagination(searchParams);
   
   // Get unread notifications
   const unread = notificationManager.getUnreadNotifications();
@@ -24,15 +26,20 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   // Homepage format (for NotificationBadge component)
   if (isHomepage) {
     return createSuccessResponse({
-      notifications: unread,
-      pendingApprovals: pending
+      notifications: paginate(unread, pagination),
+      pendingApprovals: pending,
+      total: unread.length,
+      limit: pagination.limit,
+      offset: pagination.offset,
     });
   }
   
   // Full format (for notifications page)
   return createSuccessResponse({
-    unread,
+    unread: paginate(unread, pagination),
     pending,
+    limit: pagination.limit,
+    offset: pagination.offset,
     stats: {
       totalUnread: unread.length,
       totalPending: pending.length,

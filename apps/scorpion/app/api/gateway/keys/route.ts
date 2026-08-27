@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApiKeyManager } from '@/lib/api-gateway/key-manager';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { requireAuth } from '@/lib/security/auth';
 import { z } from 'zod';
 
 const createKeySchema = z.object({
@@ -20,7 +21,7 @@ const createKeySchema = z.object({
 /**
  * GET /api/gateway/keys - List all API keys
  */
-export const GET = withErrorHandling(async (request: NextRequest) => {
+export const GET = withErrorHandling(requireAuth(async (_request: NextRequest) => {
   try {
     const keyManager = getApiKeyManager();
     const keys = await keyManager.listKeys();
@@ -50,12 +51,12 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       500
     );
   }
-});
+}));
 
 /**
  * POST /api/gateway/keys - Create a new API key
  */
-export const POST = withErrorHandling(async (request: NextRequest) => {
+export const POST = withErrorHandling(requireAuth(async (request: NextRequest) => {
   const validation = await validateRequest(request, createKeySchema);
   if (!validation.success) {
     return validation.error;
@@ -102,5 +103,5 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       500
     );
   }
-});
+}));
 
