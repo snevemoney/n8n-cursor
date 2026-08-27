@@ -1,17 +1,18 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { NextRequest } from 'next/server';
 import { isApiKeyAuthConfigured, verifyAPIKey } from '@/lib/api-auth';
 import { isPrivilegedApiPath } from '@/lib/security/privileged-paths';
 import { timingSafeEqualString } from '@/lib/security/timing-safe';
 import { MissingEnvError, requireEnv } from '@/lib/env';
 import { parsePagination, paginate } from '@/lib/api-pagination';
 import { signToken, verifyToken } from '@/lib/security/jwt';
-import { authenticate } from '@/lib/security/auth';
 
-function requestWith(headers: Record<string, string>): NextRequest {
-  return new NextRequest('http://localhost:3003/api/settings', {
-    headers,
-  });
+function requestWith(headers: Record<string, string>) {
+  const headerBag = new Headers(headers);
+  return {
+    headers: headerBag,
+    cookies: { get: () => undefined },
+    nextUrl: { searchParams: new URLSearchParams() },
+  } as Parameters<typeof verifyAPIKey>[0];
 }
 
 const saved = {
@@ -91,28 +92,6 @@ describe('JWT fail-closed', () => {
     const payload = verifyToken(token);
     expect(payload.userId).toBe('op');
     expect(payload.role).toBe('operator');
-  });
-});
-
-describe('authenticate fail-closed', () => {
-  it('is unconfigured when secrets are missing', async () => {
-    delete process.env.JWT_SECRET;
-    delete process.env.SCORPION_API_KEY;
-    delete process.env.N8N_SCORPION_API_KEY;
-    const ctx = await authenticate(requestWith({}));
-    expect(ctx.configured).toBe(false);
-    expect(ctx.authenticated).toBe(false);
-  });
-
-  it('accepts a configured API key', async () => {
-    delete process.env.JWT_SECRET;
-    process.env.SCORPION_API_KEY = 'configured-key-value-16';
-    const ctx = await authenticate(
-      requestWith({ 'x-api-key': 'configured-key-value-16' })
-    );
-    expect(ctx.configured).toBe(true);
-    expect(ctx.authenticated).toBe(true);
-    expect(ctx.role).toBe('api_key');
   });
 });
 

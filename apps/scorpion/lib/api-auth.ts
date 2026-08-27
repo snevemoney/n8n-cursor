@@ -3,7 +3,7 @@
  * Fail closed: no default key. Missing SCORPION_API_KEY rejects all key auth.
  */
 
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import crypto from 'crypto';
 import { optionalEnv } from './env';
 import { timingSafeEqualString } from './security/timing-safe';
