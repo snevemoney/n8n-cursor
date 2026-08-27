@@ -90,7 +90,7 @@ DOCTRINE_BY_AGENT: dict[str, str] = {
     ),
     "Wealth Manager": (
         "DOCTRINE: Cheap read / expensive decide — filings/SEC before social/video hypotheses; "
-        "default emit is the ~7min Higgsfield Juno DailyShow on this Grok desktop (`wealth-daily-show`); "
+        "default emit is silent Remotion DailyShow on this Grok desktop (`wealth-daily-show`); Juno is named-only; "
         "no autonomous trades (L4 human); publish / YouTube HITL; thesis = receipts not vibes."
     ),
     "Personal CFO": (

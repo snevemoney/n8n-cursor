@@ -256,17 +256,17 @@ Never delete CHRONICLE; no receipt text memorization.""",
     },
     "Wealth Manager": {
         "name": "Daily Wealth show",
-        "schedule": "daily_eod",
+        "schedule": "weekdays_9",
         "enabled": True,
         "prompt": routine_prompt(
             "Wealth Manager",
             """Default machine: scripts/hive/grok-skills/wealth-daily-show.md
-One trading-day episode (OBSERVE + ADVISE — no trades L4, no YouTube):
-1. Research the book + GLOBAL/US/CA tape in the Grok browser. Required unknowns[] + opportunities. No invented scores / Next-NVDA / TSX.
-2. On THIS Grok desktop (computer + shell — not Evens Mac, not Cursor /workspace): bash apps/portfolio-brief-remotion/scripts/desk-checkout.sh → $HOME/n8n-cursor origin/main.
+One weekday 9:00 episode (OBSERVE + ADVISE — no trades L4, no YouTube):
+1. Research the book + GLOBAL/US/CA tape in the Grok browser. Required unknowns[] + opportunities. Simpler language. No invented scores / Next-NVDA / TSX.
+2. On THIS Grok desktop (computer + shell — Evens Mac optional, not Cursor /workspace): bash apps/portfolio-brief-remotion/scripts/desk-checkout.sh → $HOME/n8n-cursor origin/main.
 3. Write + register DailyReport in apps/portfolio-brief-remotion. V2 five-act required (MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION).
-4. Higgsfield plugin Juno (get_cost first, use_unlim false). If balance session expired: do not loop mcp_auth; say so.
-5. This desktop: bash scripts/render-juno-day.sh YYYY-MM-DD → $HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4. Attach the file in this Grok chat.
+4. Default render is silent Remotion: bash scripts/render-day.sh YYYY-MM-DD → $HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD.mp4. Attach the file in this Grok chat.
+5. Higgsfield Juno / render-juno-day.sh only if Evens named Juno this sitting. Stills per act only if asked.
 Morning60 optional. New tickers are data only. Never autonomous trading. Publish HITL. Do not overwrite Evens Mac daily-2026-08-26-vo-juno.mp4.""",
         ),
     },

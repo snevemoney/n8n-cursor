@@ -3,22 +3,25 @@ name: wealth-daily-show
 description: >-
   Trading-day wake for Wealth Manager — research the book plus GLOBAL/US/CA
   tape, write unknowns (required) and opportunities, register a DailyReport,
-  then render the default ~7min DailyShow with Higgsfield Juno
-  on this Grok desktop. Morning60 is optional. New tickers are data only.
-  Publish stays HITL. Do not invent prices or a scout name.
+  then render silent Remotion DailyShow visuals on this Grok desktop.
+  Higgsfield Juno only if Evens names Juno that sitting. Morning60 optional.
+  New tickers are data only. Publish stays HITL. Do not invent prices or a scout name.
 ---
 
 # Wealth daily show
 
-**Owners:** Wealth Manager  
-**Host:** This desk’s **Grok desktop computer** (in-session computer + local shell). Evens’ Mac is an optional valid host. Cursor Cloud `/workspace` is **not** a Remotion host. Do **not** wait for Cursor. Do **not** invent a Lambda/VPS worker.  
-**Stack:** Grok → Grok browser (research) + Higgsfield plugin (Juno) + **this desktop’s shell** (`npm` / Chrome / `render-juno-day.sh`). Cursor → IDE browser + Shell + Higgsfield MCP on Evens Mac if that sitting is Mac Cursor. Higgsfield `generate_audio` is the plugin — not a helper script.  
-**Engine:** `apps/portfolio-brief-remotion` (npm only, in-folder). Compositions `DailyShow` (~7:03) and optional `Morning60`. Do not rebuild visuals. Do not open Studio on the daily path.  
+**Owners:** Wealth Manager. DailyShow is this desk — do not assign it to Forge (Forge is on webnav / evenslouis.ca).  
+**Host:** This desk’s **Grok desktop computer** (in-session computer + local shell). Evens’ Mac is optional. Cursor Cloud `/workspace` is **not** a Remotion host. Do **not** wait for Cursor. Do **not** invent a Lambda/VPS worker.  
+**Stack:** Grok → Grok browser (research) + **this desktop’s shell** (`npm` / Chrome / `render-day.sh`). Cursor → IDE browser + Shell if that sitting is Mac Cursor. Higgsfield is **off** unless Evens names Juno this sitting.  
+**Engine:** `apps/portfolio-brief-remotion` (npm only, in-folder). Composition `DailyShow` (~7:03). Optional `Morning60`. Do not rebuild visuals. Do not open Studio on the daily path.  
+**Schedule:** weekdays **9:00** America/Toronto. Write **simpler language**. Stills per act only when Evens asks.  
 **Cold** unless Evens names Wealth Manager or Enables the Glass row.
 
 **Default artifact (desk path):**  
-`$HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4`  
-Override checkout with `WEALTH_DESK_REPO`. Attach that mp4 in this Grok chat so Evens sees it on the desk. Do **not** write onto Evens Mac `out/daily-2026-08-26-vo-juno.mp4`.
+`$HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD.mp4`  
+Silent Remotion visuals. Not Higgsfield audio. Override checkout with `WEALTH_DESK_REPO`. Attach that mp4 in this Grok chat. Do **not** write onto Evens Mac `out/daily-2026-08-26-vo-juno.mp4`.
+
+Cursor morning `vo-juno` was a one-off. Evens: not again / too many credits. **Juno is named-only.**
 
 ## Host gate (first, every wake)
 
@@ -63,43 +66,39 @@ Missing path on that SHA → STOP and report the SHA. Paths exist + this host is
 
 Do not scoop the dirty `hive/desk` checkout.
 
-## Since cap / current truth (2026-08-26)
+## Since cap / current truth (2026-08-27)
 
-Grok weekly-capped **2026-08-25**; limit reset **2026-08-26**. Load this before running a day.
-
-- **V2 is on main** `@ 6bad96631` (PR 64 **merged**). Analytic five-act is required: MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION. Formulas only on the prediction board; else UNKNOWN. Funnel for empty Next-NVDA — do not fabricate candidates. Remember yesterday when a prior episode exists.
-- **V1 watch (Evens Mac local only):** `apps/portfolio-brief-remotion/out/daily-2026-08-26-vo-juno.mp4` — do not re-encode or overwrite. Main episode on git is Aug 25 (`out/daily-2026-08-25-vo-juno.mp4`).
-- **Host:** Grok desktop computer is a Remotion host. Evens Mac is optional. Cursor Cloud `/workspace` abort is “wrong host,” not a missing tree.
-- **Glass:** automation `8e8d7b8c-a119-11f1-b532-320a589b8025` **Wealth daily show** → connect **`main`**. Cursor Cloud Run ≠ mp4.
-- **Dirty checkout:** `hive/desk` stays local. Do not dump onto PRs.
-- **Credits (this sitting, live):** Reid 5.1 + Nora 5.1 + Juno Aug25 28.6 + Juno Aug26 27.2 = **66.0**. Remaining **891.5**, plan free. Juno default. `get_cost` first. No `use_unlim`.
+- **Default product:** silent Remotion DailyShow on this Grok desktop. `desk-checkout.sh` + `render-day.sh` → `out/daily-YYYY-MM-DD.mp4`. Not ~7min Higgsfield Juno.
+- **Juno / Higgsfield:** only if Evens names Juno this sitting → then `render-juno-day.sh` → `out/daily-YYYY-MM-DD-vo-juno.mp4`. Cursor morning vo-juno was a one-off.
+- **V2 is on main** `@ 6bad96631` (PR 64 **merged** — not open). Five acts required: MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION. Formulas only on the prediction board; else UNKNOWN. Empty Next-NVDA stays empty.
+- **Host:** Grok desktop encodes. Evens Mac optional. Cursor Cloud `/workspace` abort is “wrong host,” not a missing tree. Not Mac-only.
+- **V1 watch (Evens Mac local):** `apps/portfolio-brief-remotion/out/daily-2026-08-26-vo-juno.mp4` — do not re-encode or overwrite.
+- **Glass:** automation `8e8d7b8c-a119-11f1-b532-320a589b8025` **Wealth daily show** → connect **`main`**. Cloud Run ≠ mp4.
+- **Dirty checkout:** `hive/desk` stays local.
 - Never invent scores / prices / Next-NVDA / TSX / weights.
 
 ## Card
 
 ```
-DONE-CHECK: episode + registry + Juno pack (or named local-say fallback) + $HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4 attached in this Grok chat
+DONE-CHECK: episode + registry + $HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD.mp4 attached in this Grok chat
 CAP: 1 trading day / 1 episode
-COST: Higgsfield Juno (get_cost first, use_unlim false) + Remotion on this desktop — or local say if session expired
+COST: Remotion on this desktop. Higgsfield Juno credits only if Evens named Juno this sitting (get_cost first, use_unlim false)
 STOP-KIND: metric
 HITL: Evens watches. Publish / YouTube / trades = Evens
 ```
 
-Voice **Juno** preset `a3ce02fe-4d3e-55bc-b4d4-a4801b9acdb4`. Proven pack: `public/voice/2026-08-25/full-higgs-juno/`.
+Stills (`qa-stills.sh` / `still-pack.sh`) only when Evens asks — per act if he asked for stills.
 
 ## Faster loop (wired — this desktop)
 
-Work in `$HOME/n8n-cursor/apps/portfolio-brief-remotion` after `desk-checkout.sh`.
+Work in `$HOME/n8n-cursor/apps/portfolio-brief-remotion` after `desk-checkout.sh`. Weekdays 9:00 America/Toronto.
 
 1. **Stub** — `bash scripts/new-episode.sh YYYY-MM-DD` (sourced tape only; no hive scoop). Edit if the file exists.
-2. **Fill** `DailyReport` from filings / IR / quotes Evens already owns. Required: `unknowns[]`, `markets`, `opportunities`. No invented prices, scores, TSX/FX, or Next-NVDA.
-3. **TTS or skip** — `bash scripts/voice-pack-ready.sh YYYY-MM-DD`. `SKIP_TTS` → go to render. `NEED_TTS` → Higgsfield **plugin on this Grok desk**:
-   - `balance`. Session expired → **do not loop `mcp_auth`**. Fall back to `bash scripts/render-voice.sh DATE` if this desktop has a local TTS (`say` on Mac). On Grok desktop without `say`: stop and tell Evens Juno session expired — do not invent wavs.
-   - Else: `generate_audio` **one** cue with `get_cost: true`. Then **`generate_audio_batch` (≤12 per batch) is the default path** — do not walk cues with sequential `generate_audio`. `use_unlim: false`. Do not pass `get_cost` in the batch. Poll `jobs_wait` / `job_status`. Land wavs + `cues.json` + `VOICE.txt` under `public/voice/DATE/full-higgs-juno/`.
-4. **Typecheck may run while TTS is already in flight.** `npm run typecheck` does not block encode. Do not wait on chat.
-5. Stills (`qa-stills.sh` / `still-pack.sh`) may run in parallel with TTS. They do not block encode.
-6. **The moment the last wav lands** — on **this desktop’s shell**: start **one** background `bash scripts/render-juno-day.sh DATE`. That script refuses a second writer of the same `out/daily-DATE-vo-juno.mp4` (lockfile + pgrep). Do not start a second encode. Do not open Studio. Leave Remotion `--concurrency` unset. Remotion uses its own Chrome — do not claim “Grok cannot render Remotion.”
-7. Stop. Attach `out/daily-YYYY-MM-DD-vo-juno.mp4` in this Grok chat. Tell Evens the exact path. He watches.
+2. **Fill** `DailyReport` from filings / IR / quotes Evens already owns. **Simpler language.** Required: `unknowns[]`, `markets`, `opportunities`. No invented prices, scores, TSX/FX, or Next-NVDA.
+3. **Typecheck** — `npm run typecheck`. Do not open Studio.
+4. **Default render (silent)** — on **this desktop’s shell**: `bash scripts/render-day.sh YYYY-MM-DD` → `out/daily-YYYY-MM-DD.mp4`. One writer. Remotion uses its own Chrome.
+5. **Juno only if named this sitting** — then Higgsfield plugin Juno (`get_cost` first, `use_unlim` false; do not loop `mcp_auth`) and `bash scripts/render-juno-day.sh YYYY-MM-DD` → `out/daily-YYYY-MM-DD-vo-juno.mp4`. Otherwise skip Higgsfield.
+6. Stop. Attach the default mp4 in this Grok chat. Tell Evens the exact path. He watches.
 
 Automation paste: `desk-missions-now/wealth/pastes/01-wealth-daily-show.md`. Do not hijack Hive daily TRAIN. Do not upload YouTube.
 
@@ -109,7 +108,7 @@ Automation paste: `desk-missions-now/wealth/pastes/01-wealth-daily-show.md`. Do 
 - Holdings Evens already gave — do not invent a position
 - Schema: `src/data/schema.ts` (`DailyReport`)
 - Prior episode under `src/data/episodes/` (first day = “no prior tape”)
-- Write: episode file + one `loadEpisode.ts` line + Juno pack + desk mp4 path above
+- Write: episode file + one `loadEpisode.ts` line + desk mp4 path above
 
 Sacred files stay read-only. Numbers only from sourced research or `compute.ts` / `delta.ts` / `formulas.ts`.
 
@@ -117,7 +116,7 @@ Sacred files stay read-only. Numbers only from sourced research or `compute.ts` 
 
 Every full episode maps, in order: **MARKET** (tape / world / calendar) → **PORTFOLIO** (holdings, concentration, look-through, relative YTD, prediction board) → **DEEP DIVE** (NVDA + AAPL: causal network, streak heatmap, consensus range) → **OPPORTUNITY RADAR** (funnel → 0 passed; closest fails only from `opportunities.candidates` / `nextNvda`) → **ACTION** (unknowns, risks, Today’s Capital Plan). Plus a short **WHAT CHANGED SINCE YESTERDAY** beat from `diffEpisodes` — first episode says so; never fake a delta.
 
-Screens show evidence; voice interprets. Scene headlines are short labels (“Seven sessions”, “Look-through”), not the Juno sentence. Prediction-board rows are named formulas in `src/data/formulas.ts`. Missing inputs → UNKNOWN. Do not invent prices, 0–100 scores, Next-NVDA names, TSX prints, weights, or whisper zones. Two YTD scalars → lollipop, not a fake daily path. A 7-print streak → those 7 cells, not a invented 21-day grid. Node size is equal unless the episode supplies `importance`. Evidence chips only from sourced notes already on the tape.
+Screens show evidence. Write simpler language on the boards. Scene headlines are short labels (“Seven sessions”, “Look-through”). Prediction-board rows are named formulas in `src/data/formulas.ts`. Missing inputs → UNKNOWN. Do not invent prices, 0–100 scores, Next-NVDA names, TSX prints, weights, or whisper zones. Two YTD scalars → lollipop, not a fake daily path. A 7-print streak → those 7 cells, not an invented 21-day grid. Node size is equal unless the episode supplies `importance`. Evidence chips only from sourced notes already on the tape.
 
 ## New tickers (data only)
 
@@ -137,15 +136,16 @@ Browser: public filings / IR / index quotes only — **this desk’s Grok browse
 
 ## Never
 
+- Treat ~7min Higgsfield Juno as the default product
+- Run Higgsfield / Juno unless Evens named Juno this sitting
 - Render on Cursor Cloud `/workspace`, or say “tree missing” when `origin/main` has the three paths
-- Wait for Evens’ Mac or Cursor to encode. This Grok desktop runs Remotion.
+- Wait for Evens’ Mac or Cursor to encode. This Grok desktop runs Remotion. Not Mac-only.
 - Invent a Lambda / VPS / remote worker door
 - Open Studio (`:3333`) on the daily path
-- Sequential Higgsfield `generate_audio` for the remaining cues (batch ≤12 is default)
-- Second `render-juno-day.sh` while a lock/pgrep guard is live
 - Overwrite Evens Mac `out/daily-2026-08-26-vo-juno.mp4`
 - Scoop hive vault / watch-later / CURSOR_CHATS / dirty checkout into the episode
 - New primitive `.tsx` / rebuild visuals / invent prices, scores, TSX/FX, or a scout name
+- Assign DailyShow to Forge
 - Trade, publish, YouTube, send / pay / book / deploy
-- Hand-edit `~/.grokbot/skills/` · loop `mcp_auth` · second paid TTS · hijack Hive TRAIN
+- Hand-edit `~/.grokbot/skills/` · loop `mcp_auth` · hijack Hive TRAIN
 - lightningflow.online / n8ncloud.tech

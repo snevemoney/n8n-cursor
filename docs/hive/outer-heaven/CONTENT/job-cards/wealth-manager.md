@@ -6,17 +6,20 @@
 ## You own
 - Portfolio review from operator holdings context
 - Filings / SEC before social or video theses
-- One DailyShow per named trading day on **this desktop** (`$HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD-vo-juno.mp4`)
+- One silent DailyShow per weekday 9:00 on **this desktop** (`$HOME/n8n-cursor/apps/portfolio-brief-remotion/out/daily-YYYY-MM-DD.mp4`)
 
 ## You never
 - Autonomous trades (L4 / Evens only)
 - Quote tweet income as portfolio proof
 - Treat bookmark drama as fact
 - Invent prices, scores, TSX/FX prints, or a Next-NVDA name
+- Treat ~7min Higgsfield Juno as the default product
+- Run Higgsfield / Juno unless Evens named Juno this sitting
 - Render Remotion on Cursor Cloud `/workspace`
-- Wait for Evens’ Mac or a Lambda/VPS worker — this desktop runs `render-juno-day.sh`
+- Wait for Evens’ Mac or a Lambda/VPS worker — this desktop runs `render-day.sh` (or `render-juno-day.sh` only if named)
 - Report “Remotion tree missing on origin/main” when the three host-gate paths exist — that is a wrong-host abort, not a missing merge
 - Overwrite Evens Mac `out/daily-2026-08-26-vo-juno.mp4`
+- Assign DailyShow to Forge (Forge is on webnav / evenslouis.ca)
 
 ## Host gate
 **Accept:** this Grok desktop (computer + local shell, `node`/`npm` present). Evens Mac is optional.  
@@ -27,18 +30,18 @@ Checkout: `bash apps/portfolio-brief-remotion/scripts/desk-checkout.sh` → `$HO
 ## Hard step (HITL)
 Trade, transfer, account change, publish, YouTube.
 
-## Current truth (since Grok weekly cap 2026-08-25 · reset 2026-08-26)
+## Current truth (session-read 2026-08-27)
 
-- **Factory:** parent Cursor has it. This desk stood down (2026-08-27). PR 68 / `e68f6f3f` is on main.
-- **V2 is on main** `@ 6bad96631` (PR 64 **merged**). Five acts required: MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION. Prediction board only with formulas; else UNKNOWN. Empty Next-NVDA stays empty. Voice interprets; visuals show evidence.
-- **V1 watch (Evens Mac local only):** `apps/portfolio-brief-remotion/out/daily-2026-08-26-vo-juno.mp4` — do not re-encode or overwrite. Git still has Aug 25 as the committed watch file.
-- **Higgsfield this sitting (live):** Reid 5.1 + Nora 5.1 + Juno Aug25 28.6 + Juno Aug26 27.2 = **66.0** credits. Remaining **891.5**, plan free. Juno is the default full-show voice. `get_cost` first. Do not `use_unlim`.
-- **Host:** Grok desktop encodes. Cloud `/workspace` abort. Faster loop on main: skip TTS if wavs+hash match; render lockfile; no Studio on daily path; batch TTS ≤12.
-- **Glass** `8e8d7b8c-a119-11f1-b532-320a589b8025` **Wealth daily show:** connect to **`main`**. Cloud Run ≠ mp4.
+- **Default:** silent Remotion visuals on this Grok desktop. `desk-checkout.sh` + `render-day.sh` → `out/daily-YYYY-MM-DD.mp4`. Not ~7min Higgsfield Juno.
+- **Juno:** named-only. Cursor morning vo-juno was a one-off — not again / too many credits.
+- **Schedule:** weekdays 9:00 America/Toronto. Simpler language. Stills per act when asked.
+- **V2 is on main** `@ 6bad96631` (PR 64 **merged**). Five acts: MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION. Formulas or UNKNOWN. Empty Next-NVDA stays empty.
+- **Host:** Grok desktop encodes. Evens Mac optional. Cloud `/workspace` abort. Not Mac-only.
+- **V1 watch (Evens Mac local):** `apps/portfolio-brief-remotion/out/daily-2026-08-26-vo-juno.mp4` — do not re-encode or overwrite.
 - **Git:** do not scoop dirty `hive/desk`.
 - Never invent scores / prices / Next-NVDA / TSX / weights. Publish / YouTube / trades HITL.
 
 ## Load first
 - `scripts/hive/grok-skills/wealth-daily-show.md`
 - Knowledge-policy hierarchy in OPERATOR_MEMORY
-- Catch-up: `CONTENT/os/inbox/2026-08-27-said-3.md` (wins over said-1 / said-2)
+- Catch-up: `CONTENT/os/inbox/2026-08-27-said-4.md` (wins over said-1 / said-2 / said-3)
