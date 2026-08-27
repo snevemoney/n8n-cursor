@@ -1,6 +1,6 @@
 ---
 tags: [os, factory, hitl, inbox]
-at: 2026-08-25
+at: 2026-08-27
 desk: hitl-operator
 machine: dark-factory
 status: leftovers only · unsent · no execute
@@ -26,14 +26,14 @@ Format only. Evens is the only person who Saves or Activates. Yellow `grokbot_or
 
 ## Open cards
 
-### 1. Next sitting = Researcher pick or HITL leftover
+### 1. Next sitting = Watchdog hold-outs for `2J3uX8iRNng`
 
-ACTION: Do **not** start TRAIN-3 unless Evens names an id. Next legal move is a Researcher pick (real packet + `full.txt` + ACTION TRACE already on `main`) **or** a HITL leftover (re-paste / Save). Do not flatten this PASS into a new bite.  
-WHY: TRAIN-2 GRADE closed this id. An unnamed next row reopens the invent hole.  
-AGENT: Researcher next-row / Evens  
-RISK: Cloud writes hold-outs for an invent · re-grades `X80ljdCPM_U` · remint  
-REVERSIBILITY: High before a new id is named  
-EVENS: leftover
+ACTION: Researcher named unused TRAIN id `2J3uX8iRNng` (real packet + `full.txt` 6825 + ACTION TRACE on this checkout). Next legal move is Watchdog hold-outs only. Do **not** Forge-attempt. Do **not** GRADE. Do **not** re-grade `X80ljdCPM_U`.  
+WHY: Stage 1 pick is on disk. Hold-outs must exist before any attempt.  
+AGENT: Watchdog (next Hive daily TRAIN sitting)  
+RISK: Same sitting writes hold-outs AND attempts → leftover, no self-GRADE  
+REVERSIBILITY: High before hold-outs land  
+EVENS: leftover (validate the pick)
 
 ### 2. Re-paste TRAIN prompt if the live editor is stale
 
@@ -46,6 +46,7 @@ EVENS: leftover
 
 ### Always-include (until Evens closes)
 
+- Researcher named `2J3uX8iRNng`. Next desk move is Watchdog hold-outs, not a new invent and not a GRADE.
 - Save/activate remaining hive Automations is HITL. MCP cannot enable. Do not claim Active.
 - Slack leftover “Summarize changes daily” — unused. Do not hijack. Do not delete unless Evens said delete.
 - Cursor Cloud `/workspace` is the wrong Remotion host, not a missing tree. Copy stays Evens. Do not invent packets. Do not Enable Glass.
@@ -54,6 +55,6 @@ EVENS: leftover
 
 ## NEVER
 
-Send / pay / deploy / book / publish · merge PR 47 · hold-outs for `factory-os-train-plane` · remint 325 · restore `grokbot_orphans` · claim 90% actuated · paper-PROVEN · start TRAIN-3 unless Evens names it.
+Send / pay / deploy / book / publish · merge PR 47 · hold-outs for `factory-os-train-plane` · remint 325 · restore `grokbot_orphans` · claim 90% actuated · paper-PROVEN · Forge-attempt or GRADE `2J3uX8iRNng` in the same sitting that writes hold-outs.
 
 [[GOAL-GAP-BOARD]] · [[HIVE-AUTOMATION-PACK]] · [[CLOUD-HOST]]
