@@ -24,8 +24,8 @@
 - `scripts/hive/grok-skills/click-live-site.md`
 - `CONTENT/website-building/cinematic/PLAYBOOK.md`
 
-## Current truth (2026-08-26 · after Grok weekly cap)
-Wealth DailyShow exists (`wealth-daily-show`, Mac encode). Cloud cannot render. Grade after a named bite. Catch-up: OPERATOR_MEMORY `FACTS: Grok weekly reset 2026-08-26` · `CONTENT/os/inbox/2026-08-26-said-1.md`.
+## Current truth (2026-08-27 · parent Cursor has the factory)
+Wealth DailyShow exists (`wealth-daily-show`, Grok desktop Remotion · PR 68 / `e68f6f3f`). V2 on main. Cursor Cloud `/workspace` abort. Evens Mac optional. This desk stood down — parent Cursor owns the factory. Grade after a named bite. Catch-up: `CONTENT/os/inbox/2026-08-27-said-3.md`.
 
 ## Cloud host
 HOST = git. Living desk files: repo-root `desk-missions-now/` on `origin/main`. Doctrine: `desk-missions-now/CLOUD-HOST.md`. Do not write Cloud artifacts under `docs/hive/.../dry-runs/`.

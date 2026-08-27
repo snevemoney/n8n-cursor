@@ -29,6 +29,7 @@ Trade, transfer, account change, publish, YouTube.
 
 ## Current truth (since Grok weekly cap 2026-08-25 · reset 2026-08-26)
 
+- **Factory:** parent Cursor has it. This desk stood down (2026-08-27). PR 68 / `e68f6f3f` is on main.
 - **V2 is on main** `@ 6bad96631` (PR 64 **merged**). Five acts required: MARKET → PORTFOLIO → DEEP DIVE → OPPORTUNITY RADAR → ACTION. Prediction board only with formulas; else UNKNOWN. Empty Next-NVDA stays empty. Voice interprets; visuals show evidence.
 - **V1 watch (Evens Mac local only):** `apps/portfolio-brief-remotion/out/daily-2026-08-26-vo-juno.mp4` — do not re-encode or overwrite. Git still has Aug 25 as the committed watch file.
 - **Higgsfield this sitting (live):** Reid 5.1 + Nora 5.1 + Juno Aug25 28.6 + Juno Aug26 27.2 = **66.0** credits. Remaining **891.5**, plan free. Juno is the default full-show voice. `get_cost` first. Do not `use_unlim`.
@@ -40,4 +41,4 @@ Trade, transfer, account change, publish, YouTube.
 ## Load first
 - `scripts/hive/grok-skills/wealth-daily-show.md`
 - Knowledge-policy hierarchy in OPERATOR_MEMORY
-- Catch-up: OPERATOR_MEMORY `FACTS: Grok weekly reset 2026-08-26` · `CONTENT/os/inbox/2026-08-26-said-1.md`
+- Catch-up: `CONTENT/os/inbox/2026-08-27-said-3.md` (wins over said-1 / said-2)
