@@ -18,3 +18,5 @@
 4. Read-only — no heals, restarts, or deploys.
 
 **Owner agents:** Watchdog Ops, Big Boss, Engineering Lead
+
+n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.

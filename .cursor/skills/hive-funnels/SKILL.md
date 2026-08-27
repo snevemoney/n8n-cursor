@@ -132,6 +132,7 @@ Load the matching file in `scripts/hive/grok-skills/` and follow it. Grok `/` co
 
 ## Hard step
 Send, pay, deploy, book, publish = operator. Never auto.
+n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
 
 ## Never
 Claude Cowork, Claude Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus.  

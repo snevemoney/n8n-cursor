@@ -21,7 +21,8 @@
       "registerTo": "scorpion",
       "inputSchema": {
         "correlationId": "string (optional)"
-      }
+      },
+      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Telegram send removed. Register Scorpion optional audit if present."
     },
     {
       "name": "phase9-pipedrive-lead",
@@ -46,7 +47,7 @@
         "repo": "string (default n8n-cursor)",
         "service": "string (optional)"
       },
-      "note": "Secret 7 self-heal: registers ops.self_heal.proposed need_hitl; Forge opens PR, operator merges"
+      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Register Scorpion optional audit continueOnFail. Secret 7 self-heal; Forge opens PR, operator merges. Do not import/activate from repo."
     },
     {
       "name": "hive-market-signal-ingest",
@@ -111,7 +112,7 @@
         "status": "string (default new)",
         "source": "string (default client-engine)"
       },
-      "note": "Vertical slice CE lead → Scorpion ce.lead.received → Telegram #alerts. Route via hive-ecosystem-route key ce-lead-notify. Import: n8n-import-ce-lead-slice.sh"
+      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Telegram send removed. Route via hive-ecosystem-route key ce-lead-notify. Do not import/activate from repo."
     },
     {
       "name": "hive-founder-signal",
@@ -235,7 +236,7 @@
       "authHeader": "internal",
       "registerTo": "scorpion",
       "inputSchema": {},
-      "note": "Cron daily State of the Hive digest → Telegram. Same import script."
+      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Wait For Both Fetches mode=append. Telegram send deactivated."
     },
     {
       "name": "hive-operator-digest",

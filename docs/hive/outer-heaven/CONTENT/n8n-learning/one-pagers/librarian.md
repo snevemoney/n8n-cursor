@@ -14,7 +14,7 @@ Memory bus glue: Outer Heaven report notify + chronicle ingest. **Reads** prefer
 ## How they work (nodes — from JSON)
 
 ### outer-heaven-report-notify.json
-**Shape FACT:** (`Webhook` ‖ `Weekly Monday 14:00 UTC`) → `Fetch Golden Paths` → `Format Report` → `Send Outer Heaven Telegram` → `Register Scorpion`.
+**Shape FACT:** `Webhook` → `Build Report` → `Alert Grok Watchdog` → `Respond OK`. n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
 - **Code FACT:** cid from webhook body or `hive-report-${Date.now()}`; builds pass/fail lines from `gp.paths`; `voiceBrief` string.
 - **Hosts:** `evenslouis.ca`, `api.telegram.org`
 
