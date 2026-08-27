@@ -4,6 +4,7 @@
 **Rule:** FACT vs INFERENCE vs UNVERIFIED labeled in each file. Grok-first; n8n = legacy bus.  
 **Canon:** full-estate-agent-map · agent-playbooks · n8n-catalog.json  
 n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+audits → Watchdog, not Scorpion, not Telegram.
 
 ## One-pagers
 

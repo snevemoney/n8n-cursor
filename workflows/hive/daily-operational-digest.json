@@ -178,7 +178,7 @@
   "active": false,
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Wait For Both Fetches mode=append. Telegram send deactivated (not a fallback). Do not import or activate from this PR."
+    "notes": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL. Wait For Both Fetches mode=append. Telegram send deactivated (not a fallback). Register Scorpion leftover if present — NOT the audit sink. Do not import or activate from this PR."
   },
   "tags": [
     { "name": "hive" },

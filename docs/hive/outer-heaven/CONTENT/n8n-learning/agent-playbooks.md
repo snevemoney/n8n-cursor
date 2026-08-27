@@ -34,7 +34,7 @@ from: hive workflow JSON + estate maps + one-pagers
 - **One-pager:** [[one-pagers/watchdog]]
 
 ### Forge — fix / self-heal
-- **ACTIVE JSON:** `error-heal-notify` (Normalize Error cid `self-heal-*`→Register optional audit→Alert Grok Watchdog; escalate pivot ≥3), `creative-pivot-notify` (costHalt>$15 / attempt≥3 → `need_hitl`). n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+- **ACTIVE JSON:** `error-heal-notify` (Normalize Error cid `self-heal-*`→Alert Grok Watchdog; Register Scorpion leftover, NOT the audit sink; escalate pivot ≥3), `creative-pivot-notify` (costHalt>$15 / attempt≥3 → `need_hitl`). audits → Watchdog, not Scorpion, not Telegram.
 - **Pattern:** Self-heal proposes PR; operator merges. Creative pivot = loop-cost heuristic, not auto aesthetic deploy.
 - **Hygiene:** Active SaaS scaffolds = document/archive candidates.
 - **One-pager:** [[one-pagers/forge]]

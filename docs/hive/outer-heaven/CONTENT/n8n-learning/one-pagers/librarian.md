@@ -14,12 +14,12 @@ Memory bus glue: Outer Heaven report notify + chronicle ingest. **Reads** prefer
 ## How they work (nodes — from JSON)
 
 ### outer-heaven-report-notify.json
-**Shape FACT:** `Webhook` → `Build Report` → `Alert Grok Watchdog` → `Respond OK`. n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+**Shape FACT:** `Webhook` → `Build Report` → `Alert Grok Watchdog` → `Respond OK`. audits → Watchdog, not Scorpion, not Telegram.
 - **Code FACT:** cid from webhook body or `hive-report-${Date.now()}`; builds pass/fail lines from `gp.paths`; `voiceBrief` string.
 - **Hosts:** `evenslouis.ca`, `api.telegram.org`
 
 ### hive-chronicle-ingest.json
-**Shape FACT:** `Chronicle Webhook` → `Normalize Body` → `Register Scorpion` → IF `High Signal?` → `Forward Founder Signal` → `Respond OK`.
+**Shape FACT:** `Chronicle Webhook` → `Normalize Body` → leftover Register Scorpion (NOT the audit sink) → IF `High Signal?` → `Forward Founder Signal` → `Respond OK`. audits → Watchdog, not Scorpion, not Telegram.
 - **Code FACT:** cid `chronicle-*`; `highSignal = body.highSignal === true || tags.includes('founder-signal')`; forward POST `/webhook/hive-founder-signal` + secret.
 - Respond note FACT: “append on Mac via append-chronicle.sh or mine-transcripts.py”.
 

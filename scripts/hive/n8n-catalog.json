@@ -6,23 +6,23 @@
       "webhookPath": "/webhook/hive-golden-path-smoke",
       "hitl": false,
       "authHeader": "X-Hive-Secret",
-      "registerTo": "scorpion",
+      "registerTo": "watchdog",
       "inputSchema": {
         "correlationId": "string (required)",
         "message": "string (required)"
       },
-      "note": "JSON SSOT path is hive-golden-path-smoke (not hive-smoke-notify). Do not live-POST from docs."
+      "note": "JSON SSOT path is hive-golden-path-smoke (not hive-smoke-notify). audits → Watchdog, not Scorpion, not Telegram. Register Scorpion leftover — NOT the audit sink. Do not live-POST from docs."
     },
     {
       "name": "hive-outer-heaven-report-notify",
       "webhookPath": "/webhook/hive-outer-heaven-report",
       "hitl": false,
       "authHeader": "X-Hive-Secret",
-      "registerTo": "scorpion",
+      "registerTo": "watchdog",
       "inputSchema": {
         "correlationId": "string (optional)"
       },
-      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Telegram send removed. Register Scorpion optional audit if present."
+      "note": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL. Register Scorpion leftover — NOT the audit sink. Telegram send removed."
     },
     {
       "name": "phase9-pipedrive-lead",
@@ -37,7 +37,7 @@
       "webhookPath": "/webhook/hive-error-heal",
       "hitl": true,
       "authHeader": "X-Hive-Secret",
-      "registerTo": "scorpion",
+      "registerTo": "watchdog",
       "inputSchema": {
         "correlationId": "string (optional — generated if absent)",
         "statusCode": "number (default 500)",
@@ -47,7 +47,7 @@
         "repo": "string (default n8n-cursor)",
         "service": "string (optional)"
       },
-      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Register Scorpion optional audit continueOnFail. Secret 7 self-heal; Forge opens PR, operator merges. Do not import/activate from repo."
+      "note": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL plus scripts/hive/os/post-log.py / event-bus when local. Register Scorpion leftover — NOT the audit sink. Secret 7 self-heal; Forge opens PR, operator merges. Do not import/activate from repo."
     },
     {
       "name": "hive-market-signal-ingest",
@@ -103,7 +103,7 @@
       "webhookPath": "/webhook/hive-ce-lead-notify",
       "hitl": true,
       "authHeader": "X-Hive-Secret",
-      "registerTo": "both",
+      "registerTo": "watchdog",
       "inputSchema": {
         "correlationId": "string (required, min 8 chars)",
         "leadId": "string (optional)",
@@ -112,7 +112,7 @@
         "status": "string (default new)",
         "source": "string (default client-engine)"
       },
-      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Telegram send removed. Route via hive-ecosystem-route key ce-lead-notify. Do not import/activate from repo."
+      "note": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL. Telegram send removed. Route via hive-ecosystem-route key ce-lead-notify. Do not import/activate from repo."
     },
     {
       "name": "hive-founder-signal",
@@ -234,9 +234,9 @@
       "webhookPath": null,
       "hitl": false,
       "authHeader": "internal",
-      "registerTo": "scorpion",
+      "registerTo": "watchdog",
       "inputSchema": {},
-      "note": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Wait For Both Fetches mode=append. Telegram send deactivated."
+      "note": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL. Wait For Both Fetches mode=append. Telegram send deactivated."
     },
     {
       "name": "hive-operator-digest",

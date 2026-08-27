@@ -8,7 +8,7 @@ Self-heal proposals + creative-pivot containment. Output = staging PR / operator
 
 | Live name | JSON file | Trigger | HITL | When to use | Status |
 |-----------|-----------|---------|------|-------------|--------|
-| Hive Error Heal Notify | `error-heal-notify.json` | POST `/webhook/hive-error-heal` (`onReceived`) | **yes** | Normalize failure → optional Scorpion audit + Grok Watchdog; propose PR | repo JSON **FACT** |
+| Hive Error Heal Notify | `error-heal-notify.json` | POST `/webhook/hive-error-heal` (`onReceived`) | **yes** | Normalize failure → Grok Watchdog audit; propose PR | repo JSON **FACT** |
 | Hive Creative Pivot Notify | `creative-pivot-notify.json` | POST `/webhook/hive-creative-pivot` (`onReceived`) | **yes** | fix_attempt≥3 or cost halt → pivot heuristic | ACTIVE **FACT** |
 
 Secondary (**INFERENCE** estate): Advanced Features, Analytics, API Key Management, Asset Management API, Auth & User Mgmt, Compliance, Sustainability, Tenant Onboarding, Work Order Mgmt, Chat AI Agent - Asset Management, My Sub-Workflow 1, n8n hacks — **UNVERIFIED nodes**; document/archive, don’t grow.
@@ -16,7 +16,7 @@ Secondary (**INFERENCE** estate): Advanced Features, Analytics, API Key Manageme
 ## How they work (nodes — from JSON)
 
 ### error-heal-notify.json — *Hive Error Heal Notify*
-**Shape FACT:** `Webhook` → `Normalize Error` (code) → `Register Scorpion` (optional audit, continueOnFail) → `Alert Grok Watchdog`. n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+**Shape FACT:** `Webhook` → `Normalize Error` (code) → `Alert Grok Watchdog`. Register Scorpion leftover (disabled/unconnected) — NOT the audit sink. audits → Watchdog, not Scorpion, not Telegram.
 - **Code FACT:** cid `self-heal-${Date.now()}`; fields route/statusCode/error/stack/repo/service/fixAttempt/toolMethod/businessGoal; text tells Forge branch·patch·test·PR; at `fix_attempt>=3` escalate to `hive-creative-pivot`.
 - job messaging: “Self-heal proposed (Tier 3 merge required)”.
 - **Hosts:** `evenslouis.ca`, `api.telegram.org` · No respondToWebhook.

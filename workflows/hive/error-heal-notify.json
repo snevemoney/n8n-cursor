@@ -16,7 +16,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Normalize inbound failure for optional Scorpion audit + Grok Watchdog sink\nconst body = $json.body || $json;\n\nconst correlationId = body.correlationId || body.correlation_id || `self-heal-${Date.now()}`;\nconst route = body.route || body.path || 'unknown';\nconst statusCode = Number(body.statusCode || body.status_code || 500);\nconst error = body.error || body.message || 'unknown error';\nconst stack = body.stack || body.stackTrace || body.stack_trace || '';\nconst repo = body.repo || 'n8n-cursor';\nconst service = body.service || body.serviceName || 'hive';\nconst fixAttempt = Number(body.fix_attempt || body.fixAttempt || 0);\nconst toolMethod = body.toolMethod || body.tool_method || '';\nconst businessGoal = body.businessGoal || body.business_goal || '';\nconst escalatePivot = fixAttempt >= 3;\nconst status = escalatePivot ? 'escalate_pivot' : 'need_hitl';\n\nconst text = [\n  'Self-heal proposed (Tier 3 merge required)',\n  `cid: ${correlationId}`,\n  `route: ${route}`,\n  `statusCode: ${statusCode}`,\n  `error: ${error}`,\n  stack ? `stack: ${stack}` : '',\n  `repo: ${repo}`,\n  `service: ${service}`,\n  `fixAttempt: ${fixAttempt}`,\n  toolMethod ? `toolMethod: ${toolMethod}` : '',\n  businessGoal ? `businessGoal: ${businessGoal}` : '',\n  escalatePivot\n    ? 'Escalate to hive-creative-pivot (fix_attempt>=3). Forge: branch · patch · test · PR. Operator merges.'\n    : 'Forge: branch · patch · test · PR. Operator merges.'\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    correlationId,\n    status,\n    error,\n    route,\n    statusCode,\n    stack,\n    repo,\n    service,\n    fixAttempt,\n    toolMethod,\n    businessGoal,\n    escalatePivot,\n    text,\n    registerPayload: {\n      serviceName: service || 'hive-error-heal',\n      version: '1.0.0',\n      host: 'evenslouis.ca',\n      port: 443,\n      protocol: 'https',\n      status: 'unhealthy',\n      metadata: {\n        correlationId,\n        source: 'hive-error-heal',\n        jobType: 'ops.self_heal.proposed',\n        summary: text.slice(0, 500),\n        triggeredAt: new Date().toISOString()\n      },\n      tags: ['hive', 'error-heal', 'need_hitl']\n    }\n  }\n}];"
+        "jsCode": "// Normalize inbound failure for Grok Watchdog audit sink.\n// Register Scorpion is leftover — NOT the audit sink.\nconst body = $json.body || $json;\n\nconst correlationId = body.correlationId || body.correlation_id || `self-heal-${Date.now()}`;\nconst route = body.route || body.path || 'unknown';\nconst statusCode = Number(body.statusCode || body.status_code || 500);\nconst error = body.error || body.message || 'unknown error';\nconst stack = body.stack || body.stackTrace || body.stack_trace || '';\nconst repo = body.repo || 'n8n-cursor';\nconst service = body.service || body.serviceName || 'hive';\nconst fixAttempt = Number(body.fix_attempt || body.fixAttempt || 0);\nconst toolMethod = body.toolMethod || body.tool_method || '';\nconst businessGoal = body.businessGoal || body.business_goal || '';\nconst escalatePivot = fixAttempt >= 3;\nconst status = escalatePivot ? 'escalate_pivot' : 'need_hitl';\n\nconst text = [\n  'Self-heal proposed (Tier 3 merge required)',\n  `cid: ${correlationId}`,\n  `route: ${route}`,\n  `statusCode: ${statusCode}`,\n  `error: ${error}`,\n  stack ? `stack: ${stack}` : '',\n  `repo: ${repo}`,\n  `service: ${service}`,\n  `fixAttempt: ${fixAttempt}`,\n  toolMethod ? `toolMethod: ${toolMethod}` : '',\n  businessGoal ? `businessGoal: ${businessGoal}` : '',\n  escalatePivot\n    ? 'Escalate to hive-creative-pivot (fix_attempt>=3). Forge: branch · patch · test · PR. Operator merges.'\n    : 'Forge: branch · patch · test · PR. Operator merges.'\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    correlationId,\n    status,\n    error,\n    route,\n    statusCode,\n    stack,\n    repo,\n    service,\n    fixAttempt,\n    toolMethod,\n    businessGoal,\n    escalatePivot,\n    text,\n    registerPayload: {\n      serviceName: service || 'hive-error-heal',\n      version: '1.0.0',\n      host: 'evenslouis.ca',\n      port: 443,\n      protocol: 'https',\n      status: 'unhealthy',\n      metadata: {\n        correlationId,\n        source: 'hive-error-heal',\n        jobType: 'ops.self_heal.proposed',\n        summary: text.slice(0, 500),\n        triggeredAt: new Date().toISOString()\n      },\n      tags: ['hive', 'error-heal', 'need_hitl']\n    }\n  }\n}];"
       },
       "id": "normalize-error",
       "name": "Normalize Error",
@@ -39,8 +39,9 @@
       "name": "Register Scorpion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [700, 400],
-      "continueOnFail": true
+      "position": [700, 600],
+      "continueOnFail": true,
+      "disabled": true
     },
     {
       "parameters": {
@@ -72,13 +73,6 @@
     "Normalize Error": {
       "main": [
         [
-          { "node": "Register Scorpion", "type": "main", "index": 0 }
-        ]
-      ]
-    },
-    "Register Scorpion": {
-      "main": [
-        [
           { "node": "Alert Grok Watchdog", "type": "main", "index": 0 }
         ]
       ]
@@ -92,7 +86,7 @@
   "active": false,
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL. Register Scorpion is optional audit (continueOnFail), not the sink. Do not import or activate from this PR."
+    "notes": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL (n8n) plus scripts/hive/os/post-log.py / event-bus when local. Register Scorpion is leftover — NOT the audit sink; node deactivated and unconnected. Do not import or activate from this PR."
   },
   "tags": [
     { "name": "hive" },

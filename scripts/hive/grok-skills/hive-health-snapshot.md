@@ -20,3 +20,4 @@
 **Owner agents:** Watchdog Ops, Big Boss, Engineering Lead
 
 n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+audits → Watchdog, not Scorpion, not Telegram. Local: scripts/hive/os/post-log.py / event-bus.

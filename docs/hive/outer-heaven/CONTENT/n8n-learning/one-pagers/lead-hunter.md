@@ -18,7 +18,7 @@ New Leads Workflow · Website Lead Capture with Apollo.io Enrichment… · PI At
 ## How they work (nodes — from JSON)
 
 ### ce-lead-notify.json — *Hive CE Lead Notify*
-**Shape FACT:** `CE Lead Webhook` → `Build Alert` → `Alert Grok Watchdog` → `Respond OK`. n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+**Shape FACT:** `CE Lead Webhook` → `Build Alert` → `Alert Grok Watchdog` → `Respond OK`. audits → Watchdog, not Scorpion, not Telegram.
 - **Code FACT:** cid `ce-lead-${Date.now()}` (or body); fields leadId/name/email/status/source; text includes “Review on /pro (Tier 3 for approve/send): https://evenslouis.ca/pro”.
 - Respond: `{ ok, correlationId, registered, notified }`.
 - **Hosts:** `evenslouis.ca`, `api.telegram.org`

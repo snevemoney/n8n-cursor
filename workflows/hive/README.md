@@ -2,6 +2,7 @@
 
 Operational n8n workflows for the Hive ecosystem. All webhooks use the canonical domain: `https://evenslouis.ca/webhook/*`.
 n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+audits → Watchdog, not Scorpion, not Telegram. Local audit: `scripts/hive/os/post-log.py` / `event-bus`.
 
 ## Workflows
 
@@ -10,8 +11,8 @@ n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
 | `daily-operational-digest.json` | `VOqRWrgrP2Wmoriq` | Aggregates 24h missions + golden paths → Grok Watchdog digest | Schedule (daily 8AM) |
 | `ecosystem-router.json` | `5d1c6bbb-555f-42b2-919d-309d2b4f748d` | Routes inbound signals to target hive workflows | Webhook POST |
 | `founder-signal-ingest.json` | — (new) | Receives and normalizes founder signals from router | Webhook POST |
-| `golden-path-smoke-notify.json` | `TyxDfyLVDtxgqHfC` | Registers golden path smoke test with Scorpion (optional audit) | Webhook POST |
-| `error-heal-notify.json` | `RbQEZ8LYInOIsWoK` | Normalize failure → optional Scorpion audit → Grok Watchdog | Webhook POST |
+| `golden-path-smoke-notify.json` | `TyxDfyLVDtxgqHfC` | Golden path smoke → Grok Watchdog audit (Register Scorpion leftover, unconnected) | Webhook POST |
+| `error-heal-notify.json` | `RbQEZ8LYInOIsWoK` | Normalize failure → Grok Watchdog audit (Register Scorpion leftover, unconnected) | Webhook POST |
 | `ce-lead-notify.json` | `131918c7-1ca3-4205-8d42-cfc802c19a30` | CE Lead alert → Grok Watchdog | Webhook POST |
 | `outer-heaven-report-notify.json` | `e39875ba-a355-43f2-9dd6-dc0e4bcda2ef` | Outer Heaven report → Grok Watchdog | Webhook POST |
 
@@ -31,7 +32,7 @@ Set these in **n8n Settings > Variables** (not in repo). Do not invent a URL or 
 
 | Variable | Used By | Notes |
 |----------|---------|-------|
-| `GROK_WATCHDOG_WEBHOOK_URL` | error-heal, digest, ce-lead, outer-heaven | Watchdog chat webhook from routine "Hive n8n notify". Empty URL = Alert Grok Watchdog fails soft (`continueOnFail`). No Telegram fallback. |
+| `GROK_WATCHDOG_WEBHOOK_URL` | error-heal, digest, ce-lead, outer-heaven, golden-path | Watchdog audit/notify webhook from routine "Hive n8n notify". Empty URL = Alert Grok Watchdog fails soft (`continueOnFail`). No Telegram fallback. Register Scorpion is leftover — NOT the audit sink. |
 | `TELEGRAM_BOT_TOKEN` | digest (deactivated optional) | Not the notify sink. |
 | `HIVE_TELEGRAM_CHAT_ID` | digest (deactivated optional) | Not the notify sink. |
 | `HIVE_DIGEST_TOPIC_ID` | digest (deactivated optional) | Optional message_thread_id if Telegram is re-enabled HITL. |
@@ -73,4 +74,4 @@ These require human-in-the-loop and cannot be automated from this PR:
 1. **Activate `founder-signal-ingest`** — Required for Ecosystem Router to stop returning 404 on `hive-founder-signal` forwards.
 2. **Set `GROK_WATCHDOG_WEBHOOK_URL`** — Operator sets the Watchdog routine URL in n8n Variables. Empty = Alert Grok Watchdog fails soft. No URL/secret in repo.
 3. **Do not import or activate from this PR** — HITL only after review.
-4. **Verify golden path smoke** — After a later HITL import, trigger golden-path-smoke-notify and confirm Scorpion register stays optional audit (`continueOnFail`).
+4. **Do not treat Scorpion as audit** — Register Scorpion nodes stay leftover (disabled/unconnected). audits → Watchdog, not Scorpion, not Telegram.

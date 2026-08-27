@@ -14,6 +14,7 @@ NOTIFY_FILES = [
     "ce-lead-notify.json",
     "outer-heaven-report-notify.json",
     "daily-operational-digest.json",
+    "golden-path-smoke-notify.json",
 ]
 
 HARDCODED_SECRET_PATTERNS = (
@@ -73,12 +74,27 @@ def assert_no_telegram_sink(name: str, wf: dict) -> None:
         fail(f"{name}: active Telegram send '{node.get('name')}' — sink must be Grok Watchdog")
 
 
-def assert_register_optional(name: str, wf: dict) -> None:
+def connected_targets(wf: dict) -> set[str]:
+    targets: set[str] = set()
+    for hops in (wf.get("connections") or {}).values():
+        for branch in hops.get("main") or []:
+            for link in branch or []:
+                if link.get("node"):
+                    targets.add(link["node"])
+    return targets
+
+
+def assert_register_leftover(name: str, wf: dict) -> None:
     reg = nodes_by_name(wf).get("Register Scorpion")
     if not reg:
         return
-    if reg.get("continueOnFail") is not True:
-        fail(f"{name}: Register Scorpion must be continueOnFail optional audit")
+    if reg.get("disabled") is not True:
+        fail(f"{name}: Register Scorpion must be deactivated (leftover, NOT the audit sink)")
+    if "Register Scorpion" in connected_targets(wf):
+        fail(f"{name}: Register Scorpion must be unconnected (leftover, NOT the audit sink)")
+    notes = str((wf.get("meta") or {}).get("notes") or "")
+    if "NOT the audit sink" not in notes:
+        fail(f"{name}: notes must say Register Scorpion is NOT the audit sink")
 
 
 def assert_no_secrets(name: str, wf: dict) -> None:
@@ -99,7 +115,7 @@ def main() -> None:
             fail(f"{name}: active must stay false in repo")
         assert_watchdog(name, wf)
         assert_no_telegram_sink(name, wf)
-        assert_register_optional(name, wf)
+        assert_register_leftover(name, wf)
         assert_no_secrets(name, wf)
         print(f"OK {name}: Grok Watchdog sink")
 
