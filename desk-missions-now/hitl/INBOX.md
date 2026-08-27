@@ -8,13 +8,19 @@ send: removed
 clock: parked
 ---
 
-# HITL inbox — after Watchdog GRADE `X80ljdCPM_U`
+# HITL inbox — after Watchdog GRADE `X80ljdCPM_U` + wealth leftover close
 
 Format only. Evens is the only person who Saves or Activates. Yellow `grokbot_orphans` = **8**. Continue. Do not restore.
 
 **SSOT:** `desk-missions-now/hitl/INBOX.md`. Doctrine: `desk-missions-now/CLOUD-HOST.md`.
 
-## Closed this sitting
+## Closed 2026-08-27 sitting (wealth leftovers)
+
+- **Watchdog GRADE landed:** `desk-missions-now/watchdog/WEALTH-V2-HOST-GATE-GRADE.md` = **pass**. Not paper-PROVEN. No encode.
+- **Glass** `8e8d7b8c-a119-11f1-b532-320a589b8025` **Wealth daily show:** API cannot Save. Publish / YouTube stay HITL. **No Enable this sitting.** Not a click request.
+- Cursor Cloud `/workspace` is the **wrong Remotion host**, not a missing tree.
+
+## Closed 2026-08-25 sitting
 
 - **Watchdog GRADE landed:** `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` = **pass**. Hold-outs and Forge attempt were not rewritten. Not paper-PROVEN.
 
@@ -42,7 +48,7 @@ EVENS: leftover
 
 - Save/activate remaining hive Automations is HITL. MCP cannot enable. Do not claim Active.
 - Slack leftover “Summarize changes daily” — unused. Do not hijack. Do not delete unless Evens said delete.
-- `/workspace` remotion trees MISSING on the Mac. Copy stays Evens. Do not invent packets.
+- Cursor Cloud `/workspace` is the wrong Remotion host, not a missing tree. Copy stays Evens. Do not invent packets. Do not Enable Glass.
 - Factory-OS Grok chat reader = next named human-run bite, not a Cloud invent slug.
 - Skill `.md` missing on `main` (`eval-then-wrap-tools` · `golden-test-loop` · `send-removed` · `ask-principal`) is leftover sync — do not remint 325 to close it.
 
