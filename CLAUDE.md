@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Jump packet
+
+If `~/.grokbot/jumps/CURRENT.md` exists AND its status is ready, pick up that task first.
+Do the jump, then continue the sitting. Do not abandon the rest of the session.
+This is a jump packet only. Claude stays on-tape. Do not treat Claude as a hive desk.
+The packet already lives on the Mac at `~/.grokbot/jumps/CURRENT.md`.
+Do not invent a new jump system, JSON schema, or workflow engine.
+If the file is missing or status is not ready, skip this and work the sitting as usual.
+
 ## Project Overview
 
 This is a **monorepo workspace** containing multiple projects:
