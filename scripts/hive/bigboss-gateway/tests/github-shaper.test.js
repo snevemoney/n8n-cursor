@@ -98,4 +98,20 @@ describe('GitHub shaper (fixture, no network)', () => {
     assert.deepEqual(result.pulls, []);
     assert.deepEqual(result.commits, []);
   });
+
+  it('requests open PRs newest-updated first', async () => {
+    const urls = [];
+    await fetchGithubLive({
+      fetchImpl: async (url) => {
+        urls.push(String(url));
+        return { ok: true, json: async () => [] };
+      },
+    });
+    const pullUrls = urls.filter((u) => u.includes('/pulls?'));
+    assert.ok(pullUrls.length >= 1);
+    for (const url of pullUrls) {
+      assert.match(url, /sort=updated/);
+      assert.match(url, /direction=desc/);
+    }
+  });
 });

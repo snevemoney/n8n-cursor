@@ -81,7 +81,7 @@ export async function fetchGithubLive({
 
   try {
     for (const repo of REPOS) {
-      const prUrl = `https://api.github.com/repos/${repo.owner}/${repo.name}/pulls?state=open&per_page=20&sort=updated`;
+      const prUrl = `https://api.github.com/repos/${repo.owner}/${repo.name}/pulls?state=open&per_page=20&sort=updated&direction=desc`;
       const prRes = await fetchImpl(prUrl, { headers });
       if (!prRes.ok) {
         throw new Error(`pulls_${repo.name}_${prRes.status}`);
