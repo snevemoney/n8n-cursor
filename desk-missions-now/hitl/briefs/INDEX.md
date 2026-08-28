@@ -40,6 +40,6 @@ No 1803 walk. No Grok `/workspace` full-thread dump (Mac-only path → honest MI
 
 **Desk → briefs (1–2):** Forge → `signal-train-1` + `workspace-missing` · Watchdog → `signal-train-1` + `color-4823` · Researcher → `transcript-honesty` + `signal-retrieve` · HITL → `90-percent-automate-247` + `01a6b95f` · Comms → send-removed (`01a6b95f` Slack-out).
 
-Cloud invent leftover: PR 47 `factory-os-train-plane`. Next id: `X80ljdCPM_U`.
+Cloud invent leftover: PR 47 `factory-os-train-plane`. Current id: `2J3uX8iRNng` (hold-outs filed). Prior PASS: `X80ljdCPM_U`.
 
 [[CLOUD-HOST]] · [[memories]] · [[HIVE-AUTOMATION-PACK]] · [[GOAL-GAP-BOARD]]

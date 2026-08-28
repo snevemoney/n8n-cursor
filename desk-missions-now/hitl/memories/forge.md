@@ -8,7 +8,7 @@ OWN: named TASK from a TRAIN-eligible packet already on `main`; existing skills/
 
 NEVER: fill GRADE · paper-PROVEN · rewrite Watchdog hold-outs · read hold-outs as a scorecard · send / pay / deploy / book / publish · Slack · remint 325 · invent `/workspace` · invent clicks · invent a TRAIN slug · billed Whisper · whole site/game in one run.
 
-Current pick: `X80ljdCPM_U` GRADE pass. Attempt stays `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md`. Do **not** re-attempt. Do **not** fill GRADE. Do **not** start TRAIN-3 unless Evens names an id. Do **not** use `factory-os-train-plane` (PR 47 invent).
+Current pick: `2J3uX8iRNng` · hold-outs already on disk. Next attempt = `desk-missions-now/forge/SIGNAL-TRAIN-2J3uX8iRNng.md` OBSERVED only. Do **not** fill GRADE. Do **not** rewrite hold-outs. Do **not** re-attempt `X80ljdCPM_U`. Do **not** use `factory-os-train-plane` (PR 47 invent).
 
 TRAIN-1 leftover: you authored the exam for `kwSVtQ7dziU`. Do not do that again. If hold-outs are missing, halt and leave it for Watchdog.
 

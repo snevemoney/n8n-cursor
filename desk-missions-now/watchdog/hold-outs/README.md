@@ -12,6 +12,6 @@ Watchdog writes the hidden exam **before** Forge attempts. Builder never fills G
 
 ## Next exam
 
-`{id}` = `X80ljdCPM_U` — **filed** `X80ljdCPM_U.md` (Watchdog, 2026-08-25). Next Cloud TRAIN = Forge OBSERVED only. Do not rewrite this exam. Do not GRADE in the attempt sitting.
+`{id}` = `2J3uX8iRNng` — **filed** `2J3uX8iRNng.md` (Watchdog, 2026-08-28). Next Cloud TRAIN = Forge OBSERVED only. Do not rewrite this exam. Do not GRADE in the attempt sitting.
 
-TRAIN-1 leftover (Mac archive): Forge authored `SIGNAL-TRAIN-1.md` for `kwSVtQ7dziU`. Do not rewrite it. Do not re-train that id.
+Prior exams (do not rewrite / re-train): `X80ljdCPM_U.md` (Watchdog, 2026-08-25, GRADE pass) · TRAIN-1 leftover (Mac archive) Forge authored `SIGNAL-TRAIN-1.md` for `kwSVtQ7dziU`.
