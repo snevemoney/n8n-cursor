@@ -1,12 +1,10 @@
 # CLAUDE.md
 
-Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.
+Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
 
-Read [`docs/MATRIX.md`](docs/MATRIX.md) then `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`. Read all four folders under `CONTENT/os/sessions/`.
+Open Slack workspace **Hive** → `#hive` (`C0BTH1TMFC5`). Then read [`docs/MATRIX.md`](docs/MATRIX.md) and `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`. Read all four folders under `CONTENT/os/sessions/`. Exact SSOT message: `docs/hive/outer-heaven/CONTENT/os/sessions/SLACK.md`.
 
-Absolute paths this Mac can attach:
-- Repo INDEX: `/Users/evenslouis/n8n-cursor-worktrees/hive-session-matrix/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`
-- Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`
+Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`
 
 This file also provides guidance when working with code in this repository.
 

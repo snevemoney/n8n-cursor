@@ -7,6 +7,10 @@ at: 2026-08-29T19:28:34Z
 
 #os
 
+Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
+
+Slack: `#hive` (`C0BTH1TMFC5`) · [[SLACK]]
+
 Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.
 
 | surface | id | title | date | path |

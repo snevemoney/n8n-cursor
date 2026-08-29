@@ -25,7 +25,7 @@ description: >-
 - `skill-from-session` mints a skill after a winning run. This skill only **reads**.
 - Factory-OS reminder Automation writes `FACTORY-OS-NEXT.md`. It does not run this CLI.
 
-**Law:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Refresh: `python3 scripts/hive/os/sync-sessions.py`. This CLI is the one-id Grok deep read.
+**Law:** Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting. Open `#hive`. Refresh: `python3 scripts/hive/os/sync-sessions.py`. This CLI is the one-id Grok deep read.
 
 ## When
 

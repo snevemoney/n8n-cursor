@@ -1,6 +1,8 @@
 {
   "at": "2026-08-29T19:28:34Z",
-  "law": "Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.",
+  "law": "Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.",
+  "four_x_four": "Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.",
+  "slack": {"workspace": "Hive", "channel": "#hive", "channel_id": "C0BTH1TMFC5"},
   "rows": [
     {
       "surface": "cursor",
