@@ -57,6 +57,8 @@ CLAUDE_SESSIONS = Path.home() / "Library/Application Support/Claude/claude-code-
 CLAUDE_HISTORY = Path.home() / ".claude/history.jsonl"
 CHATGPT_CONV = Path.home() / "Library/Application Support/com.openai.chat"
 CODEX_INDEX = Path.home() / ".codex/session_index.jsonl"
+CHATGPT_STUB_RE = re.compile(r"^ChatGPT conversation [0-9a-fA-F-]{8,}$")
+CHATGPT_TITLES_NAME = "chatgpt-titles.json"
 
 
 def now_iso() -> str:
@@ -214,23 +216,128 @@ def collect_claude_heads(limit: int) -> list[dict[str, Any]]:
     return rows
 
 
-def collect_chatgpt_heads(limit: int) -> list[dict[str, Any]]:
+def is_real_chatgpt_title(title: str, sid: str = "") -> bool:
+    """True when title is a human name, not the id-stub fallback."""
+    text = WS_RE.sub(" ", (title or "").strip())
+    if not text:
+        return False
+    if CHATGPT_STUB_RE.match(text):
+        return False
+    if sid and text in {sid, sid[:13]}:
+        return False
+    if text.lower() in {"chatgpt", "new chat", "untitled"}:
+        return False
+    return True
+
+
+def chatgpt_titles_path(os_root: Path) -> Path:
+    return os_root / "sessions" / CHATGPT_TITLES_NAME
+
+
+def _title_from_obj(obj: Any) -> tuple[str, str]:
+    if not isinstance(obj, dict):
+        return "", ""
+    sid = str(obj.get("conversationId") or obj.get("conversation_id") or obj.get("id") or "")
+    title = str(obj.get("title") or obj.get("name") or "").strip()
+    return sid, title
+
+
+def harvest_chatgpt_desktop_titles(app_root: Path | None = None) -> dict[str, str]:
+    """Plaintext titles from the ChatGPT desktop app. Never opens .data blobs."""
+    root = app_root or CHATGPT_CONV
+    out: dict[str, str] = {}
+    if not root.is_dir():
+        return out
+    for path in root.rglob("automations.json"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        blobs: list[Any] = [data]
+        if isinstance(data, dict):
+            blobs.extend(data.get("automationResponses") or [])
+            blobs.extend(data.get("automationSessions") or [])
+            blobs.extend(data.get("requests") or [])
+        for obj in blobs:
+            sid, title = _title_from_obj(obj)
+            if sid and is_real_chatgpt_title(title, sid):
+                out[sid] = clean_ask(title, 120)
+    overlay = root / CHATGPT_TITLES_NAME
+    if overlay.is_file():
+        out.update(load_chatgpt_title_overlay(overlay))
+    return out
+
+
+def load_chatgpt_title_overlay(path: Path) -> dict[str, str]:
+    if not path.is_file():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    rows: list[Any]
+    if isinstance(raw, dict) and isinstance(raw.get("titles"), dict):
+        rows = [{"id": k, "title": v} for k, v in raw["titles"].items()]
+    elif isinstance(raw, dict) and isinstance(raw.get("rows"), list):
+        rows = [r for r in raw["rows"] if isinstance(r, dict) and r.get("surface") in (None, "chatgpt")]
+    else:
+        return {}
+    out: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        sid = str(row.get("id") or row.get("conversationId") or "")
+        title = str(row.get("title") or "")
+        if sid and is_real_chatgpt_title(title, sid):
+            out[sid] = clean_ask(title, 120)
+    return out
+
+
+def apply_chatgpt_titles(rows: list[dict[str, Any]], title_map: dict[str, str]) -> list[dict[str, Any]]:
+    for row in rows:
+        sid = str(row.get("id") or "")
+        mapped = title_map.get(sid) or ""
+        if sid and is_real_chatgpt_title(mapped, sid):
+            row["title"] = mapped
+            if not is_real_chatgpt_title(str(row.get("ask") or ""), sid):
+                row["ask"] = mapped
+    return rows
+
+
+def persist_chatgpt_titles(path: Path, title_map: dict[str, str], *, at: str) -> None:
+    existing = load_chatgpt_title_overlay(path)
+    merged = {**existing, **{k: v for k, v in title_map.items() if is_real_chatgpt_title(v, k)}}
+    if not merged:
+        return
+    write_text(
+        path,
+        json.dumps({"at": at, "source": "chatgpt-desktop", "titles": dict(sorted(merged.items()))}, indent=2)
+        + "\n",
+    )
+
+
+def collect_chatgpt_heads(limit: int, *, title_map: dict[str, str] | None = None, app_root: Path | None = None) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    if not CHATGPT_CONV.is_dir():
+    root = app_root or CHATGPT_CONV
+    if not root.is_dir():
         return rows
-    folders = sorted(CHATGPT_CONV.glob("conversations-v3-*"))
+    folders = sorted(root.glob("conversations-v3-*"))
     files: list[Path] = []
     for folder in folders:
         files.extend(folder.glob("*.data"))
     files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    titles = title_map if title_map is not None else harvest_chatgpt_desktop_titles(root)
     for path in files[:limit]:
+        sid = path.stem
+        mapped = titles.get(sid) or ""
+        title = mapped if is_real_chatgpt_title(mapped, sid) else f"ChatGPT conversation {sid[:13]}"
         rows.append(
             {
                 "surface": "chatgpt",
-                "id": path.stem,
-                "title": f"ChatGPT conversation {path.stem[:13]}",
+                "id": sid,
+                "title": title,
                 "mtime": datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).isoformat(),
-                "ask": "Local ChatGPT conversation on this Mac.",
+                "ask": title if is_real_chatgpt_title(title, sid) else "Local ChatGPT conversation on this Mac.",
                 "path": str(path),
             }
         )
@@ -266,10 +373,23 @@ def collect_codex_heads(limit: int) -> list[dict[str, Any]]:
     return rows
 
 
-def collect_all(limit: int) -> dict[str, list[dict[str, Any]]]:
-    chatgpt = collect_chatgpt_heads(limit)
+def chatgpt_title_map(repo: Path | None = None, *, app_root: Path | None = None) -> dict[str, str]:
+    """Desktop sidecars win, then the committed overlay, then last INDEX real titles."""
+    root = repo or REPO
+    store = repo_os_root(root) / "sessions"
+    overlay: dict[str, str] = {}
+    overlay.update(load_chatgpt_title_overlay(store / "INDEX.json"))
+    overlay.update(load_chatgpt_title_overlay(store / CHATGPT_TITLES_NAME))
+    overlay.update(harvest_chatgpt_desktop_titles(app_root))
+    return overlay
+
+
+def collect_all(limit: int, *, repo: Path | None = None) -> dict[str, list[dict[str, Any]]]:
+    titles = chatgpt_title_map(repo)
+    chatgpt = collect_chatgpt_heads(limit, title_map=titles)
     if len(chatgpt) < limit:
         chatgpt.extend(collect_codex_heads(max(0, limit - len(chatgpt))))
+        apply_chatgpt_titles(chatgpt, titles)
     return {
         "cursor": collect_cursor_heads(limit),
         "grok": [r for r in collect_grok_heads(limit) if not r.get("miss")],
@@ -584,6 +704,14 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
             for row in (by_surface.get(surface) or [])
         ]}, indent=2) + "\n",
     )
+    persist_chatgpt_titles(
+        chatgpt_titles_path(os_root),
+        {
+            str(row.get("id") or ""): str(row.get("title") or "")
+            for row in (by_surface.get("chatgpt") or [])
+        },
+        at=at,
+    )
     pointer = "\n".join(
         [
             "---",
@@ -680,7 +808,11 @@ def _targets(args: argparse.Namespace) -> list[Path]:
 
 
 def cmd_write(args: argparse.Namespace) -> int:
-    packed = heads_from_json(Path(args.heads_json)) if args.heads_json else collect_all(args.limit)
+    packed = (
+        heads_from_json(Path(args.heads_json))
+        if args.heads_json
+        else collect_all(args.limit, repo=Path(args.repo))
+    )
     at = now_iso()
     date = today()
     wrote: list[dict[str, str]] = []
@@ -710,7 +842,11 @@ def cmd_write(args: argparse.Namespace) -> int:
 
 
 def cmd_print(args: argparse.Namespace) -> int:
-    packed = heads_from_json(Path(args.heads_json)) if args.heads_json else collect_all(args.limit)
+    packed = (
+        heads_from_json(Path(args.heads_json))
+        if args.heads_json
+        else collect_all(args.limit, repo=Path(args.repo))
+    )
     said_rel = latest_said_rel(repo_os_root(Path(args.repo)) / "inbox")
     print(
         render_paste_pack(

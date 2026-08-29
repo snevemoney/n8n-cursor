@@ -75,6 +75,54 @@ class SessionMatrixTest(unittest.TestCase):
             got = MOD.next_said_path(inbox, "2026-08-29")
             self.assertEqual(got.name, "2026-08-29-said-3.md")
 
+    def test_chatgpt_desktop_titles_not_stubs(self) -> None:
+        sid = "6a7b2776-ba2c-83ea-9a9e-37f6c02aeaa6"
+        self.assertFalse(MOD.is_real_chatgpt_title(f"ChatGPT conversation {sid[:13]}", sid))
+        self.assertTrue(MOD.is_real_chatgpt_title("Daily Wealth & Stock Ranking", sid))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            auto = root / "automation-repository-user-x" / "automations.json"
+            auto.parent.mkdir(parents=True)
+            auto.write_text(
+                json.dumps(
+                    {
+                        "automationResponses": [
+                            {
+                                "conversationId": sid,
+                                "title": "Daily Wealth & Stock Ranking",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            conv = root / "conversations-v3-x"
+            conv.mkdir()
+            (conv / f"{sid}.data").write_bytes(b"\x00not-a-title")
+            (conv / "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.data").write_bytes(b"\x00x")
+            titles = MOD.harvest_chatgpt_desktop_titles(root)
+            self.assertEqual(titles[sid], "Daily Wealth & Stock Ranking")
+            rows = MOD.collect_chatgpt_heads(8, title_map=titles, app_root=root)
+            by_id = {r["id"]: r["title"] for r in rows}
+            self.assertEqual(by_id[sid], "Daily Wealth & Stock Ranking")
+            self.assertTrue(by_id["aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"].startswith("ChatGPT conversation"))
+            os_root = root / "os"
+            os_root.mkdir()
+            MOD.write_session_store(
+                os_root,
+                {"cursor": [], "grok": [], "claude": [], "chatgpt": rows},
+                at="2026-08-29T19:00:00Z",
+            )
+            overlay = json.loads((os_root / "sessions" / "chatgpt-titles.json").read_text(encoding="utf-8"))
+            self.assertEqual(overlay["titles"][sid], "Daily Wealth & Stock Ranking")
+            again = MOD.collect_chatgpt_heads(
+                8,
+                title_map=MOD.load_chatgpt_title_overlay(os_root / "sessions" / "chatgpt-titles.json"),
+                app_root=root,
+            )
+            self.assertEqual(again[0]["title"] if again[0]["id"] == sid else by_id[sid], "Daily Wealth & Stock Ranking")
+            self.assertTrue(all(r["id"] != sid or r["title"] == "Daily Wealth & Stock Ranking" for r in again))
+
 
 if __name__ == "__main__":
     unittest.main()

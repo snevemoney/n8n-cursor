@@ -1,6 +1,6 @@
 ---
 tags: [os]
-at: 2026-08-29T18:58:29Z
+at: 2026-08-29T19:28:34Z
 ---
 
 # PASTE-PACK
@@ -19,18 +19,18 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 
 ## Current overlay
 
-Read `inbox/2026-08-29-said-1.md` and `docs/MATRIX.md` if this app can see the repo. Do not install ChatGPT / Claude / Codex into this factory. Do not scoop dirty `hive/desk`. Publish / send / pay / deploy / book stay Evens.
+Read `inbox/2026-08-29-said-2.md` and `docs/MATRIX.md` if this app can see the repo. Do not install ChatGPT / Claude / Codex into this factory. Do not scoop dirty `hive/desk`. Publish / send / pay / deploy / book stay Evens.
 
 ## Latest Cursor heads (ids only)
 
 - `cf314c59-98f1-462a-824e-edb8e887851e` (n8n-cursor) — can you use remotion to visualize and make a full video of this reports like a presentation or youtube video?: Yes. I pulled a fresh read on the portfolio you m
+- `adb853dc-1b23-4d00-aae9-6aaa046acb68` (n8n-cursor) — Evens: “can the memory of all chat session continue in cursor, grok bot, chatgpt and claude? do they share obsidian? do you give me prompts of context summaries
 - `97db26df-d106-448a-a1ea-4b1a5a6fbe11` (n8n-cursor) — Evens’ Mac Grok Bot cannot reconnect its computer. Screenshot 2026-08-29 ~1:30 AM: modal **“Recovering Grok Bot's Computer”** / “Taking longer than expected” /
 - `b65e786d-5002-4a4e-ad07-dcc7a2854333` (n8n-cursor) — Evens: “continue where you left off” and quoted: Grok last capped 2026-08-25. Catch-up is on main now (PR 67, 89ea244f). Forge, Watchdog, HITL Operator, Researc
 - `19efc1bd-2ca1-4e17-af93-2d921b40ba8f` (n8n-cursor) — Evens: “remove it. i dont need it” — Serena (Oraios), the local dashboard at http://127.0.0.1:24282/dashboard/index.html, Cursor MCP `plugin-serena-serena`. Rem
 - `62740280-099f-4538-a077-3023e64b4123` (n8n-cursor) — Evens: the branch list must look professional. There are too many branches. You are CTO — prune. Do not ask him which ones to keep. Repo: `/Users/evenslouis/n8n
 - `4f71906c-0c86-437b-bd62-15e22ed843f9` (n8n-cursor) — Evens said **fix it**. The Wealth daily show automation keeps failing on **Cloud** (wrong host / stale “tree missing”). Remotion **is** on `origin/main` @ `3ffd
 - `a9385d55-6f8e-44a9-8959-0fe55861d496` (n8n-cursor) — Evens said **go**. Context: we deleted a 53-day-old Higgsfield MCP token. He was told to **fully quit Cursor**, reopen, and Clerk-login Higgsfield MCP (not remo
-- `b54091d1-0a78-4df3-90ac-3507660c1824` (n8n-cursor) — Can you connect via SSH? It is in the work at the moment installing on macos?
 
 ## Latest Grok heads (ids only)
 
@@ -48,4 +48,4 @@ Read `inbox/2026-08-29-said-1.md` and `docs/MATRIX.md` if this app can see the r
 - This pack is not a live tool bridge. If the app has the repo, use native tools (Claude artifacts/projects, ChatGPT canvas/memory, Codex CLI in-repo).
 - Remotion encode stays Grok desktop or Mac. Refresh: `python3 scripts/hive/os/session-matrix.py write` on the Mac.
 
-Generated 2026-08-29T18:58:29Z. [[SESSION-INDEX]] · [[hot]] · [[HOST]]
+Generated 2026-08-29T19:28:34Z. [[SESSION-INDEX]] · [[hot]] · [[HOST]]
