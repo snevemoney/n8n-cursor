@@ -1,6 +1,6 @@
 ---
 tags: [os]
-at: 2026-08-29T18:58:29Z
+at: 2026-08-29T19:28:34Z
 ---
 
 # sessions INDEX
@@ -11,7 +11,8 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 
 | surface | id | title | date | path |
 |---|---|---|---|---|
-| cursor | `cf314c59-98f1-462a-824e-edb8e887851e` | can you use remotion to visualize and make a full video of this reports like a p | 2026-08-29T18:54:57.321444+00:00 | `sessions/cursor/cf314c59-98f1-462a-824e-edb8e887851e.md` |
+| cursor | `cf314c59-98f1-462a-824e-edb8e887851e` | can you use remotion to visualize and make a full video of this reports like a p | 2026-08-29T19:18:07.729184+00:00 | `sessions/cursor/cf314c59-98f1-462a-824e-edb8e887851e.md` |
+| cursor | `adb853dc-1b23-4d00-aae9-6aaa046acb68` | Evens: “can the memory of all chat session continue in cursor, grok bot, chatgpt | 2026-08-29T19:09:35.454505+00:00 | `sessions/cursor/adb853dc-1b23-4d00-aae9-6aaa046acb68.md` |
 | cursor | `97db26df-d106-448a-a1ea-4b1a5a6fbe11` | Evens’ Mac Grok Bot cannot reconnect its computer. Screenshot 2026-08-29 ~1:30 A | 2026-08-29T05:44:15.427353+00:00 | `sessions/cursor/97db26df-d106-448a-a1ea-4b1a5a6fbe11.md` |
 | cursor | `b65e786d-5002-4a4e-ad07-dcc7a2854333` | Evens: “continue where you left off” and quoted: Grok last capped 2026-08-25. Ca | 2026-08-26T20:43:16.522994+00:00 | `sessions/cursor/b65e786d-5002-4a4e-ad07-dcc7a2854333.md` |
 | cursor | `19efc1bd-2ca1-4e17-af93-2d921b40ba8f` | Evens: “remove it. i dont need it” — Serena (Oraios), the local dashboard at htt | 2026-08-26T20:38:00.302601+00:00 | `sessions/cursor/19efc1bd-2ca1-4e17-af93-2d921b40ba8f.md` |
@@ -30,7 +31,6 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 | cursor | `2637d593-314d-4bba-a4ed-b26f6f43bcf7` | You are extending the signal domain map. Workspace: /Users/evenslouis/n8n-cursor | 2026-08-25T05:16:04.188389+00:00 | `sessions/cursor/2637d593-314d-4bba-a4ed-b26f6f43bcf7.md` |
 | cursor | `6ad3f492-62df-4f59-92d5-fc01aaf7bccb` | Evens (2026-08-21) authorized the ASK: **“allow first sync / disk work before we | 2026-08-21T22:04:17.956022+00:00 | `sessions/cursor/6ad3f492-62df-4f59-92d5-fc01aaf7bccb.md` |
 | cursor | `9107c790-7e1e-4825-84b2-ba62f823ca06` | Evens (2026-08-21): **“give grok bot access to the_billion_dollar_vault even whe | 2026-08-21T21:50:33.689987+00:00 | `sessions/cursor/9107c790-7e1e-4825-84b2-ba62f823ca06.md` |
-| cursor | `d695a750-c412-4051-a329-fbe2cab5ca93` | Desk read what task our os is giving us. (already opened on your cursor web prev | 2026-08-16T05:53:35.928849+00:00 | `sessions/cursor/d695a750-c412-4051-a329-fbe2cab5ca93.md` |
 | grok | `5ef2fff1-80fc-4923-8e32-e2914617475d` | Memory & chronicle | 2026-08-29T13:20:57.771000+00:00 | `sessions/grok/5ef2fff1-80fc-4923-8e32-e2914617475d.md` |
 | grok | `34ae8e2e-4d02-4885-b88a-433d1e4f5f5b` | Evidence & OSINT | 2026-08-29T13:19:13.921000+00:00 | `sessions/grok/34ae8e2e-4d02-4885-b88a-433d1e4f5f5b.md` |
 | grok | `298d4dd9-f402-4525-8fca-50e8c474dd85` | Autonomous engineer | 2026-08-29T03:33:52.475000+00:00 | `sessions/grok/298d4dd9-f402-4525-8fca-50e8c474dd85.md` |
@@ -48,6 +48,7 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 | grok | `fe2669ee-3d55-41f0-ad59-d3aaf54704df` | Work & compensation | 2026-08-24T13:10:15.392000+00:00 | `sessions/grok/fe2669ee-3d55-41f0-ad59-d3aaf54704df.md` |
 | grok | `91144bc2-f1ed-47cb-b17e-cd115ac40ef0` | Approval gateway | 2026-08-22T16:39:09.717000+00:00 | `sessions/grok/91144bc2-f1ed-47cb-b17e-cd115ac40ef0.md` |
 | grok | `b33e7134-3c30-4304-adf3-7eb7ad7e8514` | Email triage & drafts | 2026-08-20T11:03:52.811000+00:00 | `sessions/grok/b33e7134-3c30-4304-adf3-7eb7ad7e8514.md` |
+| claude | `local_91fc5abd-c9f9-44e5-9556-15945d8c2a32` | Weekly arch review | 2026-08-29T19:18:39.266000+00:00 | `sessions/claude/local_91fc5abd-c9f9-44e5-9556-15945d8c2a32.md` |
 | claude | `local_5ee91c04-89ee-4056-bf58-437a7cbf70a5` | Build sentinel | 2026-07-14T20:58:12.511000+00:00 | `sessions/claude/local_5ee91c04-89ee-4056-bf58-437a7cbf70a5.md` |
 | claude | `local_e0724c1c-1754-47a1-a1f0-90ab1a0e9931` | Vps health check | 2026-07-15T10:10:42.265000+00:00 | `sessions/claude/local_e0724c1c-1754-47a1-a1f0-90ab1a0e9931.md` |
 | claude | `local_ba41f471-0bad-47c6-a344-c7b37644e39d` | Build sentinel | 2026-04-03T23:27:04.737000+00:00 | `sessions/claude/local_ba41f471-0bad-47c6-a344-c7b37644e39d.md` |
@@ -67,8 +68,19 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 | claude | `local_2255d590-1746-4291-962c-193917dec6fd` | Phase tracker | 2026-07-14T20:25:47.936000+00:00 | `sessions/claude/local_2255d590-1746-4291-962c-193917dec6fd.md` |
 | claude | `local_466c6b8b-f2a8-4f52-ad7b-6ed17ddf25a0` | Daily code review | 2026-07-14T20:25:17.425000+00:00 | `sessions/claude/local_466c6b8b-f2a8-4f52-ad7b-6ed17ddf25a0.md` |
 | claude | `local_e8818580-da59-4500-a57a-429a14d7904e` | Vps health check | 2026-07-09T02:13:52.206000+00:00 | `sessions/claude/local_e8818580-da59-4500-a57a-429a14d7904e.md` |
-| claude | `local_e435356b-a002-4c89-b6fa-843a96435739` | Vps health check | 2026-07-09T01:20:01.891000+00:00 | `sessions/claude/local_e435356b-a002-4c89-b6fa-843a96435739.md` |
-| chatgpt | `6a7b2776-ba2c-83ea-9a9e-37f6c02aeaa6` | ChatGPT conversation 6a7b2776-ba2c | 2026-08-26T15:15:14.002078+00:00 | `sessions/chatgpt/6a7b2776-ba2c-83ea-9a9e-37f6c02aeaa6.md` |
+| chatgpt | `6a932df0-8e54-83e9-a691-5c1c0881144e` | ChatGPT conversation 6a932df0-8e54 | 2026-08-29T19:08:41.061066+00:00 | `sessions/chatgpt/6a932df0-8e54-83e9-a691-5c1c0881144e.md` |
+| chatgpt | `6a932d51-dc2c-83ea-9a74-ab1552052611` | ChatGPT conversation 6a932d51-dc2c | 2026-08-29T19:06:06.496977+00:00 | `sessions/chatgpt/6a932d51-dc2c-83ea-9a74-ab1552052611.md` |
+| chatgpt | `6a7b2776-ba2c-83ea-9a9e-37f6c02aeaa6` | Daily Wealth & Stock Ranking | 2026-08-29T19:04:05.783604+00:00 | `sessions/chatgpt/6a7b2776-ba2c-83ea-9a9e-37f6c02aeaa6.md` |
+| chatgpt | `6a8f06f2-a49c-83e9-bc28-2803fab67d77` | ChatGPT conversation 6a8f06f2-a49c | 2026-08-29T19:01:00.792270+00:00 | `sessions/chatgpt/6a8f06f2-a49c-83e9-bc28-2803fab67d77.md` |
+| chatgpt | `6a8f3570-3a58-83ea-b701-e961df0fb8ef` | ChatGPT conversation 6a8f3570-3a58 | 2026-08-29T19:01:00.790895+00:00 | `sessions/chatgpt/6a8f3570-3a58-83ea-b701-e961df0fb8ef.md` |
+| chatgpt | `6a90be77-2124-83e9-87f1-fd2903fa3075` | ChatGPT conversation 6a90be77-2124 | 2026-08-29T19:01:00.785227+00:00 | `sessions/chatgpt/6a90be77-2124-83e9-87f1-fd2903fa3075.md` |
+| chatgpt | `6a90d8a4-0238-83ea-a4de-95e6fa535fc6` | ChatGPT conversation 6a90d8a4-0238 | 2026-08-29T19:01:00.783974+00:00 | `sessions/chatgpt/6a90d8a4-0238-83ea-a4de-95e6fa535fc6.md` |
+| chatgpt | `6a90eafd-ec04-83e9-b9c9-49b02317d002` | ChatGPT conversation 6a90eafd-ec04 | 2026-08-29T19:01:00.779820+00:00 | `sessions/chatgpt/6a90eafd-ec04-83e9-b9c9-49b02317d002.md` |
+| chatgpt | `6a8f61f4-f9dc-83ea-804a-3fb1dd51e7de` | ChatGPT conversation 6a8f61f4-f9dc | 2026-08-29T19:01:00.706977+00:00 | `sessions/chatgpt/6a8f61f4-f9dc-83ea-804a-3fb1dd51e7de.md` |
+| chatgpt | `6a91baf2-d148-83ea-b518-a7fe1cff8f0c` | ChatGPT conversation 6a91baf2-d148 | 2026-08-29T19:01:00.676917+00:00 | `sessions/chatgpt/6a91baf2-d148-83ea-b518-a7fe1cff8f0c.md` |
+| chatgpt | `6a921241-5054-83ea-9342-a0b0f85ab9c8` | ChatGPT conversation 6a921241-5054 | 2026-08-29T19:00:57.867350+00:00 | `sessions/chatgpt/6a921241-5054-83ea-9342-a0b0f85ab9c8.md` |
+| chatgpt | `6a922dce-11a4-83e9-82b1-e09cea085546` | ChatGPT conversation 6a922dce-11a4 | 2026-08-29T19:00:57.864529+00:00 | `sessions/chatgpt/6a922dce-11a4-83e9-82b1-e09cea085546.md` |
+| chatgpt | `6a93150c-cfe4-83ea-8516-663dd7c67d17` | ChatGPT conversation 6a93150c-cfe4 | 2026-08-29T19:00:57.858596+00:00 | `sessions/chatgpt/6a93150c-cfe4-83ea-8516-663dd7c67d17.md` |
 | chatgpt | `6a8e7d69-e48c-83e9-a589-a5b4aafb9b54` | ChatGPT conversation 6a8e7d69-e48c | 2026-08-26T15:11:48.648484+00:00 | `sessions/chatgpt/6a8e7d69-e48c-83e9-a589-a5b4aafb9b54.md` |
 | chatgpt | `6a83897e-bd5c-83ea-a252-898867b704a1` | ChatGPT conversation 6a83897e-bd5c | 2026-08-26T00:30:22.236381+00:00 | `sessions/chatgpt/6a83897e-bd5c-83ea-a252-898867b704a1.md` |
 | chatgpt | `6a8cd034-30b8-83ea-9ff6-be609160a196` | ChatGPT conversation 6a8cd034-30b8 | 2026-08-26T00:30:22.232578+00:00 | `sessions/chatgpt/6a8cd034-30b8-83ea-9ff6-be609160a196.md` |
@@ -76,17 +88,5 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 | chatgpt | `6a7f29ba-df18-83ea-b0ff-f453e28a5122` | ChatGPT conversation 6a7f29ba-df18 | 2026-08-26T00:30:20.614704+00:00 | `sessions/chatgpt/6a7f29ba-df18-83ea-b0ff-f453e28a5122.md` |
 | chatgpt | `6a7f9b03-5e4c-83ea-877b-f5c8f37b7bab` | ChatGPT conversation 6a7f9b03-5e4c | 2026-08-26T00:30:20.546435+00:00 | `sessions/chatgpt/6a7f9b03-5e4c-83ea-877b-f5c8f37b7bab.md` |
 | chatgpt | `6a7f418d-17c4-83ea-9670-68981d83eec7` | ChatGPT conversation 6a7f418d-17c4 | 2026-08-26T00:30:20.545152+00:00 | `sessions/chatgpt/6a7f418d-17c4-83ea-9670-68981d83eec7.md` |
-| chatgpt | `6a837dd2-eef8-83ea-9787-8237ff903aa2` | ChatGPT conversation 6a837dd2-eef8 | 2026-08-26T00:30:20.541970+00:00 | `sessions/chatgpt/6a837dd2-eef8-83ea-9787-8237ff903aa2.md` |
-| chatgpt | `6a83e8f5-9854-83ea-931c-a6726e4e933c` | ChatGPT conversation 6a83e8f5-9854 | 2026-08-26T00:30:20.541306+00:00 | `sessions/chatgpt/6a83e8f5-9854-83ea-931c-a6726e4e933c.md` |
-| chatgpt | `6a840228-2bb4-83ea-a79f-767913d35253` | ChatGPT conversation 6a840228-2bb4 | 2026-08-26T00:30:20.540691+00:00 | `sessions/chatgpt/6a840228-2bb4-83ea-a79f-767913d35253.md` |
-| chatgpt | `6a84900d-1488-83ea-9e60-c8392d6c008f` | ChatGPT conversation 6a84900d-1488 | 2026-08-26T00:30:20.539267+00:00 | `sessions/chatgpt/6a84900d-1488-83ea-9e60-c8392d6c008f.md` |
-| chatgpt | `6a849231-ee08-83ea-8f4a-20c130619afc` | ChatGPT conversation 6a849231-ee08 | 2026-08-26T00:30:20.538667+00:00 | `sessions/chatgpt/6a849231-ee08-83ea-8f4a-20c130619afc.md` |
-| chatgpt | `6a86495e-8dd0-83ea-b62b-d510c4c81423` | ChatGPT conversation 6a86495e-8dd0 | 2026-08-26T00:30:20.537884+00:00 | `sessions/chatgpt/6a86495e-8dd0-83ea-b62b-d510c4c81423.md` |
-| chatgpt | `6a864dc3-65e0-83ea-824e-b8828a6a6eb2` | ChatGPT conversation 6a864dc3-65e0 | 2026-08-26T00:30:20.536883+00:00 | `sessions/chatgpt/6a864dc3-65e0-83ea-824e-b8828a6a6eb2.md` |
-| chatgpt | `6a7ddaac-dd90-83ea-9d42-154a497ebfc1` | ChatGPT conversation 6a7ddaac-dd90 | 2026-08-26T00:30:20.534223+00:00 | `sessions/chatgpt/6a7ddaac-dd90-83ea-9d42-154a497ebfc1.md` |
-| chatgpt | `6a87846f-8f98-83ea-8b42-74a08fb7a5f5` | ChatGPT conversation 6a87846f-8f98 | 2026-08-26T00:30:20.531760+00:00 | `sessions/chatgpt/6a87846f-8f98-83ea-8b42-74a08fb7a5f5.md` |
-| chatgpt | `6a8885b0-a050-83ea-aed0-e722d494f201` | ChatGPT conversation 6a8885b0-a050 | 2026-08-26T00:30:20.531109+00:00 | `sessions/chatgpt/6a8885b0-a050-83ea-aed0-e722d494f201.md` |
-| chatgpt | `6a8a8b79-e8c0-83ea-b484-61c2d223e62b` | ChatGPT conversation 6a8a8b79-e8c0 | 2026-08-26T00:30:20.529280+00:00 | `sessions/chatgpt/6a8a8b79-e8c0-83ea-b484-61c2d223e62b.md` |
-| chatgpt | `6a8b404c-976c-83ea-9944-1d1815a65e2b` | ChatGPT conversation 6a8b404c-976c | 2026-08-26T00:30:20.527921+00:00 | `sessions/chatgpt/6a8b404c-976c-83ea-9944-1d1815a65e2b.md` |
 
 [[hot]] · [[GRAPH]] · [[HOST]]

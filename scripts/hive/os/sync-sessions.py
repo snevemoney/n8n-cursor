@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Refresh the 4×4 session store. Same as session-matrix.py sync."""
+"""Refresh the 4×4 session store. Same as session-matrix.py sync.
+
+ChatGPT titles come from plaintext desktop sidecars (automations.json)
+plus `sessions/chatgpt-titles.json`. Does not decrypt `.data` blobs.
+Future refreshes keep a real title once one is known.
+"""
 from __future__ import annotations
 
 import runpy
