@@ -25,9 +25,11 @@ description: >-
 - `skill-from-session` mints a skill after a winning run. This skill only **reads**.
 - Factory-OS reminder Automation writes `FACTORY-OS-NEXT.md`. It does not run this CLI.
 
+**Law:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Refresh: `python3 scripts/hive/os/sync-sessions.py`. This CLI is the one-id Grok deep read.
+
 ## When
 
-Evens says read my Grok chats / desk threads / what we said in Grok Bot. A desk needs a prior Grok sitting. Not a publish. Not a vault dump. Not a `/workspace` copy.
+Evens says read my Grok chats / desk threads / what we said in Grok Bot. A desk needs a prior Grok sitting. Not a publish. Not a vault dump. Not a `/workspace` copy. Do not ask Evens to paste.
 
 ## Card (required before the model)
 

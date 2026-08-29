@@ -44,4 +44,5 @@ Trade, transfer, account change, publish, YouTube.
 ## Load first
 - `scripts/hive/grok-skills/wealth-daily-show.md`
 - Knowledge-policy hierarchy in OPERATOR_MEMORY
-- Catch-up: `CONTENT/os/inbox/2026-08-27-said-4.md` (wins over said-1 / said-2 / said-3)
+- Catch-up: `docs/MATRIX.md` + `CONTENT/os/sessions/INDEX.md` + `CONTENT/os/inbox/2026-08-27-said-4.md` (DailyShow product).
+- **Law:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.
