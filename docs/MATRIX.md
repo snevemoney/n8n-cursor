@@ -4,6 +4,8 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 
 Store: `docs/hive/outer-heaven/CONTENT/os/sessions/`  
 INDEX: `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`  
+Repo INDEX (absolute): `/Users/evenslouis/n8n-cursor-worktrees/hive-session-matrix/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`  
+Vault INDEX (absolute): `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`  
 Refresh: `python3 scripts/hive/os/sync-sessions.py`
 
 ## First action

@@ -77,6 +77,11 @@ def repo_os_root(repo: Path) -> Path:
     return repo / "docs/hive/outer-heaven/CONTENT/os"
 
 
+def repo_attach_os_root(repo: Path) -> Path:
+    """Path Evens named out loud: CONTENT/os/sessions (repo root, not docs/hive/...)."""
+    return repo / "CONTENT" / "os"
+
+
 def vault_os_root() -> Path | None:
     vc_path = HERE / "vault-config.py"
     if not vc_path.is_file():
@@ -599,6 +604,25 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
     return counts
 
 
+def write_attach_index(repo: Path, by_surface: dict[str, list[dict[str, Any]]], *, at: str) -> Path:
+    attach = repo_attach_os_root(repo) / "sessions"
+    attach.mkdir(parents=True, exist_ok=True)
+    write_text(attach / "INDEX.md", render_four_index(by_surface, at=at))
+    write_text(
+        attach / "README.md",
+        "\n".join(
+            [
+                FOUR_X_FOUR,
+                "",
+                "Canonical store: `docs/hive/outer-heaven/CONTENT/os/sessions/`.",
+                "Vault: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/`.",
+                "",
+            ]
+        ),
+    )
+    return attach / "INDEX.md"
+
+
 def write_bundle(
     os_root: Path,
     cursor: list[dict[str, Any]],
@@ -619,6 +643,9 @@ def write_bundle(
     paste = render_paste_pack(packed.get("cursor") or [], packed.get("grok") or [], at=at, said_rel=said_rel)
     write_text(os_root / "PASTE-PACK.md", paste)
     write_text(inbox / "PASTE-PACK-LATEST.md", paste)
+    if os_root.resolve() == repo_os_root(REPO).resolve():
+        write_attach_index(REPO, packed, at=at)
+        write_text(REPO / "PASTE-PACK.md", paste)
     hot_path = os_root / "hot.md"
     write_text(
         hot_path,

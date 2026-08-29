@@ -20,5 +20,7 @@
 - `agent-job-card` · `wiki-ingest`
 
 ## Load first
+- **Probe (first read):** Read the shared brain: repo n8n-cursor + Obsidian `CONTENT/os/sessions`. List the INDEX. Can you see Cursor transcripts and Grok transcripts and Claude transcripts and ChatGPT transcripts? Answer yes/no per surface and quote one title from each you can see.
+- `CONTENT/os/sessions/INDEX.md`
 - `scripts/hive/grok-skills/wiki-ingest.md`
 - `CONTENT/job-cards/INDEX.md`

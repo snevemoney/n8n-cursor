@@ -4,6 +4,10 @@ Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. S
 
 Read [`docs/MATRIX.md`](docs/MATRIX.md) then `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`. Read all four folders under `CONTENT/os/sessions/`.
 
+Absolute paths this Mac can attach:
+- Repo INDEX: `/Users/evenslouis/n8n-cursor-worktrees/hive-session-matrix/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`
+- Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`
+
 This file also provides guidance when working with code in this repository.
 
 ## Project Overview
