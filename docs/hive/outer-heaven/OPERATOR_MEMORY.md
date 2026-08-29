@@ -714,5 +714,10 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 
 - **source:** Operator — “continue whats going on with the agents let them know youll take it from here.” | confidence high
 - **FACT:** Forge, Watchdog, HITL Operator, Researcher, Communications Manager, Wealth Manager stood down. Parent Cursor has the factory. No 17-desk swarm.
-- **Load:** `CONTENT/os/inbox/2026-08-27-said-3.md` after said-1 / said-2.
+- **Load:** `CONTENT/os/inbox/2026-08-27-said-3.md` after said-1 / said-2. DailyShow product overlay: `said-4`.
 - **DON’T:** Remotion / Higgsfield / YouTube / Glass Enable / scoop dirty `hive/desk` / reopen Serena / `skills-sync.py --write` against dirty `/Users/evenslouis/n8n-cursor`.
+
+### FACTS: Session matrix surfaces (2026-08-29) [hive-os]
+
+- **source:** Operator — “grok, Claude, chatgpt and cursor reads grok, Claude, chatgpt and cursor!!!” | 2026-08-29 | confidence high
+- **FACT:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. INDEX = `CONTENT/os/sessions/INDEX.md`. Refresh: `python3 scripts/hive/os/sync-sessions.py`.

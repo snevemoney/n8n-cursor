@@ -24,7 +24,7 @@ Load `scripts/hive/grok-skills/wealth-daily-show.md` and follow it.
 
 Wired loop: `desk-checkout.sh` (origin/main on this computer) → `new-episode.sh` → typecheck → `render-day.sh`. `render-juno-day.sh` only if Evens named Juno this sitting. Do not open Studio. Do not scoop the dirty checkout. Do not wait for Cursor.
 
-**Since cap:** Aug 26 Juno mp4 is Evens-Mac local — do not overwrite. V2 is merged on main. `/workspace` cannot render. No fake scores / Next-NVDA.
+**Since cap:** Aug 26 Juno mp4 is Evens-Mac local — do not overwrite. V2 is merged on main. `/workspace` cannot render. No fake scores / Next-NVDA. **Law:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.
 
 Automation paste: `desk-missions-now/wealth/pastes/01-wealth-daily-show.md`. Hard step: send / pay / deploy / book / publish stay Evens.
 

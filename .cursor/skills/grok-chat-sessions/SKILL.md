@@ -12,6 +12,7 @@ Load `scripts/hive/grok-skills/grok-chat-sessions.md` and follow it.
 
 **Live:** `~/Library/Application Support/Grok Bot/sand-client-persistence/`  
 **CLI:** `python3 scripts/hive/os/grok-chat-sessions.py list|read --id`  
+**Catch-up:** `python3 scripts/hive/os/session-matrix.py write` → `CONTENT/os/SESSION-INDEX.md` (do not ask Evens to paste)  
 **Card:** `STORE` · `FILTER` · `ROWS` — no filter, no dump.  
 **Host:** Mac only. Cloud reminder stays reminder-only.
 

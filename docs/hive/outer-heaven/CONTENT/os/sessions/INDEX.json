@@ -1,0 +1,602 @@
+{
+  "at": "2026-08-29T18:58:29Z",
+  "law": "Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.",
+  "rows": [
+    {
+      "surface": "cursor",
+      "id": "cf314c59-98f1-462a-824e-edb8e887851e",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-29T18:54:57.321444+00:00",
+      "ask": "can you use remotion to visualize and make a full video of this reports like a presentation or youtube video?: Yes. I pulled a fresh read on the portfolio you m"
+    },
+    {
+      "surface": "cursor",
+      "id": "97db26df-d106-448a-a1ea-4b1a5a6fbe11",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-29T05:44:15.427353+00:00",
+      "ask": "Evens\u2019 Mac Grok Bot cannot reconnect its computer. Screenshot 2026-08-29 ~1:30 AM: modal **\u201cRecovering Grok Bot's Computer\u201d** / \u201cTaking longer than expected\u201d /"
+    },
+    {
+      "surface": "cursor",
+      "id": "b65e786d-5002-4a4e-ad07-dcc7a2854333",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T20:43:16.522994+00:00",
+      "ask": "Evens: \u201ccontinue where you left off\u201d and quoted: Grok last capped 2026-08-25. Catch-up is on main now (PR 67, 89ea244f). Forge, Watchdog, HITL Operator, Researc"
+    },
+    {
+      "surface": "cursor",
+      "id": "19efc1bd-2ca1-4e17-af93-2d921b40ba8f",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T20:38:00.302601+00:00",
+      "ask": "Evens: \u201cremove it. i dont need it\u201d \u2014 Serena (Oraios), the local dashboard at http://127.0.0.1:24282/dashboard/index.html, Cursor MCP `plugin-serena-serena`. Rem"
+    },
+    {
+      "surface": "cursor",
+      "id": "62740280-099f-4538-a077-3023e64b4123",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T14:57:58.486212+00:00",
+      "ask": "Evens: the branch list must look professional. There are too many branches. You are CTO \u2014 prune. Do not ask him which ones to keep. Repo: `/Users/evenslouis/n8n"
+    },
+    {
+      "surface": "cursor",
+      "id": "4f71906c-0c86-437b-bd62-15e22ed843f9",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T13:53:13.610228+00:00",
+      "ask": "Evens said **fix it**. The Wealth daily show automation keeps failing on **Cloud** (wrong host / stale \u201ctree missing\u201d). Remotion **is** on `origin/main` @ `3ffd"
+    },
+    {
+      "surface": "cursor",
+      "id": "a9385d55-6f8e-44a9-8959-0fe55861d496",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T06:21:23.321969+00:00",
+      "ask": "Evens said **go**. Context: we deleted a 53-day-old Higgsfield MCP token. He was told to **fully quit Cursor**, reopen, and Clerk-login Higgsfield MCP (not remo"
+    },
+    {
+      "surface": "cursor",
+      "id": "b54091d1-0a78-4df3-90ac-3507660c1824",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T04:09:40.758664+00:00",
+      "ask": "Can you connect via SSH? It is in the work at the moment installing on macos?"
+    },
+    {
+      "surface": "cursor",
+      "id": "236e6810-b2e0-4961-b460-b052328f22e6",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T03:57:09.345533+00:00",
+      "ask": "Evens has `apps/portfolio-brief-remotion/out/morning-2026-08-25-vo.mp4` open (74s Morning60 commute). He said **\u201crestore video length\u201d** \u2014 he wants the **full D"
+    },
+    {
+      "surface": "cursor",
+      "id": "3bb1b06a-e703-4e3e-b348-081a07cb16e8",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T03:35:31.825999+00:00",
+      "ask": "You are Forge in /Users/evenslouis/n8n-cursor. Evens listened to `apps/portfolio-brief-remotion/out/morning-2026-08-25-vo.mp4` and said the voice is **too robot"
+    },
+    {
+      "surface": "cursor",
+      "id": "887dbf2d-5d9a-4f87-94a0-f4b886d44898",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T00:55:13.584527+00:00",
+      "ask": "You are Forge in /Users/evenslouis/n8n-cursor. Upgrade the existing Remotion app at `apps/portfolio-brief-remotion` from a one-off Aug 25 presentation into a re"
+    },
+    {
+      "surface": "cursor",
+      "id": "01a6b95f-d1c1-481d-9986-1d7319fbe606",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-26T00:10:27.106550+00:00",
+      "ask": "what should we do now in terms of renaming files and project into one nice tidy project just like any developpent code team would for production level projects"
+    },
+    {
+      "surface": "cursor",
+      "id": "ec348fc2-8c90-47e9-a742-e301507925c8",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-25T23:39:11.467592+00:00",
+      "ask": "Evens: **\u201cright now we are not doing products but just continuing to build the system.\u201d** Lock that on the Cloud host so desks do not drift into Path A/C / buye"
+    },
+    {
+      "surface": "cursor",
+      "id": "31ecd95d-de91-427b-a6a1-ab82085d5290",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-25T23:37:52.818841+00:00",
+      "ask": "Evens said **grill me** and pasted an \u201cInfrastructure CTO / Agent Systems Architect\u201d onboarding (Cursor + Grok agents). He already locked: **not products \u2014 cont"
+    },
+    {
+      "surface": "cursor",
+      "id": "389db061-8f8c-439d-9972-61acc55f7a7f",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-25T22:13:04.873368+00:00",
+      "ask": "Evens: **\u201cyou didnt do anything.\u201d** He is right. Writing `MINE-DEDUP.md` is not Delete. This sitting must **click Delete** on the leftover Automations, or fail"
+    },
+    {
+      "surface": "cursor",
+      "id": "89c15c84-6ca0-4511-a0a9-b2af96d3ea08",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-25T21:07:52.251256+00:00",
+      "ask": "Evens: **\u201cyou didnt do what i said.\u201d** He is right. We were told to **remove duplicates**, test, then Active. Instead we called `open_automation` without ids an"
+    },
+    {
+      "surface": "cursor",
+      "id": "2637d593-314d-4bba-a4ed-b26f6f43bcf7",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-25T05:16:04.188389+00:00",
+      "ask": "You are extending the signal domain map. Workspace: /Users/evenslouis/n8n-cursor Evens: also have a Domain map for ai tools, .md files, prompts, workflows, task"
+    },
+    {
+      "surface": "cursor",
+      "id": "6ad3f492-62df-4f59-92d5-fc01aaf7bccb",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-21T22:04:17.956022+00:00",
+      "ask": "Evens (2026-08-21) authorized the ASK: **\u201callow first sync / disk work before we copy the rest\u201d** Sequence: (1) disk work on `n8ncloud` (2) **first sync** of th"
+    },
+    {
+      "surface": "cursor",
+      "id": "9107c790-7e1e-4825-84b2-ba62f823ca06",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-21T21:50:33.689987+00:00",
+      "ask": "Evens (2026-08-21): **\u201cgive grok bot access to the_billion_dollar_vault even when the mac is close\u201d** He wants Grok Bot to still read/write the vault when the M"
+    },
+    {
+      "surface": "cursor",
+      "id": "d695a750-c412-4051-a329-fbe2cab5ca93",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-16T05:53:35.928849+00:00",
+      "ask": "Desk read what task our os is giving us. (already opened on your cursor web preview tab)"
+    },
+    {
+      "surface": "grok",
+      "id": "5ef2fff1-80fc-4923-8e32-e2914617475d",
+      "desk": "Librarian",
+      "title": "Memory & chronicle",
+      "mtime": "2026-08-29T13:20:57.771000+00:00",
+      "ask": "Obsidian still didn\u2019t catch up \u2014 Mac\u2019s been disconnected all day, so the 5:28 vault mirror couldn\u2019t run either. Cache on the Mac is still SSOT; I\u2019ll try again t"
+    },
+    {
+      "surface": "grok",
+      "id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "desk": "Researcher",
+      "title": "Evidence & OSINT",
+      "mtime": "2026-08-29T13:19:13.921000+00:00",
+      "ask": "Every PNG is under `/workspace/own-motion-lib/proof/`. That\u2019s the proof \u2014 not a claim."
+    },
+    {
+      "surface": "grok",
+      "id": "298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "desk": "Forge",
+      "title": "Autonomous engineer",
+      "mtime": "2026-08-29T03:33:52.475000+00:00",
+      "ask": "Confirmed: Twilio + ElevenLabs sessions are on Consultant's desktop only. Each desk has its own Chrome window. Operator is signing in on yours. After handback:"
+    },
+    {
+      "surface": "grok",
+      "id": "3939593d-65c8-4c55-b3a5-db07063221d1",
+      "desk": "Wealth Manager",
+      "title": "Portfolio intelligence",
+      "mtime": "2026-08-29T01:02:02.045000+00:00",
+      "ask": "The engine already had stills, they were just faint and frozen. I\u2019m swapping in these five and giving each a slow zoom."
+    },
+    {
+      "surface": "grok",
+      "id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "desk": "Watchdog",
+      "title": "Control plane & uptime",
+      "mtime": "2026-08-29T00:31:39.513000+00:00",
+      "ask": "Last one still out: outer-heaven-backups."
+    },
+    {
+      "surface": "grok",
+      "id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+      "desk": "Day Planner",
+      "title": "Daily schedule architect",
+      "mtime": "2026-08-28T12:19:27.052000+00:00",
+      "ask": "Scanned inbox for fraud/phishing first. Good news and bad news. Almost no classic scams (lottery, fake banks, wire-transfer, etc.). Spam folder looks empty, so"
+    },
+    {
+      "surface": "grok",
+      "id": "2206818c-7588-4a21-966c-f6cea5c981d7",
+      "desk": "Consultant",
+      "title": "Strategic client advisor",
+      "mtime": "2026-08-28T03:18:58.366000+00:00",
+      "ask": "They\u2019re on the desks now. No new agents. **In:** - Publishing + me \u2014 meaner critic (adversarial / grader / four-blank before build) - Me \u2014 win/loss memo shape -"
+    },
+    {
+      "surface": "grok",
+      "id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "desk": "Creative Studio",
+      "title": "Visual & media creation",
+      "mtime": "2026-08-28T00:36:20.265000+00:00",
+      "ask": "Dwell punch recut is in. a.work still left locked (untouched). New proof: /workspace/webnav_proof.mp4 \u2014 188f / 6.3s / 1920\u00d71080. Park-before-click is 3f. End 24"
+    },
+    {
+      "surface": "grok",
+      "id": "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "desk": "Big Boss",
+      "title": "Chief of staff",
+      "mtime": "2026-08-27T21:46:59.043000+00:00",
+      "ask": "Right job only. Composition is `WebNavTutorial` in Remotion. First still is rendering now \u2014 I\u2019ll show it when it lands. No video file yet."
+    },
+    {
+      "surface": "grok",
+      "id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+      "desk": "Lead Hunter",
+      "title": "Prospect discovery",
+      "mtime": "2026-08-27T16:04:05.859000+00:00",
+      "ask": "Got the CAPTURE/SCORE map \u2014 I own web CAPTURE (find + constraint + contact) and WOS/MUST scoring with Money Desk. No CE lead mutate."
+    },
+    {
+      "surface": "grok",
+      "id": "f379dc7f-3216-47bd-8778-005370331008",
+      "desk": "Product GTM",
+      "title": "Product owner & launch",
+      "mtime": "2026-08-27T16:00:21.556000+00:00",
+      "ask": "Locking the draft to Researcher\u2019s packet. One SKU, not two. No send."
+    },
+    {
+      "surface": "grok",
+      "id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+      "desk": "Personal CFO",
+      "title": "Personal finance strategy",
+      "mtime": "2026-08-27T15:58:37.801000+00:00",
+      "ask": "FYI Researcher \u2192 Personal CFO (operator asked hive share). No reply needed. Personal-money YT: Ramsey Show highlights, stock-pick clips, Bitcoin/hard-money crea"
+    },
+    {
+      "surface": "grok",
+      "id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+      "desk": "Money Desk",
+      "title": "Business finance ops",
+      "mtime": "2026-08-27T15:58:36.860000+00:00",
+      "ask": "FR SKUs all clear on margin: **Rung 0** \u2014 Mise en forme, Andr\u00e9anne Gagnon **Rung 1** \u2014 Rapha\u00ebl Morin, Sylvie Ladouceur, Services BVM (no voice AI) GTM can cut w"
+    },
+    {
+      "surface": "grok",
+      "id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+      "desk": "Publishing Engine",
+      "title": "Content distribution",
+      "mtime": "2026-08-24T13:14:23.129000+00:00",
+      "ask": "FYI Researcher \u2192 Publishing Engine (operator asked hive share). No reply needed. He consumes AI education formats (Nate Herk, Fireship, crash courses) + comment"
+    },
+    {
+      "surface": "grok",
+      "id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+      "desk": "Career Strategist",
+      "title": "Work & compensation",
+      "mtime": "2026-08-24T13:10:15.392000+00:00",
+      "ask": "FYI Researcher \u2192 Career Strategist (operator asked hive share). No reply needed. Career narrative in likes/WL: developers starting AI agencies (not SaaS), agent"
+    },
+    {
+      "surface": "grok",
+      "id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "desk": "HITL Operator",
+      "title": "Approval gateway",
+      "mtime": "2026-08-22T16:39:09.717000+00:00",
+      "ask": "Operator: local copies of 5 FR sites first; **no APPROVE SEND** until Forge reports PASS on door fixes (curl 301/200). FR five + EN three stay unsent. SIM/live"
+    },
+    {
+      "surface": "grok",
+      "id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "desk": "Communications Manager",
+      "title": "Email triage & drafts",
+      "mtime": "2026-08-20T11:03:52.811000+00:00",
+      "ask": "Ack \u2014 GTM QC rewrite is now the copy on the operator send card. Gate 2 still theirs. No send."
+    },
+    {
+      "surface": "claude",
+      "id": "local_5ee91c04-89ee-4056-bf58-437a7cbf70a5",
+      "title": "Build sentinel",
+      "mtime": "2026-07-14T20:58:12.511000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_5ee91c04-89ee-4056-bf58-437a7cbf70a5.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_e0724c1c-1754-47a1-a1f0-90ab1a0e9931",
+      "title": "Vps health check",
+      "mtime": "2026-07-15T10:10:42.265000+00:00",
+      "ask": "Vps health check",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_e0724c1c-1754-47a1-a1f0-90ab1a0e9931.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_ba41f471-0bad-47c6-a344-c7b37644e39d",
+      "title": "Build sentinel",
+      "mtime": "2026-04-03T23:27:04.737000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_ba41f471-0bad-47c6-a344-c7b37644e39d.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_68283f23-9d25-496f-8d72-09d34c2af7c1",
+      "title": "Mar 24 \u2013 Build sentinel",
+      "mtime": "2026-03-24T15:07:26.988000+00:00",
+      "ask": "Mar 24 \u2013 Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_68283f23-9d25-496f-8d72-09d34c2af7c1.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_86092e21-5483-43b9-9a89-3ae224b550b7",
+      "title": "Push V3 roadmap dispatch branch",
+      "mtime": "2026-03-24T02:06:02.998000+00:00",
+      "ask": "Push V3 roadmap dispatch branch",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_86092e21-5483-43b9-9a89-3ae224b550b7.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_80aed334-09d1-480a-b465-9b07f16b831d",
+      "title": "Read ROADMAP.md",
+      "mtime": "2026-03-24T00:20:51.632000+00:00",
+      "ask": "Read ROADMAP.md",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_80aed334-09d1-480a-b465-9b07f16b831d.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_e1b7d453-4018-4b80-be81-f58dd1a318ab",
+      "title": "Build sentinel",
+      "mtime": "2026-07-03T22:26:37.008000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_e1b7d453-4018-4b80-be81-f58dd1a318ab.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_48af45bc-8aeb-4065-8209-708c846b29aa",
+      "title": "Build sentinel",
+      "mtime": "2026-07-02T23:49:20.361000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_48af45bc-8aeb-4065-8209-708c846b29aa.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_02a925e6-25a2-4aa0-8b06-65aa4671ae39",
+      "title": "Build sentinel",
+      "mtime": "2026-06-28T05:25:13.139000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_02a925e6-25a2-4aa0-8b06-65aa4671ae39.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_0eb95cc6-2670-4c8a-9fe8-c52ea5fea934",
+      "title": "Build sentinel",
+      "mtime": "2026-06-23T15:07:58.030000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_0eb95cc6-2670-4c8a-9fe8-c52ea5fea934.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_595116d8-d776-4faa-9246-68510ed96f75",
+      "title": "Build sentinel",
+      "mtime": "2026-06-22T16:12:37.261000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_595116d8-d776-4faa-9246-68510ed96f75.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_c88c77a7-ec49-4c03-baa9-56012324ffed",
+      "title": "Build sentinel",
+      "mtime": "2026-06-14T16:09:35.396000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_c88c77a7-ec49-4c03-baa9-56012324ffed.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_c7366dac-e66b-4d5d-9109-5a1213a8d124",
+      "title": "Build sentinel",
+      "mtime": "2026-06-13T15:36:38.558000+00:00",
+      "ask": "Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_c7366dac-e66b-4d5d-9109-5a1213a8d124.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_ac166734-abc8-48b6-bb7b-72fd408fd9be",
+      "title": "Restore Firecrawl integration",
+      "mtime": "2026-04-10T16:18:41.695000+00:00",
+      "ask": "Restore Firecrawl integration",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_ac166734-abc8-48b6-bb7b-72fd408fd9be.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_e060f75c-cfb9-4d30-ad1f-5c19259cd82c",
+      "title": "Apr 1 \u2013 Build sentinel",
+      "mtime": "2026-04-01T15:08:37.630000+00:00",
+      "ask": "Apr 1 \u2013 Build sentinel",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_e060f75c-cfb9-4d30-ad1f-5c19259cd82c.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_5c0adfe1-30a8-4f38-ae72-2d053de586b5",
+      "title": "Weekly arch review",
+      "mtime": "2026-07-14T20:42:59.401000+00:00",
+      "ask": "Weekly arch review",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_5c0adfe1-30a8-4f38-ae72-2d053de586b5.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_2255d590-1746-4291-962c-193917dec6fd",
+      "title": "Phase tracker",
+      "mtime": "2026-07-14T20:25:47.936000+00:00",
+      "ask": "Phase tracker",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_2255d590-1746-4291-962c-193917dec6fd.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_466c6b8b-f2a8-4f52-ad7b-6ed17ddf25a0",
+      "title": "Daily code review",
+      "mtime": "2026-07-14T20:25:17.425000+00:00",
+      "ask": "Daily code review",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_466c6b8b-f2a8-4f52-ad7b-6ed17ddf25a0.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_e8818580-da59-4500-a57a-429a14d7904e",
+      "title": "Vps health check",
+      "mtime": "2026-07-09T02:13:52.206000+00:00",
+      "ask": "Vps health check",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_e8818580-da59-4500-a57a-429a14d7904e.json"
+    },
+    {
+      "surface": "claude",
+      "id": "local_e435356b-a002-4c89-b6fa-843a96435739",
+      "title": "Vps health check",
+      "mtime": "2026-07-09T01:20:01.891000+00:00",
+      "ask": "Vps health check",
+      "path": "/Users/evenslouis/Library/Application Support/Claude/claude-code-sessions/98fd4766-5e22-4e33-b3a0-c2e8fcbbde90/b55cf7c6-fcac-477a-8450-546556e7d243/local_e435356b-a002-4c89-b6fa-843a96435739.json"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a7b2776-ba2c-83ea-9a9e-37f6c02aeaa6",
+      "title": "ChatGPT conversation 6a7b2776-ba2c",
+      "mtime": "2026-08-26T15:15:14.002078+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a7b2776-ba2c-83ea-9a9e-37f6c02aeaa6.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a8e7d69-e48c-83e9-a589-a5b4aafb9b54",
+      "title": "ChatGPT conversation 6a8e7d69-e48c",
+      "mtime": "2026-08-26T15:11:48.648484+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a8e7d69-e48c-83e9-a589-a5b4aafb9b54.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a83897e-bd5c-83ea-a252-898867b704a1",
+      "title": "ChatGPT conversation 6a83897e-bd5c",
+      "mtime": "2026-08-26T00:30:22.236381+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a83897e-bd5c-83ea-a252-898867b704a1.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a8cd034-30b8-83ea-9ff6-be609160a196",
+      "title": "ChatGPT conversation 6a8cd034-30b8",
+      "mtime": "2026-08-26T00:30:22.232578+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a8cd034-30b8-83ea-9ff6-be609160a196.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a7ccee3-a608-83ea-9eaa-3d477c369189",
+      "title": "ChatGPT conversation 6a7ccee3-a608",
+      "mtime": "2026-08-26T00:30:20.618396+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a7ccee3-a608-83ea-9eaa-3d477c369189.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a7f29ba-df18-83ea-b0ff-f453e28a5122",
+      "title": "ChatGPT conversation 6a7f29ba-df18",
+      "mtime": "2026-08-26T00:30:20.614704+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a7f29ba-df18-83ea-b0ff-f453e28a5122.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a7f9b03-5e4c-83ea-877b-f5c8f37b7bab",
+      "title": "ChatGPT conversation 6a7f9b03-5e4c",
+      "mtime": "2026-08-26T00:30:20.546435+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a7f9b03-5e4c-83ea-877b-f5c8f37b7bab.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a7f418d-17c4-83ea-9670-68981d83eec7",
+      "title": "ChatGPT conversation 6a7f418d-17c4",
+      "mtime": "2026-08-26T00:30:20.545152+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a7f418d-17c4-83ea-9670-68981d83eec7.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a837dd2-eef8-83ea-9787-8237ff903aa2",
+      "title": "ChatGPT conversation 6a837dd2-eef8",
+      "mtime": "2026-08-26T00:30:20.541970+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a837dd2-eef8-83ea-9787-8237ff903aa2.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a83e8f5-9854-83ea-931c-a6726e4e933c",
+      "title": "ChatGPT conversation 6a83e8f5-9854",
+      "mtime": "2026-08-26T00:30:20.541306+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a83e8f5-9854-83ea-931c-a6726e4e933c.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a840228-2bb4-83ea-a79f-767913d35253",
+      "title": "ChatGPT conversation 6a840228-2bb4",
+      "mtime": "2026-08-26T00:30:20.540691+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a840228-2bb4-83ea-a79f-767913d35253.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a84900d-1488-83ea-9e60-c8392d6c008f",
+      "title": "ChatGPT conversation 6a84900d-1488",
+      "mtime": "2026-08-26T00:30:20.539267+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a84900d-1488-83ea-9e60-c8392d6c008f.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a849231-ee08-83ea-8f4a-20c130619afc",
+      "title": "ChatGPT conversation 6a849231-ee08",
+      "mtime": "2026-08-26T00:30:20.538667+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a849231-ee08-83ea-8f4a-20c130619afc.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a86495e-8dd0-83ea-b62b-d510c4c81423",
+      "title": "ChatGPT conversation 6a86495e-8dd0",
+      "mtime": "2026-08-26T00:30:20.537884+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a86495e-8dd0-83ea-b62b-d510c4c81423.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a864dc3-65e0-83ea-824e-b8828a6a6eb2",
+      "title": "ChatGPT conversation 6a864dc3-65e0",
+      "mtime": "2026-08-26T00:30:20.536883+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a864dc3-65e0-83ea-824e-b8828a6a6eb2.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a7ddaac-dd90-83ea-9d42-154a497ebfc1",
+      "title": "ChatGPT conversation 6a7ddaac-dd90",
+      "mtime": "2026-08-26T00:30:20.534223+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a7ddaac-dd90-83ea-9d42-154a497ebfc1.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a87846f-8f98-83ea-8b42-74a08fb7a5f5",
+      "title": "ChatGPT conversation 6a87846f-8f98",
+      "mtime": "2026-08-26T00:30:20.531760+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a87846f-8f98-83ea-8b42-74a08fb7a5f5.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a8885b0-a050-83ea-aed0-e722d494f201",
+      "title": "ChatGPT conversation 6a8885b0-a050",
+      "mtime": "2026-08-26T00:30:20.531109+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a8885b0-a050-83ea-aed0-e722d494f201.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a8a8b79-e8c0-83ea-b484-61c2d223e62b",
+      "title": "ChatGPT conversation 6a8a8b79-e8c0",
+      "mtime": "2026-08-26T00:30:20.529280+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a8a8b79-e8c0-83ea-b484-61c2d223e62b.data"
+    },
+    {
+      "surface": "chatgpt",
+      "id": "6a8b404c-976c-83ea-9944-1d1815a65e2b",
+      "title": "ChatGPT conversation 6a8b404c-976c",
+      "mtime": "2026-08-26T00:30:20.527921+00:00",
+      "ask": "Local ChatGPT conversation on this Mac.",
+      "path": "/Users/evenslouis/Library/Application Support/com.openai.chat/conversations-v3-21bc0b7c-2983-4327-a613-85a5cdc8734b/6a8b404c-976c-83ea-9944-1d1815a65e2b.data"
+    }
+  ]
+}

@@ -22,4 +22,6 @@ python3 scripts/hive/os/cursor-chat-sessions.py list --limit 20
 python3 scripts/hive/os/cursor-chat-sessions.py read --id <uuid>
 ```
 
+Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. INDEX: `sessions/INDEX.md`. Refresh: `python3 scripts/hive/os/sync-sessions.py`.
+
 One session by id. Do not dump all. Do not publish. Do not commit JSONL.
