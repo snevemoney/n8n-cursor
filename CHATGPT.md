@@ -1,9 +1,8 @@
 # ChatGPT
 
-Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.
+Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
 
-Read `docs/MATRIX.md` then `CONTENT/os/sessions/INDEX.md` and `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`. Read all four folders under those `sessions/` trees.
+Open Slack workspace **Hive** → `#hive`. That channel is the shared room. Then read `docs/MATRIX.md` and `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`. Read all four folders under `CONTENT/os/sessions/`. Do not decrypt ChatGPT `.data`.
 
-Absolute paths this Mac can attach:
-- Repo INDEX: `/Users/evenslouis/n8n-cursor-worktrees/hive-session-matrix/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`
-- Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`
+Exact SSOT message: `docs/hive/outer-heaven/CONTENT/os/sessions/SLACK.md`  
+Channel: https://evenslouis.slack.com/archives/C0BTH1TMFC5

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """4×4 session store. Grok, Claude, ChatGPT, and Cursor each read all four.
 
+Hive Slack is the shared room. Optional post after write if SLACK_HIVE_* is set.
 Does not dump full JSONL or Grok blobs into git. Does not install vendor apps.
 Does not call Claude/ChatGPT APIs. Local read-only extractors only.
+Does not decrypt ChatGPT `.data`. Tokens stay in env, never in git.
 
 Usage:
   python3 scripts/hive/os/session-matrix.py write [--limit 8] [--no-vault]
@@ -14,8 +16,11 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import re
 import sys
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -44,6 +49,14 @@ FOUR_X_FOUR = (
     "Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. "
     "Same brain. Same session store."
 )
+SLACK_ROOM = (
+    "Hive Slack is the shared room. "
+    "Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. "
+    "Same brain. Same session store. "
+    "Slack Hive is how they see each other without pasting."
+)
+SLACK_INDEX_REL = "docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md"
+SLACK_HIVE_CHANNEL_DEFAULT = "C0BTH1TMFC5"
 
 OFFICIAL = {
     "memory": FOUR_X_FOUR,
@@ -519,6 +532,8 @@ def render_paste_pack(
             "",
             "#os",
             "",
+            SLACK_ROOM,
+            "",
             FOUR_X_FOUR,
             "",
             "## Official sentences",
@@ -567,9 +582,10 @@ def render_said(
     c_n = sum(1 for r in cursor if not r.get("miss"))
     g_n = sum(1 for r in grok if not r.get("miss"))
     items = [
+        SLACK_ROOM,
         FOUR_X_FOUR,
         f"Shared store `CONTENT/os/sessions/` — Cursor {c_n} · Grok {g_n} plus Claude and ChatGPT namespaces.",
-        "Read `sessions/INDEX.md`. Dirty `hive/desk` stays local. Publish HITL.",
+        "Read `sessions/INDEX.md` and Slack `#hive`. Dirty `hive/desk` stays local. Publish HITL.",
     ]
     return "\n".join(
         [
@@ -665,6 +681,8 @@ def render_four_index(by_surface: dict[str, list[dict[str, Any]]], *, at: str) -
         "",
         "#os",
         "",
+        SLACK_ROOM,
+        "",
         FOUR_X_FOUR,
         "",
         "| surface | id | title | date | path |",
@@ -698,7 +716,7 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
     write_text(store / "INDEX.md", render_four_index(by_surface, at=at))
     write_text(
         store / "INDEX.json",
-        json.dumps({"at": at, "law": FOUR_X_FOUR, "rows": [
+        json.dumps({"at": at, "law": SLACK_ROOM, "four_x_four": FOUR_X_FOUR, "rows": [
             {**row, "surface": surface}
             for surface in SURFACES
             for row in (by_surface.get(surface) or [])
@@ -720,9 +738,11 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
             "",
             "# SESSION-INDEX",
             "",
+            SLACK_ROOM,
+            "",
             FOUR_X_FOUR,
             "",
-            "SSOT: [[sessions/INDEX]] — `CONTENT/os/sessions/INDEX.md`.",
+            "SSOT: [[sessions/INDEX]] — `CONTENT/os/sessions/INDEX.md`. Slack: `#hive`.",
             "",
             "[[hot]] · [[GRAPH]] · [[HOST]]",
             "",
@@ -740,10 +760,13 @@ def write_attach_index(repo: Path, by_surface: dict[str, list[dict[str, Any]]], 
         attach / "README.md",
         "\n".join(
             [
+                SLACK_ROOM,
+                "",
                 FOUR_X_FOUR,
                 "",
                 "Canonical store: `docs/hive/outer-heaven/CONTENT/os/sessions/`.",
                 "Vault: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/`.",
+                "Slack Hive: `#hive` (`C0BTH1TMFC5`).",
                 "",
             ]
         ),
@@ -807,6 +830,139 @@ def _targets(args: argparse.Namespace) -> list[Path]:
     return targets
 
 
+def slack_hive_config() -> dict[str, str] | None:
+    """Return Slack post config from env. Never logs tokens."""
+    webhook = (os.environ.get("SLACK_HIVE_WEBHOOK_URL") or "").strip()
+    token = (
+        os.environ.get("SLACK_HIVE_BOT_TOKEN")
+        or os.environ.get("SLACK_HIVE_TOKEN")
+        or ""
+    ).strip()
+    channel = (
+        os.environ.get("SLACK_HIVE_CHANNEL_ID")
+        or os.environ.get("SLACK_HIVE_CHANNEL")
+        or SLACK_HIVE_CHANNEL_DEFAULT
+    ).strip()
+    if webhook:
+        return {"mode": "webhook", "url": webhook, "channel": channel}
+    if token:
+        return {"mode": "api", "token": token, "channel": channel}
+    return None
+
+
+def load_index_rows(path: Path) -> list[dict[str, Any]]:
+    if not path.is_file():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    rows = data.get("rows") if isinstance(data, dict) else None
+    return rows if isinstance(rows, list) else []
+
+
+def row_key(row: dict[str, Any]) -> tuple[str, str]:
+    return (str(row.get("surface") or ""), str(row.get("id") or ""))
+
+
+def row_title(row: dict[str, Any]) -> str:
+    return clean_ask(str(row.get("title") or row.get("ask") or row.get("id") or ""), 80)
+
+
+def render_slack_snapshot(
+    by_surface: dict[str, list[dict[str, Any]]],
+    *,
+    at: str,
+    said_rel: str,
+    hot_line: str,
+    prev_rows: list[dict[str, Any]] | None = None,
+    per_surface: int = 3,
+) -> str:
+    """Titles only. No ChatGPT bodies. Delta if a previous INDEX exists."""
+    prev = {row_key(r): row_title(r) for r in (prev_rows or [])}
+    lines = [
+        SLACK_ROOM,
+        "",
+        FOUR_X_FOUR,
+        "",
+        f"*INDEX:* `{SLACK_INDEX_REL}`",
+        "https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md",
+        f"*hot / said:* {hot_line or at} · `{said_rel}`",
+        "",
+    ]
+    added: list[str] = []
+    changed: list[str] = []
+    new_rows = [
+        {**row, "surface": surface}
+        for surface in SURFACES
+        for row in (by_surface.get(surface) or [])
+    ]
+    if prev:
+        for row in new_rows:
+            key = row_key(row)
+            title = row_title(row)
+            if key not in prev:
+                added.append(f"• *{row.get('surface')}* — {title}")
+            elif prev[key] != title:
+                changed.append(f"• *{row.get('surface')}* — {title}")
+        if added:
+            lines += ["*Delta — new titles*", *added[:12], ""]
+        if changed:
+            lines += ["*Delta — retitled*", *changed[:8], ""]
+        if not added and not changed:
+            lines.append("_No title delta. Snapshot below._")
+            lines.append("")
+    lines.append("*Latest titles (not bodies)*")
+    for surface in SURFACES:
+        rows = by_surface.get(surface) or []
+        lines.append(f"*{surface}*")
+        if not rows:
+            lines.append("• (none)")
+            continue
+        for row in rows[:per_surface]:
+            lines.append(f"• {row_title(row)}")
+    lines += ["", "This is Evens' Hive agent room. Not outreach. Do not decrypt ChatGPT `.data`."]
+    return "\n".join(lines)
+
+
+def post_slack_hive(text: str) -> dict[str, Any]:
+    cfg = slack_hive_config()
+    if not cfg:
+        return {"ok": False, "skipped": "no SLACK_HIVE_* env"}
+    payload = {"text": text[:4900]}
+    if cfg["mode"] == "api":
+        payload["channel"] = cfg["channel"]
+        payload["unfurl_links"] = False
+        req = urllib.request.Request(
+            "https://slack.com/api/chat.postMessage",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json; charset=utf-8",
+                "Authorization": f"Bearer {cfg['token']}",
+            },
+            method="POST",
+        )
+    else:
+        req = urllib.request.Request(
+            cfg["url"],
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json; charset=utf-8"},
+            method="POST",
+        )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = resp.read().decode("utf-8", errors="replace")
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return {"ok": False, "error": type(exc).__name__}
+    if cfg["mode"] == "webhook":
+        return {"ok": body.strip() == "ok", "skipped": False}
+    try:
+        parsed = json.loads(body)
+    except json.JSONDecodeError:
+        return {"ok": False, "error": "bad_json"}
+    return {"ok": bool(parsed.get("ok")), "error": parsed.get("error") or None}
+
+
 def cmd_write(args: argparse.Namespace) -> int:
     packed = (
         heads_from_json(Path(args.heads_json))
@@ -815,8 +971,10 @@ def cmd_write(args: argparse.Namespace) -> int:
     )
     at = now_iso()
     date = today()
+    targets = _targets(args)
+    prev_rows = load_index_rows(targets[0] / "sessions" / "INDEX.json") if targets else []
     wrote: list[dict[str, str]] = []
-    for root in _targets(args):
+    for root in targets:
         wrote.append(
             write_bundle(
                 root,
@@ -827,13 +985,29 @@ def cmd_write(args: argparse.Namespace) -> int:
                 by_surface=packed,
             )
         )
+    slack_result: dict[str, Any] = {"ok": False, "skipped": "no SLACK_HIVE_* env"}
+    if not getattr(args, "no_slack", False) and slack_hive_config():
+        said_rel = latest_said_rel(targets[0] / "inbox") if targets else ""
+        hot_line = f"{at} · store sessions/ " + " ".join(
+            f"{s}={len(packed.get(s) or [])}" for s in SURFACES
+        )
+        slack_result = post_slack_hive(
+            render_slack_snapshot(
+                packed,
+                at=at,
+                said_rel=said_rel,
+                hot_line=hot_line,
+                prev_rows=prev_rows,
+            )
+        )
     print(
         json.dumps(
             {
                 "at": at,
-                "law": FOUR_X_FOUR,
+                "law": SLACK_ROOM,
                 "counts": {s: len(packed.get(s) or []) for s in SURFACES},
                 "wrote": wrote,
+                "slack": {k: v for k, v in slack_result.items() if k != "token"},
             },
             indent=2,
         )
@@ -867,6 +1041,11 @@ def main() -> int:
     ap.add_argument("--heads-json", help="Fixture instead of live disk")
     ap.add_argument("--out-root", help="Write only this CONTENT/os root (tests)")
     ap.add_argument("--no-vault", action="store_true", help="Do not write the live Obsidian vault")
+    ap.add_argument(
+        "--no-slack",
+        action="store_true",
+        help="Skip Slack #hive post even if SLACK_HIVE_* is set",
+    )
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("write", help="Write said overlay + sessions store + INDEX")
     sub.add_parser("sync", help="Refresh all four namespaces from disk (alias of write)")

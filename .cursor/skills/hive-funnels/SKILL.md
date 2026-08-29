@@ -40,6 +40,8 @@ description: >-
 
 Workflow = funnel. Stack = **Cursor + Grok Bot**.
 
+Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting. Open `#hive`.
+
 Load the matching file in `scripts/hive/grok-skills/` and follow it. Grok `/` copies live in `~/.grokbot/skills/<slug>/SKILL.md` — **generated mirrors, never hand-edit** (`skills-sync.py`).
 
 **Drift gate (tiered, grill 2026-08-16):** before running any skill, read `docs/hive/outer-heaven/CONTENT/os/AUDIT.json` → `drift`. If the skill you are about to run appears in `mirror_diff` / `mirror_missing` — **hard-stop**: run `python3 scripts/hive/os/skills-sync.py --write`, reload the skill, then continue. Unrelated drift or `rules_stale` = yellow: name it, keep working. The sync is graded by the audit process, never by the agent running the skill.

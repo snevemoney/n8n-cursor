@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -34,6 +35,7 @@ class SessionMatrixTest(unittest.TestCase):
             at="2026-08-29T18:40:00Z",
             said_rel="inbox/2026-08-29-said-5.md",
         )
+        self.assertIn("Hive Slack is the shared room", text)
         self.assertIn("Grok, Claude, ChatGPT, and Cursor each read", text)
         self.assertIn("Same session store", text)
         self.assertIn("11111111-aaaa-bbbb-cccc-222222222222", text)
@@ -122,6 +124,40 @@ class SessionMatrixTest(unittest.TestCase):
             )
             self.assertEqual(again[0]["title"] if again[0]["id"] == sid else by_id[sid], "Daily Wealth & Stock Ranking")
             self.assertTrue(all(r["id"] != sid or r["title"] == "Daily Wealth & Stock Ranking" for r in again))
+
+    def test_slack_skipped_without_env(self) -> None:
+        old = {k: os.environ.pop(k) for k in list(os.environ) if k.startswith("SLACK_HIVE_")}
+        try:
+            self.assertIsNone(MOD.slack_hive_config())
+            result = MOD.post_slack_hive("should not send")
+            self.assertFalse(result["ok"])
+            self.assertEqual(result.get("skipped"), "no SLACK_HIVE_* env")
+        finally:
+            os.environ.update(old)
+
+    def test_render_slack_snapshot_titles_only(self) -> None:
+        packed = MOD.heads_from_json(FIXTURE)
+        text = MOD.render_slack_snapshot(
+            packed,
+            at="2026-08-29T19:40:00Z",
+            said_rel="inbox/2026-08-29-said-2.md",
+            hot_line="2026-08-29T19:40:00Z · store sessions/ cursor=1 grok=1",
+            prev_rows=[],
+        )
+        self.assertIn("Hive Slack is the shared room", text)
+        self.assertIn("`docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`", text)
+        self.assertIn("can the memory of all chat session continue", text)
+        self.assertIn("stand down", text)
+        self.assertNotIn("<user_query>", text)
+        self.assertNotIn(".data", text.split("Do not decrypt")[0])
+        delta = MOD.render_slack_snapshot(
+            packed,
+            at="2026-08-29T19:40:00Z",
+            said_rel="inbox/2026-08-29-said-2.md",
+            hot_line="hot",
+            prev_rows=[{"surface": "cursor", "id": "nope", "title": "old"}],
+        )
+        self.assertIn("Delta — new titles", delta)
 
 
 if __name__ == "__main__":

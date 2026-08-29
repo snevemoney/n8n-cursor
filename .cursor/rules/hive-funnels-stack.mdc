@@ -7,7 +7,7 @@ alwaysApply: true
 
 - **Workflow = funnel.** Same machine: who comes in → stages → hard step (Evens sends/pays/books).
 - **Factory:** we are a level-3 software factory (**process** + **product foundation**) — Evens plans + validates, Forge builds, Watchdog grades, merge ≠ ship. Loop: code → surface → chat. Machine: `dark-factory`. Card: `MATRIX-PROCESS-2026-08-15`. SIP “dark headless factory” = login/pay/share primitives (`CONTENT/knowledge/product-factory/`). Our desks = process. Both. Not a sold SKU. Not unsupervised 24/7. Next SKU reuses `primitives.json`. Default wake: Forge, Watchdog, HITL Operator, Researcher, Communications Manager.
-- **Stack:** Cursor (build, browser, repo) + Grok Bot (17 agents; default spawn is the five). Do not install Claude Cowork, Claude Code CLI, Codex app, ChatGPT desktop, Gemini, Coda, Vapi, or Abacus. **Law:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store (`docs/MATRIX.md` · `CONTENT/os/sessions/INDEX.md`).
+- **Stack:** Cursor (build, browser, repo) + Grok Bot (17 agents; default spawn is the five). Do not install Claude Cowork, Claude Code CLI, Codex app, ChatGPT desktop, Gemini, Coda, Vapi, or Abacus. **Law:** Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting (`#hive` · `docs/MATRIX.md` · `CONTENT/os/sessions/INDEX.md`).
 - **New project:** one long dump, then short loops (`session-bootstrap`).
 - **Builds:** one system per session (`slice-build`). Refuse the whole site/game in one prompt.
 - **Lists:** 50 → score 60–70% great → rewrite exclusions (`list-anneal-funnel`).
