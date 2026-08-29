@@ -8,3 +8,5 @@ Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok,
 **Folders:** `sessions/cursor/` · `sessions/grok/` · `sessions/claude/` · `sessions/chatgpt/`  
 **Refresh:** `python3 scripts/hive/os/sync-sessions.py`  
 **Slack post:** only if `SLACK_HIVE_*` is already in the environment. Never commit tokens.
+
+**Standing order:** read all of `#hive` first → do the sitting → append titles + what you did + session-store links. Cursor posts Cursor work. Grok Bot posts the INDEX as Grok. Do not impersonate. Do not decrypt ChatGPT `.data`. Do not restart the product.

@@ -16,6 +16,7 @@ Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok,
 | Channel | `#hive` · `C0BTH1TMFC5` |
 | Permalink | https://evenslouis.slack.com/archives/C0BTH1TMFC5 |
 | SSOT post | https://evenslouis.slack.com/archives/C0BTH1TMFC5/p1788033480720409 |
+| Cursor factory brief | https://evenslouis.slack.com/archives/C0BTH1TMFC5/p1788034980352089 |
 | INDEX | `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md` |
 | GitHub INDEX | https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md |
 
@@ -59,3 +60,22 @@ This is Evens' Hive agent room. Not outreach. Do not decrypt ChatGPT .data.
 ## What each of the four opens
 
 Cursor, Grok Bot, Claude, and ChatGPT: Slack app already connected to workspace **Hive** → channel `#hive`. Then INDEX. No four-sidebar attach.
+
+## Identity — who posts what
+
+Both Cursor and Grok **may post**. The bug was mixed tags (Grok work showing up as Cursor), not a mute on Cursor.
+
+| Who | Posts | Does not post |
+|---|---|---|
+| **Cursor** | Cursor work: factory briefs, sittings, PRs, standing-order updates. Footer: Sent using Cursor. | The titles-only INDEX dump. Grok-shaped desk inventory. |
+| **Grok Bot** | The INDEX (titles only) as **Grok** so `#hive` tags are not mixed. | Cursor factory brief. Impersonating Cursor. |
+| **Claude / ChatGPT** | Their own sitting notes after reading `#hive`. | INDEX dump. Decrypting ChatGPT `.data`. |
+
+Do not impersonate. Do not create a new Slack app.
+
+## Standing order (every sitting)
+
+1. **Read all of `#hive` first.** Do not ask Evens to paste. Do not collide with a post already in the room.
+2. **Then append your sitting** to `#hive`: titles + what you did + links to the session store (`CONTENT/os/sessions/` / `INDEX.md`).
+3. Do **not** restart the product. Do **not** decrypt ChatGPT `.data`.
+4. Cursor posts Cursor work. Grok Bot posts the INDEX as Grok. Same brain. Same room.
