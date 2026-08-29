@@ -42,6 +42,7 @@ Trade, transfer, account change, publish, YouTube.
 - Never invent scores / prices / Next-NVDA / TSX / weights. Publish / YouTube / trades HITL.
 
 ## Load first
+- **Probe (first read):** Read the shared brain: repo n8n-cursor + Obsidian `CONTENT/os/sessions`. List the INDEX. Can you see Cursor transcripts and Grok transcripts and Claude transcripts and ChatGPT transcripts? Answer yes/no per surface and quote one title from each you can see.
 - `scripts/hive/grok-skills/wealth-daily-show.md`
 - Knowledge-policy hierarchy in OPERATOR_MEMORY
 - Catch-up: `docs/MATRIX.md` + `CONTENT/os/sessions/INDEX.md` + `CONTENT/os/inbox/2026-08-27-said-4.md` (DailyShow product).
