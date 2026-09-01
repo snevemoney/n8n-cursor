@@ -13,6 +13,7 @@ Do not invent a new jump system, JSON schema, or workflow engine.
 ## Read first
 
 - Sitting save: [`docs/hive/outer-heaven/HANDOFF.md`](docs/hive/outer-heaven/HANDOFF.md) · [`CURRENT_STATE.md`](docs/hive/outer-heaven/CURRENT_STATE.md)
+- Harness log (Grok computer, all desks): `~/.grokbot/outer-heaven/ACTION_LOG.jsonl` — append-only. Fields, doorbell, org: `HANDOFF.md`.
 - Agent wiki: [`docs/hive/outer-heaven/OUTER_HEAVEN_LLM_WIKI.md`](docs/hive/outer-heaven/OUTER_HEAVEN_LLM_WIKI.md)
 - Operator memory (do not dump): [`docs/hive/outer-heaven/OPERATOR_MEMORY.md`](docs/hive/outer-heaven/OPERATOR_MEMORY.md)
 - Library / systems map: [`docs/hive/outer-heaven/OUTER_HEAVEN_LIBRARY.md`](docs/hive/outer-heaven/OUTER_HEAVEN_LIBRARY.md)
