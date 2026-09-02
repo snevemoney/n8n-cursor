@@ -1,0 +1,134 @@
+[
+ {
+  "t": 7,
+  "file": "frames/01-ais-layers.jpg",
+  "scene_score": 1.0,
+  "slug": "01-ais-layers.jpg"
+ },
+ {
+  "t": 31,
+  "file": "frames/02-ais-cards-stack.jpg",
+  "scene_score": 1.0,
+  "slug": "02-ais-cards-stack.jpg"
+ },
+ {
+  "t": 44,
+  "file": "frames/03-ais-faq-lock.jpg",
+  "scene_score": 1.0,
+  "slug": "03-ais-faq-lock.jpg"
+ },
+ {
+  "t": 51,
+  "file": "frames/04-ais-cta-layers.jpg",
+  "scene_score": 1.0,
+  "slug": "04-ais-cta-layers.jpg"
+ },
+ {
+  "t": 59,
+  "file": "frames/05-ais-mobile.jpg",
+  "scene_score": 1.0,
+  "slug": "05-ais-mobile.jpg"
+ },
+ {
+  "t": 92,
+  "file": "frames/06-nate-hero.jpg",
+  "scene_score": 1.0,
+  "slug": "06-nate-hero.jpg"
+ },
+ {
+  "t": 113,
+  "file": "frames/07-nate-mouse.jpg",
+  "scene_score": 1.0,
+  "slug": "07-nate-mouse.jpg"
+ },
+ {
+  "t": 158,
+  "file": "frames/08-nate-sticky-nav.jpg",
+  "scene_score": 1.0,
+  "slug": "08-nate-sticky-nav.jpg"
+ },
+ {
+  "t": 174,
+  "file": "frames/09-glido-apps.jpg",
+  "scene_score": 1.0,
+  "slug": "09-glido-apps.jpg"
+ },
+ {
+  "t": 209,
+  "file": "frames/10-glido-favorite.jpg",
+  "scene_score": 1.0,
+  "slug": "10-glido-favorite.jpg"
+ },
+ {
+  "t": 272,
+  "file": "frames/11-fora-layers.jpg",
+  "scene_score": 1.0,
+  "slug": "11-fora-layers.jpg"
+ },
+ {
+  "t": 332,
+  "file": "frames/12-21st-dev.jpg",
+  "scene_score": 1.0,
+  "slug": "12-21st-dev.jpg"
+ },
+ {
+  "t": 336,
+  "file": "frames/13-21st-container-scroll.jpg",
+  "scene_score": 1.0,
+  "slug": "13-21st-container-scroll.jpg"
+ },
+ {
+  "t": 381,
+  "file": "frames/14-lemon-clone.jpg",
+  "scene_score": 1.0,
+  "slug": "14-lemon-clone.jpg"
+ },
+ {
+  "t": 448,
+  "file": "frames/15-godly-design.jpg",
+  "scene_score": 1.0,
+  "slug": "15-godly-design.jpg"
+ },
+ {
+  "t": 471,
+  "file": "frames/16-awards-by-niche.jpg",
+  "scene_score": 1.0,
+  "slug": "16-awards-by-niche.jpg"
+ },
+ {
+  "t": 488,
+  "file": "frames/21-motion-sites.jpg",
+  "scene_score": 1.0,
+  "slug": "21-motion-sites.jpg"
+ },
+ {
+  "t": 539,
+  "file": "frames/17-ferna-hero.jpg",
+  "scene_score": 1.0,
+  "slug": "17-ferna-hero.jpg"
+ },
+ {
+  "t": 566,
+  "file": "frames/18-ferna-scroll-video.jpg",
+  "scene_score": 1.0,
+  "slug": "18-ferna-scroll-video.jpg"
+ },
+ {
+  "t": 586,
+  "file": "frames/19-lowkey-hero.jpg",
+  "scene_score": 1.0,
+  "slug": "19-lowkey-hero.jpg"
+ },
+ {
+  "t": 605,
+  "file": "frames/20-lowkey-hard-cut.jpg",
+  "scene_score": 1.0,
+  "slug": "20-lowkey-hard-cut.jpg"
+ },
+ {
+  "t": 840,
+  "file": "frames/22-fable-compare-sites.jpg",
+  "scene_score": 1.0,
+  "slug": "22-fable-compare-sites.jpg"
+ }
+]

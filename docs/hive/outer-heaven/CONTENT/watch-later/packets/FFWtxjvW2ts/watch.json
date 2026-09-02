@@ -1,0 +1,2840 @@
+{
+ "video_id": "FFWtxjvW2ts",
+ "video_url": "https://www.youtube.com/watch?v=FFWtxjvW2ts",
+ "sampling_interval_sec": 5,
+ "method": "goal-directed-watch",
+ "frames": [
+  {
+   "timestamp": "00:07",
+   "description": "OBSERVED still 01-ais-layers.jpg @ 00:07. AIS layered hero as he starts to scroll",
+   "file": "frames/01-ais-layers.jpg"
+  },
+  {
+   "timestamp": "00:31",
+   "description": "OBSERVED still 02-ais-cards-stack.jpg @ 00:31. cards start to stack",
+   "file": "frames/02-ais-cards-stack.jpg"
+  },
+  {
+   "timestamp": "00:44",
+   "description": "OBSERVED still 03-ais-faq-lock.jpg @ 00:44. FAQ text lock animation",
+   "file": "frames/03-ais-faq-lock.jpg"
+  },
+  {
+   "timestamp": "00:51",
+   "description": "OBSERVED still 04-ais-cta-layers.jpg @ 00:51. CTA with layering coming back",
+   "file": "frames/04-ais-cta-layers.jpg"
+  },
+  {
+   "timestamp": "00:59",
+   "description": "OBSERVED still 05-ais-mobile.jpg @ 00:59. mobile / phone view of AIS",
+   "file": "frames/05-ais-mobile.jpg"
+  },
+  {
+   "timestamp": "01:32",
+   "description": "OBSERVED still 06-nate-hero.jpg @ 01:32. Nate personal hero + ticking numbers",
+   "file": "frames/06-nate-hero.jpg"
+  },
+  {
+   "timestamp": "01:53",
+   "description": "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth",
+   "file": "frames/07-nate-mouse.jpg"
+  },
+  {
+   "timestamp": "02:38",
+   "description": "OBSERVED still 08-nate-sticky-nav.jpg @ 02:38. sticky / locked nav",
+   "file": "frames/08-nate-sticky-nav.jpg"
+  },
+  {
+   "timestamp": "02:54",
+   "description": "OBSERVED still 09-glido-apps.jpg @ 02:54. Glido product-in-use apps",
+   "file": "frames/09-glido-apps.jpg"
+  },
+  {
+   "timestamp": "03:29",
+   "description": "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation",
+   "file": "frames/10-glido-favorite.jpg"
+  },
+  {
+   "timestamp": "04:32",
+   "description": "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes",
+   "file": "frames/11-fora-layers.jpg"
+  },
+  {
+   "timestamp": "05:32",
+   "description": "OBSERVED still 12-21st-dev.jpg @ 05:32. 21st.dev Container Scroll + Copy prompt",
+   "file": "frames/12-21st-dev.jpg"
+  },
+  {
+   "timestamp": "05:36",
+   "description": "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component",
+   "file": "frames/13-21st-container-scroll.jpg"
+  },
+  {
+   "timestamp": "06:21",
+   "description": "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)",
+   "file": "frames/14-lemon-clone.jpg"
+  },
+  {
+   "timestamp": "07:28",
+   "description": "OBSERVED still 15-godly-design.jpg @ 07:28. godly.design gallery (heroes/CTAs/OG)",
+   "file": "frames/15-godly-design.jpg"
+  },
+  {
+   "timestamp": "07:51",
+   "description": "OBSERVED still 16-awards-by-niche.jpg @ 07:51. awards / Awwwards-style filter by niche",
+   "file": "frames/16-awards-by-niche.jpg"
+  },
+  {
+   "timestamp": "08:08",
+   "description": "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds",
+   "file": "frames/21-motion-sites.jpg"
+  },
+  {
+   "timestamp": "08:59",
+   "description": "OBSERVED still 17-ferna-hero.jpg @ 08:59. Ferna one-shot \u2014 herbs / layered product",
+   "file": "frames/17-ferna-hero.jpg"
+  },
+  {
+   "timestamp": "09:26",
+   "description": "OBSERVED still 18-ferna-scroll-video.jpg @ 09:26. Ferna grow-on-scroll video",
+   "file": "frames/18-ferna-scroll-video.jpg"
+  },
+  {
+   "timestamp": "09:46",
+   "description": "OBSERVED still 19-lowkey-hero.jpg @ 09:46. Lowkey one-shot \u2014 keyboard",
+   "file": "frames/19-lowkey-hero.jpg"
+  },
+  {
+   "timestamp": "10:05",
+   "description": "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)",
+   "file": "frames/20-lowkey-hard-cut.jpg"
+  },
+  {
+   "timestamp": "14:00",
+   "description": "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family",
+   "file": "frames/22-fable-compare-sites.jpg"
+  }
+ ],
+ "transcript": [
+  {
+   "start": "00:00",
+   "end": "00:02",
+   "text": "This is probably my favorite website"
+  },
+  {
+   "start": "00:01",
+   "end": "00:03",
+   "text": "I've ever built with Claude. This is the"
+  },
+  {
+   "start": "00:03",
+   "end": "00:05",
+   "text": "AI Automation Society site. What I think"
+  },
+  {
+   "start": "00:05",
+   "end": "00:07",
+   "text": "is so cool about this one is look at the"
+  },
+  {
+   "start": "00:07",
+   "end": "00:09",
+   "text": "layers as I start to scroll. We can see"
+  },
+  {
+   "start": "00:08",
+   "end": "00:10",
+   "text": "the mountains in the background and this"
+  },
+  {
+   "start": "00:10",
+   "end": "00:12",
+   "text": "like treeine and they are clearly"
+  },
+  {
+   "start": "00:12",
+   "end": "00:14",
+   "text": "different layers and that adds a really"
+  },
+  {
+   "start": "00:13",
+   "end": "00:15",
+   "text": "premium feel as well as this whole"
+  },
+  {
+   "start": "00:15",
+   "end": "00:17",
+   "text": "laptop kind of being dynamic. Right now"
+  },
+  {
+   "start": "00:18",
+   "end": "00:20",
+   "text": "we keep scrolling down and we see a"
+  },
+  {
+   "start": "00:19",
+   "end": "00:21",
+   "text": "little bit about AI automation society."
+  },
+  {
+   "start": "00:21",
+   "end": "00:23",
+   "text": "We see the words come in. We see the"
+  },
+  {
+   "start": "00:22",
+   "end": "00:24",
+   "text": "words come in down here and we can flip"
+  },
+  {
+   "start": "00:24",
+   "end": "00:26",
+   "text": "between the classroom live calls events"
+  },
+  {
+   "start": "00:26",
+   "end": "00:28",
+   "text": "and leaderboard. And as we keep"
+  },
+  {
+   "start": "00:28",
+   "end": "00:30",
+   "text": "scrolling, more text keeps coming in"
+  },
+  {
+   "start": "00:30",
+   "end": "00:32",
+   "text": "dynamically and these cards start to"
+  },
+  {
+   "start": "00:31",
+   "end": "00:33",
+   "text": "stack on top of each other, which I"
+  },
+  {
+   "start": "00:33",
+   "end": "00:35",
+   "text": "think just feels super super dynamic and"
+  },
+  {
+   "start": "00:36",
+   "end": "00:38",
+   "text": "engaging. We can see the pricing section"
+  },
+  {
+   "start": "00:37",
+   "end": "00:39",
+   "text": "here, free community plus community, as"
+  },
+  {
+   "start": "00:39",
+   "end": "00:41",
+   "text": "well as our certification cohort. We see"
+  },
+  {
+   "start": "00:41",
+   "end": "00:43",
+   "text": "some Q&A down here or FAQ, sorry. And"
+  },
+  {
+   "start": "00:44",
+   "end": "00:46",
+   "text": "look at this animation where the text"
+  },
+  {
+   "start": "00:45",
+   "end": "00:47",
+   "text": "sort of like locks as we switch between"
+  },
+  {
+   "start": "00:47",
+   "end": "00:49",
+   "text": "these different things. I think that's"
+  },
+  {
+   "start": "00:48",
+   "end": "00:50",
+   "text": "awesome. We see some YouTube videos and"
+  },
+  {
+   "start": "00:50",
+   "end": "00:52",
+   "text": "then finally the call to action down"
+  },
+  {
+   "start": "00:51",
+   "end": "00:53",
+   "text": "here with once again the layering comes"
+  },
+  {
+   "start": "00:54",
+   "end": "00:56",
+   "text": "back in. And I just think that that is"
+  },
+  {
+   "start": "00:55",
+   "end": "00:57",
+   "text": "so so cool. And I know you guys are"
+  },
+  {
+   "start": "00:57",
+   "end": "00:59",
+   "text": "probably wondering on mobile. So here it"
+  },
+  {
+   "start": "00:59",
+   "end": "01:01",
+   "text": "is right here. This is me on my phone."
+  },
+  {
+   "start": "01:01",
+   "end": "01:03",
+   "text": "We get the same dynamic laptop screen."
+  },
+  {
+   "start": "01:02",
+   "end": "01:04",
+   "text": "We get the same layered effect, which I"
+  },
+  {
+   "start": "01:04",
+   "end": "01:06",
+   "text": "think is just beautiful. We can scroll"
+  },
+  {
+   "start": "01:06",
+   "end": "01:08",
+   "text": "through this text. We see we get these"
+  },
+  {
+   "start": "01:08",
+   "end": "01:10",
+   "text": "same animations, but we click through"
+  },
+  {
+   "start": "01:10",
+   "end": "01:12",
+   "text": "these sections a little bit differently."
+  },
+  {
+   "start": "01:12",
+   "end": "01:14",
+   "text": "We continue to scroll down. All of this"
+  },
+  {
+   "start": "01:13",
+   "end": "01:15",
+   "text": "stuff comes in. The cards don't stack"
+  },
+  {
+   "start": "01:15",
+   "end": "01:17",
+   "text": "the same way it does on desktop, but I'm"
+  },
+  {
+   "start": "01:17",
+   "end": "01:19",
+   "text": "sure we could engineer that if we wanted"
+  },
+  {
+   "start": "01:18",
+   "end": "01:20",
+   "text": "to with just one prompt. We keep coming"
+  },
+  {
+   "start": "01:20",
+   "end": "01:22",
+   "text": "through. The point I'm trying to make"
+  },
+  {
+   "start": "01:22",
+   "end": "01:24",
+   "text": "here is Fable 5.1 is able to take care"
+  },
+  {
+   "start": "01:24",
+   "end": "01:26",
+   "text": "of this on mobile as well and you get"
+  },
+  {
+   "start": "01:27",
+   "end": "01:29",
+   "text": "the exact same premium feel. I think"
+  },
+  {
+   "start": "01:28",
+   "end": "01:30",
+   "text": "that this website is beautiful. Let's"
+  },
+  {
+   "start": "01:30",
+   "end": "01:32",
+   "text": "take a look at another example here."
+  },
+  {
+   "start": "01:32",
+   "end": "01:34",
+   "text": "This is my website. You can see we've"
+  },
+  {
+   "start": "01:34",
+   "end": "01:36",
+   "text": "got the text. We've got the hero"
+  },
+  {
+   "start": "01:35",
+   "end": "01:37",
+   "text": "section. Those numbers were sort of like"
+  },
+  {
+   "start": "01:36",
+   "end": "01:38",
+   "text": "ticking up. I've got myself over here"
+  },
+  {
+   "start": "01:38",
+   "end": "01:40",
+   "text": "and this is like a really neat"
+  },
+  {
+   "start": "01:39",
+   "end": "01:41",
+   "text": "background that I think adds depth and"
+  },
+  {
+   "start": "01:41",
+   "end": "01:43",
+   "text": "adds another layer, but it's not"
+  },
+  {
+   "start": "01:43",
+   "end": "01:45",
+   "text": "distracting. These are all clickable"
+  },
+  {
+   "start": "01:44",
+   "end": "01:46",
+   "text": "links. These numbers are ticking up and"
+  },
+  {
+   "start": "01:46",
+   "end": "01:48",
+   "text": "we can still see consistency with the"
+  },
+  {
+   "start": "01:47",
+   "end": "01:49",
+   "text": "background animation. We continue to go"
+  },
+  {
+   "start": "01:49",
+   "end": "01:51",
+   "text": "through these things color up as I"
+  },
+  {
+   "start": "01:51",
+   "end": "01:53",
+   "text": "highlight. We get into this interesting"
+  },
+  {
+   "start": "01:53",
+   "end": "01:55",
+   "text": "like dynamic element. You can see when I"
+  },
+  {
+   "start": "01:55",
+   "end": "01:57",
+   "text": "move my mouse, these move, but once"
+  },
+  {
+   "start": "01:56",
+   "end": "01:58",
+   "text": "again, it's not too overwhelming or"
+  },
+  {
+   "start": "01:58",
+   "end": "02:00",
+   "text": "distracting. I think it just feels very"
+  },
+  {
+   "start": "02:00",
+   "end": "02:02",
+   "text": "premium and adds some nice depth here."
+  },
+  {
+   "start": "02:02",
+   "end": "02:04",
+   "text": "We have a little bit and background"
+  },
+  {
+   "start": "02:03",
+   "end": "02:05",
+   "text": "information. And this links to the about"
+  },
+  {
+   "start": "02:05",
+   "end": "02:07",
+   "text": "page, which is um just a little bit of a"
+  },
+  {
+   "start": "02:08",
+   "end": "02:10",
+   "text": "bio. It's nothing too fancy at all. But"
+  },
+  {
+   "start": "02:09",
+   "end": "02:11",
+   "text": "anyways, we keep coming down and we have"
+  },
+  {
+   "start": "02:11",
+   "end": "02:13",
+   "text": "like a little bit of a photo montage."
+  },
+  {
+   "start": "02:13",
+   "end": "02:15",
+   "text": "These kind of come up as they go into"
+  },
+  {
+   "start": "02:15",
+   "end": "02:17",
+   "text": "screen. And then we keep coming down."
+  },
+  {
+   "start": "02:17",
+   "end": "02:19",
+   "text": "see my book, Becoming AI Native. We have"
+  },
+  {
+   "start": "02:19",
+   "end": "02:21",
+   "text": "new YouTube videos every week. And then"
+  },
+  {
+   "start": "02:21",
+   "end": "02:23",
+   "text": "it pulls up um join AIS and a little"
+  },
+  {
+   "start": "02:23",
+   "end": "02:25",
+   "text": "signature, which it just actually found"
+  },
+  {
+   "start": "02:26",
+   "end": "02:28",
+   "text": "in my um pictures on my local desktop."
+  },
+  {
+   "start": "02:29",
+   "end": "02:31",
+   "text": "Now, what I also really like is that the"
+  },
+  {
+   "start": "02:30",
+   "end": "02:32",
+   "text": "navbar stays with you all the way"
+  },
+  {
+   "start": "02:32",
+   "end": "02:34",
+   "text": "through. And it also did that within the"
+  },
+  {
+   "start": "02:34",
+   "end": "02:36",
+   "text": "AIS um site, which I really, really"
+  },
+  {
+   "start": "02:36",
+   "end": "02:38",
+   "text": "like. I don't know why. It just feels a"
+  },
+  {
+   "start": "02:38",
+   "end": "02:40",
+   "text": "bit more like having it locked there"
+  },
+  {
+   "start": "02:40",
+   "end": "02:42",
+   "text": "just feels good. Now, let me show you"
+  },
+  {
+   "start": "02:41",
+   "end": "02:43",
+   "text": "guys this next one, which is Glido. I"
+  },
+  {
+   "start": "02:42",
+   "end": "02:44",
+   "text": "think this one is so cool because look"
+  },
+  {
+   "start": "02:44",
+   "end": "02:46",
+   "text": "at this little dictation bar. There's so"
+  },
+  {
+   "start": "02:46",
+   "end": "02:48",
+   "text": "many animations within this. You can see"
+  },
+  {
+   "start": "02:47",
+   "end": "02:49",
+   "text": "that it's dictating words and putting"
+  },
+  {
+   "start": "02:49",
+   "end": "02:51",
+   "text": "them into Slack. And this looks very"
+  },
+  {
+   "start": "02:50",
+   "end": "02:52",
+   "text": "similar to the way that you can actually"
+  },
+  {
+   "start": "02:52",
+   "end": "02:54",
+   "text": "see me talking into my mic right now."
+  },
+  {
+   "start": "02:54",
+   "end": "02:56",
+   "text": "And right here, you can see that I'm"
+  },
+  {
+   "start": "02:55",
+   "end": "02:57",
+   "text": "dictating with Glyo. So, super super"
+  },
+  {
+   "start": "02:57",
+   "end": "02:59",
+   "text": "cool. We can have the apps right here"
+  },
+  {
+   "start": "02:58",
+   "end": "03:00",
+   "text": "that we already use and it pauses when"
+  },
+  {
+   "start": "03:00",
+   "end": "03:02",
+   "text": "I'm on it. We get these animations"
+  },
+  {
+   "start": "03:02",
+   "end": "03:04",
+   "text": "coming in with the holding down a key"
+  },
+  {
+   "start": "03:04",
+   "end": "03:06",
+   "text": "saying it messy and then it gets"
+  },
+  {
+   "start": "03:06",
+   "end": "03:08",
+   "text": "dictated and pasted over here. Much"
+  },
+  {
+   "start": "03:08",
+   "end": "03:10",
+   "text": "cleaner. We can keep going down and"
+  },
+  {
+   "start": "03:09",
+   "end": "03:11",
+   "text": "seeing that we have different apps like"
+  },
+  {
+   "start": "03:11",
+   "end": "03:13",
+   "text": "we're seeing Glido putting this into"
+  },
+  {
+   "start": "03:13",
+   "end": "03:15",
+   "text": "Slack. We're seeing Glido put this into"
+  },
+  {
+   "start": "03:15",
+   "end": "03:17",
+   "text": "cursor. We're seeing it actually sort of"
+  },
+  {
+   "start": "03:16",
+   "end": "03:18",
+   "text": "like have these animations where we can"
+  },
+  {
+   "start": "03:18",
+   "end": "03:20",
+   "text": "see what it would look like to use GLO"
+  },
+  {
+   "start": "03:20",
+   "end": "03:22",
+   "text": "in these different apps. Gmail and of"
+  },
+  {
+   "start": "03:21",
+   "end": "03:23",
+   "text": "course cloud code in the terminal. We"
+  },
+  {
+   "start": "03:24",
+   "end": "03:26",
+   "text": "have more stuff down here transcribing"
+  },
+  {
+   "start": "03:26",
+   "end": "03:28",
+   "text": "over here or speaking over here as well"
+  },
+  {
+   "start": "03:28",
+   "end": "03:30",
+   "text": "as just like typing the difference right"
+  },
+  {
+   "start": "03:29",
+   "end": "03:31",
+   "text": "there. And now this is my favorite part."
+  },
+  {
+   "start": "03:32",
+   "end": "03:34",
+   "text": "As we go down, which is this animation,"
+  },
+  {
+   "start": "03:34",
+   "end": "03:36",
+   "text": "we have the dictation and then we have"
+  },
+  {
+   "start": "03:36",
+   "end": "03:38",
+   "text": "these two things that are going"
+  },
+  {
+   "start": "03:37",
+   "end": "03:39",
+   "text": "different ways with all of these apps."
+  },
+  {
+   "start": "03:38",
+   "end": "03:40",
+   "text": "Some of these logos are obviously off,"
+  },
+  {
+   "start": "03:40",
+   "end": "03:42",
+   "text": "but hey, for a oneshot prompt, this is"
+  },
+  {
+   "start": "03:42",
+   "end": "03:44",
+   "text": "pretty solid. I like that animation,"
+  },
+  {
+   "start": "03:44",
+   "end": "03:46",
+   "text": "too. And we have some stuff from us, the"
+  },
+  {
+   "start": "03:46",
+   "end": "03:48",
+   "text": "founders down here. Anyways, the"
+  },
+  {
+   "start": "03:48",
+   "end": "03:50",
+   "text": "pricing. Now, what I want to talk about"
+  },
+  {
+   "start": "03:50",
+   "end": "03:52",
+   "text": "is how do you actually get Fable 5.1 to"
+  },
+  {
+   "start": "03:53",
+   "end": "03:55",
+   "text": "do stuff like this without giving you AI"
+  },
+  {
+   "start": "03:56",
+   "end": "03:58",
+   "text": "slop. Now, obviously, what I found is"
+  },
+  {
+   "start": "03:57",
+   "end": "03:59",
+   "text": "having things like scroll animations and"
+  },
+  {
+   "start": "04:00",
+   "end": "04:02",
+   "text": "having text feel more dynamic. And"
+  },
+  {
+   "start": "04:01",
+   "end": "04:03",
+   "text": "specifically in this video, I really"
+  },
+  {
+   "start": "04:03",
+   "end": "04:05",
+   "text": "found out about layering. That helps a"
+  },
+  {
+   "start": "04:05",
+   "end": "04:07",
+   "text": "ton. But ultimately what I realized is"
+  },
+  {
+   "start": "04:06",
+   "end": "04:08",
+   "text": "that you can't just say to Fable 5.1 or"
+  },
+  {
+   "start": "04:09",
+   "end": "04:11",
+   "text": "any AI model, make this look"
+  },
+  {
+   "start": "04:10",
+   "end": "04:12",
+   "text": "professional. Make this feel premium."
+  },
+  {
+   "start": "04:12",
+   "end": "04:14",
+   "text": "You really have to give it something to"
+  },
+  {
+   "start": "04:14",
+   "end": "04:16",
+   "text": "work off of. So what we did in this"
+  },
+  {
+   "start": "04:15",
+   "end": "04:17",
+   "text": "video is I got a lot of inspiration from"
+  },
+  {
+   "start": "04:17",
+   "end": "04:19",
+   "text": "other websites. So for example, with"
+  },
+  {
+   "start": "04:19",
+   "end": "04:21",
+   "text": "this website which I just absolutely"
+  },
+  {
+   "start": "04:20",
+   "end": "04:22",
+   "text": "love, I found an example of a website"
+  },
+  {
+   "start": "04:22",
+   "end": "04:24",
+   "text": "that I really loved and I took the"
+  },
+  {
+   "start": "04:24",
+   "end": "04:26",
+   "text": "elements from it that I liked. So this"
+  },
+  {
+   "start": "04:26",
+   "end": "04:28",
+   "text": "one is called Fora. You can see it's"
+  },
+  {
+   "start": "04:28",
+   "end": "04:30",
+   "text": "very similar. You can see it has hero"
+  },
+  {
+   "start": "04:29",
+   "end": "04:31",
+   "text": "text. It has the layers in the"
+  },
+  {
+   "start": "04:31",
+   "end": "04:33",
+   "text": "background. Then when I started to"
+  },
+  {
+   "start": "04:32",
+   "end": "04:34",
+   "text": "scroll, I was like, \"Wow, I love the"
+  },
+  {
+   "start": "04:34",
+   "end": "04:36",
+   "text": "layering here.\" So I told Fable 5.1 how"
+  },
+  {
+   "start": "04:36",
+   "end": "04:38",
+   "text": "to figure out how we could make a hero"
+  },
+  {
+   "start": "04:38",
+   "end": "04:40",
+   "text": "section that as I scroll down, there's"
+  },
+  {
+   "start": "04:40",
+   "end": "04:42",
+   "text": "like four layers. There's a back"
+  },
+  {
+   "start": "04:42",
+   "end": "04:44",
+   "text": "mountain, there's a middle mountain,"
+  },
+  {
+   "start": "04:43",
+   "end": "04:45",
+   "text": "there's a laptop screen, and then"
+  },
+  {
+   "start": "04:45",
+   "end": "04:47",
+   "text": "there's a front layer of trees. And I"
+  },
+  {
+   "start": "04:47",
+   "end": "04:49",
+   "text": "basically just love that feel and I"
+  },
+  {
+   "start": "04:49",
+   "end": "04:51",
+   "text": "wanted to replicate it. So I just had it"
+  },
+  {
+   "start": "04:50",
+   "end": "04:52",
+   "text": "make all of these separate layers that"
+  },
+  {
+   "start": "04:52",
+   "end": "04:54",
+   "text": "move when you scroll. Then we of course"
+  },
+  {
+   "start": "04:54",
+   "end": "04:56",
+   "text": "have like this text thing. I really"
+  },
+  {
+   "start": "04:56",
+   "end": "04:58",
+   "text": "liked how the cards here stacked. I"
+  },
+  {
+   "start": "04:58",
+   "end": "05:00",
+   "text": "thought that that felt super premium."
+  },
+  {
+   "start": "04:59",
+   "end": "05:01",
+   "text": "So, I looked at this website for"
+  },
+  {
+   "start": "05:01",
+   "end": "05:03",
+   "text": "inspiration and I told Fable 5.1 that I"
+  },
+  {
+   "start": "05:03",
+   "end": "05:05",
+   "text": "wanted to have mine have the same feel"
+  },
+  {
+   "start": "05:05",
+   "end": "05:07",
+   "text": "and I explained all the elements of this"
+  },
+  {
+   "start": "05:06",
+   "end": "05:08",
+   "text": "and why I liked it and how I wanted it"
+  },
+  {
+   "start": "05:08",
+   "end": "05:10",
+   "text": "to use that as inspiration. Now, for my"
+  },
+  {
+   "start": "05:11",
+   "end": "05:13",
+   "text": "website here, there wasn't exactly a"
+  },
+  {
+   "start": "05:12",
+   "end": "05:14",
+   "text": "website that I took inspiration from,"
+  },
+  {
+   "start": "05:14",
+   "end": "05:16",
+   "text": "but instead what I did is I took"
+  },
+  {
+   "start": "05:15",
+   "end": "05:17",
+   "text": "components that I really liked. So, I"
+  },
+  {
+   "start": "05:17",
+   "end": "05:19",
+   "text": "went to um where is it? I went to"
+  },
+  {
+   "start": "05:18",
+   "end": "05:20",
+   "text": "something called 21st.dev, which you"
+  },
+  {
+   "start": "05:20",
+   "end": "05:22",
+   "text": "guys have probably heard of before"
+  },
+  {
+   "start": "05:21",
+   "end": "05:23",
+   "text": "already if you've been watching me for a"
+  },
+  {
+   "start": "05:23",
+   "end": "05:25",
+   "text": "while making sites. This site basically"
+  },
+  {
+   "start": "05:25",
+   "end": "05:27",
+   "text": "has a bunch of components that you can"
+  },
+  {
+   "start": "05:26",
+   "end": "05:28",
+   "text": "find and you can literally give your AI"
+  },
+  {
+   "start": "05:28",
+   "end": "05:30",
+   "text": "agents the prompts for these animations."
+  },
+  {
+   "start": "05:30",
+   "end": "05:32",
+   "text": "So for example, this container scroll,"
+  },
+  {
+   "start": "05:32",
+   "end": "05:34",
+   "text": "you can just copy prompt and then your"
+  },
+  {
+   "start": "05:34",
+   "end": "05:36",
+   "text": "agent can basically copy that element."
+  },
+  {
+   "start": "05:36",
+   "end": "05:38",
+   "text": "So I was looking at backgrounds that I"
+  },
+  {
+   "start": "05:38",
+   "end": "05:40",
+   "text": "really liked here. I was looking at"
+  },
+  {
+   "start": "05:39",
+   "end": "05:41",
+   "text": "different gradients. I was looking at"
+  },
+  {
+   "start": "05:41",
+   "end": "05:43",
+   "text": "different interactive elements and I"
+  },
+  {
+   "start": "05:42",
+   "end": "05:44",
+   "text": "just decided that I liked one. I'm not"
+  },
+  {
+   "start": "05:44",
+   "end": "05:46",
+   "text": "going to be able to find it right now,"
+  },
+  {
+   "start": "05:45",
+   "end": "05:47",
+   "text": "but I really liked that one that you see"
+  },
+  {
+   "start": "05:46",
+   "end": "05:48",
+   "text": "in the background here and I just took"
+  },
+  {
+   "start": "05:48",
+   "end": "05:50",
+   "text": "it and then I started designing with it."
+  },
+  {
+   "start": "05:50",
+   "end": "05:52",
+   "text": "And then I just explained to Fable that"
+  },
+  {
+   "start": "05:51",
+   "end": "05:53",
+   "text": "I wanted all of this text to sort of"
+  },
+  {
+   "start": "05:52",
+   "end": "05:54",
+   "text": "appear as it enters the screen. And then"
+  },
+  {
+   "start": "05:55",
+   "end": "05:57",
+   "text": "I said, \"Hey, I want this to be 3D. I"
+  },
+  {
+   "start": "05:56",
+   "end": "05:58",
+   "text": "want this to feel dynamic. I want, you"
+  },
+  {
+   "start": "05:58",
+   "end": "06:00",
+   "text": "know, all this text to come in. I want"
+  },
+  {
+   "start": "05:59",
+   "end": "06:01",
+   "text": "this to scroll sideways.\" And of course,"
+  },
+  {
+   "start": "06:01",
+   "end": "06:03",
+   "text": "I used my scroll craft skill, which you"
+  },
+  {
+   "start": "06:03",
+   "end": "06:05",
+   "text": "guys can access for completely free. It"
+  },
+  {
+   "start": "06:05",
+   "end": "06:07",
+   "text": "is linked in my free school community,"
+  },
+  {
+   "start": "06:06",
+   "end": "06:08",
+   "text": "which is in the description. This skill"
+  },
+  {
+   "start": "06:08",
+   "end": "06:10",
+   "text": "has all of the design elements that you"
+  },
+  {
+   "start": "06:09",
+   "end": "06:11",
+   "text": "need to understand for layering, for"
+  },
+  {
+   "start": "06:11",
+   "end": "06:13",
+   "text": "scrolling, for, you know, text appearing"
+  },
+  {
+   "start": "06:13",
+   "end": "06:15",
+   "text": "like this, for text appearing like this."
+  },
+  {
+   "start": "06:15",
+   "end": "06:17",
+   "text": "It has basically all these principles"
+  },
+  {
+   "start": "06:17",
+   "end": "06:19",
+   "text": "inside of that skill. It's completely"
+  },
+  {
+   "start": "06:18",
+   "end": "06:20",
+   "text": "free. And then for GLO, what I actually"
+  },
+  {
+   "start": "06:20",
+   "end": "06:22",
+   "text": "did is we looked at a competitor site."
+  },
+  {
+   "start": "06:21",
+   "end": "06:23",
+   "text": "So we looked at Lemon, which is another"
+  },
+  {
+   "start": "06:23",
+   "end": "06:25",
+   "text": "dictation app, and I loved how it had"
+  },
+  {
+   "start": "06:24",
+   "end": "06:26",
+   "text": "these animations that almost give you"
+  },
+  {
+   "start": "06:26",
+   "end": "06:28",
+   "text": "the feel as if you're already using the"
+  },
+  {
+   "start": "06:28",
+   "end": "06:30",
+   "text": "product. So I basically just once again"
+  },
+  {
+   "start": "06:29",
+   "end": "06:31",
+   "text": "came through here and said, \"Hey,"
+  },
+  {
+   "start": "06:31",
+   "end": "06:33",
+   "text": "actually, for this one, what I want you"
+  },
+  {
+   "start": "06:32",
+   "end": "06:34",
+   "text": "to do is go to Glido. I want you to take"
+  },
+  {
+   "start": "06:34",
+   "end": "06:36",
+   "text": "our brand guidelines and just insert it"
+  },
+  {
+   "start": "06:36",
+   "end": "06:38",
+   "text": "onto a page like this.\" And you can see"
+  },
+  {
+   "start": "06:38",
+   "end": "06:40",
+   "text": "this one was, you know, very directly"
+  },
+  {
+   "start": "06:40",
+   "end": "06:42",
+   "text": "just like cloning it, I would say. But"
+  },
+  {
+   "start": "06:42",
+   "end": "06:44",
+   "text": "that's what's so cool about Fable 5.1 is"
+  },
+  {
+   "start": "06:44",
+   "end": "06:46",
+   "text": "it can inspect what's going on here and"
+  },
+  {
+   "start": "06:46",
+   "end": "06:48",
+   "text": "it can generate you one that feels the"
+  },
+  {
+   "start": "06:48",
+   "end": "06:50",
+   "text": "exact same. It even made the same sort"
+  },
+  {
+   "start": "06:49",
+   "end": "06:51",
+   "text": "of like it almost feels like watercolor"
+  },
+  {
+   "start": "06:51",
+   "end": "06:53",
+   "text": "painting in the background as you can"
+  },
+  {
+   "start": "06:52",
+   "end": "06:54",
+   "text": "see, but it made the same vibe. And now"
+  },
+  {
+   "start": "06:54",
+   "end": "06:56",
+   "text": "we just have Oh, sorry that was the"
+  },
+  {
+   "start": "06:56",
+   "end": "06:58",
+   "text": "wrong app. And now we just have this"
+  },
+  {
+   "start": "06:57",
+   "end": "06:59",
+   "text": "that we could go ahead and, you know,"
+  },
+  {
+   "start": "06:59",
+   "end": "07:01",
+   "text": "push live if we wanted to. And then look"
+  },
+  {
+   "start": "07:00",
+   "end": "07:02",
+   "text": "at what else I did. I was like, \"Okay,"
+  },
+  {
+   "start": "07:01",
+   "end": "07:03",
+   "text": "this is pretty cool.\" So I gave it an"
+  },
+  {
+   "start": "07:04",
+   "end": "07:06",
+   "text": "example of a good site. And then I gave"
+  },
+  {
+   "start": "07:05",
+   "end": "07:07",
+   "text": "it this goal, so one shot prompt. And"
+  },
+  {
+   "start": "07:07",
+   "end": "07:09",
+   "text": "then I told it to build me two"
+  },
+  {
+   "start": "07:08",
+   "end": "07:10",
+   "text": "distinctly different but most impressive"
+  },
+  {
+   "start": "07:10",
+   "end": "07:12",
+   "text": "scrollcraft, which is my skill layered"
+  },
+  {
+   "start": "07:12",
+   "end": "07:14",
+   "text": "sites that you could possibly build me"
+  },
+  {
+   "start": "07:14",
+   "end": "07:16",
+   "text": "using our skills. I told it to look at"
+  },
+  {
+   "start": "07:16",
+   "end": "07:18",
+   "text": "the AIS site cuz I really liked that"
+  },
+  {
+   "start": "07:17",
+   "end": "07:19",
+   "text": "one. I told it to grab components from"
+  },
+  {
+   "start": "07:19",
+   "end": "07:21",
+   "text": "21st.dev. I told it to go to"
+  },
+  {
+   "start": "07:21",
+   "end": "07:23",
+   "text": "godly.websites. This is all about giving"
+  },
+  {
+   "start": "07:23",
+   "end": "07:25",
+   "text": "your agent more specific prompts and"
+  },
+  {
+   "start": "07:25",
+   "end": "07:27",
+   "text": "inspiration. If I go to actually godly"
+  },
+  {
+   "start": "07:28",
+   "end": "07:30",
+   "text": "websites, you can see godly.design. We"
+  },
+  {
+   "start": "07:30",
+   "end": "07:32",
+   "text": "can find trending sites. We can find um"
+  },
+  {
+   "start": "07:33",
+   "end": "07:35",
+   "text": "logos. We can find hero sections. We can"
+  },
+  {
+   "start": "07:35",
+   "end": "07:37",
+   "text": "give all of this kind of stuff to our AI"
+  },
+  {
+   "start": "07:37",
+   "end": "07:39",
+   "text": "agents for inspiration of how we want"
+  },
+  {
+   "start": "07:39",
+   "end": "07:41",
+   "text": "our site to look. CTAs, footers, OG"
+  },
+  {
+   "start": "07:42",
+   "end": "07:44",
+   "text": "images. There's so much stuff in here."
+  },
+  {
+   "start": "07:43",
+   "end": "07:45",
+   "text": "There's also another site called awards"
+  },
+  {
+   "start": "07:45",
+   "end": "07:47",
+   "text": "where you can literally look at websites"
+  },
+  {
+   "start": "07:46",
+   "end": "07:48",
+   "text": "that are winning awards for design and"
+  },
+  {
+   "start": "07:48",
+   "end": "07:50",
+   "text": "you can just understand what kind of"
+  },
+  {
+   "start": "07:50",
+   "end": "07:52",
+   "text": "feel do you want. You know, there's"
+  },
+  {
+   "start": "07:51",
+   "end": "07:53",
+   "text": "different categories in here um you know"
+  },
+  {
+   "start": "07:53",
+   "end": "07:55",
+   "text": "technology, e-commerce, restaurant,"
+  },
+  {
+   "start": "07:55",
+   "end": "07:57",
+   "text": "fashion because obviously your site"
+  },
+  {
+   "start": "07:58",
+   "end": "08:00",
+   "text": "probably is going to convert better if"
+  },
+  {
+   "start": "07:59",
+   "end": "08:01",
+   "text": "it feels like it's in your niche talking"
+  },
+  {
+   "start": "08:01",
+   "end": "08:03",
+   "text": "to your avatar. So, this kind of stuff"
+  },
+  {
+   "start": "08:03",
+   "end": "08:05",
+   "text": "helps you get inspiration much better."
+  },
+  {
+   "start": "08:05",
+   "end": "08:07",
+   "text": "There's literally another site called"
+  },
+  {
+   "start": "08:06",
+   "end": "08:08",
+   "text": "Motion Sites that has like these"
+  },
+  {
+   "start": "08:07",
+   "end": "08:09",
+   "text": "jaw-dropping animated backgrounds that"
+  },
+  {
+   "start": "08:09",
+   "end": "08:11",
+   "text": "you can actually go ahead and grab and"
+  },
+  {
+   "start": "08:11",
+   "end": "08:13",
+   "text": "just bring right into your websites. I"
+  },
+  {
+   "start": "08:14",
+   "end": "08:16",
+   "text": "think the one that I actually used was"
+  },
+  {
+   "start": "08:15",
+   "end": "08:17",
+   "text": "very similar to this one. If you, as you"
+  },
+  {
+   "start": "08:17",
+   "end": "08:19",
+   "text": "can see, if I put this into a new page,"
+  },
+  {
+   "start": "08:19",
+   "end": "08:21",
+   "text": "this one is just kind of like a really"
+  },
+  {
+   "start": "08:21",
+   "end": "08:23",
+   "text": "nice animated background. It's obviously"
+  },
+  {
+   "start": "08:23",
+   "end": "08:25",
+   "text": "not the same because ours is sort of"
+  },
+  {
+   "start": "08:25",
+   "end": "08:27",
+   "text": "interactive, but this is also a really"
+  },
+  {
+   "start": "08:26",
+   "end": "08:28",
+   "text": "cool feel to have in the background of"
+  },
+  {
+   "start": "08:28",
+   "end": "08:30",
+   "text": "your hero section. Okay. Okay. So then"
+  },
+  {
+   "start": "08:30",
+   "end": "08:32",
+   "text": "what I did is I gave it this /goal"
+  },
+  {
+   "start": "08:31",
+   "end": "08:33",
+   "text": "prompt and I said, \"Hey, I need you to"
+  },
+  {
+   "start": "08:32",
+   "end": "08:34",
+   "text": "build me two distinctly different but"
+  },
+  {
+   "start": "08:34",
+   "end": "08:36",
+   "text": "most impressive scrollcraft, which is my"
+  },
+  {
+   "start": "08:36",
+   "end": "08:38",
+   "text": "skill type of sites that you could using"
+  },
+  {
+   "start": "08:39",
+   "end": "08:41",
+   "text": "these skills, using layering, looking at"
+  },
+  {
+   "start": "08:41",
+   "end": "08:43",
+   "text": "these components for inspiration, right?"
+  },
+  {
+   "start": "08:42",
+   "end": "08:44",
+   "text": "Like godly websites, 21st.dev, looking"
+  },
+  {
+   "start": "08:45",
+   "end": "08:47",
+   "text": "at all this type of stuff.\" I told her"
+  },
+  {
+   "start": "08:48",
+   "end": "08:50",
+   "text": "it could generate the assets that it"
+  },
+  {
+   "start": "08:50",
+   "end": "08:52",
+   "text": "needed. It could use key, it could use"
+  },
+  {
+   "start": "08:51",
+   "end": "08:53",
+   "text": "Higsfield, it can use whatever it wants,"
+  },
+  {
+   "start": "08:53",
+   "end": "08:55",
+   "text": "but I need it to be subtle but premium."
+  },
+  {
+   "start": "08:55",
+   "end": "08:57",
+   "text": "And I just said, \"Go make me these"
+  },
+  {
+   "start": "08:56",
+   "end": "08:58",
+   "text": "sites.\" So let's take a look at what it"
+  },
+  {
+   "start": "08:58",
+   "end": "09:00",
+   "text": "actually built. So, this first one's"
+  },
+  {
+   "start": "08:59",
+   "end": "09:01",
+   "text": "called Ferna, fresh herbs without the"
+  },
+  {
+   "start": "09:01",
+   "end": "09:03",
+   "text": "window sill. You can already see right"
+  },
+  {
+   "start": "09:03",
+   "end": "09:05",
+   "text": "away from the beginning, we have"
+  },
+  {
+   "start": "09:04",
+   "end": "09:06",
+   "text": "layering. We can literally tell that"
+  },
+  {
+   "start": "09:06",
+   "end": "09:08",
+   "text": "this plant PNG as well as I think even"
+  },
+  {
+   "start": "09:09",
+   "end": "09:11",
+   "text": "this leaf in the background and these"
+  },
+  {
+   "start": "09:10",
+   "end": "09:12",
+   "text": "leaves, they're all on different planes."
+  },
+  {
+   "start": "09:12",
+   "end": "09:14",
+   "text": "And the background image is on a"
+  },
+  {
+   "start": "09:14",
+   "end": "09:16",
+   "text": "different layer as well. So, that gives"
+  },
+  {
+   "start": "09:15",
+   "end": "09:17",
+   "text": "it a really nice immersive feel. We can"
+  },
+  {
+   "start": "09:18",
+   "end": "09:20",
+   "text": "see the text comes through right here."
+  },
+  {
+   "start": "09:20",
+   "end": "09:22",
+   "text": "This text pops through. This text fades"
+  },
+  {
+   "start": "09:21",
+   "end": "09:23",
+   "text": "in. These cards stack, which I think"
+  },
+  {
+   "start": "09:23",
+   "end": "09:25",
+   "text": "looks amazing. We can see right here we"
+  },
+  {
+   "start": "09:26",
+   "end": "09:28",
+   "text": "have a little scroll video now where"
+  },
+  {
+   "start": "09:27",
+   "end": "09:29",
+   "text": "this literally grows over time and we"
+  },
+  {
+   "start": "09:29",
+   "end": "09:31",
+   "text": "can go backwards. I like how this feels."
+  },
+  {
+   "start": "09:32",
+   "end": "09:34",
+   "text": "Once again, we get more layering. You"
+  },
+  {
+   "start": "09:33",
+   "end": "09:35",
+   "text": "can see the plants in the background are"
+  },
+  {
+   "start": "09:35",
+   "end": "09:37",
+   "text": "moving to the left as well, but not at"
+  },
+  {
+   "start": "09:36",
+   "end": "09:38",
+   "text": "the same rate. And then finally, we end"
+  },
+  {
+   "start": "09:38",
+   "end": "09:40",
+   "text": "off with this video where the light"
+  },
+  {
+   "start": "09:40",
+   "end": "09:42",
+   "text": "basically turns on and that is the site."
+  },
+  {
+   "start": "09:42",
+   "end": "09:44",
+   "text": "That was a oneshot prompt with"
+  },
+  {
+   "start": "09:44",
+   "end": "09:46",
+   "text": "Scrollcraft. Okay. And then the second"
+  },
+  {
+   "start": "09:46",
+   "end": "09:48",
+   "text": "one it made, this one is called Lowkey."
+  },
+  {
+   "start": "09:48",
+   "end": "09:50",
+   "text": "It's a keyboard. Let me just refresh"
+  },
+  {
+   "start": "09:50",
+   "end": "09:52",
+   "text": "this. So we see the text comes in like"
+  },
+  {
+   "start": "09:51",
+   "end": "09:53",
+   "text": "that. We can see there's a little"
+  },
+  {
+   "start": "09:52",
+   "end": "09:54",
+   "text": "animation here. It looks like there was"
+  },
+  {
+   "start": "09:54",
+   "end": "09:56",
+   "text": "like some of the keys were being"
+  },
+  {
+   "start": "09:55",
+   "end": "09:57",
+   "text": "pressed. If you watch right here, yep,"
+  },
+  {
+   "start": "09:57",
+   "end": "09:59",
+   "text": "they look like they're being pressed. We"
+  },
+  {
+   "start": "09:58",
+   "end": "10:00",
+   "text": "can keep scrolling and now we get more"
+  },
+  {
+   "start": "10:00",
+   "end": "10:02",
+   "text": "elements of layering because the"
+  },
+  {
+   "start": "10:02",
+   "end": "10:04",
+   "text": "background is moving as well as the"
+  },
+  {
+   "start": "10:03",
+   "end": "10:05",
+   "text": "actual keyboard. Now, this is something"
+  },
+  {
+   "start": "10:05",
+   "end": "10:07",
+   "text": "I don't like. You can see there's like a"
+  },
+  {
+   "start": "10:06",
+   "end": "10:08",
+   "text": "hard cut right here. So, on more of a"
+  },
+  {
+   "start": "10:09",
+   "end": "10:11",
+   "text": "verification loop and on more of like a"
+  },
+  {
+   "start": "10:11",
+   "end": "10:13",
+   "text": "iteration, it would probably we'd be"
+  },
+  {
+   "start": "10:13",
+   "end": "10:15",
+   "text": "able to fix that, but this was a oneshot"
+  },
+  {
+   "start": "10:14",
+   "end": "10:16",
+   "text": "prompt. Anyways, text comes down here."
+  },
+  {
+   "start": "10:16",
+   "end": "10:18",
+   "text": "Text comes through here. I like how it"
+  },
+  {
+   "start": "10:18",
+   "end": "10:20",
+   "text": "comes in like that. Same thing. Now,"
+  },
+  {
+   "start": "10:19",
+   "end": "10:21",
+   "text": "open it. The keyboard keeps coming down."
+  },
+  {
+   "start": "10:21",
+   "end": "10:23",
+   "text": "And now the keyboard like comes out,"
+  },
+  {
+   "start": "10:23",
+   "end": "10:25",
+   "text": "right? So it literally like takes it"
+  },
+  {
+   "start": "10:25",
+   "end": "10:27",
+   "text": "apart itself and we can see inside of"
+  },
+  {
+   "start": "10:27",
+   "end": "10:29",
+   "text": "it. And then we have different colors to"
+  },
+  {
+   "start": "10:29",
+   "end": "10:31",
+   "text": "pick from. The desk is still scrolling"
+  },
+  {
+   "start": "10:31",
+   "end": "10:33",
+   "text": "down this whole time. The keyboard comes"
+  },
+  {
+   "start": "10:32",
+   "end": "10:34",
+   "text": "back and now we could also have our call"
+  },
+  {
+   "start": "10:34",
+   "end": "10:36",
+   "text": "to action down here. So all things"
+  },
+  {
+   "start": "10:36",
+   "end": "10:38",
+   "text": "considered, one shot prompts these two"
+  },
+  {
+   "start": "10:38",
+   "end": "10:40",
+   "text": "sites. I think that it gives you a"
+  },
+  {
+   "start": "10:40",
+   "end": "10:42",
+   "text": "really good base to work from. So after"
+  },
+  {
+   "start": "10:41",
+   "end": "10:43",
+   "text": "showing you guys those examples and"
+  },
+  {
+   "start": "10:42",
+   "end": "10:44",
+   "text": "talking about all that, here's what I"
+  },
+  {
+   "start": "10:44",
+   "end": "10:46",
+   "text": "think is the most important that you"
+  },
+  {
+   "start": "10:45",
+   "end": "10:47",
+   "text": "need to actually be doing when you're"
+  },
+  {
+   "start": "10:47",
+   "end": "10:49",
+   "text": "building websites. And all of these"
+  },
+  {
+   "start": "10:48",
+   "end": "10:50",
+   "text": "things that I'm going to talk about are"
+  },
+  {
+   "start": "10:49",
+   "end": "10:51",
+   "text": "baked into my scroll craft skill, which"
+  },
+  {
+   "start": "10:51",
+   "end": "10:53",
+   "text": "you can grab, like I said, in my free"
+  },
+  {
+   "start": "10:52",
+   "end": "10:54",
+   "text": "school community. So, the first thing"
+  },
+  {
+   "start": "10:54",
+   "end": "10:56",
+   "text": "that I think is really important is to"
+  },
+  {
+   "start": "10:55",
+   "end": "10:57",
+   "text": "actually have some sort of brand"
+  },
+  {
+   "start": "10:57",
+   "end": "10:59",
+   "text": "guidelines, right? You want this to feel"
+  },
+  {
+   "start": "10:58",
+   "end": "11:00",
+   "text": "consistent as far as, you know, your"
+  },
+  {
+   "start": "11:01",
+   "end": "11:03",
+   "text": "logo, your colors, things like that."
+  },
+  {
+   "start": "11:03",
+   "end": "11:05",
+   "text": "From there, I think that you need to"
+  },
+  {
+   "start": "11:04",
+   "end": "11:06",
+   "text": "give it your three Ps, which is what I"
+  },
+  {
+   "start": "11:07",
+   "end": "11:09",
+   "text": "call sort of like the AI monetization"
+  },
+  {
+   "start": "11:08",
+   "end": "11:10",
+   "text": "readiness assessment. Meaning, does your"
+  },
+  {
+   "start": "11:10",
+   "end": "11:12",
+   "text": "business have a pain that you're"
+  },
+  {
+   "start": "11:12",
+   "end": "11:14",
+   "text": "solving? Do you have a person that"
+  },
+  {
+   "start": "11:14",
+   "end": "11:16",
+   "text": "you're solving that pain for? And do you"
+  },
+  {
+   "start": "11:16",
+   "end": "11:18",
+   "text": "have a promise of how your product or"
+  },
+  {
+   "start": "11:18",
+   "end": "11:20",
+   "text": "service is solving that pain? Promising"
+  },
+  {
+   "start": "11:21",
+   "end": "11:23",
+   "text": "how it solves that pain for that"
+  },
+  {
+   "start": "11:22",
+   "end": "11:24",
+   "text": "specific person. Now, from there, what I"
+  },
+  {
+   "start": "11:23",
+   "end": "11:25",
+   "text": "think you need is you need some sort of"
+  },
+  {
+   "start": "11:25",
+   "end": "11:27",
+   "text": "scroll um lock. And maybe lock wasn't"
+  },
+  {
+   "start": "11:29",
+   "end": "11:31",
+   "text": "the right word, but you need"
+  },
+  {
+   "start": "11:30",
+   "end": "11:32",
+   "text": "responsiveness. You need the user to"
+  },
+  {
+   "start": "11:32",
+   "end": "11:34",
+   "text": "feel that they're controlling the site"
+  },
+  {
+   "start": "11:34",
+   "end": "11:36",
+   "text": "because as they scroll, they're getting"
+  },
+  {
+   "start": "11:36",
+   "end": "11:38",
+   "text": "some sort of feedback. And it doesn't"
+  },
+  {
+   "start": "11:39",
+   "end": "11:41",
+   "text": "have to be anything super super flashy."
+  },
+  {
+   "start": "11:41",
+   "end": "11:43",
+   "text": "But like even just having the text go"
+  },
+  {
+   "start": "11:43",
+   "end": "11:45",
+   "text": "like this, even just having, you know,"
+  },
+  {
+   "start": "11:45",
+   "end": "11:47",
+   "text": "words appear. And I have to refresh this"
+  },
+  {
+   "start": "11:47",
+   "end": "11:49",
+   "text": "because they already did. Even having"
+  },
+  {
+   "start": "11:48",
+   "end": "11:50",
+   "text": "the words appear like this, just"
+  },
+  {
+   "start": "11:50",
+   "end": "11:52",
+   "text": "something that subtle, I think makes the"
+  },
+  {
+   "start": "11:52",
+   "end": "11:54",
+   "text": "website feel so much more premium"
+  },
+  {
+   "start": "11:54",
+   "end": "11:56",
+   "text": "because some feedback I got on my last"
+  },
+  {
+   "start": "11:55",
+   "end": "11:57",
+   "text": "video was like, \"Oh, I hate these 3D"
+  },
+  {
+   "start": "11:58",
+   "end": "12:00",
+   "text": "world where I scroll and it makes me fly"
+  },
+  {
+   "start": "12:00",
+   "end": "12:02",
+   "text": "through.\" And I get that. I get that. It"
+  },
+  {
+   "start": "12:01",
+   "end": "12:03",
+   "text": "depends on the business. It depends on"
+  },
+  {
+   "start": "12:03",
+   "end": "12:05",
+   "text": "the three Ps like I just said. But I do"
+  },
+  {
+   "start": "12:06",
+   "end": "12:08",
+   "text": "think that having a scroll element in"
+  },
+  {
+   "start": "12:08",
+   "end": "12:10",
+   "text": "something is just really, really"
+  },
+  {
+   "start": "12:10",
+   "end": "12:12",
+   "text": "important. Anyways, from there, I think"
+  },
+  {
+   "start": "12:12",
+   "end": "12:14",
+   "text": "that you need inspiration. I think it's"
+  },
+  {
+   "start": "12:14",
+   "end": "12:16",
+   "text": "very hard to go into a website design"
+  },
+  {
+   "start": "12:16",
+   "end": "12:18",
+   "text": "project and just tell it what you want"
+  },
+  {
+   "start": "12:19",
+   "end": "12:21",
+   "text": "and expect that it's going to come back"
+  },
+  {
+   "start": "12:20",
+   "end": "12:22",
+   "text": "and not feel like AI slot because unless"
+  },
+  {
+   "start": "12:22",
+   "end": "12:24",
+   "text": "you're using some sort of skill or"
+  },
+  {
+   "start": "12:23",
+   "end": "12:25",
+   "text": "unless you're building off of some sort"
+  },
+  {
+   "start": "12:24",
+   "end": "12:26",
+   "text": "of template, it's probably going to feel"
+  },
+  {
+   "start": "12:26",
+   "end": "12:28",
+   "text": "that way because AI is AI. So,"
+  },
+  {
+   "start": "12:28",
+   "end": "12:30",
+   "text": "inspiration can come in the form of"
+  },
+  {
+   "start": "12:30",
+   "end": "12:32",
+   "text": "looking at other websites and finding"
+  },
+  {
+   "start": "12:31",
+   "end": "12:33",
+   "text": "out what you like about it, like the"
+  },
+  {
+   "start": "12:33",
+   "end": "12:35",
+   "text": "layering. I think the layering is super"
+  },
+  {
+   "start": "12:34",
+   "end": "12:36",
+   "text": "important like that. Maybe it's the way"
+  },
+  {
+   "start": "12:36",
+   "end": "12:38",
+   "text": "that the pricing section feels. Maybe"
+  },
+  {
+   "start": "12:38",
+   "end": "12:40",
+   "text": "it's the way that the background is like"
+  },
+  {
+   "start": "12:40",
+   "end": "12:42",
+   "text": "interactive and responsive to the mouse."
+  },
+  {
+   "start": "12:42",
+   "end": "12:44",
+   "text": "Whatever it is, you need at least a"
+  },
+  {
+   "start": "12:43",
+   "end": "12:45",
+   "text": "little bit of inspiration. And what's"
+  },
+  {
+   "start": "12:44",
+   "end": "12:46",
+   "text": "cool about something like 21st.dev is"
+  },
+  {
+   "start": "12:47",
+   "end": "12:49",
+   "text": "you can get inspiration on your borders."
+  },
+  {
+   "start": "12:49",
+   "end": "12:51",
+   "text": "You can get inspiration on your actual"
+  },
+  {
+   "start": "12:51",
+   "end": "12:53",
+   "text": "buttons. This one literally has like a"
+  },
+  {
+   "start": "12:53",
+   "end": "12:55",
+   "text": "section for features. It has a section"
+  },
+  {
+   "start": "12:54",
+   "end": "12:56",
+   "text": "for FAQs. You can get inspiration on how"
+  },
+  {
+   "start": "12:56",
+   "end": "12:58",
+   "text": "you want every single like little"
+  },
+  {
+   "start": "12:58",
+   "end": "13:00",
+   "text": "element of your site to look, even like"
+  },
+  {
+   "start": "13:01",
+   "end": "13:03",
+   "text": "the text, all of the stuff. And then"
+  },
+  {
+   "start": "13:03",
+   "end": "13:05",
+   "text": "that's basically part five, which is"
+  },
+  {
+   "start": "13:04",
+   "end": "13:06",
+   "text": "understanding what components can you"
+  },
+  {
+   "start": "13:07",
+   "end": "13:09",
+   "text": "grab that already exist somewhere that"
+  },
+  {
+   "start": "13:08",
+   "end": "13:10",
+   "text": "you can use in order to make your site"
+  },
+  {
+   "start": "13:10",
+   "end": "13:12",
+   "text": "feel more dynamic and feel more branded."
+  },
+  {
+   "start": "13:12",
+   "end": "13:14",
+   "text": "And then really the most important thing"
+  },
+  {
+   "start": "13:13",
+   "end": "13:15",
+   "text": "at the end of the day besides actually"
+  },
+  {
+   "start": "13:15",
+   "end": "13:17",
+   "text": "no number six, you need to make sure it"
+  },
+  {
+   "start": "13:16",
+   "end": "13:18",
+   "text": "works on mobile too. It has to look good"
+  },
+  {
+   "start": "13:18",
+   "end": "13:20",
+   "text": "on mobile. So many people are looking"
+  },
+  {
+   "start": "13:19",
+   "end": "13:21",
+   "text": "you up on mobile, clicking links on"
+  },
+  {
+   "start": "13:20",
+   "end": "13:22",
+   "text": "mobile. Make sure it's verified on"
+  },
+  {
+   "start": "13:22",
+   "end": "13:24",
+   "text": "mobile. Claude can do that well."
+  },
+  {
+   "start": "13:24",
+   "end": "13:26",
+   "text": "Anyways, the last thing ties into that,"
+  },
+  {
+   "start": "13:26",
+   "end": "13:28",
+   "text": "which is verification. Now, by this I"
+  },
+  {
+   "start": "13:28",
+   "end": "13:30",
+   "text": "mean have it screenshot everything,"
+  },
+  {
+   "start": "13:30",
+   "end": "13:32",
+   "text": "especially when you're doing scroll"
+  },
+  {
+   "start": "13:31",
+   "end": "13:33",
+   "text": "animations. have it screenshot frame by"
+  },
+  {
+   "start": "13:34",
+   "end": "13:36",
+   "text": "frame or pixel by pixel as it's, you"
+  },
+  {
+   "start": "13:35",
+   "end": "13:37",
+   "text": "know, scrolling down. That way, it's"
+  },
+  {
+   "start": "13:37",
+   "end": "13:39",
+   "text": "essentially watching a video of how you"
+  },
+  {
+   "start": "13:39",
+   "end": "13:41",
+   "text": "will experience it. So, if you don't"
+  },
+  {
+   "start": "13:40",
+   "end": "13:42",
+   "text": "have a verification loop, if it's not"
+  },
+  {
+   "start": "13:41",
+   "end": "13:43",
+   "text": "taking screenshots and saying, \"Oh, wow."
+  },
+  {
+   "start": "13:43",
+   "end": "13:45",
+   "text": "This looks bad. This looks out of"
+  },
+  {
+   "start": "13:44",
+   "end": "13:46",
+   "text": "bounds. This color's off. Let me fix"
+  },
+  {
+   "start": "13:46",
+   "end": "13:48",
+   "text": "that.\" Then what are you doing? Now, the"
+  },
+  {
+   "start": "13:48",
+   "end": "13:50",
+   "text": "last part of this video was I was going"
+  },
+  {
+   "start": "13:49",
+   "end": "13:51",
+   "text": "to run through a bunch of these other"
+  },
+  {
+   "start": "13:50",
+   "end": "13:52",
+   "text": "experiments I did between Fable 5 and"
+  },
+  {
+   "start": "13:52",
+   "end": "13:54",
+   "text": "Fable 5.1. I had it build a bunch of"
+  },
+  {
+   "start": "13:54",
+   "end": "13:56",
+   "text": "different sites for me. As you can see,"
+  },
+  {
+   "start": "13:56",
+   "end": "13:58",
+   "text": "I did like, you know, these perk form"
+  },
+  {
+   "start": "13:58",
+   "end": "14:00",
+   "text": "sites right here. This one was Fable"
+  },
+  {
+   "start": "14:00",
+   "end": "14:02",
+   "text": "5.1. This one was Fable 5. This one was"
+  },
+  {
+   "start": "14:02",
+   "end": "14:04",
+   "text": "Fable 5. This one was Fable 5.1. They"
+  },
+  {
+   "start": "14:04",
+   "end": "14:06",
+   "text": "just felt very similar. Like none of"
+  },
+  {
+   "start": "14:06",
+   "end": "14:08",
+   "text": "them clearly blew the other one out of"
+  },
+  {
+   "start": "14:08",
+   "end": "14:10",
+   "text": "the water. They were very similar"
+  },
+  {
+   "start": "14:09",
+   "end": "14:11",
+   "text": "because they had the same prompts, the"
+  },
+  {
+   "start": "14:10",
+   "end": "14:12",
+   "text": "same assets, the same brand brand"
+  },
+  {
+   "start": "14:12",
+   "end": "14:14",
+   "text": "guidelines, excuse me. And they use the"
+  },
+  {
+   "start": "14:14",
+   "end": "14:16",
+   "text": "same skill. They all use Scrollcraft."
+  },
+  {
+   "start": "14:16",
+   "end": "14:18",
+   "text": "There was a few minor minor differences,"
+  },
+  {
+   "start": "14:18",
+   "end": "14:20",
+   "text": "but not enough for me to be like, \"Wow,"
+  },
+  {
+   "start": "14:19",
+   "end": "14:21",
+   "text": "Fable 5.1 crushes Fable 5. Those seven"
+  },
+  {
+   "start": "14:22",
+   "end": "14:24",
+   "text": "things that I just talked about are more"
+  },
+  {
+   "start": "14:23",
+   "end": "14:25",
+   "text": "important than explicitly using which"
+  },
+  {
+   "start": "14:25",
+   "end": "14:27",
+   "text": "model.\" But here's what's interesting."
+  },
+  {
+   "start": "14:27",
+   "end": "14:29",
+   "text": "Around the board, Fable 5.1 was actually"
+  },
+  {
+   "start": "14:30",
+   "end": "14:32",
+   "text": "cheaper. Here's an example. Fable 5.1"
+  },
+  {
+   "start": "14:32",
+   "end": "14:34",
+   "text": "was 1824. Fable 5 was 2022. Here's"
+  },
+  {
+   "start": "14:35",
+   "end": "14:37",
+   "text": "another one where Fable 5.1 was 1452."
+  },
+  {
+   "start": "14:37",
+   "end": "14:39",
+   "text": "Fable 5 was 1467. So, that one's"
+  },
+  {
+   "start": "14:40",
+   "end": "14:42",
+   "text": "actually pretty similar. Here's another"
+  },
+  {
+   "start": "14:41",
+   "end": "14:43",
+   "text": "one where Fable 5.1 was 1283 and Fable 5"
+  },
+  {
+   "start": "14:44",
+   "end": "14:46",
+   "text": "was 2164. Here's another one where Fable"
+  },
+  {
+   "start": "14:47",
+   "end": "14:49",
+   "text": "5.1 was 1118 and Fable 5 was 1737. So if"
+  },
+  {
+   "start": "14:51",
+   "end": "14:53",
+   "text": "you guys remember in the release blog"
+  },
+  {
+   "start": "14:53",
+   "end": "14:55",
+   "text": "they basically said enthropic said hey"
+  },
+  {
+   "start": "14:54",
+   "end": "14:56",
+   "text": "you know Fable 5 is going to be 25% more"
+  },
+  {
+   "start": "14:57",
+   "end": "14:59",
+   "text": "efficient which is cheaper on some like"
+  },
+  {
+   "start": "14:59",
+   "end": "15:01",
+   "text": "you know knowledge work and and regular"
+  },
+  {
+   "start": "15:00",
+   "end": "15:02",
+   "text": "type of work and then on heavy agentic"
+  },
+  {
+   "start": "15:02",
+   "end": "15:04",
+   "text": "coding and multistep fable 5 might be as"
+  },
+  {
+   "start": "15:05",
+   "end": "15:07",
+   "text": "much as 45% cheaper or sorry fable 5.1"
+  },
+  {
+   "start": "15:08",
+   "end": "15:10",
+   "text": "might be as much as 45% cheaper than"
+  },
+  {
+   "start": "15:10",
+   "end": "15:12",
+   "text": "fable 5 because of how much more"
+  },
+  {
+   "start": "15:11",
+   "end": "15:13",
+   "text": "efficient it is with its tokens and so"
+  },
+  {
+   "start": "15:13",
+   "end": "15:15",
+   "text": "far that actually is what I've seen out"
+  },
+  {
+   "start": "15:15",
+   "end": "15:17",
+   "text": "of all these experiments and all the"
+  },
+  {
+   "start": "15:16",
+   "end": "15:18",
+   "text": "knowledge work that I've done you know"
+  },
+  {
+   "start": "15:18",
+   "end": "15:20",
+   "text": "all of the experiments and websites that"
+  },
+  {
+   "start": "15:20",
+   "end": "15:22",
+   "text": "you guys saw me build but then also a"
+  },
+  {
+   "start": "15:21",
+   "end": "15:23",
+   "text": "bunch of testing that I've done on my"
+  },
+  {
+   "start": "15:22",
+   "end": "15:24",
+   "text": "own that I haven't showed you guys, I've"
+  },
+  {
+   "start": "15:24",
+   "end": "15:26",
+   "text": "only used about 45% of my weekly Fable"
+  },
+  {
+   "start": "15:26",
+   "end": "15:28",
+   "text": "limit, which yes, I know a lot of you"
+  },
+  {
+   "start": "15:27",
+   "end": "15:29",
+   "text": "guys might think like, oh, that's a lot"
+  },
+  {
+   "start": "15:28",
+   "end": "15:30",
+   "text": "for like, you know, 5 to 6 hours of"
+  },
+  {
+   "start": "15:30",
+   "end": "15:32",
+   "text": "work, but I've blown through Fable"
+  },
+  {
+   "start": "15:33",
+   "end": "15:35",
+   "text": "weekly limit in like 1 to two hours"
+  },
+  {
+   "start": "15:35",
+   "end": "15:37",
+   "text": "before just using Fable 5, driving work,"
+  },
+  {
+   "start": "15:38",
+   "end": "15:40",
+   "text": "building some things, building some"
+  },
+  {
+   "start": "15:39",
+   "end": "15:41",
+   "text": "websites. I was actually really"
+  },
+  {
+   "start": "15:40",
+   "end": "15:42",
+   "text": "surprised that I didn't crush through my"
+  },
+  {
+   "start": "15:42",
+   "end": "15:44",
+   "text": "weekly Fable limit already, just based"
+  },
+  {
+   "start": "15:44",
+   "end": "15:46",
+   "text": "on how much I've been sitting here using"
+  },
+  {
+   "start": "15:45",
+   "end": "15:47",
+   "text": "it for the past multiple hours. So"
+  },
+  {
+   "start": "15:47",
+   "end": "15:49",
+   "text": "anyways guys, I was going to break that"
+  },
+  {
+   "start": "15:48",
+   "end": "15:50",
+   "text": "down more, but honestly I thought that"
+  },
+  {
+   "start": "15:49",
+   "end": "15:51",
+   "text": "it would just get a little bit boring"
+  },
+  {
+   "start": "15:50",
+   "end": "15:52",
+   "text": "and feel repetitive. So I just wanted to"
+  },
+  {
+   "start": "15:52",
+   "end": "15:54",
+   "text": "bring you guys those results. Overall,"
+  },
+  {
+   "start": "15:53",
+   "end": "15:55",
+   "text": "Fable 5.1 feels a little bit faster and"
+  },
+  {
+   "start": "15:55",
+   "end": "15:57",
+   "text": "a little bit cheaper. But that is going"
+  },
+  {
+   "start": "15:56",
+   "end": "15:58",
+   "text": "to do it for today. Don't forget to go"
+  },
+  {
+   "start": "15:58",
+   "end": "16:00",
+   "text": "into my free school community linked in"
+  },
+  {
+   "start": "15:59",
+   "end": "16:01",
+   "text": "the description if you want that scroll"
+  },
+  {
+   "start": "16:00",
+   "end": "16:02",
+   "text": "craft skill because it's what I'm"
+  },
+  {
+   "start": "16:02",
+   "end": "16:04",
+   "text": "constantly updating as I'm learning more"
+  },
+  {
+   "start": "16:03",
+   "end": "16:05",
+   "text": "about AI design. So if you enjoyed the"
+  },
+  {
+   "start": "16:06",
+   "end": "16:08",
+   "text": "video or you learn something new, please"
+  },
+  {
+   "start": "16:07",
+   "end": "16:09",
+   "text": "give it a like. It helps me out a ton."
+  },
+  {
+   "start": "16:08",
+   "end": "16:10",
+   "text": "And as always, I appreciate you guys"
+  },
+  {
+   "start": "16:09",
+   "end": "16:11",
+   "text": "making it to the end of the video and I"
+  },
+  {
+   "start": "16:10",
+   "end": "16:12",
+   "text": "will see you all in the next one. Thanks"
+  },
+  {
+   "start": "16:12",
+   "end": "16:14",
+   "text": "everyone."
+  }
+ ]
+}

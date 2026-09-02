@@ -1,7 +1,7 @@
 # LEARNED — FFWtxjvW2ts
 
 **Protocol:** deep-video-learning  
-**Evidence:** caption-only. Visual/click UNKNOWN. Do not invent UI paths.  
+**Evidence:** captions + 22 goal-directed stills (`CAPTIONS.md`). Clicks UNKNOWN. Do not invent UI paths. Visual refs = OBSERVED stills, not the whole tape.  
 **Speaker:** Nate Herk. **Upload:** 2026-09-02. **Duration:** 16:13.  
 **TAPE-KIND:** build. **DESIGN:** yes.
 
@@ -205,6 +205,8 @@ CAPTION: spoken steps only
 ```
 
 Do not implement HTML this sitting.
+
+**Refs on disk (goal-directed-watch):** `CAPTIONS.md` + `frames/`. AIS layers · Fora · 21st.dev copy-prompt · Lemon · godly.design · awards-by-niche · Motion Sites · Ferna · Lowkey hard cut · PERKFORM compare. Use those stills as living objects. Premium without a named ref is still a fail.
 
 ## ACTION TRACE
 

@@ -9,7 +9,7 @@
 **Captions:** yt-dlp auto/en json3 → `full.txt` + `segments.jsonl` (544). Not invented.  
 **Date:** 2026-09-02 (upload 20260902)  
 **ICP:** `us` only. No new `icp_id`.  
-**Evidence:** caption-only. Visual/click **UNKNOWN**. No `watch.json`.  
+**Evidence:** captions + **22 goal-directed stills** (`frames/` + `CAPTIONS.md` + `watch.json`). Clicks still UNKNOWN. Not a fixed-fps dump.  
 **DESIGN:** yes. **HOW THEY BUILT:** yes.
 
 ## Load

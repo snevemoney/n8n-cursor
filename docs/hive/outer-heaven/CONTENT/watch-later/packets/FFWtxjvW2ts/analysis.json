@@ -1,0 +1,2349 @@
+{
+  "video_id": "FFWtxjvW2ts",
+  "video_url": "https://www.youtube.com/watch?v=FFWtxjvW2ts",
+  "mode": "efficient",
+  "sampling_limitations": [
+    "mode efficient: frame cap 50 \u2014 22/22 frames kept",
+    "Frames sampled every 5s \u2014 rapid cuts may be undercounted",
+    "Transcript timing may not perfectly align with visual timestamps"
+  ],
+  "timeline": [
+    {
+      "timestamp": {
+        "start": "00:00",
+        "end": "00:05"
+      },
+      "on_screen": [],
+      "spoken": "This is probably my favorite website I've ever built with Claude. This is the AI Automation Society site. What I think is so cool about this one is look at the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:05",
+        "end": "00:10"
+      },
+      "on_screen": [
+        "OBSERVED still 01-ais-layers.jpg @ 00:07. AIS layered hero as he starts to scroll"
+      ],
+      "spoken": "layers as I start to scroll. We can see the mountains in the background and this like treeine and they are clearly",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:10",
+        "end": "00:15"
+      },
+      "on_screen": [
+        "OBSERVED still 01-ais-layers.jpg @ 00:07. AIS layered hero as he starts to scroll"
+      ],
+      "spoken": "different layers and that adds a really premium feel as well as this whole laptop kind of being dynamic. Right now",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:15",
+        "end": "00:21"
+      },
+      "on_screen": [
+        "OBSERVED still 01-ais-layers.jpg @ 00:07. AIS layered hero as he starts to scroll"
+      ],
+      "spoken": "we keep scrolling down and we see a little bit about AI automation society. We see the words come in. We see the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:21",
+        "end": "00:26"
+      },
+      "on_screen": [
+        "OBSERVED still 01-ais-layers.jpg @ 00:07. AIS layered hero as he starts to scroll"
+      ],
+      "spoken": "words come in down here and we can flip between the classroom live calls events and leaderboard. And as we keep",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:26",
+        "end": "00:31"
+      },
+      "on_screen": [
+        "OBSERVED still 02-ais-cards-stack.jpg @ 00:31. cards start to stack"
+      ],
+      "spoken": "scrolling, more text keeps coming in dynamically and these cards start to",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:31",
+        "end": "00:36"
+      },
+      "on_screen": [
+        "OBSERVED still 02-ais-cards-stack.jpg @ 00:31. cards start to stack"
+      ],
+      "spoken": "stack on top of each other, which I think just feels super super dynamic and engaging. We can see the pricing section",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:36",
+        "end": "00:41"
+      },
+      "on_screen": [
+        "OBSERVED still 02-ais-cards-stack.jpg @ 00:31. cards start to stack"
+      ],
+      "spoken": "here, free community plus community, as well as our certification cohort. We see some Q&A down here or FAQ, sorry. And",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:41",
+        "end": "00:47"
+      },
+      "on_screen": [
+        "OBSERVED still 03-ais-faq-lock.jpg @ 00:44. FAQ text lock animation"
+      ],
+      "spoken": "look at this animation where the text sort of like locks as we switch between these different things. I think that's",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:47",
+        "end": "00:54"
+      },
+      "on_screen": [
+        "OBSERVED still 04-ais-cta-layers.jpg @ 00:51. CTA with layering coming back"
+      ],
+      "spoken": "awesome. We see some YouTube videos and then finally the call to action down here with once again the layering comes back in. And I just think that that is",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:54",
+        "end": "00:59"
+      },
+      "on_screen": [
+        "OBSERVED still 05-ais-mobile.jpg @ 00:59. mobile / phone view of AIS"
+      ],
+      "spoken": "so so cool. And I know you guys are probably wondering on mobile. So here it",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "00:59",
+        "end": "01:04"
+      },
+      "on_screen": [
+        "OBSERVED still 05-ais-mobile.jpg @ 00:59. mobile / phone view of AIS"
+      ],
+      "spoken": "is right here. This is me on my phone. We get the same dynamic laptop screen. We get the same layered effect, which I think is just beautiful. We can scroll",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:04",
+        "end": "01:10"
+      },
+      "on_screen": [
+        "OBSERVED still 05-ais-mobile.jpg @ 00:59. mobile / phone view of AIS"
+      ],
+      "spoken": "through this text. We see we get these same animations, but we click through these sections a little bit differently.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:10",
+        "end": "01:15"
+      },
+      "on_screen": [
+        "OBSERVED still 05-ais-mobile.jpg @ 00:59. mobile / phone view of AIS"
+      ],
+      "spoken": "We continue to scroll down. All of this stuff comes in. The cards don't stack the same way it does on desktop, but I'm",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:15",
+        "end": "01:20"
+      },
+      "on_screen": [
+        "OBSERVED still 05-ais-mobile.jpg @ 00:59. mobile / phone view of AIS"
+      ],
+      "spoken": "sure we could engineer that if we wanted to with just one prompt. We keep coming through. The point I'm trying to make",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:20",
+        "end": "01:27"
+      },
+      "on_screen": [
+        "OBSERVED still 05-ais-mobile.jpg @ 00:59. mobile / phone view of AIS"
+      ],
+      "spoken": "here is Fable 5.1 is able to take care of this on mobile as well and you get the exact same premium feel. I think",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:27",
+        "end": "01:32"
+      },
+      "on_screen": [
+        "OBSERVED still 06-nate-hero.jpg @ 01:32. Nate personal hero + ticking numbers"
+      ],
+      "spoken": "that this website is beautiful. Let's take a look at another example here.",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:32",
+        "end": "01:38"
+      },
+      "on_screen": [
+        "OBSERVED still 06-nate-hero.jpg @ 01:32. Nate personal hero + ticking numbers"
+      ],
+      "spoken": "This is my website. You can see we've got the text. We've got the hero section. Those numbers were sort of like ticking up. I've got myself over here and this is like a really neat",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:38",
+        "end": "01:43"
+      },
+      "on_screen": [
+        "OBSERVED still 06-nate-hero.jpg @ 01:32. Nate personal hero + ticking numbers"
+      ],
+      "spoken": "background that I think adds depth and adds another layer, but it's not distracting. These are all clickable",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:43",
+        "end": "01:49"
+      },
+      "on_screen": [
+        "OBSERVED still 06-nate-hero.jpg @ 01:32. Nate personal hero + ticking numbers"
+      ],
+      "spoken": "links. These numbers are ticking up and we can still see consistency with the background animation. We continue to go through these things color up as I",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:49",
+        "end": "01:55"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "highlight. We get into this interesting like dynamic element. You can see when I move my mouse, these move, but once",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "01:55",
+        "end": "02:00"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "again, it's not too overwhelming or distracting. I think it just feels very premium and adds some nice depth here.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:00",
+        "end": "02:05"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "We have a little bit and background information. And this links to the about page, which is um just a little bit of a",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:05",
+        "end": "02:11"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "bio. It's nothing too fancy at all. But anyways, we keep coming down and we have like a little bit of a photo montage.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:11",
+        "end": "02:17"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "These kind of come up as they go into screen. And then we keep coming down. see my book, Becoming AI Native. We have",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:17",
+        "end": "02:23"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "new YouTube videos every week. And then it pulls up um join AIS and a little signature, which it just actually found",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:23",
+        "end": "02:29"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "in my um pictures on my local desktop. Now, what I also really like is that the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:29",
+        "end": "02:34"
+      },
+      "on_screen": [
+        "OBSERVED still 07-nate-mouse.jpg @ 01:53. mouse-reactive depth"
+      ],
+      "spoken": "navbar stays with you all the way through. And it also did that within the AIS um site, which I really, really",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:34",
+        "end": "02:40"
+      },
+      "on_screen": [
+        "OBSERVED still 08-nate-sticky-nav.jpg @ 02:38. sticky / locked nav"
+      ],
+      "spoken": "like. I don't know why. It just feels a bit more like having it locked there just feels good. Now, let me show you",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:40",
+        "end": "02:46"
+      },
+      "on_screen": [
+        "OBSERVED still 08-nate-sticky-nav.jpg @ 02:38. sticky / locked nav"
+      ],
+      "spoken": "guys this next one, which is Glido. I think this one is so cool because look at this little dictation bar. There's so many animations within this. You can see",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:46",
+        "end": "02:52"
+      },
+      "on_screen": [
+        "OBSERVED still 08-nate-sticky-nav.jpg @ 02:38. sticky / locked nav"
+      ],
+      "spoken": "that it's dictating words and putting them into Slack. And this looks very similar to the way that you can actually see me talking into my mic right now.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:52",
+        "end": "02:57"
+      },
+      "on_screen": [
+        "OBSERVED still 09-glido-apps.jpg @ 02:54. Glido product-in-use apps"
+      ],
+      "spoken": "And right here, you can see that I'm dictating with Glyo. So, super super cool. We can have the apps right here",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "02:57",
+        "end": "03:02"
+      },
+      "on_screen": [
+        "OBSERVED still 09-glido-apps.jpg @ 02:54. Glido product-in-use apps"
+      ],
+      "spoken": "that we already use and it pauses when I'm on it. We get these animations coming in with the holding down a key",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:02",
+        "end": "03:08"
+      },
+      "on_screen": [
+        "OBSERVED still 09-glido-apps.jpg @ 02:54. Glido product-in-use apps"
+      ],
+      "spoken": "saying it messy and then it gets dictated and pasted over here. Much cleaner. We can keep going down and",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:08",
+        "end": "03:13"
+      },
+      "on_screen": [
+        "OBSERVED still 09-glido-apps.jpg @ 02:54. Glido product-in-use apps"
+      ],
+      "spoken": "seeing that we have different apps like we're seeing Glido putting this into Slack. We're seeing Glido put this into",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:13",
+        "end": "03:18"
+      },
+      "on_screen": [
+        "OBSERVED still 09-glido-apps.jpg @ 02:54. Glido product-in-use apps"
+      ],
+      "spoken": "cursor. We're seeing it actually sort of like have these animations where we can see what it would look like to use GLO",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:18",
+        "end": "03:24"
+      },
+      "on_screen": [
+        "OBSERVED still 09-glido-apps.jpg @ 02:54. Glido product-in-use apps"
+      ],
+      "spoken": "in these different apps. Gmail and of course cloud code in the terminal. We have more stuff down here transcribing",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:24",
+        "end": "03:29"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "over here or speaking over here as well as just like typing the difference right",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:29",
+        "end": "03:34"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "there. And now this is my favorite part. As we go down, which is this animation, we have the dictation and then we have",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:34",
+        "end": "03:40"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "these two things that are going different ways with all of these apps. Some of these logos are obviously off, but hey, for a oneshot prompt, this is",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:40",
+        "end": "03:46"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "pretty solid. I like that animation, too. And we have some stuff from us, the founders down here. Anyways, the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:46",
+        "end": "03:53"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "pricing. Now, what I want to talk about is how do you actually get Fable 5.1 to do stuff like this without giving you AI",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "03:53",
+        "end": "04:00"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "slop. Now, obviously, what I found is having things like scroll animations and having text feel more dynamic. And",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:00",
+        "end": "04:05"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "specifically in this video, I really found out about layering. That helps a ton. But ultimately what I realized is",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:05",
+        "end": "04:10"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "that you can't just say to Fable 5.1 or any AI model, make this look professional. Make this feel premium.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:10",
+        "end": "04:15"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "You really have to give it something to work off of. So what we did in this video is I got a lot of inspiration from",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:15",
+        "end": "04:20"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "other websites. So for example, with this website which I just absolutely love, I found an example of a website",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:20",
+        "end": "04:26"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "that I really loved and I took the elements from it that I liked. So this one is called Fora. You can see it's",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:26",
+        "end": "04:31"
+      },
+      "on_screen": [
+        "OBSERVED still 10-glido-favorite.jpg @ 03:29. Glido favorite animation"
+      ],
+      "spoken": "very similar. You can see it has hero text. It has the layers in the background. Then when I started to",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:31",
+        "end": "04:36"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "scroll, I was like, \"Wow, I love the layering here.\" So I told Fable 5.1 how to figure out how we could make a hero",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:36",
+        "end": "04:42"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "section that as I scroll down, there's like four layers. There's a back mountain, there's a middle mountain,",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:42",
+        "end": "04:47"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "there's a laptop screen, and then there's a front layer of trees. And I basically just love that feel and I",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:47",
+        "end": "04:52"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "wanted to replicate it. So I just had it make all of these separate layers that move when you scroll. Then we of course",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:52",
+        "end": "04:58"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "have like this text thing. I really liked how the cards here stacked. I thought that that felt super premium.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "04:58",
+        "end": "05:03"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "So, I looked at this website for inspiration and I told Fable 5.1 that I wanted to have mine have the same feel",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:03",
+        "end": "05:08"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "and I explained all the elements of this and why I liked it and how I wanted it to use that as inspiration. Now, for my",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:08",
+        "end": "05:14"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "website here, there wasn't exactly a website that I took inspiration from, but instead what I did is I took",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:14",
+        "end": "05:20"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "components that I really liked. So, I went to um where is it? I went to something called 21st.dev, which you guys have probably heard of before",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:20",
+        "end": "05:25"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "already if you've been watching me for a while making sites. This site basically has a bunch of components that you can",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:25",
+        "end": "05:30"
+      },
+      "on_screen": [
+        "OBSERVED still 11-fora-layers.jpg @ 04:32. Fora living inspiration \u2014 four planes"
+      ],
+      "spoken": "find and you can literally give your AI agents the prompts for these animations. So for example, this container scroll,",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:30",
+        "end": "05:36"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "you can just copy prompt and then your agent can basically copy that element.",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:36",
+        "end": "05:41"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "So I was looking at backgrounds that I really liked here. I was looking at different gradients. I was looking at different interactive elements and I",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:41",
+        "end": "05:46"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "just decided that I liked one. I'm not going to be able to find it right now, but I really liked that one that you see in the background here and I just took",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:46",
+        "end": "05:51"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "it and then I started designing with it. And then I just explained to Fable that I wanted all of this text to sort of",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:51",
+        "end": "05:56"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "appear as it enters the screen. And then I said, \"Hey, I want this to be 3D. I want this to feel dynamic. I want, you",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "05:56",
+        "end": "06:01"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "know, all this text to come in. I want this to scroll sideways.\" And of course, I used my scroll craft skill, which you",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:01",
+        "end": "06:06"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "guys can access for completely free. It is linked in my free school community, which is in the description. This skill",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:06",
+        "end": "06:11"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "has all of the design elements that you need to understand for layering, for scrolling, for, you know, text appearing",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:11",
+        "end": "06:17"
+      },
+      "on_screen": [
+        "OBSERVED still 13-21st-container-scroll.jpg @ 05:36. 21st.dev copy-prompt on the component"
+      ],
+      "spoken": "like this, for text appearing like this. It has basically all these principles inside of that skill. It's completely",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:17",
+        "end": "06:23"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "free. And then for GLO, what I actually did is we looked at a competitor site. So we looked at Lemon, which is another dictation app, and I loved how it had",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:23",
+        "end": "06:28"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "these animations that almost give you the feel as if you're already using the product. So I basically just once again",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:28",
+        "end": "06:34"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "came through here and said, \"Hey, actually, for this one, what I want you to do is go to Glido. I want you to take our brand guidelines and just insert it",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:34",
+        "end": "06:40"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "onto a page like this.\" And you can see this one was, you know, very directly just like cloning it, I would say. But",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:40",
+        "end": "06:46"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "that's what's so cool about Fable 5.1 is it can inspect what's going on here and it can generate you one that feels the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:46",
+        "end": "06:51"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "exact same. It even made the same sort of like it almost feels like watercolor painting in the background as you can",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:51",
+        "end": "06:56"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "see, but it made the same vibe. And now we just have Oh, sorry that was the wrong app. And now we just have this",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "06:56",
+        "end": "07:01"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "that we could go ahead and, you know, push live if we wanted to. And then look at what else I did. I was like, \"Okay, this is pretty cool.\" So I gave it an",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:01",
+        "end": "07:07"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "example of a good site. And then I gave it this goal, so one shot prompt. And then I told it to build me two",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:07",
+        "end": "07:12"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "distinctly different but most impressive scrollcraft, which is my skill layered sites that you could possibly build me",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:12",
+        "end": "07:17"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "using our skills. I told it to look at the AIS site cuz I really liked that one. I told it to grab components from",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:17",
+        "end": "07:23"
+      },
+      "on_screen": [
+        "OBSERVED still 14-lemon-clone.jpg @ 06:21. Lemon competitor feel (watercolor / talk-to-prompt)"
+      ],
+      "spoken": "21st.dev. I told it to go to godly.websites. This is all about giving your agent more specific prompts and",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:23",
+        "end": "07:28"
+      },
+      "on_screen": [
+        "OBSERVED still 15-godly-design.jpg @ 07:28. godly.design gallery (heroes/CTAs/OG)"
+      ],
+      "spoken": "inspiration. If I go to actually godly",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:28",
+        "end": "07:33"
+      },
+      "on_screen": [
+        "OBSERVED still 15-godly-design.jpg @ 07:28. godly.design gallery (heroes/CTAs/OG)"
+      ],
+      "spoken": "websites, you can see godly.design. We can find trending sites. We can find um logos. We can find hero sections. We can",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:33",
+        "end": "07:39"
+      },
+      "on_screen": [
+        "OBSERVED still 15-godly-design.jpg @ 07:28. godly.design gallery (heroes/CTAs/OG)"
+      ],
+      "spoken": "give all of this kind of stuff to our AI agents for inspiration of how we want our site to look. CTAs, footers, OG",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:39",
+        "end": "07:45"
+      },
+      "on_screen": [
+        "OBSERVED still 15-godly-design.jpg @ 07:28. godly.design gallery (heroes/CTAs/OG)"
+      ],
+      "spoken": "images. There's so much stuff in here. There's also another site called awards where you can literally look at websites",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:45",
+        "end": "07:50"
+      },
+      "on_screen": [
+        "OBSERVED still 15-godly-design.jpg @ 07:28. godly.design gallery (heroes/CTAs/OG)"
+      ],
+      "spoken": "that are winning awards for design and you can just understand what kind of feel do you want. You know, there's",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:50",
+        "end": "07:55"
+      },
+      "on_screen": [
+        "OBSERVED still 16-awards-by-niche.jpg @ 07:51. awards / Awwwards-style filter by niche"
+      ],
+      "spoken": "different categories in here um you know technology, e-commerce, restaurant, fashion because obviously your site",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "07:55",
+        "end": "08:01"
+      },
+      "on_screen": [
+        "OBSERVED still 16-awards-by-niche.jpg @ 07:51. awards / Awwwards-style filter by niche"
+      ],
+      "spoken": "probably is going to convert better if it feels like it's in your niche talking to your avatar. So, this kind of stuff",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:01",
+        "end": "08:06"
+      },
+      "on_screen": [
+        "OBSERVED still 16-awards-by-niche.jpg @ 07:51. awards / Awwwards-style filter by niche"
+      ],
+      "spoken": "helps you get inspiration much better. There's literally another site called Motion Sites that has like these",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:06",
+        "end": "08:11"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "jaw-dropping animated backgrounds that you can actually go ahead and grab and just bring right into your websites. I",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:11",
+        "end": "08:17"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "think the one that I actually used was very similar to this one. If you, as you can see, if I put this into a new page,",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:17",
+        "end": "08:23"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "this one is just kind of like a really nice animated background. It's obviously not the same because ours is sort of",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:23",
+        "end": "08:28"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "interactive, but this is also a really cool feel to have in the background of your hero section. Okay. Okay. So then",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:28",
+        "end": "08:34"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "what I did is I gave it this /goal prompt and I said, \"Hey, I need you to build me two distinctly different but most impressive scrollcraft, which is my",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:34",
+        "end": "08:39"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "skill type of sites that you could using these skills, using layering, looking at",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:39",
+        "end": "08:45"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "these components for inspiration, right? Like godly websites, 21st.dev, looking at all this type of stuff.\" I told her",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:45",
+        "end": "08:50"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "it could generate the assets that it needed. It could use key, it could use",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:50",
+        "end": "08:55"
+      },
+      "on_screen": [
+        "OBSERVED still 21-motion-sites.jpg @ 08:08. Motion Sites jaw-dropping animated backgrounds"
+      ],
+      "spoken": "Higsfield, it can use whatever it wants, but I need it to be subtle but premium. And I just said, \"Go make me these",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "08:55",
+        "end": "09:01"
+      },
+      "on_screen": [
+        "OBSERVED still 17-ferna-hero.jpg @ 08:59. Ferna one-shot \u2014 herbs / layered product"
+      ],
+      "spoken": "sites.\" So let's take a look at what it actually built. So, this first one's called Ferna, fresh herbs without the window sill. You can already see right",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:01",
+        "end": "09:06"
+      },
+      "on_screen": [
+        "OBSERVED still 17-ferna-hero.jpg @ 08:59. Ferna one-shot \u2014 herbs / layered product"
+      ],
+      "spoken": "away from the beginning, we have layering. We can literally tell that this plant PNG as well as I think even",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:06",
+        "end": "09:12"
+      },
+      "on_screen": [
+        "OBSERVED still 17-ferna-hero.jpg @ 08:59. Ferna one-shot \u2014 herbs / layered product"
+      ],
+      "spoken": "this leaf in the background and these leaves, they're all on different planes. And the background image is on a",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:12",
+        "end": "09:18"
+      },
+      "on_screen": [
+        "OBSERVED still 17-ferna-hero.jpg @ 08:59. Ferna one-shot \u2014 herbs / layered product"
+      ],
+      "spoken": "different layer as well. So, that gives it a really nice immersive feel. We can see the text comes through right here.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:18",
+        "end": "09:23"
+      },
+      "on_screen": [
+        "OBSERVED still 17-ferna-hero.jpg @ 08:59. Ferna one-shot \u2014 herbs / layered product"
+      ],
+      "spoken": "This text pops through. This text fades in. These cards stack, which I think looks amazing. We can see right here we",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:23",
+        "end": "09:29"
+      },
+      "on_screen": [
+        "OBSERVED still 18-ferna-scroll-video.jpg @ 09:26. Ferna grow-on-scroll video"
+      ],
+      "spoken": "have a little scroll video now where this literally grows over time and we can go backwards. I like how this feels.",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:29",
+        "end": "09:35"
+      },
+      "on_screen": [
+        "OBSERVED still 18-ferna-scroll-video.jpg @ 09:26. Ferna grow-on-scroll video"
+      ],
+      "spoken": "Once again, we get more layering. You can see the plants in the background are moving to the left as well, but not at",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:35",
+        "end": "09:40"
+      },
+      "on_screen": [
+        "OBSERVED still 18-ferna-scroll-video.jpg @ 09:26. Ferna grow-on-scroll video"
+      ],
+      "spoken": "the same rate. And then finally, we end off with this video where the light basically turns on and that is the site.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:40",
+        "end": "09:46"
+      },
+      "on_screen": [
+        "OBSERVED still 19-lowkey-hero.jpg @ 09:46. Lowkey one-shot \u2014 keyboard"
+      ],
+      "spoken": "That was a oneshot prompt with Scrollcraft. Okay. And then the second",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:46",
+        "end": "09:51"
+      },
+      "on_screen": [
+        "OBSERVED still 19-lowkey-hero.jpg @ 09:46. Lowkey one-shot \u2014 keyboard"
+      ],
+      "spoken": "one it made, this one is called Lowkey. It's a keyboard. Let me just refresh this. So we see the text comes in like that. We can see there's a little",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:51",
+        "end": "09:57"
+      },
+      "on_screen": [
+        "OBSERVED still 19-lowkey-hero.jpg @ 09:46. Lowkey one-shot \u2014 keyboard"
+      ],
+      "spoken": "animation here. It looks like there was like some of the keys were being pressed. If you watch right here, yep, they look like they're being pressed. We",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "09:57",
+        "end": "10:02"
+      },
+      "on_screen": [
+        "OBSERVED still 19-lowkey-hero.jpg @ 09:46. Lowkey one-shot \u2014 keyboard"
+      ],
+      "spoken": "can keep scrolling and now we get more elements of layering because the background is moving as well as the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:02",
+        "end": "10:09"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "actual keyboard. Now, this is something I don't like. You can see there's like a hard cut right here. So, on more of a verification loop and on more of like a",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:09",
+        "end": "10:14"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "iteration, it would probably we'd be able to fix that, but this was a oneshot prompt. Anyways, text comes down here.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:14",
+        "end": "10:19"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "Text comes through here. I like how it comes in like that. Same thing. Now, open it. The keyboard keeps coming down.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:19",
+        "end": "10:25"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "And now the keyboard like comes out, right? So it literally like takes it apart itself and we can see inside of",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:25",
+        "end": "10:31"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "it. And then we have different colors to pick from. The desk is still scrolling down this whole time. The keyboard comes",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:31",
+        "end": "10:36"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "back and now we could also have our call to action down here. So all things considered, one shot prompts these two",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:36",
+        "end": "10:41"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "sites. I think that it gives you a really good base to work from. So after showing you guys those examples and",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:41",
+        "end": "10:47"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "talking about all that, here's what I think is the most important that you need to actually be doing when you're building websites. And all of these",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:47",
+        "end": "10:52"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "things that I'm going to talk about are baked into my scroll craft skill, which you can grab, like I said, in my free school community. So, the first thing",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:52",
+        "end": "10:57"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "that I think is really important is to actually have some sort of brand guidelines, right? You want this to feel",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "10:57",
+        "end": "11:03"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "consistent as far as, you know, your logo, your colors, things like that. From there, I think that you need to",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:03",
+        "end": "11:08"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "give it your three Ps, which is what I call sort of like the AI monetization readiness assessment. Meaning, does your",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:08",
+        "end": "11:14"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "business have a pain that you're solving? Do you have a person that you're solving that pain for? And do you",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:14",
+        "end": "11:21"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "have a promise of how your product or service is solving that pain? Promising how it solves that pain for that",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:21",
+        "end": "11:29"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "specific person. Now, from there, what I think you need is you need some sort of scroll um lock. And maybe lock wasn't the right word, but you need",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:29",
+        "end": "11:34"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "responsiveness. You need the user to feel that they're controlling the site because as they scroll, they're getting",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:34",
+        "end": "11:39"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "some sort of feedback. And it doesn't have to be anything super super flashy.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:39",
+        "end": "11:45"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "But like even just having the text go like this, even just having, you know, words appear. And I have to refresh this",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:45",
+        "end": "11:50"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "because they already did. Even having the words appear like this, just something that subtle, I think makes the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:50",
+        "end": "11:55"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "website feel so much more premium because some feedback I got on my last video was like, \"Oh, I hate these 3D",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "11:55",
+        "end": "12:00"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "world where I scroll and it makes me fly through.\" And I get that. I get that. It",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:00",
+        "end": "12:06"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "depends on the business. It depends on the three Ps like I just said. But I do think that having a scroll element in",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:06",
+        "end": "12:12"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "something is just really, really important. Anyways, from there, I think that you need inspiration. I think it's",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:12",
+        "end": "12:19"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "very hard to go into a website design project and just tell it what you want and expect that it's going to come back",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:19",
+        "end": "12:24"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "and not feel like AI slot because unless you're using some sort of skill or unless you're building off of some sort of template, it's probably going to feel",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:24",
+        "end": "12:30"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "that way because AI is AI. So, inspiration can come in the form of looking at other websites and finding",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:30",
+        "end": "12:36"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "out what you like about it, like the layering. I think the layering is super important like that. Maybe it's the way that the pricing section feels. Maybe",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:36",
+        "end": "12:42"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "it's the way that the background is like interactive and responsive to the mouse. Whatever it is, you need at least a",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:42",
+        "end": "12:47"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "little bit of inspiration. And what's cool about something like 21st.dev is you can get inspiration on your borders.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:47",
+        "end": "12:53"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "You can get inspiration on your actual buttons. This one literally has like a section for features. It has a section",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:53",
+        "end": "12:58"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "for FAQs. You can get inspiration on how you want every single like little element of your site to look, even like",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "12:58",
+        "end": "13:03"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "the text, all of the stuff. And then that's basically part five, which is",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:03",
+        "end": "13:08"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "understanding what components can you grab that already exist somewhere that you can use in order to make your site",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:08",
+        "end": "13:13"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "feel more dynamic and feel more branded. And then really the most important thing at the end of the day besides actually",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:13",
+        "end": "13:18"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "no number six, you need to make sure it works on mobile too. It has to look good on mobile. So many people are looking",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:18",
+        "end": "13:24"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "you up on mobile, clicking links on mobile. Make sure it's verified on mobile. Claude can do that well. Anyways, the last thing ties into that,",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:24",
+        "end": "13:30"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "which is verification. Now, by this I mean have it screenshot everything, especially when you're doing scroll",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:30",
+        "end": "13:35"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "animations. have it screenshot frame by frame or pixel by pixel as it's, you know, scrolling down. That way, it's",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:35",
+        "end": "13:40"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "essentially watching a video of how you will experience it. So, if you don't have a verification loop, if it's not",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:40",
+        "end": "13:46"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "taking screenshots and saying, \"Oh, wow. This looks bad. This looks out of bounds. This color's off. Let me fix that.\" Then what are you doing? Now, the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:46",
+        "end": "13:52"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "last part of this video was I was going to run through a bunch of these other experiments I did between Fable 5 and Fable 5.1. I had it build a bunch of",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:52",
+        "end": "13:58"
+      },
+      "on_screen": [
+        "OBSERVED still 20-lowkey-hard-cut.jpg @ 10:05. Lowkey hard cut (D7 leftover)"
+      ],
+      "spoken": "different sites for me. As you can see, I did like, you know, these perk form sites right here. This one was Fable",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "13:58",
+        "end": "14:04"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "5.1. This one was Fable 5. This one was Fable 5. This one was Fable 5.1. They just felt very similar. Like none of",
+      "changed_since_last_beat": [
+        "visual change"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:04",
+        "end": "14:09"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "them clearly blew the other one out of the water. They were very similar because they had the same prompts, the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:09",
+        "end": "14:14"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "same assets, the same brand brand guidelines, excuse me. And they use the same skill. They all use Scrollcraft.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:14",
+        "end": "14:19"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "There was a few minor minor differences, but not enough for me to be like, \"Wow, Fable 5.1 crushes Fable 5. Those seven",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:19",
+        "end": "14:25"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "things that I just talked about are more important than explicitly using which model.\" But here's what's interesting.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:25",
+        "end": "14:30"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "Around the board, Fable 5.1 was actually cheaper. Here's an example. Fable 5.1",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:30",
+        "end": "14:35"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "was 1824. Fable 5 was 2022. Here's another one where Fable 5.1 was 1452.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:35",
+        "end": "14:40"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "Fable 5 was 1467. So, that one's actually pretty similar. Here's another",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:40",
+        "end": "14:47"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "one where Fable 5.1 was 1283 and Fable 5 was 2164. Here's another one where Fable 5.1 was 1118 and Fable 5 was 1737. So if",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:47",
+        "end": "14:53"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "you guys remember in the release blog they basically said enthropic said hey",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:53",
+        "end": "14:59"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "you know Fable 5 is going to be 25% more efficient which is cheaper on some like you know knowledge work and and regular",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "14:59",
+        "end": "15:05"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "type of work and then on heavy agentic coding and multistep fable 5 might be as much as 45% cheaper or sorry fable 5.1",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:05",
+        "end": "15:10"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "might be as much as 45% cheaper than fable 5 because of how much more",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:10",
+        "end": "15:15"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "efficient it is with its tokens and so far that actually is what I've seen out of all these experiments and all the",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:15",
+        "end": "15:20"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "knowledge work that I've done you know all of the experiments and websites that you guys saw me build but then also a",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:20",
+        "end": "15:26"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "bunch of testing that I've done on my own that I haven't showed you guys, I've only used about 45% of my weekly Fable limit, which yes, I know a lot of you",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:26",
+        "end": "15:33"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "guys might think like, oh, that's a lot for like, you know, 5 to 6 hours of work, but I've blown through Fable weekly limit in like 1 to two hours",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:33",
+        "end": "15:38"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "before just using Fable 5, driving work, building some things, building some",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:38",
+        "end": "15:44"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "websites. I was actually really surprised that I didn't crush through my weekly Fable limit already, just based on how much I've been sitting here using",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:44",
+        "end": "15:49"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "it for the past multiple hours. So anyways guys, I was going to break that down more, but honestly I thought that it would just get a little bit boring",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:49",
+        "end": "15:55"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "and feel repetitive. So I just wanted to bring you guys those results. Overall, Fable 5.1 feels a little bit faster and a little bit cheaper. But that is going",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "15:55",
+        "end": "16:00"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "to do it for today. Don't forget to go into my free school community linked in the description if you want that scroll craft skill because it's what I'm",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "16:00",
+        "end": "16:06"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "constantly updating as I'm learning more about AI design. So if you enjoyed the video or you learn something new, please",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "16:06",
+        "end": "16:12"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "give it a like. It helps me out a ton. And as always, I appreciate you guys making it to the end of the video and I will see you all in the next one. Thanks everyone.",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    },
+    {
+      "timestamp": {
+        "start": "16:12",
+        "end": "16:17"
+      },
+      "on_screen": [
+        "OBSERVED still 22-fable-compare-sites.jpg @ 14:00. PERKFORM one-shot \u2014 same skill/assets compare family"
+      ],
+      "spoken": "",
+      "changed_since_last_beat": [
+        "segment boundary"
+      ]
+    }
+  ],
+  "structure": {
+    "open": "OBSERVED: First beat 00:00-00:05: This is probably my favorite website I've ever built with Claude. This is the AI Automation Society site. What I think i",
+    "hold_development": "OBSERVED: 177 beats total",
+    "turns": [],
+    "close": "OBSERVED: Final beat 16:12-16:17"
+  },
+  "observed": [
+    "This is probably my favorite website I've ever built with Claude. This is the AI Automation Society site. What I think is so cool about this one is look at the",
+    "layers as I start to scroll. We can see the mountains in the background and this like treeine and they are clearly",
+    "different layers and that adds a really premium feel as well as this whole laptop kind of being dynamic. Right now",
+    "we keep scrolling down and we see a little bit about AI automation society. We see the words come in. We see the",
+    "words come in down here and we can flip between the classroom live calls events and leaderboard. And as we keep"
+  ],
+  "inferences": [],
+  "gaps": [
+    "Frames sampled every 5s \u2014 rapid cuts may be undercounted",
+    "Transcript timing may not perfectly align with visual timestamps"
+  ],
+  "top_observations": [
+    {
+      "observation": "Opening segment: This is probably my favorite website I've ever built with Claude. This is the AI Automation Society ",
+      "timestamps": [
+        "00:00-00:05"
+      ]
+    },
+    {
+      "observation": "Mid-video shift: helps you get inspiration much better. There's literally another site called Motion Sites that has l",
+      "timestamps": [
+        "08:01-08:06"
+      ]
+    },
+    {
+      "observation": "Close: ",
+      "timestamps": [
+        "16:12-16:17"
+      ]
+    }
+  ]
+}
