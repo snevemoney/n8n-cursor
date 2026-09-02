@@ -35,7 +35,7 @@ python3 scripts/hive/os/saylor-fold.py --course BUS612 --slug <kebab> --when "�
 python3 scripts/hive/os/skills-sync.py --write
 ```
 
-4. World-thinks-master: fill `Last verified proof` on `live-facts-hive-os.md` when a visitor can see one build. That is `inbound-from-demonstrated-build`. Publish HITL. Not a slogan. Not a certificate claim.
+4. World-thinks-master: project `saylor-master-project.md` (BUS402). Execute is yellow — Evens names an existing evenslouis.ca URL **or** starts one slice. Fill `Last verified proof` only when a visitor can see it. `inbound-from-demonstrated-build`. Publish HITL.
 
 ## What “fully setup” feels like
 - Name a lane. Every turn the mentor teaches one school on the live work, then does the work. You do not have to ask.

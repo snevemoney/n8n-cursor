@@ -15,7 +15,7 @@ No LANE → ask once, then stop inventing. Skills chew the **lane card**, not th
 | hive-os | `CONTENT/topics/live-facts-hive-os.md` | `hive-os` |
 | agency | `CONTENT/topics/live-facts-agency.md` | `ai-partner-websites` |
 
-Mentor: `saylor-course-skill` → `saylor-mentor-pass` → `saylor-leverage-map`.
+Mentor: `saylor-course-skill` → `saylor-mentor-pass --live` → `saylor-live-beats` → emit. Lanes: `business-lanes.json`. Master project: `saylor-master-project.md`.
 Speak-sheet: `saylor-trigger-map.md`.
 
 ## How to add a fact (no course code)

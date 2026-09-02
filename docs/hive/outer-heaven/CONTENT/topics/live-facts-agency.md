@@ -9,7 +9,7 @@ Empty fields stay blank. Do not invent a KPI, a MUST score, or a close. Building
 - Who it is for: **BLANK**.
 - One proof a named client can see: **BLANK**.
 - Price / pack / CTA: **BLANK**. Do not quote tape $.
-- Building mode holds. Hive-os proof on evenslouis.ca is **not** this lane's salesperson.
+- Building mode holds. Hive-os proof on evenslouis.ca is **not** this lane's salesperson. Master-surface project: `saylor-master-project.md` (hive-os only).
 
 ## Property: Path A pipeline (HITL send)
 - Send set (not sending): Charles, Raphaël, Sylvie, BVM. Andréanne parked.

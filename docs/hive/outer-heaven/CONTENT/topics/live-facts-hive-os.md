@@ -1,8 +1,15 @@
 # live-facts-hive-os
 
-**State (REPLACE)** 2026-09-02 01:30 ET
+**State (REPLACE)** 2026-09-02 01:50 ET
 **Lane:** `hive-os` · evenslouis.ca + 17-desk OS
 Empty fields stay blank. Do not invent a KPI so a skill can fire.
+
+## System (BUS206 — five components)
+- People: Evens (plans, validates, HITL) · Consultant mentors live · Forge builds · Watchdog grades · Librarian files.
+- Process: name LANE → one teaching beat → one bite → hard step stays Evens (send/pay/deploy/book/publish).
+- Data: vault Outer Heaven · `live-facts-hive-os.md` · `os/reports/mentor.md` · `business-lanes.json`.
+- Hardware: this Mac + existing Grok box. No new host.
+- Software: Cursor + Grok Bot. n8n/Scorpion = legacy fallback. Do not install another vendor.
 
 ## Property: evenslouis.ca
 - Live site: `https://evenslouis.ca` (also `/n8n`, `/pro`, `/reports/<slug>`).
@@ -19,7 +26,7 @@ Empty fields stay blank. Do not invent a KPI so a skill can fire.
 - Slack `#hive` = INDEX. Wake Big Boss with `bb:` / `Big Boss`.
 - Run log: `/home/box/.grokbot/outer-heaven/ACTION_LOG.jsonl`.
 - Skill SSOT: `scripts/hive/grok-skills/{slug}.md` (42 COURSE-SKILLs + `saylor-course-skill` + `saylor-mentor-pass`).
-- PUT-IN-SYSTEM this sitting: `saylor-leverage-map.md` + vault `os/reports/mentor.md`.
+- PUT-IN-SYSTEM this sitting: `business-lanes.json` (facts bind) · System five-line above · `saylor-master-project.md` (BUS402) · vault `os/reports/mentor.md`.
 
 ## Property: money (do not invent)
 - Personal vs business: Personal CFO vs Money Desk.
@@ -34,3 +41,4 @@ Empty fields stay blank. Do not invent a KPI so a skill can fire.
 
 ## Events
 - 2026-09-02 Split from live-facts-card. Agency facts live on `live-facts-agency.md`.
+- 2026-09-02 BUS101+BUS206+BUS402 sitting: lanes bound, five components named, master-surface treated as a project. Proof still BLANK.
