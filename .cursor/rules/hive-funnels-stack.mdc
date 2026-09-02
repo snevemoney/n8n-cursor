@@ -13,6 +13,7 @@ alwaysApply: true
 - **Lists:** 50 → score 60–70% great → rewrite exclusions (`list-anneal-funnel`).
 - **Website offer:** `website-offer-funnel` is a **router**. Named client = Path A (MUST + margin + private-book). Volume list = Path B. Our Stripe/page = Path C. Do not skip the money spine on a client.
 - **Hard step:** send / pay / deploy / book / publish stay HITL (`ask-principal`).
+- **Pre/post:** every tool / skill / workflow pairs `pre-gate` (can block, exit 2 ≠ RUN) with `post-log` (never blocks, exit 0). How-to: pre before tool, post after. Watchdog. Grok notify. Telegram/Scorpion are not the sink.
 - **Loop:** no loop ships without `checkable-stop` (done-check + cap + cost). Until-satisfied is a weak stop. `/loop` only if Evens names the interval.
 - **Browser:** IF Cursor → `cursor-ide-browser` (navigate, snapshot, click, take_screenshot; lock/unlock). Not Chrome / Playwright / browser-use. IF Grok Bot → Grok Bot’s own web browser (do not call Cursor MCP). After a click, `verify-after-browser` (`ACT` → `EXPECTED` → `OBSERVED` → `COMPARE` → `NEXT`). Caption-only tapes skip; do not invent clicks. No headed send/pay/publish. Ladder first: `api-macro-vision`. Playwright stays Scorpion/app e2e only.
 - **Video watch:** IF Cursor → `cursor-video-watch` (`cursor-ide-browser` on a living YouTube tab → `packets/{id}/watch.json`). IF Grok Bot → Grok computer watch → same `watch.json`. THEN `analyze-video-watch-output`. Do not tell a Grok desk to call Cursor MCP. Caption-only until capture runs.

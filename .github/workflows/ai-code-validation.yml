@@ -19,7 +19,7 @@ jobs:
       - name: Check scope
         run: |
           # Extract AFFECTED_PATHS from PR description or use default
-          AFFECTED_PATHS=${AFFECTED_PATHS:-"apps/**,packages/**,infra/**,.github/**,scripts/**,workflows/**,docs/**"}
+          AFFECTED_PATHS=${AFFECTED_PATHS:-"apps/**,packages/**,infra/**,.github/**,scripts/**,workflows/**,docs/**,.cursor/**"}
           ./scripts/validate/scope-check.sh "$AFFECTED_PATHS"
 
   port-validation:
