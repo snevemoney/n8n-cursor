@@ -45,7 +45,8 @@ These are the kinds of businesses the hive is allowed to hunt, brief, and instal
 | `review-to-book` | New Google review → HITL thank-you + book link → 5★ referral ask | A | lead-web-find → MUST → private-book + warm-draft-hitl | `yt:hGdG-04TkDs` |
 | `clip-factory` | Long ep → pick hooks → cut → captions/thumbs/copy → human ships | C or A | Creative + Publishing; slice-build | `yt:hGdG-04TkDs` |
 | `orchestrated-site-brief` | ICP + numbered promise + tone + fear + CTA; 3–5 passes | C | session-bootstrap + slice-build | `yt:hGdG-04TkDs` |
-| `cinematic-recipe` | Taste = big model; drop 3 loved motion sites; hero = video not fake 3D | C | session-bootstrap + slice-build + Creative | `x:2077199463278395732` `x:2074158868142194898` `x:2082070276112564256` |
+| `cinematic-recipe` | Taste = big model; drop 3 loved motion sites; hero = video not fake 3D; premium without a named ref is a fail (D1–D7) | C | session-bootstrap + slice-build + Creative | `x:2077199463278395732` `x:2074158868142194898` `x:2082070276112564256` `yt:FFWtxjvW2ts` |
+| `seven-principle-anti-slop` | Brand + 3Ps + scroll lock + named inspiration + grab components + mobile + screenshot-verify. Merge, not a new skill. | C | cinematic-recipe + seedance-site + ingest-is-steps | `yt:FFWtxjvW2ts` |
 | `speed-positioning` | Competitors → 3 options + 2-week calendar + Loom, same/next day | A | Researcher + Consultant + GTM | `yt:hGdG-04TkDs` |
 | `demand-validate` | Public gigs >$500 with completed jobs; can we do ~80%? | B | Researcher → money-now-pick3 | `yt:hGdG-04TkDs` |
 | `morning-ceo-desk` | Mail + calendar digest; visible→efficient→automatic→then delegate | C | morning-day-plan | `yt:TL8V41Ea6oM` |
@@ -211,6 +212,25 @@ Theme breakdown stays there. **Steal + doctrine merge here.** No second catalog.
 
 ### Quarantine
 Watermark break · jailbreak / burn usage · J-space · NSFW LoRA · scrape + mail postcards. See Kill table.
+
+---
+
+## YT daily L2 2026-09-02 — Nate Fable anti-slop (`yt:FFWtxjvW2ts`)
+
+Source: `yt:FFWtxjvW2ts` · Nate Herk | AI Automation · 16:13 · upload 20260902
+Caption-only (544 segments). Visual/click UNKNOWN. No new `icp_id`. Token $ UNVERIFIED. Fable/Claude on-tape = operate-never.
+
+### Seven-principle site, not a Scrollcraft install — `yt:FFWtxjvW2ts`
+- **Named business / ICP:** `us`
+- **Steal as:** `cinematic-recipe` + `seedance-site` + `ingest-is-steps` · Path C
+- **Hive run:** Brand → Three Ps (facts card only) → scroll lock → named living ref → grab components (21st.dev / godly.design / awards-by-niche / Motion Sites, read-only) → mobile → `click-live-site` on scroll frames. Two distinct variants then pick. One-shot is a base. House winner still orb-scroll / plate+scrub.
+- **Kill / do not:** Claude/Fable stack · Skool Scrollcraft · “make it premium” with no object · one-shot HTML this sitting · quote token $ · unpark Path A / clone Lemon · fill Last verified proof without a visitor URL
+
+### Clone-competitor-feel HOLD — `yt:FFWtxjvW2ts`
+- **Named business / ICP:** Path A parked (no named client)
+- **Steal as:** `website-emit-from-ref` clone method · HOLD
+- **Hive run:** Brand-onto-their-feel is allowed **after** Evens names the client + living URL. Not this sitting.
+- **Kill / do not:** unpark Path A · send the clone · invent Three Ps / offer $
 
 ---
 

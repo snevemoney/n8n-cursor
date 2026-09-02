@@ -12,7 +12,8 @@ Load `scripts/hive/grok-skills/seedance-site.md` and follow it.
 
 **Owner:** Forge + Creative Studio.  
 **Status:** WIRED 2026-08-14 from `gt8k4bA01Mo`. Not accepted forever.  
-**House winner:** `orb-scroll-demo` (video-to-website) over cinematic-recipe look-good. `TASTE-WINNER-ORB-SCROLL.md`.
+**House winner:** `orb-scroll-demo` (video-to-website) over cinematic-recipe look-good. `TASTE-WINNER-ORB-SCROLL.md`.  
+**Anti-slop (`FFWtxjvW2ts`):** named inspiration required. Scroll lock ≠ required 3D fly-through. D7 = scroll frames + mobile.
 
 Hard step: send / pay / deploy / book / publish stay Evens.
 
