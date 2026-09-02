@@ -28,6 +28,8 @@ description: >-
 
 Evens wants a cinematic landing that **feels 3D** via scroll-scrub of one plate. Path C preview or a named page. Not WebGL. Not Genie.
 
+**House winner (2026-09-02):** Forge `orb-scroll-demo` (video-to-website) feels more premium than `cinematic-recipe` / cinematic-website. Same family, this wrap. Taste note: `CONTENT/website-building/cinematic/TASTE-WINNER-ORB-SCROLL.md`.
+
 ## Card
 
 ```
@@ -55,3 +57,14 @@ Prod domain / publish / pay = Evens.
 ## Never
 
 Claude Code/Cowork · Jarvis · quote $10k/$28.5M as FACT · WebGL-as-default · stitched-shorts as “continuous” · invent Higgsfield OAuth clicks · send / pay / deploy / book / publish
+
+## Repeat-signal leftover sweep (2026-08-17)
+Labeled merges, not new skills. Caption-only. $ UNVERIFIED. Claude/Vapi/n8n-cloud operate-never.
+
+| tape | fragment |
+|------|----------|
+| `2074108067361280173` | `seedance-site` |
+| `2074119000137601528` | `script-beat-motion` |
+| `2074158868142194898` | `cinematic-recipe` |
+
+Also proven from `CAP-gt8k4bA01Mo-award-plate-scrub` (`award-ref-continuous-plate-scroll-scrub`).

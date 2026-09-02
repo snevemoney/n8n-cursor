@@ -11,6 +11,7 @@ description: >-
 
 **Owner:** Forge (wrap + fail pass) · Creative Studio (bible + hero clip). **Stack:** Cursor + Grok Bot.  
 **Playbook:** `docs/hive/outer-heaven/CONTENT/website-building/cinematic/PLAYBOOK.md`  
+**Website selling training →** `CONTENT/knowledge/training/WEBSITE-SELLING.md`  
 **Cursor copy:** `.cursor/skills/cinematic-recipe/SKILL.md`  
 **Grok `/` copy:** `~/.grokbot/skills/cinematic-recipe/SKILL.md`  
 **Status:** WIRED 2026-08-14 from @snevemoney AI bookmarks. **Merged 2026-08-14** `gt8k4bA01Mo` (Awwwards ref + continuous Seedance plate + CTA-before-scroll roast). Not accepted forever.
@@ -30,11 +31,14 @@ description: >-
 - `gt8k4bA01Mo` Zubair — “one prompt 3D site” ⊥ pack + Higgsfield MCP + roast. **Un-hid 2026-08-14:** frame-scrub wrap is `seedance-site` (not this muted-video-hero). CTA-before-scroll roast stays here. Claude Code / Jarvis = operate-never. $10k / $28.5M UNVERIFIED.
 - `iRBs8PCBCaA` Bilawal — Genie-3 / world-model ≠ this page wrap. Do not upgrade a landing to an interactive world engine.
 - `U6k4MeVks_Y` Chase — one Pinterest still + three versions. Same pick-one shape. Claude Code operate-never.
+- `njHuj8OxIVI` Chase — five distinct mockups then double-down is the same pick-one family. Command-center glass is a **UI slice** (`slice-build` + `ingest-is-steps`), not this cinematic landing. Claude Design operate-never.
 - `RDytbVDzMF4` Jack — font/style lock is a **part**; script-beat motion is `script-beat-motion`, not this skill.
 
 ## When
 
-Cinematic / premium / motion landing. `slice-build` cinematic lane. Path C demo or a named page wrap.
+Cinematic / marketing-page / muted-video-hero landing. `slice-build` cinematic lane. Path C demo or a named page wrap.
+
+**Not when** Evens wants the premium feel he already named on `orb-scroll-demo`. That wrap is `seedance-site` (one plate, scroll scrubs). House lock: `CONTENT/website-building/cinematic/TASTE-WINNER-ORB-SCROLL.md`. This skill can still look good and lose.
 
 ## Card
 
@@ -61,3 +65,16 @@ Prod domain / Stripe / publish = Evens. Preview URL is not production.
 ## Never
 
 Jailbreak / GOD-MODE prompts · quote tweet $ as FACT · WebGL-as-default · Lovable-as-prod · Claude Cowork/Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus · send / pay / deploy / book / publish
+
+## Shard-2 labeled merges (2026-08-17 · shard 2)
+Labeled merge, not a new skill. Caption-only. $ UNVERIFIED. Evens can override slugs (Q6).
+- `Vm8QOo9MiC4` — Prompt-expand + no-auto-post. Replace-guardrails on the body. Sora/n8n on-tape. cinematic-recipe / clip-factory already cover this. Operate-never: Sora auto-post · n8n-cloud publish.
+
+## Repeat-signal leftover sweep (2026-08-17)
+Labeled merges, not new skills. Caption-only. $ UNVERIFIED. Claude/Vapi/n8n-cloud operate-never.
+
+| tape | fragment |
+|------|----------|
+| `xn6Z5PYyAIE` | `reference-log-winner-skill` |
+| `mjg_JUMar04` | `bible-plan-one-job-test` |
+| `2073320835658772937` | `website-emit-from-ref` |

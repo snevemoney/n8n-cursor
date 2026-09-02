@@ -30,8 +30,11 @@ OWNER: Evens (publish) · Forge (make/name the artifact) · Consultant (mentor) 
 
 ## Execute (pick one — Evens)
 
-1. **Name:** walk https://evenslouis.ca and say which URL is the proof. I write that URL on the facts card. You publish if it is not already public.
-2. **Make:** one slice, one system, cinematic done-check. Merge ≠ ship. You publish.
+1. **Name:** paste the live URL for `orb-scroll-demo` (house premium winner, 2026-09-02). I write it on the facts card only if a visitor can open it. Higgsfield / preview / localhost-if-ship. Publish HITL.
+2. **Name (other):** walk https://evenslouis.ca and say which URL is the proof.
+3. **Make:** one `seedance-site` slice (plate+scrub), not a cinematic-recipe cousin. Merge ≠ ship. You publish.
+
+Do not pick cinematic-ai-partner as the premium bar. It looks good. Orb-scroll feels more expensive. Taste: `CONTENT/website-building/cinematic/TASTE-WINNER-ORB-SCROLL.md`.
 
 Do not outbound “I can automate your business.” Do not fill the proof with a slogan.
 
