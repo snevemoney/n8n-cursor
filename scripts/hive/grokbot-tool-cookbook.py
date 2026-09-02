@@ -29,7 +29,7 @@ GROK-FIRST TOOLS (default — use before legacy hive):
 - Grok browser/computer (Grok Bot path): research, demos, UI flows, video watch → Grok computer watch → same watch.json → /analyze-video-watch-output. Do not use cursor-video-watch (Cursor host only). Hive click-verify in Grok Bot uses this browser. Do not call Cursor MCP.
 - Mac repo ({REPO}): python3 scripts/hive/product-state.py, os/knowledge-policy.py, hive-web-research.py
 - Memory paths: cache {CACHE}/ · vault {VAULT}/00_Outer_Heaven/ · shared ~/.grokbot/shared-context.json
-- Local audit (optional): python3 scripts/hive/os/event-bus.py append …
+- Local audit → Watchdog: python3 scripts/hive/os/post-log.py --workflow NAME --status audit (event-bus; POST $GROK_WATCHDOG_WEBHOOK_URL if set). audits → Watchdog, not Scorpion, not Telegram.
 - Legacy hive CLI (only when needed): python3 scripts/hive/grok-hive-tool.py --list-tools
 Do NOT use Scorpion obsidian HTTP for Grok memory — direct brief + disk only.
 Do NOT open every briefing with n8n, Scorpion, OpenClaw, or CE — Grok agents do the work themselves.

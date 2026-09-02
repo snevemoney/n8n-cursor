@@ -1,17 +1,20 @@
 # Hive Workflows
 
 Operational n8n workflows for the Hive ecosystem. All webhooks use the canonical domain: `https://evenslouis.ca/webhook/*`.
+n8n notify sink = Grok Watchdog webhook env GROK_WATCHDOG_WEBHOOK_URL.
+audits → Watchdog, not Scorpion, not Telegram. Local audit: `scripts/hive/os/post-log.py` / `event-bus`.
 
 ## Workflows
 
 | File | Live ID | Purpose | Trigger |
 |------|---------|---------|---------|
-| `daily-operational-digest.json` | `VOqRWrgrP2Wmoriq` | Aggregates 24h missions + golden paths → Telegram digest | Schedule (daily 8AM) |
+| `daily-operational-digest.json` | `VOqRWrgrP2Wmoriq` | Aggregates 24h missions + golden paths → Grok Watchdog digest | Schedule (daily 8AM) |
 | `ecosystem-router.json` | `5d1c6bbb-555f-42b2-919d-309d2b4f748d` | Routes inbound signals to target hive workflows | Webhook POST |
 | `founder-signal-ingest.json` | — (new) | Receives and normalizes founder signals from router | Webhook POST |
-| `golden-path-smoke-notify.json` | `TyxDfyLVDtxgqHfC` | Registers golden path smoke test with Scorpion | Webhook POST |
-| `ce-lead-notify.json` | `131918c7-1ca3-4205-8d42-cfc802c19a30` | CE Lead alert → Telegram | Webhook POST |
-| `outer-heaven-report-notify.json` | `e39875ba-a355-43f2-9dd6-dc0e4bcda2ef` | Outer Heaven report → Telegram | Webhook POST |
+| `golden-path-smoke-notify.json` | `TyxDfyLVDtxgqHfC` | Golden path smoke → Grok Watchdog audit (Register Scorpion leftover, unconnected) | Webhook POST |
+| `error-heal-notify.json` | `RbQEZ8LYInOIsWoK` | Normalize failure → Grok Watchdog audit (Register Scorpion leftover, unconnected) | Webhook POST |
+| `ce-lead-notify.json` | `131918c7-1ca3-4205-8d42-cfc802c19a30` | CE Lead alert → Grok Watchdog | Webhook POST |
+| `outer-heaven-report-notify.json` | `e39875ba-a355-43f2-9dd6-dc0e4bcda2ef` | Outer Heaven report → Grok Watchdog | Webhook POST |
 
 ## Failing Execution References (root-cause evidence)
 
@@ -25,15 +28,14 @@ Operational n8n workflows for the Hive ecosystem. All webhooks use the canonical
 
 ## Required n8n Environment Variables
 
-Set these in **n8n Settings > Variables** (not in repo):
+Set these in **n8n Settings > Variables** (not in repo). Do not invent a URL or secret in git.
 
 | Variable | Used By | Notes |
 |----------|---------|-------|
-| `TELEGRAM_BOT_TOKEN` | digest, ce-lead, outer-heaven | Format: `123456789:ABCdefGHI...` |
-| `HIVE_TELEGRAM_CHAT_ID` | digest (fallback for all) | Telegram chat/group ID |
-| `HIVE_DIGEST_TOPIC_ID` | digest | Optional message_thread_id for forum topics |
-| `HIVE_CE_LEAD_CHAT_ID` | ce-lead | Overrides HIVE_TELEGRAM_CHAT_ID |
-| `HIVE_OUTER_HEAVEN_CHAT_ID` | outer-heaven | Overrides HIVE_TELEGRAM_CHAT_ID |
+| `GROK_WATCHDOG_WEBHOOK_URL` | error-heal, digest, ce-lead, outer-heaven, golden-path | Watchdog audit/notify webhook from routine "Hive n8n notify". Empty URL = Alert Grok Watchdog fails soft (`continueOnFail`). No Telegram fallback. Register Scorpion is leftover — NOT the audit sink. |
+| `TELEGRAM_BOT_TOKEN` | digest (deactivated optional) | Not the notify sink. |
+| `HIVE_TELEGRAM_CHAT_ID` | digest (deactivated optional) | Not the notify sink. |
+| `HIVE_DIGEST_TOPIC_ID` | digest (deactivated optional) | Optional message_thread_id if Telegram is re-enabled HITL. |
 
 ## Import & Activation SOP
 
@@ -70,6 +72,6 @@ n8n import --input workflows/hive/founder-signal-ingest.json
 These require human-in-the-loop and cannot be automated from this PR:
 
 1. **Activate `founder-signal-ingest`** — Required for Ecosystem Router to stop returning 404 on `hive-founder-signal` forwards.
-2. **Set `TELEGRAM_BOT_TOKEN`** — Required for all Telegram notifications. Without it, `ce-lead-notify` and `outer-heaven-report-notify` produce 404 from Telegram API.
-3. **Set `HIVE_TELEGRAM_CHAT_ID`** (and optionally per-workflow overrides) — Required for message delivery.
-4. **Verify golden path smoke** — After import, trigger golden-path-smoke-notify and confirm Scorpion responds 201. If 400, check Scorpion is running and `/api/services/register` accepts the payload.
+2. **Set `GROK_WATCHDOG_WEBHOOK_URL`** — Operator sets the Watchdog routine URL in n8n Variables. Empty = Alert Grok Watchdog fails soft. No URL/secret in repo.
+3. **Do not import or activate from this PR** — HITL only after review.
+4. **Do not treat Scorpion as audit** — Register Scorpion nodes stay leftover (disabled/unconnected). audits → Watchdog, not Scorpion, not Telegram.
