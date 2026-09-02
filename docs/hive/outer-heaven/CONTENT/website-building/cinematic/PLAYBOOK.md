@@ -53,6 +53,12 @@ Forge wraps: muted loop, poster, scroll-scrub + cursor parallax, `prefers-reduce
 
 ---
 
+## House taste (operator 2026-09-02)
+
+`orb-scroll-demo` (Forge + video-to-website / plate+scrub) **feels more premium** than `cinematic-website` (cinematic-recipe muted hero) even though the latter looks good. SSOT: `TASTE-WINNER-ORB-SCROLL.md`.
+
+If the job is that premium feel, do **not** run cinematic-recipe as the wrap. Run `seedance-site`. “Looks good” is still a fail.
+
 ## What “cinematic site” means here (OPINION, unchanged)
 
 Not a Three.js agency rebuild by default. A **premium marketing page** that feels filmic:

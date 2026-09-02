@@ -9,7 +9,10 @@ description: >-
 Load `scripts/hive/grok-skills/cinematic-recipe.md` and follow it.
 
 **Owner:** Forge + Creative Studio.  
-**Status:** WIRED 2026-08-14 from @snevemoney AI bookmarks. Not accepted forever.
+**Status:** WIRED 2026-08-14 from @snevemoney AI bookmarks. Not accepted forever.  
+**Not the premium bar:** house winner is `orb-scroll-demo` / `seedance-site`. This skill can look good and lose.  
+**Anti-slop (`FFWtxjvW2ts`):** premium without a named ref is a fail. Walk D1–D7. Two distinct then pick. Claude/Fable/Scrollcraft on-tape.  
+`njHuj8OxIVI` five-mockup loop is a UI slice (`ingest-is-steps` + `slice-build`), not this landing.
 
 Hard step: send / pay / deploy / book / publish stay Evens.
 

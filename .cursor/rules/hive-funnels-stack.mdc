@@ -22,4 +22,5 @@ alwaysApply: true
 - **Motion on a spoken beat:** `script-beat-motion`. **Demo≠their mess:** `forward-deployed-gap` (delivery/career gym, not a hunt).
 - **Actuate a wired tape:** `actuate-tape-skill` — factory pack + hidden hold-outs first, named bite, Watchdog GRADE after, scoreboard lists paths. Plate generate later. HITL deploy.
 - **Click live surface:** `click-live-site` (alias click-live-surface) — Maestro-style flow (launch / scroll / tap / swipe / assertVisible) on any owned UI a human can click (prod / staging / preview / localhost-if-ship). Host browser. Per-step `verify-after-browser`. Status on disk. Watchdog GRADE. Not Maestro CLI / Android lab / vibe-test SaaS. Native mobile = ASK. Repo with no UI → API/tests/GRADE.
+- **Live mentor:** hive/site/money turns teach one school first (`saylor-live-mentor` + `saylor-mentor-pass --live`), then do the work. End stamp is not mentoring. Cap 1 idea/turn, 1–3/sitting.
 - Skill files: `scripts/hive/grok-skills/` and `.cursor/skills/hive-funnels/SKILL.md`.

@@ -27,3 +27,9 @@ Caption-only: `transcript-implied` or `unobserved`. Do not invent APIs, prompts,
 | `spec-queue-separate-holdout` | [spec-queue-separate-holdout.json](spec-queue-separate-holdout.json) | UNTESTED |
 | `offline-plate-vs-interactive-world` | [offline-plate-vs-interactive-world.json](offline-plate-vs-interactive-world.json) | UNTESTED |
 | `specialist-handoff-group-chat` | [specialist-handoff-group-chat.json](specialist-handoff-group-chat.json) | UNTESTED |
+
+### YT 2026-09-02 Nate anti-slop (LEARNED)
+
+| id | file | status |
+|----|------|--------|
+| `seven-principle-anti-slop-site` | [seven-principle-anti-slop-site.json](seven-principle-anti-slop-site.json) | LEARNED |

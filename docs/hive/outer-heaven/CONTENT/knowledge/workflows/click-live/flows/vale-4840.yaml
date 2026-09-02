@@ -1,0 +1,52 @@
+# click-live-site — Vale Desk anti-slop emit (:4840)
+# Localhost is the ship. Money parked. No deploy.
+id: vale-4840
+name: Vale :4840 — launch → cream CTA before scroll → desks → FAQ lock → join planes return
+hard_step: publish
+host: cursor-ide-browser
+status: fail
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/RUN.md
+app:
+  url: http://127.0.0.1:4840/
+steps:
+  - id: launch-home
+    action: navigate
+    url: http://127.0.0.1:4840/
+    expected: SAMPLE label + H1 "sit with people who already hit the wall." + primary CTA "Join the next sitting" visible before scroll.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/01-launch-home.md
+  - id: assert-hero-cta
+    action: assertVisible
+    target: Join the next sitting
+    expected: Cream CTA visible in first viewport. No Stripe. CTA is a hash, not a live join.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/02-assert-hero-cta.md
+  - id: tap-desks
+    action: tapOn
+    target: Desks
+    expected: #desks or "Cards that stack as you stay." in view. Still 127.0.0.1:4840.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/03-tap-desks.md
+  - id: scroll-desks
+    action: scroll
+    direction: down
+    expected: Stacking cards still mounted. No hard cut. No pay wall.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/04-scroll-desks.md
+  - id: tap-answers
+    action: tapOn
+    target: Answers
+    expected: FAQ lock visible. Left categories + right panel. Still :4840.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/05-tap-answers.md
+  - id: tap-sittings
+    action: tapOn
+    target: Sittings
+    expected: Sittings category selected. "What happens in a sitting?" visible.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/06-tap-sittings.md
+  - id: tap-join
+    action: tapOn
+    target: Join
+    expected: #join or end planes + repeated cream CTA. Book/publish not executed.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/07-tap-join.md
+  - id: assert-hitl
+    action: assertVisible
+    target: Book stays you
+    expected: HITL line visible. No deploy chrome. hard publish not executed.
+    hard: true
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/vale-4840/cards/08-assert-hitl.md
