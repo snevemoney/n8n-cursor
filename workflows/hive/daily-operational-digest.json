@@ -66,15 +66,7 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combinationMode": "multiplex",
-        "options": {
-          "clashHandling": {
-            "values": {
-              "resolveClash": "preferInput2"
-            }
-          }
-        }
+        "mode": "append"
       },
       "id": "merge-wait",
       "name": "Wait For Both Fetches",
