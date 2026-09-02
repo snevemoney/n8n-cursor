@@ -271,8 +271,8 @@ def _speak_rows_for(agent: str, limit: int = 4) -> list[str]:
 def _mentor_block(agent: str) -> str:
     rows = _speak_rows_for(agent, 4)
     parts = [
-        "LANE first: hive-os | agency. Load that facts card. 1–3 skills. No dump.",
-        "Router `saylor-course-skill` · pass `saylor-mentor-pass` · map `saylor-leverage-map`.",
+        "LIVE this turn: one school, teach, then do. Not an end stamp. LANE first.",
+        "Router `saylor-course-skill` · pass `saylor-mentor-pass --live` · beats `saylor-live-beats`.",
     ]
     if rows:
         parts.append("This desk: " + " · ".join(rows))
@@ -483,6 +483,8 @@ def self_test() -> list[str]:
         errors.append("default brief dumped signals (must stay off)")
     if "saylor-mentor-pass" not in (b.get("markdown") or ""):
         errors.append("brief missing mentor bind")
+    if "LIVE this turn" not in (b.get("markdown") or ""):
+        errors.append("brief mentor is still an end stamp")
     c = build_brief(agent="Consultant")
     if "saylor-course-skill" not in (c.get("markdown") or ""):
         errors.append("Consultant brief missing course-skill router")

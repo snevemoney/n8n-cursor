@@ -2,7 +2,7 @@
 
 **State (REPLACE)** 2026-09-02 01:30 ET
 University skill → what goes **in the system** → how AI actually makes leverage here.
-Not a dump. Mentor picks **1–3** rows that match this sitting. LANE first (`hive-os` | `agency`).
+Not a dump. Live coach picks **one** row this turn (1–3 this sitting). Teach from `saylor-live-beats.md`, then do. LANE first (`hive-os` | `agency`).
 
 **How to read:** PUT-IN-SYSTEM is a file or blank Evens fills. LEVERAGE is Cursor + Grok desks, not “I do AI.” Hard step stays Evens.
 

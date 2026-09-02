@@ -27,7 +27,7 @@ You can be ARMED while remaining > 0. That is the point of fold.
 ## Sit down today (you are armed)
 
 1. Score: `python3 scripts/hive/os/saylor-setup-score.py` — PASS means work professionally now. Remaining > 0 is expected.
-2. Name LANE (`hive-os` | `agency`). One bite. End of sitting: `saylor-mentor-pass` (1–3) or an honest skip.
+2. Name LANE (`hive-os` | `agency`). One bite. **Every turn:** one teaching beat (`saylor-mentor-pass --live`), then work. End emit. Honest skip only if no hive/site/money.
 3. Next course close: one fold. Do not rewire.
 
 ```
@@ -38,7 +38,7 @@ python3 scripts/hive/os/skills-sync.py --write
 4. World-thinks-master: fill `Last verified proof` on `live-facts-hive-os.md` when a visitor can see one build. That is `inbound-from-demonstrated-build`. Publish HITL. Not a slogan. Not a certificate claim.
 
 ## What “fully setup” feels like
-- Name a lane. The mentor picks 1–3 skills and tells you what to put in the system.
+- Name a lane. Every turn the mentor teaches one school on the live work, then does the work. You do not have to ask.
 - A new COURSE-SKILL close is one fold command, not a new architecture.
 - One proof on evenslouis.ca is how the world decides you are a master. Fill that blank when it is true. Do not invent it.
 

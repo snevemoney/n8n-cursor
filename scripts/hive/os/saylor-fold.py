@@ -17,6 +17,7 @@ CATALOG = ROOT / "docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md"
 SPEAK = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-trigger-map.md"
 LEVERAGE = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-leverage-map.md"
 REMAINING = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-remaining.md"
+BEATS = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-live-beats.md"
 
 _spec = importlib.util.spec_from_file_location(
     "saylor_promote", ROOT / "scripts/hive/os/saylor-course-skills-promote.py"
@@ -80,6 +81,28 @@ def _append_leverage(lane: str, plain: str, course: str, put: str, leverage: str
     LEVERAGE.write_text(text, encoding="utf-8")
 
 
+def _append_beat(course: str, when: str, never: str) -> None:
+    """Stub a live beat. Do not invent Says — REPLACE from the packet."""
+    if BEATS.is_file() and re.search(rf"^## {re.escape(course)}\s*$", BEATS.read_text(encoding="utf-8"), re.M):
+        return
+    stub = (
+        f"\n## {course}\n"
+        f"**When:** {when}\n"
+        f"**Says:** REPLACE from the harvest packet. One paragraph. Plain English. No exam.\n"
+        f"**Now:** name the file or blank on the lane facts card\n"
+        f"**Watch:** {never}\n"
+    )
+    if BEATS.is_file():
+        text = BEATS.read_text(encoding="utf-8")
+        marker = "## Events"
+        if marker in text:
+            BEATS.write_text(text.replace(marker, stub.lstrip() + "\n" + marker, 1), encoding="utf-8")
+        else:
+            BEATS.write_text(text.rstrip() + stub + "\n", encoding="utf-8")
+    else:
+        BEATS.write_text("# saylor-live-beats\n" + stub + "\n", encoding="utf-8")
+
+
 def _mark_remaining(course: str, path: Path | None = None) -> bool:
     path = path or REMAINING
     if not path.is_file():
@@ -109,6 +132,7 @@ def fold(
     for lane in lanes:
         _append_leverage(lane, plain, course, put, leverage)
     promote.write_one({"course": course, "slug": slug, "when": when, "never": never})
+    _append_beat(course, when, never)
     _mark_remaining(course)
     return {
         "course": course,

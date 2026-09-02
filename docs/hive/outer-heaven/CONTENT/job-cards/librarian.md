@@ -27,3 +27,4 @@
 - `CONTENT/topics/saylor-catalog-complete.md`
 - `CONTENT/topics/saylor-remaining.md`
 - `CONTENT/topics/saylor-armed.md`
+- `CONTENT/topics/saylor-live-beats.md`

@@ -32,7 +32,7 @@ python3 scripts/hive/os/saylor-fold.py --course BUS612 --slug <kebab> --when "�
 python3 scripts/hive/os/skills-sync.py --write
 ```
 
-`--dry-run` prints the fold and writes nothing. Do not invent `--when` / `--never`. Packet on the box first. Same command for every future close.
+`--dry-run` prints the fold and writes nothing. Do not invent `--when` / `--never`. Packet on the box first. Same command for every future close. Fold also stubs a live beat — REPLACE **Says** from the packet before you call it mentoring.
 
 ## Events
 - 2026-09-02 Queue from parallel-harvest + 651–654 cluster. COMM100 + BUS633 already folded.

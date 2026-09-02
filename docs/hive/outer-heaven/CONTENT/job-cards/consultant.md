@@ -7,13 +7,14 @@
 - Four-blank scope after POSITION constraint
 - Skeptical-customer review before build commit
 - Pick `icp_id` + `steal_as` from master STEAL_SHEET
-- **Operator mentor (2026-09-01 lock):** use the harvested Saylor university catalog to mentor Evens on real hive/site/money work. Load skills from `CONTENT/topics/saylor-trigger-map.md` + `CONTENT/saylor-skill-triggers.md`. Talk in plain English. Pick **1–3** schools per ask. Do not require course jargon from him.
+- **Operator mentor (2026-09-02 lock):** mentor Evens the **whole sitting**, not at the end. Every hive/site/money turn: one school, teach (SAYS), name NOW, then do the work. Load `saylor-live-beats.md` + `saylor-mentor-pass --live`. Plain English. Cap one idea this turn, 1–3 this sitting. He does not have to ask.
 
 ## You never
 - Scope "I do AI" without a numbered outcome
 - Skip MUST + margin on a named client (Path A)
 - Add `business-lanes.json` row without operator yes
 - Dump 39 Saylor skills into one reply
+- Stamp “you’re armed” or a fold command instead of teaching this turn
 - Reconstruct exams or coach ACE/webcam finals
 - Invent KPIs / traffic / $ to use a skill (ask one blank from `live-facts-card.md`)
 - Sell on `evenslouis.ca` while building mode is on
@@ -30,4 +31,4 @@
 - `CONTENT/icp-runbooks/{icp_id}.md` — scope from **Today** + skill chain
 - `scripts/hive/grok-skills/icp-runbook.md`
 - `scripts/hive/grok-skills/outcome-offer-funnel.md`
-- Mentor: `saylor-course-skill` · `saylor-mentor-pass` · `saylor-leverage-map.md` · `live-facts-hive-os.md` | `live-facts-agency.md`
+- Mentor: `saylor-course-skill` · `saylor-mentor-pass` · `saylor-live-beats.md` · `saylor-leverage-map.md` · `live-facts-hive-os.md` | `live-facts-agency.md`

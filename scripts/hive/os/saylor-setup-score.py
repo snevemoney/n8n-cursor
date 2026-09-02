@@ -15,6 +15,8 @@ HIVE = ROOT / "docs/hive/outer-heaven/CONTENT/topics/live-facts-hive-os.md"
 AGENCY = ROOT / "docs/hive/outer-heaven/CONTENT/topics/live-facts-agency.md"
 REMAINING = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-remaining.md"
 ARMED = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-armed.md"
+BEATS = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-live-beats.md"
+RULE = ROOT / ".cursor/rules/saylor-live-mentor.mdc"
 MASTER = ROOT / "scripts/hive/grok-skills"
 
 
@@ -77,6 +79,8 @@ def score() -> dict:
         "facts_agency": AGENCY.is_file(),
         "remaining_queue": REMAINING.is_file(),
         "armed_note": ARMED.is_file(),
+        "live_beats": BEATS.is_file() and "## BUS210" in BEATS.read_text(encoding="utf-8"),
+        "live_rule": RULE.is_file() and "alwaysApply: true" in RULE.read_text(encoding="utf-8"),
         "fold_self_test": _run("saylor-fold.py"),
         "mentor_self_test": _run("saylor-mentor-pass.py"),
         "brief_self_test": _run("outer-heaven-brief.py"),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End-of-sitting mentor pass: LANE + 1–3 skills + PUT-IN-SYSTEM. No catalog dump."""
+"""Live mentor: one teaching beat then work. End emit PUT-IN-SYSTEM. No catalog dump."""
 from __future__ import annotations
 
 import argparse
@@ -13,6 +13,7 @@ ROOT = Path("/Users/evenslouis/n8n-cursor")
 MAP = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-leverage-map.md"
 SPEAK = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-trigger-map.md"
 CATALOG = ROOT / "docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md"
+BEATS = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-live-beats.md"
 LANES = ("hive-os", "agency")
 CAP = 3
 COURSE_RE = re.compile(r"\b(?:BUS|COMM|ECON|PRDV|CS|ARTH|ENGL|PHIL|MA|POLSC)\d+\b")
@@ -169,7 +170,73 @@ def render(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
         "facts": facts,
         "skills": [p["slug"] for p in picked if p["slug"] != "(none matched)"][:CAP],
         "rows": picked[:CAP],
-        "next": "fill one blank on the lane card, or HITL if this is send/pay/deploy/book/publish",
+        "next": "one guided action on the live fact, or HITL if this is send/pay/deploy/book/publish",
+    }
+
+
+def _parse_beats(path: Path | None = None) -> dict[str, dict[str, str]]:
+    path = path or BEATS
+    out: dict[str, dict[str, str]] = {}
+    if not path.is_file():
+        return out
+    course = ""
+    cur: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^## ([A-Z]{2,6}\d{2,4})\s*$", line)
+        if m:
+            if course and cur:
+                out[course] = cur
+            course = m.group(1)
+            cur = {"course": course}
+            continue
+        kv = re.match(r"^\*\*(When|Says|Now|Watch):\*\*\s+(.*)$", line)
+        if kv and course:
+            cur[kv.group(1).lower()] = kv.group(2).strip()
+    if course and cur:
+        out[course] = cur
+    return out
+
+
+def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
+    """One school this turn. Teach, then the caller does the work."""
+    card = render(lane, sitting, slugs)
+    row = card["rows"][0]
+    courses = COURSE_RE.findall(f"{row.get('skill', '')} {row.get('said', '')} {row.get('slug', '')}")
+    beats = _parse_beats()
+    beat = {}
+    for c in courses:
+        if c in beats:
+            beat = beats[c]
+            break
+    if not beat:
+        for c, b in beats.items():
+            when = (b.get("when") or "").lower()
+            if when and any(tok in (sitting or "").lower() for tok in when.split() if len(tok) > 4):
+                beat = b
+                break
+    if not beat:
+        beat = {
+            "course": row.get("skill") or "saylor-course-skill",
+            "says": (
+                f"{row.get('said') or sitting}. Decide {row.get('put')} before the next edit. "
+                f"{row.get('leverage')}."
+            ),
+            "now": row.get("put") or "name LANE + one fact",
+            "watch": "Do not dump the catalog. Do not invent a KPI.",
+        }
+    says = beat.get("says") or ""
+    return {
+        "mode": "live",
+        "lane": lane,
+        "sitting": sitting,
+        "slug": row.get("slug"),
+        "course": beat.get("course") or (courses[0] if courses else row.get("skill")),
+        "says": says,
+        "now": beat.get("now") or row.get("put"),
+        "watch": beat.get("watch") or "marketing ≠ copy ≠ CS; hard step stays Evens",
+        "put": row.get("put"),
+        "leverage": row.get("leverage"),
+        "then": "do the work through this lens; do not stamp and leave",
     }
 
 
@@ -256,6 +323,20 @@ def self_test() -> list[str]:
     )
     if "grad-data-mgmt-dbms-sql-plan-warehouse" not in future["skills"]:
         errs.append("catalog overlap missed a future-shaped sitting")
+    if not BEATS.is_file():
+        errs.append("live-beats missing")
+    beats = _parse_beats()
+    if "BUS210" not in beats or "audience" not in (beats["BUS210"].get("says") or "").lower():
+        errs.append("BUS210 live beat missing or thin")
+    live = live_beat("hive-os", "who is this page for and what tone", [])
+    if live.get("course") != "BUS210":
+        errs.append(f"live beat missed BUS210 (got {live.get('course')})")
+    if len((live.get("says") or "").split()) < 20:
+        errs.append("live SAYS is not a teaching paragraph")
+    if "who" not in (live.get("now") or "").lower() and "tone" not in (live.get("now") or "").lower():
+        errs.append("live NOW missed who/why/tone")
+    if live.get("mode") != "live":
+        errs.append("live mode flag missing")
     return errs
 
 
@@ -268,6 +349,7 @@ def main() -> int:
     ap.add_argument("--desk", default="consultant")
     ap.add_argument("--host", default="cursor", choices=("cursor", "grok"))
     ap.add_argument("--format", default="markdown", choices=("markdown", "json"))
+    ap.add_argument("--live", action="store_true", help="one teaching beat this turn (not the end card)")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     if args.self_test:
@@ -281,6 +363,26 @@ def main() -> int:
         print("LANE required: hive-os | agency", file=sys.stderr)
         return 2
     slugs = [s for s in args.slugs.split(",") if s.strip()]
+    if args.live:
+        beat = live_beat(args.lane, args.sitting, slugs)
+        if args.format == "json":
+            print(json.dumps(beat, indent=2))
+            return 0
+        print(
+            "\n".join(
+                [
+                    f"# Live mentor · {beat['lane']}",
+                    "",
+                    f"SITTING: {beat['sitting'] or '(name it)'}",
+                    f"SCHOOL: {beat['course']}",
+                    f"SAYS: {beat['says']}",
+                    f"NOW: {beat['now']}",
+                    f"THEN: {beat['then']}",
+                    f"WATCH: {beat['watch']}",
+                ]
+            )
+        )
+        return 0
     card = render(args.lane, args.sitting, slugs)
     if args.emit:
         card["vault"] = emit_vault(card, args.desk, args.host)

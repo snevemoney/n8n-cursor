@@ -9,7 +9,7 @@ Operator lock 2026-09-01 (t161–t165): when Big Boss finishes the remaining cat
 - Consultant is the university mentor (job card).
 - Speak-sheet: `CONTENT/topics/saylor-trigger-map.md`
 - Live facts: router `live-facts-card.md` → `live-facts-hive-os.md` | `live-facts-agency.md`
-- Mentor while building: `saylor-mentor-pass` + `saylor-leverage-map.md` (brief injects 1–3, not the catalog)
+- Mentor while building: live coach (`saylor-mentor-pass --live` + `saylor-live-beats.md`). Brief injects “this turn,” not the catalog.
 - Future courses: `saylor-fold.py` (same machine). Queue: `saylor-remaining.md`. Armed today: `saylor-armed.md` + `saylor-setup-score.py`
 - Catalog extract: `CONTENT/saylor-skill-triggers.md` (42 harvested; host SSOT minted 2026-09-02)
 - Plain talk, 1–3 skills per ask, no exam dump, no invented KPIs, building mode.
