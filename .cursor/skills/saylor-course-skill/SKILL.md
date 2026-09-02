@@ -9,7 +9,8 @@ description: >-
 
 Load `scripts/hive/grok-skills/saylor-course-skill.md` and follow it.
 
-**Catalog + speak-sheet first.** Pick 1–3 slugs. Bind live-facts-card.
+**Catalog + speak-sheet first.** LANE `hive-os` | `agency`. Pick 1–3 slugs.
+**Sitting end:** `saylor-mentor-pass`.
 
 Hard step: send / pay / deploy / book / publish stay Evens.
 

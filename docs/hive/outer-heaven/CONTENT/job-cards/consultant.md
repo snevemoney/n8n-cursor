@@ -30,4 +30,4 @@
 - `CONTENT/icp-runbooks/{icp_id}.md` — scope from **Today** + skill chain
 - `scripts/hive/grok-skills/icp-runbook.md`
 - `scripts/hive/grok-skills/outcome-offer-funnel.md`
-- Mentor: `saylor-course-skill` · `CONTENT/topics/saylor-trigger-map.md` · `CONTENT/topics/live-facts-card.md`
+- Mentor: `saylor-course-skill` · `saylor-mentor-pass` · `saylor-leverage-map.md` · `live-facts-hive-os.md` | `live-facts-agency.md`

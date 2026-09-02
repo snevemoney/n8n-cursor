@@ -17,7 +17,9 @@ description: >-
 
 **Catalog:** `CONTENT/saylor-skill-triggers.md` (repo: `docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md`)
 **Speak-sheet:** `CONTENT/topics/saylor-trigger-map.md`
-**Data pack:** `CONTENT/topics/live-facts-card.md`
+**Data pack:** `CONTENT/topics/live-facts-card.md` → `live-facts-hive-os.md` | `live-facts-agency.md`
+**Sitting end:** `saylor-mentor-pass`
+**Leverage:** `CONTENT/topics/saylor-leverage-map.md`
 **Masters:** `scripts/hive/grok-skills/{slug}.md`
 
 **Dissent (do not flatten):**
@@ -35,8 +37,10 @@ Evens talks hive / site / money and a harvested university skill should fire. Co
 SIT: mentor | execute | study-aid
 SAY: plain hive/site/money (not course jargon)
 SKILLS: 1–3 slugs from the speak-sheet
-FACT: live-facts-card row (blank stays blank)
+LANE: hive-os | agency
+FACT: that lane's facts card (blank stays blank)
 DESK: mentor=Consultant; execute=lane owner
+PASS: sitting end → saylor-mentor-pass (1–3 + PUT-IN-SYSTEM)
 ```
 
 No FACT and no named property → mentor with blanks. Do not invent a KPI so a skill can fire.
@@ -51,10 +55,11 @@ No FACT and no named property → mentor with blanks. Do not invent a KPI so a s
 
 1. Read the speak-sheet row. Operator does not need the course code.
 2. Load the matching `scripts/hive/grok-skills/{slug}.md` (then Cursor pointer / Grok mirror).
-3. Bind to `live-facts-card`. Empty fields stay empty.
+3. Name LANE. Bind that facts card. Empty fields stay empty. Do not merge hive-os $ with agency $.
 4. Run at most 1–3 skills. Anti-triggers on the speak-sheet win (marketing ≠ copy ≠ CS; books ≠ costs ≠ capital).
 5. Hand execution to the desk on the row. Consultant does not replace the lane owner.
-6. Hard step (send / pay / deploy / book / publish) stays Evens.
+6. End of sitting: `saylor-mentor-pass` (PUT-IN-SYSTEM + LEVERAGE + NEXT) or an honest skip.
+7. Hard step (send / pay / deploy / book / publish) stays Evens.
 
 ## Remap
 

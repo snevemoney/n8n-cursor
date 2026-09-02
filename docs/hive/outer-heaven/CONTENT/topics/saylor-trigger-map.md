@@ -3,8 +3,9 @@
 **State (REPLACE)** 2026-09-01 23:10 ET
 Operator does **not** speak Saylor jargon. **Consultant is the mentor** for the full harvested university catalog (42 skills). Other desks still *execute* 1–3 skills when the bind says so. Librarian keeps this file current. Building mode: no selling until operator says so. Host SSOT: `scripts/hive/grok-skills/{slug}.md`.
 
-**How to talk (operator):** one situation + one real number/path + which property.
+**How to talk (operator):** one situation + one real number/path + which **lane** (`hive-os` | `agency`).
 Example: "evenslouis.ca still has no weekly visitor baseline" — not "run a t-test / CLT".
+Sitting end: `saylor-mentor-pass`. Leverage: `saylor-leverage-map.md`.
 
 ## Speak this → skill fires
 

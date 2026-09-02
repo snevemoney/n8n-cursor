@@ -25,6 +25,11 @@ _spec.loader.exec_module(vc)
 SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
 MAX_BRIEF_CHARS = 4500
 JOB_CARD_MAX_CHARS = 800
+MENTOR_MAX_CHARS = 520
+SPEAK_SHEET = (
+    ROOT
+    / "docs/hive/outer-heaven/CONTENT/topics/saylor-trigger-map.md"
+)
 
 # Display name → job-cards filename slug
 AGENT_JOB_CARD_SLUG: dict[str, str] = {
@@ -235,6 +240,48 @@ def _read_note(root: Path, rel: str, max_chars: int = 3000) -> str:
     return ""
 
 
+def _speak_rows_for(agent: str, limit: int = 4) -> list[str]:
+    """Filter speak-sheet to this desk. Cap 4. No catalog dump."""
+    if not SPEAK_SHEET.is_file():
+        return []
+    needle = (agent or "").lower()
+    hits: list[str] = []
+    general: list[str] = []
+    for line in SPEAK_SHEET.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("| ") or line.startswith("| You") or line.startswith("|---"):
+            continue
+        parts = [p.strip() for p in line.strip("|").split("|")]
+        if len(parts) < 3:
+            continue
+        plain, skill, desk = parts[0], parts[1], parts[2]
+        if not plain or plain.startswith("**"):
+            continue
+        bit = f"{plain} → {skill}"
+        if needle and needle in desk.lower():
+            hits.append(bit)
+        elif "consultant" in desk.lower():
+            general.append(bit)
+        if len(hits) >= limit:
+            return hits[:limit]
+    if hits:
+        return hits[:limit]
+    return general[:limit]
+
+
+def _mentor_block(agent: str) -> str:
+    rows = _speak_rows_for(agent, 4)
+    parts = [
+        "LANE first: hive-os | agency. Load that facts card. 1–3 skills. No dump.",
+        "Router `saylor-course-skill` · pass `saylor-mentor-pass` · map `saylor-leverage-map`.",
+    ]
+    if rows:
+        parts.append("This desk: " + " · ".join(rows))
+    block = " ".join(parts)
+    if len(block) > MENTOR_MAX_CHARS:
+        block = block[: MENTOR_MAX_CHARS - 1] + "…"
+    return block
+
+
 def _job_card_brief(root: Path, agent: str, max_chars: int = JOB_CARD_MAX_CHARS) -> str:
     """Owns/never excerpt from CONTENT/job-cards/{slug}.md for brief injection."""
     slug = AGENT_JOB_CARD_SLUG.get(agent)
@@ -261,6 +308,28 @@ def _job_card_brief(root: Path, agent: str, max_chars: int = JOB_CARD_MAX_CHARS)
     return block
 
 
+def _signal_retrieve_block(prompt: str) -> str:
+    """Optional retrieve-when-relevant. Default callers pass nothing → empty."""
+    if not (prompt or "").strip():
+        return ""
+    script = ROOT / "scripts/hive/os/signal-retrieve.py"
+    if not script.is_file():
+        return ""
+    try:
+        out = subprocess.run(
+            [sys.executable, str(script), "--prompt", prompt],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=str(ROOT),
+        )
+        if out.returncode != 0:
+            return ""
+        return (out.stdout or "").strip()
+    except (subprocess.TimeoutExpired, OSError):
+        return ""
+
+
 def build_brief(
     *,
     agent: str = "Big Boss",
@@ -268,6 +337,7 @@ def build_brief(
     source: str = "auto",
     read_note: str | None = None,
     include_hunt_stats: bool = False,
+    signals_prompt: str | None = None,
 ) -> dict:
     root = vc.read_root(source if source != "auto" else "auto")
     mem_path = root / "OPERATOR_MEMORY.md"
@@ -289,12 +359,15 @@ def build_brief(
         "catalogStats": _catalog_stats_lines(),
         "operatorFocus": _operator_focus_line(),
         "captureFreshness": _capture_freshness(root),
+        "vaultAccess": vc.vault_access_card(),
+        "vaultResolve": vc.resolve_vault(),
     }
     if read_note:
         brief["noteExcerpt"] = _read_note(root, read_note)
 
     job_card = _job_card_brief(root, agent)
     brief["jobCard"] = job_card
+    brief["mentor"] = _mentor_block(agent)
     brief["toolAssignment"] = _tool_assignment_line(agent)
 
     md_parts = [
@@ -305,8 +378,12 @@ def build_brief(
     ]
     if job_card:
         md_parts.extend(["## Job card", job_card, ""])
+    if brief.get("mentor"):
+        md_parts.extend(["## Mentor (1–3, do not dump)", brief["mentor"], ""])
     if brief.get("toolAssignment"):
         md_parts.extend(["## Tools", brief["toolAssignment"], ""])
+    if brief.get("vaultAccess"):
+        md_parts.extend(["## Vault (Mac closed)", brief["vaultAccess"], ""])
     md_parts.extend(
         [
             "## North stars",
@@ -338,6 +415,11 @@ def build_brief(
             md_parts.append(f"- {ln}")
     if read_note and brief.get("noteExcerpt"):
         md_parts.extend(["", f"## Note: {read_note}", brief["noteExcerpt"]])
+    if signals_prompt:
+        sig = _signal_retrieve_block(signals_prompt)
+        brief["signals"] = sig
+        if sig:
+            md_parts.extend(["", "## Signals (retrieve-when-relevant)", sig])
 
     markdown = "\n".join(md_parts)
     if len(markdown) > MAX_BRIEF_CHARS:
@@ -366,7 +448,7 @@ def publish_shared_context(brief: dict) -> Path:
 def fetch_vps_brief() -> str:
     host = "root@69.62.66.78"
     cmd = (
-        "OUTER_HEAVEN_MIRROR=/root/outer-heaven-mirror "
+        "OUTER_HEAVEN_MIRROR=/root/My_Billion_Dollar_Vault/00_Outer_Heaven "
         "bash /root/domain-paths/n8n-cursor/scripts/hive/outer-heaven/vps-outer-heaven-brief.sh"
     )
     try:
@@ -397,6 +479,15 @@ def self_test() -> list[str]:
         errors.append("empty markdown brief")
     if not b.get("hash"):
         errors.append("missing brief hash")
+    if b.get("signals") or "## Signals (retrieve-when-relevant)" in (b.get("markdown") or ""):
+        errors.append("default brief dumped signals (must stay off)")
+    if "saylor-mentor-pass" not in (b.get("markdown") or ""):
+        errors.append("brief missing mentor bind")
+    c = build_brief(agent="Consultant")
+    if "saylor-course-skill" not in (c.get("markdown") or ""):
+        errors.append("Consultant brief missing course-skill router")
+    if (c.get("markdown") or "").count("`") > 40:
+        errors.append("Consultant brief looks like a catalog dump")
     cr = vc.cache_root()
     if not cr.is_dir():
         errors.append("cache root missing")
@@ -411,6 +502,16 @@ def main() -> int:
     ap.add_argument("--read", metavar="REL_PATH", help="Optional vault-relative note to include")
     ap.add_argument("--format", default="markdown", choices=["markdown", "json"])
     ap.add_argument("--hunt-stats", action="store_true", help="Include hunt-log-stats in brief")
+    ap.add_argument(
+        "--signals",
+        action="store_true",
+        help="Include ≤3 signal refs when --prompt is set (default off; not every brief)",
+    )
+    ap.add_argument(
+        "--prompt",
+        default="",
+        help="Operator prompt for --signals retrieve (ignored unless --signals)",
+    )
     ap.add_argument("--publish", action="store_true", help="Write ~/.grokbot/shared-context.json")
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
@@ -427,7 +528,13 @@ def main() -> int:
         text = fetch_vps_brief()
         if not text:
             print("VPS brief unavailable; falling back to local", file=sys.stderr)
-            brief = build_brief(agent=args.agent, project=args.project, read_note=args.read, include_hunt_stats=args.hunt_stats)
+            brief = build_brief(
+                agent=args.agent,
+                project=args.project,
+                read_note=args.read,
+                include_hunt_stats=args.hunt_stats,
+                signals_prompt=(args.prompt if args.signals else None),
+            )
         else:
             print(text)
             return 0
@@ -438,6 +545,7 @@ def main() -> int:
             source=args.source,
             read_note=args.read,
             include_hunt_stats=args.hunt_stats,
+            signals_prompt=(args.prompt if args.signals else None),
         )
 
     if args.publish:

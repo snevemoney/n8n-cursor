@@ -8,7 +8,8 @@ Operator lock 2026-09-01 (t161–t165): when Big Boss finishes the remaining cat
 ## Already true (do not redo)
 - Consultant is the university mentor (job card).
 - Speak-sheet: `CONTENT/topics/saylor-trigger-map.md`
-- Live facts: `CONTENT/topics/live-facts-card.md`
+- Live facts: router `live-facts-card.md` → `live-facts-hive-os.md` | `live-facts-agency.md`
+- Mentor while building: `saylor-mentor-pass` + `saylor-leverage-map.md` (brief injects 1–3, not the catalog)
 - Catalog extract: `CONTENT/saylor-skill-triggers.md` (42 harvested; host SSOT minted 2026-09-02)
 - Plain talk, 1–3 skills per ask, no exam dump, no invented KPIs, building mode.
 
@@ -31,3 +32,4 @@ Owner: **Big Boss** starts. **Librarian** files. **Consultant** mentors on the l
 ## Events
 - 2026-09-01 23:15 ET Operator: "just make sure everything we said gets implemented when bigboss is done with all the remaining courses." Pack armed.
 - 2026-09-02 00:45 ET Cursor: harvested set minted to `scripts/hive/grok-skills/`. Pack still ARMED — remaining enrolled ≠ 0.
+- 2026-09-02 01:30 ET Operator: both businesses + both surfaces. Brief inject + sitting-end mentor pass wired. Remaining still ≠ 0; do not mark SHIPPED.
