@@ -12,8 +12,10 @@ from pathlib import Path
 ROOT = Path("/Users/evenslouis/n8n-cursor")
 MAP = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-leverage-map.md"
 SPEAK = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-trigger-map.md"
+CATALOG = ROOT / "docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md"
 LANES = ("hive-os", "agency")
 CAP = 3
+COURSE_RE = re.compile(r"\b(?:BUS|COMM|ECON|PRDV|CS|ARTH|ENGL|PHIL|MA|POLSC)\d+\b")
 
 # sitting keywords → slug (first-match order; cap 3)
 HINTS: list[tuple[re.Pattern[str], str]] = [
@@ -73,8 +75,30 @@ def _keys_for_slug(slug: str) -> list[str]:
                 continue
             parts = [p.strip() for p in line.strip("|").split("|")]
             skill_cell = parts[1] if len(parts) > 1 else ""
-            keys.extend(re.findall(r"\b(?:BUS|COMM|ECON|PRDV)\d+\b", skill_cell))
+            keys.extend(COURSE_RE.findall(skill_cell))
     return keys
+
+
+def _catalog_hits(sitting: str) -> list[str]:
+    """Future courses: overlap sitting tokens with catalog use-when. No HINTS required."""
+    if not CATALOG.is_file() or not (sitting or "").strip():
+        return []
+    tokens = set(re.findall(r"[a-z0-9]{4,}", sitting.lower()))
+    scored: list[tuple[int, str]] = []
+    for line in CATALOG.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("| ") or line.startswith("| course") or line.startswith("|---"):
+            continue
+        parts = [p.strip() for p in line.strip("|").split("|")]
+        if len(parts) < 3:
+            continue
+        slug, when = parts[1].strip("`"), parts[2]
+        if not slug or slug == "slug":
+            continue
+        n = len(tokens & set(re.findall(r"[a-z0-9]{4,}", when.lower())))
+        if n >= 2:
+            scored.append((n, slug))
+    scored.sort(key=lambda x: (-x[0], x[1]))
+    return [s for _, s in scored]
 
 
 def pick_slugs(sitting: str, explicit: list[str]) -> list[str]:
@@ -87,6 +111,11 @@ def pick_slugs(sitting: str, explicit: list[str]) -> list[str]:
             return out
     for pat, slug in HINTS:
         if pat.search(sitting or "") and slug not in out:
+            out.append(slug)
+        if len(out) >= CAP:
+            return out
+    for slug in _catalog_hits(sitting):
+        if slug not in out:
             out.append(slug)
         if len(out) >= CAP:
             break
@@ -220,6 +249,13 @@ def self_test() -> list[str]:
     dump = render("hive-os", "everything", list(f"slug-{i}" for i in range(8)))
     if len(dump["skills"]) > CAP:
         errs.append("explicit slugs exceeded cap")
+    future = render(
+        "hive-os",
+        "which DBMS fits and write a data-management plan so retrieval is decision-grade",
+        [],
+    )
+    if "grad-data-mgmt-dbms-sql-plan-warehouse" not in future["skills"]:
+        errs.append("catalog overlap missed a future-shaped sitting")
     return errs
 
 

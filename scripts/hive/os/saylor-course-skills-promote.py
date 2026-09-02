@@ -105,6 +105,31 @@ TITLE = {
 }
 
 
+def desk_for(slug: str, speak: Path | None = None) -> str:
+    if slug in DESK:
+        return DESK[slug]
+    speak = speak or (ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-trigger-map.md")
+    if speak.is_file() and slug in speak.read_text(encoding="utf-8"):
+        for line in speak.read_text(encoding="utf-8").splitlines():
+            if f"`{slug}`" not in line:
+                continue
+            parts = [p.strip() for p in line.strip("|").split("|")]
+            if len(parts) >= 3 and parts[2]:
+                return parts[2]
+    return "Consultant"
+
+
+def write_one(row: dict) -> Path:
+    slug = row["slug"]
+    course = row["course"]
+    master = MASTER / f"{slug}.md"
+    master.write_text(render_master(row), encoding="utf-8")
+    cdir = CURSOR / slug
+    cdir.mkdir(parents=True, exist_ok=True)
+    (cdir / "SKILL.md").write_text(render_cursor(slug, course), encoding="utf-8")
+    return master
+
+
 def parse_catalog(path: Path) -> list[dict]:
     rows: list[dict] = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -123,7 +148,7 @@ def parse_catalog(path: Path) -> list[dict]:
 def render_master(row: dict) -> str:
     slug = row["slug"]
     course = row["course"]
-    desk = DESK.get(slug, "Consultant")
+    desk = desk_for(slug)
     title = TITLE.get(slug, slug.replace("-", " "))
     when = row["when"].rstrip(".")
     never = row["never"].rstrip(".")
@@ -165,7 +190,7 @@ Exam reconstruction · invented KPIs · dump the textbook as the skill · Claude
 ## Steps
 
 1. Load `saylor-course-skill`. Cap 1–3 skills this ask.
-2. Bind one real hive/site/money fact from `live-facts-card`. Blank stays blank.
+2. Name LANE (`hive-os` | `agency`). Bind that facts card. Blank stays blank.
 3. Run this checklist on that fact. Do not take or reconstruct a Saylor (or any) exam.
 4. {desk} executes. Consultant mentors. Hard step stays Evens.
 
@@ -234,12 +259,7 @@ def main() -> int:
             rows.append(row)
     written = 0
     for row in rows:
-        slug = row["slug"]
-        master = MASTER / f"{slug}.md"
-        master.write_text(render_master(row), encoding="utf-8")
-        cdir = CURSOR / slug
-        cdir.mkdir(parents=True, exist_ok=True)
-        (cdir / "SKILL.md").write_text(render_cursor(slug, row["course"]), encoding="utf-8")
+        write_one(row)
         written += 1
     # meta cursor pointer
     meta = CURSOR / "saylor-course-skill"

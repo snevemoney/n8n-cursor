@@ -10,6 +10,8 @@ description: >-
 Load `scripts/hive/grok-skills/saylor-mentor-pass.md` and follow it.
 
 **CLI:** `python3 scripts/hive/os/saylor-mentor-pass.py --lane hive-os|agency --sitting "…" [--slugs a,b] [--emit]`
+**Armed:** `python3 scripts/hive/os/saylor-setup-score.py`
+**Fold:** `python3 scripts/hive/os/saylor-fold.py --course --slug --when --never --plain`
 **Facts:** `live-facts-hive-os.md` or `live-facts-agency.md`
 **Map:** `CONTENT/topics/saylor-leverage-map.md`
 

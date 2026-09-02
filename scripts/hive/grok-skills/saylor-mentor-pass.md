@@ -19,6 +19,8 @@ description: >-
 **Map:** `CONTENT/topics/saylor-leverage-map.md`
 **Facts:** `live-facts-card.md` → `live-facts-hive-os.md` | `live-facts-agency.md`
 **CLI:** `python3 scripts/hive/os/saylor-mentor-pass.py`
+**Armed:** `python3 scripts/hive/os/saylor-setup-score.py` (work today ≠ remaining 0)
+**Fold next course:** `python3 scripts/hive/os/saylor-fold.py --course --slug --when --never --plain`
 
 ## When
 
@@ -40,7 +42,7 @@ No LANE → ask once. No invented KPI. Do not dump the catalog.
 ## Steps
 
 1. Name **LANE**. Load that facts card. Blanks stay blank.
-2. Match the sitting to **1–3** rows on `saylor-leverage-map.md` (hive-os table or agency table). Load those COURSE-SKILL masters only.
+2. Match the sitting to **1–3** rows on `saylor-leverage-map.md`. Future courses also match catalog `use_when` (no HINTS required). Load those COURSE-SKILL masters only.
 3. Write the card. PUT-IN-SYSTEM is a path or a blank Evens can say once.
 4. Emit: `python3 scripts/hive/os/saylor-mentor-pass.py --lane <lane> --sitting "…" --slugs a,b [--emit --desk consultant --host cursor]`
 5. Confirm vault `CONTENT/os/reports/mentor.md`. That report is STATE (replace). Daily line is EVENT (append) only if something happened.

@@ -25,6 +25,7 @@ description: >-
 **Dissent (do not flatten):**
 - Box `sand-workflow:` copies stay richer harvest bodies. This repo mint is the host SSOT so Cursor can load them. Do not pretend the box packet is gone.
 - Remaining enrolled Saylor courses are not 0. Do not mark `saylor-catalog-complete` SHIPPED.
+- Future closes fold with `saylor-fold.py`. ARMED-TO-WORK (`saylor-setup-score.py`) is a different stop from remaining = 0.
 - Exam-taking skills were skipped on purpose. Webcam ACE stays skipped.
 
 ## When
