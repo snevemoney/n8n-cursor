@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { parsePagination, paginate } from '@/lib/api-pagination';
 import { z } from 'zod';
 
 /**
@@ -112,14 +113,17 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return createSuccessResponse(conversation);
   }
   
-  // List all conversations (exclude messages from list)
+  // List conversations (exclude messages from list), paginated
+  const pagination = parsePagination(searchParams);
   const conversationList = conversations
     .map(({ messages, ...conv }) => conv)
     .sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
   
   return createSuccessResponse({
-    conversations: conversationList,
+    conversations: paginate(conversationList, pagination),
     total: conversationList.length,
+    limit: pagination.limit,
+    offset: pagination.offset,
   });
 });
 

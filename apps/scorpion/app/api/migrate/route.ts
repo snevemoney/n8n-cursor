@@ -8,8 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runMigration } from '../../../scripts/migrate-cost-tracking';
+import { requireAuth } from '@/lib/security/auth';
 
-export async function GET(request: NextRequest) {
+export const GET = requireAuth(async (_request: NextRequest) => {
   try {
     // Check if tables exist
     const { query } = await import('../../../lib/db/client');
@@ -51,9 +52,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = requireAuth(async (_request: NextRequest) => {
   try {
     await runMigration();
     
@@ -70,5 +71,5 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 

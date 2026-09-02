@@ -2,7 +2,7 @@
  * Check Ollama health status
  */
 
-import { fetchWithTimeout, isTimeoutError } from './fetch-with-timeout';
+import { fetchWithRetry, isTimeoutError } from './fetch-with-timeout';
 
 export interface OllamaHealthResult {
   available: boolean;
@@ -18,9 +18,11 @@ export async function checkOllamaHealth(ollamaUrl?: string): Promise<OllamaHealt
   const url = ollamaUrl || process.env.OLLAMA_URL || 'http://localhost:11434';
   
   try {
-    const response = await fetchWithTimeout(`${url}/api/tags`, {
+    const response = await fetchWithRetry(`${url}/api/tags`, {
       method: 'GET',
       timeout: 5000,
+      retries: 2,
+      backoffMs: 200,
     });
     
     if (response.ok) {

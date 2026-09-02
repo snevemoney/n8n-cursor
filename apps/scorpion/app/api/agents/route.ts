@@ -5,6 +5,8 @@ import { getAgentOperations, generateDefaultOperations, addAgentOperations } fro
 import { getSystemAutomation } from '@/lib/system-automation';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
 import { getStoredAgents, addAgent, getAgentById, updateAgentStatus } from '@/lib/agent-storage';
+import { parsePagination, paginate } from '@/lib/api-pagination';
+import { requireAuth } from '@/lib/security/auth';
 import { z } from 'zod';
 
 // In-memory status cache for council members (static agents)
@@ -270,7 +272,8 @@ async function councilMembersToAgentDossiers(): Promise<AgentDossier[]> {
 /**
  * GET /api/agents - List all agents
  */
-export const GET = withErrorHandling(async () => {
+export const GET = withErrorHandling(async (request: NextRequest) => {
+    const pagination = parsePagination(request.nextUrl.searchParams);
     const agents = await councilMembersToAgentDossiers();
     
     const executor = getAgentOperationsExecutor();
@@ -302,7 +305,9 @@ export const GET = withErrorHandling(async () => {
     });
     
     return createSuccessResponse({
-      agents,
+      agents: paginate(agents, pagination),
+      limit: pagination.limit,
+      offset: pagination.offset,
       summary: {
         total: agents.length,
         active: agents.filter(a => a.status === 'active').length,
@@ -327,7 +332,7 @@ const createAgentSchema = z.object({
  * POST /api/agents - Create a new agent
  * Full integration: Adds to council, radar, and creates missions
  */
-export const POST = withErrorHandling(async (request: NextRequest) => {
+export const POST = withErrorHandling(requireAuth(async (request: NextRequest) => {
   const validation = await validateRequest(request, createAgentSchema);
   if (!validation.success) {
     return validation.error;
@@ -392,4 +397,4 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       500
     );
   }
-});
+}));
