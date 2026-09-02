@@ -1,0 +1,68 @@
+[
+  {
+    "number": 95,
+    "title": "docs(hive): Goal/gap board OBSERVED 2026-08-28",
+    "state": "open",
+    "draft": true,
+    "merged_at": null,
+    "html_url": "https://github.com/snevemoney/n8n-cursor/pull/95",
+    "updated_at": "2026-08-28T18:17:10Z",
+    "created_at": "2026-08-28T18:00:00Z",
+    "user": { "login": "cursor[bot]" }
+  },
+  {
+    "number": 94,
+    "title": "Format HITL inbox leftovers for 2026-08-28",
+    "state": "open",
+    "draft": true,
+    "merged_at": null,
+    "html_url": "https://github.com/snevemoney/n8n-cursor/pull/94",
+    "updated_at": "2026-08-28T17:06:41Z",
+    "created_at": "2026-08-28T17:00:00Z",
+    "user": { "login": "cursor[bot]" }
+  },
+  {
+    "number": 92,
+    "title": "docs(hive): Factory OS Grok-reader reminder 2026-08-28",
+    "state": "open",
+    "draft": true,
+    "merged_at": null,
+    "html_url": "https://github.com/snevemoney/n8n-cursor/pull/92",
+    "updated_at": "2026-08-28T11:05:43Z",
+    "created_at": "2026-08-28T11:00:00Z",
+    "user": { "login": "cursor[bot]" }
+  },
+  {
+    "number": 91,
+    "title": "Watchdog GRADE sitting: NO-WAITING 2026-08-28",
+    "state": "open",
+    "draft": true,
+    "merged_at": null,
+    "html_url": "https://github.com/snevemoney/n8n-cursor/pull/91",
+    "updated_at": "2026-08-28T10:09:06Z",
+    "created_at": "2026-08-28T10:00:00Z",
+    "user": { "login": "cursor[bot]" }
+  },
+  {
+    "number": 85,
+    "title": "Route hive n8n notify to Grok Watchdog webhook",
+    "state": "open",
+    "draft": false,
+    "merged_at": null,
+    "html_url": "https://github.com/snevemoney/n8n-cursor/pull/85",
+    "updated_at": "2026-08-27T20:31:03Z",
+    "created_at": "2026-08-27T20:00:00Z",
+    "user": { "login": "snevemoney" }
+  },
+  {
+    "number": 82,
+    "title": "Fix Hive Daily Digest Merge Fields-to-Match crash",
+    "state": "open",
+    "draft": true,
+    "merged_at": null,
+    "html_url": "https://github.com/snevemoney/n8n-cursor/pull/82",
+    "updated_at": "2026-08-27T18:44:51Z",
+    "created_at": "2026-08-27T18:30:00Z",
+    "user": { "login": "snevemoney" }
+  }
+]
