@@ -1,12 +1,167 @@
 {
   "name": "Hive Error Heal Notify",
-  "meta": {
-    "status": "MISSING_FROM_REPO",
-    "note": "Live n8n may still have this workflow (id hint RbQEZ8LYInOIsWoK). Repo has no export. Do not import or activate from this stub. Export from live n8n before treating as SSOT.",
-    "liveIdHint": "RbQEZ8LYInOIsWoK"
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hive-error-heal",
+        "options": {
+          "responseMode": "onReceived"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Error Heal Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "hive-error-heal",
+      "notes": "Forge HITL self-heal propose. Operator merges. Daily notify is Grok Watchdog / Grok chat. Never merge to main from this workflow. Never n8ncloud.tech."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Secret 7 self-heal: propose ops.self_heal.proposed need_hitl.\n// Forge opens PR; operator merges. n8n does not patch prod.\n// Daily notify = Grok Watchdog / Grok chat. Telegram = legacy (no send from this workflow).\n// Scorpion register-outcome = legacy optional audit — not required.\n// Philanthropy :3002 and OpenClaw :18789 are HOLD — not hard-fail gates.\nconst body = $json.body || $json;\nconst correlationId = body.correlationId || body.correlation_id || `self-heal-${Date.now()}`;\nconst route = body.route || 'unknown';\nconst statusCode = Number(body.statusCode || body.status_code || 500);\nconst error = body.error || body.message || 'unknown error';\nconst stackTrace = body.stackTrace || body.stack || '';\nconst repo = body.repo || 'n8n-cursor';\nconst service = body.service || 'hive';\nconst fixAttempt = Number(body.fix_attempt || body.fixAttempt || 1);\nconst toolMethod = body.tool_method || body.toolMethod || 'hive_catalog.error_heal';\nconst businessGoal = body.business_goal || body.businessGoal || 'restore smoke';\nconst escalate = fixAttempt >= 3;\n\nconst text = [\n  `SELF-HEAL PROPOSED (Tier 3 merge required)`,\n  `cid=${correlationId}`,\n  `route=${route} status=${statusCode}`,\n  `error=${error}`,\n  `repo=${repo} service=${service} attempt=${fixAttempt}`,\n  `Forge: branch · patch · test · PR. Operator merges. Do not merge main from n8n.`,\n  escalate ? `attempt>=3 → propose hive-creative-pivot (HITL)` : '',\n  `Notify: Grok Watchdog / Grok chat (no-send from n8n). Scorpion audit optional. Telegram not sent.`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    correlationId,\n    route,\n    statusCode,\n    error,\n    stackTrace,\n    repo,\n    service,\n    fixAttempt,\n    toolMethod,\n    businessGoal,\n    escalate,\n    registerPayload: {\n      correlationId,\n      jobType: 'ops.self_heal.proposed',\n      goal: businessGoal,\n      source: 'hive-error-heal',\n      status: 'need_hitl',\n      registerTo: 'scorpion',\n      summary: text,\n      metadata: {\n        lane: 'hive-os',\n        route,\n        statusCode: String(statusCode),\n        repo,\n        service,\n        fixAttempt: String(fixAttempt),\n        toolMethod,\n        scorpion: 'legacy-optional-audit',\n        telegramSend: 'omitted',\n        notify: 'grok-watchdog-chat',\n        philanthropyHold: 'true',\n        openclawHold: 'true'\n      }\n    }\n  }\n}];"
+      },
+      "id": "normalize-error",
+      "name": "Normalize Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "register-scorpion",
+      "name": "Register Scorpion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "continueOnFail": true,
+      "notes": "Legacy optional audit (Scorpion register-outcome). NOT the notify sink. Daily notify is Grok Watchdog / Grok chat. continueOnFail — 401 is not a heal failure. No new secret."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Alert Outer Heaven — NO SEND.\n// Must not Telegram-send. Must not require Scorpion.\n// Daily OS notify is Grok Watchdog / Grok chat. This node only attaches an event-bus note.\n// Historical Telegram/OH 401 = operator HITL. Do not invent credentials. No new secrets.\n// Philanthropy :3002 and OpenClaw :18789 HOLD — do not POST there.\nconst prev = $input.first().json;\nreturn [{\n  json: {\n    ...prev,\n    alert: {\n      dest: 'grok-watchdog-chat',\n      channel: 'event-bus-note',\n      send: false,\n      telegramSend: false,\n      scorpionRequired: false,\n      summary: prev.text,\n      correlationId: prev.correlationId,\n      note: 'No-send register-to-Grok/event-bus. Watchdog reads the execution. n8n does not page Telegram or treat Scorpion as OS.'\n    }\n  }\n}];"
+      },
+      "id": "alert-outer-heaven",
+      "name": "Alert Outer Heaven",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [950, 400],
+      "notes": "No-send Grok/event-bus note. Not Telegram HTTP. Not a Scorpion-required call. Watchdog is disabling live Alert Outer Heaven to stop the 10-min 401 loop. Notify = Grok Watchdog / Grok chat."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "escalate-check",
+              "leftValue": "={{ $json.escalate }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "escalate-check",
+      "name": "Escalate Pivot?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evenslouis.ca/webhook/hive-creative-pivot",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({ correlationId: $json.correlationId, fix_attempt: $json.fixAttempt, tool_method: $json.toolMethod, business_goal: $json.businessGoal, error: $json.error }) }}",
+        "options": { "timeout": 10000 }
+      },
+      "id": "trigger-pivot",
+      "name": "Trigger Creative Pivot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 300],
+      "continueOnFail": true,
+      "notes": "HITL propose only. continueOnFail if pivot workflow is inactive. Not a notify send."
+    }
+  ],
+  "connections": {
+    "Error Heal Webhook": {
+      "main": [[{ "node": "Normalize Error", "type": "main", "index": 0 }]]
+    },
+    "Normalize Error": {
+      "main": [[{ "node": "Register Scorpion", "type": "main", "index": 0 }]]
+    },
+    "Register Scorpion": {
+      "main": [[{ "node": "Alert Outer Heaven", "type": "main", "index": 0 }]]
+    },
+    "Alert Outer Heaven": {
+      "main": [[{ "node": "Escalate Pivot?", "type": "main", "index": 0 }]]
+    },
+    "Escalate Pivot?": {
+      "main": [
+        [{ "node": "Trigger Creative Pivot", "type": "main", "index": 0 }],
+        []
+      ]
+    }
   },
-  "nodes": [],
-  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "id": "RbQEZ8LYInOIsWoK",
   "active": false,
-  "_stub": true
+  "meta": {
+    "instanceId": "hive-ops",
+    "status": "REPO_JSON_FILLED_FROM_FACT_SHAPE",
+    "liveIdHint": "RbQEZ8LYInOIsWoK",
+    "notes": "Alert is no-send Grok/event-bus (not a hard-fail path). Telegram HTTP omitted — Watchdog disabling live Alert Outer Heaven (10-min 401 loop). Scorpion register-outcome is optional audit only, continueOnFail, never the sink. Daily notify = Grok. No new secrets. Do not import/activate."
+  },
+  "tags": [
+    { "name": "hive" },
+    { "name": "error-heal" },
+    { "name": "hive-os" },
+    { "name": "hitl" },
+    { "name": "legacy-fallback" }
+  ]
 }

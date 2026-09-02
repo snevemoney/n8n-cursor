@@ -11,7 +11,7 @@
         "correlationId": "string (required)",
         "message": "string (required)"
       },
-      "note": "JSON SSOT path is hive-golden-path-smoke (not hive-smoke-notify). Do not live-POST from docs."
+      "note": "G3 smoke webhook. Daily notify is Grok Watchdog / Grok chat. Scorpion register-outcome is optional audit. Do not live-POST from docs."
     },
     {
       "name": "hive-outer-heaven-report-notify",
@@ -46,7 +46,7 @@
         "repo": "string (default n8n-cursor)",
         "service": "string (optional)"
       },
-      "note": "Secret 7 self-heal: registers ops.self_heal.proposed need_hitl; Forge opens PR, operator merges"
+      "note": "Secret 7 self-heal webhook. Alert is no-send Grok/event-bus note — not Telegram, Scorpion not required. Forge PR; operator merges."
     },
     {
       "name": "hive-market-signal-ingest",
@@ -95,7 +95,7 @@
         "sourceRepo": "string (repo id from repo-registry)",
         "payload": "object (forwarded to target webhook)"
       },
-      "note": "Secret 21 master cross-repo router. Import: n8n-import-ecosystem-router.sh"
+      "note": "Secret 21 master cross-repo router. Path hive-ecosystem-route. Never route to n8ncloud.tech, Philanthropy :3002, or OpenClaw :18789 as hard-fail. Import HITL only."
     },
     {
       "name": "hive-ce-lead-notify",
@@ -111,7 +111,7 @@
         "status": "string (default new)",
         "source": "string (default client-engine)"
       },
-      "note": "Vertical slice CE lead → Scorpion ce.lead.received → Telegram #alerts. Route via hive-ecosystem-route key ce-lead-notify. Import: n8n-import-ce-lead-slice.sh"
+      "note": "G2 CE webhook. Daily notify is Grok Watchdog / Grok chat. Scorpion audit optional. Building mode — no selling / no client send. Route key ce-lead-notify."
     },
     {
       "name": "hive-founder-signal",
@@ -226,7 +226,7 @@
         "context": "object",
         "hive_state": "object (optional)"
       },
-      "note": "Unified telemetry CIA ingest. Import: n8n-import-telemetry.sh"
+      "note": "Watchdog telemetry webhook. Repo JSON: workflows/hive/telemetry-ingest.json (do not activate). Daily notify is Grok Watchdog / Grok chat."
     },
     {
       "name": "hive-daily-operational-digest",
@@ -235,7 +235,7 @@
       "authHeader": "internal",
       "registerTo": "scorpion",
       "inputSchema": {},
-      "note": "Cron daily State of the Hive digest → Telegram. Same import script."
+      "note": "Cron gap-fill digest. Daily notify is Grok Watchdog / Grok chat. Scorpion audit optional. Merge Wait For Both Fetches must be mode=append."
     },
     {
       "name": "hive-operator-digest",
@@ -246,7 +246,7 @@
       "inputSchema": {
         "correlationId": "string (optional)"
       },
-      "note": "MISSING repo JSON — stub at workflows/hive/hive-operator-digest.json. Do not import or activate. Day Planner consumes only; do not fire."
+      "note": "LEAVE-ARCHIVED stub. Day Planner / Grok consume only. Do not rebuild email/calendar/day-plan in n8n. Do not import or activate."
     },
     {
       "name": "hive-web-learning-cycle",
@@ -322,6 +322,19 @@
         "note": "payload UNVERIFIED — do not invent webhook path"
       },
       "note": "Live n8n On-demand calling (active). Twilio number already on n8n. HITL propose only. No webhook URL in git."
+    },
+    {
+      "name": "hive-disk-alert",
+      "webhookPath": "/webhook/hive-disk-alert",
+      "hitl": false,
+      "authHeader": "X-Hive-Secret",
+      "registerTo": "scorpion",
+      "inputSchema": {
+        "correlationId": "string (optional)",
+        "diskPct": "number (optional — VPS watchdog is the sensor)",
+        "host": "string (optional)"
+      },
+      "note": "Was planned/404. Report-only JSON at workflows/hive/disk-alert.json. No prune, no delete, no n8n_data wipe. Do not activate from this PR. Prefer scripts/hive/hive-watchdog.sh disk check."
     }
   ]
 }
