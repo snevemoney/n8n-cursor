@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-09-02
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: named pick · TRAIN · unused · Evens validates · halt
 send: removed
 clock: parked
 ---
@@ -14,23 +14,38 @@ clock: parked
 
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
+| **id** | `2J3uX8iRNng` |
 | **steal \| learn** | steal |
 | **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
-| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **Spoken machine** | `same-prompt-bench` |
+| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/full.txt` (6825 words, OBSERVED) |
+| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` at line 150 (OBSERVED) |
+| **Skip?** | no — not TRAIN-1, not TRAIN-2 PASS, not the TRIAGE decoy, not `/workspace` |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** Nate Herk same-prompt Opus-vs-Fable sit is the only remaining ACTION TRACE packet on this checkout that is not already PASS. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt bench: label the run, write the stop, referee the patch, blame stale files then tokens before swapping models. Not a weight train. Not a buyer surface. Not a Fable spend. Tape $ UNVERIFIED.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**Replaced on-disk pick:** `X80ljdCPM_U` is TRAIN-2 **PASS** (`desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md`). Do not re-grade it. Do not remint. Do not keep it as the living next row.
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+**Reaffirm:** unused 2026-09-01 Researcher pick of this same id. No Watchdog GRADE on `2J3uX8iRNng`. Do not start TRAIN unless Evens names this id.
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+**Retrieve:** theme `same-prompt-bench` → **NONE**. Default-off. No SIGNAL_INDEX dump. No 1803 walk.
 
-Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
+**Checkout holes (honest):** `COVERAGE_LEDGER.json` MISSING-ON-CHECKOUT — cannot invent the steal_gap-16 list. Only three LEARNED files have `## ACTION TRACE`; the other two are PASS (`kwSVtQ7dziU` · `X80ljdCPM_U`). AUDIT.json absent here; yellow `grokbot_orphans` = 8 named from doctrine, continue.
+
+**EVENS leftover:** run this pick on the Mac or merge this file to `main`. Do not invent `full.txt`. Do not invent a slug.
+
+**This stage (done):** one named row. Researcher does not start TRAIN.
+
+**Next stage (one sitting):** Evens validates · Watchdog hold-outs if Evens names this id · then stop.
+
+Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · `factory-os-train-plane` (invent, retired) · 1803 walk · `/workspace` · 4823 · buyer surface.
+
+```
+DONE-CHECK: this file written with id 2J3uX8iRNng + TRAIN
+CAP: 1 row · no /loop · no 1803 walk
+COST: this Cloud Agent run only
+STOP-KIND: metric + cap
+```
 
 Yellow `grokbot_orphans` = 8. Continue.
 
