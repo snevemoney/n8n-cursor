@@ -192,19 +192,20 @@ Walk in this order. Steal must cite D numbers. `ingest-is-steps`. Caption-only =
 - **product:** marketing sites (community, personal, dictation app, herb shop, keyboard).
 - **steps they showed:** D1–D10 (spoken). Visual UNKNOWN.
 - **tools on-tape vs ours:** Fable/Claude → Cursor. Scrollcraft/Skool → cinematic-recipe + seedance-site + this LEARNED. 21st.dev / godly / awards / Motion Sites → browser refs (no new vendor install). Higgsfield → already on Creative. Screenshot verify → click-live-site.
-- **factory emit:** a DESIGN block + seven-principle roast on the next site bite. Not a shipped one-shot.
+- **factory emit:** Vale :4840 + Keyline :4841 (`website-building/anti-slop-ffwtx/`). One-shot is a base; these are the two-distinct walk. Publish HITL.
 
 ## DESIGN
 
 ```
-REFS: Fora (layers) · 21st.dev (components) · Lemon/competitor feel · godly.design · awards-by-niche · Motion Sites · AIS
-N: he asked for two distinct (Ferna vs Lowkey) — that is the pick-one family
-PICK: not chosen this sitting (no implement)
-DOUBLE-DOWN: after pick, D7 verify on scroll + mobile
-CAPTION: spoken steps only
+REFS: Fora (layers) · AIS FAQ lock · 21st.dev scroll shape · Lowkey listen · Lowkey hard-cut fail
+N: two distinct originals — Vale Desk (layers) vs Keyline (object)
+PICK: Vale (layer scrub = house-winner family)
+DOUBLE-DOWN: Vale FAQ lock + mobile planes
+KEYLINE: kept as cousin at :4841
+CAPTION: spoken steps only · SAMPLE brands · not AIS/Lowkey clones
 ```
 
-Do not implement HTML this sitting.
+Implement 2026-09-02: `CONTENT/website-building/anti-slop-ffwtx/`. Publish HITL.
 
 **Refs on disk (goal-directed-watch):** `CAPTIONS.md` + `frames/`. AIS layers · Fora · 21st.dev copy-prompt · Lemon · godly.design · awards-by-niche · Motion Sites · Ferna · Lowkey hard cut · PERKFORM compare. Use those stills as living objects. Premium without a named ref is still a fail.
 
