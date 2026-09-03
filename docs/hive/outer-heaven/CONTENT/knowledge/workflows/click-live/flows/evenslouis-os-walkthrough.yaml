@@ -1,0 +1,31 @@
+# click-live-site — intended evenslouis.ca /  (local preview)
+# Observe only. No form. No deploy. Hard step stays Evens.
+id: evenslouis-os-walkthrough
+name: Local / is the hive OS walkthrough (desks + named routine)
+hard_step: publish
+host: cursor-ide-browser
+status: pass
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-os-walkthrough/RUN.md
+app:
+  url: http://127.0.0.1:4011/
+steps:
+  - id: launch-home
+    action: launchApp
+    url: http://127.0.0.1:4011/
+    expected: H1 exactly "Hive OS — walkthrough" · lead "record, not an offer"
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-os-walkthrough/cards/01-launch-home.md
+  - id: assert-desks
+    action: assertVisible
+    target: Command
+    expected: Command / Make / Research / Comms / memory / Money / life visible. No Hunt / scope.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-os-walkthrough/cards/02-assert-desks.md
+  - id: assert-routine
+    action: assertVisible
+    target: Publishing pipeline check
+    expected: Mondays 9:00 AM America/Toronto · packages · does not auto-publish
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-os-walkthrough/cards/03-assert-routine.md
+  - id: assert-no-hire
+    action: assertVisible
+    target: This page is a record, not an offer.
+    expected: No Available for new projects · no Ready to build · no Contact/mailto
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/evenslouis-os-walkthrough/cards/04-assert-no-hire.md

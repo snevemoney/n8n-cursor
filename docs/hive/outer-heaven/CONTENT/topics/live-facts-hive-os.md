@@ -26,7 +26,7 @@ Empty fields stay blank. Do not invent a KPI so a skill can fire.
 - Slack `#hive` = INDEX. Wake Big Boss with `bb:` / `Big Boss`.
 - Run log: `/home/box/.grokbot/outer-heaven/ACTION_LOG.jsonl`.
 - Skill SSOT: `scripts/hive/grok-skills/{slug}.md` (42 COURSE-SKILLs + `saylor-course-skill` + `saylor-mentor-pass`).
-- PUT-IN-SYSTEM this sitting: `business-lanes.json` (facts bind) · System five-line above · `saylor-master-project.md` (BUS402) · vault `os/reports/mentor.md`.
+- PUT-IN-SYSTEM this sitting: `apps/evenslouis-public/public/index.html` (this file is `/` — walkthrough, not hire). KPI and Last verified proof stay **BLANK** until critic PASS + HITL.
 
 ## Property: money (do not invent)
 - Personal vs business: Personal CFO vs Money Desk.
@@ -42,3 +42,4 @@ Empty fields stay blank. Do not invent a KPI so a skill can fire.
 ## Events
 - 2026-09-02 Split from live-facts-card. Agency facts live on `live-facts-agency.md`.
 - 2026-09-02 BUS101+BUS206+BUS402 sitting: lanes bound, five components named, master-surface treated as a project. Proof still BLANK.
+- 2026-09-03 Walkthrough drafted at `apps/evenslouis-public/public/index.html` (intended `/`). Live hire `/` still not in git. KPI + Last verified proof stay BLANK. No HITL.
