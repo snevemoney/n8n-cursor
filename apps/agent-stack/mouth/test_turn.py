@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import tempfile
 import unittest
@@ -151,6 +152,51 @@ class MouthTurnTest(unittest.TestCase):
                 self.assertNotIn("Queued", out["spoken"])
                 _no_desk_ask(out["spoken"])
                 self.assertFalse((hive / "bus" / "jobs.jsonl").is_file())
+
+    def test_send_an_agent_is_heal_not_refuse(self) -> None:
+        self.assertEqual(MOD.classify("send an agent to fix him")["verb"], "heal")
+        self.assertEqual(MOD.classify("look at the logs again and help Jarvis")["verb"], "heal")
+        self.assertEqual(MOD.classify("what should we do today")["verb"], "today")
+        self.assertEqual(MOD.classify("send this email")["verb"], "refuse")
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-heal-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            (hive / "bus" / "state.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "turns": [
+                            {
+                                "user": "What should we do today",
+                                "jarvis": "UNKNOWN. Cursor agent needs a one-time login. Run agent login in Terminal.",
+                            }
+                        ],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text(
+                "Four north stars start with maximum leverage, minimum noise.\n",
+                encoding="utf-8",
+            )
+            out = MOD.apply_turn("send an agent to fix him", hive=hive, retrieve_roots=[vault])
+            self.assertEqual(out["verb"], "heal")
+            self.assertFalse(out["ask"])
+            self.assertIn("scar", out["spoken"].lower())
+            self.assertNotIn("I will not do that", out["spoken"])
+            scars = (hive / "bus" / "scars.jsonl").read_text(encoding="utf-8")
+            self.assertIn("cursor-auth-dark", scars)
+            today = MOD.apply_turn("what should we do today", hive=hive, retrieve_roots=[vault])
+            self.assertEqual(today["verb"], "today")
+            self.assertIn("store", today["spoken"].lower())
+            self.assertNotIn("one-time login", today["spoken"])
+            again = MOD.apply_turn("try again what's going on", hive=hive, retrieve_roots=[vault])
+            self.assertNotIn("one-time login", again["spoken"])
+            self.assertIn("Scar", again["spoken"])
 
     def test_send_this_email_refuses(self) -> None:
         self.assertEqual(MOD.classify("send this email")["verb"], "refuse")
