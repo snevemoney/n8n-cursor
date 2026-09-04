@@ -18,7 +18,7 @@ Product browser: Safari via hands/see.py — Playwright never drives Evens's Mac
 | skills | `list skills`, `hive skills` | `skills` | mouth/turn.py skills_spoken | unit | pass | UNKNOWN |
 | life | `who am i`, `what do you know about me`, `remember me` | `life` | memory/retrieve.py life_card | unit | pass | UNKNOWN |
 | files | `search my computer for ledger`, `find the file invoice`, `look through my documents` | `files` | hands/files.py search_files | unit | pass | UNKNOWN |
-| safari | `go to YouTube`, `open YouTube`, `scroll`, `scroll down`, `screenshot` | `safari` | hands/see.py safari_act | unit / playwright | pass | quoted `Hi Jarvis open YouTube` → Sir. Safari, as requested. Safari: J.A.R.V.I.S.. http://127.0.0.1:4018/ |
+| safari | `go to YouTube`, `open YouTube`, `scroll`, `scroll down`, `screenshot` | `safari` | hands/see.py safari_act | unit / playwright | pass | leak was `Sir. Safari, as requested. Safari: J.A.R.V.I.S.. http://127.0.0.1:4018/` — mouth now: Sir + dry beat + YouTube is open (URL only on open) |
 | calendar | `what's on my calendar`, `meetings today`, `meetings tomorrow` | `calendar` | hands/inbox.py calendar_events | unit | pass | UNKNOWN |
 | mail | `any unread mail`, `unread emails`, `my inbox` | `mail` | hands/inbox.py mail_unread | unit | pass | UNKNOWN |
 | invoice | `what's the unpaid invoice`, `show invoices`, `create an invoice for Mike` | `invoice` | hands/inbox.py invoice_lookup | unit | pass | UNKNOWN |

@@ -421,7 +421,7 @@ def today_spoken(retrieve_roots: list[Path] | None, hive: Path | None = None) ->
     else:
         bits.append("North star is maximum leverage, minimum noise. Name one lane and we go.")
     if hive is not None and SCARS is not None and SCARS.blocks_cursor(_scars_live(hive)):
-        bits.append("Cursor login scar is saved. Run agent login in Terminal when you want the harness back.")
+        bits.append("Cursor login stays you in Terminal when you want the harness back.")
     return " ".join(bits)
 
 
@@ -444,7 +444,6 @@ def heal_spoken(hive: Path, retrieve_roots: list[Path] | None, cursor_fn, grok) 
                 cause="heal verb",
                 live=_scars_live(hive),
             )
-    names = ", ".join(str(r.get("id")) for r in found[:5]) or "none new"
     logged_in = bool(ONLINE is not None and hasattr(ONLINE, "cursor_logged_in") and ONLINE.cursor_logged_in())
     if logged_in and cursor_fn is None and grok is None and ONLINE is not None and SCARS is not None:
         packed = SCARS.heal_prompt(found)
@@ -459,9 +458,9 @@ def heal_spoken(hive: Path, retrieve_roots: list[Path] | None, cursor_fn, grok) 
         if reply and not got.get("unknown"):
             return reply, ["cursor"], found
     narration = (
-        f"I saved the scars ({names}). I will not repeat those errors. "
-        "Cursor login stays you in Terminal if that scar is dark. "
-        "The next converse uses the store until the harness is back."
+        "I logged what went wrong. I will not repeat those errors. "
+        "Cursor login stays you in Terminal. "
+        "The next talk uses what we already have until the harness is back."
     )
     return narration, ["heal"], found
 
@@ -1283,17 +1282,10 @@ def apply_turn_iter(
     )
     if skip_cursor:
         wires = ["store"]
-        dump = PERSONA is not None and PERSONA.is_dump(_vault_spoken or "")
         if CORRECT_RE.search(spoken):
             narration = "I missed that. Say the line again, one sentence."
-        elif _vault_spoken and not dump:
-            narration = _vault_spoken
         else:
-            scar = SCARS.lookup(last_jarvis) if SCARS is not None and last_jarvis else None
-            if scar is None and SCARS is not None:
-                scar = SCARS.lookup("agent login")
-            extra = SCARS.spoken_heal(scar) if scar and SCARS is not None else "I will not repeat that dark call."
-            narration = extra + " " + today_spoken(retrieve_roots, hive)
+            narration = "The harness is dark. Name the next job in one sentence."
         yield from emit(narration)
         return
     use_stream = (

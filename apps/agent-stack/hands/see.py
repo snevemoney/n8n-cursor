@@ -68,7 +68,7 @@ def safari_front() -> dict:
     try:
         proc = _run(["osascript", "-e", script])
     except (OSError, subprocess.TimeoutExpired) as exc:
-        return {"ok": False, "wire": "safari", "spoken": f"UNKNOWN. Safari AppleScript failed: {exc}."}
+        return {"ok": False, "wire": "safari", "spoken": f"UNKNOWN. Safari is dark. {exc}."}
     if proc.returncode != 0:
         err = (proc.stderr or proc.stdout or "Safari not allowed").strip()[:180]
         return {
@@ -82,7 +82,7 @@ def safari_front() -> dict:
     title, _, url = raw.partition("\n")
     title = title.strip()
     url = url.strip()
-    spoken = f"Safari: {title or 'untitled'}. {url}".strip()
+    spoken = f"The front tab is {title or 'untitled'}."
     return {"ok": True, "wire": "safari", "open": True, "title": title, "url": url, "spoken": spoken}
 
 
@@ -165,7 +165,7 @@ def safari_js(js: str) -> dict:
             "ok": False,
             "unknown": True,
             "wire": "safari",
-            "spoken": f"UNKNOWN. Safari JavaScript is dark. Enable Develop → Allow JavaScript from Apple Events. {err}",
+            "spoken": f"UNKNOWN. Safari could not run the page action. {err}",
         }
     raw = (proc.stdout or "").strip() or "OK"
     if raw == "NONE":
@@ -243,21 +243,36 @@ def ask_plain(utterance: str) -> str:
     return text or "do that"
 
 
+def wants_url(utterance: str) -> bool:
+    """Real URL only when he asked where, or to open a page."""
+    return bool(
+        re.search(
+            r"\b(where|url|open|go (?:on|to)|watch later|https?://)\b",
+            utterance or "",
+            re.I,
+        )
+    )
+
+
 def safari_line(utterance: str, did: str, *, title: str = "", url: str = "") -> str:
-    """What he asked + what Safari did. Real URL only. No router 'as requested'."""
+    """What he asked + the human result. Real URL only if he asked where / to open."""
     ask = ask_plain(utterance)
     action = (did or "").strip().rstrip(".")
+    action = re.sub(r"Safari scrolled \w+ with (?:page keys|JavaScript)", "I scrolled the tab", action, flags=re.I)
+    action = re.sub(r"Safari grabbed the front tab(?: at \S+)?", "I grabbed the front tab", action, flags=re.I)
+    action = re.sub(r"\b(?:cgevent|osascript|apple events?|page keys)\b", "", action, flags=re.I)
+    action = re.sub(r"\s+", " ", action).strip(" .")
     parts = [f"You asked to {ask}."]
     if action:
         parts.append(action + ".")
     clean_url = (url or "").strip()
     clean_title = (title or "").strip()
-    if FACE_URL_RE.search(clean_url):
+    if FACE_URL_RE.search(clean_url) or (clean_title and clean_title.lower() in {"j.a.r.v.i.s."}):
         clean_url = ""
         clean_title = ""
-    if clean_url and clean_url not in action:
+    if wants_url(utterance) and clean_url and clean_url not in action:
         if clean_title and clean_title.lower() not in {"untitled", "sans titre", "j.a.r.v.i.s."}:
-            parts.append(f"Front tab: {clean_title}. {clean_url}")
+            parts.append(f"{clean_title}. {clean_url}")
         else:
             parts.append(clean_url)
     return " ".join(parts)
@@ -299,7 +314,7 @@ def _cgevent_page(direction: str = "down") -> dict:
             "unknown": True,
             "wire": "safari",
             "path": "cgevent",
-            "spoken": "UNKNOWN. CGEvent could not build a page key.",
+            "spoken": "UNKNOWN. Safari could not scroll.",
         }
     lib.CGEventPost(0, down)
     lib.CGEventPost(0, up)
@@ -313,7 +328,7 @@ def _cgevent_page(direction: str = "down") -> dict:
         "wire": "safari",
         "path": "cgevent",
         "direction": way,
-        "spoken": f"Safari scrolled {way} with page keys",
+        "spoken": f"I scrolled the tab {way}",
     }
 
 
@@ -326,7 +341,7 @@ def safari_scroll_cgevent(direction: str = "down") -> dict:
             "unknown": True,
             "wire": "safari",
             "path": "cgevent",
-            "spoken": f"UNKNOWN. CGEvent page keys failed: {exc}.",
+            "spoken": f"UNKNOWN. Safari could not scroll. {exc}.",
         }
 
 
@@ -354,7 +369,7 @@ def safari_scroll_keys(direction: str = "down") -> dict:
             "unknown": True,
             "wire": "safari",
             "path": "keys",
-            "spoken": f"UNKNOWN. Safari page keys failed: {exc}.",
+            "spoken": f"UNKNOWN. Safari could not scroll. {exc}.",
         }
     if proc.returncode != 0:
         err = (proc.stderr or proc.stdout or "System Events not allowed").strip()[:180]
@@ -364,8 +379,8 @@ def safari_scroll_keys(direction: str = "down") -> dict:
             "wire": "safari",
             "path": "keys",
             "spoken": (
-                "UNKNOWN. Safari page keys are dark. Allow Accessibility for "
-                f"Terminal or the Python running 4018. {err}"
+                "UNKNOWN. Safari could not scroll. Allow Accessibility for "
+                f"Terminal. {err}"
             ),
         }
     raw = (proc.stdout or "").strip()
@@ -383,7 +398,7 @@ def safari_scroll_keys(direction: str = "down") -> dict:
         "wire": "safari",
         "path": "keys",
         "direction": way,
-        "spoken": f"Safari scrolled {way} with page keys",
+        "spoken": f"I scrolled the tab {way}",
     }
 
 
@@ -401,7 +416,7 @@ def safari_scroll(direction: str = "down") -> dict:
     if got.get("ok"):
         got["path"] = "js"
         got["direction"] = way
-        got["spoken"] = f"Safari scrolled {way} with JavaScript"
+        got["spoken"] = f"I scrolled the tab {way}"
         return got
     return {
         "ok": False,
@@ -411,10 +426,7 @@ def safari_scroll(direction: str = "down") -> dict:
         "cgevent": hid,
         "keys": keys,
         "js": got,
-        "spoken": (
-            "UNKNOWN. Safari scroll is dark. CGEvent page keys, System Events keystrokes, "
-            "and JavaScript from Apple Events all failed."
-        ),
+        "spoken": "UNKNOWN. Safari could not scroll.",
     }
 
 
@@ -494,26 +506,28 @@ def safari_act(utterance: str, hive: Path | None = None) -> dict:
     dest = hive if hive is not None else HIVE
     if WATCH_LATER_ACT_RE.search(text):
         got = safari_open(WATCH_LATER_URL)
-        got["spoken"] = safari_line(text, f"Safari opened {WATCH_LATER_URL}", url=got.get("url") or WATCH_LATER_URL)
+        got["spoken"] = safari_line(text, "Watch Later is open", url=got.get("url") or WATCH_LATER_URL)
         return got
     if YOUTUBE_OPEN_RE.search(text):
         got = safari_open(YOUTUBE_HOME)
-        got["spoken"] = safari_line(text, f"Safari opened {YOUTUBE_HOME}", url=got.get("url") or YOUTUBE_HOME)
+        got["spoken"] = safari_line(text, "YouTube is open", url=got.get("url") or YOUTUBE_HOME)
         return got
     open_hit = OPEN_RE.search(text)
     if open_hit:
         target = open_hit.group(1).rstrip(".,)")
         got = safari_open(target)
-        got["spoken"] = safari_line(text, f"Safari opened {target}", url=got.get("url") or target)
+        got["spoken"] = safari_line(text, "That page is open", url=got.get("url") or target)
         return got
     if SCREEN_GRAB_RE.search(text):
         got = snapshot(hive=dest, grab=True)
         safari = got.get("safari") if isinstance(got.get("safari"), dict) else {}
         screen = got.get("screen") if isinstance(got.get("screen"), dict) else {}
-        did = "Safari grabbed the front tab"
-        if screen.get("path"):
-            did += f" at {screen['path']}"
-        got["spoken"] = safari_line(text, did, title=str(safari.get("title") or ""), url=str(safari.get("url") or ""))
+        got["spoken"] = safari_line(
+            text,
+            "I grabbed the front tab",
+            title=str(safari.get("title") or ""),
+            url=str(safari.get("url") or ""),
+        )
         return got
     if TABS_RE.search(text) and not CLICK_RE.search(text):
         got = safari_tabs()
@@ -560,7 +574,7 @@ def grab_screen(hive: Path) -> dict:
             "wire": "see",
             "spoken": (
                 "UNKNOWN. Screen grab is dark. Allow Screen Recording for "
-                f"Terminal or the Python running 4018. {err}"
+                f"Terminal. {err}"
             ),
         }
     return {
@@ -568,7 +582,7 @@ def grab_screen(hive: Path) -> dict:
         "wire": "see",
         "path": str(dest),
         "bytes": dest.stat().st_size,
-        "spoken": f"Screen saved at {dest}.",
+        "spoken": "I grabbed the screen.",
     }
 
 

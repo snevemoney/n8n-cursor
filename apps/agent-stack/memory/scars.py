@@ -98,11 +98,8 @@ def blocks_cursor(live: Path | None = None) -> bool:
 
 
 def spoken_heal(scar: dict) -> str:
-    never = str(scar.get("never_again") or "").strip()
-    ident = str(scar.get("id") or "scar")
-    if never:
-        return f"Scar {ident} already saved. {never}"
-    return f"Scar {ident} already saved. I will not repeat that error."
+    _ = scar
+    return "I already logged that error. I will not repeat it."
 
 
 def record_from_spoken(spoken: str, *, live: Path | None = None) -> dict | None:

@@ -172,8 +172,11 @@ class SeeTest(unittest.TestCase):
         js.assert_not_called()
         self.assertEqual(out.get("path"), "cgevent")
         self.assertIn("You asked to scroll", out["spoken"])
-        self.assertIn("page keys", out["spoken"])
-        self.assertIn("https://www.youtube.com/", out["spoken"])
+        self.assertIn("scrolled the tab", out["spoken"])
+        self.assertNotIn("page keys", out["spoken"])
+        self.assertNotIn("cgevent", out["spoken"].lower())
+        self.assertNotIn("as requested", out["spoken"].lower())
+        self.assertNotIn("https://www.youtube.com/", out["spoken"])
 
     def test_safari_scroll_js_fallback_when_keys_dark(self) -> None:
         with mock.patch.object(
@@ -195,7 +198,9 @@ class SeeTest(unittest.TestCase):
         js.assert_called_once()
         self.assertIn("scrollBy", js.call_args[0][0])
         self.assertEqual(out.get("path"), "js")
-        self.assertIn("JavaScript", out["spoken"])
+        self.assertIn("scrolled the tab", out["spoken"])
+        self.assertNotIn("JavaScript", out["spoken"])
+        self.assertNotIn("Apple Events", out["spoken"])
 
     def test_safari_act_screenshot_and_share_grab_front(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-see-grab-") as tmp:
@@ -221,6 +226,9 @@ class SeeTest(unittest.TestCase):
             self.assertIn("osascript", bins)
             self.assertIn("screencapture", bins)
             self.assertNotIn("127.0.0.1:4018", shot["spoken"])
+            self.assertNotIn(str(dest), shot["spoken"])
+            self.assertNotIn("as requested", shot["spoken"].lower())
+            self.assertIn("grabbed the front tab", shot["spoken"])
 
     def test_see_block_names_image(self) -> None:
         block = MOD.see_block(

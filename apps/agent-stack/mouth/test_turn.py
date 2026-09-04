@@ -186,7 +186,9 @@ class MouthTurnTest(unittest.TestCase):
             out = MOD.apply_turn("send an agent to fix him", hive=hive, retrieve_roots=[vault])
             self.assertEqual(out["verb"], "heal")
             self.assertFalse(out["ask"])
-            self.assertIn("scar", out["spoken"].lower())
+            self.assertIn("will not repeat", out["spoken"].lower())
+            self.assertNotIn("cursor-auth-dark", out["spoken"])
+            self.assertNotIn("scars.jsonl", out["spoken"])
             self.assertNotIn("I will not do that", out["spoken"])
             scars = (hive / "bus" / "scars.jsonl").read_text(encoding="utf-8")
             self.assertIn("cursor-auth-dark", scars)
@@ -194,9 +196,13 @@ class MouthTurnTest(unittest.TestCase):
             self.assertEqual(today["verb"], "today")
             self.assertIn("store", today["spoken"].lower())
             self.assertNotIn("one-time login", today["spoken"])
+            self.assertNotIn("cursor-auth-dark", today["spoken"])
             again = MOD.apply_turn("try again what's going on", hive=hive, retrieve_roots=[vault])
             self.assertNotIn("one-time login", again["spoken"])
-            self.assertIn("Scar", again["spoken"])
+            self.assertNotIn("Scar", again["spoken"])
+            self.assertNotIn("cursor-auth-dark", again["spoken"])
+            self.assertNotIn("ASKS.md", again["spoken"])
+            self.assertIn("harness is dark", again["spoken"].lower())
 
     def test_send_this_email_refuses(self) -> None:
         self.assertEqual(MOD.classify("send this email")["verb"], "refuse")
@@ -835,7 +841,43 @@ class MouthTurnTest(unittest.TestCase):
         self.assertNotIn("ask-log.py", out["spoken"])
         self.assertNotIn("709 asks", out["spoken"])
         self.assertNotIn("do not hand-edit", out["spoken"].lower())
-        self.assertIn("Say the line again", out["spoken"])
+            self.assertIn("Say the line again", out["spoken"])
+
+    def test_spoken_line_is_butler_not_debugger(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-butler-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
+            with mock.patch.object(
+                MOD.SEE,
+                "safari_act",
+                return_value={
+                    "ok": True,
+                    "wire": "safari",
+                    "path": "cgevent",
+                    "spoken": "You asked to scroll. I scrolled the tab.",
+                },
+            ):
+                scroll = MOD.apply_turn("scroll", hive=hive)
+            self.assertEqual(scroll["verb"], "safari")
+            low = scroll["spoken"].lower()
+            self.assertTrue(scroll["spoken"].startswith("Sir."))
+            self.assertIn("scrolled the tab", low)
+            self.assertNotIn("cgevent", low)
+            self.assertNotIn("as requested", low)
+            self.assertNotIn("safari_act", low)
+            self.assertNotIn("ask-log", low)
+            self.assertNotIn("page keys", low)
+            mktg = MOD.apply_turn("what is marketing", hive=hive)
+            self.assertEqual(mktg["verb"], "pro")
+            self.assertTrue(mktg["spoken"].startswith("Sir."))
+            self.assertIn("mktg", mktg["spoken"])
+            self.assertNotIn("SKILL.md", mktg["spoken"])
+            self.assertNotIn("## When", mktg["spoken"])
+            self.assertNotIn("as requested", mktg["spoken"].lower())
+            self.assertLessEqual(len(mktg.get("cites") or []), 3)
 
 
 if __name__ == "__main__":
