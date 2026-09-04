@@ -167,7 +167,11 @@ SAFARI_ACT_RE = re.compile(
     r"(?:go (?:on|to)|open)\s+youtube|"
     r"(?:click|tap|press) (?:the )?.+|"
     r"(?:type|enter|fill) .+|"
-    r"scroll (?:up|down|a bit)?|"
+    r"scroll(?:\s+(?:up|down|a bit))?|"
+    r"screenshot|screen\s*shot|screen\s*grab|"
+    r"take a (?:screen\s*)?shot|"
+    r"grab (?:the |my )?(?:screen|safari)|"
+    r"share (?:me )?(?:my )?screen|"
     r"(?:what )?(?:safari )?tabs?|"
     r"what(?:'s|s| is) open in safari"
     r")\b",
@@ -669,7 +673,7 @@ def classify(utterance: str) -> dict:
             "args": {"kind": (make_hit.group(1) or "").lower(), "text": text},
             "host": "local",
         }
-    if SAFARI_ACT_RE.search(text) and not SEE_RE.search(text):
+    if SAFARI_ACT_RE.search(text):
         return {"verb": "safari", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if STATUS_RE.search(text):
         return {"verb": "status", "needs_ask": False, "args": {"text": text}, "host": "online"}

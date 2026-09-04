@@ -25,7 +25,20 @@ HARD_CLICK = re.compile(
     r")\b",
     re.I,
 )
+YOUTUBE_HOME = "https://www.youtube.com"
+WATCH_LATER_URL = "https://www.youtube.com/playlist?list=WL"
 OPEN_RE = re.compile(r"\bopen\s+(https?://\S+)", re.I)
+YOUTUBE_OPEN_RE = re.compile(r"\b(?:go\s+(?:on|to)|open)\s+(?:the\s+)?youtube\b", re.I)
+WATCH_LATER_ACT_RE = re.compile(r"\bwatch later\b", re.I)
+SCREEN_GRAB_RE = re.compile(
+    r"\b("
+    r"screenshot|screen\s*shot|screen\s*grab|"
+    r"take a (?:screen\s*)?shot|"
+    r"grab (?:the |my )?(?:screen|safari|front tab)|"
+    r"share (?:me )?(?:my )?screen"
+    r")\b",
+    re.I,
+)
 CLICK_RE = re.compile(r"\b(?:click|tap|press)\s+(?:the\s+)?(.+?)(?:\s+button|\s+link)?\s*$", re.I)
 TYPE_RE = re.compile(r"\b(?:type|enter|fill)\s+(.+)$", re.I)
 SCROLL_RE = re.compile(r"\bscroll\b", re.I)
@@ -295,12 +308,19 @@ def safari_visible_titles() -> dict:
     }
 
 
-def safari_act(utterance: str) -> dict:
+def safari_act(utterance: str, hive: Path | None = None) -> dict:
     """Route a spoken Safari action onto the logged-in Safari. Not Chrome. Not Grok Bot."""
     text = (utterance or "").strip()
+    dest = hive if hive is not None else HIVE
+    if WATCH_LATER_ACT_RE.search(text):
+        return safari_open(WATCH_LATER_URL)
+    if YOUTUBE_OPEN_RE.search(text):
+        return safari_open(YOUTUBE_HOME)
     open_hit = OPEN_RE.search(text)
     if open_hit:
         return safari_open(open_hit.group(1).rstrip(".,)"))
+    if SCREEN_GRAB_RE.search(text):
+        return snapshot(hive=dest, grab=True)
     if TABS_RE.search(text) and not CLICK_RE.search(text):
         return safari_tabs()
     click_hit = CLICK_RE.search(text)

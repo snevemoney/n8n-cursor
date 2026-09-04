@@ -590,6 +590,18 @@ class MouthTurnTest(unittest.TestCase):
                 safari = MOD.apply_turn("click Login", hive=hive)
             self.assertEqual(safari["verb"], "safari")
             self.assertIn("Safari", safari["spoken"])
+            opened: list[str] = []
+
+            def fake_youtube(text: str, hive=None) -> dict:
+                opened.append(text)
+                return {"ok": True, "wire": "safari", "spoken": "Opened in Safari. https://www.youtube.com", "url": "https://www.youtube.com"}
+
+            with mock.patch.object(MOD.SEE, "safari_act", side_effect=fake_youtube):
+                yt = MOD.apply_turn("Hi Jarvis open YouTube", hive=hive)
+            self.assertEqual(yt["verb"], "safari")
+            self.assertEqual(opened, ["Hi Jarvis open YouTube"])
+            self.assertIn("https://www.youtube.com", yt["spoken"])
+            self.assertNotIn("127.0.0.1:4018", yt["spoken"])
             seen: list[str] = []
 
             def harness(prompt: str, mode: str = "ask", resume: str | None = None) -> dict:
@@ -673,6 +685,13 @@ class MouthTurnTest(unittest.TestCase):
         self.assertEqual(MOD.classify("BUS 204")["verb"], "pro")
         self.assertEqual(MOD.classify("what's going on")["verb"], "converse")
         self.assertEqual(MOD.classify("Go on YouTube")["verb"], "safari")
+        self.assertEqual(MOD.classify("Hi Jarvis open YouTube")["verb"], "safari")
+        self.assertEqual(MOD.classify("open YouTube")["verb"], "safari")
+        self.assertEqual(MOD.classify("go to YouTube")["verb"], "safari")
+        self.assertEqual(MOD.classify("scroll")["verb"], "safari")
+        self.assertEqual(MOD.classify("screenshot")["verb"], "safari")
+        self.assertEqual(MOD.classify("share my screen")["verb"], "safari")
+        self.assertEqual(MOD.classify("watch later")["verb"], "watch_later")
         spoken = MOD.capabilities_spoken()
         self.assertIn("Sir", spoken)
         self.assertIn("wit", spoken.lower())

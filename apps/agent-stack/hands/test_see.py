@@ -103,6 +103,80 @@ class SeeTest(unittest.TestCase):
             listed = MOD.safari_visible_titles()
         self.assertEqual(listed["titles"], ["Row from JS", "Second row"])
 
+    def _osascript_script(self, run_mock) -> str:
+        argv = run_mock.call_args[0][0]
+        self.assertEqual(argv[0], "osascript")
+        return argv[2]
+
+    def test_safari_act_open_youtube_hits_youtube_not_face(self) -> None:
+        proc = mock.Mock(returncode=0, stdout="", stderr="")
+        phrases = (
+            "Hi Jarvis open YouTube",
+            "open YouTube",
+            "go to YouTube",
+            "go on YouTube",
+        )
+        with mock.patch.object(MOD, "_run", return_value=proc) as run:
+            for phrase in phrases:
+                out = MOD.safari_act(phrase)
+                self.assertTrue(out["ok"], phrase)
+                self.assertEqual(out.get("url"), MOD.YOUTUBE_HOME, phrase)
+                self.assertIn(MOD.YOUTUBE_HOME, out["spoken"], phrase)
+                script = self._osascript_script(run)
+                self.assertIn(MOD.YOUTUBE_HOME, script, phrase)
+                self.assertNotIn("127.0.0.1:4018", script, phrase)
+                self.assertNotIn("playlist?list=WL", script, phrase)
+
+    def test_safari_act_watch_later_hits_wl_playlist(self) -> None:
+        proc = mock.Mock(returncode=0, stdout="", stderr="")
+        with mock.patch.object(MOD, "_run", return_value=proc) as run:
+            out = MOD.safari_act("what's on my watch later")
+        self.assertTrue(out["ok"])
+        self.assertEqual(out.get("url"), MOD.WATCH_LATER_URL)
+        self.assertIn(MOD.WATCH_LATER_URL, out["spoken"])
+        script = self._osascript_script(run)
+        self.assertIn("playlist?list=WL", script)
+        self.assertNotIn("127.0.0.1:4018", script)
+        self.assertNotIn("MrBeast", out["spoken"])
+        self.assertNotIn("invent", out["spoken"].lower())
+
+    def test_safari_act_bare_scroll_calls_scrollby(self) -> None:
+        with mock.patch.object(
+            MOD,
+            "safari_js",
+            return_value={"ok": True, "wire": "safari", "result": "OK", "spoken": "ok"},
+        ) as js:
+            out = MOD.safari_act("scroll")
+        self.assertTrue(out["ok"])
+        js.assert_called_once()
+        self.assertIn("scrollBy", js.call_args[0][0])
+        self.assertIn("Scrolled down", out["spoken"])
+
+    def test_safari_act_screenshot_and_share_grab_front(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-see-grab-") as tmp:
+            hive = Path(tmp)
+            dest = hive / "bus" / "see.jpg"
+            dest.parent.mkdir()
+
+            def fake_run(argv, timeout=12.0):
+                if argv and argv[0] == "screencapture":
+                    Path(argv[-1]).write_bytes(b"jpg")
+                    return subprocess.CompletedProcess(argv, 0, "", "")
+                return subprocess.CompletedProcess(argv, 0, "Front tab\nhttps://example.com\n", "")
+
+            with mock.patch.object(MOD, "_run", side_effect=fake_run) as run:
+                shot = MOD.safari_act("screenshot", hive=hive)
+                share = MOD.safari_act("share my screen", hive=hive)
+            self.assertTrue(shot["ok"])
+            self.assertTrue(share["ok"])
+            self.assertEqual(shot["safari"]["url"], "https://example.com")
+            self.assertTrue(Path(shot["screen"]["path"]).is_file())
+            self.assertTrue(Path(share["screen"]["path"]).is_file())
+            bins = [c.args[0][0] for c in run.call_args_list]
+            self.assertIn("osascript", bins)
+            self.assertIn("screencapture", bins)
+            self.assertNotIn("127.0.0.1:4018", shot["spoken"])
+
     def test_see_block_names_image(self) -> None:
         block = MOD.see_block(
             {

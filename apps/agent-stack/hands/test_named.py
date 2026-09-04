@@ -82,6 +82,29 @@ class NamedHandsTest(unittest.TestCase):
         self.assertIn("UNKNOWN", out["spoken"])
         self.assertIn("I will not invent URLs", out["spoken"])
 
+    def test_watch_later_opens_wl_playlist_url(self) -> None:
+        seen: list[str] = []
+
+        def open_fn(url: str) -> dict:
+            seen.append(url)
+            return {"ok": True, "url": url}
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-wl-url-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            out = MOD.watch_later(
+                hive=hive,
+                open_fn=open_fn,
+                titles_fn=lambda: {"ok": False, "unknown": True, "titles": []},
+                front_fn=lambda: {"ok": True, "title": "Watch later", "url": MOD.WATCH_LATER_URL},
+                grab_fn=lambda _h: {"ok": False, "spoken": "UNKNOWN. Screen grab is dark."},
+                sleep_fn=lambda _s: None,
+            )
+        self.assertEqual(seen, [MOD.WATCH_LATER_URL])
+        self.assertEqual(out["titles"], [])
+        self.assertIn("UNKNOWN", out["spoken"])
+        self.assertNotIn("MrBeast", out["spoken"])
+
     def test_watch_later_lists_only_returned_titles(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-wl-") as tmp:
             hive = Path(tmp)
