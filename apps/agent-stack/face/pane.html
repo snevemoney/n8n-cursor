@@ -317,6 +317,7 @@
           const dec = new TextDecoder();
           let buf = "";
           let last = null;
+          let heardDelta = false;
           while (true) {
             const { value, done } = await reader.read();
             if (done) break;
@@ -327,11 +328,17 @@
               const line = part.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim()).join("");
               if (!line) continue;
               try { last = JSON.parse(line); } catch (err) { continue; }
-              if (last.spoken) $("spoken").textContent = last.spoken;
-              $("spoken").className = "line" + (last.ask ? " ask" : "");
               if (last.ask) state.pending = utterance;
               else state.pending = null;
-              if (last.spoken_delta) enqueueSpeak(last.spoken_delta);
+              $("spoken").className = "line" + (last.ask ? " ask" : "");
+              if (last.spoken_delta) {
+                heardDelta = true;
+                enqueueSpeak(last.spoken_delta);
+                $("spoken").textContent = last.spoken || last.spoken_delta;
+              } else if (last.spoken) {
+                $("spoken").textContent = last.spoken;
+              }
+              if (last.done && !heardDelta && last.spoken) enqueueSpeak(last.spoken);
             }
           }
         } else {

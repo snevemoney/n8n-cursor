@@ -19,8 +19,21 @@ BLAME_RE = re.compile(
     re.I,
 )
 ALREADY_WRAPPED_RE = re.compile(r"^\s*sir[.,]", re.I)
+LEAD_SIR_RE = re.compile(r"^\s*sir[.,]\s*", re.I)
 PUNCT_RE = re.compile(r"[^a-z0-9\s]+", re.I)
 SPACE_RE = re.compile(r"\s+")
+DUMP_RE = re.compile(
+    r"("
+    r"%%generated|"
+    r"ask-log\.py|"
+    r"do not hand-edit|"
+    r"\[!abstract\]|"
+    r">\s*\[!|"
+    r"\*\*\d{2,}\s+asks\*\*"
+    r")",
+    re.I,
+)
+DUMP_SPOKEN = "I will not read a file dump aloud."
 
 FAILURE_TEMPLATE = (
     "Ah, it seems something went wrong. Naturally, it isn't my fault, sir, "
@@ -105,6 +118,34 @@ def strip_blame(text: str) -> str:
     return BLAME_RE.sub("that failed", body)
 
 
+def is_dump(text: str) -> bool:
+    """True when retrieve handed us a generated log, not a spoken answer."""
+    body = (text or "").strip()
+    if not body:
+        return False
+    if DUMP_RE.search(body):
+        return True
+    if body.startswith("%%") or body.startswith("> [!"):
+        return True
+    return False
+
+
+def sanitize_payload(text: str) -> str:
+    """Drop dump headers. Keep a real sentence if one survives."""
+    body = (text or "").strip()
+    if not body:
+        return ""
+    if is_dump(body):
+        return ""
+    body = re.sub(r"%%[^%]+%%", " ", body)
+    body = re.sub(r">\s*\[![^\]]+\][^\n]*", " ", body)
+    return SPACE_RE.sub(" ", body).strip()
+
+
+def strip_lead_sir(text: str) -> str:
+    return LEAD_SIR_RE.sub("", (text or "").strip()).strip()
+
+
 def proven_repeat(
     utterance: str,
     turns: list[dict] | None = None,
@@ -159,7 +200,10 @@ def wrap(
     scars: list[dict] | None = None,
 ) -> str:
     """Sir. One witty beat. Then the real payload. Hand already ran."""
-    payload = strip_blame(strip_waiting(spoken or ""))
+    raw = spoken or ""
+    if is_dump(raw):
+        return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
+    payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
     if not payload:
         return payload
     if ALREADY_WRAPPED_RE.match(payload) or FAILURE_TEMPLATE in payload:
@@ -171,3 +215,25 @@ def wrap(
     if payload.lower().startswith(beat.lower()):
         return f"Sir. {payload}"
     return f"Sir. {beat} {payload}"
+
+
+def stream_delta(
+    chunk: str,
+    *,
+    first: bool,
+    verb: str = "converse",
+    utterance: str = "",
+    turns: list[dict] | None = None,
+    store_lines: list[str] | None = None,
+    scars: list[dict] | None = None,
+) -> str:
+    """Wrap once on the first speakable sentence. Later chunks are payload only."""
+    raw = chunk or ""
+    if is_dump(raw):
+        return wrap(raw, verb=verb, utterance=utterance, turns=turns, store_lines=store_lines, scars=scars) if first else ""
+    payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
+    if not payload:
+        return ""
+    if first:
+        return wrap(payload, verb=verb, utterance=utterance, turns=turns, store_lines=store_lines, scars=scars)
+    return strip_lead_sir(payload)

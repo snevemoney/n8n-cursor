@@ -149,6 +149,16 @@ class ProRetrieveTest(unittest.TestCase):
         self.assertNotIn("ghost-course-not-real", got["slugs"])
         self.assertNotIn("BUS777", got["spoken"])
 
+    def test_marketing_alone_pulls_mktg_skill(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-pro-mktg-") as tmp:
+            grok, cursor = _disk(Path(tmp))
+            got = MOD.brief("what is marketing", grok_dir=grok, cursor_dir=cursor)
+        self.assertIn("mktg-value-stp-mix-plan-checklists", got["slugs"])
+        self.assertLessEqual(len(got["slugs"]), 3)
+        self.assertIn("segment", got["spoken"].lower())
+        self.assertNotIn("hive-funnels", got["slugs"])
+        self.assertFalse(got["unknown"])
+
     def test_no_match_does_not_dump_catalog(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-pro-empty-") as tmp:
             grok, cursor = _disk(Path(tmp))

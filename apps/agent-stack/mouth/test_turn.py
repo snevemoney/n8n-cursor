@@ -536,10 +536,14 @@ class MouthTurnTest(unittest.TestCase):
             hive = Path(tmp)
             (hive / "bus").mkdir()
             evs = list(MOD.apply_turn_iter("hey", hive=hive))
-        self.assertEqual(len(evs), 1)
-        self.assertTrue(evs[0]["done"])
-        self.assertIn("Hey Evens", evs[0]["spoken"])
-        self.assertIn("Hey Evens", evs[0]["spoken_delta"])
+        self.assertGreaterEqual(len(evs), 2)
+        self.assertFalse(evs[0]["done"])
+        self.assertTrue(evs[0]["partial"])
+        self.assertTrue(evs[0]["spoken_delta"])
+        self.assertIn("Hey Evens", evs[0]["spoken_delta"] + evs[0]["spoken"])
+        self.assertTrue(evs[-1]["done"])
+        self.assertIn("Hey Evens", evs[-1]["spoken"])
+        self.assertEqual(evs[-1]["spoken_delta"], "")
 
     def test_catalog_life_files_safari_are_local(self) -> None:
         self.assertEqual(MOD.classify("what can you do")["verb"], "can")
@@ -662,8 +666,13 @@ class MouthTurnTest(unittest.TestCase):
         self.assertEqual(MOD.classify("look at the code for marketing")["verb"], "cursor")
         self.assertEqual(MOD.classify("checking your professional skills")["verb"], "pro")
         self.assertEqual(MOD.classify("brief me on marketing")["verb"], "pro")
+        self.assertEqual(MOD.classify("what is marketing")["verb"], "pro")
+        self.assertEqual(MOD.classify("tell me about marketing")["verb"], "pro")
+        self.assertEqual(MOD.classify("hr staffing")["verb"], "pro")
+        self.assertEqual(MOD.classify("ops and strategy")["verb"], "pro")
         self.assertEqual(MOD.classify("BUS 204")["verb"], "pro")
         self.assertEqual(MOD.classify("what's going on")["verb"], "converse")
+        self.assertEqual(MOD.classify("Go on YouTube")["verb"], "safari")
         spoken = MOD.capabilities_spoken()
         self.assertIn("Sir", spoken)
         self.assertIn("wit", spoken.lower())
@@ -714,6 +723,85 @@ class MouthTurnTest(unittest.TestCase):
             self.assertTrue(can["spoken"].startswith("Sir."))
             self.assertIn("on-disk intelligence", can["spoken"])
             self.assertIn("Wit never blocks hands", can["spoken"])
+            mktg = MOD.apply_turn("what is marketing", hive=hive)
+            self.assertEqual(mktg["verb"], "pro")
+            self.assertTrue(mktg["spoken"].startswith("Sir."))
+            self.assertIn("mktg", mktg["spoken"])
+            self.assertLessEqual(len(mktg.get("cites") or []), 3)
+
+    def test_stream_persona_once_and_tts_on_first_delta(self) -> None:
+        chunks = [
+            {"delta": "The mix is segment, then price. "},
+            {"delta": "Sir. Do not invent a KPI."},
+            {"done": True, "wire": "cursor", "spoken": "The mix is segment, then price. Sir. Do not invent a KPI."},
+        ]
+
+        def fake_iter(packed, mode="ask", resume=None):
+            for ev in chunks:
+                yield ev
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-stream-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            (hive / "bus" / "state.json").write_text(
+                '{"schema_version":1,"turns":[],"jarvis_chat_id":"talk-1"}\n',
+                encoding="utf-8",
+            )
+            with mock.patch.object(MOD.ONLINE, "call_cursor_turn_iter", side_effect=fake_iter):
+                evs = list(MOD.apply_turn_iter("what's going on", hive=hive, retrieve_roots=[hive]))
+        partials = [e for e in evs if e.get("partial") and e.get("spoken_delta")]
+        self.assertTrue(partials)
+        self.assertFalse(partials[0]["done"])
+        self.assertTrue(partials[0]["spoken_delta"].startswith("Sir."))
+        self.assertEqual(partials[0]["spoken_delta"].count("Sir."), 1)
+        later = " ".join(e["spoken_delta"] for e in partials[1:])
+        self.assertNotIn("Sir.", later)
+        self.assertTrue(evs[-1]["done"])
+        self.assertEqual(evs[-1]["spoken_delta"], "")
+        self.assertEqual(evs[-1]["spoken"].count("Sir."), 1)
+        self.assertNotIn("Sir. Sir.", evs[-1]["spoken"])
+
+    def test_correction_does_not_speak_ask_log(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-corr-dump-") as tmp:
+            hive = Path(tmp)
+            bus = hive / "bus"
+            bus.mkdir()
+            (bus / "scars.jsonl").write_text(
+                json.dumps({"id": "cursor-auth-dark", "symptom": "agent login"}) + "\n",
+                encoding="utf-8",
+            )
+            (bus / "state.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "turns": [
+                            {
+                                "user": "Go on YouTube",
+                                "jarvis": "UNKNOWN. Cursor harness returned no reply.",
+                            }
+                        ],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "ASKS.md").write_text(
+                "%%generated by scripts/hive/os/ask-log.py — do not hand-edit%% "
+                "> [!abstract] Ask log > **709 asks** · 14 sessions that I said\n",
+                encoding="utf-8",
+            )
+            (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
+            out = MOD.apply_turn(
+                "That's not what I said",
+                hive=hive,
+                retrieve_roots=[vault],
+            )
+        self.assertNotIn("ask-log.py", out["spoken"])
+        self.assertNotIn("709 asks", out["spoken"])
+        self.assertNotIn("do not hand-edit", out["spoken"].lower())
+        self.assertIn("Say the line again", out["spoken"])
 
 
 if __name__ == "__main__":
