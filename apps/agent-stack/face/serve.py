@@ -197,7 +197,9 @@ class Handler(BaseHTTPRequestHandler):
         )
         spoken = str(out.get("spoken") or "")
         if out.get("ask") or (hasattr(live_mouth, "is_ask_leak") and live_mouth.is_ask_leak(spoken)):
-            dark = getattr(live_mouth, "DARK_BRAIN", None) or getattr(live_mouth, "DARK_GROK", "UNKNOWN. Cursor did not return a reply.")
+            dark = getattr(live_mouth, "DARK_BRAIN", None) or getattr(
+                live_mouth, "DARK_GROK", "Online. I have your vault, repo, sessions, and hive. What are we working on?"
+            )
             out = {**out, "ask": False, "spoken": dark, "verb": out.get("verb") if out.get("verb") != "desk" else "converse"}
             out.pop("permission_ask", None)
         self._json(200, out)

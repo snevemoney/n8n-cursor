@@ -35,7 +35,7 @@ class OnlineBrainTest(unittest.TestCase):
         out = MOD.unknown_grok()
         self.assertTrue(out["unknown"])
         self.assertIn("UNKNOWN", out["spoken"])
-        self.assertIn("not the brain", out["spoken"])
+        self.assertIn("not the store", out["spoken"])
         self.assertNotIn("XAI_API_KEY", out["spoken"])
 
     def test_call_grok_uses_xai_when_key_set(self) -> None:
@@ -55,8 +55,9 @@ class OnlineBrainTest(unittest.TestCase):
                 with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
                     report = MOD.wire_report()
         self.assertEqual(report["ollama"], "refused")
-        self.assertEqual(report["wires"]["brain"], "cursor")
-        self.assertEqual(report["wires"]["cursor"], "print")
+        self.assertEqual(report["wires"]["brain"], "store")
+        self.assertEqual(report["wires"]["store"], "vault+repo+sessions+hive")
+        self.assertEqual(report["wires"]["cursor"], "hand")
         self.assertEqual(report["need"], [])
 
     def test_call_cursor_turn_prints_text(self) -> None:

@@ -495,8 +495,8 @@
 
     function paintWires(report) {
       const wires = (report && report.wires) || {};
-      const live = wires.brain === "cursor" || wires.cursor === "print" || wires.cursor === "live";
-      $("link").textContent = live ? "NEURAL LINK - CURSOR" : "NEURAL LINK - CURSOR DARK";
+      const live = wires.brain === "store" || wires.store === "vault+repo+sessions+hive";
+      $("link").textContent = live ? "NEURAL LINK - STORE" : "NEURAL LINK - STORE DARK";
     }
 
     async function refresh() {
