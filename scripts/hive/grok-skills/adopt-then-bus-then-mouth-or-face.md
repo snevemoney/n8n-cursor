@@ -34,7 +34,7 @@ PERMISSION: ask
 HOSTS: cursor + grok
 FACE: visualizer from FiOTrxq9ckM screenshots — full-bleed green circuit board + center chip. Say JARVIS or tap Space. Not observe-pane. Not Mouth/Hold Home chrome.
 MOUTH: write path behind the face. Wake-word always-on like the tape HUD. Local STT/TTS. Spoken yes/cancel stay.
-MEMORY: vault retrieve is extra context. Brain is online — Grok (xAI / Grok Bot) + hive HTTP + VPS SSH + Cursor CLI. UNKNOWN names a dark wire. No local Ollama. jobs.jsonl is audit, not the answer.
+MEMORY: listen → retrieve vault hot files → local model (ollama) or extractive cite → speak. UNKNOWN on a miss. Never queue a question to Grok.
 PARK: hands
 NEVER: claude-code · second-home · live-/ · AGPL vendor into apps/ · ElevenLabs without ASK · 0.0.0.0 · Observe/Mouth as the product UI · ollama as the brain
 DONE-CHECK: mouth self-test (Grok think + status wires + hard-step ASK + no desk-turn queue) + face /healthz and GET / 200 on 127.0.0.1 showing the PCB (J.A.R.V.I.S. + TAP SPACE, no Observe/Mouth cards) + /api/wires ollama=refused · start.sh starts face · hands parked

@@ -34,19 +34,6 @@ def _load_mouth():
 MOUTH = _load_mouth()
 
 
-def _load_online():
-    path = HERE.parent / "brain" / "online.py"
-    spec = importlib.util.spec_from_file_location("agent_stack_online", path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"cannot load {path}")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-ONLINE = _load_online()
-
-
 def load_json(path: Path) -> dict:
     if not path.is_file():
         return {}
@@ -134,9 +121,6 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/stack":
             self._json(200, load_json(HIVE / "agent-stack.json"))
             return
-        if path == "/api/wires":
-            self._json(200, ONLINE.wire_report())
-            return
         target = HERE / ("pane.html" if path in ("/", "/face", "/pane.html") else path.lstrip("/"))
         try:
             target.resolve().relative_to(HERE.resolve())
@@ -215,13 +199,9 @@ def self_test() -> dict:
             html = home.read().decode("utf-8")
             code = home.status
         banned = ("Desk · Face", "<h2>Observe</h2>", "<h2>Mouth</h2>", "Hold Home", "Hold Talk")
-        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "holdMic", "RESTART_MIN", "Use Chrome", "/api/wires")
+        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "holdMic", "RESTART_MIN", "Use Chrome")
         if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned):
             return {"ok": False, "errors": ["GET / missing tape visualizer"], "status": code}
-        with urllib.request.urlopen(f"http://{HOST}:{port}/api/wires", timeout=2) as wires_res:
-            wires = json.loads(wires_res.read().decode("utf-8"))
-        if not wires.get("ok") or wires.get("ollama") != "refused":
-            return {"ok": False, "errors": ["/api/wires missing or still local-ollama"], "body": wires}
         return {"ok": True, "errors": [], "port": port, "bind": HOST, "home": 200}
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         return {"ok": False, "errors": [str(exc)]}

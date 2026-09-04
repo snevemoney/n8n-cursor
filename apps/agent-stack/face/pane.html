@@ -68,6 +68,11 @@
     body.speak .chip { box-shadow: 0 0 70px rgba(61, 255, 106, .38); }
     .chip .line { margin-top: 10px; font-size: 12px; letter-spacing: .12em; color: rgba(184, 255, 201, .72); }
     .chip .ask { color: var(--amber); }
+    body.think .chip .line { color: var(--amber); letter-spacing: .28em; }
+    body.speak .chip .line {
+      font-size: 14px; letter-spacing: .06em; color: #f4fff6;
+      max-width: 56ch; margin-left: auto; margin-right: auto; text-wrap: pretty;
+    }
     #wave { width: 100%; height: 46px; display: none; }
     body.listen #wave { display: block; }
     body.think .mark { letter-spacing: .18em; font-size: 22px; }
@@ -180,9 +185,10 @@
       if (!utterance || state.turning) return;
       state.turning = true;
       paintPhase("think");
-      $("spoken").textContent = "";
+      $("spoken").textContent = "THINKING";
       try {
         const out = await api("/api/turn", { utterance, approved: !!approved });
+        paintPhase("speak");
         $("spoken").textContent = out.spoken || "";
         $("spoken").className = "line" + (out.ask ? " ask" : "");
         if (out.ask) state.pending = utterance;

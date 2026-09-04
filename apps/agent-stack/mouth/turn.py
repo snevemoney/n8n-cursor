@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Mouth sitting: utterance → file bus → local brain, or ASK a desk job.
+"""Mouth sitting: listen → CONVERSE → speak.
 
-Questions think here (vault retrieve + ollama/extractive). Desk queue is
-only for named actions after spoken yes. Hard steps refuse. Hands parked.
-Face owns the mic (LIVE/MUTE via set_listen). Do not strip the hear-loop.
+Local: face + mic + TTS on 127.0.0.1:4018 only. Brain is online Grok.
+A normal sentence is a conversation. Never ASK to send it to a desk.
+Never queue jobs.jsonl as the answer. No Ollama.
+Hard steps (send / pay / deploy / book / publish) refuse — they stay Evens.
 """
 from __future__ import annotations
 
@@ -21,7 +22,8 @@ HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 SKILLS_DIR = ROOT / "scripts/hive/grok-skills"
 HARD_REFUSE = re.compile(
     r"\b(send|pay|deploy|book|publish|dial|twilio|retell|vapi|"
-    r"claude code|fable|cowork|auto-?approve|take over (my )?(mouse|computer))\b",
+    r"claude code|fable|cowork|auto-?approve|take over (my )?(mouse|computer)|"
+    r"ollama)\b",
     re.I,
 )
 YES_RE = re.compile(
@@ -36,34 +38,12 @@ SKILL_RE = re.compile(
     r"\b(?:use|load|run)\s+(?:skill\s+)?([a-z0-9][a-z0-9-]{2,60})\b",
     re.I,
 )
-QUESTION_RE = re.compile(
+STATUS_RE = re.compile(
     r"\b("
-    r"what(?:'s|s|'re| are| is| does| do| did| should| was| were)|"
-    r"where(?:'s| is| are)|who(?:'s| is| am| are)|when(?:'s| is| are)|"
-    r"why\b|how (?:do|does|is|are|did|can)|"
-    r"remind|remember|vault|north[\s-]?stars?|(?:the|my|our) plan|"
-    r"operator memory|tell me|do i (?:have|believe)|did i|believe|"
-    r"who am i|what's in"
-    r")\b",
-    re.I,
-)
-LEADING_Q_RE = re.compile(
-    r"^(?:(?:hey|ok|okay|please)\s+)*(?:jarvis[,.]?\s+)?(?:"
-    r"what|what's|whats|who|where|when|why|how|"
-    r"remember|remind|tell|do i|did i"
-    r")\b",
-    re.I,
-)
-DESK_RE = re.compile(
-    r"\b("
-    r"do this|look at|browse|write code|implement|"
-    r"research|spawn|queue|"
-    r"open (?:the )?(?:page|url|site)|"
-    r"watch (?:this|the)|"
-    r"draft (?:an? |the )|"
-    r"build (?:a |the |this )|"
-    r"create (?:a |the )|"
-    r"fix (?:this|the|my)"
+    r"status|bus|what are you doing|phase|"
+    r"vps|hostinger|server|servers|hive|golden(?: paths)?|"
+    r"scorpion|uptime|disk|cursor(?: cli| agent)?|"
+    r"what's (?:live|online|running)|whats (?:live|online|running)"
     r")\b",
     re.I,
 )
@@ -72,11 +52,16 @@ HELLO_RE = re.compile(
     r"(?:\s+jarvis)?[.!]?\s*$",
     re.I,
 )
+ASK_LEAK = re.compile(
+    r"say yes to (approve|send)|send this to the grok desk|"
+    r"hand this to the \w+ desk|do you want me to send this",
+    re.I,
+)
+DARK_GROK = "I can't reach Grok (missing XAI_API_KEY or GROK_API_KEY)."
 
 
-def _load_brain():
-    path = Path(__file__).resolve().parent / "brain.py"
-    spec = importlib.util.spec_from_file_location("agent_stack_brain", path)
+def _load_mod(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load {path}")
     mod = importlib.util.module_from_spec(spec)
@@ -84,7 +69,10 @@ def _load_brain():
     return mod
 
 
-BRAIN = _load_brain()
+RETRIEVE = _load_mod("agent_stack_retrieve", Path(__file__).resolve().parent.parent / "memory" / "retrieve.py")
+
+_ONLINE_PATH = Path(__file__).resolve().parent.parent / "brain" / "online.py"
+ONLINE = _load_mod("agent_stack_online", _ONLINE_PATH) if _ONLINE_PATH.is_file() else None
 
 
 def now_iso() -> str:
@@ -115,6 +103,7 @@ def bus_write(
     permission_ask: str | None,
     spoken: str | None = None,
     cites: list | None = None,
+    wires: list | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
     bus = load_json(path)
@@ -127,6 +116,7 @@ def bus_write(
             "permission_ask": permission_ask,
             "spoken": spoken,
             "cites": cites or [],
+            "wires": wires or [],
             "updated_at": now_iso(),
         }
     )
@@ -154,15 +144,6 @@ def set_listen(hive: Path, live: bool) -> dict:
     return bus
 
 
-def append_job(hive: Path, row: dict) -> dict:
-    path = hive / "bus" / "jobs.jsonl"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    row = {**row, "id": row.get("id") or f"job-{now_iso()}", "ts": now_iso()}
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(row) + "\n")
-    return row
-
-
 def classify(utterance: str) -> dict:
     text = (utterance or "").strip()
     if not text or YES_RE.match(text) or NO_RE.match(text):
@@ -175,9 +156,7 @@ def classify(utterance: str) -> dict:
             "host": "local",
         }
     if HELLO_RE.match(text):
-        return {"verb": "greet", "needs_ask": False, "args": {}, "host": "local"}
-    if re.search(r"\b(status|bus|what are you doing|phase)\b", text, re.I):
-        return {"verb": "status", "needs_ask": False, "args": {}, "host": "local"}
+        return {"verb": "hello", "needs_ask": False, "args": {}, "host": "local"}
     if SKILL_RE.search(text) or re.search(r"\b(list skills|hive skills)\b", text, re.I):
         slug = SKILL_RE.search(text)
         return {
@@ -186,12 +165,9 @@ def classify(utterance: str) -> dict:
             "args": {"slug": slug.group(1).lower()} if slug else {},
             "host": "local",
         }
-    desk_hit = DESK_RE.search(text) or re.search(r"\bcursor-\b", text, re.I)
-    question = bool(QUESTION_RE.search(text) or LEADING_Q_RE.search(text))
-    if desk_hit and not question:
-        host = "cursor" if re.search(r"\b(browse|open (the )?(page|url|site)|watch|cursor-)\b", text, re.I) else "grok"
-        return {"verb": "desk", "needs_ask": True, "args": {"text": text}, "host": host}
-    return {"verb": "memory", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    if STATUS_RE.search(text):
+        return {"verb": "status", "needs_ask": False, "args": {"text": text}, "host": "online"}
+    return {"verb": "converse", "needs_ask": False, "args": {"text": text}, "host": "online"}
 
 
 def list_skills(limit: int = 8) -> list[str]:
@@ -216,6 +192,37 @@ def speak_local(text: str) -> None:
         return
 
 
+def _vault_extract(utterance: str, retrieve_roots: list[Path] | None) -> tuple[str, list]:
+    found = RETRIEVE.search(utterance, retrieve_roots)
+    cites = found.get("hits") or []
+    if found.get("unknown") or not cites:
+        return "", cites
+    spoken = str(found.get("spoken") or "").strip()
+    if ASK_LEAK.search(spoken):
+        return "", cites
+    return spoken, cites
+
+
+def _dark_grok() -> dict:
+    if ONLINE is not None:
+        got = ONLINE.unknown_grok()
+        spoken = str(got.get("spoken") or "").strip()
+        if spoken and not ASK_LEAK.search(spoken):
+            # Keep the short product line; name the missing wire.
+            if "XAI_API_KEY" in spoken or "GROK_API_KEY" in spoken:
+                return {**got, "spoken": DARK_GROK}
+            return {**got, "spoken": DARK_GROK}
+    return {"ok": False, "unknown": True, "wire": "grok", "spoken": DARK_GROK}
+
+
+def _call_grok(utterance: str, context: str, grok) -> dict:
+    if grok is not None:
+        return grok(utterance, context)
+    if ONLINE is not None:
+        return ONLINE.think(utterance, context=context)
+    return _dark_grok()
+
+
 def apply_turn(
     utterance: str,
     *,
@@ -223,15 +230,25 @@ def apply_turn(
     hive: Path = HIVE,
     speak: bool = False,
     retrieve_roots: list[Path] | None = None,
+    grok=None,
+    status_fn=None,
 ) -> dict:
     spoken = (utterance or "").strip()
     bus_now = load_json(hive / "bus" / "state.json")
     prior = str(bus_now.get("utterance") or "").strip()
     if YES_RE.match(spoken) and bus_now.get("permission_ask") and prior:
-        return apply_turn(prior, approved=True, hive=hive, speak=speak, retrieve_roots=retrieve_roots)
+        return apply_turn(
+            prior,
+            approved=True,
+            hive=hive,
+            speak=speak,
+            retrieve_roots=retrieve_roots,
+            grok=grok,
+            status_fn=status_fn,
+        )
     if NO_RE.match(spoken) and bus_now.get("permission_ask"):
         bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None, spoken="Okay, cancelled.")
-        out = {"ok": True, "verb": "cancel", "ask": False, "spoken": "Okay, cancelled.", "host": "local", "cites": []}
+        out = {"ok": True, "verb": "cancel", "ask": False, "spoken": "Okay, cancelled.", "host": "local", "cites": [], "wires": []}
         if speak:
             speak_local(out["spoken"])
         return out
@@ -243,49 +260,62 @@ def apply_turn(
         bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None, spoken=narration)
         if speak:
             speak_local(narration)
-        return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local", "cites": []}
-
-    if plan["needs_ask"] and not approved:
-        ask = f"May I hand this to the {plan['host']} desk? Say yes to approve."
-        bus_write(hive, phase="speak", job_status="yellow", utterance=spoken, permission_ask=ask, spoken=ask)
-        if speak:
-            speak_local(ask)
-        return {"ok": True, "verb": verb, "ask": True, "spoken": ask, "host": plan["host"], "permission_ask": ask, "cites": []}
+        return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local", "cites": [], "wires": []}
 
     cites: list = []
-    engine = "local"
+    wires: list = []
     if verb == "idle":
         narration = "Holding. Say Jarvis, or tap Space."
-    elif verb == "greet":
-        narration = "Hello Evens. Ask what's in the vault, or name a job."
-    elif verb == "status":
-        narration = f"Phase {bus_now.get('phase') or 'idle'}. Job {bus_now.get('job_status') or 'done'}."
+    elif verb == "hello":
+        narration = "Online. Face is local. Brain calls Grok. What are we working on?"
     elif verb == "skills":
         narration = "Hive skills: " + ", ".join(list_skills()) + "."
     elif verb == "skill":
         slug = plan["args"]["slug"]
         path = SKILLS_DIR / f"{slug}.md"
         narration = f"Loaded {slug}." if path.is_file() else f"No skill named {slug}."
-    elif verb == "memory":
+    elif verb == "status":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None)
-        thought = BRAIN.answer(spoken, retrieve_roots)
-        cites = thought.get("cites") or []
-        narration = thought.get("spoken") or "I don't have that in the vault. UNKNOWN."
-        engine = thought.get("engine") or "extractive"
-        plan = {**plan, "host": "local", "engine": engine}
+        fn = status_fn or (ONLINE.status if ONLINE is not None else None)
+        if fn is None:
+            narration = f"Phase {bus_now.get('phase') or 'idle'}. Job {bus_now.get('job_status') or 'done'}."
+            wires = []
+        else:
+            text = spoken.lower()
+            which = "all"
+            if "cursor" in text:
+                which = "cursor"
+            elif any(w in text for w in ("vps", "hostinger")):
+                which = "vps"
+            elif any(w in text for w in ("hive", "golden", "scorpion")):
+                which = "hive"
+            got = fn(which)
+            narration = got.get("spoken") or "UNKNOWN. Status wires returned nothing."
+            wires = [p.get("wire") for p in (got.get("parts") or []) if p.get("wire")] or ["status"]
+    elif verb == "converse":
+        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None)
+        vault_spoken, cites = _vault_extract(spoken, retrieve_roots)
+        context = ""
+        if cites:
+            bits = [f"{hit.get('path')}: {hit.get('snippet')}" for hit in cites[:3]]
+            context = "Vault snippets (one memory among live state):\n" + "\n".join(bits)
+        got = _call_grok(spoken, context, grok)
+        reply = str(got.get("spoken") or "").strip()
+        if got.get("ok") and reply and not ASK_LEAK.search(reply):
+            narration = reply
+            wires = [got.get("wire") or "grok"]
+        elif vault_spoken:
+            narration = vault_spoken
+            wires = ["vault"]
+        else:
+            dark = _dark_grok()
+            narration = dark.get("spoken") or DARK_GROK
+            wires = [dark.get("wire") or "grok"]
     else:
-        job = append_job(
-            hive,
-            {
-                "kind": "desk-turn",
-                "host": plan["host"],
-                "utterance": spoken,
-                "status": "queued",
-                "note": "Cursor SDK Agent.send or one Grok desk turn. Not Claude Code.",
-            },
-        )
-        narration = f"Queued for the {plan['host']} desk. Auto-approve stays off."
-        plan = {**plan, "job": job}
+        narration = "Holding. Say Jarvis, or tap Space."
+
+    if ASK_LEAK.search(narration or ""):
+        narration = DARK_GROK
 
     bus_write(
         hive,
@@ -295,6 +325,7 @@ def apply_turn(
         permission_ask=None,
         spoken=narration,
         cites=cites,
+        wires=wires,
     )
     if speak:
         speak_local(narration)
@@ -304,53 +335,88 @@ def apply_turn(
         "ask": False,
         "spoken": narration,
         "host": plan["host"],
-        "engine": engine if verb == "memory" else "local",
         "args": plan.get("args"),
         "cites": cites,
+        "wires": wires,
     }
 
 
 def self_test() -> dict:
     import tempfile
 
+    def fake_grok(prompt: str, context: str = "") -> dict:
+        extra = " with vault" if "Vault snippets" in (context or "") else ""
+        return {
+            "ok": True,
+            "unknown": False,
+            "wire": "grok",
+            "engine": "xai",
+            "spoken": f"Grok live{extra}: {prompt[:80]}",
+        }
+
+    def fake_status(which: str = "all") -> dict:
+        return {
+            "ok": True,
+            "verb": "status",
+            "wire": "status",
+            "spoken": f"Hive golden paths 1/3. VPS srv765579 live. Cursor CLI present. slice={which}",
+            "parts": [{"wire": "hive"}, {"wire": "vps"}, {"wire": "cursor"}],
+        }
+
+    leak = ("say yes", "Grok desk", "send this to the Grok", "May I hand this")
+
+    def _no_ask(out: dict) -> bool:
+        text = out.get("spoken") or ""
+        return not out.get("ask") and not out.get("permission_ask") and not any(bit.lower() in text.lower() for bit in leak)
+
     with tempfile.TemporaryDirectory(prefix="agent-stack-mouth-") as tmp:
         hive = Path(tmp)
         vault = hive / "vault"
         vault.mkdir(parents=True)
         (vault / "OPERATOR_MEMORY.md").write_text(
-            "# Operator Memory\n\nFour north stars start with maximum leverage, minimum noise.\n"
-            "Evens is the operator. The plan is vault Q&A on the face, desks only for jobs.\n",
+            "# Operator Memory\n\nFour north stars start with maximum leverage, minimum noise.\n",
             encoding="utf-8",
         )
         (hive / "bus").mkdir(parents=True)
-        os.environ["AGENT_STACK_NO_OLLAMA"] = "1"
         refused = apply_turn("send this email", hive=hive)
-        if refused.get("verb") != "refuse":
-            return {"ok": False, "errors": ["hard-step not refused"]}
-        asked = apply_turn("look at the inbound pipeline", hive=hive)
-        if not asked.get("ask"):
-            return {"ok": False, "errors": ["desk turn must ASK"]}
-        yes = apply_turn("yes", hive=hive)
-        if yes.get("ask") or not (hive / "bus" / "jobs.jsonl").is_file():
-            return {"ok": False, "errors": ["spoken yes did not queue a desk job"]}
-        jobs_before = (hive / "bus" / "jobs.jsonl").read_text(encoding="utf-8")
-        mem = apply_turn("what are the north stars", hive=hive, retrieve_roots=[vault])
-        jobs_after = (hive / "bus" / "jobs.jsonl").read_text(encoding="utf-8")
-        if mem.get("verb") != "memory" or mem.get("ask") or mem.get("host") != "local" or not mem.get("cites"):
-            return {"ok": False, "errors": ["vault Q&A missed fixture"], "got": mem}
-        if "Queued" in (mem.get("spoken") or "") or "Grok" in (mem.get("spoken") or ""):
-            return {"ok": False, "errors": ["brain leaked a Grok queue"], "got": mem}
-        if jobs_after != jobs_before:
-            return {"ok": False, "errors": ["vault question queued a desk-turn"]}
-        unknown = apply_turn("what is the purple zebra protocol", hive=hive, retrieve_roots=[vault])
-        if unknown.get("verb") != "memory" or "UNKNOWN" not in (unknown.get("spoken") or ""):
-            return {"ok": False, "errors": ["miss should be UNKNOWN"], "got": unknown}
+        if refused.get("verb") != "refuse" or refused.get("ask"):
+            return {"ok": False, "errors": ["send this email must refuse, not ask"], "got": refused}
+        for line in ("what's my north star", "hey how are you", "remember this"):
+            out = apply_turn(line, hive=hive, retrieve_roots=[vault], grok=fake_grok)
+            jobs = hive / "bus" / "jobs.jsonl"
+            if out.get("ask") or not _no_ask(out) or jobs.is_file():
+                return {"ok": False, "errors": [f"{line!r} must converse with no ask and no queue"], "got": out}
+            if classify(line)["needs_ask"] or classify(line)["verb"] == "desk":
+                return {"ok": False, "errors": [f"{line!r} classified as desk/ask"], "got": classify(line)}
+        thought = apply_turn("what's my north star", hive=hive, retrieve_roots=[vault], grok=fake_grok)
+        if thought.get("verb") != "converse" or "Grok live" not in (thought.get("spoken") or ""):
+            return {"ok": False, "errors": ["converse must CALL Grok and speak the reply"], "got": thought}
+        dark = apply_turn(
+            "what should I work on",
+            hive=hive,
+            grok=lambda prompt, context="": {"ok": False, "unknown": True, "spoken": ""},
+        )
+        if "I can't reach Grok" not in (dark.get("spoken") or "") or not _no_ask(dark):
+            return {"ok": False, "errors": ["missing Grok must name the wire, never ask"], "got": dark}
+        vaulted = apply_turn(
+            "what's my north star",
+            hive=hive,
+            retrieve_roots=[vault],
+            grok=lambda prompt, context="": {"ok": False, "unknown": True, "spoken": ""},
+        )
+        if vaulted.get("ask") or "leverage" not in (vaulted.get("spoken") or "").lower():
+            return {"ok": False, "errors": ["dark Grok with vault must speak extractive"], "got": vaulted}
+        st = apply_turn("what's the VPS status", hive=hive, status_fn=fake_status)
+        if st.get("verb") != "status" or "VPS" not in (st.get("spoken") or "") or st.get("ask"):
+            return {"ok": False, "errors": ["status must CALL live wires with no ask"], "got": st}
         live = set_listen(hive, True)
         if live.get("phase") != "listen" or live.get("mic") != "live":
             return {"ok": False, "errors": ["LIVE did not write listen"]}
         mute = set_listen(hive, False)
         if mute.get("mic") != "mute":
             return {"ok": False, "errors": ["MUTE did not write mute"]}
+        if (hive / "bus" / "jobs.jsonl").is_file():
+            return {"ok": False, "errors": ["jobs.jsonl must not be the converse path"]}
         return {"ok": True, "errors": []}
 
 
@@ -360,11 +426,18 @@ def main() -> int:
     ap.add_argument("--approved", action="store_true")
     ap.add_argument("--speak", action="store_true")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--wires", action="store_true")
     args = ap.parse_args()
     if args.self_test or os.environ.get("AGENT_STACK_MOUTH_SELF_TEST") == "1":
         out = self_test()
         print(json.dumps(out, indent=2))
         return 0 if out.get("ok") else 2
+    if args.wires:
+        if ONLINE is None:
+            print(json.dumps({"ok": False, "error": "online brain missing"}))
+            return 2
+        print(json.dumps(ONLINE.wire_report(), indent=2))
+        return 0
     if not args.utterance:
         print(json.dumps({"ok": False, "error": "utterance required"}))
         return 2
