@@ -16,6 +16,7 @@
     "kind": "live-vault"
   },
   "repo": "/Users/evenslouis/n8n-cursor",
+  "bus_dir": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/.hive/bus",
   "bus_path": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/.hive/bus/state.json",
   "jobs_path": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/CONTENT/os/jobs.json",
   "state_path": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/.hive/state.json",
@@ -34,5 +35,5 @@
     "live-/",
     "vendor-agpl-clone"
   ],
-  "updated_at": "2026-09-04T06:33:35Z"
+  "updated_at": "2026-09-04T15:24:23Z"
 }

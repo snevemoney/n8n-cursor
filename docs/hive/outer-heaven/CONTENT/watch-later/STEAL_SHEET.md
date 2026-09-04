@@ -71,6 +71,7 @@ These are the kinds of businesses the hive is allowed to hunt, brief, and instal
 | `one-channel-deep` | One surface, spaced posts, warm net | C | outcome-offer-funnel | `yt:I7mpF7_pnPM` `yt:hGdG-04TkDs` |
 | `missed-call-book` | Missed call → book CTA + HITL; no auto-voice book | A | private-book-install + ask-principal | `yt:whIp1SOahOM` |
 | `motion-pipeline` | Still → frames → clip → grade; previs before a long render | C | Creative Studio (Higgsfield/AE we have) | `x:2075192866553413944` `x:2077016770939122149` `x:2074108067361280173` |
+| `adopt-then-bus` | Adopt existing vault + file signal bus; mouth/face later; never a second Claude home | C | adopt-then-bus-then-mouth-or-face | `github:jaredrhod/fullstack-agent` `yt:FiOTrxq9ckM` |
 
 ---
 
@@ -89,6 +90,7 @@ These are the kinds of businesses the hive is allowed to hunt, brief, and instal
 | Cold postcard / sold-home scrape mail | No-send · `x:2072687270709309589` |
 | Game studio / sprite-engine SKU this cycle | Themes only · leisure cluster |
 | Rebuild Claude / Codex / menu-bar HITL inside Grok | Habit steal only |
+| fullstack-agent / backtalk / ai-visualizer / barehands vendor trees | AGPL + second OS · `yt:FiOTrxq9ckM` |
 | 8k-node Obsidian theater | Vault + packets · `x:2072932020003496380` |
 
 **Legal shape only (OFM):** many surfaces → one URL. Publishing Engine, no farms.

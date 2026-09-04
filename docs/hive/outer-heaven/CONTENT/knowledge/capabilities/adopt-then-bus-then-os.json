@@ -14,6 +14,7 @@
   ],
   "tools": [
     "vault-config.py",
+    "apps/agent-stack (MIT wizard)",
     "agent-stack.py",
     "jobs.json / job-beat.py",
     "observe-pane / hive-state.py",
@@ -62,6 +63,7 @@
   ],
   "system_primitive": "one interview → path configs → file signal bus → optional mouth/face on the existing OS",
   "skill_candidates": [
+    "adopt-then-bus-then-mouth-or-face",
     "adopt-then-bus-then-os",
     "internal-host-os",
     "observe-pane",
@@ -71,7 +73,7 @@
   "system_upgrade_candidates": [
     "UPG-fullstack-agent-adopt-existing-os"
   ],
-  "reproduce": "python3 scripts/hive/os/agent-stack.py adopt && python3 scripts/hive/os/agent-stack.py validate. No mic. No face server. No billed TTS.",
+  "reproduce": "cd apps/agent-stack && npm test (self-test) && node dist/wizard/adopt.js adopt. Also python3 scripts/hive/os/agent-stack.py validate. No mic. No face server. No billed TTS.",
   "generalize": "Same bus can drive observe-pane yellow + a later localhost face. Mouth later uses Cursor SDK or one Grok desk turn.",
   "improve": "Do not improve by installing Claude Code or auto-approve.",
   "primitive_ids": [
