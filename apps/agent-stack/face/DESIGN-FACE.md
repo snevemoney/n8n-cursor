@@ -23,7 +23,7 @@ The product you look at is Jared's **living circuit board**. Full viewport. Dark
 2. First visit: **tap the board or Space** so the browser can arm the mic. One MediaStream stays open so the orange mic icon stays on. Chip reads **LISTENING** when the mic is live.
 3. Say **JARVIS** (or just talk once armed). It listens, thinks, speaks. If the engine ends a session, recognition restarts once with 400–800ms backoff — no hold-to-talk, no start-stop flicker.
 4. No speech engine: one-line “use Chrome” plus a hidden type field (not a Mouth card).
-5. Vault questions get cited answers. Desk jobs still ASK (say yes). Hard steps refuse.
+5. Questions CALL Grok (xAI) and speak the reply. Vault snippets are extra context. Status CALLs hive / VPS / Cursor. ASK only for send / pay / deploy / book / publish. Missing key → spoken UNKNOWN naming the wire. No Ollama. No “queued for Grokbot.”
 
 Wake-word always-on matches the stills (`MIC - LISTENING FOR "JARVIS"`) **after** the mic is armed. Repo wizard default hold-Home is **not** what the tour HUD shows.
 

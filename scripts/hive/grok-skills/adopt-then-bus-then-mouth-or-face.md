@@ -34,10 +34,10 @@ PERMISSION: ask
 HOSTS: cursor + grok
 FACE: visualizer from FiOTrxq9ckM screenshots — full-bleed green circuit board + center chip. Say JARVIS or tap Space. Not observe-pane. Not Mouth/Hold Home chrome.
 MOUTH: write path behind the face. Wake-word always-on like the tape HUD. Local STT/TTS. Spoken yes/cancel stay.
-MEMORY: vault Q&A — keyword over adopted vault + hive os allow-list. Cite snippets. UNKNOWN on a miss.
+MEMORY: listen → retrieve vault hot files → local model (ollama) or extractive cite → speak. UNKNOWN on a miss. Never queue a question to Grok.
 PARK: hands
-NEVER: claude-code · second-home · live-/ · AGPL vendor into apps/ · ElevenLabs without ASK · 0.0.0.0 · Observe/Mouth as the product UI
-DONE-CHECK: mouth self-test (vault Q&A + refuse + ASK) + face /healthz and GET / 200 on 127.0.0.1 showing the PCB (J.A.R.V.I.S. + TAP SPACE, no Observe/Mouth cards) · start.sh starts face · hands parked
+NEVER: claude-code · second-home · live-/ · AGPL vendor into apps/ · ElevenLabs without ASK · 0.0.0.0 · Observe/Mouth as the product UI · ollama as the brain
+DONE-CHECK: mouth self-test (Grok think + status wires + hard-step ASK + no desk-turn queue) + face /healthz and GET / 200 on 127.0.0.1 showing the PCB (J.A.R.V.I.S. + TAP SPACE, no Observe/Mouth cards) + /api/wires ollama=refused · start.sh starts face · hands parked
 CAP: localhost · no inferred hard-step · no ElevenLabs · no mouse · no headed-mic claim on cloud
 COST: Web Speech + speechSynthesis + optional `say`
 STOP-KIND: cap + done-check
@@ -48,10 +48,10 @@ STOP-KIND: cap + done-check
 1. Spectacle test — if you were about to clone four repos or write `~/my-agent/CLAUDE.md`, stop.
 2. `cd apps/agent-stack && npm test`
 3. `npm run adopt` — writes `.hive/agent-stack.json` + idle bus against the existing vault. Hands stay parked.
-4. Mouth tests: `AGENT_STACK_DRY_TTS=1 python3 apps/agent-stack/mouth/turn.py --self-test` and `python3 apps/agent-stack/mouth/test_turn.py`.
+4. Mouth tests: `AGENT_STACK_DRY_TTS=1 python3 apps/agent-stack/mouth/turn.py --self-test` and `python3 apps/agent-stack/mouth/test_turn.py`. Brain: `python3 apps/agent-stack/brain/test_online.py`. Wires: `python3 apps/agent-stack/mouth/turn.py --wires`.
 5. Face tests: `python3 apps/agent-stack/face/serve.py --self-test` and `python3 apps/agent-stack/face/test_serve.py`.
 6. `./start.sh check` — no daemon. `./start.sh` execs `apps/agent-stack/face/serve.py` on `127.0.0.1:4018`. Kill leftover `voice-os.py` on 4018 first. Do not bring it back.
-7. Open `http://127.0.0.1:4018/`. First thing is the circuit board. Talk to it. Desk jobs still ASK. Vault questions retrieve and speak.
+7. Open `http://127.0.0.1:4018/`. First thing is the circuit board. Talk to it. Grok / hive / VPS must actually be called. ASK only for send/pay/deploy/book/publish. Missing key → spoken UNKNOWN.
 8. Watchdog GRADE those JSON files + healthz. Builder does not self-PROVEN.
 
 ## Never
