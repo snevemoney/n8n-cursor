@@ -68,6 +68,15 @@ class FaceServeTest(unittest.TestCase):
         self.assertNotIn("scheduleRestart(180)", html)
         self.assertNotIn("scheduleRestart(120)", html)
 
+    def test_pane_picks_english_voice(self) -> None:
+        html = (Path(__file__).resolve().parent / "pane.html").read_text(encoding="utf-8")
+        self.assertIn("pickEnglishVoice", html)
+        self.assertIn("isFrenchVoice", html)
+        self.assertIn('u.lang = "en-GB"', html)
+        self.assertIn("/api/tts", html)
+        self.assertIn("daniel", html)
+        self.assertNotIn("new SpeechSynthesisUtterance(text);\n      u.rate", html)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -129,7 +129,54 @@
     const hasSR = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
     const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
-    const ttsSpeaking = () => !!(synth && synth.speaking);
+    let ttsAudio = null;
+    let jarvisVoice = null;
+    const TTS_PREF = ["daniel", "arthur", "oliver", "reed", "alex", "gordon", "tom", "fred"];
+    const ttsSpeaking = () => !!(synth && synth.speaking) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
+
+    function voiceLang(v) {
+      return String((v && v.lang) || "").toLowerCase().replace(/_/g, "-");
+    }
+    function voiceName(v) {
+      return String((v && v.name) || "").toLowerCase();
+    }
+    function isFrenchVoice(v) {
+      const lang = voiceLang(v);
+      const name = voiceName(v);
+      return lang.startsWith("fr") || /french|fran[cç]ais|am[eé]lie|jacques/.test(name);
+    }
+    function isEnglishVoice(v) {
+      return voiceLang(v).startsWith("en") && !isFrenchVoice(v);
+    }
+    function scoreVoice(v) {
+      if (!v || isFrenchVoice(v) || !isEnglishVoice(v)) return -1;
+      const name = voiceName(v);
+      const lang = voiceLang(v);
+      let s = 10;
+      if (lang.startsWith("en-gb")) s += 40;
+      else if (lang.startsWith("en-us")) s += 25;
+      TTS_PREF.forEach((p, i) => { if (name.includes(p)) s += 50 - i; });
+      if (/male/.test(name)) s += 8;
+      if (/samantha|karen|kathy|moira|fiona|victoria|female/.test(name)) s -= 8;
+      return s;
+    }
+    function pickEnglishVoice() {
+      if (!synth) return null;
+      const voices = synth.getVoices() || [];
+      let best = null;
+      let bestScore = -1;
+      voices.forEach((v) => {
+        const s = scoreVoice(v);
+        if (s > bestScore) { best = v; bestScore = s; }
+      });
+      jarvisVoice = best;
+      return best;
+    }
+    if (synth) {
+      pickEnglishVoice();
+      if (typeof synth.addEventListener === "function") synth.addEventListener("voiceschanged", pickEnglishVoice);
+      else synth.onvoiceschanged = pickEnglishVoice;
+    }
 
     function paintPhase(phase) {
       state.phase = phase || "idle";
@@ -154,17 +201,53 @@
       return res.json();
     }
 
-    function speak(text) {
+    function afterSpeak() {
+      if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
+      if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
+    }
+    function speakLocal(text) {
       if (!text || !synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-GB";
+      const voice = jarvisVoice || pickEnglishVoice();
+      if (voice && !isFrenchVoice(voice)) u.voice = voice;
       u.rate = 1.02;
       u.onstart = () => paintPhase("speak");
-      u.onend = () => {
-        if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
-        if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
-      };
+      u.onend = afterSpeak;
       synth.speak(u);
+    }
+    async function speakCloud(text) {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok || res.status === 204) return false;
+      const blob = await res.blob();
+      if (!blob || blob.size < 32) return false;
+      if (synth) synth.cancel();
+      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} }
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      ttsAudio = audio;
+      paintPhase("speak");
+      audio.onended = () => {
+        if (ttsAudio === audio) ttsAudio = null;
+        URL.revokeObjectURL(url);
+        afterSpeak();
+      };
+      audio.onerror = () => {
+        if (ttsAudio === audio) ttsAudio = null;
+        URL.revokeObjectURL(url);
+        speakLocal(text);
+      };
+      await audio.play();
+      return true;
+    }
+    function speak(text) {
+      if (!text) return;
+      speakCloud(text).then((ok) => { if (!ok) speakLocal(text); }).catch(() => speakLocal(text));
     }
 
     async function greet() {
@@ -500,6 +583,7 @@
         $("hudName").textContent = dotted("JARVIS");
         $("mark").textContent = dotted("JARVIS");
       } catch (e) {}
+      pickEnglishVoice();
       layout();
       window.addEventListener("resize", layout);
       if (!reduce) {

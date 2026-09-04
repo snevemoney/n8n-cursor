@@ -13,6 +13,9 @@ import json
 import os
 import re
 import subprocess
+import tempfile
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -207,11 +210,169 @@ def list_skills(limit: int = 8) -> list[str]:
     return names
 
 
+# backtalk default local voice is Kokoro `bm_lewis` (British butler).
+# Video voice is ElevenLabs Voice Library "Tarquin". No key in git.
+TARQUIN_VOICE_ID = "7cOBG34AiHrAzs842Rdi"
+SAY_PREF = (
+    "Daniel",
+    "Arthur",
+    "Oliver",
+    "Reed (English (UK))",
+    "Alex",
+    "Fred",
+    "Tom",
+)
+
+
+def elevenlabs_key() -> str:
+    key = (os.environ.get("ELEVENLABS_API_KEY") or os.environ.get("ELEVEN_LABS_API_KEY") or "").strip()
+    if key:
+        return key
+    try:
+        out = subprocess.run(
+            [
+                "security",
+                "find-generic-password",
+                "-a",
+                os.environ.get("USER") or "",
+                "-s",
+                "backtalk-elevenlabs",
+                "-w",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+        if out.returncode == 0:
+            return (out.stdout or "").strip()
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return ""
+
+
+def elevenlabs_voice_id() -> str:
+    return (os.environ.get("ELEVENLABS_VOICE_ID") or "").strip() or TARQUIN_VOICE_ID
+
+
+def parse_say_voices(raw: str) -> list[tuple[str, str]]:
+    rows: list[tuple[str, str]] = []
+    for line in (raw or "").splitlines():
+        body = line.split("#", 1)[0].strip()
+        if not body:
+            continue
+        bits = body.rsplit(None, 1)
+        if len(bits) != 2:
+            continue
+        name, loc = bits
+        rows.append((name, loc.replace("_", "-")))
+    return rows
+
+
+def list_say_voices() -> list[tuple[str, str]]:
+    try:
+        out = subprocess.run(["say", "-v", "?"], capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    return parse_say_voices(out.stdout or "")
+
+
+def pick_say_voice(voices: list[tuple[str, str]] | None = None) -> str:
+    """English male first (Daniel ≈ bm_lewis). Never a fr-* voice."""
+    rows = list(voices) if voices is not None else list_say_voices()
+    english: list[tuple[str, str]] = []
+    for name, loc in rows:
+        loc_l = loc.lower()
+        name_l = name.lower()
+        if loc_l.startswith("fr") or "french" in name_l or "français" in name_l:
+            continue
+        if loc_l.startswith("en"):
+            english.append((name, loc))
+    if not english:
+        return "Daniel"
+    by_name = {name.lower(): name for name, _ in english}
+    for pref in SAY_PREF:
+        hit = by_name.get(pref.lower())
+        if hit:
+            return hit
+    for loc_pref in ("en-gb", "en-us"):
+        for name, loc in english:
+            if loc.lower().startswith(loc_pref) and any(p.lower() in name.lower() for p in SAY_PREF):
+                return name
+    for name, loc in english:
+        if loc.lower().startswith("en-gb"):
+            return name
+    for name, _loc in english:
+        if name.lower() != "samantha":
+            return name
+    return english[0][0]
+
+
+def voice_report() -> dict:
+    key_on = bool(elevenlabs_key())
+    return {
+        "ok": True,
+        "engine": "elevenlabs" if key_on else "say",
+        "voice": "Tarquin" if key_on else pick_say_voice(),
+        "voice_id": elevenlabs_voice_id() if key_on else None,
+        "lang": "en-GB",
+        "repo": {"kokoro": "bm_lewis", "elevenlabs": "Tarquin"},
+    }
+
+
+def tts_bytes(text: str) -> bytes:
+    if os.environ.get("AGENT_STACK_DRY_TTS") == "1" or not text:
+        return b""
+    key = elevenlabs_key()
+    if not key:
+        return b""
+    voice = elevenlabs_voice_id()
+    payload = json.dumps({"text": text[:400], "model_id": "eleven_multilingual_v2"}).encode("utf-8")
+    req = urllib.request.Request(
+        f"https://api.elevenlabs.io/v1/text-to-speech/{voice}",
+        data=payload,
+        headers={
+            "xi-api-key": key,
+            "Content-Type": "application/json",
+            "Accept": "audio/mpeg",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as res:
+            return res.read() or b""
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return b""
+
+
+def speak_elevenlabs(text: str) -> bool:
+    audio = tts_bytes(text)
+    if not audio:
+        return False
+    path = ""
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as fh:
+            fh.write(audio)
+            path = fh.name
+        subprocess.run(["afplay", path], check=False, timeout=30)
+        return True
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    finally:
+        if path:
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+
+
 def speak_local(text: str) -> None:
     if os.environ.get("AGENT_STACK_DRY_TTS") == "1" or not text:
         return
+    if speak_elevenlabs(text):
+        return
+    voice = (os.environ.get("AGENT_STACK_SAY_VOICE") or pick_say_voice()).strip() or "Daniel"
     try:
-        subprocess.run(["say", "-v", "Samantha", text[:400]], check=False, timeout=20)
+        subprocess.run(["say", "-v", voice, text[:400]], check=False, timeout=20)
     except (OSError, subprocess.TimeoutExpired):
         return
 
@@ -311,8 +472,6 @@ def apply_turn(
 
 
 def self_test() -> dict:
-    import tempfile
-
     with tempfile.TemporaryDirectory(prefix="agent-stack-mouth-") as tmp:
         hive = Path(tmp)
         vault = hive / "vault"
