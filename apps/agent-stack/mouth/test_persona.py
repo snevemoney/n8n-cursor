@@ -32,7 +32,8 @@ class PersonaWrapTest(unittest.TestCase):
         out = MOD.wrap("UNKNOWN. Cursor harness returned no reply.", verb="converse")
         self.assertIn("Naturally, it isn't my fault, sir", out)
         self.assertIn("UNKNOWN. Cursor harness returned no reply.", out)
-        self.assertNotRegex(out.lower(), r"\bmy fault\b")
+        self.assertNotIn("I'm sorry", out)
+        self.assertNotIn("I failed", out)
         self.assertNotIn("waiting for", out.lower())
 
     def test_strips_waiting_for_and_blame(self) -> None:
