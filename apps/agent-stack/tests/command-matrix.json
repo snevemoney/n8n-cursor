@@ -114,7 +114,9 @@
       "triggers": [
         "heal yourself",
         "send an agent",
-        "look at the logs"
+        "look at the logs",
+        "fix it",
+        "try again"
       ],
       "expected_hand": "heal",
       "wire_module": "mouth/turn.py heal_spoken + memory/scars.py",
@@ -126,6 +128,23 @@
         "user": "(scar log)",
         "jarvis": "{\"id\": \"cursor-auth-dark\", \"at\": \"2026-09-04T20:03:46Z\", \"symptom\": \"Cursor harness returned login UNKNOWN on every converse.\", \"cause\": \"heal verb\"}",
         "source": "docs/hive/outer-heaven/.hive/bus/scars.jsonl"
+      }
+    },
+    {
+      "verb": "wire",
+      "triggers": [
+        "what failed",
+        "what's the wire"
+      ],
+      "expected_hand": "wire",
+      "wire_module": "mouth/turn.py LAST_WIRE.inspect_line + memory/last_wire.py",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
       }
     },
     {
@@ -460,7 +479,9 @@
       "triggers": [
         "what is marketing",
         "brief me on marketing",
-        "BUS 204"
+        "BUS 204",
+        "the whole shelf",
+        "all professional skills"
       ],
       "expected_hand": "pro",
       "wire_module": "hands/pro.py brief",
