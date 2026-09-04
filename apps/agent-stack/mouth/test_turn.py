@@ -166,8 +166,8 @@ class MouthTurnTest(unittest.TestCase):
                 grok=dark,
             )
             self.assertFalse(vaulted["ask"])
-            self.assertIn("I can't reach Grok", vaulted["spoken"])
-            self.assertIn("XAI_API_KEY", vaulted["spoken"])
+            self.assertIn("Cursor did not return a reply", vaulted["spoken"])
+            self.assertNotIn("XAI_API_KEY", vaulted["spoken"])
             _no_desk_ask(vaulted["spoken"])
 
             empty = hive / "empty"
@@ -179,8 +179,8 @@ class MouthTurnTest(unittest.TestCase):
                 grok=dark,
             )
             self.assertFalse(missing["ask"])
-            self.assertIn("I can't reach Grok", missing["spoken"])
-            self.assertIn("XAI_API_KEY", missing["spoken"])
+            self.assertIn("Cursor did not return a reply", missing["spoken"])
+            self.assertNotIn("XAI_API_KEY", missing["spoken"])
             _no_desk_ask(missing["spoken"])
             self.assertFalse((hive / "bus" / "jobs.jsonl").is_file())
 

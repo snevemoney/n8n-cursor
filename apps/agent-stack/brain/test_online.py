@@ -31,13 +31,12 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertNotIn("import ollama", text)
         self.assertEqual(MOD.wire_report()["ollama"], "refused")
 
-    def test_unknown_names_xai_key(self) -> None:
-        with mock.patch.object(MOD, "grokbot_gateway", return_value=None):
-            out = MOD.unknown_grok()
+    def test_unknown_grok_is_not_the_brain(self) -> None:
+        out = MOD.unknown_grok()
         self.assertTrue(out["unknown"])
         self.assertIn("UNKNOWN", out["spoken"])
-        self.assertIn("XAI_API_KEY", out["spoken"])
-        self.assertIn("jobs.jsonl", out["spoken"])
+        self.assertIn("not the brain", out["spoken"])
+        self.assertNotIn("XAI_API_KEY", out["spoken"])
 
     def test_call_grok_uses_xai_when_key_set(self) -> None:
         def fake_xai(prompt: str, context: str = "") -> dict:
@@ -56,9 +55,9 @@ class OnlineBrainTest(unittest.TestCase):
                 with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
                     report = MOD.wire_report()
         self.assertEqual(report["ollama"], "refused")
-        self.assertEqual(report["wires"]["grok"], "dark")
+        self.assertEqual(report["wires"]["brain"], "cursor")
         self.assertEqual(report["wires"]["cursor"], "print")
-        self.assertTrue(report["need"])
+        self.assertEqual(report["need"], [])
 
     def test_call_cursor_turn_prints_text(self) -> None:
         proc = mock.Mock(stdout="The site CSS is in pane.html.\n", stderr="", returncode=0)
@@ -73,6 +72,15 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertIn("ask", argv)
         self.assertNotIn("--force", argv)
         self.assertNotIn("--yolo", argv)
+
+    def test_call_cursor_turn_auth_names_login_not_xai(self) -> None:
+        proc = mock.Mock(stdout="", stderr="Error: Authentication required. Please run 'agent login' first.", returncode=1)
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD.subprocess, "run", return_value=proc):
+                out = MOD.call_cursor_turn("hey")
+        self.assertTrue(out["unknown"])
+        self.assertIn("agent login", out["spoken"])
+        self.assertNotIn("XAI_API_KEY", out["spoken"])
 
     def test_call_cursor_turn_dry(self) -> None:
         with mock.patch.dict(os.environ, {"AGENT_STACK_CURSOR_DRY": "1"}):

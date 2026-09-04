@@ -495,8 +495,8 @@
 
     function paintWires(report) {
       const wires = (report && report.wires) || {};
-      const grok = wires.grok === "live" || wires.grokbot === "live";
-      $("link").textContent = grok ? "NEURAL LINK - GROK LIVE" : "NEURAL LINK - GROK DARK · SET XAI_API_KEY";
+      const live = wires.brain === "cursor" || wires.cursor === "print" || wires.cursor === "live";
+      $("link").textContent = live ? "NEURAL LINK - CURSOR" : "NEURAL LINK - CURSOR DARK";
     }
 
     async function refresh() {
