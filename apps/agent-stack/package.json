@@ -10,7 +10,7 @@
     "adopt": "npm run build && node dist/wizard/adopt.js adopt",
     "self-test": "npm run build && node dist/wizard/adopt.js self-test",
     "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
-    "test": "npm run self-test && AGENT_STACK_DRY_TTS=1 python3 mouth/turn.py --self-test && AGENT_STACK_DRY_TTS=1 python3 mouth/voice.py --self-test && python3 face/serve.py --self-test && python3 face/test_serve.py && python3 mouth/test_turn.py && python3 mouth/test_voice.py && python3 brain/test_online.py && python3 hands/test_pro.py && python3 hands/test_school_index.py && AGENT_STACK_DRY_TTS=1 python3 tests/test_command_matrix.py",
+    "test": "npm run self-test && AGENT_STACK_DRY_TTS=1 python3 mouth/turn.py --self-test && AGENT_STACK_DRY_TTS=1 python3 mouth/voice.py --self-test && python3 face/serve.py --self-test && python3 face/test_serve.py && python3 mouth/test_turn.py && python3 mouth/test_persona.py && python3 mouth/test_voice.py && python3 memory/test_last_wire.py && python3 brain/test_online.py && python3 hands/test_pro.py && python3 hands/test_school_index.py && AGENT_STACK_DRY_TTS=1 python3 tests/test_command_matrix.py",
     "test:matrix": "AGENT_STACK_DRY_TTS=1 python3 tests/test_command_matrix.py",
     "test:e2e": "PLAYWRIGHT_CHROMIUM_USE_HEADLESS_SHELL=0 NODE_PATH=../scorpion/node_modules node ../scorpion/node_modules/@playwright/test/cli.js test -c face/e2e/playwright.config.cjs"
   }

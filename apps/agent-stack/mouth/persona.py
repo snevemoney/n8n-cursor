@@ -268,6 +268,13 @@ def wrap(
     raw = spoken or ""
     if is_dump(raw):
         return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
+    if (verb or "").strip().lower() == "wire":
+        payload = strip_blame(strip_waiting((raw or "").strip()))
+        if not payload:
+            return payload
+        if ALREADY_WRAPPED_RE.match(payload):
+            return payload
+        return f"Sir. {payload}"
     payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
     if not payload:
         return payload
@@ -299,6 +306,13 @@ def stream_delta(
     raw = chunk or ""
     if is_dump(raw):
         return wrap(raw, verb=verb, utterance=utterance, turns=turns, store_lines=store_lines, scars=scars) if first else ""
+    if (verb or "").strip().lower() == "wire":
+        payload = strip_blame(strip_waiting((raw or "").strip()))
+        if not payload:
+            return ""
+        if first:
+            return wrap(payload, verb=verb, utterance=utterance, turns=turns, store_lines=store_lines, scars=scars)
+        return strip_lead_sir(payload)
     payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
     if not payload:
         return ""

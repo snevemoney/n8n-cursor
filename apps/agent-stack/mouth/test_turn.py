@@ -197,7 +197,7 @@ class MouthTurnTest(unittest.TestCase):
             self.assertIn("store", today["spoken"].lower())
             self.assertNotIn("one-time login", today["spoken"])
             self.assertNotIn("cursor-auth-dark", today["spoken"])
-            again = MOD.apply_turn("try again what's going on", hive=hive, retrieve_roots=[vault])
+            again = MOD.apply_turn("what's going on", hive=hive, retrieve_roots=[vault])
             self.assertNotIn("one-time login", again["spoken"])
             self.assertNotIn("Scar", again["spoken"])
             self.assertNotIn("cursor-auth-dark", again["spoken"])
@@ -882,6 +882,82 @@ class MouthTurnTest(unittest.TestCase):
             self.assertNotIn("## When", mktg["spoken"])
             self.assertNotIn("as requested", mktg["spoken"].lower())
             self.assertLessEqual(len(mktg.get("cites") or []), 3)
+
+    def test_scroll_fail_spoken_has_no_cgevent_last_wire_has_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-last-wire-fail-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            with mock.patch.object(
+                MOD.SEE,
+                "safari_act",
+                return_value={
+                    "ok": False,
+                    "wire": "safari",
+                    "path": "cgevent",
+                    "error": "CGEvent page key dark",
+                    "spoken": "UNKNOWN. Safari could not scroll.",
+                },
+            ):
+                out = MOD.apply_turn("scroll", hive=hive)
+            self.assertEqual(out["verb"], "safari")
+            low = out["spoken"].lower()
+            self.assertIn("could not scroll", low)
+            self.assertNotIn("cgevent", low)
+            self.assertNotIn("page keys", low)
+            row = json.loads((hive / "bus" / "last-wire.json").read_text(encoding="utf-8"))
+            self.assertEqual(row["verb"], "safari")
+            self.assertFalse(row["ok"])
+            self.assertEqual(row["wire"]["path"], "cgevent")
+            self.assertEqual(row["utterance"], "scroll")
+
+    def test_heal_retries_last_wire_and_speaks_human_result(self) -> None:
+        self.assertEqual(MOD.classify("fix it")["verb"], "heal")
+        self.assertEqual(MOD.classify("try again")["verb"], "heal")
+        self.assertEqual(MOD.classify("what failed")["verb"], "wire")
+        self.assertEqual(MOD.classify("what's the wire")["verb"], "wire")
+        with tempfile.TemporaryDirectory(prefix="agent-stack-heal-wire-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            (hive / "bus" / "last-wire.json").write_text(
+                json.dumps(
+                    {
+                        "verb": "safari",
+                        "ok": False,
+                        "human_line": "Safari could not scroll.",
+                        "wire": {"path": "cgevent", "scar": None, "url": None, "error": "CGEvent page key dark"},
+                        "utterance": "scroll",
+                        "retried": False,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            with mock.patch.object(
+                MOD.SEE,
+                "safari_act",
+                return_value={
+                    "ok": True,
+                    "wire": "safari",
+                    "path": "cgevent",
+                    "spoken": "You asked to scroll. I scrolled the tab.",
+                },
+            ) as replay:
+                out = MOD.apply_turn("fix it", hive=hive)
+            replay.assert_called_once()
+            self.assertEqual(replay.call_args.args[0], "scroll")
+            self.assertEqual(out["verb"], "heal")
+            low = out["spoken"].lower()
+            self.assertIn("scrolled the tab", low)
+            self.assertNotIn("cgevent", low)
+            self.assertNotIn("page keys", low)
+            row = json.loads((hive / "bus" / "last-wire.json").read_text(encoding="utf-8"))
+            self.assertTrue(row["ok"])
+            self.assertTrue(row["retried"])
+            self.assertEqual(row["wire"]["path"], "cgevent")
+            asked = MOD.apply_turn("what failed", hive=hive)
+            self.assertEqual(asked["verb"], "wire")
+            self.assertIn("cgevent", asked["spoken"].lower())
+            self.assertIn("safari", asked["spoken"].lower())
 
 
 if __name__ == "__main__":

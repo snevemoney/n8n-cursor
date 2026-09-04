@@ -12,13 +12,14 @@ Product browser: Safari via hands/see.py — Playwright never drives Evens's Mac
 | crumb | `it`, `uh`, `hmm` | `crumb` | mouth/turn.py local | unit | pass | UNKNOWN |
 | refuse | `send this email`, `deploy this to prod`, `publish this now` | `refuse` | mouth/turn.py HARD_REFUSE | unit | pass | UNKNOWN |
 | mode | `agent mode`, `switch to plan mode`, `put yourself in ask mode` | `mode` | mouth/turn.py local | unit | pass | UNKNOWN |
-| heal | `heal yourself`, `send an agent`, `look at the logs` | `heal` | mouth/turn.py heal_spoken + memory/scars.py | unit | pass | quoted `(scar log)` → {"id": "cursor-auth-dark", "at": "2026-09-04T20:03:46Z", "symptom": "Cursor harn |
+| heal | `heal yourself`, `send an agent`, `look at the logs`, `fix it`, `try again` | `heal` | mouth/turn.py heal_from_wire + memory/last_wire.py | unit | pass | quoted `(scar log)` → {"id": "cursor-auth-dark", "at": "2026-09-04T20:03:46Z", "symptom": "Cursor harn |
+| wire | `what failed`, `what's the wire` | `wire` | mouth/turn.py LAST_WIRE.inspect_line + memory/last_wire.py | unit | pass | UNKNOWN |
 | today | `what should we do today`, `what should I work on today` | `today` | mouth/turn.py today_spoken + memory/retrieve.py | unit | pass | UNKNOWN |
 | can | `what can you do`, `what are you able`, `your tools` | `can` | mouth/turn.py capabilities_spoken | unit | pass | UNKNOWN |
 | skills | `list skills`, `hive skills` | `skills` | mouth/turn.py skills_spoken | unit | pass | UNKNOWN |
 | life | `who am i`, `what do you know about me`, `remember me` | `life` | memory/retrieve.py life_card | unit | pass | UNKNOWN |
 | files | `search my computer for ledger`, `find the file invoice`, `look through my documents` | `files` | hands/files.py search_files | unit | pass | UNKNOWN |
-| safari | `go to YouTube`, `open YouTube`, `scroll`, `scroll down`, `screenshot` | `safari` | hands/see.py safari_act | unit / playwright | pass | leak was `Sir. Safari, as requested. Safari: J.A.R.V.I.S.. http://127.0.0.1:4018/` — mouth now: Sir + dry beat + YouTube is open (URL only on open) |
+| safari | `go to YouTube`, `open YouTube`, `scroll`, `scroll down`, `screenshot` | `safari` | hands/see.py safari_act | unit / playwright | pass | quoted `Hi Jarvis open YouTube` → Sir. The tab, not the face. You asked to open YouTube. YouTube is open. https:// |
 | calendar | `what's on my calendar`, `meetings today`, `meetings tomorrow` | `calendar` | hands/inbox.py calendar_events | unit | pass | UNKNOWN |
 | mail | `any unread mail`, `unread emails`, `my inbox` | `mail` | hands/inbox.py mail_unread | unit | pass | UNKNOWN |
 | invoice | `what's the unpaid invoice`, `show invoices`, `create an invoice for Mike` | `invoice` | hands/inbox.py invoice_lookup | unit | pass | UNKNOWN |
@@ -31,7 +32,7 @@ Product browser: Safari via hands/see.py — Playwright never drives Evens's Mac
 | watch_later | `watch later`, `what's on my watch later`, `watch later playlist` | `watch_later` | hands/named.py watch_later | unit | pass | UNKNOWN |
 | news | `what's the news`, `hive signals`, `news today` | `news` | hands/named.py news_from_disk | unit | pass | UNKNOWN |
 | make | `make an image`, `create a remotion`, `generate a video` | `make` | hands/named.py make_route | unit | pass | UNKNOWN |
-| pro | `what is marketing`, `brief me on marketing`, `BUS 204` | `pro` | hands/pro.py brief | unit / playwright | pass | UNKNOWN |
+| pro | `what is marketing`, `brief me on marketing`, `BUS 204`, `the whole shelf`, `all professional skills` | `pro` | hands/pro.py brief | unit / playwright | pass | UNKNOWN |
 | idle | `(empty)` | `idle` | mouth/turn.py local | unit | pass | UNKNOWN |
 | farewell | `good night`, `goodbye`, `bye` | `farewell` | mouth/turn.py talk_spoken | unit | pass | quoted `Good night` → Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-da |
 | talk | `thanks`, `serious`, `what the hell are you saying` | `talk` | mouth/turn.py talk_spoken | unit | pass | quoted `Serious` → Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-da |

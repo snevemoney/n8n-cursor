@@ -127,6 +127,12 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertNotIn("pr #200", low)
         self.assertNotIn("pid 4018", low)
 
+    def test_wire_inspect_keeps_path_when_asked(self) -> None:
+        out = MOD.wrap("Last hand: safari. path=cgevent. CGEvent page key dark", verb="wire")
+        self.assertTrue(out.startswith("Sir."))
+        self.assertIn("path=cgevent", out)
+        self.assertIn("CGEvent", out)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -37,13 +37,42 @@ HARD_REFUSE = re.compile(
 )
 HEAL_RE = re.compile(
     r"\b("
-    r"fix (?:yourself|jarvis)|heal(?: yourself)?|self-?heal|"
+    r"fix (?:it|yourself|jarvis)|heal(?: yourself)?|self-?heal|"
+    r"try again|"
     r"send an? (?:agent|fix)|"
     r"look at (?:the )?logs|"
     r"help jarvis|"
     r"never (?:do that|again)"
     r")\b",
     re.I,
+)
+WIRE_ASK_RE = re.compile(
+    r"\b("
+    r"what failed|"
+    r"what(?:'s| is) the wire|"
+    r"what(?:'s| is) the last wire|"
+    r"show (?:me )?(?:the )?wire"
+    r")\b",
+    re.I,
+)
+HAND_WIRE_VERBS = frozenset(
+    {
+        "safari",
+        "cursor",
+        "files",
+        "search",
+        "watch_later",
+        "news",
+        "make",
+        "calendar",
+        "mail",
+        "invoice",
+        "status",
+        "pro",
+        "converse",
+        "skill",
+        "build",
+    }
 )
 TODAY_RE = re.compile(
     r"\bwhat should (?:we|i) (?:do|work on) today\b",
@@ -310,6 +339,8 @@ _PERSONA_PATH = Path(__file__).resolve().parent / "persona.py"
 PERSONA = _load_mod("agent_stack_persona", _PERSONA_PATH) if _PERSONA_PATH.is_file() else None
 _PRO_PATH = Path(__file__).resolve().parent.parent / "hands" / "pro.py"
 PRO = _load_mod("agent_stack_pro", _PRO_PATH) if _PRO_PATH.is_file() else None
+_LAST_WIRE_PATH = Path(__file__).resolve().parent.parent / "memory" / "last_wire.py"
+LAST_WIRE = _load_mod("agent_stack_last_wire", _LAST_WIRE_PATH) if _LAST_WIRE_PATH.is_file() else None
 
 
 def now_iso() -> str:
@@ -428,6 +459,136 @@ def today_spoken(retrieve_roots: list[Path] | None, hive: Path | None = None) ->
     if hive is not None and SCARS is not None and SCARS.blocks_cursor(_scars_live(hive)):
         bits.append("Cursor login stays you in Terminal when you want the harness back.")
     return " ".join(bits)
+
+
+def _hand_ok(got, narration: str) -> bool:
+    if isinstance(got, dict) and "ok" in got:
+        return bool(got.get("ok"))
+    text = narration or ""
+    return not text.upper().startswith("UNKNOWN")
+
+
+def _wire_from_got(got, narration: str) -> dict:
+    if not isinstance(got, dict):
+        return {"error": None if _hand_ok(None, narration) else narration}
+    safari = got.get("safari") if isinstance(got.get("safari"), dict) else {}
+    ok = _hand_ok(got, narration)
+    err = got.get("error")
+    if not ok and not err:
+        err = got.get("spoken") or narration
+    return {
+        "path": got.get("path"),
+        "scar": got.get("scar"),
+        "url": got.get("url") or safari.get("url"),
+        "error": err,
+    }
+
+
+def note_last_wire(
+    hive: Path,
+    verb: str,
+    narration: str,
+    utterance: str,
+    *,
+    got=None,
+    retried: bool = False,
+) -> dict:
+    if LAST_WIRE is None:
+        return {}
+    human = narration or ""
+    if PERSONA is not None:
+        human = PERSONA.sanitize_payload(human) or PERSONA.strip_factory(human) or human
+    return LAST_WIRE.write(
+        hive,
+        verb=verb,
+        ok=_hand_ok(got, narration),
+        human_line=human,
+        wire=_wire_from_got(got, narration),
+        utterance=utterance,
+        retried=retried,
+    )
+
+
+def _scar_last_wire(hive: Path, last: dict) -> None:
+    if SCARS is None or not last:
+        return
+    w = last.get("wire") if isinstance(last.get("wire"), dict) else {}
+    scar_id = str(w.get("scar") or f"{last.get('verb') or 'hand'}-wire-dark")[:80]
+    SCARS.record(
+        scar_id=scar_id,
+        symptom=str(last.get("human_line") or w.get("error") or "hand failed"),
+        cause=str(w.get("error") or w.get("path") or "last-wire retry failed"),
+        live=_scars_live(hive),
+    )
+
+
+def _replay_last(last: dict, hive: Path, retrieve_roots, cursor_fn, grok) -> dict:
+    verb = str(last.get("verb") or "")
+    utterance = str(last.get("utterance") or "")
+    if verb == "safari":
+        if SEE is None:
+            return {"ok": False, "path": None, "spoken": "UNKNOWN. Safari could not scroll."}
+        got = SEE.safari_act(utterance, hive=hive)
+        return got if isinstance(got, dict) else {"ok": False, "spoken": "UNKNOWN. Safari could not scroll."}
+    if verb == "files" and FILES is not None:
+        return FILES.search_files(utterance)
+    if verb == "search" and NAMED is not None:
+        return NAMED.web_search(utterance, hive=hive)
+    if verb == "watch_later" and NAMED is not None:
+        return NAMED.watch_later(hive=hive)
+    if verb == "news" and NAMED is not None:
+        return NAMED.news_from_disk(utterance, retrieve_roots)
+    if verb == "make" and NAMED is not None:
+        return NAMED.make_route(utterance)
+    if verb == "calendar" and INBOX is not None:
+        return INBOX.calendar_events("today")
+    if verb == "mail" and INBOX is not None:
+        return INBOX.mail_unread()
+    if verb in {"cursor", "converse", "skill", "build"}:
+        fn = cursor_fn or (ONLINE.call_cursor_turn if ONLINE is not None else None)
+        if fn is None:
+            return {"ok": False, "path": "cursor", "spoken": DARK_BRAIN}
+        try:
+            got = fn(utterance, mode="ask")
+        except TypeError:
+            got = fn(utterance)
+        if not isinstance(got, dict):
+            return {"ok": False, "path": "cursor", "spoken": DARK_BRAIN}
+        if "ok" not in got:
+            got = dict(got)
+            spoken = str(got.get("spoken") or "")
+            got["ok"] = not bool(got.get("unknown")) and not spoken.upper().startswith("UNKNOWN")
+        return got
+    return {
+        "ok": False,
+        "spoken": str(last.get("human_line") or "UNKNOWN. Nothing to retry."),
+    }
+
+
+def heal_from_wire(
+    hive: Path, retrieve_roots: list[Path] | None, cursor_fn, grok
+) -> tuple[str, list, list]:
+    """Retry the last failed hand once. Speak only the human result."""
+    last = LAST_WIRE.read(hive) if LAST_WIRE is not None else {}
+    utterance = str((last or {}).get("utterance") or "").strip()
+    if last and last.get("ok") is False and utterance:
+        if last.get("retried"):
+            _scar_last_wire(hive, last)
+            return str(last.get("human_line") or "That failed again."), ["heal"], []
+        got = _replay_last(last, hive, retrieve_roots, cursor_fn, grok)
+        narration = str((got or {}).get("spoken") or last.get("human_line") or "That failed again.")
+        row = note_last_wire(
+            hive,
+            str(last.get("verb") or ""),
+            narration,
+            utterance,
+            got=got,
+            retried=True,
+        )
+        if not _hand_ok(got, narration):
+            _scar_last_wire(hive, row or last)
+        return narration, [str(last.get("verb") or "heal")], []
+    return heal_spoken(hive, retrieve_roots, cursor_fn, grok)
 
 
 def heal_spoken(hive: Path, retrieve_roots: list[Path] | None, cursor_fn, grok) -> tuple[str, list, list]:
@@ -649,6 +810,8 @@ def classify(utterance: str) -> dict:
                 "args": {"mode": picked, "rest": rest},
                 "host": "local",
             }
+    if WIRE_ASK_RE.search(text):
+        return {"verb": "wire", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if HEAL_RE.search(text):
         return {"verb": "heal", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if TODAY_RE.search(text):
@@ -1030,9 +1193,11 @@ def apply_turn_iter(
             partial=False,
         )
 
-    def emit(narration: str, *, host: str | None = None):
+    def emit(narration: str, *, host: str | None = None, got=None):
         """First speakable sentence → SSE + TTS. Persona once. Finish does not re-speak."""
         raw = DARK_BRAIN if is_ask_leak(narration or "") else (narration or "")
+        if verb in HAND_WIRE_VERBS:
+            note_last_wire(hive, verb, raw, spoken, got=got)
         sents = _split_sentences(raw) or ([raw] if raw.strip() else [])
         parts: list[str] = []
         for sent in sents:
@@ -1112,8 +1277,14 @@ def apply_turn_iter(
             return
         yield from emit(narration)
         return
+    if verb == "wire":
+        last = LAST_WIRE.read(hive) if LAST_WIRE is not None else {}
+        narration = LAST_WIRE.inspect_line(last) if LAST_WIRE is not None else "No last wire on disk."
+        wires = ["wire"]
+        yield from emit(narration, host="local")
+        return
     if verb == "heal":
-        narration, wires, _scars = heal_spoken(hive, retrieve_roots, cursor_fn, grok)
+        narration, wires, _scars = heal_from_wire(hive, retrieve_roots, cursor_fn, grok)
         yield from emit(narration, host="local")
         return
     if verb == "today":
@@ -1133,6 +1304,7 @@ def apply_turn_iter(
         return
     if verb == "files":
         fn = FILES.search_files if FILES is not None else None
+        got = None
         if fn is None:
             narration = "UNKNOWN. Local file wire is not loaded."
             wires = ["files"]
@@ -1141,9 +1313,10 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Local file search returned nothing.")
             wires = [got.get("wire") or "files"]
             cites = got.get("hits") if isinstance(got.get("hits"), list) else []
-        yield from emit(narration, host="local")
+        yield from emit(narration, host="local", got=got)
         return
     if verb == "search":
+        got = None
         if NAMED is None:
             narration = "UNKNOWN. Web search hand is not loaded."
             wires = ["search"]
@@ -1152,9 +1325,10 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Search returned no real links.")
             wires = [got.get("wire") or "search"]
             cites = got.get("cites") if isinstance(got.get("cites"), list) else []
-        yield from emit(narration, host="local")
+        yield from emit(narration, host="local", got=got)
         return
     if verb == "watch_later":
+        got = None
         if NAMED is None:
             narration = "UNKNOWN. Watch Later hand is not loaded."
             wires = ["watch_later"]
@@ -1163,9 +1337,10 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Watch Later returned nothing.")
             wires = [got.get("wire") or "watch_later"]
             cites = [{"title": t} for t in (got.get("titles") or []) if t]
-        yield from emit(narration, host="local")
+        yield from emit(narration, host="local", got=got)
         return
     if verb == "news":
+        got = None
         if NAMED is None:
             narration = "UNKNOWN. News hand is not loaded. I will not invent headlines."
             wires = ["news"]
@@ -1174,9 +1349,10 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. No news on disk.")
             wires = [got.get("wire") or "news"]
             cites = got.get("hits") if isinstance(got.get("hits"), list) else []
-        yield from emit(narration, host="local")
+        yield from emit(narration, host="local", got=got)
         return
     if verb == "make":
+        got = None
         if NAMED is None:
             narration = "UNKNOWN. Make hand is not loaded. I will not invent a vendor."
             wires = ["make"]
@@ -1184,9 +1360,10 @@ def apply_turn_iter(
             got = NAMED.make_route(spoken)
             narration = str(got.get("spoken") or "UNKNOWN. No matching skill on disk.")
             wires = [got.get("wire") or "make"]
-        yield from emit(narration, host="local")
+        yield from emit(narration, host="local", got=got)
         return
     if verb == "safari":
+        got = None
         if SEE is None:
             narration = "UNKNOWN. Safari wire is not loaded."
             wires = ["safari"]
@@ -1194,7 +1371,7 @@ def apply_turn_iter(
             got = SEE.safari_act(spoken)
             narration = str(got.get("spoken") or "UNKNOWN. Safari returned nothing.")
             wires = [got.get("wire") or "safari"]
-        yield from emit(narration, host="local")
+        yield from emit(narration, host="local", got=got)
         return
     if verb in {"calendar", "mail", "invoice"}:
         when = str(plan.get("args", {}).get("when") or "today")
@@ -1204,6 +1381,7 @@ def apply_turn_iter(
     if verb == "status":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
         fn = status_fn or (ONLINE.status if ONLINE is not None else None)
+        got = None
         if fn is None:
             narration = f"Phase {bus_now.get('phase') or 'idle'}. Job {bus_now.get('job_status') or 'done'}."
             wires = []
@@ -1219,9 +1397,10 @@ def apply_turn_iter(
             got = fn(which)
             narration = got.get("spoken") or "UNKNOWN. Status wires returned nothing."
             wires = [p.get("wire") for p in (got.get("parts") or []) if p.get("wire")] or ["status"]
-        yield from emit(narration)
+        yield from emit(narration, got=got)
         return
     if verb == "pro":
+        got = None
         if PRO is None:
             narration = "UNKNOWN. Professional skills wire is not loaded."
             wires = ["pro"]
@@ -1230,13 +1409,14 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. No matching professional skill on disk.")
             wires = [got.get("wire") or "pro"]
             cites = got.get("cites") if isinstance(got.get("cites"), list) else []
-        yield from emit(narration, host="local")
+        yield from emit(narration, host="local", got=got)
         return
     if verb == "cursor":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
         mode = str(plan.get("args", {}).get("mode") or "ask")
         resume_chat, resume_field = _pick_resume(bus_now, mode, cursor_fn, grok)
         fn = cursor_fn or (ONLINE.call_cursor_turn if ONLINE is not None else None)
+        got = None
         if fn is None:
             narration = "UNKNOWN. Cursor wire is not loaded."
             wires = ["cursor"]
@@ -1252,7 +1432,7 @@ def apply_turn_iter(
             wires = [got.get("wire") or "cursor"]
             if got.get("chat_id"):
                 resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
-        yield from emit(narration)
+        yield from emit(narration, got=got)
         return
     if verb not in {"converse", "skill", "build"}:
         yield from emit("Holding. Say Jarvis, or tap Space.")
@@ -1357,9 +1537,10 @@ def apply_turn_iter(
             narration = dark.get("spoken") or DARK_BRAIN
             wires = [dark.get("wire") or "cursor"]
         if spoken_parts:
+            note_last_wire(hive, verb, narration, spoken, got=got_done)
             yield finish(acc or narration, spoken_delta="")
         else:
-            yield from emit(narration)
+            yield from emit(narration, got=got_done)
         return
 
     got = _call_brain(
@@ -1387,7 +1568,7 @@ def apply_turn_iter(
             dark = _dark_brain()
             narration = dark.get("spoken") or DARK_BRAIN
             wires = [dark.get("wire") or "cursor"]
-    yield from emit(narration)
+    yield from emit(narration, got=got)
 
 
 def apply_turn(
