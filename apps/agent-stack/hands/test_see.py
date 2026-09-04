@@ -75,6 +75,34 @@ class SeeTest(unittest.TestCase):
         self.assertTrue(out["ok"])
         self.assertIn("https://evenslouis.ca", out["spoken"])
 
+    def test_safari_extract_links_uses_js_raw(self) -> None:
+        with mock.patch.object(
+            MOD,
+            "safari_js",
+            return_value={"ok": True, "result": "Hive | https://evenslouis.ca\n", "spoken": "ok"},
+        ):
+            out = MOD.safari_extract_links()
+        self.assertTrue(out["ok"])
+        self.assertIn("https://evenslouis.ca", out["raw"])
+        empty = mock.patch.object(MOD, "safari_js", return_value={"ok": True, "result": "NONE", "spoken": "ok"})
+        with empty:
+            dark = MOD.safari_extract_links()
+        self.assertTrue(dark["unknown"])
+        self.assertEqual(dark["raw"], "")
+
+    def test_safari_visible_titles_empty_is_unknown(self) -> None:
+        with mock.patch.object(MOD, "safari_js", return_value={"ok": True, "result": "NONE", "spoken": "ok"}):
+            out = MOD.safari_visible_titles()
+        self.assertTrue(out["unknown"])
+        self.assertEqual(out["titles"], [])
+        with mock.patch.object(
+            MOD,
+            "safari_js",
+            return_value={"ok": True, "result": "Row from JS\nSecond row", "spoken": "ok"},
+        ):
+            listed = MOD.safari_visible_titles()
+        self.assertEqual(listed["titles"], ["Row from JS", "Second row"])
+
     def test_see_block_names_image(self) -> None:
         block = MOD.see_block(
             {

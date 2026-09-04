@@ -225,6 +225,76 @@ def safari_scroll(direction: str = "down") -> dict:
     return got
 
 
+def safari_extract_links() -> dict:
+    """Read http(s) anchors from the front Safari tab. Do not invent URLs."""
+    js = (
+        "(function(){"
+        "var nodes=Array.prototype.slice.call(document.querySelectorAll('a[href]'));"
+        "var out=[],seen={};"
+        "for(var i=0;i<nodes.length&&out.length<12;i++){"
+        "var href=nodes[i].href||'';"
+        "var t=((nodes[i].innerText||nodes[i].textContent||'')+'').replace(/\\s+/g,' ').trim().slice(0,80);"
+        "if(!href||seen[href])continue;"
+        "seen[href]=1;"
+        "out.push(t+' | '+href);"
+        "}"
+        "return out.length?out.join('\\n'):'NONE';"
+        "})()"
+    )
+    got = safari_js(js)
+    if not got.get("ok"):
+        return got
+    raw = str(got.get("result") or "").strip()
+    if raw in {"NONE", "OK", ""}:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "raw": "",
+            "spoken": "UNKNOWN. Front Safari tab listed no links.",
+        }
+    return {"ok": True, "unknown": False, "wire": "safari", "raw": raw, "spoken": "Safari listed links from the front tab."}
+
+
+def safari_visible_titles() -> dict:
+    """Visible YouTube-style titles on the front Safari tab. Empty means UNKNOWN."""
+    js = (
+        "(function(){"
+        "var sel='a#video-title, ytd-playlist-video-renderer #video-title, ytd-video-renderer #video-title';"
+        "var nodes=document.querySelectorAll(sel);"
+        "var out=[],seen={};"
+        "for(var i=0;i<nodes.length&&out.length<8;i++){"
+        "var t=((nodes[i].innerText||nodes[i].getAttribute('title')||'')+'').replace(/\\s+/g,' ').trim();"
+        "if(!t||t.length<2||seen[t])continue;"
+        "seen[t]=1;"
+        "out.push(t.slice(0,100));"
+        "}"
+        "return out.length?out.join('\\n'):'NONE';"
+        "})()"
+    )
+    got = safari_js(js)
+    if not got.get("ok"):
+        return got
+    raw = str(got.get("result") or "").strip()
+    if raw in {"NONE", "OK", ""}:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "titles": [],
+            "spoken": "UNKNOWN. Front Safari tab listed no visible titles.",
+        }
+    titles = [ln.strip() for ln in raw.splitlines() if ln.strip()][:8]
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "safari",
+        "titles": titles,
+        "raw": raw,
+        "spoken": "Safari listed visible titles from the front tab.",
+    }
+
+
 def safari_act(utterance: str) -> dict:
     """Route a spoken Safari action onto the logged-in Safari. Not Chrome. Not Grok Bot."""
     text = (utterance or "").strip()

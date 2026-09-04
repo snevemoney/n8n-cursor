@@ -128,6 +128,38 @@ FILE_RE = re.compile(
     r")\b",
     re.I,
 )
+SEARCH_RE = re.compile(
+    r"\b("
+    r"search (?:the )?(?:web|internet|online)|"
+    r"web search|"
+    r"google\s+\S|"
+    r"look up .+(?:online|on the web)|"
+    r"search (?:for )?.+ on (?:the )?(?:web|internet)|"
+    r"find (?:me )?(?:sources|references) (?:for|on)"
+    r")\b",
+    re.I,
+)
+WATCH_RE = re.compile(
+    r"\b("
+    r"(?:youtube )?(?:my )?watch later|"
+    r"watch later (?:list|playlist|queue)|"
+    r"what(?:'s|s| is) on (?:my )?watch later"
+    r")\b",
+    re.I,
+)
+NEWS_RE = re.compile(
+    r"\b("
+    r"what(?:'s|s| is)(?: the)? (?:latest )?(?:news|headlines)|"
+    r"any (?:latest )?(?:news|headlines|signals)|"
+    r"(?:hive |prescriptive )signals|"
+    r"news (?:today|this (?:week|morning))"
+    r")\b",
+    re.I,
+)
+MAKE_RE = re.compile(
+    r"\b(?:make|generate|create|render)\s+(?:me\s+)?(?:(?:a|an|new)\s+)*(image|video|remotion|presentation)\b",
+    re.I,
+)
 SAFARI_ACT_RE = re.compile(
     r"\b("
     r"open https?://|"
@@ -209,6 +241,8 @@ _INBOX_PATH = Path(__file__).resolve().parent.parent / "hands" / "inbox.py"
 INBOX = _load_mod("agent_stack_inbox", _INBOX_PATH) if _INBOX_PATH.is_file() else None
 _FILES_PATH = Path(__file__).resolve().parent.parent / "hands" / "files.py"
 FILES = _load_mod("agent_stack_files", _FILES_PATH) if _FILES_PATH.is_file() else None
+_NAMED_PATH = Path(__file__).resolve().parent.parent / "hands" / "named.py"
+NAMED = _load_mod("agent_stack_named", _NAMED_PATH) if _NAMED_PATH.is_file() else None
 _SCARS_PATH = Path(__file__).resolve().parent.parent / "memory" / "scars.py"
 SCARS = _load_mod("agent_stack_scars", _SCARS_PATH) if _SCARS_PATH.is_file() else None
 
@@ -271,9 +305,13 @@ def catalog_block() -> str:
 def capabilities_spoken() -> str:
     n = skill_count()
     return (
-        f"I run the hive catalog here, not Grok Bot. {n} skills, Cursor harness, "
-        "Safari with your logins, vault memory, local files, Calendar and Mail. "
-        "Say use skill, search my computer, click in Safari, or build a skill. "
+        f"I run the hive catalog here, not Grok Bot. {n} skills, Cursor harness. "
+        "Already works: Safari open, tabs, scroll, grab; Calendar; Mail; local files; "
+        "life, today, heal. "
+        "This slice: web search in Safari with real links; YouTube Watch Later from the live tab; "
+        "news and signals from disk; make image or video routes to an existing skill. "
+        "Skill-routed or UNKNOWN: Higgsfield generate, Remotion pipeline, full watch.json, computer takeover. "
+        "Say use skill, search the web, watch later, or search my computer. "
         "Send, pay, deploy, book, and publish stay with you."
     )
 
@@ -568,6 +606,20 @@ def classify(utterance: str) -> dict:
         return {"verb": "life", "needs_ask": False, "args": {}, "host": "local"}
     if FILE_RE.search(text):
         return {"verb": "files", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    if SEARCH_RE.search(text):
+        return {"verb": "search", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    if WATCH_RE.search(text):
+        return {"verb": "watch_later", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    if NEWS_RE.search(text):
+        return {"verb": "news", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    make_hit = MAKE_RE.search(text)
+    if make_hit:
+        return {
+            "verb": "make",
+            "needs_ask": False,
+            "args": {"kind": (make_hit.group(1) or "").lower(), "text": text},
+            "host": "local",
+        }
     if SAFARI_ACT_RE.search(text) and not SEE_RE.search(text):
         return {"verb": "safari", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if STATUS_RE.search(text):
@@ -945,6 +997,49 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Local file search returned nothing.")
             wires = [got.get("wire") or "files"]
             cites = got.get("hits") if isinstance(got.get("hits"), list) else []
+        yield finish(narration, host="local")
+        return
+    if verb == "search":
+        if NAMED is None:
+            narration = "UNKNOWN. Web search hand is not loaded."
+            wires = ["search"]
+        else:
+            got = NAMED.web_search(spoken, hive=hive)
+            narration = str(got.get("spoken") or "UNKNOWN. Search returned no real links.")
+            wires = [got.get("wire") or "search"]
+            cites = got.get("cites") if isinstance(got.get("cites"), list) else []
+        yield finish(narration, host="local")
+        return
+    if verb == "watch_later":
+        if NAMED is None:
+            narration = "UNKNOWN. Watch Later hand is not loaded."
+            wires = ["watch_later"]
+        else:
+            got = NAMED.watch_later(hive=hive)
+            narration = str(got.get("spoken") or "UNKNOWN. Watch Later returned nothing.")
+            wires = [got.get("wire") or "watch_later"]
+            cites = [{"title": t} for t in (got.get("titles") or []) if t]
+        yield finish(narration, host="local")
+        return
+    if verb == "news":
+        if NAMED is None:
+            narration = "UNKNOWN. News hand is not loaded. I will not invent headlines."
+            wires = ["news"]
+        else:
+            got = NAMED.news_from_disk(spoken, retrieve_roots)
+            narration = str(got.get("spoken") or "UNKNOWN. No news on disk.")
+            wires = [got.get("wire") or "news"]
+            cites = got.get("hits") if isinstance(got.get("hits"), list) else []
+        yield finish(narration, host="local")
+        return
+    if verb == "make":
+        if NAMED is None:
+            narration = "UNKNOWN. Make hand is not loaded. I will not invent a vendor."
+            wires = ["make"]
+        else:
+            got = NAMED.make_route(spoken)
+            narration = str(got.get("spoken") or "UNKNOWN. No matching skill on disk.")
+            wires = [got.get("wire") or "make"]
         yield finish(narration, host="local")
         return
     if verb == "safari":
