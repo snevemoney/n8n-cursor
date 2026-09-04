@@ -199,7 +199,7 @@ def self_test() -> dict:
             html = home.read().decode("utf-8")
             code = home.status
         banned = ("Desk · Face", "<h2>Observe</h2>", "<h2>Mouth</h2>", "Hold Home", "Hold Talk")
-        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR")
+        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "scheduleRestart", "Use Chrome")
         if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned):
             return {"ok": False, "errors": ["GET / missing tape visualizer"], "status": code}
         return {"ok": True, "errors": [], "port": port, "bind": HOST, "home": 200}

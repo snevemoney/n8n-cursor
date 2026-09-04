@@ -19,12 +19,13 @@ The product you look at is Jared's **living circuit board**. Full viewport. Dark
 
 ## Use (from the tape)
 
-1. Look at the board.
-2. Say **JARVIS** or tap **Space**.
-3. Talk. It listens, thinks, speaks. The board walks those states.
-4. Vault questions get cited answers. Desk jobs still ASK (say yes). Hard steps refuse.
+1. Look at the board. Chrome on `http://127.0.0.1:4018/` (Safari speech is flaky).
+2. First visit: **tap the board or Space** so the browser can arm the mic. Chip reads **LISTENING** when the mic is live.
+3. Say **JARVIS** (or just talk once armed). It listens, thinks, speaks. Recognition restarts on end — no hold-to-talk.
+4. No speech engine: one-line “use Chrome” plus a hidden type field (not a Mouth card).
+5. Vault questions get cited answers. Desk jobs still ASK (say yes). Hard steps refuse.
 
-Wake-word always-on matches the stills (`MIC - LISTENING FOR "JARVIS"`). Repo wizard default hold-Home is **not** what the tour HUD shows.
+Wake-word always-on matches the stills (`MIC - LISTENING FOR "JARVIS"`) **after** the mic is armed. Repo wizard default hold-Home is **not** what the tour HUD shows.
 
 ## Two distinct, then pick
 
