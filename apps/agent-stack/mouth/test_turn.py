@@ -479,7 +479,7 @@ class MouthTurnTest(unittest.TestCase):
             )
             out = MOD.apply_turn("use skill hive-funnels", hive=hive, cursor_fn=harness)
             saved = MOD.load_json(hive / "bus" / "state.json")
-        self.assertEqual(out["verb"], "converse")
+        self.assertEqual(out["verb"], "skill")
         self.assertEqual(seen[0][0], "agent")
         self.assertEqual(seen[0][1], "agent-9")
         self.assertEqual(saved.get("jarvis_chat_id"), "talk-1")
@@ -494,6 +494,63 @@ class MouthTurnTest(unittest.TestCase):
         self.assertTrue(evs[0]["done"])
         self.assertIn("Hey Evens", evs[0]["spoken"])
         self.assertIn("Hey Evens", evs[0]["spoken_delta"])
+
+    def test_catalog_life_files_safari_are_local(self) -> None:
+        self.assertEqual(MOD.classify("what can you do")["verb"], "can")
+        self.assertEqual(MOD.classify("list skills")["verb"], "skills")
+        self.assertEqual(MOD.classify("use skill hive-funnels")["verb"], "skill")
+        self.assertEqual(MOD.classify("build a new skill for invoices")["verb"], "build")
+        self.assertEqual(MOD.classify("what do you know about me")["verb"], "life")
+        self.assertEqual(MOD.classify("search my computer for ledger")["verb"], "files")
+        self.assertEqual(MOD.classify("click Login")["verb"], "safari")
+        self.assertEqual(MOD.classify("open https://evenslouis.ca")["verb"], "safari")
+        self.assertNotIn("grok bot", MOD.capabilities_spoken().lower().replace("not grok bot", ""))
+        self.assertIn("not Grok Bot", MOD.capabilities_spoken())
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-catalog-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text("Four north stars start with maximum leverage.\n", encoding="utf-8")
+            can = MOD.apply_turn("what can you do", hive=hive)
+            self.assertEqual(can["verb"], "can")
+            self.assertIn("not Grok Bot", can["spoken"])
+            self.assertIn("Safari", can["spoken"])
+            skills = MOD.apply_turn("list skills", hive=hive)
+            self.assertIn("Same catalog", skills["spoken"])
+            life = MOD.apply_turn("what do you know about me", hive=hive, retrieve_roots=[vault])
+            self.assertEqual(life["verb"], "life")
+            self.assertIn("Evens", life["spoken"])
+            self.assertIn("UNKNOWN", life["spoken"])
+            self.assertNotRegex(life["spoken"], r"\b2[0-9]\s+years old\b")
+            with mock.patch.object(
+                MOD.FILES,
+                "search_files",
+                return_value={"ok": True, "wire": "files", "spoken": "Found 1 local file: ledger.md.", "hits": [{"path": "/tmp/ledger.md"}]},
+            ):
+                files = MOD.apply_turn("search my computer for ledger", hive=hive)
+            self.assertEqual(files["verb"], "files")
+            self.assertIn("ledger.md", files["spoken"])
+            with mock.patch.object(
+                MOD.SEE,
+                "safari_act",
+                return_value={"ok": True, "wire": "safari", "spoken": "Clicked Login in Safari."},
+            ):
+                safari = MOD.apply_turn("click Login", hive=hive)
+            self.assertEqual(safari["verb"], "safari")
+            self.assertIn("Safari", safari["spoken"])
+            seen: list[str] = []
+
+            def harness(prompt: str, mode: str = "ask", resume: str | None = None) -> dict:
+                seen.append(prompt)
+                return {"ok": True, "wire": "cursor", "spoken": "Building the skill.", "chat_id": "a1"}
+
+            built = MOD.apply_turn("build a new skill for invoices", hive=hive, cursor_fn=harness)
+            self.assertEqual(built["verb"], "build")
+            self.assertTrue(seen)
+            self.assertIn("scripts/hive/grok-skills", seen[0])
+            self.assertIn("Do not spawn Grok Bot", seen[0])
 
 
 if __name__ == "__main__":

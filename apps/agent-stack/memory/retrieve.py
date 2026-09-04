@@ -16,6 +16,7 @@ ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 REPO_OH = ROOT / "docs/hive/outer-heaven"
 DEFAULT_VAULT = Path.home() / "Documents/My_Billion_Dollar_Vault"
+LANES = ROOT / "scripts/hive/business-lanes.json"
 
 ALLOW_REL = (
     "OPERATOR_MEMORY.md",
@@ -248,6 +249,46 @@ def _search_roots(query: str, used_roots: list[Path]) -> dict:
         if len(hits) >= MAX_CITES:
             break
     return _answer(hits)
+
+
+def life_card(roots: list[Path] | None = None) -> dict:
+    """Long-term facts from vault + lanes. Never invent age, people, or dollars."""
+    lanes = load_json(LANES)
+    operator = str(lanes.get("operator") or "Evens Louis").strip() or "Evens Louis"
+    active = []
+    for row in lanes.get("lanes") or []:
+        if isinstance(row, dict) and str(row.get("status") or "") == "active":
+            name = str(row.get("name") or row.get("id") or "").strip()
+            if name:
+                active.append(name)
+    found = search("Evens Louis operator people family age birthday", roots)
+    cites = found.get("hits") or []
+    blob = " ".join(str(h.get("snippet") or "") for h in cites if isinstance(h, dict))
+    age_known = bool(re.search(r"\b(\d{1,3})\s*(?:years old|yo)\b|\bborn\b|\bbirthday\b", blob, re.I))
+    people_known = bool(re.search(r"\b(wife|son|daughter|partner|friend|mom|dad)\b", blob, re.I))
+    bits = [f"You are {operator}."]
+    if active:
+        bits.append("Active businesses: " + ", ".join(active) + ".")
+    else:
+        bits.append("UNKNOWN. Business lanes file had no active lane.")
+    if age_known:
+        bits.append(blob[:180])
+    else:
+        bits.append("UNKNOWN. Age is not in the allow-listed vault files. I will not invent it.")
+    if not people_known:
+        bits.append("UNKNOWN. People notes are not in the allow-listed vault files.")
+    spoken = " ".join(bits)
+    if len(spoken) > 400:
+        spoken = spoken[:397].rsplit(" ", 1)[0] + "…"
+    return {
+        "ok": True,
+        "unknown": not (active or age_known or people_known),
+        "wire": "life",
+        "operator": operator,
+        "businesses": active,
+        "cites": cites,
+        "spoken": spoken,
+    }
 
 
 def search(query: str, roots: list[Path] | None = None) -> dict:

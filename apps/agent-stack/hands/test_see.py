@@ -54,6 +54,27 @@ class SeeTest(unittest.TestCase):
             self.assertTrue(out["ok"])
             self.assertTrue(Path(out["path"]).is_file())
 
+    def test_safari_act_refuses_pay_click(self) -> None:
+        out = MOD.safari_click("Pay now")
+        self.assertFalse(out["ok"])
+        self.assertIn("will not click", out["spoken"].lower())
+        self.assertNotIn("Chrome", out["spoken"])
+
+    def test_safari_tabs_parses(self) -> None:
+        proc = mock.Mock(returncode=0, stdout="Hive | https://evenslouis.ca\nMail | https://mail.google.com\n", stderr="")
+        with mock.patch.object(MOD, "_run", return_value=proc):
+            out = MOD.safari_tabs()
+        self.assertTrue(out["ok"])
+        self.assertEqual(len(out["tabs"]), 2)
+        self.assertIn("evenslouis.ca", out["spoken"])
+
+    def test_safari_act_open_http(self) -> None:
+        proc = mock.Mock(returncode=0, stdout="", stderr="")
+        with mock.patch.object(MOD, "_run", return_value=proc):
+            out = MOD.safari_act("open https://evenslouis.ca in safari")
+        self.assertTrue(out["ok"])
+        self.assertIn("https://evenslouis.ca", out["spoken"])
+
     def test_see_block_names_image(self) -> None:
         block = MOD.see_block(
             {
