@@ -503,7 +503,7 @@
       try {
         const bus = await api("/api/bus");
         if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
-        if (bus.spoken && !state.turning && !state.listening) $("spoken").textContent = bus.spoken;
+        if (bus.spoken && !state.turning && !state.listening && !/hand this to the|say yes to approve/i.test(bus.spoken)) $("spoken").textContent = bus.spoken;
         const wires = await api("/api/wires");
         paintWires(wires);
       } catch (e) {

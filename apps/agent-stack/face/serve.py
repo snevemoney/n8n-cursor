@@ -31,7 +31,22 @@ def _load_mouth():
     return mod
 
 
-MOUTH = _load_mouth()
+_MOUTH = None
+_MOUTH_MTIME = None
+
+
+def mouth():
+    """Reload turn.py when the file on disk changes. Stale 4018 was the ASK bug."""
+    global _MOUTH, _MOUTH_MTIME
+    path = HERE.parent / "mouth" / "turn.py"
+    mtime = path.stat().st_mtime
+    if _MOUTH is None or _MOUTH_MTIME != mtime:
+        _MOUTH = _load_mouth()
+        _MOUTH_MTIME = mtime
+    return _MOUTH
+
+
+MOUTH = mouth()
 
 
 def _load_online():
@@ -81,12 +96,15 @@ def observe_jobs() -> list[dict]:
             )
     bus = load_json(HIVE / "bus" / "state.json")
     if bus:
+        spoken = str(bus.get("spoken") or "")
+        leak = hasattr(mouth(), "is_ask_leak") and mouth().is_ask_leak(spoken)
+        note = spoken if spoken and not leak else (bus.get("utterance") or "idle")
         rows.insert(
             0,
             {
                 "id": "mouth",
                 "status": bus.get("job_status") or "done",
-                "note": bus.get("permission_ask") or bus.get("utterance") or "idle",
+                "note": note,
             },
         )
     return rows[:20]
@@ -163,19 +181,25 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         data = self._read_json()
+        live_mouth = mouth()
         if path == "/api/listen":
-            bus = MOUTH.set_listen(HIVE, bool(data.get("live")))
+            bus = live_mouth.set_listen(HIVE, bool(data.get("live")))
             self._json(200, {"ok": True, **bus})
             return
         if path != "/api/turn":
             self._json(404, {"ok": False, "error": "no such route"})
             return
-        out = MOUTH.apply_turn(
+        out = live_mouth.apply_turn(
             str(data.get("utterance") or ""),
             approved=bool(data.get("approved")),
             hive=HIVE,
             speak=False,
         )
+        spoken = str(out.get("spoken") or "")
+        if out.get("ask") or (hasattr(live_mouth, "is_ask_leak") and live_mouth.is_ask_leak(spoken)):
+            dark = getattr(live_mouth, "DARK_GROK", "I can't reach Grok (missing XAI_API_KEY or GROK_API_KEY).")
+            out = {**out, "ask": False, "spoken": dark, "verb": out.get("verb") if out.get("verb") != "desk" else "converse"}
+            out.pop("permission_ask", None)
         self._json(200, out)
 
 
@@ -183,6 +207,11 @@ def serve(port: int = PORT) -> None:
     if os.environ.get("VOICE_OS_BIND") == "0.0.0.0":
         raise SystemExit("0.0.0.0 refused")
     mark_pieces_wired()
+    live_mouth = mouth()
+    bus_path = HIVE / "bus" / "state.json"
+    bus = load_json(bus_path)
+    if bus and hasattr(live_mouth, "scrub_bus_ask") and live_mouth.scrub_bus_ask(bus):
+        live_mouth.write_json(bus_path, bus)
     httpd = ThreadingHTTPServer((HOST, port), Handler)
     print(json.dumps({"ok": True, "url": f"http://{HOST}:{port}/", "bind": HOST}, indent=2))
     try:

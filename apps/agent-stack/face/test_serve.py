@@ -70,6 +70,14 @@ class FaceServeTest(unittest.TestCase):
         self.assertNotIn("getTracks().forEach((t) => t.stop())", html)
         self.assertNotIn("scheduleRestart(180)", html)
         self.assertNotIn("scheduleRestart(120)", html)
+        self.assertIn("hand this to the|say yes to approve", html)
+
+    def test_stale_mouth_reloads_and_never_generates_desk_ask(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("_MOUTH_MTIME", text)
+        self.assertIn("st_mtime", text)
+        self.assertNotIn('bus.get("permission_ask") or bus.get("utterance")', text)
+        self.assertNotIn("May I hand this to the grok desk", text)
 
 
 if __name__ == "__main__":

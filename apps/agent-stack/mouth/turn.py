@@ -34,14 +34,6 @@ HARD_REFUSE = re.compile(
     r")",
     re.I,
 )
-YES_RE = re.compile(
-    r"^(yes|yeah|yep|yup|do it|approve|go ahead|ok|okay)\s*[.!]?\s*$",
-    re.I,
-)
-NO_RE = re.compile(
-    r"^(no|nope|cancel|never mind|stop|don't|do not)\s*[.!]?\s*$",
-    re.I,
-)
 SKILL_RE = re.compile(
     r"\b(?:use|load|run)\s+(?:skill\s+)?([a-z0-9][a-z0-9-]{2,60})\b",
     re.I,
@@ -61,6 +53,26 @@ ASK_LEAK = re.compile(
     re.I,
 )
 DARK_GROK = "I can't reach Grok (missing XAI_API_KEY or GROK_API_KEY)."
+
+
+def is_ask_leak(text: str) -> bool:
+    return bool(ASK_LEAK.search(text or ""))
+
+
+def scrub_bus_ask(bus: dict) -> bool:
+    """Drop leftover yellow desk-ASK so Safari cannot speak it again. True if dirty."""
+    if not isinstance(bus, dict):
+        return False
+    ask = str(bus.get("permission_ask") or "").strip()
+    spoken = str(bus.get("spoken") or "")
+    if not (ask or is_ask_leak(spoken)):
+        return False
+    bus["permission_ask"] = None
+    if is_ask_leak(spoken):
+        bus["spoken"] = ""
+    if bus.get("job_status") == "yellow":
+        bus["job_status"] = "done"
+    return True
 
 
 def _load_mod(name: str, path: Path):
@@ -197,17 +209,17 @@ def bus_write(
 
 
 def set_listen(hive: Path, live: bool) -> dict:
-    """Face owns the mic. LIVE writes listen; MUTE returns to idle unless yellow ASK."""
+    """Face owns the mic. LIVE writes listen; MUTE returns to idle."""
     path = hive / "bus" / "state.json"
     bus = load_json(path)
-    yellow = bus.get("job_status") == "yellow"
+    scrub_bus_ask(bus)
     bus.update(
         {
             "schema_version": 1,
-            "phase": "listen" if live else ("speak" if yellow else "idle"),
+            "phase": "listen" if live else "idle",
             "job_status": bus.get("job_status") or "done",
             "utterance": bus.get("utterance") or "",
-            "permission_ask": bus.get("permission_ask"),
+            "permission_ask": None,
             "mic": "live" if live else "mute",
             "updated_at": now_iso(),
         }
@@ -274,7 +286,7 @@ def _vault_extract(utterance: str, retrieve_roots: list[Path] | None) -> tuple[s
     if int(top.get("score") or 0) < 4:
         return "", []
     spoken = str(found.get("spoken") or "").strip()
-    if ASK_LEAK.search(spoken):
+    if is_ask_leak(spoken):
         return "", cites
     return spoken, cites
 
@@ -283,7 +295,7 @@ def _dark_grok() -> dict:
     if ONLINE is not None:
         got = ONLINE.unknown_grok()
         spoken = str(got.get("spoken") or "").strip()
-        if spoken and not ASK_LEAK.search(spoken):
+        if spoken and not is_ask_leak(spoken):
             if "XAI_API_KEY" in spoken or "GROK_API_KEY" in spoken:
                 return {**got, "spoken": DARK_GROK}
             return {**got, "spoken": DARK_GROK}
@@ -310,25 +322,12 @@ def apply_turn(
 ) -> dict:
     spoken = (utterance or "").strip()
     bus_now = load_json(hive / "bus" / "state.json")
-    prior = str(bus_now.get("utterance") or "").strip()
-    if YES_RE.match(spoken) and bus_now.get("permission_ask") and prior:
-        return apply_turn(
-            prior,
-            approved=True,
-            hive=hive,
-            speak=speak,
-            retrieve_roots=retrieve_roots,
-            grok=grok,
-            status_fn=status_fn,
-        )
-    if NO_RE.match(spoken) and bus_now.get("permission_ask"):
-        bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None, spoken="Okay, cancelled.")
-        out = {"ok": True, "verb": "cancel", "ask": False, "spoken": "Okay, cancelled.", "host": "local", "cites": [], "wires": []}
-        if speak:
-            speak_local(out["spoken"])
-        return out
+    if scrub_bus_ask(bus_now):
+        write_json(hive / "bus" / "state.json", bus_now)
 
     plan = classify(spoken)
+    if plan.get("needs_ask") or plan.get("verb") == "desk":
+        plan = {"verb": "converse", "needs_ask": False, "args": {"text": spoken}, "host": "online"}
     verb = plan["verb"]
     prior_turns = load_turns(bus_now)
     if verb == "refuse":
@@ -380,7 +379,7 @@ def apply_turn(
         context, cites, vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
         got = _call_grok(spoken, context, grok)
         reply = str(got.get("spoken") or "").strip()
-        if got.get("ok") and reply and not ASK_LEAK.search(reply):
+        if got.get("ok") and reply and not is_ask_leak(reply):
             narration = reply
             wires = [got.get("wire") or "grok"]
         else:
@@ -390,7 +389,7 @@ def apply_turn(
     else:
         narration = "Holding. Say Jarvis, or tap Space."
 
-    if ASK_LEAK.search(narration or ""):
+    if is_ask_leak(narration or ""):
         narration = DARK_GROK
 
     next_turns = prior_turns if verb == "idle" else append_turn(prior_turns, spoken, narration)
@@ -459,13 +458,37 @@ def self_test() -> dict:
         refused = apply_turn("send this email", hive=hive)
         if refused.get("verb") != "refuse" or refused.get("ask"):
             return {"ok": False, "errors": ["send this email must refuse, not ask"], "got": refused}
-        for line in ("what's my north star", "hey how are you", "hey", "remember this", "send me a joke"):
+        for line in ("what's my north star", "hey how are you", "hey", "what's going on", "remember this", "send me a joke", "tell me a joke"):
             out = apply_turn(line, hive=hive, retrieve_roots=[vault], grok=fake_grok)
             jobs = hive / "bus" / "jobs.jsonl"
             if out.get("ask") or not _no_ask(out) or jobs.is_file():
                 return {"ok": False, "errors": [f"{line!r} must converse with no ask and no queue"], "got": out}
             if classify(line)["needs_ask"] or classify(line)["verb"] in {"desk", "hello", "idle", "refuse"}:
                 return {"ok": False, "errors": [f"{line!r} classified as desk/ask/hello"], "got": classify(line)}
+        leftover = hive / "bus" / "state.json"
+        stale_ask = "May I " + "hand this to the " + "grok desk? Say yes to approve."
+        leftover.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "phase": "speak",
+                    "job_status": "yellow",
+                    "utterance": "Hello",
+                    "permission_ask": stale_ask,
+                    "spoken": stale_ask,
+                    "turns": [],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        for line in ("hey", "what's going on", "tell me a joke"):
+            out = apply_turn(line, hive=hive, retrieve_roots=[vault], grok=fake_grok)
+            if out.get("ask") or not _no_ask(out) or out.get("verb") != "converse":
+                return {"ok": False, "errors": [f"leftover ASK must not speak on {line!r}"], "got": out}
+            if load_json(leftover).get("permission_ask"):
+                return {"ok": False, "errors": ["leftover permission_ask must be cleared"], "got": load_json(leftover)}
         seen: list[str] = []
 
         def rec_grok(prompt: str, context: str = "") -> dict:
