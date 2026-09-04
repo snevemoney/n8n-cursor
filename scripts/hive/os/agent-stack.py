@@ -79,8 +79,8 @@ def default_stack(vault: dict | None = None, *, hive: Path = HIVE) -> dict:
         "pieces": {
             "memory": "adopted",
             "wizard": "wired",
-            "mouth": "parked",
-            "face": "parked",
+            "mouth": "wired",
+            "face": "wired",
             "hands": "parked",
         },
         "never": [

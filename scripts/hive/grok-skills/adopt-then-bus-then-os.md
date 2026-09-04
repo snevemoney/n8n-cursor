@@ -15,7 +15,7 @@ description: >-
 **Grok `/` copy:** `~/.grokbot/skills/adopt-then-bus-then-os/SKILL.md`  
 **CLI:** `python3 scripts/hive/os/agent-stack.py adopt|validate|bus-write|bus-read`  
 **Parent:** `internal-host-os` (labeled merge — this is the conductor + bus, not a second vault).  
-**Also:** `observe-pane` · `session-bootstrap` · `voice-four-pieces-three-doors` (mouth later).
+**Also:** `observe-pane` · `session-bootstrap` · `talk-then-see-then-bus` (mouth + face).
 
 **Source:** public repo + README (observed). Tour tape `FiOTrxq9ckM` caption-only / unwatched this sitting. AGPL upstream — pattern rewrite, no vendor.
 
@@ -32,7 +32,9 @@ BUS: .hive/bus/state.json  phase=idle|listen|think|speak
 JOB: observe-pane working|yellow|done
 PERMISSION: ask
 HOSTS: cursor + grok
-PARK: mouth · face · hands
+PARK: hands
+MOUTH: talk-then-see-then-bus
+FACE: obsidianOS/voice.html
 NEVER: claude-code · second-home · live-/
 ```
 
