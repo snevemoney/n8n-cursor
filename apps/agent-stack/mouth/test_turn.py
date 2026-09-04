@@ -727,7 +727,7 @@ class MouthTurnTest(unittest.TestCase):
             self.assertEqual(mktg["verb"], "pro")
             self.assertTrue(mktg["spoken"].startswith("Sir."))
             self.assertIn("mktg", mktg["spoken"])
-            self.assertLessEqual(mktg["spoken"].lower().count("mktg-"), 3)
+            self.assertLessEqual(len(mktg.get("cites") or []), 3)
 
     def test_stream_persona_once_and_tts_on_first_delta(self) -> None:
         chunks = [
