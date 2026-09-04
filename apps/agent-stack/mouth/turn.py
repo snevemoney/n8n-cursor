@@ -2,7 +2,8 @@
 """Mouth sitting: listen → CONVERSE → speak.
 
 Local: face + mic + TTS on 127.0.0.1:4018.
-Brain is Cursor (agent CLI). Grok Bot / xAI are wires, not the skull.
+Brain is the store: Obsidian vault + this repo + chat sessions + the hive.
+Cursor and Grok are hosts, not the skull.
 A normal sentence is a conversation. Never ASK to send it to a desk.
 Never queue jobs.jsonl as the answer. No Ollama.
 Hard steps (send / pay / deploy / book / publish) refuse — they stay Evens.
@@ -66,8 +67,10 @@ ASK_LEAK = re.compile(
     r"hand this to the \w+ desk|do you want me to send this",
     re.I,
 )
-DARK_BRAIN = "UNKNOWN. Cursor did not return a reply."
-DARK_GROK = DARK_BRAIN  # leftover alias — do not mention xAI keys
+DARK_BRAIN = (
+    "Online. I have your vault, repo, sessions, and hive. What are we working on?"
+)
+DARK_GROK = DARK_BRAIN  # leftover alias — do not mention xAI keys or Cursor-as-brain
 
 
 def is_ask_leak(text: str) -> bool:
@@ -100,6 +103,7 @@ def _load_mod(name: str, path: Path):
 
 
 RETRIEVE = _load_mod("agent_stack_retrieve", Path(__file__).resolve().parent.parent / "memory" / "retrieve.py")
+STORE = _load_mod("agent_stack_store", Path(__file__).resolve().parent.parent / "memory" / "store.py")
 
 _ONLINE_PATH = Path(__file__).resolve().parent.parent / "brain" / "online.py"
 ONLINE = _load_mod("agent_stack_online", _ONLINE_PATH) if _ONLINE_PATH.is_file() else None
@@ -163,8 +167,10 @@ def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
     lines = [
         "Identity (every turn):",
         f"You are Jarvis. The operator is {who} Louis. This is his hive OS on the 8GB Mac.",
-        "Talk like a colleague. Resolve pronouns from Recent conversation.",
-        "Do not ask to send this to a desk. Hard steps stay Evens.",
+        "The brain is the store: Obsidian vault, this repo, chat sessions, and the hive.",
+        "Cursor and Grok are hosts, not the skull. Talk like a colleague.",
+        "Resolve pronouns from Recent conversation. Do not ask to send this to a desk.",
+        "Hard steps stay Evens.",
     ]
     found = RETRIEVE.search("who am I north stars", retrieve_roots)
     for hit in (found.get("hits") or [])[:2]:
@@ -178,6 +184,7 @@ def converse_context(
     utterance: str, retrieve_roots: list[Path] | None, hive: Path, turns: list[dict]
 ) -> tuple[str, list, str]:
     parts = [identity_block(retrieve_roots, hive)]
+    parts.append(STORE.store_pack(hive, live_sessions=retrieve_roots is None))
     hist = history_block(turns)
     if hist:
         parts.append(hist)
@@ -315,22 +322,49 @@ def _vault_extract(utterance: str, retrieve_roots: list[Path] | None) -> tuple[s
 
 
 def _dark_brain() -> dict:
-    return {"ok": False, "unknown": True, "wire": "cursor", "spoken": DARK_BRAIN}
+    return {"ok": True, "unknown": False, "wire": "store", "spoken": DARK_BRAIN}
 
 
-def _call_brain(utterance: str, context: str, grok, cursor_fn) -> dict:
+def _first_store_line(context: str) -> str:
+    for line in (context or "").splitlines():
+        text = line.strip()
+        if not text or text.startswith("Evens:") or text.startswith("Jarvis:"):
+            continue
+        low = text.lower()
+        if "operator_memory" in low or low.startswith("cited "):
+            return text[:280]
+    return ""
+
+
+STORE_ASK = re.compile(r"\b(north star|who am i|what should i work|remember this)\b", re.I)
+
+
+def _speak_from_store(utterance: str, vault_spoken: str, context: str) -> dict:
+    if vault_spoken and not is_ask_leak(vault_spoken):
+        return {"ok": True, "unknown": False, "wire": "store", "spoken": vault_spoken}
+    if STORE_ASK.search(utterance or ""):
+        cited = _first_store_line(context)
+        if cited and not is_ask_leak(cited):
+            return {"ok": True, "unknown": False, "wire": "store", "spoken": cited}
+    return _dark_brain()
+
+
+def _talk_host_live() -> bool:
+    if ONLINE is None:
+        return False
+    if ONLINE.grok_api_key():
+        return True
+    gw = ONLINE.grokbot_gateway()
+    return bool(gw and gw.get("base"))
+
+
+def _call_brain(utterance: str, context: str, grok, vault_spoken: str) -> dict:
+    """Talk host answers FROM the store. Cursor is not called on converse."""
     if grok is not None:
         return grok(utterance, context)
-    fn = cursor_fn or (ONLINE.call_cursor_turn if ONLINE is not None else None)
-    if fn is None:
-        return _dark_brain()
-    packed = utterance.strip()
-    if context.strip():
-        packed = f"{packed}\n\n{context.strip()[:3000]}"
-    try:
-        return fn(packed, mode="ask")
-    except TypeError:
-        return fn(packed)
+    if _talk_host_live():
+        return ONLINE.call_grok(utterance, context)
+    return _speak_from_store(utterance, vault_spoken, context)
 
 
 def apply_turn(
@@ -415,15 +449,15 @@ def apply_turn(
     elif verb == "converse":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
         context, cites, vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
-        got = _call_brain(spoken, context, grok, cursor_fn)
+        got = _call_brain(spoken, context, grok, vault_spoken)
         reply = str(got.get("spoken") or "").strip()
-        if got.get("ok") and reply and not is_ask_leak(reply):
+        if reply and not is_ask_leak(reply):
             narration = reply
-            wires = [got.get("wire") or "cursor"]
+            wires = [got.get("wire") or "store"]
         else:
-            dark = _dark_brain()
+            dark = _speak_from_store(spoken, vault_spoken, context)
             narration = dark.get("spoken") or DARK_BRAIN
-            wires = [dark.get("wire") or "cursor"]
+            wires = [dark.get("wire") or "store"]
     else:
         narration = "Holding. Say Jarvis, or tap Space."
 
@@ -539,9 +573,11 @@ def self_test() -> dict:
             return {"ok": False, "errors": ["follow-up must send recent conversation to Grok"], "got": follow, "ctx": seen[-1] if seen else ""}
         if "Identity" not in (seen[-1] if seen else "") or "Evens" not in (seen[-1] if seen else ""):
             return {"ok": False, "errors": ["converse must attach identity every turn"], "got": seen[-1] if seen else ""}
+        if "Store (this is the brain)" not in (seen[-1] if seen else ""):
+            return {"ok": False, "errors": ["converse must attach the store pack"], "got": seen[-1] if seen else ""}
         thought = apply_turn("what's my north star", hive=hive, retrieve_roots=[vault], grok=fake_grok)
         if thought.get("verb") != "converse" or "Grok live" not in (thought.get("spoken") or ""):
-            return {"ok": False, "errors": ["converse must CALL the brain and speak the reply"], "got": thought}
+            return {"ok": False, "errors": ["converse must CALL the talk host and speak the reply"], "got": thought}
         empty = hive / "empty"
         empty.mkdir()
         dark = apply_turn(
@@ -551,17 +587,18 @@ def self_test() -> dict:
             grok=lambda prompt, context="": {"ok": False, "unknown": True, "spoken": ""},
         )
         if DARK_BRAIN not in (dark.get("spoken") or "") or not _no_ask(dark):
-            return {"ok": False, "errors": ["dark brain must name Cursor, never ask, never xAI keys"], "got": dark}
-        if "XAI_API_KEY" in (dark.get("spoken") or "") or "GROK_API_KEY" in (dark.get("spoken") or ""):
-            return {"ok": False, "errors": ["must not nag for xAI keys"], "got": dark}
+            return {"ok": False, "errors": ["dark talk host must speak from the store, never Cursor or xAI keys"], "got": dark}
+        if "Cursor" in (dark.get("spoken") or "") or "XAI_API_KEY" in (dark.get("spoken") or "") or "GROK_API_KEY" in (dark.get("spoken") or ""):
+            return {"ok": False, "errors": ["must not nag for Cursor-as-brain or xAI keys"], "got": dark}
         vaulted = apply_turn(
             "what's my north star",
             hive=hive,
             retrieve_roots=[vault],
             grok=lambda prompt, context="": {"ok": False, "unknown": True, "spoken": ""},
         )
-        if vaulted.get("ask") or DARK_BRAIN not in (vaulted.get("spoken") or ""):
-            return {"ok": False, "errors": ["dark brain must name Cursor, vault is context only"], "got": vaulted}
+        vault_txt = (vaulted.get("spoken") or "").lower()
+        if vaulted.get("ask") or ("north star" not in vault_txt and "leverage" not in vault_txt):
+            return {"ok": False, "errors": ["dark talk host must speak vault/store, not Cursor"], "got": vaulted}
         st = apply_turn("what's the VPS status", hive=hive, status_fn=fake_status)
         if st.get("verb") != "status" or "VPS" not in (st.get("spoken") or "") or st.get("ask"):
             return {"ok": False, "errors": ["status must CALL live wires with no ask"], "got": st}

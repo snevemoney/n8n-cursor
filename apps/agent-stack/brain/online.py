@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Online Jarvis brain. Local face only. No Ollama. No extractive answer.
+"""Talk hosts and live wires. Local face only. No Ollama.
 
-Grok (xAI or Grok Bot) thinks. Hive / VPS / Cursor are live wires.
-Vault retrieve is extra context, not the product memory.
-Missing key or CLI → spoken UNKNOWN naming that wire.
+The brain is the store (vault + repo + sessions + hive).
+Grok is a talk host. Cursor is a repo hand. Neither is the skull.
+Missing host → mouth speaks from the store. Do not nag for xAI keys.
 """
 from __future__ import annotations
 
@@ -27,11 +27,11 @@ DEFAULT_MODEL = "grok-4"
 SPEAK_CAP = 420
 SYS = (
     "You are Jarvis for Evens Louis. Face and mic stay on the 8GB Mac. "
-    "You are the online brain. Answer from the live facts and vault snippets. "
-    "Vault is one memory among live state, not the whole OS. "
+    "The brain is the store: Obsidian vault, this git repo, chat sessions, and the hive. "
+    "You are a talk host. Answer from the store pack in Live context. "
+    "Cursor is a hand for repo turns. Grok Bot is a desk. Neither is the skull. "
     "Hard steps (send, pay, deploy, book, publish) stay Evens. "
-    "Never invent Claude, ChatGPT, Gemini, or Ollama. "
-    "If a wire is missing, say UNKNOWN and name it. Speak short."
+    "Never invent Claude, ChatGPT, Gemini, or Ollama. Speak short."
 )
 
 
@@ -126,15 +126,16 @@ def wire_report() -> dict:
         "local": "face+mic+tts",
         "ollama": "refused",
         "wires": {
-            "brain": "cursor" if agent_cmd() else "dark",
-            "grok": "optional" if grok_api_key() else "off",
+            "brain": "store",
+            "store": "vault+repo+sessions+hive",
+            "grok": "talk" if grok_api_key() else "off",
             "grokbot": grokbot,
             "hive": "http",
             "vps": "ssh",
-            "cursor": "print" if agent_cmd() else "dark",
-            "vault": "context",
+            "cursor": "hand" if agent_cmd() else "dark",
+            "vault": "store",
         },
-        "need": [] if agent_cmd() else ["Cursor agent CLI (logged in)"],
+        "need": [],
     }
 
 
@@ -143,7 +144,7 @@ def unknown_grok() -> dict:
         "ok": False,
         "unknown": True,
         "wire": "grok",
-        "spoken": "UNKNOWN. Grok is a desk wire, not the brain. Talk goes through Cursor.",
+        "spoken": "UNKNOWN. Grok is a desk host, not the store.",
         "engine": "unknown",
     }
 
@@ -272,7 +273,7 @@ def call_grokbot(prompt: str, context: str = "") -> dict:
         "ack": sent,
         "spoken": (
             "UNKNOWN. Grok Bot sendPrompt did not return a spoken reply. "
-            "Grok Bot is not the brain."
+            "Grok Bot is a desk, not the store."
         ),
     }
 
