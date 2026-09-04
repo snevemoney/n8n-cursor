@@ -2,7 +2,7 @@
   "capability_id": "CAP-talk-then-see-then-bus",
   "name": "talk-then-see-then-bus",
   "goal": "shared screen + spoken ask → hive skill / file / queued browse-watch on the existing OS bus",
-  "demonstrated_outcome": "Zubair tapes show see-screen, arrow, narrate, ask-before-risky, second brain. Hive remap 2026-09-04: voice.html + voice-os.py on 127.0.0.1:4018. Mouth/face wired. Hands parked. No Claude Code.",
+  "demonstrated_outcome": "Zubair tapes show see-screen, arrow, narrate, ask-before-risky, mouse takeover. Hive remap 2026-09-04: voice.html + voice-os.py on 127.0.0.1:4018. Mouth/face/hands wired. ASK then ctypes CoreGraphics click. No Claude Code.",
   "observed_workflow": [
     "Share the screen (getDisplayMedia) so the face has eyes",
     "Hold to talk or type (barge-in cancels TTS)",
@@ -10,10 +10,11 @@
     "Hard-steps refuse; browse/watch ASK then queue for Cursor host",
     "File list/read only inside repo + adopted vault",
     "Hive skills load from scripts/hive/grok-skills/",
-    "Arrow overlay points; mouse takeover stays parked"
+    "Arrow overlay points; Hands pill + preview click after ASK arms the Mac mouse"
   ],
   "tools": [
     "voice-os.py",
+    "hands.py",
     "agent-stack.py bus",
     "obsidianOS/voice.html",
     "cursor-ide-browser (queued)",
@@ -23,6 +24,7 @@
   "agent_abilities": [
     "talk on the existing desk",
     "see a live shared screen",
+    "take the mouse after Yes (preview click or click at x y)",
     "route to hive skills without a new vendor runtime"
   ],
   "triggers": [
@@ -33,7 +35,7 @@
   "guardrails": [
     "send / pay / deploy / book / publish stay HITL",
     "Claude Code / Fable / Retell / Vapi operate-never",
-    "hands / mouse takeover parked",
+    "hands arm only after ASK; never invent a click from a button name",
     "bind 127.0.0.1 only",
     "auto-approve stays off"
   ],
@@ -44,6 +46,8 @@
   ],
   "decision_rules": [
     "IF hard-step words → refuse",
+    "IF take the mouse → ASK then bus.hands_armed",
+    "IF click without arm or without coords → tell them to approve / point",
     "IF browse or watch → ASK then queue",
     "IF path outside vault/repo → deny",
     "IF Claude Code / Fable named as host → refuse and remap"
@@ -72,7 +76,7 @@
   ],
   "reproduce": "python3 scripts/hive/os/voice-os.py self-test && python3 scripts/hive/os/voice-os.py serve",
   "generalize": "Same pane can queue any hive skill. Host still executes browser/watch.",
-  "improve": "Do not improve by installing Claude Code or taking the mouse.",
+  "improve": "Do not improve by installing Claude Code or inferring a Pay/Send click.",
   "primitive_ids": [
     "PRIM-fullstack-agent-file-bus"
   ],
@@ -84,7 +88,7 @@
   "knowledge_type": "synthesis",
   "evidence_status": "transcript-implied",
   "status": "TESTING",
-  "last_verify": "2026-09-04 Forge dry-run: test_voice_os.py (no mic). Watchdog GRADE pending.",
+  "last_verify": "2026-09-04 Forge dry-run: test_voice_os.py + test_hands.py (no live HID). Watchdog GRADE pending.",
   "unknowns": {
     "known": [
       "ud7wzdiM0gk is Claude Code computer-use",

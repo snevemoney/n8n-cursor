@@ -86,6 +86,12 @@
       border-radius: 999px; color: var(--paper); padding: 12px 14px; font: inherit;
     }
     .ask { border-color: var(--amber); }
+    .banner {
+      display: none; margin: 10px 0 0; padding: 10px 14px; border-radius: 14px;
+      border: 1px solid var(--amber); color: var(--amber); font-size: 13px;
+    }
+    .banner.on { display: block; }
+    .hero.armed { box-shadow: 0 0 0 1px var(--amber), 0 30px 80px rgba(0,0,0,.35); }
     .skills { display: flex; flex-wrap: wrap; gap: 6px; }
     .skills button { font-size: 11px; }
     @media (max-width: 820px) {
@@ -104,6 +110,7 @@
       <span class="pill"><i class="dot" id="dot"></i><span id="phase">idle</span></span>
       <a class="util" href="./index.html">NOW</a>
       <a class="util on" href="./voice.html">VOICE</a>
+      <button type="button" class="util" id="handspill">Hands off</button>
     </header>
 
     <section class="hero" id="hero">
@@ -115,7 +122,8 @@
     <div class="grid">
       <article class="card">
         <h2>Talk with the hive</h2>
-        <p>Hold talk. Barge in anytime. I use Cursor + Grok skills on this Mac — files, browse jobs, video watch. I ask before anything risky. I do not take the mouse.</p>
+        <p>Hold talk. Barge in anytime. I use Cursor + Grok skills on this Mac — files, browse jobs, video watch, and the mouse after you approve. Share Entire Screen so a preview click lands.</p>
+        <div class="banner" id="handsbanner">Hands on — click the preview to click the Mac. Esc or Hands off to drop it.</div>
         <div class="row">
           <button type="button" id="talk">Hold to talk</button>
           <input id="typed" placeholder="or type — list skills, read hot.md, watch a YouTube url" />
@@ -137,7 +145,27 @@
   </div>
   <script>
     const $ = (id) => document.getElementById(id);
-    const state = { pending: null, stream: null, rec: null, listening: false };
+    const state = { pending: null, stream: null, rec: null, listening: false, handsArmed: false };
+
+    function clamp01(n) {
+      return Math.max(0, Math.min(1, n));
+    }
+
+    function videoNorm(ev, video) {
+      const rect = video.getBoundingClientRect();
+      const vx = ev.clientX - rect.left;
+      const vy = ev.clientY - rect.top;
+      const rw = rect.width;
+      const rh = rect.height;
+      const vw = video.videoWidth || rw;
+      const vh = video.videoHeight || rh;
+      const scale = Math.max(rw / vw, rh / vh);
+      const dw = vw * scale;
+      const dh = vh * scale;
+      const ox = (dw - rw) / 2;
+      const oy = (dh - rh) / 2;
+      return { nx: clamp01((vx + ox) / dw), ny: clamp01((vy + oy) / dh) };
+    }
     const synth = window.speechSynthesis;
 
     function speak(text) {
@@ -162,8 +190,13 @@
     async function refresh() {
       try {
         const bus = await api("/api/bus");
-        $("phase").textContent = `${bus.phase || "idle"} · ${bus.job_status || ""}`;
-        $("dot").className = "dot" + (bus.job_status === "yellow" ? " yellow" : bus.phase === "listen" ? " live" : "");
+        state.handsArmed = !!bus.hands_armed;
+        $("phase").textContent = `${bus.phase || "idle"} · ${bus.job_status || ""}${state.handsArmed ? " · hands" : ""}`;
+        $("dot").className = "dot" + (bus.job_status === "yellow" ? " yellow" : bus.phase === "listen" || state.handsArmed ? " live" : "");
+        $("handspill").textContent = state.handsArmed ? "Hands on" : "Hands off";
+        $("handspill").classList.toggle("on", state.handsArmed);
+        $("handsbanner").classList.toggle("on", state.handsArmed);
+        $("hero").classList.toggle("armed", state.handsArmed);
         if (bus.utterance) logLine(`${bus.phase}: ${bus.utterance}`);
       } catch (err) {
         $("phase").textContent = "server off — run voice-os.py serve";
@@ -178,6 +211,7 @@
       const out = await api("/api/turn", { utterance, approved: !!approved, screen_note: note });
       logLine(out.spoken || JSON.stringify(out));
       speak(out.spoken || "");
+      if (typeof out.hands_armed === "boolean") state.handsArmed = out.hands_armed;
       if (out.ask) {
         state.pending = utterance;
         $("askbox").hidden = false;
@@ -194,19 +228,48 @@
         state.stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
         $("share").srcObject = state.stream;
         $("sharebtn").textContent = "Screen live";
-        speak("I can see the shared screen. I will not take the mouse.");
+        speak("I can see the shared screen. Say take the mouse if you want me to click.");
       } catch (err) {
         logLine("screen share cancelled");
       }
     };
 
-    $("hero").onclick = (ev) => {
+    $("hero").onclick = async (ev) => {
       if (ev.target.id === "sharebtn") return;
       const box = $("hero").getBoundingClientRect();
       $("arrow").style.display = "block";
       $("arrow").style.left = `${ev.clientX - box.left}px`;
       $("arrow").style.top = `${ev.clientY - box.top}px`;
+      if (!state.handsArmed) {
+        logLine("preview click — hands off. say take the mouse");
+        return;
+      }
+      const point = videoNorm(ev, $("share"));
+      try {
+        const out = await api("/api/hands", {
+          action: "click",
+          nx: point.nx,
+          ny: point.ny,
+          screen_w: window.screen.width,
+          screen_h: window.screen.height,
+        });
+        logLine(out.spoken || JSON.stringify(out));
+        if (out.spoken) speak(out.spoken);
+      } catch (err) {
+        logLine("hands click failed");
+      }
     };
+
+    $("handspill").onclick = () => {
+      if (state.handsArmed) turn("hands off", false);
+      else turn("take the mouse", false);
+    };
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && state.handsArmed) {
+        api("/api/hands", { action: "disarm" }).then(() => refresh());
+      }
+    });
 
     function startListen() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;

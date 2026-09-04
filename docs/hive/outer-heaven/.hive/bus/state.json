@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
-  "phase": "idle",
+  "phase": "speak",
   "job_status": "done",
-  "utterance": "",
+  "utterance": "send this email",
   "permission_ask": null,
-  "updated_at": "2026-09-04T06:33:35Z"
+  "hands_armed": false,
+  "updated_at": "2026-09-04T14:45:00Z"
 }

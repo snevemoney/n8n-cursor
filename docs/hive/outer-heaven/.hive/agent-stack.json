@@ -27,7 +27,7 @@
     "wizard": "wired",
     "mouth": "wired",
     "face": "wired",
-    "hands": "parked"
+      "hands": "wired"
   },
   "never": [
     "claude-code",
@@ -36,5 +36,5 @@
     "live-/",
     "vendor-agpl-clone"
   ],
-  "updated_at": "2026-09-04T06:33:35Z"
+  "updated_at": "2026-09-04T14:45:00Z"
 }
