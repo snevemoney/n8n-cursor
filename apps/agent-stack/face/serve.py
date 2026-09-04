@@ -137,6 +137,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/wires":
             self._json(200, ONLINE.wire_report())
             return
+        if path == "/api/voice":
+            self._json(200, MOUTH.voice_report())
+            return
         target = HERE / ("pane.html" if path in ("/", "/face", "/pane.html") else path.lstrip("/"))
         try:
             target.resolve().relative_to(HERE.resolve())
@@ -166,6 +169,15 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/listen":
             bus = MOUTH.set_listen(HIVE, bool(data.get("live")))
             self._json(200, {"ok": True, **bus})
+            return
+        if path == "/api/tts":
+            audio = MOUTH.tts_bytes(str(data.get("text") or ""))
+            if not audio:
+                self.send_response(204)
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                return
+            self._send(200, audio, "audio/mpeg")
             return
         if path != "/api/turn":
             self._json(404, {"ok": False, "error": "no such route"})
@@ -215,13 +227,21 @@ def self_test() -> dict:
             html = home.read().decode("utf-8")
             code = home.status
         banned = ("Desk · Face", "<h2>Observe</h2>", "<h2>Mouth</h2>", "Hold Home", "Hold Talk")
-        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "holdMic", "RESTART_MIN", "Use Chrome", "/api/wires")
+        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "holdMic", "RESTART_MIN", "Use Chrome", "/api/wires", "pickEnglishVoice", "en-GB", "/api/tts")
         if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned):
             return {"ok": False, "errors": ["GET / missing tape visualizer"], "status": code}
+        if "say -v" in html:
+            return {"ok": False, "errors": ["pane left a say -v path"]}
         with urllib.request.urlopen(f"http://{HOST}:{port}/api/wires", timeout=2) as wires_res:
             wires = json.loads(wires_res.read().decode("utf-8"))
         if not wires.get("ok") or wires.get("ollama") != "refused":
             return {"ok": False, "errors": ["/api/wires missing or still local-ollama"], "body": wires}
+        with urllib.request.urlopen(f"http://{HOST}:{port}/api/voice", timeout=2) as voice_res:
+            voice = json.loads(voice_res.read().decode("utf-8"))
+        if not voice.get("ok") or voice.get("lang") != "en-GB":
+            return {"ok": False, "errors": ["/api/voice missing English voice"], "body": voice}
+        if str(voice.get("voice") or "").lower().startswith("fr") or voice.get("voice") == "Samantha":
+            return {"ok": False, "errors": ["/api/voice still French or Samantha"], "body": voice}
         return {"ok": True, "errors": [], "port": port, "bind": HOST, "home": 200}
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         return {"ok": False, "errors": [str(exc)]}
