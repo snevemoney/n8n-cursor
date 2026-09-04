@@ -959,6 +959,50 @@ class MouthTurnTest(unittest.TestCase):
             self.assertIn("cgevent", asked["spoken"].lower())
             self.assertIn("safari", asked["spoken"].lower())
 
+    def test_classify_writes_cursor_browser_job_safari_stays_safari(self) -> None:
+        watch_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        self.assertEqual(MOD.classify(f"watch this youtube {watch_url}")["verb"], "cursor_browser")
+        self.assertEqual(MOD.classify("cursor-video-watch")["verb"], "cursor_browser")
+        self.assertEqual(MOD.classify("use the cursor browser")["verb"], "cursor_browser")
+        self.assertEqual(MOD.classify(watch_url)["verb"], "cursor_browser")
+        self.assertEqual(MOD.classify("what did you watch")["verb"], "cursor_browser")
+        for phrase in ("open YouTube", "go to YouTube", "scroll", "screenshot", "watch later"):
+            self.assertNotEqual(MOD.classify(phrase)["verb"], "cursor_browser", phrase)
+        self.assertEqual(MOD.classify("open YouTube")["verb"], "safari")
+        self.assertEqual(MOD.classify("scroll")["verb"], "safari")
+        self.assertEqual(MOD.classify("screenshot")["verb"], "safari")
+        self.assertEqual(MOD.classify("watch later")["verb"], "watch_later")
+        with tempfile.TemporaryDirectory(prefix="agent-stack-cb-mouth-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            with mock.patch.object(MOD.SEE, "safari_front", return_value={"ok": True, "url": ""}):
+                out = MOD.apply_turn(f"watch this youtube {watch_url}", hive=hive)
+            self.assertEqual(out["verb"], "cursor_browser")
+            low = out["spoken"].lower()
+            self.assertTrue(out["spoken"].startswith("Sir."))
+            self.assertIn("cursor watch that tab", low)
+            self.assertNotIn("cgevent", low)
+            self.assertNotIn("mcp", low)
+            self.assertNotIn("cursor-ide-browser", low)
+            job = json.loads((hive / "bus" / "cursor-browser-job.json").read_text(encoding="utf-8"))
+            self.assertEqual(job["status"], "pending")
+            self.assertEqual(job["video_id"], "dQw4w9WgXcQ")
+            row = json.loads((hive / "bus" / "last-wire.json").read_text(encoding="utf-8"))
+            self.assertEqual(row["verb"], "cursor_browser")
+            self.assertEqual(row["wire"]["job_id"], job["id"])
+            with mock.patch.object(
+                MOD.SEE,
+                "safari_act",
+                return_value={"ok": True, "wire": "safari", "spoken": "Opened in Safari. https://www.youtube.com"},
+            ) as safari:
+                stay = MOD.apply_turn("open YouTube", hive=hive)
+            safari.assert_called()
+            self.assertEqual(stay["verb"], "safari")
+            asked = MOD.apply_turn("what did you watch", hive=hive)
+            self.assertEqual(asked["verb"], "cursor_browser")
+            self.assertIn("UNKNOWN", asked["spoken"])
+            self.assertNotIn("frames on disk", asked["spoken"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -30,6 +30,7 @@ open http://127.0.0.1:4018/
 1. Vault is `/Users/evenslouis/Documents/My_Billion_Dollar_Vault` (hive folder `00_Outer_Heaven`). Repo is this tree. Sessions stay on disk (`cursor-chat-sessions` / `grok-chat-sessions`). Hive is `.hive` + skills.
 2. Open Safari on `http://127.0.0.1:4018/` and hard-refresh. HUD should read **NEURAL LINK - CURSOR** and **VOICE - BM LEWIS**.
 3. Say **JARVIS**. Converse calls Cursor CLI (`ask` / `plan` / `agent`). Say `agent mode` for tools and skills. `look at my screen` grabs Safari + a screenshot. No Chrome. No yolo.
-4. No Ollama. No xAI key. One-time `agent login` is the Cursor account, not a new vendor.
+4. Living-tab watch is a **disk job**, not Chrome inside 4018. Phrases `watch this youtube`, `cursor-video-watch`, `use the cursor browser`, or a `youtube.com/watch` URL write `.hive/bus/cursor-browser-job.json`. Daily open / scroll / grab stay Safari. Actuate from the **Cursor parent** (this IDE): `python3 apps/agent-stack/hands/cursor_browser.py actuate` — or print the step with `--parent-prompt`. Missing living tab → `UNKNOWN`, never a fake `watch.json`. `what did you watch` reads the result or UNKNOWN.
+5. No Ollama. No xAI key. One-time `agent login` is the Cursor account, not a new vendor.
 
 Upstream (pattern only, AGPL, not vendored): https://github.com/jaredrhod/fullstack-agent

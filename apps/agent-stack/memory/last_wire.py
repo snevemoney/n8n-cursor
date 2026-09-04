@@ -24,7 +24,7 @@ def path_for(hive: Path) -> Path:
 def _clean_wire(raw: dict | None) -> dict:
     src = raw if isinstance(raw, dict) else {}
     out = {}
-    for key in ("path", "scar", "url", "error"):
+    for key in ("path", "scar", "url", "error", "job_id"):
         val = src.get(key)
         if val is None or val == "":
             out[key] = None
@@ -78,6 +78,8 @@ def inspect_line(row: dict | None) -> str:
     bits = [f"Last hand: {last.get('verb') or 'none'}."]
     if w.get("path"):
         bits.append(f"path={w['path']}.")
+    if w.get("job_id"):
+        bits.append(f"job={w['job_id']}.")
     if w.get("scar"):
         bits.append(f"scar {w['scar']}.")
     if w.get("url"):
