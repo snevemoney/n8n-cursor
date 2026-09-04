@@ -1,0 +1,15 @@
+{
+  "name": "@hive/agent-stack",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Original hive conductor: adopt existing vault + file signal bus. Pattern port of fullstack-agent, not a fork.",
+  "type": "module",
+  "scripts": {
+    "build": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json",
+    "adopt": "npm run build && node dist/wizard/adopt.js adopt",
+    "self-test": "npm run build && node dist/wizard/adopt.js self-test",
+    "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
+    "test": "npm run self-test"
+  }
+}
