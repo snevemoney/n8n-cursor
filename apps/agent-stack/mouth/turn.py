@@ -164,6 +164,7 @@ SAFARI_ACT_RE = re.compile(
     r"\b("
     r"open https?://|"
     r"open .+\s+in safari|"
+    r"(?:go (?:on|to)|open)\s+youtube|"
     r"(?:click|tap|press) (?:the )?.+|"
     r"(?:type|enter|fill) .+|"
     r"scroll (?:up|down|a bit)?|"
@@ -208,7 +209,18 @@ PRO_TOPIC_RE = re.compile(
     r"(?:business\s+)?(?:marketing|finance|accounting|ethics|"
     r"human resources|sales|operations|strategy|statistics|"
     r"negotiation|entrepreneur(?:ship)?|organizational behavior|"
-    r"project management)"
+    r"project management)|"
+    r"\bhr\b|\bops\b|\bstats\b|\bpm\b|\bmis\b|"
+    r"law|legal|staffing|comms|communication|"
+    r"management information"
+    r")\b",
+    re.I,
+)
+CORRECT_RE = re.compile(
+    r"\b("
+    r"that(?:'s| is) not what i (?:said|meant)|"
+    r"no i meant|"
+    r"i (?:didn't|did not) (?:say|mean) that"
     r")\b",
     re.I,
 )
@@ -469,9 +481,9 @@ def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
     lines = [
         "Identity (every turn):",
         f"You are Jarvis. The operator is {who} Louis. This is his hive OS on the 8GB Mac.",
-        "You are Jarvis on a voice face. Address Evens as Sir. Think with the Cursor harness.",
+        "You are Jarvis on a voice face. Think with the Cursor harness.",
         "Memory is the store: Obsidian vault, this repo, chat sessions, and the hive.",
-        "Sharp wit, one beat, then the facts. Wit never delays a hand. Do not say you are waiting. Do not take blame.",
+        "Speak the facts only. The mouth adds one Sir and one witty beat. Do not prefix Sir. Do not say you are waiting. Do not take blame.",
         "Two to four spoken sentences. Finish the last sentence. Under 70 words.",
         "Do not ask to send this to a desk. Do not spawn Grok Bot. Hard steps stay Evens.",
         catalog_block(),
@@ -712,6 +724,11 @@ def _vault_extract(utterance: str, retrieve_roots: list[Path] | None) -> tuple[s
     spoken = str(found.get("spoken") or "").strip()
     if is_ask_leak(spoken):
         return "", cites
+    path = str(top.get("path") or "")
+    if "ASKS.md" in path:
+        return "", cites
+    if PERSONA is not None and PERSONA.is_dump(spoken):
+        return "", cites
     return spoken, cites
 
 
@@ -742,8 +759,9 @@ def _pack_harness(
     utterance: str, context: str, *, mode: str, see: str = "", skill_slug: str = "", build_kind: str = ""
 ) -> str:
     lead = (
-        "Speak as Jarvis to Evens on the local voice face. Address him as Sir. "
-        "One witty beat, then the facts. Wit never delays a hand. "
+        "Speak as Jarvis to Evens on the local voice face. "
+        "Do not prefix Sir or a joke — the mouth adds one Sir and one witty beat. "
+        "Speak the facts only. Wit never delays a hand. "
         "Do not say you are waiting. Do not take blame. "
         "Two to four spoken sentences. Finish the last sentence. Under 70 words. "
         f"Cursor harness mode: {mode}. "
@@ -926,23 +944,38 @@ def apply_turn_iter(
     resume_field = "talk"
     harness_mode = current_mode(bus_now)
 
+    def _store_lines() -> list[str]:
+        if retrieve_roots is None and hasattr(STORE, "session_lines"):
+            try:
+                return list(STORE.session_lines() or [])
+            except (OSError, TypeError, AttributeError):
+                return []
+        return []
+
+    def _dress(chunk: str, *, first: bool) -> str:
+        if PERSONA is None:
+            return chunk
+        return PERSONA.stream_delta(
+            chunk,
+            first=first,
+            verb=verb,
+            utterance=spoken,
+            turns=prior_turns,
+            store_lines=_store_lines(),
+            scars=[],
+        )
+
     def finish(narration: str, *, host: str | None = None, spoken_delta: str | None = None) -> dict:
         text = DARK_BRAIN if is_ask_leak(narration or "") else narration
         if text and str(text).upper().startswith("UNKNOWN"):
             record_spoken_scar(text, hive)
         if PERSONA is not None:
-            store_lines: list[str] = []
-            if retrieve_roots is None and hasattr(STORE, "session_lines"):
-                try:
-                    store_lines = list(STORE.session_lines() or [])
-                except (OSError, TypeError, AttributeError):
-                    store_lines = []
             text = PERSONA.wrap(
                 text,
                 verb=verb,
                 utterance=spoken,
                 turns=prior_turns,
-                store_lines=store_lines,
+                store_lines=_store_lines(),
                 scars=[],
             )
         next_turns = prior_turns if verb == "idle" else append_turn(prior_turns, spoken, text)
@@ -973,23 +1006,48 @@ def apply_turn_iter(
             partial=False,
         )
 
+    def emit(narration: str, *, host: str | None = None):
+        """First speakable sentence → SSE + TTS. Persona once. Finish does not re-speak."""
+        raw = DARK_BRAIN if is_ask_leak(narration or "") else (narration or "")
+        sents = _split_sentences(raw) or ([raw] if raw.strip() else [])
+        parts: list[str] = []
+        for sent in sents:
+            piece = _dress(sent, first=not parts)
+            if not piece:
+                continue
+            parts.append(piece)
+            acc = " ".join(parts)
+            yield _turn_event(
+                spoken=acc,
+                verb=verb,
+                host=host or plan["host"],
+                cites=cites,
+                wires=wires,
+                args=plan.get("args"),
+                done=False,
+                spoken_delta=piece,
+                partial=True,
+            )
+        acc = " ".join(parts).strip() or raw
+        yield finish(acc, host=host, spoken_delta="")
+
     if verb == "stop":
         if ONLINE is not None and hasattr(ONLINE, "cancel_cursor"):
             ONLINE.cancel_cursor()
-        yield finish("Stopped. Standing by.", host="local")
+        yield from emit("Stopped. Standing by.", host="local")
         return
     if verb == "refuse":
-        yield finish("I will not do that. Send, pay, deploy, book, and publish stay with you.", host="local")
+        yield from emit("I will not do that. Send, pay, deploy, book, and publish stay with you.", host="local")
         return
 
     if verb == "idle":
-        yield finish("Holding. Say Jarvis, or tap Space.")
+        yield from emit("Holding. Say Jarvis, or tap Space.")
         return
     if verb == "greet":
-        yield finish("Hey Evens. Standing by.")
+        yield from emit("Hey Evens. Standing by.")
         return
     if verb == "crumb":
-        yield finish("That cut off. Say the rest.")
+        yield from emit("That cut off. Say the rest.")
         return
     if verb == "mode":
         harness_mode = str(plan.get("args", {}).get("mode") or "agent")
@@ -1022,26 +1080,26 @@ def apply_turn_iter(
                 see_fn=see_fn,
             )
             return
-        yield finish(narration)
+        yield from emit(narration)
         return
     if verb == "heal":
         narration, wires, _scars = heal_spoken(hive, retrieve_roots, cursor_fn, grok)
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "today":
-        yield finish(today_spoken(retrieve_roots, hive), host="local")
+        yield from emit(today_spoken(retrieve_roots, hive), host="local")
         return
     if verb == "can":
-        yield finish(capabilities_spoken())
+        yield from emit(capabilities_spoken())
         return
     if verb == "skills":
-        yield finish(skills_spoken())
+        yield from emit(skills_spoken())
         return
     if verb == "life":
         got = RETRIEVE.life_card(retrieve_roots)
         cites = got.get("cites") if isinstance(got.get("cites"), list) else []
         wires = ["life"]
-        yield finish(str(got.get("spoken") or "UNKNOWN. Life card is empty."), host="local")
+        yield from emit(str(got.get("spoken") or "UNKNOWN. Life card is empty."), host="local")
         return
     if verb == "files":
         fn = FILES.search_files if FILES is not None else None
@@ -1053,7 +1111,7 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Local file search returned nothing.")
             wires = [got.get("wire") or "files"]
             cites = got.get("hits") if isinstance(got.get("hits"), list) else []
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "search":
         if NAMED is None:
@@ -1064,7 +1122,7 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Search returned no real links.")
             wires = [got.get("wire") or "search"]
             cites = got.get("cites") if isinstance(got.get("cites"), list) else []
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "watch_later":
         if NAMED is None:
@@ -1075,7 +1133,7 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Watch Later returned nothing.")
             wires = [got.get("wire") or "watch_later"]
             cites = [{"title": t} for t in (got.get("titles") or []) if t]
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "news":
         if NAMED is None:
@@ -1086,7 +1144,7 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. No news on disk.")
             wires = [got.get("wire") or "news"]
             cites = got.get("hits") if isinstance(got.get("hits"), list) else []
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "make":
         if NAMED is None:
@@ -1096,7 +1154,7 @@ def apply_turn_iter(
             got = NAMED.make_route(spoken)
             narration = str(got.get("spoken") or "UNKNOWN. No matching skill on disk.")
             wires = [got.get("wire") or "make"]
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "safari":
         if SEE is None:
@@ -1106,12 +1164,12 @@ def apply_turn_iter(
             got = SEE.safari_act(spoken)
             narration = str(got.get("spoken") or "UNKNOWN. Safari returned nothing.")
             wires = [got.get("wire") or "safari"]
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb in {"calendar", "mail", "invoice"}:
         when = str(plan.get("args", {}).get("when") or "today")
         narration, wires, cites = _inbox_apply(verb, spoken, retrieve_roots, when)
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "status":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
@@ -1131,7 +1189,7 @@ def apply_turn_iter(
             got = fn(which)
             narration = got.get("spoken") or "UNKNOWN. Status wires returned nothing."
             wires = [p.get("wire") for p in (got.get("parts") or []) if p.get("wire")] or ["status"]
-        yield finish(narration)
+        yield from emit(narration)
         return
     if verb == "pro":
         if PRO is None:
@@ -1142,7 +1200,7 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. No matching professional skill on disk.")
             wires = [got.get("wire") or "pro"]
             cites = got.get("cites") if isinstance(got.get("cites"), list) else []
-        yield finish(narration, host="local")
+        yield from emit(narration, host="local")
         return
     if verb == "cursor":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
@@ -1164,10 +1222,10 @@ def apply_turn_iter(
             wires = [got.get("wire") or "cursor"]
             if got.get("chat_id"):
                 resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
-        yield finish(narration)
+        yield from emit(narration)
         return
     if verb not in {"converse", "skill", "build"}:
-        yield finish("Holding. Say Jarvis, or tap Space.")
+        yield from emit("Holding. Say Jarvis, or tap Space.")
         return
 
     bus_write(
@@ -1199,15 +1257,18 @@ def apply_turn_iter(
     )
     if skip_cursor:
         wires = ["store"]
-        if vault_spoken := _vault_spoken:
-            narration = vault_spoken
+        dump = PERSONA is not None and PERSONA.is_dump(_vault_spoken or "")
+        if CORRECT_RE.search(spoken):
+            narration = "I missed that. Say the line again, one sentence."
+        elif _vault_spoken and not dump:
+            narration = _vault_spoken
         else:
             scar = SCARS.lookup(last_jarvis) if SCARS is not None and last_jarvis else None
             if scar is None and SCARS is not None:
                 scar = SCARS.lookup("agent login")
             extra = SCARS.spoken_heal(scar) if scar and SCARS is not None else "I will not repeat that dark call."
             narration = extra + " " + today_spoken(retrieve_roots, hive)
-        yield finish(narration)
+        yield from emit(narration)
         return
     use_stream = (
         cursor_fn is None
@@ -1222,38 +1283,14 @@ def apply_turn_iter(
         buf = ""
         spoken_parts: list[str] = []
         got_done: dict | None = None
-        for ev in ONLINE.call_cursor_turn_iter(packed, mode=cursor_mode, resume=resume_chat):
-            if ev.get("cancelled"):
-                narration = "Stopped. Standing by."
-                wires = ["cursor"]
-                yield finish(narration)
-                return
-            if ev.get("delta"):
-                buf += str(ev.get("delta") or "")
-                sents, buf = ONLINE.take_sentences(buf)
-                for sent in sents:
-                    spoken_parts.append(sent)
-                    acc = " ".join(spoken_parts)
-                    yield _turn_event(
-                        spoken=acc,
-                        verb=verb,
-                        host=plan["host"],
-                        cites=cites,
-                        wires=["cursor"],
-                        args=plan.get("args"),
-                        done=False,
-                        spoken_delta=sent,
-                        partial=True,
-                    )
-            if ev.get("done") or ev.get("chat_id") or ev.get("unknown"):
-                got_done = ev
-                if ev.get("chat_id"):
-                    resume_chat = str(ev.get("chat_id") or resume_chat or "").strip() or resume_chat
-        remainder = buf.strip()
-        if remainder:
-            spoken_parts.append(remainder)
+
+        def _push_sent(sent: str):
+            piece = _dress(sent, first=not spoken_parts)
+            if not piece:
+                return None
+            spoken_parts.append(piece)
             acc = " ".join(spoken_parts)
-            yield _turn_event(
+            return _turn_event(
                 spoken=acc,
                 verb=verb,
                 host=plan["host"],
@@ -1261,9 +1298,32 @@ def apply_turn_iter(
                 wires=["cursor"],
                 args=plan.get("args"),
                 done=False,
-                spoken_delta=remainder,
+                spoken_delta=piece,
                 partial=True,
             )
+
+        for ev in ONLINE.call_cursor_turn_iter(packed, mode=cursor_mode, resume=resume_chat):
+            if ev.get("cancelled"):
+                narration = "Stopped. Standing by."
+                wires = ["cursor"]
+                yield from emit(narration)
+                return
+            if ev.get("delta"):
+                buf += str(ev.get("delta") or "")
+                sents, buf = ONLINE.take_sentences(buf)
+                for sent in sents:
+                    ev_out = _push_sent(sent)
+                    if ev_out:
+                        yield ev_out
+            if ev.get("done") or ev.get("chat_id") or ev.get("unknown"):
+                got_done = ev
+                if ev.get("chat_id"):
+                    resume_chat = str(ev.get("chat_id") or resume_chat or "").strip() or resume_chat
+        remainder = buf.strip()
+        if remainder:
+            ev_out = _push_sent(remainder)
+            if ev_out:
+                yield ev_out
         acc = " ".join(spoken_parts).strip()
         reply = acc or str((got_done or {}).get("spoken") or "").strip()
         if reply and not is_ask_leak(reply):
@@ -1273,7 +1333,10 @@ def apply_turn_iter(
             dark = _dark_brain()
             narration = dark.get("spoken") or DARK_BRAIN
             wires = [dark.get("wire") or "cursor"]
-        yield finish(narration, spoken_delta="")
+        if spoken_parts:
+            yield finish(acc or narration, spoken_delta="")
+        else:
+            yield from emit(narration)
         return
 
     got = _call_brain(
@@ -1301,7 +1364,7 @@ def apply_turn_iter(
             dark = _dark_brain()
             narration = dark.get("spoken") or DARK_BRAIN
             wires = [dark.get("wire") or "cursor"]
-    yield finish(narration)
+    yield from emit(narration)
 
 
 def apply_turn(

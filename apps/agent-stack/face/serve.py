@@ -385,6 +385,7 @@ def self_test() -> dict:
             "spoken_delta",
             "enqueueSpeak",
             "ttsQueue",
+            "heardDelta",
         )
         banned_chrome = ("Use Chrome", "Safari speech is flaky")
         if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned) or any(token in html for token in banned_chrome):
