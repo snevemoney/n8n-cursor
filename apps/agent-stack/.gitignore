@@ -5,3 +5,6 @@ see.jpg
 see.png
 .venv-voice/
 .kokoro/
+face/e2e/test-artifacts/**
+!face/e2e/test-artifacts/.gitkeep
+tests/.matrix-last.json
