@@ -107,6 +107,17 @@ def cursor_cli() -> str | None:
     return None
 
 
+def agent_cmd() -> list[str] | None:
+    """Prefer the headless `agent` binary. `cursor` is the GUI."""
+    agent = shutil.which("agent")
+    if agent:
+        return [agent]
+    cursor = shutil.which("cursor")
+    if cursor:
+        return [cursor, "agent"]
+    return None
+
+
 def wire_report() -> dict:
     gw = grokbot_gateway()
     grokbot = "live" if gw and gw.get("base") else ("sealed" if gw and gw.get("sealed") else "dark")
@@ -115,32 +126,26 @@ def wire_report() -> dict:
         "local": "face+mic+tts",
         "ollama": "refused",
         "wires": {
-            "grok": "live" if grok_api_key() else "dark",
+            "brain": "cursor" if agent_cmd() else "dark",
+            "grok": "optional" if grok_api_key() else "off",
             "grokbot": grokbot,
             "hive": "http",
             "vps": "ssh",
-            "cursor": "cli" if cursor_cli() else "dark",
+            "cursor": "print" if agent_cmd() else "dark",
             "vault": "context",
         },
-        "need": []
-        if grok_api_key() or (gw and gw.get("base"))
-        else ["XAI_API_KEY or GROK_API_KEY (or GROKBOT_BASE_URL + GROKBOT_TOKEN)"],
+        "need": [] if agent_cmd() else ["Cursor agent CLI (logged in)"],
     }
 
 
 def unknown_grok() -> dict:
-    gw = grokbot_gateway()
-    if gw and gw.get("sealed"):
-        spoken = (
-            "UNKNOWN. Grok Bot connection is sealed and sendPrompt does not speak a reply. "
-            "Set XAI_API_KEY or GROK_API_KEY so I can call Grok and say the answer."
-        )
-        return {"ok": False, "unknown": True, "wire": "grok", "spoken": spoken, "engine": "unknown"}
-    spoken = (
-        "UNKNOWN. Grok wire is dark. Set XAI_API_KEY or GROK_API_KEY, "
-        "or GROKBOT_BASE_URL and GROKBOT_TOKEN. I will not pretend a jobs.jsonl queue is done."
-    )
-    return {"ok": False, "unknown": True, "wire": "grok", "spoken": spoken, "engine": "unknown"}
+    return {
+        "ok": False,
+        "unknown": True,
+        "wire": "grok",
+        "spoken": "UNKNOWN. Grok is a desk wire, not the brain. Talk goes through Cursor.",
+        "engine": "unknown",
+    }
 
 
 def call_xai(prompt: str, context: str = "") -> dict:
@@ -266,8 +271,8 @@ def call_grokbot(prompt: str, context: str = "") -> dict:
         "queued": True,
         "ack": sent,
         "spoken": (
-            "UNKNOWN. I called Grok Bot sendPrompt, but that wire does not return a spoken reply. "
-            "Set XAI_API_KEY so I can hear Grok and speak the answer. jobs.jsonl is not done."
+            "UNKNOWN. Grok Bot sendPrompt did not return a spoken reply. "
+            "Grok Bot is not the brain."
         ),
     }
 
@@ -352,22 +357,101 @@ def call_vps() -> dict:
 
 
 def call_cursor() -> dict:
-    path = cursor_cli()
-    if not path:
+    cmd = agent_cmd()
+    if not cmd:
         return {
             "ok": False,
             "unknown": True,
             "wire": "cursor",
-            "spoken": "UNKNOWN. Cursor CLI is missing. Install the cursor or agent binary.",
+            "spoken": "UNKNOWN. Cursor agent CLI is missing.",
         }
     try:
-        proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=8)
+        proc = subprocess.run([*cmd, "--version"], capture_output=True, text=True, timeout=8)
     except (OSError, subprocess.TimeoutExpired) as exc:
         return {"ok": False, "unknown": True, "wire": "cursor", "spoken": f"UNKNOWN. Cursor CLI failed: {exc}."}
     ver = (proc.stdout or proc.stderr or "").strip().splitlines()[0] if (proc.stdout or proc.stderr) else "present"
-    key = "live" if (os.environ.get("CURSOR_API_KEY") or "").strip() else "dark"
-    spoken = f"Cursor CLI {ver}. CURSOR_API_KEY {key}. Hands stay parked — I will not spawn a Cursor agent from the face."
+    spoken = f"Cursor agent {ver}. Repo turns print through this CLI. Hands parked. No yolo."
     return {"ok": True, "wire": "cursor", "spoken": spoken}
+
+
+def call_cursor_turn(prompt: str, *, mode: str = "ask") -> dict:
+    """Headless Cursor agent on this repo. Jarvis stays the mouth. No --force / --yolo."""
+    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "spoken": "UNKNOWN. Cursor print is dry.",
+        }
+    cmd = agent_cmd()
+    if not cmd:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "spoken": "UNKNOWN. Cursor agent CLI is missing.",
+        }
+    use_mode = mode if mode in ("ask", "plan") else "ask"
+    argv = [
+        *cmd,
+        "-p",
+        "--mode",
+        use_mode,
+        "--trust",
+        "--workspace",
+        str(ROOT),
+        "--output-format",
+        "text",
+        (prompt or "").strip()[:2000],
+    ]
+    try:
+        proc = subprocess.run(argv, capture_output=True, text=True, timeout=90, cwd=str(ROOT))
+    except subprocess.TimeoutExpired:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "spoken": "UNKNOWN. Cursor agent timed out.",
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "spoken": f"UNKNOWN. Cursor agent failed: {exc}.",
+        }
+    text = (proc.stdout or "").strip()
+    err = (proc.stderr or "").strip()
+    if not text and "Authentication required" in err:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "spoken": "UNKNOWN. Cursor agent needs a one-time login. Run agent login in Terminal. Not an xAI key.",
+        }
+    if not text:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "spoken": f"UNKNOWN. Cursor agent returned no text. {err[:180]}".strip(),
+        }
+    if len(text) > SPEAK_CAP:
+        text = text[: SPEAK_CAP - 1].rsplit(" ", 1)[0] + "…"
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "cursor",
+        "engine": "cursor",
+        "spoken": text,
+        "mode": use_mode,
+    }
 
 
 def status(which: str = "all") -> dict:

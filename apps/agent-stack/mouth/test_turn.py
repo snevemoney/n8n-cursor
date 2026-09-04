@@ -166,8 +166,8 @@ class MouthTurnTest(unittest.TestCase):
                 grok=dark,
             )
             self.assertFalse(vaulted["ask"])
-            self.assertIn("I can't reach Grok", vaulted["spoken"])
-            self.assertIn("XAI_API_KEY", vaulted["spoken"])
+            self.assertIn("Cursor did not return a reply", vaulted["spoken"])
+            self.assertNotIn("XAI_API_KEY", vaulted["spoken"])
             _no_desk_ask(vaulted["spoken"])
 
             empty = hive / "empty"
@@ -179,8 +179,8 @@ class MouthTurnTest(unittest.TestCase):
                 grok=dark,
             )
             self.assertFalse(missing["ask"])
-            self.assertIn("I can't reach Grok", missing["spoken"])
-            self.assertIn("XAI_API_KEY", missing["spoken"])
+            self.assertIn("Cursor did not return a reply", missing["spoken"])
+            self.assertNotIn("XAI_API_KEY", missing["spoken"])
             _no_desk_ask(missing["spoken"])
             self.assertFalse((hive / "bus" / "jobs.jsonl").is_file())
 
@@ -227,6 +227,36 @@ class MouthTurnTest(unittest.TestCase):
             self.assertIn("Identity", ctx)
             self.assertIn("Evens", ctx)
             _no_desk_ask(follow["spoken"])
+
+    def test_repo_turn_calls_cursor_no_ask(self) -> None:
+        self.assertEqual(MOD.classify("look at the code for the face")["verb"], "cursor")
+        self.assertEqual(MOD.classify("fix this bug in serve.py")["args"]["mode"], "plan")
+        self.assertEqual(MOD.classify("hey")["verb"], "converse")
+
+        def fake_cursor(prompt: str, mode: str = "ask") -> dict:
+            return {
+                "ok": True,
+                "wire": "cursor",
+                "engine": "cursor",
+                "spoken": f"Cursor {mode}: {prompt[:40]}",
+                "mode": mode,
+            }
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-cursor-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            out = MOD.apply_turn(
+                "look at the code for the face",
+                hive=hive,
+                grok=_fake_grok,
+                cursor_fn=fake_cursor,
+            )
+            self.assertEqual(out["verb"], "cursor")
+            self.assertFalse(out["ask"])
+            self.assertEqual(out["wires"], ["cursor"])
+            self.assertIn("Cursor ask", out["spoken"])
+            _no_desk_ask(out["spoken"])
+            self.assertFalse((hive / "bus" / "jobs.jsonl").is_file())
 
     def test_correction_and_project_stay_converse(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-corr-") as tmp:
