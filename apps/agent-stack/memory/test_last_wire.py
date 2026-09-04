@@ -55,6 +55,23 @@ class LastWireTest(unittest.TestCase):
         self.assertIn("path=cgevent", line)
         self.assertIn("Last hand: safari", line)
 
+    def test_write_read_keeps_job_id(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-last-wire-job-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            row = MOD.write(
+                hive,
+                verb="cursor_browser",
+                ok=True,
+                human_line="I'll have Cursor watch that tab.",
+                wire={"path": "cursor-browser-job", "job_id": "cb-dQw4w9WgXcQ-test", "url": None, "scar": None, "error": None},
+                utterance="watch this youtube",
+            )
+            self.assertEqual(row["wire"]["job_id"], "cb-dQw4w9WgXcQ-test")
+            got = MOD.read(hive)
+            self.assertEqual(got["wire"]["job_id"], "cb-dQw4w9WgXcQ-test")
+            self.assertIn("job=cb-dQw4w9WgXcQ-test", MOD.inspect_line(got))
+
 
 if __name__ == "__main__":
     unittest.main()

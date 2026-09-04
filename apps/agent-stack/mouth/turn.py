@@ -59,6 +59,7 @@ HAND_WIRE_VERBS = frozenset(
     {
         "safari",
         "cursor",
+        "cursor_browser",
         "files",
         "search",
         "watch_later",
@@ -341,6 +342,10 @@ _PRO_PATH = Path(__file__).resolve().parent.parent / "hands" / "pro.py"
 PRO = _load_mod("agent_stack_pro", _PRO_PATH) if _PRO_PATH.is_file() else None
 _LAST_WIRE_PATH = Path(__file__).resolve().parent.parent / "memory" / "last_wire.py"
 LAST_WIRE = _load_mod("agent_stack_last_wire", _LAST_WIRE_PATH) if _LAST_WIRE_PATH.is_file() else None
+_CURSOR_BROWSER_PATH = Path(__file__).resolve().parent.parent / "hands" / "cursor_browser.py"
+CURSOR_BROWSER = (
+    _load_mod("agent_stack_cursor_browser", _CURSOR_BROWSER_PATH) if _CURSOR_BROWSER_PATH.is_file() else None
+)
 
 
 def now_iso() -> str:
@@ -408,7 +413,8 @@ def capabilities_spoken() -> str:
         "life, today, heal. "
         "This slice: web search in Safari with real links; YouTube Watch Later from the live tab; "
         "news and signals from disk; make image or video routes to an existing skill. "
-        "Skill-routed or UNKNOWN: Higgsfield generate, Remotion pipeline, full watch.json, computer takeover. "
+        "Living-tab watch queues a Cursor job. Daily YouTube stays Safari. "
+        "Skill-routed or UNKNOWN: Higgsfield generate, Remotion pipeline, computer takeover. "
         "Say use skill, search the web, watch later, or search my computer. "
         "Send, pay, deploy, book, and publish stay with you."
     )
@@ -481,6 +487,7 @@ def _wire_from_got(got, narration: str) -> dict:
         "scar": got.get("scar"),
         "url": got.get("url") or safari.get("url"),
         "error": err,
+        "job_id": got.get("job_id"),
     }
 
 
@@ -530,6 +537,8 @@ def _replay_last(last: dict, hive: Path, retrieve_roots, cursor_fn, grok) -> dic
             return {"ok": False, "path": None, "spoken": "UNKNOWN. Safari could not scroll."}
         got = SEE.safari_act(utterance, hive=hive)
         return got if isinstance(got, dict) else {"ok": False, "spoken": "UNKNOWN. Safari could not scroll."}
+    if verb == "cursor_browser" and CURSOR_BROWSER is not None:
+        return CURSOR_BROWSER.queue(hive, utterance)
     if verb == "files" and FILES is not None:
         return FILES.search_files(utterance)
     if verb == "search" and NAMED is not None:
@@ -822,6 +831,10 @@ def classify(utterance: str) -> dict:
         return {"verb": "skills", "needs_ask": False, "args": {}, "host": "local"}
     if BRIEF_CMD_RE.match(text) or PRO_EXPLICIT_RE.search(text):
         return {"verb": "pro", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    if CURSOR_BROWSER is not None and CURSOR_BROWSER.is_status_utterance(text):
+        return {"verb": "cursor_browser", "needs_ask": False, "args": {"action": "status", "text": text}, "host": "local"}
+    if CURSOR_BROWSER is not None and CURSOR_BROWSER.is_queue_utterance(text):
+        return {"verb": "cursor_browser", "needs_ask": False, "args": {"action": "queue", "text": text}, "host": "local"}
     skill_hit = SKILL_RE.search(text)
     if skill_hit:
         return {
@@ -1337,6 +1350,30 @@ def apply_turn_iter(
             narration = str(got.get("spoken") or "UNKNOWN. Watch Later returned nothing.")
             wires = [got.get("wire") or "watch_later"]
             cites = [{"title": t} for t in (got.get("titles") or []) if t]
+        yield from emit(narration, host="local", got=got)
+        return
+    if verb == "cursor_browser":
+        got = None
+        if CURSOR_BROWSER is None:
+            narration = "UNKNOWN. Cursor watch job is not loaded."
+            wires = ["cursor_browser"]
+        else:
+            action = str(plan.get("args", {}).get("action") or "queue")
+            if action == "status":
+                got = CURSOR_BROWSER.read_result(hive)
+            else:
+                safari_url = ""
+                if not CURSOR_BROWSER.url_from_text(spoken) and SEE is not None:
+                    try:
+                        front = SEE.safari_front()
+                    except Exception:
+                        front = {}
+                    front_url = str((front or {}).get("url") or "")
+                    if CURSOR_BROWSER.video_id_from_text(front_url):
+                        safari_url = front_url
+                got = CURSOR_BROWSER.queue(hive, spoken, safari_url=safari_url)
+            narration = str(got.get("spoken") or "UNKNOWN. No living-tab capture yet.")
+            wires = [got.get("wire") or "cursor_browser"]
         yield from emit(narration, host="local", got=got)
         return
     if verb == "news":

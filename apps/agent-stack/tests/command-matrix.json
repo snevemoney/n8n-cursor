@@ -439,6 +439,25 @@
       }
     },
     {
+      "verb": "cursor_browser",
+      "triggers": [
+        "watch this youtube",
+        "cursor-video-watch",
+        "use the cursor browser",
+        "what did you watch"
+      ],
+      "expected_hand": "cursor_browser",
+      "wire_module": "hands/cursor_browser.py queue + actuate",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
       "verb": "news",
       "triggers": [
         "what's the news",

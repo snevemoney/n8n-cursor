@@ -277,6 +277,7 @@ class CommandMatrixTest(unittest.TestCase):
             "converse",
             "search",
             "watch_later",
+            "cursor_browser",
             "news",
             "make",
             "pro",

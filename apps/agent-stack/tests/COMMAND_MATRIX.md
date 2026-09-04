@@ -30,6 +30,7 @@ Product browser: Safari via hands/see.py — Playwright never drives Evens's Mac
 | converse | `what's going on`, `tell me a joke`, `can you` | `converse` | brain/online.py call_cursor_turn | unit / playwright | pass | UNKNOWN |
 | search | `search the web for rust`, `web search bitcoin`, `search for rust on the web` | `search` | hands/named.py web_search | unit | pass | UNKNOWN |
 | watch_later | `watch later`, `what's on my watch later`, `watch later playlist` | `watch_later` | hands/named.py watch_later | unit | pass | UNKNOWN |
+| cursor_browser | `watch this youtube`, `cursor-video-watch`, `use the cursor browser`, `what did you watch` | `cursor_browser` | hands/cursor_browser.py queue + actuate | unit | pass | UNKNOWN |
 | news | `what's the news`, `hive signals`, `news today` | `news` | hands/named.py news_from_disk | unit | pass | UNKNOWN |
 | make | `make an image`, `create a remotion`, `generate a video` | `make` | hands/named.py make_route | unit | pass | UNKNOWN |
 | pro | `what is marketing`, `brief me on marketing`, `BUS 204`, `the whole shelf`, `all professional skills` | `pro` | hands/pro.py brief | unit / playwright | pass | UNKNOWN |
