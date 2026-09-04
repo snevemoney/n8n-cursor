@@ -87,7 +87,14 @@ def _load_brain():
     return mod
 
 
-BRAIN = _load_brain()
+BRAIN = None
+
+
+def brain():
+    global BRAIN
+    if BRAIN is None:
+        BRAIN = _load_brain()
+    return BRAIN
 
 
 def now_iso() -> str:
@@ -429,7 +436,7 @@ def apply_turn(
         narration = f"Loaded {slug}." if path.is_file() else f"No skill named {slug}."
     elif verb == "memory":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None)
-        thought = BRAIN.answer(spoken, retrieve_roots)
+        thought = brain().answer(spoken, retrieve_roots)
         cites = thought.get("cites") or []
         narration = thought.get("spoken") or "I don't have that in the vault. UNKNOWN."
         engine = thought.get("engine") or "extractive"
