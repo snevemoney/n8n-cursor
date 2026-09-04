@@ -47,16 +47,27 @@ STATUS_RE = re.compile(
     re.I,
 )
 MODE_RE = re.compile(
-    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(?:go(?:\s+to)?|switch\s+to|set|use)?\s*(ask|plan|agent)\s+mode\b",
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?"
+    r"(?:put(?:\s+yourself)?\s+(?:in|into)\s+|go(?:\s+to)?\s+|switch\s+to\s+|set\s+|use\s+|flip(?:\s+to)?\s+)?"
+    r"(ask|plan|agent)\s+mode\b",
     re.I,
 )
+STOP_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(stop|cancel|never mind|forget it|shut up)\s*[.!]?\s*$",
+    re.I,
+)
+GREET_RE = re.compile(
+    r"^(?:hey|hi|hello|yo)(?:\s+jarvis)?\s*[.!]?\s*$",
+    re.I,
+)
+CRUMB_RE = re.compile(r"^(it|uh|um|ah|hmm|mm|huh|what)\s*[.!]?\s*$", re.I)
 SEE_RE = re.compile(
     r"\b("
-    r"look at (?:my )?(?:screen|display|safari)|"
+    r"look at (?:my )?(?:screen|display|safari|browser)|"
     r"what am i looking at|"
     r"share (?:me )?(?:my )?screen|"
-    r"see (?:my )?(?:screen|safari)|"
-    r"what(?:'s| is) on (?:my )?(?:screen|safari)"
+    r"see (?:my )?(?:screen|safari|browser)|"
+    r"what(?:'s| is) on (?:my )?(?:screen|safari|browser)"
     r")\b",
     re.I,
 )
@@ -74,6 +85,7 @@ REPO_RE = re.compile(
     re.I,
 )
 MAX_TURNS = 8
+_PACK_CACHE: dict = {"id_at": "", "store_at": "", "identity": "", "store": ""}
 ASK_LEAK = re.compile(
     r"say yes to (approve|send)|send this to the grok desk|"
     r"hand this to the \w+ desk|do you want me to send this",
@@ -175,6 +187,9 @@ def history_block(turns: list[dict]) -> str:
 
 
 def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
+    stamp = now_iso()[:16]
+    if retrieve_roots is None and _PACK_CACHE.get("identity") and _PACK_CACHE.get("id_at") == stamp:
+        return str(_PACK_CACHE["identity"])
     stack = load_json(hive / "agent-stack.json")
     who = str(stack.get("operator") or "Evens").strip() or "Evens"
     lines = [
@@ -182,7 +197,7 @@ def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
         f"You are Jarvis. The operator is {who} Louis. This is his hive OS on the 8GB Mac.",
         "You are Jarvis on a voice face. Think with the Cursor harness.",
         "Memory is the store: Obsidian vault, this repo, chat sessions, and the hive.",
-        "Talk like a colleague. Short spoken sentences. Do not edit files on a hello.",
+        "Talk like a colleague. Two to four spoken sentences. Finish the last sentence. Under 70 words.",
         "Do not ask to send this to a desk. Hard steps stay Evens.",
     ]
     found = RETRIEVE.search("who am I north stars", retrieve_roots)
@@ -190,14 +205,28 @@ def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
         snippet = str(hit.get("snippet") or "").strip()
         if snippet:
             lines.append(f"{hit.get('path') or 'vault'}: {snippet}")
-    return "\n".join(lines)
+    text = "\n".join(lines)
+    if retrieve_roots is None:
+        _PACK_CACHE["id_at"] = stamp
+        _PACK_CACHE["identity"] = text
+    return text
 
 
 def converse_context(
     utterance: str, retrieve_roots: list[Path] | None, hive: Path, turns: list[dict]
 ) -> tuple[str, list, str]:
     parts = [identity_block(retrieve_roots, hive)]
-    parts.append(STORE.store_pack(hive, live_sessions=retrieve_roots is None))
+    stamp = now_iso()[:16]
+    pack = str(_PACK_CACHE.get("store") or "")
+    live = retrieve_roots is None
+    if live and pack and _PACK_CACHE.get("store_at") == stamp:
+        parts.append(pack)
+    else:
+        pack = STORE.store_pack(hive, live_sessions=live)
+        if live:
+            _PACK_CACHE["store"] = pack
+            _PACK_CACHE["store_at"] = stamp
+        parts.append(pack)
     hist = history_block(turns)
     if hist:
         parts.append(hist)
@@ -237,7 +266,9 @@ def bus_write(
             "updated_at": now_iso(),
         }
     )
-    if jarvis_chat_id:
+    if jarvis_chat_id == "":
+        bus.pop("jarvis_chat_id", None)
+    elif jarvis_chat_id:
         bus["jarvis_chat_id"] = jarvis_chat_id
     if harness_mode in ("ask", "plan", "agent"):
         bus["harness_mode"] = harness_mode
@@ -280,11 +311,24 @@ def classify(utterance: str) -> dict:
             "args": {"reason": "hard-step or operate-never"},
             "host": "local",
         }
+    if STOP_RE.match(text):
+        return {"verb": "stop", "needs_ask": False, "args": {}, "host": "local"}
+    if GREET_RE.match(text):
+        return {"verb": "greet", "needs_ask": False, "args": {}, "host": "local"}
+    if len(text) <= 2 or CRUMB_RE.match(text):
+        return {"verb": "crumb", "needs_ask": False, "args": {}, "host": "local"}
     mode_hit = MODE_RE.search(text)
     if mode_hit:
         picked = (mode_hit.group(1) or "").lower()
         if picked in ("ask", "plan", "agent"):
-            return {"verb": "mode", "needs_ask": False, "args": {"mode": picked}, "host": "local"}
+            rest = text[mode_hit.end() :].strip()
+            rest = re.sub(r"^[,.\s]+(?:and\s+)?", "", rest, flags=re.I).strip()
+            return {
+                "verb": "mode",
+                "needs_ask": False,
+                "args": {"mode": picked, "rest": rest},
+                "host": "local",
+            }
     if re.search(r"\b(list skills|hive skills)\b", text, re.I):
         return {"verb": "skills", "needs_ask": False, "args": {}, "host": "local"}
     if STATUS_RE.search(text):
@@ -343,13 +387,28 @@ def current_mode(bus: dict) -> str:
     return mode if mode in ("ask", "plan", "agent") else "agent"
 
 
+def talk_cursor_mode(harness_mode: str, utterance: str) -> str:
+    """Talk is ask (faster, read-only). Full agent only when tools are actually needed."""
+    mode = (harness_mode or "ask").strip().lower()
+    if mode == "plan":
+        return "plan"
+    if mode == "ask":
+        return "ask"
+    if SKILL_RE.search(utterance or "") or REPO_RE.search(utterance or ""):
+        return "agent"
+    if re.search(r"\b(edit the|implement|change the code|run (?:this )?skill)\b", utterance or "", re.I):
+        return "agent"
+    return "ask"
+
+
 def _pack_harness(utterance: str, context: str, *, mode: str, see: str = "", skill_slug: str = "") -> str:
     lead = (
-        "Speak as Jarvis to Evens on the local voice face. Short spoken reply. "
+        "Speak as Jarvis to Evens on the local voice face. "
+        "Two to four spoken sentences. Finish the last sentence. Under 70 words. "
         f"Cursor harness mode: {mode}. "
         "Skills SSOT: scripts/hive/grok-skills/ and .cursor/skills/ — read one SKILL.md when the job matches. "
-        "Safari on this Mac: python3 apps/agent-stack/hands/see.py safari|grab|open <https-url>. "
-        "Not Chrome. Hard steps (send/pay/deploy/book/publish) stay Evens. No yolo.\n"
+        "Safari on this Mac is already in See if present. Not Chrome. "
+        "Hard steps (send/pay/deploy/book/publish) stay Evens. No yolo.\n"
     )
     if mode == "ask":
         lead += "Ask mode: explain only. Do not edit files.\n"
@@ -444,6 +503,23 @@ def apply_turn(
         plan = {"verb": "converse", "needs_ask": False, "args": {"text": spoken}, "host": "online"}
     verb = plan["verb"]
     prior_turns = load_turns(bus_now)
+    if verb == "stop":
+        if ONLINE is not None and hasattr(ONLINE, "cancel_cursor"):
+            ONLINE.cancel_cursor()
+        narration = "Stopped. Standing by."
+        bus_write(
+            hive,
+            phase="speak",
+            job_status="done",
+            utterance=spoken,
+            permission_ask=None,
+            spoken=narration,
+            turns=append_turn(prior_turns, spoken, narration),
+            harness_mode=current_mode(bus_now),
+        )
+        if speak:
+            speak_local(narration)
+        return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local", "cites": [], "wires": []}
     if verb == "refuse":
         narration = "I will not do that. Send, pay, deploy, book, and publish stay with you."
         bus_write(
@@ -466,14 +542,61 @@ def apply_turn(
     harness_mode = current_mode(bus_now)
     if verb == "idle":
         narration = "Holding. Say Jarvis, or tap Space."
+    elif verb == "greet":
+        narration = "Hey Evens. Standing by."
+    elif verb == "crumb":
+        narration = "That cut off. Say the rest."
     elif verb == "mode":
         harness_mode = str(plan.get("args", {}).get("mode") or "agent")
+        rest = str(plan.get("args", {}).get("rest") or "").strip()
+        if harness_mode == "agent":
+            resume_chat = ""
         if harness_mode == "ask":
             narration = "Ask mode. I explain. I do not edit."
         elif harness_mode == "plan":
             narration = "Plan mode. I propose. I do not edit."
         else:
             narration = "Agent mode. Tools, skills, Safari, and your screen are on the table."
+        if rest:
+            bus_write(
+                hive,
+                phase="think",
+                job_status="working",
+                utterance=spoken,
+                permission_ask=None,
+                spoken=narration,
+                turns=prior_turns,
+                jarvis_chat_id=resume_chat if harness_mode == "agent" else None,
+                harness_mode=harness_mode,
+            )
+            follow = apply_turn(
+                rest,
+                approved=approved,
+                hive=hive,
+                speak=False,
+                retrieve_roots=retrieve_roots,
+                grok=grok,
+                status_fn=status_fn,
+                cursor_fn=cursor_fn,
+                see_fn=see_fn,
+            )
+            follow_spoken = str(follow.get("spoken") or "").strip()
+            if follow_spoken and follow.get("verb") not in {"idle", "greet", "crumb"}:
+                narration = follow_spoken
+            cites = follow.get("cites") or []
+            wires = follow.get("wires") or []
+            if follow.get("verb"):
+                verb = str(follow.get("verb"))
+            return {
+                "ok": True,
+                "verb": verb,
+                "ask": False,
+                "spoken": narration,
+                "host": follow.get("host") or "local",
+                "args": plan.get("args"),
+                "cites": cites,
+                "wires": wires,
+            }
     elif verb == "skills":
         narration = "Hive skills: " + ", ".join(list_skills()) + "."
     elif verb == "status":
@@ -522,8 +645,11 @@ def apply_turn(
         skill_hit = SKILL_RE.search(spoken)
         skill_slug = skill_hit.group(1).lower() if skill_hit else ""
         see = _see_pack(spoken, hive, see_fn)
+        cursor_mode = talk_cursor_mode(harness_mode, spoken)
         resume_chat = str(bus_now.get("jarvis_chat_id") or "").strip() or None
-        if resume_chat is None and cursor_fn is None and grok is None and ONLINE is not None:
+        if cursor_mode == "agent":
+            resume_chat = None
+        elif resume_chat is None and cursor_fn is None and grok is None and ONLINE is not None:
             resume_chat = ONLINE.ensure_jarvis_chat(None)
         got = _call_brain(
             spoken,
@@ -531,20 +657,24 @@ def apply_turn(
             grok,
             cursor_fn,
             resume_chat,
-            mode=harness_mode,
+            mode=cursor_mode,
             see=see,
             skill_slug=skill_slug,
         )
-        if got.get("chat_id"):
-            resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
-        reply = str(got.get("spoken") or "").strip()
-        if reply and not is_ask_leak(reply):
-            narration = reply
-            wires = [got.get("wire") or "cursor"]
+        if got.get("cancelled"):
+            narration = "Stopped. Standing by."
+            wires = ["cursor"]
         else:
-            dark = _dark_brain()
-            narration = dark.get("spoken") or DARK_BRAIN
-            wires = [dark.get("wire") or "cursor"]
+            if got.get("chat_id"):
+                resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
+            reply = str(got.get("spoken") or "").strip()
+            if reply and not is_ask_leak(reply):
+                narration = reply
+                wires = [got.get("wire") or "cursor"]
+            else:
+                dark = _dark_brain()
+                narration = dark.get("spoken") or DARK_BRAIN
+                wires = [dark.get("wire") or "cursor"]
     else:
         narration = "Holding. Say Jarvis, or tap Space."
 
@@ -619,13 +749,16 @@ def self_test() -> dict:
         refused = apply_turn("send this email", hive=hive)
         if refused.get("verb") != "refuse" or refused.get("ask"):
             return {"ok": False, "errors": ["send this email must refuse, not ask"], "got": refused}
-        for line in ("what's my north star", "hey how are you", "hey", "what's going on", "remember this", "send me a joke", "tell me a joke"):
+        for line in ("what's my north star", "hey how are you", "what's going on", "remember this", "send me a joke", "tell me a joke"):
             out = apply_turn(line, hive=hive, retrieve_roots=[vault], grok=fake_grok)
             jobs = hive / "bus" / "jobs.jsonl"
             if out.get("ask") or not _no_ask(out) or jobs.is_file():
                 return {"ok": False, "errors": [f"{line!r} must converse with no ask and no queue"], "got": out}
             if classify(line)["needs_ask"] or classify(line)["verb"] in {"desk", "hello", "idle", "refuse"}:
                 return {"ok": False, "errors": [f"{line!r} classified as desk/ask/hello"], "got": classify(line)}
+        hi = apply_turn("hey", hive=hive, retrieve_roots=[vault], grok=fake_grok)
+        if hi.get("verb") != "greet" or hi.get("ask") or not _no_ask(hi):
+            return {"ok": False, "errors": ["hey must greet locally"], "got": hi}
         leftover = hive / "bus" / "state.json"
         stale_ask = "May I " + "hand this to the " + "grok desk? Say yes to approve."
         leftover.write_text(
@@ -644,7 +777,7 @@ def self_test() -> dict:
             + "\n",
             encoding="utf-8",
         )
-        for line in ("hey", "what's going on", "tell me a joke"):
+        for line in ("what's going on", "tell me a joke"):
             out = apply_turn(line, hive=hive, retrieve_roots=[vault], grok=fake_grok)
             if out.get("ask") or not _no_ask(out) or out.get("verb") != "converse":
                 return {"ok": False, "errors": [f"leftover ASK must not speak on {line!r}"], "got": out}

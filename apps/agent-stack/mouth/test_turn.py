@@ -87,7 +87,10 @@ class MouthTurnTest(unittest.TestCase):
             (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
             for line in lines:
                 plan = MOD.classify(line)
-                self.assertEqual(plan["verb"], "converse", line)
+                if line == "hey":
+                    self.assertEqual(plan["verb"], "greet", line)
+                else:
+                    self.assertEqual(plan["verb"], "converse", line)
                 self.assertFalse(plan["needs_ask"], line)
                 out = MOD.apply_turn(line, hive=hive, retrieve_roots=[vault], grok=_fake_grok)
                 self.assertFalse(out["ask"], line)
@@ -109,7 +112,7 @@ class MouthTurnTest(unittest.TestCase):
             vault = hive / "vault"
             vault.mkdir()
             (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
-            out = MOD.apply_turn("hey", hive=hive, retrieve_roots=[vault], grok=_fake_grok)
+            out = MOD.apply_turn("what's going on", hive=hive, retrieve_roots=[vault], grok=_fake_grok)
             self.assertFalse(out["ask"])
             self.assertEqual(out["verb"], "converse")
             self.assertNotIn("hand this", (out["spoken"] or "").lower())
@@ -131,6 +134,13 @@ class MouthTurnTest(unittest.TestCase):
             )
             for line in lines:
                 plan = MOD.classify(line)
+                if line == "hey":
+                    self.assertEqual(plan["verb"], "greet", line)
+                    out = MOD.apply_turn(line, hive=hive, retrieve_roots=[vault], grok=_fake_grok)
+                    self.assertEqual(out["verb"], "greet")
+                    self.assertFalse(out["ask"])
+                    _no_desk_ask(out["spoken"])
+                    continue
                 self.assertEqual(plan["verb"], "converse", line)
                 self.assertFalse(plan["needs_ask"], line)
                 self.assertEqual(plan["host"], "online", line)
@@ -260,7 +270,7 @@ class MouthTurnTest(unittest.TestCase):
             vault.mkdir()
             (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
             first = MOD.apply_turn(
-                "hey",
+                "what's going on",
                 hive=hive,
                 retrieve_roots=[vault],
                 cursor_fn=harness,
@@ -279,17 +289,18 @@ class MouthTurnTest(unittest.TestCase):
         self.assertEqual(follow["verb"], "converse")
         self.assertEqual(seen[0][2], "jarvis-1")
         self.assertEqual(seen[1][2], "jarvis-1")
-        self.assertIn("hey", seen[1][0].lower())
+        self.assertIn("what's going on", seen[1][0].lower())
         self.assertIn("Speak as Jarvis", seen[0][0])
-        self.assertEqual(seen[0][1], "agent")
-        self.assertIn("Agent mode", seen[0][0])
+        self.assertEqual(seen[0][1], "ask")
+        self.assertIn("Ask mode", seen[0][0])
         self.assertNotIn("XAI_API_KEY", first["spoken"])
 
     def test_mode_switch_and_screen_share(self) -> None:
         self.assertEqual(MOD.classify("agent mode")["verb"], "mode")
         self.assertEqual(MOD.classify("switch to plan mode")["args"]["mode"], "plan")
         self.assertEqual(MOD.classify("ask mode")["args"]["mode"], "ask")
-        self.assertEqual(MOD.classify("hey")["verb"], "converse")
+        self.assertEqual(MOD.classify("put yourself in ask mode")["args"]["mode"], "ask")
+        self.assertEqual(MOD.classify("hey")["verb"], "greet")
 
         seen: list[tuple] = []
 
@@ -325,7 +336,7 @@ class MouthTurnTest(unittest.TestCase):
     def test_repo_turn_calls_cursor_no_ask(self) -> None:
         self.assertEqual(MOD.classify("look at the code for the face")["verb"], "cursor")
         self.assertEqual(MOD.classify("fix this bug in serve.py")["args"]["mode"], "plan")
-        self.assertEqual(MOD.classify("hey")["verb"], "converse")
+        self.assertEqual(MOD.classify("hey")["verb"], "greet")
 
         def fake_cursor(prompt: str, mode: str = "ask") -> dict:
             return {
@@ -367,6 +378,45 @@ class MouthTurnTest(unittest.TestCase):
                 self.assertEqual(out["verb"], "converse", line)
                 self.assertFalse(out["ask"], line)
                 _no_desk_ask(out["spoken"])
+
+    def test_log_bugs_stop_mode_browser_crumb(self) -> None:
+        self.assertEqual(MOD.classify("Stop")["verb"], "stop")
+        self.assertEqual(MOD.classify("It")["verb"], "crumb")
+        put = MOD.classify("Put yourself in agent mode and look at my browser")
+        self.assertEqual(put["verb"], "mode")
+        self.assertEqual(put["args"]["mode"], "agent")
+        self.assertIn("look at my browser", put["args"]["rest"])
+        self.assertTrue(MOD.SEE_RE.search("look at my browser"))
+
+        seen: list[tuple] = []
+
+        def harness(prompt: str, mode: str = "ask", resume: str | None = None) -> dict:
+            seen.append((prompt, mode, resume))
+            return {"ok": True, "wire": "cursor", "spoken": "Safari is the hive site.", "chat_id": "c2"}
+
+        def fake_see():
+            return {"safari": {"title": "Hive", "url": "https://evenslouis.ca"}, "screen": {"path": "/tmp/see.jpg"}}
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-log-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            stopped = MOD.apply_turn("Stop", hive=hive)
+            self.assertEqual(stopped["verb"], "stop")
+            self.assertIn("Stopped", stopped["spoken"])
+            crumb = MOD.apply_turn("It", hive=hive)
+            self.assertEqual(crumb["verb"], "crumb")
+            out = MOD.apply_turn(
+                "Put yourself in agent mode and look at my browser",
+                hive=hive,
+                cursor_fn=harness,
+                see_fn=fake_see,
+            )
+            saved = MOD.load_json(hive / "bus" / "state.json")
+        self.assertIn("Safari", out["spoken"])
+        self.assertEqual(saved.get("harness_mode"), "agent")
+        self.assertTrue(seen)
+        self.assertEqual(seen[0][1], "ask")
+        self.assertIn("https://evenslouis.ca", seen[0][0])
 
 
 if __name__ == "__main__":

@@ -117,6 +117,7 @@
     const $ = (id) => document.getElementById(id);
     const synth = window.speechSynthesis;
     const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
+    const STOP_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(stop|cancel|never mind|forget it|shut up)\s*[.!]?\s*$/i;
     const WAKE_RE = /^(?:hey\s+)?jarvis[,.]?\s*/i;
     const RESTART_MIN = 400;
     const RESTART_MAX = 800;
@@ -258,21 +259,42 @@
       speak(line);
     }
 
+    let turnAbort = null;
     async function turn(utterance, approved) {
-      if (!utterance || state.turning) return;
+      const isStop = STOP_RE.test(utterance || "");
+      if (!utterance) return;
+      if (state.turning && !isStop) return;
+      if (isStop && turnAbort) {
+        try { turnAbort.abort(); } catch (e) {}
+      }
+      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
+      if (synth) synth.cancel();
       state.turning = true;
       paintPhase("think");
-      $("spoken").textContent = "";
+      if (!isStop) $("spoken").textContent = "";
+      const ac = new AbortController();
+      turnAbort = ac;
       try {
-        const out = await api("/api/turn", { utterance, approved: !!approved });
+        const res = await fetch("/api/turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ utterance, approved: !!approved }),
+          signal: ac.signal,
+        });
+        const out = await res.json();
         $("spoken").textContent = out.spoken || "";
         $("spoken").className = "line" + (out.ask ? " ask" : "");
         if (out.ask) state.pending = utterance;
         else state.pending = null;
         speak(out.spoken || "");
       } catch (e) {
-        $("spoken").textContent = "Turn failed. Type and enter, or tap the board.";
+        if (e && e.name === "AbortError") {
+          $("spoken").textContent = "Stopped. Standing by.";
+        } else {
+          $("spoken").textContent = "Turn failed. Type and enter, or tap the board.";
+        }
       }
+      if (turnAbort === ac) turnAbort = null;
       state.turning = false;
       if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
     }

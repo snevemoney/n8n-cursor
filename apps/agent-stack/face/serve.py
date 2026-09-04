@@ -161,7 +161,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except BrokenPipeError:
+            return
 
     def _json(self, code: int, payload: dict) -> None:
         self._send(code, (json.dumps(payload, indent=2) + "\n").encode("utf-8"), "application/json")
@@ -254,6 +257,12 @@ def serve(port: int = PORT) -> None:
     bus = load_json(bus_path)
     if bus and hasattr(live_mouth, "scrub_bus_ask") and live_mouth.scrub_bus_ask(bus):
         live_mouth.write_json(bus_path, bus)
+    if bus.get("job_status") == "working" and bus.get("phase") == "think":
+        bus["phase"] = "idle"
+        bus["job_status"] = "done"
+        live_mouth.write_json(bus_path, bus)
+    if hasattr(voice(), "warm"):
+        voice().warm()
     httpd = ThreadingHTTPServer((HOST, port), Handler)
     print(json.dumps({"ok": True, "url": f"http://{HOST}:{port}/", "bind": HOST}, indent=2))
     try:
@@ -302,6 +311,8 @@ def self_test() -> dict:
             "en-GB",
             "/api/wires",
             "MODE - AGENT",
+            "STOP_RE",
+            "AbortController",
         )
         banned_chrome = ("Use Chrome", "Safari speech is flaky")
         if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned) or any(token in html for token in banned_chrome):

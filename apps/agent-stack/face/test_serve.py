@@ -68,6 +68,8 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("/api/wires", html)
         self.assertIn("CURSOR", html)
         self.assertIn("MODE - AGENT", html)
+        self.assertIn("STOP_RE", html)
+        self.assertIn("AbortController", html)
         self.assertNotIn("ollama", html.lower())
         self.assertNotIn("if (state.live && !state.turning)", html)
         self.assertNotIn("bootMic()", html)

@@ -198,6 +198,21 @@ def worker_loop() -> None:
             print(json.dumps({"ok": False, "error": str(exc)[:200]}), flush=True)
 
 
+def warm() -> None:
+    """Boot the Kokoro worker so the first spoken line is not a cold load."""
+    if dry():
+        return
+
+    def _boot() -> None:
+        global _WORKER
+        with _WORKER_LOCK:
+            if _WORKER is None or _WORKER.poll() is not None:
+                _WORKER = _start_worker()
+        _kokoro_bytes("Ready.")
+
+    threading.Thread(target=_boot, daemon=True).start()
+
+
 def _start_worker() -> subprocess.Popen | None:
     py = voice_python()
     if py is None or not kokoro_ready():

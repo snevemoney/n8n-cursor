@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -15,6 +16,8 @@ ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 SESSIONS_CAP = 3
 ASK_CAP = 120
+_SESSION_CACHE: dict = {"at": 0.0, "lines": []}
+CACHE_SEC = 45.0
 
 
 def _load(name: str, path: Path):
@@ -59,6 +62,10 @@ def hive_block(hive: Path) -> str:
 
 def session_lines(limit: int = SESSIONS_CAP) -> list[str]:
     """Titles / first asks only. Never dump JSONL."""
+    now = time.time()
+    cached = _SESSION_CACHE.get("lines") or []
+    if cached and now - float(_SESSION_CACHE.get("at") or 0) < CACHE_SEC:
+        return list(cached)
     lines: list[str] = []
     cur_path = ROOT / "scripts/hive/os/cursor-chat-sessions.py"
     cur = _load("agent_stack_cursor_chats", cur_path)
@@ -89,6 +96,8 @@ def session_lines(limit: int = SESSIONS_CAP) -> list[str]:
                     lines.append(f"Hive sitting ({desk}): {ask[:ASK_CAP]}")
         except (OSError, KeyError, TypeError, AttributeError, ValueError):
             pass
+    _SESSION_CACHE["at"] = now
+    _SESSION_CACHE["lines"] = list(lines)
     return lines
 
 
