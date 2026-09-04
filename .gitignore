@@ -50,3 +50,7 @@ apps/scorpion/audit/out/
 *.har
 .env.bak
 apps/scorpion/.env.local.bak
+
+# Jarvis screen share (local only)
+**/bus/see.jpg
+**/bus/see.png

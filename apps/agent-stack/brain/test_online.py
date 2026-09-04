@@ -76,6 +76,18 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertNotIn("--force", argv)
         self.assertNotIn("--yolo", argv)
 
+    def test_call_cursor_turn_agent_omits_mode_flag(self) -> None:
+        proc = mock.Mock(stdout="Using tools.\n", stderr="", returncode=0)
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD.subprocess, "run", return_value=proc) as run:
+                out = MOD.call_cursor_turn("open the hive skill", mode="agent")
+        self.assertTrue(out["ok"])
+        argv = run.call_args[0][0]
+        self.assertIn("-p", argv)
+        self.assertNotIn("--mode", argv)
+        self.assertNotIn("--force", argv)
+        self.assertNotIn("--yolo", argv)
+
     def test_call_cursor_turn_auth_names_login_not_xai(self) -> None:
         proc = mock.Mock(stdout="", stderr="Error: Authentication required. Please run 'agent login' first.", returncode=1)
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):

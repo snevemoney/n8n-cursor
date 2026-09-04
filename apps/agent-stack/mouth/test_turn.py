@@ -274,7 +274,46 @@ class MouthTurnTest(unittest.TestCase):
         self.assertEqual(seen[1][2], "jarvis-1")
         self.assertIn("hey", seen[1][0].lower())
         self.assertIn("Speak as Jarvis", seen[0][0])
+        self.assertEqual(seen[0][1], "agent")
+        self.assertIn("Agent mode", seen[0][0])
         self.assertNotIn("XAI_API_KEY", first["spoken"])
+
+    def test_mode_switch_and_screen_share(self) -> None:
+        self.assertEqual(MOD.classify("agent mode")["verb"], "mode")
+        self.assertEqual(MOD.classify("switch to plan mode")["args"]["mode"], "plan")
+        self.assertEqual(MOD.classify("ask mode")["args"]["mode"], "ask")
+        self.assertEqual(MOD.classify("hey")["verb"], "converse")
+
+        seen: list[tuple] = []
+
+        def harness(prompt: str, mode: str = "ask", resume: str | None = None) -> dict:
+            seen.append((prompt, mode, resume))
+            return {"ok": True, "wire": "cursor", "spoken": f"mode {mode}", "chat_id": "c1"}
+
+        def fake_see():
+            return {
+                "safari": {"title": "Hive", "url": "https://evenslouis.ca"},
+                "screen": {"path": "/tmp/see.jpg"},
+            }
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-mode-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            set_mode = MOD.apply_turn("switch to plan mode", hive=hive)
+            self.assertEqual(set_mode["verb"], "mode")
+            self.assertIn("Plan mode", set_mode["spoken"])
+            self.assertEqual(MOD.load_json(hive / "bus" / "state.json").get("harness_mode"), "plan")
+            out = MOD.apply_turn(
+                "look at my screen",
+                hive=hive,
+                cursor_fn=harness,
+                see_fn=fake_see,
+            )
+        self.assertEqual(out["verb"], "converse")
+        self.assertEqual(seen[0][1], "plan")
+        self.assertIn("/tmp/see.jpg", seen[0][0])
+        self.assertIn("https://evenslouis.ca", seen[0][0])
+        self.assertIn("scripts/hive/grok-skills", seen[0][0])
 
     def test_repo_turn_calls_cursor_no_ask(self) -> None:
         self.assertEqual(MOD.classify("look at the code for the face")["verb"], "cursor")

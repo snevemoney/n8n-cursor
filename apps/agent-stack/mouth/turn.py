@@ -2,7 +2,7 @@
 """Mouth sitting: listen → CONVERSE → speak.
 
 Local: face + mic + TTS on 127.0.0.1:4018.
-Talk harness: Cursor CLI (cloud). One resumed chat. Mode ask. No yolo.
+Talk harness: Cursor CLI (cloud). Modes ask / plan / agent. No yolo.
 Memory: Obsidian vault + this repo + chat sessions + the hive.
 No Ollama. No xAI key. Never ASK to send a sentence to a desk.
 Hard steps (send / pay / deploy / book / publish) refuse — they stay Evens.
@@ -44,6 +44,20 @@ STATUS_RE = re.compile(
     r"(?:what(?:'s|s| is) the )?vps status|"
     r"hostinger status|golden paths|"
     r"status of (?:the )?(?:vps|hive|server|hostinger|cursor)"
+    r")\b",
+    re.I,
+)
+MODE_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(?:go(?:\s+to)?|switch\s+to|set|use)?\s*(ask|plan|agent)\s+mode\b",
+    re.I,
+)
+SEE_RE = re.compile(
+    r"\b("
+    r"look at (?:my )?(?:screen|display|safari)|"
+    r"what am i looking at|"
+    r"share (?:me )?(?:my )?screen|"
+    r"see (?:my )?(?:screen|safari)|"
+    r"what(?:'s| is) on (?:my )?(?:screen|safari)"
     r")\b",
     re.I,
 )
@@ -104,6 +118,8 @@ STORE = _load_mod("agent_stack_store", Path(__file__).resolve().parent.parent / 
 
 _ONLINE_PATH = Path(__file__).resolve().parent.parent / "brain" / "online.py"
 ONLINE = _load_mod("agent_stack_online", _ONLINE_PATH) if _ONLINE_PATH.is_file() else None
+_SEE_PATH = Path(__file__).resolve().parent.parent / "hands" / "see.py"
+SEE = _load_mod("agent_stack_see", _SEE_PATH) if _SEE_PATH.is_file() else None
 
 
 def now_iso() -> str:
@@ -204,6 +220,7 @@ def bus_write(
     wires: list | None = None,
     turns: list | None = None,
     jarvis_chat_id: str | None = None,
+    harness_mode: str | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
     bus = load_json(path)
@@ -222,6 +239,8 @@ def bus_write(
     )
     if jarvis_chat_id:
         bus["jarvis_chat_id"] = jarvis_chat_id
+    if harness_mode in ("ask", "plan", "agent"):
+        bus["harness_mode"] = harness_mode
     if turns is not None:
         bus["turns"] = turns
     elif "turns" not in bus:
@@ -261,14 +280,13 @@ def classify(utterance: str) -> dict:
             "args": {"reason": "hard-step or operate-never"},
             "host": "local",
         }
-    if SKILL_RE.search(text) or re.search(r"\b(list skills|hive skills)\b", text, re.I):
-        slug = SKILL_RE.search(text)
-        return {
-            "verb": "skill" if slug else "skills",
-            "needs_ask": False,
-            "args": {"slug": slug.group(1).lower()} if slug else {},
-            "host": "local",
-        }
+    mode_hit = MODE_RE.search(text)
+    if mode_hit:
+        picked = (mode_hit.group(1) or "").lower()
+        if picked in ("ask", "plan", "agent"):
+            return {"verb": "mode", "needs_ask": False, "args": {"mode": picked}, "host": "local"}
+    if re.search(r"\b(list skills|hive skills)\b", text, re.I):
+        return {"verb": "skills", "needs_ask": False, "args": {}, "host": "local"}
     if STATUS_RE.search(text):
         return {"verb": "status", "needs_ask": False, "args": {"text": text}, "host": "online"}
     if REPO_RE.search(text):
@@ -325,40 +343,88 @@ def _dark_brain() -> dict:
     return {"ok": False, "unknown": True, "wire": "cursor", "spoken": DARK_BRAIN}
 
 
-def _pack_harness(utterance: str, context: str) -> str:
+def current_mode(bus: dict) -> str:
+    mode = str((bus or {}).get("harness_mode") or "agent").strip().lower()
+    return mode if mode in ("ask", "plan", "agent") else "agent"
+
+
+def _pack_harness(utterance: str, context: str, *, mode: str, see: str = "", skill_slug: str = "") -> str:
     lead = (
-        "Speak as Jarvis to Evens on the local voice face. "
-        "Short spoken reply. One idea. Do not edit files. "
-        "Memory is the store pack below.\n\n"
+        "Speak as Jarvis to Evens on the local voice face. Short spoken reply. "
+        f"Cursor harness mode: {mode}. "
+        "Skills SSOT: scripts/hive/grok-skills/ and .cursor/skills/ — read one SKILL.md when the job matches. "
+        "Safari on this Mac: python3 apps/agent-stack/hands/see.py safari|grab|open <https-url>. "
+        "Not Chrome. Hard steps (send/pay/deploy/book/publish) stay Evens. No yolo.\n"
     )
+    if mode == "ask":
+        lead += "Ask mode: explain only. Do not edit files.\n"
+    elif mode == "plan":
+        lead += "Plan mode: propose a plan. Do not edit files.\n"
+    else:
+        lead += "Agent mode: use tools and skills. Do not send, pay, deploy, book, or publish.\n"
     body = (utterance or "").strip()
     extra = (context or "").strip()
+    if skill_slug:
+        path = SKILLS_DIR / f"{skill_slug}.md"
+        extra = f"Load skill {skill_slug} from {path}.\n\n{extra}"
+    if see:
+        extra = f"{see}\n\n{extra}"
     if extra:
-        body = f"{body}\n\n{extra[:3500]}"
-    return lead + body
+        body = f"{body}\n\n{extra[:4500]}"
+    return lead + "\n" + body
 
 
-def _call_cursor_harness(packed: str, cursor_fn, resume: str | None) -> dict:
+def _call_cursor_harness(packed: str, cursor_fn, resume: str | None, mode: str) -> dict:
     fn = cursor_fn or (ONLINE.call_cursor_turn if ONLINE is not None else None)
     if fn is None:
         return _dark_brain()
     try:
-        return fn(packed, mode="ask", resume=resume)
+        return fn(packed, mode=mode, resume=resume)
     except TypeError:
         try:
-            return fn(packed, mode="ask")
+            return fn(packed, mode=mode)
         except TypeError:
             return fn(packed)
 
 
-def _call_brain(utterance: str, context: str, grok, cursor_fn, resume: str | None) -> dict:
-    """Cursor CLI is the talk harness. grok= is a test inject only."""
-    packed = _pack_harness(utterance, context)
+def _call_brain(
+    utterance: str,
+    context: str,
+    grok,
+    cursor_fn,
+    resume: str | None,
+    *,
+    mode: str,
+    see: str = "",
+    skill_slug: str = "",
+) -> dict:
+    packed = _pack_harness(utterance, context, mode=mode, see=see, skill_slug=skill_slug)
     if cursor_fn is not None:
-        return _call_cursor_harness(packed, cursor_fn, resume)
+        return _call_cursor_harness(packed, cursor_fn, resume, mode)
     if grok is not None:
         return grok(utterance, context)
-    return _call_cursor_harness(packed, None, resume)
+    return _call_cursor_harness(packed, None, resume, mode)
+
+
+def _see_pack(utterance: str, hive: Path, see_fn) -> str:
+    want_grab = bool(SEE_RE.search(utterance or ""))
+    if see_fn is None and not want_grab:
+        return ""
+    fn = see_fn
+    if fn is None and SEE is not None:
+        def fn() -> dict:
+            return SEE.snapshot(hive=hive, grab=want_grab)
+    if fn is None:
+        return ""
+    try:
+        snap = fn()
+    except TypeError:
+        snap = fn(hive)
+    if not isinstance(snap, dict):
+        return ""
+    if SEE is not None:
+        return SEE.see_block(snap)
+    return str(snap.get("spoken") or "")
 
 
 def apply_turn(
@@ -371,6 +437,7 @@ def apply_turn(
     grok=None,
     status_fn=None,
     cursor_fn=None,
+    see_fn=None,
 ) -> dict:
     spoken = (utterance or "").strip()
     bus_now = load_json(hive / "bus" / "state.json")
@@ -401,14 +468,19 @@ def apply_turn(
     wires: list = []
     vault_spoken = ""
     resume_chat: str | None = None
+    harness_mode = current_mode(bus_now)
     if verb == "idle":
         narration = "Holding. Say Jarvis, or tap Space."
+    elif verb == "mode":
+        harness_mode = str(plan.get("args", {}).get("mode") or "agent")
+        if harness_mode == "ask":
+            narration = "Ask mode. I explain. I do not edit."
+        elif harness_mode == "plan":
+            narration = "Plan mode. I propose. I do not edit."
+        else:
+            narration = "Agent mode. Tools, skills, Safari, and your screen are on the table."
     elif verb == "skills":
         narration = "Hive skills: " + ", ".join(list_skills()) + "."
-    elif verb == "skill":
-        slug = plan["args"]["slug"]
-        path = SKILLS_DIR / f"{slug}.md"
-        narration = f"Loaded {slug}." if path.is_file() else f"No skill named {slug}."
     elif verb == "status":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
         fn = status_fn or (ONLINE.status if ONLINE is not None else None)
@@ -442,12 +514,32 @@ def apply_turn(
             narration = str(got.get("spoken") or "").strip() or "UNKNOWN. Cursor returned no text."
             wires = [got.get("wire") or "cursor"]
     elif verb == "converse":
-        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
+        bus_write(
+            hive,
+            phase="think",
+            job_status="working",
+            utterance=spoken,
+            permission_ask=None,
+            turns=prior_turns,
+            harness_mode=harness_mode,
+        )
         context, cites, vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
+        skill_hit = SKILL_RE.search(spoken)
+        skill_slug = skill_hit.group(1).lower() if skill_hit else ""
+        see = _see_pack(spoken, hive, see_fn)
         resume_chat = str(bus_now.get("jarvis_chat_id") or "").strip() or None
         if resume_chat is None and cursor_fn is None and grok is None and ONLINE is not None:
             resume_chat = ONLINE.ensure_jarvis_chat(None)
-        got = _call_brain(spoken, context, grok, cursor_fn, resume_chat)
+        got = _call_brain(
+            spoken,
+            context,
+            grok,
+            cursor_fn,
+            resume_chat,
+            mode=harness_mode,
+            see=see,
+            skill_slug=skill_slug,
+        )
         if got.get("chat_id"):
             resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
         reply = str(got.get("spoken") or "").strip()
@@ -476,6 +568,7 @@ def apply_turn(
         wires=wires,
         turns=next_turns,
         jarvis_chat_id=resume_chat,
+        harness_mode=harness_mode,
     )
     if speak:
         speak_local(narration)

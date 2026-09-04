@@ -90,6 +90,7 @@
   <div class="hud tl">
     <div class="name" id="hudName">J.A.R.V.I.S.</div>
     <div class="sub" id="link">NEURAL LINK - CHECKING WIRES</div>
+    <div class="sub" id="mode">MODE - AGENT</div>
     <div class="dots">
       <span><i></i>ONLINE</span>
       <span><i></i>LIVE</span>
@@ -503,6 +504,7 @@
         const bus = await api("/api/bus");
         if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
         if (bus.spoken && !state.turning && !state.listening && !/hand this to the|say yes to approve/i.test(bus.spoken)) $("spoken").textContent = bus.spoken;
+        if ($("mode")) $("mode").textContent = "MODE - " + String(bus.harness_mode || "agent").toUpperCase();
         const wires = await api("/api/wires");
         paintWires(wires);
       } catch (e) {
