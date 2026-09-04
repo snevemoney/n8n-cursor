@@ -91,6 +91,7 @@
     <div class="name" id="hudName">J.A.R.V.I.S.</div>
     <div class="sub" id="link">NEURAL LINK - CHECKING WIRES</div>
     <div class="sub" id="mode">MODE - AGENT</div>
+    <div class="sub" id="voice">VOICE - CHECKING</div>
     <div class="dots">
       <span><i></i>ONLINE</span>
       <span><i></i>LIVE</span>
@@ -131,8 +132,8 @@
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
     const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
     let jarvisVoice = null;
-    const TTS_PREF = ["samantha", "alex", "aaron", "nicky", "evan", "tom", "fred"];
-    const ttsSpeaking = () => !!(synth && synth.speaking);
+    let ttsAudio = null;
+    const ttsSpeaking = () => !!(synth && synth.speaking) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
 
     function voiceLang(v) {
       return String((v && v.lang) || "").toLowerCase().replace(/_/g, "-");
@@ -153,10 +154,9 @@
       const name = voiceName(v);
       const lang = voiceLang(v);
       let s = 10;
-      if (lang.startsWith("en-us")) s += 40;
-      else if (lang.startsWith("en-gb")) s += 10;
-      TTS_PREF.forEach((p, i) => { if (name.includes(p)) s += 50 - i; });
-      if (/daniel|compact|novelty/.test(name)) s -= 40;
+      if (lang.startsWith("en-gb")) s += 40;
+      else if (lang.startsWith("en-us")) s += 10;
+      if (/samantha|compact|novelty|thomas/.test(name)) s -= 40;
       return s;
     }
     function pickEnglishVoice() {
@@ -200,20 +200,53 @@
       return res.json();
     }
 
-    function speak(text) {
+    function afterSpeak() {
+      if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
+      if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
+    }
+    function speakLocal(text) {
       if (!text || !synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = "en-US";
+      u.lang = "en-GB";
       const voice = jarvisVoice || pickEnglishVoice();
       if (voice && !isFrenchVoice(voice)) u.voice = voice;
       u.rate = 1.02;
       u.onstart = () => paintPhase("speak");
-      u.onend = () => {
-        if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
-        if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
-      };
+      u.onend = afterSpeak;
       synth.speak(u);
+    }
+    async function speakCloud(text) {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok || res.status === 204) return false;
+      const blob = await res.blob();
+      if (!blob || blob.size < 32) return false;
+      if (synth) synth.cancel();
+      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} }
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      ttsAudio = audio;
+      paintPhase("speak");
+      audio.onended = () => {
+        if (ttsAudio === audio) ttsAudio = null;
+        URL.revokeObjectURL(url);
+        afterSpeak();
+      };
+      audio.onerror = () => {
+        if (ttsAudio === audio) ttsAudio = null;
+        URL.revokeObjectURL(url);
+        speakLocal(text);
+      };
+      await audio.play();
+      return true;
+    }
+    function speak(text) {
+      if (!text) return;
+      speakCloud(text).then((ok) => { if (!ok) speakLocal(text); }).catch(() => speakLocal(text));
     }
 
     async function greet() {
@@ -498,6 +531,11 @@
       const live = wires.cursor === "harness" || wires.cursor === "print" || wires.cursor === "hand";
       $("link").textContent = live ? "NEURAL LINK - CURSOR" : "NEURAL LINK - CURSOR DARK";
     }
+    function paintVoice(report) {
+      if (!$("voice")) return;
+      const name = String((report && report.voice) || "bm_lewis").replace(/_/g, " ").toUpperCase();
+      $("voice").textContent = "VOICE - " + name;
+    }
 
     async function refresh() {
       try {
@@ -507,6 +545,8 @@
         if ($("mode")) $("mode").textContent = "MODE - " + String(bus.harness_mode || "agent").toUpperCase();
         const wires = await api("/api/wires");
         paintWires(wires);
+        const voice = await api("/api/voice");
+        paintVoice(voice);
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
       }

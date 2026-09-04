@@ -5,6 +5,7 @@ Sittings of the fullstack-agent **pattern** port. Original MIT code. Not a fork.
 Face on `127.0.0.1:4018` is Jared's visualizer from tape `FiOTrxq9ckM` stills: a living green circuit board you talk to. First tap/Space arms the mic in Safari. Chip says LISTENING when it can hear. Say JARVIS. Not an Observe card. Not a Mouth / Hold Home dashboard.
 
 - **Face (local):** full-bleed PCB HUD + mic + TTS on this 8GB Mac only. Original canvas. Not vendored `ai-visualizer`.
+- **Voice:** Jared's Kokoro `bm_lewis` (British butler). ElevenLabs Tarquin only if a key is already on the machine. Not Samantha. Not Daniel. speechSynthesis is last-resort only.
 - **Brain (store):** Obsidian vault + this repo + chat sessions + the hive. Already adopted. Not an LLM.
 - **Hosts:** Cursor (repo hand) + Grok (talk desk). Face/mic/TTS stay local. Neither host is the skull.
 - **ASK only** for send / pay / deploy / book / publish. Hard steps stay Evens.
@@ -27,7 +28,7 @@ open http://127.0.0.1:4018/
 **Hear the store**
 
 1. Vault is `/Users/evenslouis/Documents/My_Billion_Dollar_Vault` (hive folder `00_Outer_Heaven`). Repo is this tree. Sessions stay on disk (`cursor-chat-sessions` / `grok-chat-sessions`). Hive is `.hive` + skills.
-2. Open Safari on `http://127.0.0.1:4018/` and hard-refresh. HUD should read **NEURAL LINK - CURSOR**.
+2. Open Safari on `http://127.0.0.1:4018/` and hard-refresh. HUD should read **NEURAL LINK - CURSOR** and **VOICE - BM LEWIS**.
 3. Say **JARVIS**. Converse calls Cursor CLI (`ask` / `plan` / `agent`). Say `agent mode` for tools and skills. `look at my screen` grabs Safari + a screenshot. No Chrome. No yolo.
 4. No Ollama. No xAI key. One-time `agent login` is the Cursor account, not a new vendor.
 

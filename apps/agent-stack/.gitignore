@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 see.jpg
 see.png
+.venv-voice/
+.kokoro/

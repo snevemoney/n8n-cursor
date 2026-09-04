@@ -70,6 +70,13 @@ class MouthTurnTest(unittest.TestCase):
         self.assertNotIn('return {"verb": "desk", "needs_ask": True', text)
         self.assertNotIn("May I hand this to the", text)
 
+    def test_speak_local_is_repo_voice_not_macos(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn('say", "-v", "Samantha"', text)
+        self.assertNotIn('say", "-v", "Daniel"', text)
+        self.assertIn("voice.py", text)
+        self.assertIn("VOICE.speak_local", text)
+
     def test_hey_whats_going_on_joke_never_hand_this(self) -> None:
         lines = ("hey", "what's going on", "tell me a joke", "send me a joke")
         with tempfile.TemporaryDirectory(prefix="agent-stack-hey-") as tmp:
