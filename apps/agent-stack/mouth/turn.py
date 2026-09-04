@@ -210,7 +210,9 @@ REPO_RE = re.compile(
 )
 PRO_EXPLICIT_RE = re.compile(
     r"\b("
-    r"(?:professional|university|saylor)\s+skills?|"
+    r"(?:the\s+)?(?:whole|entire)\s+shelf|"
+    r"all\s+(?:the\s+)?(?:professional|university|school|saylor)\s+skills?|"
+    r"(?:professional|university|saylor|school)\s+skills?|"
     r"(?:check(?:ing)?|load|use|brief)\s+(?:my |the |your )?(?:professional|university|saylor|bus|business)\s+skills?|"
     r"\bbus[- ]?\d{3}\b|"
     r"\becon[- ]?\d{3}\b|"
@@ -228,7 +230,9 @@ PRO_TOPIC_RE = re.compile(
     r"project management)|"
     r"\bhr\b|\bops\b|\bstats\b|\bpm\b|\bmis\b|"
     r"law|legal|staffing|comms|communication|"
-    r"management information"
+    r"management information|"
+    r"bitcoin literacy|what is bitcoin|austrian|"
+    r"business intelligence|customer service"
     r")\b",
     re.I,
 )
