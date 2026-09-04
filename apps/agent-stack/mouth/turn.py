@@ -336,12 +336,16 @@ def _first_store_line(context: str) -> str:
     return ""
 
 
-def _speak_from_store(vault_spoken: str, context: str) -> dict:
+STORE_ASK = re.compile(r"\b(north star|who am i|what should i work|remember this)\b", re.I)
+
+
+def _speak_from_store(utterance: str, vault_spoken: str, context: str) -> dict:
     if vault_spoken and not is_ask_leak(vault_spoken):
         return {"ok": True, "unknown": False, "wire": "store", "spoken": vault_spoken}
-    cited = _first_store_line(context)
-    if cited and not is_ask_leak(cited):
-        return {"ok": True, "unknown": False, "wire": "store", "spoken": cited}
+    if STORE_ASK.search(utterance or ""):
+        cited = _first_store_line(context)
+        if cited and not is_ask_leak(cited):
+            return {"ok": True, "unknown": False, "wire": "store", "spoken": cited}
     return _dark_brain()
 
 
@@ -360,7 +364,7 @@ def _call_brain(utterance: str, context: str, grok, vault_spoken: str) -> dict:
         return grok(utterance, context)
     if _talk_host_live():
         return ONLINE.call_grok(utterance, context)
-    return _speak_from_store(vault_spoken, context)
+    return _speak_from_store(utterance, vault_spoken, context)
 
 
 def apply_turn(
@@ -451,7 +455,7 @@ def apply_turn(
             narration = reply
             wires = [got.get("wire") or "store"]
         else:
-            dark = _speak_from_store(vault_spoken, context)
+            dark = _speak_from_store(spoken, vault_spoken, context)
             narration = dark.get("spoken") or DARK_BRAIN
             wires = [dark.get("wire") or "store"]
     else:
