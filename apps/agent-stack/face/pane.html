@@ -103,8 +103,8 @@
     </div>
     <div class="orb" aria-hidden="true"></div>
   </div>
-  <div class="hud bl" id="micline">MIC - LISTENING FOR "JARVIS"</div>
-  <div class="hud br" id="hint">SAY "JARVIS" OR TAP SPACE</div>
+  <div class="hud bl" id="micline">MIC - TAP TO ARM</div>
+  <div class="hud br" id="hint">TAP BOARD OR SPACE TO TALK</div>
   <div class="chip" id="chip" role="status">
     <canvas id="wave" width="640" height="46"></canvas>
     <div class="mark" id="mark">J.A.R.V.I.S.</div>
@@ -116,17 +116,31 @@
     const synth = window.speechSynthesis;
     const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
     const WAKE_RE = /^(?:hey\s+)?jarvis[,.]?\s*/i;
-    const state = { phase: "idle", rec: null, live: true, turning: false, pending: null, greeted: false, stack: { name: "J.A.R.V.I.S.", operator: "Evens" } };
+    const RESTART_MIN = 400;
+    const RESTART_MAX = 800;
+    const TTS_COOLDOWN = 700;
+    const state = {
+      phase: "idle", rec: null, stream: null, live: true, armed: false, arming: false,
+      listening: false, starting: false, turning: false, pending: null, greeted: false,
+      recGen: 0, restartTimer: 0, lastStartAt: 0, failStreak: 0,
+      stack: { name: "J.A.R.V.I.S.", operator: "Evens" },
+    };
     const dotted = (name) => String(name || "JARVIS").replace(/[^A-Za-z0-9]/g, "").toUpperCase().split("").join(".") || "J.A.R.V.I.S.";
+    const hasSR = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
+    const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
+    const ttsSpeaking = () => !!(synth && synth.speaking);
 
     function paintPhase(phase) {
       state.phase = phase || "idle";
       document.body.className = state.phase;
       $("phase").textContent = state.phase.toUpperCase();
       if (state.phase === "think") $("hint").textContent = "PROCESSING...";
-      else $("hint").textContent = 'SAY "JARVIS" OR TAP SPACE';
-      if (state.phase === "listen") $("micline").textContent = "MIC - LISTENING";
-      else $("micline").textContent = 'MIC - LISTENING FOR "JARVIS"';
+      else if (!state.armed) $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
+      else $("hint").textContent = 'SAY "JARVIS" OR TAP SPACE · MIC LIVE';
+      if (state.listening || state.phase === "listen") $("micline").textContent = "MIC - LISTENING";
+      else if (state.armed) $("micline").textContent = 'MIC - LISTENING FOR "JARVIS"';
+      else $("micline").textContent = "MIC - TAP TO ARM";
     }
 
     function tickClock() {
@@ -146,7 +160,10 @@
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 1.02;
       u.onstart = () => paintPhase("speak");
-      u.onend = () => { if (!state.turning) paintPhase("idle"); };
+      u.onend = () => {
+        if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
+        if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
+      };
       synth.speak(u);
     }
 
@@ -164,13 +181,18 @@
       state.turning = true;
       paintPhase("think");
       $("spoken").textContent = "";
-      const out = await api("/api/turn", { utterance, approved: !!approved });
-      $("spoken").textContent = out.spoken || "";
-      $("spoken").className = "line" + (out.ask ? " ask" : "");
-      if (out.ask) state.pending = utterance;
-      else state.pending = null;
-      speak(out.spoken || "");
+      try {
+        const out = await api("/api/turn", { utterance, approved: !!approved });
+        $("spoken").textContent = out.spoken || "";
+        $("spoken").className = "line" + (out.ask ? " ask" : "");
+        if (out.ask) state.pending = utterance;
+        else state.pending = null;
+        speak(out.spoken || "");
+      } catch (e) {
+        $("spoken").textContent = "Turn failed. Type and enter, or tap the board.";
+      }
       state.turning = false;
+      if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
     }
 
     function handleHeard(raw) {
@@ -183,35 +205,134 @@
       else turn(said, false);
     }
 
+    function scheduleRestart(ms) {
+      clearTimeout(state.restartTimer);
+      if (!state.live || !state.armed) return;
+      if (ttsSpeaking()) return;
+      const wait = Math.max(RESTART_MIN, Math.min(RESTART_MAX, ms || RESTART_MIN));
+      state.restartTimer = setTimeout(() => {
+        if (ttsSpeaking()) return;
+        if (state.live && state.armed && !state.listening && !state.starting && !state.rec) startListen();
+      }, wait);
+    }
+
+    function showTypeFallback(line) {
+      $("spoken").textContent = line;
+      $("typed").classList.add("on");
+      $("hint").textContent = "USE CHROME · OR TYPE";
+    }
+
+    async function holdMic() {
+      if (streamLive()) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+      state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return streamLive();
+    }
+
     function startListen() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
-        $("spoken").textContent = "No speech engine. Tap / to type. Space still arms the board.";
+        showTypeFallback("Use Chrome to talk. Type here is a fallback.");
         return;
       }
-      try { if (state.rec) state.rec.stop(); } catch (e) {}
-      state.rec = new SR();
-      state.rec.continuous = true;
-      state.rec.interimResults = true;
-      state.rec.onspeechstart = () => { if (synth && synth.speaking) synth.cancel(); paintPhase("listen"); };
-      state.rec.onresult = (e) => {
+      if (!state.live || !state.armed) return;
+      if (ttsSpeaking()) return;
+      if (state.listening || state.starting || state.rec) return;
+      state.recGen += 1;
+      const gen = state.recGen;
+      const rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+      rec.maxAlternatives = 1;
+      rec.onstart = () => {
+        if (gen !== state.recGen) return;
+        state.starting = false;
+        state.listening = true;
+        state.failStreak = 0;
+        state.lastStartAt = Date.now();
+        if (!state.turning && !ttsSpeaking()) paintPhase("listen");
+      };
+      rec.onspeechstart = () => {
+        if (ttsSpeaking()) return;
+        if (!state.turning) paintPhase("listen");
+      };
+      rec.onresult = (e) => {
         const last = e.results[e.results.length - 1];
         const t = last[0].transcript;
         $("spoken").textContent = t;
         if (last.isFinal) handleHeard(t);
       };
-      state.rec.onend = () => {
-        if (state.live && !state.turning) {
-          try { startListen(); } catch (e) {}
+      rec.onerror = (e) => {
+        const err = (e && e.error) || "";
+        if (err === "not-allowed" || err === "service-not-allowed") {
+          state.armed = false;
+          state.listening = false;
+          state.starting = false;
+          showTypeFallback("Allow the microphone, then tap the board. Use Chrome if this is Safari.");
+          return;
         }
+        if (err === "network") {
+          showTypeFallback("Chrome speech needs network. Type is a fallback.");
+          return;
+        }
+        if (err === "aborted") state.failStreak += 1;
       };
-      state.rec.start();
+      rec.onend = () => {
+        if (gen !== state.recGen) return;
+        const lived = Date.now() - (state.lastStartAt || Date.now());
+        state.listening = false;
+        state.starting = false;
+        state.rec = null;
+        if (!state.live || !state.armed) return;
+        if (ttsSpeaking()) return;
+        if (lived < RESTART_MIN) state.failStreak += 1;
+        else state.failStreak = Math.max(0, state.failStreak - 1);
+        const backoff = Math.min(RESTART_MAX, RESTART_MIN + state.failStreak * 150);
+        scheduleRestart(backoff);
+      };
+      state.rec = rec;
+      state.starting = true;
+      state.lastStartAt = Date.now();
+      try {
+        rec.start();
+      } catch (e) {
+        state.starting = false;
+        state.rec = null;
+        if (e && /already started/i.test(String(e.message || e))) return;
+        scheduleRestart(RESTART_MAX);
+      }
     }
 
-    async function bootMic() {
-      await api("/api/listen", { live: true });
+    async function armMic() {
+      if (state.arming) return;
+      if (state.armed && streamLive()) {
+        if (!state.listening && !state.starting && !state.rec) startListen();
+        return;
+      }
+      if (!hasSR()) {
+        showTypeFallback("Use Chrome to talk. Type here is a fallback.");
+        state.armed = true;
+        return;
+      }
+      if (isSafari) {
+        $("spoken").textContent = "Use Chrome to talk — Safari speech is flaky. Type is a fallback.";
+        $("typed").classList.add("on");
+      }
+      state.arming = true;
+      try {
+        await holdMic();
+      } catch (e) {
+        state.arming = false;
+        showTypeFallback("Allow the microphone, then tap the board.");
+        return;
+      }
+      state.armed = true;
+      state.live = true;
+      state.arming = false;
+      try { await api("/api/listen", { live: true }); } catch (e) {}
       startListen();
-      greet();
+      paintPhase("listen");
     }
 
     // --- living circuit board (original MIT; pixels from FiOTrxq9ckM stills) ---
@@ -320,8 +441,8 @@
     function paintChip() {
       if (state.phase === "think") {
         $("mark").textContent = Array.from({ length: 12 }, () => SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)]).join(" ");
-      } else if (state.phase === "listen") {
-        $("mark").textContent = "";
+      } else if (state.listening || state.phase === "listen") {
+        $("mark").textContent = "LISTENING";
       } else {
         $("mark").textContent = dotted(state.stack.face || "JARVIS");
       }
@@ -330,18 +451,23 @@
     async function refresh() {
       try {
         const bus = await api("/api/bus");
-        if (bus.phase) paintPhase(bus.phase);
-        if (bus.spoken && !state.turning) $("spoken").textContent = bus.spoken;
+        if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
+        if (bus.spoken && !state.turning && !state.listening) $("spoken").textContent = bus.spoken;
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
       }
     }
 
+    function onArmGesture(e) {
+      if (e && e.target === $("typed")) return;
+      if (e && e.preventDefault) e.preventDefault();
+      armMic();
+    }
+
     document.addEventListener("keydown", (e) => {
       if (e.code === "Space" && e.target !== $("typed")) {
         e.preventDefault();
-        paintPhase("listen");
-        bootMic();
+        armMic();
       }
       if (e.key === "/") {
         e.preventDefault();
@@ -356,7 +482,8 @@
         $("typed").value = "";
       }
     });
-    $("chip").addEventListener("click", () => bootMic());
+    $("chip").addEventListener("click", onArmGesture);
+    $("board").addEventListener("click", onArmGesture);
 
     (async () => {
       try {
@@ -376,8 +503,20 @@
       setInterval(paintChip, 160);
       refresh();
       setInterval(refresh, 4000);
-      // tape: mic always listening for Jarvis
-      bootMic();
+      if (!hasSR()) {
+        showTypeFallback("Use Chrome to talk. Type here is a fallback.");
+        return;
+      }
+      let granted = false;
+      try {
+        const perm = await navigator.permissions.query({ name: "microphone" });
+        granted = perm.state === "granted";
+      } catch (e) {}
+      if (granted) armMic();
+      else {
+        paintPhase("idle");
+        $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
+      }
     })();
   </script>
 </body>

@@ -2,7 +2,7 @@
 
 Sittings of the fullstack-agent **pattern** port. Original MIT code. Not a fork.
 
-Face on `127.0.0.1:4018` is Jared's visualizer from tape `FiOTrxq9ckM` stills: a living green circuit board you talk to. Say JARVIS or tap Space. Not an Observe card. Not a Mouth / Hold Home dashboard.
+Face on `127.0.0.1:4018` is Jared's visualizer from tape `FiOTrxq9ckM` stills: a living green circuit board you talk to. First tap/Space arms the mic (Chrome). Chip says LISTENING when it can hear. Say JARVIS. Not an Observe card. Not a Mouth / Hold Home dashboard.
 
 - **Face:** full-bleed PCB HUD. Idle / listen / think / speak. Original canvas. Not vendored `ai-visualizer`.
 - **Mouth:** write path behind the face. Local STT + local TTS. Auto-approve off.
