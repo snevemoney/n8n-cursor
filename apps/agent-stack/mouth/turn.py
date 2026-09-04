@@ -21,9 +21,17 @@ ROOT = Path(__file__).resolve().parents[3]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 SKILLS_DIR = ROOT / "scripts/hive/grok-skills"
 HARD_REFUSE = re.compile(
-    r"\b(send|pay|deploy|book|publish|dial|twilio|retell|vapi|"
-    r"claude code|fable|cowork|auto-?approve|take over (my )?(mouse|computer)|"
-    r"ollama)\b",
+    r"\b("
+    r"send (this|that|the|an?)\s+\w+|"
+    r"pay (this|that|the|an?|him|her|them)\b|"
+    r"deploy (this|that|it|to|now|prod)|"
+    r"book (a|the|this|me)\b|"
+    r"publish (this|that|the|it|now)|"
+    r"dial\b|twilio|retell|\bvapi\b|"
+    r"claude code|fable|cowork|auto-?approve|"
+    r"take over (my )?(mouse|computer)|"
+    r"\bollama\b"
+    r")",
     re.I,
 )
 YES_RE = re.compile(
@@ -40,18 +48,13 @@ SKILL_RE = re.compile(
 )
 STATUS_RE = re.compile(
     r"\b("
-    r"status|bus|what are you doing|phase|"
-    r"vps|hostinger|server|servers|hive|golden(?: paths)?|"
-    r"scorpion|uptime|disk|cursor(?: cli| agent)?|"
-    r"what's (?:live|online|running)|whats (?:live|online|running)"
+    r"(?:what(?:'s|s| is) the )?vps status|"
+    r"hostinger status|golden paths|"
+    r"status of (?:the )?(?:vps|hive|server|hostinger|cursor)"
     r")\b",
     re.I,
 )
-HELLO_RE = re.compile(
-    r"^(?:hey|hi|hello|yo|sup|good (?:morning|afternoon|evening))"
-    r"(?:\s+jarvis)?[.!]?\s*$",
-    re.I,
-)
+MAX_TURNS = 8
 ASK_LEAK = re.compile(
     r"say yes to (approve|send)|send this to the grok desk|"
     r"hand this to the \w+ desk|do you want me to send this",
@@ -94,6 +97,70 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
+def load_turns(bus: dict) -> list[dict]:
+    raw = bus.get("turns") if isinstance(bus, dict) else None
+    if not isinstance(raw, list):
+        return []
+    out: list[dict] = []
+    for row in raw:
+        if not isinstance(row, dict):
+            continue
+        user = str(row.get("user") or "").strip()
+        jarvis = str(row.get("jarvis") or "").strip()
+        if user or jarvis:
+            out.append({"user": user, "jarvis": jarvis})
+    return out[-MAX_TURNS:]
+
+
+def append_turn(turns: list[dict], user: str, jarvis: str) -> list[dict]:
+    next_turns = list(turns)
+    next_turns.append({"user": (user or "").strip(), "jarvis": (jarvis or "").strip()})
+    return next_turns[-MAX_TURNS:]
+
+
+def history_block(turns: list[dict]) -> str:
+    if not turns:
+        return ""
+    lines: list[str] = []
+    for row in turns:
+        if row.get("user"):
+            lines.append(f"Evens: {row['user']}")
+        if row.get("jarvis"):
+            lines.append(f"Jarvis: {row['jarvis']}")
+    return "Recent conversation:\n" + "\n".join(lines)
+
+
+def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
+    stack = load_json(hive / "agent-stack.json")
+    who = str(stack.get("operator") or "Evens").strip() or "Evens"
+    lines = [
+        "Identity (every turn):",
+        f"You are Jarvis. The operator is {who} Louis. This is his hive OS on the 8GB Mac.",
+        "Talk like a colleague. Resolve pronouns from Recent conversation.",
+        "Do not ask to send this to a desk. Hard steps stay Evens.",
+    ]
+    found = RETRIEVE.search("who am I north stars", retrieve_roots)
+    for hit in (found.get("hits") or [])[:2]:
+        snippet = str(hit.get("snippet") or "").strip()
+        if snippet:
+            lines.append(f"{hit.get('path') or 'vault'}: {snippet}")
+    return "\n".join(lines)
+
+
+def converse_context(
+    utterance: str, retrieve_roots: list[Path] | None, hive: Path, turns: list[dict]
+) -> tuple[str, list, str]:
+    parts = [identity_block(retrieve_roots, hive)]
+    hist = history_block(turns)
+    if hist:
+        parts.append(hist)
+    vault_spoken, cites = _vault_extract(utterance, retrieve_roots)
+    if cites:
+        bits = [f"{hit.get('path')}: {hit.get('snippet')}" for hit in cites[:3]]
+        parts.append("Vault snippets (only if they match this turn):\n" + "\n".join(bits))
+    return "\n\n".join(parts), cites, vault_spoken
+
+
 def bus_write(
     hive: Path,
     *,
@@ -104,6 +171,7 @@ def bus_write(
     spoken: str | None = None,
     cites: list | None = None,
     wires: list | None = None,
+    turns: list | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
     bus = load_json(path)
@@ -120,6 +188,10 @@ def bus_write(
             "updated_at": now_iso(),
         }
     )
+    if turns is not None:
+        bus["turns"] = turns
+    elif "turns" not in bus:
+        bus["turns"] = []
     write_json(path, bus)
     return bus
 
@@ -146,7 +218,7 @@ def set_listen(hive: Path, live: bool) -> dict:
 
 def classify(utterance: str) -> dict:
     text = (utterance or "").strip()
-    if not text or YES_RE.match(text) or NO_RE.match(text):
+    if not text:
         return {"verb": "idle", "needs_ask": False, "args": {}, "host": "local"}
     if HARD_REFUSE.search(text):
         return {
@@ -155,8 +227,6 @@ def classify(utterance: str) -> dict:
             "args": {"reason": "hard-step or operate-never"},
             "host": "local",
         }
-    if HELLO_RE.match(text):
-        return {"verb": "hello", "needs_ask": False, "args": {}, "host": "local"}
     if SKILL_RE.search(text) or re.search(r"\b(list skills|hive skills)\b", text, re.I):
         slug = SKILL_RE.search(text)
         return {
@@ -187,16 +257,22 @@ def speak_local(text: str) -> None:
     if os.environ.get("AGENT_STACK_DRY_TTS") == "1" or not text:
         return
     try:
-        subprocess.run(["say", "-v", "Samantha", text[:400]], check=False, timeout=20)
+        subprocess.run(["say", "-v", "Daniel", text[:400]], check=False, timeout=20)
     except (OSError, subprocess.TimeoutExpired):
         return
 
 
 def _vault_extract(utterance: str, retrieve_roots: list[Path] | None) -> tuple[str, list]:
+    words = RETRIEVE.tokens(utterance)
+    if len(words) < 2:
+        return "", []
     found = RETRIEVE.search(utterance, retrieve_roots)
     cites = found.get("hits") or []
     if found.get("unknown") or not cites:
-        return "", cites
+        return "", []
+    top = cites[0] if isinstance(cites[0], dict) else {}
+    if int(top.get("score") or 0) < 4:
+        return "", []
     spoken = str(found.get("spoken") or "").strip()
     if ASK_LEAK.search(spoken):
         return "", cites
@@ -254,19 +330,27 @@ def apply_turn(
 
     plan = classify(spoken)
     verb = plan["verb"]
+    prior_turns = load_turns(bus_now)
     if verb == "refuse":
         narration = "I will not do that. Send, pay, deploy, book, and publish stay with you."
-        bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None, spoken=narration)
+        bus_write(
+            hive,
+            phase="speak",
+            job_status="done",
+            utterance=spoken,
+            permission_ask=None,
+            spoken=narration,
+            turns=append_turn(prior_turns, spoken, narration),
+        )
         if speak:
             speak_local(narration)
         return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local", "cites": [], "wires": []}
 
     cites: list = []
     wires: list = []
+    vault_spoken = ""
     if verb == "idle":
         narration = "Holding. Say Jarvis, or tap Space."
-    elif verb == "hello":
-        narration = "Online. Face is local. Brain calls Grok. What are we working on?"
     elif verb == "skills":
         narration = "Hive skills: " + ", ".join(list_skills()) + "."
     elif verb == "skill":
@@ -274,7 +358,7 @@ def apply_turn(
         path = SKILLS_DIR / f"{slug}.md"
         narration = f"Loaded {slug}." if path.is_file() else f"No skill named {slug}."
     elif verb == "status":
-        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None)
+        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
         fn = status_fn or (ONLINE.status if ONLINE is not None else None)
         if fn is None:
             narration = f"Phase {bus_now.get('phase') or 'idle'}. Job {bus_now.get('job_status') or 'done'}."
@@ -292,20 +376,13 @@ def apply_turn(
             narration = got.get("spoken") or "UNKNOWN. Status wires returned nothing."
             wires = [p.get("wire") for p in (got.get("parts") or []) if p.get("wire")] or ["status"]
     elif verb == "converse":
-        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None)
-        vault_spoken, cites = _vault_extract(spoken, retrieve_roots)
-        context = ""
-        if cites:
-            bits = [f"{hit.get('path')}: {hit.get('snippet')}" for hit in cites[:3]]
-            context = "Vault snippets (one memory among live state):\n" + "\n".join(bits)
+        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
+        context, cites, vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
         got = _call_grok(spoken, context, grok)
         reply = str(got.get("spoken") or "").strip()
         if got.get("ok") and reply and not ASK_LEAK.search(reply):
             narration = reply
             wires = [got.get("wire") or "grok"]
-        elif vault_spoken:
-            narration = vault_spoken
-            wires = ["vault"]
         else:
             dark = _dark_grok()
             narration = dark.get("spoken") or DARK_GROK
@@ -316,6 +393,7 @@ def apply_turn(
     if ASK_LEAK.search(narration or ""):
         narration = DARK_GROK
 
+    next_turns = prior_turns if verb == "idle" else append_turn(prior_turns, spoken, narration)
     bus_write(
         hive,
         phase="speak",
@@ -325,6 +403,7 @@ def apply_turn(
         spoken=narration,
         cites=cites,
         wires=wires,
+        turns=next_turns,
     )
     if speak:
         speak_local(narration)
@@ -380,13 +459,25 @@ def self_test() -> dict:
         refused = apply_turn("send this email", hive=hive)
         if refused.get("verb") != "refuse" or refused.get("ask"):
             return {"ok": False, "errors": ["send this email must refuse, not ask"], "got": refused}
-        for line in ("what's my north star", "hey how are you", "remember this"):
+        for line in ("what's my north star", "hey how are you", "hey", "remember this", "send me a joke"):
             out = apply_turn(line, hive=hive, retrieve_roots=[vault], grok=fake_grok)
             jobs = hive / "bus" / "jobs.jsonl"
             if out.get("ask") or not _no_ask(out) or jobs.is_file():
                 return {"ok": False, "errors": [f"{line!r} must converse with no ask and no queue"], "got": out}
-            if classify(line)["needs_ask"] or classify(line)["verb"] == "desk":
-                return {"ok": False, "errors": [f"{line!r} classified as desk/ask"], "got": classify(line)}
+            if classify(line)["needs_ask"] or classify(line)["verb"] in {"desk", "hello", "idle", "refuse"}:
+                return {"ok": False, "errors": [f"{line!r} classified as desk/ask/hello"], "got": classify(line)}
+        seen: list[str] = []
+
+        def rec_grok(prompt: str, context: str = "") -> dict:
+            seen.append(context)
+            return {"ok": True, "unknown": False, "wire": "grok", "engine": "xai", "spoken": f"Grok live: {prompt[:80]}"}
+
+        apply_turn("tell me a joke about bitcoin", hive=hive, retrieve_roots=[vault], grok=rec_grok)
+        follow = apply_turn("that was terrible", hive=hive, retrieve_roots=[vault], grok=rec_grok)
+        if follow.get("verb") != "converse" or "tell me a joke about bitcoin" not in (seen[-1] if seen else ""):
+            return {"ok": False, "errors": ["follow-up must send recent conversation to Grok"], "got": follow, "ctx": seen[-1] if seen else ""}
+        if "Identity" not in (seen[-1] if seen else "") or "Evens" not in (seen[-1] if seen else ""):
+            return {"ok": False, "errors": ["converse must attach identity every turn"], "got": seen[-1] if seen else ""}
         thought = apply_turn("what's my north star", hive=hive, retrieve_roots=[vault], grok=fake_grok)
         if thought.get("verb") != "converse" or "Grok live" not in (thought.get("spoken") or ""):
             return {"ok": False, "errors": ["converse must CALL Grok and speak the reply"], "got": thought}
@@ -406,8 +497,8 @@ def self_test() -> dict:
             retrieve_roots=[vault],
             grok=lambda prompt, context="": {"ok": False, "unknown": True, "spoken": ""},
         )
-        if vaulted.get("ask") or "leverage" not in (vaulted.get("spoken") or "").lower():
-            return {"ok": False, "errors": ["dark Grok with vault must speak extractive"], "got": vaulted}
+        if vaulted.get("ask") or "I can't reach Grok" not in (vaulted.get("spoken") or ""):
+            return {"ok": False, "errors": ["dark Grok must name the wire, vault is context only"], "got": vaulted}
         st = apply_turn("what's the VPS status", hive=hive, status_fn=fake_status)
         if st.get("verb") != "status" or "VPS" not in (st.get("spoken") or "") or st.get("ask"):
             return {"ok": False, "errors": ["status must CALL live wires with no ask"], "got": st}

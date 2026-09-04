@@ -19,10 +19,10 @@ The product you look at is Jared's **living circuit board**. Full viewport. Dark
 
 ## Use (from the tape)
 
-1. Look at the board. Chrome on `http://127.0.0.1:4018/` (Safari speech is flaky).
+1. Look at the board in Safari on `http://127.0.0.1:4018/`.
 2. First visit: **tap the board or Space** so the browser can arm the mic. One MediaStream stays open so the orange mic icon stays on. Chip reads **LISTENING** when the mic is live.
 3. Say **JARVIS** (or just talk once armed). It listens, thinks, speaks. If the engine ends a session, recognition restarts once with 400–800ms backoff — no hold-to-talk, no start-stop flicker.
-4. No speech engine: one-line “use Chrome” plus a hidden type field (not a Mouth card).
+4. No speech engine: type fallback (not a Mouth card). Never tell him to switch browsers.
 5. Questions CALL Grok (xAI) and speak the reply. Vault snippets are extra context. Status CALLs hive / VPS / Cursor. ASK only for send / pay / deploy / book / publish. Missing key → spoken UNKNOWN naming the wire. No Ollama. No “queued for Grokbot.”
 
 Wake-word always-on matches the stills (`MIC - LISTENING FOR "JARVIS"`) **after** the mic is armed. Repo wizard default hold-Home is **not** what the tour HUD shows.
