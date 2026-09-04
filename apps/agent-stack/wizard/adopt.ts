@@ -35,6 +35,19 @@ function findRoot(start: string): string {
 }
 
 const ROOT = findRoot(HERE);
+
+function stackPackageRoot(start: string): string {
+  let cur = start;
+  for (let i = 0; i < 6; i += 1) {
+    if (existsSync(join(cur, "package.json")) && existsSync(join(cur, "start.sh"))) {
+      return cur;
+    }
+    cur = resolve(cur, "..");
+  }
+  return resolve(start, "../..");
+}
+
+const STACK_ROOT = stackPackageRoot(HERE);
 const DEFAULT_HIVE = join(ROOT, "docs/hive/outer-heaven/.hive");
 const DEFAULT_VAULT = join(homedir(), "Documents/My_Billion_Dollar_Vault");
 const NEVER = [
@@ -107,8 +120,8 @@ export function defaultStack(vault: VaultHandle, hive: string): AgentStack {
     pieces: {
       memory: "adopted",
       wizard: "wired",
-      mouth: "parked",
-      face: "parked",
+      mouth: existsSync(join(STACK_ROOT, "mouth", "start.sh")) ? "wired" : "parked",
+      face: existsSync(join(STACK_ROOT, "face", "start.sh")) ? "wired" : "parked",
       hands: "parked",
     },
     never: [...NEVER],
@@ -129,10 +142,14 @@ export function validate(stack: AgentStack, bus: BusState): string[] {
   if (!stack.vault.path) errors.push("vault.path missing — refuse to invent a second home");
   if (stack.pieces.memory !== "adopted") errors.push("memory must be adopted");
   if (stack.pieces.wizard !== "wired") errors.push("wizard must be wired");
-  for (const parked of ["mouth", "face", "hands"] as const) {
-    if (stack.pieces[parked] !== "parked") {
-      errors.push(`sitting 1 parks ${parked}`);
-    }
+  if (stack.pieces.mouth !== "parked" && stack.pieces.mouth !== "wired") {
+    errors.push("mouth must be parked or wired");
+  }
+  if (stack.pieces.face !== "parked" && stack.pieces.face !== "wired") {
+    errors.push("face must be parked or wired");
+  }
+  if (stack.pieces.hands !== "parked") {
+    errors.push("hands stay parked — no mouse takeover in sittings 2–3");
   }
   for (const lock of NEVER) {
     if (!stack.never.includes(lock)) errors.push(`never[] missing ${lock}`);
@@ -199,6 +216,13 @@ export function selfTest(): { ok: boolean; errors: string[] } {
     const errors = validate(stack, bus);
     if (stack.permission_mode !== "ask") errors.push("permission_mode drifted");
     if (!stack.vault.path) errors.push("vault.path empty");
+    if (stack.pieces.hands !== "parked") errors.push("hands drifted off parked");
+    if (existsSync(join(STACK_ROOT, "mouth", "start.sh")) && stack.pieces.mouth !== "wired") {
+      errors.push("mouth start.sh present but piece not wired");
+    }
+    if (existsSync(join(STACK_ROOT, "face", "start.sh")) && stack.pieces.face !== "wired") {
+      errors.push("face start.sh present but piece not wired");
+    }
     return { ok: errors.length === 0, errors };
   } finally {
     rmSync(hive, { recursive: true, force: true });

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hive agent-stack starter. Original MIT. Not a copy of AGPL start.sh.
-# Starts face only if a face starter exists. Skips missing mouth/face.
+# Starts face if present. Mouth is PTT-on-face, not a daemon.
 # Hands stay parked. Never starts Claude Code or vendored sibling repos.
 set -euo pipefail
 
@@ -23,24 +23,29 @@ else
   echo "stack: missing — run: npm run adopt"
 fi
 
-started=0
-if [[ -x "$FACE_START" && "$MODE" != "mouth" ]]; then
-  echo "face: starting $FACE_START"
-  "$FACE_START" &
-  started=1
-else
-  echo "face: skipped (no executable $FACE_START — sitting 1 parks face)"
+if [[ "$MODE" == "check" ]]; then
+  echo "mouth: $( [[ -x "$MOUTH_START" ]] && echo wired || echo missing )"
+  echo "face: $( [[ -x "$FACE_START" ]] && echo wired || echo missing )"
+  echo "hands: parked"
+  AGENT_STACK_DRY_TTS=1 python3 "$HERE/mouth/turn.py" --self-test
+  python3 "$HERE/face/serve.py" --self-test
+  exit 0
 fi
 
 if [[ -x "$MOUTH_START" && "$MODE" != "face" ]]; then
-  echo "mouth: starting $MOUTH_START"
-  "$MOUTH_START"
-  started=1
+  echo "mouth: ready (PTT is Home on the face; CLI $HERE/mouth/turn.py)"
+  if [[ "$MODE" == "mouth" ]]; then
+    exec "$MOUTH_START"
+  fi
 else
-  echo "mouth: skipped (no executable $MOUTH_START — sitting 2)"
+  echo "mouth: skipped (no executable $MOUTH_START)"
 fi
 
-echo "hands: parked"
-if [[ "$started" -eq 0 ]]; then
-  echo "nothing to start. conductor + bus only."
+if [[ -x "$FACE_START" && "$MODE" != "mouth" ]]; then
+  echo "face: starting $FACE_START"
+  exec "$FACE_START"
 fi
+
+echo "face: skipped (no executable $FACE_START)"
+echo "hands: parked"
+echo "nothing required left to start."

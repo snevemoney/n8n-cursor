@@ -1,0 +1,122 @@
+{
+  "capability_id": "CAP-fullstack-agent-adopt-then-bus-then-mouth-or-face",
+  "name": "adopt-then-bus-then-mouth-or-face",
+  "goal": "public Claude-home installer → adopted hive OS with file bus + PTT mouth + localhost face (hands parked)",
+  "demonstrated_outcome": "Sittings 2–3 2026-09-04: mouth/turn.py classifies utterance, writes .hive/bus, ASK then queues desk-turn for cursor|grok. Face serve.py binds 127.0.0.1:4018, pane.html is cinematic observe-pane that reads the bus. Hands parked. No Claude Code. No ElevenLabs. No AGPL vendor.",
+  "observed_workflow": [
+    "Adopt existing vault + write file bus (sitting 1)",
+    "PTT Home / hold Talk → local STT (Web Speech) or typed fallback",
+    "Classify: refuse hard-step · status · skill · desk turn",
+    "Desk turn writes yellow ASK; spoken yes queues .hive/bus/jobs.jsonl kind=desk-turn",
+    "Local TTS via speechSynthesis or macOS say (dry-gated)",
+    "Face localhost pane polls the same bus; observe-pane rows; CTA before scroll",
+    "start.sh execs face if present; mouth is not a daemon; hands stay parked"
+  ],
+  "tools": [
+    "apps/agent-stack (MIT wizard + mouth + face)",
+    "apps/agent-stack/mouth/turn.py",
+    "apps/agent-stack/face/serve.py",
+    "Web Speech / speechSynthesis / say",
+    "observe-pane / jobs.json",
+    "Cursor desk queue (no live Agent.send SDK on this box)",
+    "Grok Bot desks"
+  ],
+  "agent_abilities": [
+    "write the file signal bus from a spoken turn",
+    "ASK before handing a desk job to Cursor or Grok",
+    "show the bus on a localhost cinematic pane"
+  ],
+  "triggers": [
+    "operator names fullstack-agent / Jarvis stack / talk instead of typing / make it the agentic OS"
+  ],
+  "state": "mouth + face wired on disk; hands parked; headed mic proof UNKNOWN on this cloud host",
+  "guardrails": [
+    "send / pay / deploy / book / publish stay HITL",
+    "Claude Code / Cowork operate-never",
+    "do not create a second vault or CLAUDE.md home",
+    "do not vendor AGPL sources into apps/",
+    "live / stays HOLD",
+    "auto-approve stays off",
+    "ElevenLabs is ASK only",
+    "hands stay parked",
+    "bind 127.0.0.1 only"
+  ],
+  "prerequisites": [
+    "sitting 1 adopt + bus already on disk",
+    "existing HIVE_OBSIDIAN_VAULT / vault-config.py",
+    "UNKNOWN — headed Home-key PTT on this Mac",
+    "UNKNOWN — live Cursor Agent.send SDK"
+  ],
+  "decision_rules": [
+    "IF a vault already exists → adopt path, never move",
+    "IF Claude Code is the runtime → refuse and remap to Cursor + Grok",
+    "IF send/pay/deploy/book/publish appears → refuse; Evens only",
+    "IF desk turn → yellow ASK; spoken yes queues the job",
+    "IF hands / mouse takeover → park",
+    "IF ElevenLabs named → ASK; default is local say / speechSynthesis"
+  ],
+  "failure_modes": [
+    "clone the YouTuber / install Claude Code",
+    "second OS beside obsidianOS / serve-desk 4017",
+    "open-mic instead of PTT",
+    "self-PROVEN without Watchdog GRADE",
+    "bind 0.0.0.0 or publish the face",
+    "claim headed mic proof from a cloud host"
+  ],
+  "observed_tricks": [
+    "voice writes little status notes; the face reads them — that is the whole connection",
+    "PTT on the face, mouth is the write path, not a second listener",
+    "queued desk-turn is the remap when Agent.send is not wired"
+  ],
+  "system_primitive": "one interview → path configs → file signal bus → PTT mouth writes / localhost face reads",
+  "skill_candidates": [
+    "adopt-then-bus-then-mouth-or-face",
+    "adopt-then-bus-then-os",
+    "observe-pane",
+    "cinematic-recipe",
+    "session-bootstrap",
+    "voice-four-pieces-three-doors"
+  ],
+  "system_upgrade_candidates": [
+    "UPG-fullstack-agent-adopt-existing-os"
+  ],
+  "reproduce": "cd apps/agent-stack && npm test && npm run adopt && ./start.sh check. Also python3 apps/agent-stack/mouth/test_turn.py and python3 apps/agent-stack/face/test_serve.py. No headed mic. No billed TTS.",
+  "generalize": "Same bus can drive observe-desk 4017 and this 4018 face. Mouth queues Cursor or Grok; it does not become a third execute host.",
+  "improve": "Do not improve by installing Claude Code, ElevenLabs, or unparking hands.",
+  "primitive_ids": [
+    "PRIM-fullstack-agent-file-bus"
+  ],
+  "atom_ids": [],
+  "behavior_ids": [],
+  "source_video_id": "FiOTrxq9ckM",
+  "source_tape_id": "github-jaredrhod-fullstack-agent",
+  "timestamp": "README + fullstack-agent.md + sittings 2–3 2026-09-04",
+  "knowledge_type": "demonstrated",
+  "evidence_status": "observed",
+  "status": "TESTING",
+  "last_verify": "2026-09-04 Forge dry-run: mouth --self-test + face --self-test + npm test. Headed Home PTT UNKNOWN on this host. Watchdog GRADE still pending.",
+  "unknowns": {
+    "known": [
+      "upstream is Claude Code only; AGPL on conductor/voice/face/hands",
+      "local-push-to-talk-dictation is named in OPERATOR_MEMORY but not present under grok-skills"
+    ],
+    "observed": [
+      "fullstack-agent.md Phases 0–6 from the public repo",
+      "mouth self-test refuses send and queues after spoken yes",
+      "face self-test binds 127.0.0.1 ephemeral and /healthz ok"
+    ],
+    "unknown": [
+      "headed Home-key PTT + Web Speech on this Mac",
+      "live Cursor Agent.send SDK",
+      "ElevenLabs walkthrough clicks"
+    ],
+    "hypotheses": [
+      "queued desk-turn is enough until Agent.send exists on the Grok box"
+    ],
+    "blocking": false
+  },
+  "blockers": [
+    "UNKNOWN — headed mic / Home PTT (not sitting-blocking)",
+    "Watchdog GRADE not yet filled"
+  ]
+}

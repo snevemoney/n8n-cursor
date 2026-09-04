@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Desk · Face</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --void: #08090c;
+      --paper: #e9e4d8;
+      --cream: #f0eadd;
+      --ink: #171510;
+      --mute: rgba(233,228,216,.55);
+      --line: rgba(233,228,216,.14);
+      --glass: rgba(11,13,17,.58);
+      --rose: #c4674f;
+      --live: #7dcea0;
+      --amber: #e0a24a;
+      --ease: cubic-bezier(.25, 0, .3, 1);
+    }
+    * { box-sizing: border-box; }
+    :focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+    html, body { margin: 0; min-height: 100%; color: var(--paper); font-family: Outfit, system-ui, sans-serif; }
+    body {
+      background-color: var(--void);
+      background-image:
+        radial-gradient(1.1px 1.1px at 12% 18%, rgba(231,226,214,.45) 50%, transparent 51%),
+        radial-gradient(1px 1px at 78% 12%, rgba(231,226,214,.28) 50%, transparent 51%);
+    }
+    body::before {
+      content: "";
+      position: fixed; inset: auto -8% -10% 40%;
+      height: 36vh; border-radius: 50%;
+      background: rgba(220,228,240,.14);
+      filter: blur(48px); pointer-events: none;
+      animation: drift 40s var(--ease) infinite alternate;
+    }
+    @keyframes drift { to { transform: translate(-6vw, 4vh) scale(1.08); } }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 22px 20px 48px; position: relative; z-index: 1; }
+    header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .brand { font-family: Newsreader, Georgia, serif; letter-spacing: .04em; font-size: 22px; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--mute); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+    .dot.live { background: var(--live); }
+    .dot.yellow { background: var(--amber); }
+    a.util, button.util {
+      color: var(--paper); text-decoration: none; background: transparent;
+      border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: inherit; cursor: pointer;
+    }
+    .hero {
+      position: relative; border-radius: 24px; overflow: hidden; min-height: 28vh;
+      border: 1px solid var(--line); background: var(--glass);
+      box-shadow: 0 30px 80px rgba(0,0,0,.35); padding: 28px 24px 22px;
+    }
+    .hero h1 { font-family: Newsreader, Georgia, serif; font-size: 40px; margin: 0 0 8px; }
+    .hero p { color: var(--mute); max-width: 36rem; }
+    .cta {
+      margin-top: 16px; background: var(--rose); color: var(--cream); border: 0; border-radius: 999px;
+      padding: 12px 18px; font: 600 14px Outfit, sans-serif; cursor: pointer;
+    }
+    .cta.hot { box-shadow: 0 0 0 2px var(--amber); }
+    .grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; margin-top: 16px; }
+    .card {
+      border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; background: var(--glass);
+      backdrop-filter: blur(10px);
+    }
+    h2 { font-family: Newsreader, Georgia, serif; font-size: 22px; margin: 0 0 8px; }
+    p, li { color: var(--mute); font-size: 14px; line-height: 1.5; }
+    .job { display: flex; gap: 10px; align-items: baseline; border-bottom: 1px solid var(--line); padding: 8px 0; font-size: 13px; }
+    .job b { min-width: 72px; }
+    .job.yellow { color: var(--amber); }
+    .job.working { color: var(--live); }
+    .ask { border-color: var(--amber); margin-top: 12px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    input#typed {
+      flex: 1; min-width: 180px; background: transparent; border: 1px solid var(--line);
+      border-radius: 999px; color: var(--paper); padding: 10px 12px; font: inherit;
+    }
+    #heard { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; }
+    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } .hero h1 { font-size: 30px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">Desk · Face</div>
+      <span class="pill"><i class="dot" id="dot"></i><span id="phase">idle</span></span>
+      <a class="util" href="http://127.0.0.1:4017/">NOW</a>
+    </header>
+    <section class="hero">
+      <h1 id="heroPhase">Idle</h1>
+      <p>Hold Home and talk. I write the bus. This pane reads it. Cursor or Grok gets the job after you say yes. Hands stay parked.</p>
+      <button class="cta" id="talk" type="button">Hold Home · talk</button>
+    </section>
+    <div class="grid">
+      <article class="card">
+        <h2>Mouth</h2>
+        <p>Local speech in. Local speech out. Type is fallback.</p>
+        <div class="row">
+          <input id="typed" placeholder="fallback type only" />
+          <button type="button" class="util" id="send">Send</button>
+        </div>
+        <p id="heard"></p>
+        <div id="askbox" class="card ask" hidden>
+          <p id="asktext"></p>
+          <button type="button" class="util" id="yes">Yes · do it</button>
+        </div>
+      </article>
+      <article class="card">
+        <h2>Observe</h2>
+        <p>working · yellow · done. Yellow is ask, not yes.</p>
+        <div id="jobs"></div>
+      </article>
+    </div>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const state = { pending: null, rec: null, holding: false };
+    const synth = window.speechSynthesis;
+    const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
+    const esc = (s) => String(s || "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+
+    function speak(text) {
+      if (!text || !synth) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.02;
+      synth.speak(u);
+    }
+
+    async function api(path, body) {
+      const opt = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+      const res = await fetch(path, opt);
+      return res.json();
+    }
+
+    async function refresh() {
+      try {
+        const bus = await api("/api/bus");
+        $("phase").textContent = `${bus.phase || "idle"} · ${bus.job_status || ""}`;
+        $("heroPhase").textContent = bus.phase || "Idle";
+        $("dot").className = "dot" + (bus.job_status === "yellow" ? " yellow" : bus.phase === "listen" ? " live" : "");
+        const jobs = await api("/api/jobs");
+        $("jobs").innerHTML = (jobs.jobs || []).map((j) =>
+          `<div class="job ${esc(j.status)}"><b>${esc(j.status || "done")}</b><span>${esc(j.id)}: ${esc(j.note)}</span></div>`
+        ).join("") || "<p>No jobs on the pane.</p>";
+      } catch (err) {
+        $("phase").textContent = "face server off";
+      }
+    }
+
+    async function turn(utterance, approved) {
+      if (!utterance) return;
+      $("heard").textContent = utterance;
+      const out = await api("/api/turn", { utterance, approved: !!approved });
+      speak(out.spoken || "");
+      if (out.ask) {
+        state.pending = utterance;
+        $("askbox").hidden = false;
+        $("asktext").textContent = out.spoken;
+      } else {
+        state.pending = null;
+        $("askbox").hidden = true;
+      }
+      refresh();
+    }
+
+    function handleHeard(text) {
+      const said = (text || "").trim();
+      if (!said) return;
+      if (state.pending && YES_RE.test(said)) turn(state.pending, true);
+      else turn(said, false);
+    }
+
+    function startListen() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        $("heard").textContent = "No speech engine. Use Chrome, or type.";
+        return;
+      }
+      synth.cancel();
+      state.rec = new SR();
+      state.rec.continuous = false;
+      state.rec.interimResults = true;
+      state.rec.onresult = (e) => {
+        const t = [...e.results].map((r) => r[0].transcript).join(" ");
+        $("heard").textContent = t;
+        if (e.results[e.results.length - 1].isFinal) handleHeard(t);
+      };
+      state.rec.onend = () => { state.holding = false; $("talk").classList.remove("hot"); };
+      state.rec.start();
+      state.holding = true;
+      $("talk").classList.add("hot");
+    }
+
+    function stopListen() {
+      if (state.rec) try { state.rec.stop(); } catch (e) {}
+      state.holding = false;
+      $("talk").classList.remove("hot");
+    }
+
+    $("talk").onmousedown = startListen;
+    $("talk").onmouseup = stopListen;
+    $("talk").onmouseleave = () => { if (state.holding) stopListen(); };
+    $("talk").ontouchstart = (e) => { e.preventDefault(); startListen(); };
+    $("talk").ontouchend = (e) => { e.preventDefault(); stopListen(); };
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Home" && e.target.id !== "typed" && !state.holding) {
+        e.preventDefault();
+        startListen();
+      }
+    });
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "Home") {
+        e.preventDefault();
+        stopListen();
+      }
+    });
+    $("send").onclick = () => turn($("typed").value.trim(), false);
+    $("typed").addEventListener("keydown", (e) => { if (e.key === "Enter") turn($("typed").value.trim(), false); });
+    $("yes").onclick = () => { if (state.pending) turn(state.pending, true); };
+    refresh();
+    setInterval(refresh, 4000);
+  </script>
+</body>
+</html>
