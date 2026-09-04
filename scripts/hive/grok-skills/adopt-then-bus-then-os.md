@@ -44,7 +44,7 @@ NEVER: claude-code · second-home · live-/
 4. `python3 scripts/hive/os/agent-stack.py validate` — must say `kind=agentic-os`, memory=adopted, permission_mode=ask.
 5. Watchdog GRADE those two files. Builder does not self-PROVEN.
 6. Mouth sitting (later): PTT → local STT → Cursor SDK or one Grok desk turn → TTS. Writes the bus. Auto-approve stays off unless Evens flips it.
-7. Face sitting (later): localhost pane reads the bus. Prefer upgrading `obsidianOS` / observe-pane, not a circuit-board clone. `cinematic-recipe` applies to that webapp bite.
+7. Face sitting: `apps/agent-stack/face` is the FiOTrxq9ckM circuit-board visualizer. Do not ship observe-pane as the 4018 product.
 
 ## Reproduce (Forge)
 

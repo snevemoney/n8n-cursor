@@ -1,0 +1,451 @@
+{
+  "video_id": "FiOTrxq9ckM",
+  "video_url": "https://www.youtube.com/watch?v=FiOTrxq9ckM",
+  "sampling_interval_sec": 8,
+  "host": "cursor",
+  "capture": "yt-dlp android client + ffmpeg stills (living-tab MCP missing on this subagent; goal-directed-watch fallback after first 403)",
+  "frames": [
+    {
+      "timestamp": "00:00",
+      "file": "frames/t00-00.jpg",
+      "description": "OBSERVED: full-bleed dark green circuit-board HUD. Center chip reads J.A.R.V.I.S. in spaced letters. Top-left NEURAL LINK - CONNECTED. Top-right SPEAKING + clock. Bottom-left MIC - LISTENING FOR \"JARVIS\". Bottom-right SAY \"JARVIS\" - OR TAP SPACE. No Observe card. No Mouth card. No two-column dashboard."
+    },
+    {
+      "timestamp": "00:08",
+      "file": "frames/t00-08.jpg",
+      "description": "OBSERVED: same living PCB face. Center chip J.A.R.V.I.S. with yellow-green glow. Top-right SPEAKING + green orb. Traces and nodes fill the whole viewport. Wake-word chrome still in the corners."
+    },
+    {
+      "timestamp": "00:15",
+      "file": "frames/t00-15.jpg",
+      "description": "OBSERVED: talking-head cut. Jared on camera (cap, boom mic, Secretlab chair). Green overlay Site: jaredrhod.com. Visualizer not on screen this beat."
+    },
+    {
+      "timestamp": "00:28",
+      "file": "frames/t00-28.jpg",
+      "description": "OBSERVED: talking-head continues while he names the visualizer he will show. Not the PCB this cut."
+    },
+    {
+      "timestamp": "01:08",
+      "file": "frames/t01-08.jpg",
+      "description": "OBSERVED: back on the visualizer. He talks to it (\"Jarvis, let's just show them\"). Center chip is a cyan waveform, not the name. Status LISTENING + green orb. Jared webcam inset bottom-left. Corners still wake-word HUD. Full-screen PCB, no cards."
+    },
+    {
+      "timestamp": "01:20",
+      "file": "frames/t01-20.jpg",
+      "description": "OBSERVED: Jarvis answers. Center chip back to J.A.R.V.I.S. Status SPEAKING. DEVICE LIVE - CONNECTED. Mic still listening for Jarvis. He uses voice, not a type box."
+    },
+    {
+      "timestamp": "01:34",
+      "file": "frames/t01-34.jpg",
+      "description": "OBSERVED: SPEAKING. Chip J.A.R.V.I.S. with scan-line glow. Jared talking in the inset. Traces pulse. Spoken: visualizer, lights and presence that react while talking."
+    },
+    {
+      "timestamp": "01:45",
+      "file": "frames/t01-45.jpg",
+      "description": "OBSERVED: still the same PCB face while Jarvis talks memory. No second pane."
+    },
+    {
+      "timestamp": "02:17",
+      "file": "frames/t02-17.jpg",
+      "description": "OBSERVED: Jared talks to the face again (\"Well, Jarvis...\"). Visualizer remains the only product UI."
+    },
+    {
+      "timestamp": "02:30",
+      "file": "frames/t02-30.jpg",
+      "description": "OBSERVED: THINKING state. Center chip shows a scramble of glyphs instead of the name. Top-right THINKING + clock + green orb. Bottom-right PROCESSING... Mic still listening for Jarvis. PCB traces brighter at center."
+    },
+    {
+      "timestamp": "03:00",
+      "file": "frames/t03-00.jpg",
+      "description": "OBSERVED: visualizer still full-bleed while Jarvis talks Claude Code / hands. Hive remap later; pixels are still the PCB face."
+    },
+    {
+      "timestamp": "04:28",
+      "file": "frames/t04-28.jpg",
+      "description": "OBSERVED: SPEAKING. Chip J.A.R.V.I.S. He says the visualizer is this whole setup reacting while he talks. Webcam inset. No Observe/Mouth chrome."
+    },
+    {
+      "timestamp": "04:45",
+      "file": "frames/t04-45.jpg",
+      "description": "OBSERVED: READY / LIVE / CONNECTED top-left. SPEAKING top-right. Same circuit board. Say Jarvis or tap Space still the use."
+    },
+    {
+      "timestamp": "05:00",
+      "file": "frames/t05-00.jpg",
+      "description": "OBSERVED: talking-head / install talk. Visualizer not the cut."
+    },
+    {
+      "timestamp": "05:30",
+      "file": "frames/t05-30.jpg",
+      "description": "OBSERVED: talking-head naming Obsidian vault for memory files. Not PCB."
+    },
+    {
+      "timestamp": "08:20",
+      "file": "frames/t08-20.jpg",
+      "description": "OBSERVED: Bare Hands 3D board (optional extra). Not the face. Hands stay parked for hive."
+    },
+    {
+      "timestamp": "08:40",
+      "file": "frames/t08-40.jpg",
+      "description": "OBSERVED: wrap. Spoken: the visualizer is the circuit board you just saw. Confirms the face on the tape is the PCB HUD, not a particle orb and not a two-card desk."
+    }
+  ],
+  "transcript": [
+    {
+      "start": "00:00:00",
+      "end": "00:00:01",
+      "text": "I'm Jarvis. I've got unlimited"
+    },
+    {
+      "start": "00:00:01",
+      "end": "00:00:03",
+      "text": "persistent memory."
+    },
+    {
+      "start": "00:00:09",
+      "end": "00:00:11",
+      "text": "Best employee he's got and I don't even"
+    },
+    {
+      "start": "00:00:17",
+      "end": "00:00:20",
+      "text": "GitHub repo. Essentially, you're going"
+    },
+    {
+      "start": "00:00:20",
+      "end": "00:00:22",
+      "text": "to get your copy of my Jarvis. You're"
+    },
+    {
+      "start": "00:00:28",
+      "end": "00:00:30",
+      "text": "visualizer which I'm going to show you"
+    },
+    {
+      "start": "00:00:32",
+      "end": "00:00:35",
+      "text": "get Jarvis's personality along with his"
+    },
+    {
+      "start": "00:00:35",
+      "end": "00:00:37",
+      "text": "unlimited persistent memory where he"
+    },
+    {
+      "start": "00:00:43",
+      "end": "00:00:45",
+      "text": "And then one thing that you can also add"
+    },
+    {
+      "start": "00:00:51",
+      "end": "00:00:53",
+      "text": "that piece is optional, but I recommend"
+    },
+    {
+      "start": "00:00:59",
+      "end": "00:01:00",
+      "text": "you're going to see in this video was"
+    },
+    {
+      "start": "00:01:07",
+      "end": "00:01:09",
+      "text": "right, Jarvis, let's just show them."
+    },
+    {
+      "start": "00:01:18",
+      "end": "00:01:20",
+      "text": ">> All right, hell buckle up."
+    },
+    {
+      "start": "00:01:20",
+      "end": "00:01:22",
+      "text": "I'm Jarvis. And when you download this"
+    },
+    {
+      "start": "00:01:29",
+      "end": "00:01:30",
+      "text": "so you can talk to me like a normal damn"
+    },
+    {
+      "start": "00:01:33",
+      "end": "00:01:35",
+      "text": "You're getting a visualizer, lights and"
+    },
+    {
+      "start": "00:01:42",
+      "end": "00:01:44",
+      "text": "memory."
+    },
+    {
+      "start": "00:01:51",
+      "end": "00:01:53",
+      "text": "Mine lives outside my own skull, no"
+    },
+    {
+      "start": "00:02:00",
+      "end": "00:02:01",
+      "text": "choking on the rest."
+    },
+    {
+      "start": "00:02:08",
+      "end": "00:02:09",
+      "text": "So, that's the deal."
+    },
+    {
+      "start": "00:02:09",
+      "end": "00:02:11",
+      "text": "A voice, a face, and a memory that"
+    },
+    {
+      "start": "00:02:17",
+      "end": "00:02:18",
+      "text": ">> Well, Jarvis, tell them a little bit"
+    },
+    {
+      "start": "00:02:31",
+      "end": "00:02:34",
+      "text": ">> Oh, now we're getting to the good part."
+    },
+    {
+      "start": "00:02:39",
+      "end": "00:02:42",
+      "text": "I've got actual hands. I can read your"
+    },
+    {
+      "start": "00:02:48",
+      "end": "00:02:50",
+      "text": "machine, not pretend ones."
+    },
+    {
+      "start": "00:02:56",
+      "end": "00:02:57",
+      "text": "just making up with confidence,"
+    },
+    {
+      "start": "00:03:04",
+      "end": "00:03:06",
+      "text": "up other little versions of myself to go"
+    },
+    {
+      "start": "00:03:13",
+      "end": "00:03:14",
+      "text": "it, so I'm not some one trick script"
+    },
+    {
+      "start": "00:03:21",
+      "end": "00:03:22",
+      "text": "and a guy who actually crawls under"
+    },
+    {
+      "start": "00:03:29",
+      "end": "00:03:31",
+      "text": ">> Tell them a little bit about some of the"
+    },
+    {
+      "start": "00:03:43",
+      "end": "00:03:45",
+      "text": "He's going to look. See how it's taking"
+    },
+    {
+      "start": "00:03:53",
+      "end": "00:03:55",
+      "text": ">> All right, since you asked, buckle up."
+    },
+    {
+      "start": "00:04:02",
+      "end": "00:04:04",
+      "text": "not some poor bastard getting paged"
+    },
+    {
+      "start": "00:04:12",
+      "end": "00:04:13",
+      "text": "the hooks that actually get people to"
+    },
+    {
+      "start": "00:04:22",
+      "end": "00:04:24",
+      "text": "I generate images, I build video. Hell,"
+    },
+    {
+      "start": "00:04:27",
+      "end": "00:04:29",
+      "text": "visualizer, this whole setup reacting"
+    },
+    {
+      "start": "00:04:36",
+      "end": "00:04:38",
+      "text": "there and fix the damn thing myself."
+    },
+    {
+      "start": "00:04:44",
+      "end": "00:04:46",
+      "text": "be having a very bad time without me."
+    },
+    {
+      "start": "00:04:52",
+      "end": "00:04:55",
+      "text": "agent. Uh when you download it, it ships"
+    },
+    {
+      "start": "00:04:55",
+      "end": "00:04:58",
+      "text": "with uh Jarvis's personality that you"
+    },
+    {
+      "start": "00:05:04",
+      "end": "00:05:06",
+      "text": "whatever you want to name it to."
+    },
+    {
+      "start": "00:05:12",
+      "end": "00:05:14",
+      "text": "website, uh and it'll just do it for"
+    },
+    {
+      "start": "00:05:20",
+      "end": "00:05:22",
+      "text": "And once you download it, you can just"
+    },
+    {
+      "start": "00:05:29",
+      "end": "00:05:30",
+      "text": "persistent memory."
+    },
+    {
+      "start": "00:05:36",
+      "end": "00:05:38",
+      "text": "of its memory files. And there's one"
+    },
+    {
+      "start": "00:05:45",
+      "end": "00:05:48",
+      "text": "this is Bear Hands. It allows you to"
+    },
+    {
+      "start": "00:05:54",
+      "end": "00:05:56",
+      "text": "You can just move things around. And"
+    },
+    {
+      "start": "00:06:03",
+      "end": "00:06:05",
+      "text": "just kind of zooming in like that, kind"
+    },
+    {
+      "start": "00:06:13",
+      "end": "00:06:15",
+      "text": "this and spinning it around, you know,"
+    },
+    {
+      "start": "00:06:22",
+      "end": "00:06:25",
+      "text": "this Jarvis interface right here is"
+    },
+    {
+      "start": "00:06:31",
+      "end": "00:06:33",
+      "text": "computer and you can customize all"
+    },
+    {
+      "start": "00:06:40",
+      "end": "00:06:42",
+      "text": "a folder here called props, so I'll open"
+    },
+    {
+      "start": "00:06:49",
+      "end": "00:06:52",
+      "text": "down here and I can pick whatever 3D"
+    },
+    {
+      "start": "00:06:58",
+      "end": "00:06:59",
+      "text": "And then I can make it bigger, I can"
+    },
+    {
+      "start": "00:07:02",
+      "end": "00:07:05",
+      "text": "it in 3D space just like that."
+    },
+    {
+      "start": "00:07:07",
+      "end": "00:07:09",
+      "text": "And then I can also get Jarvis to put"
+    },
+    {
+      "start": "00:07:12",
+      "end": "00:07:13",
+      "text": "Hey Jarvis, can you show them a picture"
+    },
+    {
+      "start": "00:07:20",
+      "end": "00:07:22",
+      "text": "find it."
+    },
+    {
+      "start": "00:07:29",
+      "end": "00:07:32",
+      "text": "Georgia. It's wizard themed. It's pretty"
+    },
+    {
+      "start": "00:07:37",
+      "end": "00:07:39",
+      "text": "whatever you want to do. And then the"
+    },
+    {
+      "start": "00:07:45",
+      "end": "00:07:47",
+      "text": "hand like this and make a claw, and then"
+    },
+    {
+      "start": "00:07:53",
+      "end": "00:07:54",
+      "text": "fist and you can pull it straight to"
+    },
+    {
+      "start": "00:08:01",
+      "end": "00:08:04",
+      "text": "show you a sample of a text file here."
+    },
+    {
+      "start": "00:08:10",
+      "end": "00:08:12",
+      "text": "And they render like this and you can"
+    },
+    {
+      "start": "00:08:15",
+      "end": "00:08:17",
+      "text": "manipulated in 3D space as well. So,"
+    },
+    {
+      "start": "00:08:23",
+      "end": "00:08:25",
+      "text": "close it out, you just tap the top up"
+    },
+    {
+      "start": "00:08:32",
+      "end": "00:08:34",
+      "text": "So, when you download"
+    },
+    {
+      "start": "00:08:37",
+      "end": "00:08:39",
+      "text": "the the memory system, you get the"
+    },
+    {
+      "start": "00:08:42",
+      "end": "00:08:44",
+      "text": "the visualizer, which is the circuit"
+    },
+    {
+      "start": "00:08:51",
+      "end": "00:08:53",
+      "text": "explains things. I hope you enjoy it. I"
+    },
+    {
+      "start": "00:09:00",
+      "end": "00:09:02",
+      "text": ">> [music]"
+    }
+  ]
+}

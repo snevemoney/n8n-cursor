@@ -5,18 +5,19 @@
 **Channel:** jaredrhod
 **Kind:** yt
 **Host:** Cursor + Grok
-**Date:** 2026-09-04 (sitting 1)
-**Captions:** none pulled this sitting
-**Words:** UNKNOWN
+**Date:** 2026-09-04 (sitting 3 — tape walk)
+**Captions:** `full.txt` + `FiOTrxq9ckM.en.vtt` (yt-dlp)
+**Words:** ~11k caption chars
+**Watch:** `watch.json` (frames[] + transcript[]) · `frames/*.jpg` · `CAPTIONS.md`
 
 ```
-LADDER: oembed title + public GitHub README — not headed cursor-ide-browser
-WHY: plan said caption-only if we walk it; no watch.json on this host
-WATCH: caption-only / unwatched
+LADDER: yt-dlp android + ffmpeg stills (goal-directed). First default client 403'd.
+WHY: Evens asked for screenshots of HIS visualizer. Caption-only is how we failed.
+WATCH: walked. Visualizer = living green circuit board. Use = say JARVIS or tap Space.
 ```
 
-Do not invent clicks. Tape $ UNVERIFIED. Claude Code on tape = operate-never.
+Do not invent clicks between frames. Tape $ UNVERIFIED. Claude Code on tape = operate-never.
 Sibling repos (ai-memory-vault / backtalk / ai-visualizer / barehands) stay uncloned.
 
-**Steal:** one interview → path configs → file signal bus.
-**Operate-never:** Claude Code host · AGPL trees into `apps/` · second vault.
+**Steal:** full-bleed PCB face + wake-word talk. Voice writes bus; face reads it.
+**Operate-never:** Claude Code host · AGPL trees into `apps/` · second vault · Observe/Mouth as the product UI.

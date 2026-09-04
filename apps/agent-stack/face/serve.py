@@ -198,8 +198,10 @@ def self_test() -> dict:
         with urllib.request.urlopen(f"http://{HOST}:{port}/", timeout=2) as home:
             html = home.read().decode("utf-8")
             code = home.status
-        if code != 200 or "<canvas" not in html or "LIVE" not in html or "MUTE" not in html:
-            return {"ok": False, "errors": ["GET / missing living face"], "status": code}
+        banned = ("Desk · Face", "<h2>Observe</h2>", "<h2>Mouth</h2>", "Hold Home", "Hold Talk")
+        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR")
+        if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned):
+            return {"ok": False, "errors": ["GET / missing tape visualizer"], "status": code}
         return {"ok": True, "errors": [], "port": port, "bind": HOST, "home": 200}
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         return {"ok": False, "errors": [str(exc)]}

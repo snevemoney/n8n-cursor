@@ -228,7 +228,7 @@ def apply_turn(
 
     cites: list = []
     if verb == "idle":
-        narration = "Holding. Talk when you want — mute is on the face."
+        narration = "Holding. Say Jarvis, or tap Space."
     elif verb == "status":
         narration = f"Phase {bus_now.get('phase') or 'idle'}. Job {bus_now.get('job_status') or 'done'}."
     elif verb == "skills":

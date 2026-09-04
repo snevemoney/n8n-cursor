@@ -1,12 +1,12 @@
 # @hive/agent-stack
 
-Sittings 1–4 of the fullstack-agent **pattern** port. Original MIT code. Not a fork.
+Sittings of the fullstack-agent **pattern** port. Original MIT code. Not a fork.
 
-We will not clone Jared’s AGPL Claude installer. These are the three Jarvis feelings on the hive:
+Face on `127.0.0.1:4018` is Jared's visualizer from tape `FiOTrxq9ckM` stills: a living green circuit board you talk to. Say JARVIS or tap Space. Not an Observe card. Not a Mouth / Hold Home dashboard.
 
-- **Face:** living canvas-wisp presence on `127.0.0.1:4018`. Reacts to bus phase. Not WebGL. Not vendored `ai-visualizer`.
-- **Mouth:** always-on open mic on the face, with a visible LIVE/MUTE toggle. Barge-in cancels talk. Local STT + local TTS. Auto-approve off.
-- **Memory:** vault Q&A — keyword retrieve over the adopted vault + hive os allow-list. Cited snippets. UNKNOWN on a miss. Adopt is the path; this sitting is the ask.
+- **Face:** full-bleed PCB HUD. Idle / listen / think / speak. Original canvas. Not vendored `ai-visualizer`.
+- **Mouth:** write path behind the face. Local STT + local TTS. Auto-approve off.
+- **Memory:** vault Q&A over the adopted vault. Cited snippets. UNKNOWN on a miss.
 
 Hands stay parked. Hosts: Cursor + Grok. Claude Code operate-never. Live `/` HOLD.
 
@@ -16,11 +16,13 @@ npm run adopt
 ./start.sh check
 # headed Mac only — kill leftover voice-os first:
 # lsof -iTCP:4018 -sTCP:LISTEN
+# kill that pid if it is voice-os.py
 ./start.sh          # execs apps/agent-stack/face/serve.py
+open http://127.0.0.1:4018/
 ```
 
-Face owns the mic. Mouth is the write path, not a second daemon. Type is fallback when Web Speech is missing.
+You should see the circuit board, not two cards. Watchdog GRADE pending. No headed mic proof on a cloud host.
 
-Still not Jared: no Claude Code, no vendored visualizer repo, no ElevenLabs, no Agent.send SDK — desk jobs still ASK and queue.
+Still not Jared's installer: no Claude Code, no AGPL clone, no ElevenLabs, no Agent.send SDK — desk jobs still ASK.
 
 Upstream (pattern only, AGPL, not vendored): https://github.com/jaredrhod/fullstack-agent

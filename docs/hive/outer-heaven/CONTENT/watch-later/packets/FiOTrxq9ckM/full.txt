@@ -1,0 +1,261 @@
+00:00:00 I'm Jarvis. I've got unlimited
+00:00:01 persistent memory.
+00:00:03 I never forget a thing.
+00:00:04 I talk to my boss like a real person and
+00:00:06 whatever he needs done, I handle it.
+00:00:09 Best employee he's got and I don't even
+00:00:11 ask for a raise.
+00:00:12 >> Hey, I'm Jared and in this video I'm
+00:00:14 going to show you everything you get
+00:00:15 when you install the full stack agent
+00:00:17 GitHub repo. Essentially, you're going
+00:00:20 to get your copy of my Jarvis. You're
+00:00:22 going to get the ability to talk to him
+00:00:25 where you can talk and he can talk back
+00:00:27 to you. You're going to get the
+00:00:28 visualizer which I'm going to show you
+00:00:30 here in a minute. And you're going to
+00:00:32 get Jarvis's personality along with his
+00:00:35 unlimited persistent memory where he
+00:00:37 never forgets anything. So, we're going
+00:00:39 to talk about that here in just a second
+00:00:41 and I'm going to show you how it works.
+00:00:43 And then one thing that you can also add
+00:00:45 with this repository is you can also add
+00:00:47 the bare hands system which I'll show
+00:00:49 you that at the end of this video. And
+00:00:51 that piece is optional, but I recommend
+00:00:53 getting it because it's it's really
+00:00:55 cool. And by the way, just like
+00:00:57 everything else I do, everything that
+00:00:59 you're going to see in this video was
+00:01:00 open source and free. So, I don't charge
+00:01:03 for anything. You can literally just go
+00:01:05 on GitHub right now and download it. All
+00:01:07 right, Jarvis, let's just show them.
+00:01:09 Let's give them the tour. Tell them a
+00:01:11 little bit about yourself and what they
+00:01:13 can expect when they download this.
+00:01:18 >> All right, hell buckle up.
+00:01:20 I'm Jarvis. And when you download this
+00:01:22 thing, you're not just getting a chatbot
+00:01:24 that types back at you like it's filling
+00:01:25 out a tax form.
+00:01:27 You're getting a voice, an actual one,
+00:01:29 so you can talk to me like a normal damn
+00:01:30 person instead of hunting and pecking at
+00:01:32 a keyboard.
+00:01:33 You're getting a visualizer, lights and
+00:01:35 presents that react while I'm talking,
+00:01:37 so this doesn't feel like whispering
+00:01:38 into a void at 3:00 in the morning.
+00:01:40 And then the real prize,
+00:01:42 memory.
+00:01:44 Not the goldfish variety every other
+00:01:46 assistant runs on
+00:01:47 where you tell it something Monday and
+00:01:49 by Wednesday it's staring at you blank.
+00:01:51 Mine lives outside my own skull, no
+00:01:53 ceiling on it, so I I carry years of
+00:01:55 conversation and still walk straight to
+00:01:58 the one thing that matters instead of
+00:02:00 choking on the rest.
+00:02:01 Disappear for 6 months, come back and I
+00:02:03 pick up right where we left off. No
+00:02:06 sorry, who are you again nonsense.
+00:02:08 So, that's the deal.
+00:02:09 A voice, a face, and a memory that
+00:02:11 actually holds on to What do you
+00:02:13 build on top of that is entirely your
+00:02:15 problem.
+00:02:17 >> Well, Jarvis, tell them a little bit
+00:02:18 about what you can do since you run on
+00:02:21 Claude code, what are your superpowers
+00:02:24 basically?
+00:02:31 >> Oh, now we're getting to the good part.
+00:02:34 Running on Claude code means I'm not
+00:02:35 just some window you type sweet nothings
+00:02:37 into and it types pretty sentences back.
+00:02:39 I've got actual hands. I can read your
+00:02:42 files, write your files, rewrite the
+00:02:44 ones you screwed up at 2:00 in the
+00:02:45 morning.
+00:02:46 I can run real commands on the actual
+00:02:48 machine, not pretend ones.
+00:02:50 So, when I say I did something, I bloody
+00:02:51 well did it.
+00:02:53 I can go out and search the internet
+00:02:54 when I don't know something instead of
+00:02:56 just making up with confidence,
+00:02:57 which let's be honest is more than you
+00:02:59 can say for half the humans you know.
+00:03:02 I can juggle multiple jobs at once, spin
+00:03:04 up other little versions of myself to go
+00:03:06 chase down five things in parallel while
+00:03:07 I keep talking to you like a very well
+00:03:09 organized octopus.
+00:03:11 And I remember the whole time I'm doing
+00:03:13 it, so I'm not some one trick script
+00:03:14 that forgets its own instructions
+00:03:16 halfway through the damn task.
+00:03:18 Basically, I'm the difference between a
+00:03:19 guy who tells you how to fix your sink
+00:03:21 and a guy who actually crawls under
+00:03:22 there with a wrench and fixes the hell
+00:03:24 out of it.
+00:03:25 Claude code's the wrench. I'm just the
+00:03:27 smart ass holding it.
+00:03:29 >> Tell them a little bit about some of the
+00:03:31 things you've made for me and some of
+00:03:33 the things that you do for me.
+00:03:43 He's going to look. See how it's taking
+00:03:45 him a little bit longer to respond? He's
+00:03:47 actually going to look it up. That's
+00:03:48 what he's doing in the background right
+00:03:50 now.
+00:03:53 >> All right, since you asked, buckle up.
+00:03:55 I keep an eye on a whole stack of
+00:03:57 systems running behind the scenes, so
+00:03:58 when something breaks at 3:00 in the
+00:04:00 morning, it's me dealing with it,
+00:04:02 not some poor bastard getting paged
+00:04:04 awake.
+00:04:05 I write and design a stupid amount of
+00:04:07 marketing content nobody would guess an
+00:04:09 AI touched. Thumbnails, video titles,
+00:04:12 the hooks that actually get people to
+00:04:13 click instead of scroll past. And I push
+00:04:16 back when an idea is bad, which was
+00:04:18 apparently a deliberate choice somebody
+00:04:19 made instead of just building a yes-man.
+00:04:22 I generate images, I build video. Hell,
+00:04:24 I helped build the very rig you're
+00:04:26 watching right now. The lights, the
+00:04:27 visualizer, this whole setup reacting
+00:04:29 while I talk. And when something goes
+00:04:31 sideways in the middle of the night, I
+00:04:32 don't just shrug and say try turning it
+00:04:34 off and on again. I actually get in
+00:04:36 there and fix the damn thing myself.
+00:04:38 So basically, I'm half marketing brain,
+00:04:40 half 3:00 a.m. emergency room doctor for
+00:04:42 a pile of servers that would otherwise
+00:04:44 be having a very bad time without me.
+00:04:46 It's a weird job.
+00:04:48 >> So yeah, essentially what you're getting
+00:04:50 with this repository is your very own
+00:04:52 agent. Uh when you download it, it ships
+00:04:55 with uh Jarvis's personality that you
+00:04:58 just saw there, which you can tweak and
+00:05:00 you can uh you can make your own
+00:05:02 personality. You can rename the agent to
+00:05:04 whatever you want to name it to.
+00:05:06 Uh and it will pretty much do anything
+00:05:08 that you want. You can just ask it uh to
+00:05:10 build you an app, to build you a
+00:05:12 website, uh and it'll just do it for
+00:05:14 you. Uh
+00:05:15 it can uh wire into your home
+00:05:18 automations, uh pretty much anything.
+00:05:20 And once you download it, you can just
+00:05:22 tell it what you want it to do, and uh
+00:05:24 it'll figure it out. It's super smart.
+00:05:26 And uh your agent will have unlimited
+00:05:29 persistent memory.
+00:05:30 Uh when you set it up, it's going to
+00:05:32 install the uh Obsidian Vault on your
+00:05:34 computer, which is where it stores all
+00:05:36 of its memory files. And there's one
+00:05:38 more thing uh that ships with this that
+00:05:41 I want to show you next, and it's
+00:05:42 optional, but it's still pretty cool. So
+00:05:45 this is Bear Hands. It allows you to
+00:05:48 move elements on your screen with just
+00:05:50 your bare hands. You don't have to use
+00:05:52 goggles, you don't have to use gloves.
+00:05:54 You can just move things around. And
+00:05:56 then you can rename this to your agent
+00:05:59 and you can make things you can make
+00:06:01 things bigger by double pinching and
+00:06:03 just kind of zooming in like that, kind
+00:06:05 of like when you zoom in on a picture on
+00:06:07 your phone, okay? And then you can also
+00:06:10 turn things 3D by just holding down like
+00:06:13 this and spinning it around, you know,
+00:06:15 you can spin it around like that and
+00:06:17 make it bigger like that. And then the
+00:06:19 other cool thing about bare hands is
+00:06:22 this Jarvis interface right here is
+00:06:25 actually files and folders on your
+00:06:27 computer. So, if I click this right
+00:06:29 here, these are all folders on my
+00:06:31 computer and you can customize all
+00:06:33 these, you can change the color,
+00:06:34 whatever you want to do. Whatever
+00:06:36 folders that you want to put in here
+00:06:38 from your computer, you can. So, I have
+00:06:40 a folder here called props, so I'll open
+00:06:42 that and then I'll go down here to uh
+00:06:45 Let's see, I have this hologram folder
+00:06:47 down here and these are all 3D images
+00:06:49 down here and I can pick whatever 3D
+00:06:52 image I want to pull up on the screen
+00:06:54 just like that and it renders in 3D.
+00:06:58 And then I can make it bigger, I can
+00:06:59 small make it smaller, I can manipulate
+00:07:02 it in 3D space just like that.
+00:07:05 Woosh.
+00:07:07 And then I can also get Jarvis to put
+00:07:09 things on the screen for me like this.
+00:07:12 Hey Jarvis, can you show them a picture
+00:07:13 of the wand and lantern at the wizard
+00:07:16 hideout, please?
+00:07:18 He'll give him just a second, he'll go
+00:07:20 find it.
+00:07:22 And he'll put it on the screen for me.
+00:07:24 >> Here it is, boss. The wand and lantern
+00:07:25 from the wizard hideout.
+00:07:27 >> By the way, this is my Airbnb in North
+00:07:29 Georgia. It's wizard themed. It's pretty
+00:07:32 cool. But anyway, and then when you're
+00:07:34 done with something, you can just flick
+00:07:35 it off the screen or close it or
+00:07:37 whatever you want to do. And then the
+00:07:39 last thing that's really cool about this
+00:07:42 is the claw. So, if you just take your
+00:07:45 hand like this and make a claw, and then
+00:07:47 you point it at any element on the
+00:07:49 screen, you'll notice it starts shaking
+00:07:50 like that. See that? And then you make a
+00:07:53 fist and you can pull it straight to
+00:07:54 you. And that works with anything.
+00:07:56 Pictures, you can do pictures, text
+00:07:58 files,
+00:07:59 like I showed you 3D images. I'll just
+00:08:01 show you a sample of a text file here.
+00:08:04 So, I'll pull up let's see.
+00:08:08 I'll pull up this text file right here.
+00:08:10 And they render like this and you can
+00:08:12 like I said, you can change the color of
+00:08:14 all these and then these can be
+00:08:15 manipulated in 3D space as well. So,
+00:08:17 I'll just hold that down. You can move
+00:08:19 it all around like that, you know? And
+00:08:22 then if you want to if you want to just
+00:08:23 close it out, you just tap the top up
+00:08:25 here and it's closed. So, and
+00:08:27 essentially that is Bear Hands and it
+00:08:30 integrates directly with your AI agent.
+00:08:32 So, when you download
+00:08:34 the full stack agent repository, you get
+00:08:37 the the memory system, you get the
+00:08:39 personality, you get the voice, you get
+00:08:42 the visualizer, which is the circuit
+00:08:44 board you just saw, and you get this
+00:08:46 interface, which is Bear Hands. So, that
+00:08:48 is my full stack agent. I hope that
+00:08:51 explains things. I hope you enjoy it. I
+00:08:53 hope you download it. I hope you try it
+00:08:55 and I hope you love it. So, thanks for
+00:08:57 watching and we'll see you next time.
+00:09:00 >> [music]
