@@ -41,33 +41,35 @@ FAILURE_TEMPLATE = (
 )
 
 WIT = {
-    "can": "The short list, then.",
-    "cursor": "The repo, not a rumor.",
-    "pro": "Checking your professional skills.",
-    "brief": "Checking your professional skills.",
-    "bus": "Checking your professional skills.",
-    "search": "Safari, not folklore.",
-    "watch_later": "The live tab, not a guess.",
-    "news": "Disk only. I do not invent headlines.",
-    "calendar": "Calendar.app, not my imagination.",
-    "mail": "Mail.app, then the count.",
-    "files": "Local disk, not a scoop.",
-    "safari": "Safari, as requested.",
-    "life": "The store, not gossip.",
-    "today": "The store, not a mood.",
-    "skills": "On-disk slugs only.",
-    "status": "Wires, not vibes.",
-    "heal": "Scars first.",
-    "make": "A skill on disk, or UNKNOWN.",
-    "invoice": "Vault retrieve only.",
-    "build": "Building it now.",
-    "skill": "Loading the slug.",
-    "converse": "As requested.",
+    "can": "The short list.",
+    "cursor": "The repo.",
+    "pro": "",
+    "brief": "",
+    "bus": "",
+    "search": "Safari.",
+    "watch_later": "The live tab.",
+    "news": "Disk only.",
+    "calendar": "Calendar.app.",
+    "mail": "Mail.app.",
+    "files": "Local disk.",
+    "safari": "Safari.",
+    "life": "",
+    "today": "",
+    "skills": "",
+    "status": "",
+    "heal": "",
+    "make": "",
+    "invoice": "",
+    "build": "",
+    "skill": "",
+    "converse": "",
+    "talk": "",
+    "farewell": "",
     "refuse": "That stays with you.",
-    "stop": "Noted.",
-    "greet": "Present.",
-    "mode": "Switched.",
-    "crumb": "I need the rest.",
+    "stop": "",
+    "greet": "",
+    "mode": "",
+    "crumb": "",
 }
 
 REPEAT_WIT = {
@@ -82,7 +84,18 @@ REPEAT_WIT = {
     "files": "The disk again, sir. Something may have moved. Unlikely, but possible.",
 }
 
-DEFAULT_WIT = "As requested."
+DEFAULT_WIT = ""
+AS_REQUESTED_RE = re.compile(r"\bas requested\b", re.I)
+SCAR_HOMEWORK_RE = re.compile(
+    r"("
+    r"Scar cursor-auth-dark already saved|"
+    r"do not call agent -p again this sitting|"
+    r"From the store, not a dark Cursor call|"
+    r"Cursor login scar is saved"
+    r")",
+    re.I,
+)
+HOMEWORK_SPOKEN = "I'm here. What do you want done?"
 
 
 def normalize_ask(text: str) -> str:
@@ -186,8 +199,13 @@ def proven_repeat(
 def witty_beat(verb: str, *, repeat: bool = False) -> str:
     key = (verb or "").strip().lower()
     if repeat:
-        return REPEAT_WIT.get(key) or f"Again, sir. {WIT.get(key, DEFAULT_WIT)}"
-    return WIT.get(key, DEFAULT_WIT)
+        beat = REPEAT_WIT.get(key) or (f"Again, sir. {WIT.get(key, DEFAULT_WIT)}".strip())
+    else:
+        beat = WIT.get(key, DEFAULT_WIT)
+    beat = (beat or "").strip()
+    if AS_REQUESTED_RE.search(beat):
+        return ""
+    return beat
 
 
 def wrap(
@@ -201,17 +219,24 @@ def wrap(
 ) -> str:
     """Sir. One witty beat. Then the real payload. Hand already ran."""
     raw = spoken or ""
-    if is_dump(raw):
-        return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
-    payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
+    if is_dump(raw) or SCAR_HOMEWORK_RE.search(raw):
+        if is_dump(raw):
+            return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
+        payload = HOMEWORK_SPOKEN
+    else:
+        payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
     if not payload:
         return payload
+    payload = AS_REQUESTED_RE.sub("", payload)
+    payload = SPACE_RE.sub(" ", payload).strip()
     if ALREADY_WRAPPED_RE.match(payload) or FAILURE_TEMPLATE in payload:
         return payload
     if is_failure(payload):
         return f"{FAILURE_TEMPLATE} {payload}"
     repeat = proven_repeat(utterance, turns, store_lines, scars, verb)
     beat = witty_beat(verb, repeat=repeat)
+    if not beat:
+        return f"Sir. {payload}"
     if payload.lower().startswith(beat.lower()):
         return f"Sir. {payload}"
     return f"Sir. {beat} {payload}"

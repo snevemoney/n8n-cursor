@@ -27,6 +27,8 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertTrue(out.startswith("Sir."))
         self.assertIn("Vault and hive are on the table.", out)
         self.assertNotIn("waiting for", out.lower())
+        self.assertNotIn("as requested", out.lower())
+        self.assertNotIn("Checking your professional skills", out)
 
     def test_failure_never_takes_blame(self) -> None:
         out = MOD.wrap("UNKNOWN. Cursor harness returned no reply.", verb="converse")
@@ -81,6 +83,18 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertNotIn("do not hand-edit", out.lower())
         self.assertIn("isn't my fault, sir", out)
         self.assertIn("file dump", out.lower())
+
+    def test_homework_scar_is_not_the_answer(self) -> None:
+        raw = (
+            "Scar cursor-auth-dark already saved. After one cursor-auth-dark, "
+            "do not call agent -p again this sitting until logged in. "
+            "From the store, not a dark Cursor call. Active lanes: Website."
+        )
+        out = MOD.wrap(raw, verb="converse", utterance="Good night")
+        self.assertNotIn("as requested", out.lower())
+        self.assertNotIn("cursor-auth-dark", out)
+        self.assertNotIn("agent -p", out)
+        self.assertIn("What do you want done", out)
 
     def test_stream_delta_wraps_once_then_payload(self) -> None:
         first = MOD.stream_delta("The mix is segment, then price.", first=True, verb="pro")

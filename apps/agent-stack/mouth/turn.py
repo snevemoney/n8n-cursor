@@ -76,6 +76,32 @@ GREET_RE = re.compile(
     re.I,
 )
 CRUMB_RE = re.compile(r"^(it|uh|um|ah|hmm|mm|huh|what)\s*[.!]?\s*$", re.I)
+FAREWELL_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?("
+    r"good\s*night|goodnight|goodbye|good\s*bye|bye|"
+    r"see you(?: later)?|i(?:'m| am) (?:done|out|off)"
+    r")\s*[.!]?\s*$",
+    re.I,
+)
+META_RE = re.compile(
+    r"\b("
+    r"what the hell(?: are you saying)?|"
+    r"what are you (?:saying|talking about)|"
+    r"that doesn'?t make sense|"
+    r"you(?:'re| are) not (?:listening|making sense)|"
+    r"speak (?:english|normally|sense)"
+    r")\b",
+    re.I,
+)
+SERIOUS_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(?:be\s+)?serious\s*[.!]?\s*$",
+    re.I,
+)
+THANKS_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(thanks|thank you|cheers)\s*[.!]?\s*$",
+    re.I,
+)
+ASK_STAMP_RE = re.compile(r"^\s*-?\s*\d{1,2}:\d{2}\s+[—-]")
 SEE_RE = re.compile(
     r"\b("
     r"look at (?:my )?(?:screen|display|safari|browser)|"
@@ -396,17 +422,59 @@ def today_spoken(retrieve_roots: list[Path] | None, hive: Path | None = None) ->
     cite = ""
     hits = found.get("hits") if isinstance(found, dict) else []
     if hits and isinstance(hits[0], dict):
-        cite = str(hits[0].get("snippet") or "").strip()
-    bits = ["From the store, not a dark Cursor call."]
+        path = str(hits[0].get("path") or "")
+        snippet = str(hits[0].get("snippet") or "").strip()
+        if "ASKS.md" not in path and not ASK_STAMP_RE.search(snippet):
+            cite = snippet
+    bits = ["From the store."]
     if biz:
         bits.append("Active lanes: " + ", ".join(str(x) for x in biz[:4]) + ".")
     if cite:
         bits.append(cite[:180])
     else:
         bits.append("North star is maximum leverage, minimum noise. Name one lane and we go.")
-    if hive is not None and SCARS is not None and SCARS.blocks_cursor(_scars_live(hive)):
-        bits.append("Cursor login scar is saved. Run agent login in Terminal when you want the harness back.")
     return " ".join(bits)
+
+
+def talk_spoken(utterance: str) -> str:
+    """Local conversation. Hear the line. Do not announce a verb or a scar."""
+    text = (utterance or "").strip()
+    if FAREWELL_RE.match(text):
+        return "Good night. I'll be here."
+    if THANKS_RE.match(text):
+        return "Anytime."
+    if SERIOUS_RE.match(text):
+        return "I'm here. What's the job?"
+    if META_RE.search(text):
+        return "That last line was a status dump, not an answer. I heard you. What do you want done?"
+    return "I'm here. What do you want done?"
+
+
+def _cite_is_homework(spoken: str) -> bool:
+    body = (spoken or "").strip()
+    if not body:
+        return True
+    if PERSONA is not None and PERSONA.is_dump(body):
+        return True
+    if ASK_STAMP_RE.search(body) or "ASKS.md" in body:
+        return True
+    if PERSONA is not None and getattr(PERSONA, "SCAR_HOMEWORK_RE", None) and PERSONA.SCAR_HOMEWORK_RE.search(body):
+        return True
+    return False
+
+
+def dark_converse_spoken(utterance: str, vault_spoken: str) -> str:
+    """Cursor is dark. Still answer the line. Do not recite the login scar."""
+    if FAREWELL_RE.match(utterance or "") or THANKS_RE.match(utterance or "") or SERIOUS_RE.match(utterance or "") or META_RE.search(utterance or ""):
+        return talk_spoken(utterance)
+    if CORRECT_RE.search(utterance or ""):
+        return "I missed that. Say the line again, one sentence."
+    if vault_spoken and not _cite_is_homework(vault_spoken):
+        return vault_spoken
+    return (
+        "I'm here. The harness is dark until you run agent login in Terminal — "
+        "that's a note, not the answer. What do you want done?"
+    )
 
 
 def heal_spoken(hive: Path, retrieve_roots: list[Path] | None, cursor_fn, grok) -> tuple[str, list, list]:
@@ -611,6 +679,10 @@ def classify(utterance: str) -> dict:
         return {"verb": "stop", "needs_ask": False, "args": {}, "host": "local"}
     if GREET_RE.match(text):
         return {"verb": "greet", "needs_ask": False, "args": {}, "host": "local"}
+    if FAREWELL_RE.match(text):
+        return {"verb": "farewell", "needs_ask": False, "args": {}, "host": "local"}
+    if THANKS_RE.match(text) or SERIOUS_RE.match(text) or META_RE.search(text):
+        return {"verb": "talk", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if len(text) <= 2 or CRUMB_RE.match(text):
         return {"verb": "crumb", "needs_ask": False, "args": {}, "host": "local"}
     mode_hit = MODE_RE.search(text)
@@ -1044,7 +1116,10 @@ def apply_turn_iter(
         yield from emit("Holding. Say Jarvis, or tap Space.")
         return
     if verb == "greet":
-        yield from emit("Hey Evens. Standing by.")
+        yield from emit("Hey Evens. What are we working on?")
+        return
+    if verb in {"farewell", "talk"}:
+        yield from emit(talk_spoken(spoken), host="local")
         return
     if verb == "crumb":
         yield from emit("That cut off. Say the rest.")
@@ -1257,17 +1332,7 @@ def apply_turn_iter(
     )
     if skip_cursor:
         wires = ["store"]
-        dump = PERSONA is not None and PERSONA.is_dump(_vault_spoken or "")
-        if CORRECT_RE.search(spoken):
-            narration = "I missed that. Say the line again, one sentence."
-        elif _vault_spoken and not dump:
-            narration = _vault_spoken
-        else:
-            scar = SCARS.lookup(last_jarvis) if SCARS is not None and last_jarvis else None
-            if scar is None and SCARS is not None:
-                scar = SCARS.lookup("agent login")
-            extra = SCARS.spoken_heal(scar) if scar and SCARS is not None else "I will not repeat that dark call."
-            narration = extra + " " + today_spoken(retrieve_roots, hive)
+        narration = dark_converse_spoken(spoken, _vault_spoken)
         yield from emit(narration)
         return
     use_stream = (

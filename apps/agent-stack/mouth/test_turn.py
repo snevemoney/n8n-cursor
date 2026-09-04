@@ -196,7 +196,9 @@ class MouthTurnTest(unittest.TestCase):
             self.assertNotIn("one-time login", today["spoken"])
             again = MOD.apply_turn("try again what's going on", hive=hive, retrieve_roots=[vault])
             self.assertNotIn("one-time login", again["spoken"])
-            self.assertIn("Scar", again["spoken"])
+            self.assertNotIn("Scar cursor-auth-dark", again["spoken"])
+            self.assertNotIn("as requested", again["spoken"].lower())
+            self.assertIn("What do you want done", again["spoken"])
 
     def test_send_this_email_refuses(self) -> None:
         self.assertEqual(MOD.classify("send this email")["verb"], "refuse")
@@ -714,7 +716,8 @@ class MouthTurnTest(unittest.TestCase):
             self.assertEqual(pro["verb"], "pro")
             self.assertFalse(pro["ask"])
             self.assertTrue(pro["spoken"].startswith("Sir."))
-            self.assertIn("Checking your professional skills", pro["spoken"])
+            self.assertNotIn("Checking your professional skills", pro["spoken"])
+            self.assertNotIn("as requested", pro["spoken"].lower())
             self.assertIn("bizstat-describe-sample-infer-regress-checklists", pro["spoken"])
             self.assertIn("BUS204", pro["spoken"])
             self.assertNotIn("waiting for", pro["spoken"].lower())
@@ -727,7 +730,58 @@ class MouthTurnTest(unittest.TestCase):
             self.assertEqual(mktg["verb"], "pro")
             self.assertTrue(mktg["spoken"].startswith("Sir."))
             self.assertIn("mktg", mktg["spoken"])
+            self.assertNotIn("## When", mktg["spoken"])
+            self.assertNotIn("## Steps", mktg["spoken"])
+            self.assertNotIn("Checking your professional skills", mktg["spoken"])
             self.assertLessEqual(len(mktg.get("cites") or []), 3)
+
+    def test_frontier_talk_is_an_answer_not_a_router(self) -> None:
+        self.assertEqual(MOD.classify("Good night")["verb"], "farewell")
+        self.assertEqual(MOD.classify("What the hell are you saying")["verb"], "talk")
+        self.assertEqual(MOD.classify("Serious")["verb"], "talk")
+        self.assertEqual(MOD.classify("what is marketing")["verb"], "pro")
+        with tempfile.TemporaryDirectory(prefix="agent-stack-frontier-") as tmp:
+            hive = Path(tmp)
+            bus = hive / "bus"
+            bus.mkdir()
+            (bus / "scars.jsonl").write_text(
+                json.dumps({"id": "cursor-auth-dark", "symptom": "agent login"}) + "\n",
+                encoding="utf-8",
+            )
+            (bus / "state.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "turns": [
+                            {
+                                "user": "hey",
+                                "jarvis": "UNKNOWN. Cursor harness returned no reply.",
+                            }
+                        ],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
+            night = MOD.apply_turn("Good night", hive=hive, retrieve_roots=[vault])
+            meta = MOD.apply_turn("What the hell are you saying", hive=hive, retrieve_roots=[vault])
+            serious = MOD.apply_turn("Serious", hive=hive, retrieve_roots=[vault])
+            going = MOD.apply_turn("what's going on", hive=hive, retrieve_roots=[vault])
+        for out, line in ((night, "Good night"), (meta, "hell"), (serious, "Serious"), (going, "going on")):
+            spoken = out["spoken"]
+            self.assertTrue(spoken.startswith("Sir."), line)
+            self.assertNotIn("as requested", spoken.lower(), line)
+            self.assertNotIn("Scar cursor-auth-dark", spoken, line)
+            self.assertNotIn("do not call agent -p", spoken, line)
+            self.assertNotIn("17:47", spoken, line)
+            self.assertNotIn("Checking your professional skills", spoken, line)
+        self.assertIn("Good night", night["spoken"])
+        self.assertIn("status dump", meta["spoken"].lower())
+        self.assertIn("What's the job", serious["spoken"])
+        self.assertIn("What do you want done", going["spoken"])
 
     def test_stream_persona_once_and_tts_on_first_delta(self) -> None:
         chunks = [

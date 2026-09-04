@@ -332,8 +332,22 @@ def brief(
                 "Name the school — marketing, finance, ops, ethics — and I will pull those files."
             ),
         }
-    parts = [brief_from_row(r) for r in matched]
-    lead = "From " + ", ".join(slugs) + "."
+    useful = []
+    for row in matched:
+        bit = str(row.get("when") or "").strip() or section(str(row.get("text") or ""), "Steps")
+        if bit:
+            useful.append(bit[:BRIEF_CAP])
+        if len(useful) >= 2:
+            break
+    body = " ".join(useful) if useful else "On disk. No When/Steps section to speak."
+    cite_bits = []
+    for row in matched:
+        slug = str(row.get("slug") or "")
+        course = str(row.get("course") or "")
+        if not slug:
+            continue
+        cite_bits.append(f"{slug} ({course})" if course else slug)
+    cite = "; ".join(cite_bits)
     return {
         "ok": True,
         "unknown": False,
@@ -341,5 +355,5 @@ def brief(
         "slugs": slugs,
         "courses": [str(r.get("course") or "") for r in matched if r.get("course")],
         "cites": cites,
-        "spoken": f"{lead} " + " ".join(parts),
+        "spoken": f"{body} ({cite})" if cite else body,
     }
