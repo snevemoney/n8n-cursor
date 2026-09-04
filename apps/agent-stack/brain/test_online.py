@@ -80,19 +80,22 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertIn("ask", argv)
         self.assertIn("--resume", argv)
         self.assertIn("chat-1", argv)
+        self.assertIn("stream-json", argv)
+        self.assertIn("--stream-partial-output", argv)
         self.assertNotIn("--force", argv)
         self.assertNotIn("--yolo", argv)
 
-    def test_call_cursor_turn_agent_omits_mode_flag(self) -> None:
+    def test_call_cursor_turn_agent_resumes_agent_chat(self) -> None:
         proc = self._proc("Using tools.\n")
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
             with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as popen:
-                out = MOD.call_cursor_turn("open the hive skill", mode="agent", resume="old-ask")
+                out = MOD.call_cursor_turn("open the hive skill", mode="agent", resume="agent-1")
         self.assertTrue(out["ok"])
         argv = popen.call_args[0][0]
         self.assertIn("-p", argv)
         self.assertNotIn("--mode", argv)
-        self.assertNotIn("--resume", argv)
+        self.assertIn("--resume", argv)
+        self.assertIn("agent-1", argv)
         self.assertNotIn("--force", argv)
         self.assertNotIn("--yolo", argv)
 
@@ -133,6 +136,45 @@ class OnlineBrainTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {"AGENT_STACK_CURSOR_DRY": "1"}):
             self.assertIsNone(MOD.ensure_jarvis_chat(None))
             self.assertEqual(MOD.ensure_jarvis_chat("keep-me"), "keep-me")
+            chats = MOD.ensure_jarvis_chats("talk-1", None)
+            self.assertEqual(chats["talk"], "talk-1")
+            self.assertIsNone(chats["agent"])
+
+    def test_parse_stream_json_line_shapes(self) -> None:
+        delta = MOD.parse_stream_json_line('{"type":"text-delta","delta":"Hello Evens."}')
+        self.assertEqual(delta["delta"], "Hello Evens.")
+        msg = MOD.parse_stream_json_line(
+            '{"type":"assistant","message":{"content":[{"type":"text","text":"Standing by."}]}}'
+        )
+        self.assertEqual(msg["delta"], "Standing by.")
+        result = MOD.parse_stream_json_line('{"type":"result","result":"Hello Evens. Standing by."}')
+        self.assertEqual(result["result"], "Hello Evens. Standing by.")
+        plain = MOD.parse_stream_json_line("The site CSS is in pane.html.")
+        self.assertEqual(plain["delta"], "The site CSS is in pane.html.")
+
+    def test_take_sentences_splits_completed(self) -> None:
+        sents, rest = MOD.take_sentences("Hello Evens. Standing by. More")
+        self.assertEqual(sents, ["Hello Evens.", "Standing by."])
+        self.assertEqual(rest, "More")
+
+    def test_call_cursor_turn_iter_yields_deltas(self) -> None:
+        lines = [
+            '{"type":"text-delta","delta":"Hello Evens. "}\n',
+            '{"type":"text-delta","delta":"Standing by."}\n',
+            '{"type":"result","result":"Hello Evens. Standing by."}\n',
+            "",
+        ]
+        proc = self._proc("")
+        proc.stdout.readline.side_effect = lines
+        proc.stderr.read.return_value = ""
+        proc.poll.side_effect = [None, None, None, 0]
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc):
+                evs = list(MOD.call_cursor_turn_iter("hey", mode="ask", resume="chat-1"))
+        deltas = [ev.get("delta") for ev in evs if ev.get("partial")]
+        self.assertEqual(deltas, ["Hello Evens. ", "Standing by."])
+        self.assertTrue(evs[-1]["done"])
+        self.assertIn("Hello Evens.", evs[-1]["spoken"])
 
 
 if __name__ == "__main__":

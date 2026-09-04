@@ -134,7 +134,10 @@
     const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
     let jarvisVoice = null;
     let ttsAudio = null;
-    const ttsSpeaking = () => !!(synth && synth.speaking) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
+    const ttsQueue = [];
+    let ttsBusy = false;
+    let ttsGen = 0;
+    const ttsSpeaking = () => ttsBusy || !!(synth && synth.speaking) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
 
     function voiceLang(v) {
       return String((v && v.lang) || "").toLowerCase().replace(/_/g, "-");
@@ -217,37 +220,65 @@
       u.onend = afterSpeak;
       synth.speak(u);
     }
-    async function speakCloud(text) {
+    function stopSpeech() {
+      ttsGen += 1;
+      ttsQueue.length = 0;
+      ttsBusy = false;
+      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
+      if (synth) synth.cancel();
+    }
+    async function speakCloud(text, gen) {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
       if (!res.ok || res.status === 204) return false;
+      if (gen !== undefined && gen !== ttsGen) return false;
       const blob = await res.blob();
       if (!blob || blob.size < 32) return false;
       if (synth) synth.cancel();
-      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} }
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       ttsAudio = audio;
       paintPhase("speak");
-      audio.onended = () => {
-        if (ttsAudio === audio) ttsAudio = null;
+      try {
+        await audio.play();
+      } catch (e) {
         URL.revokeObjectURL(url);
-        afterSpeak();
-      };
-      audio.onerror = () => {
-        if (ttsAudio === audio) ttsAudio = null;
-        URL.revokeObjectURL(url);
-        speakLocal(text);
-      };
-      await audio.play();
+        ttsAudio = null;
+        return false;
+      }
+      await new Promise((resolve) => {
+        audio.onended = resolve;
+        audio.onerror = resolve;
+      });
+      if (ttsAudio === audio) ttsAudio = null;
+      URL.revokeObjectURL(url);
       return true;
+    }
+    function enqueueSpeak(text) {
+      if (!text) return;
+      ttsQueue.push(text);
+      pumpTts();
+    }
+    async function pumpTts() {
+      if (ttsBusy) return;
+      const gen = ttsGen;
+      ttsBusy = true;
+      while (ttsQueue.length && gen === ttsGen) {
+        const next = ttsQueue.shift();
+        paintPhase("speak");
+        let ok = false;
+        try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
+        if (!ok && gen === ttsGen) speakLocal(next);
+      }
+      ttsBusy = false;
+      if (gen === ttsGen) afterSpeak();
     }
     function speak(text) {
       if (!text) return;
-      speakCloud(text).then((ok) => { if (!ok) speakLocal(text); }).catch(() => speakLocal(text));
+      enqueueSpeak(text);
     }
 
     async function greet() {
@@ -267,8 +298,7 @@
       if (isStop && turnAbort) {
         try { turnAbort.abort(); } catch (e) {}
       }
-      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
-      if (synth) synth.cancel();
+      stopSpeech();
       state.turning = true;
       paintPhase("think");
       if (!isStop) $("spoken").textContent = "";
@@ -277,16 +307,41 @@
       try {
         const res = await fetch("/api/turn", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ utterance, approved: !!approved }),
+          headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+          body: JSON.stringify({ utterance, approved: !!approved, stream: true }),
           signal: ac.signal,
         });
-        const out = await res.json();
-        $("spoken").textContent = out.spoken || "";
-        $("spoken").className = "line" + (out.ask ? " ask" : "");
-        if (out.ask) state.pending = utterance;
-        else state.pending = null;
-        speak(out.spoken || "");
+        const ctype = (res.headers.get("content-type") || "").toLowerCase();
+        if (ctype.includes("text/event-stream") && res.body) {
+          const reader = res.body.getReader();
+          const dec = new TextDecoder();
+          let buf = "";
+          let last = null;
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            const parts = buf.split("\n\n");
+            buf = parts.pop() || "";
+            for (const part of parts) {
+              const line = part.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim()).join("");
+              if (!line) continue;
+              try { last = JSON.parse(line); } catch (err) { continue; }
+              if (last.spoken) $("spoken").textContent = last.spoken;
+              $("spoken").className = "line" + (last.ask ? " ask" : "");
+              if (last.ask) state.pending = utterance;
+              else state.pending = null;
+              if (last.spoken_delta) enqueueSpeak(last.spoken_delta);
+            }
+          }
+        } else {
+          const out = await res.json();
+          $("spoken").textContent = out.spoken || "";
+          $("spoken").className = "line" + (out.ask ? " ask" : "");
+          if (out.ask) state.pending = utterance;
+          else state.pending = null;
+          enqueueSpeak(out.spoken || "");
+        }
       } catch (e) {
         if (e && e.name === "AbortError") {
           $("spoken").textContent = "Stopped. Standing by.";

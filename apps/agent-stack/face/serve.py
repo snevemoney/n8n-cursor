@@ -9,6 +9,7 @@ import importlib.util
 import json
 import os
 import sys
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
@@ -138,6 +139,38 @@ def observe_jobs() -> list[dict]:
     return rows[:20]
 
 
+def _warm_cursor_chats() -> None:
+    """Pre-create talk + agent Cursor chats so the first spoken line resumes."""
+    try:
+        bus_path = HIVE / "bus" / "state.json"
+        bus = load_json(bus_path)
+        live = mouth()
+        chats = ONLINE.ensure_jarvis_chats(
+            str(bus.get("jarvis_chat_id") or "") or None,
+            str(bus.get("jarvis_agent_chat_id") or "") or None,
+        )
+        talk = chats.get("talk")
+        agent = chats.get("agent")
+        if not (talk or agent):
+            return
+        live.bus_write(
+            HIVE,
+            phase=str(bus.get("phase") or "idle"),
+            job_status=str(bus.get("job_status") or "done"),
+            utterance=str(bus.get("utterance") or ""),
+            permission_ask=None,
+            spoken=bus.get("spoken"),
+            cites=bus.get("cites") if isinstance(bus.get("cites"), list) else None,
+            wires=bus.get("wires") if isinstance(bus.get("wires"), list) else None,
+            turns=bus.get("turns") if isinstance(bus.get("turns"), list) else None,
+            jarvis_chat_id=talk,
+            jarvis_agent_chat_id=agent,
+            harness_mode=bus.get("harness_mode") if bus.get("harness_mode") in ("ask", "plan", "agent") else None,
+        )
+    except Exception:
+        return
+
+
 def mark_pieces_wired() -> None:
     stack_path = HIVE / "agent-stack.json"
     stack = load_json(stack_path)
@@ -232,12 +265,21 @@ class Handler(BaseHTTPRequestHandler):
         if path != "/api/turn":
             self._json(404, {"ok": False, "error": "no such route"})
             return
+        utterance = str(data.get("utterance") or "")
+        accept = (self.headers.get("Accept") or "").lower()
+        want_stream = bool(data.get("stream")) or "text/event-stream" in accept
+        if want_stream and hasattr(live_mouth, "apply_turn_iter"):
+            self._sse_turn(live_mouth, utterance, bool(data.get("approved")))
+            return
         out = live_mouth.apply_turn(
-            str(data.get("utterance") or ""),
+            utterance,
             approved=bool(data.get("approved")),
             hive=HIVE,
             speak=False,
         )
+        self._json(200, self._scrub_turn(live_mouth, out))
+
+    def _scrub_turn(self, live_mouth, out: dict) -> dict:
         spoken = str(out.get("spoken") or "")
         if out.get("ask") or (hasattr(live_mouth, "is_ask_leak") and live_mouth.is_ask_leak(spoken)):
             dark = getattr(live_mouth, "DARK_BRAIN", None) or getattr(
@@ -245,7 +287,32 @@ class Handler(BaseHTTPRequestHandler):
             )
             out = {**out, "ask": False, "spoken": dark, "verb": out.get("verb") if out.get("verb") != "desk" else "converse"}
             out.pop("permission_ask", None)
-        self._json(200, out)
+        return out
+
+    def _sse_turn(self, live_mouth, utterance: str, approved: bool) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        try:
+            for ev in live_mouth.apply_turn_iter(
+                utterance,
+                approved=approved,
+                hive=HIVE,
+            ):
+                clean = self._scrub_turn(live_mouth, ev)
+                payload = (f"data: {json.dumps(clean)}\n\n").encode("utf-8")
+                self.wfile.write(payload)
+                self.wfile.flush()
+        except BrokenPipeError:
+            if hasattr(ONLINE, "cancel_cursor"):
+                ONLINE.cancel_cursor()
+            return
+        except Exception:
+            if hasattr(ONLINE, "cancel_cursor"):
+                ONLINE.cancel_cursor()
+            raise
 
 
 def serve(port: int = PORT) -> None:
@@ -263,6 +330,7 @@ def serve(port: int = PORT) -> None:
         live_mouth.write_json(bus_path, bus)
     if hasattr(voice(), "warm"):
         voice().warm()
+    threading.Thread(target=_warm_cursor_chats, daemon=True).start()
     httpd = ThreadingHTTPServer((HOST, port), Handler)
     print(json.dumps({"ok": True, "url": f"http://{HOST}:{port}/", "bind": HOST}, indent=2))
     try:
@@ -313,6 +381,10 @@ def self_test() -> dict:
             "MODE - AGENT",
             "STOP_RE",
             "AbortController",
+            "text/event-stream",
+            "spoken_delta",
+            "enqueueSpeak",
+            "ttsQueue",
         )
         banned_chrome = ("Use Chrome", "Safari speech is flaky")
         if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned) or any(token in html for token in banned_chrome):
@@ -345,6 +417,19 @@ def self_test() -> dict:
             tts_code = int(exc.code)
         if tts_code != 204:
             return {"ok": False, "errors": ["dry /api/tts must be 204"], "status": tts_code}
+        turn_req = urllib.request.Request(
+            f"http://{HOST}:{port}/api/turn",
+            data=json.dumps({"utterance": "hey", "stream": True}).encode("utf-8"),
+            headers={"Content-Type": "application/json", "Accept": "text/event-stream"},
+            method="POST",
+        )
+        with urllib.request.urlopen(turn_req, timeout=4) as turn_res:
+            turn_body = turn_res.read().decode("utf-8")
+            turn_type = str(turn_res.headers.get("Content-Type") or "")
+        if "text/event-stream" not in turn_type and "spoken_delta" not in turn_body:
+            return {"ok": False, "errors": ["stream /api/turn must be SSE"], "ctype": turn_type, "body": turn_body[:240]}
+        if "Hey Evens" not in turn_body or "spoken_delta" not in turn_body:
+            return {"ok": False, "errors": ["SSE greet missing spoken_delta"], "body": turn_body[:240]}
         return {"ok": True, "errors": [], "port": port, "bind": HOST, "home": 200}
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         return {"ok": False, "errors": [str(exc)]}

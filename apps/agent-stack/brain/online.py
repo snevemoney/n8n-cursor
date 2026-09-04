@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 import threading
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -168,6 +169,9 @@ def wire_report() -> dict:
             "vps": "ssh",
             "cursor": "harness" if agent_cmd() else "dark",
             "vault": "store",
+            "calendar": "macos",
+            "mail": "macos",
+            "invoice": "vault",
         },
         "need": [] if agent_cmd() else ["Cursor agent CLI"],
     }
@@ -419,7 +423,11 @@ def cursor_logged_in() -> bool:
 
 
 def ensure_jarvis_chat(chat_id: str | None = None) -> str | None:
-    """One Cursor chat for the voice sitting. Resume it. Do not dump other sessions."""
+    """Warm remap of `agent persist`.
+
+    The persist CLI needs tmux and a TTY attach. Headless 4018 cannot use it.
+    Pre-create a chat, then always `--resume` it. Do not dump other sessions.
+    """
     existing = (chat_id or "").strip()
     if existing:
         return existing
@@ -440,37 +448,162 @@ def ensure_jarvis_chat(chat_id: str | None = None) -> str | None:
     return token or None
 
 
-def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = None) -> dict:
-    """Headless Cursor harness. ask | plan | agent. No --force / --yolo."""
-    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "spoken": "UNKNOWN. Cursor print is dry.",
-        }
-    cmd = agent_cmd()
-    if not cmd:
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "spoken": "UNKNOWN. Cursor agent CLI is missing.",
-        }
-    global _CURSOR_PROC, _CURSOR_CANCELLED
+def ensure_jarvis_chats(talk_id: str | None = None, agent_id: str | None = None) -> dict:
+    """One ask/talk chat and one tool chat. Agent must not resume an ask-locked chat."""
+    return {
+        "talk": ensure_jarvis_chat(talk_id),
+        "agent": ensure_jarvis_chat(agent_id),
+    }
+
+
+def take_sentences(buf: str) -> tuple[list[str], str]:
+    """Split completed sentences from a growing buffer. Return (sentences, remainder)."""
+    rest = buf or ""
+    out: list[str] = []
+    while True:
+        match = re.search(r"[.!?](?:\s+|$)", rest)
+        if not match:
+            break
+        chunk = rest[: match.end()].strip()
+        rest = rest[match.end() :]
+        if len(chunk) < 2:
+            continue
+        out.append(chunk)
+    return out, rest
+
+
+def parse_stream_json_line(line: str) -> dict:
+    """Tolerant Cursor stream-json line → {delta, result}."""
+    raw = (line or "").strip()
+    if raw.startswith("data:"):
+        raw = raw[5:].strip()
+    if not raw:
+        return {"delta": "", "result": ""}
+    try:
+        obj = json.loads(raw)
+    except json.JSONDecodeError:
+        if raw.startswith("{"):
+            return {"delta": "", "result": ""}
+        return {"delta": raw, "result": ""}
+    if isinstance(obj, str):
+        return {"delta": obj, "result": ""}
+    if not isinstance(obj, dict):
+        return {"delta": "", "result": ""}
+    typ = str(obj.get("type") or obj.get("subtype") or "")
+    if typ == "result":
+        res = obj.get("result")
+        if res is None:
+            res = obj.get("text")
+        return {"delta": "", "result": str(res).strip() if res else ""}
+    text = _stream_delta_text(obj)
+    return {"delta": text, "result": ""}
+
+
+def _stream_delta_text(obj: dict) -> str:
+    typ = str(obj.get("type") or "")
+    if typ in ("system", "tool_call", "tool-call", "tool_result", "tool-result"):
+        return ""
+    for key in ("delta", "text", "content"):
+        val = obj.get(key)
+        if isinstance(val, str) and val:
+            if key == "content" and typ in ("", "result"):
+                continue
+            if typ in ("text-delta", "text_delta", "content_block_delta", "assistant", "content", ""):
+                return val
+        if isinstance(val, dict):
+            inner = val.get("text") or val.get("delta") or val.get("content")
+            if isinstance(inner, str) and inner:
+                return inner
+        if isinstance(val, list):
+            bits = _content_list_text(val)
+            if bits:
+                return bits
+    msg = obj.get("message")
+    if isinstance(msg, dict):
+        content = msg.get("content")
+        if isinstance(content, str) and content:
+            return content
+        if isinstance(content, list):
+            return _content_list_text(content)
+    return ""
+
+
+def _content_list_text(parts: list) -> str:
+    bits: list[str] = []
+    for part in parts:
+        if isinstance(part, str):
+            bits.append(part)
+        elif isinstance(part, dict):
+            bits.append(str(part.get("text") or part.get("content") or part.get("delta") or ""))
+    return "".join(bits)
+
+
+def _cursor_argv(cmd: list[str], prompt: str, *, mode: str, resume: str | None) -> tuple[list[str], str, str, int]:
     use_mode = mode if mode in ("ask", "plan", "agent") else "ask"
-    argv = [*cmd, "-p", "--trust", "--workspace", str(ROOT), "--output-format", "text"]
+    argv = [
+        *cmd,
+        "-p",
+        "--trust",
+        "--workspace",
+        str(ROOT),
+        "--output-format",
+        "stream-json",
+        "--stream-partial-output",
+    ]
     if use_mode in ("ask", "plan"):
         argv.extend(["--mode", use_mode])
     chat = (resume or "").strip()
-    if use_mode == "agent":
-        chat = ""
     if chat:
         argv.extend(["--resume", chat])
     argv.append((prompt or "").strip()[:4000])
     timeout = 90 if use_mode == "agent" else 45
+    return argv, use_mode, chat, timeout
+
+
+def _read_cursor_line(proc: subprocess.Popen) -> str | None:
+    """Return a stdout line, empty string on EOF, or None to fall back to communicate()."""
+    stdout = proc.stdout
+    if stdout is None:
+        return None
+    try:
+        line = stdout.readline()
+    except Exception:
+        return None
+    if isinstance(line, str):
+        return line
+    return None
+
+
+def _cursor_fail(spoken: str, *, cancelled: bool = False) -> dict:
+    out = {
+        "ok": False,
+        "unknown": True,
+        "wire": "cursor",
+        "engine": "cursor",
+        "spoken": spoken,
+        "done": True,
+        "partial": False,
+        "delta": "",
+    }
+    if cancelled:
+        out["cancelled"] = True
+    return out
+
+
+def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None = None):
+    """Yield stream deltas, then one done event. No --force / --yolo.
+
+    `agent persist` is TTY/tmux. This is the headless remap: resume + stream-json.
+    """
+    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
+        yield _cursor_fail("UNKNOWN. Cursor print is dry.")
+        return
+    cmd = agent_cmd()
+    if not cmd:
+        yield _cursor_fail("UNKNOWN. Cursor agent CLI is missing.")
+        return
+    global _CURSOR_PROC, _CURSOR_CANCELLED
+    argv, use_mode, chat, timeout = _cursor_argv(cmd, prompt, mode=mode, resume=resume)
     _CURSOR_CANCELLED = False
     try:
         proc = subprocess.Popen(
@@ -481,58 +614,98 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
             cwd=str(ROOT),
         )
     except OSError as exc:
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "spoken": f"UNKNOWN. Cursor agent failed: {exc}.",
-        }
+        yield _cursor_fail(f"UNKNOWN. Cursor agent failed: {exc}.")
+        return
     with _CURSOR_LOCK:
         _CURSOR_PROC = proc
+    collected: list[str] = []
+    result_text = ""
+    err_text = ""
+    timed_out = False
+    used_stream = False
+    killer = threading.Timer(timeout, proc.kill)
+    killer.daemon = True
+    killer.start()
     try:
-        out, err = proc.communicate(timeout=timeout)
+        while True:
+            if _CURSOR_CANCELLED:
+                break
+            line = _read_cursor_line(proc)
+            if line is None:
+                try:
+                    out, err = proc.communicate(timeout=max(1.0, timeout))
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    timed_out = True
+                    out, err = "", ""
+                err_text = (err or "").strip()
+                blob_bits: list[str] = []
+                for chunk in (out or "").splitlines() or [out or ""]:
+                    parsed_blob = parse_stream_json_line(chunk)
+                    if parsed_blob["delta"]:
+                        blob_bits.append(parsed_blob["delta"])
+                    if parsed_blob["result"]:
+                        result_text = parsed_blob["result"]
+                if blob_bits:
+                    text = "".join(blob_bits)
+                    collected.append(text)
+                    yield {"partial": True, "done": False, "delta": text, "wire": "cursor"}
+                elif not result_text and (out or "").strip() and not (out or "").lstrip().startswith("{"):
+                    text = (out or "").strip()
+                    collected.append(text)
+                    yield {"partial": True, "done": False, "delta": text, "wire": "cursor"}
+                break
+            if line:
+                used_stream = True
+                parsed = parse_stream_json_line(line)
+                if parsed["delta"]:
+                    collected.append(parsed["delta"])
+                    yield {"partial": True, "done": False, "delta": parsed["delta"], "wire": "cursor"}
+                if parsed["result"]:
+                    result_text = parsed["result"]
+                continue
+            if proc.poll() is not None:
+                if proc.stderr is not None:
+                    try:
+                        err_text = (proc.stderr.read() or "").strip()
+                    except Exception:
+                        err_text = ""
+                break
+            time.sleep(0.02)
+        if used_stream and proc.poll() is None and not _CURSOR_CANCELLED:
+            try:
+                proc.wait(timeout=1.0)
+            except subprocess.TimeoutExpired:
+                pass
+        if proc.poll() is None and not _CURSOR_CANCELLED:
+            if killer.is_alive() is False:
+                timed_out = True
     except subprocess.TimeoutExpired:
         proc.kill()
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "spoken": "UNKNOWN. Cursor timed out. Say stop, or ask again shorter.",
-        }
+        timed_out = True
     finally:
+        killer.cancel()
         with _CURSOR_LOCK:
             if _CURSOR_PROC is proc:
                 _CURSOR_PROC = None
+        if proc.poll() is None:
+            proc.kill()
     if _CURSOR_CANCELLED:
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "cancelled": True,
-            "spoken": "",
-        }
-    text = (out or "").strip()
-    err_text = (err or "").strip()
+        yield _cursor_fail("", cancelled=True)
+        return
+    if timed_out and not "".join(collected).strip() and not result_text:
+        yield _cursor_fail("UNKNOWN. Cursor timed out. Say stop, or ask again shorter.")
+        return
+    text = "".join(collected).strip() or result_text.strip()
     if not text and "Authentication required" in err_text:
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "spoken": "UNKNOWN. Cursor agent needs a one-time login. Run agent login in Terminal. Not an xAI key.",
-        }
+        yield _cursor_fail(
+            "UNKNOWN. Cursor agent needs a one-time login. Run agent login in Terminal. Not an xAI key."
+        )
+        return
     if not text:
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "spoken": f"UNKNOWN. Cursor agent returned no text. {err_text[:180]}".strip(),
-        }
-    return {
+        yield _cursor_fail(f"UNKNOWN. Cursor agent returned no text. {err_text[:180]}".strip())
+        return
+    yield {
         "ok": True,
         "unknown": False,
         "wire": "cursor",
@@ -540,6 +713,27 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
         "spoken": clip_spoken(text),
         "mode": use_mode,
         "chat_id": chat or None,
+        "done": True,
+        "partial": False,
+        "delta": "",
+    }
+
+
+def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = None) -> dict:
+    """Headless Cursor harness. ask | plan | agent. Always resume when a chat id is given."""
+    last = _cursor_fail("UNKNOWN. Cursor harness returned no reply.")
+    for ev in call_cursor_turn_iter(prompt, mode=mode, resume=resume):
+        if ev.get("done") or ev.get("cancelled") or ev.get("unknown") or ev.get("ok"):
+            last = ev
+    return {
+        "ok": bool(last.get("ok")),
+        "unknown": bool(last.get("unknown")),
+        "wire": last.get("wire") or "cursor",
+        "engine": last.get("engine") or "cursor",
+        "spoken": str(last.get("spoken") or ""),
+        "mode": last.get("mode") or mode,
+        "chat_id": last.get("chat_id"),
+        "cancelled": bool(last.get("cancelled")),
     }
 
 
