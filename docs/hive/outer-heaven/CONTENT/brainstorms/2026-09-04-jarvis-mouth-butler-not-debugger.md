@@ -13,16 +13,20 @@ at: 2026-09-04T17:53:01
 
 ## SUMMARY
 
-Mouth wrap strips factory talk. Hands still execute. One Q this sitting: spoken = human result, not the debugger trail.
+Q1 = both (Evens). Spoken stays butler. last-wire under `.hive/bus/` is the Jarvis-visible path/scar/url/error. Heal retries once from that row.
 
 ## KEY DECISIONS
 
-- Spoken line is for Sir. Internals stay off TTS.
+- Two channels: spoken = butler human result; last-wire.json = Jarvis heal.
+- Heal retries last-wire once, then scars.
 
 ## Q&A LOG
 
 **Q1. When a Safari or Cursor hand fails, does the spoken line name the wire so you can debug (CGEvent, Apple Events, scar id, face URL), or only the human result?**
-A: Only the human result. Sir hears YouTube is open or Safari could not scroll. Factory stays in the bus, scars, and tests. You already named the mouth: Sir, dry wit, execute now, never wait, failure not-my-fault.
+A: Both. Sir hears the human result (YouTube is open / Safari could not scroll). Factory stays in the bus. And Jarvis must hear the wire (CGEvent, scar id, face URL) so it can fix — last-wire on disk, not TTS. When he says fix it / heal / try again, classify reads that wire and retries or saves a scar.
+
+**Q2. When last-wire says the last Safari or Cursor hand failed, does heal retry that same utterance once, or only save a scar and wait for you to re-issue the command?**
+A: Retry once from last-wire. Speak the human result of that retry. If it fails again, save a scar and speak the human fail. Do not ask him to re-say scroll.
 
 ## OPEN FLAGS
 

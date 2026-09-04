@@ -55,7 +55,7 @@ def _install_mocks(serve, hive: Path) -> None:
     mouth = serve.mouth()
     serve.HIVE = hive
     if mouth.SEE is not None:
-        mouth.SEE.safari_act = lambda text: {
+        mouth.SEE.safari_act = lambda text, hive=None: {
             "ok": True,
             "wire": "safari",
             "spoken": "Safari opened YouTube (e2e mock). Not a vault dump.",
