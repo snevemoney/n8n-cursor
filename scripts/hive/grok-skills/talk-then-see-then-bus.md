@@ -4,8 +4,8 @@ description: >-
   Voice + live screen share on the existing agentic OS. Mouth writes
   the file bus. Face reads it. Hive skills, file sandbox, queued
   browse/watch. ASK before side effects. Hands arm after Yes, then
-  a preview click moves the Mac mouse. Cursor plus Grok. Do not
-  install Claude Code.
+  a preview click moves the Mac mouse. Talk is the path; type is
+  fallback. Cursor plus Grok. Do not install Claude Code.
 ---
 
 # Talk, then see, then bus
@@ -24,7 +24,7 @@ description: >-
 ## Card
 
 ```
-DONE-CHECK: voice-os.py self-test + pane on 127.0.0.1:4018/voice.html (hold-talk, getDisplayMedia, bus poll, ASK, hands arm + dry click)
+DONE-CHECK: voice-os.py self-test + pane on 127.0.0.1:4018/voice.html (open-mic talk, spoken yes/cancel, getDisplayMedia, ASK, hands arm + dry click)
 CAP: this Mac only · 127.0.0.1 · no inferred hard-step clicks · no phone · no billed TTS
 COST: Web Speech + speechSynthesis + ctypes CoreGraphics. No pyobjc / cliclick. ElevenLabs ASK.
 STOP-KIND: cap + done-check
@@ -38,7 +38,7 @@ HANDS: wired (ASK then bus.hands_armed)
 1. `python3 scripts/hive/os/agent-stack.py adopt && python3 scripts/hive/os/agent-stack.py validate`
 2. `python3 scripts/hive/os/voice-os.py self-test`
 3. `python3 scripts/hive/os/voice-os.py serve` — open `http://127.0.0.1:4018/voice.html`
-4. Share **Entire Screen**. Hold talk or type. Yellow = approve.
+4. Click **Talk** once (or Share screen · talk). Stay listening. Say **yes** or **cancel** when yellow. Type is fallback. Chrome on this Mac.
 5. Say **take the mouse** → Yes. Click the preview to click the Mac. Esc / **hands off** disarms.
 6. Enable Accessibility for the Terminal/Python running `voice-os.py` if HID events do not land.
 7. Browse / watch become jobs on `.hive/bus/jobs.jsonl` for the Cursor host (`cursor-ide-browser` / `cursor-video-watch`).

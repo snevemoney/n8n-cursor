@@ -12,7 +12,7 @@ Status: compiled
 ## Steps
 1. Adopt/validate the existing stack
 2. `voice-os.py self-test`
-3. `voice-os.py serve` → share screen → hold talk
+3. `voice-os.py serve` → Talk once → stay listening. Share screen if you want the mouse.
 4. Yellow ASK for browse/watch and for take-the-mouse
 5. Armed preview click → `/api/hands` (ctypes CoreGraphics). Esc disarms
 6. Watchdog GRADE

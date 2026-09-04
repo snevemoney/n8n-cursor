@@ -111,6 +111,7 @@
       <a class="util" href="./index.html">NOW</a>
       <a class="util on" href="./voice.html">VOICE</a>
       <button type="button" class="util" id="handspill">Hands off</button>
+      <button type="button" class="util" id="earpill">Ear off</button>
     </header>
 
     <section class="hero" id="hero">
@@ -122,11 +123,12 @@
     <div class="grid">
       <article class="card">
         <h2>Talk with the hive</h2>
-        <p>Hold talk. Barge in anytime. I use Cursor + Grok skills on this Mac — files, browse jobs, video watch, and the mouse after you approve. Share Entire Screen so a preview click lands.</p>
+        <p>Talk. I stay listening. Say yes or cancel when I ask. Type is only a fallback. Share Entire Screen if you want the mouse.</p>
+        <div class="banner" id="earbanner">Listening — just speak. Space pauses. I ignore my own voice while I answer.</div>
         <div class="banner" id="handsbanner">Hands on — click the preview to click the Mac. Esc or Hands off to drop it.</div>
         <div class="row">
-          <button type="button" id="talk">Hold to talk</button>
-          <input id="typed" placeholder="or type — list skills, read hot.md, watch a YouTube url" />
+          <button type="button" id="talk">Talk</button>
+          <input id="typed" placeholder="fallback type only" />
           <button type="button" class="util" id="send">Send</button>
         </div>
         <p id="heard"></p>
@@ -145,7 +147,18 @@
   </div>
   <script>
     const $ = (id) => document.getElementById(id);
-    const state = { pending: null, stream: null, rec: null, listening: false, handsArmed: false };
+    const YES_RE = /^(yes|yeah|yep|yup|do it|approve|go ahead|ok|okay|please)\s*[.!]?\s*$/i;
+    const NO_RE = /^(no|nope|cancel|never mind|stop|don't|do not)\s*[.!]?\s*$/i;
+    const state = {
+      pending: null,
+      stream: null,
+      rec: null,
+      micStream: null,
+      wantListen: false,
+      turning: false,
+      speaking: false,
+      handsArmed: false,
+    };
 
     function clamp01(n) {
       return Math.max(0, Math.min(1, n));
@@ -169,12 +182,22 @@
     const synth = window.speechSynthesis;
 
     function speak(text) {
-      if (!text || !synth) return;
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.02;
-      u.pitch = 0.95;
-      synth.speak(u);
+      return new Promise((resolve) => {
+        if (!text || !synth) {
+          resolve();
+          return;
+        }
+        synth.cancel();
+        state.speaking = true;
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 1.02;
+        u.pitch = 0.95;
+        u.onend = u.onerror = () => {
+          state.speaking = false;
+          resolve();
+        };
+        synth.speak(u);
+      });
     }
 
     function logLine(line) {
@@ -197,6 +220,9 @@
         $("handspill").classList.toggle("on", state.handsArmed);
         $("handsbanner").classList.toggle("on", state.handsArmed);
         $("hero").classList.toggle("armed", state.handsArmed);
+        $("earpill").textContent = state.wantListen ? "Ear on" : "Ear off";
+        $("earpill").classList.toggle("on", state.wantListen);
+        $("earbanner").classList.toggle("on", state.wantListen);
         if (bus.utterance) logLine(`${bus.phase}: ${bus.utterance}`);
       } catch (err) {
         $("phase").textContent = "server off — run voice-os.py serve";
@@ -204,23 +230,30 @@
     }
 
     async function turn(utterance, approved) {
-      if (!utterance) return;
-      await api("/api/bus", { phase: "listen", job_status: "working", utterance });
-      $("heard").textContent = utterance;
-      const note = $("share").srcObject ? "live screen is shared" : "";
-      const out = await api("/api/turn", { utterance, approved: !!approved, screen_note: note });
-      logLine(out.spoken || JSON.stringify(out));
-      speak(out.spoken || "");
-      if (typeof out.hands_armed === "boolean") state.handsArmed = out.hands_armed;
-      if (out.ask) {
-        state.pending = utterance;
-        $("askbox").hidden = false;
-        $("asktext").textContent = out.spoken;
-      } else {
-        state.pending = null;
-        $("askbox").hidden = true;
+      if (!utterance || state.turning) return;
+      state.turning = true;
+      pauseRec();
+      try {
+        await api("/api/bus", { phase: "listen", job_status: "working", utterance });
+        $("heard").textContent = utterance;
+        const note = $("share").srcObject ? "live screen is shared" : "";
+        const out = await api("/api/turn", { utterance, approved: !!approved, screen_note: note });
+        logLine(out.spoken || JSON.stringify(out));
+        if (typeof out.hands_armed === "boolean") state.handsArmed = out.hands_armed;
+        if (out.ask) {
+          state.pending = utterance;
+          $("askbox").hidden = false;
+          $("asktext").textContent = out.spoken;
+        } else {
+          state.pending = null;
+          $("askbox").hidden = true;
+        }
+        await speak(out.spoken || "");
+        refresh();
+      } finally {
+        state.turning = false;
+        if (state.wantListen) bootRec();
       }
-      refresh();
     }
 
     $("sharebtn").onclick = async () => {
@@ -228,7 +261,10 @@
         state.stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
         $("share").srcObject = state.stream;
         $("sharebtn").textContent = "Screen live";
-        speak("I can see the shared screen. Say take the mouse if you want me to click.");
+        await startListen();
+        pauseRec();
+        await speak("I can see the shared screen. Talk. Say take the mouse if you want me to click.");
+        if (state.wantListen) bootRec();
       } catch (err) {
         logLine("screen share cancelled");
       }
@@ -269,34 +305,135 @@
       if (e.key === "Escape" && state.handsArmed) {
         api("/api/hands", { action: "disarm" }).then(() => refresh());
       }
+      if (e.code === "Space" && e.target.id !== "typed") {
+        e.preventDefault();
+        if (state.speaking) synth.cancel();
+        toggleListen();
+      }
     });
 
-    function startListen() {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) {
-        $("heard").textContent = "No speech recognition in this browser — type instead.";
-        return;
-      }
-      synth.cancel();
-      state.rec = new SR();
-      state.rec.continuous = false;
-      state.rec.interimResults = true;
-      state.rec.onresult = (e) => {
-        const t = [...e.results].map((r) => r[0].transcript).join(" ");
-        $("heard").textContent = t;
-        if (e.results[e.results.length - 1].isFinal) turn(t, false);
-      };
-      state.rec.onerror = () => { state.listening = false; $("talk").classList.remove("hot"); };
-      state.rec.onend = () => { state.listening = false; $("talk").classList.remove("hot"); };
-      state.rec.start();
-      state.listening = true;
-      $("talk").classList.add("hot");
-      api("/api/bus", { phase: "listen", job_status: "working" });
+    function speechEngine() {
+      return window.SpeechRecognition || window.webkitSpeechRecognition || null;
     }
 
-    $("talk").onmousedown = startListen;
-    $("talk").onmouseup = () => { if (state.rec) try { state.rec.stop(); } catch (e) {} };
-    $("talk").onmouseleave = () => { if (state.rec && state.listening) try { state.rec.stop(); } catch (e) {} };
+    function setListenUI(on) {
+      $("talk").classList.toggle("hot", on);
+      $("talk").textContent = on ? "Listening — tap to pause" : "Talk";
+      $("earpill").textContent = on ? "Ear on" : "Ear off";
+      $("earpill").classList.toggle("on", on);
+      $("earbanner").classList.toggle("on", on);
+    }
+
+    function pauseRec() {
+      if (state.rec) {
+        try {
+          state.rec.onend = null;
+          state.rec.stop();
+        } catch (err) {}
+        state.rec = null;
+      }
+    }
+
+    async function armMic() {
+      if (state.micStream) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        $("heard").textContent = "No microphone API. Use Chrome on this Mac.";
+        return false;
+      }
+      try {
+        state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        return true;
+      } catch (err) {
+        $("heard").textContent = "Mic blocked. Allow microphone for this page, then click Talk.";
+        logLine("mic denied");
+        return false;
+      }
+    }
+
+    function handleHeard(said) {
+      const text = (said || "").trim();
+      if (!text || state.turning) return;
+      if (state.pending && YES_RE.test(text)) {
+        turn(state.pending, true);
+        return;
+      }
+      if (state.pending && NO_RE.test(text)) {
+        turn("cancel", false);
+        return;
+      }
+      turn(text, false);
+    }
+
+    function bootRec() {
+      if (!state.wantListen || state.turning) return;
+      const SR = speechEngine();
+      if (!SR) return;
+      pauseRec();
+      const rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+      rec.onresult = (e) => {
+        if (state.speaking) synth.cancel();
+        let finalText = "";
+        let interim = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const chunk = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += chunk;
+          else interim += chunk;
+        }
+        $("heard").textContent = finalText || interim;
+        if (finalText) handleHeard(finalText);
+      };
+      rec.onerror = (e) => {
+        logLine(`ear: ${e.error || "error"}`);
+        if (e.error === "not-allowed") {
+          state.wantListen = false;
+          setListenUI(false);
+          $("heard").textContent = "Mic denied. Allow microphone, then click Talk.";
+        }
+      };
+      rec.onend = () => {
+        state.rec = null;
+        if (state.wantListen && !state.turning) setTimeout(bootRec, 250);
+        else if (!state.wantListen) setListenUI(false);
+      };
+      try {
+        rec.start();
+        state.rec = rec;
+        setListenUI(true);
+        api("/api/bus", { phase: "listen", job_status: "working" });
+      } catch (err) {
+        if (state.wantListen && !state.turning) setTimeout(bootRec, 400);
+      }
+    }
+
+    async function startListen() {
+      const SR = speechEngine();
+      if (!SR) {
+        $("heard").textContent = "This browser has no speech engine. Open Chrome on this Mac, then click Talk.";
+        return;
+      }
+      if (state.speaking) synth.cancel();
+      const ok = await armMic();
+      if (!ok) return;
+      state.wantListen = true;
+      bootRec();
+    }
+
+    function stopListen() {
+      state.wantListen = false;
+      pauseRec();
+      setListenUI(false);
+    }
+
+    function toggleListen() {
+      if (state.wantListen) stopListen();
+      else startListen();
+    }
+
+    $("talk").onclick = () => toggleListen();
+    $("earpill").onclick = () => toggleListen();
     $("send").onclick = () => turn($("typed").value.trim(), false);
     $("typed").addEventListener("keydown", (e) => { if (e.key === "Enter") turn($("typed").value.trim(), false); });
     $("yes").onclick = () => { if (state.pending) turn(state.pending, true); };

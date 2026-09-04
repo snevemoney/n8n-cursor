@@ -5,7 +5,7 @@
   "demonstrated_outcome": "Zubair tapes show see-screen, arrow, narrate, ask-before-risky, mouse takeover. Hive remap 2026-09-04: voice.html + voice-os.py on 127.0.0.1:4018. Mouth/face/hands wired. ASK then ctypes CoreGraphics click. No Claude Code.",
   "observed_workflow": [
     "Share the screen (getDisplayMedia) so the face has eyes",
-    "Hold to talk or type (barge-in cancels TTS)",
+    "Open-mic talk (toggle). Spoken yes/cancel. Type is fallback. Ear pauses while answering.",
     "Mouth writes bus phase listen → think → speak",
     "Hard-steps refuse; browse/watch ASK then queue for Cursor host",
     "File list/read only inside repo + adopted vault",
