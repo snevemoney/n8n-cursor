@@ -153,22 +153,24 @@ class SeeTest(unittest.TestCase):
         self.assertEqual(out.get("path"), "keys")
         self.assertTrue(out["ok"])
 
-    def test_safari_act_bare_scroll_uses_page_keys_not_js(self) -> None:
+    def test_safari_act_bare_scroll_uses_cgevent_not_js(self) -> None:
         with mock.patch.object(
             MOD,
-            "safari_scroll_keys",
-            return_value={"ok": True, "path": "keys", "spoken": "Safari scrolled down with page keys"},
-        ) as keys:
-            with mock.patch.object(MOD, "safari_js") as js:
-                with mock.patch.object(
-                    MOD,
-                    "safari_front",
-                    return_value={"ok": True, "title": "YouTube", "url": "https://www.youtube.com/"},
-                ):
-                    out = MOD.safari_act("scroll")
-        keys.assert_called_once()
+            "safari_scroll_cgevent",
+            return_value={"ok": True, "path": "cgevent", "spoken": "Safari scrolled down with page keys"},
+        ) as hid:
+            with mock.patch.object(MOD, "safari_scroll_keys") as keys:
+                with mock.patch.object(MOD, "safari_js") as js:
+                    with mock.patch.object(
+                        MOD,
+                        "safari_front",
+                        return_value={"ok": True, "title": "YouTube", "url": "https://www.youtube.com/"},
+                    ):
+                        out = MOD.safari_act("scroll")
+        hid.assert_called_once()
+        keys.assert_not_called()
         js.assert_not_called()
-        self.assertEqual(out.get("path"), "keys")
+        self.assertEqual(out.get("path"), "cgevent")
         self.assertIn("You asked to scroll", out["spoken"])
         self.assertIn("page keys", out["spoken"])
         self.assertIn("https://www.youtube.com/", out["spoken"])
@@ -176,15 +178,20 @@ class SeeTest(unittest.TestCase):
     def test_safari_scroll_js_fallback_when_keys_dark(self) -> None:
         with mock.patch.object(
             MOD,
-            "safari_scroll_keys",
-            return_value={"ok": False, "unknown": True, "path": "keys", "spoken": "UNKNOWN. keys dark"},
+            "safari_scroll_cgevent",
+            return_value={"ok": False, "unknown": True, "path": "cgevent", "spoken": "UNKNOWN. hid dark"},
         ):
             with mock.patch.object(
                 MOD,
-                "safari_js",
-                return_value={"ok": True, "wire": "safari", "result": "OK", "spoken": "ok"},
-            ) as js:
-                out = MOD.safari_scroll("down")
+                "safari_scroll_keys",
+                return_value={"ok": False, "unknown": True, "path": "keys", "spoken": "UNKNOWN. keys dark"},
+            ):
+                with mock.patch.object(
+                    MOD,
+                    "safari_js",
+                    return_value={"ok": True, "wire": "safari", "result": "OK", "spoken": "ok"},
+                ) as js:
+                    out = MOD.safari_scroll("down")
         js.assert_called_once()
         self.assertIn("scrollBy", js.call_args[0][0])
         self.assertEqual(out.get("path"), "js")

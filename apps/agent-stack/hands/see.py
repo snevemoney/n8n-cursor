@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
+import ctypes.util
 import json
 import os
 import re
@@ -47,6 +49,8 @@ WAKE_RE = re.compile(r"^(?:hey\s+|hi\s+|hello\s+|yo\s+)?(?:jarvis[,.\s]+)?", re.
 FACE_URL_RE = re.compile(r"127\.0\.0\.1:4018", re.I)
 KEY_PAGE_DOWN = 121
 KEY_PAGE_UP = 116
+VK_PAGE_DOWN = 0x79
+VK_PAGE_UP = 0x74
 
 
 def _run(argv: list[str], timeout: float = 12.0) -> subprocess.CompletedProcess[str]:
@@ -259,6 +263,73 @@ def safari_line(utterance: str, did: str, *, title: str = "", url: str = "") -> 
     return " ".join(parts)
 
 
+def _cgevent_page(direction: str = "down") -> dict:
+    """HID page keys from this Python. Not osascript keystrokes. Not Safari JS."""
+    way = "up" if str(direction or "").lower() == "up" else "down"
+    vk = VK_PAGE_UP if way == "up" else VK_PAGE_DOWN
+    lib_path = ctypes.util.find_library("ApplicationServices") or (
+        "/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices"
+    )
+    lib = ctypes.CDLL(lib_path)
+    event_ref = ctypes.c_void_p
+    source_ref = ctypes.c_void_p
+    lib.CGEventSourceCreate.argtypes = [ctypes.c_uint32]
+    lib.CGEventSourceCreate.restype = source_ref
+    lib.CGEventCreateKeyboardEvent.argtypes = [source_ref, ctypes.c_uint16, ctypes.c_bool]
+    lib.CGEventCreateKeyboardEvent.restype = event_ref
+    lib.CGEventPost.argtypes = [ctypes.c_uint32, event_ref]
+    lib.CGEventPost.restype = None
+    lib.CFRelease.argtypes = [ctypes.c_void_p]
+    try:
+        _run(["osascript", "-e", 'tell application "Safari" to activate'], timeout=4.0)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    src = lib.CGEventSourceCreate(1)
+    down = lib.CGEventCreateKeyboardEvent(src, vk, True)
+    up = lib.CGEventCreateKeyboardEvent(src, vk, False)
+    if not down or not up:
+        if down:
+            lib.CFRelease(down)
+        if up:
+            lib.CFRelease(up)
+        if src:
+            lib.CFRelease(src)
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "path": "cgevent",
+            "spoken": "UNKNOWN. CGEvent could not build a page key.",
+        }
+    lib.CGEventPost(0, down)
+    lib.CGEventPost(0, up)
+    lib.CFRelease(down)
+    lib.CFRelease(up)
+    if src:
+        lib.CFRelease(src)
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "safari",
+        "path": "cgevent",
+        "direction": way,
+        "spoken": f"Safari scrolled {way} with page keys",
+    }
+
+
+def safari_scroll_cgevent(direction: str = "down") -> dict:
+    try:
+        return _cgevent_page(direction)
+    except (OSError, AttributeError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "path": "cgevent",
+            "spoken": f"UNKNOWN. CGEvent page keys failed: {exc}.",
+        }
+
+
 def safari_scroll_keys(direction: str = "down") -> dict:
     """Page keys via System Events. No Safari JavaScript from Apple Events."""
     way = "up" if str(direction or "").lower() == "up" else "down"
@@ -317,8 +388,11 @@ def safari_scroll_keys(direction: str = "down") -> dict:
 
 
 def safari_scroll(direction: str = "down") -> dict:
-    """Page keys first. JavaScript from Apple Events only if keys are dark."""
+    """CGEvent page keys first. osascript keys, then JS, only if that is dark."""
     way = "up" if str(direction or "").lower() == "up" else "down"
+    hid = safari_scroll_cgevent(way)
+    if hid.get("ok"):
+        return hid
     keys = safari_scroll_keys(way)
     if keys.get("ok"):
         return keys
@@ -334,11 +408,12 @@ def safari_scroll(direction: str = "down") -> dict:
         "unknown": True,
         "wire": "safari",
         "path": "unknown",
+        "cgevent": hid,
         "keys": keys,
         "js": got,
         "spoken": (
-            "UNKNOWN. Safari scroll is dark. Page keys need Accessibility for System Events. "
-            "JavaScript from Apple Events is also dark."
+            "UNKNOWN. Safari scroll is dark. CGEvent page keys, System Events keystrokes, "
+            "and JavaScript from Apple Events all failed."
         ),
     }
 
