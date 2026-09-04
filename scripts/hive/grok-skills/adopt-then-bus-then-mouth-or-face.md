@@ -1,16 +1,16 @@
 ---
 name: adopt-then-bus-then-mouth-or-face
 description: >-
-  Adopt the existing vault, write the file bus, then attach mouth
-  and face. PTT Home writes the bus; the localhost pane reads it.
-  Hands stay parked. Use when Evens names fullstack-agent or the
+  Adopt the existing vault, write the file bus, then attach a living
+  face, always-on mouth with mute, and vault Q&A. Hands stay parked.
+  Use when Evens names fullstack-agent, Jarvis feelings, or the
   agentic OS bus. Do not install Claude Code. Cursor plus Grok.
 ---
 
 # Adopt, then bus, then mouth or face
 
-**Owner:** Forge (adopt + mouth + face) · Watchdog (GRADE) · Librarian (index).  
-**Status:** WIRED 2026-09-04 sittings 1–3. Not accepted forever.  
+**Owner:** Forge (adopt + mouth + face + vault Q&A) · Watchdog (GRADE) · Librarian (index).  
+**Status:** WIRED 2026-09-04 sittings 1–4. Not accepted forever.  
 **Cursor copy:** `.cursor/skills/adopt-then-bus-then-mouth-or-face/SKILL.md`  
 **Grok `/` copy:** `~/.grokbot/skills/adopt-then-bus-then-mouth-or-face/SKILL.md`  
 **CLI:** `cd apps/agent-stack && npm test && npm run adopt && ./start.sh check`  
@@ -22,7 +22,7 @@ description: >-
 
 ## When
 
-Evens names fullstack-agent / Jarvis / memory+voice+face / “make it the agentic OS.” Not a client SKU. Not a second dashboard.
+Evens names fullstack-agent / Jarvis / living face + always-on voice + vault answers / “make it the agentic OS.” Not a client SKU. Not a second dashboard.
 
 ## Card
 
@@ -33,12 +33,13 @@ BUS: .hive/bus/state.json  phase=idle|listen|think|speak + utterance + permissio
 JOB: observe-pane working|yellow|done
 PERMISSION: ask
 HOSTS: cursor + grok
-MOUTH: wired — PTT Home / hold Talk → local STT → bus → desk job after spoken yes
-FACE: wired — 127.0.0.1:4018 cinematic observe-pane reads the bus
+FACE: living visualizer — canvas wisps + orb on 127.0.0.1:4018 react to bus phase. Observe rows secondary.
+MOUTH: always-on with mute — face owns the mic. Barge-in cancels talk. Local STT/TTS. Spoken yes/cancel stay.
+MEMORY: vault Q&A — keyword over adopted vault + hive os allow-list. Cite snippets. UNKNOWN on a miss. Adopt is the path, not the answer.
 PARK: hands
-NEVER: claude-code · second-home · live-/ · AGPL vendor into apps/ · ElevenLabs without ASK · 0.0.0.0
-DONE-CHECK: mouth self-test + face /healthz on 127.0.0.1 · Home PTT writes bus · yellow ASK · start.sh starts face · hands parked
-CAP: localhost · no inferred hard-step · no ElevenLabs · no mouse
+NEVER: claude-code · second-home · live-/ · AGPL vendor into apps/ · ElevenLabs without ASK · 0.0.0.0 · WebGL-as-product
+DONE-CHECK: mouth self-test (always-on classify + vault Q&A + refuse + ASK) + face /healthz and GET / 200 on 127.0.0.1 · LIVE writes listen · yellow ASK · start.sh starts face · hands parked
+CAP: localhost · no inferred hard-step · no ElevenLabs · no mouse · no headed-mic claim on cloud
 COST: Web Speech + speechSynthesis + optional `say`
 STOP-KIND: cap + done-check
 ```
@@ -50,10 +51,10 @@ STOP-KIND: cap + done-check
 3. `npm run adopt` — writes `.hive/agent-stack.json` + idle bus against the existing vault. Mouth/face mark wired when their `start.sh` exists. Hands stay parked.
 4. Mouth tests: `AGENT_STACK_DRY_TTS=1 python3 apps/agent-stack/mouth/turn.py --self-test` and `python3 apps/agent-stack/mouth/test_turn.py`.
 5. Face tests: `python3 apps/agent-stack/face/serve.py --self-test` and `python3 apps/agent-stack/face/test_serve.py`.
-6. `./start.sh check` — no daemon. `./start.sh` execs the face on `127.0.0.1:4018`.
-7. PTT is hold Home (or hold Talk). Type is fallback. Spoken yes queues a `desk-turn` for Cursor or Grok. There is no live Cursor `Agent.send` SDK on this box — the remap is the queued job.
+6. `./start.sh check` — no daemon. `./start.sh` execs `apps/agent-stack/face/serve.py` on `127.0.0.1:4018`. Kill leftover `voice-os.py` on 4018 first. Do not bring it back.
+7. Face owns the mic. LIVE is continuous listen; MUTE kills it. Desk jobs still ASK. Spoken yes queues a `desk-turn` for Cursor or Grok. Vault questions retrieve and speak. There is no live Cursor `Agent.send` SDK on this box — the remap is the queued job.
 8. Watchdog GRADE those JSON files + healthz. Builder does not self-PROVEN.
 
 ## Never
 
-Claude Code / Cowork · vendor AGPL trees into `apps/` · second vault · extra dashboard · live `/` · send / pay / deploy / book / publish · ElevenLabs without ASK · mouse takeover · `0.0.0.0` · self-PROVEN · remap `session-bootstrap` or `observe-pane` as done
+Claude Code / Cowork · vendor AGPL trees into `apps/` · second vault · extra dashboard · live `/` · send / pay / deploy / book / publish · ElevenLabs without ASK · mouse takeover · `0.0.0.0` · self-PROVEN · remap `session-bootstrap` or `observe-pane` as done · invent `local-push-to-talk-dictation` under grok-skills

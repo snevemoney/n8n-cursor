@@ -31,6 +31,14 @@ class FaceServeTest(unittest.TestCase):
         out = MOD.self_test()
         self.assertTrue(out["ok"], out)
         self.assertEqual(out.get("bind"), "127.0.0.1")
+        self.assertEqual(out.get("home"), 200)
+
+    def test_pane_is_living_face(self) -> None:
+        html = (Path(__file__).resolve().parent / "pane.html").read_text(encoding="utf-8")
+        self.assertIn("<canvas", html)
+        self.assertIn("LIVE", html)
+        self.assertIn("MUTE", html)
+        self.assertNotIn("Hold Home · talk", html)
 
 
 if __name__ == "__main__":

@@ -1,20 +1,23 @@
 {
   "capability_id": "CAP-fullstack-agent-adopt-then-bus-then-mouth-or-face",
   "name": "adopt-then-bus-then-mouth-or-face",
-  "goal": "public Claude-home installer → adopted hive OS with file bus + PTT mouth + localhost face (hands parked)",
-  "demonstrated_outcome": "Sittings 2–3 2026-09-04: mouth/turn.py classifies utterance, writes .hive/bus, ASK then queues desk-turn for cursor|grok. Face serve.py binds 127.0.0.1:4018, pane.html is cinematic observe-pane that reads the bus. Hands parked. No Claude Code. No ElevenLabs. No AGPL vendor.",
+  "goal": "public Claude-home installer → adopted hive OS with file bus + living face + always-on mouth + vault Q&A (hands parked)",
+  "demonstrated_outcome": "Sitting 4 2026-09-04: face pane is a living canvas-wisp presence on 127.0.0.1:4018. Mouth is always-on LIVE/MUTE on the face with barge-in. Memory classifies questions and keyword-retrieves the adopted vault + hive os allow-list, cites snippets, UNKNOWN on a miss. Desk jobs still ASK then queue. Hands parked. No Claude Code. No ElevenLabs. No AGPL vendor.",
   "observed_workflow": [
     "Adopt existing vault + write file bus (sitting 1)",
-    "PTT Home / hold Talk → local STT (Web Speech) or typed fallback",
-    "Classify: refuse hard-step · status · skill · desk turn",
+    "LIVE on the face → continuous local STT; MUTE kills the mic",
+    "Barge-in cancels speechSynthesis; tool path stays silent except the spoken result",
+    "Classify: refuse hard-step · status · skill · memory/vault Q&A · desk turn",
+    "Vault Q&A searches allow-list (OPERATOR_MEMORY + os hot/index/asks/inbox). No hive/desk. No ChatGPT .data.",
     "Desk turn writes yellow ASK; spoken yes queues .hive/bus/jobs.jsonl kind=desk-turn",
     "Local TTS via speechSynthesis or macOS say (dry-gated)",
-    "Face localhost pane polls the same bus; observe-pane rows; CTA before scroll",
-    "start.sh execs face if present; mouth is not a daemon; hands stay parked"
+    "Face hero reacts to idle/listen/think/speak; observe-pane rows stay secondary",
+    "start.sh execs face/serve.py; mouth is not a daemon; hands stay parked"
   ],
   "tools": [
-    "apps/agent-stack (MIT wizard + mouth + face)",
+    "apps/agent-stack (MIT wizard + mouth + face + memory)",
     "apps/agent-stack/mouth/turn.py",
+    "apps/agent-stack/memory/retrieve.py",
     "apps/agent-stack/face/serve.py",
     "Web Speech / speechSynthesis / say",
     "observe-pane / jobs.json",
@@ -23,13 +26,15 @@
   ],
   "agent_abilities": [
     "write the file signal bus from a spoken turn",
+    "listen continuously on the face until muted",
+    "answer vault questions with cited snippets",
     "ASK before handing a desk job to Cursor or Grok",
-    "show the bus on a localhost cinematic pane"
+    "show a living presence that reads the bus"
   ],
   "triggers": [
-    "operator names fullstack-agent / Jarvis stack / talk instead of typing / make it the agentic OS"
+    "operator names fullstack-agent / Jarvis / living face + always-on voice + vault answers / make it the agentic OS"
   ],
-  "state": "mouth + face wired on disk; hands parked; headed mic proof UNKNOWN on this cloud host",
+  "state": "living face + always-on mouth + vault Q&A wired on disk; hands parked; headed mic proof UNKNOWN on this cloud host",
   "guardrails": [
     "send / pay / deploy / book / publish stay HITL",
     "Claude Code / Cowork operate-never",
@@ -39,16 +44,19 @@
     "auto-approve stays off",
     "ElevenLabs is ASK only",
     "hands stay parked",
-    "bind 127.0.0.1 only"
+    "bind 127.0.0.1 only",
+    "do not claim headed mic proof from a cloud host"
   ],
   "prerequisites": [
-    "sitting 1 adopt + bus already on disk",
+    "sittings 1–3 adopt + bus + mouth/face already on disk",
     "existing HIVE_OBSIDIAN_VAULT / vault-config.py",
-    "UNKNOWN — headed Home-key PTT on this Mac",
+    "UNKNOWN — headed LIVE mic on this Mac",
     "UNKNOWN — live Cursor Agent.send SDK"
   ],
   "decision_rules": [
     "IF a vault already exists → adopt path, never move",
+    "IF the ask is what the vault says → retrieve + cite; do not queue a desk",
+    "IF nothing matches → speak UNKNOWN",
     "IF Claude Code is the runtime → refuse and remap to Cursor + Grok",
     "IF send/pay/deploy/book/publish appears → refuse; Evens only",
     "IF desk turn → yellow ASK; spoken yes queues the job",
@@ -58,24 +66,29 @@
   "failure_modes": [
     "clone the YouTuber / install Claude Code",
     "second OS beside obsidianOS / serve-desk 4017",
-    "open-mic instead of PTT",
+    "PTT-only after he named always-on",
+    "dump the whole vault into the prompt",
     "self-PROVEN without Watchdog GRADE",
     "bind 0.0.0.0 or publish the face",
-    "claim headed mic proof from a cloud host"
+    "claim headed mic proof from a cloud host",
+    "bring voice-os.py back as a second OS"
   ],
   "observed_tricks": [
     "voice writes little status notes; the face reads them — that is the whole connection",
-    "PTT on the face, mouth is the write path, not a second listener",
+    "always-on on the face, mouth is the write path, not a second listener",
+    "adopt stored the path; Q&A is a filter then cite, not a stuffed prompt",
     "queued desk-turn is the remap when Agent.send is not wired"
   ],
-  "system_primitive": "one interview → path configs → file signal bus → PTT mouth writes / localhost face reads",
+  "system_primitive": "one interview → path configs → file signal bus → always-on mouth writes / living face reads / vault answers",
   "skill_candidates": [
     "adopt-then-bus-then-mouth-or-face",
     "adopt-then-bus-then-os",
     "observe-pane",
     "cinematic-recipe",
     "session-bootstrap",
-    "voice-four-pieces-three-doors"
+    "vault-not-prompt",
+    "classify-question-then-pick-retrieval",
+    "barge-in-then-tool-silence"
   ],
   "system_upgrade_candidates": [
     "UPG-fullstack-agent-adopt-existing-os"
@@ -90,11 +103,11 @@
   "behavior_ids": [],
   "source_video_id": "FiOTrxq9ckM",
   "source_tape_id": "github-jaredrhod-fullstack-agent",
-  "timestamp": "README + fullstack-agent.md + sittings 2–3 2026-09-04",
+  "timestamp": "README + fullstack-agent.md + sitting 4 2026-09-04",
   "knowledge_type": "demonstrated",
   "evidence_status": "observed",
   "status": "TESTING",
-  "last_verify": "2026-09-04 Forge dry-run: mouth --self-test + face --self-test + npm test. Headed Home PTT UNKNOWN on this host. Watchdog GRADE still pending.",
+  "last_verify": "2026-09-04 Forge dry-run sitting 4: always-on classify + vault Q&A + refuse + ASK + face GET / 200. Headed LIVE mic UNKNOWN on this host. Watchdog GRADE still pending.",
   "unknowns": {
     "known": [
       "upstream is Claude Code only; AGPL on conductor/voice/face/hands",
@@ -102,11 +115,11 @@
     ],
     "observed": [
       "fullstack-agent.md Phases 0–6 from the public repo",
-      "mouth self-test refuses send and queues after spoken yes",
-      "face self-test binds 127.0.0.1 ephemeral and /healthz ok"
+      "mouth self-test refuses send, ASKs desk jobs, answers a vault fixture, UNKNOWN on a miss",
+      "face self-test binds 127.0.0.1, /healthz ok, GET / 200 with canvas + LIVE/MUTE"
     ],
     "unknown": [
-      "headed Home-key PTT + Web Speech on this Mac",
+      "headed LIVE mic + Web Speech on this Mac",
       "live Cursor Agent.send SDK",
       "ElevenLabs walkthrough clicks"
     ],
@@ -116,7 +129,7 @@
     "blocking": false
   },
   "blockers": [
-    "UNKNOWN — headed mic / Home PTT (not sitting-blocking)",
+    "UNKNOWN — headed mic / LIVE listen (not sitting-blocking)",
     "Watchdog GRADE not yet filled"
   ]
 }
