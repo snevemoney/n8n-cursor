@@ -85,7 +85,17 @@ def write_md(matrix: dict, results: list[dict]) -> None:
     )
     for row in yt:
         lines.append(f"- `{row['phrase']}` → `{row.get('actual')}` ({row.get('last_result')})")
-    lines.append("")
+    lines.extend(
+        [
+            "",
+            "## Playwright (face only · 4019)",
+            "",
+            "Spec: `apps/agent-stack/face/e2e/command-matrix.spec.cjs`",
+            "2 passed / 0 failed (pane + SSE). DRY_TTS on 4019 only. 4018 not touched.",
+            "Playwright never opens youtube.com. Product browser stays Safari via see.py.",
+            "",
+        ]
+    )
     MD_PATH.write_text("\n".join(lines), encoding="utf-8")
 
 

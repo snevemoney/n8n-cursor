@@ -27,7 +27,7 @@
       ],
       "expected_hand": "stop",
       "wire_module": "mouth/turn.py local",
-      "test_status": "unit",
+      "test_status": "unit / playwright",
       "required": true,
       "last_result": "UNKNOWN",
       "last_live": {
@@ -45,7 +45,7 @@
       ],
       "expected_hand": "greet",
       "wire_module": "mouth/turn.py local",
-      "test_status": "unit",
+      "test_status": "unit / playwright",
       "required": true,
       "last_result": "UNKNOWN",
       "last_live": {
@@ -225,7 +225,7 @@
       ],
       "expected_hand": "safari",
       "wire_module": "hands/see.py safari_act",
-      "test_status": "unit",
+      "test_status": "unit / playwright",
       "required": true,
       "youtube": true,
       "last_result": "UNKNOWN",
@@ -353,7 +353,7 @@
       ],
       "expected_hand": "cursor",
       "wire_module": "brain/online.py call_cursor_turn",
-      "test_status": "unit",
+      "test_status": "unit / playwright",
       "required": true,
       "last_result": "UNKNOWN",
       "last_live": {
@@ -371,7 +371,7 @@
       ],
       "expected_hand": "converse",
       "wire_module": "brain/online.py call_cursor_turn",
-      "test_status": "unit",
+      "test_status": "unit / playwright",
       "required": true,
       "last_result": "UNKNOWN",
       "last_live": {
@@ -462,7 +462,7 @@
       ],
       "expected_hand": "pro",
       "wire_module": "hands/pro.py brief",
-      "test_status": "unit",
+      "test_status": "unit / playwright",
       "required": true,
       "last_result": "UNKNOWN",
       "last_live": {
