@@ -119,7 +119,7 @@
         "try again"
       ],
       "expected_hand": "heal",
-      "wire_module": "mouth/turn.py heal_spoken + memory/scars.py",
+      "wire_module": "mouth/turn.py heal_from_wire + memory/last_wire.py",
       "test_status": "unit",
       "required": true,
       "last_result": "UNKNOWN",
