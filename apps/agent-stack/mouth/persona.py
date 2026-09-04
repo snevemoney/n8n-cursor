@@ -52,7 +52,9 @@ WIT = {
     "calendar": "Calendar.app, not my imagination.",
     "mail": "Mail.app, then the count.",
     "files": "Local disk, not a scoop.",
-    "safari": "Safari, as requested.",
+    "safari": "The tab, not the face.",
+    "talk": "Straight.",
+    "farewell": "Rest.",
     "life": "The store, not gossip.",
     "today": "The store, not a mood.",
     "skills": "On-disk slugs only.",
@@ -211,6 +213,8 @@ def wrap(
     if is_failure(payload):
         return f"{FAILURE_TEMPLATE} {payload}"
     repeat = proven_repeat(utterance, turns, store_lines, scars, verb)
+    if verb == "safari" and not repeat:
+        return f"Sir. {payload}"
     beat = witty_beat(verb, repeat=repeat)
     if payload.lower().startswith(beat.lower()):
         return f"Sir. {payload}"

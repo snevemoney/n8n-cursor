@@ -122,6 +122,8 @@ class SeeTest(unittest.TestCase):
                 self.assertTrue(out["ok"], phrase)
                 self.assertEqual(out.get("url"), MOD.YOUTUBE_HOME, phrase)
                 self.assertIn(MOD.YOUTUBE_HOME, out["spoken"], phrase)
+                self.assertIn("You asked to", out["spoken"], phrase)
+                self.assertNotIn("as requested", out["spoken"].lower(), phrase)
                 script = self._osascript_script(run)
                 self.assertIn(MOD.YOUTUBE_HOME, script, phrase)
                 self.assertNotIn("127.0.0.1:4018", script, phrase)
@@ -140,17 +142,53 @@ class SeeTest(unittest.TestCase):
         self.assertNotIn("MrBeast", out["spoken"])
         self.assertNotIn("invent", out["spoken"].lower())
 
-    def test_safari_act_bare_scroll_calls_scrollby(self) -> None:
+    def test_safari_scroll_keys_sends_page_down(self) -> None:
+        proc = mock.Mock(returncode=0, stdout="OK\n", stderr="")
+        with mock.patch.object(MOD, "_run", return_value=proc) as run:
+            out = MOD.safari_scroll_keys("down")
+        script = self._osascript_script(run)
+        self.assertIn("key code 121", script)
+        self.assertIn("System Events", script)
+        self.assertNotIn("do JavaScript", script)
+        self.assertEqual(out.get("path"), "keys")
+        self.assertTrue(out["ok"])
+
+    def test_safari_act_bare_scroll_uses_page_keys_not_js(self) -> None:
         with mock.patch.object(
             MOD,
-            "safari_js",
-            return_value={"ok": True, "wire": "safari", "result": "OK", "spoken": "ok"},
-        ) as js:
-            out = MOD.safari_act("scroll")
-        self.assertTrue(out["ok"])
+            "safari_scroll_keys",
+            return_value={"ok": True, "path": "keys", "spoken": "Safari scrolled down with page keys"},
+        ) as keys:
+            with mock.patch.object(MOD, "safari_js") as js:
+                with mock.patch.object(
+                    MOD,
+                    "safari_front",
+                    return_value={"ok": True, "title": "YouTube", "url": "https://www.youtube.com/"},
+                ):
+                    out = MOD.safari_act("scroll")
+        keys.assert_called_once()
+        js.assert_not_called()
+        self.assertEqual(out.get("path"), "keys")
+        self.assertIn("You asked to scroll", out["spoken"])
+        self.assertIn("page keys", out["spoken"])
+        self.assertIn("https://www.youtube.com/", out["spoken"])
+
+    def test_safari_scroll_js_fallback_when_keys_dark(self) -> None:
+        with mock.patch.object(
+            MOD,
+            "safari_scroll_keys",
+            return_value={"ok": False, "unknown": True, "path": "keys", "spoken": "UNKNOWN. keys dark"},
+        ):
+            with mock.patch.object(
+                MOD,
+                "safari_js",
+                return_value={"ok": True, "wire": "safari", "result": "OK", "spoken": "ok"},
+            ) as js:
+                out = MOD.safari_scroll("down")
         js.assert_called_once()
         self.assertIn("scrollBy", js.call_args[0][0])
-        self.assertIn("Scrolled down", out["spoken"])
+        self.assertEqual(out.get("path"), "js")
+        self.assertIn("JavaScript", out["spoken"])
 
     def test_safari_act_screenshot_and_share_grab_front(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-see-grab-") as tmp:

@@ -75,6 +75,18 @@ GREET_RE = re.compile(
     r"^(?:hey|hi|hello|yo)(?:\s+jarvis)?\s*[.!]?\s*$",
     re.I,
 )
+FAREWELL_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(good\s*night|goodbye|good\s*bye|bye)\s*[.!]?\s*$",
+    re.I,
+)
+META_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?("
+    r"thanks|thank you|serious|"
+    r"what the hell(?: are you saying)?|"
+    r"what are you saying"
+    r")\s*[.!]?\s*$",
+    re.I,
+)
 CRUMB_RE = re.compile(r"^(it|uh|um|ah|hmm|mm|huh|what)\s*[.!]?\s*$", re.I)
 SEE_RE = re.compile(
     r"\b("
@@ -615,6 +627,10 @@ def classify(utterance: str) -> dict:
         return {"verb": "stop", "needs_ask": False, "args": {}, "host": "local"}
     if GREET_RE.match(text):
         return {"verb": "greet", "needs_ask": False, "args": {}, "host": "local"}
+    if FAREWELL_RE.match(text):
+        return {"verb": "farewell", "needs_ask": False, "args": {}, "host": "local"}
+    if META_RE.match(text):
+        return {"verb": "talk", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if len(text) <= 2 or CRUMB_RE.match(text):
         return {"verb": "crumb", "needs_ask": False, "args": {}, "host": "local"}
     mode_hit = MODE_RE.search(text)
@@ -1049,6 +1065,12 @@ def apply_turn_iter(
         return
     if verb == "greet":
         yield from emit("Hey Evens. Standing by.")
+        return
+    if verb == "farewell":
+        yield from emit("Good night Evens. Standing by.", host="local")
+        return
+    if verb == "talk":
+        yield from emit("Say the next job in one sentence. I will not reread the store.", host="local")
         return
     if verb == "crumb":
         yield from emit("That cut off. Say the rest.")
