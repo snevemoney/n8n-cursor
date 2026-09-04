@@ -89,7 +89,7 @@
   <canvas id="board" aria-hidden="true"></canvas>
   <div class="hud tl">
     <div class="name" id="hudName">J.A.R.V.I.S.</div>
-    <div class="sub" id="link">NEURAL LINK - CONNECTED</div>
+    <div class="sub" id="link">NEURAL LINK - CHECKING WIRES</div>
     <div class="dots">
       <span><i></i>ONLINE</span>
       <span><i></i>LIVE</span>
@@ -448,11 +448,19 @@
       }
     }
 
+    function paintWires(report) {
+      const wires = (report && report.wires) || {};
+      const grok = wires.grok === "live" || wires.grokbot === "live";
+      $("link").textContent = grok ? "NEURAL LINK - GROK LIVE" : "NEURAL LINK - GROK DARK · SET XAI_API_KEY";
+    }
+
     async function refresh() {
       try {
         const bus = await api("/api/bus");
         if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
         if (bus.spoken && !state.turning && !state.listening) $("spoken").textContent = bus.spoken;
+        const wires = await api("/api/wires");
+        paintWires(wires);
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
       }

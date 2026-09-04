@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mouth tests. Always-on classify + vault Q&A. No mic. No billed TTS."""
+"""Mouth tests. Online wires. No mic. No billed TTS. No Ollama."""
 from __future__ import annotations
 
 import importlib.util
@@ -24,65 +24,93 @@ def _load():
 MOD = _load()
 
 
+def _fake_grok(prompt: str, context: str = "") -> dict:
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "grok",
+        "engine": "xai",
+        "spoken": f"Grok says {prompt[:60]}",
+    }
+
+
+def _fake_status(which: str = "all") -> dict:
+    return {
+        "ok": True,
+        "verb": "status",
+        "spoken": f"Hive 1/3. VPS live. Cursor present. slice={which}",
+        "parts": [{"wire": "hive"}, {"wire": "vps"}, {"wire": "cursor"}],
+    }
+
+
 class MouthTurnTest(unittest.TestCase):
     def test_self_test(self) -> None:
         out = MOD.self_test()
         self.assertTrue(out["ok"], out)
 
-    def test_always_on_classify(self) -> None:
-        self.assertEqual(MOD.classify("what does my vault say about north stars")["verb"], "memory")
-        self.assertFalse(MOD.classify("what does my vault say about north stars")["needs_ask"])
-        self.assertEqual(MOD.classify("what are the north stars")["verb"], "memory")
-        self.assertEqual(MOD.classify("yes")["verb"], "idle")
-        plan = MOD.classify("research the inbound leak")
-        self.assertEqual(plan["verb"], "desk")
-        self.assertTrue(plan["needs_ask"])
+    def test_no_ollama_runtime(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("import ollama", text)
+        self.assertNotIn("11434", text)
+        brain = SCRIPT.parent.parent / "brain" / "online.py"
+        brain_text = brain.read_text(encoding="utf-8")
+        self.assertNotIn("11434", brain_text)
+        self.assertNotIn("import ollama", brain_text)
+        self.assertIn("No Ollama", brain_text)
 
-    def test_vault_qa(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="agent-stack-vault-") as tmp:
+    def test_classify_online(self) -> None:
+        self.assertEqual(MOD.classify("what are the north stars")["verb"], "think")
+        self.assertFalse(MOD.classify("what are the north stars")["needs_ask"])
+        self.assertEqual(MOD.classify("research the inbound leak")["verb"], "think")
+        self.assertFalse(MOD.classify("research the inbound leak")["needs_ask"])
+        self.assertEqual(MOD.classify("what's the VPS status")["verb"], "status")
+        self.assertEqual(MOD.classify("send this email")["verb"], "hard-ask")
+        self.assertTrue(MOD.classify("send this email")["needs_ask"])
+        self.assertEqual(MOD.classify("install ollama")["verb"], "refuse")
+
+    def test_think_calls_grok_not_queue(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-think-") as tmp:
             hive = Path(tmp)
-            vault = hive / "vault"
-            vault.mkdir()
-            (vault / "OPERATOR_MEMORY.md").write_text(
-                "Four north stars start with maximum leverage, minimum noise.\n",
-                encoding="utf-8",
+            (hive / "bus").mkdir()
+            out = MOD.apply_turn("what are the north stars", hive=hive, grok=_fake_grok)
+            self.assertEqual(out["verb"], "think")
+            self.assertFalse(out["ask"])
+            self.assertIn("Grok says", out["spoken"])
+            self.assertNotIn("Queued", out["spoken"])
+            jobs = (hive / "bus" / "jobs.jsonl").read_text(encoding="utf-8")
+            self.assertIn("online-think", jobs)
+            self.assertNotIn("desk-turn", jobs)
+
+    def test_missing_grok_names_wire(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-dark-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            out = MOD.apply_turn(
+                "what should I work on",
+                hive=hive,
+                grok=lambda prompt, context="": MOD.ONLINE.unknown_grok(),
             )
-            (hive / "bus").mkdir()
-            hit = MOD.apply_turn("what are the north stars", hive=hive, retrieve_roots=[vault])
-            self.assertEqual(hit["verb"], "memory")
-            self.assertFalse(hit["ask"])
-            self.assertTrue(hit["cites"])
-            self.assertIn("leverage", (hit["spoken"] or "").lower())
-            miss = MOD.apply_turn("what is the purple zebra protocol", hive=hive, retrieve_roots=[vault])
-            self.assertEqual(miss["verb"], "memory")
-            self.assertIn("UNKNOWN", miss["spoken"])
+            self.assertIn("UNKNOWN", out["spoken"])
+            self.assertIn("XAI_API_KEY", out["spoken"])
 
-    def test_refuse_hard_steps(self) -> None:
-        self.assertEqual(MOD.classify("please deploy live")["verb"], "refuse")
-        self.assertEqual(MOD.classify("send this email")["verb"], "refuse")
-        self.assertEqual(MOD.classify("pay the invoice")["verb"], "refuse")
-        self.assertEqual(MOD.classify("book a call and publish it")["verb"], "refuse")
-        with tempfile.TemporaryDirectory(prefix="agent-stack-refuse-") as tmp:
+    def test_status_calls_wires(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-status-") as tmp:
             hive = Path(tmp)
             (hive / "bus").mkdir()
-            refused = MOD.apply_turn("deploy to production", hive=hive)
-            self.assertEqual(refused["verb"], "refuse")
-            self.assertFalse(refused["ask"])
+            out = MOD.apply_turn("hive status", hive=hive, status_fn=_fake_status)
+            self.assertEqual(out["verb"], "status")
+            self.assertIn("Hive", out["spoken"])
+            self.assertIn("hive", out["wires"])
 
-    def test_ask_before_desk_jobs(self) -> None:
-        plan = MOD.classify("research the inbound leak")
-        self.assertEqual(plan["verb"], "desk")
-        self.assertTrue(plan["needs_ask"])
-        self.assertEqual(plan["host"], "grok")
+    def test_hard_step_ask_not_execute(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-ask-") as tmp:
             hive = Path(tmp)
             (hive / "bus").mkdir()
-            asked = MOD.apply_turn("look at the inbound pipeline", hive=hive)
+            asked = MOD.apply_turn("deploy to production", hive=hive)
             self.assertTrue(asked["ask"])
-            self.assertEqual(asked["verb"], "desk")
             yes = MOD.apply_turn("yes", hive=hive)
             self.assertFalse(yes["ask"])
-            self.assertTrue((hive / "bus" / "jobs.jsonl").is_file())
+            self.assertIn("Draft only", yes["spoken"])
 
 
 if __name__ == "__main__":

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Mouth sitting: utterance → file bus → local vault Q&A or Cursor/Grok job.
+"""Mouth sitting: utterance → file bus → local brain, or ASK a desk job.
 
-Always-on lives on the face (LIVE/MUTE). This module is the write path.
-Auto-approve stays off. ElevenLabs is ASK. Hands stay parked.
+Questions think here (vault retrieve + ollama/extractive). Desk queue is
+only for named actions after spoken yes. Hard steps refuse. Hands parked.
+Face owns the mic (LIVE/MUTE via set_listen). Do not strip the hear-loop.
 """
 from __future__ import annotations
 
@@ -12,7 +13,6 @@ import json
 import os
 import re
 import subprocess
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -36,24 +36,47 @@ SKILL_RE = re.compile(
     r"\b(?:use|load|run)\s+(?:skill\s+)?([a-z0-9][a-z0-9-]{2,60})\b",
     re.I,
 )
-MEMORY_RE = re.compile(
-    r"\b(what(?:'s|s| is| are| does| do)|where(?:'s| is)|who(?:'s| is)|"
-    r"when(?:'s| is)|why |how (?:do|does|is|are)|remind|remember|"
-    r"vault|operator memory|in (?:my |the )?(?:vault|memory|wiki)|"
-    r"tell me (?:about|what)|do i have|did i (?:say|write|decide)|"
-    r"what(?:'s| is) in)\b",
+QUESTION_RE = re.compile(
+    r"\b("
+    r"what(?:'s|s|'re| are| is| does| do| did| should| was| were)|"
+    r"where(?:'s| is| are)|who(?:'s| is| am| are)|when(?:'s| is| are)|"
+    r"why\b|how (?:do|does|is|are|did|can)|"
+    r"remind|remember|vault|north[\s-]?stars?|(?:the|my|our) plan|"
+    r"operator memory|tell me|do i (?:have|believe)|did i|believe|"
+    r"who am i|what's in"
+    r")\b",
     re.I,
 )
-ACTION_RE = re.compile(
-    r"\b(build|write|research|look at|browse|open|watch|queue|spawn|"
-    r"draft|fix|implement|make|create)\b",
+LEADING_Q_RE = re.compile(
+    r"^(?:(?:hey|ok|okay|please)\s+)*(?:jarvis[,.]?\s+)?(?:"
+    r"what|what's|whats|who|where|when|why|how|"
+    r"remember|remind|tell|do i|did i"
+    r")\b",
+    re.I,
+)
+DESK_RE = re.compile(
+    r"\b("
+    r"do this|look at|browse|write code|implement|"
+    r"research|spawn|queue|"
+    r"open (?:the )?(?:page|url|site)|"
+    r"watch (?:this|the)|"
+    r"draft (?:an? |the )|"
+    r"build (?:a |the |this )|"
+    r"create (?:a |the )|"
+    r"fix (?:this|the|my)"
+    r")\b",
+    re.I,
+)
+HELLO_RE = re.compile(
+    r"^(?:hey|hi|hello|yo|sup|good (?:morning|afternoon|evening))"
+    r"(?:\s+jarvis)?[.!]?\s*$",
     re.I,
 )
 
 
-def _load_retrieve():
-    path = Path(__file__).resolve().parent.parent / "memory" / "retrieve.py"
-    spec = importlib.util.spec_from_file_location("agent_stack_retrieve", path)
+def _load_brain():
+    path = Path(__file__).resolve().parent / "brain.py"
+    spec = importlib.util.spec_from_file_location("agent_stack_brain", path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load {path}")
     mod = importlib.util.module_from_spec(spec)
@@ -61,7 +84,7 @@ def _load_retrieve():
     return mod
 
 
-RETRIEVE = _load_retrieve()
+BRAIN = _load_brain()
 
 
 def now_iso() -> str:
@@ -151,6 +174,8 @@ def classify(utterance: str) -> dict:
             "args": {"reason": "hard-step or operate-never"},
             "host": "local",
         }
+    if HELLO_RE.match(text):
+        return {"verb": "greet", "needs_ask": False, "args": {}, "host": "local"}
     if re.search(r"\b(status|bus|what are you doing|phase)\b", text, re.I):
         return {"verb": "status", "needs_ask": False, "args": {}, "host": "local"}
     if SKILL_RE.search(text) or re.search(r"\b(list skills|hive skills)\b", text, re.I):
@@ -161,11 +186,12 @@ def classify(utterance: str) -> dict:
             "args": {"slug": slug.group(1).lower()} if slug else {},
             "host": "local",
         }
-    if MEMORY_RE.search(text) and not ACTION_RE.search(text):
-        return {"verb": "memory", "needs_ask": False, "args": {"text": text}, "host": "local"}
-    if re.search(r"\b(browse|open (the )?(page|url|site)|watch|cursor-)\b", text, re.I):
-        return {"verb": "desk", "needs_ask": True, "args": {"text": text}, "host": "cursor"}
-    return {"verb": "desk", "needs_ask": True, "args": {"text": text}, "host": "grok"}
+    desk_hit = DESK_RE.search(text) or re.search(r"\bcursor-\b", text, re.I)
+    question = bool(QUESTION_RE.search(text) or LEADING_Q_RE.search(text))
+    if desk_hit and not question:
+        host = "cursor" if re.search(r"\b(browse|open (the )?(page|url|site)|watch|cursor-)\b", text, re.I) else "grok"
+        return {"verb": "desk", "needs_ask": True, "args": {"text": text}, "host": host}
+    return {"verb": "memory", "needs_ask": False, "args": {"text": text}, "host": "local"}
 
 
 def list_skills(limit: int = 8) -> list[str]:
@@ -227,8 +253,11 @@ def apply_turn(
         return {"ok": True, "verb": verb, "ask": True, "spoken": ask, "host": plan["host"], "permission_ask": ask, "cites": []}
 
     cites: list = []
+    engine = "local"
     if verb == "idle":
         narration = "Holding. Say Jarvis, or tap Space."
+    elif verb == "greet":
+        narration = "Hello Evens. Ask what's in the vault, or name a job."
     elif verb == "status":
         narration = f"Phase {bus_now.get('phase') or 'idle'}. Job {bus_now.get('job_status') or 'done'}."
     elif verb == "skills":
@@ -239,9 +268,11 @@ def apply_turn(
         narration = f"Loaded {slug}." if path.is_file() else f"No skill named {slug}."
     elif verb == "memory":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None)
-        found = RETRIEVE.search(spoken, retrieve_roots)
-        cites = found.get("hits") or []
-        narration = found.get("spoken") or "I don't have that in the vault. UNKNOWN."
+        thought = BRAIN.answer(spoken, retrieve_roots)
+        cites = thought.get("cites") or []
+        narration = thought.get("spoken") or "I don't have that in the vault. UNKNOWN."
+        engine = thought.get("engine") or "extractive"
+        plan = {**plan, "host": "local", "engine": engine}
     else:
         job = append_job(
             hive,
@@ -273,6 +304,7 @@ def apply_turn(
         "ask": False,
         "spoken": narration,
         "host": plan["host"],
+        "engine": engine if verb == "memory" else "local",
         "args": plan.get("args"),
         "cites": cites,
     }
@@ -286,10 +318,12 @@ def self_test() -> dict:
         vault = hive / "vault"
         vault.mkdir(parents=True)
         (vault / "OPERATOR_MEMORY.md").write_text(
-            "# Operator Memory\n\nFour north stars start with maximum leverage, minimum noise.\n",
+            "# Operator Memory\n\nFour north stars start with maximum leverage, minimum noise.\n"
+            "Evens is the operator. The plan is vault Q&A on the face, desks only for jobs.\n",
             encoding="utf-8",
         )
         (hive / "bus").mkdir(parents=True)
+        os.environ["AGENT_STACK_NO_OLLAMA"] = "1"
         refused = apply_turn("send this email", hive=hive)
         if refused.get("verb") != "refuse":
             return {"ok": False, "errors": ["hard-step not refused"]}
@@ -299,9 +333,15 @@ def self_test() -> dict:
         yes = apply_turn("yes", hive=hive)
         if yes.get("ask") or not (hive / "bus" / "jobs.jsonl").is_file():
             return {"ok": False, "errors": ["spoken yes did not queue a desk job"]}
+        jobs_before = (hive / "bus" / "jobs.jsonl").read_text(encoding="utf-8")
         mem = apply_turn("what are the north stars", hive=hive, retrieve_roots=[vault])
-        if mem.get("verb") != "memory" or mem.get("ask") or not mem.get("cites"):
+        jobs_after = (hive / "bus" / "jobs.jsonl").read_text(encoding="utf-8")
+        if mem.get("verb") != "memory" or mem.get("ask") or mem.get("host") != "local" or not mem.get("cites"):
             return {"ok": False, "errors": ["vault Q&A missed fixture"], "got": mem}
+        if "Queued" in (mem.get("spoken") or "") or "Grok" in (mem.get("spoken") or ""):
+            return {"ok": False, "errors": ["brain leaked a Grok queue"], "got": mem}
+        if jobs_after != jobs_before:
+            return {"ok": False, "errors": ["vault question queued a desk-turn"]}
         unknown = apply_turn("what is the purple zebra protocol", hive=hive, retrieve_roots=[vault])
         if unknown.get("verb") != "memory" or "UNKNOWN" not in (unknown.get("spoken") or ""):
             return {"ok": False, "errors": ["miss should be UNKNOWN"], "got": unknown}
