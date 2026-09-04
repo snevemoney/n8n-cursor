@@ -57,20 +57,22 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertEqual(report["ollama"], "refused")
         self.assertEqual(report["wires"]["brain"], "store")
         self.assertEqual(report["wires"]["store"], "vault+repo+sessions+hive")
-        self.assertEqual(report["wires"]["cursor"], "hand")
+        self.assertEqual(report["wires"]["cursor"], "harness")
         self.assertEqual(report["need"], [])
 
     def test_call_cursor_turn_prints_text(self) -> None:
         proc = mock.Mock(stdout="The site CSS is in pane.html.\n", stderr="", returncode=0)
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
             with mock.patch.object(MOD.subprocess, "run", return_value=proc) as run:
-                out = MOD.call_cursor_turn("look at the code for the face", mode="ask")
+                out = MOD.call_cursor_turn("look at the code for the face", mode="ask", resume="chat-1")
         self.assertTrue(out["ok"])
         self.assertEqual(out["wire"], "cursor")
         self.assertIn("pane.html", out["spoken"])
         argv = run.call_args[0][0]
         self.assertIn("-p", argv)
         self.assertIn("ask", argv)
+        self.assertIn("--resume", argv)
+        self.assertIn("chat-1", argv)
         self.assertNotIn("--force", argv)
         self.assertNotIn("--yolo", argv)
 
@@ -88,6 +90,11 @@ class OnlineBrainTest(unittest.TestCase):
             out = MOD.call_cursor_turn("look at the repo")
         self.assertTrue(out["unknown"])
         self.assertIn("dry", out["spoken"])
+
+    def test_ensure_jarvis_chat_dry_stays_none(self) -> None:
+        with mock.patch.dict(os.environ, {"AGENT_STACK_CURSOR_DRY": "1"}):
+            self.assertIsNone(MOD.ensure_jarvis_chat(None))
+            self.assertEqual(MOD.ensure_jarvis_chat("keep-me"), "keep-me")
 
 
 if __name__ == "__main__":
