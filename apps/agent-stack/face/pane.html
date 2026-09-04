@@ -130,7 +130,7 @@
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
     const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
     let jarvisVoice = null;
-    const TTS_PREF = ["daniel", "arthur", "oliver", "reed", "alex", "gordon", "tom", "fred"];
+    const TTS_PREF = ["samantha", "alex", "aaron", "nicky", "evan", "tom", "fred"];
     const ttsSpeaking = () => !!(synth && synth.speaking);
 
     function voiceLang(v) {
@@ -142,7 +142,7 @@
     function isFrenchVoice(v) {
       const lang = voiceLang(v);
       const name = voiceName(v);
-      return lang.startsWith("fr") || /french|fran[cç]ais|am[eé]lie|jacques/.test(name);
+      return lang.startsWith("fr") || /french|fran[cç]ais|am[eé]lie|jacques|thomas/.test(name);
     }
     function isEnglishVoice(v) {
       return voiceLang(v).startsWith("en") && !isFrenchVoice(v);
@@ -152,11 +152,10 @@
       const name = voiceName(v);
       const lang = voiceLang(v);
       let s = 10;
-      if (lang.startsWith("en-gb")) s += 40;
-      else if (lang.startsWith("en-us")) s += 25;
+      if (lang.startsWith("en-us")) s += 40;
+      else if (lang.startsWith("en-gb")) s += 10;
       TTS_PREF.forEach((p, i) => { if (name.includes(p)) s += 50 - i; });
-      if (/male/.test(name)) s += 8;
-      if (/samantha|karen|kathy|moira|fiona|victoria|female/.test(name)) s -= 8;
+      if (/daniel|compact|novelty/.test(name)) s -= 40;
       return s;
     }
     function pickEnglishVoice() {
@@ -204,7 +203,7 @@
       if (!text || !synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = "en-GB";
+      u.lang = "en-US";
       const voice = jarvisVoice || pickEnglishVoice();
       if (voice && !isFrenchVoice(voice)) u.voice = voice;
       u.rate = 1.02;
