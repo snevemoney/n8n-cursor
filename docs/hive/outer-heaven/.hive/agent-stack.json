@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "kind": "agentic-os",
+  "name": "hive",
+  "operator": "Evens",
+  "hosts": [
+    "cursor",
+    "grok"
+  ],
+  "permission_mode": "ask",
+  "vault": {
+    "ok": true,
+    "source": "local",
+    "path": "/Users/evenslouis/Documents/My_Billion_Dollar_Vault",
+    "oh": "/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven",
+    "kind": "live-vault"
+  },
+  "repo": "/Users/evenslouis/n8n-cursor",
+  "bus_path": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/.hive/bus/state.json",
+  "jobs_path": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/CONTENT/os/jobs.json",
+  "state_path": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/.hive/state.json",
+  "os_surface": "apps/portfolio/public/obsidianOS",
+  "pieces": {
+    "memory": "adopted",
+    "wizard": "wired",
+    "mouth": "parked",
+    "face": "parked",
+    "hands": "parked"
+  },
+  "never": [
+    "claude-code",
+    "second-vault",
+    "second-home",
+    "live-/",
+    "vendor-agpl-clone"
+  ],
+  "updated_at": "2026-09-04T06:33:35Z"
+}

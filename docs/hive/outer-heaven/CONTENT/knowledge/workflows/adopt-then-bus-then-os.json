@@ -1,0 +1,55 @@
+{
+  "workflow_id": "WF-adopt-then-bus-then-os-v1",
+  "project_id": "adopt-then-bus-then-os",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    {
+      "id": "T1",
+      "title": "Adopt existing vault",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T2",
+      "title": "Write stack + bus",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T3",
+      "title": "Refuse second home",
+      "coverage": "have hive skill"
+    },
+    {
+      "id": "T4",
+      "title": "Watchdog GRADE",
+      "coverage": "HITL / desk"
+    },
+    {
+      "id": "T5",
+      "title": "Mouth later",
+      "coverage": "parked"
+    },
+    {
+      "id": "T6",
+      "title": "Face later",
+      "coverage": "parked"
+    }
+  ],
+  "pattern_ids": [
+    "PRIM-fullstack-agent-file-bus"
+  ],
+  "support_ids": [
+    "CAP-fullstack-agent-adopt-then-bus-then-os"
+  ],
+  "dissent_ids": [
+    "Grok 2026-09-04 Stage-5 PDF CapEx is a different slice — do not steal that runway",
+    "obsidianOS already is the command-center face — sitting-3 upgrades it, does not replace it with a circuit-board clone"
+  ],
+  "provenance": "WORKFLOW → PATTERN → ATOMS → TRANSCRIPT",
+  "audits": {
+    "coverage": "pass",
+    "context_misuse": "pass",
+    "contradiction": "pass"
+  },
+  "tape_id": "github-jaredrhod-fullstack-agent"
+}

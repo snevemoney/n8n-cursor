@@ -1,0 +1,112 @@
+{
+  "capability_id": "CAP-fullstack-agent-adopt-then-bus-then-os",
+  "name": "adopt-then-bus-then-os",
+  "goal": "public installer wizard for a Claude home → adopted hive agentic OS (existing vault + file bus + parked mouth/face)",
+  "demonstrated_outcome": "Jared's fullstack-agent.md interviews once, clones four repos, wires JSON paths, greets. Hive remap 2026-09-04: adopt writes .hive/agent-stack.json + bus/state.json against My_Billion_Dollar_Vault. No CLAUDE.md home. No AGPL vendor. Mouth/face parked.",
+  "observed_workflow": [
+    "Find home / adopt existing agent (Phase 0) — we adopt the vault, never create ~/my-agent",
+    "Menu: memory / voice / face / optional hands (Phase 1)",
+    "One interview: name, identity, vault, mic, voice engine, face, permission_mode (Phase 2)",
+    "Clone sibling repos and run each wizard (Phase 3) — operate-never: Claude Code + git clone of AGPL trees",
+    "Wire seams: backtalk.json agent_dir + extra_dirs + greeting; visualizer bus_dir; mechanic clause (Phase 4)",
+    "First hello via start.sh (Phase 5) — parked this sitting",
+    "Desktop launchers (Phase 6) — parked"
+  ],
+  "tools": [
+    "vault-config.py",
+    "agent-stack.py",
+    "jobs.json / job-beat.py",
+    "observe-pane / hive-state.py",
+    "obsidianOS (existing face surface)",
+    "Cursor SDK (mouth later)",
+    "Grok Bot desks"
+  ],
+  "agent_abilities": [
+    "adopt existing vault as memory",
+    "write a file signal bus the face can poll",
+    "keep permission_mode=ask"
+  ],
+  "triggers": [
+    "operator names fullstack-agent / Jarvis stack / make it the agentic OS"
+  ],
+  "state": "stack + idle bus on disk; mouth/face not started",
+  "guardrails": [
+    "send / pay / deploy / book / publish stay HITL",
+    "Claude Code / Cowork operate-never",
+    "do not create a second vault or CLAUDE.md home",
+    "do not vendor AGPL sources into apps/",
+    "live / stays HOLD",
+    "auto-approve stays off this sitting"
+  ],
+  "prerequisites": [
+    "existing HIVE_OBSIDIAN_VAULT / vault-config.py",
+    "internal-host-os already WIRED",
+    "UNKNOWN — live mic / ElevenLabs / headed face"
+  ],
+  "decision_rules": [
+    "IF a vault already exists → adopt path, never move",
+    "IF Claude Code is the runtime → refuse and remap to Cursor + Grok",
+    "IF mouth or face requested this sitting → park; bus contract is the slice",
+    "IF send/pay/deploy appears → Evens"
+  ],
+  "failure_modes": [
+    "clone the YouTuber / install Claude Code",
+    "second OS beside obsidianOS (Serena already removed)",
+    "self-PROVEN without Watchdog GRADE",
+    "treat live / as this slice"
+  ],
+  "observed_tricks": [
+    "voice writes little status notes; the face reads them — that is the whole connection",
+    "adoption before install; identity and vault are never rebuilt",
+    "one interview so later pieces never re-ask"
+  ],
+  "system_primitive": "one interview → path configs → file signal bus → optional mouth/face on the existing OS",
+  "skill_candidates": [
+    "adopt-then-bus-then-os",
+    "internal-host-os",
+    "observe-pane",
+    "session-bootstrap",
+    "voice-four-pieces-three-doors"
+  ],
+  "system_upgrade_candidates": [
+    "UPG-fullstack-agent-adopt-existing-os"
+  ],
+  "reproduce": "python3 scripts/hive/os/agent-stack.py adopt && python3 scripts/hive/os/agent-stack.py validate. No mic. No face server. No billed TTS.",
+  "generalize": "Same bus can drive observe-pane yellow + a later localhost face. Mouth later uses Cursor SDK or one Grok desk turn.",
+  "improve": "Do not improve by installing Claude Code or auto-approve.",
+  "primitive_ids": [
+    "PRIM-fullstack-agent-file-bus"
+  ],
+  "atom_ids": [],
+  "behavior_ids": [],
+  "source_video_id": "FiOTrxq9ckM",
+  "source_tape_id": "github-jaredrhod-fullstack-agent",
+  "timestamp": "README + fullstack-agent.md (repo read 2026-09-04)",
+  "knowledge_type": "demonstrated",
+  "evidence_status": "observed",
+  "status": "TESTING",
+  "last_verify": "2026-09-04 Forge dry-run: test_agent_stack.py + adopt + validate exit 0 on .hive/agent-stack.json (kind=agentic-os, memory=adopted). Watchdog GRADE still pending (Evens only eyes)",
+  "unknowns": {
+    "known": [
+      "upstream is Claude Code only; four sibling repos; AGPL-3.0 on conductor/voice/face/hands",
+      "hive already has vault + jobs.json + obsidianOS + session matrix"
+    ],
+    "observed": [
+      "fullstack-agent.md Phases 0–6 from the public repo",
+      "Grok 2026-09-04: Stage 5 harness CapEx is a different slice; live / HOLD; not hive face",
+      "Cursor 2026-08-29: one brain = vault + this repo; execute = Cursor + Grok"
+    ],
+    "unknown": [
+      "headed start.sh hello on this Mac",
+      "backtalk local model sizes / ElevenLabs walkthrough clicks"
+    ],
+    "hypotheses": [
+      "mouth sitting can write the same bus without a second home"
+    ],
+    "blocking": false
+  },
+  "blockers": [
+    "UNKNOWN — live mic / face (not sitting-1 blocking)",
+    "Watchdog GRADE not yet filled"
+  ]
+}
