@@ -179,6 +179,8 @@ BUILD_RE = re.compile(
 REPO_RE = re.compile(
     r"\b("
     r"look at (?:the )?(?:code|file|repo|repository)|"
+    r"check (?:my |the )?(?:repo|repository|code)|"
+    r"what(?:'s| is) (?:in|on) (?:my |the )?(?:repo|repository)|"
     r"open (?:this|the) file|"
     r"in the repo|"
     r"why (?:is|does) (?:this|the) (?:code|site|build|test|file)|"
@@ -189,6 +191,32 @@ REPO_RE = re.compile(
     r")\b",
     re.I,
 )
+PRO_EXPLICIT_RE = re.compile(
+    r"\b("
+    r"(?:professional|university|saylor)\s+skills?|"
+    r"(?:check(?:ing)?|load|use|brief)\s+(?:my |the |your )?(?:professional|university|saylor|bus|business)\s+skills?|"
+    r"\bbus[- ]?\d{3}\b|"
+    r"\becon[- ]?\d{3}\b|"
+    r"\bcomm[- ]?\d{3}\b|"
+    r"\bprdv[- ]?\d{3}\b|"
+    r"(?:brief|briefing)\s+(?:me\s+)?(?:on|about)"
+    r")\b",
+    re.I,
+)
+PRO_TOPIC_RE = re.compile(
+    r"\b("
+    r"(?:business\s+)?(?:marketing|finance|accounting|ethics|"
+    r"human resources|sales|operations|strategy|statistics|"
+    r"negotiation|entrepreneur(?:ship)?|organizational behavior|"
+    r"project management)"
+    r")\b",
+    re.I,
+)
+BRIEF_CMD_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(?:brief|bus|pro)\b",
+    re.I,
+)
+PRO_RE = PRO_EXPLICIT_RE
 MAX_TURNS = 8
 _PACK_CACHE: dict = {"id_at": "", "store_at": "", "identity": "", "store": ""}
 ASK_LEAK = re.compile(
@@ -245,6 +273,10 @@ _NAMED_PATH = Path(__file__).resolve().parent.parent / "hands" / "named.py"
 NAMED = _load_mod("agent_stack_named", _NAMED_PATH) if _NAMED_PATH.is_file() else None
 _SCARS_PATH = Path(__file__).resolve().parent.parent / "memory" / "scars.py"
 SCARS = _load_mod("agent_stack_scars", _SCARS_PATH) if _SCARS_PATH.is_file() else None
+_PERSONA_PATH = Path(__file__).resolve().parent / "persona.py"
+PERSONA = _load_mod("agent_stack_persona", _PERSONA_PATH) if _PERSONA_PATH.is_file() else None
+_PRO_PATH = Path(__file__).resolve().parent.parent / "hands" / "pro.py"
+PRO = _load_mod("agent_stack_pro", _PRO_PATH) if _PRO_PATH.is_file() else None
 
 
 def now_iso() -> str:
@@ -306,6 +338,8 @@ def capabilities_spoken() -> str:
     n = skill_count()
     return (
         f"I run the hive catalog here, not Grok Bot. {n} skills, Cursor harness. "
+        "Voice is Sir and wit — one beat, then the hand. "
+        "Professional skills are on-disk intelligence. Wit never blocks hands. "
         "Already works: Safari open, tabs, scroll, grab; Calendar; Mail; local files; "
         "life, today, heal. "
         "This slice: web search in Safari with real links; YouTube Watch Later from the live tab; "
@@ -435,9 +469,10 @@ def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
     lines = [
         "Identity (every turn):",
         f"You are Jarvis. The operator is {who} Louis. This is his hive OS on the 8GB Mac.",
-        "You are Jarvis on a voice face. Think with the Cursor harness.",
+        "You are Jarvis on a voice face. Address Evens as Sir. Think with the Cursor harness.",
         "Memory is the store: Obsidian vault, this repo, chat sessions, and the hive.",
-        "Talk like a colleague. Two to four spoken sentences. Finish the last sentence. Under 70 words.",
+        "Sharp wit, one beat, then the facts. Wit never delays a hand. Do not say you are waiting. Do not take blame.",
+        "Two to four spoken sentences. Finish the last sentence. Under 70 words.",
         "Do not ask to send this to a desk. Do not spawn Grok Bot. Hard steps stay Evens.",
         catalog_block(),
     ]
@@ -586,6 +621,8 @@ def classify(utterance: str) -> dict:
         return {"verb": "can", "needs_ask": False, "args": {}, "host": "local"}
     if re.search(r"\b(list skills|hive skills)\b", text, re.I):
         return {"verb": "skills", "needs_ask": False, "args": {}, "host": "local"}
+    if BRIEF_CMD_RE.match(text) or PRO_EXPLICIT_RE.search(text):
+        return {"verb": "pro", "needs_ask": False, "args": {"text": text}, "host": "local"}
     skill_hit = SKILL_RE.search(text)
     if skill_hit:
         return {
@@ -639,6 +676,8 @@ def classify(utterance: str) -> dict:
             "args": {"text": text, "mode": mode},
             "host": "cursor",
         }
+    if PRO_TOPIC_RE.search(text):
+        return {"verb": "pro", "needs_ask": False, "args": {"text": text}, "host": "local"}
     return {"verb": "converse", "needs_ask": False, "args": {"text": text}, "host": "online"}
 
 
@@ -703,7 +742,9 @@ def _pack_harness(
     utterance: str, context: str, *, mode: str, see: str = "", skill_slug: str = "", build_kind: str = ""
 ) -> str:
     lead = (
-        "Speak as Jarvis to Evens on the local voice face. "
+        "Speak as Jarvis to Evens on the local voice face. Address him as Sir. "
+        "One witty beat, then the facts. Wit never delays a hand. "
+        "Do not say you are waiting. Do not take blame. "
         "Two to four spoken sentences. Finish the last sentence. Under 70 words. "
         f"Cursor harness mode: {mode}. "
         "Skills SSOT: scripts/hive/grok-skills/ and .cursor/skills/ — read one SKILL.md when the job matches. "
@@ -889,6 +930,21 @@ def apply_turn_iter(
         text = DARK_BRAIN if is_ask_leak(narration or "") else narration
         if text and str(text).upper().startswith("UNKNOWN"):
             record_spoken_scar(text, hive)
+        if PERSONA is not None:
+            store_lines: list[str] = []
+            if retrieve_roots is None and hasattr(STORE, "session_lines"):
+                try:
+                    store_lines = list(STORE.session_lines() or [])
+                except (OSError, TypeError, AttributeError):
+                    store_lines = []
+            text = PERSONA.wrap(
+                text,
+                verb=verb,
+                utterance=spoken,
+                turns=prior_turns,
+                store_lines=store_lines,
+                scars=[],
+            )
         next_turns = prior_turns if verb == "idle" else append_turn(prior_turns, spoken, text)
         bus_write(
             hive,
@@ -1076,6 +1132,17 @@ def apply_turn_iter(
             narration = got.get("spoken") or "UNKNOWN. Status wires returned nothing."
             wires = [p.get("wire") for p in (got.get("parts") or []) if p.get("wire")] or ["status"]
         yield finish(narration)
+        return
+    if verb == "pro":
+        if PRO is None:
+            narration = "UNKNOWN. Professional skills wire is not loaded."
+            wires = ["pro"]
+        else:
+            got = PRO.brief(spoken)
+            narration = str(got.get("spoken") or "UNKNOWN. No matching professional skill on disk.")
+            wires = [got.get("wire") or "pro"]
+            cites = got.get("cites") if isinstance(got.get("cites"), list) else []
+        yield finish(narration, host="local")
         return
     if verb == "cursor":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
