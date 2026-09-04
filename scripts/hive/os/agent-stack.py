@@ -77,8 +77,8 @@ def default_stack(vault: dict | None = None, *, hive: Path = HIVE) -> dict:
         "pieces": {
             "memory": "adopted",
             "wizard": "wired",
-            "mouth": "parked",
-            "face": "parked",
+            "mouth": "wired" if (ROOT / "apps/agent-stack/mouth/start.sh").is_file() else "parked",
+            "face": "wired" if (ROOT / "apps/agent-stack/face/start.sh").is_file() else "parked",
             "hands": "parked",
         },
         "never": [
@@ -146,9 +146,12 @@ def validate(stack: dict, bus: dict) -> list[str]:
         errors.append("memory must be adopted (existing vault), never created")
     if pieces.get("wizard") != "wired":
         errors.append("wizard must be wired this sitting")
-    for parked in ("mouth", "face", "hands"):
-        if pieces.get(parked) not in ("parked", "wired"):
-            errors.append(f"pieces.{parked} missing")
+    if pieces.get("mouth") not in ("parked", "wired"):
+        errors.append("pieces.mouth must be parked or wired")
+    if pieces.get("face") not in ("parked", "wired"):
+        errors.append("pieces.face must be parked or wired")
+    if pieces.get("hands") != "parked":
+        errors.append("hands stay parked — no mouse takeover in sittings 2–3")
     never = set(stack.get("never") or [])
     for lock in ("claude-code", "second-vault", "second-home"):
         if lock not in never:

@@ -44,7 +44,13 @@ class AgentStackAdoptTest(unittest.TestCase):
         self.assertEqual(stack["kind"], "agentic-os")
         self.assertEqual(stack["permission_mode"], "ask")
         self.assertEqual(stack["pieces"]["memory"], "adopted")
-        self.assertEqual(stack["pieces"]["mouth"], "parked")
+        self.assertEqual(stack["pieces"]["hands"], "parked")
+        expected_mouth = (
+            "wired"
+            if (MOD.ROOT / "apps/agent-stack/mouth/start.sh").is_file()
+            else "parked"
+        )
+        self.assertEqual(stack["pieces"]["mouth"], expected_mouth)
         self.assertFalse((self.hive / "CLAUDE.md").exists())
 
     def test_validate_rejects_missing_vault_path(self) -> None:

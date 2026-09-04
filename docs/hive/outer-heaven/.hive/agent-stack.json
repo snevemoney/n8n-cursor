@@ -24,8 +24,8 @@
   "pieces": {
     "memory": "adopted",
     "wizard": "wired",
-    "mouth": "parked",
-    "face": "parked",
+    "mouth": "wired",
+    "face": "wired",
     "hands": "parked"
   },
   "never": [
@@ -35,5 +35,5 @@
     "live-/",
     "vendor-agpl-clone"
   ],
-  "updated_at": "2026-09-04T15:24:23Z"
+  "updated_at": "2026-09-04T15:34:12Z"
 }
