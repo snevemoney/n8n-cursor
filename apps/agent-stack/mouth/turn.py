@@ -22,7 +22,8 @@ HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 SKILLS_DIR = ROOT / "scripts/hive/grok-skills"
 HARD_REFUSE = re.compile(
     r"\b("
-    r"send (this|that|the|an?)\s+\w+|"
+    r"send (this|that|the)\s+(email|message|invoice|payment|sms|text)|"
+    r"send an? (email|invoice|payment|sms)|"
     r"pay (this|that|the|an?|him|her|them)\b|"
     r"deploy (this|that|it|to|now|prod)|"
     r"book (a|the|this|me)\b|"
@@ -32,6 +33,20 @@ HARD_REFUSE = re.compile(
     r"take over (my )?(mouse|computer)|"
     r"\bollama\b"
     r")",
+    re.I,
+)
+HEAL_RE = re.compile(
+    r"\b("
+    r"fix (?:yourself|jarvis)|heal(?: yourself)?|self-?heal|"
+    r"send an? (?:agent|fix)|"
+    r"look at (?:the )?logs|"
+    r"help jarvis|"
+    r"never (?:do that|again)"
+    r")\b",
+    re.I,
+)
+TODAY_RE = re.compile(
+    r"\bwhat should (?:we|i) (?:do|work on) today\b",
     re.I,
 )
 SKILL_RE = re.compile(
@@ -194,6 +209,8 @@ _INBOX_PATH = Path(__file__).resolve().parent.parent / "hands" / "inbox.py"
 INBOX = _load_mod("agent_stack_inbox", _INBOX_PATH) if _INBOX_PATH.is_file() else None
 _FILES_PATH = Path(__file__).resolve().parent.parent / "hands" / "files.py"
 FILES = _load_mod("agent_stack_files", _FILES_PATH) if _FILES_PATH.is_file() else None
+_SCARS_PATH = Path(__file__).resolve().parent.parent / "memory" / "scars.py"
+SCARS = _load_mod("agent_stack_scars", _SCARS_PATH) if _SCARS_PATH.is_file() else None
 
 
 def now_iso() -> str:
@@ -259,6 +276,94 @@ def capabilities_spoken() -> str:
         "Say use skill, search my computer, click in Safari, or build a skill. "
         "Send, pay, deploy, book, and publish stay with you."
     )
+
+
+def _scars_live(hive: Path) -> Path:
+    return hive / "bus" / "scars.jsonl"
+
+
+def record_spoken_scar(spoken: str, hive: Path) -> dict | None:
+    if SCARS is None or not (spoken or "").strip():
+        return None
+    return SCARS.record_from_spoken(spoken, live=_scars_live(hive))
+
+
+def cursor_blocked(hive: Path) -> bool:
+    if SCARS is not None and SCARS.blocks_cursor(_scars_live(hive)):
+        return True
+    if ONLINE is not None and hasattr(ONLINE, "cursor_logged_in"):
+        try:
+            if not ONLINE.cursor_logged_in() and SCARS is not None and SCARS.hits_for(
+                "cursor-auth-dark", _scars_live(hive)
+            ) >= 1:
+                return True
+        except Exception:
+            return False
+    return False
+
+
+def today_spoken(retrieve_roots: list[Path] | None, hive: Path | None = None) -> str:
+    if hasattr(RETRIEVE, "life_card"):
+        life = RETRIEVE.life_card(retrieve_roots)
+        biz = life.get("businesses") if isinstance(life, dict) else []
+    else:
+        biz = []
+    found = RETRIEVE.search("what should I work on today hot north stars", retrieve_roots)
+    cite = ""
+    hits = found.get("hits") if isinstance(found, dict) else []
+    if hits and isinstance(hits[0], dict):
+        cite = str(hits[0].get("snippet") or "").strip()
+    bits = ["From the store, not a dark Cursor call."]
+    if biz:
+        bits.append("Active lanes: " + ", ".join(str(x) for x in biz[:4]) + ".")
+    if cite:
+        bits.append(cite[:180])
+    else:
+        bits.append("North star is maximum leverage, minimum noise. Name one lane and we go.")
+    if hive is not None and SCARS is not None and SCARS.blocks_cursor(_scars_live(hive)):
+        bits.append("Cursor login scar is saved. Run agent login in Terminal when you want the harness back.")
+    return " ".join(bits)
+
+
+def heal_spoken(hive: Path, retrieve_roots: list[Path] | None, cursor_fn, grok) -> tuple[str, list, list]:
+    """Apply never-again. Dispatch a fix agent only when Cursor is logged in."""
+    bus = load_json(hive / "bus" / "state.json")
+    found: list[dict] = []
+    for row in load_turns(bus):
+        spoken = str(row.get("jarvis") or "")
+        scar = record_spoken_scar(spoken, hive)
+        if scar and scar not in found:
+            found.append(scar)
+    if not found and SCARS is not None:
+        found = [row for row in SCARS.load_bank() if row.get("id") in {"cursor-auth-dark", "send-an-agent-not-hard-step", "repeat-unknown"}]
+    if SCARS is not None:
+        for row in found:
+            SCARS.record(
+                scar_id=str(row.get("id") or "repeat-unknown"),
+                symptom=str(row.get("symptom") or row.get("id")),
+                cause="heal verb",
+                live=_scars_live(hive),
+            )
+    names = ", ".join(str(r.get("id")) for r in found[:5]) or "none new"
+    logged_in = bool(ONLINE is not None and hasattr(ONLINE, "cursor_logged_in") and ONLINE.cursor_logged_in())
+    if logged_in and cursor_fn is None and grok is None and ONLINE is not None and SCARS is not None:
+        packed = SCARS.heal_prompt(found)
+        resume = str(bus.get("jarvis_agent_chat_id") or "").strip() or None
+        if resume is None:
+            resume = ONLINE.ensure_jarvis_chat(None)
+        try:
+            got = ONLINE.call_cursor_turn(packed, mode="agent", resume=resume)
+        except TypeError:
+            got = ONLINE.call_cursor_turn(packed, mode="agent")
+        reply = str(got.get("spoken") or "").strip()
+        if reply and not got.get("unknown"):
+            return reply, ["cursor"], found
+    narration = (
+        f"I saved the scars ({names}). I will not repeat those errors. "
+        "Cursor login stays you in Terminal if that scar is dark. "
+        "The next converse uses the store until the harness is back."
+    )
+    return narration, ["heal"], found
 
 
 def skills_spoken() -> str:
@@ -435,6 +540,10 @@ def classify(utterance: str) -> dict:
                 "args": {"mode": picked, "rest": rest},
                 "host": "local",
             }
+    if HEAL_RE.search(text):
+        return {"verb": "heal", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    if TODAY_RE.search(text):
+        return {"verb": "today", "needs_ask": False, "args": {}, "host": "local"}
     if CAN_RE.search(text):
         return {"verb": "can", "needs_ask": False, "args": {}, "host": "local"}
     if re.search(r"\b(list skills|hive skills)\b", text, re.I):
@@ -726,6 +835,8 @@ def apply_turn_iter(
 
     def finish(narration: str, *, host: str | None = None, spoken_delta: str | None = None) -> dict:
         text = DARK_BRAIN if is_ask_leak(narration or "") else narration
+        if text and str(text).upper().startswith("UNKNOWN"):
+            record_spoken_scar(text, hive)
         next_turns = prior_turns if verb == "idle" else append_turn(prior_turns, spoken, text)
         bus_write(
             hive,
@@ -804,6 +915,13 @@ def apply_turn_iter(
             )
             return
         yield finish(narration)
+        return
+    if verb == "heal":
+        narration, wires, _scars = heal_spoken(hive, retrieve_roots, cursor_fn, grok)
+        yield finish(narration, host="local")
+        return
+    if verb == "today":
+        yield finish(today_spoken(retrieve_roots, hive), host="local")
         return
     if verb == "can":
         yield finish(capabilities_spoken())
@@ -908,6 +1026,27 @@ def apply_turn_iter(
     see = _see_pack(spoken, hive, see_fn)
     cursor_mode = "agent" if verb in {"skill", "build"} else talk_cursor_mode(harness_mode, spoken)
     resume_chat, resume_field = _pick_resume(bus_now, cursor_mode, cursor_fn, grok)
+    last_jarvis = str(prior_turns[-1].get("jarvis") or "") if prior_turns else ""
+    skip_cursor = cursor_fn is None and grok is None and (
+        cursor_blocked(hive)
+        or (
+            last_jarvis.upper().startswith("UNKNOWN")
+            and SCARS is not None
+            and SCARS.lookup(last_jarvis) is not None
+        )
+    )
+    if skip_cursor:
+        wires = ["store"]
+        if vault_spoken := _vault_spoken:
+            narration = vault_spoken
+        else:
+            scar = SCARS.lookup(last_jarvis) if SCARS is not None and last_jarvis else None
+            if scar is None and SCARS is not None:
+                scar = SCARS.lookup("agent login")
+            extra = SCARS.spoken_heal(scar) if scar and SCARS is not None else "I will not repeat that dark call."
+            narration = extra + " " + today_spoken(retrieve_roots, hive)
+        yield finish(narration)
+        return
     use_stream = (
         cursor_fn is None
         and grok is None
