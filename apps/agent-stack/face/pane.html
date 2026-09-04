@@ -30,38 +30,49 @@
         radial-gradient(1.1px 1.1px at 12% 18%, rgba(231,226,214,.45) 50%, transparent 51%),
         radial-gradient(1px 1px at 78% 12%, rgba(231,226,214,.28) 50%, transparent 51%);
     }
-    body::before {
-      content: "";
-      position: fixed; inset: auto -8% -10% 40%;
-      height: 36vh; border-radius: 50%;
-      background: rgba(220,228,240,.14);
-      filter: blur(48px); pointer-events: none;
-      animation: drift 40s var(--ease) infinite alternate;
-    }
-    @keyframes drift { to { transform: translate(-6vw, 4vh) scale(1.08); } }
-    .wrap { max-width: 1040px; margin: 0 auto; padding: 22px 20px 48px; position: relative; z-index: 1; }
-    header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 16px 18px 40px; position: relative; z-index: 1; }
+    header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
     .brand { font-family: Newsreader, Georgia, serif; letter-spacing: .04em; font-size: 22px; }
     .pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--mute); }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
     .dot.live { background: var(--live); }
     .dot.yellow { background: var(--amber); }
+    .dot.speak { background: var(--rose); }
     a.util, button.util {
       color: var(--paper); text-decoration: none; background: transparent;
       border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: inherit; cursor: pointer;
     }
     .hero {
-      position: relative; border-radius: 24px; overflow: hidden; min-height: 28vh;
+      position: relative; border-radius: 28px; overflow: hidden; min-height: 68vh;
       border: 1px solid var(--line); background: var(--glass);
-      box-shadow: 0 30px 80px rgba(0,0,0,.35); padding: 28px 24px 22px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.35);
     }
-    .hero h1 { font-family: Newsreader, Georgia, serif; font-size: 40px; margin: 0 0 8px; }
-    .hero p { color: var(--mute); max-width: 36rem; }
+    #viz { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .presence {
+      position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+    }
+    .orb {
+      width: min(28vw, 220px); height: min(28vw, 220px); border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, rgba(240,234,221,.28), transparent 42%),
+                  radial-gradient(circle at 50% 55%, rgba(196,103,79,.18), transparent 62%);
+      box-shadow: 0 0 80px rgba(224,162,74,.18);
+      animation: breathe 6s var(--ease) infinite;
+    }
+    .hero.listen .orb { box-shadow: 0 0 90px rgba(125,206,160,.35); animation-duration: 2.4s; }
+    .hero.think .orb { box-shadow: 0 0 90px rgba(224,162,74,.4); animation-duration: 1.6s; }
+    .hero.speak .orb { box-shadow: 0 0 100px rgba(196,103,79,.45); animation-duration: 1.2s; }
+    @keyframes breathe { 50% { transform: scale(1.06); } }
+    .hero-copy {
+      position: absolute; left: 24px; right: 24px; bottom: 22px;
+      display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px;
+    }
+    .hero-copy h1 { font-family: Newsreader, Georgia, serif; font-size: clamp(32px, 6vw, 56px); margin: 0; }
+    .hero-copy p { color: var(--mute); max-width: 28rem; margin: 6px 0 0; }
     .cta {
-      margin-top: 16px; background: var(--rose); color: var(--cream); border: 0; border-radius: 999px;
+      background: var(--rose); color: var(--cream); border: 0; border-radius: 999px;
       padding: 12px 18px; font: 600 14px Outfit, sans-serif; cursor: pointer;
     }
-    .cta.hot { box-shadow: 0 0 0 2px var(--amber); }
+    .cta.hot { background: var(--live); color: var(--ink); box-shadow: 0 0 0 2px var(--live); }
     .grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; margin-top: 16px; }
     .card {
       border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; background: var(--glass);
@@ -79,9 +90,12 @@
       flex: 1; min-width: 180px; background: transparent; border: 1px solid var(--line);
       border-radius: 999px; color: var(--paper); padding: 10px 12px; font: inherit;
     }
-    #heard { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; }
-    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } .hero h1 { font-size: 30px; } }
-    @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; } }
+    #heard, #cites { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; }
+    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } .hero { min-height: 58vh; } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before { animation: none !important; }
+      #viz { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -89,22 +103,30 @@
     <header class="top">
       <div class="brand">Desk · Face</div>
       <span class="pill"><i class="dot" id="dot"></i><span id="phase">idle</span></span>
+      <span class="pill" id="micpill">MUTE</span>
       <a class="util" href="http://127.0.0.1:4017/">NOW</a>
     </header>
-    <section class="hero">
-      <h1 id="heroPhase">Idle</h1>
-      <p>Hold Home and talk. I write the bus. This pane reads it. Cursor or Grok gets the job after you say yes. Hands stay parked.</p>
-      <button class="cta" id="talk" type="button">Hold Home · talk</button>
+    <section class="hero idle" id="hero">
+      <canvas id="viz" aria-hidden="true"></canvas>
+      <div class="presence"><div class="orb" id="orb"></div></div>
+      <div class="hero-copy">
+        <div>
+          <h1 id="heroPhase">Idle</h1>
+          <p id="heroLine">Open mic. I listen until you mute. Vault questions get cited answers. Desk jobs still ask first.</p>
+        </div>
+        <button class="cta" id="talk" type="button">LIVE</button>
+      </div>
     </section>
     <div class="grid">
       <article class="card">
         <h2>Mouth</h2>
-        <p>Local speech in. Local speech out. Type is fallback.</p>
+        <p>Always-on local speech. Barge-in cancels talk. Type is fallback.</p>
         <div class="row">
           <input id="typed" placeholder="fallback type only" />
           <button type="button" class="util" id="send">Send</button>
         </div>
         <p id="heard"></p>
+        <p id="cites"></p>
         <div id="askbox" class="card ask" hidden>
           <p id="asktext"></p>
           <button type="button" class="util" id="yes">Yes · do it</button>
@@ -112,14 +134,14 @@
       </article>
       <article class="card">
         <h2>Observe</h2>
-        <p>working · yellow · done. Yellow is ask, not yes.</p>
+        <p>working · yellow · done. Yellow is ask, not yes. Secondary to the face.</p>
         <div id="jobs"></div>
       </article>
     </div>
   </div>
   <script>
     const $ = (id) => document.getElementById(id);
-    const state = { pending: null, rec: null, holding: false };
+    const state = { pending: null, rec: null, live: false, turning: false, phase: "idle" };
     const synth = window.speechSynthesis;
     const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
     const esc = (s) => String(s || "").replace(/[&<>"']/g, (c) => ({
@@ -140,12 +162,28 @@
       return res.json();
     }
 
+    function paintPhase(phase, job) {
+      state.phase = phase || "idle";
+      $("phase").textContent = `${state.phase} · ${job || ""}`;
+      $("heroPhase").textContent = state.phase;
+      $("hero").className = "hero " + state.phase;
+      $("dot").className = "dot" + (job === "yellow" ? " yellow" : state.phase === "listen" ? " live" : state.phase === "speak" ? " speak" : "");
+    }
+
+    function paintMic() {
+      $("talk").textContent = state.live ? "MUTE" : "LIVE";
+      $("talk").classList.toggle("hot", state.live);
+      $("micpill").textContent = state.live ? "LIVE" : "MUTE";
+    }
+
     async function refresh() {
       try {
         const bus = await api("/api/bus");
-        $("phase").textContent = `${bus.phase || "idle"} · ${bus.job_status || ""}`;
-        $("heroPhase").textContent = bus.phase || "Idle";
-        $("dot").className = "dot" + (bus.job_status === "yellow" ? " yellow" : bus.phase === "listen" ? " live" : "");
+        paintPhase(bus.phase || "idle", bus.job_status || "");
+        if (bus.spoken) $("heroLine").textContent = bus.spoken;
+        if (Array.isArray(bus.cites) && bus.cites.length) {
+          $("cites").textContent = bus.cites.map((c) => c.path + " — " + (c.snippet || "")).join(" · ");
+        }
         const jobs = await api("/api/jobs");
         $("jobs").innerHTML = (jobs.jobs || []).map((j) =>
           `<div class="job ${esc(j.status)}"><b>${esc(j.status || "done")}</b><span>${esc(j.id)}: ${esc(j.note)}</span></div>`
@@ -156,10 +194,14 @@
     }
 
     async function turn(utterance, approved) {
-      if (!utterance) return;
+      if (!utterance || state.turning) return;
+      state.turning = true;
       $("heard").textContent = utterance;
+      paintPhase("think", "working");
       const out = await api("/api/turn", { utterance, approved: !!approved });
       speak(out.spoken || "");
+      $("heroLine").textContent = out.spoken || "";
+      $("cites").textContent = (out.cites || []).map((c) => c.path + " — " + (c.snippet || "")).join(" · ");
       if (out.ask) {
         state.pending = utterance;
         $("askbox").hidden = false;
@@ -168,6 +210,7 @@
         state.pending = null;
         $("askbox").hidden = true;
       }
+      state.turning = false;
       refresh();
     }
 
@@ -181,50 +224,89 @@
     function startListen() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
-        $("heard").textContent = "No speech engine. Use Chrome, or type.";
+        $("heard").textContent = "No speech engine. Use Chrome, or type. Mute still works.";
         return;
       }
-      synth.cancel();
+      try { if (state.rec) state.rec.stop(); } catch (e) {}
       state.rec = new SR();
-      state.rec.continuous = false;
+      state.rec.continuous = true;
       state.rec.interimResults = true;
+      state.rec.onspeechstart = () => { if (synth && synth.speaking) synth.cancel(); };
       state.rec.onresult = (e) => {
         const t = [...e.results].map((r) => r[0].transcript).join(" ");
         $("heard").textContent = t;
         if (e.results[e.results.length - 1].isFinal) handleHeard(t);
       };
-      state.rec.onend = () => { state.holding = false; $("talk").classList.remove("hot"); };
+      state.rec.onend = () => {
+        if (state.live && !state.turning) {
+          try { startListen(); } catch (e) {}
+        }
+      };
       state.rec.start();
-      state.holding = true;
-      $("talk").classList.add("hot");
+      paintPhase("listen", "working");
     }
 
     function stopListen() {
       if (state.rec) try { state.rec.stop(); } catch (e) {}
-      state.holding = false;
-      $("talk").classList.remove("hot");
+      state.rec = null;
     }
 
-    $("talk").onmousedown = startListen;
-    $("talk").onmouseup = stopListen;
-    $("talk").onmouseleave = () => { if (state.holding) stopListen(); };
-    $("talk").ontouchstart = (e) => { e.preventDefault(); startListen(); };
-    $("talk").ontouchend = (e) => { e.preventDefault(); stopListen(); };
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Home" && e.target.id !== "typed" && !state.holding) {
-        e.preventDefault();
-        startListen();
-      }
-    });
-    document.addEventListener("keyup", (e) => {
-      if (e.key === "Home") {
-        e.preventDefault();
+    async function setLive(on) {
+      state.live = on;
+      paintMic();
+      await api("/api/listen", { live: on });
+      if (on) startListen();
+      else {
         stopListen();
+        paintPhase("idle", "done");
       }
-    });
+    }
+
+    const canvas = $("viz");
+    const ctx = canvas.getContext("2d");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dots = Array.from({ length: 70 }, () => ({
+      a: Math.random() * Math.PI * 2,
+      r: 40 + Math.random() * 180,
+      s: 0.002 + Math.random() * 0.01,
+      z: 0.4 + Math.random() * 1.2
+    }));
+    function size() {
+      canvas.width = canvas.clientWidth * devicePixelRatio;
+      canvas.height = canvas.clientHeight * devicePixelRatio;
+    }
+    function pal() {
+      if (state.phase === "listen") return [125, 206, 160];
+      if (state.phase === "think") return [224, 162, 74];
+      if (state.phase === "speak") return [196, 103, 79];
+      return [233, 228, 216];
+    }
+    function frame(t) {
+      if (reduce || !ctx) return;
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const [r, g, b] = pal();
+      const cx = w * 0.5, cy = h * 0.46;
+      dots.forEach((d) => {
+        d.a += d.s * (state.phase === "idle" ? 1 : 2.2);
+        const x = cx + Math.cos(d.a) * d.r * d.z * devicePixelRatio;
+        const y = cy + Math.sin(d.a * 1.15) * d.r * 0.55 * d.z * devicePixelRatio;
+        ctx.fillStyle = `rgba(${r},${g},${b},${0.18 + d.z * 0.22})`;
+        ctx.beginPath();
+        ctx.arc(x, y, (1.1 + d.z) * devicePixelRatio, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(frame);
+    }
+    size();
+    window.addEventListener("resize", size);
+    if (!reduce) requestAnimationFrame(frame);
+
+    $("talk").onclick = () => setLive(!state.live);
     $("send").onclick = () => turn($("typed").value.trim(), false);
     $("typed").addEventListener("keydown", (e) => { if (e.key === "Enter") turn($("typed").value.trim(), false); });
     $("yes").onclick = () => { if (state.pending) turn(state.pending, true); };
+    paintMic();
     refresh();
     setInterval(refresh, 4000);
   </script>

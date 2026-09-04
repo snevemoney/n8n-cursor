@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Original hive conductor: adopt existing vault + file signal bus + PTT mouth + localhost face. Pattern port of fullstack-agent, not a fork. Hands parked.",
+  "description": "Original hive conductor: adopt existing vault + file bus + always-on mouth + living face + vault Q&A. Pattern port of fullstack-agent, not a fork. Hands parked.",
   "type": "module",
   "scripts": {
     "build": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json",
