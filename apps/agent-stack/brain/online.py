@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import subprocess
+import threading
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -24,7 +25,10 @@ XAI_URL = "https://api.x.ai/v1/chat/completions"
 GROKBOT_CONN = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 DEFAULT_VPS = "root@69.62.66.78"
 DEFAULT_MODEL = "grok-4"
-SPEAK_CAP = 420
+SPEAK_CAP = 900
+_CURSOR_LOCK = threading.Lock()
+_CURSOR_PROC: subprocess.Popen | None = None
+_CURSOR_CANCELLED = False
 SYS = (
     "You are Jarvis for Evens Louis. Face and mic stay on the 8GB Mac. "
     "The brain is the store: Obsidian vault, this git repo, chat sessions, and the hive. "
@@ -33,6 +37,36 @@ SYS = (
     "Hard steps (send, pay, deploy, book, publish) stay Evens. "
     "Never invent Claude, ChatGPT, Gemini, or Ollama. Speak short."
 )
+
+
+def clip_spoken(text: str, cap: int = SPEAK_CAP) -> str:
+    body = (text or "").strip()
+    if len(body) <= cap:
+        return body
+    cut = body[:cap]
+    for mark in (". ", "? ", "! ", "\n"):
+        idx = cut.rfind(mark)
+        if idx >= 80:
+            return cut[: idx + 1].strip()
+    return cut.rsplit(" ", 1)[0].strip()
+
+
+def cancel_cursor() -> bool:
+    global _CURSOR_PROC, _CURSOR_CANCELLED
+    _CURSOR_CANCELLED = True
+    with _CURSOR_LOCK:
+        proc = _CURSOR_PROC
+        _CURSOR_PROC = None
+    if proc is None:
+        return False
+    if proc.poll() is None:
+        proc.kill()
+        return True
+    return False
+
+
+def was_cancelled() -> bool:
+    return _CURSOR_CANCELLED
 
 
 def _http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
@@ -192,8 +226,7 @@ def call_xai(prompt: str, context: str = "") -> dict:
             "engine": "xai",
             "spoken": f"UNKNOWN. Grok xAI returned no text. {err or data.get('http')}.",
         }
-    if len(text) > SPEAK_CAP:
-        text = text[: SPEAK_CAP - 1].rsplit(" ", 1)[0] + "…"
+    text = clip_spoken(text)
     return {"ok": True, "unknown": False, "wire": "grok", "engine": "xai", "spoken": text, "model": grok_model()}
 
 
@@ -260,10 +293,8 @@ def call_grokbot(prompt: str, context: str = "") -> dict:
                     reply = str(last.get("text") or last.get("content") or "").strip()
         if reply:
             break
-    if reply:
-        if len(reply) > SPEAK_CAP:
-            reply = reply[: SPEAK_CAP - 1].rsplit(" ", 1)[0] + "…"
-        return {"ok": True, "unknown": False, "wire": "grokbot", "engine": "grokbot", "spoken": reply}
+        if reply:
+            return {"ok": True, "unknown": False, "wire": "grokbot", "engine": "grokbot", "spoken": clip_spoken(reply)}
     return {
         "ok": False,
         "unknown": True,
@@ -428,25 +459,27 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
             "engine": "cursor",
             "spoken": "UNKNOWN. Cursor agent CLI is missing.",
         }
+    global _CURSOR_PROC, _CURSOR_CANCELLED
     use_mode = mode if mode in ("ask", "plan", "agent") else "ask"
     argv = [*cmd, "-p", "--trust", "--workspace", str(ROOT), "--output-format", "text"]
     if use_mode in ("ask", "plan"):
         argv.extend(["--mode", use_mode])
     chat = (resume or "").strip()
+    if use_mode == "agent":
+        chat = ""
     if chat:
         argv.extend(["--resume", chat])
-    argv.append((prompt or "").strip()[:6000])
-    timeout = 180 if use_mode == "agent" else 90
+    argv.append((prompt or "").strip()[:4000])
+    timeout = 90 if use_mode == "agent" else 45
+    _CURSOR_CANCELLED = False
     try:
-        proc = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, cwd=str(ROOT))
-    except subprocess.TimeoutExpired:
-        return {
-            "ok": False,
-            "unknown": True,
-            "wire": "cursor",
-            "engine": "cursor",
-            "spoken": "UNKNOWN. Cursor agent timed out.",
-        }
+        proc = subprocess.Popen(
+            argv,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=str(ROOT),
+        )
     except OSError as exc:
         return {
             "ok": False,
@@ -455,9 +488,35 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
             "engine": "cursor",
             "spoken": f"UNKNOWN. Cursor agent failed: {exc}.",
         }
-    text = (proc.stdout or "").strip()
-    err = (proc.stderr or "").strip()
-    if not text and "Authentication required" in err:
+    with _CURSOR_LOCK:
+        _CURSOR_PROC = proc
+    try:
+        out, err = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "spoken": "UNKNOWN. Cursor timed out. Say stop, or ask again shorter.",
+        }
+    finally:
+        with _CURSOR_LOCK:
+            if _CURSOR_PROC is proc:
+                _CURSOR_PROC = None
+    if _CURSOR_CANCELLED:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "cursor",
+            "engine": "cursor",
+            "cancelled": True,
+            "spoken": "",
+        }
+    text = (out or "").strip()
+    err_text = (err or "").strip()
+    if not text and "Authentication required" in err_text:
         return {
             "ok": False,
             "unknown": True,
@@ -471,16 +530,14 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
             "unknown": True,
             "wire": "cursor",
             "engine": "cursor",
-            "spoken": f"UNKNOWN. Cursor agent returned no text. {err[:180]}".strip(),
+            "spoken": f"UNKNOWN. Cursor agent returned no text. {err_text[:180]}".strip(),
         }
-    if len(text) > SPEAK_CAP:
-        text = text[: SPEAK_CAP - 1].rsplit(" ", 1)[0] + "…"
     return {
         "ok": True,
         "unknown": False,
         "wire": "cursor",
         "engine": "cursor",
-        "spoken": text,
+        "spoken": clip_spoken(text),
         "mode": use_mode,
         "chat_id": chat or None,
     }

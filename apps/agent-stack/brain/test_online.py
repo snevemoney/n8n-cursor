@@ -60,15 +60,22 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertEqual(report["wires"]["cursor"], "harness")
         self.assertEqual(report["need"], [])
 
+    def _proc(self, stdout: str, stderr: str = "", returncode: int = 0):
+        proc = mock.Mock()
+        proc.communicate.return_value = (stdout, stderr)
+        proc.returncode = returncode
+        proc.poll.return_value = returncode
+        return proc
+
     def test_call_cursor_turn_prints_text(self) -> None:
-        proc = mock.Mock(stdout="The site CSS is in pane.html.\n", stderr="", returncode=0)
+        proc = self._proc("The site CSS is in pane.html.\n")
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
-            with mock.patch.object(MOD.subprocess, "run", return_value=proc) as run:
+            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as popen:
                 out = MOD.call_cursor_turn("look at the code for the face", mode="ask", resume="chat-1")
         self.assertTrue(out["ok"])
         self.assertEqual(out["wire"], "cursor")
         self.assertIn("pane.html", out["spoken"])
-        argv = run.call_args[0][0]
+        argv = popen.call_args[0][0]
         self.assertIn("-p", argv)
         self.assertIn("ask", argv)
         self.assertIn("--resume", argv)
@@ -77,25 +84,44 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertNotIn("--yolo", argv)
 
     def test_call_cursor_turn_agent_omits_mode_flag(self) -> None:
-        proc = mock.Mock(stdout="Using tools.\n", stderr="", returncode=0)
+        proc = self._proc("Using tools.\n")
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
-            with mock.patch.object(MOD.subprocess, "run", return_value=proc) as run:
-                out = MOD.call_cursor_turn("open the hive skill", mode="agent")
+            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as popen:
+                out = MOD.call_cursor_turn("open the hive skill", mode="agent", resume="old-ask")
         self.assertTrue(out["ok"])
-        argv = run.call_args[0][0]
+        argv = popen.call_args[0][0]
         self.assertIn("-p", argv)
         self.assertNotIn("--mode", argv)
+        self.assertNotIn("--resume", argv)
         self.assertNotIn("--force", argv)
         self.assertNotIn("--yolo", argv)
 
     def test_call_cursor_turn_auth_names_login_not_xai(self) -> None:
-        proc = mock.Mock(stdout="", stderr="Error: Authentication required. Please run 'agent login' first.", returncode=1)
+        proc = self._proc("", "Error: Authentication required. Please run 'agent login' first.", 1)
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
-            with mock.patch.object(MOD.subprocess, "run", return_value=proc):
+            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc):
                 out = MOD.call_cursor_turn("hey")
         self.assertTrue(out["unknown"])
         self.assertIn("agent login", out["spoken"])
         self.assertNotIn("XAI_API_KEY", out["spoken"])
+
+    def test_clip_spoken_keeps_last_sentence(self) -> None:
+        long = "First sentence is done. " + ("word " * 200)
+        out = MOD.clip_spoken(long, 80)
+        self.assertLessEqual(len(out), 80)
+        self.assertIn("done.", out)
+        self.assertFalse(out.endswith("…"))
+
+    def test_cancel_cursor_kills_proc(self) -> None:
+        proc = mock.Mock()
+        proc.poll.return_value = None
+        MOD._CURSOR_PROC = proc
+        MOD._CURSOR_CANCELLED = False
+        self.assertTrue(MOD.cancel_cursor())
+        proc.kill.assert_called_once()
+        self.assertTrue(MOD.was_cancelled())
+        MOD._CURSOR_PROC = None
+        MOD._CURSOR_CANCELLED = False
 
     def test_call_cursor_turn_dry(self) -> None:
         with mock.patch.dict(os.environ, {"AGENT_STACK_CURSOR_DRY": "1"}):
