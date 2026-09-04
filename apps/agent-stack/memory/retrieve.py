@@ -27,6 +27,7 @@ ALLOW_REL = (
     "CONTENT/os/DESK-MISSIONS-NOW.md",
     "CONTENT/os/RECEIVE.md",
     "CONTENT/watch-later/OPERATOR_MEMORY.md",
+    "CONTENT/knowledge/PRESCRIPTIVE-SIGNALS.md",
 )
 INBOX_REL = "CONTENT/os/inbox"
 BLOCK_MARKS = (
@@ -287,6 +288,41 @@ def life_card(roots: list[Path] | None = None) -> dict:
         "operator": operator,
         "businesses": active,
         "cites": cites,
+        "spoken": spoken,
+    }
+
+
+def news_signals(query: str, roots: list[Path] | None = None) -> dict:
+    """News and signals from allow-listed disk only. Never invent headlines."""
+    words = tokens(query)
+    skip = {"news", "headlines", "signals", "latest", "today", "hive", "prescriptive"}
+    extra = [w for w in words if w not in skip]
+    look = " ".join(extra) if extra else "signals"
+    found = search(look, roots)
+    hits = found.get("hits") if isinstance(found.get("hits"), list) else []
+    lanes = load_json(LANES)
+    active: list[str] = []
+    for row in lanes.get("lanes") or []:
+        if isinstance(row, dict) and str(row.get("status") or "") == "active":
+            name = str(row.get("name") or row.get("id") or "").strip()
+            if name:
+                active.append(name)
+    bits = ["From disk only. I will not invent headlines."]
+    if hits and not found.get("unknown"):
+        bits.append(str(found.get("spoken") or "").strip())
+    else:
+        bits.append("UNKNOWN. No news or signals snippet on the allow-listed store.")
+    if active:
+        bits.append("Active lanes on disk: " + ", ".join(active[:4]) + ". Those are lanes, not headlines.")
+    spoken = " ".join(b for b in bits if b)
+    if len(spoken) > 420:
+        spoken = spoken[:417].rsplit(" ", 1)[0] + "…"
+    return {
+        "ok": bool(hits) and not found.get("unknown"),
+        "unknown": not hits or bool(found.get("unknown")),
+        "wire": "news",
+        "hits": hits,
+        "lanes": active,
         "spoken": spoken,
     }
 

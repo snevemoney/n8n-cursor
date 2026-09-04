@@ -598,6 +598,65 @@ class MouthTurnTest(unittest.TestCase):
             self.assertIn("scripts/hive/grok-skills", seen[0])
             self.assertIn("Do not spawn Grok Bot", seen[0])
 
+    def test_named_hands_classify_and_apply(self) -> None:
+        self.assertEqual(MOD.classify("search the web for rust")["verb"], "search")
+        self.assertEqual(MOD.classify("what's on my watch later")["verb"], "watch_later")
+        self.assertEqual(MOD.classify("what's the news")["verb"], "news")
+        self.assertEqual(MOD.classify("hive signals")["verb"], "news")
+        self.assertEqual(MOD.classify("make an image")["verb"], "make")
+        self.assertEqual(MOD.classify("create a remotion")["verb"], "make")
+        self.assertEqual(MOD.classify("search my computer for ledger")["verb"], "files")
+        self.assertEqual(MOD.classify("what's going on")["verb"], "converse")
+        spoken = MOD.capabilities_spoken()
+        self.assertIn("Already works", spoken)
+        self.assertIn("This slice", spoken)
+        self.assertIn("UNKNOWN", spoken)
+        self.assertIn("not Grok Bot", spoken)
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-named-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text("north stars only\n", encoding="utf-8")
+            with mock.patch.object(
+                MOD.NAMED,
+                "web_search",
+                return_value={
+                    "ok": True,
+                    "wire": "search",
+                    "spoken": "Sources: Example — https://example.com.",
+                    "cites": [{"title": "Example", "url": "https://example.com"}],
+                },
+            ):
+                search = MOD.apply_turn("search the web for rust", hive=hive)
+            self.assertEqual(search["verb"], "search")
+            self.assertIn("https://example.com", search["spoken"])
+            self.assertNotIn("cnn.com", search["spoken"])
+            with mock.patch.object(
+                MOD.NAMED,
+                "watch_later",
+                return_value={
+                    "ok": False,
+                    "unknown": True,
+                    "wire": "watch_later",
+                    "titles": [],
+                    "spoken": "UNKNOWN. Watch Later listed no visible titles. I will not invent video titles.",
+                },
+            ):
+                later = MOD.apply_turn("what's on my watch later", hive=hive)
+            self.assertEqual(later["verb"], "watch_later")
+            self.assertIn("UNKNOWN", later["spoken"])
+            self.assertNotIn("MrBeast", later["spoken"])
+            news = MOD.apply_turn("what's the news", hive=hive, retrieve_roots=[vault])
+            self.assertEqual(news["verb"], "news")
+            self.assertIn("UNKNOWN", news["spoken"])
+            self.assertIn("invent headlines", news["spoken"].lower())
+            made = MOD.apply_turn("make an image", hive=hive)
+            self.assertEqual(made["verb"], "make")
+            self.assertIn("image-agent-hitl", made["spoken"])
+            self.assertIn("Publish stays you", made["spoken"])
+
 
 if __name__ == "__main__":
     unittest.main()
