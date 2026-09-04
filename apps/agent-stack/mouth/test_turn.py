@@ -70,8 +70,49 @@ class MouthTurnTest(unittest.TestCase):
         self.assertNotIn('return {"verb": "desk", "needs_ask": True', text)
         self.assertNotIn("May I hand this to the", text)
 
+    def test_hey_whats_going_on_joke_never_hand_this(self) -> None:
+        lines = ("hey", "what's going on", "tell me a joke", "send me a joke")
+        with tempfile.TemporaryDirectory(prefix="agent-stack-hey-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
+            for line in lines:
+                plan = MOD.classify(line)
+                self.assertEqual(plan["verb"], "converse", line)
+                self.assertFalse(plan["needs_ask"], line)
+                out = MOD.apply_turn(line, hive=hive, retrieve_roots=[vault], grok=_fake_grok)
+                self.assertFalse(out["ask"], line)
+                self.assertNotIn("hand this", (out["spoken"] or "").lower())
+                self.assertNotIn("say yes", (out["spoken"] or "").lower())
+                _no_desk_ask(out["spoken"])
+
+    def test_leftover_yellow_bus_does_not_speak_hand_this(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-leftover-") as tmp:
+            hive = Path(tmp)
+            bus = hive / "bus"
+            bus.mkdir()
+            (bus / "state.json").write_text(
+                '{"schema_version":1,"phase":"speak","job_status":"yellow",'
+                '"utterance":"Hello","permission_ask":"May I hand this to the grok desk? Say yes to approve.",'
+                '"spoken":"May I hand this to the grok desk? Say yes to approve.","turns":[]}\n',
+                encoding="utf-8",
+            )
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
+            out = MOD.apply_turn("hey", hive=hive, retrieve_roots=[vault], grok=_fake_grok)
+            self.assertFalse(out["ask"])
+            self.assertEqual(out["verb"], "converse")
+            self.assertNotIn("hand this", (out["spoken"] or "").lower())
+            self.assertNotIn("say yes", (out["spoken"] or "").lower())
+            _no_desk_ask(out["spoken"])
+            saved = MOD.load_json(bus / "state.json")
+            self.assertFalse(saved.get("permission_ask"))
+
     def test_normal_sentences_converse_no_ask_no_queue(self) -> None:
-        lines = ("what's my north star", "hey how are you", "hey", "remember this", "send me a joke")
+        lines = ("what's my north star", "hey how are you", "hey", "what's going on", "remember this", "send me a joke")
         with tempfile.TemporaryDirectory(prefix="agent-stack-converse-") as tmp:
             hive = Path(tmp)
             (hive / "bus").mkdir()
