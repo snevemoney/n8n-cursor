@@ -28,6 +28,7 @@ if [[ "$MODE" == "check" ]]; then
   echo "face: $( [[ -x "$FACE_START" ]] && echo wired || echo missing )"
   echo "hands: parked"
   AGENT_STACK_DRY_TTS=1 python3 "$HERE/mouth/turn.py" --self-test
+  AGENT_STACK_DRY_TTS=1 python3 "$HERE/mouth/voice.py" --self-test
   python3 "$HERE/face/serve.py" --self-test
   exit 0
 fi

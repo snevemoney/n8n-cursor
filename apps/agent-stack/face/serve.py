@@ -62,6 +62,34 @@ def _load_online():
 ONLINE = _load_online()
 
 
+def _load_voice():
+    path = HERE.parent / "mouth" / "voice.py"
+    spec = importlib.util.spec_from_file_location("agent_stack_voice", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_VOICE = None
+_VOICE_MTIME = None
+
+
+def voice():
+    """Reload voice.py when the file on disk changes."""
+    global _VOICE, _VOICE_MTIME
+    path = HERE.parent / "mouth" / "voice.py"
+    mtime = path.stat().st_mtime
+    if _VOICE is None or _VOICE_MTIME != mtime:
+        _VOICE = _load_voice()
+        _VOICE_MTIME = mtime
+    return _VOICE
+
+
+VOICE = voice()
+
+
 def load_json(path: Path) -> dict:
     if not path.is_file():
         return {}
@@ -155,6 +183,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/wires":
             self._json(200, ONLINE.wire_report())
             return
+        if path == "/api/voice":
+            self._json(200, voice().voice_report())
+            return
         target = HERE / ("pane.html" if path in ("/", "/face", "/pane.html") else path.lstrip("/"))
         try:
             target.resolve().relative_to(HERE.resolve())
@@ -185,6 +216,15 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/listen":
             bus = live_mouth.set_listen(HIVE, bool(data.get("live")))
             self._json(200, {"ok": True, **bus})
+            return
+        if path == "/api/tts":
+            audio, mime = voice().tts_audio(str(data.get("text") or ""))
+            if not audio:
+                self.send_response(204)
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                return
+            self._send(200, audio, mime or "audio/wav")
             return
         if path != "/api/turn":
             self._json(404, {"ok": False, "error": "no such route"})
@@ -246,14 +286,54 @@ def self_test() -> dict:
             html = home.read().decode("utf-8")
             code = home.status
         banned = ("Desk · Face", "<h2>Observe</h2>", "<h2>Mouth</h2>", "Hold Home", "Hold Talk")
-        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "holdMic", "RESTART_MIN", "pickEnglishVoice", "en-US", "samantha", "/api/wires", "MODE - AGENT")
+        needed = (
+            "<canvas",
+            "J.A.R.V.I.S.",
+            "TAP SPACE",
+            "LISTENING FOR",
+            "getUserMedia",
+            "holdMic",
+            "RESTART_MIN",
+            "pickEnglishVoice",
+            "speakCloud",
+            "/api/tts",
+            "/api/voice",
+            "bm_lewis",
+            "en-GB",
+            "/api/wires",
+            "MODE - AGENT",
+        )
         banned_chrome = ("Use Chrome", "Safari speech is flaky")
         if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned) or any(token in html for token in banned_chrome):
-            return {"ok": False, "errors": ["GET / missing tape visualizer or still tells him Chrome"], "status": code}
+            return {"ok": False, "errors": ["GET / missing tape visualizer, repo TTS, or still tells him Chrome"], "status": code}
+        if "say -v" in html:
+            return {"ok": False, "errors": ["pane left a say -v path"]}
         with urllib.request.urlopen(f"http://{HOST}:{port}/api/wires", timeout=2) as wires_res:
             wires = json.loads(wires_res.read().decode("utf-8"))
         if not wires.get("ok") or wires.get("ollama") != "refused":
             return {"ok": False, "errors": ["/api/wires missing or still local-ollama"], "body": wires}
+        with urllib.request.urlopen(f"http://{HOST}:{port}/api/voice", timeout=2) as voice_res:
+            voice_body = json.loads(voice_res.read().decode("utf-8"))
+        if not voice_body.get("ok") or voice_body.get("lang") != "en-GB":
+            return {"ok": False, "errors": ["/api/voice missing British repo voice"], "body": voice_body}
+        if str(voice_body.get("voice") or "") in {"Samantha", "Daniel"}:
+            return {"ok": False, "errors": ["/api/voice still a macOS remap"], "body": voice_body}
+        if voice_body.get("repo", {}).get("kokoro") != "bm_lewis":
+            return {"ok": False, "errors": ["/api/voice lost bm_lewis"], "body": voice_body}
+        os.environ["AGENT_STACK_DRY_TTS"] = "1"
+        req = urllib.request.Request(
+            f"http://{HOST}:{port}/api/tts",
+            data=json.dumps({"text": "hello"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=2) as tts_res:
+                tts_code = tts_res.status
+        except urllib.error.HTTPError as exc:
+            tts_code = int(exc.code)
+        if tts_code != 204:
+            return {"ok": False, "errors": ["dry /api/tts must be 204"], "status": tts_code}
         return {"ok": True, "errors": [], "port": port, "bind": HOST, "home": 200}
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         return {"ok": False, "errors": [str(exc)]}

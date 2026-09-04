@@ -14,7 +14,6 @@ import importlib.util
 import json
 import os
 import re
-import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -115,6 +114,7 @@ def _load_mod(name: str, path: Path):
 
 RETRIEVE = _load_mod("agent_stack_retrieve", Path(__file__).resolve().parent.parent / "memory" / "retrieve.py")
 STORE = _load_mod("agent_stack_store", Path(__file__).resolve().parent.parent / "memory" / "store.py")
+VOICE = _load_mod("agent_stack_voice", Path(__file__).resolve().parent / "voice.py")
 
 _ONLINE_PATH = Path(__file__).resolve().parent.parent / "brain" / "online.py"
 ONLINE = _load_mod("agent_stack_online", _ONLINE_PATH) if _ONLINE_PATH.is_file() else None
@@ -314,12 +314,7 @@ def list_skills(limit: int = 8) -> list[str]:
 
 
 def speak_local(text: str) -> None:
-    if os.environ.get("AGENT_STACK_DRY_TTS") == "1" or not text:
-        return
-    try:
-        subprocess.run(["say", "-v", "Samantha", text[:400]], check=False, timeout=20)
-    except (OSError, subprocess.TimeoutExpired):
-        return
+    VOICE.speak_local(text)
 
 
 def _vault_extract(utterance: str, retrieve_roots: list[Path] | None) -> tuple[str, list]:
