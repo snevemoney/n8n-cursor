@@ -46,7 +46,7 @@ class AgentStackAdoptTest(unittest.TestCase):
         self.assertEqual(stack["pieces"]["memory"], "adopted")
         self.assertEqual(stack["pieces"]["mouth"], "wired")
         self.assertEqual(stack["pieces"]["face"], "wired")
-        self.assertEqual(stack["pieces"]["hands"], "parked")
+        self.assertEqual(stack["pieces"]["hands"], "wired")
         self.assertTrue(stack["session_brief"].endswith("BRIEF-2026-08-14-to-2026-09-04.md"))
         self.assertFalse((self.hive / "CLAUDE.md").exists())
 
@@ -70,6 +70,9 @@ class AgentStackAdoptTest(unittest.TestCase):
         self.assertTrue(checked["ok"], checked)
         self.assertEqual(checked["bus"]["phase"], "listen")
         self.assertEqual(checked["bus"]["job_status"], "yellow")
+        armed = MOD.bus_write(hands_armed=True, hive=self.hive)
+        self.assertTrue(armed["ok"], armed)
+        self.assertTrue(armed["bus"]["hands_armed"])
 
     def test_self_test(self) -> None:
         out = MOD.self_test()

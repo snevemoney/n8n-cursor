@@ -9,12 +9,13 @@
     { "id": "T3", "title": "Pane: talk + screenshare", "coverage": "have hive skill" },
     { "id": "T4", "title": "ASK then queue browse/watch", "coverage": "have hive skill" },
     { "id": "T5", "title": "Watchdog GRADE", "coverage": "HITL / desk" },
-    { "id": "T6", "title": "Hands / phone", "coverage": "parked" }
+    { "id": "T6", "title": "Hands ASK then click", "coverage": "have hive skill" },
+    { "id": "T7", "title": "Phone / billed TTS", "coverage": "parked" }
   ],
   "support_ids": ["CAP-talk-then-see-then-bus"],
   "dissent_ids": [
     "Claude Fable / Claude Code on tape are not hosts",
-    "Full computer takeover stays parked (hands)"
+    "Hands click only after ASK; do not invent a Pay/Send click"
   ],
   "tape_id": "ud7wzdiM0gk"
 }

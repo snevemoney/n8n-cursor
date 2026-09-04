@@ -2,7 +2,7 @@
 """Voice + screen desk for the existing agentic OS.
 
 Mouth writes the bus. Face reads it. Live screen share stays in the browser.
-File / browse / watch jobs remap hive skills. Hands (mouse takeover) stay parked.
+File / browse / watch jobs remap hive skills. Hands (mouse) arm after ASK.
 
 Bind: 127.0.0.1:4018  ·  never 0.0.0.0
 """
@@ -28,7 +28,27 @@ PORT = 4018
 MAX_READ = 24_000
 HARD_REFUSE = re.compile(
     r"\b(send|pay|deploy|book|publish|dial|call the restaurant|twilio|retell|vapi|"
-    r"claude code|fable|cowork|auto-?approve|take over (my )?(mouse|computer))\b",
+    r"claude code|fable|cowork|auto-?approve|take over (my )?computer)\b",
+    re.I,
+)
+HANDS_ON_RE = re.compile(
+    r"\b(take (the |my )?(mouse|hands)|hands on|arm (the )?hands|mouse takeover|"
+    r"take over (the |my )?mouse)\b",
+    re.I,
+)
+HANDS_OFF_RE = re.compile(
+    r"\b(hands off|disarm( the hands)?|drop (the )?mouse|stop (the )?mouse|"
+    r"let go( of the mouse)?)\b",
+    re.I,
+)
+CLICK_RE = re.compile(r"\b(click|tap)\b", re.I)
+MOVE_RE = re.compile(r"\b(move (the )?(mouse|cursor)|point (at|to))\b", re.I)
+PIXEL_RE = re.compile(
+    r"\b(?:at|to)\s+(\d{1,5})(?:\s*[,x]\s*|\s+)(\d{1,5})\b",
+    re.I,
+)
+NORM_RE = re.compile(
+    r"\b(?:at|to)\s+(0\.\d+|1(?:\.0+)?)\s+(0\.\d+|1(?:\.0+)?)\b",
     re.I,
 )
 SECRET_NAME = re.compile(
@@ -61,6 +81,40 @@ def _load_stack_mod():
 
 
 STACK = _load_stack_mod()
+
+
+def _load_hands_mod():
+    import importlib.util
+
+    path = Path(__file__).resolve().parent / "hands.py"
+    spec = importlib.util.spec_from_file_location("hive_hands", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+HANDS = _load_hands_mod()
+
+
+def hands_dry() -> bool:
+    return os.environ.get("VOICE_OS_DRY_HANDS") == "1"
+
+
+def bus_hands_armed(hive: Path = HIVE) -> bool:
+    bus = STACK.load_json(hive / "bus" / "state.json") or {}
+    return bool(bus.get("hands_armed"))
+
+
+def parse_point(text: str) -> dict:
+    pixel = PIXEL_RE.search(text)
+    if pixel:
+        return {"x": int(pixel.group(1)), "y": int(pixel.group(2))}
+    norm = NORM_RE.search(text)
+    if norm:
+        return {"nx": float(norm.group(1)), "ny": float(norm.group(2))}
+    return {}
 
 
 def allowed_roots(hive: Path = HIVE) -> list[Path]:
@@ -135,6 +189,13 @@ def classify(utterance: str) -> dict:
             "needs_ask": False,
             "args": {"reason": "hard-step or operate-never (send/pay/deploy/book/Claude/phone)"},
         }
+    if HANDS_OFF_RE.search(text):
+        return {"verb": "hands_off", "needs_ask": False, "args": {}}
+    if HANDS_ON_RE.search(text):
+        return {"verb": "hands_on", "needs_ask": True, "args": {}}
+    if CLICK_RE.search(text) or MOVE_RE.search(text):
+        verb = "move" if MOVE_RE.search(text) and not CLICK_RE.search(text) else "click"
+        return {"verb": verb, "needs_ask": False, "args": parse_point(text)}
     yt = YT_RE.search(text)
     if yt or re.search(r"\b(watch|cursor-video-watch)\b", text, re.I):
         return {
@@ -202,12 +263,18 @@ def apply_turn(
         return {**result, "ok": True, "ask": False, "spoken": narration}
 
     if plan["needs_ask"] and not approved:
-        ask = f"May I {verb}"
-        if args.get("url"):
-            ask += f" {args['url']}"
-        if args.get("video_id"):
-            ask += f" video {args['video_id']}"
-        ask += "? Say yes to approve."
+        if verb == "hands_on":
+            ask = (
+                "May I take the mouse on this Mac? After yes, click the Entire Screen "
+                "preview to click. I still refuse send, pay, deploy, book, and publish. Say yes to approve."
+            )
+        else:
+            ask = f"May I {verb}"
+            if args.get("url"):
+                ask += f" {args['url']}"
+            if args.get("video_id"):
+                ask += f" video {args['video_id']}"
+            ask += "? Say yes to approve."
         STACK.bus_write(
             phase="speak",
             job_status="yellow",
@@ -272,7 +339,7 @@ def apply_turn(
                 hive=hive,
             )
             result["job"] = job
-            narration = f"Queued browse {url} for the Cursor host. I do not drive the mouse."
+            narration = f"Queued browse {url} for the Cursor host. Hands stay ASK-armed, not inferred."
     elif verb == "watch":
         vid = args.get("video_id") or ""
         if not vid:
@@ -290,13 +357,85 @@ def apply_turn(
             )
             result["job"] = job
             narration = f"Queued watch {vid}. Caption-only until the Cursor host captures frames."
+    elif verb == "hands_on":
+        STACK.bus_write(
+            phase="speak",
+            job_status="done",
+            utterance=utterance,
+            permission_ask=None,
+            hands_armed=True,
+            hive=hive,
+        )
+        narration = (
+            "Hands on. Share Entire Screen, then click the preview to click the Mac. "
+            "Escape or say hands off to drop the mouse. I still refuse send, pay, deploy, book, and publish."
+        )
+        return {**result, "ok": True, "ask": False, "spoken": narration, "hands_armed": True}
+    elif verb == "hands_off":
+        STACK.bus_write(
+            phase="speak",
+            job_status="done",
+            utterance=utterance,
+            permission_ask=None,
+            hands_armed=False,
+            hive=hive,
+        )
+        narration = "Hands off. I will not move the mouse until you take it again."
+        return {**result, "ok": True, "ask": False, "spoken": narration, "hands_armed": False}
+    elif verb in ("click", "move"):
+        if not bus_hands_armed(hive):
+            narration = "Hands are off. Say take the mouse and approve before I click."
+            STACK.bus_write(
+                phase="speak",
+                job_status="done",
+                utterance=utterance,
+                permission_ask=None,
+                hive=hive,
+            )
+            return {**result, "ok": True, "ask": False, "spoken": narration, "hands_armed": False}
+        if not args:
+            narration = "Point on the shared screen. I will not invent a click from a button name."
+            STACK.bus_write(
+                phase="speak",
+                job_status="done",
+                utterance=utterance,
+                permission_ask=None,
+                hive=hive,
+            )
+            return {**result, "ok": True, "ask": False, "spoken": narration, "hands_armed": True}
+        moved = HANDS.execute(
+            action=verb,
+            x=args.get("x"),
+            y=args.get("y"),
+            nx=args.get("nx"),
+            ny=args.get("ny"),
+            dry_run=hands_dry(),
+            hive=hive,
+        )
+        result["hands"] = moved
+        if moved.get("ok"):
+            kind = "dry-run " if moved.get("dry_run") else ""
+            narration = f"{kind}{verb} at {moved.get('x')},{moved.get('y')}."
+        else:
+            narration = (
+                f"Could not {verb}: {moved.get('error')}. "
+                "Enable Accessibility for the Terminal running voice-os.py if this is live."
+            )
+        STACK.bus_write(
+            phase="speak",
+            job_status="done",
+            utterance=utterance,
+            permission_ask=None,
+            hive=hive,
+        )
+        return {**result, "ok": bool(moved.get("ok")), "ask": False, "spoken": narration, "hands_armed": True}
     else:
         brief = OS_DIR / "sessions" / "BRIEF-2026-08-14-to-2026-09-04.md"
         hint = ""
         if brief.is_file():
             hint = " One brain is the vault plus this repo. I use Cursor and Grok skills, not Claude Code."
         seen = f" I can see your shared screen: {screen_note[:180]}." if screen_note else ""
-        narration = f"Heard you.{seen}{hint} Hold talk again, or ask me to list skills, read a file, browse a URL, or watch a video."
+        narration = f"Heard you.{seen}{hint} Hold talk again, or ask me to list skills, read a file, browse a URL, watch a video, or take the mouse."
 
     STACK.bus_write(
         phase="speak",
@@ -334,6 +473,28 @@ def self_test() -> dict:
             return {"ok": False, "errors": ["file_list failed"]}
         if classify("watch https://youtu.be/ud7wzdiM0gk")["verb"] != "watch":
             return {"ok": False, "errors": ["watch classify failed"]}
+        if classify("take over my mouse")["verb"] != "hands_on":
+            return {"ok": False, "errors": ["mouse takeover must classify as hands_on, not refuse"]}
+        asked_hands = apply_turn("take the mouse", hive=hive)
+        if not asked_hands.get("ask"):
+            return {"ok": False, "errors": ["hands_on must ASK"]}
+        prev = os.environ.get("VOICE_OS_DRY_HANDS")
+        os.environ["VOICE_OS_DRY_HANDS"] = "1"
+        try:
+            armed = apply_turn("take the mouse", approved=True, hive=hive)
+            if not armed.get("hands_armed"):
+                return {"ok": False, "errors": ["approved hands_on did not arm"]}
+            clicked = apply_turn("click at 100 200", hive=hive)
+            if clicked.get("verb") != "click" or not (clicked.get("hands") or {}).get("dry_run"):
+                return {"ok": False, "errors": ["armed click must dry-run in self-test"]}
+            off = apply_turn("hands off", hive=hive)
+            if off.get("hands_armed") is not False:
+                return {"ok": False, "errors": ["hands off did not disarm"]}
+        finally:
+            if prev is None:
+                os.environ.pop("VOICE_OS_DRY_HANDS", None)
+            else:
+                os.environ["VOICE_OS_DRY_HANDS"] = prev
         return {"ok": True, "errors": []}
 
 
@@ -421,6 +582,57 @@ class Handler(BaseHTTPRequestHandler):
                 hive=self.hive,
             )
             self._json(200 if out.get("ok") else 400, out)
+            return
+        if parsed.path == "/api/hands":
+            action = str(data.get("action") or "").strip().lower()
+            if action == "disarm":
+                out = apply_turn("hands off", hive=self.hive)
+                self._json(200, out)
+                return
+            if action in ("arm", "hands_on"):
+                self._json(
+                    400,
+                    {"ok": False, "error": "arm only through /api/turn take the mouse + Yes"},
+                )
+                return
+            if action not in ("click", "move", "right_click"):
+                self._json(400, {"ok": False, "error": "action must be click, move, right_click, or disarm"})
+                return
+            if not bus_hands_armed(self.hive):
+                self._json(
+                    200,
+                    {
+                        "ok": True,
+                        "ask": False,
+                        "spoken": "Hands are off. Say take the mouse and approve before I click.",
+                        "hands_armed": False,
+                    },
+                )
+                return
+            moved = HANDS.execute(
+                action=action,
+                x=data.get("x"),
+                y=data.get("y"),
+                nx=data.get("nx"),
+                ny=data.get("ny"),
+                screen_w=data.get("screen_w"),
+                screen_h=data.get("screen_h"),
+                dry_run=hands_dry(),
+                hive=self.hive,
+            )
+            spoken = (
+                f"{'dry-run ' if moved.get('dry_run') else ''}{action} at {moved.get('x')},{moved.get('y')}."
+                if moved.get("ok")
+                else f"Could not {action}: {moved.get('error')}"
+            )
+            STACK.bus_write(
+                phase="speak",
+                job_status="done",
+                utterance=f"hands {action}",
+                permission_ask=None,
+                hive=self.hive,
+            )
+            self._json(200, {**moved, "spoken": spoken, "hands_armed": True})
             return
         self._json(404, {"ok": False, "error": "no such route"})
 

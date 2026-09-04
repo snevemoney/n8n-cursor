@@ -81,7 +81,7 @@ def default_stack(vault: dict | None = None, *, hive: Path = HIVE) -> dict:
             "wizard": "wired",
             "mouth": "wired",
             "face": "wired",
-            "hands": "parked",
+            "hands": "wired",
         },
         "never": [
             "claude-code",
@@ -101,6 +101,7 @@ def default_bus() -> dict:
         "job_status": "done",
         "utterance": "",
         "permission_ask": None,
+        "hands_armed": False,
         "updated_at": now_iso(),
     }
 
@@ -159,6 +160,8 @@ def validate(stack: dict, bus: dict) -> list[str]:
         errors.append("bus.phase must be idle|listen|think|speak")
     if bus.get("job_status") not in JOB_STATUSES:
         errors.append("bus.job_status must be working|yellow|done")
+    if "hands_armed" in bus and not isinstance(bus.get("hands_armed"), bool):
+        errors.append("bus.hands_armed must be a bool when set")
     return errors
 
 
@@ -193,6 +196,7 @@ def bus_write(
     job_status: str | None = None,
     utterance: str | None = None,
     permission_ask: str | None = None,
+    hands_armed: bool | None = None,
     hive: Path = HIVE,
 ) -> dict:
     bus_path = hive / "bus" / "state.json"
@@ -209,6 +213,8 @@ def bus_write(
         bus["utterance"] = utterance
     if permission_ask is not None:
         bus["permission_ask"] = permission_ask or None
+    if hands_armed is not None:
+        bus["hands_armed"] = bool(hands_armed)
     bus["updated_at"] = now_iso()
     stack = load_json(hive / "agent-stack.json")
     errors = validate(stack, bus) if stack else []
@@ -273,6 +279,7 @@ def main() -> int:
     bw.add_argument("--job-status", choices=JOB_STATUSES)
     bw.add_argument("--utterance", default=None)
     bw.add_argument("--permission-ask", default=None)
+    bw.add_argument("--hands-armed", choices=("true", "false"), default=None)
     sub.add_parser("self-test", help="Temp-dir adopt + bus cycle")
     args = ap.parse_args()
     hive: Path = args.hive
@@ -293,6 +300,7 @@ def main() -> int:
             job_status=args.job_status,
             utterance=args.utterance,
             permission_ask=args.permission_ask,
+            hands_armed=None if args.hands_armed is None else args.hands_armed == "true",
             hive=hive,
         )
         print(json.dumps(out, indent=2))

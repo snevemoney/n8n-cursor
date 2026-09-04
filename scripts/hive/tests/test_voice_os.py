@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Voice OS conductor tests. No mic. No live browser."""
+"""Voice OS conductor tests. No mic. No live browser. No live mouse."""
 from __future__ import annotations
 
 import importlib.util
+import os
 import tempfile
 import unittest
 from pathlib import Path
+
+os.environ["VOICE_OS_DRY_HANDS"] = "1"
 
 SCRIPT = Path(__file__).resolve().parents[1] / "os" / "voice-os.py"
 
@@ -61,6 +64,38 @@ class VoiceOsTest(unittest.TestCase):
             self.assertTrue(out.get("ok"), out)
             self.assertFalse(out.get("ask"))
             self.assertTrue((hive / "bus" / "jobs.jsonl").is_file())
+
+    def test_mouse_is_hands_on_not_refuse(self) -> None:
+        plan = MOD.classify("take over my mouse")
+        self.assertEqual(plan["verb"], "hands_on")
+        self.assertTrue(plan["needs_ask"])
+        self.assertEqual(MOD.classify("please send this email")["verb"], "refuse")
+
+    def test_hands_ask_then_dry_click(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="voice-os-hands-") as tmp:
+            hive = Path(tmp)
+            vault = {
+                "ok": True,
+                "source": "local",
+                "path": str(MOD.ROOT),
+                "oh": str(MOD.OS_DIR),
+                "kind": "test",
+            }
+            adopted = MOD.STACK.adopt(hive=hive, vault=vault)
+            self.assertTrue(adopted.get("ok"), adopted)
+            cold = MOD.apply_turn("click at 100 200", hive=hive)
+            self.assertIn("Hands are off", cold.get("spoken") or "")
+            asked = MOD.apply_turn("take the mouse", hive=hive)
+            self.assertTrue(asked.get("ask"), asked)
+            armed = MOD.apply_turn("take the mouse", approved=True, hive=hive)
+            self.assertTrue(armed.get("hands_armed"), armed)
+            clicked = MOD.apply_turn("click at 100 200", hive=hive)
+            self.assertEqual(clicked.get("verb"), "click")
+            self.assertTrue((clicked.get("hands") or {}).get("dry_run"), clicked)
+            nameless = MOD.apply_turn("click the red button", hive=hive)
+            self.assertIn("Point on the shared screen", nameless.get("spoken") or "")
+            off = MOD.apply_turn("hands off", hive=hive)
+            self.assertFalse(off.get("hands_armed"))
 
 
 if __name__ == "__main__":

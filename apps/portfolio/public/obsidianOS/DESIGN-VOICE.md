@@ -21,12 +21,13 @@ CTA before scroll: **Share screen · talk** sits on the hero.
 1. **Cloud glass (PICK)** — live screen hero, hold-to-talk, bus card, amber ask lock. Ships as `voice.html`.
 2. **Editorial paper (REJECT)** — cream daylight full-bleed type, no glass, no live video. Readable, not the land. Same reject as command-center pick 4.
 
-Hands / glowing HUD / Jarvis chrome stay off. Desk is the product name, never glass.
+Glowing HUD / Jarvis chrome stay off. Desk is the product name, never glass.
+Hands are a desk control (pill + amber armed banner), not a second skin.
 
 ## Four pieces / three doors
 
 - persona: hive desk (Evens’s OS)
 - voice: local SpeechSynthesis (ElevenLabs ASK)
 - knowledge: adopted vault + repo + session brief
-- tools: hive skills + file sandbox + queued browse/watch
-- door this sitting: **test UI** on `127.0.0.1:4018`. Widget / phone parked.
+- tools: hive skills + file sandbox + queued browse/watch + ASK-armed mouse
+- door this sitting: **test UI** on `127.0.0.1:4018`. Widget / phone parked. Hands wired after Yes.

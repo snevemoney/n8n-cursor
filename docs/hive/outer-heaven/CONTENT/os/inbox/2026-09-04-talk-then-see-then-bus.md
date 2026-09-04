@@ -8,7 +8,7 @@
 
 - The assistant is the hive desk. One brain = vault + repo. Hosts = Cursor + Grok.
 - Mouth writes `.hive/bus/state.json`. Face is `obsidianOS/voice.html`.
-- Live screenshare is eyes. Arrow points. Hands (mouse takeover) stay parked.
+- Live screenshare is eyes. Arrow points. Hands arm after ASK (see `2026-09-04-voice-os-hands.md`).
 - Browse / watch queue for the Cursor host. File tools stay inside repo + vault.
 - Claude Code / Fable / Retell / phone stay on tape.
 
