@@ -71,6 +71,24 @@ SEE_RE = re.compile(
     r")\b",
     re.I,
 )
+CAL_RE = re.compile(
+    r"\b("
+    r"(?:what(?:'s|s| is)|anything) (?:on )?(?:my )?(?:calendar|schedule)|"
+    r"(?:my )?(?:meetings?|calendar|schedule)(?:\s+(?:today|tomorrow))|"
+    r"meetings? (?:today|tomorrow|this (?:week|morning))|"
+    r"what(?:'s|s| do i have) (?:on )?(?:today|tomorrow)"
+    r")\b",
+    re.I,
+)
+MAIL_RE = re.compile(
+    r"\b("
+    r"(?:unread|new) (?:mail|e-?mails?)|"
+    r"(?:how many|any) (?:unread )?(?:e-?mails?|messages)|"
+    r"(?:my )?(?:inbox|unread mail)"
+    r")\b",
+    re.I,
+)
+INVOICE_RE = re.compile(r"\b(invoice|invoices)\b", re.I)
 REPO_RE = re.compile(
     r"\b("
     r"look at (?:the )?(?:code|file|repo|repository)|"
@@ -132,6 +150,8 @@ _ONLINE_PATH = Path(__file__).resolve().parent.parent / "brain" / "online.py"
 ONLINE = _load_mod("agent_stack_online", _ONLINE_PATH) if _ONLINE_PATH.is_file() else None
 _SEE_PATH = Path(__file__).resolve().parent.parent / "hands" / "see.py"
 SEE = _load_mod("agent_stack_see", _SEE_PATH) if _SEE_PATH.is_file() else None
+_INBOX_PATH = Path(__file__).resolve().parent.parent / "hands" / "inbox.py"
+INBOX = _load_mod("agent_stack_inbox", _INBOX_PATH) if _INBOX_PATH.is_file() else None
 
 
 def now_iso() -> str:
@@ -249,6 +269,7 @@ def bus_write(
     wires: list | None = None,
     turns: list | None = None,
     jarvis_chat_id: str | None = None,
+    jarvis_agent_chat_id: str | None = None,
     harness_mode: str | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
@@ -270,6 +291,10 @@ def bus_write(
         bus.pop("jarvis_chat_id", None)
     elif jarvis_chat_id:
         bus["jarvis_chat_id"] = jarvis_chat_id
+    if jarvis_agent_chat_id == "":
+        bus.pop("jarvis_agent_chat_id", None)
+    elif jarvis_agent_chat_id:
+        bus["jarvis_agent_chat_id"] = jarvis_agent_chat_id
     if harness_mode in ("ask", "plan", "agent"):
         bus["harness_mode"] = harness_mode
     if turns is not None:
@@ -333,6 +358,13 @@ def classify(utterance: str) -> dict:
         return {"verb": "skills", "needs_ask": False, "args": {}, "host": "local"}
     if STATUS_RE.search(text):
         return {"verb": "status", "needs_ask": False, "args": {"text": text}, "host": "online"}
+    if CAL_RE.search(text):
+        when = "tomorrow" if re.search(r"tomorrow", text, re.I) else "today"
+        return {"verb": "calendar", "needs_ask": False, "args": {"when": when}, "host": "local"}
+    if MAIL_RE.search(text):
+        return {"verb": "mail", "needs_ask": False, "args": {}, "host": "local"}
+    if INVOICE_RE.search(text):
+        return {"verb": "invoice", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if REPO_RE.search(text):
         mode = "plan" if re.search(r"\b(fix|edit|implement|change the code)\b", text, re.I) else "ask"
         return {
@@ -460,6 +492,70 @@ def _call_brain(
     return _call_cursor_harness(packed, None, resume, mode)
 
 
+def _turn_event(
+    *,
+    spoken: str,
+    verb: str,
+    host: str,
+    cites: list | None = None,
+    wires: list | None = None,
+    args=None,
+    done: bool = True,
+    spoken_delta: str = "",
+    partial: bool = False,
+) -> dict:
+    return {
+        "ok": True,
+        "verb": verb,
+        "ask": False,
+        "spoken": spoken,
+        "host": host,
+        "args": args,
+        "cites": cites or [],
+        "wires": wires or [],
+        "done": done,
+        "partial": partial,
+        "spoken_delta": spoken_delta,
+    }
+
+
+def _split_sentences(text: str) -> list[str]:
+    body = (text or "").strip()
+    if not body:
+        return []
+    if ONLINE is not None and hasattr(ONLINE, "take_sentences"):
+        sents, rest = ONLINE.take_sentences(body)
+        if rest.strip():
+            sents = list(sents) + [rest.strip()]
+        return sents or [body]
+    return [body]
+
+
+def _inbox_apply(verb: str, utterance: str, retrieve_roots: list[Path] | None, when: str = "today") -> tuple[str, list, list]:
+    if INBOX is None:
+        return f"UNKNOWN. {verb} wire is not loaded.", [verb], []
+    if verb == "calendar":
+        got = INBOX.calendar_events(when)
+    elif verb == "mail":
+        got = INBOX.mail_unread()
+    else:
+        got = INBOX.invoice_lookup(utterance, retrieve_roots)
+    cites = got.get("cites") if isinstance(got.get("cites"), list) else []
+    return str(got.get("spoken") or f"UNKNOWN. {verb} wire returned nothing."), [got.get("wire") or verb], cites
+
+
+def _pick_resume(bus: dict, cursor_mode: str, cursor_fn, grok) -> tuple[str | None, str]:
+    if cursor_mode == "agent":
+        chat = str((bus or {}).get("jarvis_agent_chat_id") or "").strip() or None
+        field = "agent"
+    else:
+        chat = str((bus or {}).get("jarvis_chat_id") or "").strip() or None
+        field = "talk"
+    if chat is None and cursor_fn is None and grok is None and ONLINE is not None:
+        chat = ONLINE.ensure_jarvis_chat(None)
+    return chat, field
+
+
 def _see_pack(utterance: str, hive: Path, see_fn) -> str:
     want_grab = bool(SEE_RE.search(utterance or ""))
     if see_fn is None and not want_grab:
@@ -481,18 +577,17 @@ def _see_pack(utterance: str, hive: Path, see_fn) -> str:
     return str(snap.get("spoken") or "")
 
 
-def apply_turn(
+def apply_turn_iter(
     utterance: str,
     *,
     approved: bool = False,
     hive: Path = HIVE,
-    speak: bool = False,
     retrieve_roots: list[Path] | None = None,
     grok=None,
     status_fn=None,
     cursor_fn=None,
     see_fn=None,
-) -> dict:
+):
     spoken = (utterance or "").strip()
     bus_now = load_json(hive / "bus" / "state.json")
     if scrub_bus_ask(bus_now):
@@ -503,54 +598,63 @@ def apply_turn(
         plan = {"verb": "converse", "needs_ask": False, "args": {"text": spoken}, "host": "online"}
     verb = plan["verb"]
     prior_turns = load_turns(bus_now)
+    cites: list = []
+    wires: list = []
+    resume_chat: str | None = None
+    resume_field = "talk"
+    harness_mode = current_mode(bus_now)
+
+    def finish(narration: str, *, host: str | None = None, spoken_delta: str | None = None) -> dict:
+        text = DARK_BRAIN if is_ask_leak(narration or "") else narration
+        next_turns = prior_turns if verb == "idle" else append_turn(prior_turns, spoken, text)
+        bus_write(
+            hive,
+            phase="speak",
+            job_status="done",
+            utterance=spoken,
+            permission_ask=None,
+            spoken=text,
+            cites=cites,
+            wires=wires,
+            turns=next_turns,
+            jarvis_chat_id=resume_chat if resume_field == "talk" else None,
+            jarvis_agent_chat_id=resume_chat if resume_field == "agent" else None,
+            harness_mode=harness_mode,
+        )
+        delta = text if spoken_delta is None else spoken_delta
+        return _turn_event(
+            spoken=text,
+            verb=verb,
+            host=host or plan["host"],
+            cites=cites,
+            wires=wires,
+            args=plan.get("args"),
+            done=True,
+            spoken_delta=delta,
+            partial=False,
+        )
+
     if verb == "stop":
         if ONLINE is not None and hasattr(ONLINE, "cancel_cursor"):
             ONLINE.cancel_cursor()
-        narration = "Stopped. Standing by."
-        bus_write(
-            hive,
-            phase="speak",
-            job_status="done",
-            utterance=spoken,
-            permission_ask=None,
-            spoken=narration,
-            turns=append_turn(prior_turns, spoken, narration),
-            harness_mode=current_mode(bus_now),
-        )
-        if speak:
-            speak_local(narration)
-        return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local", "cites": [], "wires": []}
+        yield finish("Stopped. Standing by.", host="local")
+        return
     if verb == "refuse":
-        narration = "I will not do that. Send, pay, deploy, book, and publish stay with you."
-        bus_write(
-            hive,
-            phase="speak",
-            job_status="done",
-            utterance=spoken,
-            permission_ask=None,
-            spoken=narration,
-            turns=append_turn(prior_turns, spoken, narration),
-        )
-        if speak:
-            speak_local(narration)
-        return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local", "cites": [], "wires": []}
+        yield finish("I will not do that. Send, pay, deploy, book, and publish stay with you.", host="local")
+        return
 
-    cites: list = []
-    wires: list = []
-    vault_spoken = ""
-    resume_chat: str | None = None
-    harness_mode = current_mode(bus_now)
     if verb == "idle":
-        narration = "Holding. Say Jarvis, or tap Space."
-    elif verb == "greet":
-        narration = "Hey Evens. Standing by."
-    elif verb == "crumb":
-        narration = "That cut off. Say the rest."
-    elif verb == "mode":
+        yield finish("Holding. Say Jarvis, or tap Space.")
+        return
+    if verb == "greet":
+        yield finish("Hey Evens. Standing by.")
+        return
+    if verb == "crumb":
+        yield finish("That cut off. Say the rest.")
+        return
+    if verb == "mode":
         harness_mode = str(plan.get("args", {}).get("mode") or "agent")
         rest = str(plan.get("args", {}).get("rest") or "").strip()
-        if harness_mode == "agent":
-            resume_chat = ""
         if harness_mode == "ask":
             narration = "Ask mode. I explain. I do not edit."
         elif harness_mode == "plan":
@@ -566,40 +670,30 @@ def apply_turn(
                 permission_ask=None,
                 spoken=narration,
                 turns=prior_turns,
-                jarvis_chat_id=resume_chat if harness_mode == "agent" else None,
                 harness_mode=harness_mode,
             )
-            follow = apply_turn(
+            yield from apply_turn_iter(
                 rest,
                 approved=approved,
                 hive=hive,
-                speak=False,
                 retrieve_roots=retrieve_roots,
                 grok=grok,
                 status_fn=status_fn,
                 cursor_fn=cursor_fn,
                 see_fn=see_fn,
             )
-            follow_spoken = str(follow.get("spoken") or "").strip()
-            if follow_spoken and follow.get("verb") not in {"idle", "greet", "crumb"}:
-                narration = follow_spoken
-            cites = follow.get("cites") or []
-            wires = follow.get("wires") or []
-            if follow.get("verb"):
-                verb = str(follow.get("verb"))
-            return {
-                "ok": True,
-                "verb": verb,
-                "ask": False,
-                "spoken": narration,
-                "host": follow.get("host") or "local",
-                "args": plan.get("args"),
-                "cites": cites,
-                "wires": wires,
-            }
-    elif verb == "skills":
-        narration = "Hive skills: " + ", ".join(list_skills()) + "."
-    elif verb == "status":
+            return
+        yield finish(narration)
+        return
+    if verb == "skills":
+        yield finish("Hive skills: " + ", ".join(list_skills()) + ".")
+        return
+    if verb in {"calendar", "mail", "invoice"}:
+        when = str(plan.get("args", {}).get("when") or "today")
+        narration, wires, cites = _inbox_apply(verb, spoken, retrieve_roots, when)
+        yield finish(narration, host="local")
+        return
+    if verb == "status":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
         fn = status_fn or (ONLINE.status if ONLINE is not None else None)
         if fn is None:
@@ -617,95 +711,176 @@ def apply_turn(
             got = fn(which)
             narration = got.get("spoken") or "UNKNOWN. Status wires returned nothing."
             wires = [p.get("wire") for p in (got.get("parts") or []) if p.get("wire")] or ["status"]
-    elif verb == "cursor":
+        yield finish(narration)
+        return
+    if verb == "cursor":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
-        fn = cursor_fn or (ONLINE.call_cursor_turn if ONLINE is not None else None)
         mode = str(plan.get("args", {}).get("mode") or "ask")
+        resume_chat, resume_field = _pick_resume(bus_now, mode, cursor_fn, grok)
+        fn = cursor_fn or (ONLINE.call_cursor_turn if ONLINE is not None else None)
         if fn is None:
             narration = "UNKNOWN. Cursor wire is not loaded."
             wires = ["cursor"]
         else:
             try:
-                got = fn(spoken, mode=mode)
+                got = fn(spoken, mode=mode, resume=resume_chat)
             except TypeError:
-                got = fn(spoken)
+                try:
+                    got = fn(spoken, mode=mode)
+                except TypeError:
+                    got = fn(spoken)
             narration = str(got.get("spoken") or "").strip() or "UNKNOWN. Cursor returned no text."
             wires = [got.get("wire") or "cursor"]
-    elif verb == "converse":
-        bus_write(
-            hive,
-            phase="think",
-            job_status="working",
-            utterance=spoken,
-            permission_ask=None,
-            turns=prior_turns,
-            harness_mode=harness_mode,
-        )
-        context, cites, vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
-        skill_hit = SKILL_RE.search(spoken)
-        skill_slug = skill_hit.group(1).lower() if skill_hit else ""
-        see = _see_pack(spoken, hive, see_fn)
-        cursor_mode = talk_cursor_mode(harness_mode, spoken)
-        resume_chat = str(bus_now.get("jarvis_chat_id") or "").strip() or None
-        if cursor_mode == "agent":
-            resume_chat = None
-        elif resume_chat is None and cursor_fn is None and grok is None and ONLINE is not None:
-            resume_chat = ONLINE.ensure_jarvis_chat(None)
-        got = _call_brain(
-            spoken,
-            context,
-            grok,
-            cursor_fn,
-            resume_chat,
-            mode=cursor_mode,
-            see=see,
-            skill_slug=skill_slug,
-        )
-        if got.get("cancelled"):
-            narration = "Stopped. Standing by."
-            wires = ["cursor"]
-        else:
             if got.get("chat_id"):
                 resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
-            reply = str(got.get("spoken") or "").strip()
-            if reply and not is_ask_leak(reply):
-                narration = reply
-                wires = [got.get("wire") or "cursor"]
-            else:
-                dark = _dark_brain()
-                narration = dark.get("spoken") or DARK_BRAIN
-                wires = [dark.get("wire") or "cursor"]
-    else:
-        narration = "Holding. Say Jarvis, or tap Space."
+        yield finish(narration)
+        return
+    if verb != "converse":
+        yield finish("Holding. Say Jarvis, or tap Space.")
+        return
 
-    if is_ask_leak(narration or ""):
-        narration = DARK_BRAIN
-
-    next_turns = prior_turns if verb == "idle" else append_turn(prior_turns, spoken, narration)
     bus_write(
         hive,
-        phase="speak",
-        job_status="done",
+        phase="think",
+        job_status="working",
         utterance=spoken,
         permission_ask=None,
-        spoken=narration,
-        cites=cites,
-        wires=wires,
-        turns=next_turns,
-        jarvis_chat_id=resume_chat,
+        turns=prior_turns,
         harness_mode=harness_mode,
     )
+    context, cites, _vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
+    skill_hit = SKILL_RE.search(spoken)
+    skill_slug = skill_hit.group(1).lower() if skill_hit else ""
+    see = _see_pack(spoken, hive, see_fn)
+    cursor_mode = talk_cursor_mode(harness_mode, spoken)
+    resume_chat, resume_field = _pick_resume(bus_now, cursor_mode, cursor_fn, grok)
+    use_stream = (
+        cursor_fn is None
+        and grok is None
+        and ONLINE is not None
+        and hasattr(ONLINE, "call_cursor_turn_iter")
+    )
+    if use_stream:
+        packed = _pack_harness(spoken, context, mode=cursor_mode, see=see, skill_slug=skill_slug)
+        buf = ""
+        spoken_parts: list[str] = []
+        got_done: dict | None = None
+        for ev in ONLINE.call_cursor_turn_iter(packed, mode=cursor_mode, resume=resume_chat):
+            if ev.get("cancelled"):
+                narration = "Stopped. Standing by."
+                wires = ["cursor"]
+                yield finish(narration)
+                return
+            if ev.get("delta"):
+                buf += str(ev.get("delta") or "")
+                sents, buf = ONLINE.take_sentences(buf)
+                for sent in sents:
+                    spoken_parts.append(sent)
+                    acc = " ".join(spoken_parts)
+                    yield _turn_event(
+                        spoken=acc,
+                        verb=verb,
+                        host=plan["host"],
+                        cites=cites,
+                        wires=["cursor"],
+                        args=plan.get("args"),
+                        done=False,
+                        spoken_delta=sent,
+                        partial=True,
+                    )
+            if ev.get("done") or ev.get("chat_id") or ev.get("unknown"):
+                got_done = ev
+                if ev.get("chat_id"):
+                    resume_chat = str(ev.get("chat_id") or resume_chat or "").strip() or resume_chat
+        remainder = buf.strip()
+        if remainder:
+            spoken_parts.append(remainder)
+            acc = " ".join(spoken_parts)
+            yield _turn_event(
+                spoken=acc,
+                verb=verb,
+                host=plan["host"],
+                cites=cites,
+                wires=["cursor"],
+                args=plan.get("args"),
+                done=False,
+                spoken_delta=remainder,
+                partial=True,
+            )
+        acc = " ".join(spoken_parts).strip()
+        reply = acc or str((got_done or {}).get("spoken") or "").strip()
+        if reply and not is_ask_leak(reply):
+            narration = reply
+            wires = [(got_done or {}).get("wire") or "cursor"]
+        else:
+            dark = _dark_brain()
+            narration = dark.get("spoken") or DARK_BRAIN
+            wires = [dark.get("wire") or "cursor"]
+        yield finish(narration, spoken_delta="")
+        return
+
+    got = _call_brain(
+        spoken,
+        context,
+        grok,
+        cursor_fn,
+        resume_chat,
+        mode=cursor_mode,
+        see=see,
+        skill_slug=skill_slug,
+    )
+    if got.get("cancelled"):
+        narration = "Stopped. Standing by."
+        wires = ["cursor"]
+    else:
+        if got.get("chat_id"):
+            resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
+        reply = str(got.get("spoken") or "").strip()
+        if reply and not is_ask_leak(reply):
+            narration = reply
+            wires = [got.get("wire") or "cursor"]
+        else:
+            dark = _dark_brain()
+            narration = dark.get("spoken") or DARK_BRAIN
+            wires = [dark.get("wire") or "cursor"]
+    yield finish(narration)
+
+
+def apply_turn(
+    utterance: str,
+    *,
+    approved: bool = False,
+    hive: Path = HIVE,
+    speak: bool = False,
+    retrieve_roots: list[Path] | None = None,
+    grok=None,
+    status_fn=None,
+    cursor_fn=None,
+    see_fn=None,
+) -> dict:
+    last = _turn_event(spoken="", verb="idle", host="local")
+    for ev in apply_turn_iter(
+        utterance,
+        approved=approved,
+        hive=hive,
+        retrieve_roots=retrieve_roots,
+        grok=grok,
+        status_fn=status_fn,
+        cursor_fn=cursor_fn,
+        see_fn=see_fn,
+    ):
+        last = ev
     if speak:
-        speak_local(narration)
+        speak_local(str(last.get("spoken") or ""))
     return {
         "ok": True,
-        "verb": verb,
+        "verb": last.get("verb") or "converse",
         "ask": False,
-        "spoken": narration,
-        "host": plan["host"],
-        "args": plan.get("args"),
-        "cites": cites,
-        "wires": wires,
+        "spoken": last.get("spoken") or "",
+        "host": last.get("host") or "online",
+        "args": last.get("args"),
+        "cites": last.get("cites") or [],
+        "wires": last.get("wires") or [],
     }
 
 

@@ -7,6 +7,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 os.environ["AGENT_STACK_DRY_TTS"] = "1"
 SCRIPT = Path(__file__).resolve().parent / "turn.py"
@@ -417,6 +418,82 @@ class MouthTurnTest(unittest.TestCase):
         self.assertTrue(seen)
         self.assertEqual(seen[0][1], "ask")
         self.assertIn("https://evenslouis.ca", seen[0][0])
+
+    def test_calendar_mail_invoice_are_local_wires(self) -> None:
+        self.assertEqual(MOD.classify("what's on my calendar")["verb"], "calendar")
+        self.assertEqual(MOD.classify("meetings tomorrow")["args"]["when"], "tomorrow")
+        self.assertEqual(MOD.classify("any unread mail")["verb"], "mail")
+        self.assertEqual(MOD.classify("what's the unpaid invoice")["verb"], "invoice")
+        self.assertEqual(MOD.classify("create an invoice for Mike")["verb"], "invoice")
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-inbox-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text("north stars only\n", encoding="utf-8")
+            with mock.patch.object(
+                MOD.INBOX,
+                "calendar_events",
+                return_value={"ok": True, "wire": "calendar", "spoken": "Calendar.app today: Standup @ 9:00 AM.", "events": ["Standup @ 9:00 AM"]},
+            ):
+                cal = MOD.apply_turn("what's on my calendar", hive=hive)
+            self.assertEqual(cal["verb"], "calendar")
+            self.assertIn("Standup", cal["spoken"])
+            self.assertEqual(cal["wires"], ["calendar"])
+            with mock.patch.object(
+                MOD.INBOX,
+                "mail_unread",
+                return_value={"ok": True, "wire": "mail", "spoken": "Mail.app inbox has 2 unread.", "unread": 2},
+            ):
+                mail = MOD.apply_turn("any unread mail", hive=hive)
+            self.assertEqual(mail["verb"], "mail")
+            self.assertIn("2 unread", mail["spoken"])
+            invoice = MOD.apply_turn(
+                "what's the unpaid invoice",
+                hive=hive,
+                retrieve_roots=[vault],
+            )
+            self.assertEqual(invoice["verb"], "invoice")
+            self.assertIn("UNKNOWN", invoice["spoken"])
+            self.assertNotIn("Mike Johnson", invoice["spoken"])
+            self.assertNotIn("2500", invoice["spoken"])
+            created = MOD.apply_turn("create an invoice for Mike Johnson for $2500", hive=hive)
+            self.assertEqual(created["verb"], "invoice")
+            self.assertIn("will not invent", created["spoken"].lower())
+
+    def test_agent_skill_resumes_second_chat(self) -> None:
+        seen: list[tuple] = []
+
+        def harness(prompt: str, mode: str = "ask", resume: str | None = None) -> dict:
+            seen.append((mode, resume))
+            return {"ok": True, "wire": "cursor", "spoken": "Skill loaded.", "chat_id": resume or "agent-9"}
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-agent-chat-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            (hive / "bus" / "state.json").write_text(
+                '{"schema_version":1,"turns":[],"harness_mode":"agent",'
+                '"jarvis_chat_id":"talk-1","jarvis_agent_chat_id":"agent-9"}\n',
+                encoding="utf-8",
+            )
+            out = MOD.apply_turn("use skill hive-funnels", hive=hive, cursor_fn=harness)
+            saved = MOD.load_json(hive / "bus" / "state.json")
+        self.assertEqual(out["verb"], "converse")
+        self.assertEqual(seen[0][0], "agent")
+        self.assertEqual(seen[0][1], "agent-9")
+        self.assertEqual(saved.get("jarvis_chat_id"), "talk-1")
+        self.assertEqual(saved.get("jarvis_agent_chat_id"), "agent-9")
+
+    def test_apply_turn_iter_yields_done_event(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-iter-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            evs = list(MOD.apply_turn_iter("hey", hive=hive))
+        self.assertEqual(len(evs), 1)
+        self.assertTrue(evs[0]["done"])
+        self.assertIn("Hey Evens", evs[0]["spoken"])
+        self.assertIn("Hey Evens", evs[0]["spoken_delta"])
 
 
 if __name__ == "__main__":
