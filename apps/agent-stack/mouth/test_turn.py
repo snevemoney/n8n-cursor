@@ -657,6 +657,64 @@ class MouthTurnTest(unittest.TestCase):
             self.assertIn("image-agent-hitl", made["spoken"])
             self.assertIn("Publish stays you", made["spoken"])
 
+    def test_wit_sir_and_pro_route(self) -> None:
+        self.assertEqual(MOD.classify("check my repo")["verb"], "cursor")
+        self.assertEqual(MOD.classify("look at the code for marketing")["verb"], "cursor")
+        self.assertEqual(MOD.classify("checking your professional skills")["verb"], "pro")
+        self.assertEqual(MOD.classify("brief me on marketing")["verb"], "pro")
+        self.assertEqual(MOD.classify("BUS 204")["verb"], "pro")
+        self.assertEqual(MOD.classify("what's going on")["verb"], "converse")
+        spoken = MOD.capabilities_spoken()
+        self.assertIn("Sir", spoken)
+        self.assertIn("wit", spoken.lower())
+        self.assertIn("on-disk intelligence", spoken)
+        self.assertIn("Wit never blocks hands", spoken)
+        self.assertIn("Already works", spoken)
+        self.assertIn("not Grok Bot", spoken)
+
+        def fake_cursor(prompt: str, mode: str = "ask") -> dict:
+            return {
+                "ok": True,
+                "wire": "cursor",
+                "spoken": "Your repo for today includes agent-stack and hive scripts.",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-wit-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            repo = MOD.apply_turn("check my repo", hive=hive, cursor_fn=fake_cursor)
+            self.assertEqual(repo["verb"], "cursor")
+            self.assertFalse(repo["ask"])
+            self.assertTrue(repo["spoken"].startswith("Sir."))
+            self.assertIn("Your repo for today includes agent-stack", repo["spoken"])
+            self.assertNotIn("waiting for", repo["spoken"].lower())
+            self.assertEqual(repo["wires"], ["cursor"])
+            with mock.patch.object(
+                MOD.PRO,
+                "brief",
+                return_value={
+                    "ok": True,
+                    "wire": "pro",
+                    "slugs": ["bizstat-describe-sample-infer-regress-checklists"],
+                    "courses": ["BUS204"],
+                    "cites": [{"slug": "bizstat-describe-sample-infer-regress-checklists", "course": "BUS204"}],
+                    "spoken": "From bizstat-describe-sample-infer-regress-checklists (BUS204): a workplace number needs a baseline.",
+                },
+            ):
+                pro = MOD.apply_turn("BUS 204", hive=hive)
+            self.assertEqual(pro["verb"], "pro")
+            self.assertFalse(pro["ask"])
+            self.assertTrue(pro["spoken"].startswith("Sir."))
+            self.assertIn("Checking your professional skills", pro["spoken"])
+            self.assertIn("bizstat-describe-sample-infer-regress-checklists", pro["spoken"])
+            self.assertIn("BUS204", pro["spoken"])
+            self.assertNotIn("waiting for", pro["spoken"].lower())
+            self.assertNotIn("BUS999", pro["spoken"])
+            can = MOD.apply_turn("what can you do", hive=hive)
+            self.assertTrue(can["spoken"].startswith("Sir."))
+            self.assertIn("on-disk intelligence", can["spoken"])
+            self.assertIn("Wit never blocks hands", can["spoken"])
+
 
 if __name__ == "__main__":
     unittest.main()
