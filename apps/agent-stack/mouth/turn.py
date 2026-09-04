@@ -89,6 +89,46 @@ MAIL_RE = re.compile(
     re.I,
 )
 INVOICE_RE = re.compile(r"\b(invoice|invoices)\b", re.I)
+CAN_RE = re.compile(
+    r"\b("
+    r"what can you do|what are you able|"
+    r"your (?:tools|skills|plugins|catalog)|"
+    r"same as grok(?:\s*bot)?"
+    r")\b",
+    re.I,
+)
+LIFE_RE = re.compile(
+    r"\b("
+    r"who am i|what(?:'s|s| is) my name|how old(?: am i)?|my age|"
+    r"who do i know|people i know|my businesses|"
+    r"what do you know about me|remember (?:me|who i am)"
+    r")\b",
+    re.I,
+)
+FILE_RE = re.compile(
+    r"\b("
+    r"search (?:my )?(?:computer|mac|files|disk|documents|vault)|"
+    r"find (?:the |my )?file|"
+    r"look (?:on|in|through) my (?:computer|mac|files|documents|disk)"
+    r")\b",
+    re.I,
+)
+SAFARI_ACT_RE = re.compile(
+    r"\b("
+    r"open https?://|"
+    r"open .+\s+in safari|"
+    r"(?:click|tap|press) (?:the )?.+|"
+    r"(?:type|enter|fill) .+|"
+    r"scroll (?:up|down|a bit)?|"
+    r"(?:what )?(?:safari )?tabs?|"
+    r"what(?:'s|s| is) open in safari"
+    r")\b",
+    re.I,
+)
+BUILD_RE = re.compile(
+    r"\b(build|make|create|write|add)\s+(?:(?:a|an|new)\s+)*(skill|workflow|tool|plugin)\b",
+    re.I,
+)
 REPO_RE = re.compile(
     r"\b("
     r"look at (?:the )?(?:code|file|repo|repository)|"
@@ -152,6 +192,8 @@ _SEE_PATH = Path(__file__).resolve().parent.parent / "hands" / "see.py"
 SEE = _load_mod("agent_stack_see", _SEE_PATH) if _SEE_PATH.is_file() else None
 _INBOX_PATH = Path(__file__).resolve().parent.parent / "hands" / "inbox.py"
 INBOX = _load_mod("agent_stack_inbox", _INBOX_PATH) if _INBOX_PATH.is_file() else None
+_FILES_PATH = Path(__file__).resolve().parent.parent / "hands" / "files.py"
+FILES = _load_mod("agent_stack_files", _FILES_PATH) if _FILES_PATH.is_file() else None
 
 
 def now_iso() -> str:
@@ -194,6 +236,41 @@ def append_turn(turns: list[dict], user: str, jarvis: str) -> list[dict]:
     return next_turns[-MAX_TURNS:]
 
 
+def skill_count() -> int:
+    if not SKILLS_DIR.is_dir():
+        return 0
+    return sum(1 for p in SKILLS_DIR.glob("*.md") if p.name.upper() != "README.MD")
+
+
+def catalog_block() -> str:
+    n = skill_count()
+    return (
+        f"Catalog (this Mac, not Grok Bot): {n} hive skills at scripts/hive/grok-skills/. "
+        "Cursor harness runs them. Safari uses Evens's logged-in session. "
+        "Local files: vault + Documents + this repo. Never hive/desk dump."
+    )
+
+
+def capabilities_spoken() -> str:
+    n = skill_count()
+    return (
+        f"I run the hive catalog here, not Grok Bot. {n} skills, Cursor harness, "
+        "Safari with your logins, vault memory, local files, Calendar and Mail. "
+        "Say use skill, search my computer, click in Safari, or build a skill. "
+        "Send, pay, deploy, book, and publish stay with you."
+    )
+
+
+def skills_spoken() -> str:
+    n = skill_count()
+    names = list_skills(6)
+    examples = ", ".join(names) if names else "none listed"
+    return (
+        f"Same catalog Grok Bot mirrors. I run them on this Mac. {n} skills. "
+        f"Examples: {examples}. Say use skill and the slug."
+    )
+
+
 def history_block(turns: list[dict]) -> str:
     if not turns:
         return ""
@@ -218,7 +295,8 @@ def identity_block(retrieve_roots: list[Path] | None, hive: Path) -> str:
         "You are Jarvis on a voice face. Think with the Cursor harness.",
         "Memory is the store: Obsidian vault, this repo, chat sessions, and the hive.",
         "Talk like a colleague. Two to four spoken sentences. Finish the last sentence. Under 70 words.",
-        "Do not ask to send this to a desk. Hard steps stay Evens.",
+        "Do not ask to send this to a desk. Do not spawn Grok Bot. Hard steps stay Evens.",
+        catalog_block(),
     ]
     found = RETRIEVE.search("who am I north stars", retrieve_roots)
     for hit in (found.get("hits") or [])[:2]:
@@ -254,6 +332,9 @@ def converse_context(
     if cites:
         bits = [f"{hit.get('path')}: {hit.get('snippet')}" for hit in cites[:3]]
         parts.append("Vault snippets (only if they match this turn):\n" + "\n".join(bits))
+    if LIFE_RE.search(utterance or ""):
+        life = RETRIEVE.life_card(retrieve_roots)
+        parts.append("Life card (vault + lanes only):\n" + str(life.get("spoken") or ""))
     return "\n\n".join(parts), cites, vault_spoken
 
 
@@ -354,8 +435,32 @@ def classify(utterance: str) -> dict:
                 "args": {"mode": picked, "rest": rest},
                 "host": "local",
             }
+    if CAN_RE.search(text):
+        return {"verb": "can", "needs_ask": False, "args": {}, "host": "local"}
     if re.search(r"\b(list skills|hive skills)\b", text, re.I):
         return {"verb": "skills", "needs_ask": False, "args": {}, "host": "local"}
+    skill_hit = SKILL_RE.search(text)
+    if skill_hit:
+        return {
+            "verb": "skill",
+            "needs_ask": False,
+            "args": {"slug": skill_hit.group(1).lower(), "text": text},
+            "host": "cursor",
+        }
+    build_hit = BUILD_RE.search(text)
+    if build_hit:
+        return {
+            "verb": "build",
+            "needs_ask": False,
+            "args": {"kind": (build_hit.group(2) or "skill").lower(), "text": text},
+            "host": "cursor",
+        }
+    if LIFE_RE.search(text):
+        return {"verb": "life", "needs_ask": False, "args": {}, "host": "local"}
+    if FILE_RE.search(text):
+        return {"verb": "files", "needs_ask": False, "args": {"text": text}, "host": "local"}
+    if SAFARI_ACT_RE.search(text) and not SEE_RE.search(text):
+        return {"verb": "safari", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if STATUS_RE.search(text):
         return {"verb": "status", "needs_ask": False, "args": {"text": text}, "host": "online"}
     if CAL_RE.search(text):
@@ -426,20 +531,23 @@ def talk_cursor_mode(harness_mode: str, utterance: str) -> str:
         return "plan"
     if mode == "ask":
         return "ask"
-    if SKILL_RE.search(utterance or "") or REPO_RE.search(utterance or ""):
+    if SKILL_RE.search(utterance or "") or REPO_RE.search(utterance or "") or BUILD_RE.search(utterance or ""):
         return "agent"
-    if re.search(r"\b(edit the|implement|change the code|run (?:this )?skill)\b", utterance or "", re.I):
+    if re.search(r"\b(edit the|implement|change the code|run (?:this )?skill|run (?:the )?workflow)\b", utterance or "", re.I):
         return "agent"
     return "ask"
 
 
-def _pack_harness(utterance: str, context: str, *, mode: str, see: str = "", skill_slug: str = "") -> str:
+def _pack_harness(
+    utterance: str, context: str, *, mode: str, see: str = "", skill_slug: str = "", build_kind: str = ""
+) -> str:
     lead = (
         "Speak as Jarvis to Evens on the local voice face. "
         "Two to four spoken sentences. Finish the last sentence. Under 70 words. "
         f"Cursor harness mode: {mode}. "
         "Skills SSOT: scripts/hive/grok-skills/ and .cursor/skills/ — read one SKILL.md when the job matches. "
-        "Safari on this Mac is already in See if present. Not Chrome. "
+        "Do not spawn Grok Bot. You already have the same catalog. "
+        "Safari on this Mac is already logged in. Use that session. Not Chrome. "
         "Hard steps (send/pay/deploy/book/publish) stay Evens. No yolo.\n"
     )
     if mode == "ask":
@@ -452,7 +560,16 @@ def _pack_harness(utterance: str, context: str, *, mode: str, see: str = "", ski
     extra = (context or "").strip()
     if skill_slug:
         path = SKILLS_DIR / f"{skill_slug}.md"
-        extra = f"Load skill {skill_slug} from {path}.\n\n{extra}"
+        extra = f"Load skill {skill_slug} from {path}. Run it here. Do not spawn Grok Bot.\n\n{extra}"
+    if build_kind:
+        dest = "scripts/hive/grok-skills/<slug>.md" if build_kind == "skill" else (
+            "workflows/" if build_kind == "workflow" else "apps/agent-stack/"
+        )
+        extra = (
+            f"Build a new {build_kind} in {dest}. Same catalog Grok Bot mirrors. "
+            "Do not spawn Grok Bot. Do not send, pay, deploy, book, or publish.\n\n"
+            f"{extra}"
+        )
     if see:
         extra = f"{see}\n\n{extra}"
     if extra:
@@ -483,8 +600,11 @@ def _call_brain(
     mode: str,
     see: str = "",
     skill_slug: str = "",
+    build_kind: str = "",
 ) -> dict:
-    packed = _pack_harness(utterance, context, mode=mode, see=see, skill_slug=skill_slug)
+    packed = _pack_harness(
+        utterance, context, mode=mode, see=see, skill_slug=skill_slug, build_kind=build_kind
+    )
     if cursor_fn is not None:
         return _call_cursor_harness(packed, cursor_fn, resume, mode)
     if grok is not None:
@@ -685,8 +805,39 @@ def apply_turn_iter(
             return
         yield finish(narration)
         return
+    if verb == "can":
+        yield finish(capabilities_spoken())
+        return
     if verb == "skills":
-        yield finish("Hive skills: " + ", ".join(list_skills()) + ".")
+        yield finish(skills_spoken())
+        return
+    if verb == "life":
+        got = RETRIEVE.life_card(retrieve_roots)
+        cites = got.get("cites") if isinstance(got.get("cites"), list) else []
+        wires = ["life"]
+        yield finish(str(got.get("spoken") or "UNKNOWN. Life card is empty."), host="local")
+        return
+    if verb == "files":
+        fn = FILES.search_files if FILES is not None else None
+        if fn is None:
+            narration = "UNKNOWN. Local file wire is not loaded."
+            wires = ["files"]
+        else:
+            got = fn(spoken)
+            narration = str(got.get("spoken") or "UNKNOWN. Local file search returned nothing.")
+            wires = [got.get("wire") or "files"]
+            cites = got.get("hits") if isinstance(got.get("hits"), list) else []
+        yield finish(narration, host="local")
+        return
+    if verb == "safari":
+        if SEE is None:
+            narration = "UNKNOWN. Safari wire is not loaded."
+            wires = ["safari"]
+        else:
+            got = SEE.safari_act(spoken)
+            narration = str(got.get("spoken") or "UNKNOWN. Safari returned nothing.")
+            wires = [got.get("wire") or "safari"]
+        yield finish(narration, host="local")
         return
     if verb in {"calendar", "mail", "invoice"}:
         when = str(plan.get("args", {}).get("when") or "today")
@@ -735,7 +886,7 @@ def apply_turn_iter(
                 resume_chat = str(got.get("chat_id") or resume_chat or "").strip() or resume_chat
         yield finish(narration)
         return
-    if verb != "converse":
+    if verb not in {"converse", "skill", "build"}:
         yield finish("Holding. Say Jarvis, or tap Space.")
         return
 
@@ -749,10 +900,13 @@ def apply_turn_iter(
         harness_mode=harness_mode,
     )
     context, cites, _vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
-    skill_hit = SKILL_RE.search(spoken)
-    skill_slug = skill_hit.group(1).lower() if skill_hit else ""
+    skill_slug = str(plan.get("args", {}).get("slug") or "")
+    if not skill_slug:
+        skill_hit = SKILL_RE.search(spoken)
+        skill_slug = skill_hit.group(1).lower() if skill_hit else ""
+    build_kind = str(plan.get("args", {}).get("kind") or "") if verb == "build" else ""
     see = _see_pack(spoken, hive, see_fn)
-    cursor_mode = talk_cursor_mode(harness_mode, spoken)
+    cursor_mode = "agent" if verb in {"skill", "build"} else talk_cursor_mode(harness_mode, spoken)
     resume_chat, resume_field = _pick_resume(bus_now, cursor_mode, cursor_fn, grok)
     use_stream = (
         cursor_fn is None
@@ -761,7 +915,9 @@ def apply_turn_iter(
         and hasattr(ONLINE, "call_cursor_turn_iter")
     )
     if use_stream:
-        packed = _pack_harness(spoken, context, mode=cursor_mode, see=see, skill_slug=skill_slug)
+        packed = _pack_harness(
+            spoken, context, mode=cursor_mode, see=see, skill_slug=skill_slug, build_kind=build_kind
+        )
         buf = ""
         spoken_parts: list[str] = []
         got_done: dict | None = None
@@ -828,6 +984,7 @@ def apply_turn_iter(
         mode=cursor_mode,
         see=see,
         skill_slug=skill_slug,
+        build_kind=build_kind,
     )
     if got.get("cancelled"):
         narration = "Stopped. Standing by."

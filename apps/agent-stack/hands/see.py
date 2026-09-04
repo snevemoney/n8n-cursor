@@ -18,6 +18,18 @@ ROOT = Path(__file__).resolve().parents[3]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 SEE_NAME = "see.jpg"
 HTTP_RE = re.compile(r"^https?://", re.I)
+HARD_CLICK = re.compile(
+    r"\b("
+    r"send|pay|deploy|book|publish|checkout|buy now|place order|"
+    r"confirm purchase|submit payment|transfer"
+    r")\b",
+    re.I,
+)
+OPEN_RE = re.compile(r"\bopen\s+(https?://\S+)", re.I)
+CLICK_RE = re.compile(r"\b(?:click|tap|press)\s+(?:the\s+)?(.+?)(?:\s+button|\s+link)?\s*$", re.I)
+TYPE_RE = re.compile(r"\b(?:type|enter|fill)\s+(.+)$", re.I)
+SCROLL_RE = re.compile(r"\bscroll\b", re.I)
+TABS_RE = re.compile(r"\b(tabs?|what(?:'s|s| is) open in safari)\b", re.I)
 
 
 def _run(argv: list[str], timeout: float = 12.0) -> subprocess.CompletedProcess[str]:
@@ -66,6 +78,170 @@ def safari_open(url: str) -> dict:
         err = (proc.stderr or "").strip()[:160]
         return {"ok": False, "wire": "safari", "spoken": f"UNKNOWN. Safari open failed. {err}"}
     return {"ok": True, "wire": "safari", "spoken": f"Opened in Safari. {target}", "url": target}
+
+
+def safari_tabs() -> dict:
+    """List front Safari tabs. Uses the logged-in Safari. Cap 8."""
+    script = (
+        'tell application "Safari"\n'
+        "  if (count of windows) is 0 then return \"NONE\"\n"
+        "  set bits to {}\n"
+        "  repeat with w in windows\n"
+        "    repeat with t in tabs of w\n"
+        '      set end of bits to (name of t as text) & " | " & (URL of t as text)\n'
+        "    end repeat\n"
+        "  end repeat\n"
+        "  if (count of bits) is 0 then return \"NONE\"\n"
+        "  set AppleScript's text item delimiters to linefeed\n"
+        "  return bits as text\n"
+        "end tell\n"
+    )
+    try:
+        proc = _run(["osascript", "-e", script], timeout=8.0)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"ok": False, "unknown": True, "wire": "safari", "tabs": [], "spoken": f"UNKNOWN. Safari tabs failed: {exc}."}
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout or "Safari not allowed").strip()[:160]
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "tabs": [],
+            "spoken": f"UNKNOWN. Safari is dark. Allow Terminal to control Safari. {err}",
+        }
+    raw = (proc.stdout or "").strip()
+    if not raw or raw == "NONE":
+        return {"ok": True, "wire": "safari", "tabs": [], "spoken": "Safari has no tabs."}
+    tabs = [ln.strip() for ln in raw.splitlines() if ln.strip()][:8]
+    spoken = "Safari tabs: " + "; ".join(tabs[:4])
+    if len(tabs) > 4:
+        spoken += f". Plus {len(tabs) - 4} more."
+    else:
+        spoken += "."
+    return {"ok": True, "unknown": False, "wire": "safari", "tabs": tabs, "spoken": spoken}
+
+
+def safari_js(js: str) -> dict:
+    """Run JavaScript in the front Safari tab. Same session, same logins. Not Chrome."""
+    body = (js or "").strip()
+    if not body:
+        return {"ok": False, "unknown": True, "wire": "safari", "spoken": "UNKNOWN. Safari JS was empty."}
+    script = (
+        'tell application "Safari"\n'
+        "  if (count of windows) is 0 then return \"NONE\"\n"
+        f"  set r to do JavaScript {json.dumps(body)} in current tab of front window\n"
+        "  if r is missing value then return \"OK\"\n"
+        "  return r as text\n"
+        "end tell\n"
+    )
+    try:
+        proc = _run(["osascript", "-e", script], timeout=8.0)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"ok": False, "unknown": True, "wire": "safari", "spoken": f"UNKNOWN. Safari JavaScript failed: {exc}."}
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout or "JS not allowed").strip()[:160]
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "spoken": f"UNKNOWN. Safari JavaScript is dark. Enable Develop → Allow JavaScript from Apple Events. {err}",
+        }
+    raw = (proc.stdout or "").strip() or "OK"
+    if raw == "NONE":
+        return {"ok": False, "unknown": True, "wire": "safari", "spoken": "UNKNOWN. Safari has no window."}
+    return {"ok": True, "unknown": False, "wire": "safari", "result": raw, "spoken": f"Safari did it. {raw}"[:240]}
+
+
+def safari_click(label: str) -> dict:
+    target = (label or "").strip()
+    if not target:
+        return {"ok": False, "unknown": True, "wire": "safari", "spoken": "UNKNOWN. Say what to click in Safari."}
+    if HARD_CLICK.search(target):
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "spoken": "I will not click send, pay, deploy, book, or publish. That stay with you.",
+        }
+    js = (
+        "(function(){var t=%s;var nodes=Array.prototype.slice.call("
+        "document.querySelectorAll('a,button,input,[role=button],label'));"
+        "var el=nodes.find(function(n){var s=((n.innerText||n.value||n.getAttribute('aria-label')||'')+'')"
+        ".toLowerCase();return s.indexOf(t)>=0;});"
+        "if(!el)return 'NONE';el.click();return 'OK '+t;})()"
+        % json.dumps(target.lower())
+    )
+    got = safari_js(js)
+    if got.get("result") == "NONE":
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "spoken": f"UNKNOWN. Safari found no control named {target}. I will not invent a click.",
+        }
+    if got.get("ok"):
+        got["spoken"] = f"Clicked {target} in Safari."
+    return got
+
+
+def safari_type(text: str) -> dict:
+    value = (text or "").strip()
+    if not value:
+        return {"ok": False, "unknown": True, "wire": "safari", "spoken": "UNKNOWN. Say what to type in Safari."}
+    if HARD_CLICK.search(value) and re.search(r"\b(send|pay|deploy|publish)\b", value, re.I):
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "spoken": "I will not type a send or pay action. That stay with you.",
+        }
+    js = (
+        "(function(){var v=%s;var el=document.activeElement;"
+        "if(!el||!('value' in el)){"
+        "el=document.querySelector('input:not([type=hidden]),textarea,[contenteditable=true]');}"
+        "if(!el)return 'NONE';"
+        "if('value' in el){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));}"
+        "else{el.textContent=v;}return 'OK';})()"
+        % json.dumps(value[:500])
+    )
+    got = safari_js(js)
+    if got.get("result") == "NONE":
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "spoken": "UNKNOWN. Safari has no field to type into.",
+        }
+    if got.get("ok"):
+        got["spoken"] = "Typed in the front Safari field."
+    return got
+
+
+def safari_scroll(direction: str = "down") -> dict:
+    dy = -600 if str(direction or "").lower() == "up" else 600
+    got = safari_js(f"window.scrollBy(0,{dy}); 'OK';")
+    if got.get("ok"):
+        got["spoken"] = f"Scrolled {('up' if dy < 0 else 'down')} in Safari."
+    return got
+
+
+def safari_act(utterance: str) -> dict:
+    """Route a spoken Safari action onto the logged-in Safari. Not Chrome. Not Grok Bot."""
+    text = (utterance or "").strip()
+    open_hit = OPEN_RE.search(text)
+    if open_hit:
+        return safari_open(open_hit.group(1).rstrip(".,)"))
+    if TABS_RE.search(text) and not CLICK_RE.search(text):
+        return safari_tabs()
+    click_hit = CLICK_RE.search(text)
+    if click_hit:
+        return safari_click(click_hit.group(1).strip(" ."))
+    if SCROLL_RE.search(text):
+        return safari_scroll("up" if re.search(r"\bup\b", text, re.I) else "down")
+    type_hit = TYPE_RE.search(text)
+    if type_hit:
+        return safari_type(type_hit.group(1).strip(" ."))
+    return safari_front()
 
 
 def grab_screen(hive: Path) -> dict:

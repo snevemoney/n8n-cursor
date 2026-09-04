@@ -172,6 +172,9 @@ def wire_report() -> dict:
             "calendar": "macos",
             "mail": "macos",
             "invoice": "vault",
+            "safari": "macos",
+            "files": "mdfind",
+            "catalog": "grok-skills",
         },
         "need": [] if agent_cmd() else ["Cursor agent CLI"],
     }
