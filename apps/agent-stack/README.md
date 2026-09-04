@@ -2,7 +2,7 @@
 
 Sittings of the fullstack-agent **pattern** port. Original MIT code. Not a fork.
 
-Face on `127.0.0.1:4018` is Jared's visualizer from tape `FiOTrxq9ckM` stills: a living green circuit board you talk to. First tap/Space arms the mic (Chrome). Chip says LISTENING when it can hear. Say JARVIS. Not an Observe card. Not a Mouth / Hold Home dashboard.
+Face on `127.0.0.1:4018` is Jared's visualizer from tape `FiOTrxq9ckM` stills: a living green circuit board you talk to. First tap/Space arms the mic in Safari. Chip says LISTENING when it can hear. Say JARVIS. Not an Observe card. Not a Mouth / Hold Home dashboard.
 
 - **Face (local):** full-bleed PCB HUD + mic + TTS on this 8GB Mac only. Original canvas. Not vendored `ai-visualizer`.
 - **Brain (online):** listen → decide → CALL Grok / hive / VPS / Cursor → speak the reply. Vault retrieve is extra context, not the product memory.
@@ -27,7 +27,7 @@ open http://127.0.0.1:4018/
 
 1. Export `XAI_API_KEY` or `GROK_API_KEY` (xAI chat). Optional: `GROK_MODEL` (default `grok-4`).
 2. Keep hive HTTP up (`evenslouis.ca` golden-paths / healthz). SSH `HIVE_VPS_SSH` (default `root@69.62.66.78`) for VPS status.
-3. Open Chrome on `http://127.0.0.1:4018/`. HUD should read **NEURAL LINK - GROK LIVE**.
+3. Open Safari on `http://127.0.0.1:4018/` and hard-refresh. HUD should read **NEURAL LINK - GROK LIVE**.
 4. Say **JARVIS**, then a question (“what should I work on”) or “what's the VPS status”.
 5. The chip speaks the Grok / hive / VPS reply. If a key is missing it says **UNKNOWN** and names the wire.
 

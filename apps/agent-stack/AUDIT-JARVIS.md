@@ -258,6 +258,16 @@ Done-check for this sitting: casual / joke / follow-up "that" / project / correc
 
 ---
 
-## What this sitting will patch (after this file commits)
+## What this sitting patched (after the audit commit)
 
-`mouth/turn.py` · `face/pane.html` · `face/serve.py` / tests **only as required** for 1–4 + Safari. Then verify through the real runtime.
+Files: `mouth/turn.py` · `mouth/test_turn.py` · `face/pane.html` · `face/serve.py` · `face/test_serve.py` · `face/DESIGN-FACE.md` · `README.md`.
+
+1. **Natural conversation** — `hey` / `yes` / jokes / `send me a joke` / corrections go to `converse`. `HARD_REFUSE` only matches real hard-step intent (`send this email` still refuses). `STATUS_RE` no longer steals every “hive/cursor” sentence.
+2. **Conversational context** — last 8 `{user, jarvis}` turns live on the bus and are prepended into the existing Grok `context` string. Follow-up `that` has an antecedent.
+3. **Relevant memory** — vault snippets attach only when the query has ≥2 tokens and a score ≥4. Dark Grok **names the wire**; it does not speak a random `ASKS.md` cite as Jarvis.
+4. **Identity** — every converse turn attaches Jarvis / Evens Louis plus north-star retrieve hits.
+5. **Safari / #178 voice** — deleted every “Use Chrome” string. Type fallback stays. `speechSynthesis` picks English Daniel / en-GB. CLI `say` is Daniel. Hard-refresh in Safari.
+
+Not patched (parked on purpose): tools, desk spawn, Ollama #177, Tarquin `/api/tts` (stays on #178), 4017.
+
+**Verify (this machine):** unit + self-test green. Real `apply_turn` + `POST /api/turn` + `python3 mouth/turn.py "hey"`: casual / joke / `that` / project / correction = `converse` + `ask:false`. `send this email` = refuse. No `XAI_API_KEY` in this worker → spoken UNKNOWN names the Grok wire (correct). Evens: export the key, Safari hard-refresh `http://127.0.0.1:4018/`.

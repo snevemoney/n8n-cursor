@@ -129,7 +129,53 @@
     const hasSR = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
     const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
+    let jarvisVoice = null;
+    const TTS_PREF = ["daniel", "arthur", "oliver", "reed", "alex", "gordon", "tom", "fred"];
     const ttsSpeaking = () => !!(synth && synth.speaking);
+
+    function voiceLang(v) {
+      return String((v && v.lang) || "").toLowerCase().replace(/_/g, "-");
+    }
+    function voiceName(v) {
+      return String((v && v.name) || "").toLowerCase();
+    }
+    function isFrenchVoice(v) {
+      const lang = voiceLang(v);
+      const name = voiceName(v);
+      return lang.startsWith("fr") || /french|fran[cç]ais|am[eé]lie|jacques/.test(name);
+    }
+    function isEnglishVoice(v) {
+      return voiceLang(v).startsWith("en") && !isFrenchVoice(v);
+    }
+    function scoreVoice(v) {
+      if (!v || isFrenchVoice(v) || !isEnglishVoice(v)) return -1;
+      const name = voiceName(v);
+      const lang = voiceLang(v);
+      let s = 10;
+      if (lang.startsWith("en-gb")) s += 40;
+      else if (lang.startsWith("en-us")) s += 25;
+      TTS_PREF.forEach((p, i) => { if (name.includes(p)) s += 50 - i; });
+      if (/male/.test(name)) s += 8;
+      if (/samantha|karen|kathy|moira|fiona|victoria|female/.test(name)) s -= 8;
+      return s;
+    }
+    function pickEnglishVoice() {
+      if (!synth) return null;
+      const voices = synth.getVoices() || [];
+      let best = null;
+      let bestScore = -1;
+      voices.forEach((v) => {
+        const s = scoreVoice(v);
+        if (s > bestScore) { best = v; bestScore = s; }
+      });
+      jarvisVoice = best;
+      return best;
+    }
+    if (synth) {
+      pickEnglishVoice();
+      if (typeof synth.addEventListener === "function") synth.addEventListener("voiceschanged", pickEnglishVoice);
+      else synth.onvoiceschanged = pickEnglishVoice;
+    }
 
     function paintPhase(phase) {
       state.phase = phase || "idle";
@@ -158,6 +204,9 @@
       if (!text || !synth) return;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-GB";
+      const voice = jarvisVoice || pickEnglishVoice();
+      if (voice && !isFrenchVoice(voice)) u.voice = voice;
       u.rate = 1.02;
       u.onstart = () => paintPhase("speak");
       u.onend = () => {
@@ -219,7 +268,7 @@
     function showTypeFallback(line) {
       $("spoken").textContent = line;
       $("typed").classList.add("on");
-      $("hint").textContent = "USE CHROME · OR TYPE";
+      $("hint").textContent = "TYPE AND ENTER · OR TAP THE BOARD";
     }
 
     async function holdMic() {
@@ -232,7 +281,7 @@
     function startListen() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
-        showTypeFallback("Use Chrome to talk. Type here is a fallback.");
+        showTypeFallback("Type here, or tap the board and allow the microphone.");
         return;
       }
       if (!state.live || !state.armed) return;
@@ -269,11 +318,11 @@
           state.armed = false;
           state.listening = false;
           state.starting = false;
-          showTypeFallback("Allow the microphone, then tap the board. Use Chrome if this is Safari.");
+          showTypeFallback("Allow the microphone, then tap the board.");
           return;
         }
         if (err === "network") {
-          showTypeFallback("Chrome speech needs network. Type is a fallback.");
+          showTypeFallback("Speech needs network. Type is a fallback.");
           return;
         }
         if (err === "aborted") state.failStreak += 1;
@@ -311,13 +360,9 @@
         return;
       }
       if (!hasSR()) {
-        showTypeFallback("Use Chrome to talk. Type here is a fallback.");
+        showTypeFallback("Type here, or tap the board and allow the microphone.");
         state.armed = true;
         return;
-      }
-      if (isSafari) {
-        $("spoken").textContent = "Use Chrome to talk — Safari speech is flaky. Type is a fallback.";
-        $("typed").classList.add("on");
       }
       state.arming = true;
       try {
@@ -512,7 +557,7 @@
       refresh();
       setInterval(refresh, 4000);
       if (!hasSR()) {
-        showTypeFallback("Use Chrome to talk. Type here is a fallback.");
+        showTypeFallback("Type here, or tap the board and allow the microphone.");
         return;
       }
       let granted = false;

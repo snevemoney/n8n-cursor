@@ -215,9 +215,10 @@ def self_test() -> dict:
             html = home.read().decode("utf-8")
             code = home.status
         banned = ("Desk · Face", "<h2>Observe</h2>", "<h2>Mouth</h2>", "Hold Home", "Hold Talk")
-        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "holdMic", "RESTART_MIN", "Use Chrome", "/api/wires")
-        if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned):
-            return {"ok": False, "errors": ["GET / missing tape visualizer"], "status": code}
+        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR", "getUserMedia", "holdMic", "RESTART_MIN", "pickEnglishVoice", "en-GB", "/api/wires")
+        banned_chrome = ("Use Chrome", "Safari speech is flaky")
+        if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned) or any(token in html for token in banned_chrome):
+            return {"ok": False, "errors": ["GET / missing tape visualizer or still tells him Chrome"], "status": code}
         with urllib.request.urlopen(f"http://{HOST}:{port}/api/wires", timeout=2) as wires_res:
             wires = json.loads(wires_res.read().decode("utf-8"))
         if not wires.get("ok") or wires.get("ollama") != "refused":

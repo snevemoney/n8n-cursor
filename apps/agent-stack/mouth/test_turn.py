@@ -71,7 +71,7 @@ class MouthTurnTest(unittest.TestCase):
         self.assertNotIn("May I hand this to the", text)
 
     def test_normal_sentences_converse_no_ask_no_queue(self) -> None:
-        lines = ("what's my north star", "hey how are you", "remember this")
+        lines = ("what's my north star", "hey how are you", "hey", "remember this", "send me a joke")
         with tempfile.TemporaryDirectory(prefix="agent-stack-converse-") as tmp:
             hive = Path(tmp)
             (hive / "bus").mkdir()
@@ -125,7 +125,8 @@ class MouthTurnTest(unittest.TestCase):
                 grok=dark,
             )
             self.assertFalse(vaulted["ask"])
-            self.assertIn("leverage", (vaulted["spoken"] or "").lower())
+            self.assertIn("I can't reach Grok", vaulted["spoken"])
+            self.assertIn("XAI_API_KEY", vaulted["spoken"])
             _no_desk_ask(vaulted["spoken"])
 
             empty = hive / "empty"
@@ -141,6 +142,66 @@ class MouthTurnTest(unittest.TestCase):
             self.assertIn("XAI_API_KEY", missing["spoken"])
             _no_desk_ask(missing["spoken"])
             self.assertFalse((hive / "bus" / "jobs.jsonl").is_file())
+
+    def test_follow_up_sends_history_and_identity(self) -> None:
+        seen: list[str] = []
+
+        def rec_grok(prompt: str, context: str = "") -> dict:
+            seen.append(context)
+            return {
+                "ok": True,
+                "unknown": False,
+                "wire": "grok",
+                "engine": "xai",
+                "spoken": f"Grok says {prompt[:60]}",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-hist-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            (hive / "agent-stack.json").write_text('{"operator": "Evens"}\n', encoding="utf-8")
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text(
+                "Four north stars start with maximum leverage, minimum noise.\n",
+                encoding="utf-8",
+            )
+            first = MOD.apply_turn(
+                "tell me a joke about bitcoin",
+                hive=hive,
+                retrieve_roots=[vault],
+                grok=rec_grok,
+            )
+            self.assertEqual(first["verb"], "converse")
+            follow = MOD.apply_turn(
+                "that was terrible",
+                hive=hive,
+                retrieve_roots=[vault],
+                grok=rec_grok,
+            )
+            self.assertEqual(follow["verb"], "converse")
+            self.assertFalse(follow["ask"])
+            ctx = seen[-1]
+            self.assertIn("tell me a joke about bitcoin", ctx)
+            self.assertIn("Identity", ctx)
+            self.assertIn("Evens", ctx)
+            _no_desk_ask(follow["spoken"])
+
+    def test_correction_and_project_stay_converse(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-corr-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            vault = hive / "vault"
+            vault.mkdir()
+            (vault / "OPERATOR_MEMORY.md").write_text(
+                "Four north stars start with maximum leverage, minimum noise.\n",
+                encoding="utf-8",
+            )
+            for line in ("no I meant the website lane", "what's my north star"):
+                out = MOD.apply_turn(line, hive=hive, retrieve_roots=[vault], grok=_fake_grok)
+                self.assertEqual(out["verb"], "converse", line)
+                self.assertFalse(out["ask"], line)
+                _no_desk_ask(out["spoken"])
 
 
 if __name__ == "__main__":
