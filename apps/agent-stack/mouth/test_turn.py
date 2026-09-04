@@ -841,7 +841,7 @@ class MouthTurnTest(unittest.TestCase):
         self.assertNotIn("ask-log.py", out["spoken"])
         self.assertNotIn("709 asks", out["spoken"])
         self.assertNotIn("do not hand-edit", out["spoken"].lower())
-            self.assertIn("Say the line again", out["spoken"])
+        self.assertIn("Say the line again", out["spoken"])
 
     def test_spoken_line_is_butler_not_debugger(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-butler-") as tmp:
