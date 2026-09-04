@@ -45,6 +45,7 @@ class AgentStackAdoptTest(unittest.TestCase):
         self.assertEqual(stack["permission_mode"], "ask")
         self.assertEqual(stack["pieces"]["memory"], "adopted")
         self.assertEqual(stack["pieces"]["mouth"], "parked")
+        self.assertTrue(stack["session_brief"].endswith("BRIEF-2026-08-14-to-2026-09-04.md"))
         self.assertFalse((self.hive / "CLAUDE.md").exists())
 
     def test_validate_rejects_missing_vault_path(self) -> None:

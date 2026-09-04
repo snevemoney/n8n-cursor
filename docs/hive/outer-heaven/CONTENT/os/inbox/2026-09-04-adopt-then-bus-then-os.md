@@ -12,6 +12,7 @@
 - File bus: `docs/hive/outer-heaven/.hive/bus/state.json` (idle|listen|think|speak + observe-pane job_status).
 - Existing face surface stays `apps/portfolio/public/obsidianOS`. Do not clone a circuit-board OS.
 - Grok Stage-5 PDF CapEx (`run-agentic-eval.py` / `harness-ci.sh`) is a different slice. Live `/` HOLD.
+- 3-week session law lives at `CONTENT/os/sessions/BRIEF-2026-08-14-to-2026-09-04.md`. Read that before one-brain / harness / face work.
 
 ## Index rows (append to the live indexes when those files are clean)
 

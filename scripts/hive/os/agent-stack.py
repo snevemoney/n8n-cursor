@@ -74,6 +74,8 @@ def default_stack(vault: dict | None = None, *, hive: Path = HIVE) -> dict:
         "jobs_path": str((OS_DIR / "jobs.json").resolve()),
         "state_path": str((hive / "state.json").resolve()),
         "os_surface": "apps/portfolio/public/obsidianOS",
+        "session_brief": "docs/hive/outer-heaven/CONTENT/os/sessions/BRIEF-2026-08-14-to-2026-09-04.md",
+        "session_index": "docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md",
         "pieces": {
             "memory": "adopted",
             "wizard": "wired",
