@@ -3,6 +3,7 @@
 
 Wit never delays a hand. Never invent a repeat. Never take blame.
 Never say waiting-for. Address the operator as Sir regardless of title.
+The spoken line is for Sir. Factory internals stay in the bus.
 """
 from __future__ import annotations
 
@@ -35,6 +36,56 @@ DUMP_RE = re.compile(
 )
 DUMP_SPOKEN = "I will not read a file dump aloud."
 
+# Factory talk Sir must never hear. Hands still execute; this is the mouth only.
+FACTORY_PHRASE = (
+    (
+        re.compile(r"Safari scrolled \w+ with (?:page keys|JavaScript)", re.I),
+        "I scrolled the tab",
+    ),
+    (
+        re.compile(r"Safari grabbed the front tab(?: at \S+)?", re.I),
+        "I grabbed the front tab",
+    ),
+    (re.compile(r"Screen saved at \S+", re.I), "I grabbed the screen"),
+    (re.compile(r"Cited \S+\.?", re.I), ""),
+    (re.compile(r"\bas requested\.?", re.I), ""),
+    (re.compile(r"\bpath\s*=\s*\w+", re.I), ""),
+    (re.compile(r"\bsafari_act\b", re.I), ""),
+    (re.compile(r"\bcgevent\b", re.I), ""),
+    (re.compile(r"\bpage keys\b", re.I), ""),
+    (re.compile(r"\bosascript\b", re.I), ""),
+    (re.compile(r"\bapplescript\b", re.I), ""),
+    (re.compile(r"\bapple events?\b", re.I), ""),
+    (re.compile(r"JavaScript from Apple Events[^.]*\.?", re.I), ""),
+    (
+        re.compile(r"Enable Develop\s*[→\-].*?Apple Events\.?", re.I),
+        "",
+    ),
+    (re.compile(r"\bHID\b"), ""),
+    (re.compile(r"\bPID\s*\d+\b", re.I), ""),
+    (re.compile(r"\bPR\s*#?\d+\b", re.I), ""),
+    (re.compile(r"ASKS\.md", re.I), ""),
+    (re.compile(r"SKILL\.md", re.I), ""),
+    (re.compile(r"ask-log\.py", re.I), ""),
+    (re.compile(r"scars?\.jsonl", re.I), ""),
+    (re.compile(r"\bscar\s+[\w-]+", re.I), "the logged error"),
+    (re.compile(r"cursor-auth-dark", re.I), ""),
+    (re.compile(r"%%[^%]*%%"), ""),
+    (re.compile(r">\s*\[![^\]]+\][^\n]*"), ""),
+    (re.compile(r"\{[^{}]{8,}\}"), ""),
+    (re.compile(r"127\.0\.0\.1:4018\S*", re.I), ""),
+    (
+        re.compile(
+            r"(?:(?:/Users|/home|/tmp|/var|/opt|~/|[A-Za-z]:\\)[\w./\\-]+|"
+            r"(?:apps|scripts|docs|CONTENT|packages)/[\w./-]+)"
+        ),
+        "",
+    ),
+    (re.compile(r"\b(?:mouth|hands|brain)/[\w./-]+\.py\b", re.I), ""),
+    (re.compile(r"\bclassified as\b", re.I), ""),
+    (re.compile(r"\bclassify(?:\s+verb)?\b", re.I), ""),
+)
+
 FAILURE_TEMPLATE = (
     "Ah, it seems something went wrong. Naturally, it isn't my fault, sir, "
     "but I shall investigate regardless."
@@ -59,12 +110,12 @@ WIT = {
     "today": "The store, not a mood.",
     "skills": "On-disk slugs only.",
     "status": "Wires, not vibes.",
-    "heal": "Scars first.",
+    "heal": "Logged.",
     "make": "A skill on disk, or UNKNOWN.",
     "invoice": "Vault retrieve only.",
     "build": "Building it now.",
     "skill": "Loading the slug.",
-    "converse": "As requested.",
+    "converse": "Then.",
     "refuse": "That stays with you.",
     "stop": "Noted.",
     "greet": "Present.",
@@ -84,7 +135,7 @@ REPEAT_WIT = {
     "files": "The disk again, sir. Something may have moved. Unlikely, but possible.",
 }
 
-DEFAULT_WIT = "As requested."
+DEFAULT_WIT = "Done."
 
 
 def normalize_ask(text: str) -> str:
@@ -132,15 +183,27 @@ def is_dump(text: str) -> bool:
     return False
 
 
+def strip_factory(text: str) -> str:
+    """Drop debugger crumbs. Keep the human result."""
+    body = (text or "").strip()
+    if not body:
+        return ""
+    for pat, repl in FACTORY_PHRASE:
+        body = pat.sub(repl, body)
+    body = SPACE_RE.sub(" ", body).strip()
+    body = re.sub(r"\s+([,.;:])", r"\1", body)
+    body = re.sub(r"\.\s*\.", ".", body)
+    return SPACE_RE.sub(" ", body).strip()
+
+
 def sanitize_payload(text: str) -> str:
-    """Drop dump headers. Keep a real sentence if one survives."""
+    """Drop dump headers and factory leaks. Keep a real sentence if one survives."""
     body = (text or "").strip()
     if not body:
         return ""
     if is_dump(body):
         return ""
-    body = re.sub(r"%%[^%]+%%", " ", body)
-    body = re.sub(r">\s*\[![^\]]+\][^\n]*", " ", body)
+    body = strip_factory(body)
     return SPACE_RE.sub(" ", body).strip()
 
 
@@ -208,13 +271,14 @@ def wrap(
     payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
     if not payload:
         return payload
-    if ALREADY_WRAPPED_RE.match(payload) or FAILURE_TEMPLATE in payload:
+    payload = strip_factory(payload)
+    if not payload:
         return payload
+    if ALREADY_WRAPPED_RE.match(payload) or FAILURE_TEMPLATE in payload:
+        return strip_factory(payload)
     if is_failure(payload):
         return f"{FAILURE_TEMPLATE} {payload}"
     repeat = proven_repeat(utterance, turns, store_lines, scars, verb)
-    if verb == "safari" and not repeat:
-        return f"Sir. {payload}"
     beat = witty_beat(verb, repeat=repeat)
     if payload.lower().startswith(beat.lower()):
         return f"Sir. {payload}"
@@ -240,4 +304,4 @@ def stream_delta(
         return ""
     if first:
         return wrap(payload, verb=verb, utterance=utterance, turns=turns, store_lines=store_lines, scars=scars)
-    return strip_lead_sir(payload)
+    return strip_factory(strip_lead_sir(payload))

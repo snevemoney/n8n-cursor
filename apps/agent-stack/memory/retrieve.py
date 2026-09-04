@@ -205,12 +205,11 @@ def _answer(hits: list[dict]) -> dict:
         return {"ok": True, "hits": [], "unknown": True, "spoken": "I don't have that in the vault. UNKNOWN."}
     first = hits[0]["snippet"]
     spoken = first if len(first) <= 180 else first[:177].rsplit(" ", 1)[0] + "…"
-    cite = hits[0]["path"]
     return {
         "ok": True,
         "hits": hits,
         "unknown": False,
-        "spoken": f"{spoken} Cited {cite}.",
+        "spoken": spoken,
     }
 
 

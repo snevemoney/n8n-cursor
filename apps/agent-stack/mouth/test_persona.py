@@ -52,6 +52,7 @@ class PersonaWrapTest(unittest.TestCase):
             utterance="Hi Jarvis open YouTube",
         )
         self.assertTrue(out.startswith("Sir."))
+        self.assertIn("The tab, not the face.", out)
         self.assertIn("You asked to open YouTube", out)
         self.assertIn("https://www.youtube.com", out)
         self.assertNotIn("as requested", out.lower())
@@ -104,6 +105,27 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertIn("Do not invent a KPI.", second)
         self.assertEqual(third, first)
         self.assertNotIn("Sir. Sir.", first)
+
+    def test_factory_leaks_are_stripped(self) -> None:
+        raw = (
+            "path=cgevent safari_act as requested. "
+            "CGEvent page keys and Apple Events failed. "
+            "Cited CONTENT/os/ASKS.md. Scar cursor-auth-dark already saved. "
+            "Screen saved at /tmp/see.jpg. PR #200 PID 4018."
+        )
+        out = MOD.wrap(raw, verb="safari", utterance="scroll")
+        low = out.lower()
+        self.assertTrue(out.startswith("Sir."))
+        self.assertNotIn("cgevent", low)
+        self.assertNotIn("as requested", low)
+        self.assertNotIn("safari_act", low)
+        self.assertNotIn("apple events", low)
+        self.assertNotIn("ask-log", low)
+        self.assertNotIn("asks.md", low)
+        self.assertNotIn("cursor-auth-dark", low)
+        self.assertNotIn("/tmp/see.jpg", low)
+        self.assertNotIn("pr #200", low)
+        self.assertNotIn("pid 4018", low)
 
 
 if __name__ == "__main__":

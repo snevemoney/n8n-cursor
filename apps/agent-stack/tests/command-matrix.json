@@ -234,7 +234,7 @@
       "last_live": {
         "status": "quoted",
         "user": "Hi Jarvis open YouTube",
-        "jarvis": "Sir. Safari, as requested. Safari: J.A.R.V.I.S.. http://127.0.0.1:4018/",
+        "jarvis": "Sir. The tab, not the face. You asked to open YouTube. YouTube is open. https://www.youtube.com",
         "source": "docs/hive/outer-heaven/.hive/bus/state.json"
       }
     },
