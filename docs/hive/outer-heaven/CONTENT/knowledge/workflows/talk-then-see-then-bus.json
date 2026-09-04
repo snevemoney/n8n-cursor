@@ -1,0 +1,20 @@
+{
+  "workflow_id": "WF-talk-then-see-then-bus-v1",
+  "project_id": "talk-then-see-then-bus",
+  "version": 1,
+  "status": "compiled",
+  "steps": [
+    { "id": "T1", "title": "Adopt existing OS", "coverage": "have hive skill" },
+    { "id": "T2", "title": "Voice conductor self-test", "coverage": "have hive skill" },
+    { "id": "T3", "title": "Pane: talk + screenshare", "coverage": "have hive skill" },
+    { "id": "T4", "title": "ASK then queue browse/watch", "coverage": "have hive skill" },
+    { "id": "T5", "title": "Watchdog GRADE", "coverage": "HITL / desk" },
+    { "id": "T6", "title": "Hands / phone", "coverage": "parked" }
+  ],
+  "support_ids": ["CAP-talk-then-see-then-bus"],
+  "dissent_ids": [
+    "Claude Fable / Claude Code on tape are not hosts",
+    "Full computer takeover stays parked (hands)"
+  ],
+  "tape_id": "ud7wzdiM0gk"
+}

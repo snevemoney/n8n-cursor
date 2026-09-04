@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Desk · Voice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --void: #08090c;
+      --paper: #e9e4d8;
+      --cream: #f0eadd;
+      --ink: #171510;
+      --mute: rgba(233,228,216,.55);
+      --line: rgba(233,228,216,.14);
+      --glass: rgba(11,13,17,.58);
+      --rose: #c4674f;
+      --live: #7dcea0;
+      --amber: #e0a24a;
+      --ease: cubic-bezier(.25, 0, .3, 1);
+    }
+    * { box-sizing: border-box; }
+    :focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+    html, body { margin: 0; min-height: 100%; color: var(--paper); font-family: Outfit, system-ui, sans-serif; }
+    body {
+      background-color: var(--void);
+      background-image:
+        radial-gradient(1.1px 1.1px at 12% 18%, rgba(231,226,214,.45) 50%, transparent 51%),
+        radial-gradient(1px 1px at 78% 12%, rgba(231,226,214,.28) 50%, transparent 51%);
+    }
+    body::before {
+      content: "";
+      position: fixed; inset: auto -8% -10% 40%;
+      height: 36vh; border-radius: 50%;
+      background: rgba(220,228,240,.14);
+      filter: blur(48px); pointer-events: none;
+      animation: drift 40s var(--ease) infinite alternate;
+    }
+    @keyframes drift { to { transform: translate(-6vw, 4vh) scale(1.08); } }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 48px; position: relative; z-index: 1; }
+    header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .brand { font-family: Newsreader, Georgia, serif; letter-spacing: .04em; font-size: 22px; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--mute); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+    .dot.live { background: var(--live); }
+    .dot.yellow { background: var(--amber); }
+    a.util, button.util {
+      color: var(--paper); text-decoration: none; background: transparent;
+      border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: inherit; cursor: pointer;
+    }
+    a.util.on, button.util.on { border-color: var(--amber); color: var(--amber); }
+    .hero {
+      position: relative; border-radius: 24px; overflow: hidden;
+      border: 1px solid var(--line); background: var(--glass); min-height: 42vh;
+      box-shadow: 0 30px 80px rgba(0,0,0,.35);
+    }
+    video#share { width: 100%; height: 52vh; object-fit: cover; background: #050608; display: block; }
+    .arrow {
+      position: absolute; width: 28px; height: 28px; margin: -6px 0 0 -6px;
+      border-left: 3px solid var(--amber); border-bottom: 3px solid var(--amber);
+      transform: rotate(-45deg); pointer-events: none; display: none; filter: drop-shadow(0 0 8px var(--amber));
+    }
+    .cta {
+      position: absolute; left: 18px; top: 16px;
+      background: var(--rose); color: var(--cream); border: 0; border-radius: 999px;
+      padding: 10px 16px; font: 600 13px Outfit, sans-serif; cursor: pointer;
+    }
+    .grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; margin-top: 16px; }
+    .card {
+      border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; background: var(--glass);
+      backdrop-filter: blur(10px);
+    }
+    h2 { font-family: Newsreader, Georgia, serif; font-size: 22px; margin: 0 0 8px; }
+    p, li { color: var(--mute); font-size: 14px; line-height: 1.5; }
+    #log { max-height: 280px; overflow: auto; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    #talk {
+      min-width: 160px; min-height: 48px; border: 0; border-radius: 999px;
+      background: var(--paper); color: var(--ink); font: 650 15px Outfit, sans-serif; cursor: pointer;
+    }
+    #talk.hot { background: var(--rose); color: var(--cream); }
+    input#typed {
+      flex: 1; min-width: 200px; background: transparent; border: 1px solid var(--line);
+      border-radius: 999px; color: var(--paper); padding: 12px 14px; font: inherit;
+    }
+    .ask { border-color: var(--amber); }
+    .skills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skills button { font-size: 11px; }
+    @media (max-width: 820px) {
+      .grid { grid-template-columns: 1fr; }
+      video#share { height: 38vh; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">Desk · Voice</div>
+      <span class="pill"><i class="dot" id="dot"></i><span id="phase">idle</span></span>
+      <a class="util" href="./index.html">NOW</a>
+      <a class="util on" href="./voice.html">VOICE</a>
+    </header>
+
+    <section class="hero" id="hero">
+      <button class="cta" id="sharebtn" type="button">Share screen · talk</button>
+      <video id="share" autoplay muted playsinline></video>
+      <div class="arrow" id="arrow" aria-hidden="true"></div>
+    </section>
+
+    <div class="grid">
+      <article class="card">
+        <h2>Talk with the hive</h2>
+        <p>Hold talk. Barge in anytime. I use Cursor + Grok skills on this Mac — files, browse jobs, video watch. I ask before anything risky. I do not take the mouse.</p>
+        <div class="row">
+          <button type="button" id="talk">Hold to talk</button>
+          <input id="typed" placeholder="or type — list skills, read hot.md, watch a YouTube url" />
+          <button type="button" class="util" id="send">Send</button>
+        </div>
+        <p id="heard"></p>
+        <div id="askbox" class="card ask" hidden>
+          <p id="asktext"></p>
+          <button type="button" class="util on" id="yes">Yes · do it</button>
+        </div>
+        <div class="skills" id="skills"></div>
+      </article>
+      <article class="card">
+        <h2>Bus</h2>
+        <p>Voice writes little status notes. This face reads them.</p>
+        <div id="log"></div>
+      </article>
+    </div>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const state = { pending: null, stream: null, rec: null, listening: false };
+    const synth = window.speechSynthesis;
+
+    function speak(text) {
+      if (!text || !synth) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.02;
+      u.pitch = 0.95;
+      synth.speak(u);
+    }
+
+    function logLine(line) {
+      $("log").textContent = `${new Date().toLocaleTimeString()}  ${line}\n` + $("log").textContent;
+    }
+
+    async function api(path, body) {
+      const opt = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+      const res = await fetch(path, opt);
+      return res.json();
+    }
+
+    async function refresh() {
+      try {
+        const bus = await api("/api/bus");
+        $("phase").textContent = `${bus.phase || "idle"} · ${bus.job_status || ""}`;
+        $("dot").className = "dot" + (bus.job_status === "yellow" ? " yellow" : bus.phase === "listen" ? " live" : "");
+        if (bus.utterance) logLine(`${bus.phase}: ${bus.utterance}`);
+      } catch (err) {
+        $("phase").textContent = "server off — run voice-os.py serve";
+      }
+    }
+
+    async function turn(utterance, approved) {
+      if (!utterance) return;
+      await api("/api/bus", { phase: "listen", job_status: "working", utterance });
+      $("heard").textContent = utterance;
+      const note = $("share").srcObject ? "live screen is shared" : "";
+      const out = await api("/api/turn", { utterance, approved: !!approved, screen_note: note });
+      logLine(out.spoken || JSON.stringify(out));
+      speak(out.spoken || "");
+      if (out.ask) {
+        state.pending = utterance;
+        $("askbox").hidden = false;
+        $("asktext").textContent = out.spoken;
+      } else {
+        state.pending = null;
+        $("askbox").hidden = true;
+      }
+      refresh();
+    }
+
+    $("sharebtn").onclick = async () => {
+      try {
+        state.stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+        $("share").srcObject = state.stream;
+        $("sharebtn").textContent = "Screen live";
+        speak("I can see the shared screen. I will not take the mouse.");
+      } catch (err) {
+        logLine("screen share cancelled");
+      }
+    };
+
+    $("hero").onclick = (ev) => {
+      if (ev.target.id === "sharebtn") return;
+      const box = $("hero").getBoundingClientRect();
+      $("arrow").style.display = "block";
+      $("arrow").style.left = `${ev.clientX - box.left}px`;
+      $("arrow").style.top = `${ev.clientY - box.top}px`;
+    };
+
+    function startListen() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        $("heard").textContent = "No speech recognition in this browser — type instead.";
+        return;
+      }
+      synth.cancel();
+      state.rec = new SR();
+      state.rec.continuous = false;
+      state.rec.interimResults = true;
+      state.rec.onresult = (e) => {
+        const t = [...e.results].map((r) => r[0].transcript).join(" ");
+        $("heard").textContent = t;
+        if (e.results[e.results.length - 1].isFinal) turn(t, false);
+      };
+      state.rec.onerror = () => { state.listening = false; $("talk").classList.remove("hot"); };
+      state.rec.onend = () => { state.listening = false; $("talk").classList.remove("hot"); };
+      state.rec.start();
+      state.listening = true;
+      $("talk").classList.add("hot");
+      api("/api/bus", { phase: "listen", job_status: "working" });
+    }
+
+    $("talk").onmousedown = startListen;
+    $("talk").onmouseup = () => { if (state.rec) try { state.rec.stop(); } catch (e) {} };
+    $("talk").onmouseleave = () => { if (state.rec && state.listening) try { state.rec.stop(); } catch (e) {} };
+    $("send").onclick = () => turn($("typed").value.trim(), false);
+    $("typed").addEventListener("keydown", (e) => { if (e.key === "Enter") turn($("typed").value.trim(), false); });
+    $("yes").onclick = () => { if (state.pending) turn(state.pending, true); };
+
+    api("/api/skills").then((data) => {
+      (data.skills || []).slice(0, 10).forEach((s) => {
+        const b = document.createElement("button");
+        b.className = "util";
+        b.textContent = s.id;
+        b.onclick = () => turn(`use skill ${s.id}`, false);
+        $("skills").appendChild(b);
+      });
+    }).catch(() => {});
+
+    refresh();
+    setInterval(refresh, 4000);
+  </script>
+</body>
+</html>

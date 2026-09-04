@@ -15,7 +15,7 @@ Load `scripts/hive/grok-skills/adopt-then-bus-then-os.md` and follow it.
 **Status:** WIRED 2026-09-04 pattern port of jaredrhod/fullstack-agent. Not accepted forever.  
 **CLI:** `python3 scripts/hive/os/agent-stack.py adopt|validate`  
 **Parent:** `internal-host-os`. This is the conductor + bus, not a second home.  
-**Park:** mouth · face · hands this sitting.
+**Next:** `talk-then-see-then-bus` (mouth + face). Hands parked.
 
 Hard step: send / pay / deploy / book / publish stay Evens. Claude Code operate-never.
 

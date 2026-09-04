@@ -1,0 +1,110 @@
+{
+  "capability_id": "CAP-talk-then-see-then-bus",
+  "name": "talk-then-see-then-bus",
+  "goal": "shared screen + spoken ask → hive skill / file / queued browse-watch on the existing OS bus",
+  "demonstrated_outcome": "Zubair tapes show see-screen, arrow, narrate, ask-before-risky, second brain. Hive remap 2026-09-04: voice.html + voice-os.py on 127.0.0.1:4018. Mouth/face wired. Hands parked. No Claude Code.",
+  "observed_workflow": [
+    "Share the screen (getDisplayMedia) so the face has eyes",
+    "Hold to talk or type (barge-in cancels TTS)",
+    "Mouth writes bus phase listen → think → speak",
+    "Hard-steps refuse; browse/watch ASK then queue for Cursor host",
+    "File list/read only inside repo + adopted vault",
+    "Hive skills load from scripts/hive/grok-skills/",
+    "Arrow overlay points; mouse takeover stays parked"
+  ],
+  "tools": [
+    "voice-os.py",
+    "agent-stack.py bus",
+    "obsidianOS/voice.html",
+    "cursor-ide-browser (queued)",
+    "cursor-video-watch (queued)",
+    "Web Speech + speechSynthesis"
+  ],
+  "agent_abilities": [
+    "talk on the existing desk",
+    "see a live shared screen",
+    "route to hive skills without a new vendor runtime"
+  ],
+  "triggers": [
+    "operator wants a voice assistant / agentic OS / screenshare and talk",
+    "names fullstack-agent mouth/face or the Zubair Jarvis tapes"
+  ],
+  "state": "TESTING — conductor self-test; headed pane + Watchdog GRADE pending",
+  "guardrails": [
+    "send / pay / deploy / book / publish stay HITL",
+    "Claude Code / Fable / Retell / Vapi operate-never",
+    "hands / mouse takeover parked",
+    "bind 127.0.0.1 only",
+    "auto-approve stays off"
+  ],
+  "prerequisites": [
+    "adopt-then-bus-then-os already WIRED",
+    "existing obsidianOS bible",
+    "UNKNOWN — headed Chrome speech recognition on this Mac"
+  ],
+  "decision_rules": [
+    "IF hard-step words → refuse",
+    "IF browse or watch → ASK then queue",
+    "IF path outside vault/repo → deny",
+    "IF Claude Code / Fable named as host → refuse and remap"
+  ],
+  "failure_modes": [
+    "clone Claude Code Jarvis",
+    "0.0.0.0 bind",
+    "self-PROVEN",
+    "treat phone number as the product"
+  ],
+  "observed_tricks": [
+    "voice writes notes; face reads them",
+    "check with the boss is the feature",
+    "hero is the live screen, not WebGL"
+  ],
+  "system_primitive": "share screen → speak → ASK → hive skill or queued host job on one bus",
+  "skill_candidates": [
+    "talk-then-see-then-bus",
+    "adopt-then-bus-then-os",
+    "voice-four-pieces-three-doors",
+    "barge-in-then-tool-silence",
+    "cursor-video-watch"
+  ],
+  "system_upgrade_candidates": [
+    "UPG-talk-then-see-then-bus"
+  ],
+  "reproduce": "python3 scripts/hive/os/voice-os.py self-test && python3 scripts/hive/os/voice-os.py serve",
+  "generalize": "Same pane can queue any hive skill. Host still executes browser/watch.",
+  "improve": "Do not improve by installing Claude Code or taking the mouse.",
+  "primitive_ids": [
+    "PRIM-fullstack-agent-file-bus"
+  ],
+  "atom_ids": [],
+  "behavior_ids": [],
+  "source_video_id": "ud7wzdiM0gk",
+  "source_tape_id": "ud7wzdiM0gk",
+  "timestamp": "chapters + oembed 2026-09-04 (caption-only)",
+  "knowledge_type": "synthesis",
+  "evidence_status": "transcript-implied",
+  "status": "TESTING",
+  "last_verify": "2026-09-04 Forge dry-run: test_voice_os.py (no mic). Watchdog GRADE pending.",
+  "unknowns": {
+    "known": [
+      "ud7wzdiM0gk is Claude Code computer-use",
+      "YK-qJwmwjVc is Claude Fable 5.1",
+      "whIp1SOahOM gather→ask→book already LEARNED"
+    ],
+    "observed": [
+      "public chapters: see screen, arrow, narrate, ask before risky"
+    ],
+    "unknown": [
+      "living watch.json frames",
+      "ElevenLabs walkthrough"
+    ],
+    "hypotheses": [
+      "headed SpeechRecognition works in Chromium on this Mac"
+    ],
+    "blocking": false
+  },
+  "blockers": [
+    "Watchdog GRADE not yet filled",
+    "cursor-ide-browser missing on this cloud host — browse/watch stay queued"
+  ]
+}
