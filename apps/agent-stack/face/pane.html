@@ -116,14 +116,20 @@
     const synth = window.speechSynthesis;
     const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
     const WAKE_RE = /^(?:hey\s+)?jarvis[,.]?\s*/i;
+    const RESTART_MIN = 400;
+    const RESTART_MAX = 800;
+    const TTS_COOLDOWN = 700;
     const state = {
-      phase: "idle", rec: null, live: true, armed: false, listening: false,
-      turning: false, pending: null, greeted: false, recGen: 0, restartTimer: 0,
+      phase: "idle", rec: null, stream: null, live: true, armed: false, arming: false,
+      listening: false, starting: false, turning: false, pending: null, greeted: false,
+      recGen: 0, restartTimer: 0, lastStartAt: 0, failStreak: 0,
       stack: { name: "J.A.R.V.I.S.", operator: "Evens" },
     };
     const dotted = (name) => String(name || "JARVIS").replace(/[^A-Za-z0-9]/g, "").toUpperCase().split("").join(".") || "J.A.R.V.I.S.";
     const hasSR = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
+    const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
+    const ttsSpeaking = () => !!(synth && synth.speaking);
 
     function paintPhase(phase) {
       state.phase = phase || "idle";
@@ -156,7 +162,7 @@
       u.onstart = () => paintPhase("speak");
       u.onend = () => {
         if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
-        if (state.armed && state.live) scheduleRestart(120);
+        if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
       };
       synth.speak(u);
     }
@@ -186,7 +192,7 @@
         $("spoken").textContent = "Turn failed. Type and enter, or tap the board.";
       }
       state.turning = false;
-      if (state.armed && state.live && !state.listening) scheduleRestart(160);
+      if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
     }
 
     function handleHeard(raw) {
@@ -199,31 +205,28 @@
       else turn(said, false);
     }
 
-    function killRec() {
-      const rec = state.rec;
-      state.rec = null;
-      state.listening = false;
-      if (!rec) return;
-      rec.onend = null;
-      rec.onerror = null;
-      rec.onresult = null;
-      rec.onspeechstart = null;
-      rec.onstart = null;
-      try { rec.stop(); } catch (e) {}
-      try { rec.abort(); } catch (e) {}
-    }
-
     function scheduleRestart(ms) {
       clearTimeout(state.restartTimer);
+      if (!state.live || !state.armed) return;
+      if (ttsSpeaking()) return;
+      const wait = Math.max(RESTART_MIN, Math.min(RESTART_MAX, ms || RESTART_MIN));
       state.restartTimer = setTimeout(() => {
-        if (state.live && state.armed && !state.listening) startListen();
-      }, ms || 180);
+        if (ttsSpeaking()) return;
+        if (state.live && state.armed && !state.listening && !state.starting && !state.rec) startListen();
+      }, wait);
     }
 
     function showTypeFallback(line) {
       $("spoken").textContent = line;
       $("typed").classList.add("on");
       $("hint").textContent = "USE CHROME · OR TYPE";
+    }
+
+    async function holdMic() {
+      if (streamLive()) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+      state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return streamLive();
     }
 
     function startListen() {
@@ -233,8 +236,8 @@
         return;
       }
       if (!state.live || !state.armed) return;
-      if (synth && synth.speaking) return;
-      killRec();
+      if (ttsSpeaking()) return;
+      if (state.listening || state.starting || state.rec) return;
       state.recGen += 1;
       const gen = state.recGen;
       const rec = new SR();
@@ -244,11 +247,14 @@
       rec.maxAlternatives = 1;
       rec.onstart = () => {
         if (gen !== state.recGen) return;
+        state.starting = false;
         state.listening = true;
-        if (!state.turning && !(synth && synth.speaking)) paintPhase("listen");
+        state.failStreak = 0;
+        state.lastStartAt = Date.now();
+        if (!state.turning && !ttsSpeaking()) paintPhase("listen");
       };
       rec.onspeechstart = () => {
-        if (synth && synth.speaking) synth.cancel();
+        if (ttsSpeaking()) return;
         if (!state.turning) paintPhase("listen");
       };
       rec.onresult = (e) => {
@@ -262,6 +268,7 @@
         if (err === "not-allowed" || err === "service-not-allowed") {
           state.armed = false;
           state.listening = false;
+          state.starting = false;
           showTypeFallback("Allow the microphone, then tap the board. Use Chrome if this is Safari.");
           return;
         }
@@ -269,24 +276,40 @@
           showTypeFallback("Chrome speech needs network. Type is a fallback.");
           return;
         }
-        // no-speech / aborted / audio-capture: onend restarts
+        if (err === "aborted") state.failStreak += 1;
       };
       rec.onend = () => {
         if (gen !== state.recGen) return;
+        const lived = Date.now() - (state.lastStartAt || Date.now());
         state.listening = false;
+        state.starting = false;
+        state.rec = null;
         if (!state.live || !state.armed) return;
-        if (synth && synth.speaking) return;
-        scheduleRestart(180);
+        if (ttsSpeaking()) return;
+        if (lived < RESTART_MIN) state.failStreak += 1;
+        else state.failStreak = Math.max(0, state.failStreak - 1);
+        const backoff = Math.min(RESTART_MAX, RESTART_MIN + state.failStreak * 150);
+        scheduleRestart(backoff);
       };
       state.rec = rec;
+      state.starting = true;
+      state.lastStartAt = Date.now();
       try {
         rec.start();
       } catch (e) {
-        scheduleRestart(280);
+        state.starting = false;
+        state.rec = null;
+        if (e && /already started/i.test(String(e.message || e))) return;
+        scheduleRestart(RESTART_MAX);
       }
     }
 
     async function armMic() {
+      if (state.arming) return;
+      if (state.armed && streamLive()) {
+        if (!state.listening && !state.starting && !state.rec) startListen();
+        return;
+      }
       if (!hasSR()) {
         showTypeFallback("Use Chrome to talk. Type here is a fallback.");
         state.armed = true;
@@ -296,21 +319,20 @@
         $("spoken").textContent = "Use Chrome to talk — Safari speech is flaky. Type is a fallback.";
         $("typed").classList.add("on");
       }
+      state.arming = true;
       try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          stream.getTracks().forEach((t) => t.stop());
-        }
+        await holdMic();
       } catch (e) {
+        state.arming = false;
         showTypeFallback("Allow the microphone, then tap the board.");
         return;
       }
       state.armed = true;
       state.live = true;
+      state.arming = false;
       try { await api("/api/listen", { live: true }); } catch (e) {}
       startListen();
       paintPhase("listen");
-      if (!state.greeted) setTimeout(greet, 500);
     }
 
     // --- living circuit board (original MIT; pixels from FiOTrxq9ckM stills) ---

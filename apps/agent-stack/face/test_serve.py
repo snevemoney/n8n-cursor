@@ -48,6 +48,9 @@ class FaceServeTest(unittest.TestCase):
     def test_pane_hears_without_ptt_or_observe(self) -> None:
         html = (Path(__file__).resolve().parent / "pane.html").read_text(encoding="utf-8")
         self.assertIn("getUserMedia", html)
+        self.assertIn("holdMic", html)
+        self.assertIn("streamLive", html)
+        self.assertIn("RESTART_MIN", html)
         self.assertIn("scheduleRestart", html)
         self.assertIn("rec.onerror", html)
         self.assertIn("rec.onend", html)
@@ -58,6 +61,9 @@ class FaceServeTest(unittest.TestCase):
         self.assertNotIn("bootMic()", html)
         self.assertNotIn("Hold Home", html)
         self.assertNotIn("<h2>Mouth</h2>", html)
+        self.assertNotIn("getTracks().forEach((t) => t.stop())", html)
+        self.assertNotIn("scheduleRestart(180)", html)
+        self.assertNotIn("scheduleRestart(120)", html)
 
 
 if __name__ == "__main__":
