@@ -62,6 +62,14 @@ SKILL_RE = re.compile(
     r"\b(?:use|load|run)\s+(?:skill\s+)?([a-z0-9][a-z0-9-]{2,60})\b",
     re.I,
 )
+YES_RE = re.compile(
+    r"^(yes|yeah|yep|yup|do it|approve|go ahead|ok|okay|please)\s*[.!]?\s*$",
+    re.I,
+)
+NO_RE = re.compile(
+    r"^(no|nope|cancel|never mind|stop|don't|do not)\s*[.!]?\s*$",
+    re.I,
+)
 
 
 def now_iso() -> str:
@@ -245,6 +253,27 @@ def apply_turn(
     screen_note: str = "",
     hive: Path = HIVE,
 ) -> dict:
+    spoken = (utterance or "").strip()
+    bus_now = STACK.load_json(hive / "bus" / "state.json") or {}
+    prior = str(bus_now.get("utterance") or "").strip()
+    if YES_RE.match(spoken) and bus_now.get("permission_ask") and prior and not YES_RE.match(prior):
+        return apply_turn(prior, approved=True, screen_note=screen_note, hive=hive)
+    if NO_RE.match(spoken) and bus_now.get("permission_ask"):
+        STACK.bus_write(
+            phase="speak",
+            job_status="done",
+            utterance=spoken,
+            permission_ask=None,
+            hive=hive,
+        )
+        return {
+            "verb": "cancel",
+            "args": {},
+            "ok": True,
+            "ask": False,
+            "spoken": "Okay, cancelled. Still listening.",
+        }
+
     plan = classify(utterance)
     verb = plan["verb"]
     args = plan["args"]
@@ -468,6 +497,13 @@ def self_test() -> dict:
         asked = apply_turn("browse https://example.com/docs", hive=hive)
         if not asked.get("ask"):
             return {"ok": False, "errors": ["browse must ASK"]}
+        spoken_yes = apply_turn("yes", hive=hive)
+        if spoken_yes.get("ask") or spoken_yes.get("verb") != "browse":
+            return {"ok": False, "errors": ["spoken yes must approve the pending ask"]}
+        apply_turn("browse https://example.com/later", hive=hive)
+        cancelled = apply_turn("cancel", hive=hive)
+        if cancelled.get("verb") != "cancel" or cancelled.get("ask"):
+            return {"ok": False, "errors": ["spoken cancel must drop the pending ask"]}
         ok_list = apply_turn("list files in docs/hive/outer-heaven/CONTENT/os", hive=hive)
         if not ok_list.get("ok") or ok_list.get("verb") != "file_list":
             return {"ok": False, "errors": ["file_list failed"]}

@@ -97,6 +97,32 @@ class VoiceOsTest(unittest.TestCase):
             off = MOD.apply_turn("hands off", hive=hive)
             self.assertFalse(off.get("hands_armed"))
 
+    def test_spoken_yes_and_cancel(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="voice-os-talk-") as tmp:
+            hive = Path(tmp)
+            vault = {
+                "ok": True,
+                "source": "local",
+                "path": str(MOD.ROOT),
+                "oh": str(MOD.OS_DIR),
+                "kind": "test",
+            }
+            adopted = MOD.STACK.adopt(hive=hive, vault=vault)
+            self.assertTrue(adopted.get("ok"), adopted)
+            asked = MOD.apply_turn("browse https://example.com/docs", hive=hive)
+            self.assertTrue(asked.get("ask"), asked)
+            yes = MOD.apply_turn("yes", hive=hive)
+            self.assertEqual(yes.get("verb"), "browse")
+            self.assertFalse(yes.get("ask"))
+            self.assertTrue((hive / "bus" / "jobs.jsonl").is_file())
+            asked_again = MOD.apply_turn("take the mouse", hive=hive)
+            self.assertTrue(asked_again.get("ask"), asked_again)
+            cancel = MOD.apply_turn("cancel", hive=hive)
+            self.assertEqual(cancel.get("verb"), "cancel")
+            self.assertFalse(cancel.get("ask"))
+            cold = MOD.apply_turn("click at 10 10", hive=hive)
+            self.assertIn("Hands are off", cold.get("spoken") or "")
+
 
 if __name__ == "__main__":
     unittest.main()
