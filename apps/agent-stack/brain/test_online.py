@@ -53,11 +53,32 @@ class OnlineBrainTest(unittest.TestCase):
         env = {k: v for k, v in os.environ.items() if k not in {"XAI_API_KEY", "GROK_API_KEY", "GROKBOT_BASE_URL", "GROKBOT_TOKEN"}}
         with mock.patch.dict(os.environ, env, clear=True):
             with mock.patch.object(MOD, "grokbot_gateway", return_value=None):
-                with mock.patch.object(MOD, "cursor_cli", return_value="/usr/local/bin/cursor"):
+                with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
                     report = MOD.wire_report()
         self.assertEqual(report["ollama"], "refused")
         self.assertEqual(report["wires"]["grok"], "dark")
+        self.assertEqual(report["wires"]["cursor"], "print")
         self.assertTrue(report["need"])
+
+    def test_call_cursor_turn_prints_text(self) -> None:
+        proc = mock.Mock(stdout="The site CSS is in pane.html.\n", stderr="", returncode=0)
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD.subprocess, "run", return_value=proc) as run:
+                out = MOD.call_cursor_turn("look at the code for the face", mode="ask")
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["wire"], "cursor")
+        self.assertIn("pane.html", out["spoken"])
+        argv = run.call_args[0][0]
+        self.assertIn("-p", argv)
+        self.assertIn("ask", argv)
+        self.assertNotIn("--force", argv)
+        self.assertNotIn("--yolo", argv)
+
+    def test_call_cursor_turn_dry(self) -> None:
+        with mock.patch.dict(os.environ, {"AGENT_STACK_CURSOR_DRY": "1"}):
+            out = MOD.call_cursor_turn("look at the repo")
+        self.assertTrue(out["unknown"])
+        self.assertIn("dry", out["spoken"])
 
 
 if __name__ == "__main__":

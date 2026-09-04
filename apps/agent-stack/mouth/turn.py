@@ -46,6 +46,19 @@ STATUS_RE = re.compile(
     r")\b",
     re.I,
 )
+REPO_RE = re.compile(
+    r"\b("
+    r"look at (?:the )?(?:code|file|repo|repository)|"
+    r"open (?:this|the) file|"
+    r"in the repo|"
+    r"why (?:is|does) (?:this|the) (?:code|site|build|test|file)|"
+    r"fix (?:this|the|that) (?:bug|code|site|file|test|lint)|"
+    r"(?:edit|implement|typecheck|lint) (?:this|the|that)|"
+    r"pull request|"
+    r"change the code"
+    r")\b",
+    re.I,
+)
 MAX_TURNS = 8
 ASK_LEAK = re.compile(
     r"say yes to (approve|send)|send this to the grok desk|"
@@ -249,6 +262,14 @@ def classify(utterance: str) -> dict:
         }
     if STATUS_RE.search(text):
         return {"verb": "status", "needs_ask": False, "args": {"text": text}, "host": "online"}
+    if REPO_RE.search(text):
+        mode = "plan" if re.search(r"\b(fix|edit|implement|change the code)\b", text, re.I) else "ask"
+        return {
+            "verb": "cursor",
+            "needs_ask": False,
+            "args": {"text": text, "mode": mode},
+            "host": "cursor",
+        }
     return {"verb": "converse", "needs_ask": False, "args": {"text": text}, "host": "online"}
 
 
@@ -319,6 +340,7 @@ def apply_turn(
     retrieve_roots: list[Path] | None = None,
     grok=None,
     status_fn=None,
+    cursor_fn=None,
 ) -> dict:
     spoken = (utterance or "").strip()
     bus_now = load_json(hive / "bus" / "state.json")
@@ -374,6 +396,20 @@ def apply_turn(
             got = fn(which)
             narration = got.get("spoken") or "UNKNOWN. Status wires returned nothing."
             wires = [p.get("wire") for p in (got.get("parts") or []) if p.get("wire")] or ["status"]
+    elif verb == "cursor":
+        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
+        fn = cursor_fn or (ONLINE.call_cursor_turn if ONLINE is not None else None)
+        mode = str(plan.get("args", {}).get("mode") or "ask")
+        if fn is None:
+            narration = "UNKNOWN. Cursor wire is not loaded."
+            wires = ["cursor"]
+        else:
+            try:
+                got = fn(spoken, mode=mode)
+            except TypeError:
+                got = fn(spoken)
+            narration = str(got.get("spoken") or "").strip() or "UNKNOWN. Cursor returned no text."
+            wires = [got.get("wire") or "cursor"]
     elif verb == "converse":
         bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None, turns=prior_turns)
         context, cites, vault_spoken = converse_context(spoken, retrieve_roots, hive, prior_turns)
