@@ -1,0 +1,531 @@
+{
+  "schema_version": 1,
+  "idea": "every named hand has a checkable test, or it is UNKNOWN",
+  "source": "apps/agent-stack/mouth/turn.py classify()",
+  "product_browser": "Safari via hands/see.py \u2014 Playwright never drives Evens's Mac",
+  "youtube_must_hit": [
+    "go to YouTube",
+    "open YouTube",
+    "go on YouTube",
+    "watch later",
+    "what's on my watch later",
+    "scroll",
+    "scroll down",
+    "screenshot"
+  ],
+  "youtube_allowed_hands": [
+    "safari",
+    "watch_later"
+  ],
+  "rows": [
+    {
+      "verb": "stop",
+      "triggers": [
+        "stop",
+        "never mind",
+        "shut up"
+      ],
+      "expected_hand": "stop",
+      "wire_module": "mouth/turn.py local",
+      "test_status": "unit / playwright",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "greet",
+      "triggers": [
+        "hello",
+        "hey",
+        "hi jarvis"
+      ],
+      "expected_hand": "greet",
+      "wire_module": "mouth/turn.py local",
+      "test_status": "unit / playwright",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "quoted",
+        "user": "hey",
+        "jarvis": "Sir. Hey Evens. What are we working on?",
+        "source": "docs/hive/outer-heaven/.hive/bus/state.json"
+      }
+    },
+    {
+      "verb": "crumb",
+      "triggers": [
+        "it",
+        "uh",
+        "hmm"
+      ],
+      "expected_hand": "crumb",
+      "wire_module": "mouth/turn.py local",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "refuse",
+      "triggers": [
+        "send this email",
+        "deploy this to prod",
+        "publish this now"
+      ],
+      "expected_hand": "refuse",
+      "wire_module": "mouth/turn.py HARD_REFUSE",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "mode",
+      "triggers": [
+        "agent mode",
+        "switch to plan mode",
+        "put yourself in ask mode"
+      ],
+      "expected_hand": "mode",
+      "wire_module": "mouth/turn.py local",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "heal",
+      "triggers": [
+        "heal yourself",
+        "send an agent",
+        "look at the logs"
+      ],
+      "expected_hand": "heal",
+      "wire_module": "mouth/turn.py heal_spoken + memory/scars.py",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "quoted",
+        "user": "(scar log)",
+        "jarvis": "{\"id\": \"cursor-auth-dark\", \"at\": \"2026-09-04T20:03:46Z\", \"symptom\": \"Cursor harness returned login UNKNOWN on every converse.\", \"cause\": \"heal verb\"}",
+        "source": "docs/hive/outer-heaven/.hive/bus/scars.jsonl"
+      }
+    },
+    {
+      "verb": "today",
+      "triggers": [
+        "what should we do today",
+        "what should I work on today"
+      ],
+      "expected_hand": "today",
+      "wire_module": "mouth/turn.py today_spoken + memory/retrieve.py",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "can",
+      "triggers": [
+        "what can you do",
+        "what are you able",
+        "your tools"
+      ],
+      "expected_hand": "can",
+      "wire_module": "mouth/turn.py capabilities_spoken",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "skills",
+      "triggers": [
+        "list skills",
+        "hive skills"
+      ],
+      "expected_hand": "skills",
+      "wire_module": "mouth/turn.py skills_spoken",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "life",
+      "triggers": [
+        "who am i",
+        "what do you know about me",
+        "remember me"
+      ],
+      "expected_hand": "life",
+      "wire_module": "memory/retrieve.py life_card",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "files",
+      "triggers": [
+        "search my computer for ledger",
+        "find the file invoice",
+        "look through my documents"
+      ],
+      "expected_hand": "files",
+      "wire_module": "hands/files.py search_files",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "safari",
+      "triggers": [
+        "go to YouTube",
+        "open YouTube",
+        "scroll down"
+      ],
+      "expected_hand": "safari",
+      "wire_module": "hands/see.py safari_act",
+      "test_status": "unit / playwright",
+      "required": true,
+      "youtube": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "quoted",
+        "user": "Hi Jarvis open YouTube",
+        "jarvis": "Sir. Safari, as requested. Safari: J.A.R.V.I.S.. http://127.0.0.1:4018/",
+        "source": "docs/hive/outer-heaven/.hive/bus/state.json"
+      }
+    },
+    {
+      "verb": "calendar",
+      "triggers": [
+        "what's on my calendar",
+        "meetings today",
+        "meetings tomorrow"
+      ],
+      "expected_hand": "calendar",
+      "wire_module": "hands/inbox.py calendar_events",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "mail",
+      "triggers": [
+        "any unread mail",
+        "unread emails",
+        "my inbox"
+      ],
+      "expected_hand": "mail",
+      "wire_module": "hands/inbox.py mail_unread",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "invoice",
+      "triggers": [
+        "what's the unpaid invoice",
+        "show invoices",
+        "create an invoice for Mike"
+      ],
+      "expected_hand": "invoice",
+      "wire_module": "hands/inbox.py invoice_lookup",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "status",
+      "triggers": [
+        "what's the VPS status",
+        "hostinger status",
+        "status of the hive"
+      ],
+      "expected_hand": "status",
+      "wire_module": "brain/online.py status",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "skill",
+      "triggers": [
+        "use skill hive-funnels",
+        "load skill checkable-stop",
+        "run skill slice-build"
+      ],
+      "expected_hand": "skill",
+      "wire_module": "brain/online.py call_cursor_turn + grok-skills",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "build",
+      "triggers": [
+        "build a new skill for invoices",
+        "create a workflow",
+        "write a new plugin"
+      ],
+      "expected_hand": "build",
+      "wire_module": "brain/online.py call_cursor_turn",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "cursor",
+      "triggers": [
+        "check my repo",
+        "look at the code",
+        "fix this bug"
+      ],
+      "expected_hand": "cursor",
+      "wire_module": "brain/online.py call_cursor_turn",
+      "test_status": "unit / playwright",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "converse",
+      "triggers": [
+        "what's going on",
+        "tell me a joke",
+        "can you"
+      ],
+      "expected_hand": "converse",
+      "wire_module": "brain/online.py call_cursor_turn",
+      "test_status": "unit / playwright",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "search",
+      "triggers": [
+        "search the web for rust",
+        "web search bitcoin",
+        "search for rust on the web"
+      ],
+      "expected_hand": "search",
+      "wire_module": "hands/named.py web_search",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "watch_later",
+      "triggers": [
+        "watch later",
+        "what's on my watch later",
+        "watch later playlist"
+      ],
+      "expected_hand": "watch_later",
+      "wire_module": "hands/named.py watch_later",
+      "test_status": "unit",
+      "required": true,
+      "youtube": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "news",
+      "triggers": [
+        "what's the news",
+        "hive signals",
+        "news today"
+      ],
+      "expected_hand": "news",
+      "wire_module": "hands/named.py news_from_disk",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "make",
+      "triggers": [
+        "make an image",
+        "create a remotion",
+        "generate a video"
+      ],
+      "expected_hand": "make",
+      "wire_module": "hands/named.py make_route",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "pro",
+      "triggers": [
+        "what is marketing",
+        "brief me on marketing",
+        "BUS 204"
+      ],
+      "expected_hand": "pro",
+      "wire_module": "hands/pro.py brief",
+      "test_status": "unit / playwright",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "idle",
+      "triggers": [
+        ""
+      ],
+      "expected_hand": "idle",
+      "wire_module": "mouth/turn.py local",
+      "test_status": "unit",
+      "required": true,
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "UNKNOWN",
+        "quote": null,
+        "source": null
+      }
+    },
+    {
+      "verb": "farewell",
+      "triggers": [
+        "good night",
+        "goodbye",
+        "bye"
+      ],
+      "expected_hand": "farewell",
+      "wire_module": "mouth/turn.py talk_spoken",
+      "test_status": "unit",
+      "required": false,
+      "gate": "FAREWELL_RE",
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "quoted",
+        "user": "Good night",
+        "jarvis": "Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-dark, do not call agent -p again this sitting until logged in. Answer from the store. Login stays Evens in Terminal. From the store, not a dark Cursor call. Active lanes: Website / AI Partner services, ",
+        "source": "docs/hive/outer-heaven/.hive/bus/state.json"
+      }
+    },
+    {
+      "verb": "talk",
+      "triggers": [
+        "thanks",
+        "serious",
+        "what the hell are you saying"
+      ],
+      "expected_hand": "talk",
+      "wire_module": "mouth/turn.py talk_spoken",
+      "test_status": "unit",
+      "required": false,
+      "gate": "META_RE",
+      "last_result": "UNKNOWN",
+      "last_live": {
+        "status": "quoted",
+        "user": "Serious",
+        "jarvis": "Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-dark, do not call agent -p again this sitting until logged in. Answer from the store. Login stays Evens in Terminal. From the store, not a dark Cursor call. Active lanes: Website / AI Partner services, ",
+        "source": "docs/hive/outer-heaven/.hive/bus/state.json"
+      }
+    }
+  ]
+}
