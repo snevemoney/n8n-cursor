@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Mouth sitting: utterance → file bus → Cursor or Grok job → local speak.
+"""Mouth sitting: utterance → file bus → local vault Q&A or Cursor/Grok job.
 
-PTT lives on the face (Home). This module is the write path.
+Always-on lives on the face (LIVE/MUTE). This module is the write path.
 Auto-approve stays off. ElevenLabs is ASK. Hands stay parked.
 """
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import re
@@ -17,7 +18,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
-OS_DIR = ROOT / "docs/hive/outer-heaven/CONTENT/os"
 SKILLS_DIR = ROOT / "scripts/hive/grok-skills"
 HARD_REFUSE = re.compile(
     r"\b(send|pay|deploy|book|publish|dial|twilio|retell|vapi|"
@@ -36,6 +36,32 @@ SKILL_RE = re.compile(
     r"\b(?:use|load|run)\s+(?:skill\s+)?([a-z0-9][a-z0-9-]{2,60})\b",
     re.I,
 )
+MEMORY_RE = re.compile(
+    r"\b(what(?:'s|s| is| are| does| do)|where(?:'s| is)|who(?:'s| is)|"
+    r"when(?:'s| is)|why |how (?:do|does|is|are)|remind|remember|"
+    r"vault|operator memory|in (?:my |the )?(?:vault|memory|wiki)|"
+    r"tell me (?:about|what)|do i have|did i (?:say|write|decide)|"
+    r"what(?:'s| is) in)\b",
+    re.I,
+)
+ACTION_RE = re.compile(
+    r"\b(build|write|research|look at|browse|open|watch|queue|spawn|"
+    r"draft|fix|implement|make|create)\b",
+    re.I,
+)
+
+
+def _load_retrieve():
+    path = Path(__file__).resolve().parent.parent / "memory" / "retrieve.py"
+    spec = importlib.util.spec_from_file_location("agent_stack_retrieve", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+RETRIEVE = _load_retrieve()
 
 
 def now_iso() -> str:
@@ -64,6 +90,8 @@ def bus_write(
     job_status: str,
     utterance: str,
     permission_ask: str | None,
+    spoken: str | None = None,
+    cites: list | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
     bus = load_json(path)
@@ -74,6 +102,28 @@ def bus_write(
             "job_status": job_status,
             "utterance": utterance,
             "permission_ask": permission_ask,
+            "spoken": spoken,
+            "cites": cites or [],
+            "updated_at": now_iso(),
+        }
+    )
+    write_json(path, bus)
+    return bus
+
+
+def set_listen(hive: Path, live: bool) -> dict:
+    """Face owns the mic. LIVE writes listen; MUTE returns to idle unless yellow ASK."""
+    path = hive / "bus" / "state.json"
+    bus = load_json(path)
+    yellow = bus.get("job_status") == "yellow"
+    bus.update(
+        {
+            "schema_version": 1,
+            "phase": "listen" if live else ("speak" if yellow else "idle"),
+            "job_status": bus.get("job_status") or "done",
+            "utterance": bus.get("utterance") or "",
+            "permission_ask": bus.get("permission_ask"),
+            "mic": "live" if live else "mute",
             "updated_at": now_iso(),
         }
     )
@@ -92,7 +142,7 @@ def append_job(hive: Path, row: dict) -> dict:
 
 def classify(utterance: str) -> dict:
     text = (utterance or "").strip()
-    if not text:
+    if not text or YES_RE.match(text) or NO_RE.match(text):
         return {"verb": "idle", "needs_ask": False, "args": {}, "host": "local"}
     if HARD_REFUSE.search(text):
         return {
@@ -111,9 +161,10 @@ def classify(utterance: str) -> dict:
             "args": {"slug": slug.group(1).lower()} if slug else {},
             "host": "local",
         }
+    if MEMORY_RE.search(text) and not ACTION_RE.search(text):
+        return {"verb": "memory", "needs_ask": False, "args": {"text": text}, "host": "local"}
     if re.search(r"\b(browse|open (the )?(page|url|site)|watch|cursor-)\b", text, re.I):
-        host = "cursor"
-        return {"verb": "desk", "needs_ask": True, "args": {"text": text}, "host": host}
+        return {"verb": "desk", "needs_ask": True, "args": {"text": text}, "host": "cursor"}
     return {"verb": "desk", "needs_ask": True, "args": {"text": text}, "host": "grok"}
 
 
@@ -145,15 +196,16 @@ def apply_turn(
     approved: bool = False,
     hive: Path = HIVE,
     speak: bool = False,
+    retrieve_roots: list[Path] | None = None,
 ) -> dict:
     spoken = (utterance or "").strip()
     bus_now = load_json(hive / "bus" / "state.json")
     prior = str(bus_now.get("utterance") or "").strip()
     if YES_RE.match(spoken) and bus_now.get("permission_ask") and prior:
-        return apply_turn(prior, approved=True, hive=hive, speak=speak)
+        return apply_turn(prior, approved=True, hive=hive, speak=speak, retrieve_roots=retrieve_roots)
     if NO_RE.match(spoken) and bus_now.get("permission_ask"):
-        bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None)
-        out = {"ok": True, "verb": "cancel", "ask": False, "spoken": "Okay, cancelled.", "host": "local"}
+        bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None, spoken="Okay, cancelled.")
+        out = {"ok": True, "verb": "cancel", "ask": False, "spoken": "Okay, cancelled.", "host": "local", "cites": []}
         if speak:
             speak_local(out["spoken"])
         return out
@@ -162,20 +214,21 @@ def apply_turn(
     verb = plan["verb"]
     if verb == "refuse":
         narration = "I will not do that. Send, pay, deploy, book, and publish stay with you."
-        bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None)
+        bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None, spoken=narration)
         if speak:
             speak_local(narration)
-        return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local"}
+        return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": "local", "cites": []}
 
     if plan["needs_ask"] and not approved:
         ask = f"May I hand this to the {plan['host']} desk? Say yes to approve."
-        bus_write(hive, phase="speak", job_status="yellow", utterance=spoken, permission_ask=ask)
+        bus_write(hive, phase="speak", job_status="yellow", utterance=spoken, permission_ask=ask, spoken=ask)
         if speak:
             speak_local(ask)
-        return {"ok": True, "verb": verb, "ask": True, "spoken": ask, "host": plan["host"], "permission_ask": ask}
+        return {"ok": True, "verb": verb, "ask": True, "spoken": ask, "host": plan["host"], "permission_ask": ask, "cites": []}
 
+    cites: list = []
     if verb == "idle":
-        narration = "Holding. Hold Home and talk."
+        narration = "Holding. Say Jarvis, or tap Space."
     elif verb == "status":
         narration = f"Phase {bus_now.get('phase') or 'idle'}. Job {bus_now.get('job_status') or 'done'}."
     elif verb == "skills":
@@ -184,6 +237,11 @@ def apply_turn(
         slug = plan["args"]["slug"]
         path = SKILLS_DIR / f"{slug}.md"
         narration = f"Loaded {slug}." if path.is_file() else f"No skill named {slug}."
+    elif verb == "memory":
+        bus_write(hive, phase="think", job_status="working", utterance=spoken, permission_ask=None)
+        found = RETRIEVE.search(spoken, retrieve_roots)
+        cites = found.get("hits") or []
+        narration = found.get("spoken") or "I don't have that in the vault. UNKNOWN."
     else:
         job = append_job(
             hive,
@@ -198,10 +256,26 @@ def apply_turn(
         narration = f"Queued for the {plan['host']} desk. Auto-approve stays off."
         plan = {**plan, "job": job}
 
-    bus_write(hive, phase="speak", job_status="done", utterance=spoken, permission_ask=None)
+    bus_write(
+        hive,
+        phase="speak",
+        job_status="done",
+        utterance=spoken,
+        permission_ask=None,
+        spoken=narration,
+        cites=cites,
+    )
     if speak:
         speak_local(narration)
-    return {"ok": True, "verb": verb, "ask": False, "spoken": narration, "host": plan["host"], "args": plan.get("args")}
+    return {
+        "ok": True,
+        "verb": verb,
+        "ask": False,
+        "spoken": narration,
+        "host": plan["host"],
+        "args": plan.get("args"),
+        "cites": cites,
+    }
 
 
 def self_test() -> dict:
@@ -209,6 +283,12 @@ def self_test() -> dict:
 
     with tempfile.TemporaryDirectory(prefix="agent-stack-mouth-") as tmp:
         hive = Path(tmp)
+        vault = hive / "vault"
+        vault.mkdir(parents=True)
+        (vault / "OPERATOR_MEMORY.md").write_text(
+            "# Operator Memory\n\nFour north stars start with maximum leverage, minimum noise.\n",
+            encoding="utf-8",
+        )
         (hive / "bus").mkdir(parents=True)
         refused = apply_turn("send this email", hive=hive)
         if refused.get("verb") != "refuse":
@@ -219,6 +299,18 @@ def self_test() -> dict:
         yes = apply_turn("yes", hive=hive)
         if yes.get("ask") or not (hive / "bus" / "jobs.jsonl").is_file():
             return {"ok": False, "errors": ["spoken yes did not queue a desk job"]}
+        mem = apply_turn("what are the north stars", hive=hive, retrieve_roots=[vault])
+        if mem.get("verb") != "memory" or mem.get("ask") or not mem.get("cites"):
+            return {"ok": False, "errors": ["vault Q&A missed fixture"], "got": mem}
+        unknown = apply_turn("what is the purple zebra protocol", hive=hive, retrieve_roots=[vault])
+        if unknown.get("verb") != "memory" or "UNKNOWN" not in (unknown.get("spoken") or ""):
+            return {"ok": False, "errors": ["miss should be UNKNOWN"], "got": unknown}
+        live = set_listen(hive, True)
+        if live.get("phase") != "listen" or live.get("mic") != "live":
+            return {"ok": False, "errors": ["LIVE did not write listen"]}
+        mute = set_listen(hive, False)
+        if mute.get("mic") != "mute":
+            return {"ok": False, "errors": ["MUTE did not write mute"]}
         return {"ok": True, "errors": []}
 
 

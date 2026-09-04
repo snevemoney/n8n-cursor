@@ -135,18 +135,25 @@ class Handler(BaseHTTPRequestHandler):
             ctype = "text/css"
         self._send(200, target.read_bytes(), ctype)
 
-    def do_POST(self) -> None:  # noqa: N802
-        if urlparse(self.path).path != "/api/turn":
-            self._json(404, {"ok": False, "error": "no such route"})
-            return
+    def _read_json(self) -> dict:
         length = int(self.headers.get("Content-Length") or 0)
         raw = self.rfile.read(length) if length else b"{}"
         try:
             data = json.loads(raw.decode("utf-8"))
         except json.JSONDecodeError:
             data = {}
-        if not isinstance(data, dict):
-            data = {}
+        return data if isinstance(data, dict) else {}
+
+    def do_POST(self) -> None:  # noqa: N802
+        path = urlparse(self.path).path
+        data = self._read_json()
+        if path == "/api/listen":
+            bus = MOUTH.set_listen(HIVE, bool(data.get("live")))
+            self._json(200, {"ok": True, **bus})
+            return
+        if path != "/api/turn":
+            self._json(404, {"ok": False, "error": "no such route"})
+            return
         out = MOUTH.apply_turn(
             str(data.get("utterance") or ""),
             approved=bool(data.get("approved")),
@@ -188,7 +195,14 @@ def self_test() -> dict:
             body = json.loads(res.read().decode("utf-8"))
         if not body.get("ok"):
             return {"ok": False, "errors": ["healthz not ok"], "body": body}
-        return {"ok": True, "errors": [], "port": port, "bind": HOST}
+        with urllib.request.urlopen(f"http://{HOST}:{port}/", timeout=2) as home:
+            html = home.read().decode("utf-8")
+            code = home.status
+        banned = ("Desk · Face", "<h2>Observe</h2>", "<h2>Mouth</h2>", "Hold Home", "Hold Talk")
+        needed = ("<canvas", "J.A.R.V.I.S.", "TAP SPACE", "LISTENING FOR")
+        if code != 200 or any(token not in html for token in needed) or any(token in html for token in banned):
+            return {"ok": False, "errors": ["GET / missing tape visualizer"], "status": code}
+        return {"ok": True, "errors": [], "port": port, "bind": HOST, "home": 200}
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         return {"ok": False, "errors": [str(exc)]}
     finally:

@@ -3,13 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Original hive conductor: adopt existing vault + file signal bus + PTT mouth + localhost face. Pattern port of fullstack-agent, not a fork. Hands parked.",
+  "description": "Original hive conductor: adopt existing vault + file bus + tape visualizer (FiOTrxq9ckM circuit board) + local voice + vault Q&A. Pattern port of fullstack-agent, not a fork. Hands parked.",
   "type": "module",
   "scripts": {
     "build": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json",
     "adopt": "npm run build && node dist/wizard/adopt.js adopt",
     "self-test": "npm run build && node dist/wizard/adopt.js self-test",
     "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
-    "test": "npm run self-test"
+    "test": "npm run self-test && AGENT_STACK_DRY_TTS=1 python3 mouth/turn.py --self-test && python3 face/serve.py --self-test && python3 face/test_serve.py && python3 mouth/test_turn.py"
   }
 }

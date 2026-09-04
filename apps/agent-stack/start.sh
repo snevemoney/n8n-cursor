@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hive agent-stack starter. Original MIT. Not a copy of AGPL start.sh.
-# Starts face if present. Mouth is PTT-on-face, not a daemon.
+# Starts the tape visualizer on 4018. Mouth is the write path, not a daemon.
 # Hands stay parked. Never starts Claude Code or vendored sibling repos.
 set -euo pipefail
 
@@ -33,7 +33,7 @@ if [[ "$MODE" == "check" ]]; then
 fi
 
 if [[ -x "$MOUTH_START" && "$MODE" != "face" ]]; then
-  echo "mouth: ready (PTT is Home on the face; CLI $HERE/mouth/turn.py)"
+  echo "mouth: ready (say JARVIS or tap Space on the face; CLI $HERE/mouth/turn.py)"
   if [[ "$MODE" == "mouth" ]]; then
     exec "$MOUTH_START"
   fi

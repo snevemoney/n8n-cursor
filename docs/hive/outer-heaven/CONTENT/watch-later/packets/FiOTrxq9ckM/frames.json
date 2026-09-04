@@ -1,0 +1,87 @@
+[
+  {
+    "t": 0,
+    "file": "frames/t00-00.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 8,
+    "file": "frames/t00-08.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 15,
+    "file": "frames/t00-15.jpg",
+    "scene_score": 0.3
+  },
+  {
+    "t": 28,
+    "file": "frames/t00-28.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 68,
+    "file": "frames/t01-08.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 80,
+    "file": "frames/t01-20.jpg",
+    "scene_score": 0.3
+  },
+  {
+    "t": 94,
+    "file": "frames/t01-34.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 105,
+    "file": "frames/t01-45.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 137,
+    "file": "frames/t02-17.jpg",
+    "scene_score": 0.3
+  },
+  {
+    "t": 150,
+    "file": "frames/t02-30.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 180,
+    "file": "frames/t03-00.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 268,
+    "file": "frames/t04-28.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 285,
+    "file": "frames/t04-45.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 300,
+    "file": "frames/t05-00.jpg",
+    "scene_score": 0.3
+  },
+  {
+    "t": 330,
+    "file": "frames/t05-30.jpg",
+    "scene_score": 0.9
+  },
+  {
+    "t": 500,
+    "file": "frames/t08-20.jpg",
+    "scene_score": 0.3
+  },
+  {
+    "t": 520,
+    "file": "frames/t08-40.jpg",
+    "scene_score": 0.9
+  }
+]

@@ -1,21 +1,28 @@
 # @hive/agent-stack
 
-Sittings 1–3 of the fullstack-agent **pattern** port. Original MIT code. Not a fork.
+Sittings of the fullstack-agent **pattern** port. Original MIT code. Not a fork.
 
-- Adopt the existing Obsidian vault. Never create `~/my-agent` or a `CLAUDE.md` home.
-- Write `.hive/agent-stack.json` + `.hive/bus/state.json`.
-- **Mouth (sitting 2):** hold Home / hold Talk → local STT → bus write → Cursor or Grok desk job after spoken yes. Local TTS (`say` or `speechSynthesis`). Auto-approve off. ElevenLabs ASK only.
-- **Face (sitting 3):** `127.0.0.1:4018` cinematic observe-pane reads the bus. Not evenslouis.ca. Not a second hive.
-- **Hands stay parked.** No mouse takeover.
-- Hosts: Cursor + Grok. Claude Code operate-never.
+Face on `127.0.0.1:4018` is Jared's visualizer from tape `FiOTrxq9ckM` stills: a living green circuit board you talk to. Say JARVIS or tap Space. Not an Observe card. Not a Mouth / Hold Home dashboard.
+
+- **Face:** full-bleed PCB HUD. Idle / listen / think / speak. Original canvas. Not vendored `ai-visualizer`.
+- **Mouth:** write path behind the face. Local STT + local TTS. Auto-approve off.
+- **Memory:** vault Q&A over the adopted vault. Cited snippets. UNKNOWN on a miss.
+
+Hands stay parked. Hosts: Cursor + Grok. Claude Code operate-never. Live `/` HOLD.
 
 ```
 npm test
 npm run adopt
 ./start.sh check
-./start.sh          # execs the face if present
+# headed Mac only — kill leftover voice-os first:
+# lsof -iTCP:4018 -sTCP:LISTEN
+# kill that pid if it is voice-os.py
+./start.sh          # execs apps/agent-stack/face/serve.py
+open http://127.0.0.1:4018/
 ```
 
-PTT is on the face, not a mouth daemon. Type is fallback when Web Speech is missing.
+You should see the circuit board, not two cards. Watchdog GRADE pending. No headed mic proof on a cloud host.
+
+Still not Jared's installer: no Claude Code, no AGPL clone, no ElevenLabs, no Agent.send SDK — desk jobs still ASK.
 
 Upstream (pattern only, AGPL, not vendored): https://github.com/jaredrhod/fullstack-agent
