@@ -299,7 +299,7 @@ def speak_local(text: str) -> None:
     if os.environ.get("AGENT_STACK_DRY_TTS") == "1" or not text:
         return
     try:
-        subprocess.run(["say", "-v", "Daniel", text[:400]], check=False, timeout=20)
+        subprocess.run(["say", "-v", "Samantha", text[:400]], check=False, timeout=20)
     except (OSError, subprocess.TimeoutExpired):
         return
 
