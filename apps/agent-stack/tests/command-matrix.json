@@ -221,7 +221,9 @@
       "triggers": [
         "go to YouTube",
         "open YouTube",
-        "scroll down"
+        "scroll",
+        "scroll down",
+        "screenshot"
       ],
       "expected_hand": "safari",
       "wire_module": "hands/see.py safari_act",
