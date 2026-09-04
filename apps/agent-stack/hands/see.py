@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
+import ctypes.util
 import json
 import os
 import re
@@ -43,6 +45,12 @@ CLICK_RE = re.compile(r"\b(?:click|tap|press)\s+(?:the\s+)?(.+?)(?:\s+button|\s+
 TYPE_RE = re.compile(r"\b(?:type|enter|fill)\s+(.+)$", re.I)
 SCROLL_RE = re.compile(r"\bscroll\b", re.I)
 TABS_RE = re.compile(r"\b(tabs?|what(?:'s|s| is) open in safari)\b", re.I)
+WAKE_RE = re.compile(r"^(?:hey\s+|hi\s+|hello\s+|yo\s+)?(?:jarvis[,.\s]+)?", re.I)
+FACE_URL_RE = re.compile(r"127\.0\.0\.1:4018", re.I)
+KEY_PAGE_DOWN = 121
+KEY_PAGE_UP = 116
+VK_PAGE_DOWN = 0x79
+VK_PAGE_UP = 0x74
 
 
 def _run(argv: list[str], timeout: float = 12.0) -> subprocess.CompletedProcess[str]:
@@ -230,12 +238,184 @@ def safari_type(text: str) -> dict:
     return got
 
 
+def ask_plain(utterance: str) -> str:
+    text = WAKE_RE.sub("", (utterance or "").strip(), count=1).strip(" .,!")
+    return text or "do that"
+
+
+def safari_line(utterance: str, did: str, *, title: str = "", url: str = "") -> str:
+    """What he asked + what Safari did. Real URL only. No router 'as requested'."""
+    ask = ask_plain(utterance)
+    action = (did or "").strip().rstrip(".")
+    parts = [f"You asked to {ask}."]
+    if action:
+        parts.append(action + ".")
+    clean_url = (url or "").strip()
+    clean_title = (title or "").strip()
+    if FACE_URL_RE.search(clean_url):
+        clean_url = ""
+        clean_title = ""
+    if clean_url and clean_url not in action:
+        if clean_title and clean_title.lower() not in {"untitled", "sans titre", "j.a.r.v.i.s."}:
+            parts.append(f"Front tab: {clean_title}. {clean_url}")
+        else:
+            parts.append(clean_url)
+    return " ".join(parts)
+
+
+def _cgevent_page(direction: str = "down") -> dict:
+    """HID page keys from this Python. Not osascript keystrokes. Not Safari JS."""
+    way = "up" if str(direction or "").lower() == "up" else "down"
+    vk = VK_PAGE_UP if way == "up" else VK_PAGE_DOWN
+    lib_path = ctypes.util.find_library("ApplicationServices") or (
+        "/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices"
+    )
+    lib = ctypes.CDLL(lib_path)
+    event_ref = ctypes.c_void_p
+    source_ref = ctypes.c_void_p
+    lib.CGEventSourceCreate.argtypes = [ctypes.c_uint32]
+    lib.CGEventSourceCreate.restype = source_ref
+    lib.CGEventCreateKeyboardEvent.argtypes = [source_ref, ctypes.c_uint16, ctypes.c_bool]
+    lib.CGEventCreateKeyboardEvent.restype = event_ref
+    lib.CGEventPost.argtypes = [ctypes.c_uint32, event_ref]
+    lib.CGEventPost.restype = None
+    lib.CFRelease.argtypes = [ctypes.c_void_p]
+    try:
+        _run(["osascript", "-e", 'tell application "Safari" to activate'], timeout=4.0)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    src = lib.CGEventSourceCreate(1)
+    down = lib.CGEventCreateKeyboardEvent(src, vk, True)
+    up = lib.CGEventCreateKeyboardEvent(src, vk, False)
+    if not down or not up:
+        if down:
+            lib.CFRelease(down)
+        if up:
+            lib.CFRelease(up)
+        if src:
+            lib.CFRelease(src)
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "path": "cgevent",
+            "spoken": "UNKNOWN. CGEvent could not build a page key.",
+        }
+    lib.CGEventPost(0, down)
+    lib.CGEventPost(0, up)
+    lib.CFRelease(down)
+    lib.CFRelease(up)
+    if src:
+        lib.CFRelease(src)
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "safari",
+        "path": "cgevent",
+        "direction": way,
+        "spoken": f"Safari scrolled {way} with page keys",
+    }
+
+
+def safari_scroll_cgevent(direction: str = "down") -> dict:
+    try:
+        return _cgevent_page(direction)
+    except (OSError, AttributeError, TypeError, ValueError) as exc:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "path": "cgevent",
+            "spoken": f"UNKNOWN. CGEvent page keys failed: {exc}.",
+        }
+
+
+def safari_scroll_keys(direction: str = "down") -> dict:
+    """Page keys via System Events. No Safari JavaScript from Apple Events."""
+    way = "up" if str(direction or "").lower() == "up" else "down"
+    code = KEY_PAGE_UP if way == "up" else KEY_PAGE_DOWN
+    script = (
+        'tell application "Safari" to activate\n'
+        "delay 0.15\n"
+        'tell application "System Events"\n'
+        '  if not (exists process "Safari") then return "NONE"\n'
+        '  tell process "Safari"\n'
+        "    set frontmost to true\n"
+        f"    key code {code}\n"
+        "  end tell\n"
+        "end tell\n"
+        'return "OK"\n'
+    )
+    try:
+        proc = _run(["osascript", "-e", script], timeout=8.0)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "path": "keys",
+            "spoken": f"UNKNOWN. Safari page keys failed: {exc}.",
+        }
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout or "System Events not allowed").strip()[:180]
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "path": "keys",
+            "spoken": (
+                "UNKNOWN. Safari page keys are dark. Allow Accessibility for "
+                f"Terminal or the Python running 4018. {err}"
+            ),
+        }
+    raw = (proc.stdout or "").strip()
+    if raw == "NONE":
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "safari",
+            "path": "keys",
+            "spoken": "UNKNOWN. Safari is not running.",
+        }
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "safari",
+        "path": "keys",
+        "direction": way,
+        "spoken": f"Safari scrolled {way} with page keys",
+    }
+
+
 def safari_scroll(direction: str = "down") -> dict:
-    dy = -600 if str(direction or "").lower() == "up" else 600
+    """CGEvent page keys first. osascript keys, then JS, only if that is dark."""
+    way = "up" if str(direction or "").lower() == "up" else "down"
+    hid = safari_scroll_cgevent(way)
+    if hid.get("ok"):
+        return hid
+    keys = safari_scroll_keys(way)
+    if keys.get("ok"):
+        return keys
+    dy = -600 if way == "up" else 600
     got = safari_js(f"window.scrollBy(0,{dy}); 'OK';")
     if got.get("ok"):
-        got["spoken"] = f"Scrolled {('up' if dy < 0 else 'down')} in Safari."
-    return got
+        got["path"] = "js"
+        got["direction"] = way
+        got["spoken"] = f"Safari scrolled {way} with JavaScript"
+        return got
+    return {
+        "ok": False,
+        "unknown": True,
+        "wire": "safari",
+        "path": "unknown",
+        "cgevent": hid,
+        "keys": keys,
+        "js": got,
+        "spoken": (
+            "UNKNOWN. Safari scroll is dark. CGEvent page keys, System Events keystrokes, "
+            "and JavaScript from Apple Events all failed."
+        ),
+    }
 
 
 def safari_extract_links() -> dict:
@@ -313,25 +493,55 @@ def safari_act(utterance: str, hive: Path | None = None) -> dict:
     text = (utterance or "").strip()
     dest = hive if hive is not None else HIVE
     if WATCH_LATER_ACT_RE.search(text):
-        return safari_open(WATCH_LATER_URL)
+        got = safari_open(WATCH_LATER_URL)
+        got["spoken"] = safari_line(text, f"Safari opened {WATCH_LATER_URL}", url=got.get("url") or WATCH_LATER_URL)
+        return got
     if YOUTUBE_OPEN_RE.search(text):
-        return safari_open(YOUTUBE_HOME)
+        got = safari_open(YOUTUBE_HOME)
+        got["spoken"] = safari_line(text, f"Safari opened {YOUTUBE_HOME}", url=got.get("url") or YOUTUBE_HOME)
+        return got
     open_hit = OPEN_RE.search(text)
     if open_hit:
-        return safari_open(open_hit.group(1).rstrip(".,)"))
+        target = open_hit.group(1).rstrip(".,)")
+        got = safari_open(target)
+        got["spoken"] = safari_line(text, f"Safari opened {target}", url=got.get("url") or target)
+        return got
     if SCREEN_GRAB_RE.search(text):
-        return snapshot(hive=dest, grab=True)
+        got = snapshot(hive=dest, grab=True)
+        safari = got.get("safari") if isinstance(got.get("safari"), dict) else {}
+        screen = got.get("screen") if isinstance(got.get("screen"), dict) else {}
+        did = "Safari grabbed the front tab"
+        if screen.get("path"):
+            did += f" at {screen['path']}"
+        got["spoken"] = safari_line(text, did, title=str(safari.get("title") or ""), url=str(safari.get("url") or ""))
+        return got
     if TABS_RE.search(text) and not CLICK_RE.search(text):
-        return safari_tabs()
+        got = safari_tabs()
+        got["spoken"] = safari_line(text, got.get("spoken") or "Safari listed tabs")
+        return got
     click_hit = CLICK_RE.search(text)
     if click_hit:
-        return safari_click(click_hit.group(1).strip(" ."))
+        got = safari_click(click_hit.group(1).strip(" ."))
+        got["spoken"] = safari_line(text, got.get("spoken") or "Safari clicked")
+        return got
     if SCROLL_RE.search(text):
-        return safari_scroll("up" if re.search(r"\bup\b", text, re.I) else "down")
+        got = safari_scroll("up" if re.search(r"\bup\b", text, re.I) else "down")
+        front = safari_front() if got.get("ok") else {}
+        got["spoken"] = safari_line(
+            text,
+            got.get("spoken") or "Safari tried to scroll",
+            title=str(front.get("title") or ""),
+            url=str(front.get("url") or ""),
+        )
+        return got
     type_hit = TYPE_RE.search(text)
     if type_hit:
-        return safari_type(type_hit.group(1).strip(" ."))
-    return safari_front()
+        got = safari_type(type_hit.group(1).strip(" ."))
+        got["spoken"] = safari_line(text, got.get("spoken") or "Safari typed")
+        return got
+    got = safari_front()
+    got["spoken"] = safari_line(text, got.get("spoken") or "Safari front tab", title=got.get("title") or "", url=got.get("url") or "")
+    return got
 
 
 def grab_screen(hive: Path) -> dict:

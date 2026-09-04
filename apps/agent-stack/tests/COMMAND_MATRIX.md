@@ -33,8 +33,8 @@ Product browser: Safari via hands/see.py — Playwright never drives Evens's Mac
 | make | `make an image`, `create a remotion`, `generate a video` | `make` | hands/named.py make_route | unit | pass | UNKNOWN |
 | pro | `what is marketing`, `brief me on marketing`, `BUS 204` | `pro` | hands/pro.py brief | unit / playwright | pass | UNKNOWN |
 | idle | `(empty)` | `idle` | mouth/turn.py local | unit | pass | UNKNOWN |
-| farewell | `good night`, `goodbye`, `bye` | `farewell` | mouth/turn.py talk_spoken | unit | UNKNOWN | quoted `Good night` → Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-da |
-| talk | `thanks`, `serious`, `what the hell are you saying` | `talk` | mouth/turn.py talk_spoken | unit | UNKNOWN | quoted `Serious` → Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-da |
+| farewell | `good night`, `goodbye`, `bye` | `farewell` | mouth/turn.py talk_spoken | unit | pass | quoted `Good night` → Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-da |
+| talk | `thanks`, `serious`, `what the hell are you saying` | `talk` | mouth/turn.py talk_spoken | unit | pass | quoted `Serious` → Sir. As requested. Scar cursor-auth-dark already saved. After one cursor-auth-da |
 
 ## YouTube must-hit
 

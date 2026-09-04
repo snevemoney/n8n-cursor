@@ -45,6 +45,18 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertNotIn("I am sorry", out)
         self.assertNotIn("I'm sorry", out)
 
+    def test_safari_wrap_is_conversation_not_router(self) -> None:
+        out = MOD.wrap(
+            "You asked to open YouTube. Safari opened https://www.youtube.com.",
+            verb="safari",
+            utterance="Hi Jarvis open YouTube",
+        )
+        self.assertTrue(out.startswith("Sir."))
+        self.assertIn("You asked to open YouTube", out)
+        self.assertIn("https://www.youtube.com", out)
+        self.assertNotIn("as requested", out.lower())
+        self.assertNotIn("127.0.0.1:4018", out)
+
     def test_no_again_without_history(self) -> None:
         out = MOD.wrap("Clicked Login in Safari.", verb="safari", utterance="click Login")
         self.assertNotIn("again", out.lower())

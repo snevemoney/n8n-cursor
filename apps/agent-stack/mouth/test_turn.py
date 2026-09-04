@@ -602,6 +602,17 @@ class MouthTurnTest(unittest.TestCase):
             self.assertEqual(opened, ["Hi Jarvis open YouTube"])
             self.assertIn("https://www.youtube.com", yt["spoken"])
             self.assertNotIn("127.0.0.1:4018", yt["spoken"])
+            self.assertNotIn("as requested", yt["spoken"].lower())
+            night = MOD.apply_turn("Good night", hive=hive)
+            self.assertEqual(night["verb"], "farewell")
+            self.assertIn("Good night Evens", night["spoken"])
+            self.assertNotIn("Scar", night["spoken"])
+            self.assertNotIn("ASKS.md", night["spoken"])
+            serious = MOD.apply_turn("Serious", hive=hive)
+            self.assertEqual(serious["verb"], "talk")
+            self.assertIn("next job", serious["spoken"].lower())
+            self.assertNotIn("Scar", serious["spoken"])
+            self.assertNotIn("ASKS.md", serious["spoken"])
             seen: list[str] = []
 
             def harness(prompt: str, mode: str = "ask", resume: str | None = None) -> dict:
@@ -692,6 +703,10 @@ class MouthTurnTest(unittest.TestCase):
         self.assertEqual(MOD.classify("screenshot")["verb"], "safari")
         self.assertEqual(MOD.classify("share my screen")["verb"], "safari")
         self.assertEqual(MOD.classify("watch later")["verb"], "watch_later")
+        self.assertEqual(MOD.classify("Good night")["verb"], "farewell")
+        self.assertEqual(MOD.classify("Serious")["verb"], "talk")
+        self.assertEqual(MOD.classify("What the hell are you saying")["verb"], "talk")
+        self.assertEqual(MOD.classify("thanks")["verb"], "talk")
         spoken = MOD.capabilities_spoken()
         self.assertIn("Sir", spoken)
         self.assertIn("wit", spoken.lower())
