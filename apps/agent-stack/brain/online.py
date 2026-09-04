@@ -410,7 +410,7 @@ def ensure_jarvis_chat(chat_id: str | None = None) -> str | None:
 
 
 def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = None) -> dict:
-    """Headless Cursor harness. Voice sitting. No --force / --yolo."""
+    """Headless Cursor harness. ask | plan | agent. No --force / --yolo."""
     if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
         return {
             "ok": False,
@@ -428,24 +428,17 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
             "engine": "cursor",
             "spoken": "UNKNOWN. Cursor agent CLI is missing.",
         }
-    use_mode = mode if mode in ("ask", "plan") else "ask"
-    argv = [
-        *cmd,
-        "-p",
-        "--mode",
-        use_mode,
-        "--trust",
-        "--workspace",
-        str(ROOT),
-        "--output-format",
-        "text",
-    ]
+    use_mode = mode if mode in ("ask", "plan", "agent") else "ask"
+    argv = [*cmd, "-p", "--trust", "--workspace", str(ROOT), "--output-format", "text"]
+    if use_mode in ("ask", "plan"):
+        argv.extend(["--mode", use_mode])
     chat = (resume or "").strip()
     if chat:
         argv.extend(["--resume", chat])
-    argv.append((prompt or "").strip()[:4000])
+    argv.append((prompt or "").strip()[:6000])
+    timeout = 180 if use_mode == "agent" else 90
     try:
-        proc = subprocess.run(argv, capture_output=True, text=True, timeout=90, cwd=str(ROOT))
+        proc = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, cwd=str(ROOT))
     except subprocess.TimeoutExpired:
         return {
             "ok": False,

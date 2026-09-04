@@ -64,6 +64,7 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("state.armed", html)
         self.assertIn("/api/wires", html)
         self.assertIn("CURSOR", html)
+        self.assertIn("MODE - AGENT", html)
         self.assertNotIn("ollama", html.lower())
         self.assertNotIn("if (state.live && !state.turning)", html)
         self.assertNotIn("bootMic()", html)
