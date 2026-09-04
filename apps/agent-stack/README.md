@@ -27,8 +27,8 @@ open http://127.0.0.1:4018/
 **Hear the store**
 
 1. Vault is `/Users/evenslouis/Documents/My_Billion_Dollar_Vault` (hive folder `00_Outer_Heaven`). Repo is this tree. Sessions stay on disk (`cursor-chat-sessions` / `grok-chat-sessions`). Hive is `.hive` + skills.
-2. Open Safari on `http://127.0.0.1:4018/` and hard-refresh. HUD should read **NEURAL LINK - STORE**.
-3. Say **JARVIS**, then a normal sentence. Converse packs the store. A talk host is optional. Cursor is only for repo turns (`look at the code`).
-4. Do not export an xAI key to make the product exist. Do not run `agent login` to make the skull exist.
+2. Open Safari on `http://127.0.0.1:4018/` and hard-refresh. HUD should read **NEURAL LINK - CURSOR**.
+3. Say **JARVIS**. Converse calls Cursor CLI (`agent -p --mode ask --resume`) with the store pack. One chat for the sitting.
+4. No Ollama. No xAI key. One-time `agent login` is the Cursor account, not a new vendor.
 
 Upstream (pattern only, AGPL, not vendored): https://github.com/jaredrhod/fullstack-agent

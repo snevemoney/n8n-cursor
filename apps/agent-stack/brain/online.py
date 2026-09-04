@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Talk hosts and live wires. Local face only. No Ollama.
 
-The brain is the store (vault + repo + sessions + hive).
-Grok is a talk host. Cursor is a repo hand. Neither is the skull.
-Missing host → mouth speaks from the store. Do not nag for xAI keys.
+Talk harness is Cursor CLI (cloud). Memory is the store
+(vault + repo + sessions + hive). No Ollama. Do not nag for xAI keys.
 """
 from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import urllib.error
@@ -132,10 +132,10 @@ def wire_report() -> dict:
             "grokbot": grokbot,
             "hive": "http",
             "vps": "ssh",
-            "cursor": "hand" if agent_cmd() else "dark",
+            "cursor": "harness" if agent_cmd() else "dark",
             "vault": "store",
         },
-        "need": [],
+        "need": [] if agent_cmd() else ["Cursor agent CLI"],
     }
 
 
@@ -375,8 +375,42 @@ def call_cursor() -> dict:
     return {"ok": True, "wire": "cursor", "spoken": spoken}
 
 
-def call_cursor_turn(prompt: str, *, mode: str = "ask") -> dict:
-    """Headless Cursor agent on this repo. Jarvis stays the mouth. No --force / --yolo."""
+def cursor_logged_in() -> bool:
+    cmd = agent_cmd()
+    if not cmd:
+        return False
+    try:
+        proc = subprocess.run([*cmd, "status"], capture_output=True, text=True, timeout=8)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    text = f"{proc.stdout or ''} {proc.stderr or ''}".lower()
+    return "not logged in" not in text and bool((proc.stdout or proc.stderr or "").strip())
+
+
+def ensure_jarvis_chat(chat_id: str | None = None) -> str | None:
+    """One Cursor chat for the voice sitting. Resume it. Do not dump other sessions."""
+    existing = (chat_id or "").strip()
+    if existing:
+        return existing
+    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
+        return None
+    cmd = agent_cmd()
+    if not cmd or not cursor_logged_in():
+        return None
+    try:
+        proc = subprocess.run([*cmd, "create-chat"], capture_output=True, text=True, timeout=20, cwd=str(ROOT))
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    out = (proc.stdout or "").strip()
+    match = re.search(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", out, re.I)
+    if match:
+        return match.group(0)
+    token = out.split()[-1] if out else ""
+    return token or None
+
+
+def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = None) -> dict:
+    """Headless Cursor harness. Voice sitting. No --force / --yolo."""
     if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
         return {
             "ok": False,
@@ -405,8 +439,11 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask") -> dict:
         str(ROOT),
         "--output-format",
         "text",
-        (prompt or "").strip()[:2000],
     ]
+    chat = (resume or "").strip()
+    if chat:
+        argv.extend(["--resume", chat])
+    argv.append((prompt or "").strip()[:4000])
     try:
         proc = subprocess.run(argv, capture_output=True, text=True, timeout=90, cwd=str(ROOT))
     except subprocess.TimeoutExpired:
@@ -452,6 +489,7 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask") -> dict:
         "engine": "cursor",
         "spoken": text,
         "mode": use_mode,
+        "chat_id": chat or None,
     }
 
 

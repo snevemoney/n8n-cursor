@@ -61,7 +61,7 @@ class FaceServeTest(unittest.TestCase):
         self.assertNotIn("Safari speech is flaky", html)
         self.assertIn("state.armed", html)
         self.assertIn("/api/wires", html)
-        self.assertIn("STORE", html)
+        self.assertIn("CURSOR", html)
         self.assertNotIn("ollama", html.lower())
         self.assertNotIn("if (state.live && !state.turning)", html)
         self.assertNotIn("bootMic()", html)

@@ -166,9 +166,7 @@ class MouthTurnTest(unittest.TestCase):
                 grok=dark,
             )
             self.assertFalse(vaulted["ask"])
-            low = (vaulted["spoken"] or "").lower()
-            self.assertTrue("north star" in low or "leverage" in low, vaulted["spoken"])
-            self.assertNotIn("Cursor did not return a reply", vaulted["spoken"])
+            self.assertIn("Cursor harness", vaulted["spoken"])
             self.assertNotIn("XAI_API_KEY", vaulted["spoken"])
             _no_desk_ask(vaulted["spoken"])
 
@@ -181,9 +179,7 @@ class MouthTurnTest(unittest.TestCase):
                 grok=dark,
             )
             self.assertFalse(missing["ask"])
-            self.assertIn("vault", (missing["spoken"] or "").lower())
-            self.assertIn("hive", (missing["spoken"] or "").lower())
-            self.assertNotIn("Cursor did not return a reply", missing["spoken"])
+            self.assertIn("Cursor harness", missing["spoken"])
             self.assertNotIn("XAI_API_KEY", missing["spoken"])
             _no_desk_ask(missing["spoken"])
             self.assertFalse((hive / "bus" / "jobs.jsonl").is_file())
@@ -233,33 +229,52 @@ class MouthTurnTest(unittest.TestCase):
             self.assertIn("Store (this is the brain)", ctx)
             _no_desk_ask(follow["spoken"])
 
-    def test_converse_does_not_call_cursor(self) -> None:
-        called: list[int] = []
+    def test_converse_calls_cursor_harness(self) -> None:
+        seen: list[tuple] = []
 
-        def boom(prompt: str, mode: str = "ask") -> dict:
-            called.append(1)
-            return {"ok": True, "wire": "cursor", "spoken": "cursor should not run"}
+        def harness(prompt: str, mode: str = "ask", resume: str | None = None) -> dict:
+            seen.append((prompt, mode, resume))
+            return {
+                "ok": True,
+                "wire": "cursor",
+                "engine": "cursor",
+                "spoken": "Hey Evens. Vault and hive are on the table. What are we doing?",
+                "chat_id": resume or "jarvis-1",
+            }
 
-        def dark(_prompt: str, context: str = "") -> dict:
-            return {"ok": False, "unknown": True, "spoken": ""}
-
-        with tempfile.TemporaryDirectory(prefix="agent-stack-no-cursor-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-harness-") as tmp:
             hive = Path(tmp)
             (hive / "bus").mkdir()
+            (hive / "bus" / "state.json").write_text(
+                '{"schema_version":1,"turns":[],"jarvis_chat_id":"jarvis-1"}\n',
+                encoding="utf-8",
+            )
             vault = hive / "vault"
             vault.mkdir()
             (vault / "OPERATOR_MEMORY.md").write_text("north stars\n", encoding="utf-8")
-            out = MOD.apply_turn(
+            first = MOD.apply_turn(
                 "hey",
                 hive=hive,
                 retrieve_roots=[vault],
-                grok=dark,
-                cursor_fn=boom,
+                cursor_fn=harness,
             )
-        self.assertEqual(called, [])
-        self.assertEqual(out["verb"], "converse")
-        self.assertNotIn("cursor should not run", out["spoken"])
-        self.assertNotIn("XAI_API_KEY", out["spoken"])
+            follow = MOD.apply_turn(
+                "what did I just say",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=harness,
+            )
+            saved = MOD.load_json(hive / "bus" / "state.json")
+            self.assertEqual(saved.get("jarvis_chat_id"), "jarvis-1")
+        self.assertEqual(first["verb"], "converse")
+        self.assertEqual(first["wires"], ["cursor"])
+        self.assertIn("Vault and hive", first["spoken"])
+        self.assertEqual(follow["verb"], "converse")
+        self.assertEqual(seen[0][2], "jarvis-1")
+        self.assertEqual(seen[1][2], "jarvis-1")
+        self.assertIn("hey", seen[1][0].lower())
+        self.assertIn("Speak as Jarvis", seen[0][0])
+        self.assertNotIn("XAI_API_KEY", first["spoken"])
 
     def test_repo_turn_calls_cursor_no_ask(self) -> None:
         self.assertEqual(MOD.classify("look at the code for the face")["verb"], "cursor")
