@@ -161,6 +161,45 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertEqual(out.get("verb"), "safari_see")
         self.assertIn("Example", out.get("spoken") or "")
 
+    def test_pack_includes_full_school_shelf(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="pipeline-school-pack-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            pack = PIPE.write_pack("the whole shelf", hive=hive, retrieve_roots=[], turns=[])
+            body = pack.read_text(encoding="utf-8")
+        self.assertIn("School shelf", body)
+        self.assertIn("164", body)
+        self.assertIn("Count: **42**", body)
+        self.assertNotIn("## When", body)
+        self.assertIn("BUS203", body)
+        self.assertIn("mktg-value-stp-mix-plan-checklists", body)
+
+    def test_vault_read_whole_shelf_is_not_bus206_only(self) -> None:
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            return {
+                "tool": "vault_read",
+                "args": {"query": "the whole shelf"},
+                "speak": "From the school shelf.",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-shelf-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            out = MOUTH.apply_turn(
+                "the whole shelf",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=fake_cursor,
+            )
+        spoken = out.get("spoken") or ""
+        self.assertIn("164", spoken)
+        self.assertIn("on disk", spoken.lower())
+        self.assertNotIn("## When", spoken)
+        self.assertIn("school", (out.get("wires") or []))
+        self.assertLess(spoken.lower().count("bus206"), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -62,6 +62,7 @@ RETRIEVE = _load("agent_stack_retrieve", STACK / "memory" / "retrieve.py")
 LAST_WIRE = _load("agent_stack_last_wire", STACK / "memory" / "last_wire.py")
 PERSONA = _load("agent_stack_persona", STACK / "mouth" / "persona.py")
 SEE = _load("agent_stack_see", STACK / "hands" / "see.py")
+PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
 ONLINE = _load("agent_stack_online", HERE / "online.py")
 
 
@@ -194,6 +195,9 @@ def assemble_pack(
         last = LAST_WIRE.read(hive)
         lines.append("Last wire:")
         lines.append(json.dumps(last or {}, ensure_ascii=True))
+        lines.append("")
+    if PRO is not None:
+        lines.append(PRO.pack_block())
         lines.append("")
     bus = load_json(hive / "bus" / "state.json")
     lines.append("Bus:")
@@ -333,7 +337,12 @@ def store_converse(
     if prior:
         bits.append(f"Before that you said: {prior[:120]}.")
     greet_stop = {"hello", "hey", "hi", "yo", "jarvis", "hear", "heard", "didnt", "didn"}
-    if RETRIEVE is not None:
+    if PRO is not None and PRO.is_school_query(utterance):
+        school = PRO.brief(utterance)
+        evidence = str(school.get("spoken") or "").strip()
+        if evidence:
+            bits.append(evidence)
+    elif RETRIEVE is not None:
         words = [w for w in RETRIEVE.tokens(utterance) if w not in greet_stop]
         if words:
             found = RETRIEVE.search(utterance, retrieve_roots)
@@ -513,6 +522,18 @@ def run_tool(
         }
     if tool == "vault_read":
         query = str(args.get("query") or utterance or "").strip()
+        if PRO is not None and PRO.is_school_query(query):
+            school = PRO.brief(query)
+            evidence = str(school.get("spoken") or "").strip()
+            cites = school.get("cites") if isinstance(school.get("cites"), list) else []
+            return {
+                "ok": True,
+                "tool": tool,
+                "spoken": _evidence_line(speak, evidence),
+                "wires": ["vault_read", "store", "school"],
+                "cites": cites,
+                "sent": False,
+            }
         found = {"spoken": "", "hits": [], "unknown": True}
         if RETRIEVE is not None:
             found = RETRIEVE.search(query, retrieve_roots)

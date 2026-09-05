@@ -43,6 +43,8 @@ def _mouth_stamp() -> tuple:
         stack / "mouth" / "turn.py",
         stack / "brain" / "pipeline.py",
         stack / "mouth" / "persona.py",
+        stack / "hands" / "pro.py",
+        stack / "hands" / "school_index.py",
     )
     return tuple(p.stat().st_mtime for p in paths)
 

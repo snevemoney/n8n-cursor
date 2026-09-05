@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import subprocess
@@ -240,11 +241,32 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
     }
 
 
+def _shelf_line() -> str:
+    """Catalog is the school. Do not stamp one course as the whole shelf."""
+    idx = ROOT / "apps/agent-stack/hands/school_index.py"
+    if not idx.is_file():
+        return "SHELF: 164 claimed (saylor-catalog-complete.md); harvest table is not 164 rows"
+    spec = importlib.util.spec_from_file_location("mentor_school_index", idx)
+    if spec is None or spec.loader is None:
+        return "SHELF: 164 claimed (saylor-catalog-complete.md); harvest table is not 164 rows"
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    snap = mod.build_snapshot()
+    return (
+        f"SHELF: {snap.get('enrolled_catalog_claim')} claimed / "
+        f"{snap.get('on_disk')} on disk / "
+        f"{snap.get('missing')} named missing / "
+        f"delta {snap.get('unnamed_enrolled_delta')} unnamed "
+        f"(harvest Count: **{snap.get('harvest_table_count')}**)"
+    )
+
+
 def emit_vault(card: dict, desk: str, host: str) -> str:
     items = [
         f"LANE: {card['lane']}",
         f"SITTING: {card['sitting']}",
         f"SKILLS: {', '.join(card['skills']) or 'none'}",
+        _shelf_line(),
     ]
     for row in card["rows"][:CAP]:
         items.append(f"{row['slug']}: PUT {row['put']} · LEV {row['leverage']}")
@@ -395,6 +417,7 @@ def main() -> int:
         f"SITTING: {card['sitting'] or '(name it)'}",
         f"FACTS: {card['facts']}",
         f"SKILLS: {', '.join(card['skills']) or '(none — skip or say one fact)'}",
+        _shelf_line(),
         "",
     ]
     for row in card["rows"]:

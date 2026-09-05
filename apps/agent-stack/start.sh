@@ -35,6 +35,8 @@ if [[ "$MODE" == "check" ]]; then
   AGENT_STACK_DRY_TTS=1 python3 "$HERE/mouth/voice.py" --self-test
   python3 "$HERE/face/serve.py" --self-test
   AGENT_STACK_DRY_TTS=1 AGENT_STACK_CURSOR_DRY=1 python3 "$HERE/tests/test_golden_pipeline.py"
+  python3 "$HERE/hands/test_school_index.py"
+  python3 "$HERE/hands/test_pro.py"
   python3 "$HERE/memory/test_scars.py"
   exit 0
 fi
