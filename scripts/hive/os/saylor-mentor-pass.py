@@ -18,8 +18,21 @@ BEATS = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-live-beats.md"
 LANES = ("hive-os", "agency")
 CAP = 3
 COURSE_RE = re.compile(r"\b(?:BUS|COMM|ECON|PRDV|CS|ARTH|ENGL|PHIL|MA|POLSC)\d+\b")
+# Catalog is the school. Do not treat "hive-os" or "not just BUS206" as one course.
 SHELF_SIT_RE = re.compile(
-    r"\b(all\s+164|whole\s+shelf|all\s+school\s+skills|164\s+skills|full\s+catalog|not just BUS206)\b",
+    r"("
+    r"all\s+164|"
+    r"all\s+(?:the\s+)?(?:school\s+)?(?:skills?\s+)?164|"
+    r"164\s+(?:school\s+)?(?:skills|index|catalog|courses)|"
+    r"school\s+skills\s+164|"
+    r"(?:the\s+)?(?:whole|entire)\s+shelf|"
+    r"full\s+catalog|"
+    r"all\s+(?:the\s+)?school\s+skills|"
+    r"not\s+just\s+BUS206|"
+    r"don'?t\s+just\s+(?:focus\s+on\s+)?BUS206|"
+    r"catalog\s+(?:is\s+the\s+)?(?:school|claim)|"
+    r"school\s+is\s+the\s+catalog"
+    r")",
     re.I,
 )
 
@@ -33,15 +46,51 @@ HINTS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\b(inbox|customer|complaint|cs script)\b", re.I), "custsvc-impression-needs-channel-complaint-experience"),
     (re.compile(r"\b(kpi|baseline|did (this|it) (work|move)|number mean)\b", re.I), "bizstat-describe-sample-infer-regress-checklists"),
     (re.compile(r"\b(dashboard|warehouse|which numbers)\b", re.I), "bi-sources-warehouse-present-model-privacy"),
-    (re.compile(r"\b(people, process|five component|what systems)\b", re.I), "mis-intro-five-components"),
+    (re.compile(r"\b(people, process|five component|what systems|information system)\b", re.I), "mis-intro-five-components"),
     (re.compile(r"\b(fund|refuse|keep or kill|saas|spend)\b", re.I), "strategic-it-when-whether-then-strategy"),
     (re.compile(r"\b(project|slice|done-check|has an end)\b", re.I), "intro-pm-process-groups-people-checklists"),
     (re.compile(r"\b(offer|who (the site|it) is for|stp|ads vs)\b", re.I), "mktg-value-stp-mix-plan-checklists"),
     (re.compile(r"\b(spin|sales process|loyalty|close)\b", re.I), "grad-sales-process-spin-loyalty-brand"),
     (re.compile(r"\b(ethical|hitl|send this)\b", re.I), "bizethics-integrity-stakeholder-csr-dilemma"),
     (re.compile(r"\b(legal|allowed)\b", re.I), "bizlaw-sources-forum-wrongs-assets-entity-checklists"),
-    (re.compile(r"\b(put in the system|where data lives|os)\b", re.I), "mis-intro-five-components"),
+    (re.compile(r"\b(put in the system|where data lives)\b", re.I), "mis-intro-five-components"),
 ]
+
+
+def is_shelf_sitting(sitting: str) -> bool:
+    """True when he named the catalog, not one course as the university."""
+    text = sitting or ""
+    if SHELF_SIT_RE.search(text):
+        return True
+    if re.search(r"\b164\b", text) and re.search(
+        r"\b(school|catalog|shelf|skills?|index|courses?|enrolled)\b", text, re.I
+    ):
+        return True
+    return False
+
+
+def _shelf_card(lane: str, sitting: str) -> dict:
+    snap_line = _shelf_line()
+    return {
+        "mode": "live",
+        "lane": lane,
+        "sitting": sitting,
+        "slug": "saylor-course-skill",
+        "course": "SHELF",
+        "school": snap_line,
+        "says": (
+            "The catalog is the school, not one course code. "
+            "164 unique courses are the enrolled claim. "
+            "The harvest table on disk is not 164 rows. "
+            "Named remaining stay UNKNOWN until a file exists. "
+            "Do not stamp BUS206 as intelligence."
+        ),
+        "now": "Scan the shelf. Speak 1–3. Do not dump 164 manuals.",
+        "watch": "One course code is not the university. Hard step stays Evens.",
+        "put": "shelf counts on the mentor card (claimed / on disk / delta)",
+        "leverage": snap_line,
+        "then": "do the work through this lens; do not stamp and leave",
+    }
 
 
 def _parse_map_rows(lane: str) -> list[dict[str, str]]:
@@ -203,28 +252,9 @@ def _parse_beats(path: Path | None = None) -> dict[str, dict[str, str]]:
 
 
 def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
-    """One school this turn. Teach, then the caller does the work."""
-    if SHELF_SIT_RE.search(sitting or ""):
-        snap_line = _shelf_line()
-        return {
-            "mode": "live",
-            "lane": lane,
-            "sitting": sitting,
-            "slug": "saylor-course-skill",
-            "course": "SHELF",
-            "says": (
-                "The catalog is the school, not one course code. "
-                "164 unique courses are the enrolled claim. "
-                "The harvest table on disk is not 164 rows. "
-                "Named remaining stay UNKNOWN until a file exists. "
-                "Do not stamp BUS206 as intelligence."
-            ),
-            "now": "Scan the shelf. Speak 1–3. Do not dump 164 manuals.",
-            "watch": "One course code is not the university. Hard step stays Evens.",
-            "put": "shelf counts on the mentor card (claimed / on disk / delta)",
-            "leverage": snap_line,
-            "then": "do the work through this lens; do not stamp and leave",
-        }
+    """School is the catalog. This-turn lens may be one course. Never stamp BUS206 as the university."""
+    if is_shelf_sitting(sitting):
+        return _shelf_card(lane, sitting)
     card = render(lane, sitting, slugs)
     row = card["rows"][0]
     courses = COURSE_RE.findall(f"{row.get('skill', '')} {row.get('said', '')} {row.get('slug', '')}")
@@ -257,6 +287,7 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
         "sitting": sitting,
         "slug": row.get("slug"),
         "course": beat.get("course") or (courses[0] if courses else row.get("skill")),
+        "school": _shelf_line(),
         "says": says,
         "now": beat.get("now") or row.get("put"),
         "watch": beat.get("watch") or "marketing ≠ copy ≠ CS; hard step stays Evens",
@@ -264,6 +295,24 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
         "leverage": row.get("leverage"),
         "then": "do the work through this lens; do not stamp and leave",
     }
+
+
+def format_live(beat: dict) -> str:
+    """SCHOOL is always the catalog counts. LENS is this-turn only."""
+    school = beat.get("school") or _shelf_line()
+    return "\n".join(
+        [
+            f"# Live mentor · {beat['lane']}",
+            "",
+            f"SITTING: {beat['sitting'] or '(name it)'}",
+            f"SCHOOL: {school}",
+            f"LENS: {beat.get('course') or 'SHELF'}",
+            f"SAYS: {beat['says']}",
+            f"NOW: {beat['now']}",
+            f"THEN: {beat['then']}",
+            f"WATCH: {beat['watch']}",
+        ]
+    )
 
 
 def _shelf_line() -> str:
@@ -384,11 +433,38 @@ def self_test() -> list[str]:
         errs.append("live NOW missed who/why/tone")
     if live.get("mode") != "live":
         errs.append("live mode flag missing")
+    if "164" not in (live.get("school") or ""):
+        errs.append("copy sitting SCHOOL missed catalog counts")
+    live_md = format_live(live)
+    school_line = next((ln for ln in live_md.splitlines() if ln.startswith("SCHOOL:")), "")
+    if "164" not in school_line or "on disk" not in school_line.lower():
+        errs.append("live SCHOOL line is not catalog counts")
+    if re.search(r"^SCHOOL:\s*BUS206\s*$", live_md, re.M):
+        errs.append("live stamp SCHOOL is BUS206")
     shelf = live_beat("hive-os", "school is all 164 skills not just BUS206", [])
     if shelf.get("course") == "BUS206":
         errs.append("shelf sitting collapsed to BUS206")
     if "164" not in (shelf.get("says") or "") and "catalog" not in (shelf.get("says") or "").lower():
         errs.append("shelf sitting missed catalog-as-school")
+    evens = live_beat(
+        "hive-os",
+        "Don't just focus on BUS206. Focus on all the school skills 164 as well.",
+        [],
+    )
+    if evens.get("course") == "BUS206":
+        errs.append("evens phrasing collapsed to BUS206")
+    if evens.get("course") != "SHELF":
+        errs.append(f"evens phrasing missed SHELF (got {evens.get('course')})")
+    evens_md = format_live(evens)
+    if re.search(r"^SCHOOL:\s*BUS206\s*$", evens_md, re.M):
+        errs.append("evens live stamp SCHOOL is BUS206")
+    if "164" not in evens_md or "on disk" not in evens_md.lower():
+        errs.append("evens live stamp missed catalog counts")
+    hive_os = live_beat("hive-os", "hive-os confirm the 164 index is what pipeline uses", [])
+    if hive_os.get("course") == "BUS206":
+        errs.append("hive-os + 164 index sitting collapsed to BUS206")
+    if not is_shelf_sitting("hive-os confirm the 164 index"):
+        errs.append("164 index sitting not detected as shelf")
     return errs
 
 
@@ -420,20 +496,7 @@ def main() -> int:
         if args.format == "json":
             print(json.dumps(beat, indent=2))
             return 0
-        print(
-            "\n".join(
-                [
-                    f"# Live mentor · {beat['lane']}",
-                    "",
-                    f"SITTING: {beat['sitting'] or '(name it)'}",
-                    f"SCHOOL: {beat['course']}",
-                    f"SAYS: {beat['says']}",
-                    f"NOW: {beat['now']}",
-                    f"THEN: {beat['then']}",
-                    f"WATCH: {beat['watch']}",
-                ]
-            )
-        )
+        print(format_live(beat))
         return 0
     card = render(args.lane, args.sitting, slugs)
     if args.emit:

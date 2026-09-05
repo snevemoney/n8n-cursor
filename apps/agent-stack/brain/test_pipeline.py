@@ -209,6 +209,19 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertIn("BUS203", body)
         self.assertIn("mktg-value-stp-mix-plan-checklists", body)
 
+    def test_pack_is_not_a_bus206_allow_list(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="pipeline-not-206-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            pack = PIPE.write_pack("what is marketing", hive=hive, retrieve_roots=[], turns=[])
+            body = pack.read_text(encoding="utf-8")
+        self.assertIn("164", body)
+        self.assertIn("BUS203", body)
+        self.assertIn("mktg-value-stp-mix-plan-checklists", body)
+        self.assertGreater(body.count("BUS"), 1)
+        self.assertIn("Do not dump a school skill because a word like marketing", body)
+        self.assertFalse(PIPE.asked_for_course("what is marketing"))
+
     def test_vault_read_whole_shelf_is_not_bus206_only(self) -> None:
         def fake_cursor(prompt: str, mode: str = "ask", **kw):
             _ = (prompt, mode, kw)

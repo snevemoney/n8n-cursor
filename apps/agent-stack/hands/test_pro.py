@@ -324,6 +324,16 @@ a task asks about an obscure syllabus that is still a real school file
         self.assertNotIn("## When", got["spoken"])
         self.assertLess(len(got["spoken"]), 2000)
 
+    def test_school_brief_is_full_catalog_not_bus206(self) -> None:
+        got = MOD.school_brief("the whole shelf")
+        self.assertEqual(got.get("enrolled_catalog_claim"), 164)
+        courses = {c for c in (got.get("courses") or []) if c}
+        self.assertGreater(len(courses), 1)
+        self.assertTrue(any(c != "BUS206" for c in courses))
+        self.assertIn("164", got["spoken"])
+        self.assertNotIn("## When", got["spoken"])
+        self.assertLess(got["spoken"].lower().count("bus206"), 3)
+
     def test_asked_for_course_not_topic_word(self) -> None:
         self.assertFalse(MOD.asked_for_course("what is marketing"))
         self.assertFalse(MOD.asked_for_course("Tell me about marketing"))
