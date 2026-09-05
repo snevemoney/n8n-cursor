@@ -114,6 +114,31 @@ def grok_api_key() -> str:
     return (os.environ.get("XAI_API_KEY") or os.environ.get("GROK_API_KEY") or "").strip()
 
 
+def has_xai_key() -> bool:
+    """Yes/no only. Never log or return the secret."""
+    return bool(grok_api_key())
+
+
+def try_agent_login() -> dict:
+    """Last resort after keys are checked. Do not loop this. Do not treat it as talk."""
+    cmd = agent_cmd()
+    if not cmd:
+        return {"tried": True, "ok": False, "reason": "no-cli"}
+    try:
+        proc = subprocess.run(
+            [*cmd, "login"],
+            capture_output=True,
+            text=True,
+            timeout=45,
+            cwd=str(ROOT),
+        )
+    except subprocess.TimeoutExpired:
+        return {"tried": True, "ok": False, "reason": "timeout"}
+    except OSError as exc:
+        return {"tried": True, "ok": False, "reason": type(exc).__name__}
+    return {"tried": True, "ok": cursor_logged_in(), "code": int(proc.returncode)}
+
+
 def grok_model() -> str:
     return (os.environ.get("GROK_MODEL") or DEFAULT_MODEL).strip() or DEFAULT_MODEL
 

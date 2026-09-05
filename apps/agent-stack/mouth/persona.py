@@ -59,6 +59,9 @@ PACK_LEAK_RE = re.compile(
     r"last you said|"
     r"you were at|"
     r"still on that|"
+    r"\bi(?:'m| am) here\b|"
+    r"\bstill here\b|"
+    r"still need [`']?agent login|"
     r"`[a-z0-9-]{8,}`"
     r")",
     re.I,

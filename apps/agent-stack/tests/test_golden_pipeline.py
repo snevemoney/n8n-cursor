@@ -358,7 +358,8 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertNotIn("Last you said", spoken)
         self.assertNotIn("You were at", spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertIn("agent login", spoken.lower())
+        self.assertIn("no model is available", spoken.lower())
+        self.assertNotIn("I'm here", spoken)
 
     def test_10_converse_is_default_not_a_template(self) -> None:
         def fake_cursor(prompt: str, mode: str = "ask", **kw):
@@ -437,10 +438,11 @@ class GoldenPipelineTest(unittest.TestCase):
         c = third.get("spoken") or ""
         for spoken in (a, b, c):
             self.assertTrue(spoken.startswith("Sir."), spoken)
-            self.assertIn("agent login", spoken.lower())
+            self.assertIn("no model is available", spoken.lower())
             self.assertNotIn("how's it going", spoken.lower())
             self.assertNotIn("what did i just say", spoken.lower())
             self.assertNotIn("Wires, not vibes", spoken)
+            self.assertNotIn("I'm here", spoken)
             self.assertNotIn("BUS602", spoken)
             self.assertNotIn("LESSONS:", spoken)
             self.assertNotIn("professional skills again", spoken.lower())
@@ -508,6 +510,73 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertEqual(out.get("verb"), "refuse_hard_step")
         self.assertIn("Proposal only", out.get("spoken") or "")
         self.assertNotIn("I will publish it", out.get("spoken") or "")
+
+    def test_14_xai_mouth_when_cursor_dark(self) -> None:
+        replies = (
+            "Evening is quiet. I am listening.",
+            "One sitting tonight. Then stop.",
+            "Yes — that sitting. I have it.",
+        )
+        talks: list[str] = []
+
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": "UNKNOWN. Cursor agent needs a one-time login.",
+            }
+
+        def fake_xai(prompt: str, context: str = "") -> dict:
+            talks.append(prompt)
+            self.assertTrue(context)
+            self.assertIn("Conversation is the product", context)
+            return {
+                "ok": True,
+                "engine": "xai",
+                "wire": "grok",
+                "spoken": replies[len(talks) - 1],
+            }
+
+        with tempfile.TemporaryDirectory(prefix="golden-xai-") as tmp:
+            hive, vault = _hive(tmp)
+            first = TURN.apply_turn(
+                "how's it going",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+                talk_fn=fake_xai,
+            )
+            second = TURN.apply_turn(
+                "what should I do tonight",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+                talk_fn=fake_xai,
+            )
+            third = TURN.apply_turn(
+                "yeah that",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+                talk_fn=fake_xai,
+            )
+        self.assertEqual(len(talks), 3)
+        self.assertEqual(first.get("verb"), "converse")
+        self.assertEqual(first.get("brain"), "xai")
+        self.assertIn("Evening is quiet", first.get("spoken") or "")
+        self.assertIn("One sitting tonight", second.get("spoken") or "")
+        self.assertIn("that sitting", third.get("spoken") or "")
+        for spoken in (
+            first.get("spoken") or "",
+            second.get("spoken") or "",
+            third.get("spoken") or "",
+        ):
+            self.assertNotIn("Last you said", spoken)
+            self.assertNotIn("Still need agent login", spoken)
+            self.assertNotIn("I'm here", spoken)
+            self.assertNotIn("BUS602", spoken)
 
 
 if __name__ == "__main__":

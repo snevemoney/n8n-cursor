@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import unittest
 from pathlib import Path
@@ -30,6 +31,19 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertNotIn("11434", text)
         self.assertNotIn("import ollama", text)
         self.assertEqual(MOD.wire_report()["ollama"], "refused")
+
+    def test_has_xai_key_is_boolean_only(self) -> None:
+        with mock.patch.object(MOD, "grok_api_key", return_value=""):
+            self.assertFalse(MOD.has_xai_key())
+        with mock.patch.object(MOD, "grok_api_key", return_value="x"):
+            self.assertTrue(MOD.has_xai_key())
+
+    def test_try_agent_login_reports_without_speaking_key(self) -> None:
+        with mock.patch.object(MOD, "agent_cmd", return_value=None):
+            out = MOD.try_agent_login()
+        self.assertTrue(out["tried"])
+        self.assertFalse(out["ok"])
+        self.assertNotIn("XAI_API_KEY", json.dumps(out))
 
     def test_unknown_grok_is_not_the_brain(self) -> None:
         out = MOD.unknown_grok()

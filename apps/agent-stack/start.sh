@@ -25,6 +25,7 @@ fi
 
 if [[ "$MODE" != "check" ]]; then
   unset AGENT_STACK_DRY_TTS || true
+  export AGENT_STACK_TRY_LOGIN=1
 fi
 
 if [[ "$MODE" == "check" ]]; then

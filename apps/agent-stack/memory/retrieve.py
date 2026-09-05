@@ -76,8 +76,7 @@ LEAK_RE = re.compile(
     r")",
     re.I,
 )
-# speak_life built this and speak_store glued it onto every dark-cursor turn.
-# Pack / model only. Mouth must never use it as the default spoken line.
+# Banned mouth lines. Pack / model only. Never hand these to TTS.
 LANES_DEFAULT = (
     "You are Evens Louis. On disk: Website / AI Partner services, "
     "Operator Amazon store, Hive / agent automation platform."
@@ -493,10 +492,6 @@ def speak_store(
     greet: bool = False,
     can_do: bool = False,
 ) -> str:
-    """Short butler line. Life/lanes/hot stay off TTS. Search stays on `brief`."""
-    _ = (utterance, roots)
-    if greet:
-        return GREET_SPOKEN
-    if can_do:
-        return CAN_DO_SPOKEN
-    return STORE_SPOKEN
+    """Not a mouth. Echo / lanes / wiki stay off TTS. The model speaks."""
+    _ = (utterance, roots, greet, can_do)
+    return ""

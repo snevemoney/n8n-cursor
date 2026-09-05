@@ -164,7 +164,8 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertNotIn("Still on that", second_spoken)
         self.assertNotEqual(second.get("verb"), "can")
         self.assertTrue(second_spoken.startswith("Sir."))
-        self.assertIn("agent login", second_spoken.lower())
+        self.assertIn("no model is available", second_spoken.lower())
+        self.assertNotIn("Still need", second_spoken)
 
     def test_safari_see_calls_see_py_front(self) -> None:
         called: list[str] = []
@@ -311,9 +312,10 @@ class PipelineDarkCursorTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertIn("agent login", spoken.lower())
+        self.assertIn("no model is available", spoken.lower())
         self.assertNotIn("Last you said", spoken)
         self.assertNotIn("You were at", spoken)
+        self.assertNotIn("I'm here", spoken)
         self.assertIn("agent login", (why.get("spoken") or "").lower())
 
 
@@ -404,9 +406,14 @@ class Live4018MouthContractTest(unittest.TestCase):
                 for leak in self.LEAKS:
                     self.assertNotIn(leak, spoken, f"{utter!r} spoke {spoken!r}")
                 self.assertTrue(spoken.startswith("Sir."), spoken)
-                self.assertIn("agent login", spoken.lower())
+                low = spoken.lower()
+                self.assertTrue(
+                    "no model is available" in low or "agent login" in low,
+                    spoken,
+                )
                 self.assertNotIn("Last you said", spoken)
                 self.assertNotIn("You were at", spoken)
+                self.assertNotIn("I'm here", spoken)
                 self.assertNotIn("Watchdog", spoken)
                 self.assertNotIn("factory close", spoken.lower())
                 self.assertNotIn("On disk:", spoken)
@@ -438,9 +445,9 @@ class Live4018MouthContractTest(unittest.TestCase):
         star_spoken = star.get("spoken") or ""
         self.assertNotIn("Watchdog", work_spoken)
         self.assertNotIn("factory close", work_spoken.lower())
-        self.assertIn("agent login", work_spoken.lower())
+        self.assertIn("no model is available", work_spoken.lower())
         self.assertNotIn("Last you said", work_spoken)
-        self.assertIn("agent login", star_spoken.lower())
+        self.assertIn("no model is available", star_spoken.lower())
         self.assertNotIn("leverage", star_spoken.lower())
         self.assertNotIn("Watchdog", star_spoken)
 
@@ -469,7 +476,7 @@ class Live4018MouthContractTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken, spoken)
         self.assertTrue(spoken.startswith("Sir."), spoken)
-        self.assertIn("agent login", spoken.lower())
+        self.assertIn("no model is available", spoken.lower())
         self.assertLess(len(spoken), 280)
 
     def test_dark_cursor_safari_see_calls_see_py(self) -> None:
@@ -538,11 +545,12 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertNotIn(lanes, tube_spoken)
         self.assertNotIn("On disk: Website / AI Partner", greet_spoken)
         self.assertNotIn("On disk: Website / AI Partner", can_spoken)
-        self.assertIn("agent login", greet_spoken.lower())
-        self.assertIn("agent login", can_spoken.lower())
-        self.assertIn("agent login", school_spoken.lower())
+        self.assertIn("no model is available", greet_spoken.lower())
+        self.assertIn("no model is available", can_spoken.lower())
+        self.assertIn("no model is available", school_spoken.lower())
         self.assertNotIn("Last you said", greet_spoken)
         self.assertNotIn("You were at", can_spoken)
+        self.assertNotIn("I'm here", greet_spoken)
         self.assertNotIn("BUS203", school_spoken)
         self.assertNotIn("BUS602", school_spoken)
         self.assertNotIn("## When", school_spoken)
@@ -557,6 +565,78 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertEqual(tube.get("verb"), "safari_see")
         self.assertEqual(saw, ["YouTube"])
         self.assertIn("youtube", tube_spoken.lower())
+
+    def test_dark_cursor_uses_injected_xai_prose(self) -> None:
+        cursor_calls: list[str] = []
+        talks: list[str] = []
+        replies = (
+            "Quiet night. I am with you.",
+            "Tonight: one sitting, then rest.",
+            "Yes. That sitting. Same thread.",
+        )
+
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            cursor_calls.append(prompt)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": PIPE.LOGIN_UNKNOWN,
+            }
+
+        def fake_xai(prompt: str, context: str = "") -> dict:
+            talks.append(prompt)
+            self.assertIn("pipeline-pack.md", prompt + context)
+            self.assertNotIn(context[:4000] if False else "Last you said", context)
+            return {
+                "ok": True,
+                "wire": "grok",
+                "engine": "xai",
+                "spoken": replies[len(talks) - 1],
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-xai-mouth-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            first = MOUTH.apply_turn(
+                "how's it going",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=dark_cursor,
+                talk_fn=fake_xai,
+            )
+            second = MOUTH.apply_turn(
+                "what should I do tonight",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=dark_cursor,
+                talk_fn=fake_xai,
+            )
+            third = MOUTH.apply_turn(
+                "yeah that",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=dark_cursor,
+                talk_fn=fake_xai,
+            )
+        self.assertEqual(len(cursor_calls), 1)
+        self.assertEqual(len(talks), 3)
+        self.assertEqual(first.get("brain"), "xai")
+        self.assertIn("Quiet night", first.get("spoken") or "")
+        self.assertIn("one sitting", second.get("spoken") or "")
+        self.assertIn("that sitting", (third.get("spoken") or "").lower())
+        for spoken in (
+            first.get("spoken") or "",
+            second.get("spoken") or "",
+            third.get("spoken") or "",
+        ):
+            self.assertNotIn("Last you said", spoken)
+            self.assertNotIn("Still need agent login", spoken)
+            self.assertNotIn("I'm here", spoken)
+            self.assertNotIn("BUS602", spoken)
+            self.assertNotIn("On disk: Website", spoken)
 
 
 if __name__ == "__main__":

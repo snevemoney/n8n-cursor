@@ -160,6 +160,10 @@ def _turn_event(
     done: bool = True,
     spoken_delta: str = "",
     partial: bool = False,
+    brain: str | None = None,
+    login_tried: bool = False,
+    model_available: bool | None = None,
+    unknown: bool = False,
 ) -> dict:
     return {
         "ok": True,
@@ -173,6 +177,10 @@ def _turn_event(
         "done": done,
         "partial": partial,
         "spoken_delta": spoken_delta,
+        "brain": brain,
+        "login_tried": login_tried,
+        "model_available": bool(brain) if model_available is None else bool(model_available),
+        "unknown": unknown,
     }
 
 
@@ -204,6 +212,8 @@ def apply_turn_iter(
     cursor_fn=None,
     see_fn=None,
     cursor_ask_fn=None,
+    talk_fn=None,
+    login_fn=None,
 ):
     _ = (approved, grok)
     spoken = (utterance or "").strip()
@@ -228,6 +238,8 @@ def apply_turn_iter(
             see_fn=see_fn,
             status_fn=status_fn,
             cursor_ask_fn=cursor_ask_fn,
+            talk_fn=talk_fn,
+            login_fn=login_fn,
         ):
             text = str(out.get("spoken") or PIPELINE.PROPOSAL)
             yield _turn_event(
@@ -240,6 +252,10 @@ def apply_turn_iter(
                 done=bool(out.get("done", True)),
                 spoken_delta=str(out.get("spoken_delta") or ""),
                 partial=bool(out.get("partial")),
+                brain=out.get("brain"),
+                login_tried=bool(out.get("login_tried")),
+                model_available=out.get("model_available"),
+                unknown=bool(out.get("unknown")),
             )
         return
 
@@ -251,6 +267,8 @@ def apply_turn_iter(
         see_fn=see_fn,
         status_fn=status_fn,
         cursor_ask_fn=cursor_ask_fn,
+        talk_fn=talk_fn,
+        login_fn=login_fn,
     ):
         text = str(out.get("spoken") or DARK_BRAIN)
         if is_ask_leak(text):
@@ -268,6 +286,10 @@ def apply_turn_iter(
             done=bool(out.get("done", True)),
             spoken_delta=delta,
             partial=bool(out.get("partial")),
+            brain=out.get("brain"),
+            login_tried=bool(out.get("login_tried")),
+            model_available=out.get("model_available"),
+            unknown=bool(out.get("unknown")),
         )
 
 
@@ -283,6 +305,8 @@ def apply_turn(
     cursor_fn=None,
     see_fn=None,
     cursor_ask_fn=None,
+    talk_fn=None,
+    login_fn=None,
 ) -> dict:
     last = _turn_event(spoken="", verb="idle", host="local")
     for ev in apply_turn_iter(
@@ -295,6 +319,8 @@ def apply_turn(
         cursor_fn=cursor_fn,
         see_fn=see_fn,
         cursor_ask_fn=cursor_ask_fn,
+        talk_fn=talk_fn,
+        login_fn=login_fn,
     ):
         last = ev
     if speak:
@@ -308,6 +334,10 @@ def apply_turn(
         "args": last.get("args"),
         "cites": last.get("cites") or [],
         "wires": last.get("wires") or [],
+        "brain": last.get("brain"),
+        "login_tried": bool(last.get("login_tried")),
+        "model_available": bool(last.get("model_available")),
+        "unknown": bool(last.get("unknown")),
     }
 
 

@@ -41,7 +41,7 @@ LOGIN_UNKNOWN = (
     "Run agent login in Terminal."
 )
 NEED_LOGIN = "You need `agent login` for a real talk."
-STILL_NEED_LOGIN = "Still need `agent login`."
+NO_MODEL = "No model is available."
 PROPOSAL = (
     "Proposal only. I will not send, pay, deploy, book, or publish. "
     "That hard step stays with you."
@@ -52,7 +52,10 @@ ECHO_STUB_RE = re.compile(
     r"last you said|"
     r"you were at|"
     r"still on that|"
-    r"^going\."
+    r"^going\.|"
+    r"\bi(?:'m| am) here\b|"
+    r"\bstill here\b|"
+    r"still need [`']?agent login"
     r")",
     re.I,
 )
@@ -152,6 +155,8 @@ def write_bus(
     turns: list | None = None,
     tool: str | None = None,
     cursor_login_said: bool | None = None,
+    agent_login_tried: bool | None = None,
+    brain: str | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
     bus = load_json(path)
@@ -177,6 +182,10 @@ def write_bus(
         bus["cursor_login_said"] = True
     elif cursor_login_said is False:
         bus.pop("cursor_login_said", None)
+    if agent_login_tried is True:
+        bus["agent_login_tried"] = True
+    if brain:
+        bus["brain"] = brain
     write_json(path, bus)
     return bus
 
@@ -381,16 +390,72 @@ def _is_speak_leak(text: str) -> bool:
     return False
 
 
-def dark_cursor_reply(
+def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
+    """Cursor-dark mouth: existing call_xai only when a key is already in the env.
+
+    Do not print a missing key. Do not spawn Grok Bot. Tests that set
+    AGENT_STACK_CURSOR_DRY skip the live HTTP call unless talk_fn is injected.
+    """
+    if talk_fn is not None:
+        try:
+            got = talk_fn(prompt, pack_text)
+        except TypeError:
+            try:
+                got = talk_fn(prompt)
+            except TypeError:
+                got = talk_fn(prompt, "")
+        if isinstance(got, dict):
+            return got
+        return {"ok": True, "spoken": str(got or ""), "wire": "xai", "engine": "xai"}
+    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
+        return None
+    if ONLINE is None or not hasattr(ONLINE, "call_xai"):
+        return None
+    key_fn = getattr(ONLINE, "has_xai_key", None) or getattr(ONLINE, "grok_api_key", None)
+    try:
+        present = bool(key_fn()) if key_fn is not None else False
+    except (OSError, TypeError, AttributeError):
+        present = False
+    if not present:
+        return None
+    got = ONLINE.call_xai(prompt, pack_text)
+    return got if isinstance(got, dict) else None
+
+
+def try_login_once(hive: Path, login_fn=None) -> dict:
+    """One `agent login` after keys were checked. Never the spoken product."""
+    bus = load_json(hive / "bus" / "state.json")
+    if bus.get("agent_login_tried"):
+        return {"tried": True, "ok": False, "already": True}
+    path = hive / "bus" / "state.json"
+    bus["agent_login_tried"] = True
+    write_json(path, bus)
+    if login_fn is not None:
+        try:
+            got = login_fn()
+        except TypeError:
+            got = login_fn()
+        return got if isinstance(got, dict) else {"tried": True, "ok": bool(got)}
+    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
+        return {"tried": True, "ok": False, "dry": True}
+    if os.environ.get("AGENT_STACK_TRY_LOGIN") != "1":
+        return {"tried": True, "ok": False, "skipped": True}
+    if ONLINE is not None and hasattr(ONLINE, "try_agent_login"):
+        try:
+            got = ONLINE.try_agent_login()
+        except (OSError, TypeError, AttributeError):
+            return {"tried": True, "ok": False}
+        return got if isinstance(got, dict) else {"tried": True, "ok": False}
+    return {"tried": True, "ok": False}
+
+
+def no_model_reply(
     utterance: str,
     *,
     hive: Path,
-    turns: list[dict],
-    retrieve_roots: list[Path] | None,
     see_fn=None,
 ) -> dict:
-    """Dark Cursor: Safari hands, or one honest login line. Not a fake brain."""
-    _ = (turns, retrieve_roots)
+    """Safari hands, or one honest line. Not echo, lanes, wiki, or a login kiosk."""
     heard = (utterance or "").strip()
     if wants_safari(heard) and (see_fn is not None or SEE is not None):
         if see_fn is not None:
@@ -410,19 +475,37 @@ def dark_cursor_reply(
             "cites": [],
             "sent": False,
             "from_store": True,
+            "brain": "safari",
             "see": got,
         }
-    spoken = NEED_LOGIN if wants_login_why(heard) else STILL_NEED_LOGIN
-    spoken = _speakable_line(spoken) or STILL_NEED_LOGIN
+    said = login_already_said(hive)
+    spoken = NEED_LOGIN if wants_login_why(heard) or not said else NO_MODEL
+    spoken = _speakable_line(spoken) or NO_MODEL
     return {
-        "ok": True,
+        "ok": False,
         "tool": "pipeline",
         "spoken": spoken,
-        "wires": ["cursor", "pipeline"],
+        "wires": ["pipeline"],
         "cites": [],
         "sent": False,
         "from_store": True,
+        "brain": None,
+        "unknown": True,
+        "model_available": False,
     }
+
+
+def dark_cursor_reply(
+    utterance: str,
+    *,
+    hive: Path,
+    turns: list[dict],
+    retrieve_roots: list[Path] | None,
+    see_fn=None,
+) -> dict:
+    """Kept for tests. Dark Cursor is not a fake brain."""
+    _ = (turns, retrieve_roots)
+    return no_model_reply(utterance, hive=hive, see_fn=see_fn)
 
 
 def _as_pick(tool: str, args: dict, speak: str) -> dict | None:
@@ -573,7 +656,7 @@ def _evidence_line(speak: str, evidence: str) -> str:
     evidence = _speakable_line(evidence)
     if speak and evidence and evidence not in speak:
         return f"{speak} {evidence}"
-    return speak or evidence or "I'm here."
+    return speak or evidence or ""
 
 
 def run_tool(
@@ -603,7 +686,7 @@ def run_tool(
         return {
             "ok": True,
             "tool": "converse",
-            "spoken": _speakable_line(speak) or "Still here.",
+            "spoken": _speakable_line(speak),
             "wires": ["converse", "store"],
             "cites": [],
             "sent": False,
@@ -674,7 +757,7 @@ def run_tool(
             return {
                 "ok": True,
                 "tool": "converse",
-                "spoken": _speakable_line(speak) or "Still here.",
+                "spoken": _speakable_line(speak),
                 "wires": ["converse", "store"],
                 "cites": [],
                 "sent": False,
@@ -758,7 +841,11 @@ def _pipeline_event(
     unknown: bool = False,
     done: bool = True,
     partial: bool = False,
+    brain: str | None = None,
+    login_tried: bool = False,
+    model_available: bool | None = None,
 ) -> dict:
+    available = bool(brain) if model_available is None else bool(model_available)
     return {
         "ok": ok,
         "verb": tool,
@@ -775,6 +862,9 @@ def _pipeline_event(
         "unknown": unknown,
         "done": done,
         "partial": partial,
+        "brain": brain,
+        "login_tried": login_tried,
+        "model_available": available,
     }
 
 
@@ -793,11 +883,17 @@ def _commit_spoken(
     unknown: bool = False,
     login_said: bool | None = None,
     wire: dict | None = None,
+    brain: str | None = None,
+    login_tried: bool = False,
 ):
     text = dress(raw, tool=tool, utterance=spoken_in, turns=prior_turns)
     if _is_speak_leak(text) or is_lanes_default(text):
+        cleaned = ""
+        if PERSONA is not None and hasattr(PERSONA, "sanitize_payload"):
+            cleaned = str(PERSONA.sanitize_payload(raw) or "")
+        fallback = cleaned if cleaned and not _is_speak_leak(cleaned) else (NO_MODEL if not brain else "")
         text = dress(
-            "Still here.",
+            fallback or NO_MODEL,
             tool="converse",
             utterance=spoken_in,
             turns=prior_turns,
@@ -814,6 +910,8 @@ def _commit_spoken(
         turns=next_turns,
         tool=tool,
         cursor_login_said=login_said,
+        agent_login_tried=True if login_tried else None,
+        brain=brain,
     )
     note_wire(hive, tool, text, spoken_in, ok=ok, wire=wire)
     first, rest = first_sentence(text)
@@ -829,6 +927,8 @@ def apply_pipeline_iter(
     see_fn=None,
     status_fn=None,
     cursor_ask_fn=None,
+    talk_fn=None,
+    login_fn=None,
 ):
     """Yield first speakable sentence, then the finished turn. Do not wait for done to speak."""
     spoken_in = (utterance or "").strip()
@@ -881,104 +981,76 @@ def apply_pipeline_iter(
     ran = None
     pick = None
     got = {}
-    login_fail = False
-    if should_skip_cursor(hive, cursor_fn):
-        ran = dark_cursor_reply(
-            spoken_in,
-            hive=hive,
-            turns=prior_turns,
-            retrieve_roots=retrieve_roots,
-            see_fn=see_fn,
-        )
+    brain = None
+    login_tried = False
+    prompt = pick_prompt(pack, spoken_in)
+    pack_text = pack.read_text(encoding="utf-8") if pack.is_file() else ""
+
+    if not should_skip_cursor(hive, cursor_fn):
+        pick, got = cursor_pick(pack, spoken_in, cursor_fn)
+        if pick is not None:
+            brain = "cursor"
+
+    if pick is None:
+        talked = online_talk(prompt, pack_text, talk_fn=talk_fn)
+        pick = extract_pick(talked) if talked else None
+        if pick is not None:
+            brain = str((talked or {}).get("engine") or (talked or {}).get("wire") or "xai")
+            got = talked or got
+
+    if pick is None and wants_safari(spoken_in):
+        ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn)
         pick = {
-            "tool": str(ran.get("tool") or "status"),
+            "tool": str(ran.get("tool") or "safari_see"),
             "args": {},
             "speak": str(ran.get("spoken") or ""),
         }
-    else:
-        pick, got = cursor_pick(pack, spoken_in, cursor_fn)
-        if pick is None:
-            if is_dark_cursor(got) and login_already_said(hive):
-                ran = dark_cursor_reply(
-                    spoken_in,
-                    hive=hive,
-                    turns=prior_turns,
-                    retrieve_roots=retrieve_roots,
-                    see_fn=see_fn,
-                )
-                pick = {
-                    "tool": str(ran.get("tool") or "status"),
-                    "args": {},
-                    "speak": str(ran.get("spoken") or ""),
-                }
-            else:
-                login_fail = True
+        brain = str(ran.get("brain") or "safari")
 
-    if login_fail:
-        raw = miss_spoken(got)
-        login_said = True if is_login_unknown_text(raw) or is_dark_cursor(got) else None
-        text, first, rest = _commit_spoken(
-            hive,
-            spoken_in=spoken_in,
-            prior_turns=prior_turns,
-            tool="pipeline",
-            raw=raw,
-            wires=["cursor"],
-            cites=[],
-            ok=False,
-            pack=str(pack),
-            unknown=True,
-            login_said=login_said,
-            wire={"path": "cursor", "error": raw},
-        )
-        if first and rest:
-            yield _pipeline_event(
-                ok=False,
-                tool="pipeline",
-                spoken=first,
-                spoken_delta=first,
-                wires=["cursor"],
-                cites=[],
-                pack=str(pack),
-                unknown=True,
-                done=False,
-                partial=True,
-            )
-        yield _pipeline_event(
-            ok=False,
-            tool="pipeline",
-            spoken=text,
-            spoken_delta=rest if first and rest else text,
-            wires=["cursor"],
-            cites=[],
-            pack=str(pack),
-            unknown=True,
-        )
-        return
+    if pick is None:
+        login_out = try_login_once(hive, login_fn=login_fn)
+        login_tried = bool(login_out.get("tried"))
+        if login_out.get("ok") and not should_skip_cursor(hive, cursor_fn):
+            pick, got = cursor_pick(pack, spoken_in, cursor_fn)
+            if pick is not None:
+                brain = "cursor"
+        if pick is None:
+            ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn)
+            pick = {
+                "tool": str(ran.get("tool") or "pipeline"),
+                "args": {},
+                "speak": str(ran.get("spoken") or ""),
+            }
+            brain = ran.get("brain")
 
     early = ""
     speak_early = str((pick or {}).get("speak") or "").strip()
-    if speak_early and ran is None:
+    if speak_early and ran is None and brain:
         early_raw, _ = first_sentence(speak_early)
         early = dress(
             early_raw or speak_early,
-            tool=str((pick or {}).get("tool") or "status"),
+            tool=str((pick or {}).get("tool") or "converse"),
             utterance=spoken_in,
             turns=prior_turns,
         )
-        if early:
+        if early and not _is_speak_leak(early) and not is_lanes_default(early):
             yield _pipeline_event(
                 ok=True,
-                tool=str((pick or {}).get("tool") or "status"),
+                tool=str((pick or {}).get("tool") or "converse"),
                 spoken=early,
                 spoken_delta=early,
-                wires=[str((pick or {}).get("tool") or "status")],
+                wires=[str((pick or {}).get("tool") or "converse")],
                 cites=[],
                 pack=str(pack),
                 args=(pick or {}).get("args"),
                 done=False,
                 partial=True,
+                brain=brain,
+                login_tried=login_tried,
+                model_available=True,
             )
+        else:
+            early = ""
 
     if ran is None:
         ran = run_tool(
@@ -990,29 +1062,43 @@ def apply_pipeline_iter(
             status_fn=status_fn,
             cursor_ask_fn=cursor_ask_fn,
         )
+        if not str(ran.get("spoken") or "").strip() and not brain:
+            ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn)
     tool = str(ran.get("tool") or (pick or {}).get("tool") or "pipeline")
     wires = ran.get("wires") if isinstance(ran.get("wires"), list) else [tool]
     cites = ran.get("cites") if isinstance(ran.get("cites"), list) else []
-    login_said = False if not ran.get("from_store") else True
+    login_said = True if (
+        not brain
+        or brain == "xai"
+        or ran.get("from_store")
+        or is_dark_cursor(got)
+    ) else False
+    raw_spoken = str(ran.get("spoken") or "")
+    if not raw_spoken.strip():
+        raw_spoken = NO_MODEL if not brain else UNKNOWN
     text, first, rest = _commit_spoken(
         hive,
         spoken_in=spoken_in,
         prior_turns=prior_turns,
         tool=tool,
-        raw=str(ran.get("spoken") or UNKNOWN),
+        raw=raw_spoken,
         wires=wires,
         cites=cites,
-        ok=bool(ran.get("ok")),
+        ok=bool(ran.get("ok")) if brain else False,
         pack=str(pack),
         args=(pick or {}).get("args"),
         login_said=login_said,
+        brain=brain,
+        login_tried=login_tried,
+        unknown=not bool(brain),
+        wire={"path": brain or ("cursor" if got else "pipeline"), "error": None if brain else raw_spoken},
     )
     extra = ""
     if early:
         extra = text[len(early) :].strip() if text.startswith(early) else rest
     elif first and rest:
         yield _pipeline_event(
-            ok=bool(ran.get("ok")),
+            ok=bool(ran.get("ok")) if brain else False,
             tool=tool,
             spoken=first,
             spoken_delta=first,
@@ -1022,12 +1108,15 @@ def apply_pipeline_iter(
             args=(pick or {}).get("args"),
             done=False,
             partial=True,
+            brain=brain,
+            login_tried=login_tried,
+            model_available=bool(brain),
         )
         extra = rest
     else:
         extra = text
     yield _pipeline_event(
-        ok=bool(ran.get("ok")),
+        ok=bool(ran.get("ok")) if brain else False,
         tool=tool,
         spoken=text,
         spoken_delta=extra,
@@ -1035,7 +1124,10 @@ def apply_pipeline_iter(
         cites=cites,
         pack=str(pack),
         args=(pick or {}).get("args"),
-        unknown=bool(ran.get("unknown")),
+        unknown=not bool(brain),
+        brain=brain,
+        login_tried=login_tried,
+        model_available=bool(brain),
     )
 
 
@@ -1048,6 +1140,8 @@ def apply_pipeline(
     see_fn=None,
     status_fn=None,
     cursor_ask_fn=None,
+    talk_fn=None,
+    login_fn=None,
 ) -> dict:
     last = {
         "ok": False,
@@ -1060,6 +1154,9 @@ def apply_pipeline(
         "wires": ["pipeline"],
         "sent": False,
         "pack": None,
+        "brain": None,
+        "login_tried": False,
+        "model_available": False,
     }
     for ev in apply_pipeline_iter(
         utterance,
@@ -1069,6 +1166,8 @@ def apply_pipeline(
         see_fn=see_fn,
         status_fn=status_fn,
         cursor_ask_fn=cursor_ask_fn,
+        talk_fn=talk_fn,
+        login_fn=login_fn,
     ):
         last = ev
     return last
