@@ -58,7 +58,14 @@ LEAK_RE = re.compile(
     r"origin/main|"
     r"publish\s+hitl|"
     r"\d{4}-\d{2}-\d{2}T\d{2}:|"
-    r"on disk:"
+    r"on disk:|"
+    r"per-agent business cheat|"
+    r"business cheat sheets|"
+    r"cache ssot|"
+    r"methods/|"
+    r"grok shared workflow|"
+    r"content/business-kits|"
+    r"\[\[+"
     r")",
     re.I,
 )

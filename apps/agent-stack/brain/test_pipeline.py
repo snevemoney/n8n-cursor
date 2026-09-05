@@ -287,6 +287,10 @@ class Live4018MouthContractTest(unittest.TestCase):
         "Watchdog GRADE",
         "factory close",
         "On disk:",
+        "Per-agent business cheat sheets",
+        "cache SSOT",
+        "METHODS/",
+        "Grok shared workflows",
     )
 
     def _live_hive(self, tmp: str) -> tuple[Path, Path]:
@@ -394,6 +398,33 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertIn("leverage", star_spoken.lower())
         self.assertNotIn("Watchdog", star_spoken)
 
+    def test_cheat_sheet_wiki_stays_off_spoken(self) -> None:
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        os.environ["AGENT_STACK_DRY_TTS"] = "1"
+        wiki = (
+            "Per-agent business cheat sheets live under CONTENT/business-kits/ "
+            "(cache SSOT → git → vault). Skills: Grok shared workflows + [[x]]; "
+            "METHODS/ only after proven."
+        )
+        with tempfile.TemporaryDirectory(prefix="pipeline-no-cheats-") as tmp:
+            hive, vault = self._live_hive(tmp)
+            (vault / "OPERATOR_MEMORY.md").write_text(wiki + "\n", encoding="utf-8")
+            out = MOUTH.apply_turn(
+                "Where do the cheat sheets live?",
+                hive=hive,
+                retrieve_roots=[vault],
+            )
+        spoken = out.get("spoken") or ""
+        for leak in (
+            "Per-agent business cheat sheets",
+            "cache SSOT",
+            "METHODS/",
+            "Grok shared workflows",
+        ):
+            self.assertNotIn(leak, spoken, spoken)
+        self.assertTrue(spoken.startswith("Sir."), spoken)
+        self.assertLess(len(spoken), 280)
+
     def test_store_converse_safari_see_calls_see_py(self) -> None:
         os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
         os.environ["AGENT_STACK_DRY_TTS"] = "1"
@@ -466,6 +497,11 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertIn("here", greet_spoken.lower())
         self.assertRegex(can_spoken.lower(), r"(vault|safari|school|status)")
         self.assertRegex(school_spoken.lower(), r"(market|segment|mix|mktg|bus203)")
+        self.assertNotIn("Per-agent business cheat sheets", school_spoken)
+        self.assertNotIn("cache SSOT", school_spoken)
+        self.assertNotIn("METHODS/", school_spoken)
+        self.assertNotIn("From grad-mktg", school_spoken)
+        self.assertLess(len(school_spoken), 280)
         self.assertEqual(tube.get("verb"), "safari_see")
         self.assertEqual(saw, ["YouTube"])
         self.assertIn("youtube", tube_spoken.lower())

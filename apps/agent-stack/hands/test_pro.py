@@ -184,7 +184,10 @@ class ProRetrieveTest(unittest.TestCase):
         self.assertLessEqual(len(got["slugs"]), 3)
         self.assertNotIn("bizstat-describe-sample-infer-regress-checklists", got["slugs"])
         self.assertNotIn("hive-funnels", got["slugs"])
-        self.assertIn("segment", got["spoken"].lower())
+        pack = str(got.get("brief") or got["spoken"]).lower()
+        self.assertIn("segment", pack)
+        self.assertRegex(got["spoken"].lower(), r"(segment|pv|wacc|capital|marketing)")
+        self.assertLess(len(got["spoken"]), 220)
         self.assertFalse(got["unknown"])
 
     def test_never_returns_slug_absent_from_disk(self) -> None:
@@ -214,6 +217,9 @@ class ProRetrieveTest(unittest.TestCase):
         self.assertNotIn("hive-funnels", got["slugs"])
         self.assertFalse(got["unknown"])
         self.assertFalse(got.get("shelf"))
+        self.assertLess(len(got["spoken"]), 220)
+        self.assertNotIn("From mktg-value-stp-mix-plan-checklists", got["spoken"])
+        self.assertIn("segment", str(got.get("brief") or got["spoken"]).lower())
 
     def test_hr_bitcoin_stats_rank_from_same_index(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-pro-topics-") as tmp:

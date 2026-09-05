@@ -46,7 +46,13 @@ PACK_LEAK_RE = re.compile(
     r"structured long-term memory|"
     r"watchdog\s+grade|"
     r"factory\s+close|"
-    r"on disk:"
+    r"on disk:|"
+    r"per-agent business cheat|"
+    r"business cheat sheets|"
+    r"cache ssot|"
+    r"methods/|"
+    r"grok shared workflow|"
+    r"content/business-kits"
     r")",
     re.I,
 )

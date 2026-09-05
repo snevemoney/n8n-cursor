@@ -92,6 +92,7 @@ FAMILY_LABEL = {
 }
 MAX_SKILLS = 3
 BRIEF_CAP = 280
+SPEAK_CAP = 180
 FILE_CAP = 80_000
 
 
@@ -263,6 +264,19 @@ def brief_from_row(row: dict) -> str:
     return f"{label}: {useful[:BRIEF_CAP]}"
 
 
+def _tts_brief(text: str, cap: int = SPEAK_CAP) -> str:
+    """One mouth sentence. Full When / skill list stays on `brief`."""
+    body = re.sub(r"\s+", " ", (text or "").strip())
+    if not body:
+        return ""
+    match = re.search(r"[.!?]", body)
+    if match and match.end() <= cap + 24:
+        body = body[: match.end()].strip()
+    if len(body) > cap:
+        body = body[: cap - 1].rsplit(" ", 1)[0] + "…"
+    return body
+
+
 def _family(course: str) -> str:
     if (course or "") == "ESLHub":
         return "ESL"
@@ -423,8 +437,10 @@ def brief(
             "slugs": slugs,
             "courses": [str(r.get("course") or "") for r in live_matched if r.get("course")],
             "cites": cites,
+            "brief": closest,
             "spoken": (
-                f"UNKNOWN. {missing_codes[0]} is not on disk. Closest on-disk: {closest}"
+                f"UNKNOWN. {missing_codes[0]} is not on disk. "
+                f"Closest on-disk: {_tts_brief(closest)}"
             ),
         }
     if not live_matched:
@@ -441,8 +457,7 @@ def brief(
                 "Name the school — marketing, finance, ops, ethics — and I will pull those files."
             ),
         }
-    parts = [brief_from_row(r) for r in live_matched]
-    lead = "From " + ", ".join(slugs) + "."
+    pack = " ".join(brief_from_row(r) for r in live_matched)
     return {
         "ok": True,
         "unknown": False,
@@ -451,7 +466,8 @@ def brief(
         "slugs": slugs,
         "courses": [str(r.get("course") or "") for r in live_matched if r.get("course")],
         "cites": cites,
-        "spoken": f"{lead} " + " ".join(parts),
+        "brief": pack,
+        "spoken": _tts_brief(brief_from_row(live_matched[0])),
     }
 
 

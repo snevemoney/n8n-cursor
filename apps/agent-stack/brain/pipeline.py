@@ -500,6 +500,7 @@ def store_converse(
             "from_store": True,
             "see": got,
         }
+    tool = "status"
     if is_mouth_echo(heard, hive) or is_greet_or_empty(heard) or is_work_check(heard):
         spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
     elif wants_login_why(heard):
@@ -513,8 +514,13 @@ def store_converse(
         school = PRO.brief(heard)
         evidence = str(school.get("spoken") or "").strip()
         spoken = evidence if evidence and not _is_speak_leak(evidence) else ""
+        if spoken:
+            first, rest = first_sentence(spoken)
+            if rest or len(spoken) > 180:
+                spoken = first or spoken[:177].rsplit(" ", 1)[0] + "…"
         if not spoken:
             spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
+        tool = "pro"
     else:
         spoken = answer_from_store(heard, retrieve_roots=retrieve_roots)
     spoken = _speakable_line(spoken) or "I'm here."
@@ -522,9 +528,9 @@ def store_converse(
         spoken = "I'm here."
     return {
         "ok": True,
-        "tool": "status",
+        "tool": tool,
         "spoken": spoken,
-        "wires": ["store"],
+        "wires": ["store", tool] if tool != "status" else ["store"],
         "cites": [],
         "sent": False,
         "from_store": True,

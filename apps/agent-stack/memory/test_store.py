@@ -133,6 +133,31 @@ class SpeakStoreTest(unittest.TestCase):
         self.assertNotIn("22:48", found.get("spoken") or "")
         self.assertNotIn("agentic OS", found.get("spoken") or "")
 
+    def test_cheat_sheet_wiki_is_brief_not_spoken(self) -> None:
+        retrieve = Path(__file__).resolve().parent / "retrieve.py"
+        spec = importlib.util.spec_from_file_location("agent_stack_retrieve_cheats", retrieve)
+        if spec is None or spec.loader is None:
+            self.fail("retrieve missing")
+        ret = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ret)
+        wiki = (
+            "Per-agent business cheat sheets live under CONTENT/business-kits/ "
+            "(cache SSOT → git → vault). Skills: Grok shared workflows + [[x]]; "
+            "METHODS/ only after proven."
+        )
+        with tempfile.TemporaryDirectory(prefix="agent-stack-cheats-") as tmp:
+            vault = Path(tmp)
+            (vault / "OPERATOR_MEMORY.md").write_text(wiki + "\n", encoding="utf-8")
+            found = ret.search("Where do the cheat sheets live?", [vault])
+        spoken = found.get("spoken") or ""
+        brief = found.get("brief") or ""
+        self.assertTrue(ret.is_speak_leak(wiki))
+        self.assertTrue(brief)
+        self.assertNotIn("Per-agent business cheat sheets", spoken)
+        self.assertNotIn("cache SSOT", spoken)
+        self.assertNotIn("METHODS/", spoken)
+        self.assertNotIn("Grok shared workflows", spoken)
+
 
 if __name__ == "__main__":
     unittest.main()
