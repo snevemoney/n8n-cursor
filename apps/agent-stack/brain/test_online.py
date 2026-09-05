@@ -190,6 +190,19 @@ class OnlineBrainTest(unittest.TestCase):
         plain = MOD.parse_stream_json_line("The site CSS is in pane.html.")
         self.assertEqual(plain["delta"], "The site CSS is in pane.html.")
 
+    def test_agent_cmd_falls_back_to_home_local_bin(self) -> None:
+        home = Path.home() / ".local" / "bin" / "agent"
+        with mock.patch.object(MOD.shutil, "which", return_value=None):
+            with mock.patch.object(MOD.os, "access", return_value=True):
+                with mock.patch.object(Path, "is_file", return_value=True):
+                    cmd = MOD.agent_cmd()
+        self.assertEqual(cmd, [str(home)])
+
+    def test_sys_prompt_is_coordinator_not_cursor_brain(self) -> None:
+        self.assertIn("coordinator", MOD.SYS)
+        self.assertIn("one worker", MOD.SYS)
+        self.assertNotIn("Ollama", MOD.SYS.replace("Never invent Claude, ChatGPT, Gemini, or Ollama", ""))
+
     def test_take_sentences_splits_completed(self) -> None:
         sents, rest = MOD.take_sentences("Hello Evens. Standing by. More")
         self.assertEqual(sents, ["Hello Evens.", "Standing by."])

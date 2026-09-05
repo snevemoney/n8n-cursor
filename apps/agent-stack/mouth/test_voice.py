@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import unittest
+import unittest.mock
 from pathlib import Path
 
 os.environ["AGENT_STACK_DRY_TTS"] = "1"
@@ -41,6 +42,24 @@ class VoiceTest(unittest.TestCase):
         self.assertEqual(audio, b"")
         self.assertEqual(mime, "")
         self.assertEqual(MOD.tts_bytes("Hello Evens"), b"")
+
+    def test_kokoro_retries_once_after_dead_pipe(self) -> None:
+        os.environ.pop("AGENT_STACK_DRY_TTS", None)
+        calls = {"n": 0}
+
+        def fake_ask(text: str) -> bytes:
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return b""
+            return b"RIFF" + b"\x00" * 12
+
+        with unittest.mock.patch.object(MOD, "kokoro_ready", return_value=True):
+            with unittest.mock.patch.object(MOD, "voice_python", return_value=Path("/bin/true")):
+                with unittest.mock.patch.object(MOD, "_ask_worker", side_effect=fake_ask):
+                    audio = MOD._kokoro_bytes("Hello Evens")
+        self.assertEqual(calls["n"], 2)
+        self.assertTrue(audio.startswith(b"RIFF"))
+        os.environ["AGENT_STACK_DRY_TTS"] = "1"
 
     def test_no_macos_say_remap(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")

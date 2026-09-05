@@ -227,6 +227,36 @@ def _start_worker() -> subprocess.Popen | None:
     )
 
 
+def _ask_worker(text: str) -> bytes:
+    """One Kokoro request. Reset the worker on a dead pipe so the next turn talks."""
+    global _WORKER
+    if _WORKER is None or _WORKER.poll() is not None:
+        _WORKER = _start_worker()
+    proc = _WORKER
+    if proc is None or proc.stdin is None or proc.stdout is None:
+        return b""
+    try:
+        proc.stdin.write(json.dumps({"text": text[:TEXT_CAP]}) + "\n")
+        proc.stdin.flush()
+        line = proc.stdout.readline()
+    except (OSError, BrokenPipeError, ConnectionResetError):
+        _WORKER = None
+        return b""
+    if not line:
+        _WORKER = None
+        return b""
+    try:
+        payload = json.loads(line)
+    except json.JSONDecodeError:
+        return b""
+    if not payload.get("ok"):
+        return b""
+    try:
+        return base64.b64decode(payload.get("b64") or "")
+    except (ValueError, TypeError):
+        return b""
+
+
 def _kokoro_bytes(text: str) -> bytes:
     global _WORKER
     if not kokoro_ready():
@@ -238,31 +268,12 @@ def _kokoro_bytes(text: str) -> bytes:
         except Exception:
             return b""
     with _WORKER_LOCK:
-        if _WORKER is None or _WORKER.poll() is not None:
-            _WORKER = _start_worker()
-        proc = _WORKER
-        if proc is None or proc.stdin is None or proc.stdout is None:
-            return b""
-        try:
-            proc.stdin.write(json.dumps({"text": text[:TEXT_CAP]}) + "\n")
-            proc.stdin.flush()
-            line = proc.stdout.readline()
-        except (OSError, BrokenPipeError):
-            _WORKER = None
-            return b""
-        if not line:
-            _WORKER = None
-            return b""
-        try:
-            payload = json.loads(line)
-        except json.JSONDecodeError:
-            return b""
-        if not payload.get("ok"):
-            return b""
-        try:
-            return base64.b64decode(payload.get("b64") or "")
-        except (ValueError, TypeError):
-            return b""
+        audio = _ask_worker(text)
+        if audio:
+            return audio
+        # ChatGPT: one request died (connection reset) and the next turn stayed mute.
+        audio = _ask_worker(text)
+        return audio
 
 
 def tts_audio(text: str) -> tuple[bytes, str]:

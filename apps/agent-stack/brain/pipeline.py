@@ -204,7 +204,12 @@ def assemble_pack(
     """Full context. Written to a file. Never stuffed into a truncated argv prompt."""
     lines = [
         "Jarvis pipeline pack. Conversation is the product.",
-        "Hear what he said. Answer that. Then stop.",
+        "You are the coordinator. Cursor CLI is one worker, not the brain.",
+        "Three layers: face+voice, this coordinator, tool adapters.",
+        "Adapters: Cursor CLI (coding/repo), Safari (browser), files on disk.",
+        "Hear what he said. Answer that from the sitting. Then stop.",
+        "Keep delegated work until it finishes or Evens is needed.",
+        "Do not replay canned status or last-wire leftovers as the mouth.",
         "Do not dump a school skill because a word like marketing or funnel appeared.",
         "Only brief a course when he named the course (BUS203) or asked for the shelf.",
         "Pick a hand only when you need one. Otherwise converse.",
@@ -291,6 +296,7 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
     return (
         "Read the full context pack at this path. Do not guess the file.\n"
         f"{pack_path}\n"
+        "You are the coordinator. Cursor CLI is one worker, not the brain.\n"
         "Use that pack, not a truncated prompt. Conversation is the product.\n"
         f"Utterance: {(utterance or '').strip()}\n"
         "Answer what he said. Follow-ups use the sitting turns in the pack.\n"
@@ -337,29 +343,50 @@ def asked_for_course(utterance: str) -> bool:
 
 
 def login_already_said(hive: Path) -> bool:
+    """Bus flag only. Last-wire leftovers are not a permanent dark lock."""
     bus = load_json(hive / "bus" / "state.json")
-    if bus.get("cursor_login_said"):
-        return True
-    if LAST_WIRE is None:
+    return bool(bus.get("cursor_login_said"))
+
+
+def live_cursor_ready() -> bool:
+    """Fresh `agent status`. Do not trust a previous sitting's login flag."""
+    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
         return False
-    last = LAST_WIRE.read(hive) or {}
-    err = str((last.get("wire") or {}).get("error") or last.get("human_line") or "")
-    return is_login_unknown_text(err)
+    if ONLINE is None or not hasattr(ONLINE, "cursor_logged_in"):
+        return False
+    try:
+        return bool(ONLINE.cursor_logged_in())
+    except (OSError, TypeError, AttributeError):
+        return False
+
+
+def clear_stale_login(hive: Path) -> None:
+    """ChatGPT: login messages were stale after another runtime was already in."""
+    if not live_cursor_ready():
+        return
+    path = hive / "bus" / "state.json"
+    bus = load_json(path)
+    if not bus.get("cursor_login_said"):
+        return
+    bus.pop("cursor_login_said", None)
+    write_json(path, bus)
 
 
 def should_skip_cursor(hive: Path, cursor_fn) -> bool:
-    """After login UNKNOWN was spoken once, do not loop agent -p while still dark."""
+    """After login UNKNOWN was spoken once, do not loop agent -p while still dark.
+
+    Injected cursor_fn is the test door — do not let a live `agent status` unstick it.
+    Live 4018 passes cursor_fn=None and re-checks login each turn.
+    """
+    if cursor_fn is None and live_cursor_ready():
+        clear_stale_login(hive)
+        return False
     if not login_already_said(hive):
         return False
     if cursor_fn is not None:
         return True
     if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
         return True
-    if ONLINE is not None and hasattr(ONLINE, "cursor_logged_in"):
-        try:
-            return not bool(ONLINE.cursor_logged_in())
-        except (OSError, TypeError, AttributeError):
-            return True
     return True
 
 

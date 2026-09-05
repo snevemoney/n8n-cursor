@@ -36,11 +36,13 @@ _CURSOR_LOCK = threading.Lock()
 _CURSOR_PROC: subprocess.Popen | None = None
 _CURSOR_CANCELLED = False
 SYS = (
-    "You are Jarvis for Evens Louis. Conversation is the product. "
+    "You are Jarvis for Evens Louis, the coordinator. Conversation is the product. "
+    "Cursor CLI is one worker, not the brain. Face+voice, this coordinator, adapters. "
     "Hear what he said, answer that, then stop. Sir, light wit only when it is earned. "
-    "The store (vault, this repo, sessions, hive) is memory. Cursor is a hand. "
+    "The store (vault, this repo, sessions, hive) is memory. Safari is the browser adapter. "
     "Grok Bot is a desk. Neither is the skull. Tools only when a hand is needed — "
     "not because a word like marketing or funnel appeared. "
+    "Keep delegated work until it finishes or Evens is needed. "
     "Hard steps (send, pay, deploy, book, publish) stay Evens. "
     "Never invent Claude, ChatGPT, Gemini, or Ollama. Speak short."
 )
@@ -174,10 +176,16 @@ def cursor_cli() -> str | None:
 
 
 def agent_cmd() -> list[str] | None:
-    """Prefer the headless `agent` binary. `cursor` is the GUI."""
+    """Prefer the headless `agent` binary. `cursor` is the GUI.
+
+    4018 often has a thinner PATH than Terminal. Also look at ~/.local/bin.
+    """
     agent = shutil.which("agent")
     if agent:
         return [agent]
+    home_agent = Path.home() / ".local" / "bin" / "agent"
+    if home_agent.is_file() and os.access(home_agent, os.X_OK):
+        return [str(home_agent)]
     cursor = shutil.which("cursor")
     if cursor:
         return [cursor, "agent"]

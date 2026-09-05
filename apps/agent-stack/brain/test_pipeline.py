@@ -7,6 +7,7 @@ import json
 import os
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parent / "pipeline.py"
@@ -637,6 +638,62 @@ class Live4018MouthContractTest(unittest.TestCase):
             self.assertNotIn("I'm here", spoken)
             self.assertNotIn("BUS602", spoken)
             self.assertNotIn("On disk: Website", spoken)
+
+
+    def test_pack_names_coordinator_not_cursor_brain(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="pipeline-coord-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            pack = PIPE.assemble_pack(
+                "how's it going",
+                hive=hive,
+                retrieve_roots=[hive],
+                turns=[{"user": "hey", "jarvis": "Sir. Here."}],
+            )
+        self.assertIn("You are the coordinator", pack)
+        self.assertIn("Cursor CLI is one worker, not the brain", pack)
+        self.assertIn("Three layers", pack)
+        self.assertIn("Recent conversation", pack)
+        self.assertIn("Evens: hey", pack)
+        prompt = PIPE.pick_prompt(hive / "bus" / "pipeline-pack.md", "how's it going")
+        self.assertIn("coordinator", prompt)
+        self.assertLess(len(prompt), 2000)
+
+    def test_stale_login_flag_clears_when_live_cursor_is_in(self) -> None:
+        os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
+        with tempfile.TemporaryDirectory(prefix="pipeline-stale-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps({"schema_version": 1, "cursor_login_said": True, "turns": []})
+                + "\n",
+                encoding="utf-8",
+            )
+            with unittest.mock.patch.object(PIPE, "live_cursor_ready", return_value=True):
+                self.assertFalse(PIPE.should_skip_cursor(hive, None))
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+        self.assertNotIn("cursor_login_said", bus)
+
+    def test_last_wire_login_error_is_not_a_permanent_skip(self) -> None:
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        with tempfile.TemporaryDirectory(prefix="pipeline-lastwire-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps({"schema_version": 1, "turns": []}) + "\n",
+                encoding="utf-8",
+            )
+            if PIPE.LAST_WIRE is not None:
+                PIPE.LAST_WIRE.write(
+                    hive,
+                    verb="pipeline",
+                    ok=False,
+                    human_line=PIPE.NEED_LOGIN,
+                    wire={"path": "cursor", "error": PIPE.LOGIN_UNKNOWN},
+                    utterance="hey",
+                )
+            self.assertFalse(PIPE.login_already_said(hive))
+            self.assertFalse(PIPE.should_skip_cursor(hive, lambda p: {}))
 
 
 if __name__ == "__main__":
