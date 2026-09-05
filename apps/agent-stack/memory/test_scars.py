@@ -37,6 +37,15 @@ class ScarsTest(unittest.TestCase):
             self.assertTrue(MOD.blocks_cursor(live))
             self.assertEqual(MOD.hits_for("cursor-auth-dark", live), 1)
 
+    def test_legacy_row_without_ttl_does_not_block(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-scars-legacy-") as tmp:
+            live = Path(tmp) / "scars.jsonl"
+            live.write_text(
+                '{"id":"cursor-auth-dark","at":"2026-09-04T20:03:46Z","symptom":"login"}\n',
+                encoding="utf-8",
+            )
+            self.assertFalse(MOD.blocks_cursor(live))
+
     def test_expired_or_resolved_does_not_block(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-scars-ttl-") as tmp:
             live = Path(tmp) / "scars.jsonl"

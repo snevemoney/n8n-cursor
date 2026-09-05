@@ -108,7 +108,9 @@ def is_active(row: dict | None) -> bool:
     if row.get("resolved") is True:
         return False
     expires = _parse_iso(str(row.get("expires_at") or ""))
-    if expires is not None and expires <= datetime.now(timezone.utc):
+    if expires is None:
+        return False
+    if expires <= datetime.now(timezone.utc):
         return False
     return True
 
