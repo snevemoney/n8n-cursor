@@ -97,6 +97,7 @@ class FaceServeTest(unittest.TestCase):
         text = SCRIPT.read_text(encoding="utf-8")
         self.assertIn("_MOUTH_MTIME", text)
         self.assertIn("st_mtime", text)
+        self.assertIn("pipeline.py", text)
         self.assertNotIn('bus.get("permission_ask") or bus.get("utterance")', text)
         self.assertNotIn("May I hand this to the grok desk", text)
 

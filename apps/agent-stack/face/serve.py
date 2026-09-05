@@ -36,14 +36,24 @@ _MOUTH = None
 _MOUTH_MTIME = None
 
 
+def _mouth_stamp() -> tuple:
+    """turn.py plus the thinker it imports. Pipeline-only edits used to stay stale."""
+    stack = HERE.parent
+    paths = (
+        stack / "mouth" / "turn.py",
+        stack / "brain" / "pipeline.py",
+        stack / "mouth" / "persona.py",
+    )
+    return tuple(p.stat().st_mtime for p in paths)
+
+
 def mouth():
-    """Reload turn.py when the file on disk changes. Stale 4018 was the ASK bug."""
+    """Reload the door when turn/pipeline/persona change. Stale 4018 was the ASK bug."""
     global _MOUTH, _MOUTH_MTIME
-    path = HERE.parent / "mouth" / "turn.py"
-    mtime = path.stat().st_mtime
-    if _MOUTH is None or _MOUTH_MTIME != mtime:
+    stamp = _mouth_stamp()
+    if _MOUTH is None or _MOUTH_MTIME != stamp:
         _MOUTH = _load_mouth()
-        _MOUTH_MTIME = mtime
+        _MOUTH_MTIME = stamp
     return _MOUTH
 
 
