@@ -91,7 +91,12 @@ class FaceServeTest(unittest.TestCase):
         self.assertNotIn("getTracks().forEach((t) => t.stop())", html)
         self.assertNotIn("scheduleRestart(180)", html)
         self.assertNotIn("scheduleRestart(120)", html)
-        self.assertIn("hand this to the|say yes to approve", html)
+        self.assertIn("stopListen", html)
+        self.assertIn("lastSpoken", html)
+        self.assertIn("ECHO_RE", html)
+        self.assertIn("isMouthEcho", html)
+        self.assertIn("if (ttsSpeaking() || state.turning) return", html)
+        self.assertNotIn("if (bus.spoken && !state.turning && !state.listening", html)
 
     def test_stale_mouth_reloads_and_never_generates_desk_ask(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")

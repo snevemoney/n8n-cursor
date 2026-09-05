@@ -48,7 +48,9 @@ LEAK_RE = re.compile(
     r"youtuber said|"
     r"\[paste|"
     r"i heard you:|"
-    r"before that you said:"
+    r"before that you said:|"
+    r"this document is the|"
+    r"structured long-term memory"
     r")",
     re.I,
 )
@@ -439,16 +441,11 @@ def speak_hot(roots: list[Path] | None = None) -> str:
 
 
 def speak_store(utterance: str, roots: list[Path] | None = None, *, greet: bool = False) -> str:
-    """Butler answer from life/lanes/hot. Never paste pack, ASKS, or watch-later."""
+    """Butler line from life/lanes/hot. Search snippets stay on `brief`, never TTS."""
+    _ = utterance
     life = speak_life(roots)
     if greet:
         return f"I'm here. {life} What are we working on?"
-    words = tokens(utterance)
-    if words:
-        found = search(utterance, roots)
-        evidence = str(found.get("spoken") or "").strip()
-        if evidence and not found.get("unknown") and not is_speak_leak(evidence):
-            return evidence
     hot = speak_hot(roots)
     if hot:
         return f"{life} {hot}"

@@ -370,6 +370,23 @@ def clean_store_answer(
     return "I'm here. The store is on disk. What are we working on?"
 
 
+def is_mouth_echo(utterance: str, hive: Path) -> bool:
+    """True when the mic heard our last line (or pack crumbs), not a new ask."""
+    heard = (utterance or "").strip()
+    if not heard:
+        return False
+    if _is_speak_leak(heard):
+        return True
+    low = heard.lower()
+    if STORE_LOGIN_ONCE.lower() in low or "i already said cursor needs" in low:
+        return True
+    bus = load_json(hive / "bus" / "state.json")
+    last = str(bus.get("spoken") or "").strip()
+    if last and len(last) >= 24 and last[:80].lower() in low:
+        return True
+    return False
+
+
 def store_converse(
     utterance: str,
     *,
@@ -377,12 +394,17 @@ def store_converse(
     turns: list[dict],
     retrieve_roots: list[Path] | None,
 ) -> dict:
-    """Talk from the clean store. Pack / last-wire / ASKS stay off the mouth."""
+    """Talk from the clean store. Pack / last-wire / ASKS / vault snippets stay off the mouth."""
     _ = turns
     heard = (utterance or "").strip()
-    if wants_login_why(heard):
+    if is_mouth_echo(heard, hive) or is_greet_or_empty(heard):
+        if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
+            spoken = RETRIEVE.speak_store(heard, retrieve_roots, greet=True)
+        else:
+            spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
+    elif wants_login_why(heard):
         spoken = STORE_LOGIN_ONCE
-    elif PRO is not None and PRO.is_school_query(heard) and not is_greet_or_empty(heard):
+    elif PRO is not None and PRO.is_school_query(heard):
         school = PRO.brief(heard)
         evidence = str(school.get("spoken") or "").strip()
         spoken = evidence if evidence and not _is_speak_leak(evidence) else ""
@@ -390,7 +412,7 @@ def store_converse(
             spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
     else:
         spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
-    spoken = (spoken or "").strip() or "I'm here. What are we working on?"
+    spoken = _speakable_line(spoken) or "I'm here. What are we working on?"
     return {
         "ok": True,
         "tool": "status",
@@ -628,7 +650,7 @@ def run_tool(
             return {
                 "ok": True,
                 "tool": tool,
-                "spoken": speak.strip(),
+                "spoken": _speakable_line(speak) or "I'm here. What are we working on?",
                 "wires": ["store"],
                 "cites": [],
                 "sent": False,
@@ -749,6 +771,13 @@ def _commit_spoken(
     wire: dict | None = None,
 ):
     text = dress(raw, tool=tool, utterance=spoken_in, turns=prior_turns)
+    if _is_speak_leak(text):
+        text = dress(
+            "I'm here. What are we working on?",
+            tool=tool,
+            utterance=spoken_in,
+            turns=prior_turns,
+        )
     next_turns = append_turn(prior_turns, spoken_in, text)
     write_bus(
         hive,

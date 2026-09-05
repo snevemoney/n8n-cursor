@@ -41,7 +41,9 @@ PACK_LEAK_RE = re.compile(
     r"i heard you:|"
     r"before that you said:|"
     r"\b\d{1,2}:\d{2}\s+[—\-–]|"
-    r"agentic os"
+    r"agentic os|"
+    r"this document is the|"
+    r"structured long-term memory"
     r")",
     re.I,
 )

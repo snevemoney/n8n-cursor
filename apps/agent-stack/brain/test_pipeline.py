@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -271,6 +273,89 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertTrue(spoken.startswith("Sir."))
         self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
         self.assertIn("one-time login", (why.get("spoken") or "").lower())
+
+
+class Live4018MouthContractTest(unittest.TestCase):
+    """Same door 4018 uses: apply_turn, no cursor_fn, skip-cursor store talk."""
+
+    LEAKS = (
+        "adopted path missing",
+        "22:48",
+        "agentic OS",
+        "I already said Cursor needs",
+        "structured long-term memory",
+    )
+
+    def _live_hive(self, tmp: str) -> tuple[Path, Path]:
+        hive = Path(tmp)
+        vault = hive / "vault"
+        (hive / "bus").mkdir(parents=True)
+        (vault / "CONTENT/os").mkdir(parents=True)
+        (vault / "OPERATOR_MEMORY.md").write_text(
+            "This document is the **structured long-term memory** for Evens — "
+            "decisions, goals, and lessons. The store still works on disk.\n",
+            encoding="utf-8",
+        )
+        (vault / "CONTENT/os/ASKS.md").write_text(
+            "- 22:48 — If you don't know how to build your own agentic OS, "
+            "then you are falling behind. But not for the reason you think.\n",
+            encoding="utf-8",
+        )
+        (hive / "agent-stack.json").write_text(
+            '{"name":"hive","repo":"/repo","vault":{}}\n',
+            encoding="utf-8",
+        )
+        (hive / "bus" / "state.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "phase": "speak",
+                    "job_status": "done",
+                    "utterance": "Hey do you work now",
+                    "spoken": (
+                        "Sir. Wires, not vibes. This document is the **structured "
+                        "long-term memory** for Evens. Vault: adopted path missing. "
+                        "- 22:48 — If you don't know how to build your own agentic OS. "
+                        "I already said Cursor needs a one-time login."
+                    ),
+                    "cursor_login_said": True,
+                    "turns": [
+                        {
+                            "user": "Hello Jarvis",
+                            "jarvis": (
+                                "I heard you: Hello Jarvis. Before that you said: stop. "
+                                "Vault: adopted path missing - 22:48 — agentic OS."
+                            ),
+                        }
+                    ],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return hive, vault
+
+    def test_apply_turn_without_cursor_fn_never_speaks_pack_or_vault(self) -> None:
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        os.environ["AGENT_STACK_DRY_TTS"] = "1"
+        utterances = (
+            "Hello Jarvis",
+            "He's Jarvis",
+            "Hey do you work now",
+            (
+                "Hello Jarvis I already said Cursor needs a one-time login. "
+                "22:48 — agentic OS. Vault: adopted path missing"
+            ),
+        )
+        with tempfile.TemporaryDirectory(prefix="pipeline-live-4018-") as tmp:
+            hive, vault = self._live_hive(tmp)
+            for utter in utterances:
+                out = MOUTH.apply_turn(utter, hive=hive, retrieve_roots=[vault])
+                spoken = out.get("spoken") or ""
+                for leak in self.LEAKS:
+                    self.assertNotIn(leak, spoken, f"{utter!r} spoke {spoken!r}")
+                self.assertTrue(spoken.startswith("Sir."), spoken)
+                self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
 
 
 if __name__ == "__main__":

@@ -138,6 +138,8 @@
     const ttsQueue = [];
     let ttsBusy = false;
     let ttsGen = 0;
+    let lastSpoken = "";
+    const ECHO_RE = /adopted path missing|agentic os|i already said cursor|i heard you:|before that you said:|structured long-term memory/i;
     const ttsSpeaking = () => ttsBusy || !!(synth && synth.speaking) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
 
     function voiceLang(v) {
@@ -221,10 +223,24 @@
       u.onend = afterSpeak;
       synth.speak(u);
     }
+    function stopListen() {
+      state.recGen += 1;
+      const rec = state.rec;
+      state.rec = null;
+      state.listening = false;
+      state.starting = false;
+      if (rec) {
+        try { rec.onresult = null; rec.onend = null; rec.onerror = null; } catch (e) {}
+        try { rec.abort(); } catch (e) {
+          try { rec.stop(); } catch (err) {}
+        }
+      }
+    }
     function stopSpeech() {
       ttsGen += 1;
       ttsQueue.length = 0;
       ttsBusy = false;
+      stopListen();
       if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
       if (synth) synth.cancel();
     }
@@ -309,6 +325,7 @@
       const gen = turnGen;
       stopSpeech();
       state.turning = true;
+      lastSpoken = "";
       paintPhase("think");
       if (!isStop) $("spoken").textContent = "";
       const ac = new AbortController();
@@ -340,12 +357,13 @@
               if (last.ask) state.pending = utterance;
               else state.pending = null;
               $("spoken").className = "line" + (last.ask ? " ask" : "");
+              if (last.spoken) {
+                lastSpoken = last.spoken;
+                $("spoken").textContent = last.spoken;
+              }
               if (last.spoken_delta) {
                 heardDelta = true;
                 enqueueSpeak(last.spoken_delta);
-                $("spoken").textContent = last.spoken || last.spoken_delta;
-              } else if (last.spoken) {
-                $("spoken").textContent = last.spoken;
               }
               if (last.done && !heardDelta && last.spoken) enqueueSpeak(last.spoken);
             }
@@ -371,9 +389,18 @@
       if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
     }
 
+    function isMouthEcho(said) {
+      const text = (said || "").trim();
+      if (!text) return false;
+      if (ttsSpeaking() || state.turning) return true;
+      if (ECHO_RE.test(text)) return true;
+      if (lastSpoken && text.length > 20 && lastSpoken.toLowerCase().indexOf(text.toLowerCase().slice(0, 40)) >= 0) return true;
+      return false;
+    }
     function handleHeard(raw) {
       let said = (raw || "").trim();
       if (!said) return;
+      if (isMouthEcho(said)) return;
       const woke = WAKE_RE.test(said);
       said = said.replace(WAKE_RE, "").trim() || (woke ? "" : said);
       if (!said) { greet(); return; }
@@ -434,6 +461,7 @@
         if (!state.turning) paintPhase("listen");
       };
       rec.onresult = (e) => {
+        if (ttsSpeaking() || state.turning) return;
         const last = e.results[e.results.length - 1];
         const t = last[0].transcript;
         $("spoken").textContent = t;
@@ -636,7 +664,6 @@
       try {
         const bus = await api("/api/bus");
         if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
-        if (bus.spoken && !state.turning && !state.listening && !/hand this to the|say yes to approve/i.test(bus.spoken)) $("spoken").textContent = bus.spoken;
         if ($("mode")) $("mode").textContent = "MODE - " + String(bus.harness_mode || "agent").toUpperCase();
         const wires = await api("/api/wires");
         paintWires(wires);
