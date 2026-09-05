@@ -219,6 +219,8 @@ class ProRetrieveTest(unittest.TestCase):
         self.assertFalse(got.get("shelf"))
         self.assertLess(len(got["spoken"]), 220)
         self.assertNotIn("From mktg-value-stp-mix-plan-checklists", got["spoken"])
+        self.assertNotIn("mktg-value-stp-mix-plan-checklists", got["spoken"])
+        self.assertIn("BUS203", got["spoken"])
         self.assertIn("segment", str(got.get("brief") or got["spoken"]).lower())
 
     def test_hr_bitcoin_stats_rank_from_same_index(self) -> None:

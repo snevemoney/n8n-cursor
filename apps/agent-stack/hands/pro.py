@@ -269,6 +269,8 @@ def _tts_brief(text: str, cap: int = SPEAK_CAP) -> str:
     body = re.sub(r"\s+", " ", (text or "").strip())
     if not body:
         return ""
+    body = re.sub(r"^[a-z0-9-]+\s+\(([A-Z0-9]+)\):\s+", r"\1: ", body, count=1)
+    body = re.sub(r"^[a-z0-9-]+:\s+", "", body, count=1)
     match = re.search(r"[.!?]", body)
     if match and match.end() <= cap + 24:
         body = body[: match.end()].strip()
