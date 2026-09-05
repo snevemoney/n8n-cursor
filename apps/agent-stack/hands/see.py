@@ -30,7 +30,10 @@ HARD_CLICK = re.compile(
 YOUTUBE_HOME = "https://www.youtube.com"
 WATCH_LATER_URL = "https://www.youtube.com/playlist?list=WL"
 OPEN_RE = re.compile(r"\bopen\s+(https?://\S+)", re.I)
-YOUTUBE_OPEN_RE = re.compile(r"\b(?:go\s+(?:on|to)|open)\s+(?:the\s+)?youtube\b", re.I)
+YOUTUBE_OPEN_RE = re.compile(
+    r"\b(?:(?:go\s+(?:on|to)|open)\s+(?:the\s+)?)?youtube\b",
+    re.I,
+)
 WATCH_LATER_ACT_RE = re.compile(r"\bwatch later\b", re.I)
 SCREEN_GRAB_RE = re.compile(
     r"\b("
@@ -247,7 +250,7 @@ def wants_url(utterance: str) -> bool:
     """Real URL only when he asked where, or to open a page."""
     return bool(
         re.search(
-            r"\b(where|url|open|go (?:on|to)|watch later|https?://)\b",
+            r"\b(where|url|open|go (?:on|to)|watch later|youtube|https?://)\b",
             utterance or "",
             re.I,
         )

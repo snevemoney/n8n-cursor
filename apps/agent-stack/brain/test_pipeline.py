@@ -419,6 +419,57 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertEqual(out.get("verb"), "safari_see")
         self.assertIn("scrolled the tab", (out.get("spoken") or "").lower())
 
+    def test_two_asks_cannot_both_equal_lanes_default(self) -> None:
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        os.environ["AGENT_STACK_DRY_TTS"] = "1"
+        lanes = PIPE.RETRIEVE.LANES_DEFAULT
+        saw: list[str] = []
+
+        def fake_see(utterance: str = ""):
+            saw.append(utterance)
+            return {
+                "ok": True,
+                "wire": "safari",
+                "spoken": "YouTube is open",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-no-lanes-loop-") as tmp:
+            hive, vault = self._live_hive(tmp)
+            greet = MOUTH.apply_turn("Hello Jarvis", hive=hive, retrieve_roots=[vault])
+            can = MOUTH.apply_turn("What can you do?", hive=hive, retrieve_roots=[vault])
+            school = MOUTH.apply_turn(
+                "Tell me about marketing",
+                hive=hive,
+                retrieve_roots=[vault],
+            )
+            tube = MOUTH.apply_turn(
+                "YouTube",
+                hive=hive,
+                retrieve_roots=[vault],
+                see_fn=fake_see,
+            )
+        greet_spoken = greet.get("spoken") or ""
+        can_spoken = can.get("spoken") or ""
+        school_spoken = school.get("spoken") or ""
+        tube_spoken = tube.get("spoken") or ""
+        self.assertNotEqual(greet_spoken, can_spoken)
+        self.assertNotEqual(can_spoken, school_spoken)
+        self.assertNotEqual(greet_spoken, school_spoken)
+        self.assertNotEqual(greet_spoken, lanes)
+        self.assertNotEqual(can_spoken, lanes)
+        self.assertNotIn(lanes, greet_spoken)
+        self.assertNotIn(lanes, can_spoken)
+        self.assertNotIn(lanes, school_spoken)
+        self.assertNotIn(lanes, tube_spoken)
+        self.assertNotIn("On disk: Website / AI Partner", greet_spoken)
+        self.assertNotIn("On disk: Website / AI Partner", can_spoken)
+        self.assertIn("here", greet_spoken.lower())
+        self.assertRegex(can_spoken.lower(), r"(vault|safari|school|status)")
+        self.assertRegex(school_spoken.lower(), r"(market|segment|mix|mktg|bus203)")
+        self.assertEqual(tube.get("verb"), "safari_see")
+        self.assertEqual(saw, ["YouTube"])
+        self.assertIn("youtube", tube_spoken.lower())
+
 
 if __name__ == "__main__":
     unittest.main()

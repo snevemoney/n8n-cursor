@@ -115,6 +115,7 @@ class SeeTest(unittest.TestCase):
             "open YouTube",
             "go to YouTube",
             "go on YouTube",
+            "YouTube",
         )
         with mock.patch.object(MOD, "_run", return_value=proc) as run:
             for phrase in phrases:

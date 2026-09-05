@@ -69,11 +69,20 @@ SAFARI_WANT_RE = re.compile(
     r"scroll|"
     r"screenshot|screen\s*shot|screen\s*grab|"
     r"watch later|"
-    r"(?:go\s+(?:on|to)|open)\s+(?:the\s+)?youtube|"
+    r"youtube|"
     r"open\s+https?://|"
     r"look at (?:this |the )?(?:page|tab|screen)|"
     r"grab (?:the |my )?(?:screen|safari|front tab)|"
     r"share (?:me )?(?:my )?screen"
+    r")\b",
+    re.I,
+)
+CAN_DO_RE = re.compile(
+    r"\b("
+    r"what can you do|"
+    r"what do you do|"
+    r"your capabilities|"
+    r"what are you (?:able to do|good at)"
     r")\b",
     re.I,
 )
@@ -380,6 +389,18 @@ def wants_safari(utterance: str) -> bool:
     return bool(SAFARI_WANT_RE.search(utterance or ""))
 
 
+def wants_capabilities(utterance: str) -> bool:
+    """'What can you do' is the real toolbox, not business-lanes.json."""
+    return bool(CAN_DO_RE.search(utterance or ""))
+
+
+def is_lanes_default(text: str) -> bool:
+    """True when the mouth is about to repeat the business-lanes greeting."""
+    if RETRIEVE is not None and hasattr(RETRIEVE, "is_lanes_default"):
+        return bool(RETRIEVE.is_lanes_default(text))
+    return "on disk: website / ai partner" in (text or "").lower()
+
+
 def _is_speak_leak(text: str) -> bool:
     if RETRIEVE is not None and hasattr(RETRIEVE, "is_speak_leak"):
         return bool(RETRIEVE.is_speak_leak(text))
@@ -397,11 +418,19 @@ def clean_store_answer(
     """Short butler line. Never paste life/lanes/hot/ASKS."""
     _ = hive
     greet = is_greet_or_empty(utterance) or is_work_check(utterance)
+    can_do = wants_capabilities(utterance)
     if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
-        return RETRIEVE.speak_store(utterance, retrieve_roots, greet=greet)
+        return RETRIEVE.speak_store(
+            utterance, retrieve_roots, greet=greet, can_do=can_do
+        )
     if greet:
-        return "I'm here. What are we working on?"
-    return "I'm here. The store is on disk. What are we working on?"
+        return "I'm here."
+    if wants_capabilities(utterance):
+        return (
+            "I read the vault, look at the Safari tab, brief a school skill, "
+            "or report status. Hard steps stay with you."
+        )
+    return "I'm here. The store is on disk."
 
 
 def answer_from_store(
@@ -417,7 +446,7 @@ def answer_from_store(
             return evidence
         if hasattr(RETRIEVE, "speak_store"):
             return RETRIEVE.speak_store(utterance, retrieve_roots, greet=False)
-    return "I'm here. The store is on disk. What are we working on?"
+    return "I'm here. The store is on disk."
 
 
 def is_mouth_echo(utterance: str, hive: Path) -> bool:
@@ -475,6 +504,11 @@ def store_converse(
         spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
     elif wants_login_why(heard):
         spoken = STORE_LOGIN_ONCE
+    elif wants_capabilities(heard):
+        if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
+            spoken = RETRIEVE.speak_store(heard, retrieve_roots, can_do=True)
+        else:
+            spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
     elif PRO is not None and PRO.is_school_query(heard):
         school = PRO.brief(heard)
         evidence = str(school.get("spoken") or "").strip()
@@ -483,7 +517,9 @@ def store_converse(
             spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
     else:
         spoken = answer_from_store(heard, retrieve_roots=retrieve_roots)
-    spoken = _speakable_line(spoken) or "I'm here. What are we working on?"
+    spoken = _speakable_line(spoken) or "I'm here."
+    if is_lanes_default(spoken):
+        spoken = "I'm here."
     return {
         "ok": True,
         "tool": "status",
@@ -629,7 +665,7 @@ def _evidence_line(speak: str, evidence: str) -> str:
     evidence = _speakable_line(evidence)
     if speak and evidence and evidence not in speak:
         return f"{speak} {evidence}"
-    return speak or evidence or "I'm here. What are we working on?"
+    return speak or evidence or "I'm here."
 
 
 def run_tool(
@@ -721,7 +757,7 @@ def run_tool(
             return {
                 "ok": True,
                 "tool": tool,
-                "spoken": _speakable_line(speak) or "I'm here. What are we working on?",
+                "spoken": _speakable_line(speak) or "I'm here.",
                 "wires": ["store"],
                 "cites": [],
                 "sent": False,
@@ -842,9 +878,9 @@ def _commit_spoken(
     wire: dict | None = None,
 ):
     text = dress(raw, tool=tool, utterance=spoken_in, turns=prior_turns)
-    if _is_speak_leak(text):
+    if _is_speak_leak(text) or is_lanes_default(text):
         text = dress(
-            "I'm here. What are we working on?",
+            "I'm here.",
             tool=tool,
             utterance=spoken_in,
             turns=prior_turns,

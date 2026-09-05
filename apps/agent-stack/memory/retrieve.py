@@ -57,10 +57,23 @@ LEAK_RE = re.compile(
     r"overlay\s+`?said-|"
     r"origin/main|"
     r"publish\s+hitl|"
-    r"\d{4}-\d{2}-\d{2}T\d{2}:"
+    r"\d{4}-\d{2}-\d{2}T\d{2}:|"
+    r"on disk:"
     r")",
     re.I,
 )
+# speak_life built this and speak_store glued it onto every dark-cursor turn.
+# Pack / model only. Mouth must never use it as the default spoken line.
+LANES_DEFAULT = (
+    "You are Evens Louis. On disk: Website / AI Partner services, "
+    "Operator Amazon store, Hive / agent automation platform."
+)
+GREET_SPOKEN = "I'm here."
+CAN_DO_SPOKEN = (
+    "I read the vault, look at the Safari tab, brief a school skill, "
+    "or report status. Hard steps stay with you."
+)
+STORE_SPOKEN = "I'm here. The store is on disk."
 STOP = {
     "the",
     "a",
@@ -413,6 +426,14 @@ def search(query: str, roots: list[Path] | None = None) -> dict:
     return _search_roots(query, live)
 
 
+def is_lanes_default(text: str) -> bool:
+    """True when the mouth is about to repeat the business-lanes greeting."""
+    body = (text or "").lower()
+    if LANES_DEFAULT.lower() in body:
+        return True
+    return "on disk: website / ai partner" in body
+
+
 def speak_life(roots: list[Path] | None = None) -> str:
     """Operator + active lanes. Pack / model only. Mouth uses speak_store."""
     life = life_card(roots)
@@ -451,9 +472,17 @@ def speak_hot(roots: list[Path] | None = None) -> str:
     return ""
 
 
-def speak_store(utterance: str, roots: list[Path] | None = None, *, greet: bool = False) -> str:
+def speak_store(
+    utterance: str,
+    roots: list[Path] | None = None,
+    *,
+    greet: bool = False,
+    can_do: bool = False,
+) -> str:
     """Short butler line. Life/lanes/hot stay off TTS. Search stays on `brief`."""
     _ = (utterance, roots)
     if greet:
-        return "I'm here. What are we working on?"
-    return "I'm here. The store is on disk. What are we working on?"
+        return GREET_SPOKEN
+    if can_do:
+        return CAN_DO_SPOKEN
+    return STORE_SPOKEN
