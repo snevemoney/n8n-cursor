@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "kind": "jarvis-never-again",
+  "scars": [
+    {
+      "id": "cursor-auth-dark",
+      "match": [
+        "authentication required",
+        "needs a one-time login",
+        "agent login"
+      ],
+      "symptom": "Cursor harness returned login UNKNOWN on every converse.",
+      "cause": "agent CLI not logged in for the 4018 process. Repeating the call does not log it in.",
+      "never_again": "cursor-auth-dark expires or resolves. Do not permanently block Cursor. Login stays Evens in Terminal.",
+      "heal": "store_fallback",
+      "status": "open"
+    },
+    {
+      "id": "send-an-agent-not-hard-step",
+      "match": [
+        "send an agent",
+        "send a fix",
+        "self-heal"
+      ],
+      "symptom": "Send an agent to fix Jarvis was refused as a hard step.",
+      "cause": "HARD_REFUSE treated send an <word> as send-email.",
+      "never_again": "Hard refuse is send email/invoice/payment only. Heal/fix/agent dispatch is a local verb.",
+      "heal": "heal_verb",
+      "status": "open"
+    },
+    {
+      "id": "repeat-unknown",
+      "match": [
+        "unknown."
+      ],
+      "symptom": "The same UNKNOWN spoken on Try again.",
+      "cause": "Converse called the same dark wire with no scar check.",
+      "never_again": "If the last spoken UNKNOWN matches this wire, apply the scar heal. Do not re-call.",
+      "heal": "repeat_guard",
+      "status": "open"
+    }
+  ]
+}

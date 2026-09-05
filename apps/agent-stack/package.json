@@ -1,0 +1,11 @@
+{
+  "name": "@hive/agent-stack",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "One Jarvis pipeline: context file, one Cursor pick, one tool, butler speak. Face/mic/TTS on 127.0.0.1:4018.",
+  "type": "module",
+  "scripts": {
+    "test": "AGENT_STACK_DRY_TTS=1 python3 mouth/turn.py --self-test && AGENT_STACK_DRY_TTS=1 python3 mouth/voice.py --self-test && python3 face/serve.py --self-test && AGENT_STACK_DRY_TTS=1 AGENT_STACK_CURSOR_DRY=1 python3 tests/test_golden_pipeline.py && python3 memory/test_scars.py && python3 mouth/test_persona.py && python3 mouth/test_voice.py && python3 mouth/test_turn.py && python3 face/test_serve.py"
+  }
+}
