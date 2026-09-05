@@ -178,6 +178,52 @@ class OnlineBrainTest(unittest.TestCase):
             self.assertEqual(chats["talk"], "talk-1")
             self.assertIsNone(chats["agent"])
 
+    def test_parse_output_json_shapes(self) -> None:
+        self.assertEqual(MOD.parse_output_json('{"result":"Hello Evens."}'), "Hello Evens.")
+        self.assertEqual(
+            MOD.parse_output_json('{"type":"result","result":"Standing by."}'),
+            "Standing by.",
+        )
+        self.assertEqual(
+            MOD.parse_output_json(
+                '{"message":{"content":[{"type":"text","text":"Quiet evening."}]}}'
+            ),
+            "Quiet evening.",
+        )
+        jsonl = (
+            '{"type":"text-delta","delta":"Hello "}\n'
+            '{"type":"result","result":"Hello Evens."}\n'
+        )
+        self.assertEqual(MOD.parse_output_json(jsonl), "Hello Evens.")
+        self.assertEqual(MOD.parse_output_json(""), "")
+        self.assertEqual(MOD.parse_output_json("not-json prose"), "not-json prose")
+
+    def test_empty_stream_retries_output_format_json(self) -> None:
+        proc = self._proc("")
+        retry = mock.Mock()
+        retry.returncode = 0
+
+        def fake_run(argv, *, stdout=None, stderr=None, **_kw):
+            self.assertIn("-p", argv)
+            self.assertIn("json", argv)
+            self.assertNotIn("--stream-partial-output", argv)
+            self.assertNotIn("--force", argv)
+            self.assertNotIn("--yolo", argv)
+            if stdout is not None:
+                stdout.write(b'{"result":"Quiet evening, sir."}\n')
+                stdout.flush()
+            return retry
+
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD, "cursor_logged_in", return_value=True):
+                with mock.patch.object(MOD.subprocess, "Popen", return_value=proc):
+                    with mock.patch.object(MOD.subprocess, "run", side_effect=fake_run):
+                        out = MOD.call_cursor_turn("how's it going", mode="ask", resume="chat-1")
+        self.assertTrue(out["ok"])
+        self.assertTrue(out["json_retry"])
+        self.assertIn("Quiet evening", out["spoken"])
+        self.assertNotIn("Last you said", out["spoken"])
+
     def test_parse_stream_json_line_shapes(self) -> None:
         delta = MOD.parse_stream_json_line('{"type":"text-delta","delta":"Hello Evens."}')
         self.assertEqual(delta["delta"], "Hello Evens.")

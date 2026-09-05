@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import threading
 import time
 import urllib.error
@@ -527,6 +528,69 @@ def take_sentences(buf: str) -> tuple[list[str], str]:
     return out, rest
 
 
+def parse_output_json(blob: str) -> str:
+    """Spoken text from Cursor `--output-format json` (or a JSONL dump to a file).
+
+    Claude tape: parse JSON, not regexed prose. Empty pipe stdout is not 'no model'
+    until the file/json blob is also empty.
+    """
+    raw = (blob or "").strip()
+    if not raw:
+        return ""
+    try:
+        obj = json.loads(raw)
+    except json.JSONDecodeError:
+        bits: list[str] = []
+        last_result = ""
+        for line in raw.splitlines():
+            parsed = parse_stream_json_line(line)
+            if parsed["delta"]:
+                bits.append(parsed["delta"])
+            if parsed["result"]:
+                last_result = parsed["result"]
+        return (last_result or "".join(bits)).strip()
+    return _json_result_text(obj)
+
+
+def _json_result_text(obj) -> str:
+    if isinstance(obj, str):
+        return obj.strip()
+    if isinstance(obj, list):
+        bits = [_json_result_text(item) for item in obj]
+        return " ".join(bit for bit in bits if bit).strip()
+    if not isinstance(obj, dict):
+        return ""
+    typ = str(obj.get("type") or obj.get("subtype") or "")
+    if typ in ("system", "tool_call", "tool-call", "tool_result", "tool-result"):
+        return ""
+    for key in ("result", "text"):
+        val = obj.get(key)
+        if isinstance(val, str) and val.strip():
+            return val.strip()
+    msg = obj.get("message")
+    if isinstance(msg, str) and msg.strip():
+        return msg.strip()
+    if isinstance(msg, dict):
+        content = msg.get("content")
+        if isinstance(content, str) and content.strip():
+            return content.strip()
+        if isinstance(content, list):
+            listed = _content_list_text(content)
+            if listed.strip():
+                return listed.strip()
+        inner = msg.get("text") or msg.get("result")
+        if isinstance(inner, str) and inner.strip():
+            return inner.strip()
+    content = obj.get("content")
+    if isinstance(content, str) and content.strip() and typ not in ("", "result"):
+        return content.strip()
+    if isinstance(content, list):
+        listed = _content_list_text(content)
+        if listed.strip():
+            return listed.strip()
+    return ""
+
+
 def parse_stream_json_line(line: str) -> dict:
     """Tolerant Cursor stream-json line → {delta, result}."""
     raw = (line or "").strip()
@@ -593,8 +657,16 @@ def _content_list_text(parts: list) -> str:
     return "".join(bits)
 
 
-def _cursor_argv(cmd: list[str], prompt: str, *, mode: str, resume: str | None) -> tuple[list[str], str, str, int]:
+def _cursor_argv(
+    cmd: list[str],
+    prompt: str,
+    *,
+    mode: str,
+    resume: str | None,
+    output_format: str = "stream-json",
+) -> tuple[list[str], str, str, int]:
     use_mode = mode if mode in ("ask", "plan", "agent") else "ask"
+    fmt = output_format if output_format in ("stream-json", "json") else "stream-json"
     argv = [
         *cmd,
         "-p",
@@ -602,9 +674,10 @@ def _cursor_argv(cmd: list[str], prompt: str, *, mode: str, resume: str | None) 
         "--workspace",
         str(ROOT),
         "--output-format",
-        "stream-json",
-        "--stream-partial-output",
+        fmt,
     ]
+    if fmt == "stream-json":
+        argv.append("--stream-partial-output")
     if use_mode in ("ask", "plan"):
         argv.extend(["--mode", use_mode])
     chat = (resume or "").strip()
@@ -613,6 +686,55 @@ def _cursor_argv(cmd: list[str], prompt: str, *, mode: str, resume: str | None) 
     argv.append((prompt or "").strip())
     timeout = 90 if use_mode == "agent" else 45
     return argv, use_mode, chat, timeout
+
+
+def _cursor_json_once(cmd: list[str], prompt: str, *, mode: str, resume: str | None) -> dict:
+    """One `--output-format json` pass with stdout redirected to a file.
+
+    Claude tape: non-TTY pipe stdout can vanish while the model finishes (exit 0).
+    File redirect is the check. No --force / --yolo. One retry only.
+    """
+    argv, use_mode, chat, timeout = _cursor_argv(
+        cmd, prompt, mode=mode, resume=resume, output_format="json"
+    )
+    out_path = err_path = ""
+    try:
+        with tempfile.NamedTemporaryFile(
+            prefix="jarvis-cursor-json-", suffix=".out", delete=False
+        ) as out_f, tempfile.NamedTemporaryFile(
+            prefix="jarvis-cursor-json-", suffix=".err", delete=False
+        ) as err_f:
+            out_path, err_path = out_f.name, err_f.name
+            proc = subprocess.run(
+                argv,
+                stdout=out_f,
+                stderr=err_f,
+                cwd=str(ROOT),
+                timeout=timeout,
+                check=False,
+            )
+        out = Path(out_path).read_text(encoding="utf-8", errors="replace")
+        err = Path(err_path).read_text(encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return {"text": "", "err": "timeout", "code": -1, "argv": argv, "mode": use_mode, "chat": chat}
+    except OSError as exc:
+        return {"text": "", "err": type(exc).__name__, "code": -1, "argv": argv, "mode": use_mode, "chat": chat}
+    finally:
+        for path in (out_path, err_path):
+            if path:
+                try:
+                    os.unlink(path)
+                except OSError:
+                    pass
+    return {
+        "text": parse_output_json(out),
+        "err": (err or "").strip(),
+        "code": int(proc.returncode),
+        "argv": argv,
+        "mode": use_mode,
+        "chat": chat,
+        "raw": out,
+    }
 
 
 def _read_cursor_line(proc: subprocess.Popen) -> str | None:
@@ -758,10 +880,24 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
     if not text and cursor_login_error(err_text):
         yield _cursor_fail(LOGIN_UNKNOWN)
         return
+    json_retry = False
+    if not text and not _CURSOR_CANCELLED:
+        # Claude: parse JSON + file-redirect when streamed/piped stdout vanished.
+        retry = _cursor_json_once(cmd, prompt, mode=use_mode, resume=chat)
+        json_retry = True
+        retry_text = str(retry.get("text") or "").strip()
+        retry_err = str(retry.get("err") or "")
+        if retry_text:
+            text = retry_text
+        elif cursor_login_error(retry_err):
+            yield _cursor_fail(LOGIN_UNKNOWN)
+            return
+        else:
+            err_text = retry_err or err_text
     if not text:
         yield _cursor_fail(f"UNKNOWN. Cursor agent returned no text. {err_text[:180]}".strip())
         return
-    yield {
+    done = {
         "ok": True,
         "unknown": False,
         "wire": "cursor",
@@ -773,6 +909,9 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
         "partial": False,
         "delta": "",
     }
+    if json_retry:
+        done["json_retry"] = True
+    yield done
 
 
 def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = None) -> dict:
@@ -790,6 +929,7 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
         "mode": last.get("mode") or mode,
         "chat_id": last.get("chat_id"),
         "cancelled": bool(last.get("cancelled")),
+        "json_retry": bool(last.get("json_retry")),
     }
 
 
