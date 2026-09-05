@@ -23,6 +23,10 @@ else
   echo "stack: missing — run: npm run adopt"
 fi
 
+if [[ "$MODE" != "check" ]]; then
+  unset AGENT_STACK_DRY_TTS || true
+fi
+
 if [[ "$MODE" == "check" ]]; then
   echo "mouth: $( [[ -x "$MOUTH_START" ]] && echo wired || echo missing )"
   echo "face: $( [[ -x "$FACE_START" ]] && echo wired || echo missing )"

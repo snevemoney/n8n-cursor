@@ -222,6 +222,86 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertIn("leverage", (out.get("spoken") or "").lower())
         self.assertNotIn(CANNED_CAN, out.get("spoken") or "")
 
+    def test_6_conversation_without_tool_still_answers(self) -> None:
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            return {"speak": "I have the vault, this repo, and this sitting. What are we working on?"}
+
+        with tempfile.TemporaryDirectory(prefix="golden-speak-") as tmp:
+            hive, vault = _hive(tmp)
+            out = TURN.apply_turn(
+                "Hello Jarvis",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=fake_cursor,
+            )
+        self.assertNotEqual(out.get("verb"), "can")
+        self.assertNotIn(CANNED_CAN, out.get("spoken") or "")
+        self.assertIn("sitting", (out.get("spoken") or "").lower())
+        self.assertIn("store", (out.get("wires") or []))
+
+    def test_7_tts_first_delta_before_done(self) -> None:
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            return {
+                "tool": "vault_read",
+                "args": {"query": "north star"},
+                "speak": "First sentence starts now. Second sentence can wait.",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="golden-delta-") as tmp:
+            hive, vault = _hive(tmp)
+            events = list(
+                TURN.apply_turn_iter(
+                    "What is my north star?",
+                    hive=hive,
+                    retrieve_roots=[vault],
+                    cursor_fn=fake_cursor,
+                )
+            )
+        self.assertGreaterEqual(len(events), 2)
+        first = events[0]
+        last = events[-1]
+        self.assertTrue(first.get("spoken_delta"))
+        self.assertTrue(first.get("partial") or not first.get("done"))
+        self.assertIn("First sentence", first.get("spoken_delta") or "")
+        self.assertTrue(last.get("done"))
+        self.assertIn("leverage", (last.get("spoken") or "").lower())
+
+    def test_8_safari_see_invokes_see_py(self) -> None:
+        saw: list[str] = []
+
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            return {"tool": "safari_see", "args": {"act": "scroll"}, "speak": "Scrolling."}
+
+        real_scroll = TURN.PIPELINE.SEE.safari_scroll
+
+        def wrap_scroll(direction: str = "down"):
+            saw.append(direction)
+            return {
+                "ok": True,
+                "wire": "safari",
+                "path": "cgevent",
+                "spoken": f"I scrolled the tab {direction}",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="golden-see-py-") as tmp:
+            hive, vault = _hive(tmp)
+            TURN.PIPELINE.SEE.safari_scroll = wrap_scroll
+            try:
+                out = TURN.apply_turn(
+                    "Scroll the page",
+                    hive=hive,
+                    retrieve_roots=[vault],
+                    cursor_fn=fake_cursor,
+                )
+            finally:
+                TURN.PIPELINE.SEE.safari_scroll = real_scroll
+        self.assertEqual(saw, ["down"])
+        self.assertEqual(out.get("verb"), "safari_see")
+        self.assertIn("scrolled the tab", (out.get("spoken") or "").lower())
+
 
 if __name__ == "__main__":
     unittest.main()

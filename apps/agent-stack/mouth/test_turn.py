@@ -35,7 +35,7 @@ class MouthDoorTest(unittest.TestCase):
         self.assertNotIn("capabilities_spoken", text)
         self.assertNotIn("May I hand this to the", text)
         self.assertNotIn("prompt[:4000]", text)
-        self.assertIn("PIPELINE.apply_pipeline", text)
+        self.assertIn("PIPELINE.apply_pipeline_iter", text)
 
     def test_stop_and_empty_are_local(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-door-") as tmp:

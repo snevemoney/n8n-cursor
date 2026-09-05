@@ -15,7 +15,7 @@ Input → full context file → Cursor CLI picks one tool (`vault_read` / `safar
 # headed Mac only — kill leftover 4018 first, do not start with AGENT_STACK_DRY_TTS:
 # lsof -iTCP:4018 -sTCP:LISTEN
 env -u AGENT_STACK_DRY_TTS ./start.sh
-# hard-refresh Safari http://127.0.0.1:4018/
+# start.sh unsets DRY_TTS on live 4018. Hard-refresh Safari http://127.0.0.1:4018/
 ```
 
 No Ollama. No new xAI key. No computer takeover.

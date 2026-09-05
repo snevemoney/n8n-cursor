@@ -220,7 +220,7 @@ def apply_turn_iter(
         yield _door_speak(hive, spoken, "Stopped. Standing by.", "stop")
         return
     if PIPELINE.is_hard_step(spoken):
-        out = PIPELINE.apply_pipeline(
+        for out in PIPELINE.apply_pipeline_iter(
             spoken,
             hive=hive,
             retrieve_roots=retrieve_roots,
@@ -228,20 +228,22 @@ def apply_turn_iter(
             see_fn=see_fn,
             status_fn=status_fn,
             cursor_ask_fn=cursor_ask_fn,
-        )
-        text = str(out.get("spoken") or PIPELINE.PROPOSAL)
-        yield _turn_event(
-            spoken=text,
-            verb="refuse_hard_step",
-            host="pipeline",
-            cites=out.get("cites") or [],
-            wires=out.get("wires") or ["refuse_hard_step"],
-            args=out.get("args"),
-            spoken_delta=text,
-        )
+        ):
+            text = str(out.get("spoken") or PIPELINE.PROPOSAL)
+            yield _turn_event(
+                spoken=text,
+                verb="refuse_hard_step",
+                host="pipeline",
+                cites=out.get("cites") or [],
+                wires=out.get("wires") or ["refuse_hard_step"],
+                args=out.get("args"),
+                done=bool(out.get("done", True)),
+                spoken_delta=str(out.get("spoken_delta") or ""),
+                partial=bool(out.get("partial")),
+            )
         return
 
-    out = PIPELINE.apply_pipeline(
+    for out in PIPELINE.apply_pipeline_iter(
         spoken,
         hive=hive,
         retrieve_roots=retrieve_roots,
@@ -249,19 +251,24 @@ def apply_turn_iter(
         see_fn=see_fn,
         status_fn=status_fn,
         cursor_ask_fn=cursor_ask_fn,
-    )
-    text = str(out.get("spoken") or DARK_BRAIN)
-    if is_ask_leak(text):
-        text = DARK_BRAIN
-    yield _turn_event(
-        spoken=text,
-        verb=str(out.get("verb") or out.get("tool") or "pipeline"),
-        host="pipeline",
-        cites=out.get("cites") or [],
-        wires=out.get("wires") or ["pipeline"],
-        args=out.get("args"),
-        spoken_delta=text,
-    )
+    ):
+        text = str(out.get("spoken") or DARK_BRAIN)
+        if is_ask_leak(text):
+            text = DARK_BRAIN
+        delta = str(out.get("spoken_delta") or "")
+        if is_ask_leak(delta):
+            delta = ""
+        yield _turn_event(
+            spoken=text,
+            verb=str(out.get("verb") or out.get("tool") or "pipeline"),
+            host="pipeline",
+            cites=out.get("cites") or [],
+            wires=out.get("wires") or ["pipeline"],
+            args=out.get("args"),
+            done=bool(out.get("done", True)),
+            spoken_delta=delta,
+            partial=bool(out.get("partial")),
+        )
 
 
 def apply_turn(

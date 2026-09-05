@@ -90,6 +90,72 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertEqual(out.get("verb"), "status")
         self.assertIn("Wires", out.get("spoken") or "")
 
+    def test_login_unknown_once_then_store_converse(self) -> None:
+        calls: list[str] = []
+
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            calls.append(prompt)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": PIPE.LOGIN_UNKNOWN,
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-login-once-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            first = MOUTH.apply_turn(
+                "Hi Jarvis",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=dark_cursor,
+            )
+            second = MOUTH.apply_turn(
+                "Hello didn't you hear me",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=dark_cursor,
+            )
+        self.assertEqual(len(calls), 1)
+        self.assertIn("agent login", first.get("spoken") or "")
+        self.assertIn("I heard you", second.get("spoken") or "")
+        self.assertIn("already said", (second.get("spoken") or "").lower())
+        self.assertNotIn("returned no reply", second.get("spoken") or "")
+        self.assertNotEqual(second.get("verb"), "can")
+
+    def test_safari_see_calls_see_py_front(self) -> None:
+        called: list[str] = []
+
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            return {"tool": "safari_see", "args": {"act": "front"}, "speak": "Looking."}
+
+        def fake_front():
+            called.append("front")
+            return {"ok": True, "wire": "safari", "spoken": "The front tab is Example.", "title": "Example"}
+
+        real = MOUTH.PIPELINE.SEE.safari_front
+        MOUTH.PIPELINE.SEE.safari_front = fake_front
+        try:
+            with tempfile.TemporaryDirectory(prefix="pipeline-see-") as tmp:
+                hive = Path(tmp)
+                (hive / "bus").mkdir(parents=True)
+                (hive / "vault").mkdir(parents=True)
+                out = MOUTH.apply_turn(
+                    "Look at this page",
+                    hive=hive,
+                    retrieve_roots=[hive / "vault"],
+                    cursor_fn=fake_cursor,
+                )
+        finally:
+            MOUTH.PIPELINE.SEE.safari_front = real
+        self.assertEqual(called, ["front"])
+        self.assertEqual(out.get("verb"), "safari_see")
+        self.assertIn("Example", out.get("spoken") or "")
+
 
 if __name__ == "__main__":
     unittest.main()

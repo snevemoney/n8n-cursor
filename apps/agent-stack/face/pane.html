@@ -134,6 +134,7 @@
     const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
     let jarvisVoice = null;
     let ttsAudio = null;
+    let voiceEngine = "dark";
     const ttsQueue = [];
     let ttsBusy = false;
     let ttsGen = 0;
@@ -227,6 +228,9 @@
       if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
       if (synth) synth.cancel();
     }
+    function productMouth() {
+      return voiceEngine === "elevenlabs" || voiceEngine === "kokoro" || voiceEngine === "kokoro-dark-python";
+    }
     async function speakCloud(text, gen) {
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -271,7 +275,10 @@
         paintPhase("speak");
         let ok = false;
         try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
-        if (!ok && gen === ttsGen) speakLocal(next);
+        if (!ok && gen === ttsGen && productMouth()) {
+          try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
+        }
+        if (!ok && gen === ttsGen && !productMouth()) speakLocal(next);
       }
       ttsBusy = false;
       if (gen === ttsGen) afterSpeak();
@@ -291,13 +298,15 @@
     }
 
     let turnAbort = null;
+    let turnGen = 0;
     async function turn(utterance, approved) {
       const isStop = STOP_RE.test(utterance || "");
       if (!utterance) return;
-      if (state.turning && !isStop) return;
-      if (isStop && turnAbort) {
+      if (state.turning && turnAbort) {
         try { turnAbort.abort(); } catch (e) {}
       }
+      turnGen += 1;
+      const gen = turnGen;
       stopSpeech();
       state.turning = true;
       paintPhase("think");
@@ -356,6 +365,7 @@
           $("spoken").textContent = "Turn failed. Type and enter, or tap the board.";
         }
       }
+      if (turnGen !== gen) return;
       if (turnAbort === ac) turnAbort = null;
       state.turning = false;
       if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
@@ -617,6 +627,7 @@
     }
     function paintVoice(report) {
       if (!$("voice")) return;
+      voiceEngine = String((report && report.engine) || "dark");
       const name = String((report && report.voice) || "bm_lewis").replace(/_/g, " ").toUpperCase();
       $("voice").textContent = "VOICE - " + name;
     }
