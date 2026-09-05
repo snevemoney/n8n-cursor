@@ -50,7 +50,14 @@ LEAK_RE = re.compile(
     r"i heard you:|"
     r"before that you said:|"
     r"this document is the|"
-    r"structured long-term memory"
+    r"structured long-term memory|"
+    r"watchdog\s+grade|"
+    r"factory\s+close|"
+    r"forge\s+typecheck|"
+    r"overlay\s+`?said-|"
+    r"origin/main|"
+    r"publish\s+hitl|"
+    r"\d{4}-\d{2}-\d{2}T\d{2}:"
     r")",
     re.I,
 )
@@ -265,6 +272,8 @@ def _answer(hits: list[dict]) -> dict:
             "brief": brief,
         }
     first = str(spoken_hit.get("snippet") or "")
+    first = re.sub(r"#{1,6}\s*", "", first)
+    first = re.sub(r"\s+", " ", first).strip()
     spoken = first if len(first) <= 180 else first[:177].rsplit(" ", 1)[0] + "…"
     return {
         "ok": True,
@@ -405,7 +414,7 @@ def search(query: str, roots: list[Path] | None = None) -> dict:
 
 
 def speak_life(roots: list[Path] | None = None) -> str:
-    """Operator + active lanes. No invented age. No UNKNOWN dump."""
+    """Operator + active lanes. Pack / model only. Mouth uses speak_store."""
     life = life_card(roots)
     name = str(life.get("operator") or "Evens").strip() or "Evens"
     lanes = [str(x).strip() for x in (life.get("businesses") or []) if str(x).strip()]
@@ -416,7 +425,7 @@ def speak_life(roots: list[Path] | None = None) -> str:
 
 
 def speak_hot(roots: list[Path] | None = None) -> str:
-    """First clean dash line from hot.md. Skip callouts and leak crumbs."""
+    """First clean dash line from hot.md. Skip factory / ASKS / leak crumbs."""
     used = roots if roots is not None else ([REPO_OH] if REPO_OH.is_dir() else [])
     for root in used:
         path = Path(root) / "CONTENT/os/hot.md"
@@ -436,17 +445,15 @@ def speak_hot(roots: list[Path] | None = None) -> str:
             body = re.sub(r"`+", "", body)
             if len(body) > 140:
                 body = body[:137].rsplit(" ", 1)[0] + "…"
+            if is_speak_leak(body):
+                continue
             return body
     return ""
 
 
 def speak_store(utterance: str, roots: list[Path] | None = None, *, greet: bool = False) -> str:
-    """Butler line from life/lanes/hot. Search snippets stay on `brief`, never TTS."""
-    _ = utterance
-    life = speak_life(roots)
+    """Short butler line. Life/lanes/hot stay off TTS. Search stays on `brief`."""
+    _ = (utterance, roots)
     if greet:
-        return f"I'm here. {life} What are we working on?"
-    hot = speak_hot(roots)
-    if hot:
-        return f"{life} {hot}"
-    return f"{life} What are we working on?"
+        return "I'm here. What are we working on?"
+    return "I'm here. The store is on disk. What are we working on?"

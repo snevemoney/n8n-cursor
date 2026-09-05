@@ -98,16 +98,29 @@ class SpeakStoreTest(unittest.TestCase):
                 "then you are falling behind. Jarvis setup is not the value.\n",
                 encoding="utf-8",
             )
+            (vault / "CONTENT/os/hot.md").write_text(
+                "- 2026-08-27T05:05:00Z · factory close — Watchdog GRADE **pass** "
+                "(V2 + host-gate). Forge typecheck pass.\n"
+                "- A human line about leverage is fine.\n",
+                encoding="utf-8",
+            )
             greet = ret.speak_store("He's Jarvis", [vault], greet=True)
             work = ret.speak_store("Hey do you work now", [vault], greet=False)
+            hot = ret.speak_hot([vault])
             found = ret.search("Hey do you work now", [vault])
         self.assertNotIn("adopted path missing", greet.lower())
         self.assertNotIn("22:48", greet)
         self.assertNotIn("agentic OS", greet)
         self.assertIn("here", greet.lower())
+        self.assertNotIn("On disk:", greet)
         self.assertNotIn("structured long-term memory", work.lower())
         self.assertNotIn("22:48", work)
         self.assertNotIn("agentic OS", work)
+        self.assertNotIn("Watchdog", work)
+        self.assertNotIn("factory close", work.lower())
+        self.assertNotIn("Watchdog", hot)
+        self.assertNotIn("factory close", hot.lower())
+        self.assertIn("leverage", hot.lower())
         self.assertTrue(found.get("brief"))
         self.assertTrue(ret.is_speak_leak(str(found.get("brief") or "")) or "22:48" in str(found.get("brief") or "") or "structured" in str(found.get("brief") or ""))
         self.assertNotIn("22:48", found.get("spoken") or "")

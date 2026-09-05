@@ -43,7 +43,10 @@ PACK_LEAK_RE = re.compile(
     r"\b\d{1,2}:\d{2}\s+[—\-–]|"
     r"agentic os|"
     r"this document is the|"
-    r"structured long-term memory"
+    r"structured long-term memory|"
+    r"watchdog\s+grade|"
+    r"factory\s+close|"
+    r"on disk:"
     r")",
     re.I,
 )
@@ -77,6 +80,11 @@ FACTORY_PHRASE = (
     (re.compile(r"\bHID\b"), ""),
     (re.compile(r"\bPID\s*\d+\b", re.I), ""),
     (re.compile(r"\bPR\s*#?\d+\b", re.I), ""),
+    (re.compile(r"watchdog\s+grade[^.]*\.?", re.I), ""),
+    (re.compile(r"factory\s+close[^.]*\.?", re.I), ""),
+    (re.compile(r"forge\s+typecheck[^.]*\.?", re.I), ""),
+    (re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", re.I), ""),
+    (re.compile(r"On disk:\s*[^.]+\.?", re.I), ""),
     (re.compile(r"ASKS\.md", re.I), ""),
     (re.compile(r"SKILL\.md", re.I), ""),
     (re.compile(r"ask-log\.py", re.I), ""),

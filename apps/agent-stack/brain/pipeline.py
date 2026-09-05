@@ -52,6 +52,31 @@ WHY_THINK_RE = re.compile(
     r"\bagent login\b|one-time login|not logged in",
     re.I,
 )
+WORK_CHECK_RE = re.compile(
+    r"\b("
+    r"do you work|"
+    r"are you (?:there|working|up|online|on)\b|"
+    r"you work now|"
+    r"does this work|"
+    r"can you hear|"
+    r"did(?:n't| not)? you hear"
+    r")",
+    re.I,
+)
+SAFARI_WANT_RE = re.compile(
+    r"\b("
+    r"safari|"
+    r"scroll|"
+    r"screenshot|screen\s*shot|screen\s*grab|"
+    r"watch later|"
+    r"(?:go\s+(?:on|to)|open)\s+(?:the\s+)?youtube|"
+    r"open\s+https?://|"
+    r"look at (?:this |the )?(?:page|tab|screen)|"
+    r"grab (?:the |my )?(?:screen|safari|front tab)|"
+    r"share (?:me )?(?:my )?screen"
+    r")\b",
+    re.I,
+)
 GREET_STOP = {
     "hello",
     "hey",
@@ -345,6 +370,16 @@ def is_greet_or_empty(utterance: str) -> bool:
     return not words
 
 
+def is_work_check(utterance: str) -> bool:
+    """Presence / 'do you work' is a status check, not a vault dump."""
+    return bool(WORK_CHECK_RE.search(utterance or ""))
+
+
+def wants_safari(utterance: str) -> bool:
+    """Only explicit Safari hands. Do not treat a greeting as safari_front."""
+    return bool(SAFARI_WANT_RE.search(utterance or ""))
+
+
 def _is_speak_leak(text: str) -> bool:
     if RETRIEVE is not None and hasattr(RETRIEVE, "is_speak_leak"):
         return bool(RETRIEVE.is_speak_leak(text))
@@ -359,14 +394,29 @@ def clean_store_answer(
     hive: Path,
     retrieve_roots: list[Path] | None,
 ) -> str:
-    """Butler + short human line from life/lanes/hot. Never paste the pack."""
+    """Short butler line. Never paste life/lanes/hot/ASKS."""
     _ = hive
+    greet = is_greet_or_empty(utterance) or is_work_check(utterance)
     if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
-        return RETRIEVE.speak_store(
-            utterance,
-            retrieve_roots,
-            greet=is_greet_or_empty(utterance),
-        )
+        return RETRIEVE.speak_store(utterance, retrieve_roots, greet=greet)
+    if greet:
+        return "I'm here. What are we working on?"
+    return "I'm here. The store is on disk. What are we working on?"
+
+
+def answer_from_store(
+    utterance: str,
+    *,
+    retrieve_roots: list[Path] | None,
+) -> str:
+    """One speakable vault line, or a butler fallback. Never hot.md / ASKS."""
+    if RETRIEVE is not None:
+        found = RETRIEVE.search(utterance, retrieve_roots)
+        evidence = str(found.get("spoken") or "").strip()
+        if evidence and not found.get("unknown") and not _is_speak_leak(evidence):
+            return evidence
+        if hasattr(RETRIEVE, "speak_store"):
+            return RETRIEVE.speak_store(utterance, retrieve_roots, greet=False)
     return "I'm here. The store is on disk. What are we working on?"
 
 
@@ -393,15 +443,36 @@ def store_converse(
     hive: Path,
     turns: list[dict],
     retrieve_roots: list[Path] | None,
+    see_fn=None,
 ) -> dict:
-    """Talk from the clean store. Pack / last-wire / ASKS / vault snippets stay off the mouth."""
+    """Talk from the clean store. Pack / last-wire / ASKS / hot.md stay off the mouth.
+
+    Cursor dark still has hands: safari_see goes to see.py. Real asks search the store.
+    """
     _ = turns
     heard = (utterance or "").strip()
-    if is_mouth_echo(heard, hive) or is_greet_or_empty(heard):
-        if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
-            spoken = RETRIEVE.speak_store(heard, retrieve_roots, greet=True)
+    if wants_safari(heard) and (see_fn is not None or SEE is not None):
+        if see_fn is not None:
+            try:
+                got = see_fn(heard)
+            except TypeError:
+                got = see_fn()
         else:
-            spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
+            got = SEE.safari_act(heard, hive=hive)
+        got = got if isinstance(got, dict) else {}
+        spoken = _speakable_line(str(got.get("spoken") or "")) or "I looked at the tab."
+        return {
+            "ok": bool(got.get("ok", True)),
+            "tool": "safari_see",
+            "spoken": spoken,
+            "wires": [got.get("wire") or "safari_see"],
+            "cites": [],
+            "sent": False,
+            "from_store": True,
+            "see": got,
+        }
+    if is_mouth_echo(heard, hive) or is_greet_or_empty(heard) or is_work_check(heard):
+        spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
     elif wants_login_why(heard):
         spoken = STORE_LOGIN_ONCE
     elif PRO is not None and PRO.is_school_query(heard):
@@ -411,7 +482,7 @@ def store_converse(
         if not spoken:
             spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
     else:
-        spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
+        spoken = answer_from_store(heard, retrieve_roots=retrieve_roots)
     spoken = _speakable_line(spoken) or "I'm here. What are we working on?"
     return {
         "ok": True,
@@ -864,8 +935,13 @@ def apply_pipeline_iter(
             hive=hive,
             turns=prior_turns,
             retrieve_roots=retrieve_roots,
+            see_fn=see_fn,
         )
-        pick = {"tool": "status", "args": {}, "speak": str(ran.get("spoken") or "")}
+        pick = {
+            "tool": str(ran.get("tool") or "status"),
+            "args": {},
+            "speak": str(ran.get("spoken") or ""),
+        }
     else:
         pick, got = cursor_pick(pack, spoken_in, cursor_fn)
         if pick is None:
@@ -875,8 +951,13 @@ def apply_pipeline_iter(
                     hive=hive,
                     turns=prior_turns,
                     retrieve_roots=retrieve_roots,
+                    see_fn=see_fn,
                 )
-                pick = {"tool": "status", "args": {}, "speak": str(ran.get("spoken") or "")}
+                pick = {
+                    "tool": str(ran.get("tool") or "status"),
+                    "args": {},
+                    "speak": str(ran.get("spoken") or ""),
+                }
             else:
                 login_fail = True
 

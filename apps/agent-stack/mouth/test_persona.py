@@ -127,6 +127,18 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertNotIn("pr #200", low)
         self.assertNotIn("pid 4018", low)
 
+    def test_factory_close_and_grade_are_not_spoken(self) -> None:
+        raw = (
+            "2026-08-27T05:05:00Z · factory close — Watchdog GRADE **pass**. "
+            "On disk: Website / AI Partner services. The store is still here."
+        )
+        out = MOD.wrap(raw, verb="status", utterance="Hey do you work now")
+        low = out.lower()
+        self.assertNotIn("watchdog", low)
+        self.assertNotIn("factory close", low)
+        self.assertNotIn("on disk:", low)
+        self.assertNotIn("2026-08-27t05:05:00z", low)
+
     def test_wire_inspect_keeps_path_when_asked(self) -> None:
         out = MOD.wrap("Last hand: safari. path=cgevent. CGEvent page key dark", verb="wire")
         self.assertTrue(out.startswith("Sir."))

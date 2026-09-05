@@ -284,6 +284,9 @@ class Live4018MouthContractTest(unittest.TestCase):
         "agentic OS",
         "I already said Cursor needs",
         "structured long-term memory",
+        "Watchdog GRADE",
+        "factory close",
+        "On disk:",
     )
 
     def _live_hive(self, tmp: str) -> tuple[Path, Path]:
@@ -356,6 +359,65 @@ class Live4018MouthContractTest(unittest.TestCase):
                     self.assertNotIn(leak, spoken, f"{utter!r} spoke {spoken!r}")
                 self.assertTrue(spoken.startswith("Sir."), spoken)
                 self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
+                self.assertNotIn("Watchdog", spoken)
+                self.assertNotIn("factory close", spoken.lower())
+                self.assertNotIn("On disk:", spoken)
+
+    def test_store_converse_answers_vault_not_hot(self) -> None:
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        os.environ["AGENT_STACK_DRY_TTS"] = "1"
+        with tempfile.TemporaryDirectory(prefix="pipeline-answer-store-") as tmp:
+            hive, vault = self._live_hive(tmp)
+            (vault / "OPERATOR_MEMORY.md").write_text(
+                "North star: maximum leverage, minimum noise.\n",
+                encoding="utf-8",
+            )
+            (vault / "CONTENT/os/hot.md").write_text(
+                "- 2026-08-27T05:05:00Z · factory close — Watchdog GRADE **pass**.\n",
+                encoding="utf-8",
+            )
+            work = MOUTH.apply_turn(
+                "Hey do you work now",
+                hive=hive,
+                retrieve_roots=[vault],
+            )
+            star = MOUTH.apply_turn(
+                "What is my north star?",
+                hive=hive,
+                retrieve_roots=[vault],
+            )
+        work_spoken = work.get("spoken") or ""
+        star_spoken = star.get("spoken") or ""
+        self.assertNotIn("Watchdog", work_spoken)
+        self.assertNotIn("factory close", work_spoken.lower())
+        self.assertRegex(work_spoken.lower(), r"(here|working on)")
+        self.assertIn("leverage", star_spoken.lower())
+        self.assertNotIn("Watchdog", star_spoken)
+
+    def test_store_converse_safari_see_calls_see_py(self) -> None:
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        os.environ["AGENT_STACK_DRY_TTS"] = "1"
+        saw: list[str] = []
+
+        def fake_see(utterance: str = ""):
+            saw.append(utterance)
+            return {
+                "ok": True,
+                "wire": "safari",
+                "spoken": "I scrolled the tab down",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-store-see-") as tmp:
+            hive, vault = self._live_hive(tmp)
+            out = MOUTH.apply_turn(
+                "Scroll the page",
+                hive=hive,
+                retrieve_roots=[vault],
+                see_fn=fake_see,
+            )
+        self.assertEqual(saw, ["Scroll the page"])
+        self.assertEqual(out.get("verb"), "safari_see")
+        self.assertIn("scrolled the tab", (out.get("spoken") or "").lower())
 
 
 if __name__ == "__main__":
