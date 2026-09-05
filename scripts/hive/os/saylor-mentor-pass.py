@@ -18,6 +18,10 @@ BEATS = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-live-beats.md"
 LANES = ("hive-os", "agency")
 CAP = 3
 COURSE_RE = re.compile(r"\b(?:BUS|COMM|ECON|PRDV|CS|ARTH|ENGL|PHIL|MA|POLSC)\d+\b")
+SHELF_SIT_RE = re.compile(
+    r"\b(all\s+164|whole\s+shelf|all\s+school\s+skills|164\s+skills|full\s+catalog|not just BUS206)\b",
+    re.I,
+)
 
 # sitting keywords → slug (first-match order; cap 3)
 HINTS: list[tuple[re.Pattern[str], str]] = [
@@ -200,6 +204,27 @@ def _parse_beats(path: Path | None = None) -> dict[str, dict[str, str]]:
 
 def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
     """One school this turn. Teach, then the caller does the work."""
+    if SHELF_SIT_RE.search(sitting or ""):
+        snap_line = _shelf_line()
+        return {
+            "mode": "live",
+            "lane": lane,
+            "sitting": sitting,
+            "slug": "saylor-course-skill",
+            "course": "SHELF",
+            "says": (
+                "The catalog is the school, not one course code. "
+                "164 unique courses are the enrolled claim. "
+                "The harvest table on disk is not 164 rows. "
+                "Named remaining stay UNKNOWN until a file exists. "
+                "Do not stamp BUS206 as intelligence."
+            ),
+            "now": "Scan the shelf. Speak 1–3. Do not dump 164 manuals.",
+            "watch": "One course code is not the university. Hard step stays Evens.",
+            "put": "shelf counts on the mentor card (claimed / on disk / delta)",
+            "leverage": snap_line,
+            "then": "do the work through this lens; do not stamp and leave",
+        }
     card = render(lane, sitting, slugs)
     row = card["rows"][0]
     courses = COURSE_RE.findall(f"{row.get('skill', '')} {row.get('said', '')} {row.get('slug', '')}")
@@ -359,6 +384,11 @@ def self_test() -> list[str]:
         errs.append("live NOW missed who/why/tone")
     if live.get("mode") != "live":
         errs.append("live mode flag missing")
+    shelf = live_beat("hive-os", "school is all 164 skills not just BUS206", [])
+    if shelf.get("course") == "BUS206":
+        errs.append("shelf sitting collapsed to BUS206")
+    if "164" not in (shelf.get("says") or "") and "catalog" not in (shelf.get("says") or "").lower():
+        errs.append("shelf sitting missed catalog-as-school")
     return errs
 
 
