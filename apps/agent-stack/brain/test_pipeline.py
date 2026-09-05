@@ -25,6 +25,11 @@ MOUTH = _load("agent_stack_mouth_pipeline_test", TURN)
 
 
 class PipelineDarkCursorTest(unittest.TestCase):
+    def test_first_sentence_keeps_sir_with_beat(self) -> None:
+        first, rest = PIPE.first_sentence("Sir. Wires, not vibes. The store is on disk.")
+        self.assertEqual(first, "Sir. Wires, not vibes.")
+        self.assertEqual(rest, "The store is on disk.")
+
     def test_login_unknown_does_not_retry_p(self) -> None:
         calls: list[str] = []
 

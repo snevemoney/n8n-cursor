@@ -252,14 +252,22 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
 
 
 def first_sentence(text: str) -> tuple[str, str]:
-    """Split the first speakable sentence from the rest. TTS starts on the first."""
+    """Split the first speakable sentence from the rest. TTS starts on the first.
+
+    A lone 'Sir.' is the butler wrap, not a sentence. Keep it with the next beat.
+    """
     body = (text or "").strip()
     if not body:
         return "", ""
-    match = re.search(r"[.!?](?:\s+|$)", body)
-    if not match or match.end() >= len(body):
+    lead = re.match(r"^Sir\.\s+", body, re.I)
+    start = lead.end() if lead else 0
+    match = re.search(r"[.!?](?:\s+|$)", body[start:])
+    if not match:
         return body, ""
-    return body[: match.end()].strip(), body[match.end() :].strip()
+    end = start + match.end()
+    if end >= len(body):
+        return body, ""
+    return body[:end].strip(), body[end:].strip()
 
 
 def is_login_unknown_text(text: str) -> bool:
@@ -324,11 +332,14 @@ def store_converse(
             break
     if prior:
         bits.append(f"Before that you said: {prior[:120]}.")
+    greet_stop = {"hello", "hey", "hi", "yo", "jarvis", "hear", "heard", "didnt", "didn"}
     if RETRIEVE is not None:
-        found = RETRIEVE.search(utterance, retrieve_roots)
-        evidence = str(found.get("spoken") or "").strip()
-        if evidence and not found.get("unknown"):
-            bits.append(evidence)
+        words = [w for w in RETRIEVE.tokens(utterance) if w not in greet_stop]
+        if words:
+            found = RETRIEVE.search(utterance, retrieve_roots)
+            evidence = str(found.get("spoken") or "").strip()
+            if evidence and not found.get("unknown"):
+                bits.append(evidence)
     if STORE is not None:
         block = STORE.hive_block(hive)
         for line in block.splitlines():
