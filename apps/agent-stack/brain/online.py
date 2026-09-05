@@ -27,6 +27,11 @@ GROKBOT_CONN = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 DEFAULT_VPS = "root@69.62.66.78"
 DEFAULT_MODEL = "grok-4"
 SPEAK_CAP = 900
+LOGIN_UNKNOWN = (
+    "UNKNOWN. Cursor agent needs a one-time login. "
+    "Run agent login in Terminal. Not an xAI key."
+)
+NO_REPLY = "UNKNOWN. Cursor harness returned no reply."
 _CURSOR_LOCK = threading.Lock()
 _CURSOR_PROC: subprocess.Popen | None = None
 _CURSOR_CANCELLED = False
@@ -413,7 +418,18 @@ def call_cursor() -> dict:
     return {"ok": True, "wire": "cursor", "spoken": spoken}
 
 
+def cursor_login_error(text: str) -> bool:
+    blob = (text or "").lower()
+    return (
+        "authentication required" in blob
+        or "not logged in" in blob
+        or "needs a one-time login" in blob
+        or "please run 'agent login'" in blob
+    )
+
+
 def cursor_logged_in() -> bool:
+    """One `agent status` read. Do not treat this as a billed `agent -p`."""
     cmd = agent_cmd()
     if not cmd:
         return False
@@ -421,8 +437,10 @@ def cursor_logged_in() -> bool:
         proc = subprocess.run([*cmd, "status"], capture_output=True, text=True, timeout=8)
     except (OSError, subprocess.TimeoutExpired):
         return False
-    text = f"{proc.stdout or ''} {proc.stderr or ''}".lower()
-    return "not logged in" not in text and bool((proc.stdout or proc.stderr or "").strip())
+    text = f"{proc.stdout or ''} {proc.stderr or ''}"
+    if cursor_login_error(text):
+        return False
+    return bool(text.strip())
 
 
 def ensure_jarvis_chat(chat_id: str | None = None) -> str | None:
@@ -605,6 +623,9 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
     if not cmd:
         yield _cursor_fail("UNKNOWN. Cursor agent CLI is missing.")
         return
+    if not cursor_logged_in():
+        yield _cursor_fail(LOGIN_UNKNOWN)
+        return
     global _CURSOR_PROC, _CURSOR_CANCELLED
     argv, use_mode, chat, timeout = _cursor_argv(cmd, prompt, mode=mode, resume=resume)
     _CURSOR_CANCELLED = False
@@ -700,10 +721,8 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
         yield _cursor_fail("UNKNOWN. Cursor timed out. Say stop, or ask again shorter.")
         return
     text = "".join(collected).strip() or result_text.strip()
-    if not text and "Authentication required" in err_text:
-        yield _cursor_fail(
-            "UNKNOWN. Cursor agent needs a one-time login. Run agent login in Terminal. Not an xAI key."
-        )
+    if not text and cursor_login_error(err_text):
+        yield _cursor_fail(LOGIN_UNKNOWN)
         return
     if not text:
         yield _cursor_fail(f"UNKNOWN. Cursor agent returned no text. {err_text[:180]}".strip())
@@ -724,7 +743,7 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
 
 def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = None) -> dict:
     """Headless Cursor harness. ask | plan | agent. Always resume when a chat id is given."""
-    last = _cursor_fail("UNKNOWN. Cursor harness returned no reply.")
+    last = _cursor_fail(NO_REPLY)
     for ev in call_cursor_turn_iter(prompt, mode=mode, resume=resume):
         if ev.get("done") or ev.get("cancelled") or ev.get("unknown") or ev.get("ok"):
             last = ev

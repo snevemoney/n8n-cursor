@@ -196,7 +196,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         try:
             self.wfile.write(body)
-        except BrokenPipeError:
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             return
 
     def _json(self, code: int, payload: dict) -> None:
@@ -305,7 +305,7 @@ class Handler(BaseHTTPRequestHandler):
                 payload = (f"data: {json.dumps(clean)}\n\n").encode("utf-8")
                 self.wfile.write(payload)
                 self.wfile.flush()
-        except BrokenPipeError:
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             if hasattr(ONLINE, "cancel_cursor"):
                 ONLINE.cancel_cursor()
             return

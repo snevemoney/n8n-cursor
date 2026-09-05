@@ -34,6 +34,10 @@ HARD_STEP_RE = re.compile(
 )
 JSON_RE = re.compile(r"\{.*\}", re.S)
 UNKNOWN = "UNKNOWN. Cursor harness returned no reply."
+LOGIN_UNKNOWN = (
+    "UNKNOWN. Cursor agent needs a one-time login. "
+    "Run agent login in Terminal. Not an xAI key."
+)
 PROPOSAL = (
     "Proposal only. I will not send, pay, deploy, book, or publish. "
     "That hard step stays with you."
@@ -284,15 +288,46 @@ def live_cursor(prompt: str) -> dict:
     return ONLINE.call_cursor_turn(prompt, mode="ask")
 
 
-def cursor_pick(pack_path: Path, utterance: str, cursor_fn) -> dict | None:
+def as_cursor_event(raw) -> dict:
+    if isinstance(raw, dict):
+        return raw
+    return {"spoken": str(raw or "")}
+
+
+def is_dark_cursor(got) -> bool:
+    """True when the harness already failed. Do not loop agent -p."""
+    ev = as_cursor_event(got)
+    if ev.get("unknown"):
+        return True
+    spoken = str(ev.get("spoken") or "")
+    if ONLINE is not None and hasattr(ONLINE, "cursor_login_error") and ONLINE.cursor_login_error(spoken):
+        return True
+    return spoken.upper().startswith("UNKNOWN")
+
+
+def miss_spoken(got) -> str:
+    ev = as_cursor_event(got)
+    spoken = str(ev.get("spoken") or "").strip()
+    if spoken:
+        return spoken
+    if ev.get("unknown"):
+        if ONLINE is not None and hasattr(ONLINE, "LOGIN_UNKNOWN"):
+            return str(ONLINE.LOGIN_UNKNOWN)
+        return LOGIN_UNKNOWN
+    return UNKNOWN
+
+
+def cursor_pick(pack_path: Path, utterance: str, cursor_fn) -> tuple[dict | None, dict]:
     prompt = pick_prompt(pack_path, utterance)
     fn = cursor_fn or live_cursor
-    got = _invoke_cursor(fn, prompt)
+    got = as_cursor_event(_invoke_cursor(fn, prompt))
     pick = extract_pick(got)
     if pick is not None:
-        return pick
-    got = _invoke_cursor(fn, prompt + "\nJSON only. Retry.")
-    return extract_pick(got)
+        return pick, got
+    if is_dark_cursor(got):
+        return None, got
+    got = as_cursor_event(_invoke_cursor(fn, prompt + "\nJSON only. Retry."))
+    return extract_pick(got), got
 
 
 def _evidence_line(speak: str, evidence: str) -> str:
@@ -420,15 +455,28 @@ def dress(spoken: str, *, tool: str, utterance: str, turns: list[dict]) -> str:
     return PERSONA.wrap(text, verb=tool, utterance=utterance, turns=turns)
 
 
-def note_wire(hive: Path, tool: str, spoken: str, utterance: str, *, ok: bool) -> dict:
+def note_wire(
+    hive: Path,
+    tool: str,
+    spoken: str,
+    utterance: str,
+    *,
+    ok: bool,
+    wire: dict | None = None,
+) -> dict:
     if LAST_WIRE is None:
         return {}
+    row = wire if isinstance(wire, dict) else {}
+    path = str(row.get("path") or "pipeline")
+    error = row.get("error")
+    if not ok and error is None:
+        error = spoken
     return LAST_WIRE.write(
         hive,
         verb=tool,
         ok=ok,
         human_line=spoken,
-        wire={"path": "pipeline", "error": None if ok else spoken},
+        wire={"path": path, "error": None if ok else error},
         utterance=utterance,
     )
 
@@ -482,9 +530,10 @@ def apply_pipeline(
         turns=prior_turns,
     )
     pack = write_pack(spoken_in, hive=hive, retrieve_roots=retrieve_roots, turns=prior_turns)
-    pick = cursor_pick(pack, spoken_in, cursor_fn)
+    pick, got = cursor_pick(pack, spoken_in, cursor_fn)
     if pick is None:
-        text = dress(UNKNOWN, tool="pipeline", utterance=spoken_in, turns=prior_turns)
+        raw = miss_spoken(got)
+        text = dress(raw, tool="pipeline", utterance=spoken_in, turns=prior_turns)
         next_turns = append_turn(prior_turns, spoken_in, text)
         write_bus(
             hive,
@@ -492,11 +541,18 @@ def apply_pipeline(
             job_status="done",
             utterance=spoken_in,
             spoken=text,
-            wires=["pipeline"],
+            wires=["cursor"],
             turns=next_turns,
             tool="unknown",
         )
-        note_wire(hive, "pipeline", text, spoken_in, ok=False)
+        note_wire(
+            hive,
+            "pipeline",
+            text,
+            spoken_in,
+            ok=False,
+            wire={"path": "cursor", "error": raw},
+        )
         return {
             "ok": False,
             "verb": "pipeline",
@@ -505,7 +561,7 @@ def apply_pipeline(
             "spoken": text,
             "host": "pipeline",
             "cites": [],
-            "wires": ["pipeline"],
+            "wires": ["cursor"],
             "sent": False,
             "pack": str(pack),
             "unknown": True,

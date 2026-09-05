@@ -28,6 +28,7 @@ class ScarsTest(unittest.TestCase):
         self.assertIsNotNone(scar)
         self.assertEqual(scar["id"], "cursor-auth-dark")
         self.assertEqual(scar["heal"], "store_fallback")
+        self.assertEqual(MOD.lookup("Not logged in")["id"], "cursor-auth-dark")
 
     def test_record_then_blocks_cursor(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-scars-") as tmp:

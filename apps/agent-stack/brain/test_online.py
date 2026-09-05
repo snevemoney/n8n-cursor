@@ -70,8 +70,9 @@ class OnlineBrainTest(unittest.TestCase):
     def test_call_cursor_turn_prints_text(self) -> None:
         proc = self._proc("The site CSS is in pane.html.\n")
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
-            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as popen:
-                out = MOD.call_cursor_turn("look at the code for the face", mode="ask", resume="chat-1")
+            with mock.patch.object(MOD, "cursor_logged_in", return_value=True):
+                with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as popen:
+                    out = MOD.call_cursor_turn("look at the code for the face", mode="ask", resume="chat-1")
         self.assertTrue(out["ok"])
         self.assertEqual(out["wire"], "cursor")
         self.assertIn("pane.html", out["spoken"])
@@ -88,8 +89,9 @@ class OnlineBrainTest(unittest.TestCase):
     def test_call_cursor_turn_agent_resumes_agent_chat(self) -> None:
         proc = self._proc("Using tools.\n")
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
-            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as popen:
-                out = MOD.call_cursor_turn("open the hive skill", mode="agent", resume="agent-1")
+            with mock.patch.object(MOD, "cursor_logged_in", return_value=True):
+                with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as popen:
+                    out = MOD.call_cursor_turn("open the hive skill", mode="agent", resume="agent-1")
         self.assertTrue(out["ok"])
         argv = popen.call_args[0][0]
         self.assertIn("-p", argv)
@@ -102,11 +104,33 @@ class OnlineBrainTest(unittest.TestCase):
     def test_call_cursor_turn_auth_names_login_not_xai(self) -> None:
         proc = self._proc("", "Error: Authentication required. Please run 'agent login' first.", 1)
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
-            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc):
-                out = MOD.call_cursor_turn("hey")
+            with mock.patch.object(MOD, "cursor_logged_in", return_value=True):
+                with mock.patch.object(MOD.subprocess, "Popen", return_value=proc):
+                    out = MOD.call_cursor_turn("hey")
         self.assertTrue(out["unknown"])
         self.assertIn("agent login", out["spoken"])
         self.assertNotIn("XAI_API_KEY", out["spoken"])
+
+    def test_call_cursor_turn_not_logged_in_skips_p(self) -> None:
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD, "cursor_logged_in", return_value=False):
+                with mock.patch.object(MOD.subprocess, "Popen") as popen:
+                    out = MOD.call_cursor_turn("hey")
+        popen.assert_not_called()
+        self.assertTrue(out["unknown"])
+        self.assertEqual(out["wire"], "cursor")
+        self.assertIn("agent login", out["spoken"])
+        self.assertNotIn("returned no reply", out["spoken"])
+        self.assertNotIn("XAI_API_KEY", out["spoken"])
+
+    def test_cursor_logged_in_false_on_status(self) -> None:
+        proc = mock.Mock()
+        proc.stdout = "Not logged in\n"
+        proc.stderr = ""
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD.subprocess, "run", return_value=proc):
+                self.assertFalse(MOD.cursor_logged_in())
+        self.assertTrue(MOD.cursor_login_error("Not logged in"))
 
     def test_clip_spoken_keeps_last_sentence(self) -> None:
         long = "First sentence is done. " + ("word " * 200)
@@ -169,8 +193,9 @@ class OnlineBrainTest(unittest.TestCase):
         proc.stderr.read.return_value = ""
         proc.poll.side_effect = [None, None, None, 0]
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
-            with mock.patch.object(MOD.subprocess, "Popen", return_value=proc):
-                evs = list(MOD.call_cursor_turn_iter("hey", mode="ask", resume="chat-1"))
+            with mock.patch.object(MOD, "cursor_logged_in", return_value=True):
+                with mock.patch.object(MOD.subprocess, "Popen", return_value=proc):
+                    evs = list(MOD.call_cursor_turn_iter("hey", mode="ask", resume="chat-1"))
         deltas = [ev.get("delta") for ev in evs if ev.get("partial")]
         self.assertEqual(deltas, ["Hello Evens. ", "Standing by."])
         self.assertTrue(evs[-1]["done"])

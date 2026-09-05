@@ -4,10 +4,11 @@
   "scars": [
     {
       "id": "cursor-auth-dark",
-      "match": [
+        "match": [
         "authentication required",
         "needs a one-time login",
-        "agent login"
+        "agent login",
+        "not logged in"
       ],
       "symptom": "Cursor harness returned login UNKNOWN on every converse.",
       "cause": "agent CLI not logged in for the 4018 process. Repeating the call does not log it in.",
