@@ -82,7 +82,10 @@ VAULT_DUMP_RE = re.compile(
     r"##\s+when\b|"
     r"\*\*when\*\*|"
     r"watch later funnels|"
-    r"operator_memory"
+    r"operator_memory|"
+    r"catalog bump|"
+    r"one-person-marketing|"
+    r"`[a-z0-9-]{8,}`"
     r")",
     re.I,
 )

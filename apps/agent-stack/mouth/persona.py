@@ -53,7 +53,10 @@ PACK_LEAK_RE = re.compile(
     r"cache ssot|"
     r"methods/|"
     r"grok shared workflow|"
-    r"content/business-kits"
+    r"content/business-kits|"
+    r"catalog bump|"
+    r"one-person-marketing|"
+    r"`[a-z0-9-]{8,}`"
     r")",
     re.I,
 )

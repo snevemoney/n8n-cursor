@@ -69,6 +69,9 @@ LEAK_RE = re.compile(
     r"##\s+when\b|"
     r"\*\*when\*\*|"
     r"watch later funnels|"
+    r"catalog bump|"
+    r"one-person-marketing|"
+    r"`[a-z0-9-]{8,}`|"
     r"\[\[+"
     r")",
     re.I,
