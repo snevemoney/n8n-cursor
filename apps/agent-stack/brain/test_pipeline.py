@@ -64,14 +64,38 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertEqual((last.get("wire") or {}).get("path"), "cursor")
         self.assertIn("agent login", str((last.get("wire") or {}).get("error") or ""))
 
-    def test_prose_pick_still_retries_once(self) -> None:
+    def test_prose_pick_is_converse_no_retry(self) -> None:
         calls: list[str] = []
 
-        def prose_then_pick(prompt: str, mode: str = "ask", **kw):
+        def prose_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            calls.append(prompt)
+            return {"ok": True, "spoken": "I will think about it in paragraphs."}
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-prose-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            out = MOUTH.apply_turn(
+                "how's it going",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=prose_cursor,
+            )
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(out.get("verb"), "converse")
+        self.assertIn("paragraphs", out.get("spoken") or "")
+        self.assertNotIn("Wires, not vibes", out.get("spoken") or "")
+        self.assertNotIn("JSON only", calls[0])
+
+    def test_garbage_pick_still_retries_once(self) -> None:
+        calls: list[str] = []
+
+        def empty_then_pick(prompt: str, mode: str = "ask", **kw):
             _ = (mode, kw)
             calls.append(prompt)
             if len(calls) == 1:
-                return {"ok": True, "spoken": "I will think about it in paragraphs."}
+                return {"ok": True, "spoken": ""}
             return {
                 "tool": "status",
                 "args": {"which": "cursor"},
@@ -89,7 +113,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
                 "What is the status",
                 hive=hive,
                 retrieve_roots=[hive / "vault"],
-                cursor_fn=prose_then_pick,
+                cursor_fn=empty_then_pick,
                 status_fn=fake_status,
             )
         self.assertEqual(len(calls), 2)
@@ -496,7 +520,12 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertNotIn("On disk: Website / AI Partner", can_spoken)
         self.assertIn("here", greet_spoken.lower())
         self.assertRegex(can_spoken.lower(), r"(vault|safari|school|status)")
-        self.assertRegex(school_spoken.lower(), r"(market|segment|mix|mktg|bus203)")
+        self.assertNotIn("BUS203", school_spoken)
+        self.assertNotIn("BUS602", school_spoken)
+        self.assertNotIn("## When", school_spoken)
+        self.assertNotIn("Wires, not vibes", school_spoken)
+        self.assertNotIn("professional skills again", school_spoken.lower())
+        self.assertNotIn("Repetition is a kind of scholarship", school_spoken)
         self.assertNotIn("Per-agent business cheat sheets", school_spoken)
         self.assertNotIn("cache SSOT", school_spoken)
         self.assertNotIn("METHODS/", school_spoken)

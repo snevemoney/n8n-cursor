@@ -65,6 +65,10 @@ LEAK_RE = re.compile(
     r"methods/|"
     r"grok shared workflow|"
     r"content/business-kits|"
+    r"lessons\s*:|"
+    r"##\s+when\b|"
+    r"\*\*when\*\*|"
+    r"watch later funnels|"
     r"\[\[+"
     r")",
     re.I,

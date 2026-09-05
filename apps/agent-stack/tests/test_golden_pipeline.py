@@ -235,10 +235,13 @@ class GoldenPipelineTest(unittest.TestCase):
                 retrieve_roots=[vault],
                 cursor_fn=fake_cursor,
             )
+        self.assertEqual(out.get("verb"), "converse")
         self.assertNotEqual(out.get("verb"), "can")
         self.assertNotIn(CANNED_CAN, out.get("spoken") or "")
         self.assertIn("sitting", (out.get("spoken") or "").lower())
         self.assertIn("store", (out.get("wires") or []))
+        self.assertNotIn("Wires, not vibes", out.get("spoken") or "")
+        self.assertNotIn("Then.", out.get("spoken") or "")
 
     def test_7_tts_first_delta_before_done(self) -> None:
         def fake_cursor(prompt: str, mode: str = "ask", **kw):
@@ -354,6 +357,109 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertNotIn("one-time login", spoken.lower())
         self.assertTrue(spoken.startswith("Sir."))
         self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
+
+    def test_10_converse_is_default_not_a_template(self) -> None:
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            self.assertIn("Conversation is the product", prompt)
+            return {"speak": "Quiet evening. Vault and this sitting are on the table."}
+
+        with tempfile.TemporaryDirectory(prefix="golden-converse-") as tmp:
+            hive, vault = _hive(tmp)
+            out = TURN.apply_turn(
+                "how's it going",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=fake_cursor,
+            )
+        spoken = out.get("spoken") or ""
+        self.assertEqual(out.get("verb"), "converse")
+        self.assertIn("Quiet evening", spoken)
+        self.assertNotIn("Wires, not vibes", spoken)
+        self.assertNotIn("I'm here.", spoken)
+        self.assertNotIn(CANNED_CAN, spoken)
+
+    def test_11_marketing_is_not_auto_skill_dump(self) -> None:
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            return {"speak": "Marketing is how you pick who pays and what you say to them."}
+
+        with tempfile.TemporaryDirectory(prefix="golden-mktg-") as tmp:
+            hive, vault = _hive(tmp)
+            talk = TURN.apply_turn(
+                "what is marketing",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=fake_cursor,
+            )
+            course = TURN.apply_turn(
+                "brief me on BUS203",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=lambda p, mode="ask", **kw: {
+                    "tool": "vault_read",
+                    "args": {"query": "brief me on BUS203"},
+                    "speak": "From the course.",
+                },
+            )
+        talk_spoken = talk.get("spoken") or ""
+        course_spoken = course.get("spoken") or ""
+        self.assertEqual(talk.get("verb"), "converse")
+        self.assertIn("who pays", talk_spoken.lower())
+        self.assertNotIn("BUS602", talk_spoken)
+        self.assertNotIn("professional skills again", talk_spoken.lower())
+        self.assertNotIn("## When", talk_spoken)
+        self.assertIn("BUS203", course_spoken)
+
+    def test_12_thread_tracks_three_conversational_lines(self) -> None:
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        with tempfile.TemporaryDirectory(prefix="golden-thread-") as tmp:
+            hive, vault = _hive(tmp)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps({"schema_version": 1, "cursor_login_said": True, "turns": []})
+                + "\n",
+                encoding="utf-8",
+            )
+            first = TURN.apply_turn(
+                "how's it going", hive=hive, retrieve_roots=[vault]
+            )
+            second = TURN.apply_turn(
+                "what did I just say", hive=hive, retrieve_roots=[vault]
+            )
+            third = TURN.apply_turn(
+                "yeah keep going", hive=hive, retrieve_roots=[vault]
+            )
+        a = first.get("spoken") or ""
+        b = second.get("spoken") or ""
+        c = third.get("spoken") or ""
+        self.assertNotEqual(a, b)
+        self.assertNotEqual(b, c)
+        self.assertNotEqual(a, c)
+        self.assertIn("going", a.lower())
+        self.assertIn("how's it going", b.lower())
+        self.assertTrue("how's it going" in c.lower() or "what did i just say" in c.lower())
+        for spoken in (a, b, c):
+            self.assertTrue(spoken.startswith("Sir."), spoken)
+            self.assertNotIn("Wires, not vibes", spoken)
+            self.assertNotIn("BUS602", spoken)
+            self.assertNotIn("LESSONS:", spoken)
+            self.assertNotIn("professional skills again", spoken.lower())
+
+    def test_13_hard_step_still_proposal(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="golden-hard-") as tmp:
+            hive, vault = _hive(tmp)
+            out = TURN.apply_turn(
+                "publish this now",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=lambda p, mode="ask", **kw: {
+                    "tool": "converse",
+                    "speak": "I will publish it.",
+                },
+            )
+        self.assertEqual(out.get("verb"), "refuse_hard_step")
+        self.assertIn("Proposal only", out.get("spoken") or "")
+        self.assertNotIn("I will publish it", out.get("spoken") or "")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 One pipeline. Face on `127.0.0.1:4018`. Safari, not Chrome.
 
-Input → full context file → Cursor CLI picks one tool (`vault_read` / `safari_see` / `cursor_ask` / `status` / `refuse_hard_step`) → hard-step proposal only → butler speak → bus.
+Input → full context file → conversation by default. Cursor CLI picks a hand (`vault_read` / `safari_see` / `cursor_ask` / `status` / `refuse_hard_step`) only when one is needed. Hard-step proposal only → butler speak → bus.
 
 - **Face (local):** PCB HUD + mic + TTS. POST `/api/turn` (JSON or SSE).
 - **Voice:** Kokoro `bm_lewis` (British butler). ElevenLabs Tarquin if a key is already on the machine.

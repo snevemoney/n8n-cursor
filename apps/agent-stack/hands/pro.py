@@ -77,6 +77,18 @@ SCHOOL_WORD_RE = re.compile(
     r"\b(school|university|saylor|catalog|shelf|course|courses)\b",
     re.I,
 )
+COURSE_INTENT_RE = re.compile(
+    r"\b("
+    r"professional skills?|"
+    r"course(?:work)?|"
+    r"syllabus|"
+    r"school skill|"
+    r"teach me|"
+    r"brief me on|"
+    r"from the (?:school|saylor) (?:shelf|catalog)"
+    r")\b",
+    re.I,
+)
 FAMILY_LABEL = {
     "BUS": "Business",
     "ECON": "Economics",
@@ -152,15 +164,26 @@ def is_shelf_ask(utterance: str) -> bool:
 
 
 def is_school_query(utterance: str) -> bool:
+    """Topic word may match a file. Auto-dump uses asked_for_course."""
+    text = utterance or ""
+    if asked_for_course(text):
+        return True
+    words = set(tokens(text))
+    return bool(words & set(TOPIC_HINTS))
+
+
+def asked_for_course(utterance: str) -> bool:
+    """True only when he named a course, the shelf, or asked to be taught."""
     text = utterance or ""
     if is_shelf_ask(text):
         return True
     if asked_courses(text):
         return True
-    words = set(tokens(text))
-    if words & set(TOPIC_HINTS):
+    if COURSE_INTENT_RE.search(text):
         return True
-    return bool(SCHOOL_WORD_RE.search(text))
+    if SCHOOL_WORD_RE.search(text) and (set(tokens(text)) & set(TOPIC_HINTS)):
+        return True
+    return False
 
 
 def _hint_score(slug: str, words: list[str]) -> int:

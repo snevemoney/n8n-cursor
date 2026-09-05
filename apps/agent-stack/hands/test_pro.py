@@ -324,6 +324,16 @@ a task asks about an obscure syllabus that is still a real school file
         self.assertNotIn("## When", got["spoken"])
         self.assertLess(len(got["spoken"]), 2000)
 
+    def test_asked_for_course_not_topic_word(self) -> None:
+        self.assertFalse(MOD.asked_for_course("what is marketing"))
+        self.assertFalse(MOD.asked_for_course("Tell me about marketing"))
+        self.assertFalse(MOD.asked_for_course("funnel"))
+        self.assertTrue(MOD.asked_for_course("BUS203"))
+        self.assertTrue(MOD.asked_for_course("brief me on BUS203"))
+        self.assertTrue(MOD.asked_for_course("the whole shelf"))
+        self.assertTrue(MOD.asked_for_course("teach me the marketing course"))
+        self.assertTrue(MOD.asked_for_course("checking your professional skills on marketing"))
+
     def test_fake_course_unknown(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-pro-fake-") as tmp:
             grok, cursor = _disk(Path(tmp))

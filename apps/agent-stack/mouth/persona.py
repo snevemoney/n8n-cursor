@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Jarvis mouth layer: Sir, one witty beat, then the payload.
+"""Jarvis mouth layer: Sir, then the payload. Wit is rare.
 
-Wit never delays a hand. Never invent a repeat. Never take blame.
-Never say waiting-for. Address the operator as Sir regardless of title.
+Conversation is the product. Do not stamp a canned beat on every turn.
+Never invent a repeat. Never take blame. Never say waiting-for.
+Address the operator as Sir regardless of title.
 The spoken line is for Sir. Factory internals stay in the bus.
 """
 from __future__ import annotations
@@ -118,12 +119,26 @@ FAILURE_TEMPLATE = (
     "but I shall investigate regardless."
 )
 
+# Conversation is the product. No stamp on ordinary talk.
+# Hands may take a rare beat. Those three canned lines stay off TTS.
+CONVERSE_VERBS = frozenset(
+    {
+        "converse",
+        "status",
+        "pipeline",
+        "vault_read",
+        "pro",
+        "brief",
+        "bus",
+        "talk",
+        "greet",
+        "life",
+        "today",
+        "can",
+    }
+)
 WIT = {
-    "can": "The short list, then.",
     "cursor": "The repo, not a rumor.",
-    "pro": "Checking your professional skills.",
-    "brief": "Checking your professional skills.",
-    "bus": "Checking your professional skills.",
     "search": "Safari, not folklore.",
     "watch_later": "The live tab, not a guess.",
     "news": "Disk only. I do not invent headlines.",
@@ -131,38 +146,23 @@ WIT = {
     "mail": "Mail.app, then the count.",
     "files": "Local disk, not a scoop.",
     "safari": "The tab, not the face.",
-    "talk": "Straight.",
-    "farewell": "Rest.",
-    "life": "The store, not gossip.",
-    "today": "The store, not a mood.",
-    "skills": "On-disk slugs only.",
-    "status": "Wires, not vibes.",
-    "heal": "Logged.",
-    "make": "A skill on disk, or UNKNOWN.",
-    "invoice": "Vault retrieve only.",
-    "build": "Building it now.",
-    "skill": "Loading the slug.",
-    "converse": "Then.",
-    "pipeline": "Then.",
-    "vault_read": "The store, then.",
     "safari_see": "The tab, not the face.",
     "cursor_ask": "The repo, not a rumor.",
     "refuse_hard_step": "That stays with you.",
     "refuse": "That stays with you.",
     "stop": "Noted.",
-    "greet": "Present.",
+    "heal": "Logged.",
     "mode": "Switched.",
     "crumb": "I need the rest.",
 }
 
 REPEAT_WIT = {
     "safari": "Oh, checking the browser again, sir? I do admire your commitment to staying vaguely aware of the internet.",
+    "safari_see": "Oh, checking the browser again, sir? I do admire your commitment to staying vaguely aware of the internet.",
     "cursor": "The repo again, sir. Consistency is a virtue, or at least a habit.",
+    "cursor_ask": "The repo again, sir. Consistency is a virtue, or at least a habit.",
     "calendar": "Calendar again, sir. I shall assume the day has not improved itself.",
     "mail": "The inbox again, sir. Devotion, or dread. Either way.",
-    "pro": "The professional skills again, sir. Repetition is a kind of scholarship.",
-    "brief": "The professional skills again, sir. Repetition is a kind of scholarship.",
-    "bus": "The professional skills again, sir. Repetition is a kind of scholarship.",
     "search": "The web again, sir. I do admire the optimism.",
     "files": "The disk again, sir. Something may have moved. Unlikely, but possible.",
 }
@@ -303,10 +303,13 @@ def proven_repeat(
 
 
 def witty_beat(verb: str, *, repeat: bool = False) -> str:
+    """Rare hand beat. Ordinary converse is Sir + payload, nothing else."""
     key = (verb or "").strip().lower()
+    if not key or key in CONVERSE_VERBS:
+        return ""
     if repeat:
         return REPEAT_WIT.get(key) or f"Again, sir. {WIT.get(key, DEFAULT_WIT)}"
-    return WIT.get(key, DEFAULT_WIT)
+    return WIT.get(key, "")
 
 
 def wrap(
@@ -318,7 +321,7 @@ def wrap(
     store_lines: list[str] | None = None,
     scars: list[dict] | None = None,
 ) -> str:
-    """Sir. One witty beat. Then the real payload. Hand already ran."""
+    """Sir. Then the payload. A rare hand beat only when it is earned."""
     raw = spoken or ""
     if is_dump(raw):
         return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
@@ -346,6 +349,8 @@ def wrap(
         return f"{FAILURE_TEMPLATE} {payload}"
     repeat = proven_repeat(utterance, turns, store_lines, scars, verb)
     beat = witty_beat(verb, repeat=repeat)
+    if not beat:
+        return f"Sir. {payload}"
     if payload.lower().startswith(beat.lower()):
         return f"Sir. {payload}"
     return f"Sir. {beat} {payload}"

@@ -27,6 +27,21 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertTrue(out.startswith("Sir."))
         self.assertIn("Vault and hive are on the table.", out)
         self.assertNotIn("waiting for", out.lower())
+        self.assertNotIn("Then.", out)
+        self.assertNotIn("Wires, not vibes", out)
+
+    def test_converse_has_no_canned_wit(self) -> None:
+        banned = (
+            "Wires, not vibes",
+            "The professional skills again",
+            "Repetition is a kind of scholarship",
+            "Then.",
+        )
+        for verb in ("converse", "status", "pipeline", "vault_read"):
+            out = MOD.wrap("I'm listening.", verb=verb, utterance="how's it going")
+            self.assertEqual(out, "Sir. I'm listening.", verb)
+            for stamp in banned:
+                self.assertNotIn(stamp, out, verb)
 
     def test_failure_never_takes_blame(self) -> None:
         out = MOD.wrap("UNKNOWN. Cursor harness returned no reply.", verb="converse")
