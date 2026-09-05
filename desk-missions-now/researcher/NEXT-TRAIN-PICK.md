@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-09-05
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: named pick · TRAIN · unused · Evens validates · halt
 send: removed
 clock: parked
 ---
@@ -12,23 +12,41 @@ clock: parked
 
 **HOST = git.** SSOT: repo-root `desk-missions-now/`. Doctrine: `desk-missions-now/CLOUD-HOST.md`.
 
+```
+DESK: researcher
+OWN: one next TRAIN row (id · steal|learn · why · TRAIN|TRIAGE)
+NEVER: walk 1803 · invent full.txt · flip COVERAGE_LEDGER.json · Slack · send / pay / deploy / book / publish · start TRAIN · wake default-17
+THEN: this pick file only
+```
+
+```
+DONE-CHECK: this file has id + TRAIN|TRIAGE (or explicit none-qualify)
+CAP: 1 row · no /loop · no 1803 walk
+COST: this Cloud Agent run only
+STOP-KIND: metric + cap
+```
+
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
+| **id** | `2J3uX8iRNng` |
 | **steal \| learn** | steal |
 | **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
+| **Spoken machine** | `same-prompt-bench` |
+| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/full.txt` (6825 words, OBSERVED) |
 | **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **Skip?** | no — not a PASS id, not the TRIAGE decoy, not `/workspace` |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** Nate Herk same-prompt bench (Opus vs Fable on one harness) is the only unused steal row on this checkout that already has packet + caption `full.txt` + LEARNED ACTION TRACE. Spoken machine is label the model, write the stop before the run, referee the patch, blame stale context before swapping models. Not a weight train. Not a buyer surface. Tape $ UNVERIFIED.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**Filter (not a 1803 walk):** LEARNED `## ACTION TRACE` on this checkout = four ids. `kwSVtQ7dziU` TRAIN-1 PASS · `X80ljdCPM_U` TRAIN-2 PASS · `FFWtxjvW2ts` parked (buyer-surface / anti-slop this stretch) · `2J3uX8iRNng` unused. `COVERAGE_LEDGER.json` = **MISSING-ON-CHECKOUT** — steal_gap not confirmed from JSON. Do not flip it.
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+**Retrieve:** theme `same-prompt-bench` → **NONE**. No second shop. No SIGNAL_INDEX dump.
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+**Do not use `factory-os-train-plane`.** Invented slug. Not a YouTube id. No `full.txt`. No ACTION TRACE.
+
+**This stage (done):** Researcher propose only. Evens validates. Do **not** start TRAIN. Do not write hold-outs. Do not remint. Do not re-grade PASS ids.
+
+**EVENS leftover:** validate `2J3uX8iRNng` on the Mac (or merge this pick to `main` so daily jobs stop seeing stale `X80ljdCPM_U`). Connect browser-use on cursor.com first — do not start OAuth inside Automations.
 
 Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
 
