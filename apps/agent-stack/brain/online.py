@@ -29,7 +29,7 @@ DEFAULT_MODEL = "grok-4"
 SPEAK_CAP = 900
 LOGIN_UNKNOWN = (
     "UNKNOWN. Cursor agent needs a one-time login. "
-    "Run agent login in Terminal. Not an xAI key."
+    "Run agent login in Terminal."
 )
 NO_REPLY = "UNKNOWN. Cursor harness returned no reply."
 _CURSOR_LOCK = threading.Lock()

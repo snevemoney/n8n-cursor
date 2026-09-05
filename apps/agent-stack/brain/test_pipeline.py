@@ -121,7 +121,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertEqual(out.get("verb"), "status")
         self.assertIn("Wires", out.get("spoken") or "")
 
-    def test_login_unknown_once_then_store_converse(self) -> None:
+    def test_login_unknown_once_then_honest_line(self) -> None:
         calls: list[str] = []
 
         def dark_cursor(prompt: str, mode: str = "ask", **kw):
@@ -159,9 +159,12 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertNotIn("one-time login", second_spoken.lower())
         self.assertNotIn("adopted path missing", second_spoken.lower())
         self.assertNotIn("returned no reply", second_spoken)
+        self.assertNotIn("Last you said", second_spoken)
+        self.assertNotIn("You were at", second_spoken)
+        self.assertNotIn("Still on that", second_spoken)
         self.assertNotEqual(second.get("verb"), "can")
         self.assertTrue(second_spoken.startswith("Sir."))
-        self.assertRegex(second_spoken.lower(), r"(here|working on|evens|disk)")
+        self.assertIn("agent login", second_spoken.lower())
 
     def test_safari_see_calls_see_py_front(self) -> None:
         called: list[str] = []
@@ -232,7 +235,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertIn("school", (out.get("wires") or []))
         self.assertLess(spoken.lower().count("bus206"), 3)
 
-    def test_store_converse_does_not_speak_asks_or_pack(self) -> None:
+    def test_dark_cursor_does_not_speak_asks_or_pack(self) -> None:
         calls: list[str] = []
 
         def dark_cursor(prompt: str, mode: str = "ask", **kw):
@@ -295,8 +298,10 @@ class PipelineDarkCursorTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
-        self.assertIn("one-time login", (why.get("spoken") or "").lower())
+        self.assertIn("agent login", spoken.lower())
+        self.assertNotIn("Last you said", spoken)
+        self.assertNotIn("You were at", spoken)
+        self.assertIn("agent login", (why.get("spoken") or "").lower())
 
 
 class Live4018MouthContractTest(unittest.TestCase):
@@ -386,12 +391,14 @@ class Live4018MouthContractTest(unittest.TestCase):
                 for leak in self.LEAKS:
                     self.assertNotIn(leak, spoken, f"{utter!r} spoke {spoken!r}")
                 self.assertTrue(spoken.startswith("Sir."), spoken)
-                self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
+                self.assertIn("agent login", spoken.lower())
+                self.assertNotIn("Last you said", spoken)
+                self.assertNotIn("You were at", spoken)
                 self.assertNotIn("Watchdog", spoken)
                 self.assertNotIn("factory close", spoken.lower())
                 self.assertNotIn("On disk:", spoken)
 
-    def test_store_converse_answers_vault_not_hot(self) -> None:
+    def test_dark_cursor_does_not_dump_vault(self) -> None:
         os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
         os.environ["AGENT_STACK_DRY_TTS"] = "1"
         with tempfile.TemporaryDirectory(prefix="pipeline-answer-store-") as tmp:
@@ -418,8 +425,10 @@ class Live4018MouthContractTest(unittest.TestCase):
         star_spoken = star.get("spoken") or ""
         self.assertNotIn("Watchdog", work_spoken)
         self.assertNotIn("factory close", work_spoken.lower())
-        self.assertRegex(work_spoken.lower(), r"(here|working on)")
-        self.assertIn("leverage", star_spoken.lower())
+        self.assertIn("agent login", work_spoken.lower())
+        self.assertNotIn("Last you said", work_spoken)
+        self.assertIn("agent login", star_spoken.lower())
+        self.assertNotIn("leverage", star_spoken.lower())
         self.assertNotIn("Watchdog", star_spoken)
 
     def test_cheat_sheet_wiki_stays_off_spoken(self) -> None:
@@ -447,9 +456,10 @@ class Live4018MouthContractTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken, spoken)
         self.assertTrue(spoken.startswith("Sir."), spoken)
+        self.assertIn("agent login", spoken.lower())
         self.assertLess(len(spoken), 280)
 
-    def test_store_converse_safari_see_calls_see_py(self) -> None:
+    def test_dark_cursor_safari_see_calls_see_py(self) -> None:
         os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
         os.environ["AGENT_STACK_DRY_TTS"] = "1"
         saw: list[str] = []
@@ -507,9 +517,6 @@ class Live4018MouthContractTest(unittest.TestCase):
         can_spoken = can.get("spoken") or ""
         school_spoken = school.get("spoken") or ""
         tube_spoken = tube.get("spoken") or ""
-        self.assertNotEqual(greet_spoken, can_spoken)
-        self.assertNotEqual(can_spoken, school_spoken)
-        self.assertNotEqual(greet_spoken, school_spoken)
         self.assertNotEqual(greet_spoken, lanes)
         self.assertNotEqual(can_spoken, lanes)
         self.assertNotIn(lanes, greet_spoken)
@@ -518,8 +525,11 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertNotIn(lanes, tube_spoken)
         self.assertNotIn("On disk: Website / AI Partner", greet_spoken)
         self.assertNotIn("On disk: Website / AI Partner", can_spoken)
-        self.assertIn("here", greet_spoken.lower())
-        self.assertRegex(can_spoken.lower(), r"(vault|safari|school|status)")
+        self.assertIn("agent login", greet_spoken.lower())
+        self.assertIn("agent login", can_spoken.lower())
+        self.assertIn("agent login", school_spoken.lower())
+        self.assertNotIn("Last you said", greet_spoken)
+        self.assertNotIn("You were at", can_spoken)
         self.assertNotIn("BUS203", school_spoken)
         self.assertNotIn("BUS602", school_spoken)
         self.assertNotIn("## When", school_spoken)

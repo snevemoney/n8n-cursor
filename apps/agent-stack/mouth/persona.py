@@ -56,6 +56,9 @@ PACK_LEAK_RE = re.compile(
     r"content/business-kits|"
     r"catalog bump|"
     r"one-person-marketing|"
+    r"last you said|"
+    r"you were at|"
+    r"still on that|"
     r"`[a-z0-9-]{8,}`"
     r")",
     re.I,

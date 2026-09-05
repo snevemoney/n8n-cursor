@@ -305,7 +305,7 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertEqual(out.get("verb"), "safari_see")
         self.assertIn("scrolled the tab", (out.get("spoken") or "").lower())
 
-    def test_9_store_converse_does_not_speak_pack_or_asks(self) -> None:
+    def test_9_dark_cursor_does_not_speak_pack_or_asks(self) -> None:
         calls: list[str] = []
 
         def dark_cursor(prompt: str, mode: str = "ask", **kw):
@@ -317,7 +317,7 @@ class GoldenPipelineTest(unittest.TestCase):
                 "wire": "cursor",
                 "spoken": (
                     "UNKNOWN. Cursor agent needs a one-time login. "
-                    "Run agent login in Terminal. Not an xAI key."
+                    "Run agent login in Terminal."
                 ),
             }
 
@@ -355,8 +355,10 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertNotIn("I heard you", spoken)
         self.assertNotIn("Before that you said", spoken)
         self.assertNotIn("one-time login", spoken.lower())
+        self.assertNotIn("Last you said", spoken)
+        self.assertNotIn("You were at", spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
+        self.assertIn("agent login", spoken.lower())
 
     def test_10_converse_is_default_not_a_template(self) -> None:
         def fake_cursor(prompt: str, mode: str = "ask", **kw):
@@ -411,8 +413,9 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertNotIn("## When", talk_spoken)
         self.assertIn("BUS203", course_spoken)
 
-    def test_12_thread_tracks_three_conversational_lines(self) -> None:
+    def test_12_dark_cursor_does_not_echo_the_thread(self) -> None:
         os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        banned = ("Last you said", "You were at", "Still on that", "Going.")
         with tempfile.TemporaryDirectory(prefix="golden-thread-") as tmp:
             hive, vault = _hive(tmp)
             (hive / "bus" / "state.json").write_text(
@@ -432,18 +435,63 @@ class GoldenPipelineTest(unittest.TestCase):
         a = first.get("spoken") or ""
         b = second.get("spoken") or ""
         c = third.get("spoken") or ""
-        self.assertNotEqual(a, b)
-        self.assertNotEqual(b, c)
-        self.assertNotEqual(a, c)
-        self.assertIn("going", a.lower())
-        self.assertIn("how's it going", b.lower())
-        self.assertTrue("how's it going" in c.lower() or "what did i just say" in c.lower())
         for spoken in (a, b, c):
             self.assertTrue(spoken.startswith("Sir."), spoken)
+            self.assertIn("agent login", spoken.lower())
+            self.assertNotIn("how's it going", spoken.lower())
+            self.assertNotIn("what did i just say", spoken.lower())
             self.assertNotIn("Wires, not vibes", spoken)
             self.assertNotIn("BUS602", spoken)
             self.assertNotIn("LESSONS:", spoken)
             self.assertNotIn("professional skills again", spoken.lower())
+            for phrase in banned:
+                self.assertNotIn(phrase, spoken)
+
+    def test_12b_logged_in_cursor_speaks_model_prose(self) -> None:
+        replies = (
+            "Quiet evening. The sitting is on the table.",
+            "You asked how the evening was going.",
+            "Same thread. I am still with you.",
+        )
+        calls: list[str] = []
+
+        def fake_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            calls.append(prompt)
+            return {"speak": replies[len(calls) - 1]}
+
+        with tempfile.TemporaryDirectory(prefix="golden-logged-in-") as tmp:
+            hive, vault = _hive(tmp)
+            first = TURN.apply_turn(
+                "how's it going",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=fake_cursor,
+            )
+            second = TURN.apply_turn(
+                "what did I just say",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=fake_cursor,
+            )
+            third = TURN.apply_turn(
+                "yeah keep going",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=fake_cursor,
+            )
+        self.assertEqual(len(calls), 3)
+        self.assertIn("Quiet evening", first.get("spoken") or "")
+        self.assertIn("evening was going", second.get("spoken") or "")
+        self.assertIn("still with you", third.get("spoken") or "")
+        for spoken in (
+            first.get("spoken") or "",
+            second.get("spoken") or "",
+            third.get("spoken") or "",
+        ):
+            self.assertNotIn("Last you said", spoken)
+            self.assertNotIn("You were at", spoken)
+            self.assertNotIn("Still on that", spoken)
 
     def test_13_hard_step_still_proposal(self) -> None:
         with tempfile.TemporaryDirectory(prefix="golden-hard-") as tmp:

@@ -38,54 +38,21 @@ JSON_RE = re.compile(r"\{.*\}", re.S)
 UNKNOWN = "UNKNOWN. Cursor harness returned no reply."
 LOGIN_UNKNOWN = (
     "UNKNOWN. Cursor agent needs a one-time login. "
-    "Run agent login in Terminal. Not an xAI key."
+    "Run agent login in Terminal."
 )
-STORE_UNTIL_LOGIN = "I can talk from the store until you run agent login."
-NEED_MODEL = "I need the model for that one."
+NEED_LOGIN = "You need `agent login` for a real talk."
+STILL_NEED_LOGIN = "Still need `agent login`."
 PROPOSAL = (
     "Proposal only. I will not send, pay, deploy, book, or publish. "
     "That hard step stays with you."
 )
 MAX_TURNS = 8
-STORE_LOGIN_ONCE = (
-    "I already said Cursor needs a one-time login in Terminal. Not an xAI key."
-)
-RECALL_RE = re.compile(
-    r"\b("
-    r"what did i (?:just )?say|"
-    r"what did you (?:just )?say|"
-    r"repeat that|"
-    r"say that again"
-    r")\b",
-    re.I,
-)
-CONTINUE_RE = re.compile(
-    r"\b("
-    r"(?:yeah |yes |yep )?(?:keep going|go on|continue|tell me more)|"
-    r"and then\b|"
-    r"what next"
-    r")\b",
-    re.I,
-)
-HOW_RE = re.compile(
-    r"\b("
-    r"how(?:'s| is) it going|"
-    r"how are you|"
-    r"how(?:'re| are) we|"
-    r"what'?s up"
-    r")\b",
-    re.I,
-)
-VAULT_DUMP_RE = re.compile(
+ECHO_STUB_RE = re.compile(
     r"("
-    r"lessons\s*:|"
-    r"##\s+when\b|"
-    r"\*\*when\*\*|"
-    r"watch later funnels|"
-    r"operator_memory|"
-    r"catalog bump|"
-    r"one-person-marketing|"
-    r"`[a-z0-9-]{8,}`"
+    r"last you said|"
+    r"you were at|"
+    r"still on that|"
+    r"^going\."
     r")",
     re.I,
 )
@@ -93,17 +60,6 @@ WHY_THINK_RE = re.compile(
     r"why can(?:'t|not| not) you think|"
     r"why (?:are you|is (?:it|cursor)) (?:dark|offline|dumb|silent)|"
     r"\bagent login\b|one-time login|not logged in",
-    re.I,
-)
-WORK_CHECK_RE = re.compile(
-    r"\b("
-    r"do you work|"
-    r"are you (?:there|working|up|online|on)\b|"
-    r"you work now|"
-    r"does this work|"
-    r"can you hear|"
-    r"did(?:n't| not)? you hear"
-    r")",
     re.I,
 )
 SAFARI_WANT_RE = re.compile(
@@ -120,31 +76,6 @@ SAFARI_WANT_RE = re.compile(
     r")\b",
     re.I,
 )
-CAN_DO_RE = re.compile(
-    r"\b("
-    r"what can you do|"
-    r"what do you do|"
-    r"your capabilities|"
-    r"what are you (?:able to do|good at)"
-    r")\b",
-    re.I,
-)
-GREET_STOP = {
-    "hello",
-    "hey",
-    "hi",
-    "yo",
-    "jarvis",
-    "hear",
-    "heard",
-    "didnt",
-    "didn",
-    "hes",
-    "there",
-    "you",
-    "me",
-    "sir",
-}
 
 
 def _load(name: str, path: Path):
@@ -385,8 +316,8 @@ def is_login_unknown_text(text: str) -> bool:
         "needs a one-time login" in blob
         or "please run 'agent login'" in blob
         or "not logged in" in blob
-        or "until you run agent login" in blob
-        or "talk from the store until" in blob
+        or "agent login" in blob
+        or "for a real talk" in blob
     )
 
 
@@ -408,7 +339,7 @@ def login_already_said(hive: Path) -> bool:
 
 
 def should_skip_cursor(hive: Path, cursor_fn) -> bool:
-    """After the login UNKNOWN was spoken once, do not brick the next greetings."""
+    """After login UNKNOWN was spoken once, do not loop agent -p while still dark."""
     if not login_already_said(hive):
         return False
     if cursor_fn is not None:
@@ -424,31 +355,13 @@ def should_skip_cursor(hive: Path, cursor_fn) -> bool:
 
 
 def wants_login_why(utterance: str) -> bool:
-    """Login lecture only on first UNKNOWN or when he asks why the brain is dark."""
+    """Honest login line when he asks why the brain is dark."""
     return bool(WHY_THINK_RE.search(utterance or ""))
-
-
-def is_greet_or_empty(utterance: str) -> bool:
-    raw = RETRIEVE.tokens(utterance) if RETRIEVE is not None else re.findall(
-        r"[a-z0-9']{3,}", (utterance or "").lower()
-    )
-    words = [w.replace("'", "") for w in raw if w.replace("'", "") not in GREET_STOP]
-    return not words
-
-
-def is_work_check(utterance: str) -> bool:
-    """Presence / 'do you work' is a status check, not a vault dump."""
-    return bool(WORK_CHECK_RE.search(utterance or ""))
 
 
 def wants_safari(utterance: str) -> bool:
     """Only explicit Safari hands. Do not treat a greeting as safari_front."""
     return bool(SAFARI_WANT_RE.search(utterance or ""))
-
-
-def wants_capabilities(utterance: str) -> bool:
-    """'What can you do' is the real toolbox, not business-lanes.json."""
-    return bool(CAN_DO_RE.search(utterance or ""))
 
 
 def is_lanes_default(text: str) -> bool:
@@ -459,6 +372,8 @@ def is_lanes_default(text: str) -> bool:
 
 
 def _is_speak_leak(text: str) -> bool:
+    if ECHO_STUB_RE.search(text or ""):
+        return True
     if RETRIEVE is not None and hasattr(RETRIEVE, "is_speak_leak"):
         return bool(RETRIEVE.is_speak_leak(text))
     if PERSONA is not None and hasattr(PERSONA, "is_pack_leak"):
@@ -466,113 +381,7 @@ def _is_speak_leak(text: str) -> bool:
     return False
 
 
-def _last_turn_field(turns: list[dict], key: str) -> str:
-    for row in reversed(turns or []):
-        if not isinstance(row, dict):
-            continue
-        text = str(row.get(key) or "").strip()
-        if text:
-            return text
-    return ""
-
-
-def _clip_clause(text: str, cap: int = 80) -> str:
-    body = re.sub(r"^Sir\.\s+", "", (text or "").strip(), flags=re.I)
-    body = re.sub(r"\s+", " ", body).strip()
-    if len(body) <= cap:
-        return body
-    cut = body[: cap - 1].rsplit(" ", 1)
-    return (cut[0] if cut else body[:cap]) + "…"
-
-
-def converse_from_thread(utterance: str, turns: list[dict]) -> str:
-    """Answer from this sitting. Not a canned Hello / marketing / funnel trio."""
-    heard = (utterance or "").strip()
-    last_user = _last_turn_field(turns, "user")
-    last_jarvis = _last_turn_field(turns, "jarvis")
-    if RECALL_RE.search(heard):
-        if last_user:
-            return f"You said: {_clip_clause(last_user, 120)}"
-        return "You have not said anything else in this sitting yet."
-    if CONTINUE_RE.search(heard):
-        topic = last_user or last_jarvis
-        if topic:
-            return f"Still on that. You were at: {_clip_clause(topic, 100)}"
-        return "Nothing to continue yet. Say the next thing."
-    if HOW_RE.search(heard):
-        if last_user:
-            return f"Going. Last you said: {_clip_clause(last_user, 80)}"
-        return "Going. I am here."
-    if is_work_check(heard) or is_greet_or_empty(heard):
-        if last_user:
-            return f"Still here. Last you said: {_clip_clause(last_user, 80)}"
-        return "Still here."
-    return ""
-
-
-def clean_store_answer(
-    utterance: str,
-    *,
-    hive: Path,
-    retrieve_roots: list[Path] | None,
-    turns: list[dict] | None = None,
-) -> str:
-    """Short butler line. Never paste life/lanes/hot/ASKS."""
-    _ = hive
-    thread = converse_from_thread(utterance, turns or [])
-    if thread:
-        return thread
-    greet = is_greet_or_empty(utterance) or is_work_check(utterance)
-    can_do = wants_capabilities(utterance)
-    if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
-        return RETRIEVE.speak_store(
-            utterance, retrieve_roots, greet=greet, can_do=can_do
-        )
-    if greet:
-        return "Still here."
-    if wants_capabilities(utterance):
-        return (
-            "I read the vault, look at the Safari tab, brief a school skill, "
-            "or report status. Hard steps stay with you."
-        )
-    return "Still here. The store is on disk."
-
-
-def answer_from_store(
-    utterance: str,
-    *,
-    retrieve_roots: list[Path] | None,
-) -> str:
-    """One filtered vault line. Empty if the hit is a dump or miss."""
-    if RETRIEVE is None:
-        return ""
-    found = RETRIEVE.search(utterance, retrieve_roots)
-    evidence = str(found.get("spoken") or "").strip()
-    if not evidence or found.get("unknown"):
-        return ""
-    if _is_speak_leak(evidence) or VAULT_DUMP_RE.search(evidence):
-        return ""
-    return evidence
-
-
-def is_mouth_echo(utterance: str, hive: Path) -> bool:
-    """True when the mic heard our last line (or pack crumbs), not a new ask."""
-    heard = (utterance or "").strip()
-    if not heard:
-        return False
-    if _is_speak_leak(heard):
-        return True
-    low = heard.lower()
-    if STORE_LOGIN_ONCE.lower() in low or "i already said cursor needs" in low:
-        return True
-    bus = load_json(hive / "bus" / "state.json")
-    last = str(bus.get("spoken") or "").strip()
-    if last and len(last) >= 24 and last[:80].lower() in low:
-        return True
-    return False
-
-
-def store_converse(
+def dark_cursor_reply(
     utterance: str,
     *,
     hive: Path,
@@ -580,10 +389,8 @@ def store_converse(
     retrieve_roots: list[Path] | None,
     see_fn=None,
 ) -> dict:
-    """Talk from the sitting + a filtered vault line. No school dump. No pack paste.
-
-    Login lecture already happened. Answer the question. Safari hands still run.
-    """
+    """Dark Cursor: Safari hands, or one honest login line. Not a fake brain."""
+    _ = (turns, retrieve_roots)
     heard = (utterance or "").strip()
     if wants_safari(heard) and (see_fn is not None or SEE is not None):
         if see_fn is not None:
@@ -605,55 +412,13 @@ def store_converse(
             "from_store": True,
             "see": got,
         }
-    tool = "converse"
-    if is_mouth_echo(heard, hive):
-        spoken = clean_store_answer(
-            heard, hive=hive, retrieve_roots=retrieve_roots, turns=turns
-        )
-    elif wants_login_why(heard):
-        spoken = STORE_LOGIN_ONCE
-    elif wants_capabilities(heard):
-        if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
-            spoken = RETRIEVE.speak_store(heard, retrieve_roots, can_do=True)
-        else:
-            spoken = clean_store_answer(
-                heard, hive=hive, retrieve_roots=retrieve_roots, turns=turns
-            )
-    elif asked_for_course(heard):
-        school = PRO.brief(heard) if PRO is not None else {}
-        evidence = str(school.get("spoken") or "").strip()
-        spoken = evidence if evidence and not _is_speak_leak(evidence) else ""
-        if spoken and (VAULT_DUMP_RE.search(spoken) or _is_speak_leak(spoken)):
-            spoken = ""
-        if spoken:
-            first, rest = first_sentence(spoken)
-            if rest or len(spoken) > 180:
-                spoken = first or spoken[:177].rsplit(" ", 1)[0] + "…"
-        if not spoken:
-            spoken = converse_from_thread(heard, turns) or NEED_MODEL
-        tool = "pro"
-    else:
-        thread = converse_from_thread(heard, turns)
-        vault = answer_from_store(heard, retrieve_roots=retrieve_roots)
-        if thread and (
-            RECALL_RE.search(heard) or CONTINUE_RE.search(heard) or HOW_RE.search(heard)
-            or is_greet_or_empty(heard) or is_work_check(heard)
-        ):
-            spoken = thread
-        elif vault:
-            spoken = vault
-        elif thread:
-            spoken = thread
-        else:
-            spoken = NEED_MODEL
-    spoken = _speakable_line(spoken) or NEED_MODEL
-    if is_lanes_default(spoken):
-        spoken = "Still here."
+    spoken = NEED_LOGIN if wants_login_why(heard) else STILL_NEED_LOGIN
+    spoken = _speakable_line(spoken) or STILL_NEED_LOGIN
     return {
         "ok": True,
-        "tool": tool,
+        "tool": "pipeline",
         "spoken": spoken,
-        "wires": ["store", tool] if tool != "converse" else ["store", "converse"],
+        "wires": ["cursor", "pipeline"],
         "cites": [],
         "sent": False,
         "from_store": True,
@@ -748,11 +513,11 @@ def miss_spoken(got) -> str:
     ev = as_cursor_event(got)
     spoken = str(ev.get("spoken") or "").strip()
     if is_dark_cursor(got) or is_login_unknown_text(spoken):
-        return STORE_UNTIL_LOGIN
+        return NEED_LOGIN
     if spoken:
         return spoken
     if ev.get("unknown"):
-        return STORE_UNTIL_LOGIN
+        return NEED_LOGIN
     return UNKNOWN
 
 
@@ -1118,7 +883,7 @@ def apply_pipeline_iter(
     got = {}
     login_fail = False
     if should_skip_cursor(hive, cursor_fn):
-        ran = store_converse(
+        ran = dark_cursor_reply(
             spoken_in,
             hive=hive,
             turns=prior_turns,
@@ -1134,7 +899,7 @@ def apply_pipeline_iter(
         pick, got = cursor_pick(pack, spoken_in, cursor_fn)
         if pick is None:
             if is_dark_cursor(got) and login_already_said(hive):
-                ran = store_converse(
+                ran = dark_cursor_reply(
                     spoken_in,
                     hive=hive,
                     turns=prior_turns,
