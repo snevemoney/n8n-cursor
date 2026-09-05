@@ -126,10 +126,16 @@ class PipelineDarkCursorTest(unittest.TestCase):
             )
         self.assertEqual(len(calls), 1)
         self.assertIn("agent login", first.get("spoken") or "")
-        self.assertIn("I heard you", second.get("spoken") or "")
-        self.assertIn("already said", (second.get("spoken") or "").lower())
-        self.assertNotIn("returned no reply", second.get("spoken") or "")
+        second_spoken = second.get("spoken") or ""
+        self.assertNotIn("I heard you", second_spoken)
+        self.assertNotIn("Before that you said", second_spoken)
+        self.assertNotIn("already said", second_spoken.lower())
+        self.assertNotIn("one-time login", second_spoken.lower())
+        self.assertNotIn("adopted path missing", second_spoken.lower())
+        self.assertNotIn("returned no reply", second_spoken)
         self.assertNotEqual(second.get("verb"), "can")
+        self.assertTrue(second_spoken.startswith("Sir."))
+        self.assertRegex(second_spoken.lower(), r"(here|working on|evens|disk)")
 
     def test_safari_see_calls_see_py_front(self) -> None:
         called: list[str] = []
@@ -199,6 +205,72 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertNotIn("## When", spoken)
         self.assertIn("school", (out.get("wires") or []))
         self.assertLess(spoken.lower().count("bus206"), 3)
+
+    def test_store_converse_does_not_speak_asks_or_pack(self) -> None:
+        calls: list[str] = []
+
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            calls.append(prompt)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": PIPE.LOGIN_UNKNOWN,
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-no-pack-") as tmp:
+            hive = Path(tmp)
+            vault = hive / "vault"
+            (hive / "bus").mkdir(parents=True)
+            (vault / "CONTENT/os").mkdir(parents=True)
+            (vault / "OPERATOR_MEMORY.md").write_text(
+                "Jarvis can read the vault. North star: leverage.\n",
+                encoding="utf-8",
+            )
+            (vault / "CONTENT/os/ASKS.md").write_text(
+                "- 22:48 — If you don't know how to build your own agentic OS, "
+                "then you are falling behind. But not for the reason you think. "
+                "It's not because you need some fancy dashboard or a Jarvis setup.\n",
+                encoding="utf-8",
+            )
+            (hive / "agent-stack.json").write_text(
+                '{"name":"hive","repo":"/repo","vault":{}}\n',
+                encoding="utf-8",
+            )
+            first = MOUTH.apply_turn(
+                "Hi Jarvis",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+            )
+            second = MOUTH.apply_turn(
+                "He's Jarvis",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+            )
+            why = MOUTH.apply_turn(
+                "Why can't you think?",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+            )
+        spoken = second.get("spoken") or ""
+        self.assertEqual(len(calls), 1)
+        self.assertIn("agent login", first.get("spoken") or "")
+        for leak in (
+            "adopted path missing",
+            "22:48",
+            "agentic OS",
+            "I heard you",
+            "Before that you said",
+            "one-time login",
+        ):
+            self.assertNotIn(leak, spoken)
+        self.assertTrue(spoken.startswith("Sir."))
+        self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
+        self.assertIn("one-time login", (why.get("spoken") or "").lower())
 
 
 if __name__ == "__main__":

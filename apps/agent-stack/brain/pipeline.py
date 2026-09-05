@@ -46,6 +46,28 @@ MAX_TURNS = 8
 STORE_LOGIN_ONCE = (
     "I already said Cursor needs a one-time login in Terminal. Not an xAI key."
 )
+WHY_THINK_RE = re.compile(
+    r"why can(?:'t|not| not) you think|"
+    r"why (?:are you|is (?:it|cursor)) (?:dark|offline|dumb|silent)|"
+    r"\bagent login\b|one-time login|not logged in",
+    re.I,
+)
+GREET_STOP = {
+    "hello",
+    "hey",
+    "hi",
+    "yo",
+    "jarvis",
+    "hear",
+    "heard",
+    "didnt",
+    "didn",
+    "hes",
+    "there",
+    "you",
+    "me",
+    "sir",
+}
 
 
 def _load(name: str, path: Path):
@@ -310,6 +332,44 @@ def should_skip_cursor(hive: Path, cursor_fn) -> bool:
     return True
 
 
+def wants_login_why(utterance: str) -> bool:
+    """Login lecture only on first UNKNOWN or when he asks why the brain is dark."""
+    return bool(WHY_THINK_RE.search(utterance or ""))
+
+
+def is_greet_or_empty(utterance: str) -> bool:
+    raw = RETRIEVE.tokens(utterance) if RETRIEVE is not None else re.findall(
+        r"[a-z0-9']{3,}", (utterance or "").lower()
+    )
+    words = [w.replace("'", "") for w in raw if w.replace("'", "") not in GREET_STOP]
+    return not words
+
+
+def _is_speak_leak(text: str) -> bool:
+    if RETRIEVE is not None and hasattr(RETRIEVE, "is_speak_leak"):
+        return bool(RETRIEVE.is_speak_leak(text))
+    if PERSONA is not None and hasattr(PERSONA, "is_pack_leak"):
+        return bool(PERSONA.is_pack_leak(text))
+    return False
+
+
+def clean_store_answer(
+    utterance: str,
+    *,
+    hive: Path,
+    retrieve_roots: list[Path] | None,
+) -> str:
+    """Butler + short human line from life/lanes/hot. Never paste the pack."""
+    _ = hive
+    if RETRIEVE is not None and hasattr(RETRIEVE, "speak_store"):
+        return RETRIEVE.speak_store(
+            utterance,
+            retrieve_roots,
+            greet=is_greet_or_empty(utterance),
+        )
+    return "I'm here. The store is on disk. What are we working on?"
+
+
 def store_converse(
     utterance: str,
     *,
@@ -317,46 +377,20 @@ def store_converse(
     turns: list[dict],
     retrieve_roots: list[Path] | None,
 ) -> dict:
-    """Real answer from the store pack + sitting. Not classify(). Not canned can/today."""
-    bits: list[str] = []
-    last = LAST_WIRE.read(hive) if LAST_WIRE is not None else {}
-    err = str((last.get("wire") or {}).get("error") or last.get("human_line") or "")
-    if is_login_unknown_text(err):
-        bits.append(STORE_LOGIN_ONCE)
-    elif login_already_said(hive):
-        bits.append("Cursor is still dark. I already said so. I will not repeat that UNKNOWN.")
+    """Talk from the clean store. Pack / last-wire / ASKS stay off the mouth."""
+    _ = turns
     heard = (utterance or "").strip()
-    if heard:
-        bits.append(f"I heard you: {heard[:160]}.")
-    prior = ""
-    for row in reversed(turns or []):
-        user = str(row.get("user") or "").strip()
-        if user and user != heard:
-            prior = user
-            break
-    if prior:
-        bits.append(f"Before that you said: {prior[:120]}.")
-    greet_stop = {"hello", "hey", "hi", "yo", "jarvis", "hear", "heard", "didnt", "didn"}
-    if PRO is not None and PRO.is_school_query(utterance):
-        school = PRO.brief(utterance)
+    if wants_login_why(heard):
+        spoken = STORE_LOGIN_ONCE
+    elif PRO is not None and PRO.is_school_query(heard) and not is_greet_or_empty(heard):
+        school = PRO.brief(heard)
         evidence = str(school.get("spoken") or "").strip()
-        if evidence:
-            bits.append(evidence)
-    elif RETRIEVE is not None:
-        words = [w for w in RETRIEVE.tokens(utterance) if w not in greet_stop]
-        if words:
-            found = RETRIEVE.search(utterance, retrieve_roots)
-            evidence = str(found.get("spoken") or "").strip()
-            if evidence and not found.get("unknown"):
-                bits.append(evidence)
-    if STORE is not None:
-        block = STORE.hive_block(hive)
-        for line in block.splitlines():
-            if line.startswith(("Vault:", "Repo:", "Hive:")):
-                bits.append(line)
-                break
-        bits.append("The store is still on disk. What are we working on?")
-    spoken = " ".join(bits).strip() or "I have the store on disk. What are we working on?"
+        spoken = evidence if evidence and not _is_speak_leak(evidence) else ""
+        if not spoken:
+            spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
+    else:
+        spoken = clean_store_answer(heard, hive=hive, retrieve_roots=retrieve_roots)
+    spoken = (spoken or "").strip() or "I'm here. What are we working on?"
     return {
         "ok": True,
         "tool": "status",
@@ -489,12 +523,20 @@ def _safari_see(args: dict, utterance: str, *, hive: Path, see_fn=None) -> dict:
     return SEE.safari_act(utterance, hive=hive)
 
 
+def _speakable_line(text: str) -> str:
+    """Mouth only. Pack / ASKS / video crumbs are for the model brief."""
+    body = (text or "").strip()
+    if not body or _is_speak_leak(body):
+        return ""
+    return body
+
+
 def _evidence_line(speak: str, evidence: str) -> str:
-    speak = (speak or "").strip()
-    evidence = (evidence or "").strip()
+    speak = _speakable_line(speak)
+    evidence = _speakable_line(evidence)
     if speak and evidence and evidence not in speak:
         return f"{speak} {evidence}"
-    return speak or evidence or UNKNOWN
+    return speak or evidence or "I'm here. What are we working on?"
 
 
 def run_tool(
@@ -534,15 +576,17 @@ def run_tool(
                 "cites": cites,
                 "sent": False,
             }
-        found = {"spoken": "", "hits": [], "unknown": True}
+        found = {"spoken": "", "hits": [], "unknown": True, "brief": ""}
         if RETRIEVE is not None:
             found = RETRIEVE.search(query, retrieve_roots)
         cites = found.get("hits") if isinstance(found.get("hits"), list) else []
         evidence = str(found.get("spoken") or "").strip()
+        brief = str(found.get("brief") or "")
         return {
             "ok": True,
             "tool": tool,
             "spoken": _evidence_line(speak, evidence),
+            "brief": brief,
             "wires": ["vault_read", "store"],
             "cites": cites,
             "sent": False,

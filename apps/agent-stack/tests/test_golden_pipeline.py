@@ -302,6 +302,59 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertEqual(out.get("verb"), "safari_see")
         self.assertIn("scrolled the tab", (out.get("spoken") or "").lower())
 
+    def test_9_store_converse_does_not_speak_pack_or_asks(self) -> None:
+        calls: list[str] = []
+
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            calls.append(prompt)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": (
+                    "UNKNOWN. Cursor agent needs a one-time login. "
+                    "Run agent login in Terminal. Not an xAI key."
+                ),
+            }
+
+        with tempfile.TemporaryDirectory(prefix="golden-no-pack-") as tmp:
+            hive, vault = _hive(tmp)
+            asks = vault / "CONTENT" / "os"
+            asks.mkdir(parents=True)
+            (asks / "ASKS.md").write_text(
+                "- 22:48 — If you don't know how to build your own agentic OS, "
+                "then you are falling behind. But not for the reason you think. "
+                "It's not because you need some fancy dashboard or a Jarvis setup.\n",
+                encoding="utf-8",
+            )
+            (hive / "agent-stack.json").write_text(
+                '{"name":"hive","repo":"/repo","vault":{}}\n',
+                encoding="utf-8",
+            )
+            first = TURN.apply_turn(
+                "Hi Jarvis",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+            )
+            second = TURN.apply_turn(
+                "He's Jarvis",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+            )
+        spoken = second.get("spoken") or ""
+        self.assertEqual(len(calls), 1)
+        self.assertIn("agent login", first.get("spoken") or "")
+        for leak in ("adopted path missing", "22:48", "agentic OS"):
+            self.assertNotIn(leak, spoken)
+        self.assertNotIn("I heard you", spoken)
+        self.assertNotIn("Before that you said", spoken)
+        self.assertNotIn("one-time login", spoken.lower())
+        self.assertTrue(spoken.startswith("Sir."))
+        self.assertRegex(spoken.lower(), r"(here|working on|evens|disk)")
+
 
 if __name__ == "__main__":
     unittest.main()

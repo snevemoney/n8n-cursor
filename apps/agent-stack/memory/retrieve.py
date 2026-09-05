@@ -38,6 +38,20 @@ BLOCK_MARKS = (
     "/node_modules/",
     "/.git/",
 )
+# Mouth never reads these aloud. Pack / model brief still may cite them.
+SPEAK_SKIP = ("watch-later", "asks.md", "/inbox/", "\\inbox\\")
+LEAK_RE = re.compile(
+    r"("
+    r"adopted path missing|"
+    r"\b\d{1,2}:\d{2}\s+[—\-–]|"
+    r"agentic os|"
+    r"youtuber said|"
+    r"\[paste|"
+    r"i heard you:|"
+    r"before that you said:"
+    r")",
+    re.I,
+)
 STOP = {
     "the",
     "a",
@@ -200,16 +214,62 @@ def _snippet(text: str, words: list[str]) -> str:
     return chunk[:SNIP]
 
 
+def is_speak_leak(text: str) -> bool:
+    """True when a snippet is pack / ASKS / video crumb, not a mouth line."""
+    return bool(LEAK_RE.search(text or ""))
+
+
+def _speakable_path(path: str) -> bool:
+    s = (path or "").lower().replace("\\", "/")
+    return not any(mark in s for mark in SPEAK_SKIP)
+
+
+def model_brief(hits: list[dict]) -> str:
+    """Short cite list for the model. Never hand this string to TTS."""
+    lines: list[str] = []
+    for hit in hits[:MAX_CITES]:
+        if not isinstance(hit, dict):
+            continue
+        path = str(hit.get("path") or "").strip()
+        snippet = str(hit.get("snippet") or "").strip()
+        if path and snippet:
+            lines.append(f"{path}: {snippet[:160]}")
+    return "\n".join(lines)
+
+
 def _answer(hits: list[dict]) -> dict:
+    brief = model_brief(hits)
     if not hits:
-        return {"ok": True, "hits": [], "unknown": True, "spoken": "I don't have that in the vault. UNKNOWN."}
-    first = hits[0]["snippet"]
+        return {
+            "ok": True,
+            "hits": [],
+            "unknown": True,
+            "spoken": "I don't have that in the vault. UNKNOWN.",
+            "brief": brief,
+        }
+    spoken_hit = None
+    for hit in hits:
+        path = str(hit.get("path") or "")
+        snippet = str(hit.get("snippet") or "")
+        if _speakable_path(path) and snippet and not is_speak_leak(snippet):
+            spoken_hit = hit
+            break
+    if spoken_hit is None:
+        return {
+            "ok": True,
+            "hits": hits,
+            "unknown": True,
+            "spoken": "I don't have a speakable vault line for that.",
+            "brief": brief,
+        }
+    first = str(spoken_hit.get("snippet") or "")
     spoken = first if len(first) <= 180 else first[:177].rsplit(" ", 1)[0] + "…"
     return {
         "ok": True,
         "hits": hits,
         "unknown": False,
         "spoken": spoken,
+        "brief": brief,
     }
 
 
@@ -340,3 +400,56 @@ def search(query: str, roots: list[Path] | None = None) -> dict:
     if not live:
         return repo
     return _search_roots(query, live)
+
+
+def speak_life(roots: list[Path] | None = None) -> str:
+    """Operator + active lanes. No invented age. No UNKNOWN dump."""
+    life = life_card(roots)
+    name = str(life.get("operator") or "Evens").strip() or "Evens"
+    lanes = [str(x).strip() for x in (life.get("businesses") or []) if str(x).strip()]
+    bits = [f"You are {name}."]
+    if lanes:
+        bits.append("On disk: " + ", ".join(lanes[:3]) + ".")
+    return " ".join(bits)
+
+
+def speak_hot(roots: list[Path] | None = None) -> str:
+    """First clean dash line from hot.md. Skip callouts and leak crumbs."""
+    used = roots if roots is not None else ([REPO_OH] if REPO_OH.is_dir() else [])
+    for root in used:
+        path = Path(root) / "CONTENT/os/hot.md"
+        if not path.is_file():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for line in text.splitlines():
+            raw = line.strip()
+            if not raw.startswith("- "):
+                continue
+            body = raw[2:].strip()
+            if is_speak_leak(body) or body.startswith("[!"):
+                continue
+            body = re.sub(r"`+", "", body)
+            if len(body) > 140:
+                body = body[:137].rsplit(" ", 1)[0] + "…"
+            return body
+    return ""
+
+
+def speak_store(utterance: str, roots: list[Path] | None = None, *, greet: bool = False) -> str:
+    """Butler answer from life/lanes/hot. Never paste pack, ASKS, or watch-later."""
+    life = speak_life(roots)
+    if greet:
+        return f"I'm here. {life} What are we working on?"
+    words = tokens(utterance)
+    if words:
+        found = search(utterance, roots)
+        evidence = str(found.get("spoken") or "").strip()
+        if evidence and not found.get("unknown") and not is_speak_leak(evidence):
+            return evidence
+    hot = speak_hot(roots)
+    if hot:
+        return f"{life} {hot}"
+    return f"{life} What are we working on?"

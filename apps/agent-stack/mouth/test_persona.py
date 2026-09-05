@@ -133,6 +133,20 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertIn("path=cgevent", out)
         self.assertIn("CGEvent", out)
 
+    def test_pack_and_asks_are_not_spoken(self) -> None:
+        raw = (
+            "I heard you: He's Jarvis. Before that you said: stop. "
+            "- 22:48 — If you don't know how to build your own agentic OS. "
+            "Vault: adopted path missing The store is still on disk."
+        )
+        out = MOD.wrap(raw, verb="status", utterance="He's Jarvis")
+        low = out.lower()
+        self.assertNotIn("adopted path missing", low)
+        self.assertNotIn("22:48", out)
+        self.assertNotIn("agentic os", low)
+        self.assertNotIn("i heard you", low)
+        self.assertNotIn("before that you said", low)
+
 
 if __name__ == "__main__":
     unittest.main()

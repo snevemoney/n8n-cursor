@@ -78,5 +78,37 @@ class LifeCardTest(unittest.TestCase):
         self.assertNotIn("breaking", out["spoken"].lower())
 
 
+class SpeakStoreTest(unittest.TestCase):
+    def test_asks_and_timestamps_are_not_spoken(self) -> None:
+        retrieve = Path(__file__).resolve().parent / "retrieve.py"
+        spec = importlib.util.spec_from_file_location("agent_stack_retrieve_speak", retrieve)
+        if spec is None or spec.loader is None:
+            self.fail("retrieve missing")
+        ret = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ret)
+        with tempfile.TemporaryDirectory(prefix="agent-stack-speak-") as tmp:
+            vault = Path(tmp)
+            (vault / "CONTENT/os").mkdir(parents=True)
+            (vault / "OPERATOR_MEMORY.md").write_text(
+                "North star: maximum leverage, minimum noise.\n",
+                encoding="utf-8",
+            )
+            (vault / "CONTENT/os/ASKS.md").write_text(
+                "- 22:48 — If you don't know how to build your own agentic OS, "
+                "then you are falling behind. Jarvis setup is not the value.\n",
+                encoding="utf-8",
+            )
+            greet = ret.speak_store("He's Jarvis", [vault], greet=True)
+            found = ret.search("He's Jarvis", [vault])
+        self.assertNotIn("adopted path missing", greet.lower())
+        self.assertNotIn("22:48", greet)
+        self.assertNotIn("agentic OS", greet)
+        self.assertIn("here", greet.lower())
+        self.assertTrue(found.get("brief"))
+        self.assertTrue(ret.is_speak_leak(str(found.get("brief") or "")) or "22:48" in str(found.get("brief") or ""))
+        self.assertNotIn("22:48", found.get("spoken") or "")
+        self.assertNotIn("agentic OS", found.get("spoken") or "")
+
+
 if __name__ == "__main__":
     unittest.main()

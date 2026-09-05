@@ -35,6 +35,17 @@ DUMP_RE = re.compile(
     re.I,
 )
 DUMP_SPOKEN = "I will not read a file dump aloud."
+PACK_LEAK_RE = re.compile(
+    r"("
+    r"adopted path missing|"
+    r"i heard you:|"
+    r"before that you said:|"
+    r"\b\d{1,2}:\d{2}\s+[—\-–]|"
+    r"agentic os"
+    r")",
+    re.I,
+)
+VAULT_PACK_RE = re.compile(r"\bVault:\s*", re.I)
 
 # Factory talk Sir must never hear. Hands still execute; this is the mouth only.
 FACTORY_PHRASE = (
@@ -188,6 +199,25 @@ def is_dump(text: str) -> bool:
     return False
 
 
+def is_pack_leak(text: str) -> bool:
+    """True when store/ASKS/router residue is about to hit TTS."""
+    return bool(PACK_LEAK_RE.search(text or ""))
+
+
+def strip_pack_leak(text: str) -> str:
+    """Drop pack / ASKS / router sentences. Keep a human leftover if one exists."""
+    body = (text or "").strip()
+    if not body:
+        return ""
+    parts = re.split(r"(?<=[.!?])\s+", body)
+    kept = []
+    for part in parts:
+        if not part or is_pack_leak(part) or VAULT_PACK_RE.search(part):
+            continue
+        kept.append(part)
+    return SPACE_RE.sub(" ", " ".join(kept)).strip()
+
+
 def strip_factory(text: str) -> str:
     """Drop debugger crumbs. Keep the human result."""
     body = (text or "").strip()
@@ -202,11 +232,14 @@ def strip_factory(text: str) -> str:
 
 
 def sanitize_payload(text: str) -> str:
-    """Drop dump headers and factory leaks. Keep a real sentence if one survives."""
+    """Drop dump headers, pack leaks, and factory crumbs. Keep a real sentence."""
     body = (text or "").strip()
     if not body:
         return ""
     if is_dump(body):
+        return ""
+    body = strip_pack_leak(body)
+    if not body:
         return ""
     body = strip_factory(body)
     return SPACE_RE.sub(" ", body).strip()
@@ -280,7 +313,12 @@ def wrap(
         if ALREADY_WRAPPED_RE.match(payload):
             return payload
         return f"Sir. {payload}"
-    payload = strip_blame(strip_waiting(sanitize_payload(raw) or raw))
+    cleaned = sanitize_payload(raw)
+    if not cleaned:
+        if is_pack_leak(raw):
+            return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
+        cleaned = strip_factory(raw)
+    payload = strip_blame(strip_waiting(cleaned))
     if not payload:
         return payload
     payload = strip_factory(payload)
