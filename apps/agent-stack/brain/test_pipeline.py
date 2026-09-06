@@ -670,6 +670,7 @@ class Live4018MouthContractTest(unittest.TestCase):
                 encoding="utf-8",
             )
             with unittest.mock.patch.object(PIPE, "live_cursor_ready", return_value=True):
+                self.assertTrue(PIPE.login_already_said(hive))
                 self.assertFalse(PIPE.should_skip_cursor(hive, None))
             bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
         self.assertNotIn("cursor_login_said", bus)

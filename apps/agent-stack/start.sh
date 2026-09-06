@@ -25,7 +25,9 @@ fi
 
 if [[ "$MODE" != "check" ]]; then
   unset AGENT_STACK_DRY_TTS || true
-  export AGENT_STACK_TRY_LOGIN=1
+  # Do not loop `agent login` here. A prior try printed success and did not stick.
+  # Face loads existing .env keys and uses the same `agent` as Terminal.
+  export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
 if [[ "$MODE" == "check" ]]; then

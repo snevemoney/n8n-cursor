@@ -343,7 +343,11 @@ def asked_for_course(utterance: str) -> bool:
 
 
 def login_already_said(hive: Path) -> bool:
-    """Bus flag only. Last-wire leftovers are not a permanent dark lock."""
+    """Bus flag only. Last-wire leftovers are not a permanent dark lock.
+
+    Live 4018 must not honor this flag when `agent status` is logged in —
+    `should_skip_cursor` re-reads login and clears the flag.
+    """
     bus = load_json(hive / "bus" / "state.json")
     return bool(bus.get("cursor_login_said"))
 
@@ -1012,6 +1016,11 @@ def apply_pipeline_iter(
     login_tried = False
     prompt = pick_prompt(pack, spoken_in)
     pack_text = pack.read_text(encoding="utf-8") if pack.is_file() else ""
+    if ONLINE is not None and hasattr(ONLINE, "load_existing_env"):
+        try:
+            ONLINE.load_existing_env()
+        except (OSError, TypeError, AttributeError):
+            pass
 
     if not should_skip_cursor(hive, cursor_fn):
         pick, got = cursor_pick(pack, spoken_in, cursor_fn)
@@ -1100,6 +1109,8 @@ def apply_pipeline_iter(
         or ran.get("from_store")
         or is_dark_cursor(got)
     ) else False
+    if live_cursor_ready():
+        login_said = False
     raw_spoken = str(ran.get("spoken") or "")
     if not raw_spoken.strip():
         raw_spoken = NO_MODEL if not brain else UNKNOWN

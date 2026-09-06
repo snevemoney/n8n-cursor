@@ -333,6 +333,8 @@ class Handler(BaseHTTPRequestHandler):
 def serve(port: int = PORT) -> None:
     if os.environ.get("VOICE_OS_BIND") == "0.0.0.0":
         raise SystemExit("0.0.0.0 refused")
+    if hasattr(ONLINE, "load_existing_env"):
+        ONLINE.load_existing_env()
     mark_pieces_wired()
     live_mouth = mouth()
     bus_path = HIVE / "bus" / "state.json"

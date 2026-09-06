@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -145,6 +146,52 @@ class OnlineBrainTest(unittest.TestCase):
             with mock.patch.object(MOD.subprocess, "run", return_value=proc):
                 self.assertFalse(MOD.cursor_logged_in())
         self.assertTrue(MOD.cursor_login_error("Not logged in"))
+
+    def test_cursor_logged_in_reads_json_flag(self) -> None:
+        proc = mock.Mock()
+        proc.stdout = json.dumps({"isAuthenticated": True, "status": "authenticated"})
+        proc.stderr = ""
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD.subprocess, "run", return_value=proc) as run:
+                self.assertTrue(MOD.cursor_logged_in())
+        argv = run.call_args[0][0]
+        self.assertIn("status", argv)
+        self.assertIn("--format", argv)
+        self.assertIn("json", argv)
+        kwargs = run.call_args.kwargs
+        self.assertEqual(kwargs.get("cwd"), str(MOD.ROOT))
+        self.assertIn("HOME", kwargs.get("env") or {})
+        proc.stdout = json.dumps({"isAuthenticated": False, "message": "Not logged in"})
+        with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
+            with mock.patch.object(MOD.subprocess, "run", return_value=proc):
+                self.assertFalse(MOD.cursor_logged_in())
+
+    def test_load_existing_env_sets_missing_key_without_returning_value(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="online-env-") as tmp:
+            path = Path(tmp) / ".env"
+            path.write_text("XAI_API_KEY=test-from-file\nGROK_MODEL=grok-4\n", encoding="utf-8")
+            env = {k: v for k, v in os.environ.items() if k not in {"XAI_API_KEY", "GROK_API_KEY"}}
+            with mock.patch.dict(os.environ, env, clear=True):
+                out = MOD.load_existing_env([path])
+                self.assertTrue(MOD.has_xai_key())
+                self.assertEqual(os.environ.get("GROK_MODEL"), "grok-4")
+        blob = json.dumps(out)
+        self.assertIn("XAI_API_KEY", out["found"])
+        self.assertIn("XAI_API_KEY", out["loaded"])
+        self.assertNotIn("test-from-file", blob)
+        self.assertNotIn("test-from-file", json.dumps(out["found"]))
+
+    def test_load_existing_env_does_not_overwrite(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="online-env-keep-") as tmp:
+            path = Path(tmp) / ".env"
+            path.write_text("XAI_API_KEY=from-file\n", encoding="utf-8")
+            with mock.patch.dict(os.environ, {"XAI_API_KEY": "already-set"}):
+                out = MOD.load_existing_env([path])
+                self.assertEqual(os.environ.get("XAI_API_KEY"), "already-set")
+        self.assertIn("XAI_API_KEY", out["found"])
+        self.assertNotIn("XAI_API_KEY", out["loaded"])
+        self.assertNotIn("from-file", json.dumps(out))
+        self.assertNotIn("already-set", json.dumps(out))
 
     def test_clip_spoken_keeps_last_sentence(self) -> None:
         long = "First sentence is done. " + ("word " * 200)

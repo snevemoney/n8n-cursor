@@ -27,6 +27,13 @@ GROKBOT_CONN = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 DEFAULT_VPS = "root@69.62.66.78"
 DEFAULT_MODEL = "grok-4"
 SPEAK_CAP = 900
+ALLOWED_ENV = (
+    "XAI_API_KEY",
+    "GROK_API_KEY",
+    "GROK_MODEL",
+    "GROKBOT_BASE_URL",
+    "GROKBOT_TOKEN",
+)
 LOGIN_UNKNOWN = (
     "UNKNOWN. Cursor agent needs a one-time login. "
     "Run agent login in Terminal."
@@ -121,6 +128,85 @@ def has_xai_key() -> bool:
     return bool(grok_api_key())
 
 
+def parse_dotenv(path: Path) -> dict[str, str]:
+    """KEY=VALUE from an existing env file. Values stay local. Never log them."""
+    out: dict[str, str] = {}
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return {}
+    for line in text.splitlines():
+        raw = line.strip()
+        if not raw or raw.startswith("#") or "=" not in raw:
+            continue
+        if raw.startswith("export "):
+            raw = raw[7:].strip()
+        key, _, val = raw.partition("=")
+        key = key.strip()
+        val = val.strip()
+        if len(val) >= 2 and val[0] == val[-1] and val[0] in {"'", '"'}:
+            val = val[1:-1]
+        if key:
+            out[key] = val
+    return out
+
+
+def default_env_files() -> list[Path]:
+    """Existing files only. Face used to skip these and miss a brain already on disk."""
+    return [
+        ROOT / ".env",
+        ROOT / ".env.dev",
+        ROOT / ".env.local",
+        ROOT / "apps" / "scorpion" / ".env.local",
+        Path.home() / ".env",
+    ]
+
+
+def ensure_mac_user_env() -> None:
+    """4018 must share the Mac user's HOME and ~/.local/bin with Terminal."""
+    home = (os.environ.get("HOME") or "").strip() or str(Path.home())
+    os.environ["HOME"] = home
+    local_bin = str(Path(home) / ".local" / "bin")
+    parts = [p for p in (os.environ.get("PATH") or "").split(":") if p]
+    if local_bin not in parts:
+        parts.insert(0, local_bin)
+    os.environ["PATH"] = ":".join(parts)
+
+
+def agent_env() -> dict[str, str]:
+    """Env for `agent` subprocesses. Same HOME/PATH as the Mac user, not a thin 4018 PATH."""
+    ensure_mac_user_env()
+    return dict(os.environ)
+
+
+def load_existing_env(files: list[Path] | None = None) -> dict:
+    """Load already-present brain keys into this process. Names only in the return.
+
+    Do not overwrite a key that is already set. Do not print values.
+    """
+    ensure_mac_user_env()
+    found: list[str] = []
+    loaded: list[str] = []
+    scanned = 0
+    for path in files if files is not None else default_env_files():
+        if not path.is_file():
+            continue
+        scanned += 1
+        parsed = parse_dotenv(path)
+        for key in ALLOWED_ENV:
+            val = (parsed.get(key) or "").strip()
+            if not val:
+                continue
+            if key not in found:
+                found.append(key)
+            if (os.environ.get(key) or "").strip():
+                continue
+            os.environ[key] = val
+            if key not in loaded:
+                loaded.append(key)
+    return {"ok": True, "scanned": scanned, "found": found, "loaded": loaded}
+
+
 def try_agent_login() -> dict:
     """Last resort after keys are checked. Do not loop this. Do not treat it as talk."""
     cmd = agent_cmd()
@@ -133,6 +219,7 @@ def try_agent_login() -> dict:
             text=True,
             timeout=45,
             cwd=str(ROOT),
+            env=agent_env(),
         )
     except subprocess.TimeoutExpired:
         return {"tried": True, "ok": False, "reason": "timeout"}
@@ -178,14 +265,15 @@ def cursor_cli() -> str | None:
 def agent_cmd() -> list[str] | None:
     """Prefer the headless `agent` binary. `cursor` is the GUI.
 
-    4018 often has a thinner PATH than Terminal. Also look at ~/.local/bin.
+    4018 often has a thinner PATH than Terminal. Put ~/.local/bin first, then which.
     """
+    ensure_mac_user_env()
+    home_agent = Path(os.environ.get("HOME") or Path.home()) / ".local" / "bin" / "agent"
+    if home_agent.is_file() and os.access(home_agent, os.X_OK):
+        return [str(home_agent)]
     agent = shutil.which("agent")
     if agent:
         return [agent]
-    home_agent = Path.home() / ".local" / "bin" / "agent"
-    if home_agent.is_file() and os.access(home_agent, os.X_OK):
-        return [str(home_agent)]
     cursor = shutil.which("cursor")
     if cursor:
         return [cursor, "agent"]
@@ -444,7 +532,14 @@ def call_cursor() -> dict:
             "spoken": "UNKNOWN. Cursor agent CLI is missing.",
         }
     try:
-        proc = subprocess.run([*cmd, "--version"], capture_output=True, text=True, timeout=8)
+        proc = subprocess.run(
+            [*cmd, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            cwd=str(ROOT),
+            env=agent_env(),
+        )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return {"ok": False, "unknown": True, "wire": "cursor", "spoken": f"UNKNOWN. Cursor CLI failed: {exc}."}
     ver = (proc.stdout or proc.stderr or "").strip().splitlines()[0] if (proc.stdout or proc.stderr) else "present"
@@ -463,14 +558,32 @@ def cursor_login_error(text: str) -> bool:
 
 
 def cursor_logged_in() -> bool:
-    """One `agent status` read. Do not treat this as a billed `agent -p`."""
+    """One live `agent status`. Bus flags and last-wire leftovers are not this read.
+
+    Same binary, HOME, PATH, and repo cwd as Terminal. JSON `isAuthenticated` wins
+    over a stale `cursor_login_said` flag in the pipeline.
+    """
     cmd = agent_cmd()
     if not cmd:
         return False
     try:
-        proc = subprocess.run([*cmd, "status"], capture_output=True, text=True, timeout=8)
+        proc = subprocess.run(
+            [*cmd, "status", "--format", "json"],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            cwd=str(ROOT),
+            env=agent_env(),
+        )
     except (OSError, subprocess.TimeoutExpired):
         return False
+    raw = (proc.stdout or "").strip() or (proc.stderr or "").strip()
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        data = None
+    if isinstance(data, dict) and "isAuthenticated" in data:
+        return bool(data.get("isAuthenticated"))
     text = f"{proc.stdout or ''} {proc.stderr or ''}"
     if cursor_login_error(text):
         return False
@@ -492,7 +605,14 @@ def ensure_jarvis_chat(chat_id: str | None = None) -> str | None:
     if not cmd or not cursor_logged_in():
         return None
     try:
-        proc = subprocess.run([*cmd, "create-chat"], capture_output=True, text=True, timeout=20, cwd=str(ROOT))
+        proc = subprocess.run(
+            [*cmd, "create-chat"],
+            capture_output=True,
+            text=True,
+            timeout=20,
+            cwd=str(ROOT),
+            env=agent_env(),
+        )
     except (OSError, subprocess.TimeoutExpired):
         return None
     out = (proc.stdout or "").strip()
@@ -670,6 +790,7 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
             stderr=subprocess.PIPE,
             text=True,
             cwd=str(ROOT),
+            env=agent_env(),
         )
     except OSError as exc:
         yield _cursor_fail(f"UNKNOWN. Cursor agent failed: {exc}.")

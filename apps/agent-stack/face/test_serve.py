@@ -103,6 +103,7 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("_MOUTH_MTIME", text)
         self.assertIn("st_mtime", text)
         self.assertIn("pipeline.py", text)
+        self.assertIn("load_existing_env", text)
         self.assertNotIn('bus.get("permission_ask") or bus.get("utterance")', text)
         self.assertNotIn("May I hand this to the grok desk", text)
 
