@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>J.A.R.V.I.S.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --void: #020805;
+      --forest: #03140c;
+      --trace: #1f6b3a;
+      --neon: #3dff6a;
+      --mint: #b8ffc9;
+      --amber: #e0a24a;
+      --ink: #041208;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%; overflow: hidden;
+      background: var(--void); color: var(--mint);
+      font-family: "Share Tech Mono", ui-monospace, monospace;
+    }
+    #board { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+    .hud {
+      position: fixed; z-index: 2; pointer-events: none;
+      letter-spacing: .18em; font-size: 12px; color: #d8ffe4;
+      text-shadow: 0 0 10px rgba(61, 255, 106, .35);
+    }
+    .hud.tl { top: 22px; left: 28px; }
+    .hud.tr { top: 22px; right: 28px; text-align: right; display: flex; align-items: flex-start; gap: 14px; }
+    .hud.bl { bottom: 22px; left: 28px; }
+    .hud.br { bottom: 22px; right: 28px; text-align: right; }
+    .hud .name { font-size: 15px; letter-spacing: .42em; }
+    .hud .sub { opacity: .7; margin-top: 6px; letter-spacing: .22em; font-size: 10px; }
+    .dots { display: flex; gap: 10px; margin-top: 8px; }
+    .dots span { display: inline-flex; align-items: center; gap: 5px; letter-spacing: .16em; font-size: 10px; }
+    .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 8px var(--neon); }
+    .phase { font-size: 18px; letter-spacing: .34em; }
+    .clock { opacity: .75; margin-top: 6px; letter-spacing: .2em; }
+    .orb {
+      width: 18px; height: 18px; border-radius: 50%; margin-top: 4px;
+      background: radial-gradient(circle at 35% 30%, #e8ffe8, var(--neon) 45%, #0b3d1c 80%);
+      box-shadow: 0 0 18px var(--neon); animation: pulse 1.8s ease-in-out infinite;
+    }
+    body.listen .orb { animation-duration: 1.1s; }
+    body.think .orb { animation-duration: .7s; box-shadow: 0 0 22px var(--amber); }
+    body.speak .orb { animation-duration: .9s; }
+    @keyframes pulse { 50% { transform: scale(1.25); opacity: .75; } }
+    .chip {
+      position: fixed; z-index: 3; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      min-width: min(72vw, 640px); min-height: 88px;
+      padding: 22px 36px; text-align: center;
+      background: rgba(2, 10, 6, .78);
+      border: 1px solid rgba(61, 255, 106, .55);
+      box-shadow: 0 0 40px rgba(61, 255, 106, .22), inset 0 0 40px rgba(61, 255, 106, .06);
+    }
+    .chip .mark {
+      font-size: clamp(28px, 5vw, 48px); letter-spacing: .42em;
+      margin-left: .42em; color: #f4fff6;
+      text-shadow: 0 0 18px rgba(61, 255, 106, .55);
+    }
+    body.listen .chip { border-color: #7dcea0; }
+    body.think .chip { border-color: var(--amber); }
+    body.speak .chip { box-shadow: 0 0 70px rgba(61, 255, 106, .38); }
+    .chip .line { margin-top: 10px; font-size: 12px; letter-spacing: .12em; color: rgba(184, 255, 201, .72); }
+    .chip .ask { color: var(--amber); }
+    #wave { width: 100%; height: 46px; display: none; }
+    body.listen #wave { display: block; }
+    body.think .mark { letter-spacing: .18em; font-size: 22px; }
+    input#typed {
+      position: fixed; z-index: 4; left: 50%; bottom: 64px;
+      transform: translateX(-50%); width: min(70vw, 520px);
+      background: rgba(2, 10, 6, .7); color: var(--mint);
+      border: 1px solid rgba(61, 255, 106, .3); padding: 8px 12px;
+      font: 12px "Share Tech Mono", ui-monospace, monospace; letter-spacing: .08em;
+      display: none;
+    }
+    input#typed.on { display: block; }
+    @media (prefers-reduced-motion: reduce) {
+      .orb, #board { animation: none !important; }
+    }
+  </style>
+</head>
+<body class="idle">
+  <canvas id="board" aria-hidden="true"></canvas>
+  <div class="hud tl">
+    <div class="name" id="hudName">J.A.R.V.I.S.</div>
+    <div class="sub" id="link">NEURAL LINK - CHECKING WIRES</div>
+    <div class="sub" id="mode">MODE - AGENT</div>
+    <div class="sub" id="voice">VOICE - CHECKING</div>
+    <div class="dots">
+      <span><i></i>ONLINE</span>
+      <span><i></i>LIVE</span>
+      <span><i></i>CONNECTED</span>
+    </div>
+  </div>
+  <div class="hud tr">
+    <div>
+      <div class="phase" id="phase">IDLE</div>
+      <div class="clock" id="clock">00:00:00</div>
+    </div>
+    <div class="orb" aria-hidden="true"></div>
+  </div>
+  <div class="hud bl" id="micline">MIC - TAP TO ARM</div>
+  <div class="hud br" id="hint">TAP BOARD OR SPACE TO TALK</div>
+  <div class="chip" id="chip" role="status">
+    <canvas id="wave" width="640" height="46"></canvas>
+    <div class="mark" id="mark">J.A.R.V.I.S.</div>
+    <div class="line" id="spoken"></div>
+  </div>
+  <input id="typed" placeholder="/ type fallback · enter to send" autocomplete="off" />
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const synth = window.speechSynthesis;
+    const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
+    const STOP_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(stop|cancel|never mind|forget it|shut up)\s*[.!]?\s*$/i;
+    const WAKE_RE = /^(?:hey\s+)?jarvis[,.]?\s*/i;
+    const RESTART_MIN = 400;
+    const RESTART_MAX = 800;
+    const TTS_COOLDOWN = 700;
+    const state = {
+      phase: "idle", rec: null, stream: null, live: true, armed: false, arming: false,
+      listening: false, starting: false, turning: false, pending: null, greeted: false,
+      recGen: 0, restartTimer: 0, lastStartAt: 0, failStreak: 0,
+      stack: { name: "J.A.R.V.I.S.", operator: "Evens" },
+    };
+    const dotted = (name) => String(name || "JARVIS").replace(/[^A-Za-z0-9]/g, "").toUpperCase().split("").join(".") || "J.A.R.V.I.S.";
+    const hasSR = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
+    const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
+    let jarvisVoice = null;
+    let ttsAudio = null;
+    let voiceEngine = "dark";
+    const ttsQueue = [];
+    let ttsBusy = false;
+    let ttsGen = 0;
+    let lastSpoken = "";
+    const ECHO_RE = /adopted path missing|agentic os|i already said cursor|i heard you:|before that you said:|structured long-term memory/i;
+    const ttsSpeaking = () => ttsBusy || !!(synth && synth.speaking) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
+
+    function voiceLang(v) {
+      return String((v && v.lang) || "").toLowerCase().replace(/_/g, "-");
+    }
+    function voiceName(v) {
+      return String((v && v.name) || "").toLowerCase();
+    }
+    function isFrenchVoice(v) {
+      const lang = voiceLang(v);
+      const name = voiceName(v);
+      return lang.startsWith("fr") || /french|fran[cç]ais|am[eé]lie|jacques|thomas/.test(name);
+    }
+    function isEnglishVoice(v) {
+      return voiceLang(v).startsWith("en") && !isFrenchVoice(v);
+    }
+    function scoreVoice(v) {
+      if (!v || isFrenchVoice(v) || !isEnglishVoice(v)) return -1;
+      const name = voiceName(v);
+      const lang = voiceLang(v);
+      let s = 10;
+      if (lang.startsWith("en-gb")) s += 40;
+      else if (lang.startsWith("en-us")) s += 10;
+      if (/samantha|compact|novelty|thomas/.test(name)) s -= 40;
+      return s;
+    }
+    function pickEnglishVoice() {
+      if (!synth) return null;
+      const voices = synth.getVoices() || [];
+      let best = null;
+      let bestScore = -1;
+      voices.forEach((v) => {
+        const s = scoreVoice(v);
+        if (s > bestScore) { best = v; bestScore = s; }
+      });
+      jarvisVoice = best;
+      return best;
+    }
+    if (synth) {
+      pickEnglishVoice();
+      if (typeof synth.addEventListener === "function") synth.addEventListener("voiceschanged", pickEnglishVoice);
+      else synth.onvoiceschanged = pickEnglishVoice;
+    }
+
+    function paintPhase(phase) {
+      state.phase = phase || "idle";
+      document.body.className = state.phase;
+      $("phase").textContent = state.phase.toUpperCase();
+      if (state.phase === "think") $("hint").textContent = "PROCESSING...";
+      else if (!state.armed) $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
+      else $("hint").textContent = 'SAY "JARVIS" OR TAP SPACE · MIC LIVE';
+      if (state.listening || state.phase === "listen") $("micline").textContent = "MIC - LISTENING";
+      else if (state.armed) $("micline").textContent = 'MIC - LISTENING FOR "JARVIS"';
+      else $("micline").textContent = "MIC - TAP TO ARM";
+    }
+
+    function tickClock() {
+      const d = new Date();
+      $("clock").textContent = [d.getHours(), d.getMinutes(), d.getSeconds()].map((n) => String(n).padStart(2, "0")).join(":");
+    }
+
+    async function api(path, body) {
+      const opt = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+      const res = await fetch(path, opt);
+      return res.json();
+    }
+
+    function afterSpeak() {
+      if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
+      if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
+    }
+    function speakLocal(text) {
+      if (!text || !synth) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-GB";
+      const voice = jarvisVoice || pickEnglishVoice();
+      if (voice && !isFrenchVoice(voice)) u.voice = voice;
+      u.rate = 1.02;
+      u.onstart = () => paintPhase("speak");
+      u.onend = afterSpeak;
+      synth.speak(u);
+    }
+    function stopListen() {
+      state.recGen += 1;
+      const rec = state.rec;
+      state.rec = null;
+      state.listening = false;
+      state.starting = false;
+      if (rec) {
+        try { rec.onresult = null; rec.onend = null; rec.onerror = null; } catch (e) {}
+        try { rec.abort(); } catch (e) {
+          try { rec.stop(); } catch (err) {}
+        }
+      }
+    }
+    function stopSpeech() {
+      ttsGen += 1;
+      ttsQueue.length = 0;
+      ttsBusy = false;
+      stopListen();
+      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
+      if (synth) synth.cancel();
+    }
+    function productMouth() {
+      return voiceEngine === "elevenlabs" || voiceEngine === "kokoro" || voiceEngine === "kokoro-dark-python";
+    }
+    async function speakCloud(text, gen) {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok || res.status === 204) return false;
+      if (gen !== undefined && gen !== ttsGen) return false;
+      const blob = await res.blob();
+      if (!blob || blob.size < 32) return false;
+      if (synth) synth.cancel();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      ttsAudio = audio;
+      paintPhase("speak");
+      try {
+        await audio.play();
+      } catch (e) {
+        URL.revokeObjectURL(url);
+        ttsAudio = null;
+        return false;
+      }
+      await new Promise((resolve) => {
+        audio.onended = resolve;
+        audio.onerror = resolve;
+      });
+      if (ttsAudio === audio) ttsAudio = null;
+      URL.revokeObjectURL(url);
+      return true;
+    }
+    function enqueueSpeak(text) {
+      if (!text) return;
+      ttsQueue.push(text);
+      pumpTts();
+    }
+    async function pumpTts() {
+      if (ttsBusy) return;
+      const gen = ttsGen;
+      ttsBusy = true;
+      while (ttsQueue.length && gen === ttsGen) {
+        const next = ttsQueue.shift();
+        paintPhase("speak");
+        let ok = false;
+        try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
+        if (!ok && gen === ttsGen && productMouth()) {
+          try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
+        }
+        if (!ok && gen === ttsGen && !productMouth()) speakLocal(next);
+      }
+      ttsBusy = false;
+      if (gen === ttsGen) afterSpeak();
+    }
+    function speak(text) {
+      if (!text) return;
+      enqueueSpeak(text);
+    }
+
+    async function greet() {
+      if (state.greeted) return;
+      state.greeted = true;
+      const who = state.stack.operator || "Evens";
+      const line = `Hello ${who}, what are we working on today?`;
+      $("spoken").textContent = line;
+      speak(line);
+    }
+
+    let turnAbort = null;
+    let turnGen = 0;
+    async function turn(utterance, approved) {
+      const isStop = STOP_RE.test(utterance || "");
+      if (!utterance) return;
+      if (state.turning && turnAbort) {
+        try { turnAbort.abort(); } catch (e) {}
+      }
+      turnGen += 1;
+      const gen = turnGen;
+      stopSpeech();
+      state.turning = true;
+      lastSpoken = "";
+      paintPhase("think");
+      if (!isStop) $("spoken").textContent = "";
+      const ac = new AbortController();
+      turnAbort = ac;
+      try {
+        const res = await fetch("/api/turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+          body: JSON.stringify({ utterance, approved: !!approved, stream: true }),
+          signal: ac.signal,
+        });
+        const ctype = (res.headers.get("content-type") || "").toLowerCase();
+        if (ctype.includes("text/event-stream") && res.body) {
+          const reader = res.body.getReader();
+          const dec = new TextDecoder();
+          let buf = "";
+          let last = null;
+          let heardDelta = false;
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            const parts = buf.split("\n\n");
+            buf = parts.pop() || "";
+            for (const part of parts) {
+              const line = part.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim()).join("");
+              if (!line) continue;
+              try { last = JSON.parse(line); } catch (err) { continue; }
+              if (last.ask) state.pending = utterance;
+              else state.pending = null;
+              $("spoken").className = "line" + (last.ask ? " ask" : "");
+              if (last.spoken) {
+                lastSpoken = last.spoken;
+                $("spoken").textContent = last.spoken;
+              }
+              if (last.spoken_delta) {
+                heardDelta = true;
+                enqueueSpeak(last.spoken_delta);
+              }
+              if (last.done && !heardDelta && last.spoken) enqueueSpeak(last.spoken);
+            }
+          }
+        } else {
+          const out = await res.json();
+          $("spoken").textContent = out.spoken || "";
+          $("spoken").className = "line" + (out.ask ? " ask" : "");
+          if (out.ask) state.pending = utterance;
+          else state.pending = null;
+          enqueueSpeak(out.spoken || "");
+        }
+      } catch (e) {
+        if (e && e.name === "AbortError") {
+          $("spoken").textContent = "Stopped. Standing by.";
+        } else {
+          $("spoken").textContent = "Turn failed. Type and enter, or tap the board.";
+        }
+      }
+      if (turnGen !== gen) return;
+      if (turnAbort === ac) turnAbort = null;
+      state.turning = false;
+      if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
+    }
+
+    function isMouthEcho(said) {
+      const text = (said || "").trim();
+      if (!text) return false;
+      if (ttsSpeaking() || state.turning) return true;
+      if (ECHO_RE.test(text)) return true;
+      if (lastSpoken && text.length > 20 && lastSpoken.toLowerCase().indexOf(text.toLowerCase().slice(0, 40)) >= 0) return true;
+      return false;
+    }
+    function handleHeard(raw) {
+      let said = (raw || "").trim();
+      if (!said) return;
+      if (isMouthEcho(said)) return;
+      const woke = WAKE_RE.test(said);
+      said = said.replace(WAKE_RE, "").trim() || (woke ? "" : said);
+      if (!said) { greet(); return; }
+      if (state.pending && YES_RE.test(said)) turn(state.pending, true);
+      else turn(said, false);
+    }
+
+    function scheduleRestart(ms) {
+      clearTimeout(state.restartTimer);
+      if (!state.live || !state.armed) return;
+      if (ttsSpeaking()) return;
+      const wait = Math.max(RESTART_MIN, Math.min(RESTART_MAX, ms || RESTART_MIN));
+      state.restartTimer = setTimeout(() => {
+        if (ttsSpeaking()) return;
+        if (state.live && state.armed && !state.listening && !state.starting && !state.rec) startListen();
+      }, wait);
+    }
+
+    function showTypeFallback(line) {
+      $("spoken").textContent = line;
+      $("typed").classList.add("on");
+      $("hint").textContent = "TYPE AND ENTER · OR TAP THE BOARD";
+    }
+
+    async function holdMic() {
+      if (streamLive()) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+      state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return streamLive();
+    }
+
+    function startListen() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        showTypeFallback("Type here, or tap the board and allow the microphone.");
+        return;
+      }
+      if (!state.live || !state.armed) return;
+      if (ttsSpeaking()) return;
+      if (state.listening || state.starting || state.rec) return;
+      state.recGen += 1;
+      const gen = state.recGen;
+      const rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+      rec.maxAlternatives = 1;
+      rec.onstart = () => {
+        if (gen !== state.recGen) return;
+        state.starting = false;
+        state.listening = true;
+        state.failStreak = 0;
+        state.lastStartAt = Date.now();
+        if (!state.turning && !ttsSpeaking()) paintPhase("listen");
+      };
+      rec.onspeechstart = () => {
+        if (ttsSpeaking()) return;
+        if (!state.turning) paintPhase("listen");
+      };
+      rec.onresult = (e) => {
+        if (ttsSpeaking() || state.turning) return;
+        const last = e.results[e.results.length - 1];
+        const t = last[0].transcript;
+        $("spoken").textContent = t;
+        if (last.isFinal) handleHeard(t);
+      };
+      rec.onerror = (e) => {
+        const err = (e && e.error) || "";
+        if (err === "not-allowed" || err === "service-not-allowed") {
+          state.armed = false;
+          state.listening = false;
+          state.starting = false;
+          showTypeFallback("Allow the microphone, then tap the board.");
+          return;
+        }
+        if (err === "network") {
+          showTypeFallback("Speech needs network. Type is a fallback.");
+          return;
+        }
+        if (err === "aborted") state.failStreak += 1;
+      };
+      rec.onend = () => {
+        if (gen !== state.recGen) return;
+        const lived = Date.now() - (state.lastStartAt || Date.now());
+        state.listening = false;
+        state.starting = false;
+        state.rec = null;
+        if (!state.live || !state.armed) return;
+        if (ttsSpeaking()) return;
+        if (lived < RESTART_MIN) state.failStreak += 1;
+        else state.failStreak = Math.max(0, state.failStreak - 1);
+        const backoff = Math.min(RESTART_MAX, RESTART_MIN + state.failStreak * 150);
+        scheduleRestart(backoff);
+      };
+      state.rec = rec;
+      state.starting = true;
+      state.lastStartAt = Date.now();
+      try {
+        rec.start();
+      } catch (e) {
+        state.starting = false;
+        state.rec = null;
+        if (e && /already started/i.test(String(e.message || e))) return;
+        scheduleRestart(RESTART_MAX);
+      }
+    }
+
+    async function armMic() {
+      if (state.arming) return;
+      if (state.armed && streamLive()) {
+        if (!state.listening && !state.starting && !state.rec) startListen();
+        return;
+      }
+      if (!hasSR()) {
+        showTypeFallback("Type here, or tap the board and allow the microphone.");
+        state.armed = true;
+        return;
+      }
+      state.arming = true;
+      try {
+        await holdMic();
+      } catch (e) {
+        state.arming = false;
+        showTypeFallback("Allow the microphone, then tap the board.");
+        return;
+      }
+      state.armed = true;
+      state.live = true;
+      state.arming = false;
+      try { await api("/api/listen", { live: true }); } catch (e) {}
+      startListen();
+      paintPhase("listen");
+    }
+
+    // --- living circuit board (original MIT; pixels from FiOTrxq9ckM stills) ---
+    const canvas = $("board");
+    const ctx = canvas.getContext("2d");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const traces = [];
+    const nodes = [];
+    const pulses = [];
+
+    function layout() {
+      const dpr = devicePixelRatio || 1;
+      canvas.width = innerWidth * dpr;
+      canvas.height = innerHeight * dpr;
+      traces.length = 0;
+      nodes.length = 0;
+      pulses.length = 0;
+      const cols = 18, rows = 11;
+      const gw = canvas.width / cols, gh = canvas.height / rows;
+      for (let y = 1; y < rows; y++) {
+        for (let x = 1; x < cols; x++) {
+          if (Math.random() < 0.22) continue;
+          const x0 = x * gw + (Math.random() - 0.5) * gw * 0.15;
+          const y0 = y * gh + (Math.random() - 0.5) * gh * 0.15;
+          const horiz = Math.random() > 0.45;
+          const x1 = horiz ? x0 + gw * (0.7 + Math.random() * 1.4) * (Math.random() > 0.5 ? 1 : -1) : x0;
+          const y1 = horiz ? y0 : y0 + gh * (0.7 + Math.random() * 1.4) * (Math.random() > 0.5 ? 1 : -1);
+          traces.push({ x0, y0, x1, y1, w: 0.8 + Math.random() * 1.6 });
+          if (Math.random() < 0.35) nodes.push({ x: x0, y: y0, s: 4 + Math.random() * 14, kind: Math.random() < 0.3 ? "chip" : "pad" });
+        }
+      }
+      for (let i = 0; i < 28; i++) {
+        const tr = traces[i % traces.length];
+        pulses.push({ tr, t: Math.random(), speed: 0.002 + Math.random() * 0.006 });
+      }
+    }
+
+    function pal() {
+      if (state.phase === "listen") return [125, 206, 160];
+      if (state.phase === "think") return [224, 162, 74];
+      return [61, 255, 106];
+    }
+
+    function drawBoard() {
+      if (!ctx) return;
+      const w = canvas.width, h = canvas.height;
+      const [r, g, b] = pal();
+      ctx.fillStyle = "#020805";
+      ctx.fillRect(0, 0, w, h);
+      const grd = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, w * 0.55);
+      grd.addColorStop(0, "rgba(20, 80, 40, .35)");
+      grd.addColorStop(1, "rgba(2, 8, 5, 0)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, w, h);
+      ctx.lineCap = "square";
+      traces.forEach((tr) => {
+        ctx.strokeStyle = `rgba(${r},${g},${b},0.18)`;
+        ctx.lineWidth = tr.w * (devicePixelRatio || 1);
+        ctx.beginPath();
+        ctx.moveTo(tr.x0, tr.y0);
+        ctx.lineTo(tr.x1, tr.y1);
+        ctx.stroke();
+      });
+      nodes.forEach((n) => {
+        ctx.fillStyle = `rgba(${r},${g},${b},${n.kind === "chip" ? 0.16 : 0.28})`;
+        ctx.strokeStyle = `rgba(${r},${g},${b},0.45)`;
+        ctx.lineWidth = 1;
+        const s = n.s * (devicePixelRatio || 1);
+        ctx.beginPath();
+        ctx.rect(n.x - s / 2, n.y - s / 2, s, n.kind === "chip" ? s * 0.55 : s);
+        ctx.fill();
+        ctx.stroke();
+      });
+      const dir = state.phase === "listen" ? -1 : 1;
+      const boost = state.phase === "idle" ? 1 : 2.1;
+      pulses.forEach((p) => {
+        if (!reduce) p.t = (p.t + p.speed * boost * dir + 1) % 1;
+        const x = p.tr.x0 + (p.tr.x1 - p.tr.x0) * p.t;
+        const y = p.tr.y0 + (p.tr.y1 - p.tr.y0) * p.t;
+        ctx.fillStyle = `rgba(${r},${g},${b},0.9)`;
+        ctx.beginPath();
+        ctx.arc(x, y, 2.2 * (devicePixelRatio || 1), 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(drawBoard);
+    }
+
+    const wave = $("wave");
+    const wctx = wave.getContext("2d");
+    function drawWave(t) {
+      if (!wctx) return;
+      wctx.clearRect(0, 0, wave.width, wave.height);
+      wctx.strokeStyle = "#7dcea0";
+      wctx.lineWidth = 2;
+      wctx.beginPath();
+      for (let x = 0; x < wave.width; x++) {
+        const y = 23 + Math.sin(x * 0.08 + t / 90) * 12 * (0.4 + Math.random() * 0.6);
+        if (x === 0) wctx.moveTo(x, y);
+        else wctx.lineTo(x, y);
+      }
+      wctx.stroke();
+      requestAnimationFrame(drawWave);
+    }
+
+    const SCRAMBLE = "/#R0?BU&CN1A%X7*Q";
+    function paintChip() {
+      if (state.phase === "think") {
+        $("mark").textContent = Array.from({ length: 12 }, () => SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)]).join(" ");
+      } else if (state.listening || state.phase === "listen") {
+        $("mark").textContent = "LISTENING";
+      } else {
+        $("mark").textContent = dotted(state.stack.face || "JARVIS");
+      }
+    }
+
+    function paintWires(report) {
+      const wires = (report && report.wires) || {};
+      const live = wires.cursor === "harness" || wires.cursor === "print" || wires.cursor === "hand";
+      $("link").textContent = live ? "NEURAL LINK - CURSOR" : "NEURAL LINK - CURSOR DARK";
+    }
+    function paintVoice(report) {
+      if (!$("voice")) return;
+      voiceEngine = String((report && report.engine) || "dark");
+      const name = String((report && report.voice) || "bm_lewis").replace(/_/g, " ").toUpperCase();
+      $("voice").textContent = "VOICE - " + name;
+    }
+
+    async function refresh() {
+      try {
+        const bus = await api("/api/bus");
+        if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
+        if ($("mode")) $("mode").textContent = "MODE - " + String(bus.harness_mode || "agent").toUpperCase();
+        const wires = await api("/api/wires");
+        paintWires(wires);
+        const voice = await api("/api/voice");
+        paintVoice(voice);
+      } catch (e) {
+        $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
+      }
+    }
+
+    function onArmGesture(e) {
+      if (e && e.target === $("typed")) return;
+      if (e && e.preventDefault) e.preventDefault();
+      armMic();
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && e.target !== $("typed")) {
+        e.preventDefault();
+        armMic();
+      }
+      if (e.key === "/") {
+        e.preventDefault();
+        $("typed").classList.add("on");
+        $("typed").focus();
+      }
+      if (e.key === "Escape") $("typed").classList.remove("on");
+    });
+    $("typed").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        turn($("typed").value.trim(), false);
+        $("typed").value = "";
+      }
+    });
+    $("chip").addEventListener("click", onArmGesture);
+    $("board").addEventListener("click", onArmGesture);
+
+    (async () => {
+      try {
+        const stack = await api("/api/stack");
+        state.stack = { ...state.stack, ...stack, face: "JARVIS" };
+        $("hudName").textContent = dotted("JARVIS");
+        $("mark").textContent = dotted("JARVIS");
+      } catch (e) {}
+      layout();
+      window.addEventListener("resize", layout);
+      if (!reduce) {
+        requestAnimationFrame(drawBoard);
+        requestAnimationFrame(drawWave);
+      }
+      tickClock();
+      setInterval(tickClock, 1000);
+      setInterval(paintChip, 160);
+      refresh();
+      setInterval(refresh, 4000);
+      if (!hasSR()) {
+        showTypeFallback("Type here, or tap the board and allow the microphone.");
+        return;
+      }
+      let granted = false;
+      try {
+        const perm = await navigator.permissions.query({ name: "microphone" });
+        granted = perm.state === "granted";
+      } catch (e) {}
+      if (granted) armMic();
+      else {
+        paintPhase("idle");
+        $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
+      }
+    })();
+  </script>
+</body>
+</html>
