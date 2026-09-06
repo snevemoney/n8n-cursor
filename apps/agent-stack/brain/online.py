@@ -6,6 +6,7 @@ Talk harness is Cursor CLI (cloud). Memory is the store
 """
 from __future__ import annotations
 
+import base64
 import json
 import os
 import re
@@ -232,6 +233,72 @@ def grok_model() -> str:
     return (os.environ.get("GROK_MODEL") or DEFAULT_MODEL).strip() or DEFAULT_MODEL
 
 
+def _well_formed_file_key(key_b64: str) -> bool:
+    raw = (key_b64 or "").strip()
+    if not raw:
+        return False
+    try:
+        return len(base64.b64decode(raw)) == 32
+    except (ValueError, TypeError):
+        return False
+
+
+def grokbot_file_key() -> str:
+    """Plain 32-byte AES key already on disk. Never log it. v10 blobs stay sealed."""
+    path = Path.home() / "Library/Application Support/Grok Bot/sand-secrets.json"
+    if not path.is_file():
+        return ""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    if not isinstance(data, dict):
+        return ""
+    key = str(data.get("local-exec-file-key") or "").strip()
+    return key if _well_formed_file_key(key) else ""
+
+
+def unseal_local_exec(envelope: dict, key_b64: str) -> dict | None:
+    """AES-256-GCM envelope used by Grok Bot. Values stay local. Never print them."""
+    if not isinstance(envelope, dict) or envelope.get("sandSealedFile") != 1:
+        return None
+    blob = envelope.get("data")
+    if not isinstance(blob, str) or not blob.strip() or not _well_formed_file_key(key_b64):
+        return None
+    node = shutil.which("node") or str(Path.home() / ".local/bin/node")
+    if not Path(node).is_file():
+        return None
+    script = (
+        "const c=require('crypto');"
+        "const key=Buffer.from(process.env.AGENT_STACK_UNSEAL_KEY||'','base64');"
+        "const blob=Buffer.from(process.env.AGENT_STACK_UNSEAL_BLOB||'','base64');"
+        "if(key.length!==32||blob.length<28) process.exit(2);"
+        "const iv=blob.subarray(0,12),tag=blob.subarray(12,28),ct=blob.subarray(28);"
+        "const d=c.createDecipheriv('aes-256-gcm',key,iv);d.setAuthTag(tag);"
+        "process.stdout.write(Buffer.concat([d.update(ct),d.final()]));"
+    )
+    env = dict(os.environ)
+    env["AGENT_STACK_UNSEAL_KEY"] = key_b64.strip()
+    env["AGENT_STACK_UNSEAL_BLOB"] = blob.strip()
+    try:
+        proc = subprocess.run(
+            [node, "-e", script],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            env=env,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0 or not (proc.stdout or "").strip():
+        return None
+    try:
+        parsed = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
 def grokbot_gateway() -> dict | None:
     base = (os.environ.get("GROKBOT_BASE_URL") or "").strip().rstrip("/")
     token = (os.environ.get("GROKBOT_TOKEN") or "").strip()
@@ -249,9 +316,22 @@ def grokbot_gateway() -> dict | None:
     tok = str(conn.get("token") or "").strip()
     if url and tok:
         return {"base": url, "token": tok, "source": "grokbot-conn"}
+    key = grokbot_file_key()
+    if key and (conn.get("sandSealedFile") or conn.get("data")):
+        opened = unseal_local_exec(conn, key)
+        if isinstance(opened, dict):
+            url = str(opened.get("baseUrl") or "").strip().rstrip("/")
+            tok = str(opened.get("token") or "").strip()
+            if url and tok:
+                return {"base": url, "token": tok, "source": "grokbot-unsealed"}
     if conn.get("sandSealedFile") or (isinstance(conn.get("data"), str) and "baseUrl" not in conn):
         return {"sealed": True, "source": "grokbot-sealed"}
     return None
+
+
+def grokbot_ready() -> bool:
+    gw = grokbot_gateway()
+    return bool(gw and gw.get("base") and gw.get("token"))
 
 
 def cursor_cli() -> str | None:
@@ -364,6 +444,30 @@ def call_xai(prompt: str, context: str = "") -> dict:
     return {"ok": True, "unknown": False, "wire": "grok", "engine": "xai", "spoken": text, "model": grok_model()}
 
 
+def _grokbot_message_text(got) -> str:
+    if isinstance(got, dict):
+        reply = str(got.get("text") or got.get("message") or got.get("content") or "").strip()
+        msgs = got.get("messages") or got.get("data") or []
+        if not reply and isinstance(msgs, list) and msgs:
+            last = msgs[-1]
+            if isinstance(last, dict):
+                reply = str(last.get("text") or last.get("content") or "").strip()
+        return reply
+    return ""
+
+
+def _grokbot_last(base: str, agent_id: str, headers: dict) -> str:
+    for path in ("/api/getLastMessage", "/api/getAgentMessages", "/api/listMessages"):
+        try:
+            got = _http_json(f"{base}{path}", data={"agentId": agent_id}, headers=headers, timeout=15.0)
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError):
+            continue
+        reply = _grokbot_message_text(got)
+        if reply:
+            return reply
+    return ""
+
+
 def call_grokbot(prompt: str, context: str = "") -> dict:
     gw = grokbot_gateway()
     if not gw or not gw.get("base"):
@@ -397,6 +501,7 @@ def call_grokbot(prompt: str, context: str = "") -> dict:
             "engine": "grokbot",
             "spoken": "UNKNOWN. Grok Bot has no listed desk. Keep Grok Bot open and signed in.",
         }
+    before = _grokbot_last(gw["base"], agent_id, headers)
     try:
         sent = _http_json(
             f"{gw['base']}/api/sendPrompt",
@@ -413,22 +518,18 @@ def call_grokbot(prompt: str, context: str = "") -> dict:
             "spoken": f"UNKNOWN. Grok Bot sendPrompt failed: {exc}.",
         }
     reply = ""
-    for path in ("/api/getLastMessage", "/api/getAgentMessages", "/api/listMessages"):
-        try:
-            got = _http_json(f"{gw['base']}{path}", data={"agentId": agent_id}, headers=headers, timeout=15.0)
-        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError):
-            continue
-        if isinstance(got, dict):
-            reply = str(got.get("text") or got.get("message") or got.get("content") or "").strip()
-            msgs = got.get("messages") or got.get("data") or []
-            if not reply and isinstance(msgs, list) and msgs:
-                last = msgs[-1]
-                if isinstance(last, dict):
-                    reply = str(last.get("text") or last.get("content") or "").strip()
-        if reply:
-            break
-        if reply:
-            return {"ok": True, "unknown": False, "wire": "grokbot", "engine": "grokbot", "spoken": clip_spoken(reply)}
+    for _ in range(4):
+        reply = _grokbot_last(gw["base"], agent_id, headers)
+        if reply and reply != before:
+            return {
+                "ok": True,
+                "unknown": False,
+                "queued": False,
+                "wire": "grokbot",
+                "engine": "grokbot",
+                "spoken": clip_spoken(reply),
+            }
+        time.sleep(0.8)
     return {
         "ok": False,
         "unknown": True,
@@ -445,7 +546,11 @@ def call_grokbot(prompt: str, context: str = "") -> dict:
 
 def call_grok(prompt: str, context: str = "") -> dict:
     if grok_api_key():
-        return call_xai(prompt, context)
+        got = call_xai(prompt, context)
+        if isinstance(got, dict) and got.get("ok") and not got.get("unknown"):
+            spoken = str(got.get("spoken") or "").strip()
+            if spoken and not spoken.upper().startswith("UNKNOWN"):
+                return got
     return call_grokbot(prompt, context)
 
 

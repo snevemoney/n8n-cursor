@@ -165,7 +165,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertNotIn("Still on that", second_spoken)
         self.assertNotEqual(second.get("verb"), "can")
         self.assertTrue(second_spoken.startswith("Sir."))
-        self.assertIn("no model is available", second_spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), second_spoken.lower())
         self.assertNotIn("Still need", second_spoken)
 
     def test_safari_see_calls_see_py_front(self) -> None:
@@ -313,7 +313,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertIn("no model is available", spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), spoken.lower())
         self.assertNotIn("Last you said", spoken)
         self.assertNotIn("You were at", spoken)
         self.assertNotIn("I'm here", spoken)
@@ -409,7 +409,7 @@ class Live4018MouthContractTest(unittest.TestCase):
                 self.assertTrue(spoken.startswith("Sir."), spoken)
                 low = spoken.lower()
                 self.assertTrue(
-                    "no model is available" in low or "agent login" in low,
+                    PIPE.NO_MODEL.lower() in low or "agent login" in low,
                     spoken,
                 )
                 self.assertNotIn("Last you said", spoken)
@@ -446,9 +446,9 @@ class Live4018MouthContractTest(unittest.TestCase):
         star_spoken = star.get("spoken") or ""
         self.assertNotIn("Watchdog", work_spoken)
         self.assertNotIn("factory close", work_spoken.lower())
-        self.assertIn("no model is available", work_spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), work_spoken.lower())
         self.assertNotIn("Last you said", work_spoken)
-        self.assertIn("no model is available", star_spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), star_spoken.lower())
         self.assertNotIn("leverage", star_spoken.lower())
         self.assertNotIn("Watchdog", star_spoken)
 
@@ -477,7 +477,7 @@ class Live4018MouthContractTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken, spoken)
         self.assertTrue(spoken.startswith("Sir."), spoken)
-        self.assertIn("no model is available", spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), spoken.lower())
         self.assertLess(len(spoken), 280)
 
     def test_dark_cursor_safari_see_calls_see_py(self) -> None:
@@ -546,9 +546,9 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertNotIn(lanes, tube_spoken)
         self.assertNotIn("On disk: Website / AI Partner", greet_spoken)
         self.assertNotIn("On disk: Website / AI Partner", can_spoken)
-        self.assertIn("no model is available", greet_spoken.lower())
-        self.assertIn("no model is available", can_spoken.lower())
-        self.assertIn("no model is available", school_spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), greet_spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), can_spoken.lower())
+        self.assertIn(PIPE.NO_MODEL.lower(), school_spoken.lower())
         self.assertNotIn("Last you said", greet_spoken)
         self.assertNotIn("You were at", can_spoken)
         self.assertNotIn("I'm here", greet_spoken)
@@ -566,6 +566,70 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertEqual(tube.get("verb"), "safari_see")
         self.assertEqual(saw, ["YouTube"])
         self.assertIn("youtube", tube_spoken.lower())
+
+    def test_dark_cursor_uses_injected_grokbot_prose(self) -> None:
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": PIPE.LOGIN_UNKNOWN,
+            }
+
+        def fake_bot(prompt: str, context: str = "") -> dict:
+            self.assertIn("pipeline-pack.md", prompt + context)
+            return {
+                "ok": True,
+                "unknown": False,
+                "wire": "grokbot",
+                "engine": "grokbot",
+                "spoken": "Evening. The sitting is quiet.",
+            }
+
+        def queued_bot(prompt: str, context: str = "") -> dict:
+            _ = (prompt, context)
+            return {
+                "ok": False,
+                "unknown": True,
+                "queued": True,
+                "wire": "grokbot",
+                "engine": "grokbot",
+                "spoken": "UNKNOWN. Grok Bot sendPrompt did not return a spoken reply.",
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-grokbot-mouth-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            out = MOUTH.apply_turn(
+                "how's it going",
+                hive=hive,
+                retrieve_roots=[hive / "vault"],
+                cursor_fn=dark_cursor,
+                talk_fn=fake_bot,
+            )
+        with tempfile.TemporaryDirectory(prefix="pipeline-grokbot-queued-") as qtmp:
+            qhive = Path(qtmp)
+            (qhive / "bus").mkdir(parents=True)
+            (qhive / "vault").mkdir(parents=True)
+            miss = MOUTH.apply_turn(
+                "Hello Jarvis",
+                hive=qhive,
+                retrieve_roots=[qhive / "vault"],
+                cursor_fn=dark_cursor,
+                talk_fn=queued_bot,
+            )
+        self.assertEqual(out.get("brain"), "grokbot")
+        self.assertIn("sitting is quiet", out.get("spoken") or "")
+        self.assertNotIn(PIPE.NO_MODEL, out.get("spoken") or "")
+        self.assertNotIn("No model is available", out.get("spoken") or "")
+        miss_spoken = miss.get("spoken") or ""
+        self.assertNotIn("sitting is quiet", miss_spoken)
+        self.assertTrue(
+            "agent login" in miss_spoken.lower() or PIPE.NO_MODEL.lower() in miss_spoken.lower(),
+            miss_spoken,
+        )
 
     def test_dark_cursor_uses_injected_xai_prose(self) -> None:
         cursor_calls: list[str] = []

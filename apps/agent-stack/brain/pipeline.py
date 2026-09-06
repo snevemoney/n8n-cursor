@@ -4,7 +4,7 @@
 Conversation is the product. The model answers first. Hands
 (vault_read / safari_see / cursor_ask / status / refuse_hard_step) only when needed.
 Hard steps stay a spoken proposal. No classify-as-brain. No truncated argv prompt.
-Grok Bot is a desk, not the mouth. call_grokbot stays unused here.
+Grok Bot is a desk, not a new spawn. An already-running local gateway is a mouth.
 """
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ LOGIN_UNKNOWN = (
     "Run agent login in Terminal."
 )
 NEED_LOGIN = "You need `agent login` for a real talk."
-NO_MODEL = "No model is available."
+NO_MODEL = "Cursor is signed out and Grok Bot's gateway is sealed."
 PROPOSAL = (
     "Proposal only. I will not send, pay, deploy, book, or publish. "
     "That hard step stays with you."
@@ -421,11 +421,24 @@ def _is_speak_leak(text: str) -> bool:
     return False
 
 
-def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
-    """Cursor-dark mouth: existing call_xai only when a key is already in the env.
+def _talk_ok(got) -> dict | None:
+    """Keep a live reply. UNKNOWN / queued is not a successful mouth."""
+    if not isinstance(got, dict):
+        return None
+    if got.get("unknown") or got.get("queued") or not got.get("ok"):
+        return None
+    spoken = str(got.get("spoken") or "").strip()
+    if not spoken or spoken.upper().startswith("UNKNOWN"):
+        return None
+    return got
 
-    Do not print a missing key. Do not spawn Grok Bot. Tests that set
-    AGENT_STACK_CURSOR_DRY skip the live HTTP call unless talk_fn is injected.
+
+def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
+    """Cursor-dark mouth: existing xAI key, then an already-running Grok Bot gateway.
+
+    Do not print a missing key. Do not spawn a desk. Do not treat UNKNOWN/queued
+    as talk. Tests that set AGENT_STACK_CURSOR_DRY skip live HTTP unless talk_fn
+    is injected.
     """
     if talk_fn is not None:
         try:
@@ -440,17 +453,21 @@ def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
         return {"ok": True, "spoken": str(got or ""), "wire": "xai", "engine": "xai"}
     if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
         return None
-    if ONLINE is None or not hasattr(ONLINE, "call_xai"):
+    if ONLINE is None:
         return None
-    key_fn = getattr(ONLINE, "has_xai_key", None) or getattr(ONLINE, "grok_api_key", None)
-    try:
-        present = bool(key_fn()) if key_fn is not None else False
-    except (OSError, TypeError, AttributeError):
-        present = False
-    if not present:
-        return None
-    got = ONLINE.call_xai(prompt, pack_text)
-    return got if isinstance(got, dict) else None
+    if hasattr(ONLINE, "call_grok"):
+        return _talk_ok(ONLINE.call_grok(prompt, pack_text))
+    if hasattr(ONLINE, "call_xai"):
+        key_fn = getattr(ONLINE, "has_xai_key", None) or getattr(ONLINE, "grok_api_key", None)
+        try:
+            present = bool(key_fn()) if key_fn is not None else False
+        except (OSError, TypeError, AttributeError):
+            present = False
+        if present:
+            return _talk_ok(ONLINE.call_xai(prompt, pack_text))
+    if hasattr(ONLINE, "call_grokbot"):
+        return _talk_ok(ONLINE.call_grokbot(prompt, pack_text))
+    return None
 
 
 def try_login_once(hive: Path, login_fn=None) -> dict:

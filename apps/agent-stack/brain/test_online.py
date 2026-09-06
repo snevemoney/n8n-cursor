@@ -2,6 +2,7 @@
 """Online brain unit tests. No live billed Grok. No Ollama."""
 from __future__ import annotations
 
+import base64
 import importlib.util
 import json
 import os
@@ -59,9 +60,73 @@ class OnlineBrainTest(unittest.TestCase):
 
         with mock.patch.object(MOD, "grok_api_key", return_value="test-key"):
             with mock.patch.object(MOD, "call_xai", side_effect=fake_xai):
-                out = MOD.call_grok("ping")
+                with mock.patch.object(MOD, "call_grokbot") as bot:
+                    out = MOD.call_grok("ping")
         self.assertEqual(out["spoken"], "hello from grok")
         self.assertEqual(out["engine"], "xai")
+        bot.assert_not_called()
+
+    def test_call_grok_uses_grokbot_when_no_key(self) -> None:
+        def fake_bot(prompt: str, context: str = "") -> dict:
+            return {"ok": True, "wire": "grokbot", "engine": "grokbot", "spoken": "from the gateway"}
+
+        with mock.patch.object(MOD, "grok_api_key", return_value=""):
+            with mock.patch.object(MOD, "call_grokbot", side_effect=fake_bot):
+                out = MOD.call_grok("ping")
+        self.assertEqual(out["spoken"], "from the gateway")
+        self.assertEqual(out["engine"], "grokbot")
+
+    def test_file_key_rejects_v10_blob(self) -> None:
+        self.assertFalse(MOD._well_formed_file_key(""))
+        self.assertFalse(MOD._well_formed_file_key("djEwnot-32-bytes"))
+        good = base64.b64encode(b"a" * 32).decode("ascii")
+        self.assertTrue(MOD._well_formed_file_key(good))
+
+    def test_call_grokbot_returns_new_reply_not_stale(self) -> None:
+        calls = {"n": 0}
+
+        def fake_http(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0):
+            _ = (data, headers, timeout)
+            if url.endswith("/api/listAgents"):
+                return {"agents": [{"name": "Big Boss", "id": "boss-1"}]}
+            if url.endswith("/api/sendPrompt"):
+                return {"ok": True, "http": 200}
+            if url.endswith("/api/getLastMessage"):
+                calls["n"] += 1
+                if calls["n"] == 1:
+                    return {"text": "old desk line"}
+                return {"text": "Evening. The sitting is quiet."}
+            raise AssertionError(url)
+
+        with mock.patch.object(MOD, "grokbot_gateway", return_value={"base": "http://127.0.0.1:9", "token": "t"}):
+            with mock.patch.object(MOD, "_http_json", side_effect=fake_http):
+                with mock.patch.object(MOD.time, "sleep"):
+                    out = MOD.call_grokbot("hello")
+        self.assertTrue(out["ok"])
+        self.assertFalse(out.get("unknown"))
+        self.assertFalse(out.get("queued"))
+        self.assertEqual(out["engine"], "grokbot")
+        self.assertIn("sitting is quiet", out["spoken"])
+        self.assertNotIn("old desk line", out["spoken"])
+
+    def test_call_grokbot_queued_is_not_success(self) -> None:
+        def fake_http(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0):
+            _ = (data, headers, timeout)
+            if url.endswith("/api/listAgents"):
+                return {"agents": [{"name": "Jarvis", "id": "j-1"}]}
+            if url.endswith("/api/sendPrompt"):
+                return {"ok": True, "http": 200}
+            return {"text": "same leftover"}
+
+        with mock.patch.object(MOD, "grokbot_gateway", return_value={"base": "http://127.0.0.1:9", "token": "t"}):
+            with mock.patch.object(MOD, "_http_json", side_effect=fake_http):
+                with mock.patch.object(MOD.time, "sleep"):
+                    out = MOD.call_grokbot("hello")
+        self.assertFalse(out["ok"])
+        self.assertTrue(out["unknown"])
+        self.assertTrue(out["queued"])
+        self.assertTrue(out["spoken"].startswith("UNKNOWN"))
+        self.assertNotIn("same leftover", out["spoken"])
 
     def test_wire_report_lists_need(self) -> None:
         env = {k: v for k, v in os.environ.items() if k not in {"XAI_API_KEY", "GROK_API_KEY", "GROKBOT_BASE_URL", "GROKBOT_TOKEN"}}

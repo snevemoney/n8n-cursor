@@ -358,7 +358,7 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertNotIn("Last you said", spoken)
         self.assertNotIn("You were at", spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertIn("no model is available", spoken.lower())
+        self.assertIn(TURN.PIPELINE.NO_MODEL.lower(), spoken.lower())
         self.assertNotIn("I'm here", spoken)
 
     def test_10_converse_is_default_not_a_template(self) -> None:
@@ -438,7 +438,7 @@ class GoldenPipelineTest(unittest.TestCase):
         c = third.get("spoken") or ""
         for spoken in (a, b, c):
             self.assertTrue(spoken.startswith("Sir."), spoken)
-            self.assertIn("no model is available", spoken.lower())
+            self.assertIn(TURN.PIPELINE.NO_MODEL.lower(), spoken.lower())
             self.assertNotIn("how's it going", spoken.lower())
             self.assertNotIn("what did i just say", spoken.lower())
             self.assertNotIn("Wires, not vibes", spoken)
