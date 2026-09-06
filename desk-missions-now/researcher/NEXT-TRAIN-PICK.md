@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-09-06
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: named pick · TRAIN · unused · halt
 send: removed
 clock: parked
 ---
@@ -14,23 +14,30 @@ clock: parked
 
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
+| **id** | `2J3uX8iRNng` |
 | **steal \| learn** | steal |
 | **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
-| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **Spoken machine** | `same-prompt-bench` |
+| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/full.txt` (6825 words, OBSERVED) |
+| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (line 150, OBSERVED) |
+| **Skip?** | no — not TRAIN-1/2 PASS, not the TRIAGE decoy, not `/workspace` |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** Nate Herk same-prompt bench (Opus vs Fable) is already on this checkout with caption `full.txt` plus LEARNED ACTION TRACE. Spoken machine is label the run, write the stop, referee the patch, blame stale context before swapping models. Steal the stop, not the vendor bakeoff. Not a weight train. Not a buyer surface.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**Retrieve:** theme `same-prompt-bench` → **NONE**. Default-off. Did not dump SIGNAL_INDEX. Did not walk 1803.
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+**This stage (done):** Researcher propose only. Evens validates. Do **not** start TRAIN unless Evens names this id.
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+**Skipped on this checkout (ACTION TRACE present, not this pick):**
+- `kwSVtQ7dziU` — TRAIN-1 **PASS**
+- `X80ljdCPM_U` — TRAIN-2 **PASS** (on-disk pick was this; replaced)
+- `FFWtxjvW2ts` — labeled merge / buyer-surface anti-slop; this week Factory OS only
+- `karpathy-wiki-nate-herk` — no ACTION TRACE (TRIAGE decoy)
+- `factory-os-train-plane` — invent, retired
 
-Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
+`COVERAGE_LEDGER.json` **MISSING-ON-CHECKOUT**. Did not invent the steal_gap-16 list. Four LEARNED files on this checkout have `## ACTION TRACE`; two are PASS; one is buyer-surface this week; this is the remaining unused steal.
+
+Do not remint `same-prompt-bench` / `golden-test-loop`. Do not flip the ledger. Do not attempt the TASK.
 
 Yellow `grokbot_orphans` = 8. Continue.
 
