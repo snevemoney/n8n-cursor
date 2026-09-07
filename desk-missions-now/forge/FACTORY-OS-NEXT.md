@@ -1,6 +1,6 @@
 ---
 tags: [os, factory, forge, reminder]
-at: 2026-08-25
+at: 2026-09-07
 desk: forge
 status: REMINDER · not started on Cloud
 send: removed
@@ -9,24 +9,34 @@ clock: parked
 
 # FACTORY-OS-NEXT
 
-**Status:** REMINDER on Cloud · Mac CLI landed this sitting  
-**Date:** 2026-08-25  
+**Status:** REMINDER · not started on Cloud  
+**Date:** 2026-09-07  
 **SSOT:** `desk-missions-now/forge/FACTORY-OS-NEXT.md` (this file). Doctrine: `desk-missions-now/CLOUD-HOST.md`.
 
-## Named gap
+## OBSERVED (this Cloud run)
 
-First Factory OS bite = hive CLI to list/read Grok desk threads (sibling of `cursor-chat-sessions`). Not a remint. `skill-from-session` stays the mint gate.
+- Checkout has sibling files on git: `scripts/hive/os/grok-chat-sessions.py` + `scripts/hive/grok-skills/grok-chat-sessions.md`. Same card as `cursor-chat-sessions` (`list` → one id → `read`). Not a remint. Do not stack a second SKU.
+- This Cloud Agent did not list Grok threads. Persistence is Mac-local (`~/Library/Application Support/Grok Bot/`). Unseen from this host. No SSH. No `/workspace` copy.
+- Five components this sitting: people = Evens HITL · process = reminder only · data = Mac Grok store (unseen) · hardware = Cloud VM ≠ Mac · software = existing sibling CLI. A new Cloud reader would be a second host.
+- Watchdog: no GRADE on a reminder. No paper-PROVEN. No mint.
 
-**Mac HOST (this sitting):** `python3 scripts/hive/os/grok-chat-sessions.py list --limit 5` · `read --id`. Skill: `scripts/hive/grok-skills/grok-chat-sessions.md`. Persistence folder exists on this Mac. Cloud still cannot see it.
+## Next human-run sitting
 
-## Why Cloud must not implement
-
-Grok persistence is Mac-local (`~/Library/Application Support/Grok Bot/`). This checkout cannot see it. Do not pretend you listed threads. Do not re-implement the reader on Cloud. Do not SSH. Do not copy `/workspace`. Reminder job stays reminder-only.
+Grok chat reader CLI on the Mac. Run the existing sibling (`list` then `read --id`). New slug only after PROVEN.
 
 ## Never this sitting
 
-Buyer surface · Path A book-door · 4823 restyle · walkthrough orb · `/workspace` copy · invoke all five scoreboard slugs · mint · send / pay / deploy / book / publish.
+Buyer surface · Path A book-door · 4823 restyle · walkthrough orb · `/workspace` copy · invoke all five scoreboard slugs · remint `cursor-chat-sessions` · implement the reader on Cloud · mint · send / pay / deploy / book / publish · Slack · `/loop`.
+
+## Checkable-stop
+
+```
+DONE-CHECK: this file dated 2026-09-07 + REMINDER + EVENS leftover
+CAP: one brief. No code. No mint. No /loop.
+COST: this Cloud Agent run only.
+STOP-KIND: metric + cap
+```
 
 **EVENS leftover:** name a human-run sitting on the Mac when ready.
 
-Yellow orphans = 8. Continue.
+Yellow orphans = 8. Named, continue. Do not restore.
