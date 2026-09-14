@@ -1,0 +1,149 @@
+---
+tags: [os, factory, watchdog, signal-train]
+at: 2026-09-14
+desk: watchdog
+machine: dark-factory
+status: NO-WAITING · halt · not a GRADE · not hold-outs
+send: removed
+clock: parked
+---
+
+# NO-WAITING — Watchdog GRADE sitting 2026-09-14
+
+**Legal move:** neither A nor B. Written halt. Not a GRADE. Not hold-outs. Not paper-PROVEN.  
+**Desk:** Watchdog · sitting `bc-5206834a-1269-41c9-b7e5-a43e3b49e7d3` · branch `cursor/watchdog-hold-outs-grading-ebac`  
+**Skill:** `separate-verifier` · `checkable-stop`  
+**Do not treat as PROVEN.** No ship. No mint. Hard step DENY.
+
+```
+DESK: watchdog
+READ: CLOUD-HOST.md · job-cards/watchdog.md · separate-verifier · NEXT-TRAIN-PICK.md · forge/SIGNAL-TRAIN-*.md · hold-outs/
+OWN: this halt file · independent OBSERVED of what is waiting
+NEVER: re-grade X80ljdCPM_U · hold-outs for unnamed 2J3uX8iRNng · copy draft PRs · remint 325 · send / pay / deploy / book / publish · Slack · /loop
+THEN: stop
+```
+
+```
+DONE-CHECK: this file exists · neither A nor B applied · one sitting
+CAP: 1 id this run · no /loop
+COST: this Cloud Agent run only
+STOP-KIND: metric + cap
+DENY: invent GRADE · invent hold-outs · paper-PROVEN · merge · copy unmerged drafts
+BYPASS: none
+```
+
+LANE: hive-os. School (this turn): BUS208 POLC — plan the done-check, look at the artifact, halt. A new TRAIN row is not the control step.
+
+---
+
+## Why neither A nor B
+
+**A (hold-outs first)** needs a **named** TRAIN-eligible id on SSOT whose exam is missing.  
+**B (independent GRADE)** needs hold-outs + Forge attempt, this run did not write those hold-outs, and the id is not already SKIP-PASS.
+
+Independent OBSERVED on this cold checkout:
+
+| Gate | OBSERVED 2026-09-14 |
+|------|---------------------|
+| HOST | `git rev-parse HEAD` = `feb4082d1e03a2b6ca5987178075549b40ad0206` = `origin/main` (merge PR 139, 2026-09-02 09:45:05 -0400). Same SHA as 2026-09-05 through 2026-09-13 Watchdog sittings. |
+| Named pick | `desk-missions-now/researcher/NEXT-TRAIN-PICK.md` **id** = `X80ljdCPM_U`. Status on that file: TRAIN · Forge attempted · Watchdog GRADE **pass** · halt. Next stage: Researcher pick **or** HITL leftover. Do **not** start TRAIN-3 unless Evens names an id. |
+| Hold-outs | `desk-missions-now/watchdog/hold-outs/X80ljdCPM_U.md` **PRESENT**. No other `{id}.md` exam. |
+| Forge attempt | `desk-missions-now/forge/SIGNAL-TRAIN-X80ljdCPM_U.md` **PRESENT**. No other `SIGNAL-TRAIN-*.md`. |
+| GRADE | `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` **GRADE: pass**. SKIP: do not re-grade. |
+| Inbox | `desk-missions-now/hitl/INBOX.md` open card 1: do not start TRAIN-3 unless Evens names an id. |
+| Board | `desk-missions-now/hitl/GOAL-GAP-BOARD.md` already-closed: TRAIN-1 `kwSVtQ7dziU` PASS · TRAIN-2 `X80ljdCPM_U` PASS. |
+
+**A does not apply:** the only named id already has Watchdog hold-outs.  
+**B does not apply:** the only Forge attempt already has an independent GRADE **pass** from a prior sitting. This run did not write those hold-outs, and SKIP forbids re-grade.
+
+---
+
+## Packet leftovers (not a named TRAIN-3)
+
+`2J3uX8iRNng` is on this `origin/main` checkout:
+
+- `full.txt` **PRESENT** · `wc -w` = **6825** · real speech (opens on “All right, so Claude Opus 5 is here…”) · not a title stub
+- `LEARNED.md` `## ACTION TRACE` at **line 150** · spoken machine `same-prompt-bench`
+- Evens has **not** named it on SSOT (`NEXT-TRAIN-PICK` still `X80ljdCPM_U`)
+
+Packet-on-main ≠ named TRAIN-3. Do **not** write hold-outs. Do **not** GRADE. Do **not** copy draft Researcher/TRAIN picks.
+
+TRAIN-1 `kwSVtQ7dziU`: `LEARNED.md` **PRESENT** · `full.txt` **ABSENT** this checkout. Already PASS. Do not rewrite the Forge-authored exam. Do not re-train.
+
+Retired invent `factory-os-train-plane`: refuse. No hold-outs.
+
+TRIAGE decoy `karpathy-wiki-nate-herk`: no ACTION TRACE → not TRAIN. No exam.
+
+---
+
+## Same-day / sibling drafts (OPEN · unmerged · do not copy)
+
+Read titles + numbers only. Did not merge. Did not cherry-pick. Did not treat as SSOT.
+
+| PR | Head (this sitting) | Why unread as exam |
+|----|---------------------|--------------------|
+| 287 · 288 · 289 | Researcher / TRAIN Stage 1 pick `2J3uX8iRNng` (2026-09-14) | Unmerged. Pick on `main` is still `X80ljdCPM_U`. |
+| 290 | Sibling Watchdog `watchdog-train-grade-b715` NO-WAITING 2026-09-14 | Same halt, other job. Do not copy. |
+| 278 · 279 · 280 | Same Researcher/TRAIN pick pattern 2026-09-13 | Still OPEN. |
+| 281 · 282 | Sibling + this-job NO-WAITING 2026-09-13 | Still OPEN. Do not copy. |
+
+Prior same-job NO-WAITING PRs stay OPEN (273/272/264/263/255/254/247/246/238/237/229/228/220/219/211/210 and later twins). Do not copy.
+
+---
+
+## Independent cheap checks (this sitting)
+
+| Check | Result |
+|-------|--------|
+| `git rev-parse HEAD` / `origin/main` | both `feb4082d1` |
+| Named id on `NEXT-TRAIN-PICK.md` | `X80ljdCPM_U` |
+| `hold-outs/` | `X80ljdCPM_U.md` + README only |
+| `forge/SIGNAL-TRAIN-*.md` | `SIGNAL-TRAIN-X80ljdCPM_U.md` only |
+| existing `*-GRADE.md` | X80 **pass** · Automation-1 **pass** · Wealth V2 host-gate **pass** — different bites; none waiting |
+| `packets/X80ljdCPM_U/full.txt` | **4440** words · ACTION TRACE line **149** · `watch.json` **ABSENT** |
+| `packets/2J3uX8iRNng/full.txt` | **6825** words · ACTION TRACE line **150** · unnamed on SSOT |
+| `packets/kwSVtQ7dziU/full.txt` | **ABSENT** |
+| `scripts/hive/grok-skills/*.md` | **137** (sync drift vs TRAIN-2 labeled 10 — not a new TRAIN row; do not remint 325) |
+| `AUDIT.json` / `SIGNAL_INDEX.md` / `COVERAGE_LEDGER.json` | **ABSENT** |
+
+Did not POST `/webhook/hive-golden-path-smoke`. Did not edit Forge / hold-outs / LEARNED. Did not mint. Did not execute send / pay / deploy / book / publish. Did not arm `/loop`. Slack unused.
+
+Yellow (named, continue): `grokbot_orphans` = **8**. `AUDIT.json` ABSENT this checkout. Do not restore.
+
+---
+
+## Fail-fast (none triggered)
+
+- Re-grade `X80ljdCPM_U` — refused
+- Hold-outs for unnamed `2J3uX8iRNng` / invent `factory-os-train-plane` / decoy `karpathy-wiki-nate-herk` — refused
+- Copy unmerged draft pick as SSOT — refused
+- Same-run exam + GRADE — N/A (neither written)
+- Paper-PROVEN / remint 325 / headed OBSERVED invent / 1803 walk — refused
+
+---
+
+## Missing Piece Hunter (halt sitting)
+
+Assume this halt is wrong. What would that miss?
+
+- overlooked prerequisites: Evens could have named TRAIN-3 **off git** (chat / Grok persistence). Cloud cannot see that. SSOT on this checkout does not name it. UNKNOWN if a Mac leftover named it.
+- permissions / files: draft PRs 287/288/289 would change the pick **if merged**. They are not on `main`. Treating them as named would violate HOST = git.
+- cuts / edits that skip a setup: scoring packet-on-disk as named TRAIN-3; flattening Wealth/color/walkthrough PASS into this bite; reminting because grok-skills is 137 not 10.
+- UNKNOWN blockers: whether Evens will merge a Researcher pick today; whether sibling PR 290 lands first (same halt, other branch).
+- BLOCKING?: **no** for this halt. **yes** if the next sitting writes hold-outs without Evens naming an id on `main`.
+
+---
+
+## Hard step
+
+send / pay / deploy / book / publish / merge — **DENY**. Not executed.
+
+## Next sitting (one line)
+
+Evens names a real id on `main` → Watchdog hold-outs **first** → stop. Until then, NO-WAITING is the done-check.
+
+## GRADE
+
+Not filled. This file is **NO-WAITING**, not pass|fail.
+
+[[CLOUD-HOST]] · [[NEXT-TRAIN-PICK]] · [[separate-verifier]]
