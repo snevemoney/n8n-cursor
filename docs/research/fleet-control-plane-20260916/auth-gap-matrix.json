@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "schema_version": "1.0.0",
+    "census_id": "fleet-reentry-20260916",
+    "generated_at": "2026-09-16T17:45:00-04:00",
+    "source_probes": "fleet-reentry-20260916-IMMUTABLE-SNAPSHOT/live-probes-20260916.md",
+    "policy": "No secrets. No MCP connects this phase. recommended_next \u2208 {reconnect MCP, login CLI, leave HOLD, broker later}",
+    "recommended_next_enum": [
+      "broker later",
+      "leave HOLD",
+      "login CLI",
+      "reconnect MCP"
+    ]
+  },
+  "columns": [
+    "surface",
+    "path",
+    "evidence",
+    "auth_state",
+    "impact",
+    "recommended_next"
+  ],
+  "rows": [
+    {
+      "id": "vercel_cli",
+      "surface": "Vercel CLI",
+      "path": "cli",
+      "evidence": "verified_presence_broken_auth",
+      "evidence_detail": "CLI 59.16.0 on PATH; whoami logged out; config dir without login token keys",
+      "auth_state": "logged_out",
+      "impact": "Cannot deploy/promote via CLI; does not unblock MCP Vercel",
+      "recommended_next": "login CLI",
+      "notes": "CLI login alone insufficient for MCP plane; still subject to live `/` HOLD + Tier-3 HITL on deploy",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "vercel_mcp",
+      "surface": "Vercel MCP",
+      "path": "mcp",
+      "evidence": "verified_needs_auth",
+      "evidence_detail": "GetMcpServerStatus: Vercel needsAuth tools=0",
+      "auth_state": "needs_auth",
+      "impact": "No MCP deploy/project tools until reconnect; capability:vercel rollup=broken",
+      "recommended_next": "reconnect MCP",
+      "notes": "Primary recommended path for agent routing once reconnected; NEVER request secret values in chat",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "aws",
+      "surface": "AWS",
+      "path": "cli",
+      "evidence": "verified_broken",
+      "evidence_detail": "aws-cli/2.36.44 present; NoCredentials; credentials/config files MISSING",
+      "auth_state": "logged_out",
+      "impact": "Cloud infra via AWS unusable; no owning desk for AWS work",
+      "recommended_next": "leave HOLD",
+      "notes": "Defer until operator decides broker vs CLI login; no secret capture",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "gcloud",
+      "surface": "gcloud",
+      "path": "cli",
+      "evidence": "verified_broken",
+      "evidence_detail": "Google Cloud SDK 584.0.0; no credentialed accounts; credentials.db REF broken",
+      "auth_state": "logged_out",
+      "impact": "GCP workflows blocked",
+      "recommended_next": "leave HOLD",
+      "notes": "Same deferral as AWS unless a concrete GCP task appears",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "stripe",
+      "surface": "Stripe",
+      "path": "cli+api",
+      "evidence": "verified_broken",
+      "evidence_detail": "stripe CLI 1.50.5 present; API keys ABSENT in config.toml",
+      "auth_state": "logged_out",
+      "impact": "Money Desk stripe-cfo-weekly-scan cannot observe live Stripe; advise-only remains",
+      "recommended_next": "broker later",
+      "notes": "Prefer credential broker/provider when available; never paste API keys into graph or chat",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "docker_daemon",
+      "surface": "Docker daemon",
+      "path": "local_service",
+      "evidence": "verified_broken",
+      "evidence_detail": "Docker CLI OK; daemon socket permission denied",
+      "auth_state": "none",
+      "impact": "Container runtime actions fail; CLI alone insufficient",
+      "recommended_next": "leave HOLD",
+      "notes": "Needs host/socket permission fix by operator \u2014 not an MCP reconnect",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "canva",
+      "surface": "Canva",
+      "path": "mcp",
+      "evidence": "verified_needs_auth",
+      "evidence_detail": "needsAuth tools=0",
+      "auth_state": "needs_auth",
+      "impact": "Creative extras via Canva MCP unavailable; Higgsfield still usable for CapEx",
+      "recommended_next": "leave HOLD",
+      "notes": "Reconnect only if CapEx workflow explicitly needs Canva",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "lovable",
+      "surface": "Lovable",
+      "path": "mcp",
+      "evidence": "verified_needs_auth",
+      "evidence_detail": "needsAuth tools=0",
+      "auth_state": "needs_auth",
+      "impact": "Lovable app-builder path unavailable",
+      "recommended_next": "leave HOLD",
+      "notes": "Not on critical path for current building-mode cycle",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "heygen",
+      "surface": "Heygen",
+      "path": "mcp",
+      "evidence": "verified_needs_auth",
+      "evidence_detail": "needsAuth tools=0",
+      "auth_state": "needs_auth",
+      "impact": "Avatar/video gen via Heygen blocked; Higgsfield alternative may cover CapEx",
+      "recommended_next": "leave HOLD",
+      "notes": "Public Ironlane HOLD still applies even after reconnect",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "amplitude",
+      "surface": "Amplitude",
+      "path": "mcp",
+      "evidence": "verified_needs_auth",
+      "evidence_detail": "needsAuth tools=0",
+      "auth_state": "needs_auth",
+      "impact": "Product analytics MCP unavailable",
+      "recommended_next": "leave HOLD",
+      "notes": "Reconnect when analytics instrumentation is in-scope",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "prisma_remote",
+      "surface": "Prisma-Remote",
+      "path": "mcp",
+      "evidence": "verified_needs_auth",
+      "evidence_detail": "needsAuth tools=0; Prisma-Local connected (3 tools) as separate plane",
+      "auth_state": "needs_auth",
+      "impact": "Remote Prisma cloud features blocked; local Prisma still OK",
+      "recommended_next": "leave HOLD",
+      "notes": "Do not confuse with Prisma-Local (verified connected)",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "gh_cli_vs_mcp",
+      "surface": "gh CLI (vs MCP Github)",
+      "path": "cli vs mcp",
+      "evidence": "verified_split_planes",
+      "evidence_detail": "gh CLI logged out; MCP Github connected tools=45",
+      "auth_state": "cli=logged_out; mcp=authenticated",
+      "impact": "CLI-only GitHub workflows BROKEN; API/MCP GitHub WORKS \u2014 different auth planes",
+      "recommended_next": "login CLI",
+      "notes": "Optional: login gh for CLI workflows; prefer MCP for agent routing. Do not infer one plane from the other.",
+      "recommended_next_detail": ""
+    },
+    {
+      "id": "credential_provider_1password",
+      "surface": "credential provider / 1Password",
+      "path": "local_service",
+      "evidence": "verified_broken",
+      "evidence_detail": "GetCredentialProviderStatus: not connected; saved=0; no op/1password status files",
+      "auth_state": "logged_out",
+      "impact": "Secret injection / broker path UNKNOWN/BROKEN; cannot safely hydrate Stripe/AWS/etc.",
+      "recommended_next": "broker later",
+      "notes": "Operator-owned reconnect; NEVER request secret values; graph stores REF only",
+      "recommended_next_detail": ""
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evenslouis.ca/schemas/capability-graph.v1.schema.json",
+  "title": "Jarvis Capability Graph v1 (multi-path)",
+  "description": "Extends v0 nodes/edges. Capability nodes carry access_paths[] for multi-plane routing (mcp|api|cli|browser|computer_use|local_service|remote_worker). Compatible with v0 seed migration: legacy top-level evidence_level/owner_agent_ids/shared_box remain optional rollups.",
+  "type": "object",
+  "required": ["meta", "nodes", "edges"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["schema_version", "census_id", "generated_at"],
+      "properties": {
+        "schema_version": { "type": "string", "const": "1.0.0" },
+        "census_id": { "type": "string" },
+        "generated_at": { "type": "string", "description": "ISO-8601 timestamp" },
+        "migrated_from": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Agent",
+              "Capability",
+              "Tool",
+              "Skill",
+              "CredentialRef",
+              "Integration",
+              "Routine",
+              "Project",
+              "AccessPath"
+            ]
+          },
+          "name": { "type": "string" },
+          "title": { "type": "string" },
+          "evidence_level": {
+            "type": "string",
+            "enum": [
+              "declared",
+              "discovered",
+              "authenticated",
+              "verified",
+              "degraded",
+              "broken",
+              "blocked",
+              "unknown"
+            ],
+            "description": "Rollup for Compatibility; for Capability prefer worst/best path rollup documented in metadata.rollup_policy"
+          },
+          "last_verified_at": { "type": ["string", "null"] },
+          "owner_agent_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "v0 alias; prefer owning_agent_ids on Capability / access_paths"
+          },
+          "owning_agent_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "shared_box": { "type": "boolean" },
+          "hitl_level": { "type": ["string", "null"] },
+          "status": { "type": "string" },
+          "access_paths": {
+            "type": "array",
+            "description": "Required for type=Capability in v1 (multi-path). Empty array allowed for role-only capabilities.",
+            "items": { "$ref": "#/$defs/AccessPath" }
+          },
+          "metadata": { "type": "object" }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "const": "Capability" } } },
+            "then": {
+              "required": ["id", "name", "access_paths", "shared_box"],
+              "properties": {
+                "access_paths": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/AccessPath" }
+                }
+              }
+            }
+          }
+        ],
+        "additionalProperties": true
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "from", "to"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "owns",
+              "can_use",
+              "delegates_to",
+              "requires_hitl",
+              "depends_on",
+              "shares_computer",
+              "has_path",
+              "falls_back_to"
+            ]
+          },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "evidence_level": {
+            "type": "string",
+            "enum": [
+              "declared",
+              "discovered",
+              "authenticated",
+              "verified",
+              "degraded",
+              "broken",
+              "blocked",
+              "unknown"
+            ]
+          },
+          "path_kind": {
+            "type": "string",
+            "enum": [
+              "mcp",
+              "api",
+              "cli",
+              "browser",
+              "computer_use",
+              "local_service",
+              "remote_worker"
+            ]
+          },
+          "metadata": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "AccessPath": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "evidence_level",
+        "authentication_state",
+        "health",
+        "permissions",
+        "requires_hitl",
+        "owning_agent_ids",
+        "shared_box"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable path id, e.g. path:github:mcp"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "mcp",
+            "api",
+            "cli",
+            "browser",
+            "computer_use",
+            "local_service",
+            "remote_worker"
+          ]
+        },
+        "label": { "type": "string" },
+        "integration_ref": {
+          "type": ["string", "null"],
+          "description": "Optional node id of Integration/Tool this path uses"
+        },
+        "evidence_level": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "discovered",
+            "authenticated",
+            "verified",
+            "degraded",
+            "broken",
+            "blocked",
+            "unknown"
+          ]
+        },
+        "authentication_state": {
+          "type": "string",
+          "enum": [
+            "none",
+            "logged_out",
+            "needs_auth",
+            "authenticated",
+            "expired",
+            "unknown"
+          ]
+        },
+        "health": {
+          "type": "string",
+          "enum": ["healthy", "degraded", "down", "unknown"]
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["read", "write", "admin", "unknown"]
+          }
+        },
+        "requires_hitl": { "type": "boolean" },
+        "hitl_tier": {
+          "type": ["string", "null"],
+          "description": "e.g. tier-1|tier-2|tier-3|null when unknown"
+        },
+        "latency_cost": {
+          "type": ["object", "null"],
+          "properties": {
+            "class": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "unknown"]
+            },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "last_verified_at": { "type": ["string", "null"] },
+        "owning_agent_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "shared_box": { "type": "boolean" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  }
+}
