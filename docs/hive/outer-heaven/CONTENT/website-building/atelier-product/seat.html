@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Request a seat — Atelier Cohort · SAMPLE</title>
+  <meta name="description" content="SAMPLE seat request. Pick a cohort, pick an open chair, request it. Full cohort gives a numbered waitlist place. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%236f3f8f%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EAC%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/product.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept · HOLD</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Atelier Cohort home">
+      <span class="mark" aria-hidden="true">AC</span>
+      <span class="name">Atelier Cohort<small>Small-cohort course · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#cohorts">Cohorts</a></li>
+        <li><a href="seat.html" aria-current="page">Seats</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#cohorts">Back to cohorts</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="seat-title">
+    <p class="eyebrow">Request a seat</p>
+    <h2 id="seat-title">Pick a chair. <span class="hi">Request it.</span></h2>
+    <p class="sub">
+      Twelve chairs per cohort. Taken ones are struck through. Pick an open one and request it — held.
+      Full cohort — a numbered waitlist place. Nothing here emails, drips, or leaves this page.
+    </p>
+
+    <div class="layout">
+      <section class="frame" id="seat-frame" data-state="empty" aria-labelledby="seat-label">
+        <div class="frame-head">
+          <span class="label" id="seat-label">Seat map · <span id="cohort-when"></span></span>
+          <span class="state-pill" id="seat-state" aria-live="polite">seats open</span>
+        </div>
+
+        <p class="eyebrow">Cohort</p>
+        <div class="chips" id="cohorts" role="group" aria-label="Sample cohorts"></div>
+
+        <p class="eyebrow" style="margin-top:16px">Chairs</p>
+        <div class="seats" id="seats" role="group" aria-label="Twelve chairs"></div>
+      </section>
+
+      <aside class="panel">
+        <form class="card panel" id="seat-form" novalidate>
+          <p class="eyebrow">Your request</p>
+          <p class="selection empty" id="selection" aria-live="polite">Pick an open seat.</p>
+          <div class="field">
+            <label for="maker">Name (sample)</label>
+            <input class="input" id="maker" name="maker" type="text" autocomplete="off" placeholder="Sample maker" />
+          </div>
+          <div class="actions">
+            <button class="btn btn-brand" type="submit" id="request-btn" disabled>Request this seat</button>
+          </div>
+        </form>
+
+        <section class="outcome" id="outcome" hidden tabindex="-1" aria-live="polite" aria-atomic="true">
+          <p class="eyebrow">Requested</p>
+          <h3 class="headline" id="outcome-headline"></h3>
+          <p class="detail" id="outcome-detail"></p>
+        </section>
+
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Funnel spam (the old door)</p>
+          <div class="msg">Email 3 of 7 · “Doors close soon!!”</div>
+          <div class="msg">Email 5 of 7 · “Last chance — countdown inside”</div>
+          <div class="msg">Pop-up · “Grab the free PDF first”</div>
+          <p class="muted-line" id="friction-line">Funnel spam: seven-email drip, fake countdown, “last chance” — for a class with twelve chairs.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-held">Load held seat</button>
+            <button class="btn btn-ghost btn-small" type="button" id="load-waitlisted">Load waitlist place</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Seat held</span>
+  </div>
+
+  <footer class="foot">
+    <span>Atelier Cohort · SAMPLE · CapEx / preview</span>
+    <span>No drip · No send · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/seat-ui.js"></script>
+</body>
+</html>
