@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Open the book — Sketchbook · SAMPLE</title>
+  <meta name="description" content="SAMPLE desk-book page-turn. Cover, spreads, colophon. Buttons or arrow keys. Reduced motion safe. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23a97f3f%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3ESB%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/sketchbook.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Sketchbook home">
+      <span class="mark" aria-hidden="true">SB</span>
+      <span class="name">Sketchbook<small>Craft · Desk book · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Spreads</a></li>
+        <li><a href="book.html" aria-current="page">The book</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="book-title">
+    <p class="eyebrow">The desk book</p>
+    <h2 id="book-title">Open the cover. <span class="hi">Turn.</span></h2>
+    <p class="sub">
+      Closed on load. Open it, turn with the buttons or the arrow keys, read to the colophon.
+      Nothing autoplays, nothing scrolls for you. Sample spreads.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="book" data-state="closed" data-direction="none" aria-labelledby="book-label">
+        <div class="stage-head">
+          <span class="label" id="book-label">Desk book · SAMPLE</span>
+          <span class="state" id="book-state" aria-live="polite">closed · cover</span>
+        </div>
+
+        <div class="desk">
+          <button class="cover" id="cover" type="button" aria-label="Open the book">
+            <span class="cover-title">Sketchbook</span>
+            <span class="cover-sub">a desk book · SAMPLE</span>
+            <span class="cover-hint">tap to open</span>
+          </button>
+
+          <div class="spread" id="spread" data-page="0" hidden>
+            <article class="page left" id="page-left" aria-label="Left page"></article>
+            <div class="gutter" aria-hidden="true"></div>
+            <article class="page right" id="page-right" aria-label="Right page"></article>
+          </div>
+        </div>
+
+        <div class="book-controls">
+          <button class="btn btn-ghost" type="button" id="prev-btn" disabled>← Prev</button>
+          <span class="position" id="position" aria-live="polite">closed · cover</span>
+          <button class="btn btn-brand" type="button" id="open-btn">Open →</button>
+          <button class="btn btn-brand" type="button" id="next-btn">Next →</button>
+        </div>
+        <p class="hint">Arrow keys turn pages too. ← on the first spread closes the book.</p>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Template sameness</p>
+          <div class="msg">Hero · three cards · testimonial slider · footer — same as the last forty sites</div>
+          <p class="muted-line" id="friction-line">The layout everyone ships. Not what the book does.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">How it turns</p>
+          <p class="note">CSS 3D flip on the spread. With reduced motion, the turn is a cut. Position is always spoken aloud.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Jump to colophon</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Close the book</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Read to the end</span>
+  </div>
+
+  <footer class="foot">
+    <span>Sketchbook · SAMPLE · CapEx / preview</span>
+    <span>No template · No tracking · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/pages-ui.js"></script>
+</body>
+</html>

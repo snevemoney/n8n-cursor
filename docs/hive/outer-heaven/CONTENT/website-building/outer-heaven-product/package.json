@@ -1,0 +1,11 @@
+{
+  "name": "outer-heaven-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Outer Heaven SAMPLE \u2014 factory / ops proof walkthrough behind the brand shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}
