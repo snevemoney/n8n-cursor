@@ -21,6 +21,9 @@
 
 * { box-sizing: border-box; }
 
+/* Class rules below set display:flex/grid; the hidden attribute must still win. */
+[hidden] { display: none !important; }
+
 html { color-scheme: dark; scroll-behavior: smooth; }
 
 body {
@@ -129,6 +132,12 @@ a { color: inherit; }
 }
 .nav-links a { text-decoration: none; opacity: 0.85; }
 .nav-links a:hover, .nav-links a[aria-current="page"] { opacity: 1; }
+
+@media (max-width: 720px) {
+  .nav { flex-wrap: wrap; row-gap: 10px; }
+  .nav nav { order: 3; flex-basis: 100%; }
+  .nav-links { gap: 16px; flex-wrap: wrap; }
+}
 
 /* ---- buttons ---- */
 .btn {
@@ -302,6 +311,7 @@ a { color: inherit; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
+  align-items: start;
 }
 
 .book-layout {
@@ -449,6 +459,7 @@ a { color: inherit; }
 .panel {
   display: grid;
   gap: 12px;
+  align-content: start;
 }
 .panel label {
   display: block;

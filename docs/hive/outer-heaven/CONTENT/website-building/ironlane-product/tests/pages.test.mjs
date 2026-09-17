@@ -91,6 +91,13 @@ test("CapEx locks: sample labels on every page, no external scripts, no payment 
   }
 });
 
+test("CSS: hidden attribute beats display:flex/grid so fail state never shows the pass CTA", () => {
+  const css = read("assets/ironlane.css");
+  assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important;?\s*\}/);
+  assert.match(css, /@media \(max-width: 720px\)/, "mobile breakpoint present");
+  assert.match(css, /prefers-reduced-motion: reduce/, "reduced motion respected");
+});
+
 test("JS modules: no network, no storage, no clock", () => {
   const dir = join(ROOT, "assets");
   for (const f of readdirSync(dir).filter((f) => f.endsWith(".js"))) {
