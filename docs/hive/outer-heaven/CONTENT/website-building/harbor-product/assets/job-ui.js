@@ -157,7 +157,8 @@ function render() {
   if (booked) nameInput.value = state.visit.name;
 
   stepJob.hidden = booked || state.step !== 0;
-  stepVisit.hidden = booked || state.step !== 1;
+  // The booked visit stays visible on the calendar — that is the picture the story sells.
+  stepVisit.hidden = !booked && state.step !== 1;
   nextBtn.hidden = booked || state.step !== 0;
   nextBtn.disabled = !jobComplete(state);
   backBtn.hidden = booked || state.step !== 1;
