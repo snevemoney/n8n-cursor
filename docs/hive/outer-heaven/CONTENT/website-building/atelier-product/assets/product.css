@@ -345,6 +345,7 @@ a { color: inherit; }
 }
 .frame[data-state="requested"] .state-pill,
 .frame[data-state="waitlisted"] .state-pill,
+.frame[data-state="received"] .state-pill,
 .frame[data-state="review"] .state-pill {
   color: var(--brand);
   border-color: var(--brand);
@@ -578,6 +579,14 @@ button.listing[disabled]:not([aria-pressed="true"]) { opacity: 0.5; }
   gap: 10px;
   font-size: 13px;
   color: var(--muted);
+}
+.panel label.check {
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+  margin-bottom: 0;
 }
 .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--brand); }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; }

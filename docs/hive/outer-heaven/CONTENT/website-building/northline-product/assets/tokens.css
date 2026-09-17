@@ -1,0 +1,32 @@
+/* Northline Clinic — brand tokens. SAMPLE / CapEx.
+   Swap point: VERTICALS.northline in launch-samples/project/src/lib/tokens.ts (not in this repo;
+   values below are placeholders chosen for the preview, not the SSOT). */
+:root {
+  --brand: #2fbfae;
+  --brand-deep: #178274;
+  --brand-glow: #8ae6da;
+  --brand-tint: rgba(47, 191, 174, 0.18);
+  --brand-shadow: rgba(47, 191, 174, 0.35);
+  --brand-shadow-strong: rgba(47, 191, 174, 0.5);
+  --brand-shadow-soft: rgba(47, 191, 174, 0.12);
+  --on-brand: #041a17;
+  --hero-a: #c6f3ec;
+  --hero-b: #178274;
+  --hero-c: #0e2f3a;
+  --hero-d: #143e4c;
+  --hero-e: #071c22;
+  --hero-text: #f1fdfb;
+  --ink: #070c0d;
+  --ink-2: #0c1416;
+  --ink-3: #121c1e;
+  --line: rgba(47, 191, 174, 0.18);
+  --text: #eef7f6;
+  --muted: #93aaa7;
+  --green: #35c26b;
+  --green-deep: #1f8a49;
+  --red: #ff5d5d;
+  --red-deep: #8f2b2b;
+  --radius: 14px;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
