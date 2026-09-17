@@ -123,7 +123,8 @@ prevBtn.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.target.closest("input, textarea, select")) return;
+  const target = e.target instanceof Element ? e.target : null;
+  if (target && target.closest("input, textarea, select")) return;
   if (e.key === "ArrowRight") {
     if (next(state).ok) render();
   } else if (e.key === "ArrowLeft") {
