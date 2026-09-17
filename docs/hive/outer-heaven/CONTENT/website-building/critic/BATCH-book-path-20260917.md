@@ -3,7 +3,9 @@
 **Builder:** Forge (Cursor cloud) · branch `cursor/book-path-product-match-capex-9b2e`
 **Verifier:** Watchdog — new session, read-only, no Send / Pay tools. **GRADE UNFILLED for all six.** Forge does not self-PASS.
 **Locks held:** CapEx / preview only · live `/` HOLD · invent_kpi=0 · no Remotion / launch-video edits · no deploy · no ironlane redo · no live `/work` case-page wiring (separate HITL).
-**Brief:** `FORGE_BRIEF.md` (Creative Studio → Forge, packet, not in repo). **Template:** `../ironlane-product/` (PR #323).
+**Brief:** [`FORGE_BRIEF-product-match-15-20260917.md`](FORGE_BRIEF-product-match-15-20260917.md) (Creative Studio → Forge; copy attached here from the operator upload). **Template:** `../ironlane-product/` (PR #323).
+
+**Slug lock (exact, from the brief · no renames):** `ashford-product` · `quay-product` · `atelier-product` · `ledgerline-product` · `harbor-product` · `northline-product`, all under `docs/hive/outer-heaven/CONTENT/website-building/` — the same root PR #323 used for `ironlane-product`.
 
 ## Slices
 
