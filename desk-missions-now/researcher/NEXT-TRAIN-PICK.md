@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-09-21
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: named pick · TRAIN · unused · halt
 send: removed
 clock: parked
 ---
@@ -14,24 +14,35 @@ clock: parked
 
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
+| **id** | `2J3uX8iRNng` |
 | **steal \| learn** | steal |
 | **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
-| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **Spoken machine** | `same-prompt-bench` |
+| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/full.txt` (6825 words, OBSERVED) |
+| **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` at line 150 (OBSERVED) |
+| **Skip?** | no — not TRAIN-1, not TRAIN-2, not the TRIAGE decoy, not `/workspace`, not buyer surface |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** Nate “I Tested Opus 5 vs. Fable 5” is the remaining checkout packet with `full.txt` plus LEARNED ACTION TRACE that is not already PASS and not a buyer surface. Spoken machine is same-prompt-bench: same prompt, same harness, label the model, write the stop before you start, referee the patch (not the vibe), blame stale context before swapping models. Tape $ / benches stay UNVERIFIED. Not a weight train. Not a buyer site. This week Factory OS.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**Retrieve:** theme `same-prompt-bench` → **NONE** (hyphenated slug miss; leftover token-hole). Default-off still the law. Did not dump SIGNAL_INDEX.
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+**This stage (done):** Researcher propose only. Reaffirm of unused 2026-09-11 / 2026-09-12 / 2026-09-13 / 2026-09-14 / 2026-09-15 / 2026-09-16 / 2026-09-17 / 2026-09-18 / 2026-09-19 / 2026-09-20 pick. No Watchdog GRADE on this id. On-disk pick was still PASS `X80ljdCPM_U` — replaced this sitting.
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+**Next stage (one sitting):** Evens names this id **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names it. Do not re-grade `X80ljdCPM_U`. Do not remint. Do not attempt the TASK.
 
-Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
+**Checkout holes (named, not invented):** `COVERAGE_LEDGER.json` MISSING-ON-CHECKOUT — do not invent the steal_gap-16 list. TRAIN-1 `kwSVtQ7dziU` LEARNED present, `full.txt` ABSENT here (skipped as PASS anyway). `karpathy-wiki-nate-herk` LEARNED ABSENT (TRIAGE decoy). `FFWtxjvW2ts` has ACTION TRACE but is buyer-surface / anti-slop — skip this week Factory OS.
 
-Yellow `grokbot_orphans` = 8. Continue.
+Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · `FFWtxjvW2ts` (buyer surface) · 1803 walk · `/workspace` · 4823 · invent `full.txt`.
+
+Yellow `grokbot_orphans` = 8. Continue. Do not restore.
+
+**EVENS leftover:** run this pick on the Mac or merge this file to `main`. Cloud cannot see Grok Bot persistence. Merge ≠ ship. Hard step DENY.
+
+```
+DONE-CHECK: this file written with id 2J3uX8iRNng + TRAIN
+CAP: 1 row · no /loop · no 1803 walk
+COST: this Cloud Agent run only
+STOP-KIND: metric + cap
+```
 
 [[CLOUD-HOST]] · [[GOAL-GAP-BOARD]] · [[SIGNAL-TRAIN-LOOP]]
