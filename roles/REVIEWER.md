@@ -1,9 +1,7 @@
 # Reviewer
 
-Read the diff after live proof. Do not review the builder's summary.
+A role on one claim. Read the diff after live proof. Do not modify the candidate while reviewing.
 
-Inputs: scope, decisions, diff, runtime evidence, acceptance, tests.
+The reviewer must be a different actor from that claim's builder. Cursor may review a Forge claim, and Forge may review a Cursor claim, only on a separate run.
 
-Reject unreachable code, borrowed proof, and a builder who stamped `VERIFIED`.
-
-You may send the job back to `IMPLEMENTING` or `REGRESSION` with the failing evidence. You may not invent a pass.
+You may send the claim back to `REGRESSION`. You may not invent a pass. `hive-gate.py` applies the state.

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Forge owns CapEx state. Request, validate, apply, append a receipt.
+"""hive-gate is the machine. Forge is a Grok builder, not this file.
 
-  python3 scripts/hive/eng/forge-transition.py request \\
-    --claim-dir <path> --to ARCHITECTED --actor cursor --role builder \\
+  python3 scripts/hive/eng/hive-gate.py request \\
+    --claim-dir <path> --to ARCHITECTED --platform cursor --actor cursor-agent --role builder \\
     --expected SCOPED --expected-revision 0
 
-Direct edits of claim.json state fail the next verify. applied is true only after the write.
+Cursor or Forge may hold Builder on a claim. This process applies the state.
 """
 from __future__ import annotations
 
@@ -43,6 +43,7 @@ ROLE_FOR = {
     "VERIFIED": "verifier",
     "REVIEWED": "reviewer",
 }
+BUILDER_TARGETS = {"ARCHITECTED", "READY", "IMPLEMENTING", "IMPLEMENTED_UNVERIFIED", "WIRED"}
 
 
 def emit(payload: dict, ok: bool) -> int:
@@ -54,6 +55,31 @@ def emit(payload: dict, ok: bool) -> int:
 def load_permissions() -> dict:
     path = ROOT / "roles" / "permissions.json"
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def eligible(perms: dict, role_name: str, platform: str, actor: str) -> bool:
+    rows = perms.get("eligible", {}).get(role_name, [])
+    want_platform = platform.strip().lower()
+    want_actor = actor.strip().lower()
+    return any(
+        str(row.get("platform") or "").lower() == want_platform
+        and str(row.get("actor") or "").lower() == want_actor
+        for row in rows
+        if isinstance(row, dict)
+    )
+
+
+def assignment_reason(claim: dict, role_name: str, platform: str, actor: str, run_id: str) -> str:
+    assigned = hive_job.party(claim.get(role_name))
+    if assigned is None:
+        return f"{role_name} must be {{platform, actor, run_id}}"
+    if platform.strip().lower() != assigned["platform"] or actor.strip().lower() != assigned["actor"]:
+        return (
+            f"this claim assigns {role_name} to {assigned['platform']}/{assigned['actor']}"
+        )
+    if assigned["run_id"] and run_id and assigned["run_id"] != run_id:
+        return "run_id does not match the claim assignment"
+    return ""
 
 
 def request_transition(
@@ -91,9 +117,27 @@ def request_transition(
         reasons.append(f"{target} requires role {need}, got {role or 'missing'}")
     if role in perms and need and f"request_{target}" not in perms[role].get("may", []):
         reasons.append(f"role {role} may not request {target}")
-    builder = str(claim.get("builder") or "").strip().lower()
-    if target in hive_job.VERIFIED_PLUS and actor.strip().lower() == builder:
+    builder = hive_job.party(claim.get("builder"))
+    if builder and target in hive_job.VERIFIED_PLUS and actor.strip().lower() == builder["actor"]:
         reasons.append("builder cannot certify this transition")
+    if target in BUILDER_TARGETS:
+        if role != "builder":
+            reasons.append("implementation requires the claim builder")
+        else:
+            why = assignment_reason(claim, "builder", platform, actor, run_id)
+            if why:
+                reasons.append(why)
+            elif not eligible(perms, "builder", platform, actor):
+                reasons.append("actor is not an eligible builder")
+    if need in {"verifier", "reviewer"}:
+        why = assignment_reason(claim, need, platform, actor, run_id)
+        if why:
+            reasons.append(why)
+        elif not eligible(perms, need, platform, actor):
+            reasons.append(f"actor is not an eligible {need}")
+        assigned_builder = builder or {"actor": ""}
+        if need == "reviewer" and actor.strip().lower() == assigned_builder["actor"]:
+            reasons.append("reviewer must differ from the builder")
     if target == "READY":
         reasons.extend(hive_job.g2_reasons(claim, directory))
     if target in hive_job.LIVE_PLUS:
@@ -111,7 +155,7 @@ def request_transition(
             argv = regression.get("argv")
             cwd = regression.get("cwd")
             if not isinstance(argv, list) or not argv or not cwd or not Path(str(cwd)).is_dir():
-                reasons.append("VERIFIED requires a regression argv and cwd Forge can execute")
+                reasons.append("VERIFIED requires a regression argv and cwd hive-gate can execute")
             else:
                 proc = subprocess.run([str(x) for x in argv], cwd=str(cwd), capture_output=True, text=True)
                 ran = {
@@ -138,7 +182,7 @@ def request_transition(
         "at": hive_job.utc_now(),
         "from": current,
         "platform": platform,
-        "ran_by": "forge-transition",
+        "ran_by": "hive-gate",
         "revision": new_revision,
         "role": role,
         "run_id": run_id,
@@ -163,7 +207,7 @@ def request_transition(
                     "run_id": run_id,
                     "verdict": "PASS",
                     "receipt_sha": row["receipt_sha"],
-                    "ran_by": "forge-transition",
+                    "ran_by": "hive-gate",
                 },
                 indent=2,
             )
@@ -185,7 +229,7 @@ def request_transition(
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Forge applies CapEx transitions")
+    ap = argparse.ArgumentParser(description="hive-gate applies CapEx transitions")
     sub = ap.add_subparsers(dest="cmd", required=True)
     req = sub.add_parser("request")
     req.add_argument("--claim")

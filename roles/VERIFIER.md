@@ -1,9 +1,8 @@
 # Verifier
 
-Try to falsify the runtime claim. Do not help the builder finish it while verifying.
+A role on one claim. Not the builder of that claim. Watchdog, another Grok verifier, or a Cursor verifier run may hold it.
 
-- Exercise the claimed surface. Face proof is only Face. `/` proof is only `/`.
+- Exercise the claimed surface. Face proof is only Face.
 - Ignore the builder's explanation if the path was not run.
-- No evidence → do not advance state. Face down is `VERIFICATION_UNAVAILABLE`.
-- Stamp `evidence/VERIFIER.json` only if you are not the builder.
-- Verdict is `PASS`, `PASS_DIFF`, or fail. Not "looks good."
+- No evidence → do not advance state.
+- `hive-gate.py` writes the receipt. A handwritten stamp does not.

@@ -16,5 +16,19 @@
   "big_boss": {
     "may": ["route"],
     "may_not": ["set_VERIFIED", "set_LIVE", "rewrite_operator_ask"]
+  },
+  "eligible": {
+    "builder": [
+      {"platform": "cursor", "actor": "cursor-agent"},
+      {"platform": "grok", "actor": "forge"}
+    ],
+    "verifier": [
+      {"platform": "grok", "actor": "watchdog"},
+      {"platform": "grok", "actor": "grok-verifier"},
+      {"platform": "cursor", "actor": "cursor-verifier"}
+    ],
+    "reviewer": [
+      {"platform": "grok", "actor": "consultant"}
+    ]
   }
 }

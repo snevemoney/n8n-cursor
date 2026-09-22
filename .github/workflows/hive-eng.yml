@@ -9,6 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Control-plane tests
-        run: python3 -m unittest scripts.hive.eng.test_hive_job scripts.hive.eng.test_hive_matrix scripts.hive.eng.test_forge_transition scripts.hive.eng.test_hive_rules scripts.hive.eng.test_signal -q
+        run: python3 -m unittest scripts.hive.eng.test_hive_job scripts.hive.eng.test_hive_matrix scripts.hive.eng.test_hive_gate scripts.hive.eng.test_hive_rules scripts.hive.eng.test_signal -q
       - name: Secret scan of the git index
         run: python3 scripts/hive/eng/secret-scan.py

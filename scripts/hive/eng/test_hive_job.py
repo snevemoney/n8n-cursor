@@ -33,9 +33,9 @@ def base_claim(state: str, **extra: object) -> dict:
         "close_type": "",
         "release_status": "NOT_DEPLOYED",
         "operator_ask": {"original": "Keep Jev in Jarvis.", "authority": "EVENS", "may_rewrite": False},
-        "builder": "cursor",
-        "verifier": "grok",
-        "reviewer": "consultant",
+        "builder": {"platform": "cursor", "actor": "cursor-agent", "run_id": "builder-run"},
+        "verifier": {"platform": "grok", "actor": "watchdog", "run_id": "verifier-run"},
+        "reviewer": {"platform": "grok", "actor": "consultant", "run_id": "reviewer-run"},
         "g2_checklist_path": "g2.json",
         "blocked": False,
         "unlock": "",
@@ -73,7 +73,7 @@ def write_claim(tmp: Path, claim: dict, evidence: dict | None = None) -> Path:
             "revision": 1,
             "actor": "cursor",
             "role": "builder",
-            "ran_by": "forge-transition",
+            "ran_by": "hive-gate",
         }
         (tmp / "transitions.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
     if evidence is not None:
@@ -115,11 +115,17 @@ class HiveJobGateTest(unittest.TestCase):
             (tmp / "claim.json").write_text(json.dumps(claim), encoding="utf-8")
             proc = run_verify(tmp, "--offline")
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
-            self.assertIn("state edited outside Forge", proc.stdout)
+            self.assertIn("state edited outside hive-gate", proc.stdout)
 
     def test_builder_cannot_self_verify(self) -> None:
         with tempfile.TemporaryDirectory(prefix="hive-job-self-") as raw:
-            tmp = write_claim(Path(raw), base_claim("VERIFIED", verifier="cursor"))
+            tmp = write_claim(
+                Path(raw),
+                base_claim(
+                    "VERIFIED",
+                    verifier={"platform": "cursor", "actor": "cursor-agent", "run_id": "builder-run"},
+                ),
+            )
             proc = run_verify(tmp, "--offline")
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertIn("builder may not stamp VERIFIED", proc.stdout)
@@ -134,7 +140,7 @@ class HiveJobGateTest(unittest.TestCase):
             )
             proc = run_verify(tmp, "--offline")
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
-            self.assertIn("not produced by the Forge receipt", proc.stdout)
+            self.assertIn("not produced by the hive-gate receipt", proc.stdout)
 
     def test_implemented_unverified_needs_no_runtime(self) -> None:
         with tempfile.TemporaryDirectory(prefix="hive-job-iu-") as raw:

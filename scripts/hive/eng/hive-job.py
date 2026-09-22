@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""CapEx claim gate. One work unit. Forge is the only writer of state.
+"""CapEx claim gate. One work unit. hive-gate is the only writer of state.
+
+Cursor and Forge are both eligible builders. Neither one is this machine.
 
   python3 scripts/hive/eng/hive-job.py states
   python3 scripts/hive/eng/hive-job.py verify --claim JOB-JEV-001
@@ -172,10 +174,10 @@ def ownership_reasons(claim: dict, receipts: list[dict]) -> list[str]:
     if not receipts:
         if state == "SCOPED" and revision == 0:
             return []
-        return ["state edited outside Forge"]
+        return ["state edited outside hive-gate"]
     last = receipts[-1]
     if state != last.get("to") or revision != last.get("revision"):
-        return ["state edited outside Forge"]
+        return ["state edited outside hive-gate"]
     return []
 
 
@@ -292,6 +294,37 @@ def evidence_reasons(claim: dict, directory: Path, ev: dict) -> list[str]:
     return reasons
 
 
+def party(value: object) -> dict | None:
+    if not isinstance(value, dict):
+        return None
+    platform = str(value.get("platform") or "").strip().lower()
+    actor = str(value.get("actor") or "").strip().lower()
+    run_id = str(value.get("run_id") or "").strip()
+    if not platform or not actor:
+        return None
+    return {"platform": platform, "actor": actor, "run_id": run_id}
+
+
+def role_reasons(claim: dict) -> list[str]:
+    reasons: list[str] = []
+    builder = party(claim.get("builder"))
+    verifier = party(claim.get("verifier"))
+    reviewer = party(claim.get("reviewer"))
+    if builder is None:
+        reasons.append("builder must be {platform, actor, run_id}")
+    if verifier is None:
+        reasons.append("verifier must be {platform, actor, run_id}")
+    if reviewer is None:
+        reasons.append("reviewer must be {platform, actor, run_id}")
+    if builder and verifier and builder["actor"] == verifier["actor"]:
+        reasons.append("builder may not stamp VERIFIED (builder == verifier)")
+    if builder and verifier and builder["run_id"] and builder["run_id"] == verifier["run_id"]:
+        reasons.append("verifier run_id matches the builder")
+    if builder and reviewer and builder["actor"] == reviewer["actor"]:
+        reasons.append("reviewer must differ from the builder")
+    return reasons
+
+
 def probe_face(host: str, timeout: float = 3.0) -> dict:
     url = f"http://{host}/healthz"
     try:
@@ -310,6 +343,7 @@ def reasons_for(claim: dict, directory: Path, *, ping_runtime: bool, l4_log: Pat
     if state not in STATES:
         return [f"unknown state {state!r}"]
     reasons.extend(ownership_reasons(claim, load_receipts(directory)))
+    reasons.extend(role_reasons(claim))
     for key in CLAIM_KEYS:
         if key not in claim:
             reasons.append(f"missing claim field {key}")
@@ -329,26 +363,23 @@ def reasons_for(claim: dict, directory: Path, *, ping_runtime: bool, l4_log: Pat
                 if not health.get("ok"):
                     reasons.append(f"Face {face} not reachable → VERIFICATION_UNAVAILABLE")
     if state in VERIFIED_PLUS:
-        builder = str(claim.get("builder") or "").strip().lower()
-        verifier = str(claim.get("verifier") or "").strip().lower()
-        if builder and verifier and builder == verifier:
-            reasons.append("builder may not stamp VERIFIED (builder == verifier)")
+        builder = party(claim.get("builder")) or {"actor": "", "run_id": ""}
         receipts = load_receipts(directory)
         last = receipts[-1] if receipts else {}
-        if last.get("ran_by") != "forge-transition" or last.get("to") not in VERIFIED_PLUS:
-            reasons.append("VERIFIED requires a Forge execution receipt, not a handwritten stamp")
-        elif str(last.get("actor") or "").strip().lower() == builder:
+        if last.get("ran_by") != "hive-gate" or last.get("to") not in VERIFIED_PLUS:
+            reasons.append("VERIFIED requires a hive-gate execution receipt, not a handwritten stamp")
+        elif str(last.get("actor") or "").strip().lower() == builder["actor"]:
             reasons.append("builder cannot certify this transition")
         stamp_path = directory / "evidence" / "VERIFIER.json"
         if not stamp_path.is_file():
-            reasons.append("VERIFIED requires the Forge-written evidence/VERIFIER.json")
+            reasons.append("VERIFIED requires the hive-gate evidence/VERIFIER.json")
         else:
             try:
                 stamp = json.loads(stamp_path.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
                 stamp = {}
             if not last.get("receipt_sha") or stamp.get("receipt_sha") != last.get("receipt_sha"):
-                reasons.append("VERIFIER.json was not produced by the Forge receipt")
+                reasons.append("VERIFIER.json was not produced by the hive-gate receipt")
             if not str(last.get("run_id") or "").strip() or not str(last.get("platform") or "").strip():
                 reasons.append("verifier receipt missing platform or run_id")
     if state == "REVIEWED":

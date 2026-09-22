@@ -191,7 +191,7 @@ def guard(job: dict, action: str, directory: Path) -> tuple[bool, dict]:
 def unchanged(directory: Path, before: str) -> None:
     after = hive_job.load_claim(directory)
     if str(after.get("state") or "") != before:
-        raise SystemExit("FAIL: conductor wrote state; Forge is the only writer")
+        raise SystemExit("FAIL: conductor wrote state; hive-gate is the only writer")
 
 
 def cmd_next(directory: Path) -> int:
@@ -208,6 +208,9 @@ def cmd_next(directory: Path) -> int:
         "allow": route["allow"],
         "say": route["say"],
         "ok": True,
+        "builder": job.get("builder"),
+        "eligible_builders": ["cursor-agent", "forge"],
+        "machine": "hive-gate",
     }
     return emit(payload, True)
 

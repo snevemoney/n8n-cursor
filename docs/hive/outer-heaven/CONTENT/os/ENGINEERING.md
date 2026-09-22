@@ -3,10 +3,10 @@
 Continuity (Slack, session folders) is how the four see each other. It is **not** whether a capability is true.
 
 **Rules:** `.cursor/rules/hive-engineering-rules.mdc` and root `AGENTS.md` (same constitution). Roles in `roles/`.
-**Transitions:** `python3 scripts/hive/eng/forge-transition.py request --claim <id> --to <STATE> --actor <name> --role <role> --expected <STATE> --expected-revision <n>`
+**Transitions:** `python3 scripts/hive/eng/hive-gate.py request --claim <id> --to <STATE> --platform <platform> --actor <actor> --role <role> --expected <STATE> --expected-revision <n>`
 **Conductor:** `python3 scripts/hive/eng/hive-matrix.py next --claim <id>`  
 **Evidence gate:** `python3 scripts/hive/eng/hive-job.py verify --claim <id>`  
-**Claims:** `CONTENT/os/capex/` (`claim.json`). Forge applies state: `python3 scripts/hive/eng/forge-transition.py request --claim <id> --to <STATE> --expected <STATE> --expected-revision <n>`.  
+**Claims:** `CONTENT/os/capex/` (`claim.json`). `hive-gate.py` applies state. Forge is a Grok builder, not the gate.  
 **L4 Forge-done (unchanged):** `python3 docs/hive/outer-heaven/check-forge-done.py --slice-id <id>`
 
 ## Two lanes

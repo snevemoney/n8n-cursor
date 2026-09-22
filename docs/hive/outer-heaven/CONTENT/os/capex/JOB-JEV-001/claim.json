@@ -11,9 +11,16 @@
     "authority": "EVENS",
     "may_rewrite": false
   },
-  "builder": "cursor",
-  "verifier": "grok",
-  "reviewer": "consultant",
+  "builder": {"platform": "cursor", "actor": "cursor-agent", "run_id": ""},
+  "verifier": {"platform": "grok", "actor": "watchdog", "run_id": ""},
+  "reviewer": {"platform": "grok", "actor": "consultant", "run_id": ""},
+  "routing": {
+    "type": "implementation",
+    "scope": "agent-stack",
+    "risk": "medium",
+    "preferred_builder": {"platform": "cursor", "actor": "cursor-agent"},
+    "alternatives": [{"platform": "grok", "actor": "forge"}]
+  },
   "g2_checklist_path": "g2.json",
   "blocked": false,
   "unlock": "",

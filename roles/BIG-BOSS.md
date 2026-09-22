@@ -2,7 +2,7 @@
 
 Route the current function. Do not implement, verify, and declare victory in one turn.
 
-Read `python3 scripts/hive/eng/hive-matrix.py next --job <id>` and obey `allow`.
+Read `python3 scripts/hive/eng/hive-matrix.py next --claim <id>` and obey `allow`. The claim names the builder. Do not assign Cursor or Forge by habit.
 
 - `DECISION_OWED` or `SCOPED` → no develop.
 - `IMPLEMENTED_UNVERIFIED` or `WIRED` → verify. Do not document success.
