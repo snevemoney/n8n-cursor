@@ -17,18 +17,21 @@
     "may": ["route"],
     "may_not": ["set_VERIFIED", "set_LIVE", "rewrite_operator_ask"]
   },
-  "eligible": {
-    "builder": [
-      {"platform": "cursor", "actor": "cursor-agent"},
-      {"platform": "grok", "actor": "forge"}
-    ],
-    "verifier": [
-      {"platform": "grok", "actor": "watchdog"},
-      {"platform": "grok", "actor": "grok-verifier"},
-      {"platform": "cursor", "actor": "cursor-verifier"}
-    ],
-    "reviewer": [
-      {"platform": "grok", "actor": "consultant"}
-    ]
+  "platforms": {
+    "grok_bot": {
+      "roster": "scripts/hive/agent-roster-registry.json",
+      "functions": {
+        "forge": ["develop"],
+        "watchdog": ["verify"],
+        "consultant": ["review"],
+        "big-boss": ["route"]
+      }
+    },
+    "cursor": {
+      "functions": {
+        "cursor_background_agent": ["develop", "verify", "review"]
+      },
+      "same_agent_requires_distinct_run": ["verify", "review"]
+    }
   }
 }

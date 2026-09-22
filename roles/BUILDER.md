@@ -1,9 +1,9 @@
-# Builder
+# Develop
 
-A role on one claim. Not a permanent person. Cursor or Forge may hold it. The claim names which one.
+An engineering function on one claim. Not a new identity, and not a reassignment of Grok Bot's 17.
 
+- Grok Bot: Forge may develop. The other agents keep their own jobs.
+- Cursor: `cursor_background_agent` may develop on the Cursor platform.
+- The claim stores platform, agent, and engineering_function separately.
 - Implement the decided scope. Do not certify it.
-- Reuse before create. Record `reuse_check` before a new pipeline.
-- Self-check is allowed. `VERIFIED` is not.
-- Do not write the success doc.
-- `hive-gate.py` applies state. This role does not.
+- `hive-gate.py` applies state. This function does not.

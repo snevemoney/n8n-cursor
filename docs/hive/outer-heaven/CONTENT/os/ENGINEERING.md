@@ -3,10 +3,10 @@
 Continuity (Slack, session folders) is how the four see each other. It is **not** whether a capability is true.
 
 **Rules:** `.cursor/rules/hive-engineering-rules.mdc` and root `AGENTS.md` (same constitution). Roles in `roles/`.
-**Transitions:** `python3 scripts/hive/eng/hive-gate.py request --claim <id> --to <STATE> --platform <platform> --actor <actor> --role <role> --expected <STATE> --expected-revision <n>`
+**Transitions:** `python3 scripts/hive/eng/hive-gate.py request --claim <id> --to <STATE> --platform <platform> --agent <agent> --role <role> --expected <STATE> --expected-revision <n>`
 **Conductor:** `python3 scripts/hive/eng/hive-matrix.py next --claim <id>`  
 **Evidence gate:** `python3 scripts/hive/eng/hive-job.py verify --claim <id>`  
-**Claims:** `CONTENT/os/capex/` (`claim.json`). `hive-gate.py` applies state. Forge is a Grok builder, not the gate.  
+**Claims:** `CONTENT/os/capex/` (`claim.json`). `hive-gate.py` applies state. Forge, Watchdog, and Consultant stay Grok Bot agents. They are not Cursor roles.  
 **L4 Forge-done (unchanged):** `python3 docs/hive/outer-heaven/check-forge-done.py --slice-id <id>`
 
 ## Two lanes
@@ -23,7 +23,7 @@ No agent may claim DONE. File, unit test, typecheck, commit, and status prose ca
 
 Only observable evidence from the claimed path advances `WIRED` / `LIVE`. Only a **different** verifier may stamp `VERIFIED`.
 
-Builder ≠ verifier. Watchdog / Grok / another model grades Cursor. Cursor does not grade Cursor.
+Builder ≠ verifier on the same run. Watchdog may verify a Cursor develop run. A second Cursor run may verify only when its run_id differs.
 
 Hard step (send / pay / deploy / book / publish / Post) stays Evens. `SHIPPED` is not a merge.
 

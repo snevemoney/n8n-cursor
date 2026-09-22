@@ -11,15 +11,15 @@
     "authority": "EVENS",
     "may_rewrite": false
   },
-  "builder": {"platform": "cursor", "actor": "cursor-agent", "run_id": ""},
-  "verifier": {"platform": "grok", "actor": "watchdog", "run_id": ""},
-  "reviewer": {"platform": "grok", "actor": "consultant", "run_id": ""},
+  "builder": {"platform": "cursor", "agent": "cursor_background_agent", "engineering_function": "develop", "run_id": ""},
+  "verifier": {"platform": "grok_bot", "agent": "watchdog", "engineering_function": "verify", "run_id": ""},
+  "reviewer": {"platform": "grok_bot", "agent": "consultant", "engineering_function": "review", "run_id": ""},
   "routing": {
     "type": "implementation",
     "scope": "agent-stack",
     "risk": "medium",
-    "preferred_builder": {"platform": "cursor", "actor": "cursor-agent"},
-    "alternatives": [{"platform": "grok", "actor": "forge"}]
+    "preferred_builder": {"platform": "cursor", "agent": "cursor_background_agent", "engineering_function": "develop"},
+    "alternatives": [{"platform": "grok_bot", "agent": "forge", "engineering_function": "develop"}]
   },
   "g2_checklist_path": "g2.json",
   "blocked": false,

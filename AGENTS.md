@@ -25,7 +25,7 @@ Cursor loads the same constitution at `.cursor/rules/hive-engineering-rules.mdc`
 
 Conductor: `python3 scripts/hive/eng/hive-matrix.py next --claim <id>`
 Evidence: `python3 scripts/hive/eng/hive-job.py verify --claim <id>`
-Forge applies CapEx state. A handwritten `state` fails verify.
+`hive-gate.py` applies CapEx state. Platform, agent, and function stay separate. A handwritten `state` fails verify.
 Signals: `python3 scripts/hive/eng/signal.py pack --query "<topic>"` — a saved signal is not a Hive rule.
 Roles: `roles/BIG-BOSS.md` `roles/BUILDER.md` `roles/VERIFIER.md` `roles/REVIEWER.md`
 Jarvis: `apps/agent-stack/AGENTS.md`

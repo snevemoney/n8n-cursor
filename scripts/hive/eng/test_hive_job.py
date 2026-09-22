@@ -33,9 +33,24 @@ def base_claim(state: str, **extra: object) -> dict:
         "close_type": "",
         "release_status": "NOT_DEPLOYED",
         "operator_ask": {"original": "Keep Jev in Jarvis.", "authority": "EVENS", "may_rewrite": False},
-        "builder": {"platform": "cursor", "actor": "cursor-agent", "run_id": "builder-run"},
-        "verifier": {"platform": "grok", "actor": "watchdog", "run_id": "verifier-run"},
-        "reviewer": {"platform": "grok", "actor": "consultant", "run_id": "reviewer-run"},
+        "builder": {
+            "platform": "cursor",
+            "agent": "cursor_background_agent",
+            "engineering_function": "develop",
+            "run_id": "builder-run",
+        },
+        "verifier": {
+            "platform": "grok_bot",
+            "agent": "watchdog",
+            "engineering_function": "verify",
+            "run_id": "verifier-run",
+        },
+        "reviewer": {
+            "platform": "grok_bot",
+            "agent": "consultant",
+            "engineering_function": "review",
+            "run_id": "reviewer-run",
+        },
         "g2_checklist_path": "g2.json",
         "blocked": False,
         "unlock": "",
@@ -71,7 +86,7 @@ def write_claim(tmp: Path, claim: dict, evidence: dict | None = None) -> Path:
             "from": "SCOPED",
             "to": claim["state"],
             "revision": 1,
-            "actor": "cursor",
+            "agent": "cursor_background_agent",
             "role": "builder",
             "ran_by": "hive-gate",
         }
@@ -123,7 +138,12 @@ class HiveJobGateTest(unittest.TestCase):
                 Path(raw),
                 base_claim(
                     "VERIFIED",
-                    verifier={"platform": "cursor", "actor": "cursor-agent", "run_id": "builder-run"},
+                    verifier={
+                        "platform": "cursor",
+                        "agent": "cursor_background_agent",
+                        "engineering_function": "verify",
+                        "run_id": "builder-run",
+                    },
                 ),
             )
             proc = run_verify(tmp, "--offline")
@@ -170,6 +190,37 @@ class HiveJobGateTest(unittest.TestCase):
         proc = run_verify(CAPEX / "JOB-JEV-001", "--offline")
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertIn("SCOPED", proc.stdout)
+
+    def test_researcher_cannot_develop(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            claim = base_claim("SCOPED", revision=0)
+            claim["builder"] = {
+                "platform": "grok_bot",
+                "agent": "researcher",
+                "engineering_function": "develop",
+                "run_id": "",
+            }
+            tmp = Path(raw)
+            (tmp / "claim.json").write_text(json.dumps(claim), encoding="utf-8")
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("not authorized for develop", proc.stdout)
+            self.assertIn("remains a Grok Bot agent", proc.stdout)
+
+    def test_forge_is_not_a_verifier(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            claim = base_claim("SCOPED", revision=0)
+            claim["verifier"] = {
+                "platform": "grok_bot",
+                "agent": "forge",
+                "engineering_function": "verify",
+                "run_id": "verifier-run",
+            }
+            tmp = Path(raw)
+            (tmp / "claim.json").write_text(json.dumps(claim), encoding="utf-8")
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("forge performs develop on grok_bot and is not a verifier", proc.stdout)
 
     def test_registry_is_derived(self) -> None:
         proc = subprocess.run(

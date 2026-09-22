@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""hive-gate is the machine. Forge is a Grok builder, not this file.
+"""hive-gate is the machine. It is not an agent and not a workforce.
 
   python3 scripts/hive/eng/hive-gate.py request \\
-    --claim-dir <path> --to ARCHITECTED --platform cursor --actor cursor-agent --role builder \\
-    --expected SCOPED --expected-revision 0
+    --claim-dir <path> --to ARCHITECTED --platform cursor --agent cursor_background_agent \\
+    --role builder --expected SCOPED --expected-revision 0
 
-Cursor or Forge may hold Builder on a claim. This process applies the state.
+Platform, agent, and engineering function stay separate. Grok Bot's 17 stay Grok Bot agents.
 """
 from __future__ import annotations
 
@@ -57,26 +57,12 @@ def load_permissions() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def eligible(perms: dict, role_name: str, platform: str, actor: str) -> bool:
-    rows = perms.get("eligible", {}).get(role_name, [])
-    want_platform = platform.strip().lower()
-    want_actor = actor.strip().lower()
-    return any(
-        str(row.get("platform") or "").lower() == want_platform
-        and str(row.get("actor") or "").lower() == want_actor
-        for row in rows
-        if isinstance(row, dict)
-    )
-
-
-def assignment_reason(claim: dict, role_name: str, platform: str, actor: str, run_id: str) -> str:
+def assignment_reason(claim: dict, role_name: str, platform: str, agent: str, run_id: str) -> str:
     assigned = hive_job.party(claim.get(role_name))
     if assigned is None:
-        return f"{role_name} must be {{platform, actor, run_id}}"
-    if platform.strip().lower() != assigned["platform"] or actor.strip().lower() != assigned["actor"]:
-        return (
-            f"this claim assigns {role_name} to {assigned['platform']}/{assigned['actor']}"
-        )
+        return f"{role_name} must be {hive_job.PARTY_SHAPE}"
+    if platform.strip().lower() != assigned["platform"] or agent.strip().lower() != assigned["agent"]:
+        return f"this claim assigns {role_name} to {assigned['platform']}/{assigned['agent']}"
     if assigned["run_id"] and run_id and assigned["run_id"] != run_id:
         return "run_id does not match the claim assignment"
     return ""
@@ -85,7 +71,7 @@ def assignment_reason(claim: dict, role_name: str, platform: str, actor: str, ru
 def request_transition(
     directory: Path,
     target: str,
-    actor: str,
+    agent: str,
     role: str,
     expected: str,
     expected_revision: int,
@@ -118,26 +104,41 @@ def request_transition(
     if role in perms and need and f"request_{target}" not in perms[role].get("may", []):
         reasons.append(f"role {role} may not request {target}")
     builder = hive_job.party(claim.get("builder"))
-    if builder and target in hive_job.VERIFIED_PLUS and actor.strip().lower() == builder["actor"]:
-        reasons.append("builder cannot certify this transition")
+    function = hive_job.ROLE_FUNCTION.get(role, "")
+    requester = {
+        "platform": platform.strip().lower(),
+        "agent": agent.strip().lower(),
+        "engineering_function": function,
+        "run_id": run_id,
+    }
+    if builder and target in hive_job.VERIFIED_PLUS and function:
+        blocked = hive_job.independence_reason(builder, requester, function)
+        if blocked and requester["agent"] == builder["agent"] and requester["platform"] == builder["platform"]:
+            reasons.append("builder cannot certify this transition")
+            reasons.append(blocked)
     if target in BUILDER_TARGETS:
         if role != "builder":
             reasons.append("implementation requires the claim builder")
         else:
-            why = assignment_reason(claim, "builder", platform, actor, run_id)
+            why = assignment_reason(claim, "builder", platform, agent, run_id)
             if why:
                 reasons.append(why)
-            elif not eligible(perms, "builder", platform, actor):
-                reasons.append("actor is not an eligible builder")
+            else:
+                denied = hive_job.authorization_reason(platform, agent, "develop")
+                if denied:
+                    reasons.append(denied)
     if need in {"verifier", "reviewer"}:
-        why = assignment_reason(claim, need, platform, actor, run_id)
+        why = assignment_reason(claim, need, platform, agent, run_id)
         if why:
             reasons.append(why)
-        elif not eligible(perms, need, platform, actor):
-            reasons.append(f"actor is not an eligible {need}")
-        assigned_builder = builder or {"actor": ""}
-        if need == "reviewer" and actor.strip().lower() == assigned_builder["actor"]:
-            reasons.append("reviewer must differ from the builder")
+        else:
+            denied = hive_job.authorization_reason(platform, agent, hive_job.ROLE_FUNCTION[need])
+            if denied:
+                reasons.append(denied)
+            elif builder:
+                blocked = hive_job.independence_reason(builder, requester, hive_job.ROLE_FUNCTION[need])
+                if blocked:
+                    reasons.append(blocked)
     if target == "READY":
         reasons.extend(hive_job.g2_reasons(claim, directory))
     if target in hive_job.LIVE_PLUS:
@@ -178,8 +179,9 @@ def request_transition(
         )
     new_revision = int(revision) + 1
     row = {
-        "actor": actor,
+        "agent": agent,
         "at": hive_job.utc_now(),
+        "engineering_function": function,
         "from": current,
         "platform": platform,
         "ran_by": "hive-gate",
@@ -202,8 +204,9 @@ def request_transition(
         (evidence / "VERIFIER.json").write_text(
             json.dumps(
                 {
-                    "verifier": actor,
+                    "agent": agent,
                     "platform": platform,
+                    "engineering_function": "verify",
                     "run_id": run_id,
                     "verdict": "PASS",
                     "receipt_sha": row["receipt_sha"],
@@ -235,7 +238,8 @@ def main() -> int:
     req.add_argument("--claim")
     req.add_argument("--claim-dir")
     req.add_argument("--to", required=True)
-    req.add_argument("--actor", required=True)
+    req.add_argument("--agent", default="")
+    req.add_argument("--actor", default="", help="alias for --agent")
     req.add_argument("--role", required=True)
     req.add_argument("--expected", required=True)
     req.add_argument("--expected-revision", required=True, type=int)
@@ -244,10 +248,13 @@ def main() -> int:
     req.add_argument("--l4-log", default="")
     args = ap.parse_args()
     directory = Path(args.claim_dir) if args.claim_dir else hive_job.claim_dir_for(str(args.claim or ""))
+    agent = str(args.agent or args.actor or "").strip()
+    if not agent:
+        return emit({"applied": False, "reasons": ["--agent is required"]}, False)
     return request_transition(
         directory,
         args.to,
-        args.actor,
+        agent,
         args.role,
         args.expected,
         args.expected_revision,

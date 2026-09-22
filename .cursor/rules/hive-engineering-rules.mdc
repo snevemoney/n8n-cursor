@@ -9,7 +9,7 @@ alwaysApply: true
 
 Applies to Cursor, Grok, Claude, ChatGPT, Jarvis, Big Boss, Forge, and subagents. Overrides preference and best guess.
 
-Independent workers. Not one brain. Truth order: runtime, git, job state, decisions, current context, then Slack. `hive-gate.py` applies transitions. Cursor and Forge may each be Builder. The operator ask is immutable.
+Independent workers. Not one brain. Truth order: runtime, git, job state, decisions, current context, then Slack. `hive-gate.py` applies transitions. Platform, agent, and engineering function stay separate. Grok Bot's 17 stay Grok Bot agents. The operator ask is immutable.
 
 1. Do the ask. A report is not a fix. Unreachable code is not wiring. A passing test is not live.
 2. Scope before code. Scope is what. Architecture is how.
@@ -39,7 +39,7 @@ Independent workers. Not one brain. Truth order: runtime, git, job state, decisi
 
 Conductor: `python3 scripts/hive/eng/hive-matrix.py next --claim <id>`
 Evidence: `python3 scripts/hive/eng/hive-job.py verify --claim <id>`
-Forge applies state. A handwritten `state` fails verify. Claims: `docs/hive/outer-heaven/CONTENT/os/capex/`.
+`hive-gate.py` applies state. A handwritten `state` fails verify. Claims: `docs/hive/outer-heaven/CONTENT/os/capex/`.
 Signals: `python3 scripts/hive/eng/signal.py pack --query "<topic>"` — a saved signal is not a Hive rule.
 Roles: `roles/BIG-BOSS.md` `roles/BUILDER.md` `roles/VERIFIER.md` `roles/REVIEWER.md`
 Jarvis: `apps/agent-stack/AGENTS.md` · Jev hands: `apps/agent-stack/hands/AGENTS.md`

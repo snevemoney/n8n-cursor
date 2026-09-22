@@ -209,7 +209,10 @@ def cmd_next(directory: Path) -> int:
         "say": route["say"],
         "ok": True,
         "builder": job.get("builder"),
-        "eligible_builders": ["cursor-agent", "forge"],
+        "platforms": {
+            "grok_bot": "scripts/hive/agent-roster-registry.json",
+            "cursor": "cursor_background_agent",
+        },
         "machine": "hive-gate",
     }
     return emit(payload, True)

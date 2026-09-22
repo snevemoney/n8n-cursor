@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """CapEx claim gate. One work unit. hive-gate is the only writer of state.
 
-Cursor and Forge are both eligible builders. Neither one is this machine.
+Platform, agent, and engineering function are separate. Grok Bot's 17 stay Grok Bot agents.
 
   python3 scripts/hive/eng/hive-job.py states
   python3 scripts/hive/eng/hive-job.py verify --claim JOB-JEV-001
@@ -294,34 +294,127 @@ def evidence_reasons(claim: dict, directory: Path, ev: dict) -> list[str]:
     return reasons
 
 
+ROLE_FUNCTION = {
+    "builder": "develop",
+    "verifier": "verify",
+    "reviewer": "review",
+}
+PARTY_SHAPE = "{platform, agent, engineering_function, run_id}"
+
+
 def party(value: object) -> dict | None:
     if not isinstance(value, dict):
         return None
     platform = str(value.get("platform") or "").strip().lower()
-    actor = str(value.get("actor") or "").strip().lower()
+    agent = str(value.get("agent") or "").strip().lower()
+    function = str(value.get("engineering_function") or "").strip().lower()
     run_id = str(value.get("run_id") or "").strip()
-    if not platform or not actor:
+    if not platform or not agent or not function:
         return None
-    return {"platform": platform, "actor": actor, "run_id": run_id}
+    return {
+        "platform": platform,
+        "agent": agent,
+        "engineering_function": function,
+        "run_id": run_id,
+    }
+
+
+def load_permissions() -> dict:
+    path = ROOT / "roles" / "permissions.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def grok_roster() -> set[str]:
+    path = ROOT / "scripts/hive/agent-roster-registry.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    rows = data.get("coreAgents") if isinstance(data, dict) else None
+    slugs: set[str] = set()
+    if not isinstance(rows, list):
+        return slugs
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        agent_id = str(row.get("id") or "")
+        if agent_id.startswith("grok-os-"):
+            slugs.add(agent_id[len("grok-os-") :])
+    return slugs
+
+
+def authorization_reason(platform: str, agent: str, function: str) -> str:
+    perms = load_permissions()
+    platforms = perms.get("platforms") if isinstance(perms.get("platforms"), dict) else {}
+    spec = platforms.get(platform)
+    if not isinstance(spec, dict):
+        return f"unknown platform {platform}"
+    functions = spec.get("functions") if isinstance(spec.get("functions"), dict) else {}
+    held = functions.get(agent)
+    held_list = [str(item) for item in held] if isinstance(held, list) else []
+    if platform == "grok_bot" and agent not in grok_roster():
+        return f"{agent} is not a Grok Bot agent"
+    if function in held_list:
+        return ""
+    if platform == "grok_bot" and held_list:
+        performed = " and ".join(held_list)
+        noun = {"verify": "verifier", "review": "reviewer", "develop": "builder"}.get(function, function)
+        return f"{agent} performs {performed} on grok_bot and is not a {noun}"
+    if platform == "grok_bot":
+        return f"{agent} is not authorized for {function} on grok_bot and remains a Grok Bot agent"
+    return f"{agent} is not authorized for {function} on {platform}"
+
+
+def independence_reason(builder: dict, other: dict, function: str) -> str:
+    same_party = builder["platform"] == other["platform"] and builder["agent"] == other["agent"]
+    same_run = bool(builder["run_id"]) and builder["run_id"] == other["run_id"]
+    if same_party and same_run:
+        if function == "verify":
+            return "builder may not stamp VERIFIED (builder == verifier)"
+        return "reviewer must differ from the builder"
+    if same_party:
+        perms = load_permissions()
+        platforms = perms.get("platforms") if isinstance(perms.get("platforms"), dict) else {}
+        spec = platforms.get(builder["platform"]) if isinstance(platforms.get(builder["platform"]), dict) else {}
+        needs = spec.get("same_agent_requires_distinct_run") if isinstance(spec, dict) else []
+        distinct = isinstance(needs, list) and function in needs
+        if distinct:
+            if not builder["run_id"] or not other["run_id"]:
+                return "cursor verify/review requires a different run_id from the develop run"
+            return ""
+        if function == "verify":
+            return "builder may not stamp VERIFIED (builder == verifier)"
+        return "reviewer must differ from the builder"
+    if same_run:
+        if function == "verify":
+            return "verifier run_id matches the builder"
+        return "reviewer run_id matches the builder"
+    return ""
 
 
 def role_reasons(claim: dict) -> list[str]:
     reasons: list[str] = []
-    builder = party(claim.get("builder"))
-    verifier = party(claim.get("verifier"))
-    reviewer = party(claim.get("reviewer"))
-    if builder is None:
-        reasons.append("builder must be {platform, actor, run_id}")
-    if verifier is None:
-        reasons.append("verifier must be {platform, actor, run_id}")
-    if reviewer is None:
-        reasons.append("reviewer must be {platform, actor, run_id}")
-    if builder and verifier and builder["actor"] == verifier["actor"]:
-        reasons.append("builder may not stamp VERIFIED (builder == verifier)")
-    if builder and verifier and builder["run_id"] and builder["run_id"] == verifier["run_id"]:
-        reasons.append("verifier run_id matches the builder")
-    if builder and reviewer and builder["actor"] == reviewer["actor"]:
-        reasons.append("reviewer must differ from the builder")
+    parties: dict[str, dict | None] = {}
+    for name, function in ROLE_FUNCTION.items():
+        who = party(claim.get(name))
+        parties[name] = who
+        if who is None:
+            reasons.append(f"{name} must be {PARTY_SHAPE}")
+            continue
+        if who["engineering_function"] != function:
+            reasons.append(f"{name} engineering_function must be {function}")
+            continue
+        why = authorization_reason(who["platform"], who["agent"], function)
+        if why:
+            reasons.append(why)
+    builder = parties.get("builder")
+    verifier = parties.get("verifier")
+    reviewer = parties.get("reviewer")
+    if builder and verifier:
+        why = independence_reason(builder, verifier, "verify")
+        if why:
+            reasons.append(why)
+    if builder and reviewer:
+        why = independence_reason(builder, reviewer, "review")
+        if why:
+            reasons.append(why)
     return reasons
 
 
@@ -363,13 +456,27 @@ def reasons_for(claim: dict, directory: Path, *, ping_runtime: bool, l4_log: Pat
                 if not health.get("ok"):
                     reasons.append(f"Face {face} not reachable → VERIFICATION_UNAVAILABLE")
     if state in VERIFIED_PLUS:
-        builder = party(claim.get("builder")) or {"actor": "", "run_id": ""}
+        builder = party(claim.get("builder")) or {
+            "platform": "",
+            "agent": "",
+            "engineering_function": "",
+            "run_id": "",
+        }
         receipts = load_receipts(directory)
         last = receipts[-1] if receipts else {}
         if last.get("ran_by") != "hive-gate" or last.get("to") not in VERIFIED_PLUS:
             reasons.append("VERIFIED requires a hive-gate execution receipt, not a handwritten stamp")
-        elif str(last.get("actor") or "").strip().lower() == builder["actor"]:
-            reasons.append("builder cannot certify this transition")
+        else:
+            receipt_party = {
+                "platform": str(last.get("platform") or "").strip().lower(),
+                "agent": str(last.get("agent") or "").strip().lower(),
+                "engineering_function": "verify",
+                "run_id": str(last.get("run_id") or "").strip(),
+            }
+            if builder["agent"] and receipt_party["agent"]:
+                why = independence_reason(builder, receipt_party, "verify")
+                if why:
+                    reasons.append("builder cannot certify this transition")
         stamp_path = directory / "evidence" / "VERIFIER.json"
         if not stamp_path.is_file():
             reasons.append("VERIFIED requires the hive-gate evidence/VERIFIER.json")

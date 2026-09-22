@@ -40,9 +40,24 @@ def write_claim(tmp: Path, state: str, evidence: dict | None = None, **extra: ob
         "ask_verbs": ["keep"],
         "close_type": "",
         "release_status": "NOT_DEPLOYED",
-        "builder": {"platform": "cursor", "actor": "cursor-agent", "run_id": "builder-run"},
-        "verifier": {"platform": "grok", "actor": "watchdog", "run_id": "verifier-run"},
-        "reviewer": {"platform": "grok", "actor": "consultant", "run_id": "reviewer-run"},
+        "builder": {
+            "platform": "cursor",
+            "agent": "cursor_background_agent",
+            "engineering_function": "develop",
+            "run_id": "builder-run",
+        },
+        "verifier": {
+            "platform": "grok_bot",
+            "agent": "watchdog",
+            "engineering_function": "verify",
+            "run_id": "verifier-run",
+        },
+        "reviewer": {
+            "platform": "grok_bot",
+            "agent": "consultant",
+            "engineering_function": "review",
+            "run_id": "reviewer-run",
+        },
         "g2_checklist_path": "g2.json",
         "blocked": False,
         "unlock": "",
@@ -78,7 +93,7 @@ def write_claim(tmp: Path, state: str, evidence: dict | None = None, **extra: ob
                     "from": "SCOPED",
                     "to": state,
                     "revision": claim["revision"],
-                    "actor": "cursor",
+                    "agent": "cursor_background_agent",
                     "role": "builder",
                     "ran_by": "hive-gate",
                 }
@@ -92,9 +107,15 @@ def write_claim(tmp: Path, state: str, evidence: dict | None = None, **extra: ob
     return tmp
 
 
-def request(tmp: Path, target: str, actor: str, role: str, **extra: str) -> subprocess.CompletedProcess[str]:
+def request(tmp: Path, target: str, agent: str, role: str, **extra: str) -> subprocess.CompletedProcess[str]:
     claim = json.loads((tmp / "claim.json").read_text(encoding="utf-8"))
-    platform = {"cursor-agent": "cursor", "forge": "grok", "watchdog": "grok", "consultant": "grok"}[actor]
+    platform = {
+        "cursor_background_agent": "cursor",
+        "forge": "grok_bot",
+        "watchdog": "grok_bot",
+        "consultant": "grok_bot",
+        "researcher": "grok_bot",
+    }[agent]
     cmd = [
         sys.executable,
         str(CLI),
@@ -105,8 +126,8 @@ def request(tmp: Path, target: str, actor: str, role: str, **extra: str) -> subp
         target,
         "--platform",
         extra.pop("platform", platform),
-        "--actor",
-        actor,
+        "--agent",
+        agent,
         "--role",
         role,
         "--run-id",
@@ -152,7 +173,7 @@ class HiveGateTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)
             tmp = write_claim(tmp, "LIVE", live_evidence(tmp))
-            proc = request(tmp, "VERIFIED", "cursor-agent", "verifier", run_id="builder-run")
+            proc = request(tmp, "VERIFIED", "cursor_background_agent", "verifier", run_id="builder-run")
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("builder cannot certify", proc.stdout)
 
@@ -170,14 +191,14 @@ class HiveGateTest(unittest.TestCase):
     def test_missing_operator_ask_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = write_claim(Path(raw), "READY", operator_ask={})
-            proc = request(tmp, "IMPLEMENTING", "cursor-agent", "builder")
+            proc = request(tmp, "IMPLEMENTING", "cursor_background_agent", "builder")
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("operator_ask", proc.stdout)
 
     def test_ready_without_g2_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = write_claim(Path(raw), "ARCHITECTED")
-            proc = request(tmp, "READY", "cursor-agent", "builder")
+            proc = request(tmp, "READY", "cursor_background_agent", "builder")
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertIn("G2 checklist missing", proc.stdout)
 
@@ -208,8 +229,8 @@ class HiveGateTest(unittest.TestCase):
                     "ARCHITECTED",
                     "--platform",
                     "cursor",
-                    "--actor",
-                    "cursor-agent",
+                    "--agent",
+                    "cursor_background_agent",
                     "--role",
                     "builder",
                     "--run-id",
@@ -253,21 +274,107 @@ class HiveGateTest(unittest.TestCase):
             tmp = write_claim(Path(raw), "SCOPED")
             proc = request(tmp, "ARCHITECTED", "forge", "builder")
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
-            self.assertIn("assigns builder to cursor/cursor-agent", proc.stdout)
+            self.assertIn("assigns builder to cursor/cursor_background_agent", proc.stdout)
 
     def test_forge_can_build_when_the_claim_names_forge(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = write_claim(
                 Path(raw),
                 "SCOPED",
-                builder={"platform": "grok", "actor": "forge", "run_id": "builder-run"},
-                verifier={"platform": "cursor", "actor": "cursor-verifier", "run_id": "verifier-run"},
+                builder={
+                    "platform": "grok_bot",
+                    "agent": "forge",
+                    "engineering_function": "develop",
+                    "run_id": "builder-run",
+                },
+                verifier={
+                    "platform": "cursor",
+                    "agent": "cursor_background_agent",
+                    "engineering_function": "verify",
+                    "run_id": "verifier-run",
+                },
             )
             proc = request(tmp, "ARCHITECTED", "forge", "builder")
             self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
             claim = json.loads((tmp / "claim.json").read_text(encoding="utf-8"))
             self.assertEqual(claim["state"], "ARCHITECTED")
-            self.assertEqual(claim["builder"]["actor"], "forge")
+            self.assertEqual(claim["builder"]["agent"], "forge")
+
+    def test_researcher_cannot_develop(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = write_claim(
+                Path(raw),
+                "SCOPED",
+                builder={
+                    "platform": "grok_bot",
+                    "agent": "researcher",
+                    "engineering_function": "develop",
+                    "run_id": "builder-run",
+                },
+            )
+            proc = request(tmp, "ARCHITECTED", "researcher", "builder")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("not authorized for develop", proc.stdout)
+            self.assertIn("remains a Grok Bot agent", proc.stdout)
+
+    def test_forge_cannot_verify(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            tmp = write_claim(
+                tmp,
+                "WIRED",
+                live_evidence(tmp),
+                verifier={
+                    "platform": "grok_bot",
+                    "agent": "forge",
+                    "engineering_function": "verify",
+                    "run_id": "verifier-run",
+                },
+            )
+            proc = request(tmp, "LIVE", "forge", "verifier", run_id="verifier-run")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("forge performs develop on grok_bot and is not a verifier", proc.stdout)
+
+    def test_cursor_same_run_cannot_verify(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            tmp = write_claim(
+                tmp,
+                "LIVE",
+                live_evidence(tmp),
+                verifier={
+                    "platform": "cursor",
+                    "agent": "cursor_background_agent",
+                    "engineering_function": "verify",
+                    "run_id": "builder-run",
+                },
+            )
+            proc = request(tmp, "VERIFIED", "cursor_background_agent", "verifier", run_id="builder-run")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("builder cannot certify", proc.stdout)
+
+    def test_cursor_separate_run_may_verify(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            tmp = write_claim(
+                tmp,
+                "LIVE",
+                live_evidence(tmp),
+                verifier={
+                    "platform": "cursor",
+                    "agent": "cursor_background_agent",
+                    "engineering_function": "verify",
+                    "run_id": "verifier-run",
+                },
+                regression={"argv": [sys.executable, "-c", "raise SystemExit(0)"], "cwd": str(tmp)},
+            )
+            proc = request(tmp, "VERIFIED", "cursor_background_agent", "verifier", run_id="verifier-run")
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            claim = json.loads((tmp / "claim.json").read_text(encoding="utf-8"))
+            self.assertEqual(claim["state"], "VERIFIED")
+            receipt = (tmp / "transitions.jsonl").read_text(encoding="utf-8").strip().splitlines()[-1]
+            self.assertIn("cursor_background_agent", receipt)
+            self.assertNotIn("cursor-verifier", receipt)
 
     def test_tracked_env_backups_are_not_in_git(self) -> None:
         listed = subprocess.check_output(["git", "ls-files"], cwd=str(ROOT), text=True)

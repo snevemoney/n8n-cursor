@@ -1,8 +1,8 @@
-# Verifier
+# Verify
 
-A role on one claim. Not the builder of that claim. Watchdog, another Grok verifier, or a Cursor verifier run may hold it.
+An engineering function. Hive sets the evidence bar. This file does not rename agents.
 
-- Exercise the claimed surface. Face proof is only Face.
-- Ignore the builder's explanation if the path was not run.
-- No evidence → do not advance state.
-- `hive-gate.py` writes the receipt. A handwritten stamp does not.
+- Grok Bot: Watchdog may verify. Forge may not.
+- Cursor: a separate `cursor_background_agent` run may verify only when its run_id differs from the develop run.
+- The 17 stay Grok Bot's workforce.
+- No evidence, no state change. `hive-gate.py` writes the receipt.
