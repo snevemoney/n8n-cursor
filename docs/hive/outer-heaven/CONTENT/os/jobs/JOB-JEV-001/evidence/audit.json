@@ -1,0 +1,11 @@
+{
+  "id": "JOB-JEV-001",
+  "state": "LIVE",
+  "face_health": {
+    "ok": true,
+    "url": "http://127.0.0.1:4018/healthz",
+    "error": null
+  },
+  "contradictions": [],
+  "ok": true
+}

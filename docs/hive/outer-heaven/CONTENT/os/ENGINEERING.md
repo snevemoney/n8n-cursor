@@ -2,9 +2,18 @@
 
 Continuity (Slack, session folders) is how the four see each other. It is **not** whether a capability is true.
 
-**Gate:** `python3 scripts/hive/eng/hive-job.py verify --job <id>`  
+**Conductor:** `python3 scripts/hive/eng/hive-matrix.py next --job <id>`  
+**Evidence gate:** `python3 scripts/hive/eng/hive-job.py verify --job <id>`  
 **Jobs:** `CONTENT/os/jobs/`  
 **L4 Forge-done (unchanged):** `python3 docs/hive/outer-heaven/check-forge-done.py --slice-id <id>`
+
+## Two lanes
+
+Lane A is this conductor (scope → architect → audit → develop → verify → test → review → document/sync). Debug is a separate route (`REGRESSION` / `WIRE_FAILURE`), not another develop pass.
+
+Lane B is the product. First dogfood: `JOB-JEV-001` — Jarvis calls Jev for browser Watch (`computer.next_op`) and computer voice-Mac (`voice.mac_op`). Not a new agent OS.
+
+Big Boss reads `next`. It does not implement, verify, and declare victory in one breath.
 
 ## Law
 

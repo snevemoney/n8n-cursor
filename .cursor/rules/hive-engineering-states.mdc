@@ -9,7 +9,8 @@ Do not claim DONE / working / wired / live / verified without the gate.
 
 Contract: `docs/hive/outer-heaven/CONTENT/os/ENGINEERING.md`
 Jobs: `docs/hive/outer-heaven/CONTENT/os/jobs/`
-Command: `python3 scripts/hive/eng/hive-job.py verify --job <id>`
+Conductor: `python3 scripts/hive/eng/hive-matrix.py next --job <id>`
+Evidence: `python3 scripts/hive/eng/hive-job.py verify --job <id>`
 
 A file, unit test, typecheck, commit, or status line cannot advance a runtime capability past `IMPLEMENTED_UNVERIFIED`.
 Builder ≠ verifier. Cursor does not stamp its own `VERIFIED`.

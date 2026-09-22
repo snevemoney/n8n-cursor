@@ -25,6 +25,50 @@
     "picker": "typesafe/jev-1.13",
     "families": ["computer.next_op", "voice.mac_op"]
   },
+  "scope": {
+    "goal": "Jarvis invokes Jev for browser Watch and computer voice-Mac",
+    "v1": [
+      "Watch tick observes Safari and acts",
+      "voice-Mac observes words and acts",
+      "result returns on the same Face",
+      "plates stay split"
+    ],
+    "not_v1": [
+      "new agent OS",
+      "replacement Jarvis planner",
+      "jev-ultrafast install",
+      "independent Jev memory",
+      "autonomous deploy"
+    ]
+  },
+  "architecture": {
+    "jev_role": "picker tool",
+    "owner_plan": "Jarvis Face routes",
+    "owner_perception": "safari_see and listen partials",
+    "owner_act": "mac_act and voice-mac runner",
+    "browser": "computer.next_op",
+    "computer": "voice.mac_op",
+    "permissions": "Book Post send pay deploy stay Evens"
+  },
+  "reuse_check": {
+    "need": "browser and computer executor",
+    "existing": [
+      "face/serve.py /api/watch",
+      "face/serve.py /api/turn voice.mac_op",
+      "hands safari_watch",
+      "hands voice_mac"
+    ],
+    "decision": "extend",
+    "rejected": [
+      "new browser engine",
+      "jev-ultrafast clone",
+      "second Jarvis pipeline"
+    ]
+  },
+  "regression": {
+    "argv": ["python3", "-m", "unittest", "face.test_serve", "-q"],
+    "cwd": "/Users/evenslouis/n8n-cursor-wt-decision-fabric-v0/apps/agent-stack"
+  },
   "reuse": [
     "apps/agent-stack/face/serve.py",
     "apps/agent-stack/hands safari_watch / voice_mac",

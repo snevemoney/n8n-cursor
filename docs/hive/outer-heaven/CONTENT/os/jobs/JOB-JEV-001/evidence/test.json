@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "face.test_serve",
+    "-q"
+  ],
+  "cwd": "/Users/evenslouis/n8n-cursor-wt-decision-fabric-v0/apps/agent-stack",
+  "returncode": 0,
+  "ok": true
+}
