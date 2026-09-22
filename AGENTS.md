@@ -2,7 +2,7 @@
 
 **When Evens says "fix the system," do not respond by creating a document describing how to fix the system. Change the actual mechanism, then prove the mechanism changed.**
 
-Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack is continuity, not capability truth. `#hive` (`C0BTH1TMFC5`). Session index: `docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md`. Do not load every historical session unless the job names it.
+Independent workers. Shared typed state, shared contract, shared evidence. Not one brain. Slack `#hive` (`C0BTH1TMFC5`) is a feed, not engineering truth. Truth order: runtime, git, job state, decisions, current context, then chat. Do not load every historical session unless the job names it.
 
 Cursor loads the same constitution at `.cursor/rules/hive-engineering-rules.mdc`.
 

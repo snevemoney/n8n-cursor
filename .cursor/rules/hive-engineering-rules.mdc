@@ -9,6 +9,8 @@ alwaysApply: true
 
 Applies to Cursor, Grok, Claude, ChatGPT, Jarvis, Big Boss, Forge, and subagents. Overrides preference and best guess.
 
+Independent workers. Not one brain. Truth order: runtime, git, job state, decisions, current context, then Slack. Forge accepts transitions: `python3 scripts/hive/eng/forge-transition.py request --job <id> --to <STATE> --actor <name> --role <role>`. The operator ask is immutable.
+
 1. Do the ask. A report is not a fix. Unreachable code is not wiring. A passing test is not live.
 2. Scope before code. Scope is what. Architecture is how.
 3. Audit runtime before editing legacy code. Docs ≠ runtime → `DOC_RUNTIME_CONTRADICTION`. Record both. Do not silently rewrite either.

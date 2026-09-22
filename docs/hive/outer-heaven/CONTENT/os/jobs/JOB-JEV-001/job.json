@@ -1,6 +1,11 @@
 {
   "id": "JOB-JEV-001",
   "title": "Jarvis uses Jev for browser Watch and computer voice-Mac",
+  "operator_ask": {
+    "original": "Engineer Hive so agents stop shadow work, and keep Jarvis using Jev for browser use and computer use.",
+    "authority": "EVENS",
+    "may_rewrite": false
+  },
   "state": "LIVE",
   "builder": "cursor",
   "verifier": "grok",

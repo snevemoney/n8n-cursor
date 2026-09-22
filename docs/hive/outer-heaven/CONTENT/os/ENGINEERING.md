@@ -3,6 +3,7 @@
 Continuity (Slack, session folders) is how the four see each other. It is **not** whether a capability is true.
 
 **Rules:** `.cursor/rules/hive-engineering-rules.mdc` and root `AGENTS.md` (same constitution). Roles in `roles/`.
+**Transitions:** `python3 scripts/hive/eng/forge-transition.py request --job <id> --to <STATE> --actor <name> --role <role>`
 **Conductor:** `python3 scripts/hive/eng/hive-matrix.py next --job <id>`  
 **Evidence gate:** `python3 scripts/hive/eng/hive-job.py verify --job <id>`  
 **Jobs:** `CONTENT/os/jobs/`  
