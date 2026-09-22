@@ -1,0 +1,38 @@
+{
+  "id": "JOB-JEV-001",
+  "title": "Jarvis uses Jev for browser Watch and computer voice-Mac",
+  "state": "LIVE",
+  "builder": "cursor",
+  "verifier": "grok",
+  "reviewer": "consultant",
+  "acceptance": [
+    "Live Face 127.0.0.1:4018 healthz ok",
+    "POST /api/watch tick runs computer.next_op via openrouter_jev; Book never",
+    "POST /api/voice-mac reset then /api/turn family voice.mac_op FIRE via openrouter_jev; Post never",
+    "Plates not merged"
+  ],
+  "non_goals": [
+    "jev-ultrafast install",
+    "TypeSafe SDK",
+    "Chrome / Browser Harness as host",
+    "Book / Select flight / Post / send / pay / deploy",
+    "Builder self-VERIFIED"
+  ],
+  "runtime": {
+    "entrypoint": "/api/watch + /api/turn",
+    "environment": "local",
+    "expected_face": "127.0.0.1:4018",
+    "picker": "typesafe/jev-1.13",
+    "families": ["computer.next_op", "voice.mac_op"]
+  },
+  "reuse": [
+    "apps/agent-stack/face/serve.py",
+    "apps/agent-stack/hands safari_watch / voice_mac",
+    "isolated Face tree n8n-cursor-wt-decision-fabric-v0"
+  ],
+  "evidence": {
+    "required": ["live_request", "live_response", "face_health"]
+  },
+  "decisions_owed": [],
+  "rollback": "Leave Face on isolated worktree. Do not merge plates. Revert orb_widget converse guard if Mic must talk CapEx again."
+}

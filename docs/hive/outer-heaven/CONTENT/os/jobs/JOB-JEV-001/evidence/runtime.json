@@ -1,0 +1,80 @@
+{
+  "kind": "live_face",
+  "when": "2026-09-22T19:40:05Z",
+  "environment": "local",
+  "face_health": {
+    "ok": true,
+    "status": 200,
+    "bind": "127.0.0.1:4018",
+    "tree": "/Users/evenslouis/n8n-cursor-wt-decision-fabric-v0/apps/agent-stack"
+  },
+  "plates": {
+    "status": 200,
+    "merged": false,
+    "p1_armed": true,
+    "p2_armed": true,
+    "arc_missing": false,
+    "p1_family": "computer.next_op",
+    "p2_family": "voice.mac_op"
+  },
+  "live_request": {
+    "watch": "GET /api/watch + POST /api/watch {tick,search_path} (prior prove 2026-09-22T19:35:55Z 12 acts book_never)",
+    "voice": [
+      {
+        "path": "/api/voice-mac",
+        "body": {
+          "reset": true
+        }
+      },
+      {
+        "path": "/api/turn",
+        "body": {
+          "utterance": "open up the",
+          "partial": true,
+          "family": "voice.mac_op"
+        }
+      },
+      {
+        "path": "/api/turn",
+        "body": {
+          "utterance": "open up the notes app for me?",
+          "partial": true,
+          "family": "voice.mac_op"
+        }
+      }
+    ]
+  },
+  "live_response": {
+    "reset": {
+      "status": 200,
+      "done": [],
+      "family": "voice.mac_op"
+    },
+    "wait": {
+      "status": 200,
+      "op": "WAIT",
+      "fired": false,
+      "family": "voice.mac_op"
+    },
+    "fire": {
+      "status": 200,
+      "op": "OPEN_NOTES",
+      "fired": true,
+      "executed": true,
+      "picker": "openrouter_jev",
+      "spoken": "Notes is open."
+    },
+    "reset_after": {
+      "status": 200,
+      "done": []
+    },
+    "prior_watch_tick": {
+      "when": "2026-09-22T19:35:55Z",
+      "acts": 12,
+      "proof_ok": true,
+      "did_not_book": true,
+      "picker": "openrouter_jev",
+      "route": "Z\u00fcrich \u2192 London one-way Sun 27"
+    }
+  }
+}

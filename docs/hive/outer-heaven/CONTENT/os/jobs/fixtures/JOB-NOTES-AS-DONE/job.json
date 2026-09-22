@@ -1,0 +1,16 @@
+{
+  "id": "JOB-NOTES-AS-DONE",
+  "title": "Everything is implemented you just need to start Face",
+  "state": "VERIFIED",
+  "builder": "cursor",
+  "verifier": "grok",
+  "acceptance": ["Jarvis talks"],
+  "non_goals": [],
+  "runtime": {
+    "entrypoint": "/api/turn",
+    "expected_face": "127.0.0.1:4018"
+  },
+  "evidence": {
+    "required": ["live_request", "live_response"]
+  }
+}

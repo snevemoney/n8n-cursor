@@ -1,0 +1,18 @@
+---
+description: Hive engineering states are gated by hive-job.py, not by prose.
+alwaysApply: true
+---
+
+# Hive engineering states
+
+Do not claim DONE / working / wired / live / verified without the gate.
+
+Contract: `docs/hive/outer-heaven/CONTENT/os/ENGINEERING.md`
+Jobs: `docs/hive/outer-heaven/CONTENT/os/jobs/`
+Command: `python3 scripts/hive/eng/hive-job.py verify --job <id>`
+
+A file, unit test, typecheck, commit, or status line cannot advance a runtime capability past `IMPLEMENTED_UNVERIFIED`.
+Builder ≠ verifier. Cursor does not stamp its own `VERIFIED`.
+Face down → `VERIFICATION_UNAVAILABLE`, not PASS.
+Slack / session folders are continuity. They are not the engineering SSOT.
+Hard step (send / pay / deploy / book / publish) stays Evens.

@@ -6,8 +6,8 @@ Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok,
 Exact message the four treat as SSOT: `docs/hive/outer-heaven/CONTENT/os/sessions/SLACK.md`
 
 Store: `docs/hive/outer-heaven/CONTENT/os/sessions/`  
-INDEX: `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`  
-Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`  
+INDEX: `docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md`  
+Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/Recent Conversations.md`  
 Refresh: `python3 scripts/hive/os/sync-sessions.py`  
 Slack delta after write: only if `SLACK_HIVE_*` is already in the environment. Never put tokens in git.
 
@@ -16,10 +16,16 @@ Slack delta after write: only if `SLACK_HIVE_*` is already in the environment. N
 1. Slack `#hive` — **read the whole channel first** (do not ask Evens to click four sidebars)
 2. `CONTENT/os/hot.md`
 3. Latest `CONTENT/os/inbox/*said*`
-4. `CONTENT/os/sessions/INDEX.md` (Grok Bot posts this INDEX into `#hive` as Grok)
+4. `CONTENT/os/sessions/Recent Conversations.md` (Grok Bot posts this INDEX into `#hive` as Grok)
 5. Then the named job card.
 
-Read all four folders: `sessions/cursor/` · `sessions/grok/` · `sessions/claude/` · `sessions/chatgpt/`.
+Read named session files when the **job** cites them. Do not inject all four folders by default.
+
+## Engineering SSOT
+
+Capability truth is `CONTENT/os/ENGINEERING.md` + `CONTENT/os/jobs/` + `python3 scripts/hive/eng/hive-job.py verify --job <id>`.
+`#hive` is the shared room. It does not stamp `LIVE` or `VERIFIED`.
+No DONE. File / unit test / commit cannot pass `IMPLEMENTED_UNVERIFIED`.
 
 ## Standing order
 

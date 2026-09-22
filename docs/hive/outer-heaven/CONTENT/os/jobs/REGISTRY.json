@@ -1,0 +1,27 @@
+{
+  "schema": "hive.eng.registry.v1",
+  "updated": "2026-09-22",
+  "note": "Engineering truth. Slack/sessions are continuity only.",
+  "capabilities": [
+    {
+      "id": "jarvis.jev.watch",
+      "job": "JOB-JEV-001",
+      "state": "LIVE",
+      "path": "/api/watch",
+      "family": "computer.next_op"
+    },
+    {
+      "id": "jarvis.jev.voice_mac",
+      "job": "JOB-JEV-001",
+      "state": "LIVE",
+      "path": "/api/turn family=voice.mac_op",
+      "family": "voice.mac_op"
+    },
+    {
+      "id": "jarvis.converse",
+      "job": null,
+      "state": "VERIFICATION_UNAVAILABLE",
+      "note": "Grok BITE-001 REVIEWED on their box today. Evidence bundle is not in this checkout. Do not treat Slack or a stamp filename as VERIFIED here."
+    }
+  ]
+}
