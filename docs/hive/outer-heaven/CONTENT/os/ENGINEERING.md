@@ -45,3 +45,7 @@ Do not inject all four session folders unless the **job** names them.
 ## Reuse
 
 Do not mint a second Jarvis pipeline. Canonical Face is `apps/agent-stack/face` on `127.0.0.1:4018`. Jev picker is OpenRouter Decisions `typesafe/jev-1.13` — not the TypeSafe SDK, not `jev-ultrafast` clone.
+
+## Signal loop
+
+Saved material is untrusted research. `python3 scripts/hive/eng/signal.py` captures an immutable raw signal, extracts claims, and can file a candidate. `promote --write-rule` fails. A candidate stays a candidate until an experiment is `PROVEN` on the claimed surface, and an untrusted signal cannot promote itself. Lookup of old sheets stays `scripts/hive/os/signal-retrieve.py` (≤3 refs, default off). A saved signal is not a Hive rule.

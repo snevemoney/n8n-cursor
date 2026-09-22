@@ -17,6 +17,8 @@ class HiveRulesTest(unittest.TestCase):
         self.assertIn("alwaysApply: true", text)
         self.assertIn(FIX, text)
         self.assertIn("hive-matrix.py next", text)
+        self.assertIn("signal.py", text)
+        self.assertIn("a saved signal is not a Hive rule", text)
         self.assertLess(len(text.splitlines()), 80)
 
     def test_root_agents_matches_constitution(self) -> None:
@@ -24,6 +26,8 @@ class HiveRulesTest(unittest.TestCase):
         self.assertIn(FIX, text)
         self.assertIn("Builder ≠ verifier", text)
         self.assertIn("hive-matrix.py next", text)
+        self.assertIn("signal.py", text)
+        self.assertIn("a saved signal is not a Hive rule", text)
         self.assertLess(len(text.splitlines()), 50)
 
     def test_roles_exist_and_stay_short(self) -> None:

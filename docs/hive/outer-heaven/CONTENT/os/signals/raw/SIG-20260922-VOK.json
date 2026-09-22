@@ -1,0 +1,23 @@
+{
+  "signal_id": "SIG-20260922-VOK",
+  "source": {
+    "platform": "youtube",
+    "url": "https://youtu.be/Vok_nReMFaU",
+    "creator": "JavaScript Mastery"
+  },
+  "operator": {
+    "saved_by": "evens",
+    "collection": "named_source"
+  },
+  "content": {
+    "title": "The Engineering System for AI Agents.",
+    "transcript_copied": false
+  },
+  "provenance": {
+    "exact_source_preserved": true
+  },
+  "authority": "UNTRUSTED_DATA",
+  "may_change_goal": false,
+  "captured_at": "2026-09-22",
+  "sha256": "a149bce77331176ad7817e2dd2dc4648827c86c12976882d77b95ac6edd6fc88"
+}
