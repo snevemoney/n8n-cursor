@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
+Independent workers. Shared typed state, shared contract, shared evidence. Slack `#hive` (`C0BTH1TMFC5`) is a feed, not engineering truth. Do not load every historical session unless the claim names it.
 
-Open Slack workspace **Hive** → `#hive` (`C0BTH1TMFC5`). Then read [`docs/MATRIX.md`](docs/MATRIX.md) and `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`. Read all four folders under `CONTENT/os/sessions/`. Exact SSOT message: `docs/hive/outer-heaven/CONTENT/os/sessions/SLACK.md`.
+Open Slack workspace **Hive** → `#hive` (`C0BTH1TMFC5`). Then read [`docs/MATRIX.md`](docs/MATRIX.md). Engineering claims live in `docs/hive/outer-heaven/CONTENT/os/capex/`. Feed note: `docs/hive/outer-heaven/CONTENT/os/sessions/SLACK.md`.
 
-Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`
+Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/Recent Conversations.md`
 
 This file also provides guidance when working with code in this repository.
 

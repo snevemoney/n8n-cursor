@@ -28,16 +28,24 @@ assert _spec and _spec.loader
 hive_job = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(hive_job)
 
+FUNCTIONS = (
+    "scope",
+    "architect",
+    "audit",
+    "develop",
+    "verify",
+    "test",
+    "review",
+    "document",
+    "sync",
+    "debug",
+)
+
 # state -> the one function Big Boss should run now
 ROUTE: dict[str, dict] = {
-    "DISCOVERED": {
-        "now": "SCOPE",
-        "allow": ["scope"],
-        "say": "Scope the observable outcome and the non-goals before any code.",
-    },
     "SCOPED": {
         "now": "ARCHITECT",
-        "allow": ["architect"],
+        "allow": ["scope", "architect"],
         "say": "Architecture and value sources next. Development is not allowed.",
     },
     "DECISION_OWED": {
@@ -73,7 +81,7 @@ ROUTE: dict[str, dict] = {
     "LIVE": {
         "now": "TEST",
         "allow": ["test", "audit"],
-        "say": "Development finished. Do not document success. Lock a regression, then independent review.",
+        "say": "Lock a regression. Development is finished. Do not document success.",
     },
     "VERIFIED": {
         "now": "REVIEW",
@@ -83,12 +91,7 @@ ROUTE: dict[str, dict] = {
     "REVIEWED": {
         "now": "DOCUMENT",
         "allow": ["document", "sync", "audit"],
-        "say": "Document from the diff and the evidence. Then sync context to the repo.",
-    },
-    "SHIPPED": {
-        "now": "SYNC",
-        "allow": ["sync", "audit"],
-        "say": "Shipped is Evens. Sync context. Do not reopen develop.",
+        "say": "Document from the diff and the evidence. Then sync context to the repo. Release status is separate.",
     },
     "REGRESSION": {
         "now": "DEBUG",
@@ -105,11 +108,6 @@ ROUTE: dict[str, dict] = {
         "allow": ["verify", "audit"],
         "say": "Proof cannot be acquired. That is not PASS.",
     },
-    "VERIFICATION_PREREQUISITE_REQUIRED": {
-        "now": "VERIFY",
-        "allow": ["verify"],
-        "say": "A prerequisite is missing. Do not invent the proof.",
-    },
     "PARKED": {
         "now": "PARKED",
         "allow": [],
@@ -119,19 +117,46 @@ ROUTE: dict[str, dict] = {
 
 
 def directory_from(args: argparse.Namespace) -> Path:
-    if args.job_dir:
-        return Path(args.job_dir)
-    return hive_job.job_dir_for(str(args.job or ""))
+    if args.claim_dir:
+        return Path(args.claim_dir)
+    return hive_job.claim_dir_for(str(args.claim or ""))
 
 
-def route_for(state: str) -> dict:
+def regression_locked(directory: Path, claim: dict) -> bool:
+    path = directory / "evidence" / "test.json"
+    if not path.is_file():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return False
+    if not isinstance(data, dict) or data.get("ok") is not True:
+        return False
+    runtime = claim.get("runtime") if isinstance(claim.get("runtime"), dict) else {}
+    sha = str(runtime.get("git_sha") or "")
+    return bool(sha) and data.get("git_sha") == sha
+
+
+def route_for(claim: dict, directory: Path) -> dict:
+    state = str(claim.get("state") or "")
     if state not in ROUTE:
         return {
             "now": "UNKNOWN",
             "allow": [],
             "say": f"Unknown state {state!r}. Hive has no DONE.",
         }
-    return ROUTE[state]
+    route = dict(ROUTE[state])
+    route["allow"] = list(route["allow"])
+    if state == "SCOPED":
+        scope = claim.get("scope") if isinstance(claim.get("scope"), dict) else {}
+        if not scope.get("goal") or not scope.get("v1"):
+            route["now"] = "SCOPE"
+            route["say"] = "Scope the observable outcome and the non-goals before architecture."
+    if state == "LIVE" and regression_locked(directory, claim):
+        route["now"] = "VERIFY"
+        route["allow"] = ["verify", "audit"]
+        route["say"] = "Regression is locked. Independent verify is next. Do not loop on test."
+    return route
 
 
 def emit(payload: dict, ok: bool) -> int:
@@ -143,9 +168,9 @@ def emit(payload: dict, ok: bool) -> int:
     return 1
 
 
-def guard(job: dict, action: str) -> tuple[bool, dict]:
+def guard(job: dict, action: str, directory: Path) -> tuple[bool, dict]:
     state = str(job.get("state") or "")
-    route = route_for(state)
+    route = route_for(job, directory)
     allowed = action in route["allow"]
     payload = {
         "id": job.get("id"),
@@ -163,10 +188,16 @@ def guard(job: dict, action: str) -> tuple[bool, dict]:
     return allowed, payload
 
 
+def unchanged(directory: Path, before: str) -> None:
+    after = hive_job.load_claim(directory)
+    if str(after.get("state") or "") != before:
+        raise SystemExit("FAIL: conductor wrote state; Forge is the only writer")
+
+
 def cmd_next(directory: Path) -> int:
-    job = hive_job.load_job(directory)
+    job = hive_job.load_claim(directory)
     state = str(job.get("state") or "")
-    route = route_for(state)
+    route = route_for(job, directory)
     payload = {
         "id": job.get("id"),
         "state": state,
@@ -181,9 +212,41 @@ def cmd_next(directory: Path) -> int:
     return emit(payload, True)
 
 
+def cmd_bound(directory: Path, action: str) -> int:
+    job = hive_job.load_claim(directory)
+    before = str(job.get("state") or "")
+    allowed, payload = guard(job, action, directory)
+    payload["applies_state"] = False
+    if not allowed:
+        return emit(payload, False)
+    if action == "scope":
+        scope = job.get("scope") if isinstance(job.get("scope"), dict) else {}
+        if not scope.get("goal") or not scope.get("v1"):
+            payload["ok"] = False
+            payload["reason"] = "scope.goal and scope.v1 required"
+            return emit(payload, False)
+    if action == "architect":
+        if not isinstance(job.get("architecture"), dict) or not isinstance(job.get("reuse_check"), dict):
+            payload["ok"] = False
+            payload["reason"] = "architecture and reuse_check required"
+            return emit(payload, False)
+    if action == "review":
+        reasons = hive_job.l4_reasons(job, hive_job._default_l4(job, directory))
+        if reasons:
+            payload["ok"] = False
+            payload["reason"] = reasons[0]
+            return emit(payload, False)
+    if action == "sync":
+        payload["synced_vault"] = False
+        payload["reason"] = "sync does not write the Obsidian vault"
+    unchanged(directory, before)
+    return emit(payload, True)
+
+
 def cmd_develop(directory: Path) -> int:
-    job = hive_job.load_job(directory)
-    allowed, payload = guard(job, "develop")
+    job = hive_job.load_claim(directory)
+    before = str(job.get("state") or "")
+    allowed, payload = guard(job, "develop", directory)
     if not allowed:
         return emit(payload, False)
     reuse = job.get("reuse_check")
@@ -196,21 +259,27 @@ def cmd_develop(directory: Path) -> int:
         payload["reason"] = "CREATE requires rejected alternatives on reuse_check"
         return emit(payload, False)
     payload["reuse_check"] = reuse.get("decision")
+    payload["applies_state"] = False
+    unchanged(directory, before)
     return emit(payload, True)
 
 
 def cmd_document(directory: Path) -> int:
-    job = hive_job.load_job(directory)
-    allowed, payload = guard(job, "document")
+    job = hive_job.load_claim(directory)
+    before = str(job.get("state") or "")
+    allowed, payload = guard(job, "document", directory)
     if not allowed:
         payload["reason"] = payload.get("reason") or "do not document success"
         return emit(payload, False)
+    payload["applies_state"] = False
+    unchanged(directory, before)
     return emit(payload, True)
 
 
 def cmd_debug(directory: Path) -> int:
-    job = hive_job.load_job(directory)
-    allowed, payload = guard(job, "debug")
+    job = hive_job.load_claim(directory)
+    before = str(job.get("state") or "")
+    allowed, payload = guard(job, "debug", directory)
     if not allowed:
         return emit(payload, False)
     path = directory / "evidence" / "hypothesis.json"
@@ -232,11 +301,13 @@ def cmd_debug(directory: Path) -> int:
         payload["reason"] = "one experiment at a time"
         return emit(payload, False)
     payload["hypothesis"] = hypothesis.strip()[:240]
+    payload["applies_state"] = False
+    unchanged(directory, before)
     return emit(payload, True)
 
 
 def cmd_audit(directory: Path) -> int:
-    job = hive_job.load_job(directory)
+    job = hive_job.load_claim(directory)
     runtime = job.get("runtime") if isinstance(job.get("runtime"), dict) else {}
     face = str(runtime.get("expected_face") or "").strip()
     contradictions: list[dict] = []
@@ -305,8 +376,9 @@ def cmd_audit(directory: Path) -> int:
 
 
 def cmd_test(directory: Path) -> int:
-    job = hive_job.load_job(directory)
-    allowed, payload = guard(job, "test")
+    job = hive_job.load_claim(directory)
+    before = str(job.get("state") or "")
+    allowed, payload = guard(job, "test", directory)
     if not allowed:
         return emit(payload, False)
     regression = job.get("regression") if isinstance(job.get("regression"), dict) else {}
@@ -314,20 +386,20 @@ def cmd_test(directory: Path) -> int:
     cwd = regression.get("cwd")
     if not isinstance(argv, list) or not argv or not cwd:
         payload["ok"] = False
-        payload["state_if_missing"] = "VERIFICATION_PREREQUISITE_REQUIRED"
         payload["reason"] = "regression.argv and regression.cwd required — a green wish is not a test"
         return emit(payload, False)
     if not Path(str(cwd)).is_dir():
         payload["ok"] = False
-        payload["state_if_missing"] = "VERIFICATION_PREREQUISITE_REQUIRED"
         payload["reason"] = f"regression cwd missing: {cwd}"
         return emit(payload, False)
     proc = subprocess.run([str(x) for x in argv], cwd=str(cwd), capture_output=True, text=True)
+    runtime = job.get("runtime") if isinstance(job.get("runtime"), dict) else {}
     record = {
         "argv": argv,
         "cwd": cwd,
         "returncode": proc.returncode,
         "ok": proc.returncode == 0,
+        "git_sha": runtime.get("git_sha") or "",
     }
     (directory / "evidence").mkdir(parents=True, exist_ok=True)
     (directory / "evidence" / "test.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
@@ -336,16 +408,18 @@ def cmd_test(directory: Path) -> int:
     payload["stderr_tail"] = (proc.stderr or "")[-400:]
     if proc.returncode != 0:
         payload["reason"] = "regression command failed — state stays un-reviewed"
+    payload["applies_state"] = False
+    unchanged(directory, before)
     return emit(payload, proc.returncode == 0)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Hive engineering conductor")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("next", "develop", "document", "debug", "audit", "test"):
+    for name in ("next", *FUNCTIONS):
         cmd = sub.add_parser(name)
-        cmd.add_argument("--job")
-        cmd.add_argument("--job-dir")
+        cmd.add_argument("--claim")
+        cmd.add_argument("--claim-dir")
     args = ap.parse_args()
     directory = directory_from(args)
     dispatch = {
@@ -355,6 +429,11 @@ def main() -> int:
         "debug": cmd_debug,
         "audit": cmd_audit,
         "test": cmd_test,
+        "scope": lambda path: cmd_bound(path, "scope"),
+        "architect": lambda path: cmd_bound(path, "architect"),
+        "verify": lambda path: cmd_bound(path, "verify"),
+        "review": lambda path: cmd_bound(path, "review"),
+        "sync": lambda path: cmd_bound(path, "sync"),
     }
     return dispatch[args.cmd](directory)
 

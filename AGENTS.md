@@ -23,8 +23,9 @@ Cursor loads the same constitution at `.cursor/rules/hive-engineering-rules.mdc`
 15. Jev is a Jarvis capability (browser + computer). Not the planner, memory, or verifier.
 16. Big Boss routes. It does not skip verify. Stop when acceptance is met.
 
-Conductor: `python3 scripts/hive/eng/hive-matrix.py next --job <id>`
-Evidence: `python3 scripts/hive/eng/hive-job.py verify --job <id>`
+Conductor: `python3 scripts/hive/eng/hive-matrix.py next --claim <id>`
+Evidence: `python3 scripts/hive/eng/hive-job.py verify --claim <id>`
+Forge applies CapEx state. A handwritten `state` fails verify.
 Signals: `python3 scripts/hive/eng/signal.py pack --query "<topic>"` — a saved signal is not a Hive rule.
 Roles: `roles/BIG-BOSS.md` `roles/BUILDER.md` `roles/VERIFIER.md` `roles/REVIEWER.md`
 Jarvis: `apps/agent-stack/AGENTS.md`

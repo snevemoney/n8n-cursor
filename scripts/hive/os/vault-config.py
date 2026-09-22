@@ -79,8 +79,19 @@ def read_root(prefer: str = "auto") -> Path:
 
 
 def write_root() -> Path:
-    """Canonical capture write path (always fast local cache)."""
+    """Fast local cache. Not the Obsidian vault and not the git mirror."""
     return cache_root()
+
+
+def knowledge_status() -> dict:
+    vault = vault_outer_heaven()
+    return {
+        "cache": str(cache_root()),
+        "vault": str(vault) if vault else "",
+        "mirror": str(REPO_MIRROR),
+        "write_root": str(write_root()),
+        "one_store": False,
+    }
 
 
 def vault_path_for_agents() -> str:
@@ -101,11 +112,15 @@ if __name__ == "__main__":
     ap.add_argument("--outer-heaven", action="store_true", help="Read root for agents")
     ap.add_argument("--cache", action="store_true", help="Cache root path")
     ap.add_argument("--write-root", action="store_true", help="Capture write root")
+    ap.add_argument("--status", action="store_true", help="Show that cache, vault, and mirror are separate")
     args = ap.parse_args()
     if args.cache:
         print(cache_root())
     elif args.write_root:
         print(write_root())
+    elif args.status:
+        print(json.dumps(knowledge_status(), indent=2))
+        raise SystemExit(0)
     elif args.outer_heaven:
         print(read_root("auto"))
     elif args.show:

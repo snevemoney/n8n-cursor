@@ -14,10 +14,12 @@
     "transcript_copied": false
   },
   "provenance": {
-    "exact_source_preserved": true
+    "exact_source_preserved": false,
+    "content_sha256": "",
+    "preserved": "url-and-title"
   },
   "authority": "UNTRUSTED_DATA",
   "may_change_goal": false,
   "captured_at": "2026-09-22",
-  "sha256": "a149bce77331176ad7817e2dd2dc4648827c86c12976882d77b95ac6edd6fc88"
+  "sha256": "f0dd1fc87072f6c0889f05604b3bc2e147bf91da1578ad4c89737bb4639ee0eb"
 }

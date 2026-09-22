@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "name": "face_entrypoint",
+      "source": "apps/agent-stack/face/serve.py"
+    },
+    {
+      "name": "watch_family",
+      "source": "computer.next_op"
+    },
+    {
+      "name": "voice_family",
+      "source": "voice.mac_op"
+    }
+  ]
+}

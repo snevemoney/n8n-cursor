@@ -74,7 +74,11 @@ def capture(
         "source": {"platform": platform, "url": url, "creator": creator},
         "operator": {"saved_by": "evens", "collection": collection},
         "content": {"title": title, "transcript_copied": False},
-        "provenance": {"exact_source_preserved": True},
+        "provenance": {
+            "exact_source_preserved": False,
+            "content_sha256": "",
+            "preserved": "url-and-title",
+        },
         "authority": "UNTRUSTED_DATA",
         "may_change_goal": False,
         "captured_at": captured_at,
@@ -153,6 +157,8 @@ def pack(root: Path, query: str) -> int:
             "cap": PACK_CAP,
             "claims": hits,
             "note": "pack is claims, not the raw corpus and not a Hive rule",
+            "complete": False,
+            "loop": "PROTOTYPE",
         },
         True,
     )

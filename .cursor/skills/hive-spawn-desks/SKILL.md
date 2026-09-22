@@ -15,7 +15,7 @@ Evens is the visionary. Each desk coworks. Parent does not write 17 hats.
 
 **Factory process:** we are a level-3 software factory (process), not a SKU. Card: `docs/hive/outer-heaven/CONTENT/job-cards/MATRIX-PROCESS-2026-08-15.md`. Machine: `dark-factory`. Loop: code → surface → chat.
 
-**Law:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Wake prompt: read `docs/MATRIX.md` + `CONTENT/os/sessions/INDEX.md` + all four `sessions/` folders.
+**Law:** Independent workers. Shared typed state, shared contract, shared evidence. Slack is a feed. Wake prompt: read `docs/MATRIX.md` and the claim under `CONTENT/os/capex/`. Do not read all four session folders unless the claim names them.
 
 **Study method (tape walks only):** `deep-video-learning`. Learn globally (A–K), then steal the machine, then L. Old short steal/never take is not enough. Never understand-only. Never steal-first / skip the transcript. Channel / social ingest lives on Researcher (`channel-walk`, `social-source-ingest`); parent still names `--video-id` for YouTube tapes.
 
@@ -37,7 +37,7 @@ Evens is the visionary. Each desk coworks. Parent does not write 17 hats.
    - `run_in_background`: `true`
    - `model`: inherit
    - `description`: desk name
-   - `prompt`: workspace `/Users/evenslouis/n8n-cursor` + load `MATRIX-PROCESS-2026-08-15.md` + `dark-factory` + that desk’s job card + **Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Read `docs/MATRIX.md` + `sessions/INDEX.md`.** Layer they may touch: Forge/Watchdog = CODE; HITL = SURFACE gate; Researcher = CHAT research; Comms = CHAT draft (send-removed). Write only what Evens named.
+   - `prompt`: workspace `/Users/evenslouis/n8n-cursor` + load `MATRIX-PROCESS-2026-08-15.md` + `dark-factory` + that desk’s job card + **Independent workers. Read `docs/MATRIX.md` and the named CapEx claim. Do not read every session folder.** Layer they may touch: Forge/Watchdog = CODE; HITL = SURFACE gate; Researcher = CHAT research; Comms = CHAT draft (send-removed). Write only what Evens named.
 3. **Assume-it-will-touch:** ALLOW = process/matrix files Evens named this sitting. DENY = send/pay/deploy/book/publish + other desks' takes + ProofCheck product + Stripe. BYPASS = none.
 4. **Observe-pane:** `python3 scripts/hive/hive-state.py set-job --id factory-loop --name factory-loop --status working --desk parent`
 5. Parent reports who is running (link each desk). Do not fill take files yourself.

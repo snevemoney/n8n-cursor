@@ -11,12 +11,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 CLI = Path(__file__).resolve().parent / "hive-matrix.py"
-JOBS = ROOT / "docs/hive/outer-heaven/CONTENT/os/jobs"
+CAPEX = ROOT / "docs/hive/outer-heaven/CONTENT/os/capex"
 
 
 def run(cmd: str, directory: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(CLI), cmd, "--job-dir", str(directory)],
+        [sys.executable, str(CLI), cmd, "--claim-dir", str(directory)],
         capture_output=True,
         text=True,
         cwd=str(ROOT),
@@ -37,7 +37,7 @@ def write_job(tmp: Path, state: str, **extra: object) -> Path:
     }
     job.update(extra)
     tmp.mkdir(parents=True, exist_ok=True)
-    (tmp / "job.json").write_text(json.dumps(job), encoding="utf-8")
+    (tmp / "claim.json").write_text(json.dumps(job), encoding="utf-8")
     return tmp
 
 
@@ -114,12 +114,34 @@ class HiveMatrixRouteTest(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("one experiment", proc.stdout)
 
-    def test_jev_job_next_is_test(self) -> None:
-        proc = run("next", JOBS / "JOB-JEV-001")
+    def test_jev_claim_next_is_architect(self) -> None:
+        proc = run("next", CAPEX / "JOB-JEV-001")
         self.assertEqual(proc.returncode, 0, proc.stdout)
-        self.assertIn('"lane_a": "TEST"', proc.stdout)
-        develop = run("develop", JOBS / "JOB-JEV-001")
+        self.assertIn('"lane_a": "ARCHITECT"', proc.stdout)
+        develop = run("develop", CAPEX / "JOB-JEV-001")
         self.assertNotEqual(develop.returncode, 0)
+        architect = run("architect", CAPEX / "JOB-JEV-001")
+        self.assertEqual(architect.returncode, 0, architect.stdout)
+        self.assertIn('"applies_state": false', architect.stdout)
+
+    def test_live_with_locked_regression_routes_to_verify(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = write_job(
+                Path(raw),
+                "LIVE",
+                runtime={"git_sha": "abc", "expected_face": "127.0.0.1:4018"},
+            )
+            (tmp / "evidence").mkdir()
+            (tmp / "evidence" / "test.json").write_text(
+                json.dumps({"ok": True, "git_sha": "abc"}),
+                encoding="utf-8",
+            )
+            proc = run("next", tmp)
+            self.assertEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn('"lane_a": "VERIFY"', proc.stdout)
+            verify = run("verify", tmp)
+            self.assertEqual(verify.returncode, 0, verify.stdout)
+            self.assertIn('"applies_state": false', verify.stdout)
 
 
 if __name__ == "__main__":

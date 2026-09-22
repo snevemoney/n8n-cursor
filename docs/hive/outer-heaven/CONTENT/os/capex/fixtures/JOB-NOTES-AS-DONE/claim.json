@@ -1,0 +1,10 @@
+{
+  "id": "JOB-NOTES-AS-DONE",
+  "title": "Status says working",
+  "state": "VERIFIED",
+  "revision": 1,
+  "builder": "cursor",
+  "verifier": "grok",
+  "acceptance": ["Jarvis talks"],
+  "runtime": {"surface": "127.0.0.1:4018"}
+}

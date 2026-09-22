@@ -3,10 +3,10 @@
 Continuity (Slack, session folders) is how the four see each other. It is **not** whether a capability is true.
 
 **Rules:** `.cursor/rules/hive-engineering-rules.mdc` and root `AGENTS.md` (same constitution). Roles in `roles/`.
-**Transitions:** `python3 scripts/hive/eng/forge-transition.py request --job <id> --to <STATE> --actor <name> --role <role>`
-**Conductor:** `python3 scripts/hive/eng/hive-matrix.py next --job <id>`  
-**Evidence gate:** `python3 scripts/hive/eng/hive-job.py verify --job <id>`  
-**Jobs:** `CONTENT/os/jobs/`  
+**Transitions:** `python3 scripts/hive/eng/forge-transition.py request --claim <id> --to <STATE> --actor <name> --role <role> --expected <STATE> --expected-revision <n>`
+**Conductor:** `python3 scripts/hive/eng/hive-matrix.py next --claim <id>`  
+**Evidence gate:** `python3 scripts/hive/eng/hive-job.py verify --claim <id>`  
+**Claims:** `CONTENT/os/capex/` (`claim.json`). Forge applies state: `python3 scripts/hive/eng/forge-transition.py request --claim <id> --to <STATE> --expected <STATE> --expected-revision <n>`.  
 **L4 Forge-done (unchanged):** `python3 docs/hive/outer-heaven/check-forge-done.py --slice-id <id>`
 
 ## Two lanes
@@ -29,7 +29,9 @@ Hard step (send / pay / deploy / book / publish / Post) stays Evens. `SHIPPED` i
 
 ## States
 
-`DISCOVERED` `SCOPED` `DECISION_OWED` `ARCHITECTED` `READY` `IMPLEMENTING` `IMPLEMENTED_UNVERIFIED` `WIRED` `LIVE` `VERIFIED` `REVIEWED` `SHIPPED` `WIRE_FAILURE` `VERIFICATION_UNAVAILABLE` `VERIFICATION_PREREQUISITE_REQUIRED` `REGRESSION` `PARKED`
+`SCOPED` `DECISION_OWED` `ARCHITECTED` `READY` `IMPLEMENTING` `IMPLEMENTED_UNVERIFIED` `WIRED` `LIVE` `VERIFIED` `REVIEWED` `WIRE_FAILURE` `VERIFICATION_UNAVAILABLE` `PARKED` `REGRESSION`
+
+`DISCOVERED`, `SHIPPED`, and `VERIFICATION_PREREQUISITE_REQUIRED` are rejected. `release_status` is the HITL field.
 
 `PARKED` is not complete. Face down is `VERIFICATION_UNAVAILABLE`, not PASS.
 
@@ -40,7 +42,7 @@ Hard step (send / pay / deploy / book / publish / Post) stays Evens. `SHIPPED` i
 | Engineering | this file · `jobs/` · gate exit code · Face `127.0.0.1:4018` |
 | Continuity | `#hive` · session folders · transcripts |
 
-Do not inject all four session folders unless the **job** names them.
+Do not inject all four session folders unless the claim names them.
 
 ## Reuse
 
@@ -48,4 +50,4 @@ Do not mint a second Jarvis pipeline. Canonical Face is `apps/agent-stack/face` 
 
 ## Signal loop
 
-Saved material is untrusted research. `python3 scripts/hive/eng/signal.py` captures an immutable raw signal, extracts claims, and can file a candidate. `promote --write-rule` fails. A candidate stays a candidate until an experiment is `PROVEN` on the claimed surface, and an untrusted signal cannot promote itself. Lookup of old sheets stays `scripts/hive/os/signal-retrieve.py` (≤3 refs, default off). A saved signal is not a Hive rule.
+Saved material is untrusted research. `python3 scripts/hive/eng/signal.py` is a prototype (`complete: false`): one named video, manual claims, lexical pack. A URL is not exact source content. It captures an immutable raw signal, extracts claims, and can file a candidate. `promote --write-rule` fails. A candidate stays a candidate until an experiment is `PROVEN` on the claimed surface, and an untrusted signal cannot promote itself. Lookup of old sheets stays `scripts/hive/os/signal-retrieve.py` (≤3 refs, default off). A saved signal is not a Hive rule.

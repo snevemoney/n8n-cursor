@@ -102,7 +102,10 @@ class SignalIntelligenceTest(unittest.TestCase):
         self.assertGreaterEqual(len(data["claims"]), 1)
         self.assertLessEqual(len(data["claims"]), 12)
         self.assertTrue((CORPUS / "raw").is_dir())
-        self.assertTrue((CORPUS / "raw" / "SIG-20260922-VOK.json").is_file())
+        self.assertFalse(data["complete"])
+        raw = json.loads((CORPUS / "raw" / "SIG-20260922-VOK.json").read_text(encoding="utf-8"))
+        self.assertFalse(raw["provenance"]["exact_source_preserved"])
+        self.assertEqual(raw["provenance"]["preserved"], "url-and-title")
         refused = subprocess.run(
             [sys.executable, str(CLI), "promote", "--candidate", "CAND-20260922-VOK"],
             capture_output=True,

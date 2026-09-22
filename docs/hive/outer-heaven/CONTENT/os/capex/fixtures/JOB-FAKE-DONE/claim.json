@@ -1,0 +1,7 @@
+{
+  "id": "JOB-FAKE-DONE",
+  "title": "I implemented Watch support",
+  "state": "DONE",
+  "revision": 0,
+  "acceptance": ["Watch works"]
+}
