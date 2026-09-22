@@ -1,0 +1,44 @@
+---
+description: Hive engineering constitution. Overrides convenience. One line per rule.
+alwaysApply: true
+---
+
+# Hive engineering rules
+
+**When Evens says "fix the system," do not respond by creating a document describing how to fix the system. Change the actual mechanism, then prove the mechanism changed.**
+
+Applies to Cursor, Grok, Claude, ChatGPT, Jarvis, Big Boss, Forge, and subagents. Overrides preference and best guess.
+
+1. Do the ask. A report is not a fix. Unreachable code is not wiring. A passing test is not live.
+2. Scope before code. Scope is what. Architecture is how.
+3. Audit runtime before editing legacy code. Docs ≠ runtime → `DOC_RUNTIME_CONTRADICTION`. Record both. Do not silently rewrite either.
+4. Reuse, then extend, then refactor, then create. Convenience is not a reason for a parallel pipeline.
+5. A missing material decision is `DECISION_OWED`. Stop coding unless Evens authorizes the assumption in writing.
+6. Every important value needs a real source. No source → do not invent one while coding.
+7. Code, commits, diffs, builds, unit tests, mocks, docs, and schemas max at `IMPLEMENTED_UNVERIFIED`.
+8. `WIRED` means the canonical entrypoint reaches the code. `LIVE` means that surface was exercised. `VERIFIED` means a different verifier checked acceptance.
+9. Surfaces do not borrow proof. Face `127.0.0.1:4018` ≠ `evenslouis.ca /` ≠ a CapEx file.
+10. Builder ≠ verifier. The builder may self-check. The builder may not stamp `VERIFIED`.
+11. Review the diff, the decisions, and the runtime evidence. Not the builder's story.
+12. Debug one hypothesis and one experiment. Reproduce, isolate, confirm or reject, revert the failure, fix the cause, retest live, add a regression, search for the same defect.
+13. A failed experiment does not stay in the tree.
+14. A branch, a file, a report, a green suite, a declared route, a disabled flag, or unimported code is not completion.
+15. No `DONE` / finished / working / fixed / complete / integrated unless the evidence-backed state is named.
+16. Spawning an agent is not progress. The parent owns the ask. Delegate a bounded question, not "fix whatever seems wrong."
+17. No swarm without unique scope, artifact, and one merge authority.
+18. Read the current job, project rules, architecture, and code. Historical sessions are evidence, not truth.
+19. After `VERIFIED`, sync only the context the change touched. If unsure, flag the conflict.
+20. Document after reality. Label `PLANNED` / `IMPLEMENTED_UNVERIFIED` / `WIRED` / `LIVE` / `VERIFIED` / `PARKED` / `DEPRECATED`.
+21. Tests catch regressions. They do not prove live behavior. Test pass + no live evidence = `IMPLEMENTED_UNVERIFIED`.
+22. Jev is a Jarvis capability: browser observe/act and computer observe/act. Jev is not the planner, memory, conversation engine, verifier, or Hive state authority unless a decision says so.
+23. Computer and browser use must observe, act, observe again, and return that result. An invocation return is not success.
+24. Big Boss routes `SCOPE|ARCHITECT|AUDIT|DEVELOP|VERIFY|TEST|REVIEW|DOCUMENT|SYNC|DEBUG`. It does not skip verify.
+25. Stop when acceptance is met. Extra ideas go to `FOLLOW_UP`.
+
+Conductor: `python3 scripts/hive/eng/hive-matrix.py next --job <id>`
+Evidence: `python3 scripts/hive/eng/hive-job.py verify --job <id>`
+Roles: `roles/BIG-BOSS.md` `roles/BUILDER.md` `roles/VERIFIER.md` `roles/REVIEWER.md`
+Jarvis: `apps/agent-stack/AGENTS.md` · Jev hands: `apps/agent-stack/hands/AGENTS.md`
+
+After meaningful work report: `ASK` `CURRENT FUNCTION` `STATE` `CHANGED` `PROVEN` `NOT PROVEN` `BLOCKER` `NEXT`.
+Hard step (send / pay / deploy / book / publish / Post) stays Evens.
