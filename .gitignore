@@ -3,6 +3,8 @@ node_modules/
 **/node_modules/
 
 # Build outputs
+apps/agent-stack/face/bin/
+apps/agent-stack/face/dist/
 .next/
 *.pack.gz
 *.tsbuildinfo
@@ -26,7 +28,13 @@ logs/
 .env.local
 .env.*.local
 .env.backup
+.env.dev
 .env.monitoring
+.env.monitoring.backup
+**/.env.local.backup
+
+# Local designed ElevenLabs voice id (not a secret, but not git)
+docs/hive/outer-heaven/.hive/bus/voice-local.json
 
 # Deployment artifacts
 *.zip

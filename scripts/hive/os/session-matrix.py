@@ -46,14 +46,13 @@ WS_RE = re.compile(r"\s+")
 
 SURFACES = ("cursor", "grok", "claude", "chatgpt")
 FOUR_X_FOUR = (
-    "Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. "
-    "Same brain. Same session store."
+    "Independent workers. Shared typed state, shared contract, shared evidence. "
+    "Slack #hive is a feed, not engineering truth."
 )
 SLACK_ROOM = (
-    "Hive Slack is the shared room. "
-    "Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. "
-    "Same brain. Same session store. "
-    "Slack Hive is how they see each other without pasting."
+    "Hive Slack is a feed. "
+    "Independent workers share typed state, contract, and evidence. "
+    "Do not load every historical session unless the claim names it."
 )
 SLACK_INDEX_REL = "docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md"
 SLACK_HIVE_CHANNEL_DEFAULT = "C0BTH1TMFC5"

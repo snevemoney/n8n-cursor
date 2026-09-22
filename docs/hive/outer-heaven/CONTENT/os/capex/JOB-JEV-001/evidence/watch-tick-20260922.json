@@ -1,0 +1,222 @@
+{
+  "when": "2026-09-22T19:35:55Z",
+  "steps": [
+    {
+      "name": "mic_reset",
+      "done": [],
+      "family": "voice.mac_op",
+      "reset": true
+    },
+    {
+      "name": "partial_open_up_the",
+      "op": "WAIT",
+      "fired": false,
+      "family": "voice.mac_op",
+      "spoken": "Listening."
+    },
+    {
+      "name": "fire_open_notes",
+      "op": "OPEN_NOTES",
+      "fired": true,
+      "executed": true,
+      "picker": {
+        "ok": true,
+        "choice": "OPEN_NOTES",
+        "source": "openrouter_jev",
+        "http": true,
+        "model": "typesafe/jev-1.13",
+        "alias": "~typesafe/jev-latest",
+        "url": "https://openrouter.ai/api/alpha/decisions",
+        "confidence": 0.96,
+        "meta": {
+          "failure_class": "ok",
+          "authority": "none"
+        }
+      },
+      "family": "voice.mac_op",
+      "spoken": "Notes is open."
+    },
+    {
+      "name": "watch_look",
+      "armed": true,
+      "family": "computer.next_op",
+      "url": "https://www.google.com/travel/flights/search?tfs=CBwQAhooEgoyMDI2LTA5LTI3agwIAxIIL20vMDg5NjZyDAgDEggvbS8wNGpwbEABSAFwAYIBCwj___________8BmAEC",
+      "spoken": "Watch looked. Jev has not acted.",
+      "offered": 0
+    },
+    {
+      "name": "watch_tick",
+      "ok": true,
+      "family": "computer.next_op",
+      "proof": {
+        "ok": true,
+        "checks": {
+          "flights_url": true,
+          "search_page": true,
+          "one_way": true,
+          "zurich": true,
+          "london": true,
+          "date_2026": true,
+          "options_visible": true,
+          "did_not_book": true
+        },
+        "proof": true,
+        "done_is_not_proof": true
+      },
+      "book_never": true,
+      "spoken": "Search path finished. Book never.",
+      "act_count": 12,
+      "act_ops": [
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:8"
+          },
+          "label": "Change ticket type. Round trip"
+        },
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:9"
+          },
+          "label": "One way"
+        },
+        {
+          "op": "type",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "type:11"
+          },
+          "label": "Where from?"
+        },
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:15"
+          },
+          "label": "Z\u00fcrich, Switzerland"
+        },
+        {
+          "op": "type",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "type:12"
+          },
+          "label": "Where to?"
+        },
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:14"
+          },
+          "label": "London, United Kingdom"
+        },
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:14"
+          },
+          "label": "Departure"
+        },
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:26"
+          },
+          "label": "Sunday, September 27, 2026"
+        },
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:118"
+          },
+          "label": "Done. Search for one-way flights, departing on September 27, 2026"
+        },
+        {
+          "op": "click",
+          "picker": {
+            "source": "openrouter_jev",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "click:15"
+          },
+          "label": "Search"
+        },
+        {
+          "op": "wait",
+          "picker": {
+            "source": "below_do_not_act",
+            "model": "typesafe/jev-1.13",
+            "http": true,
+            "choice": "wait:0"
+          },
+          "label": ""
+        },
+        {
+          "op": "done",
+          "picker": null,
+          "label": ""
+        }
+      ],
+      "keys": [
+        "armed",
+        "book_never",
+        "family",
+        "host",
+        "http",
+        "jev_ultrafast_clone",
+        "kind",
+        "kinds",
+        "mac_act",
+        "merged_with_process_2",
+        "model",
+        "needed",
+        "ok",
+        "pick_shape",
+        "picker",
+        "plate",
+        "proof",
+        "reason",
+        "safari_see",
+        "spoken",
+        "status",
+        "steps",
+        "tape_ids",
+        "tape_ok",
+        "typesafe_sdk",
+        "voice_mac_op"
+      ]
+    }
+  ],
+  "plates": {
+    "p1": true,
+    "p2": true,
+    "arc_missing": false,
+    "merged": false
+  }
+}

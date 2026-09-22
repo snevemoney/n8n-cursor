@@ -1,25 +1,30 @@
-# Hive matrix — one brain
+# Hive matrix
 
-Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
+Independent workers. Shared typed state, shared engineering contract, shared evidence. Not one brain.
 
-**Slack (SSOT for the four):** workspace **Hive** (`evenslouis.slack.com`) · channel `#hive` (`C0BTH1TMFC5`) · https://evenslouis.slack.com/archives/C0BTH1TMFC5  
-Exact message the four treat as SSOT: `docs/hive/outer-heaven/CONTENT/os/sessions/SLACK.md`
+Truth order, do not invert: runtime, git, job state, architecture decisions, current context, then Slack and old sessions.
+
+**Slack is the feed** (`#hive` `C0BTH1TMFC5`). It is not engineering truth. Session index: `docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md`.
 
 Store: `docs/hive/outer-heaven/CONTENT/os/sessions/`  
-INDEX: `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`  
-Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`  
+INDEX: `docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md`  
+Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/Recent Conversations.md`  
 Refresh: `python3 scripts/hive/os/sync-sessions.py`  
 Slack delta after write: only if `SLACK_HIVE_*` is already in the environment. Never put tokens in git.
 
 ## First action
 
-1. Slack `#hive` — **read the whole channel first** (do not ask Evens to click four sidebars)
-2. `CONTENT/os/hot.md`
-3. Latest `CONTENT/os/inbox/*said*`
-4. `CONTENT/os/sessions/INDEX.md` (Grok Bot posts this INDEX into `#hive` as Grok)
-5. Then the named job card.
+1. `python3 scripts/hive/eng/hive-matrix.py next --job <id>` for the current job.
+2. That job's `operator_ask` (immutable unless Evens changes it).
+3. Project `AGENTS.md` and the code the job names.
 
-Read all four folders: `sessions/cursor/` · `sessions/grok/` · `sessions/claude/` · `sessions/chatgpt/`.
+Do not read the whole Slack channel or all four session folders first. Load a session file only when the job cites it.
+
+## Engineering SSOT
+
+Capability truth is `CONTENT/os/ENGINEERING.md` + `CONTENT/os/jobs/` + `python3 scripts/hive/eng/hive-job.py verify --job <id>`.
+`#hive` is the shared room. It does not stamp `LIVE` or `VERIFIED`.
+No DONE. File / unit test / commit cannot pass `IMPLEMENTED_UNVERIFIED`.
 
 ## Standing order
 

@@ -1,0 +1,111 @@
+{
+  "id": "JOB-JEV-001",
+  "title": "Jarvis uses Jev for browser Watch and computer voice-Mac",
+  "state": "SCOPED",
+  "revision": 0,
+  "ask_verbs": ["engineer", "keep"],
+  "close_type": "",
+  "release_status": "NOT_DEPLOYED",
+  "operator_ask": {
+    "original": "Engineer Hive so agents stop shadow work, and keep Jarvis using Jev for browser use and computer use.",
+    "authority": "EVENS",
+    "may_rewrite": false
+  },
+  "builder": {"platform": "cursor", "agent": "cursor_background_agent", "engineering_function": "develop", "run_id": ""},
+  "verifier": {"platform": "grok_bot", "agent": "watchdog", "engineering_function": "verify", "run_id": ""},
+  "reviewer": {"platform": "grok_bot", "agent": "consultant", "engineering_function": "review", "run_id": ""},
+  "routing": {
+    "type": "implementation",
+    "scope": "agent-stack",
+    "risk": "medium",
+    "preferred_builder": {"platform": "cursor", "agent": "cursor_background_agent", "engineering_function": "develop"},
+    "alternatives": [{"platform": "grok_bot", "agent": "forge", "engineering_function": "develop"}]
+  },
+  "g2_checklist_path": "g2.json",
+  "blocked": false,
+  "unlock": "",
+  "proof_status": "NOT_RUN",
+  "bite_id": "JEV-001",
+  "freeze": false,
+  "artifact": "",
+  "l4_log": "",
+  "acceptance": [
+    {
+      "id": "face-health",
+      "requirement": "Live Face 127.0.0.1:4018 healthz ok",
+      "mandatory": false,
+      "result": "NOT_RUN",
+      "evidence_refs": []
+    },
+    {
+      "id": "watch-tick",
+      "requirement": "POST /api/watch tick runs computer.next_op via openrouter_jev; Book never",
+      "mandatory": true,
+      "result": "NOT_RUN",
+      "evidence_refs": []
+    },
+    {
+      "id": "voice-mac",
+      "requirement": "POST /api/voice-mac reset then /api/turn family voice.mac_op FIRE via openrouter_jev; Post never",
+      "mandatory": true,
+      "result": "NOT_RUN",
+      "evidence_refs": []
+    },
+    {
+      "id": "plates-split",
+      "requirement": "Plates not merged",
+      "mandatory": true,
+      "result": "NOT_RUN",
+      "evidence_refs": []
+    }
+  ],
+  "non_goals": [
+    "jev-ultrafast install",
+    "TypeSafe SDK",
+    "Chrome / Browser Harness as host",
+    "Book / Select flight / Post / send / pay / deploy",
+    "Builder self-VERIFIED"
+  ],
+  "runtime": {
+    "surface": "127.0.0.1:4018",
+    "entrypoint": "/api/watch",
+    "expected_listen": "4018",
+    "environment": "local",
+    "address": "127.0.0.1:4018",
+    "git_sha": "",
+    "worktree": "",
+    "picker": "typesafe/jev-1.13",
+    "families": ["computer.next_op", "voice.mac_op"]
+  },
+  "scope": {
+    "goal": "Jarvis invokes Jev for browser Watch and computer voice-Mac",
+    "v1": [
+      "Watch tick observes Safari and acts",
+      "voice-Mac observes words and acts",
+      "result returns on the same Face",
+      "plates stay split"
+    ],
+    "not_v1": [
+      "new agent OS",
+      "replacement Jarvis planner",
+      "jev-ultrafast install"
+    ]
+  },
+  "architecture": {
+    "jev_role": "picker tool",
+    "browser": "computer.next_op",
+    "computer": "voice.mac_op"
+  },
+  "reuse_check": {
+    "need": "browser and computer executor",
+    "existing": ["face/serve.py /api/watch", "face/serve.py /api/turn voice.mac_op"],
+    "decision": "extend",
+    "rejected": ["new browser engine", "jev-ultrafast clone", "second Jarvis pipeline"]
+  },
+  "regression": {
+    "argv": ["python3", "-m", "unittest", "face.test_serve", "-q"],
+    "cwd": "/Users/evenslouis/n8n-cursor-wt-decision-fabric-v0/apps/agent-stack"
+  },
+  "decisions_owed": [],
+  "rollback": "Leave Face on the isolated worktree until a Forge receipt binds that SHA."
+}

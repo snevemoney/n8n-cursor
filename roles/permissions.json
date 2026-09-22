@@ -1,0 +1,37 @@
+{
+  "builder": {
+    "may": ["modify_code", "run_tests", "attach_implementation_evidence", "request_IMPLEMENTED_UNVERIFIED"],
+    "may_not": ["set_VERIFIED", "set_REVIEWED", "approve_own_review", "deploy_tier3"]
+  },
+  "verifier": {
+    "may": ["run_runtime", "inspect_traces", "request_LIVE", "request_VERIFIED"],
+    "may_not": ["modify_candidate_code", "set_REVIEWED"],
+    "must_differ_from": "builder"
+  },
+  "reviewer": {
+    "may": ["read_diff", "request_REVIEWED", "request_REGRESSION"],
+    "may_not": ["modify_candidate_code", "set_VERIFIED"],
+    "must_differ_from": "builder"
+  },
+  "big_boss": {
+    "may": ["route"],
+    "may_not": ["set_VERIFIED", "set_LIVE", "rewrite_operator_ask"]
+  },
+  "platforms": {
+    "grok_bot": {
+      "roster": "scripts/hive/agent-roster-registry.json",
+      "functions": {
+        "forge": ["develop"],
+        "watchdog": ["verify"],
+        "consultant": ["review"],
+        "big-boss": ["route"]
+      }
+    },
+    "cursor": {
+      "functions": {
+        "cursor_background_agent": ["develop", "verify", "review"]
+      },
+      "same_agent_requires_distinct_run": ["verify", "review"]
+    }
+  }
+}
