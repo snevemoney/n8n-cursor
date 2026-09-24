@@ -60,16 +60,41 @@ def _read_tail(path: Path, max_lines: int = 80) -> str:
     return "\n".join(lines[-max_lines:])
 
 
-def _extract_section(text: str, heading: str, max_chars: int = 1200) -> str:
+STANDING_LOCKS_REL = "CONTENT/topics/standing-locks-20260903.md"
+STANDING_LOCKS_MAX = 4000
+
+
+def _extract_section(
+    text: str,
+    heading: str,
+    max_chars: int = 1200,
+    which: str = "first",
+) -> str:
     pattern = rf"^## {re.escape(heading)}\s*$"
-    m = re.search(pattern, text, re.MULTILINE)
-    if not m:
+    matches = list(re.finditer(pattern, text, re.MULTILINE))
+    if not matches:
         return ""
+    if which == "last":
+        m = matches[-1]
+    elif which == "first":
+        m = matches[0]
+    else:
+        raise ValueError(f"which must be first or last, got {which!r}")
     rest = text[m.end() :]
     nxt = re.search(r"^## ", rest, re.MULTILINE)
     body = rest[: nxt.start()] if nxt else rest
     body = body.strip()
     return body[:max_chars] + ("…" if len(body) > max_chars else "")
+
+
+def _standing_locks(root: Path) -> str:
+    path = root / STANDING_LOCKS_REL
+    if not path.is_file():
+        return ""
+    text = path.read_text(encoding="utf-8", errors="replace").strip()
+    if len(text) <= STANDING_LOCKS_MAX:
+        return text
+    return text[:STANDING_LOCKS_MAX] + "…"
 
 
 def _chronicle_summaries(root: Path, n: int = 3) -> list[str]:
@@ -349,8 +374,9 @@ def build_brief(
         "project": project,
         "sourceRoot": str(root),
         "northStars": _extract_section(mem_text, "Four north stars", 900),
-        "decisions": _extract_section(mem_text, "DECISIONS (seeded)", 600),
-        "goals": _extract_section(mem_text, "GOALS (seeded)", 600),
+        "decisions": _extract_section(mem_text, "DECISIONS (seeded)", 600, which="last"),
+        "goals": _extract_section(mem_text, "GOALS (seeded)", 600, which="last"),
+        "standingLocks": _standing_locks(root),
         "chronicleRecent": _chronicle_summaries(root, 3),
         "graphHubs": _graph_hubs(root, 10),
         "recentCursorChats": _cursor_chat_titles(root, 10),
@@ -384,6 +410,10 @@ def build_brief(
         md_parts.extend(["## Tools", brief["toolAssignment"], ""])
     if brief.get("vaultAccess"):
         md_parts.extend(["## Vault (Mac closed)", brief["vaultAccess"], ""])
+    if brief.get("standingLocks"):
+        md_parts.extend(["## Standing locks", brief["standingLocks"], ""])
+    if brief.get("decisions"):
+        md_parts.extend(["## Decisions (latest seeded)", brief["decisions"], ""])
     md_parts.extend(
         [
             "## North stars",

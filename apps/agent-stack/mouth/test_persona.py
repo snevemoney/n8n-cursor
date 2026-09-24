@@ -174,6 +174,36 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertNotIn("i heard you", low)
         self.assertNotIn("before that you said", low)
 
+    def test_spoken_line_is_not_cloud_placeholder_or_live_claim(self) -> None:
+        """Smoke S03/S04: do not speak the vault status or an unsolicited live stamp."""
+        absent = "What color did I store under the namespace jarvis-e2e-absent-color-924?"
+        live_ask = "Is Jarvis live?"
+        cloud_lines = (
+            "Live vault file is a cloud placeholder.",
+            "Sir. Live vault file is a cloud placeholder.",
+        )
+        live_lines = (
+            "Yes, Sir—I'm Jarvis and live.",
+            "Yes, Sir—I’m Jarvis and live.",
+            "Sir. Yes, Sir—I’m Jarvis and live.",
+        )
+        for raw in cloud_lines:
+            spoken = MOD.wrap(raw, verb="vault_read", utterance=absent)
+            delta = MOD.stream_delta(raw, first=True, verb="vault_read", utterance=absent)
+            for out in (spoken, delta):
+                low = out.lower()
+                self.assertNotIn("cloud placeholder", low, out)
+                self.assertNotIn("live vault file", low, out)
+        for raw in live_lines:
+            spoken = MOD.wrap(raw, verb="converse", utterance=live_ask)
+            delta = MOD.stream_delta(raw, first=True, verb="converse", utterance=live_ask)
+            for out in (spoken, delta):
+                folded = out.lower().replace("\u2019", "'")
+                self.assertNotIn("i'm jarvis and live", folded, out)
+                self.assertNotRegex(folded, r"\bproven\b", out)
+        kept = MOD.wrap("Begin with the calendar.", verb="converse", utterance="Good morning.")
+        self.assertIn("Begin with the calendar.", kept)
+
 
 if __name__ == "__main__":
     unittest.main()
