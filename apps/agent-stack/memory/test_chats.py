@@ -47,6 +47,24 @@ class JarvisChatsTest(unittest.TestCase):
         self.assertIn("wires: converse, store", body)
         self.assertNotIn("/Users/", body)
 
+    def test_archive_keeps_backticks_from_the_bus_line(self) -> None:
+        bus_line = "Sir. Standing lock 2: Live `/` HOLD — the public site stays HOLD."
+        with tempfile.TemporaryDirectory(prefix="jarvis-chats-ticks-") as tmp:
+            wrote = MOD.append_jarvis_turn(
+                utterance="What does standing lock 2 say about the live site?",
+                spoken=bus_line,
+                verb="vault_read",
+                tool="vault_read",
+                wires=["vault_read"],
+                roots=[Path(tmp)],
+                turn_gen=3367,
+                jarvis_chat_id="chat-1",
+                outcome="MODEL_TALK",
+            )
+            body = wrote[0].read_text(encoding="utf-8")
+        self.assertIn("Live `/` HOLD", body)
+        self.assertNotIn("Live / HOLD —", body)
+
     def test_closed_turn_records_identity_including_wire_failure(self) -> None:
         with tempfile.TemporaryDirectory(prefix="jarvis-chats-identity-") as tmp:
             vault = Path(tmp)

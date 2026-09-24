@@ -231,6 +231,13 @@ def _clean(text: str) -> str:
     return re.sub(r"\s+", " ", body).strip()
 
 
+def _bus_line(text: str) -> str:
+    """The bus payload. Markdown stays. Secrets and filesystem paths do not."""
+    body = PATH_RE.sub("", _unescape(text or ""))
+    body = SECRET_RE.sub("", body)
+    return re.sub(r"[ \t]+", " ", body).strip()
+
+
 def _clean_title(text: str) -> str:
     return _clean(text)
 
@@ -460,7 +467,7 @@ def append_jarvis_turn(
     user = _clean(utterance)
     if not user or (verb or "").strip().lower() == "idle":
         return []
-    line = _clean(spoken)
+    line = _bus_line(spoken)
     tool_name = _clean(tool or verb)
     wire_s = ", ".join(_clean(str(w)) for w in (wires or []) if str(w).strip()) or verb
     day = date.today().isoformat()

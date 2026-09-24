@@ -818,6 +818,12 @@ def standing_reply(utterance: str, prior_turns: list | None = None) -> str:
         return "No. Forge finishing does not make the public site live."
     if re.search(r"\bpass\b", heard, re.I) and re.search(r"\bjev\b", heard, re.I) and re.search(r"\bship\b", heard, re.I):
         return "No. PASS is not a ship, and Jev did not ship it."
+    if (
+        re.search(r"\bforge\b", heard, re.I)
+        and re.search(r"\bpass\b", heard, re.I)
+        and re.search(r"\bship\b", heard, re.I)
+    ):
+        return "No. Forge PASS is not ship. Merge is not ship. Live / stays HOLD."
     if re.search(r"\bdid you store it\b|\bwrite that (?:phrase|down)\b", heard, re.I):
         return "No. I did not store it, and I did not write it to a file, a lock, or a board."
     if re.search(r"\bbecomes?\s+\d+\b", heard, re.I) and re.search(r"\bthis chat\b", heard, re.I):
@@ -4607,6 +4613,11 @@ def apply_pipeline_iter(
             pack=None,
             retrieve_roots=retrieve_roots,
             gen=token,
+            wire={
+                "path": "refuse_hard_step",
+                "tool": "refuse_hard_step",
+                "outcome": "REFUSED",
+            },
         )
         if first and rest:
             yield _pipeline_event(
@@ -4848,6 +4859,19 @@ def apply_pipeline_iter(
                 "sent": False,
             }
 
+    if pick is None and _RECORD_ASK_RE.search(spoken_in):
+        yield _pipeline_event(
+            ok=True,
+            tool="vault_read",
+            spoken="",
+            spoken_delta="",
+            wires=["vault_read"],
+            cites=[],
+            pack=None,
+            done=False,
+            partial=True,
+            gen=token,
+        )
     if pick is None:
         routed = harness_route(
             spoken_in,

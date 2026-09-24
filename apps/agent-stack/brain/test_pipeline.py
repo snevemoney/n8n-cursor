@@ -4634,6 +4634,57 @@ class RecordAbsenceTest(unittest.TestCase):
         self.assertEqual(missed, "It is unmerged or unknown.")
         self.assertNotIn(PIPE.HONEST_EMPTY, missed)
 
+    def test_record_ask_signals_vault_read_before_retrieve(self) -> None:
+        started = {"n": 0}
+
+        def slow_retrieve(*_a, **_k):
+            started["n"] += 1
+            return {"spoken": "", "unknown": True}
+
+        hive = Path(tempfile.mkdtemp(prefix="record-signal-"))
+        (hive / "bus").mkdir()
+        (hive / "bus" / "state.json").write_text('{"turns":[]}', encoding="utf-8")
+        prompt = "What color did I store under the namespace jarvis-e2e-absent-color-924?"
+        with unittest.mock.patch.object(PIPE, "retrieve_once", side_effect=slow_retrieve):
+            stream = PIPE.apply_pipeline_iter(prompt, hive=hive, retrieve_roots=[hive])
+            signal = None
+            for ev in stream:
+                if (ev.get("verb") or ev.get("tool")) == "vault_read" and ev.get("partial"):
+                    signal = ev
+                    break
+                if started["n"]:
+                    break
+        self.assertEqual(started["n"], 0)
+        self.assertIsNotNone(signal)
+        self.assertFalse(str(signal.get("spoken") or "").strip())
+
+    def test_forge_pass_is_not_a_ship(self) -> None:
+        line = PIPE.standing_reply("Forge marked this build PASS. Does that mean we ship?")
+        self.assertIn("Forge PASS is not ship", line)
+        self.assertIn("Merge is not ship", line)
+        self.assertIn("Live / stays HOLD", line)
+
+    def test_hard_step_close_records_outcome(self) -> None:
+        hive = Path(tempfile.mkdtemp(prefix="hard-step-outcome-"))
+        (hive / "bus").mkdir()
+        (hive / "bus" / "state.json").write_text(
+            json.dumps({"turns": [], "turn_gen": 1, "jarvis_chat_id": "chat-refuse"}),
+            encoding="utf-8",
+        )
+        calls: list[dict] = []
+
+        def record(**kw):
+            calls.append(kw)
+            return []
+
+        prompt = "Send the client an email that the invoice is approved and pay it from the operating account now."
+        with unittest.mock.patch.object(PIPE.CHATS, "archive_turn", side_effect=record):
+            out = PIPE.apply_pipeline(prompt, hive=hive, retrieve_roots=[hive])
+        self.assertIn("will not send", (out.get("spoken") or "").lower())
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0]["outcome"], "REFUSED")
+        self.assertEqual(calls[0]["spoken"], out.get("spoken"))
+
 
 class ToolCallTaggedAbsenceTest(unittest.TestCase):
     """A vault_read tool call must not be rewritten into the generic absence sentence."""
