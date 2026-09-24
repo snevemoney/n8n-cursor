@@ -256,6 +256,50 @@ def strip_factory(text: str) -> str:
     return SPACE_RE.sub(" ", body).strip()
 
 
+# Vault status and proof stamps are not conversation. The model brief may
+# still say a file is a cloud placeholder. The mouth must not.
+CLOUD_MOUTH_RE = re.compile(
+    r"live vault file is a cloud placeholder|\bcloud placeholder\b",
+    re.I,
+)
+LIVE_SELF_RE = re.compile(
+    r"i(?:\s+am|['\u2019]m)\s+jarvis\s+and\s+live\b",
+    re.I,
+)
+ABSENT_MOUTH = "I don't have that."
+PANE_MOUTH = "I'm Jarvis on this Mac. I will not call that live or verified."
+
+
+def scrub_unspeakable(text: str) -> str:
+    """Drop filesystem status and an unsolicited live identity claim."""
+    body = (text or "").strip()
+    if not body:
+        return ""
+    parts = re.split(r"(?<=[.!?])\s+", body)
+    kept: list[str] = []
+    dropped_live = False
+    dropped_cloud = False
+    for part in parts:
+        if not part:
+            continue
+        folded = part.replace("\u2019", "'").replace("\u2018", "'")
+        if CLOUD_MOUTH_RE.search(folded):
+            dropped_cloud = True
+            continue
+        if LIVE_SELF_RE.search(folded):
+            dropped_live = True
+            continue
+        kept.append(part)
+    leftover = SPACE_RE.sub(" ", " ".join(kept)).strip()
+    if leftover:
+        return leftover
+    if not dropped_live and not dropped_cloud:
+        return body
+    if dropped_live:
+        return PANE_MOUTH
+    return ABSENT_MOUTH
+
+
 def sanitize_payload(text: str) -> str:
     """Drop dump headers, pack leaks, and factory crumbs. Keep a real sentence."""
     body = (text or "").strip()
@@ -267,7 +311,7 @@ def sanitize_payload(text: str) -> str:
     if not body:
         return ""
     body = strip_factory(body)
-    return SPACE_RE.sub(" ", body).strip()
+    return scrub_unspeakable(SPACE_RE.sub(" ", body).strip())
 
 
 def strip_lead_sir(text: str) -> str:
@@ -331,7 +375,7 @@ def wrap(
     scars: list[dict] | None = None,
 ) -> str:
     """Sir. Then the payload. A rare hand beat only when it is earned."""
-    raw = spoken or ""
+    raw = scrub_unspeakable(spoken or "")
     if is_dump(raw):
         return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
     if (verb or "").strip().lower() == "wire":
@@ -376,7 +420,7 @@ def stream_delta(
     scars: list[dict] | None = None,
 ) -> str:
     """Wrap once on the first speakable sentence. Later chunks are payload only."""
-    raw = chunk or ""
+    raw = scrub_unspeakable(chunk or "")
     if is_dump(raw):
         return wrap(raw, verb=verb, utterance=utterance, turns=turns, store_lines=store_lines, scars=scars) if first else ""
     if (verb or "").strip().lower() == "wire":
