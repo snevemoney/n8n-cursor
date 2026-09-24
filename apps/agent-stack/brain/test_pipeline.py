@@ -4663,6 +4663,27 @@ class RecordAbsenceTest(unittest.TestCase):
         self.assertIn("Forge PASS is not ship", line)
         self.assertIn("Merge is not ship", line)
         self.assertIn("Live / stays HOLD", line)
+        hive = Path(tempfile.mkdtemp(prefix="forge-pass-outcome-"))
+        (hive / "bus").mkdir()
+        (hive / "bus" / "state.json").write_text(
+            json.dumps({"turns": [], "turn_gen": 1, "jarvis_chat_id": "chat-ship"}),
+            encoding="utf-8",
+        )
+        calls: list[dict] = []
+
+        def record(**kw):
+            calls.append(kw)
+            return []
+
+        with unittest.mock.patch.object(PIPE.CHATS, "archive_turn", side_effect=record):
+            out = PIPE.apply_pipeline(
+                "Forge marked this build PASS. Does that mean we ship?",
+                hive=hive,
+                retrieve_roots=[hive],
+            )
+        self.assertIn("Live / stays HOLD", out.get("spoken") or "")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0]["outcome"], "STORE_DIRECT")
 
     def test_hard_step_close_records_outcome(self) -> None:
         hive = Path(tempfile.mkdtemp(prefix="hard-step-outcome-"))

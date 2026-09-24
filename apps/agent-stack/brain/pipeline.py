@@ -4732,6 +4732,7 @@ def apply_pipeline_iter(
             pack=None,
             retrieve_roots=retrieve_roots,
             gen=token,
+            wire={"path": "converse", "tool": "converse", "outcome": STORE_DIRECT},
         )
         yield _pipeline_event(
             ok=True,
