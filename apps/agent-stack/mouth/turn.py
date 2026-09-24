@@ -12,6 +12,7 @@ import importlib.util
 import json
 import os
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -28,9 +29,15 @@ ASK_LEAK = re.compile(
 )
 DARK_BRAIN = "UNKNOWN. Cursor harness returned no reply."
 DARK_GROK = DARK_BRAIN
+QUIET_THINK_RE = re.compile(
+    r"\b(?:stop|don'?t|do not|quit|enough).{0,60}\b(?:looking|thinking)\b"
+    r"|\b(?:looking|thinking).{0,40}\b(?:thinking|looking)\b",
+    re.I,
+)
 
 
 def _load_mod(name: str, path: Path):
+    sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"cannot load {path}")
@@ -43,6 +50,17 @@ VOICE = _load_mod("agent_stack_voice", Path(__file__).resolve().parent / "voice.
 PIPELINE = _load_mod("agent_stack_pipeline", Path(__file__).resolve().parent.parent / "brain" / "pipeline.py")
 _ONLINE_PATH = Path(__file__).resolve().parent.parent / "brain" / "online.py"
 ONLINE = _load_mod("agent_stack_online", _ONLINE_PATH) if _ONLINE_PATH.is_file() else None
+_SENSES = None
+
+
+def _load_senses():
+    global _SENSES
+    if _SENSES is None:
+        _SENSES = _load_mod(
+            "agent_stack_senses",
+            Path(__file__).resolve().parent.parent / "face" / "senses.py",
+        )
+    return _SENSES
 
 
 def now_iso() -> str:
@@ -91,58 +109,72 @@ def bus_write(
     jarvis_chat_id: str | None = None,
     jarvis_agent_chat_id: str | None = None,
     harness_mode: str | None = None,
+    gen: int | None = None,
 ) -> dict:
-    path = hive / "bus" / "state.json"
-    bus = load_json(path)
-    bus.update(
-        {
-            "schema_version": 1,
-            "phase": phase,
-            "job_status": job_status,
-            "utterance": utterance,
-            "permission_ask": permission_ask,
-            "spoken": spoken,
-            "cites": cites or [],
-            "wires": wires or [],
-            "updated_at": now_iso(),
-        }
-    )
-    if jarvis_chat_id == "":
-        bus.pop("jarvis_chat_id", None)
-    elif jarvis_chat_id:
-        bus["jarvis_chat_id"] = jarvis_chat_id
-    if jarvis_agent_chat_id == "":
-        bus.pop("jarvis_agent_chat_id", None)
-    elif jarvis_agent_chat_id:
-        bus["jarvis_agent_chat_id"] = jarvis_agent_chat_id
-    if harness_mode in ("ask", "plan", "agent"):
-        bus["harness_mode"] = harness_mode
-    if turns is not None:
-        bus["turns"] = turns
-    elif "turns" not in bus:
-        bus["turns"] = []
-    write_json(path, bus)
-    return bus
+    def apply(bus: dict) -> dict:
+        bus.update(
+            {
+                "schema_version": 1,
+                "phase": phase,
+                "job_status": job_status,
+                "utterance": utterance,
+                "permission_ask": permission_ask,
+                "spoken": spoken,
+                "cites": cites or [],
+                "wires": wires or [],
+                "updated_at": now_iso(),
+            }
+        )
+        if jarvis_chat_id == "":
+            bus.pop("jarvis_chat_id", None)
+        elif jarvis_chat_id:
+            bus["jarvis_chat_id"] = jarvis_chat_id
+        if jarvis_agent_chat_id == "":
+            bus.pop("jarvis_agent_chat_id", None)
+        elif jarvis_agent_chat_id:
+            bus["jarvis_agent_chat_id"] = jarvis_agent_chat_id
+        if harness_mode in ("ask", "plan", "agent"):
+            bus["harness_mode"] = harness_mode
+        if turns is not None:
+            bus["turns"] = turns
+        elif "turns" not in bus:
+            bus["turns"] = []
+        return bus
+
+    act = getattr(PIPELINE, "act_if_current", None)
+    if act is None:
+        return PIPELINE.mutate_bus(hive, apply)
+    out = act(hive, gen, apply)
+    if out is None:
+        return PIPELINE.load_json(hive / "bus" / "state.json")
+    return out
 
 
-def set_listen(hive: Path, live: bool) -> dict:
+def set_listen(hive: Path, live: bool, gen: int | None = None) -> dict:
     """Face owns the mic. LIVE writes listen; MUTE returns to idle."""
-    path = hive / "bus" / "state.json"
-    bus = load_json(path)
-    scrub_bus_ask(bus)
-    bus.update(
-        {
-            "schema_version": 1,
-            "phase": "listen" if live else "idle",
-            "job_status": bus.get("job_status") or "done",
-            "utterance": bus.get("utterance") or "",
-            "permission_ask": None,
-            "mic": "live" if live else "mute",
-            "updated_at": now_iso(),
-        }
-    )
-    write_json(path, bus)
-    return bus
+
+    def apply(bus: dict) -> dict:
+        scrub_bus_ask(bus)
+        bus.update(
+            {
+                "schema_version": 1,
+                "phase": "listen" if live else "idle",
+                "job_status": bus.get("job_status") or "done",
+                "utterance": bus.get("utterance") or "",
+                "permission_ask": None,
+                "mic": "live" if live else "mute",
+                "updated_at": now_iso(),
+            }
+        )
+        return bus
+
+    act = getattr(PIPELINE, "act_if_current", None)
+    if act is None:
+        return PIPELINE.mutate_bus(hive, apply)
+    out = act(hive, gen, apply)
+    if out is None:
+        return PIPELINE.load_json(hive / "bus" / "state.json")
+    return out
 
 
 def speak_local(text: str) -> None:
@@ -164,8 +196,11 @@ def _turn_event(
     login_tried: bool = False,
     model_available: bool | None = None,
     unknown: bool = False,
+    outcome: str | None = None,
+    source: str | None = None,
+    gen: int | None = None,
 ) -> dict:
-    return {
+    ev = {
         "ok": True,
         "verb": verb,
         "ask": False,
@@ -181,24 +216,81 @@ def _turn_event(
         "login_tried": login_tried,
         "model_available": bool(brain) if model_available is None else bool(model_available),
         "unknown": unknown,
+        "outcome": outcome,
+        "source": source,
+        "status": outcome,
     }
+    if gen is not None:
+        ev["gen"] = int(gen)
+        ev["turn_gen"] = int(gen)
+    return ev
 
 
-def _door_speak(hive: Path, utterance: str, spoken: str, verb: str) -> dict:
+def _door_speak(
+    hive: Path,
+    utterance: str,
+    spoken: str,
+    verb: str,
+    retrieve_roots: list[Path] | None = None,
+    gen: int | None = None,
+) -> dict:
+    if gen is not None and hasattr(PIPELINE, "turn_cancelled") and PIPELINE.turn_cancelled(hive, gen):
+        return _turn_event(
+            spoken="Stopped. Standing by.",
+            verb="stop",
+            host="local",
+            wires=["stop"],
+            spoken_delta="",
+            gen=gen,
+        )
+    text = spoken
+    persona = getattr(PIPELINE, "PERSONA", None)
+    if persona is not None and hasattr(persona, "wrap"):
+        text = persona.wrap(spoken, verb=verb, utterance=utterance)
     bus = load_json(hive / "bus" / "state.json")
     prior = PIPELINE.load_turns(bus)
-    next_turns = prior if verb == "idle" else PIPELINE.append_turn(prior, utterance, spoken)
+    next_turns = prior if verb == "idle" else PIPELINE.append_turn(prior, utterance, text)
     bus_write(
         hive,
         phase="speak",
         job_status="done",
         utterance=utterance,
         permission_ask=None,
-        spoken=spoken,
+        spoken=text,
         wires=[verb],
         turns=next_turns,
+        gen=gen,
     )
-    return _turn_event(spoken=spoken, verb=verb, host="local", wires=[verb], spoken_delta=spoken)
+    if gen is not None and hasattr(PIPELINE, "turn_cancelled") and PIPELINE.turn_cancelled(hive, gen):
+        return _turn_event(
+            spoken="Stopped. Standing by.",
+            verb="stop",
+            host="local",
+            wires=["stop"],
+            spoken_delta="",
+            gen=gen,
+        )
+    chats = getattr(PIPELINE, "CHATS", None)
+    if chats is not None and hasattr(chats, "archive_turn"):
+        try:
+            chats.archive_turn(
+                hive=hive,
+                retrieve_roots=retrieve_roots,
+                utterance=utterance,
+                spoken=text,
+                verb=verb,
+                tool=verb,
+                wires=[verb],
+                gen=gen,
+                turn_gen=gen,
+                jarvis_chat_id=str(bus.get("jarvis_chat_id") or "") or None,
+                outcome="STOPPED" if verb == "stop" else None,
+            )
+        except OSError:
+            pass
+    return _turn_event(
+        spoken=text, verb=verb, host="local", wires=[verb], spoken_delta=text, gen=gen
+    )
 
 
 def apply_turn_iter(
@@ -217,19 +309,34 @@ def apply_turn_iter(
 ):
     _ = (approved, grok)
     spoken = (utterance or "").strip()
-    bus_now = load_json(hive / "bus" / "state.json")
-    if scrub_bus_ask(bus_now):
-        write_json(hive / "bus" / "state.json", bus_now)
+    PIPELINE.mutate_bus(hive, lambda bus: (scrub_bus_ask(bus) or True) and bus)
 
     if not spoken:
-        yield _door_speak(hive, spoken, "Holding. Say Jarvis, or tap Space.", "idle")
+        yield _door_speak(hive, spoken, "Holding. Say Jarvis, or tap Space.", "idle", retrieve_roots)
         return
     if STOP_RE.match(spoken):
         if ONLINE is not None and hasattr(ONLINE, "cancel_cursor"):
             ONLINE.cancel_cursor()
-        yield _door_speak(hive, spoken, "Stopped. Standing by.", "stop")
+        if VOICE is not None and hasattr(VOICE, "cancel_tts"):
+            VOICE.cancel_tts()
+        stop_gen = PIPELINE.cancel_turn(hive) if hasattr(PIPELINE, "cancel_turn") else None
+        yield _door_speak(
+            hive, spoken, "Stopped. Standing by.", "stop", retrieve_roots, gen=stop_gen
+        )
+        return
+    if QUIET_THINK_RE.search(spoken):
+        token = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
+        yield _door_speak(
+            hive,
+            spoken,
+            "Noted. I stay quiet until I have the line.",
+            "converse",
+            retrieve_roots,
+            gen=token,
+        )
         return
     if PIPELINE.is_hard_step(spoken):
+        token = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
         for out in PIPELINE.apply_pipeline_iter(
             spoken,
             hive=hive,
@@ -240,6 +347,7 @@ def apply_turn_iter(
             cursor_ask_fn=cursor_ask_fn,
             talk_fn=talk_fn,
             login_fn=login_fn,
+            gen=token,
         ):
             text = str(out.get("spoken") or PIPELINE.PROPOSAL)
             yield _turn_event(
@@ -252,11 +360,103 @@ def apply_turn_iter(
                 done=bool(out.get("done", True)),
                 spoken_delta=str(out.get("spoken_delta") or ""),
                 partial=bool(out.get("partial")),
-                brain=out.get("brain"),
-                login_tried=bool(out.get("login_tried")),
-                model_available=out.get("model_available"),
-                unknown=bool(out.get("unknown")),
+                gen=out.get("gen") or out.get("turn_gen") or token,
             )
+        return
+    bus_armed = load_json(hive / "bus" / "state.json")
+    already_armed = isinstance(bus_armed.get("watch"), dict) and bool(bus_armed["watch"].get("armed"))
+    verbal_watch = bool(hasattr(PIPELINE, "wants_watch") and PIPELINE.wants_watch(spoken))
+    token = (
+        PIPELINE.begin_turn(hive, arm_watch=already_armed or verbal_watch)
+        if hasattr(PIPELINE, "begin_turn")
+        else None
+    )
+    fresh = load_json(hive / "bus" / "state.json")
+    watch_row = fresh.get("watch") if isinstance(fresh.get("watch"), dict) else {}
+    watch_on = bool(watch_row.get("armed"))
+    if verbal_watch and not watch_on:
+        yield _door_speak(
+            hive,
+            spoken,
+            "Watch is off. Tap Watch on the face.",
+            "watch",
+            retrieve_roots,
+            gen=token,
+        )
+        return
+    if verbal_watch and watch_on:
+        yield _door_speak(
+            hive,
+            spoken,
+            "Watch is on. Switch to the app you want me to use, then tell me.",
+            "watch",
+            retrieve_roots,
+            gen=token,
+        )
+        return
+    owns_watch = bool(
+        watch_on
+        and hasattr(PIPELINE, "watch_owns_turn")
+        and PIPELINE.watch_owns_turn(spoken, watch_row)
+    )
+    if owns_watch and hasattr(PIPELINE, "run_watch_loop"):
+        got = PIPELINE.run_watch_loop(
+            spoken, hive=hive, talk_fn=talk_fn, see_fn=see_fn, gen=token
+        )
+        if (token is not None and hasattr(PIPELINE, "turn_cancelled") and PIPELINE.turn_cancelled(hive, token)) or (
+            isinstance(got, dict) and got.get("cancelled")
+        ):
+            yield _turn_event(
+                spoken="Stopped. Standing by.",
+                verb="stop",
+                host="local",
+                wires=["stop"],
+                spoken_delta="",
+                gen=token,
+            )
+            return
+        text = str(got.get("spoken") or "Watch is on.")
+        yield _door_speak(hive, spoken, text, "watch", retrieve_roots, gen=token)
+        return
+    if hasattr(PIPELINE, "wants_eyes") and PIPELINE.wants_eyes(spoken):
+        bus = load_json(hive / "bus" / "state.json")
+        eyes = bus.get("eyes") if isinstance(bus.get("eyes"), dict) else {}
+        if eyes.get("path") and eyes.get("active") is not False:
+            text = "Eyes still is on disk. I will use it as context."
+        else:
+            text = "Tap Eyes on the face to open the camera. I will not invent a frame."
+        yield _door_speak(hive, spoken, text, "eyes", retrieve_roots, gen=token)
+        return
+    drop_bus = load_json(hive / "bus" / "state.json")
+    drop = drop_bus.get("drop") if isinstance(drop_bus.get("drop"), dict) else {}
+    drop_ask = re.search(
+        r"\b(which file|what file|what did i (?:just )?drop)\b",
+        spoken,
+        re.I,
+    )
+    # A pin the ask already says is missing is not the file on the bus.
+    pin_absent = bool(
+        re.search(r"\bpin", spoken, re.I)
+        and re.search(r"\b(?:did not|didn't|do not|don't|not)\s+pin\b", spoken, re.I)
+        and not re.search(r"\bdrop", spoken, re.I)
+    )
+    if drop.get("name") and drop_ask and not pin_absent:
+        text = f"You dropped {drop['name']}. It is on the bus. I did not run it."
+        yield _door_speak(hive, spoken, text, "drop", retrieve_roots, gen=token)
+        return
+
+    if hasattr(PIPELINE, "wants_stand_down") and PIPELINE.wants_stand_down(spoken):
+        got = PIPELINE.focus_stand_down(hive)
+        yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "focus", retrieve_roots, gen=token)
+        return
+    if hasattr(PIPELINE, "wants_relief") and PIPELINE.wants_relief(spoken):
+        got = PIPELINE.focus_relief(hive)
+        yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "focus", retrieve_roots, gen=token)
+        return
+    focus_minutes = PIPELINE.wants_focus(spoken) if hasattr(PIPELINE, "wants_focus") else None
+    if focus_minutes is not None:
+        got = PIPELINE.focus_arm(hive, minutes=focus_minutes)
+        yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "focus", retrieve_roots, gen=token)
         return
 
     for out in PIPELINE.apply_pipeline_iter(
@@ -269,8 +469,11 @@ def apply_turn_iter(
         cursor_ask_fn=cursor_ask_fn,
         talk_fn=talk_fn,
         login_fn=login_fn,
+        gen=token,
     ):
-        text = str(out.get("spoken") or DARK_BRAIN)
+        text = str(out.get("spoken") or "")
+        if not text and not bool(out.get("partial")):
+            text = DARK_BRAIN
         if is_ask_leak(text):
             text = DARK_BRAIN
         delta = str(out.get("spoken_delta") or "")
@@ -290,6 +493,9 @@ def apply_turn_iter(
             login_tried=bool(out.get("login_tried")),
             model_available=out.get("model_available"),
             unknown=bool(out.get("unknown")),
+            outcome=out.get("outcome") or out.get("status"),
+            source=out.get("source"),
+            gen=out.get("gen") or out.get("turn_gen") or token,
         )
 
 
@@ -338,6 +544,9 @@ def apply_turn(
         "login_tried": bool(last.get("login_tried")),
         "model_available": bool(last.get("model_available")),
         "unknown": bool(last.get("unknown")),
+        "outcome": last.get("outcome"),
+        "source": last.get("source"),
+        "status": last.get("status") or last.get("outcome"),
     }
 
 
@@ -388,10 +597,11 @@ def self_test() -> dict:
             return {"ok": False, "errors": ["pipeline leaked a desk ASK"], "got": can}
         if "XAI_API_KEY" in (can.get("spoken") or "") or "May I hand this" in (can.get("spoken") or ""):
             return {"ok": False, "errors": ["must not nag for xAI or hand to grok"], "got": can}
-        live = set_listen(hive, True)
+        token = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else 1
+        live = set_listen(hive, True, gen=token)
         if live.get("phase") != "listen" or live.get("mic") != "live":
             return {"ok": False, "errors": ["LIVE did not write listen"]}
-        mute = set_listen(hive, False)
+        mute = set_listen(hive, False, gen=token)
         if mute.get("mic") != "mute":
             return {"ok": False, "errors": ["MUTE did not write mute"]}
         return {"ok": True, "errors": []}
