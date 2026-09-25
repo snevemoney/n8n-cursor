@@ -46,3 +46,4 @@ Jarvis: `apps/agent-stack/AGENTS.md` · Jev hands: `apps/agent-stack/hands/AGENT
 
 After meaningful work report: `ASK` `CURRENT FUNCTION` `STATE` `CHANGED` `PROVEN` `NOT PROVEN` `BLOCKER` `NEXT`.
 Hard step (send / pay / deploy / book / publish / Post) stays Evens.
+Delivery: `python3 scripts/hive/eng/delivery.py decide` — git merge-tree and the existing GitHub checks. A clean update is automatic. A conflict is not guessed. A red check repairs without Evens. Merge waits for an independent review, green required checks, and a tier. Main and Tier 3 stay Evens. Jev is not merge authority.

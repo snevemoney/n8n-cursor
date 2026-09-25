@@ -1,7 +1,7 @@
 {
   "builder": {
     "may": ["modify_code", "run_tests", "attach_implementation_evidence", "request_IMPLEMENTED_UNVERIFIED"],
-    "may_not": ["set_VERIFIED", "set_REVIEWED", "approve_own_review", "deploy_tier3"]
+    "may_not": ["set_VERIFIED", "set_REVIEWED", "approve_own_review", "deploy_tier3", "push_main", "merge_main", "guess_semantic_conflict"]
   },
   "verifier": {
     "may": ["run_runtime", "inspect_traces", "request_LIVE", "request_VERIFIED"],
