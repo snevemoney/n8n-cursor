@@ -533,6 +533,16 @@ def transition_job(
     )
     word = _is_terminal_word(target, closes_work=closes_work)
     token = _terminal_token(target)
+    if not decision["permitted"] and _close_still_proven(existing):
+        kept = existing if isinstance(existing, dict) else {}
+        return {
+            "permitted": False,
+            "state": kept.get("status"),
+            "reason": decision.get("reason") or "narrower declaration does not replace a proven close",
+            "permit": kept.get("proofPermit"),
+            "stale": False,
+            "job": kept,
+        }
     bump_cohort(
         data,
         "unsupported_terminal_escape_rate",
@@ -578,6 +588,8 @@ def transition_job(
     if not decision["permitted"] and word:
         row["terminal_rejected"] = decision["reason"]
     saved = _upsert_job(data, row)
+    if not decision["permitted"]:
+        saved.pop("proofPermit", None)
     save(data, state_path)
     stored = str(saved.get("status") or "")
     if stored != decision.get("state") or (decision.get("permitted") and not saved.get("proofPermit")):
@@ -668,6 +680,16 @@ def _untouched_historical(job: dict, previous_job: dict) -> bool:
     prev_ev = previous_job.get("evidence") if isinstance(previous_job.get("evidence"), list) else []
     cur_ev = job.get("evidence") if isinstance(job.get("evidence"), list) else []
     return prev_ev == cur_ev
+
+
+def _close_still_proven(job: dict | None) -> bool:
+    """A stored close still matches the classes and permit on the row."""
+    if not isinstance(job, dict) or not job.get("proofPermit"):
+        return False
+    if _terminal_token(str(job.get("status") or "")) is None:
+        return False
+    decision = _decision_for_job(job)
+    return bool(decision["permitted"] and job.get("proofPermit") == decision["permit"])
 
 
 def _decision_for_job(job: dict) -> dict:
@@ -774,9 +796,12 @@ def guard_outcome_payload(payload: dict, *, state_path: Path | None = None) -> d
         receipt=out.get("receipt") if isinstance(out.get("receipt"), dict) else None,
         state_path=state_path,
     )
-    out["status"] = decision["state"]
-    if decision["permitted"]:
-        out["proofPermit"] = decision["permit"]
+    out["status"] = str(decision["job"].get("status") or decision["state"]) if isinstance(decision.get("job"), dict) else decision["state"]
+    stored_permit = decision["job"].get("proofPermit") if isinstance(decision.get("job"), dict) else None
+    if decision["permitted"] or stored_permit:
+        if stored_permit or decision.get("permit"):
+            out["proofPermit"] = stored_permit or decision.get("permit")
+        out.pop("terminal_rejected", None)
         out["guard"] = "hive-state.transition_job"
     else:
         out.pop("proofPermit", None)

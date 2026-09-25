@@ -797,9 +797,44 @@ class TerminalProofTest(unittest.TestCase):
                 state_path=state,
             )
             self.assertFalse(narrowed["permitted"])
-            self.assertNotEqual(narrowed["state"], "DONE")
-            self.assertNotEqual(narrowed["job"]["status"], "DONE")
+            self.assertEqual(narrowed["job"]["status"], "DONE")
             self.assertEqual(narrowed["state"], narrowed["job"]["status"])
+            self.assertEqual(narrowed["permit"], closed["permit"])
+            self.assertEqual(narrowed["job"]["required_evidence"], ["RUNTIME", "SURFACE"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "job-strict")
+            self.assertEqual(row["status"], "DONE")
+            self.assertEqual(row["proofPermit"], closed["permit"])
+            forwarded = HS.guard_outcome_payload(
+                {
+                    "status": "DONE",
+                    "job_id": "job-strict",
+                    "builder": "Forge",
+                    "verifier": verifier,
+                    "evidence": [{"class": "DIFF"}],
+                    "required_evidence": ["DIFF"],
+                    "environment": {},
+                },
+                state_path=state,
+            )
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "job-strict")
+            self.assertEqual(forwarded["status"], row["status"])
+            self.assertEqual(forwarded.get("proofPermit"), row.get("proofPermit"))
+            self.assertEqual(row["status"], "DONE")
+            self.assertEqual(row["required_evidence"], ["RUNTIME", "SURFACE"])
+            again = HS.transition_job(
+                "job-strict",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(again["permitted"])
+            self.assertEqual(again["job"]["status"], "DONE")
+            self.assertEqual(again["state"], "DONE")
             refused = HS.transition_job(
                 "declared-first",
                 "DONE",
@@ -818,10 +853,15 @@ class TerminalProofTest(unittest.TestCase):
                 verifier=verifier,
                 evidence=[{"class": "DIFF"}],
                 required=["DIFF"],
+                environment={},
                 state_path=state,
             )
             self.assertFalse(follow["permitted"])
             self.assertNotEqual(follow["job"]["status"], "DONE")
+            self.assertNotIn(follow["job"]["status"], HS.TERMINAL_WORDS)
+            self.assertNotIn("proofPermit", follow["job"])
+            self.assertIn("RUNTIME", follow["job"]["required_evidence"])
+            self.assertIn("SURFACE", follow["job"]["required_evidence"])
 
     def test_payload_matches_demoted_disk_row(self) -> None:
         evidence, verifier, env = _proof()
