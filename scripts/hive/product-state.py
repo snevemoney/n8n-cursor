@@ -13,8 +13,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 STATE_DIR = Path(__file__).resolve().parent / "product-state"
 OPERATOR_FOCUS_PATH = ROOT / "docs/hive/outer-heaven/CONTENT/OPERATOR_FOCUS.json"
-# Live hunt is OPERATOR_FOCUS.icp_id on the operator project — not a second lane.
-_EMPTY_ICP = frozenset({"", "none", "(none)", "null", "parked"})
+# Live hunt is OPERATOR_FOCUS.icp_id. An empty id stops Lead Hunter on every project.
 
 LIFECYCLE_ORDER = [
     "idea",
@@ -56,6 +55,14 @@ def _load_should_run():
     assert spec.loader is not None
     spec.loader.exec_module(mod)
     return mod.should_run, mod.gate_prompt_prefix
+
+
+_fc_spec = importlib.util.spec_from_file_location(
+    "fleet_closures", Path(__file__).resolve().parent / "os" / "fleet-closures.py"
+)
+fc = importlib.util.module_from_spec(_fc_spec)
+assert _fc_spec is not None and _fc_spec.loader is not None
+_fc_spec.loader.exec_module(fc)
 
 
 def _load_event_bus():
@@ -140,15 +147,11 @@ def load_operator_focus_icp(path: Path | None = None) -> str:
 def can_act(agent: str, project_id: str | None) -> dict[str, Any]:
     should_run, gate_prefix = _load_should_run()
     state = load_state(project_id) if project_id else {}
-    # Lead Hunter hunts the focused ICP on operator. clipengine allowlist unchanged.
-    if agent == "Lead Hunter" and project_id == "operator":
-        icp = load_operator_focus_icp()
-        if not icp or icp.lower() in _EMPTY_ICP:
-            decision: str = "IGNORE"
-            reason = (
-                "OPERATOR_FOCUS.icp_id empty — Lead Hunter NO_ACTION "
-                "(do not hunt random ICP)"
-            )
+    # No ICP stops Lead Hunter on every project. The routine's first call is clipengine.
+    if agent == "Lead Hunter":
+        stopped = fc.lead_hunter_decision(load_operator_focus_icp())
+        if stopped is not None:
+            decision, reason = stopped
             return {
                 "agent": agent,
                 "project_id": project_id,
@@ -156,9 +159,10 @@ def can_act(agent: str, project_id: str | None) -> dict[str, Any]:
                 "reason": reason,
                 "gate_prefix": gate_prefix(agent, decision, reason),
             }
-        allowed = list(state.get("allowed_agents") or [])
-        if "Lead Hunter" not in allowed:
-            state = {**state, "allowed_agents": [*allowed, "Lead Hunter"]}
+        if project_id == "operator":
+            allowed = list(state.get("allowed_agents") or [])
+            if "Lead Hunter" not in allowed:
+                state = {**state, "allowed_agents": [*allowed, "Lead Hunter"]}
     decision, reason = should_run(agent, None, state)
     return {
         "agent": agent,

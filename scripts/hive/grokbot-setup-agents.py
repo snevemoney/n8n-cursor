@@ -48,6 +48,13 @@ CORE_AGENT_NAMES = _os_mod.CORE_AGENT_NAMES
 
 CONN_PATH = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 AUTOMATION_REGISTRY = Path.home() / ".grokbot/hive-automation-registry.json"
+_fc_spec = importlib.util.spec_from_file_location(
+    "fleet_closures", _conn_dir / "os" / "fleet-closures.py"
+)
+_fc = importlib.util.module_from_spec(_fc_spec)
+assert _fc_spec.loader is not None
+_fc_spec.loader.exec_module(_fc)
+other_agent_has_routine = _fc.other_agent_has_routine
 
 LEGACY_HIVE_BACKGROUND = """
 LEGACY HIVE (background only — do not make these the story unless operator asks):
