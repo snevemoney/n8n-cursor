@@ -696,6 +696,14 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
         return
     if _untouched_historical(job, previous_job):
         return
+    # Exact DONE with no permit is a label. A later save that does not name the id leaves it.
+    if (
+        status == "DONE"
+        and status == previous_status
+        and not previous_job.get("proofPermit")
+        and not job.get("proofPermit")
+    ):
+        return
     decision = _decision_for_job(job)
     if decision["permitted"] and job.get("proofPermit") == decision["permit"]:
         return

@@ -1176,7 +1176,14 @@ class TerminalProofTest(unittest.TestCase):
                     "status": "DONE",
                     "desk": "forge",
                     "updated": "2026-09-25",
-                }
+                },
+                {
+                    "id": "sibling",
+                    "name": "sibling",
+                    "status": "working",
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                },
             ]
             state.write_text(json.dumps(seeded), encoding="utf-8")
             before = json.loads(state.read_text(encoding="utf-8"))
@@ -1206,6 +1213,49 @@ class TerminalProofTest(unittest.TestCase):
             ]
             self.assertEqual(len(lines), 1)
             self.assertEqual(lines[0].get("done_check"), refused["reason"])
+            owed = HS.record_owed(
+                "other-owed",
+                owner="Forge",
+                expected_artifact="apps/scorpion/app/api/hive/register/route.ts",
+                wake_condition="next change that ships scorpion_register_outcome",
+                stall_timeout="2 register attempts while the route file is absent",
+                note="route file is absent",
+                state_path=state,
+            )
+            self.assertEqual(owed["status"], "BLOCKED")
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "canonical-unproven")
+            self.assertEqual(row, prior)
+            self.assertEqual(row["status"], "DONE")
+            self.assertNotIn("terminal_rejected", row)
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            kept_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "canonical-unproven" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(kept_lines, lines)
+            other = HS.transition_job(
+                "sibling",
+                "DONE",
+                builder="Forge",
+                verifier={"actor": "Watchdog", "role": "verifier"},
+                evidence=[{"class": "DIFF"}],
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(other["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "canonical-unproven")
+            self.assertEqual(row, prior)
+            self.assertNotIn("terminal_rejected", row)
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            sibling_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "sibling" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(sibling_lines), 1)
 
     def test_refused_reclose_of_proven_job_appends_the_log(self) -> None:
         evidence, verifier, env = _proof()
