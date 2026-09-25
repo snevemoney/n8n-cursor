@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -215,6 +216,163 @@ class TerminalProofTest(unittest.TestCase):
         self.assertNotIn("sum", floors)
         with self.assertRaises(SystemExit):
             HS._floors({"unsupported_completion_sessions": 39, "total": 91})
+
+    def test_nonclosing_pass_does_not_store_the_terminal_word(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            decision = HS.transition_job(
+                "j-pass-open",
+                "PASS",
+                builder="Forge",
+                closes_work=False,
+                state_path=state,
+            )
+            self.assertFalse(decision["permitted"])
+            self.assertNotIn(decision["job"]["status"], HS.TERMINAL_WORDS)
+            self.assertNotEqual(decision["job"]["status"], "PASS")
+            self.assertIn(decision["job"]["status"], HS.NON_TERMINAL_STATES)
+            saved = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in saved["jobs"] if job["id"] == "j-pass-open")
+            self.assertNotEqual(row["status"], "PASS")
+            self.assertNotIn(row["status"], HS.TERMINAL_WORDS)
+            forwarded = HS.guard_outcome_payload(
+                {"status": "PASS", "closes_work": False, "job_id": "payload-pass"},
+                state_path=state,
+            )
+            self.assertNotEqual(forwarded["status"], "PASS")
+            self.assertNotIn(forwarded["status"], HS.TERMINAL_WORDS)
+
+    def test_save_does_not_promote_historical_done(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = {
+                "schema_version": 1,
+                "ids": {"monotonic": True, "next_run_id": 1},
+                "jobs": [
+                    {
+                        "id": "historical",
+                        "name": "historical",
+                        "status": "done",
+                        "desk": "forge",
+                        "updated": "2026-08-01",
+                    }
+                ],
+                "last_run": {"id": None, "job": None, "desk": None, "at": None},
+                "log": [],
+            }
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            loaded = HS.load(state)
+            self.assertEqual(loaded["jobs"][0]["status"], "done")
+            untouched = json.loads(json.dumps(loaded))
+            HS.save(untouched, state)
+            self.assertEqual(json.loads(state.read_text(encoding="utf-8"))["jobs"][0]["status"], "done")
+            promoted = json.loads(json.dumps(loaded))
+            promoted["jobs"][0]["status"] = "DONE"
+            with self.assertRaises(SystemExit):
+                HS.save(promoted, state)
+            self.assertEqual(json.loads(state.read_text(encoding="utf-8"))["jobs"][0]["status"], "done")
+
+    def test_register_forward_ignores_nonempty_permit(self) -> None:
+        source = (HIVE / "philanthropy-hive-tools" / "hive.ts").read_text(encoding="utf-8")
+        start = source.index("const TERMINAL_STATUS")
+        handler_start = source.index("const scorpion_register_outcome")
+        handler_end = source.index("const n8n_get_execution")
+        claim = source[start:handler_start].replace("(status: string): boolean", "(status)")
+        handler = source[handler_start:handler_end]
+        self.assertNotIn("proofPermit", handler)
+        self.assertNotIn("closesWork", handler)
+        self.assertLess(handler.index("isTerminalClaim(requested)"), handler.index("hiveFetch('scorpion_register_outcome'"))
+        script = (
+            claim
+            + "\nconst statuses = ['DONE','PASS','pass','done','VERIFIED','LIVE','SHIPPED','CLOSED'];\n"
+            + "for (const status of statuses) { if (!isTerminalClaim(status)) process.exit(2); }\n"
+            + "if (isTerminalClaim('IMPLEMENTED') || isTerminalClaim('BLOCKED')) process.exit(3);\n"
+        )
+        ran = subprocess.run(["node", "-e", script], check=False, capture_output=True, text=True)
+        self.assertEqual(ran.returncode, 0, ran.stderr or ran.stdout)
+
+    def test_verifier_identity_is_case_insensitive(self) -> None:
+        evidence, _verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            decision = HS.transition_job(
+                "job-case",
+                "VERIFIED",
+                builder="Forge",
+                verifier={"actor": "forge", "role": "verifier"},
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertFalse(decision["permitted"])
+            self.assertNotEqual(decision["state"], "VERIFIED")
+            self.assertEqual(decision["state"], "VERIFYING")
+            self.assertEqual(decision["reason"], "builder cannot verify its own job")
+            self.assertNotEqual(decision["job"]["status"], "VERIFIED")
+
+    def test_unbound_evidence_cannot_hold_terminal_after_runtime_change(self) -> None:
+        verifier = {"actor": "Watchdog", "role": "verifier"}
+        unbound = [
+            {"class": "RUNTIME", "kind": "live", "checked_at": "2026-09-25T03:00:00+00:00"},
+            {"class": "SURFACE", "kind": "live", "checked_at": "2026-09-25T03:00:00+00:00"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            named = HS.transition_job(
+                "job-unbound-named",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=unbound,
+                environment={"runtime": "runtime-1", "changed_at": "2026-09-25T00:00:00+00:00"},
+                state_path=state,
+            )
+            self.assertFalse(named["permitted"])
+            self.assertNotIn(named["job"]["status"], HS.TERMINAL_WORDS)
+            opened = HS.transition_job(
+                "job-unbound-open",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=unbound,
+                state_path=state,
+            )
+            self.assertTrue(opened["permitted"])
+            self.assertEqual(opened["job"]["status"], "DONE")
+            noted = HS.note_environment(
+                "job-unbound-open",
+                {"runtime": "runtime-2", "changed_at": "2026-09-25T04:00:00+00:00"},
+                state_path=state,
+            )
+            self.assertTrue(noted["stale"])
+            self.assertEqual(noted["job"]["status"], "VERIFYING")
+            self.assertNotIn(noted["job"]["status"], HS.TERMINAL_WORDS)
+            late = [
+                {
+                    "class": "RUNTIME",
+                    "kind": "live",
+                    "runtime": "runtime-1",
+                    "checked_at": "2026-09-25T05:00:00+00:00",
+                },
+                {
+                    "class": "SURFACE",
+                    "kind": "live",
+                    "runtime": "runtime-1",
+                    "checked_at": "2026-09-25T05:00:00+00:00",
+                },
+            ]
+            mismatched = HS.transition_job(
+                "job-late-check",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=late,
+                environment={"runtime": "runtime-2", "changed_at": "2026-09-25T02:00:00+00:00"},
+                state_path=state,
+            )
+            self.assertFalse(mismatched["permitted"])
+            self.assertNotEqual(mismatched["job"]["status"], "DONE")
+            self.assertNotIn(mismatched["job"]["status"], HS.TERMINAL_WORDS)
 
 
 class SessionReceiptTest(unittest.TestCase):

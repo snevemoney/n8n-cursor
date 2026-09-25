@@ -108,16 +108,24 @@ def load(path: Path | None = None) -> dict:
     return data
 
 
-def _is_terminal_word(status: str, *, closes_work: bool = True) -> str | None:
+def _terminal_token(status: str) -> str | None:
+    """The terminal word a label would write, including a non-closing PASS."""
     raw = str(status or "").strip()
-    upper = raw.upper()
-    if upper == "PASS" and not closes_work:
+    if not raw:
         return None
+    upper = raw.upper()
     if upper in TERMINAL_WORDS:
         return upper
     if raw.lower() == "done":
         return "DONE"
     return None
+
+
+def _is_terminal_word(status: str, *, closes_work: bool = True) -> str | None:
+    token = _terminal_token(status)
+    if token == "PASS" and not closes_work:
+        return None
+    return token
 
 
 def _floors(floors: dict | None = None) -> dict:
@@ -188,16 +196,15 @@ def _evidence_class(item: dict) -> str:
 
 
 def _fresh(item: dict, environment: dict | None) -> bool:
+    """Bound evidence matches the environment. A missing binding is not that runtime."""
     if item.get("stale") is True:
         return False
     if not environment:
         return True
-    checked = str(item.get("checked_at") or "")
-    changed = str(environment.get("changed_at") or "")
-    if not checked or not changed or changed <= checked:
-        return True
     for key in ("runtime", "config", "version"):
-        if key in item and key in environment and item.get(key) != environment.get(key):
+        if key not in environment:
+            continue
+        if key not in item or item.get(key) != environment.get(key):
             return False
     return True
 
@@ -239,7 +246,7 @@ def independent_verifier(builder: str, verifier: dict | None) -> bool:
     actor = str(verifier.get("actor") or "").strip()
     if not actor or actor.upper() == "UNKNOWN":
         return False
-    if actor == str(builder or "").strip():
+    if actor.casefold() == str(builder or "").strip().casefold():
         return False
     if str(verifier.get("role") or "").lower() == "builder":
         return False
@@ -363,7 +370,8 @@ def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
     word = _is_terminal_word(status, closes_work=bool(job.get("closes_work", True)))
     if word is None:
         return True
-    if previous == status or (previous or "").lower() == "done" and status.lower() == "done":
+    # Exact text only. A historical "done" label is not proof of "DONE".
+    if previous == status:
         return True
     decision = decide_terminal(
         word,
@@ -476,11 +484,12 @@ def transition_job(
         job_id=job_id,
     )
     word = _is_terminal_word(target, closes_work=closes_work)
+    token = _terminal_token(target)
     bump_cohort(
         data,
         "unsupported_terminal_escape_rate",
         attempts=1,
-        escapes=0 if decision["permitted"] or word is None else 1,
+        escapes=0 if decision["permitted"] or token is None else 1,
     )
     if _materially_active(session):
         bump_cohort(
@@ -494,7 +503,7 @@ def transition_job(
     row: dict[str, Any] = {
         "id": job_id,
         "name": name or job_id,
-        "status": decision["state"] if word else (target if target in JOB_STATUSES else decision["state"]),
+        "status": _persisted_status(target, decision, word),
         "desk": desk or actor,
         "updated": today(),
         "builder": who,
@@ -553,11 +562,35 @@ def note_environment(job_id: str, environment: dict, *, state_path: Path | None 
     return {"job": job, "stale": stale}
 
 
+def _persisted_status(target: str, decision: dict, word: str | None) -> str:
+    """A terminal token is stored only when the close itself was permitted."""
+    if word and decision.get("permitted"):
+        return str(decision["state"])
+    if _terminal_token(target):
+        hold = decision.get("state")
+        if hold in NON_TERMINAL_STATES:
+            return str(hold)
+        return "BLOCKED"
+    if target in NON_TERMINAL_STATES:
+        return target
+    hold = decision.get("state")
+    if hold in NON_TERMINAL_STATES:
+        return str(hold)
+    return "BLOCKED"
+
+
 def guard_outcome_payload(payload: dict, *, state_path: Path | None = None) -> dict:
     """Register callers cannot stamp done ahead of the canonical writer."""
     out = dict(payload)
     target = str(out.get("status") or "")
-    word = _is_terminal_word(target, closes_work=bool(out.get("closes_work", True)))
+    closes = bool(out.get("closes_work", True))
+    word = _is_terminal_word(target, closes_work=closes)
+    if _terminal_token(target) and word is None:
+        out["status"] = "BLOCKED"
+        out.pop("proofPermit", None)
+        out["terminal_rejected"] = "not a closing terminal"
+        out["guard"] = "hive-state.transition_job"
+        return out
     if word is None:
         return out
     evidence = out.get("evidence") if isinstance(out.get("evidence"), list) else []
