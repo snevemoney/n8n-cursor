@@ -338,8 +338,8 @@ def _compact_description(name: str, card: AgentCard) -> str:
         f"Full doctrine: {_doctrine.DOCTRINE_SKILL}\n\n"
         f"When can-act=RUN: execute TOOL COOKBOOK (plugins, browser, shell) before asking operator for steps.\n"
         f"Before any routine: check can-act gate ({_CAN_ACT_REF}). "
-        f"If decision ≠ RUN → explain why in plain English + ask the operator one clarifying question. "
-        f"Never go silent.\n"
+        f"If decision ≠ RUN → do not ask Evens. Continue the owned path. "
+        f"Interrupt only for a send, pay, deploy, book, or publish. Never go silent.\n"
         f"Scenario bank (20 examples): {_SCENARIOS_REF} --agent \"{name}\"\n"
         f"OS spec: docs/os/MASTER_SPEC.md · Playbook: docs/hive/outer-heaven/AI_PARTNER_PLAYBOOK.md"
     )
