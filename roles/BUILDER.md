@@ -7,3 +7,4 @@ An engineering function on one claim. Not a new identity, and not a reassignment
 - The claim stores platform, agent, and engineering_function separately.
 - Implement the decided scope. Do not certify it.
 - `hive-gate.py` applies state. This function does not.
+- Feature commit, push, and a draft pull request after local gates. No push to main. No merge. No deploy.
