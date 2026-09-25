@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Project state machine v2 — lifecycle + agent states + can-act gate."""
+"""Project state machine v2 — lifecycle + agent states + can-act gate.
+
+The lifecycle list is the engineering department. It is not the company.
+Progress claims go through report_progress. Utilization is not progress.
+"""
 from __future__ import annotations
 
 import argparse
@@ -46,6 +50,127 @@ AGENT_STATES = frozenset(
         "FAILED",
     }
 )
+
+# Company reading of the same factory. Labels only. Not a second pipeline.
+COMPANY_STAGES = (
+    "signal",
+    "opportunity",
+    "problem",
+    "icp",
+    "offer",
+    "proof",
+    "positioning",
+    "distribution",
+    "lead",
+    "conversion",
+    "delivery",
+    "retention",
+    "outcome",
+    "learning",
+)
+
+ENGINEERING_DEPARTMENT = "engineering"
+
+# Activity shapes. None of these are outcome movement.
+_UTILIZATION_KINDS = frozenset(
+    {
+        "utilization",
+        "activity",
+        "agents_busy",
+        "agent_busy",
+        "agents_busy_count",
+        "reports_written",
+        "reports",
+        "busy",
+        "wip",
+        "agent_count",
+    }
+)
+
+_CLAIM_STATUS = "IMPLEMENTED_UNVERIFIED"
+
+
+def _norm_token(value: object) -> str:
+    return str(value or "").strip().lower().replace("-", " ").replace("_", " ")
+
+
+def _kind(claim: dict[str, Any]) -> str:
+    return _norm_token(claim.get("kind")).replace(" ", "_")
+
+
+def report_progress(claim: dict[str, Any] | None) -> dict[str, Any]:
+    """Judge one progress claim. Does not write state and does not invent evidence.
+
+    Utilization, a working feature, an engineering stage, a recommendation,
+    idle, a signal, or a broken website cannot be reported as progress.
+    Customer and revenue counts are refused. Status stays IMPLEMENTED_UNVERIFIED.
+    """
+    body = claim or {}
+    kind = _kind(body)
+    verdict: dict[str, Any] = {
+        "reported_as_progress": False,
+        "market_proof": False,
+        "executed": False,
+        "buyer": False,
+        "demand": False,
+        "failure": False,
+        "healthy_idle": False,
+        "invented": False,
+        "department": None,
+        "status": _CLAIM_STATUS,
+        "reason": "not_progress",
+    }
+
+    if kind in _UTILIZATION_KINDS or any(key in body for key in _UTILIZATION_KINDS):
+        verdict["reason"] = "utilization_is_not_progress"
+        return verdict
+
+    if kind in {"idle", "agent_idle"} or _norm_token(body.get("agent_state")) == "idle":
+        verdict["healthy_idle"] = True
+        verdict["failure"] = False
+        verdict["reason"] = "idle_is_healthy"
+        return verdict
+
+    if kind == "recommendation":
+        verdict["executed"] = False
+        verdict["reason"] = "recommendation_is_not_action"
+        return verdict
+
+    if kind == "signal":
+        verdict["demand"] = False
+        verdict["reason"] = "signal_is_not_demand"
+        return verdict
+
+    if kind in {"broken_website", "website"}:
+        verdict["buyer"] = False
+        verdict["reason"] = "broken_website_is_not_a_buyer"
+        return verdict
+
+    if kind in {"customers", "customer", "revenue", "buyer"}:
+        verdict["invented"] = True
+        verdict["buyer"] = False
+        verdict["reason"] = "customers_or_revenue_invented"
+        return verdict
+
+    lifecycle_kinds = {_norm_token(stage).replace(" ", "_") for stage in LIFECYCLE_ORDER}
+    if kind in lifecycle_kinds or kind in {"working_feature", "feature", "engineering", "engineering_lifecycle"}:
+        verdict["department"] = ENGINEERING_DEPARTMENT
+        verdict["market_proof"] = False
+        if kind in {"working_feature", "feature"}:
+            verdict["reason"] = "working_feature_is_not_market_proof"
+        else:
+            verdict["reason"] = "engineering_is_one_department"
+        return verdict
+
+    if kind == "outcome_movement":
+        verdict["reason"] = "outcome_movement_not_certified"
+        return verdict
+
+    if kind in COMPANY_STAGES:
+        verdict["reason"] = "stage_label_is_not_movement"
+        return verdict
+
+    return verdict
 
 
 def _load_should_run():
@@ -193,7 +318,24 @@ def main() -> int:
     ap.add_argument("--lifecycle")
     ap.add_argument("--agent-state")
     ap.add_argument("--actor", default="operator")
+    ap.add_argument(
+        "--progress",
+        metavar="JSON",
+        help="Judge one progress claim. Utilization is not progress.",
+    )
     args = ap.parse_args()
+
+    if args.progress is not None:
+        try:
+            payload = json.loads(args.progress)
+        except json.JSONDecodeError as exc:
+            print(f"refuse: progress claim is not JSON ({exc})", file=sys.stderr)
+            return 2
+        if not isinstance(payload, dict):
+            print("refuse: progress claim must be an object", file=sys.stderr)
+            return 2
+        print(json.dumps(report_progress(payload), indent=2))
+        return 0
 
     if args.validate:
         return validate_all()
