@@ -104,6 +104,12 @@ class ProjectionTests(unittest.TestCase):
         self.assertFalse(
             vc.mutation_authorized(
                 "Big Boss",
+                {"source": "Publishing Engine", "job_id": "JOB", "dated": "2026-09-24"},
+            )
+        )
+        self.assertFalse(
+            vc.mutation_authorized(
+                "Big Boss",
                 {
                     "source": "evens",
                     "via": "Big Boss",
@@ -112,7 +118,7 @@ class ProjectionTests(unittest.TestCase):
                 },
             )
         )
-        self.assertTrue(
+        self.assertFalse(
             vc.mutation_authorized(
                 "Publishing Engine",
                 {"source": "evens", "job_id": "JOB", "dated": "2026-09-24"},

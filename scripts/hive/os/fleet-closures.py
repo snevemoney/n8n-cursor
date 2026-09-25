@@ -83,9 +83,13 @@ def creative_trace_gaps(trace: dict | None) -> list[str]:
 
 
 def mutation_authorized(actor: str, authority: dict | None = None) -> bool:
-    """Desk names do not grant a vault-config write. Evens's own dated job does."""
-    del actor
+    """Publishing Engine cannot authorize a vault-config write, as actor or as source."""
+    if (actor or "").strip().lower() in {"publishing engine", "publishing"}:
+        return False
     if not isinstance(authority, dict):
+        return False
+    source = str(authority.get("source") or "").strip().lower()
+    if source in {"publishing engine", "publishing"}:
         return False
     if str(authority.get("via") or "").strip():
         return False
