@@ -1165,6 +1165,91 @@ class TerminalProofTest(unittest.TestCase):
             self.assertEqual(lines[0].get("done_check"), refused["reason"])
             self.assertTrue(lines[0].get("done_check"))
 
+    def test_refused_exact_done_without_permit_keeps_the_label(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "canonical-unproven",
+                    "name": "canonical-unproven",
+                    "status": "DONE",
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            before = json.loads(state.read_text(encoding="utf-8"))
+            prior = next(job for job in before["jobs"] if job["id"] == "canonical-unproven")
+            refused = HS.transition_job(
+                "canonical-unproven",
+                "DONE",
+                builder="Forge",
+                verifier={"actor": "Watchdog", "role": "verifier"},
+                evidence=[{"class": "DIFF"}],
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(refused["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "canonical-unproven")
+            self.assertEqual(row, prior)
+            self.assertEqual(row["status"], "DONE")
+            self.assertNotIn("terminal_rejected", row)
+            self.assertNotIn("proofPermit", row)
+            self.assertFalse(HS.counts_as_done(row))
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "canonical-unproven" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(lines), 1)
+            self.assertEqual(lines[0].get("done_check"), refused["reason"])
+
+    def test_refused_reclose_of_proven_job_appends_the_log(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            closed = HS.transition_job(
+                "proven",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(closed["permitted"])
+            before = json.loads(state.read_text(encoding="utf-8"))
+            prior = next(job for job in before["jobs"] if job["id"] == "proven")
+            log_before = list(before.get("log") or [])
+            refused = HS.transition_job(
+                "proven",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=[{"class": "DIFF"}],
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(refused["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "proven")
+            self.assertEqual(row, prior)
+            self.assertEqual(row["status"], "DONE")
+            self.assertEqual(row.get("proofPermit"), closed["permit"])
+            self.assertNotIn("terminal_rejected", row)
+            self.assertEqual(HS.done_total(disk["jobs"]), 1)
+            lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "proven" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(lines), 1)
+            self.assertEqual(len(disk.get("log") or []), len(log_before) + 1)
+            self.assertEqual(lines[-1].get("done_check"), refused["reason"])
+
     def test_stalled_owed_artifact_has_owner_and_wake_not_founder_wait(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             state = _blank_state(Path(tmp))
