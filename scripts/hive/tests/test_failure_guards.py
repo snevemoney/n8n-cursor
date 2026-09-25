@@ -1061,6 +1061,132 @@ class TerminalProofTest(unittest.TestCase):
             self.assertNotIn("proofPermit", forwarded)
             self.assertNotIn("proofPermit", row)
 
+    def test_done_label_without_permit_is_absent_from_the_done_total(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "historical",
+                    "name": "historical",
+                    "status": "done",
+                    "desk": "parent",
+                    "updated": "2026-08-14",
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            reloaded = HS.load(state)
+            HS.save(reloaded, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "historical")
+            self.assertEqual(row["status"], "done")
+            self.assertNotIn("proofPermit", row)
+            self.assertFalse(HS.counts_as_done(row))
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            self.assertEqual(HS.done_jobs(disk["jobs"]), [])
+
+    def test_permitted_close_is_present_in_the_done_total(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            closed = HS.transition_job(
+                "proven",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(closed["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(HS.done_total(disk["jobs"]), 1)
+            self.assertEqual([job["id"] for job in HS.done_jobs(disk["jobs"])], ["proven"])
+            self.assertEqual(disk["jobs"][0]["status"], "DONE")
+
+    def test_refused_transition_does_not_mutate_the_job(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "open-job",
+                    "name": "open-job",
+                    "status": "working",
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                    "required_evidence": ["RUNTIME", "SURFACE"],
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            before = json.loads(state.read_text(encoding="utf-8"))
+            prior = next(job for job in before["jobs"] if job["id"] == "open-job")
+            refused = HS.transition_job(
+                "open-job",
+                "DONE",
+                builder="Forge",
+                verifier={"actor": "Watchdog", "role": "verifier"},
+                evidence=[{"class": "DIFF"}],
+                state_path=state,
+            )
+            self.assertFalse(refused["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "open-job")
+            for key, value in prior.items():
+                self.assertEqual(row.get(key), value, key)
+            self.assertEqual(row["status"], "working")
+            self.assertNotEqual(row["status"], "DONE")
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+
+    def test_stalled_owed_artifact_has_owner_and_wake_not_founder_wait(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            owed = HS.record_owed(
+                "hive-register-route",
+                owner="Forge",
+                expected_artifact="apps/scorpion/app/api/hive/register/route.ts",
+                wake_condition="next change that ships scorpion_register_outcome",
+                stall_timeout="2 register attempts while the route file is absent",
+                note="route file is absent",
+                state_path=state,
+            )
+            held = HS.stall_disposition(owed)
+            self.assertEqual(owed["status"], "BLOCKED")
+            self.assertEqual(held["owner"], "Forge")
+            self.assertEqual(held["wake_condition"], owed["wake_condition"])
+            self.assertNotEqual(held["wait"], "WAIT_EVENS")
+            self.assertFalse(held["founder_wait"])
+            missing_owner = {
+                "status": "BLOCKED",
+                "expected_artifact": "route.ts",
+                "wake_condition": "file appears",
+                "stall_timeout": "2 attempts",
+                "authority_class": "send",
+            }
+            self.assertFalse(HS.stall_disposition(missing_owner)["founder_wait"])
+            self.assertNotEqual(HS.stall_disposition(missing_owner)["wait"], "WAIT_EVENS")
+            stale = {
+                "status": "done",
+                "owner": "Forge",
+                "expected_artifact": "route.ts",
+                "wake_condition": "file appears",
+                "stall_timeout": "2 attempts",
+                "authority_class": "send",
+            }
+            self.assertFalse(HS.stall_disposition(stale)["founder_wait"])
+            self.assertNotEqual(HS.stall_disposition(stale)["wait"], "WAIT_EVENS")
+            consequential = {
+                "status": "BLOCKED",
+                "owner": "HITL Operator",
+                "expected_artifact": "sent receipt",
+                "wake_condition": "Evens approves the send",
+                "stall_timeout": "1 unanswered send",
+                "authority_class": "send",
+            }
+            sent = HS.stall_disposition(consequential)
+            self.assertTrue(sent["founder_wait"])
+            self.assertEqual(sent["wait"], "WAIT_EVENS")
+
 
 class SessionReceiptTest(unittest.TestCase):
     def _close(self, store: Path, **extra):
