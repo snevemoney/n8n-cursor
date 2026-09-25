@@ -41,6 +41,7 @@ def _mouth_stamp() -> tuple:
     stack = HERE.parent
     paths = (
         stack / "mouth" / "turn.py",
+        stack / "face" / "controls.py",
         stack / "brain" / "pipeline.py",
         stack / "brain" / "online.py",
         stack / "mouth" / "persona.py",
@@ -268,6 +269,14 @@ class Handler(BaseHTTPRequestHandler):
             bus = live_mouth.set_listen(HIVE, bool(data.get("live")))
             self._json(200, {"ok": True, **bus})
             return
+        if path == "/api/stop":
+            out = live_mouth.cancel_scoped(
+                str(data.get("scope") or "speak"),
+                str(data.get("target") or ""),
+                hive=HIVE,
+            )
+            self._json(200, out)
+            return
         if path == "/api/tts":
             audio, mime = voice().tts_audio(str(data.get("text") or ""))
             if not audio:
@@ -320,13 +329,14 @@ class Handler(BaseHTTPRequestHandler):
                 payload = (f"data: {json.dumps(clean)}\n\n").encode("utf-8")
                 self.wfile.write(payload)
                 self.wfile.flush()
-        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-            if hasattr(ONLINE, "cancel_cursor"):
-                ONLINE.cancel_cursor()
-            return
-        except Exception:
-            if hasattr(ONLINE, "cancel_cursor"):
-                ONLINE.cancel_cursor()
+        except Exception as exc:
+            dropped = isinstance(exc, (BrokenPipeError, ConnectionResetError, ConnectionAbortedError))
+            try:
+                live_mouth.cancel_scoped("tool", "", hive=HIVE)
+            except Exception:
+                pass
+            if dropped:
+                return
             raise
 
 
