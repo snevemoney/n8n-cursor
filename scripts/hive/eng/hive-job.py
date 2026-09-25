@@ -64,6 +64,42 @@ EVIDENCE_KEYS = (
     "observed",
 )
 NOT_RUNTIME = frozenset({"slack", "chat", "markdown", "unit_test", "status_message", "commit", "doc"})
+# These words are not interchangeable, and none of them is an engineering state.
+SEPARATE_TRUTH = (
+    "discussed",
+    "suggested",
+    "accepted",
+    "candidate",
+    "implemented",
+    "verified",
+    "live",
+    "superseded",
+    "revoked",
+    "historical",
+)
+NOT_LIVE_PROOF = frozenset(
+    {
+        "DISCUSSED",
+        "SUGGESTED",
+        "ACCEPTED",
+        "CANDIDATE",
+        "IMPLEMENTED",
+        "HISTORICAL",
+        "SUPERSEDED",
+        "REVOKED",
+        "PASS_DIFF",
+        "PASS@DIFF",
+        "CO_SIGNED",
+        "CO-SIGNED",
+        "VERIFIED_HOLD",
+    }
+)
+NOT_SHIP_PROOF = frozenset({"PASS_DIFF", "PASS@DIFF", "VERIFIED_HOLD"})
+IDENTITY_KEYS = ("repo", "branch", "machine", "runtime", "config")
+HARD_STEPS = frozenset({"send", "pay", "publish", "deploy", "book"})
+MARKDOWN_PICKS = frozenset({"markdown_order", "file_order", "first_line", "heading_order"})
+DIAGNOSTIC_KINDS = frozenset({"runner_chip", "diagnostic_chip", "campaign_chip"})
+SINGLE_WRITER = "hive-gate"
 CLAIM_KEYS = (
     "id",
     "title",
@@ -418,6 +454,147 @@ def role_reasons(claim: dict) -> list[str]:
     return reasons
 
 
+def _proof_token(value: object) -> str:
+    return str(value or "").strip().upper().replace(" ", "_")
+
+
+def _truth_flags(claim: dict, ev: dict) -> dict[str, bool]:
+    """Bool labels from the claim, its statuses map, and the evidence beside it.
+
+    A string such as evidence.kind live_face is not a live flag.
+    """
+    flags: dict[str, bool] = {}
+    statuses = claim.get("statuses")
+    if isinstance(statuses, dict):
+        for word in SEPARATE_TRUTH:
+            if word in statuses:
+                flags[word] = statuses.get(word) is True
+    for word in SEPARATE_TRUTH:
+        if isinstance(claim.get(word), bool):
+            flags[word] = claim.get(word) is True
+        if isinstance(ev.get(word), bool):
+            flags[word] = ev.get(word) is True or flags.get(word) is True
+    return flags
+
+
+def authority_proof_reasons(
+    claim: dict,
+    ev: dict,
+    receipts: list[dict],
+    *,
+    state: str,
+) -> list[str]:
+    """Reject collapsed labels. hive-gate remains the only writer of claim state.
+
+    A file, an acceptance flag, a passing test, PASS_DIFF, a co-sign, markdown
+    order, a vault line, or a diagnostic chip does not promote the claim.
+    """
+    reasons: list[str] = []
+    proof = _proof_token(claim.get("proof_status"))
+    release = _proof_token(claim.get("release_status"))
+    kind = str(ev.get("kind") or "").lower()
+    runtime = claim.get("runtime") if isinstance(claim.get("runtime"), dict) else {}
+    strong = state in LIVE_PLUS
+
+    statuses = claim.get("statuses")
+    if isinstance(statuses, str):
+        reasons.append("discussed, accepted, and live must stay separate")
+    flags = _truth_flags(claim, ev)
+    earlier = [word for word in ("discussed", "suggested", "accepted", "candidate") if flags.get(word)]
+    bundled = [word for word in ("discussed", "accepted", "live") if flags.get(word)]
+    # A live flag next to discussed or accepted does not promote the claim.
+    if earlier and (strong or flags.get("live") or len(bundled) >= 2):
+        reasons.append("discussed, accepted, and live must stay separate")
+    if strong and proof in NOT_LIVE_PROOF:
+        reasons.append(f"{proof} is not {state}")
+    if claim.get("code_exists") is True and (claim.get("accepted") is True or proof == "ACCEPTED"):
+        reasons.append("code existing is not acceptance")
+    if (
+        claim.get("accepted") is True
+        and claim.get("exists") is True
+        and not str(claim.get("accepted_by") or "").strip()
+    ):
+        reasons.append("acceptance is not existence")
+    if strong and (kind == "unit_test" or ev.get("test_passed") is True):
+        reasons.append("a passing test is not live")
+
+    ask = claim.get("operator_ask") if isinstance(claim.get("operator_ask"), dict) else {}
+    original = str(ask.get("original") or "")
+    if ask.get("current") is not None and str(ask.get("current")) != original:
+        reasons.append("later paraphrase does not replace operator_ask.original")
+    if ask.get("may_rewrite") is True:
+        reasons.append("operator_ask.may_rewrite must stay false")
+
+    if str(ev.get("picked_by") or "") in MARKDOWN_PICKS or str(claim.get("picked_by") or "") in MARKDOWN_PICKS:
+        reasons.append("markdown order is not authority")
+    if ev.get("authority") == "vault_line" or ev.get("authority_from") == "vault":
+        reasons.append("a vault line is evidence, not authority")
+
+    conflicts = claim.get("conflicts")
+    if conflicts is None:
+        conflicts = ev.get("conflicts")
+    picked = claim.get("picked_source") or ev.get("picked_source")
+    if isinstance(conflicts, list) and conflicts and picked:
+        reasons.append("conflict hidden by picking a source")
+    sources = ev.get("sources")
+    if isinstance(sources, list) and len(sources) >= 2:
+        values = [str(src.get("value")) for src in sources if isinstance(src, dict) and "value" in src]
+        if len(set(values)) > 1 and not (isinstance(conflicts, list) and conflicts):
+            reasons.append("conflicts stay explicit")
+
+    builder = party(claim.get("builder"))
+    if proof in {"CO_SIGNED", "CO-SIGNED"} or claim.get("co_signed") is True or ev.get("co_signed") is True:
+        reasons.append("co-signed is not independent")
+    graded_by = str(claim.get("graded_by") or ev.get("graded_by") or "").strip().lower()
+    if graded_by and builder and graded_by == builder["agent"]:
+        reasons.append("builder cannot promote its own result")
+
+    if proof in NOT_SHIP_PROOF and (strong or release in {"SHIPPED", "LIVE", "DEPLOYED", "PRODUCTION"}):
+        reasons.append("PASS_DIFF is not ship")
+
+    if ev.get("archive_equals_rendered") is True or ev.get("archive_equals_bus") is True:
+        reasons.append("archive, bus, and rendered face are different surfaces")
+    if strong and (
+        kind in DIAGNOSTIC_KINDS
+        or ev.get("diagnostic") is True
+        or str(ev.get("campaign") or "") in {"300", "runner-300"}
+    ):
+        reasons.append("runner chips are diagnostic, not final proof")
+
+    verbs = {str(item).lower() for item in claim.get("ask_verbs") or []}
+    hard = bool(verbs & HARD_STEPS) or str(claim.get("hard_step") or "").lower() in HARD_STEPS
+    if hard and state in VERIFIED_PLUS:
+        receipt = claim.get("consequential_receipt") if isinstance(claim.get("consequential_receipt"), dict) else {}
+        if any(not str(receipt.get(key) or "").strip() for key in ("authorized_by", "executed_by", "target", "time", "result")):
+            reasons.append("consequential action needs a receipt")
+
+    writers = {str(row.get("ran_by") or "") for row in receipts if str(row.get("ran_by") or "")}
+    if writers and writers != {SINGLE_WRITER}:
+        reasons.append("several writers mutate control truth")
+
+    if strong and ev:
+        for key in IDENTITY_KEYS:
+            if ev.get(key) in (None, "", {}, []):
+                reasons.append(f"missing evidence.{key}")
+        for key in IDENTITY_KEYS:
+            ev_val = ev.get(key)
+            rt_val = runtime.get(key)
+            if ev_val not in (None, "", {}, []) and rt_val not in (None, "", {}, []) and str(ev_val) != str(rt_val):
+                reasons.append("evidence expired: runtime changed")
+                break
+        certified = ev.get("certified_runtime")
+        if isinstance(certified, dict):
+            for key in IDENTITY_KEYS:
+                if (
+                    certified.get(key) not in (None, "", {}, [])
+                    and runtime.get(key) not in (None, "", {}, [])
+                    and str(certified.get(key)) != str(runtime.get(key))
+                ):
+                    reasons.append("evidence expired: runtime changed")
+                    break
+    return reasons
+
+
 def probe_face(host: str, timeout: float = 3.0) -> dict:
     url = f"http://{host}/healthz"
     try:
@@ -445,6 +622,7 @@ def reasons_for(claim: dict, directory: Path, *, ping_runtime: bool, l4_log: Pat
         if key not in runtime:
             reasons.append(f"missing runtime.{key}")
     reasons.extend(acceptance_reasons(claim, verified=state in VERIFIED_PLUS))
+    reasons.extend(authority_proof_reasons(claim, load_evidence(directory), load_receipts(directory), state=state))
     if state == "READY":
         reasons.extend(g2_reasons(claim, directory))
     if state in LIVE_PLUS:
