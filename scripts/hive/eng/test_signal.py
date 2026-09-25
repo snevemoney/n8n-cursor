@@ -115,6 +115,140 @@ class SignalIntelligenceTest(unittest.TestCase):
         self.assertNotEqual(refused.returncode, 0, refused.stdout)
         self.assertIn("candidate", refused.stdout)
 
+    def test_rising_count_and_live_pid_do_not_call_jev(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            captured = run(
+                root,
+                "capture",
+                "--id",
+                "SIG-PID",
+                "--platform",
+                "local",
+                "--url",
+                "file://pid",
+                "--title",
+                "Live pid",
+            )
+            self.assertEqual(captured.returncode, 0, captured.stdout)
+            path = root / "raw" / "SIG-PID.json"
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            doc["reflex"] = {
+                "pid_alive": True,
+                "row_count": 4,
+                "previous_row_count": 3,
+                "verb": "rank",
+            }
+            path.write_text(json.dumps(doc), encoding="utf-8")
+            filed = run(
+                root,
+                "candidate",
+                "--id",
+                "CAND-PID",
+                "--signal",
+                "SIG-PID",
+                "--kind",
+                "CANDIDATE_PRODUCT",
+                "--text",
+                "Rank this rising count",
+            )
+            self.assertEqual(filed.returncode, 0, filed.stdout + filed.stderr)
+            body = json.loads(filed.stdout.split("PASS")[0])
+            self.assertEqual(body["action"], "MONITOR")
+            self.assertEqual(body["lane"], "deterministic")
+            self.assertFalse(body["jev_called"])
+            self.assertFalse(body["jev_allowed"])
+            self.assertFalse(body["candidate_filed"])
+            self.assertFalse((root / "candidates" / "CAND-PID.json").exists())
+
+    def test_bounded_rank_of_safe_repairs_may(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            captured = run(
+                root,
+                "capture",
+                "--id",
+                "SIG-RANK",
+                "--platform",
+                "local",
+                "--url",
+                "file://repairs",
+                "--title",
+                "Safe repairs",
+            )
+            self.assertEqual(captured.returncode, 0, captured.stdout)
+            path = root / "raw" / "SIG-RANK.json"
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            doc["reflex"] = {
+                "verb": "rank",
+                "repair_clusters": [
+                    {"id": "restart", "safe": True},
+                    {"id": "retry", "safe": True},
+                ],
+                "clear_winner": False,
+            }
+            path.write_text(json.dumps(doc), encoding="utf-8")
+            filed = run(
+                root,
+                "candidate",
+                "--id",
+                "CAND-RANK",
+                "--signal",
+                "SIG-RANK",
+                "--kind",
+                "CANDIDATE_RULE",
+                "--text",
+                "Rank the safe repairs",
+            )
+            self.assertEqual(filed.returncode, 0, filed.stdout + filed.stderr)
+            body = json.loads(filed.stdout.split("PASS")[0])
+            self.assertEqual(body["verb"], "rank")
+            self.assertTrue(body["jev_allowed"])
+            self.assertFalse(body["jev_called"])
+            self.assertFalse(body["provider_call"])
+            self.assertIsNone(body["provider"])
+            self.assertFalse(body["candidate_filed"])
+            self.assertFalse((root / "candidates" / "CAND-RANK.json").exists())
+
+    def test_reflex_does_not_ask_the_question_library(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            captured = run(
+                root,
+                "capture",
+                "--id",
+                "SIG-LIB",
+                "--platform",
+                "local",
+                "--url",
+                "file://library",
+                "--title",
+                "Question library",
+            )
+            self.assertEqual(captured.returncode, 0, captured.stdout)
+            path = root / "raw" / "SIG-LIB.json"
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            doc["reflex"] = {"ask_all": True, "library_size": 273, "questions": list(range(273)), "verb": "score"}
+            path.write_text(json.dumps(doc), encoding="utf-8")
+            filed = run(
+                root,
+                "candidate",
+                "--id",
+                "CAND-LIB",
+                "--signal",
+                "SIG-LIB",
+                "--kind",
+                "CANDIDATE_EVAL",
+                "--text",
+                "Ask every question",
+            )
+            self.assertEqual(filed.returncode, 0, filed.stdout + filed.stderr)
+            body = json.loads(filed.stdout.split("PASS")[0])
+            self.assertEqual(body["action"], "NO_ACTION")
+            self.assertEqual(body["questions_asked"], 0)
+            self.assertFalse(body["jev_called"])
+            self.assertFalse((root / "candidates" / "CAND-LIB.json").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

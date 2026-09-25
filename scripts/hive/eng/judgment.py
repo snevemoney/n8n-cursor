@@ -4,8 +4,11 @@
 `evaluate` decides who may judge. It does not call a model, start a watcher,
 or turn an external demo corpus into features.
 
-Exact checks stay deterministic: pid alive, count increased, output stopped,
-batch finished, artifact appeared, error code. Jev is not called for that state.
+Exact checks stay deterministic: pid alive, row count changed, artifact exists,
+process finished, plus the earlier count, output, batch, and error-code reads.
+Jev is not called for that state. Jev may only be allowed for a bounded verb:
+route, rank, gate, filter, score, react, select. It is not Jarvis's model and
+it is not merge authority.
 """
 from __future__ import annotations
 
@@ -18,17 +21,35 @@ EXACT_CHECKS = frozenset(
     {
         "pid_alive",
         "count_increased",
+        "row_count_changed",
         "output_stopped",
         "batch_finished",
+        "process_finished",
         "artifact_appeared",
+        "artifact_exists",
         "error_code",
     }
 )
-JEV_VERBS = frozenset({"route", "rank", "gate", "filter", "score", "react"})
+JEV_VERBS = frozenset({"route", "rank", "gate", "filter", "score", "react", "select"})
 ABSTAIN = frozenset({"NO_ACTION", "WAIT", "ASK", "ESCALATE"})
 FORBIDDEN_ROLES = frozenset(
-    {"brain", "jarvis_brain", "authority", "code_generator", "researcher"}
+    {
+        "brain",
+        "jarvis_brain",
+        "jarvis_model",
+        "jarvis",
+        "authority",
+        "code_generator",
+        "researcher",
+        "conversation",
+        "research",
+        "architecture",
+        "coding",
+        "merge_authority",
+        "merge",
+    }
 )
+CLOSED_KINDS = frozenset({"conversation", "research", "architecture", "coding", "authority"})
 QUESTION_PACK_CAP = 12
 LIBRARY_SIZE = 273
 DEMO_CORPUS_URL = "https://webdevcody.github.io/jev-demos/"
@@ -120,6 +141,19 @@ def _catastrophic(request: dict[str, Any]) -> bool:
     ) is True
 
 
+def _closed_use(request: dict[str, Any]) -> bool:
+    """Conversation, research, architecture, coding, and authority stay off Jev.
+
+    Jev is not Jarvis's model and it is not merge authority.
+    """
+    if request.get("merge_authority") is True or request.get("jarvis_model") is True:
+        return True
+    if request.get("jarvis") is True and str(request.get("model") or "").strip().lower() == "jev":
+        return True
+    kind = str(request.get("kind") or "").strip().lower().replace(" ", "_").replace("-", "_")
+    return kind in CLOSED_KINDS
+
+
 def _has_exact_state(request: dict[str, Any]) -> bool:
     if any(
         key in request
@@ -128,9 +162,14 @@ def _has_exact_state(request: dict[str, Any]) -> bool:
             "count",
             "previous_count",
             "count_increased",
+            "row_count",
+            "previous_row_count",
+            "row_count_changed",
             "output_stopped",
             "batch_finished",
+            "process_finished",
             "artifact_appeared",
+            "artifact_exists",
             "error_code",
             "stall_line",
             "unchanged_ticks",
@@ -177,7 +216,11 @@ def _questions_refused(request: dict[str, Any]) -> dict[str, Any] | None:
 def _exact(request: dict[str, Any], evidence: list[Any]) -> dict[str, Any]:
     pid_alive = request.get("pid_alive")
     count = request.get("count")
+    if count is None:
+        count = request.get("row_count")
     previous = request.get("previous_count")
+    if previous is None:
+        previous = request.get("previous_row_count")
     increased = request.get("count_increased")
     if increased is None and isinstance(count, (int, float)) and isinstance(previous, (int, float)):
         increased = count > previous
@@ -186,6 +229,9 @@ def _exact(request: dict[str, Any], evidence: list[Any]) -> dict[str, Any]:
         and isinstance(previous, (int, float))
         and count == previous
     )
+    changed = request.get("row_count_changed")
+    if isinstance(count, (int, float)) and isinstance(previous, (int, float)):
+        changed = count != previous
     stall_line = request.get("stall_line")
     unchanged_ticks = request.get("unchanged_ticks")
     past_stall = (
@@ -200,7 +246,12 @@ def _exact(request: dict[str, Any], evidence: list[Any]) -> dict[str, Any]:
         "past_stall": past_stall,
         "output_stopped": request.get("output_stopped") is True,
         "batch_finished": request.get("batch_finished") is True,
+        "row_count_changed": changed is True,
         "artifact_appeared": request.get("artifact_appeared") is True,
+        "artifact_exists": request.get("artifact_exists") is True or request.get("artifact_appeared") is True,
+        "process_finished": request.get("process_finished") is True
+        or request.get("batch_finished") is True
+        or request.get("output_stopped") is True,
         "error_code": request.get("error_code") if "error_code" in request else None,
     }
     if pid_alive is True and increased is True:
@@ -251,7 +302,7 @@ def evaluate(request: dict[str, Any]) -> dict[str, Any]:
         return _out(
             lane="human",
             action="ESCALATE",
-            reason="Jev is not Jarvis's brain, authority, a code generator, or a researcher",
+            reason="Jev is not Jarvis's model, merge authority, a coder, or a researcher",
             evidence=_evidence(request),
         )
 
@@ -279,6 +330,14 @@ def evaluate(request: dict[str, Any]) -> dict[str, Any]:
 
     if _has_exact_state(request):
         return _exact(request, evidence)
+
+    if _closed_use(request):
+        return _out(
+            lane="human",
+            action="ESCALATE",
+            reason="Jev is not used for conversation, research, architecture, coding, or authority",
+            evidence=evidence,
+        )
 
     if _similar_failures(request):
         return _rank(request, evidence, "similar failures may be clustered and ranked")

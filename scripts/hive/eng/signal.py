@@ -22,7 +22,7 @@ from pathlib import Path
 _ENG = Path(__file__).resolve().parent
 if str(_ENG) not in sys.path:
     sys.path.insert(0, str(_ENG))
-from judgment import corpus_features
+from judgment import corpus_features, evaluate
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT = ROOT / "docs/hive/outer-heaven/CONTENT/os/signals"
@@ -141,6 +141,11 @@ def file_candidate(root: Path, candidate_id: str, signal_id: str, kind: str, tex
             }
         )
         return emit(decision, False)
+    reflex = raw_doc.get("reflex")
+    if isinstance(reflex, dict):
+        decision = dict(evaluate(reflex))
+        decision["candidate_filed"] = False
+        return emit(decision, decision.get("jev_called") is False)
     doc = {
         "id": candidate_id,
         "kind": kind,
