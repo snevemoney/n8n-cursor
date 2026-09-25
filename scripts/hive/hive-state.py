@@ -34,8 +34,8 @@ ALLOWED = (
     "product_factory",
     "post_fix_cohort",
 )
-# Historical observe-pane rows use lowercase "done". New terminal writes are uppercase
-# and only land through transition_job. Do not treat the lowercase rows as a cohort.
+# Lowercase "done" is still a closing word. A resave without a permit drops it.
+# New terminal writes are uppercase and only land through transition_job.
 JOB_STATUSES = (
     "working",
     "yellow",
@@ -581,7 +581,9 @@ def transition_job(
     justified = list(effective_required) if effective_required is not None else None
     if word and decision["permitted"] and justified is None:
         justified = list(required_classes(word, None))
-    if justified is not None:
+    # A refusal must not widen a requirement already on the row. The first
+    # declaration can still be recorded so a later diff cannot invent a close.
+    if justified is not None and (decision["permitted"] or stored_required is None):
         row["required_evidence"] = justified
     if note:
         row["note"] = note
@@ -662,8 +664,6 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
         return
     if status != previous_status and status == token and not previous_job.get("proofPermit"):
         return
-    if status == previous_status and status != token and _untouched_historical(job, previous_job):
-        return
     decision = _decision_for_job(job)
     if decision["permitted"] and job.get("proofPermit") == decision["permit"]:
         return
@@ -671,15 +671,6 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
     job["status"] = hold
     job.pop("proofPermit", None)
     job["terminal_rejected"] = decision["reason"]
-
-
-def _untouched_historical(job: dict, previous_job: dict) -> bool:
-    """A frozen observe-pane label with no proof and no evidence change is not a new close."""
-    if previous_job.get("proofPermit") or job.get("proofPermit"):
-        return False
-    prev_ev = previous_job.get("evidence") if isinstance(previous_job.get("evidence"), list) else []
-    cur_ev = job.get("evidence") if isinstance(job.get("evidence"), list) else []
-    return prev_ev == cur_ev
 
 
 def _close_still_proven(job: dict | None) -> bool:
@@ -717,7 +708,11 @@ def _dimension_bound(item: dict, key: str, value: object) -> bool:
         return False
     if key not in item or item.get(key) != value:
         return False
-    return _evidence_class(item) in EVIDENCE_CLASSES
+    cls = _evidence_class(item)
+    # A diff is not a close and does not bind a runtime, config, or version.
+    if cls == "DIFF":
+        return False
+    return cls in EVIDENCE_CLASSES
 
 
 def _added_unbound_dimension(job: dict, previous_job: dict) -> bool:

@@ -49,6 +49,7 @@ AGENT_STATES = frozenset(
         "RECEIPT_UNPROVEN",
         "VERIFYING",
         "PARTIAL",
+        "DONE",
     }
 )
 _CLOSE_AGENT_STATES = frozenset({"COMPLETED", "DONE", "PASS", "VERIFIED", "LIVE", "SHIPPED", "CLOSED"})
@@ -156,6 +157,8 @@ def transition(
             )
             if decision["permitted"] and str(agent_state).upper() == "COMPLETED":
                 state["agent_state"] = "COMPLETED"
+            elif decision["permitted"]:
+                state["agent_state"] = str(decision["state"])
             else:
                 hold = str(decision["state"])
                 state["agent_state"] = hold if hold in AGENT_STATES else "BLOCKED"

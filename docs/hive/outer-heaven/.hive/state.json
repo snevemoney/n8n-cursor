@@ -17,106 +17,119 @@
     {
       "id": "coverage-loop",
       "name": "coverage-loop",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "Nate-82 system-upgrade board WIRED this session"
+      "note": "Nate-82 system-upgrade board WIRED this session",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "dry-run-six",
       "name": "dry-run-six",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "six fixtures scored 2026-08-14; clients parked"
+      "note": "six fixtures scored 2026-08-14; clients parked",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "knowledge-use",
       "name": "knowledge-use",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "graph+patterns+12 workflows; Path A parked; no send"
+      "note": "graph+patterns+12 workflows; Path A parked; no send",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "click-live-evenslouis",
       "name": "click-live-evenslouis",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "watchdog",
       "updated": "2026-08-14",
-      "note": "headed CTA path pass; money-spine gap; form not sent"
+      "note": "headed CTA path pass; money-spine gap; form not sent",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "channel-walk-social-2026-08-14",
       "name": "channel-walk-social-2026-08-14",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "watchdog",
       "updated": "2026-08-14",
-      "note": "HIS: X @snevemoney YT @Snevemoney TT @evenslouistv FB evens.louis IG @evenslouis_ + @snevemoney_; Reddit skip; no site offer on profiles"
+      "note": "HIS: X @snevemoney YT @Snevemoney TT @evenslouistv FB evens.louis IG @evenslouis_ + @snevemoney_; Reddit skip; no site offer on profiles",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "matrix-social-channel",
       "name": "matrix-social-channel",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "skills wired; Path C clip-factory + demand-validate gate active; Path A parked; no send"
+      "note": "skills wired; Path C clip-factory + demand-validate gate active; Path A parked; no send",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "path-c-social-2026-08-14",
       "name": "path-c-social-three-jobs",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "bios+HIS packets/atoms; pick TT @evenslouistv; clip preview HITL; no publish"
+      "note": "bios+HIS packets/atoms; pick TT @evenslouistv; clip preview HITL; no publish",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "his-stats-2026-08-14",
       "name": "his-stats-2026-08-14",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "OBSERVED card STATS-2026-08-14.md + canvas. TT 389/94.2k likes; YT 17 subs/11169 views/90 vids; X 101/429; IG 209/812/6. FB+IG@snevemoney_+Studio UNKNOWN. Site 200 + healthz + pixel 1413012380573952."
+      "note": "OBSERVED card STATS-2026-08-14.md + canvas. TT 389/94.2k likes; YT 17 subs/11169 views/90 vids; X 101/429; IG 209/812/6. FB+IG@snevemoney_+Studio UNKNOWN. Site 200 + healthz + pixel 1413012380573952.",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "x-bookmarks-ai-2026-08-14",
       "name": "x-bookmarks-ai",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "researcher",
       "updated": "2026-08-14",
-      "note": "98 scanned, 37 AI, 6 wired, 0 unread"
+      "note": "98 scanned, 37 AI, 6 wired, 0 unread",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "dry-run-six-bookmark-skills",
       "name": "dry-run-six-bookmark-skills",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "watchdog",
       "updated": "2026-08-14",
-      "note": "6 WIRED bookmark skills fixture dry-run; GRADE not accept-forever; no Studio"
+      "note": "6 WIRED bookmark skills fixture dry-run; GRADE not accept-forever; no Studio",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "yt-wl-ai-2026-08-14",
       "name": "yt-wl-ai",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "6 packets+LEARNED+24 atoms; WIRED script-beat-motion + forward-deployed-gap; merges on existing; caption-only; not the 476"
+      "note": "6 packets+LEARNED+24 atoms; WIRED script-beat-motion + forward-deployed-gap; merges on existing; caption-only; not the 476",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "tape-wire-2026-08-14",
       "name": "tape-wire-last-mile",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-14",
-      "note": "TAPE-WIRE-NOTES + TBTU + 5 skills + 153 workflows. Dry-run UNTESTED."
+      "note": "TAPE-WIRE-NOTES + TBTU + 5 skills + 153 workflows. Dry-run UNTESTED.",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "product-factory-foundation",
       "name": "product-factory-foundation",
-      "status": "done",
+      "status": "IMPLEMENTED",
       "desk": "parent",
       "updated": "2026-08-15",
-      "note": "primitives + roadblocks + Path C promotion hook. Pay HITL. Speed MISS."
+      "note": "primitives + roadblocks + Path C promotion hook. Pay HITL. Speed MISS.",
+      "terminal_rejected": "missing proof"
     },
     {
       "id": "hive-register-route",
