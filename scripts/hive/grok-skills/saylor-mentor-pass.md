@@ -30,7 +30,11 @@ Every hive / site / money turn — start, middle, and end. Evens does not have t
 
 ```
 LANE: hive-os | agency
-SCHOOL: saylor-course-skills catalog (available = the index search count, not the active skill)
+SCHOOL: saylor-course-skills catalog · catalog_size is the curriculum count, not the active skill
+catalog_size: count of candidate COURSE-SKILLs in that namespace
+retrieval_hits: what the trigger search returns
+selected_skills: the mission selection
+active_skills: Saylor capabilities on the graph with status active
 GRAPH: the sufficient subset for this mission
 SAYS: what the school means on this exact work (one paragraph)
 NOW: what to decide or put in the system before the next edit

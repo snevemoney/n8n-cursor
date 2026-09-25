@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Live mentor: one teaching beat, then the mission's ActiveSkillGraph.
 
-School (`saylor-course-skills`) is the catalog namespace. Available is the
-count index_rows() returns. It is not the active skill.
+School (`saylor-course-skills`) is the curriculum namespace. catalog_size is
+the count of candidate COURSE-SKILLs in that namespace. A search hit count is
+SkillDiscovery, not the size of the school. The school is not the active skill.
 A mission builds the sufficient subset. Skill bodies are not loaded by default.
 """
 from __future__ import annotations
@@ -43,6 +44,11 @@ NOVEL_RE = re.compile(
     re.I,
 )
 EXAM_RE = re.compile(r"\b(reconstruct(?:ing)?|take the exam|exam dump)\b", re.I)
+JOB_TEXT = "read the share"
+RULE_TEXT = "Redacted plugin output is not the file"
+GRAPH_STATUSES = {"active", "waiting", "completed", "dynamically_added", "not_applicable"}
+OCCUPYING = {"active", "dynamically_added"}
+SEARCHED = "docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md"
 COMPANY_RE = re.compile(
     r"\b(company-wide|company wide|whole company|across the company)\b",
     re.I,
@@ -173,8 +179,60 @@ def _tokens(text: str) -> set[str]:
     return {t for t in TOKEN_RE.findall((text or "").lower()) if t not in STOP}
 
 
+def _declares_course(path: Path) -> bool:
+    """Header only. A course declaration is a candidate skill, not a body load."""
+    try:
+        with path.open(encoding="utf-8") as handle:
+            for index, line in enumerate(handle):
+                if index >= 40:
+                    break
+                if line.startswith("**Course:**") and line.split(":", 1)[-1].strip():
+                    return True
+    except OSError:
+        return False
+    return False
+
+
+def curriculum_slugs() -> list[str]:
+    """Candidate skills in the saylor-course-skills namespace.
+
+    Counts skill files that declare a course. Does not read the trigger search
+    and does not hardcode a size. Cursor copies of the same slug are one skill.
+    """
+    found: dict[str, None] = {}
+    if SKILL_DIR.is_dir():
+        for path in sorted(SKILL_DIR.glob("*.md")):
+            if _declares_course(path):
+                found.setdefault(path.stem, None)
+    cursor = ROOT / ".cursor/skills"
+    if cursor.is_dir():
+        for path in sorted(cursor.glob("*/SKILL.md")):
+            if _declares_course(path):
+                found.setdefault(path.parent.name, None)
+    return list(found)
+
+
+def _is_job(text: str) -> bool:
+    return JOB_TEXT in (text or "").lower()
+
+
+def _is_evidence_rule(text: str) -> bool:
+    return RULE_TEXT.lower() in (text or "").lower()
+
+
+def _non_skill(text: str) -> bool:
+    return _is_job(text) or _is_evidence_rule(text)
+
+
+def _evidence_rules(sitting: str, slugs: list[str]) -> list[dict]:
+    blob = " ".join([sitting or "", *slugs])
+    if _is_evidence_rule(blob):
+        return [{"type": "EvidenceRule", "text": RULE_TEXT}]
+    return []
+
+
 def index_rows() -> list[dict[str, str]]:
-    """Catalog index only. Skill markdown bodies stay unread."""
+    """Trigger search. The length of this list is a discovery result, not catalog_size."""
     if not CATALOG.is_file():
         return []
     rows: list[dict[str, str]] = []
@@ -202,21 +260,21 @@ def index_rows() -> list[dict[str, str]]:
 
 
 def school_view() -> dict:
-    found = len(index_rows())
     return {
         "namespace": SCHOOL_NAMESPACE,
+        "catalog": SCHOOL_NAMESPACE,
         "role": "catalog",
-        "available": found,
-        "indexed": found,
+        "catalog_size": len(curriculum_slugs()),
         "loaded": False,
         "active_skill": None,
+        "mastered": False,
     }
 
 
 def school_label(view: dict | None = None) -> str:
     view = view or school_view()
     return (
-        f"{view['namespace']} catalog · available {view['available']} · "
+        f"{view['catalog']} catalog · catalog_size: {view['catalog_size']} · "
         "not loaded · not the active skill"
     )
 
@@ -294,8 +352,9 @@ def _layout(graph: dict) -> None:
         {"from": prereq, "to": node["slug"]}
         for node in graph["nodes"]
         for prereq in node.get("prerequisites") or []
-        if node["status"] in {"active", "needs_prerequisite", "completed"}
+        if node["status"] in {"active", "waiting", "completed", "dynamically_added"}
     ]
+    graph["active"] = [node["slug"] for node in graph["nodes"] if node["status"] == "active"]
 
 
 def _finish_result(graph: dict) -> None:
@@ -308,13 +367,13 @@ def _finish_result(graph: dict) -> None:
     if not statuses:
         graph["result"] = "NO_METHOD_NEEDED"
         return
-    if any(status in {"active", "completed"} for status in statuses):
+    if any(status in {"active", "completed", "dynamically_added"} for status in statuses):
         graph["result"] = None
         return
     if statuses and all(status == "not_applicable" for status in statuses):
         graph["result"] = "NOT_APPLICABLE"
         return
-    if any(status == "needs_prerequisite" for status in statuses):
+    if any(status == "waiting" for status in statuses):
         graph["result"] = "NEEDS_PREREQUISITE"
         return
     graph["result"] = None
@@ -344,7 +403,32 @@ def _new_graph(lane: str, sitting: str) -> dict:
         "jev": {"jev_called": False, "provider": None, "provider_call": False},
         "activation_depth": 0,
         "context_skills": [],
+        "active": [],
+        "evidence_rules": [],
+        "discovery": {
+            "searched": SEARCHED,
+            "candidates_returned": 0,
+            "eligible_after_filter": 0,
+            "selected": [],
+        },
     }
+
+
+def _attach_discovery(graph: dict, rows: list[dict[str, str]]) -> None:
+    """Search hits stay on SkillDiscovery. They are not written into catalog_size."""
+    selected = [node["slug"] for node in graph["nodes"]]
+    eligible = sum(
+        1
+        for node in graph["nodes"]
+        if node["status"] in {"active", "waiting", "completed", "dynamically_added"}
+    )
+    graph["discovery"] = {
+        "searched": SEARCHED,
+        "candidates_returned": len(rows),
+        "eligible_after_filter": eligible,
+        "selected": selected,
+    }
+    graph["active"] = [node["slug"] for node in graph["nodes"] if node["status"] == "active"]
 
 
 def _distinctive_hits(sitting: str, rows: list[dict[str, str]]) -> list[tuple[int, str]]:
@@ -402,6 +486,8 @@ def build_active_skill_graph(
     graph = _new_graph(lane, sitting)
     rows = index_rows()
     by_slug = _row_map(rows)
+    supplied = [slug.strip() for slug in (explicit or []) if slug.strip()]
+    graph["evidence_rules"] = _evidence_rules(sitting, supplied)
     risk, company = _mission_shape(sitting)
     graph["risk_target"] = "high" if risk == "high" else "low"
     if SHELF_RE.search(sitting or ""):
@@ -409,6 +495,7 @@ def build_active_skill_graph(
         graph["one_skill_sufficient"] = False
         _layout(graph)
         _finish_result(graph)
+        _attach_discovery(graph, rows)
         return graph
     if NOVEL_RE.search(sitting or ""):
         decision = _call_gate(
@@ -436,9 +523,10 @@ def build_active_skill_graph(
         }
         graph["result"] = "FRONTIER"
         _layout(graph)
+        _attach_discovery(graph, rows)
         return graph
 
-    requested = [slug.strip() for slug in (explicit or []) if slug.strip()]
+    requested = [slug for slug in supplied if not _non_skill(slug)]
     hard = requested or _hard_slugs(sitting)
     scored = _distinctive_hits(sitting, rows)
     top_score = scored[0][0] if scored else 0
@@ -490,13 +578,7 @@ def build_active_skill_graph(
                 "provider_call": False,
                 "lane": decision.get("lane"),
             }
-            if decision.get("jev_allowed"):
-                for slug in optional:
-                    if slug in hard:
-                        continue
-                    node = _blank_node(slug, status="skipped", depth=0, dynamic=False, row=by_slug.get(slug))
-                    node["skip_reason"] = "filtered_optional"
-                    graph["nodes"].append(node)
+            # Optional hits stay in discovery. One sufficient skill does not put them on the graph.
 
     if risk == "high":
         graph["one_skill_sufficient"] = False
@@ -531,7 +613,7 @@ def build_active_skill_graph(
     seen: set[str] = set()
     cost = graph["budgets"]["cost"]
     for slug in hard:
-        if slug in seen:
+        if slug in seen or _non_skill(slug):
             continue
         if len([node for node in graph["nodes"] if node["status"] == "active"]) >= cost:
             break
@@ -542,6 +624,7 @@ def build_active_skill_graph(
     _apply_negative(graph["nodes"], sitting)
     _layout(graph)
     _finish_result(graph)
+    _attach_discovery(graph, rows)
     return graph
 
 
@@ -558,13 +641,24 @@ def request_specialist(
     depth = int(from_depth) + 1
     budgets = graph["budgets"]
     record = {"slug": slug, "reason": reason, "depth": depth}
+    if _non_skill(slug):
+        if _is_evidence_rule(slug):
+            rules = graph.setdefault("evidence_rules", [])
+            if not any(item.get("text") == RULE_TEXT for item in rules):
+                rules.append({"type": "EvidenceRule", "text": RULE_TEXT})
+        record["status"] = "refused"
+        record["skip_reason"] = "not_a_skill"
+        graph["fanout"].append(record)
+        _layout(graph)
+        _finish_result(graph)
+        return graph
     if depth > budgets["depth"]:
         record["status"] = "skipped"
         record["skip_reason"] = "depth_budget"
         graph["fanout"].append(record)
         return graph
-    active = [node for node in graph["nodes"] if node["status"] == "active"]
-    if len(active) >= budgets["cost"]:
+    occupying = [node for node in graph["nodes"] if node["status"] in OCCUPYING]
+    if len(occupying) >= budgets["cost"]:
         record["status"] = "skipped"
         record["skip_reason"] = "cost_budget"
         graph["fanout"].append(record)
@@ -572,7 +666,7 @@ def request_specialist(
     same_depth = [
         node
         for node in graph["nodes"]
-        if node["status"] == "active" and node["activation_depth"] == depth
+        if node["status"] in OCCUPYING and node["activation_depth"] == depth
     ]
     if len(same_depth) >= budgets["concurrency"]:
         record["status"] = "skipped"
@@ -580,29 +674,47 @@ def request_specialist(
         graph["fanout"].append(record)
         return graph
     satisfied = set(graph.get("context_skills") or [])
-    satisfied |= {node["slug"] for node in graph["nodes"] if node["status"] in {"active", "completed"}}
+    satisfied |= {
+        node["slug"]
+        for node in graph["nodes"]
+        if node["status"] in {"active", "completed", "dynamically_added"}
+    }
     row = _row_map(index_rows()).get(slug)
     if any(prereq not in satisfied for prereq in prerequisites):
-        node = _blank_node(slug, status="needs_prerequisite", depth=depth, dynamic=True, row=row)
+        node = _blank_node(slug, status="waiting", depth=depth, dynamic=True, row=row)
         node["prerequisites"] = prerequisites
         graph["nodes"].append(node)
-        record["status"] = "needs_prerequisite"
+        record["status"] = "waiting"
         graph["fanout"].append(record)
         graph["dynamic"].append(slug)
         _layout(graph)
         _finish_result(graph)
+        _refresh_selection(graph)
         return graph
-    node = _blank_node(slug, status="active", depth=depth, dynamic=True, row=row)
+    node = _blank_node(slug, status="dynamically_added", depth=depth, dynamic=True, row=row)
     node["prerequisites"] = prerequisites
     graph["nodes"].append(node)
     graph["activation_depth"] = max(int(graph.get("activation_depth", 0)), depth)
     graph["dynamic"].append(slug)
-    record["status"] = "active"
+    record["status"] = "dynamically_added"
     graph["fanout"].append(record)
     graph["one_skill_sufficient"] = False
     _layout(graph)
     _finish_result(graph)
+    _refresh_selection(graph)
     return graph
+
+
+def _refresh_selection(graph: dict) -> None:
+    """Specialist adds change selection. They do not change catalog_size or retrieval_hits."""
+    disc = graph.setdefault("discovery", {})
+    disc["selected"] = [node["slug"] for node in graph["nodes"]]
+    disc["eligible_after_filter"] = sum(
+        1
+        for node in graph["nodes"]
+        if node["status"] in {"active", "waiting", "completed", "dynamically_added"}
+    )
+    graph["active"] = [node["slug"] for node in graph["nodes"] if node["status"] == "active"]
 
 
 def load_skill_body(graph: dict, slug: str) -> str | None:
@@ -619,7 +731,7 @@ def load_skill_body(graph: dict, slug: str) -> str | None:
 
 
 def mark_node(graph: dict, slug: str, status: str) -> dict:
-    allowed = {"completed", "skipped", "not_applicable", "active", "needs_prerequisite"}
+    allowed = set(GRAPH_STATUSES)
     if status not in allowed:
         raise ValueError(status)
     for node in graph["nodes"]:
@@ -810,9 +922,9 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
             "school": school,
             "graph": graph,
             "says": (
-                "School names the catalog of candidate capabilities. "
-                "Available means they can be discovered. "
-                "It does not select a skill and it does not load the manuals. "
+                "School names the curriculum. catalog_size is how many candidate skills that namespace holds. "
+                "A search hit count is not that size. "
+                "The catalog is not a selected skill and the manuals stay closed. "
                 "A mission builds the graph it actually needs."
             ),
             "now": "Leave the catalog closed. Name the mission if one skill is not the whole job.",
@@ -860,6 +972,7 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
             "put": "no course beat",
             "leverage": "NOT_APPLICABLE",
             "then": "do not teach a course the graph refused",
+            "evidence_scope": "exam_card",
         }
     if graph.get("result") == "FRONTIER":
         return {
@@ -923,15 +1036,28 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
     }
 
 
+def _card_fields(school: dict, graph: dict) -> list[str]:
+    disc = graph.get("discovery") or {}
+    active = list(graph.get("active") or [])
+    selected = list(disc.get("selected") or [])
+    return [
+        f"catalog_size: {school.get('catalog_size')}",
+        f"retrieval_hits: {disc.get('candidates_returned')}",
+        f"selected_skills: {', '.join(selected) or '(none)'}",
+        f"active_skills: {', '.join(active) or '(none)'}",
+    ]
+
+
 def format_live(beat: dict) -> str:
     school = beat.get("school") or school_view()
     graph = beat.get("graph") or {}
-    active = [node["slug"] for node in graph.get("nodes") or [] if node.get("status") == "active"]
+    active = list(graph.get("active") or [])
     lines = [
         f"# Live mentor · {beat['lane']}",
         "",
         f"SITTING: {beat['sitting'] or '(name it)'}",
         f"SCHOOL: {school_label(school)}",
+        *_card_fields(school, graph),
         f"LENS: {beat.get('course') or '(none)'}",
         f"GRAPH: {len(active)} active · loaded {graph.get('bodies_loaded', 0)} · "
         f"result {graph.get('result') or 'graph'}",
@@ -940,8 +1066,6 @@ def format_live(beat: dict) -> str:
         f"THEN: {beat['then']}",
         f"WATCH: {beat['watch']}",
     ]
-    if active:
-        lines.append("ACTIVE: " + ", ".join(active))
     return "\n".join(lines)
 
 
@@ -952,6 +1076,7 @@ def emit_vault(card: dict, desk: str, host: str) -> str:
         f"LANE: {card['lane']}",
         f"SITTING: {card['sitting']}",
         f"SCHOOL: {school_label(card.get('school'))}",
+        *_card_fields(card.get("school") or school_view(), graph),
         f"SKILLS: {', '.join(card['skills']) or 'none'}",
         f"GRAPH: {len(active)} active · loaded {graph.get('bodies_loaded', 0)}",
     ]
@@ -1046,22 +1171,34 @@ def self_test() -> list[str]:
         errs.append("live NOW missed who/why/tone")
     if live.get("mode") != "live":
         errs.append("live mode flag missing")
+    counted = len(curriculum_slugs())
     found = len(index_rows())
     school = live.get("school") or {}
-    if school.get("namespace") != SCHOOL_NAMESPACE or school.get("available") != found:
+    if school.get("catalog") != SCHOOL_NAMESPACE or school.get("namespace") != SCHOOL_NAMESPACE:
         errs.append("school is not the saylor-course-skills catalog")
-    if school.get("indexed") != found:
-        errs.append("available is not the index search count")
+    if school.get("catalog_size") != counted:
+        errs.append("catalog_size is not the curriculum count")
+    if "available" in school:
+        errs.append("school still carries available")
     if school.get("loaded") or school.get("active_skill") is not None:
         errs.append("school loaded a skill or selected one")
+    if school.get("mastered") is True:
+        errs.append("school was reported as mastered")
     live_md = format_live(live)
     school_line = next((line for line in live_md.splitlines() if line.startswith("SCHOOL:")), "")
     if re.search(r"^SCHOOL:\s*BUS\d+\s*$", school_line) or "BUS210" in school_line:
         errs.append("SCHOOL label is a selected course")
-    if "not the active skill" not in school_line or str(found) not in school_line:
-        errs.append("SCHOOL line missed the catalog namespace")
-    if "164" in school_line:
-        errs.append("SCHOOL line labels 164 over the harvest")
+    if "not the active skill" not in school_line or f"catalog_size: {counted}" not in school_line:
+        errs.append("SCHOOL line missed catalog_size")
+    if re.search(r"available\s*[:=]?\s*\d+", live_md, re.I):
+        errs.append("available carries a naked count")
+    if f"catalog_size: {counted}" not in live_md or f"retrieval_hits: {found}" not in live_md:
+        errs.append("card missed catalog_size or retrieval_hits")
+    if "selected_skills:" not in live_md or "active_skills:" not in live_md:
+        errs.append("card missed selected_skills or active_skills")
+    disc = (live.get("graph") or {}).get("discovery") or {}
+    if disc.get("candidates_returned") != found:
+        errs.append("retrieval_hits is not the search result")
     graph = live.get("graph") or {}
     active = [node["slug"] for node in graph.get("nodes") or [] if node.get("status") == "active"]
     if active != ["bizcomm-audience-purpose-channel-tone-feedback"]:
@@ -1078,8 +1215,10 @@ def self_test() -> list[str]:
     wide_active = [node["slug"] for node in wide["nodes"] if node["status"] == "active"]
     if len(wide_active) != 31:
         errs.append(f"high-blast graph size {len(wide_active)} is not 31")
-    if len(wide_active) >= wide["school"]["available"]:
+    if len(wide_active) >= wide["school"]["catalog_size"]:
         errs.append("high-blast graph loaded the catalog")
+    if wide["school"]["catalog_size"] != counted:
+        errs.append("high-blast catalog_size followed the search")
     if wide["bodies_loaded"] != 0 or wide["school"]["loaded"]:
         errs.append("high-blast graph loaded bodies")
     if wide["one_skill_sufficient"]:
@@ -1109,12 +1248,20 @@ def self_test() -> list[str]:
         errs.append("not-applicable card taught BUS210")
     if exam_live.get("graph", {}).get("result") != "NOT_APPLICABLE":
         errs.append("exam card lost NOT_APPLICABLE")
+    if exam_live.get("evidence_scope") != "exam_card":
+        errs.append("exam-card pass was not scoped to the card")
+    if exam_live.get("school", {}).get("mastered") is True or re.search(r"mastered|mastery", exam_md, re.I):
+        errs.append("exam-card pass was reported as the school being mastered")
     shelf = live_beat("hive-os", "Don't just focus on BUS206. Focus on all the school skills 164 as well.", [])
     if shelf.get("course") == "BUS206" or shelf.get("school", {}).get("active_skill") is not None:
         errs.append("shelf sitting selected BUS206 or a skill")
     shelf_school = next(line for line in format_live(shelf).splitlines() if line.startswith("SCHOOL:"))
-    if "164" in shelf_school or str(found) not in shelf_school:
-        errs.append("shelf SCHOOL line is not the search count")
+    if shelf["school"]["catalog_size"] != counted:
+        errs.append("shelf catalog_size is not the curriculum count")
+    if shelf["school"]["catalog_size"] == 164 and counted != 164:
+        errs.append("shelf catalog_size hardcoded 164")
+    if "available" in shelf_school.lower() or "mastered" in shelf_school.lower():
+        errs.append("shelf SCHOOL line uses available or mastery")
     if shelf["graph"]["bodies_loaded"] != 0 or shelf["graph"]["nodes"]:
         errs.append("shelf sitting loaded the catalog")
     frontier = build_active_skill_graph("hive-os", "decompose a novel method that no course covers", [])
@@ -1139,13 +1286,19 @@ def self_test() -> list[str]:
     if any(node["status"] == "active" for node in denied["nodes"]):
         errs.append("denied gate still expanded the high-blast bundle")
     empty = build_active_skill_graph("hive-os", "change the css color of the hero", [])
-    request_specialist(empty, "ghost-skill", reason="need a specialist", prerequisites=["missing-course"])
+    request_specialist(
+        empty,
+        "bizlaw-sources-forum-wrongs-assets-entity-checklists",
+        reason="need a specialist",
+        prerequisites=["missing-course"],
+    )
     if empty.get("result") != "NEEDS_PREREQUISITE":
         errs.append(f"missing prerequisite was {empty.get('result')}")
     base = build_active_skill_graph("hive-os", "who is this page for and what tone", [])
-    for index in range(6):
-        request_specialist(base, f"specialist-{index}", reason="fan-out")
-    added = [item for item in base["fanout"] if item.get("status") == "active"]
+    pool = [slug for slug in curriculum_slugs() if not slug.startswith("bizcomm-")]
+    for slug in pool[:6]:
+        request_specialist(base, slug, reason="fan-out")
+    added = [item for item in base["fanout"] if item.get("status") == "dynamically_added"]
     skipped = [item for item in base["fanout"] if item.get("skip_reason") == "concurrency_budget"]
     if len(added) != base["budgets"]["concurrency"] or len(skipped) != 2:
         errs.append(f"fan-out concurrency failed ({len(added)} added, {len(skipped)} skipped)")
@@ -1170,7 +1323,82 @@ def self_test() -> list[str]:
             errs.append(f"path contract missed {key}")
     if contract.get("role") != "catalog_namespace":
         errs.append("course skill contract is not the catalog namespace")
+    _regress_distinctions(errs, counted, found)
     return errs
+
+
+def _regress_distinctions(errs: list[str], counted: int, found: int) -> None:
+    """These fail if a later edit collapses two different objects into one."""
+    if counted < 1:
+        errs.append("catalog_size count found no candidate skills")
+        return
+    original = index_rows
+    extra = {
+        "course": "ZZZ",
+        "slug": "search-only-hit",
+        "triggers": "searchonlyhit tokenone tokentwo",
+        "negative_triggers": "",
+        "risk_relevance": "low",
+    }
+
+    def inflated() -> list[dict[str, str]]:
+        return list(original()) + [extra]
+
+    globals()["index_rows"] = inflated
+    try:
+        view = school_view()
+        if view.get("catalog_size") != counted:
+            errs.append("SEARCH RESULT collapsed into CATALOG: catalog_size followed retrieval_hits")
+        graph = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+        hits = (graph.get("discovery") or {}).get("candidates_returned")
+        if hits != found + 1:
+            errs.append(f"retrieval did not follow the search ({hits})")
+        if graph["school"]["catalog_size"] == hits and counted != hits:
+            errs.append("Writing retrieval_hits into catalog_size")
+        if graph["school"]["catalog_size"] != counted:
+            errs.append("catalog_size is not the curriculum count under a different search")
+        beat = live_beat("hive-os", "change the css color of the hero", [])
+        md = format_live(beat)
+        if f"catalog_size: {counted}" not in md:
+            errs.append("card wrote retrieval_hits into catalog_size")
+        if f"retrieval_hits: {found + 1}" not in md:
+            errs.append("card retrieval_hits did not follow the search")
+        if re.search(r"available\s*[:=]?\s*\d+", md, re.I):
+            errs.append("available carries a naked count")
+    finally:
+        globals()["index_rows"] = original
+
+    job = build_active_skill_graph("hive-os", JOB_TEXT, [JOB_TEXT])
+    if any(JOB_TEXT in (slug or "").lower() for slug in job.get("active") or []):
+        errs.append("JOB collapsed into SKILL: read the share is in ActiveSkillGraph.active")
+    if any(JOB_TEXT in (node.get("slug") or "").lower() for node in job["nodes"]):
+        errs.append("JOB collapsed into SKILL: read the share is a graph node")
+    if job.get("result") != "NO_METHOD_NEEDED" or job.get("active"):
+        errs.append("a job was treated as a Saylor method")
+
+    rule = build_active_skill_graph("hive-os", RULE_TEXT, [RULE_TEXT])
+    if any(
+        node.get("status") in {"active", "not_applicable"} and _is_evidence_rule(node.get("slug") or "")
+        for node in rule["nodes"]
+    ):
+        errs.append("RULE collapsed into SKILL")
+    if any(_is_evidence_rule(node.get("slug") or "") for node in rule["nodes"]):
+        errs.append("EvidenceRule was stored as a skill node")
+    rules = rule.get("evidence_rules") or []
+    if not any(item.get("type") == "EvidenceRule" and item.get("text") == RULE_TEXT for item in rules):
+        errs.append("EvidenceRule was not recorded separately from skills")
+    if rule.get("active"):
+        errs.append("an evidence rule activated a skill")
+
+    quiet = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+    if quiet.get("result") != "NO_METHOD_NEEDED" or quiet.get("active"):
+        errs.append("CATALOG collapsed into ACTIVE CONTEXT")
+    if quiet["school"]["catalog_size"] != counted or quiet["school"]["catalog_size"] < 1:
+        errs.append("NO_METHOD mission lost the curriculum count")
+    if curriculum_slugs()[0] in (quiet.get("active") or []):
+        errs.append("a skill in the school was automatically active")
+    if set(quiet.get("active") or []) == set(curriculum_slugs()):
+        errs.append("the catalog was copied into the active context")
 
 
 def main() -> int:
@@ -1214,18 +1442,17 @@ def main() -> int:
         "",
         f"SITTING: {card['sitting'] or '(name it)'}",
         f"SCHOOL: {school_label(card.get('school'))}",
+        *_card_fields(card.get("school") or school_view(), card.get("graph") or {}),
         f"FACTS: {card['facts']}",
         f"SKILLS: {', '.join(card['skills']) or '(none — skip or say one fact)'}",
         "",
     ]
     graph = card.get("graph") or {}
-    active = [node["slug"] for node in graph.get("nodes") or [] if node.get("status") == "active"]
+    active = list(graph.get("active") or [])
     lines.append(
         f"GRAPH: {len(active)} active · result {graph.get('result') or 'graph'} · "
         f"loaded {graph.get('bodies_loaded', 0)}"
     )
-    if active:
-        lines.append("ACTIVE: " + ", ".join(active))
     lines.append("")
     for row in card["rows"]:
         lines += [
