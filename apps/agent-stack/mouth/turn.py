@@ -34,6 +34,59 @@ QUIET_THINK_RE = re.compile(
     r"|\b(?:looking|thinking).{0,40}\b(?:thinking|looking)\b",
     re.I,
 )
+# One path for these verbs. No button per verb.
+HIGH_VERBS = ("work", "delegate", "remember", "research", "act", "create", "brief", "review", "continue")
+GOAL_LEAD_RE = re.compile(
+    r"^(?:please\s+)?(?:hey\s+)?(?:jarvis[,.\s]+)?("
+    + "|".join(HIGH_VERBS)
+    + r")\b[:\s,.-]*(.*)$",
+    re.I,
+)
+OUTCOME_RE = re.compile(
+    r"\b(?:i want|the outcome is|the goal is|until|finish|so that)\b[:\s]*(.+)$",
+    re.I,
+)
+MORNING_RE = re.compile(
+    r"\b(?:what should i work on|what do i work on)\b",
+    re.I,
+)
+GREETING_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?good morning\s*[.!]?\s*$",
+    re.I,
+)
+CONTINUE_RE = re.compile(
+    r"^(?:please\s+)?(?:keep going|carry on|go on|resume|continue(?:\s+that|\s+the goal)?)\s*[.!]?\s*$",
+    re.I,
+)
+UNBOUNDED_RE = re.compile(
+    r"\b(?:everything|whatever|the whole (?:company|os|system)|all of it|someday|in general|be better|improve things)\b",
+    re.I,
+)
+AGENT_MENU_RE = re.compile(
+    r"name the desk|which agent|which desk|pick (?:an?|the) (?:agent|worker|desk)|"
+    r"choose (?:an?|the) (?:agent|worker|desk)|forge,\s*watchdog|"
+    r"who should (?:do|take)|you wake it",
+    re.I,
+)
+CONTROL_PLANE_RE = re.compile(
+    r"\b(?:WAIT_EVENS|PARTIAL|READY_FOR_AUTHORITY|ROOT_CAUSE_FOUND|not on disk)\b",
+    re.I,
+)
+_CONTEXT_STOP = {
+    "that",
+    "this",
+    "with",
+    "from",
+    "into",
+    "until",
+    "about",
+    "please",
+    "jarvis",
+    "goal",
+    "work",
+    "once",
+    "says",
+}
 
 
 def _load_mod(name: str, path: Path):
@@ -293,6 +346,243 @@ def _door_speak(
     )
 
 
+def _content_tokens(text: str) -> set[str]:
+    return {
+        word
+        for word in re.findall(r"[a-z0-9']{4,}", (text or "").lower())
+        if word not in _CONTEXT_STOP
+    }
+
+
+def outcome_is_bounded(outcome: str) -> bool:
+    """A finish you can keep going on. Open-ended wishes stay unbounded."""
+    text = (outcome or "").strip()
+    if len(text) < 8 or UNBOUNDED_RE.search(text):
+        return False
+    if re.search(r"\b(?:until|once|one sentence|the \w+)\b", text, re.I):
+        return True
+    return len(_content_tokens(text)) >= 2
+
+
+def recover_context(bus: dict, outcome: str) -> list[str]:
+    """Prior lines on this bus that share the outcome. Not a second memory."""
+    want = _content_tokens(outcome)
+    turns = bus.get("turns") if isinstance(bus.get("turns"), list) else []
+    found: list[str] = []
+    for row in reversed(turns):
+        if not isinstance(row, dict):
+            continue
+        line = str(row.get("user") or "").strip()
+        if line and want and (_content_tokens(line) & want) and line not in found:
+            found.append(line)
+        if len(found) >= 3:
+            break
+    goal = bus.get("active_goal") if isinstance(bus.get("active_goal"), dict) else {}
+    prior = goal.get("context") if isinstance(goal.get("context"), list) else []
+    for line in prior:
+        text = str(line or "").strip()
+        if text and text not in found:
+            found.append(text)
+        if len(found) >= 3:
+            break
+    return found[:3]
+
+
+def classify_utterance(utterance: str, bus: dict | None = None) -> dict:
+    """Ordinary talk stays ordinary. A goal names an outcome. Verbs share this path."""
+    heard = (utterance or "").strip()
+    goal = (bus or {}).get("active_goal") if isinstance((bus or {}).get("active_goal"), dict) else {}
+    held = str(goal.get("outcome") or "").strip()
+    bounded = bool(goal.get("bounded"))
+    if GREETING_RE.match(heard) or MORNING_RE.search(heard):
+        return {
+            "kind": "morning",
+            "verb": "brief",
+            "outcome": held,
+            "bounded": bounded,
+            "attach_mission": False,
+        }
+    if CONTINUE_RE.match(heard):
+        return {
+            "kind": "continue",
+            "verb": "continue",
+            "outcome": held,
+            "bounded": bounded,
+            "attach_mission": False,
+        }
+    lead = GOAL_LEAD_RE.match(heard)
+    if lead:
+        verb = lead.group(1).lower()
+        rest = (lead.group(2) or "").strip().rstrip(".")
+        if verb == "continue":
+            if rest and not held:
+                return {
+                    "kind": "goal",
+                    "verb": "continue",
+                    "outcome": rest,
+                    "bounded": outcome_is_bounded(rest),
+                    "attach_mission": True,
+                }
+            return {
+                "kind": "continue",
+                "verb": "continue",
+                "outcome": held,
+                "bounded": bounded,
+                "attach_mission": False,
+            }
+        if verb == "brief":
+            return {
+                "kind": "brief",
+                "verb": "brief",
+                "outcome": held,
+                "bounded": bounded,
+                "attach_mission": False,
+            }
+        if verb == "remember":
+            return {
+                "kind": "remember",
+                "verb": "remember",
+                "outcome": held,
+                "note": rest or heard,
+                "bounded": bounded,
+                "attach_mission": False,
+            }
+        if verb in HIGH_VERBS and rest:
+            return {
+                "kind": "goal",
+                "verb": verb,
+                "outcome": rest,
+                "bounded": outcome_is_bounded(rest),
+                "attach_mission": True,
+            }
+    found = OUTCOME_RE.search(heard)
+    if found:
+        rest = found.group(1).strip().rstrip(".")
+        if rest:
+            return {
+                "kind": "goal",
+                "verb": "work",
+                "outcome": rest,
+                "bounded": outcome_is_bounded(rest),
+                "attach_mission": True,
+            }
+    return {
+        "kind": "ordinary",
+        "verb": "converse",
+        "outcome": held,
+        "bounded": bounded,
+        "attach_mission": False,
+    }
+
+
+def _matrix_mission(decision: dict) -> dict:
+    return {
+        "kind": "matrix",
+        "outcome": decision.get("outcome") or "",
+        "verb": decision.get("verb") or "work",
+        "bounded": bool(decision.get("bounded")),
+        "owner": "native",
+    }
+
+
+def apply_intent(hive: Path, utterance: str) -> dict:
+    """Keep one active goal on the bus. Attach a Matrix mission only for a goal."""
+    bus = load_json(hive / "bus" / "state.json")
+    decision = classify_utterance(utterance, bus)
+
+    def apply(current: dict) -> dict:
+        goal = current.get("active_goal") if isinstance(current.get("active_goal"), dict) else {}
+        kind = decision["kind"]
+        if kind == "ordinary" or kind == "morning":
+            current["intent"] = {"kind": kind, "verb": decision["verb"], "mission": None}
+            return current
+        if kind == "remember":
+            ctx = [str(line) for line in (goal.get("context") or []) if str(line).strip()]
+            note = str(decision.get("note") or "").strip()
+            if note and note not in ctx:
+                ctx.append(note)
+            kept = dict(goal)
+            kept["context"] = ctx[-3:]
+            kept["verb"] = "remember"
+            kept["mission"] = goal.get("mission")
+            current["active_goal"] = kept
+            current["intent"] = {"kind": "remember", "verb": "remember", "mission": None}
+            return current
+        if kind == "brief":
+            current["intent"] = {"kind": "brief", "verb": "brief", "mission": None}
+            return current
+        if kind == "continue":
+            current["intent"] = {
+                "kind": "continue",
+                "verb": "continue",
+                "mission": goal.get("mission"),
+            }
+            if goal:
+                current["active_goal"] = goal
+            return current
+        if kind == "goal":
+            ctx = recover_context(current, str(decision.get("outcome") or ""))
+            mission = _matrix_mission(decision) if decision.get("attach_mission") else None
+            current["active_goal"] = {
+                "outcome": decision.get("outcome") or "",
+                "bounded": bool(decision.get("bounded")),
+                "verb": decision.get("verb") or "work",
+                "context": ctx,
+                "mission": mission,
+            }
+            current["intent"] = {"kind": "goal", "verb": decision.get("verb"), "mission": mission}
+            return current
+        return current
+
+    PIPELINE.mutate_bus(hive, apply)
+    return decision
+
+
+def _continue_line(outcome: str, *, resumed: bool) -> str:
+    text = (outcome or "").strip().rstrip(".")
+    if resumed:
+        return f"Still on it. The outcome is {text}."
+    return f"Continuing. The outcome is {text}."
+
+
+def _needs_human_line(text: str, decision: dict) -> bool:
+    heard = text or ""
+    if AGENT_MENU_RE.search(heard) or CONTROL_PLANE_RE.search(heard):
+        return True
+    if decision.get("kind") in {"goal", "continue"} and decision.get("bounded"):
+        if not heard.strip() or heard.strip() == DARK_BRAIN or "UNKNOWN" in heard:
+            return True
+    return False
+
+
+def _human_line(decision: dict) -> str:
+    outcome = str(decision.get("outcome") or "").strip()
+    kind = decision.get("kind")
+    if kind in {"goal", "continue"} and decision.get("bounded") and outcome:
+        return _continue_line(outcome, resumed=kind == "continue")
+    if outcome:
+        return f"The outcome is {outcome}."
+    return "Nothing is waiting on you."
+
+
+def _scrub_agent_choice(text: str, decision: dict) -> str:
+    if _needs_human_line(text, decision):
+        return _human_line(decision)
+    return text
+
+
+def _rewrite_spoken(hive: Path, text: str) -> None:
+    def apply(bus: dict) -> dict:
+        bus["spoken"] = text
+        turns = bus.get("turns") if isinstance(bus.get("turns"), list) else None
+        if turns and isinstance(turns[-1], dict):
+            turns[-1]["jarvis"] = text
+            bus["turns"] = turns
+        return bus
+
+    PIPELINE.mutate_bus(hive, apply)
+
+
 def apply_turn_iter(
     utterance: str,
     *,
@@ -459,8 +749,47 @@ def apply_turn_iter(
         yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "focus", retrieve_roots, gen=token)
         return
 
+    decision = apply_intent(hive, spoken)
+    if decision["kind"] == "morning" and GREETING_RE.match(spoken):
+        yield _door_speak(hive, spoken, "Good morning.", "converse", retrieve_roots, gen=token)
+        return
+    if decision["kind"] == "morning":
+        line = _human_line(decision)
+        yield _door_speak(hive, spoken, line, "brief", retrieve_roots, gen=token)
+        return
+    if decision["kind"] == "brief":
+        line = _human_line(decision)
+        yield _door_speak(hive, spoken, line, "brief", retrieve_roots, gen=token)
+        return
+    if decision["kind"] == "remember":
+        line = "I'll keep that with the outcome." if decision.get("outcome") else "I'll keep that."
+        yield _door_speak(hive, spoken, line, "remember", retrieve_roots, gen=token)
+        return
+    if decision["kind"] == "continue" and not decision.get("outcome"):
+        yield _door_speak(hive, spoken, "No outcome is active.", "continue", retrieve_roots, gen=token)
+        return
+    if decision["kind"] == "goal" and not decision.get("bounded"):
+        yield _door_speak(
+            hive,
+            spoken,
+            "What does finished look like?",
+            str(decision.get("verb") or "work"),
+            retrieve_roots,
+            gen=token,
+        )
+        return
+    if decision["kind"] == "continue" and not decision.get("bounded"):
+        yield _door_speak(hive, spoken, "What does finished look like?", "continue", retrieve_roots, gen=token)
+        return
+
+    work = spoken
+    if decision["kind"] in {"goal", "continue"} and decision.get("bounded") and decision.get("outcome"):
+        work = (
+            "Continue this outcome yourself. Do not ask which agent. Outcome: "
+            + str(decision["outcome"])
+        )
     for out in PIPELINE.apply_pipeline_iter(
-        spoken,
+        work,
         hive=hive,
         retrieve_roots=retrieve_roots,
         cursor_fn=cursor_fn,
@@ -479,12 +808,29 @@ def apply_turn_iter(
         delta = str(out.get("spoken_delta") or "")
         if is_ask_leak(delta):
             delta = ""
+        held = decision["kind"] in {"goal", "continue"} and bool(decision.get("bounded"))
+        if held:
+            text = _scrub_agent_choice(text, decision)
+            if delta:
+                delta = _scrub_agent_choice(delta, decision)
+            if bool(out.get("done", True)):
+                _rewrite_spoken(hive, text)
+        verb = (
+            str(decision.get("verb") or "work")
+            if held
+            else str(out.get("verb") or out.get("tool") or "pipeline")
+        )
+        wires = list(out.get("wires") or ["pipeline"])
+        if held and verb not in wires:
+            wires.append(verb)
+        if held and decision.get("attach_mission") and "matrix" not in wires:
+            wires.append("matrix")
         yield _turn_event(
             spoken=text,
-            verb=str(out.get("verb") or out.get("tool") or "pipeline"),
+            verb=verb,
             host="pipeline",
             cites=out.get("cites") or [],
-            wires=out.get("wires") or ["pipeline"],
+            wires=wires,
             args=out.get("args"),
             done=bool(out.get("done", True)),
             spoken_delta=delta,
@@ -604,6 +950,83 @@ def self_test() -> dict:
         mute = set_listen(hive, False, gen=token)
         if mute.get("mic") != "mute":
             return {"ok": False, "errors": ["MUTE did not write mute"]}
+
+        def _seed(bus: dict) -> dict:
+            bus["turns"] = [{"user": "the hero must say the offer", "jarvis": "Noted."}]
+            return bus
+
+        PIPELINE.mutate_bus(hive, _seed)
+
+        def menu_talk(prompt: str, pack: str = "", **kw):
+            _ = (prompt, pack, kw)
+            return {
+                "ok": True,
+                "spoken": "Name the desk: Forge, Watchdog, Researcher, HITL, or Comms.",
+                "wire": "xai",
+                "engine": "xai",
+            }
+
+        goal = apply_turn(
+            "Work until the hero says the offer in one sentence.",
+            hive=hive,
+            talk_fn=menu_talk,
+        )
+        bus = load_json(hive / "bus" / "state.json")
+        active = bus.get("active_goal") if isinstance(bus.get("active_goal"), dict) else {}
+        mission = active.get("mission") if isinstance(active.get("mission"), dict) else {}
+        if mission.get("kind") != "matrix" or mission.get("owner") != "native":
+            return {"ok": False, "errors": ["bounded goal must attach one native matrix mission"], "got": active}
+        if "hero" not in str(active.get("outcome") or "").lower():
+            return {"ok": False, "errors": ["bounded goal must keep the outcome"], "got": active}
+        if not any("hero" in str(line).lower() for line in (active.get("context") or [])):
+            return {"ok": False, "errors": ["bounded goal must recover context"], "got": active}
+        if AGENT_MENU_RE.search(goal.get("spoken") or "") or goal.get("ask"):
+            return {"ok": False, "errors": ["bounded goal must not ask Evens to choose an agent"], "got": goal}
+        if goal.get("verb") != "work":
+            return {"ok": False, "errors": ["work stays on the turn path"], "got": goal}
+        morning = apply_turn("good morning", hive=hive)
+        bus = load_json(hive / "bus" / "state.json")
+        still = bus.get("active_goal") if isinstance(bus.get("active_goal"), dict) else {}
+        if (still.get("mission") or {}).get("kind") != "matrix":
+            return {"ok": False, "errors": ["ordinary greeting must leave the mission"], "got": still}
+        if "mission" in (morning.get("wires") or []):
+            return {"ok": False, "errors": ["ordinary greeting must not attach a mission"], "got": morning}
+        again = apply_turn("continue", hive=hive, talk_fn=menu_talk)
+        bus = load_json(hive / "bus" / "state.json")
+        kept = bus.get("active_goal") if isinstance(bus.get("active_goal"), dict) else {}
+        if kept.get("outcome") != active.get("outcome"):
+            return {"ok": False, "errors": ["continue must keep the active goal"], "got": kept}
+        if AGENT_MENU_RE.search(again.get("spoken") or ""):
+            return {"ok": False, "errors": ["continue must not ask for an agent"], "got": again}
+        if again.get("verb") != "continue":
+            return {"ok": False, "errors": ["continue stays on the turn path"], "got": again}
+        remembered = apply_turn("remember the offer is one sentence", hive=hive)
+        bus = load_json(hive / "bus" / "state.json")
+        noted = bus.get("active_goal") if isinstance(bus.get("active_goal"), dict) else {}
+        if not any("one sentence" in str(line).lower() for line in (noted.get("context") or [])):
+            return {"ok": False, "errors": ["remember keeps the note on the active goal"], "got": noted}
+        if (noted.get("mission") or {}).get("outcome") != (kept.get("mission") or {}).get("outcome"):
+            return {"ok": False, "errors": ["remember must not attach a new mission"], "got": noted}
+        briefed = apply_turn("brief", hive=hive)
+        if CONTROL_PLANE_RE.search(briefed.get("spoken") or ""):
+            return {"ok": False, "errors": ["brief must not speak a control-plane label"], "got": briefed}
+        asked = apply_turn("what should I work on this morning?", hive=hive)
+        if CONTROL_PLANE_RE.search(asked.get("spoken") or "") or AGENT_MENU_RE.search(asked.get("spoken") or ""):
+            return {"ok": False, "errors": ["a morning question stays a human sentence"], "got": asked}
+        delegated = apply_turn("delegate the whole company", hive=hive)
+        if AGENT_MENU_RE.search(delegated.get("spoken") or ""):
+            return {"ok": False, "errors": ["delegate must not offer a desk menu"], "got": delegated}
+        if "finished" not in (delegated.get("spoken") or "").lower():
+            return {"ok": False, "errors": ["an unbounded goal asks for a finish"], "got": delegated}
+        for verb in ("research", "act", "create", "review"):
+            sample = classify_utterance(f"{verb} the hero sentence until it is one line", {})
+            if sample.get("kind") != "goal" or sample.get("verb") != verb or not sample.get("attach_mission"):
+                return {"ok": False, "errors": [f"{verb} must stay a goal on this path"], "got": sample}
+            if not sample.get("bounded"):
+                return {"ok": False, "errors": [f"{verb} with a finish must be bounded"], "got": sample}
+        plain = classify_utterance("thanks", {"active_goal": active})
+        if plain.get("kind") != "ordinary" or plain.get("attach_mission"):
+            return {"ok": False, "errors": ["thanks stays ordinary conversation"], "got": plain}
         return {"ok": True, "errors": []}
 
 

@@ -475,6 +475,8 @@ DISPATCH_DEST = ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/dispat
 
 
 def _load(name: str, path: Path):
+    if not path.is_file():
+        return None
     sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
@@ -1806,6 +1808,16 @@ def assemble_pack(
         )
     )
     lines.append("")
+    goal = bus.get("active_goal") if isinstance(bus.get("active_goal"), dict) else {}
+    if str(goal.get("outcome") or "").strip():
+        lines.append("Active goal:")
+        lines.append(f"Outcome: {goal.get('outcome')}")
+        lines.append("Continue this outcome. Do not ask Evens to choose an agent.")
+        ctx = goal.get("context") if isinstance(goal.get("context"), list) else []
+        for line in ctx[:3]:
+            if str(line).strip():
+                lines.append(f"Context: {line}")
+        lines.append("")
     eyes = bus.get("eyes") if isinstance(bus.get("eyes"), dict) else {}
     if eyes.get("path") and eyes.get("active") is not False:
         lines.append("Eyes (camera on this Mac, local only):")
@@ -4421,15 +4433,16 @@ def note_wire(
         payload["scar"] = row.get("scar")
     if row.get("url"):
         payload["url"] = row.get("url")
-    return LAST_WIRE.write(
-        hive,
-        verb=tool,
-        ok=ok,
-        human_line=spoken,
-        wire=payload,
-        utterance=utterance,
-        gen=gen,
-    )
+    kwargs = {
+        "verb": tool,
+        "ok": ok,
+        "human_line": spoken,
+        "wire": payload,
+        "utterance": utterance,
+    }
+    if "gen" in getattr(LAST_WIRE.write, "__code__").co_varnames:
+        kwargs["gen"] = gen
+    return LAST_WIRE.write(hive, **kwargs)
 
 
 def _pipeline_event(
