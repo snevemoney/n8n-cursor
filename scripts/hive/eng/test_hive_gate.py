@@ -28,6 +28,11 @@ def live_evidence(tmp: Path) -> dict:
         "trace_id": "trace-1",
         "input": {"path": "/api/watch"},
         "observed": {"op": "OPEN_NOTES", "did_not_book": True},
+        "repo": "snevemoney/n8n-cursor",
+        "branch": "cursor/hive-eng-control-plane-9b29",
+        "machine": "fixture-host",
+        "runtime": "python3-fixture",
+        "config": "fixture-config",
     }
 
 

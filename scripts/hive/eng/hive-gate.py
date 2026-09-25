@@ -143,6 +143,14 @@ def request_transition(
         reasons.extend(hive_job.g2_reasons(claim, directory))
     if target in hive_job.LIVE_PLUS:
         reasons.extend(hive_job.evidence_reasons(claim, directory, hive_job.load_evidence(directory)))
+    reasons.extend(
+        hive_job.authority_proof_reasons(
+            claim,
+            hive_job.load_evidence(directory),
+            hive_job.load_receipts(directory),
+            state=target,
+        )
+    )
     if target == "REVIEWED":
         reasons.extend(hive_job.close_reasons(claim))
         log = Path(l4_log) if l4_log else hive_job._default_l4(claim, directory)

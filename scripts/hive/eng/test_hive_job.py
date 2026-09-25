@@ -222,6 +222,168 @@ class HiveJobGateTest(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertIn("forge performs develop on grok_bot and is not a verifier", proc.stdout)
 
+    def _live_evidence(self, tmp: Path) -> dict:
+        return {
+            "kind": "live_face",
+            "surface": "127.0.0.1:4018",
+            "entrypoint": "/api/watch",
+            "expected_listen": "4018",
+            "environment": "local",
+            "address": "127.0.0.1:4018",
+            "git_sha": "fixture-sha",
+            "worktree": str(tmp),
+            "process": "test",
+            "timestamp": "2026-09-22T20:00:00Z",
+            "trace_id": "trace-1",
+            "input": {"path": "/api/watch"},
+            "observed": {"op": "OPEN_NOTES", "did_not_book": True},
+            "repo": "snevemoney/n8n-cursor",
+            "branch": "cursor/hive-eng-control-plane-9b29",
+            "machine": "fixture-host",
+            "runtime": "python3-fixture",
+            "config": "fixture-config",
+        }
+
+    def test_discussed_is_not_live(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            claim = base_claim("LIVE", statuses="discussed")
+            write_claim(tmp, claim, self._live_evidence(tmp))
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("must stay separate", proc.stdout)
+
+    def test_code_existing_is_not_acceptance(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            claim = base_claim("IMPLEMENTED_UNVERIFIED", code_exists=True, accepted=True)
+            write_claim(tmp, claim)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("code existing is not acceptance", proc.stdout)
+
+    def test_later_paraphrase_does_not_replace_the_ask(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            claim = base_claim("IMPLEMENTED_UNVERIFIED")
+            claim["operator_ask"] = {
+                "original": "Keep Jev in Jarvis.",
+                "current": "Ship Jev to production.",
+                "authority": "EVENS",
+                "may_rewrite": False,
+            }
+            write_claim(tmp, claim)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("later paraphrase does not replace", proc.stdout)
+
+    def test_markdown_order_is_not_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            evidence = self._live_evidence(tmp)
+            evidence["picked_by"] = "markdown_order"
+            write_claim(tmp, base_claim("LIVE"), evidence)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("markdown order is not authority", proc.stdout)
+
+    def test_conflict_stays_explicit(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            evidence = self._live_evidence(tmp)
+            evidence["conflicts"] = [{"a": "HOLD", "b": "LIVE"}]
+            evidence["picked_source"] = "b"
+            write_claim(tmp, base_claim("LIVE"), evidence)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("conflict hidden by picking a source", proc.stdout)
+
+    def test_co_signed_is_not_independent(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            write_claim(tmp, base_claim("VERIFIED", co_signed=True), self._live_evidence(tmp))
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("co-signed is not independent", proc.stdout)
+
+    def test_pass_diff_is_not_ship(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            write_claim(tmp, base_claim("LIVE", proof_status="PASS_DIFF"), self._live_evidence(tmp))
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("PASS_DIFF is not ship", proc.stdout)
+
+    def test_archive_is_not_the_rendered_face(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            evidence = self._live_evidence(tmp)
+            evidence["archive_equals_bus"] = True
+            write_claim(tmp, base_claim("LIVE"), evidence)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("different surfaces", proc.stdout)
+
+    def test_runner_chips_are_diagnostic(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            evidence = self._live_evidence(tmp)
+            evidence["kind"] = "runner_chip"
+            evidence["campaign"] = "300"
+            write_claim(tmp, base_claim("VERIFIED"), evidence)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("diagnostic, not final proof", proc.stdout)
+
+    def test_consequential_action_needs_a_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            claim = base_claim("VERIFIED", ask_verbs=["deploy"])
+            write_claim(tmp, claim, self._live_evidence(tmp))
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("consequential action needs a receipt", proc.stdout)
+
+    def test_second_writer_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            write_claim(tmp, base_claim("IMPLEMENTED_UNVERIFIED"))
+            row = {
+                "from": "SCOPED",
+                "to": "IMPLEMENTED_UNVERIFIED",
+                "revision": 1,
+                "agent": "cursor_background_agent",
+                "role": "builder",
+                "ran_by": "builder",
+            }
+            (tmp / "transitions.jsonl").write_text(json.dumps(row) + "\n", encoding="utf-8")
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("several writers mutate control truth", proc.stdout)
+
+    def test_old_pass_expires_when_runtime_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            evidence = self._live_evidence(tmp)
+            claim = base_claim("LIVE")
+            claim["runtime"] = {**claim["runtime"], "repo": "snevemoney/n8n-cursor", "branch": "other-branch"}
+            evidence["repo"] = "snevemoney/n8n-cursor"
+            evidence["branch"] = "cursor/hive-eng-control-plane-9b29"
+            write_claim(tmp, claim, evidence)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("evidence expired: runtime changed", proc.stdout)
+
+    def test_live_claim_without_environment_identity_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            evidence = self._live_evidence(tmp)
+            evidence.pop("machine")
+            write_claim(tmp, base_claim("LIVE"), evidence)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("missing evidence.machine", proc.stdout)
+
     def test_registry_is_derived(self) -> None:
         proc = subprocess.run(
             [sys.executable, str(CLI), "registry"],
