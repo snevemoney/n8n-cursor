@@ -253,10 +253,10 @@ const TERMINAL_STATUS = new Set([
   'CLOSED',
 ])
 
-function closingTerminal(status: string, closesWork: unknown): boolean {
-  const upper = status.toUpperCase()
-  if (upper === 'PASS' && closesWork === false) return false
-  return TERMINAL_STATUS.has(upper) || status.toLowerCase() === 'done'
+function isTerminalClaim(status: string): boolean {
+  const raw = status.trim()
+  const upper = raw.toUpperCase()
+  return TERMINAL_STATUS.has(upper) || raw.toLowerCase() === 'done'
 }
 
 const scorpion_register_outcome: ToolHandler = async (params) => {
@@ -276,26 +276,16 @@ const scorpion_register_outcome: ToolHandler = async (params) => {
     )
   }
   const requested = String(params.status || 'IMPLEMENTED')
-  if (closingTerminal(requested, params.closesWork)) {
-    const permit = typeof params.proofPermit === 'string' ? params.proofPermit : ''
-    const builder = String(params.builder || params.source || '')
-    const verifier =
-      params.verifier && typeof params.verifier === 'object'
-        ? (params.verifier as { actor?: string })
-        : undefined
-    const verifierActor = String(verifier?.actor || '')
-    const evidenceOk = Array.isArray(params.evidence) && params.evidence.length > 0
-    if (!permit || !evidenceOk || !verifierActor || verifierActor === builder) {
-      return NextResponse.json(
-        {
-          ok: false,
-          code: 'TERMINAL_PROOF_REQUIRED',
-          error: 'Terminal status is only accepted from hive-state.transition_job',
-          hold: 'IMPLEMENTED',
-        },
-        { status: 400 },
-      )
-    }
+  if (isTerminalClaim(requested)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        code: 'TERMINAL_PROOF_REQUIRED',
+        error: 'Terminal status is only accepted from hive-state.transition_job',
+        hold: 'IMPLEMENTED',
+      },
+      { status: 400 },
+    )
   }
   const body: Record<string, unknown> = {
     correlationId: missionId,
@@ -306,7 +296,6 @@ const scorpion_register_outcome: ToolHandler = async (params) => {
     registerTo: target,
     summary,
   }
-  if (typeof params.proofPermit === 'string') body.proofPermit = params.proofPermit
   if (Array.isArray(params.artifacts)) body.artifacts = params.artifacts
   if (params.metadata && typeof params.metadata === 'object') body.metadata = params.metadata
   return hiveFetch('scorpion_register_outcome', '/api/hive/register', {
