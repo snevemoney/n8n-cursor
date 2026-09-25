@@ -37,9 +37,33 @@ _FINANCE_LINE = re.compile(
     re.I,
 )
 _FINANCE_KEY = re.compile(
-    r"(bank[_\s-]?balance|account[_\s-]?number|routing([_\s-]?number)?|savings[_\s-]?rate|^amount$|^balance$|invoice|transaction([_\s-]?amount)?)",
+    r"(bank[_\s-]?balance|account[_\s-]?number|routing([_\s-]?number)?|savings[_\s-]?rate|"
+    r"(^|[_\s-])(amount|balance|cash|cents)([_\s-]|$)|invoice|transaction([_\s-]?(amount|cash))?)",
     re.I,
 )
+_FINANCE_KEY_TOKENS = frozenset(
+    {"amount", "amounts", "balance", "balances", "cash", "cents", "invoice", "invoices"}
+)
+_NUMBER_WORD = (
+    r"zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|"
+    r"thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
+    r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|"
+    r"hundred|thousand|million|billion"
+)
+_MONEY_PROSE = re.compile(
+    r"(?:"
+    r"[$€£]\s*\d"
+    r"|\b\d[\d,]*(?:\.\d+)?\s*(?:usd|cad|eur|gbp|dollars?|cents?)\b"
+    r"|\b(?:usd|cad|eur|gbp|dollars?|cents?)\s*[:.]?\s*\d"
+    r"|\b(?:figure|cash|amount|balance|invoice|payment|paid|wire)\b[^.\n]{0,80}\d"
+    r"|\d[^.\n]{0,40}\b(?:figure|dollars?|cents?|usd|cash)\b"
+    r"|\b(?:" + _NUMBER_WORD + r")(?:[\s-](?:and|" + _NUMBER_WORD + r"))*\s+(?:dollars?|cents?|usd)\b"
+    r"|\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b"
+    r"|\b\d+\.\d{2}\b"
+    r")",
+    re.I,
+)
+_REDACTION_STUB_KINDS = frozenset({"finance_raw", "personal_raw"})
 _PERSONAL_LINE = re.compile(
     r"\b(home\s*address|date\s*of\s*birth|personal\s*phone|medical\s*record|diagnosis)\b",
     re.I,
@@ -255,13 +279,35 @@ def kill_switch_blocks(data: dict[str, Any] | None) -> tuple[bool, str]:
     return decision == "IGNORE", reason
 
 
+def _finance_key(key: str) -> bool:
+    text = str(key)
+    if _FINANCE_KEY.search(text):
+        return True
+    spaced = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", text)
+    tokens = [part for part in re.split(r"[_\s\-]+", spaced.strip().lower()) if part]
+    return any(part in _FINANCE_KEY_TOKENS for part in tokens)
+
+
+def _is_redaction_stub(payload: Any) -> bool:
+    """The writer stub is redacted plus a classification and nothing else.
+
+    A redacted flag beside an amount, a cash field, or a prose figure is not safe.
+    """
+    if not isinstance(payload, dict) or payload.get("redacted") is not True:
+        return False
+    if set(payload) - {"redacted", "classification"}:
+        return False
+    kind = payload.get("classification")
+    return isinstance(kind, str) and kind in _REDACTION_STUB_KINDS
+
+
 def _scan_mapping(obj: Any) -> str | None:
     if isinstance(obj, dict):
         for key, value in obj.items():
             key_text = str(key)
             if _PERSONAL_KEY.search(key_text):
                 return "personal_raw"
-            if _FINANCE_KEY.search(key_text):
+            if _finance_key(key_text):
                 return "finance_raw"
             found = _scan_mapping(value)
             if found:
@@ -276,14 +322,15 @@ def _scan_mapping(obj: Any) -> str | None:
     if isinstance(obj, str):
         if _PERSONAL_LINE.search(obj):
             return "personal_raw"
-        if _FINANCE_LINE.search(obj):
+        if _FINANCE_LINE.search(obj) or _MONEY_PROSE.search(obj):
             return "finance_raw"
     return None
 
 
 def shared_event_classification(event: dict[str, Any]) -> str | None:
     """Raw finance or personal data, including the default sensitivity and unlabeled payloads."""
-    if isinstance(event.get("payload"), dict) and event["payload"].get("redacted") is True:
+    payload = event.get("payload")
+    if _is_redaction_stub(payload):
         return None
     sensitivity = str(event.get("sensitivity") or "internal").lower()
     if sensitivity in {"personal", "personal_raw"}:
@@ -427,6 +474,29 @@ def self_test() -> int:
         {"type": "agent.heartbeat", "sensitivity": "internal", "payload": {"ok": True}}
     )
     check(plain["payload"] == {"ok": True}, "plain payload kept")
+    leaks = (
+        ("cash", {"cash": 636363}, "636363"),
+        ("amount_cents", {"amount_cents": 747474}, "747474"),
+        ("prose figure", {"note": "The prose figure was $818181"}, "818181"),
+        ("prose dollars", {"note": "owed forty-two thousand dollars"}, "forty-two"),
+        ("redacted flag keeps amount", {"redacted": True, "amount": 919191}, "919191"),
+    )
+    for label, payload, marker in leaks:
+        cleaned, refuse_leak = prepare_shared_event(
+            {
+                "type": "agent.heartbeat",
+                "source": "cli",
+                "actor": "operator",
+                "sensitivity": "internal",
+                "payload": payload,
+            }
+        )
+        check(refuse_leak is None and marker not in json.dumps(cleaned), f"cli drops {label}")
+    stub_in = {"redacted": True, "classification": "finance_raw"}
+    stub_out, _ = prepare_shared_event(
+        {"type": "agent.heartbeat", "sensitivity": "internal", "payload": dict(stub_in)}
+    )
+    check(stub_out["payload"] == stub_in, "writer stub stays")
     _, refuse_pub = prepare_shared_event({"type": "content.published", "payload": {"status": "done"}})
     check(refuse_pub is not None, "publish without receipt refused")
     _, refuse_done = prepare_shared_event(
