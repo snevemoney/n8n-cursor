@@ -121,9 +121,16 @@ def _terminal_token(status: str) -> str | None:
     return None
 
 
+def _closes_work_flag(value: object) -> bool:
+    """Only an explicit false keeps PASS from being a close. The string "false" counts."""
+    if isinstance(value, str):
+        return value.strip().lower() not in {"false", "0", "no"}
+    return bool(value)
+
+
 def _is_terminal_word(status: str, *, closes_work: bool = True) -> str | None:
     token = _terminal_token(status)
-    if token == "PASS" and not closes_work:
+    if token == "PASS" and not _closes_work_flag(closes_work):
         return None
     return token
 
@@ -373,7 +380,8 @@ def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
     token = _terminal_token(status)
     if token is None:
         return True
-    word = _is_terminal_word(status, closes_work=bool(job.get("closes_work", True)))
+    closes = _closes_work_flag(job.get("closes_work", True))
+    word = _is_terminal_word(status, closes_work=closes)
     # save() is not a second writer. A non-closing PASS is still the word PASS.
     if word is None:
         return False
@@ -384,7 +392,7 @@ def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
         evidence=job.get("evidence") if isinstance(job.get("evidence"), list) else None,
         environment=job.get("environment") if isinstance(job.get("environment"), dict) else None,
         required=job.get("required_evidence") if isinstance(job.get("required_evidence"), list) else None,
-        closes_work=bool(job.get("closes_work", True)),
+        closes_work=closes,
         session=job.get("session") if isinstance(job.get("session"), dict) else None,
         receipt=job.get("receipt") if isinstance(job.get("receipt"), dict) else None,
         job_id=str(job.get("id") or ""),
@@ -394,7 +402,7 @@ def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
 
 def save(data: dict, path: Path | None = None) -> None:
     target = path or STATE
-    previous: dict[str, str] = {}
+    previous: dict[str, dict] = {}
     if target.is_file():
         try:
             old = json.loads(target.read_text(encoding="utf-8"))
@@ -402,13 +410,16 @@ def save(data: dict, path: Path | None = None) -> None:
             old = {}
         for row in old.get("jobs") or []:
             if isinstance(row, dict) and row.get("id"):
-                previous[str(row["id"])] = str(row.get("status") or "")
+                previous[str(row["id"])] = row
     blocked: list[str] = []
     for row in data.get("jobs") or []:
         if not isinstance(row, dict):
             continue
         job_id = str(row.get("id") or "")
-        if not _terminal_change_allowed(row, previous.get(job_id)):
+        prior = previous.get(job_id)
+        _demote_invalid_close(row, prior if isinstance(prior, dict) else None)
+        prior_status = str(prior.get("status") or "") if isinstance(prior, dict) else None
+        if not _terminal_change_allowed(row, prior_status):
             blocked.append(job_id or "?")
     if blocked:
         raise SystemExit(f"terminal status without canonical proof: {', '.join(blocked)}")
@@ -557,9 +568,10 @@ def note_environment(job_id: str, environment: dict, *, state_path: Path | None 
     job["evidence"] = evidence
     job["environment"] = environment
     _present, stale = present_evidence(evidence, environment)
+    marked_stale = any(isinstance(item, dict) and item.get("stale") is True for item in evidence)
     unbound = _unbound_dimension(evidence, environment)
     token = _terminal_token(str(job.get("status") or ""))
-    if (stale or unbound) and token:
+    if (stale or unbound or marked_stale) and token:
         job["status"] = "VERIFYING"
         job.pop("proofPermit", None)
         job["terminal_rejected"] = "evidence stale"
@@ -567,6 +579,39 @@ def note_environment(job_id: str, environment: dict, *, state_path: Path | None 
     _upsert_job(data, job)
     save(data, state_path)
     return {"job": job, "stale": stale}
+
+
+def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
+    """An existing close drops when closes_work turns off or a runtime is attached unbound."""
+    if not isinstance(previous_job, dict):
+        return
+    if _terminal_token(str(job.get("status") or "")) is None:
+        return
+    if not _closes_work_flag(job.get("closes_work", True)):
+        job["status"] = "BLOCKED"
+        job.pop("proofPermit", None)
+        job["terminal_rejected"] = "not a closing terminal"
+        return
+    if _added_unbound_dimension(job, previous_job):
+        job["status"] = "VERIFYING"
+        job.pop("proofPermit", None)
+        job["terminal_rejected"] = "evidence stale"
+
+
+def _added_unbound_dimension(job: dict, previous_job: dict) -> bool:
+    env = job.get("environment") if isinstance(job.get("environment"), dict) else None
+    if not env:
+        return False
+    prev_env = previous_job.get("environment") if isinstance(previous_job.get("environment"), dict) else {}
+    added = [key for key in ("runtime", "config", "version") if key in env and env.get(key) != prev_env.get(key)]
+    if not added:
+        return False
+    evidence = job.get("evidence") if isinstance(job.get("evidence"), list) else []
+    items = [item for item in evidence if isinstance(item, dict)]
+    for key in added:
+        if not any(item.get(key) == env.get(key) and item.get("stale") is not True for item in items):
+            return True
+    return False
 
 
 def _unbound_dimension(evidence: list, environment: dict | None) -> bool:
