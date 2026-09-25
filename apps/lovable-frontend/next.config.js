@@ -24,7 +24,7 @@ const nextConfig = {
     domains: [
       'n8ncloud.tech',
       'n8n.local',
-      'localhost',
+      process.env.NEXT_IMAGE_LOCAL_HOST || 'localhost',
       'lightningflow.local',
       'app.lightningflow.local',
       'lightningflow.online'

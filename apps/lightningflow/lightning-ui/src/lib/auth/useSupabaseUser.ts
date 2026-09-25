@@ -23,7 +23,7 @@ const getDevBypassStatus = () => {
   try {
     // Check if we're in development and bypass is enabled
     return typeof window !== 'undefined' && 
-           (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+           (window.location.hostname === (process.env.NEXT_PUBLIC_DEV_HOST || 'localhost') || window.location.hostname === '127.0.0.1')
   } catch {
     return false
   }

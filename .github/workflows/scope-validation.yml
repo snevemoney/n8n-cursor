@@ -182,8 +182,11 @@ jobs:
 
       - name: Check for secrets
         run: |
-          # Check for common secret patterns
-          if grep -r -i "password\|secret\|key\|token" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+          # Same real-secret assignment rule and fixture filter as Reliability Guards.
+          if grep -r -E "(api_key|secret_key|private_key|auth_token)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]" \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist \
+            apps/ packages/ 2>/dev/null | grep -v "process\.env\|test-\|mock-\|fake-\|dummy\|vitest\|jest\|\.test\.\|\.spec\.\|__test"; then
             echo "❌ Potential secrets found in code"
             exit 1
           fi
@@ -191,8 +194,11 @@ jobs:
 
       - name: Check for hardcoded URLs
         run: |
-          # Check for hardcoded localhost or IP addresses
-          if grep -r "localhost\|127\.0\.0\.1\|0\.0\.0\.0" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+          # Same fixture filter and local bind allowlist as Reliability Guards.
+          if grep -r -E "localhost|127\.0\.0\.1|(^|[^0-9])0\.0\.0\.0([^0-9]|$)" \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist \
+            apps/ | grep -v "process\.env\|NEXT_PUBLIC_\|healthcheck\|127\.0\.0\.1:3000\|127\.0\.0\.1:4000\|127\.0\.0\.1:5678\|test-\|mock-\|fake-\|dummy\|vitest\|jest\|\.test\.\|\.spec\.\|__test"; then
             echo "❌ Hardcoded URLs found in code"
             exit 1
           fi

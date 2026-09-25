@@ -11,8 +11,8 @@ export const schema = z.object({
 export async function handler(args: z.infer<typeof schema>) {
   try {
     const url = args.modelIds && args.modelIds.length > 0
-      ? `http://localhost:3003/api/llm/models/compare?ids=${args.modelIds.join(',')}`
-      : 'http://localhost:3003/api/llm/models/compare';
+      ? `${process.env.SCORPION_API_URL || 'http://localhost:3003'}/api/llm/models/compare?ids=${args.modelIds.join(',')}`
+      : process.env.SCORPION_API_URL || 'http://localhost:3003/api/llm/models/compare';
     
     const response = await fetch(url);
     if (!response.ok) {

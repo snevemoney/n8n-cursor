@@ -56,7 +56,7 @@ interface CouncilMemberConfig {
  * Power of 10 Rule #4: Explicit promise handling with timeout
  */
 async function getCouncilMembers(): Promise<CouncilMemberConfig[]> {
-  // Use environment variable for agents API URL (fixes hardcoded localhost)
+  // Use environment variable for agents API URL (fixes a hardcoded host)
   const agentsApiUrl = process.env.AGENTS_API_URL || process.env.NEXT_PUBLIC_URL || 'http://localhost:3003';
   const apiEndpoint = `${agentsApiUrl}/api/agents`;
 

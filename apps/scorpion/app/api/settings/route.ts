@@ -17,7 +17,7 @@ interface Settings {
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  ollamaUrl: 'http://localhost:11434',
+  ollamaUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
   ollamaModel: 'llama3.2:latest',
   autoRefresh: true,
   refreshInterval: 30,

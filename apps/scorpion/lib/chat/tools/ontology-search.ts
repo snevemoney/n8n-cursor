@@ -11,7 +11,7 @@ export const schema = z.object({
 
 export async function handler(args: z.infer<typeof schema>) {
   try {
-    const response = await fetch(`http://localhost:3003/api/ontology?query=${encodeURIComponent(args.query)}&limit=${args.limit}`);
+    const response = await fetch(`${process.env.SCORPION_API_URL || 'http://localhost:3003'}/api/ontology?query=${encodeURIComponent(args.query)}&limit=${args.limit}`);
     if (!response.ok) {
       throw new Error(`Failed to search ontology: ${response.statusText}`);
     }

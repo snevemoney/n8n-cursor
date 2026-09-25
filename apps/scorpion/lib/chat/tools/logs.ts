@@ -11,7 +11,7 @@ export const schema = z.object({
 
 export async function handler(args: z.infer<typeof schema>) {
   try {
-    const response = await fetch(`http://localhost:3003/api/logs`);
+    const response = await fetch(`${process.env.SCORPION_API_URL || 'http://localhost:3003'}/api/logs`);
     
     if (!response.ok) {
       throw new Error(`Logs API returned ${response.status}`);

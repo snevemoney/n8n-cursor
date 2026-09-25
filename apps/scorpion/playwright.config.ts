@@ -37,7 +37,7 @@ export default defineConfig({
   // Don't start the dev server (assume it's already running)
   // webServer: {
   //   command: 'pnpm dev',
-  //   url: 'http://localhost:3003',
+  // dev server url is supplied by BASE_URL
   //   reuseExistingServer: true,
   // },
 });

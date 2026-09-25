@@ -156,7 +156,7 @@ class AutonomousTestRunner {
 
     try {
       // Call our self-heal API
-      const response = await fetch('http://localhost:3001/api/ai/self-heal', {
+      const response = await fetch(process.env.BASE_URL || 'http://localhost:3001/api/ai/self-heal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

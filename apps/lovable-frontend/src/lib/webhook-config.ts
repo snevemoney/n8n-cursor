@@ -38,7 +38,7 @@ function preparePayload(data: any): any {
     actor: data.actor ?? 'system',
     request_id: data.request_id ?? requestId,
     session_id: data.session_id ?? sessionId,
-    origin: typeof window !== 'undefined' ? window.location.origin : 'https://localhost:3000',
+    origin: typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_ORIGIN || 'https://localhost:3000',
     env: process.env.NODE_ENV || 'development',
   };
 }

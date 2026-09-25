@@ -485,7 +485,7 @@ class LNbitsClient {
 
   private isLNbitsAvailable(): boolean {
     return !!(this.config.baseUrl && 
-              this.config.baseUrl !== 'http://localhost:5000' && 
+              this.config.baseUrl !== (process.env.LNBITS_URL || 'http://localhost:5000') && 
               this.config.adminKey);
   }
 

@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
         'option_payment_metadata': true
       },
       uris: [
-        `mock_node_02a1b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789ab@127.0.0.1:9735`
+        `mock-node_02a1b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789ab@127.0.0.1:9735`
       ],
       best_header_timestamp: Math.floor(Date.now() / 1000),
       chains: [

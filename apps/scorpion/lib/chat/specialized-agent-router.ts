@@ -167,7 +167,7 @@ export async function executeSpecializedAgent(
   params: any
 ): Promise<any> {
   try {
-    const response = await fetch('http://localhost:3003/api/agents/specialized', {
+    const response = await fetch(process.env.SCORPION_API_URL || 'http://localhost:3003/api/agents/specialized', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

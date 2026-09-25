@@ -19,7 +19,9 @@ services:
     command: ["redis-server","--save","","--appendonly","no","--maxmemory","128mb","--maxmemory-policy","allkeys-lru"]
     ports: ["127.0.0.1:6379:6379"]
     healthcheck: { test: ["CMD","redis-cli","ping"], interval: 5s, timeout: 2s, retries: 20 }
-    cpus: "0.25"; mem_limit: "128m"; pids_limit: 100  # Reduced limits
+    cpus: "0.25"
+    mem_limit: "128m"
+    pids_limit: 100  # Reduced limits
 
   # Minimal n8n for lightweight mode
   n8n:
@@ -38,7 +40,9 @@ services:
     volumes:
       - ${DEV_DATA_ROOT:-./data}/n8n_data:/home/node/.n8n
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:5678/healthz"], interval: 15s, timeout: 3s, retries: 10 }
-    cpus: "0.5"; mem_limit: "512m"; pids_limit: 150  # Reduced limits
+    cpus: "0.5"
+    mem_limit: "512m"
+    pids_limit: 150  # Reduced limits
 
   # Lightweight Scorpion with aggressive memory limits
   scorpion:
@@ -65,7 +69,9 @@ services:
       redis: { condition: service_healthy }
       n8n: { condition: service_healthy }
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 15s, timeout: 3s, retries: 10 }
-    cpus: "1"; mem_limit: "512m"; pids_limit: 200  # Aggressive limits for 8GB systems
+    cpus: "1"
+    mem_limit: "512m"
+    pids_limit: 200  # Aggressive limits for 8GB systems
     # Memory reservation to prevent OOM kills
     mem_reservation: "256m"
 

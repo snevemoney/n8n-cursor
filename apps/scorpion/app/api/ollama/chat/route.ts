@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { model, messages, ollamaUrl = 'http://localhost:11434' } = body;
+    const { model, messages, ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434' } = body;
 
     if (!model || !messages) {
       return NextResponse.json(

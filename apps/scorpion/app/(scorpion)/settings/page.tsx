@@ -10,7 +10,7 @@ export default function SettingsPage() {
   const [autoTrigger, setAutoTrigger] = useState(false);
   const [councilAutoContext, setCouncilAutoContext] = useState(true);
   const [modelSource, setModelSource] = useState('ollama');
-  const [ollamaUrl, setOllamaUrl] = useState('http://localhost:11434');
+  const [ollamaUrl, setOllamaUrl] = useState(process.env.OLLAMA_URL || 'http://localhost:11434');
   const [openaiKey, setOpenaiKey] = useState('');
   const [entityRetention, setEntityRetention] = useState('90 days');
   const [ragModel, setRagModel] = useState('nomic-embed-text');

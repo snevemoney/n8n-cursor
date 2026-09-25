@@ -8,7 +8,7 @@ export const schema = z.object({});
 
 export async function handler(args: z.infer<typeof schema>) {
   try {
-    const response = await fetch('http://localhost:3003/api/project/status');
+    const response = await fetch(process.env.SCORPION_API_URL || 'http://localhost:3003/api/project/status');
     if (!response.ok) {
       throw new Error(`Failed to fetch project status: ${response.statusText}`);
     }

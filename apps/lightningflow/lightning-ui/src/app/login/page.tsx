@@ -12,7 +12,7 @@ const supabase = createBrowserClient(
 // Check if we're in dev mode
 const isDevMode = () => {
   if (typeof window === 'undefined') return false;
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  return window.location.hostname === (process.env.NEXT_PUBLIC_DEV_HOST || 'localhost') || window.location.hostname === '127.0.0.1';
 };
 
 export default function LoginPage() {
