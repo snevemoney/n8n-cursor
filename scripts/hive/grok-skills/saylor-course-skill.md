@@ -15,7 +15,7 @@ description: >-
 **Grok `/` copy:** `~/.grokbot/skills/saylor-course-skill/SKILL.md`
 **Status:** WIRED 2026-09-02 from catalog promote. Not accepted forever.
 
-**Catalog namespace:** `saylor-course-skills` (available 164 candidate capabilities). This file is the router, not the active skill.
+**Catalog namespace:** `saylor-course-skills`. Available is the count the index search returns, not a fixed label over a shorter harvest. This file is the router, not the active skill.
 **Catalog index:** `CONTENT/saylor-skill-triggers.md` (repo: `docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md`). Do not load the skill bodies by default.
 **Speak-sheet:** `CONTENT/topics/saylor-trigger-map.md`
 **Data pack:** `CONTENT/topics/live-facts-card.md` → `live-facts-hive-os.md` | `live-facts-agency.md`
@@ -79,7 +79,7 @@ This declaration is the catalog namespace, not an active node.
 - Triggers: a hive, site, or money sitting; a named course skill; a request for the university catalog.
 - Negative triggers: exam reconstruction; dumping the catalog; treating `saylor-course-skills` as the selected skill.
 - Required context: LANE.
-- Outputs: `catalog_namespace` (school). Available 164 means discoverable candidates. Bodies stay unloaded.
+- Outputs: `catalog_namespace` (school). Available is `index_rows()` on the harvest table. Bodies stay unloaded.
 - Parallel: no. This router does not run beside the mission as a second skill.
 - Activation depth: 0.
 - Risk relevance: low.

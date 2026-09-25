@@ -9,7 +9,7 @@ description: >-
 
 Load `scripts/hive/grok-skills/saylor-course-skill.md` and follow it.
 
-**Catalog namespace first.** `saylor-course-skills` (available 164) is not the active skill. LANE `hive-os` | `agency`. The mission graph is the sufficient subset.
+**Catalog namespace first.** `saylor-course-skills` (available = the index search count) is not the active skill. LANE `hive-os` | `agency`. The mission graph is the sufficient subset.
 **Live mentor:** `saylor-mentor-pass` (beat this turn, emit at end).
 
 Hard step: send / pay / deploy / book / publish stay Evens.

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Live mentor: one teaching beat, then the mission's ActiveSkillGraph.
 
-School (`saylor-course-skills`) is the catalog namespace. Available 164 means
-164 candidate capabilities are discoverable. It is not the active skill.
+School (`saylor-course-skills`) is the catalog namespace. Available is the
+count index_rows() returns. It is not the active skill.
 A mission builds the sufficient subset. Skill bodies are not loaded by default.
 """
 from __future__ import annotations
@@ -24,7 +24,6 @@ JUDGMENT = ROOT / "scripts/hive/eng/judgment.py"
 SKILL_DIR = ROOT / "scripts/hive/grok-skills"
 LANES = ("hive-os", "agency")
 CAP = 3
-AVAILABLE = 164
 SCHOOL_NAMESPACE = "saylor-course-skills"
 COURSE_RE = re.compile(r"\b(?:BUS|COMM|ECON|PRDV|CS|ARTH|ENGL|PHIL|MA|POLSC)\d+\b")
 SHELF_RE = re.compile(
@@ -203,12 +202,12 @@ def index_rows() -> list[dict[str, str]]:
 
 
 def school_view() -> dict:
-    rows = index_rows()
+    found = len(index_rows())
     return {
         "namespace": SCHOOL_NAMESPACE,
         "role": "catalog",
-        "available": AVAILABLE,
-        "indexed": len(rows),
+        "available": found,
+        "indexed": found,
         "loaded": False,
         "active_skill": None,
     }
@@ -842,6 +841,26 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
             "leverage": "NO_METHOD_NEEDED",
             "then": "do the work; do not stamp a school",
         }
+    if graph.get("result") == "NOT_APPLICABLE":
+        return {
+            "mode": "live",
+            "lane": lane,
+            "sitting": sitting,
+            "slug": None,
+            "course": None,
+            "school": school,
+            "graph": graph,
+            "says": (
+                "The skill that matched this sitting is not applicable. "
+                "An exam reconstruction does not get that course beat. "
+                "Leave the checklist closed."
+            ),
+            "now": "Do not teach the checklist. The node stays not applicable.",
+            "watch": "A not-applicable node does not become the lens.",
+            "put": "no course beat",
+            "leverage": "NOT_APPLICABLE",
+            "then": "do not teach a course the graph refused",
+        }
     if graph.get("result") == "FRONTIER":
         return {
             "mode": "live",
@@ -1027,17 +1046,22 @@ def self_test() -> list[str]:
         errs.append("live NOW missed who/why/tone")
     if live.get("mode") != "live":
         errs.append("live mode flag missing")
+    found = len(index_rows())
     school = live.get("school") or {}
-    if school.get("namespace") != SCHOOL_NAMESPACE or school.get("available") != AVAILABLE:
+    if school.get("namespace") != SCHOOL_NAMESPACE or school.get("available") != found:
         errs.append("school is not the saylor-course-skills catalog")
+    if school.get("indexed") != found:
+        errs.append("available is not the index search count")
     if school.get("loaded") or school.get("active_skill") is not None:
         errs.append("school loaded a skill or selected one")
     live_md = format_live(live)
     school_line = next((line for line in live_md.splitlines() if line.startswith("SCHOOL:")), "")
     if re.search(r"^SCHOOL:\s*BUS\d+\s*$", school_line) or "BUS210" in school_line:
         errs.append("SCHOOL label is a selected course")
-    if "not the active skill" not in school_line or "164" not in school_line:
+    if "not the active skill" not in school_line or str(found) not in school_line:
         errs.append("SCHOOL line missed the catalog namespace")
+    if "164" in school_line:
+        errs.append("SCHOOL line labels 164 over the harvest")
     graph = live.get("graph") or {}
     active = [node["slug"] for node in graph.get("nodes") or [] if node.get("status") == "active"]
     if active != ["bizcomm-audience-purpose-channel-tone-feedback"]:
@@ -1052,8 +1076,8 @@ def self_test() -> list[str]:
         [],
     )
     wide_active = [node["slug"] for node in wide["nodes"] if node["status"] == "active"]
-    if not (20 <= len(wide_active) <= 40):
-        errs.append(f"high-blast graph size {len(wide_active)} outside 20-40")
+    if len(wide_active) != 31:
+        errs.append(f"high-blast graph size {len(wide_active)} is not 31")
     if len(wide_active) >= wide["school"]["available"]:
         errs.append("high-blast graph loaded the catalog")
     if wide["bodies_loaded"] != 0 or wide["school"]["loaded"]:
@@ -1073,12 +1097,24 @@ def self_test() -> list[str]:
     none = build_active_skill_graph("hive-os", "change the css color of the hero", [])
     if none.get("result") != "NO_METHOD_NEEDED" or none["nodes"]:
         errs.append(f"css sitting was not NO_METHOD_NEEDED ({none.get('result')})")
+    hero = build_active_skill_graph("hive-os", "render the hero still to a 6 second clip", [])
+    if hero.get("result") != "NO_METHOD_NEEDED" or hero["nodes"]:
+        errs.append(f"hero still was not NO_METHOD_NEEDED ({hero.get('result')})")
     exam = build_active_skill_graph("hive-os", "reconstruct the exam and fix the tone", [])
     if exam.get("result") != "NOT_APPLICABLE":
         errs.append(f"exam sitting was not NOT_APPLICABLE ({exam.get('result')})")
+    exam_live = live_beat("hive-os", "reconstruct the exam and fix the tone", [])
+    exam_md = format_live(exam_live)
+    if exam_live.get("course") == "BUS210" or "BUS210" in exam_md or "Audience, purpose" in exam_md:
+        errs.append("not-applicable card taught BUS210")
+    if exam_live.get("graph", {}).get("result") != "NOT_APPLICABLE":
+        errs.append("exam card lost NOT_APPLICABLE")
     shelf = live_beat("hive-os", "Don't just focus on BUS206. Focus on all the school skills 164 as well.", [])
     if shelf.get("course") == "BUS206" or shelf.get("school", {}).get("active_skill") is not None:
         errs.append("shelf sitting selected BUS206 or a skill")
+    shelf_school = next(line for line in format_live(shelf).splitlines() if line.startswith("SCHOOL:"))
+    if "164" in shelf_school or str(found) not in shelf_school:
+        errs.append("shelf SCHOOL line is not the search count")
     if shelf["graph"]["bodies_loaded"] != 0 or shelf["graph"]["nodes"]:
         errs.append("shelf sitting loaded the catalog")
     frontier = build_active_skill_graph("hive-os", "decompose a novel method that no course covers", [])
