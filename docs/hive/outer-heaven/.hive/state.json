@@ -117,6 +117,30 @@
       "desk": "parent",
       "updated": "2026-08-15",
       "note": "primitives + roadblocks + Path C promotion hook. Pay HITL. Speed MISS."
+    },
+    {
+      "id": "hive-register-route",
+      "name": "hive-register-route",
+      "status": "BLOCKED",
+      "desk": "forge",
+      "updated": "2026-09-25",
+      "owner": "Forge",
+      "expected_artifact": "apps/scorpion/app/api/hive/register/route.ts",
+      "wake_condition": "next change that ships scorpion_register_outcome",
+      "stall_timeout": "2 register attempts while the route file is absent",
+      "note": "The tool posts /api/hive/register. That route is not in this tree. Terminal status is refused in the tool until hive-state.transition_job permits it."
+    },
+    {
+      "id": "jarvis-bus-writer",
+      "name": "jarvis-bus-writer",
+      "status": "BLOCKED",
+      "desk": "forge",
+      "updated": "2026-09-25",
+      "owner": "Forge",
+      "expected_artifact": "apps/agent-stack/memory/bus_io.py",
+      "wake_condition": "agent-stack bus writer is present in this repo",
+      "stall_timeout": "2 Jarvis continuity publishes while bus_io.py is absent",
+      "note": "Jarvis primary and isolated consumers run on scripts/hive/os/event-bus.py. The Face bus writer is not in this checkout."
     }
   ],
   "product_factory": {
@@ -283,5 +307,25 @@
       "done_check": "LoginPrimitive adapter on ProofCheck AuthContext + three maestro YAML flows + RUN.md pending + ProofCheck localhost:8080",
       "stop_kind": "cap"
     }
-  ]
+  ],
+  "post_fix_cohort": {
+    "armed": true,
+    "adopted": false,
+    "compare_to_historical_floors": false,
+    "historical_floors": {
+      "unsupported_completion_sessions": 39,
+      "artifact_only_rows": 34,
+      "divergence_instances": 18
+    },
+    "counters": {
+      "unsupported_terminal_escape_rate": {"escapes": 0, "attempts": 0},
+      "missing_receipt_rate": {"missing": 0, "active_closes": 0},
+      "unresolvable_receipt_rate": {"unresolvable": 0, "receipts": 0},
+      "stale_apply_rate": {"stale": 0, "applies": 0},
+      "duplicate_apply_rate": {"duplicates": 0, "applies": 0},
+      "conflict_rate": {"conflicts": 0, "applies": 0},
+      "propagation_latency": {"samples": 0, "total_ms": 0},
+      "manual_Evens_bus_count": {"count": 0}
+    }
+  }
 }

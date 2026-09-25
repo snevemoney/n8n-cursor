@@ -376,6 +376,8 @@ def collect_codex_heads(limit: int) -> list[dict[str, Any]]:
         rows.append(
             {
                 "surface": "chatgpt",
+                "platform": "codex",
+                "native_platform": "codex",
                 "id": str(data["id"]),
                 "title": title,
                 "mtime": str(data.get("updated_at") or ""),
@@ -963,6 +965,218 @@ def post_slack_hive(text: str) -> dict[str, Any]:
     return {"ok": bool(parsed.get("ok")), "error": parsed.get("error") or None}
 
 
+RECEIPT_NAME = "receipts.jsonl"
+NATIVE_PLATFORMS = frozenset({"cursor", "grok", "claude", "chatgpt", "codex"})
+_INDEX_NAMES = frozenset(
+    {
+        "INDEX.md",
+        "INDEX.json",
+        "PASTE-PACK.md",
+        "hot.md",
+        "SESSION-INDEX.md",
+        "session_index.jsonl",
+        "session_index.json",
+    }
+)
+
+
+def _unknown(value: Any) -> Any:
+    if value is None or value == "":
+        return "UNKNOWN"
+    return value
+
+
+def _logical_receipt_id(platform: str, native_session_id: str, mission_id: str, job_id: str) -> str:
+    return f"{platform}|{native_session_id}|{mission_id}|{job_id}"
+
+
+def _receipt_path(store: Path) -> Path:
+    return store / RECEIPT_NAME
+
+
+def _read_receipts(store: Path) -> list[dict[str, Any]]:
+    path = _receipt_path(store)
+    if not path.is_file():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def _write_receipts(store: Path, rows: list[dict[str, Any]]) -> None:
+    store.mkdir(parents=True, exist_ok=True)
+    body = "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows)
+    _receipt_path(store).write_text(body, encoding="utf-8")
+
+
+def _is_index_pointer(pointer: str) -> bool:
+    """A catalog or session index is not that session's transcript."""
+    name = Path(str(pointer)).name.casefold()
+    if name in {item.casefold() for item in _INDEX_NAMES}:
+        return True
+    return "paste-pack" in name
+
+
+def transcript_completeness(pointer: str, native_session_id: str) -> str:
+    """A summary index is not a transcript. Missing native text is never invented."""
+    if not native_session_id or native_session_id == "UNKNOWN":
+        if not pointer or pointer == "UNKNOWN":
+            return "UNAVAILABLE"
+    if not pointer or pointer == "UNKNOWN":
+        return "PARTIAL"
+    path = Path(str(pointer))
+    if _is_index_pointer(str(pointer)):
+        return "PARTIAL"
+    if not path.is_file():
+        return "PARTIAL"
+    return "FULL"
+
+
+def validate_receipt(receipt: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    pointer = str(receipt.get("transcript_pointer") or "")
+    if pointer and pointer != "UNKNOWN":
+        path = Path(pointer)
+        if _is_index_pointer(pointer) or not path.is_file():
+            errors.append(f"transcript pointer does not resolve: {pointer}")
+    for ref in receipt.get("evidence_refs") or []:
+        if not isinstance(ref, str) or ref == "UNKNOWN":
+            continue
+        if not Path(ref).is_file():
+            errors.append(f"missing evidence: {ref}")
+    if receipt.get("completeness") == "FULL" and errors:
+        errors.append("FULL requires resolvable transcript and evidence")
+    return errors
+
+
+def close_session(record: dict[str, Any], *, store: Path) -> dict[str, Any]:
+    """One logical receipt on the session close path. Native ids are kept. Gaps stay UNKNOWN."""
+    platform = str(record.get("platform") or record.get("native_platform") or record.get("surface") or "UNKNOWN")
+    native_session_id = str(record.get("native_session_id") or record.get("id") or "UNKNOWN")
+    mission_id = str(record.get("mission_id") or "UNKNOWN")
+    job_id = str(record.get("job_id") or "UNKNOWN")
+    logical = _logical_receipt_id(platform, native_session_id, mission_id, job_id)
+    existing = _read_receipts(store)
+    for row in existing:
+        if row.get("logical_id") == logical:
+            return row
+    pointer = record.get("transcript_pointer")
+    if pointer is None:
+        native_path = record.get("path") or ""
+        pointer = str(native_path) if native_path else "UNKNOWN"
+    if record.get("transcript_unavailable"):
+        pointer = "UNKNOWN"
+    derived = transcript_completeness(str(pointer), native_session_id)
+    claimed = str(record.get("completeness") or "")
+    if claimed not in ("FULL", "PARTIAL", "UNAVAILABLE"):
+        completeness = derived
+    elif claimed == "FULL" and derived != "FULL":
+        completeness = derived
+    else:
+        completeness = claimed
+    receipt: dict[str, Any] = {
+        "receipt_id": logical,
+        "logical_id": logical,
+        "platform": platform,
+        "seat": _unknown(record.get("seat")),
+        "native_session_id": native_session_id,
+        "mission_id": mission_id,
+        "job_id": job_id,
+        "environment": _unknown(record.get("environment")),
+        "started_at": _unknown(record.get("started_at") or record.get("mtime")),
+        "ended_at": _unknown(record.get("ended_at")),
+        "input_ref": _unknown(record.get("input_ref") or record.get("ask")),
+        "tools": record.get("tools") if isinstance(record.get("tools"), list) else [],
+        "artifacts": record.get("artifacts") if isinstance(record.get("artifacts"), list) else [],
+        "evidence_refs": record.get("evidence_refs") if isinstance(record.get("evidence_refs"), list) else [],
+        "final_state": _unknown(record.get("final_state")),
+        "blockers": record.get("blockers") if isinstance(record.get("blockers"), list) else [],
+        "handoff_target": _unknown(record.get("handoff_target")),
+        "transcript_pointer": _unknown(pointer),
+        "completeness": completeness,
+    }
+    errors = validate_receipt(receipt)
+    if errors and receipt["completeness"] == "FULL":
+        receipt["completeness"] = "PARTIAL"
+        errors = validate_receipt(receipt)
+    if errors:
+        receipt["validation_errors"] = errors
+    existing.append(receipt)
+    _write_receipts(store, existing)
+    return receipt
+
+
+def link_handoff(
+    store: Path,
+    *,
+    platform: str,
+    native_session_id: str,
+    mission_id: str,
+    job_id: str,
+    handoff_target: str,
+    seat: str = "UNKNOWN",
+) -> dict[str, Any]:
+    """Handoff updates the one logical receipt so the receiver is on it."""
+    logical = _logical_receipt_id(platform, native_session_id, mission_id, job_id)
+    rows = _read_receipts(store)
+    match = next((row for row in rows if row.get("logical_id") == logical), None)
+    if match is None:
+        same = [
+            row
+            for row in rows
+            if str(row.get("platform") or "") == platform
+            and str(row.get("native_session_id") or "") == native_session_id
+        ]
+        unknown = [
+            row
+            for row in same
+            if str(row.get("mission_id") or "UNKNOWN") == "UNKNOWN"
+            and str(row.get("job_id") or "UNKNOWN") == "UNKNOWN"
+        ]
+        if len(unknown) == 1:
+            match = unknown[0]
+        elif len(same) == 1:
+            match = same[0]
+    if match is not None:
+        match["handoff_target"] = handoff_target
+        if str(match.get("mission_id") or "UNKNOWN") == "UNKNOWN" and mission_id not in ("", "UNKNOWN"):
+            match["mission_id"] = mission_id
+        if str(match.get("job_id") or "UNKNOWN") == "UNKNOWN" and job_id not in ("", "UNKNOWN"):
+            match["job_id"] = job_id
+        updated = _logical_receipt_id(
+            str(match.get("platform") or platform),
+            str(match.get("native_session_id") or native_session_id),
+            str(match.get("mission_id") or "UNKNOWN"),
+            str(match.get("job_id") or "UNKNOWN"),
+        )
+        match["logical_id"] = updated
+        match["receipt_id"] = updated
+        _write_receipts(store, rows)
+        return match
+    return close_session(
+        {
+            "platform": platform,
+            "native_session_id": native_session_id,
+            "mission_id": mission_id,
+            "job_id": job_id,
+            "handoff_target": handoff_target,
+            "seat": seat,
+            "transcript_unavailable": True,
+            "final_state": "PARTIAL",
+        },
+        store=store,
+    )
+
+
 def cmd_write(args: argparse.Namespace) -> int:
     packed = (
         heads_from_json(Path(args.heads_json))
@@ -985,6 +1199,23 @@ def cmd_write(args: argparse.Namespace) -> int:
                 by_surface=packed,
             )
         )
+    receipts: list[dict[str, Any]] = []
+    if getattr(args, "close", False):
+        for root in targets:
+            store = root / "sessions"
+            for surface in SURFACES:
+                for row in packed.get(surface) or []:
+                    receipts.append(
+                        close_session(
+                            {
+                                **row,
+                                "platform": row.get("native_platform") or row.get("platform") or surface,
+                                "native_session_id": row.get("id") or "",
+                                "ended_at": at,
+                            },
+                            store=store,
+                        )
+                    )
     slack_result: dict[str, Any] = {"ok": False, "skipped": "no SLACK_HIVE_* env"}
     if not getattr(args, "no_slack", False) and slack_hive_config():
         said_rel = latest_said_rel(targets[0] / "inbox") if targets else ""
@@ -1007,6 +1238,7 @@ def cmd_write(args: argparse.Namespace) -> int:
                 "law": SLACK_ROOM,
                 "counts": {s: len(packed.get(s) or []) for s in SURFACES},
                 "wrote": wrote,
+                "receipts": len(receipts),
                 "slack": {k: v for k, v in slack_result.items() if k != "token"},
             },
             indent=2,
@@ -1045,6 +1277,11 @@ def main() -> int:
         "--no-slack",
         action="store_true",
         help="Skip Slack #hive post even if SLACK_HIVE_* is set",
+    )
+    ap.add_argument(
+        "--close",
+        action="store_true",
+        help="Emit one session receipt per head into the existing sessions store",
     )
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("write", help="Write said overlay + sessions store + INDEX")
