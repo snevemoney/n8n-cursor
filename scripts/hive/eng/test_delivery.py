@@ -193,6 +193,32 @@ class DeliveryPolicyTest(unittest.TestCase):
         self.assertFalse(ready["performed"])
         self.assertFalse(ready["allowed"])
         self.assertFalse(ready["ask_evens"])
+        flagged = delivery.decide(
+            {
+                "verb": "merge",
+                "actor": "worker",
+                "base": "develop",
+                "policy_tier": 2,
+                "checks": GREEN,
+                "independent_review": True,
+            }
+        )
+        self.assertEqual(flagged["action"], "wait_merge")
+        self.assertFalse(flagged["ready"])
+        self.assertFalse(flagged["performed"])
+        reviewer_only = delivery.decide(
+            {
+                "verb": "merge",
+                "actor": "worker",
+                "base": "develop",
+                "policy_tier": 2,
+                "checks": GREEN,
+                "independent_review": True,
+                "reviewer": REVIEWER,
+            }
+        )
+        self.assertEqual(reviewer_only["action"], "wait_merge")
+        self.assertFalse(reviewer_only["ready"])
 
     def test_red_ci_repairs_without_asking_evens(self) -> None:
         row = delivery.decide(
@@ -251,6 +277,27 @@ class DeliveryPolicyTest(unittest.TestCase):
                 self.assertFalse(row["ready"])
                 self.assertFalse(row["performed"])
                 self.assertIn(str(number), row["reasons"][0])
+        for hold in (None, []):
+            for number in (394, 398):
+                with self.subTest(hold=hold, pr=number):
+                    row = delivery.decide(
+                        {
+                            "verb": "merge",
+                            "actor": "worker",
+                            "pr": number,
+                            "base": "develop",
+                            "policy_tier": 2,
+                            "builder": BUILDER,
+                            "reviewer": REVIEWER,
+                            "checks": GREEN,
+                            "independent_review": True,
+                            "hold": hold,
+                        }
+                    )
+                    self.assertNotEqual(row["action"], "merge_ready")
+                    self.assertFalse(row["ready"])
+                    self.assertFalse(row["performed"])
+                    self.assertIn(str(number), row["reasons"][0])
 
     def test_permissions_record_the_refusals(self) -> None:
         denied = delivery.builder_may_not()

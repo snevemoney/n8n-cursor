@@ -69,10 +69,11 @@ def tier_of(request: dict) -> int | None:
 
 
 def hold_of(request: dict) -> set[int]:
-    raw = request.get("hold", OPEN_PR_HOLD)
-    if raw is None:
-        return set()
-    found: set[int] = set()
+    """394 and 398 stay refused. A caller list can add holds, not clear these."""
+    found = set(OPEN_PR_HOLD)
+    raw = request.get("hold")
+    if not isinstance(raw, (list, tuple, set, frozenset)):
+        return found
     for item in raw:
         try:
             found.add(int(item))
@@ -285,11 +286,9 @@ def _update(request: dict, payload: dict) -> dict:
 def _review_reason(request: dict) -> str:
     builder = hive_job.party(request.get("builder"))
     reviewer = hive_job.party(request.get("reviewer"))
-    if builder and reviewer:
-        return hive_job.independence_reason(builder, reviewer, "review")
-    if request.get("independent_review") is True:
-        return ""
-    return "merge waits for an independent review"
+    if reviewer is None or builder is None:
+        return "merge waits for an independent review"
+    return hive_job.independence_reason(builder, reviewer, "review")
 
 
 def _merge(request: dict, payload: dict) -> dict:
