@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Live mentor: one teaching beat, then the mission's ActiveSkillGraph.
 
-School (`saylor-course-skills`) is the curriculum namespace. catalog_size is
-the count of candidate COURSE-SKILLs in that namespace. A search hit count is
-SkillDiscovery, not the size of the school. The school is not the active skill.
+School (`saylor-course-skills`) is the curriculum namespace. catalog_size stays
+UNVERIFIED until a catalog contract proves the skill set. A course-declaring
+slug count and a search hit count are other counts. The school is not the
+active skill.
 A mission builds the sufficient subset. Skill bodies are not loaded by default.
 """
 from __future__ import annotations
@@ -179,37 +180,76 @@ def _tokens(text: str) -> set[str]:
     return {t for t in TOKEN_RE.findall((text or "").lower()) if t not in STOP}
 
 
-def _declares_course(path: Path) -> bool:
-    """Header only. A course declaration is a candidate skill, not a body load."""
+COURSE_HEADER_RE = re.compile(r"^\*\*Course:\*\*\s+(\S+)\s*$")
+CATALOG_SIZE_UNVERIFIED = "UNVERIFIED"
+
+
+def _course_header(path: Path) -> str:
+    """Header only. A course declaration is not a body load and not catalog_size."""
     try:
         with path.open(encoding="utf-8") as handle:
             for index, line in enumerate(handle):
                 if index >= 40:
                     break
-                if line.startswith("**Course:**") and line.split(":", 1)[-1].strip():
-                    return True
+                match = COURSE_HEADER_RE.match(line.rstrip("\n"))
+                if match:
+                    return match.group(1)
     except OSError:
-        return False
-    return False
+        return ""
+    return ""
 
 
-def curriculum_slugs() -> list[str]:
-    """Candidate skills in the saylor-course-skills namespace.
+def course_declarations() -> dict[str, str]:
+    """slug -> course header. A cursor copy of the same slug counts once."""
+    found: dict[str, str] = {}
 
-    Counts skill files that declare a course. Does not read the trigger search
-    and does not hardcode a size. Cursor copies of the same slug are one skill.
-    """
-    found: dict[str, None] = {}
+    def take(slug: str, path: Path) -> None:
+        if slug in found:
+            return
+        course = _course_header(path)
+        if course:
+            found[slug] = course
+
     if SKILL_DIR.is_dir():
         for path in sorted(SKILL_DIR.glob("*.md")):
-            if _declares_course(path):
-                found.setdefault(path.stem, None)
+            take(path.stem, path)
     cursor = ROOT / ".cursor/skills"
     if cursor.is_dir():
         for path in sorted(cursor.glob("*/SKILL.md")):
-            if _declares_course(path):
-                found.setdefault(path.parent.name, None)
-    return list(found)
+            take(path.parent.name, path)
+    return found
+
+
+def curriculum_slugs() -> list[str]:
+    return list(course_declarations())
+
+
+def catalog_contract_proves_slug_identity() -> bool:
+    """True only when a catalog contract states the identity.
+
+    Counting files that declare a course is not that statement. The harvest
+    table's own count line is not that statement.
+    """
+    needle = "every valid catalog skill is exactly one course-declaring slug"
+    paths = (
+        SKILL_DIR / "saylor-course-skill.md",
+        ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-catalog-complete.md",
+    )
+    for path in paths:
+        if path.is_file() and needle in path.read_text(encoding="utf-8").lower():
+            return True
+    return False
+
+
+def proven_catalog_size() -> int | None:
+    """Direct enumeration of the catalog, only after the identity proof.
+
+    Returns None while the contract does not prove the set. Callers must not
+    substitute a search hit count.
+    """
+    if not catalog_contract_proves_slug_identity():
+        return None
+    return len(course_declarations())
 
 
 def _is_job(text: str) -> bool:
@@ -260,11 +300,15 @@ def index_rows() -> list[dict[str, str]]:
 
 
 def school_view() -> dict:
+    declarations = course_declarations()
+    proven = proven_catalog_size()
     return {
         "namespace": SCHOOL_NAMESPACE,
         "catalog": SCHOOL_NAMESPACE,
         "role": "catalog",
-        "catalog_size": len(curriculum_slugs()),
+        "catalog_size": proven if proven is not None else CATALOG_SIZE_UNVERIFIED,
+        "course_declaring_skill_slugs": len(declarations),
+        "unique_course_headers": len(set(declarations.values())),
         "loaded": False,
         "active_skill": None,
         "mastered": False,
@@ -405,6 +449,7 @@ def _new_graph(lane: str, sitting: str) -> dict:
         "context_skills": [],
         "active": [],
         "evidence_rules": [],
+        "shelf_phrase_tokens": [],
         "discovery": {
             "searched": SEARCHED,
             "candidates_returned": 0,
@@ -493,6 +538,14 @@ def build_active_skill_graph(
     if SHELF_RE.search(sitting or ""):
         graph["catalog_named"] = True
         graph["one_skill_sufficient"] = False
+        graph["shelf_phrase_tokens"] = [
+            {
+                "token": token,
+                "status": CATALOG_SIZE_UNVERIFIED,
+                "roles_refused": ["skill", "course", "lesson", "lens"],
+            }
+            for token in re.findall(r"\b\d+\b", sitting or "")
+        ]
         _layout(graph)
         _finish_result(graph)
         _attach_discovery(graph, rows)
@@ -922,8 +975,8 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
             "school": school,
             "graph": graph,
             "says": (
-                "School names the curriculum. catalog_size is how many candidate skills that namespace holds. "
-                "A search hit count is not that size. "
+                "School names the curriculum. catalog_size stays unverified until a contract proves the set. "
+                "A number spoken next to the shelf is a phrase token, not a count of skills, courses, lessons, or lenses. "
                 "The catalog is not a selected skill and the manuals stay closed. "
                 "A mission builds the graph it actually needs."
             ),
@@ -1042,6 +1095,8 @@ def _card_fields(school: dict, graph: dict) -> list[str]:
     selected = list(disc.get("selected") or [])
     return [
         f"catalog_size: {school.get('catalog_size')}",
+        f"course_declaring_skill_slugs: {school.get('course_declaring_skill_slugs')}",
+        f"unique_course_headers: {school.get('unique_course_headers')}",
         f"retrieval_hits: {disc.get('candidates_returned')}",
         f"selected_skills: {', '.join(selected) or '(none)'}",
         f"active_skills: {', '.join(active) or '(none)'}",
@@ -1171,13 +1226,23 @@ def self_test() -> list[str]:
         errs.append("live NOW missed who/why/tone")
     if live.get("mode") != "live":
         errs.append("live mode flag missing")
-    counted = len(curriculum_slugs())
+    declarations = course_declarations()
+    declaring = len(declarations)
+    headers = len(set(declarations.values()))
     found = len(index_rows())
+    proven = proven_catalog_size()
     school = live.get("school") or {}
     if school.get("catalog") != SCHOOL_NAMESPACE or school.get("namespace") != SCHOOL_NAMESPACE:
         errs.append("school is not the saylor-course-skills catalog")
-    if school.get("catalog_size") != counted:
-        errs.append("catalog_size is not the curriculum count")
+    if school.get("course_declaring_skill_slugs") != declaring:
+        errs.append("course_declaring_skill_slugs is not the declaration count")
+    if school.get("unique_course_headers") != headers:
+        errs.append("unique_course_headers is not the distinct course-header count")
+    if proven == found:
+        if school.get("catalog_size") != proven:
+            errs.append("proven catalog enumeration was not used as catalog_size")
+    elif school.get("catalog_size") == found or school.get("catalog_size") != CATALOG_SIZE_UNVERIFIED:
+        errs.append("search hits were written into catalog_size")
     if "available" in school:
         errs.append("school still carries available")
     if school.get("loaded") or school.get("active_skill") is not None:
@@ -1188,12 +1253,16 @@ def self_test() -> list[str]:
     school_line = next((line for line in live_md.splitlines() if line.startswith("SCHOOL:")), "")
     if re.search(r"^SCHOOL:\s*BUS\d+\s*$", school_line) or "BUS210" in school_line:
         errs.append("SCHOOL label is a selected course")
-    if "not the active skill" not in school_line or f"catalog_size: {counted}" not in school_line:
+    if "not the active skill" not in school_line or "catalog_size:" not in school_line:
         errs.append("SCHOOL line missed catalog_size")
     if re.search(r"available\s*[:=]?\s*\d+", live_md, re.I):
         errs.append("available carries a naked count")
-    if f"catalog_size: {counted}" not in live_md or f"retrieval_hits: {found}" not in live_md:
-        errs.append("card missed catalog_size or retrieval_hits")
+    if proven != found and re.search(rf"(?m)^catalog_size:\s*{found}\s*$", live_md):
+        errs.append("card printed the search hit count as catalog_size")
+    if proven is None and "catalog_size: UNVERIFIED" not in live_md:
+        errs.append("card did not print catalog_size: UNVERIFIED")
+    if f"retrieval_hits: {found}" not in live_md:
+        errs.append("card missed retrieval_hits")
     if "selected_skills:" not in live_md or "active_skills:" not in live_md:
         errs.append("card missed selected_skills or active_skills")
     disc = (live.get("graph") or {}).get("discovery") or {}
@@ -1215,10 +1284,12 @@ def self_test() -> list[str]:
     wide_active = [node["slug"] for node in wide["nodes"] if node["status"] == "active"]
     if len(wide_active) != 31:
         errs.append(f"high-blast graph size {len(wide_active)} is not 31")
-    if len(wide_active) >= wide["school"]["catalog_size"]:
-        errs.append("high-blast graph loaded the catalog")
-    if wide["school"]["catalog_size"] != counted:
-        errs.append("high-blast catalog_size followed the search")
+    if set(curriculum_slugs()) <= set(wide_active):
+        errs.append("high-blast graph loaded every course-declaring slug")
+    if proven is None and wide["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+        errs.append("high-blast catalog_size left UNVERIFIED")
+    if proven is not None and len(wide_active) >= proven:
+        errs.append("high-blast graph loaded the proven catalog")
     if wide["bodies_loaded"] != 0 or wide["school"]["loaded"]:
         errs.append("high-blast graph loaded bodies")
     if wide["one_skill_sufficient"]:
@@ -1255,11 +1326,26 @@ def self_test() -> list[str]:
     shelf = live_beat("hive-os", "Don't just focus on BUS206. Focus on all the school skills 164 as well.", [])
     if shelf.get("course") == "BUS206" or shelf.get("school", {}).get("active_skill") is not None:
         errs.append("shelf sitting selected BUS206 or a skill")
-    shelf_school = next(line for line in format_live(shelf).splitlines() if line.startswith("SCHOOL:"))
-    if shelf["school"]["catalog_size"] != counted:
-        errs.append("shelf catalog_size is not the curriculum count")
-    if shelf["school"]["catalog_size"] == 164 and counted != 164:
-        errs.append("shelf catalog_size hardcoded 164")
+    shelf_md = format_live(shelf)
+    shelf_school = next(line for line in shelf_md.splitlines() if line.startswith("SCHOOL:"))
+    if proven is None and shelf["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+        errs.append("shelf catalog_size left UNVERIFIED")
+    for token in re.findall(r"\b\d+\b", shelf.get("sitting") or ""):
+        if str(shelf["school"]["catalog_size"]) == token:
+            errs.append("shelf-phrase token was printed as catalog_size")
+        if token in str(shelf.get("course") or ""):
+            errs.append("shelf-phrase token was used as a lens")
+        for node in shelf["graph"]["nodes"]:
+            if token in (node.get("slug") or "") or token == (node.get("course") or ""):
+                errs.append("shelf-phrase token was used as a skill or course")
+        lessons = list(shelf["graph"].get("lessons") or []) + list(shelf["school"].get("lessons") or [])
+        if token in [str(item) for item in lessons]:
+            errs.append("shelf-phrase token was used as a lesson")
+        noted = shelf["graph"].get("shelf_phrase_tokens") or []
+        if not any(item.get("token") == token and item.get("status") == CATALOG_SIZE_UNVERIFIED for item in noted):
+            errs.append("shelf-phrase token was not left UNVERIFIED")
+        if re.search(rf"(?m)^catalog_size:\s*{re.escape(token)}\s*$", shelf_md):
+            errs.append("shelf card printed the phrase token as catalog_size")
     if "available" in shelf_school.lower() or "mastered" in shelf_school.lower():
         errs.append("shelf SCHOOL line uses available or mastery")
     if shelf["graph"]["bodies_loaded"] != 0 or shelf["graph"]["nodes"]:
@@ -1323,15 +1409,52 @@ def self_test() -> list[str]:
             errs.append(f"path contract missed {key}")
     if contract.get("role") != "catalog_namespace":
         errs.append("course skill contract is not the catalog namespace")
-    _regress_distinctions(errs, counted, found)
+    _regress_distinctions(errs, found)
     return errs
 
 
-def _regress_distinctions(errs: list[str], counted: int, found: int) -> None:
-    """These fail if a later edit collapses two different objects into one."""
-    if counted < 1:
-        errs.append("catalog_size count found no candidate skills")
+def _regress_search_hits_are_not_catalog_size(errs: list[str], hits: int) -> None:
+    """A live search hit count is retrieval_hits. It is not catalog_size without proof."""
+    graph = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+    if (graph.get("discovery") or {}).get("candidates_returned") != hits:
+        errs.append("retrieval_hits did not follow the search")
+    proven = proven_catalog_size()
+    size = graph["school"]["catalog_size"]
+    beat = live_beat("hive-os", "change the css color of the hero", [])
+    md = format_live(beat)
+    if f"retrieval_hits: {hits}" not in md:
+        errs.append("card retrieval_hits did not follow the search")
+    if proven == hits:
+        if size != proven:
+            errs.append("direct enumeration proved N and catalog_size did not use it")
         return
+    if size == hits:
+        errs.append("a search hit count was written into catalog_size without an enumeration proof")
+    if proven is None and size != CATALOG_SIZE_UNVERIFIED:
+        errs.append("catalog_size was not UNVERIFIED")
+    if re.search(rf"(?m)^catalog_size:\s*{hits}\s*$", md):
+        errs.append("card printed the search hit count as catalog_size")
+    declarations = course_declarations()
+    declaring = len(declarations)
+    header_count = len(set(declarations.values()))
+    if graph["school"].get("course_declaring_skill_slugs") != declaring:
+        errs.append("course_declaring_skill_slugs left the declaration count")
+    if graph["school"].get("unique_course_headers") != header_count:
+        errs.append("unique_course_headers left the distinct header count")
+    if proven is None and size in {declaring, header_count}:
+        errs.append("a course-file count was printed as catalog_size")
+    grouped: dict[str, list[str]] = {}
+    for slug, course in declarations.items():
+        grouped.setdefault(course, []).append(slug)
+    if "BUS401" not in grouped or len(grouped["BUS401"]) < 2:
+        errs.append("BUS401 is not declared by more than one skill file")
+    if declaring == header_count:
+        errs.append("unique course headers were collapsed into skill slugs")
+
+
+def _regress_distinctions(errs: list[str], found: int) -> None:
+    """These fail if a later edit collapses two different objects into one."""
+    _regress_search_hits_are_not_catalog_size(errs, found)
     original = index_rows
     extra = {
         "course": "ZZZ",
@@ -1347,22 +1470,20 @@ def _regress_distinctions(errs: list[str], counted: int, found: int) -> None:
     globals()["index_rows"] = inflated
     try:
         view = school_view()
-        if view.get("catalog_size") != counted:
-            errs.append("SEARCH RESULT collapsed into CATALOG: catalog_size followed retrieval_hits")
         graph = build_active_skill_graph("hive-os", "change the css color of the hero", [])
         hits = (graph.get("discovery") or {}).get("candidates_returned")
         if hits != found + 1:
             errs.append(f"retrieval did not follow the search ({hits})")
-        if graph["school"]["catalog_size"] == hits and counted != hits:
-            errs.append("Writing retrieval_hits into catalog_size")
-        if graph["school"]["catalog_size"] != counted:
-            errs.append("catalog_size is not the curriculum count under a different search")
+        if view.get("catalog_size") == hits or graph["school"]["catalog_size"] == hits:
+            errs.append("SEARCH RESULT collapsed into CATALOG: catalog_size followed retrieval_hits")
+        if proven_catalog_size() is None and graph["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+            errs.append("inflated search changed catalog_size off UNVERIFIED")
         beat = live_beat("hive-os", "change the css color of the hero", [])
         md = format_live(beat)
-        if f"catalog_size: {counted}" not in md:
-            errs.append("card wrote retrieval_hits into catalog_size")
         if f"retrieval_hits: {found + 1}" not in md:
-            errs.append("card retrieval_hits did not follow the search")
+            errs.append("card retrieval_hits did not follow the inflated search")
+        if re.search(rf"(?m)^catalog_size:\s*{found + 1}\s*$", md):
+            errs.append("card wrote the inflated retrieval_hits into catalog_size")
         if re.search(r"available\s*[:=]?\s*\d+", md, re.I):
             errs.append("available carries a naked count")
     finally:
@@ -1393,8 +1514,8 @@ def _regress_distinctions(errs: list[str], counted: int, found: int) -> None:
     quiet = build_active_skill_graph("hive-os", "change the css color of the hero", [])
     if quiet.get("result") != "NO_METHOD_NEEDED" or quiet.get("active"):
         errs.append("CATALOG collapsed into ACTIVE CONTEXT")
-    if quiet["school"]["catalog_size"] != counted or quiet["school"]["catalog_size"] < 1:
-        errs.append("NO_METHOD mission lost the curriculum count")
+    if proven_catalog_size() is None and quiet["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+        errs.append("NO_METHOD mission printed an unproven catalog_size")
     if curriculum_slugs()[0] in (quiet.get("active") or []):
         errs.append("a skill in the school was automatically active")
     if set(quiet.get("active") or []) == set(curriculum_slugs()):

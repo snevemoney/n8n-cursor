@@ -30,8 +30,10 @@ Every hive / site / money turn — start, middle, and end. Evens does not have t
 
 ```
 LANE: hive-os | agency
-SCHOOL: saylor-course-skills catalog · catalog_size is the curriculum count, not the active skill
-catalog_size: count of candidate COURSE-SKILLs in that namespace
+SCHOOL: saylor-course-skills catalog · catalog_size: UNVERIFIED until a contract proves the set
+catalog_size: UNVERIFIED. A course-declaring file count is not this field.
+course_declaring_skill_slugs: skill files that declare a course
+unique_course_headers: distinct course headers on those files
 retrieval_hits: what the trigger search returns
 selected_skills: the mission selection
 active_skills: Saylor capabilities on the graph with status active
