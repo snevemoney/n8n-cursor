@@ -932,11 +932,14 @@ class TerminalProofTest(unittest.TestCase):
             self.assertNotEqual(follow["job"]["status"], "DONE")
             after = json.loads(state.read_text(encoding="utf-8"))
             after_row = next(job for job in after["jobs"] if job["id"] == "declared-first")
-            self.assertEqual(after_row["status"], before_row["status"])
-            self.assertEqual(after_row.get("required_evidence"), before_row.get("required_evidence"))
-            self.assertEqual(after_row.get("evidence"), before_row.get("evidence"))
-            self.assertEqual(after_row.get("proofPermit"), before_row.get("proofPermit"))
-            self.assertEqual(after_row.get("terminal_rejected"), follow["reason"])
+            self.assertEqual(after_row, before_row)
+            follow_lines = [
+                entry
+                for entry in after.get("log") or []
+                if entry.get("job") == "declared-first" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertTrue(follow_lines)
+            self.assertEqual(follow_lines[-1].get("done_check"), follow["reason"])
             met = HS.transition_job(
                 "declared-first",
                 "DONE",
@@ -995,9 +998,15 @@ class TerminalProofTest(unittest.TestCase):
             self.assertEqual(row["status"], prior["status"])
             self.assertEqual(row["required_evidence"], prior["required_evidence"])
             self.assertNotEqual(row["status"], "VERIFYING")
-            for key, value in prior.items():
-                self.assertEqual(row.get(key), value, key)
-            self.assertEqual(row.get("terminal_rejected"), refused["reason"])
+            self.assertEqual(row, prior)
+            self.assertNotIn("terminal_rejected", row)
+            open_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "open-job" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(open_lines), 1)
+            self.assertEqual(open_lines[0].get("done_check"), refused["reason"])
             hist = HS.transition_job(
                 "coverage-loop",
                 "DONE",
@@ -1011,9 +1020,18 @@ class TerminalProofTest(unittest.TestCase):
             self.assertFalse(hist["permitted"])
             disk = json.loads(state.read_text(encoding="utf-8"))
             kept = next(job for job in disk["jobs"] if job["id"] == "coverage-loop")
+            prior_hist = next(job for job in before["jobs"] if job["id"] == "coverage-loop")
+            self.assertEqual(kept, prior_hist)
             self.assertEqual(kept["status"], "done")
             self.assertEqual(kept["required_evidence"], ["RUNTIME", "SURFACE"])
             self.assertNotIn("proofPermit", kept)
+            hist_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "coverage-loop" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(hist_lines), 1)
+            self.assertEqual(hist_lines[0].get("done_check"), hist["reason"])
             reloaded = HS.load(state)
             HS.save(reloaded, state)
             again = json.loads(state.read_text(encoding="utf-8"))
@@ -1132,11 +1150,20 @@ class TerminalProofTest(unittest.TestCase):
             self.assertFalse(refused["permitted"])
             disk = json.loads(state.read_text(encoding="utf-8"))
             row = next(job for job in disk["jobs"] if job["id"] == "open-job")
-            for key, value in prior.items():
-                self.assertEqual(row.get(key), value, key)
+            self.assertEqual(row, prior)
+            self.assertEqual(set(row), set(prior))
+            self.assertNotIn("terminal_rejected", row)
             self.assertEqual(row["status"], "working")
             self.assertNotEqual(row["status"], "DONE")
             self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "open-job" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(lines), 1)
+            self.assertEqual(lines[0].get("done_check"), refused["reason"])
+            self.assertTrue(lines[0].get("done_check"))
 
     def test_stalled_owed_artifact_has_owner_and_wake_not_founder_wait(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

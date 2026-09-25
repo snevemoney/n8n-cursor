@@ -548,25 +548,23 @@ def transition_job(
             "job": kept,
         }
     if not decision["permitted"] and isinstance(existing, dict) and word:
-        # A refusal may leave an audit reason. It does not rewrite status,
-        # evidence, or the requirement already stored on the row.
-        audited = dict(existing)
-        audited["terminal_rejected"] = decision.get("reason") or "missing proof"
+        # A refusal leaves the job row as it was. The reason is an append on the run log.
+        reason = str(decision.get("reason") or "missing proof")
         bump_cohort(
             data,
             "unsupported_terminal_escape_rate",
             attempts=1,
             escapes=1,
         )
-        saved = _upsert_job(data, audited)
+        _append_refusal_log(data, existing, reason, desk=str(who or existing.get("desk") or "builder"))
         save(data, state_path)
         return {
             "permitted": False,
-            "state": saved.get("status"),
-            "reason": decision.get("reason"),
-            "permit": saved.get("proofPermit"),
+            "state": existing.get("status"),
+            "reason": reason,
+            "permit": existing.get("proofPermit"),
             "stale": bool(decision.get("stale")),
-            "job": saved,
+            "job": existing,
         }
     bump_cohort(
         data,
@@ -994,6 +992,26 @@ def cmd_set_job(args: argparse.Namespace) -> int:
     save(data)
     print(json.dumps(saved, indent=2))
     return 0
+
+
+def _append_refusal_log(data: dict, job: dict, reason: str, *, desk: str) -> dict:
+    """Audit a refused close on the append-only run log. The job row is not a log."""
+    ids = data.setdefault("ids", {"monotonic": True, "next_run_id": 1})
+    ids["monotonic"] = True
+    run_id = int(ids.get("next_run_id") or 1)
+    entry = {
+        "id": run_id,
+        "job": str(job.get("id") or ""),
+        "desk": desk or str(job.get("desk") or "builder"),
+        "at": today(),
+        "done_check": reason,
+        "stop_kind": "terminal_rejected",
+    }
+    log = list(data.get("log") or [])
+    log.append(entry)
+    data["log"] = log
+    ids["next_run_id"] = run_id + 1
+    return entry
 
 
 def cmd_log_run(args: argparse.Namespace) -> int:
