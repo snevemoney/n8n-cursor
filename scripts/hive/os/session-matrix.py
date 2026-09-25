@@ -967,7 +967,17 @@ def post_slack_hive(text: str) -> dict[str, Any]:
 
 RECEIPT_NAME = "receipts.jsonl"
 NATIVE_PLATFORMS = frozenset({"cursor", "grok", "claude", "chatgpt", "codex"})
-_INDEX_NAMES = frozenset({"INDEX.md", "INDEX.json", "PASTE-PACK.md", "hot.md", "SESSION-INDEX.md"})
+_INDEX_NAMES = frozenset(
+    {
+        "INDEX.md",
+        "INDEX.json",
+        "PASTE-PACK.md",
+        "hot.md",
+        "SESSION-INDEX.md",
+        "session_index.jsonl",
+        "session_index.json",
+    }
+)
 
 
 def _unknown(value: Any) -> Any:
@@ -1008,6 +1018,14 @@ def _write_receipts(store: Path, rows: list[dict[str, Any]]) -> None:
     _receipt_path(store).write_text(body, encoding="utf-8")
 
 
+def _is_index_pointer(pointer: str) -> bool:
+    """A catalog or session index is not that session's transcript."""
+    name = Path(str(pointer)).name.casefold()
+    if name in {item.casefold() for item in _INDEX_NAMES}:
+        return True
+    return "paste-pack" in name
+
+
 def transcript_completeness(pointer: str, native_session_id: str) -> str:
     """A summary index is not a transcript. Missing native text is never invented."""
     if not native_session_id or native_session_id == "UNKNOWN":
@@ -1016,7 +1034,7 @@ def transcript_completeness(pointer: str, native_session_id: str) -> str:
     if not pointer or pointer == "UNKNOWN":
         return "PARTIAL"
     path = Path(str(pointer))
-    if path.name in _INDEX_NAMES or "PASTE-PACK" in path.name:
+    if _is_index_pointer(str(pointer)):
         return "PARTIAL"
     if not path.is_file():
         return "PARTIAL"
@@ -1028,7 +1046,7 @@ def validate_receipt(receipt: dict[str, Any]) -> list[str]:
     pointer = str(receipt.get("transcript_pointer") or "")
     if pointer and pointer != "UNKNOWN":
         path = Path(pointer)
-        if path.name in _INDEX_NAMES or not path.is_file():
+        if _is_index_pointer(pointer) or not path.is_file():
             errors.append(f"transcript pointer does not resolve: {pointer}")
     for ref in receipt.get("evidence_refs") or []:
         if not isinstance(ref, str) or ref == "UNKNOWN":
@@ -1057,9 +1075,14 @@ def close_session(record: dict[str, Any], *, store: Path) -> dict[str, Any]:
         pointer = str(native_path) if native_path else "UNKNOWN"
     if record.get("transcript_unavailable"):
         pointer = "UNKNOWN"
-    completeness = str(record.get("completeness") or transcript_completeness(str(pointer), native_session_id))
-    if completeness not in ("FULL", "PARTIAL", "UNAVAILABLE"):
-        completeness = "PARTIAL"
+    derived = transcript_completeness(str(pointer), native_session_id)
+    claimed = str(record.get("completeness") or "")
+    if claimed not in ("FULL", "PARTIAL", "UNAVAILABLE"):
+        completeness = derived
+    elif claimed == "FULL" and derived != "FULL":
+        completeness = derived
+    else:
+        completeness = claimed
     receipt: dict[str, Any] = {
         "receipt_id": logical,
         "logical_id": logical,
@@ -1105,11 +1128,40 @@ def link_handoff(
     """Handoff updates the one logical receipt so the receiver is on it."""
     logical = _logical_receipt_id(platform, native_session_id, mission_id, job_id)
     rows = _read_receipts(store)
-    for row in rows:
-        if row.get("logical_id") == logical:
-            row["handoff_target"] = handoff_target
-            _write_receipts(store, rows)
-            return row
+    match = next((row for row in rows if row.get("logical_id") == logical), None)
+    if match is None:
+        same = [
+            row
+            for row in rows
+            if str(row.get("platform") or "") == platform
+            and str(row.get("native_session_id") or "") == native_session_id
+        ]
+        unknown = [
+            row
+            for row in same
+            if str(row.get("mission_id") or "UNKNOWN") == "UNKNOWN"
+            and str(row.get("job_id") or "UNKNOWN") == "UNKNOWN"
+        ]
+        if len(unknown) == 1:
+            match = unknown[0]
+        elif len(same) == 1:
+            match = same[0]
+    if match is not None:
+        match["handoff_target"] = handoff_target
+        if str(match.get("mission_id") or "UNKNOWN") == "UNKNOWN" and mission_id not in ("", "UNKNOWN"):
+            match["mission_id"] = mission_id
+        if str(match.get("job_id") or "UNKNOWN") == "UNKNOWN" and job_id not in ("", "UNKNOWN"):
+            match["job_id"] = job_id
+        updated = _logical_receipt_id(
+            str(match.get("platform") or platform),
+            str(match.get("native_session_id") or native_session_id),
+            str(match.get("mission_id") or "UNKNOWN"),
+            str(match.get("job_id") or "UNKNOWN"),
+        )
+        match["logical_id"] = updated
+        match["receipt_id"] = updated
+        _write_receipts(store, rows)
+        return match
     return close_session(
         {
             "platform": platform,
