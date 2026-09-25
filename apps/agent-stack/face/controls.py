@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 from pathlib import Path
 
 SCOPES = ("speak", "tool", "job", "mission")
@@ -26,18 +27,21 @@ _BOOK: dict[tuple[str, str], dict] = {}
 _KILLED: set[str] = set()
 _SEQ = 0
 _KILLER = None
+_LOCK = threading.Lock()
 
 
 def reset_book() -> None:
     global _SEQ
-    _BOOK.clear()
-    _KILLED.clear()
-    _SEQ = 0
+    with _LOCK:
+        _BOOK.clear()
+        _KILLED.clear()
+        _SEQ = 0
 
 
 def set_killer(fn) -> None:
     global _KILLER
-    _KILLER = fn
+    with _LOCK:
+        _KILLER = fn
 
 
 def parse_stop(utterance: str) -> tuple[str, str] | None:
@@ -160,53 +164,74 @@ def _job_status(hive: Path, job_id: str, world: dict) -> str:
     return "working"
 
 
+def _already(receipt: dict) -> dict:
+    prior = dict(receipt)
+    prior["already"] = True
+    prior["killed"] = False
+    return prior
+
+
 def cancel_once(scope: str, target: str = "", *, hive: Path, killer=None) -> dict:
-    """Cancel one named scope. The same scope and target is a no-op the second time."""
+    """Cancel one named scope. The same scope and target is a no-op the second time.
+
+    The book is claimed under a lock before the killer runs. An overlapping
+    call waits, then returns that same cancel_id with already set.
+    """
     name = (scope or "").strip().lower()
     if name in ("speaking", "speech"):
         name = "speak"
     if name not in SCOPES:
         return {"ok": False, "error": "unknown scope", "scope": name, "spoken": "Stopped."}
-    world = load_world(hive)
-    resolved = _resolve_target(name, target, world)
-    key = (name, resolved)
-    if key in _BOOK:
-        prior = dict(_BOOK[key])
-        prior["already"] = True
-        prior["killed"] = False
-        return prior
-    use_killer = _KILLER if _KILLER is not None else killer
-    killed = False
-    if name == "speak":
-        _patch(hive, lambda bus: bus.__setitem__("speak", "stopped"))
-        spoken = "Stopped speaking."
-    elif name == "tool":
-        if resolved == world["active_tool"]:
-            killed = _kill_tool_once(resolved, use_killer)
-        spoken = "Stopped that tool."
-    elif name == "job":
-        _mark_job(hive, resolved)
-        if world["tool_owner_job"] == resolved:
-            killed = _kill_tool_once(str(world["active_tool"]), use_killer)
-        spoken = "Stopped that job."
-    else:
-        owned = list(world["missions"].get(resolved, {}).get("jobs") or [])
-        for job_id in owned:
-            _mark_job(hive, job_id)
-        if world["tool_owner_job"] in owned:
-            killed = _kill_tool_once(str(world["active_tool"]), use_killer)
-        spoken = "Stopped that mission."
-    jobs = {job_id: _job_status(hive, str(job_id), world) for job_id in world["jobs"]}
-    receipt = {
-        "ok": True,
-        "verb": "stop",
-        "scope": name,
-        "target": resolved,
-        "cancel_id": _next_id(),
-        "already": False,
-        "killed": killed,
-        "spoken": spoken,
-        "jobs": jobs,
-    }
-    _BOOK[key] = dict(receipt)
-    return receipt
+    with _LOCK:
+        world = load_world(hive)
+        resolved = _resolve_target(name, target, world)
+        key = (name, resolved)
+        if key in _BOOK:
+            return _already(_BOOK[key])
+        cancel_id = _next_id()
+        _BOOK[key] = {
+            "ok": True,
+            "verb": "stop",
+            "scope": name,
+            "target": resolved,
+            "cancel_id": cancel_id,
+            "already": False,
+            "killed": False,
+            "spoken": "Stopped.",
+            "jobs": {},
+        }
+        use_killer = _KILLER if _KILLER is not None else killer
+        killed = False
+        if name == "speak":
+            _patch(hive, lambda bus: bus.__setitem__("speak", "stopped"))
+            spoken = "Stopped speaking."
+        elif name == "tool":
+            if resolved == world["active_tool"]:
+                killed = _kill_tool_once(resolved, use_killer)
+            spoken = "Stopped that tool."
+        elif name == "job":
+            _mark_job(hive, resolved)
+            if world["tool_owner_job"] == resolved:
+                killed = _kill_tool_once(str(world["active_tool"]), use_killer)
+            spoken = "Stopped that job."
+        else:
+            owned = list(world["missions"].get(resolved, {}).get("jobs") or [])
+            for job_id in owned:
+                _mark_job(hive, job_id)
+            if world["tool_owner_job"] in owned:
+                killed = _kill_tool_once(str(world["active_tool"]), use_killer)
+            spoken = "Stopped that mission."
+        jobs = {job_id: _job_status(hive, str(job_id), world) for job_id in world["jobs"]}
+        receipt = {
+            "ok": True,
+            "verb": "stop",
+            "scope": name,
+            "target": resolved,
+            "cancel_id": cancel_id,
+            "already": False,
+            "killed": killed,
+            "spoken": spoken,
+            "jobs": jobs,
+        }
+        _BOOK[key] = dict(receipt)
+        return receipt

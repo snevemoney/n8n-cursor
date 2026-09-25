@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib.util
 import json
 import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
 
@@ -112,6 +114,38 @@ class ScopedStopTest(unittest.TestCase):
         self.assertFalse(second["killed"])
         self.assertEqual(self.calls, ["cursor"])
         self.assertEqual(first["jobs"]["job-b"], "working")
+
+    def test_overlapping_tool_cancels_share_one_receipt(self) -> None:
+        hive = self._hive()
+
+        def killer(tool_id: str) -> bool:
+            self.calls.append(tool_id)
+            time.sleep(0.02)
+            return True
+
+        CONTROLS.set_killer(killer)
+        for _ in range(40):
+            CONTROLS.reset_book()
+            self.calls.clear()
+            CONTROLS.set_killer(killer)
+            results: list[dict] = []
+            gate = threading.Lock()
+
+            def run() -> None:
+                out = CONTROLS.cancel_once("tool", "", hive=hive)
+                with gate:
+                    results.append(out)
+
+            threads = [threading.Thread(target=run), threading.Thread(target=run)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+            self.assertEqual(len(results), 2)
+            self.assertEqual({row["cancel_id"] for row in results}, {results[0]["cancel_id"]})
+            self.assertEqual(sorted(bool(row["already"]) for row in results), [False, True])
+            self.assertEqual(self.calls, ["cursor"])
+            self.assertEqual(sum(1 for row in results if row["killed"]), 1)
 
 
 class FaceControlPresentationTest(unittest.TestCase):
