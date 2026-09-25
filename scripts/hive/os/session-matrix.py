@@ -9,7 +9,10 @@ Does not decrypt ChatGPT `.data`. Tokens stay in env, never in git.
 Usage:
   python3 scripts/hive/os/session-matrix.py write [--limit 8] [--no-vault]
   python3 scripts/hive/os/session-matrix.py write --heads-json fixture.json --out-root DIR
+  python3 scripts/hive/os/session-matrix.py learn-fact --out-root DIR --fact-json fact.json
   python3 scripts/hive/os/session-matrix.py print
+
+learn-fact writes the session store. It does not ask Evens to paste.
 """
 from __future__ import annotations
 
@@ -30,7 +33,10 @@ REPO = HERE.parents[2]
 LIB_DIR = REPO / "scripts/hive/outer-heaven"
 if str(LIB_DIR) not in sys.path:
     sys.path.insert(0, str(LIB_DIR))
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
 
+from continuity_propagate import learn_fact, propagate_root  # noqa: E402
 from lib import strip_secrets  # noqa: E402
 
 ASK_LIMIT = 160
@@ -975,16 +981,16 @@ def cmd_write(args: argparse.Namespace) -> int:
     prev_rows = load_index_rows(targets[0] / "sessions" / "INDEX.json") if targets else []
     wrote: list[dict[str, str]] = []
     for root in targets:
-        wrote.append(
-            write_bundle(
-                root,
-                packed.get("cursor") or [],
-                packed.get("grok") or [],
-                at=at,
-                date=date,
-                by_surface=packed,
-            )
+        bundle = write_bundle(
+            root,
+            packed.get("cursor") or [],
+            packed.get("grok") or [],
+            at=at,
+            date=date,
+            by_surface=packed,
         )
+        bundle["continuity"] = propagate_root(root)
+        wrote.append(bundle)
     slack_result: dict[str, Any] = {"ok": False, "skipped": "no SLACK_HIVE_* env"}
     if not getattr(args, "no_slack", False) and slack_hive_config():
         said_rel = latest_said_rel(targets[0] / "inbox") if targets else ""
@@ -1013,6 +1019,15 @@ def cmd_write(args: argparse.Namespace) -> int:
         )
     )
     return 0
+
+
+def cmd_learn_fact(args: argparse.Namespace) -> int:
+    """Record one platform fact on the session store and project it."""
+    payload = json.loads(Path(args.fact_json).read_text(encoding="utf-8"))
+    root = Path(args.out_root) if args.out_root else repo_os_root(Path(args.repo))
+    result = learn_fact(root, payload)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result.get("ok") else 1
 
 
 def cmd_print(args: argparse.Namespace) -> int:
@@ -1050,10 +1065,19 @@ def main() -> int:
     sub.add_parser("write", help="Write said overlay + sessions store + INDEX")
     sub.add_parser("sync", help="Refresh all four namespaces from disk (alias of write)")
     sub.add_parser("print", help="Print PASTE-PACK to stdout")
+    learn = sub.add_parser(
+        "learn-fact",
+        help="Project one fact to Jarvis and its audience. Evens does not paste it.",
+    )
+    learn.add_argument("--fact-json", required=True, help="One fact object. Not a transcript.")
     args = ap.parse_args()
     if args.cmd in ("write", "sync"):
         return cmd_write(args)
-    return cmd_print(args)
+    if args.cmd == "learn-fact":
+        return cmd_learn_fact(args)
+    if args.cmd == "print":
+        return cmd_print(args)
+    return 1
 
 
 if __name__ == "__main__":
