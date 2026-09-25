@@ -469,7 +469,11 @@ def cmd_get(args: argparse.Namespace) -> int:
     if args.key == "jobs":
         rows = list(slice_ or [])
         if args.status:
-            rows = [r for r in rows if r.get("status") == args.status]
+            # The done rollup is the permitted close. A historical "done" label is not that total.
+            if _terminal_token(args.status) == "DONE":
+                rows = [r for r in rows if counts_as_done(r)]
+            else:
+                rows = [r for r in rows if r.get("status") == args.status]
         if args.job:
             rows = [r for r in rows if r.get("id") == args.job or r.get("name") == args.job]
         slice_ = rows
@@ -841,6 +845,79 @@ def guard_outcome_payload(payload: dict, *, state_path: Path | None = None) -> d
         out["terminal_rejected"] = decision["reason"]
         out["guard"] = "hive-state.transition_job"
     return out
+
+
+# Founder wait is a disposition on the job row, not a second status machine.
+# These are the consequential classes a stall may surface as WAIT_EVENS.
+CONSEQUENTIAL_AUTHORITY = frozenset(
+    {
+        "send",
+        "pay",
+        "trade",
+        "public publish",
+        "destructive irreversible action",
+        "strategic conflict",
+    }
+)
+
+
+def counts_as_done(job: dict) -> bool:
+    """Work done is a close the terminal guard permitted. A bare done label is not."""
+    if not isinstance(job, dict):
+        return False
+    if _terminal_token(str(job.get("status") or "")) != "DONE":
+        return False
+    return _close_still_proven(job)
+
+
+def done_jobs(jobs: list | None) -> list[dict]:
+    return [job for job in jobs or [] if counts_as_done(job)]
+
+
+def done_total(jobs: list | None) -> int:
+    """Jobs the canonical close permitted. Historical done strings are absent."""
+    return len(done_jobs(jobs))
+
+
+def _authority_class(value: object) -> str | None:
+    text = " ".join(str(value or "").casefold().split())
+    if text in CONSEQUENTIAL_AUTHORITY:
+        return text
+    return None
+
+
+def _stale_progress_label(job: dict) -> bool:
+    """A stale or unpermitted terminal label is not a founder wait."""
+    if job.get("stale") is True:
+        return True
+    status = str(job.get("status") or "").strip()
+    if status.casefold() == "stale":
+        return True
+    if _terminal_token(status) and not _close_still_proven(job):
+        return True
+    return False
+
+
+def stall_disposition(job: dict, *, authority_class: str | None = None) -> dict:
+    """A stalled owed artifact stays with its owner unless the class is consequential.
+
+    WAIT_EVENS is not the fallback for a missing owner or a stale label.
+    """
+    owner = str(job.get("owner") or "").strip()
+    expected = str(job.get("expected_artifact") or "").strip()
+    wake = str(job.get("wake_condition") or "").strip()
+    stall = str(job.get("stall_timeout") or "").strip()
+    named = _authority_class(authority_class if authority_class is not None else job.get("authority_class"))
+    complete = bool(owner and expected and wake and stall)
+    founder = complete and named is not None and not _stale_progress_label(job)
+    return {
+        "owner": owner,
+        "expected_artifact": expected,
+        "wake_condition": wake,
+        "stall_timeout": stall,
+        "wait": "WAIT_EVENS" if founder else owner,
+        "founder_wait": founder,
+    }
 
 
 def record_owed(
