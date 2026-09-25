@@ -70,14 +70,20 @@ def append_event(
     event: dict[str, Any],
     *,
     path: Path = DEFAULT_PATH,
+    receipt_path: Path | None = None,
 ) -> tuple[bool, str]:
     """Returns (inserted, event_id). Skips if event_id already exists.
 
     Every writer passes through the shared-bus allowlist first. Keys that
     are not on that list, including raw amounts and prose, are not stored.
+    A complete consequential receipt is committed to the scoped receipt store
+    by that same prepare, not onto this jsonl line.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    prepared, refuse = _privacy_taste_action().prepare_shared_event(event)
+    prepared, refuse = _privacy_taste_action().prepare_shared_event(
+        event,
+        receipt_path=receipt_path,
+    )
     if refuse:
         raise ValueError(refuse)
     eid = prepared.get("event_id") or str(uuid.uuid4())
@@ -115,6 +121,7 @@ def emit(
     sensitivity: str = "internal",
     path: Path = DEFAULT_PATH,
     receipt: dict[str, Any] | None = None,
+    receipt_path: Path | None = None,
 ) -> str:
     event: dict[str, Any] = {
         "type": event_type,
@@ -130,10 +137,13 @@ def emit(
         event["entity_id"] = entity_id
     if receipt is not None:
         event["receipt"] = receipt
-    prepared, refuse = _privacy_taste_action().prepare_shared_event(event)
+    prepared, refuse = _privacy_taste_action().prepare_shared_event(
+        event,
+        receipt_path=receipt_path,
+    )
     if refuse:
         raise ValueError(refuse)
-    _, eid = append_event(prepared, path=path)
+    _, eid = append_event(prepared, path=path, receipt_path=receipt_path)
     return eid
 
 

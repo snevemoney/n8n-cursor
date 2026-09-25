@@ -12,6 +12,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import tempfile
+import uuid
+from pathlib import Path
 from typing import Any, Literal
 
 VerbName = Literal["KILL", "KEEP", "SEND", "PUBLISH"]
@@ -27,6 +30,7 @@ RECEIPT_FIELDS = ("authorized_by", "executed_by", "target", "timestamp", "result
 CONSEQUENTIAL_EVENT_TYPES = frozenset(
     {"email.replied", "content.published", "calendar.event_created"}
 )
+SCOPED_RECEIPT_PATH = Path.home() / ".grokbot" / "os-receipts.jsonl"
 _DONE_EVIDENCE = frozenset(
     {"done", "complete", "completed", "ok", "worker said done", "worker_done"}
 )
@@ -395,20 +399,69 @@ def _project_shared_event(event: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def prepare_shared_event(event: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
+def _scoped_receipt_exists(receipt_id: str, path: Path) -> bool:
+    if not path.is_file():
+        return False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict) and row.get("receipt_id") == receipt_id:
+            return True
+    return False
+
+
+def _commit_scoped_receipt(receipt: dict[str, Any], *, event_type: str, path: Path) -> str:
+    """Keep one complete receipt, including its exact amount, off the shared bus."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_id = str(receipt.get("receipt_id") or "")
+    if not _UUID.fullmatch(receipt_id):
+        receipt_id = str(uuid.uuid4())
+    if _scoped_receipt_exists(receipt_id, path):
+        return receipt_id
+    stored = dict(receipt)
+    stored["receipt_id"] = receipt_id
+    stored["event_type"] = event_type
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(stored, ensure_ascii=False) + "\n")
+    return receipt_id
+
+
+def prepare_shared_event(
+    event: dict[str, Any],
+    *,
+    receipt_path: Path | None = None,
+) -> tuple[dict[str, Any], str | None]:
     """Project one event onto the shared-bus allowlist before it is stored.
 
-    The receipt check stays in memory. The receipt body, including any exact
-    amount, is not copied onto the bus, into the archive line, or into telemetry.
+    A complete consequential receipt is committed to the scoped receipt store.
+    The bus keeps a receipt id only. An incomplete receipt is not stored and
+    does not count as done. Calling this twice does not drop a receipt that
+    was already committed.
     """
     if not isinstance(event, dict):
         return {"sensitivity": "internal", "payload": {}}, "event must be a record"
     prepared = _project_shared_event(event)
-    if prepared.get("type") in CONSEQUENTIAL_EVENT_TYPES:
-        receipt = event.get("receipt") if isinstance(event.get("receipt"), dict) else {}
-        ok, reason = consequential_receipt_ok(receipt)
-        if not ok:
-            return prepared, reason
+    if prepared.get("type") not in CONSEQUENTIAL_EVENT_TYPES:
+        return prepared, None
+    store = receipt_path or SCOPED_RECEIPT_PATH
+    receipt_id = event.get("receipt_id")
+    if isinstance(receipt_id, str) and _UUID.fullmatch(receipt_id) and _scoped_receipt_exists(receipt_id, store):
+        prepared["receipt_id"] = receipt_id
+        return prepared, None
+    receipt = event.get("receipt") if isinstance(event.get("receipt"), dict) else None
+    ok, reason = consequential_receipt_ok(receipt)
+    if not ok or receipt is None:
+        return prepared, reason
+    prepared["receipt_id"] = _commit_scoped_receipt(
+        receipt,
+        event_type=str(prepared.get("type") or ""),
+        path=store,
+    )
     return prepared, None
 
 
@@ -570,29 +623,42 @@ def self_test() -> int:
     )
     check(state_refuse is None and state_event["payload"]["to"] == {"lifecycle": "testing", "agent_state": "WORKING"}, "state delta kept")
     check("50" not in json.dumps(state_event), "cash inside a delta dropped")
-    published, publish_ok = prepare_shared_event(
-        {
-            "type": "content.published",
-            "source": "cli",
-            "actor": "operator",
-            "payload": {"amount": 919191},
-            "receipt": {
-                "authorized_by": "Evens",
-                "executed_by": "operator",
-                "target": "post-1",
-                "timestamp": "2026-09-25T01:20:00Z",
-                "result_evidence": "USD forty-two",
-            },
-        }
-    )
+    receipt_dir = Path(tempfile.mkdtemp())
+    receipt_store = receipt_dir / "os-receipts.jsonl"
+    publish_event = {
+        "type": "content.published",
+        "source": "cli",
+        "actor": "operator",
+        "payload": {"ok": True, "amount": 919191},
+        "receipt": {
+            "authorized_by": "Evens",
+            "executed_by": "operator",
+            "target": "post-1",
+            "timestamp": "2026-09-25T01:20:00Z",
+            "result_evidence": "ledger row 919191",
+        },
+    }
+    published, publish_ok = prepare_shared_event(publish_event, receipt_path=receipt_store)
     published_dump = json.dumps(published)
-    check(publish_ok is None and "forty-two" not in published_dump and "919191" not in published_dump, "receipt amount stays off the bus")
-    check("receipt" not in published, "receipt body is not a bus field")
-    _, refuse_pub = prepare_shared_event({"type": "content.published", "payload": {"status": "done"}})
-    check(refuse_pub is not None, "publish without receipt refused")
+    check(publish_ok is None and "919191" not in published_dump, "receipt amount stays off the bus")
+    check(published["payload"] == {"ok": True}, "publish bus keeps ok only")
+    check("receipt" not in published and published.get("receipt_id"), "bus keeps receipt id only")
+    stored = receipt_store.read_text(encoding="utf-8") if receipt_store.is_file() else ""
+    check("919191" in stored and "ledger row 919191" in stored, "exact amount stays in scoped receipt store")
+    again, again_ok = prepare_shared_event(published, receipt_path=receipt_store)
+    check(again_ok is None and again.get("receipt_id") == published.get("receipt_id"), "second prepare keeps the committed receipt")
+    check("919191" not in json.dumps(again), "second prepare still leaves the amount off the bus")
+    check(stored.count("919191") == receipt_store.read_text(encoding="utf-8").count("919191"), "second prepare does not duplicate the receipt")
+    incomplete_store = receipt_dir / "incomplete.jsonl"
+    _, refuse_pub = prepare_shared_event(
+        {"type": "content.published", "payload": {"ok": True}},
+        receipt_path=incomplete_store,
+    )
+    check(refuse_pub is not None and not incomplete_store.exists(), "publish without receipt refused")
     _, refuse_done = prepare_shared_event(
         {
             "type": "content.published",
+            "payload": {"ok": True},
             "receipt": {
                 "authorized_by": "Evens",
                 "executed_by": "Publishing Engine",
@@ -600,9 +666,11 @@ def self_test() -> int:
                 "timestamp": "2026-09-25T01:20:00Z",
                 "result_evidence": "done",
             },
-        }
+        },
+        receipt_path=incomplete_store,
     )
     check(refuse_done is not None and "not a receipt" in (refuse_done or ""), "publish done is not a receipt")
+    check(not incomplete_store.exists(), "incomplete receipt is not stored")
 
     if fails:
         print(f"privacy-taste-action self-test: {fails} FAIL")
