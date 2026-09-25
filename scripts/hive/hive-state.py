@@ -426,8 +426,9 @@ def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
     return bool(decision["permitted"] and job.get("proofPermit") == decision["permit"])
 
 
-def save(data: dict, path: Path | None = None) -> None:
+def save(data: dict, path: Path | None = None, *, preserve_ids: set[str] | None = None) -> None:
     target = path or STATE
+    keep = preserve_ids or set()
     previous: dict[str, dict] = {}
     if target.is_file():
         try:
@@ -443,7 +444,9 @@ def save(data: dict, path: Path | None = None) -> None:
             continue
         job_id = str(row.get("id") or "")
         prior = previous.get(job_id)
-        _demote_invalid_close(row, prior if isinstance(prior, dict) else None)
+        # A refusal names the row so save does not demote a label the caller left in place.
+        if job_id not in keep:
+            _demote_invalid_close(row, prior if isinstance(prior, dict) else None)
         prior_status = str(prior.get("status") or "") if isinstance(prior, dict) else None
         if not _terminal_change_allowed(row, prior_status):
             blocked.append(job_id or "?")
@@ -539,10 +542,14 @@ def transition_job(
     token = _terminal_token(target)
     if not decision["permitted"] and _close_still_proven(existing):
         kept = existing if isinstance(existing, dict) else {}
+        reason = str(decision.get("reason") or "narrower declaration does not replace a proven close")
+        if isinstance(existing, dict):
+            _append_refusal_log(data, existing, reason, desk=str(who or existing.get("desk") or "builder"))
+            save(data, state_path, preserve_ids={str(existing.get("id") or "")})
         return {
             "permitted": False,
             "state": kept.get("status"),
-            "reason": decision.get("reason") or "narrower declaration does not replace a proven close",
+            "reason": reason,
             "permit": kept.get("proofPermit"),
             "stale": False,
             "job": kept,
@@ -557,7 +564,7 @@ def transition_job(
             escapes=1,
         )
         _append_refusal_log(data, existing, reason, desk=str(who or existing.get("desk") or "builder"))
-        save(data, state_path)
+        save(data, state_path, preserve_ids={str(existing.get("id") or "")})
         return {
             "permitted": False,
             "state": existing.get("status"),
