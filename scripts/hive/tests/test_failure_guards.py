@@ -1148,6 +1148,101 @@ class SessionReceiptTest(unittest.TestCase):
             self.assertEqual(codex["platform"], "codex")
             self.assertEqual(codex["native_session_id"], "codex-thread-7")
 
+    def test_full_claim_with_unknown_pointer_is_not_full(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            receipt = self._close(Path(tmp), completeness="FULL")
+            self.assertEqual(receipt["transcript_pointer"], "UNKNOWN")
+            self.assertIn(receipt["completeness"], ("PARTIAL", "UNAVAILABLE"))
+            self.assertNotEqual(receipt["completeness"], "FULL")
+            self.assertNotIn("transcript", json.dumps({k: v for k, v in receipt.items() if k != "transcript_pointer"}))
+
+    def test_empty_id_and_no_pointer_stays_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            receipt = SESS.close_session(
+                {"platform": "cursor", "id": "", "completeness": "FULL"},
+                store=Path(tmp),
+            )
+            self.assertEqual(receipt["completeness"], "UNAVAILABLE")
+            self.assertEqual(receipt["native_session_id"], "UNKNOWN")
+            self.assertEqual(receipt["transcript_pointer"], "UNKNOWN")
+
+    def test_session_index_pointer_is_not_a_transcript(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp)
+            index = store / "session_index.jsonl"
+            index.write_text('{"id":"codex-thread-7"}\n', encoding="utf-8")
+            receipt = SESS.close_session(
+                {
+                    "platform": "codex",
+                    "native_session_id": "codex-thread-7",
+                    "path": str(index),
+                    "completeness": "FULL",
+                },
+                store=store,
+            )
+            self.assertNotEqual(receipt["completeness"], "FULL")
+            self.assertEqual(receipt["platform"], "codex")
+            self.assertEqual(receipt["native_session_id"], "codex-thread-7")
+            self.assertEqual(receipt["transcript_pointer"], str(index))
+            errors = receipt.get("validation_errors") or []
+            self.assertTrue(any("does not resolve" in item for item in errors))
+
+    def test_missing_evidence_with_real_transcript_fails_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp)
+            transcript = store / "native.jsonl"
+            transcript.write_text("{}\n", encoding="utf-8")
+            missing = store / "not-written.txt"
+            receipt = self._close(
+                store,
+                transcript_pointer=str(transcript),
+                evidence_refs=[str(missing)],
+            )
+            errors = receipt.get("validation_errors") or []
+            self.assertTrue(any(item.startswith("missing evidence:") for item in errors))
+            self.assertEqual(receipt["completeness"], "PARTIAL")
+            self.assertFalse(missing.exists())
+
+    def test_close_then_handoff_is_one_receipt_with_receiver(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp)
+            closed = SESS.close_session(
+                {
+                    "platform": "cursor",
+                    "native_session_id": "cursor-session-9",
+                    "transcript_unavailable": True,
+                },
+                store=store,
+            )
+            self.assertEqual(closed["logical_id"], "cursor|cursor-session-9|UNKNOWN|UNKNOWN")
+            self.assertEqual(closed["handoff_target"], "UNKNOWN")
+            linked = SESS.link_handoff(
+                store,
+                platform="cursor",
+                native_session_id="cursor-session-9",
+                mission_id="cid-grade-1",
+                job_id="research.web_intel",
+                handoff_target="Product GTM",
+            )
+            again = SESS.link_handoff(
+                store,
+                platform="cursor",
+                native_session_id="cursor-session-9",
+                mission_id="cid-grade-1",
+                job_id="research.web_intel",
+                handoff_target="Product GTM",
+            )
+            lines = (store / "receipts.jsonl").read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 1)
+            body = json.loads(lines[0])
+            self.assertEqual(linked["handoff_target"], "Product GTM")
+            self.assertEqual(again["handoff_target"], "Product GTM")
+            self.assertEqual(body["handoff_target"], "Product GTM")
+            self.assertEqual(body["logical_id"], "cursor|cursor-session-9|cid-grade-1|research.web_intel")
+            self.assertEqual(body["receipt_id"], body["logical_id"])
+            self.assertEqual(body["completeness"], "PARTIAL")
+            self.assertEqual(body["transcript_pointer"], "UNKNOWN")
+
 
 class VersionedContinuityTest(unittest.TestCase):
     def test_v2_after_v3_is_stale(self) -> None:
