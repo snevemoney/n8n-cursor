@@ -458,6 +458,25 @@ def _proof_token(value: object) -> str:
     return str(value or "").strip().upper().replace(" ", "_")
 
 
+def _truth_flags(claim: dict, ev: dict) -> dict[str, bool]:
+    """Bool labels from the claim, its statuses map, and the evidence beside it.
+
+    A string such as evidence.kind live_face is not a live flag.
+    """
+    flags: dict[str, bool] = {}
+    statuses = claim.get("statuses")
+    if isinstance(statuses, dict):
+        for word in SEPARATE_TRUTH:
+            if word in statuses:
+                flags[word] = statuses.get(word) is True
+    for word in SEPARATE_TRUTH:
+        if isinstance(claim.get(word), bool):
+            flags[word] = claim.get(word) is True
+        if isinstance(ev.get(word), bool):
+            flags[word] = ev.get(word) is True or flags.get(word) is True
+    return flags
+
+
 def authority_proof_reasons(
     claim: dict,
     ev: dict,
@@ -480,10 +499,12 @@ def authority_proof_reasons(
     statuses = claim.get("statuses")
     if isinstance(statuses, str):
         reasons.append("discussed, accepted, and live must stay separate")
-    elif strong and isinstance(statuses, dict):
-        named = [word for word in ("discussed", "suggested", "accepted", "candidate") if statuses.get(word) is True]
-        if named and statuses.get("live") is not True and state == "LIVE":
-            reasons.append("discussed, accepted, and live must stay separate")
+    flags = _truth_flags(claim, ev)
+    earlier = [word for word in ("discussed", "suggested", "accepted", "candidate") if flags.get(word)]
+    bundled = [word for word in ("discussed", "accepted", "live") if flags.get(word)]
+    # A live flag next to discussed or accepted does not promote the claim.
+    if earlier and (strong or flags.get("live") or len(bundled) >= 2):
+        reasons.append("discussed, accepted, and live must stay separate")
     if strong and proof in NOT_LIVE_PROOF:
         reasons.append(f"{proof} is not {state}")
     if claim.get("code_exists") is True and (claim.get("accepted") is True or proof == "ACCEPTED"):

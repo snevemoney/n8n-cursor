@@ -253,6 +253,37 @@ class HiveJobGateTest(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertIn("must stay separate", proc.stdout)
 
+    def test_live_flag_does_not_promote_discussed_and_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            claim = base_claim(
+                "LIVE",
+                statuses={"discussed": True, "accepted": True, "live": True},
+            )
+            write_claim(tmp, claim, self._live_evidence(tmp))
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("must stay separate", proc.stdout)
+
+    def test_nearby_live_flag_on_evidence_does_not_promote(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            claim = base_claim("LIVE", discussed=True, accepted=True)
+            evidence = self._live_evidence(tmp)
+            evidence["live"] = True
+            write_claim(tmp, claim, evidence)
+            proc = run_verify(tmp, "--offline")
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertIn("must stay separate", proc.stdout)
+
+    def test_live_alone_is_not_a_collapsed_label(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            claim = base_claim("LIVE", statuses={"live": True})
+            write_claim(tmp, claim, self._live_evidence(tmp))
+            proc = run_verify(tmp, "--offline")
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
     def test_code_existing_is_not_acceptance(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)
