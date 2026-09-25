@@ -22,6 +22,12 @@ assert _spec and _spec.loader
 vc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(vc)
 
+_pta_path = ROOT / "scripts/hive/os/privacy_taste_action.py"
+_pta_spec = importlib.util.spec_from_file_location("privacy_taste_action", _pta_path)
+assert _pta_spec and _pta_spec.loader
+pta = importlib.util.module_from_spec(_pta_spec)
+_pta_spec.loader.exec_module(pta)
+
 SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
 MAX_BRIEF_CHARS = 4500
 JOB_CARD_MAX_CHARS = 800
@@ -348,9 +354,9 @@ def build_brief(
         "agent": agent,
         "project": project,
         "sourceRoot": str(root),
-        "northStars": _extract_section(mem_text, "Four north stars", 900),
-        "decisions": _extract_section(mem_text, "DECISIONS (seeded)", 600),
-        "goals": _extract_section(mem_text, "GOALS (seeded)", 600),
+        "northStars": pta.scrub_text_for_desk(_extract_section(mem_text, "Four north stars", 900), agent),
+        "decisions": pta.scrub_text_for_desk(_extract_section(mem_text, "DECISIONS (seeded)", 600), agent),
+        "goals": pta.scrub_text_for_desk(_extract_section(mem_text, "GOALS (seeded)", 600), agent),
         "chronicleRecent": _chronicle_summaries(root, 3),
         "graphHubs": _graph_hubs(root, 10),
         "recentCursorChats": _cursor_chat_titles(root, 10),
@@ -363,7 +369,7 @@ def build_brief(
         "vaultResolve": vc.resolve_vault(),
     }
     if read_note:
-        brief["noteExcerpt"] = _read_note(root, read_note)
+        brief["noteExcerpt"] = pta.scrub_text_for_desk(_read_note(root, read_note), agent)
 
     job_card = _job_card_brief(root, agent)
     brief["jobCard"] = job_card

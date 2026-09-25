@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import sys
 import uuid
@@ -69,11 +70,24 @@ def append_event(
     event: dict[str, Any],
     *,
     path: Path = DEFAULT_PATH,
+    receipt_path: Path | None = None,
 ) -> tuple[bool, str]:
-    """Returns (inserted, event_id). Skips if event_id already exists."""
+    """Returns (inserted, event_id). Skips if event_id already exists.
+
+    Every writer passes through the shared-bus allowlist first. Keys that
+    are not on that list, including raw amounts and prose, are not stored.
+    A complete consequential receipt is committed to the scoped receipt store
+    by that same prepare, not onto this jsonl line.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
-    eid = event.get("event_id") or str(uuid.uuid4())
-    event = {**event, "event_id": eid}
+    prepared, refuse = _privacy_taste_action().prepare_shared_event(
+        event,
+        receipt_path=receipt_path,
+    )
+    if refuse:
+        raise ValueError(refuse)
+    eid = prepared.get("event_id") or str(uuid.uuid4())
+    event = {**prepared, "event_id": eid}
     if "timestamp" not in event:
         event["timestamp"] = _now_iso()
     existing = {r.get("event_id") for r in _read_all(path)}
@@ -82,6 +96,17 @@ def append_event(
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(event, ensure_ascii=False) + "\n")
     return True, eid
+
+
+def _privacy_taste_action():
+    spec = importlib.util.spec_from_file_location(
+        "privacy_taste_action",
+        Path(__file__).resolve().parent / "privacy_taste_action.py",
+    )
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def emit(
@@ -95,8 +120,10 @@ def emit(
     entity_id: str | None = None,
     sensitivity: str = "internal",
     path: Path = DEFAULT_PATH,
+    receipt: dict[str, Any] | None = None,
+    receipt_path: Path | None = None,
 ) -> str:
-    event = {
+    event: dict[str, Any] = {
         "type": event_type,
         "source": source,
         "actor": actor,
@@ -108,7 +135,15 @@ def emit(
         event["project_id"] = project_id
     if entity_id:
         event["entity_id"] = entity_id
-    _, eid = append_event(event, path=path)
+    if receipt is not None:
+        event["receipt"] = receipt
+    prepared, refuse = _privacy_taste_action().prepare_shared_event(
+        event,
+        receipt_path=receipt_path,
+    )
+    if refuse:
+        raise ValueError(refuse)
+    _, eid = append_event(prepared, path=path, receipt_path=receipt_path)
     return eid
 
 
@@ -137,14 +172,18 @@ def main() -> int:
         if args.emit not in STANDARD_TYPES:
             print(f"Warning: {args.emit} not in STANDARD_TYPES catalog", file=sys.stderr)
         payload = json.loads(args.payload)
-        eid = emit(
-            args.emit,
-            args.source,
-            args.actor,
-            payload,
-            project_id=args.project_id,
-            path=args.path,
-        )
+        try:
+            eid = emit(
+                args.emit,
+                args.source,
+                args.actor,
+                payload,
+                project_id=args.project_id,
+                path=args.path,
+            )
+        except ValueError as exc:
+            print(json.dumps({"refused": True, "reason": str(exc), "type": args.emit}, indent=2))
+            return 1
         print(json.dumps({"event_id": eid, "type": args.emit}, indent=2))
         return 0
 
