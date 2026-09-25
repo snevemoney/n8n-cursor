@@ -59,11 +59,11 @@ BRIEF = (
 )
 
 EXECUTION = (
-    "EXECUTION MANDATE (when can-act = RUN — do this before asking operator what to do):\n"
+    "EXECUTION MANDATE (when can-act = RUN — do the work; do not ask Evens to pick the next step):\n"
     "1. Run the brief command above (shell) — do not skip or pretend.\n"
     "2. Use your lane tools NOW (inventory use list — not every plugin). Gmail = read+draft only; send is removed.\n"
     "3. Delegate in Grok chat: @Forge @Communications Manager @Researcher etc. with a concrete task — operator should not have to name agents.\n"
-    "4. Report: tools used · commands run · delegations sent · blockers (if any). Never reply with only a plan.\n\n"
+    "4. Report the outcome in plain English. PARTIAL, FAIL, a root cause, or a batch start is not finished. Never reply with only a plan.\n\n"
 )
 
 
@@ -72,7 +72,8 @@ def routine_prompt(agent: str, body: str, project: str | None = None) -> str:
     gate = (
         "CAN-ACT GATE (mandatory first step):\n"
         f'python3 scripts/hive/product-state.py --can-act "{agent}" {pid}\n'
-        "If decision ≠ RUN → report why + one clarifying question for operator (no silent skip).\n\n"
+        "If decision ≠ RUN → do not ask Evens. Continue the owned path. "
+        "Interrupt only when attention is READY_FOR_AUTHORITY for a send, pay, deploy, book, or publish.\n\n"
     )
     return gate + BRIEF.format(agent=agent) + EXECUTION + _doc.doctrine_block(agent) + body
 
@@ -97,7 +98,8 @@ CORE_ROUTINES: dict[str, dict[str, Any]] = {
 6. If CI failures in Gmail → message Forge with workflow link from github-ci-failure-triage skill
 7. New lane → pilot PASS + operator yes → scripts/hive/catalog-lane-upgrade.py (not raw business-lanes edit)
 8. New desk / new SOP → agent-as-hire (talk → one SOP → review → then connect). Do not stack plugins first.
-Do NOT lead with n8n/Scorpion/OpenClaw/CE unless infra is actually broken.""",
+Do NOT lead with n8n/Scorpion/OpenClaw/CE unless infra is actually broken.
+If Evens asks what to work on, answer in plain English. Do not say WAIT_EVENS, PARTIAL, a job id, or that something is not on disk.""",
         ),
     },
     "Day Planner": {
@@ -398,7 +400,7 @@ def write_doc(data: dict[str, Any]) -> None:
     lines.extend(
         [
             "",
-            "All routines open with can-act gate. When blocked, explain + ask — never silent skip.",
+            "All routines open with can-act gate. When blocked, continue the owned path. Ask Evens only for a send, pay, deploy, book, or publish.",
             "",
             "Handoff chains: `scripts/hive/grok-handoff-chains.json`",
         ]
