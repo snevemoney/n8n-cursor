@@ -99,6 +99,50 @@ const MONEY_PARAM_KEYS = new Set([
   'invoiceSentAt',
 ])
 
+const VERBS = ['KILL', 'KEEP', 'SEND', 'PUBLISH'] as const
+const RECEIPT_KEYS = ['authorized_by', 'executed_by', 'target', 'timestamp', 'result_evidence'] as const
+const ONE_FLAG_KEYS = ['approved', 'done', 'execute', 'active', 'flag'] as const
+const DONE_EVIDENCE = new Set(['done', 'complete', 'completed', 'ok', 'worker said done', 'worker_done'])
+
+/**
+ * KILL, KEEP, SEND, and PUBLISH keep recommendation, Evens decision, and
+ * execution as separate fields. A boolean flag is not an action.
+ * Returns a reason when the payload collapses them, otherwise null.
+ */
+export function actionStatesCollapsed(params: Record<string, unknown>): string | null {
+  for (const verb of VERBS) {
+    if (typeof params[verb] === 'boolean' || typeof params[verb.toLowerCase()] === 'boolean') {
+      return 'recommendation and execution cannot collapse into one flag'
+    }
+  }
+  const hasThree =
+    'recommendation' in params && 'evens_decision' in params && 'execution' in params
+  for (const key of ONE_FLAG_KEYS) {
+    if (typeof params[key] === 'boolean' && !hasThree) {
+      return 'recommendation and execution cannot collapse into one flag'
+    }
+  }
+  if (!hasThree) return null
+  if (params.recommendation === params.execution && params.execution !== 'not_executed') {
+    return 'recommendation and execution cannot collapse into one flag'
+  }
+  if (params.execution === 'executed' && params.evens_decision !== 'yes') {
+    return 'execution requires Evens decision yes'
+  }
+  if (params.execution === 'executed') {
+    const receipt =
+      params.receipt && typeof params.receipt === 'object'
+        ? (params.receipt as Record<string, unknown>)
+        : params
+    for (const key of RECEIPT_KEYS) {
+      if (!receipt[key]) return `consequential action missing ${key}`
+    }
+    const evidence = String(receipt.result_evidence).trim().toLowerCase()
+    if (DONE_EVIDENCE.has(evidence)) return 'a worker saying done is not a receipt'
+  }
+  return null
+}
+
 function paramsAttemptMoneyBypass(params: Record<string, unknown>): boolean {
   for (const key of Object.keys(params)) {
     if (MONEY_PARAM_KEYS.has(key)) return true
@@ -136,6 +180,15 @@ export function enforceTier3HitlGate(
     return tier3BlockResponse(tool, block)
   }
 
+  const collapsed = actionStatesCollapsed(params)
+  if (collapsed) {
+    return tier3BlockResponse(tool, {
+      category: 'client_send',
+      operatorSurface: 'Evens — recommendation, decision, and execution stay separate',
+      reason: collapsed,
+    })
+  }
+
   if (paramsAttemptMoneyBypass(params)) {
     return tier3BlockResponse(tool, {
       category: 'money',
@@ -150,7 +203,7 @@ export function enforceTier3HitlGate(
 export function listTier3Policy() {
   return {
     tier: 3,
-    rule: 'Money mutations, prod deploy, secrets, and client send never execute from Telegram',
+    rule: 'Money mutations, prod deploy, secrets, and client send never execute from Telegram. KILL, KEEP, SEND, and PUBLISH keep recommendation, Evens decision, and execution as separate fields. A worker saying done is not a receipt.',
     blockedTools: Object.keys(TIER3_BLOCKED_TOOLS),
     tier2LedgerTools: [...TIER2_CE_LEDGER_TOOLS],
     operatorSurfaces: {

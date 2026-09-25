@@ -6,6 +6,7 @@ Used by product-state.py --can-act and routine prompts.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import sys
 from datetime import datetime, timezone
@@ -32,15 +33,38 @@ def _audit_log(path: Path, row: dict[str, Any]) -> None:
         fh.write(json.dumps({**row, "timestamp": _now_iso()}, ensure_ascii=False) + "\n")
 
 
-def kill_switch_active(kill_path: Path | None = None) -> bool:
+def _privacy_taste_action():
+    spec = importlib.util.spec_from_file_location(
+        "privacy_taste_action",
+        Path(__file__).resolve().parent / "privacy_taste_action.py",
+    )
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def read_kill_switch(kill_path: Path | None = None) -> dict[str, Any] | None:
     p = kill_path or Path.home() / ".grokbot/os-kill-switch.json"
     if not p.is_file():
-        return False
+        return None
     try:
         data = json.loads(p.read_text(encoding="utf-8"))
-        return bool(data.get("active"))
     except json.JSONDecodeError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def kill_switch_active(kill_path: Path | None = None) -> bool:
+    """True only when KILL has Evens's yes, execution, and a receipt.
+
+    A lone active flag is a recommendation. It does not execute.
+    """
+    data = read_kill_switch(kill_path)
+    if data is None:
         return False
+    blocks, _reason = _privacy_taste_action().kill_switch_blocks(data)
+    return blocks
 
 
 def should_run(
@@ -53,10 +77,24 @@ def should_run(
 ) -> tuple[Decision, str]:
     """Evaluate spec §9 checklist. Returns (decision, reason)."""
     audit = audit_path or Path.home() / ".grokbot/os-audit.jsonl"
-    if kill_switch_active(kill_path):
-        reason = "kill switch active — all agents NO_ACTION"
-        _audit_log(audit, {"agent": agent, "decision": "IGNORE", "reason": reason, "trigger": "kill_switch"})
-        return "IGNORE", reason
+    kill_note = ""
+    kill_data = read_kill_switch(kill_path)
+    if kill_data:
+        blocks, kill_reason = _privacy_taste_action().kill_switch_blocks(kill_data)
+        if blocks:
+            _audit_log(audit, {"agent": agent, "decision": "IGNORE", "reason": kill_reason, "trigger": "kill_switch"})
+            return "IGNORE", kill_reason
+        if kill_reason:
+            kill_note = kill_reason
+            _audit_log(
+                audit,
+                {
+                    "agent": agent,
+                    "decision": "recommendation_only",
+                    "reason": kill_reason,
+                    "trigger": "kill_recommendation_not_execution",
+                },
+            )
 
     st = state or {}
     lifecycle = str(st.get("lifecycle", "idea")).lower()
@@ -119,6 +157,8 @@ def should_run(
             return "IGNORE", reason
 
     reason = "checks passed"
+    if kill_note:
+        reason = f"{reason}; {kill_note}"
     _audit_log(audit, {"agent": agent, "decision": "RUN", "reason": reason, "event_type": (event or {}).get("type")})
     return "RUN", reason
 
@@ -152,6 +192,19 @@ def self_test() -> int:
         if got != expected:
             print(f"FAIL {agent}: expected {expected} got {got}")
             fails += 1
+    kill = Path("/tmp/os-kill-selftest.json")
+    kill.write_text(json.dumps({"active": True}), encoding="utf-8")
+    got, reason = should_run(
+        "Forge",
+        None,
+        {"lifecycle": "production"},
+        kill_path=kill,
+        audit_path=Path("/tmp/os-audit-selftest.jsonl"),
+    )
+    kill.unlink(missing_ok=True)
+    if got == "IGNORE" or "one flag" not in reason:
+        print(f"FAIL kill flag executed: {got} {reason}")
+        fails += 1
     if fails:
         return 1
     print("should-run self-test: OK")

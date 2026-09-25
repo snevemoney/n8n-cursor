@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import sys
 import uuid
@@ -84,6 +85,17 @@ def append_event(
     return True, eid
 
 
+def _privacy_taste_action():
+    spec = importlib.util.spec_from_file_location(
+        "privacy_taste_action",
+        Path(__file__).resolve().parent / "privacy_taste_action.py",
+    )
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def emit(
     event_type: str,
     source: str,
@@ -95,8 +107,9 @@ def emit(
     entity_id: str | None = None,
     sensitivity: str = "internal",
     path: Path = DEFAULT_PATH,
+    receipt: dict[str, Any] | None = None,
 ) -> str:
-    event = {
+    event: dict[str, Any] = {
         "type": event_type,
         "source": source,
         "actor": actor,
@@ -108,7 +121,12 @@ def emit(
         event["project_id"] = project_id
     if entity_id:
         event["entity_id"] = entity_id
-    _, eid = append_event(event, path=path)
+    if receipt is not None:
+        event["receipt"] = receipt
+    prepared, refuse = _privacy_taste_action().prepare_shared_event(event)
+    if refuse:
+        raise ValueError(refuse)
+    _, eid = append_event(prepared, path=path)
     return eid
 
 
@@ -137,14 +155,18 @@ def main() -> int:
         if args.emit not in STANDARD_TYPES:
             print(f"Warning: {args.emit} not in STANDARD_TYPES catalog", file=sys.stderr)
         payload = json.loads(args.payload)
-        eid = emit(
-            args.emit,
-            args.source,
-            args.actor,
-            payload,
-            project_id=args.project_id,
-            path=args.path,
-        )
+        try:
+            eid = emit(
+                args.emit,
+                args.source,
+                args.actor,
+                payload,
+                project_id=args.project_id,
+                path=args.path,
+            )
+        except ValueError as exc:
+            print(json.dumps({"refused": True, "reason": str(exc), "type": args.emit}, indent=2))
+            return 1
         print(json.dumps({"event_id": eid, "type": args.emit}, indent=2))
         return 0
 
