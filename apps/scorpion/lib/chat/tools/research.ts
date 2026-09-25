@@ -21,7 +21,7 @@ export function setBrowserActionEmitter(emitter: ((action: any) => void) | null)
 export async function handler(args: z.infer<typeof schema>) {
   try {
     // Call existing research API to start research
-    const response = await fetch('http://localhost:3003/api/research/start', {
+    const response = await fetch(process.env.SCORPION_API_URL || 'http://localhost:3003/api/research/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(args),
@@ -52,7 +52,7 @@ export async function handler(args: z.infer<typeof schema>) {
     let eventsAbortController: AbortController | null = null;
     if (browserActionEmitter) {
       eventsAbortController = new AbortController();
-      fetch(`http://localhost:3003/api/research/events?sessionId=${sessionId}`, {
+      fetch(`${process.env.SCORPION_API_URL || 'http://localhost:3003'}/api/research/events?sessionId=${sessionId}`, {
         signal: eventsAbortController.signal,
       })
         .then(async (eventsResponse) => {
@@ -101,7 +101,7 @@ export async function handler(args: z.infer<typeof schema>) {
       }
 
       try {
-        const pollResponse = await fetch(`http://localhost:3003/api/research/start?sessionId=${sessionId}`, {
+        const pollResponse = await fetch(`${process.env.SCORPION_API_URL || 'http://localhost:3003'}/api/research/start?sessionId=${sessionId}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });

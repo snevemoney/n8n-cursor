@@ -568,7 +568,7 @@ class SystemAutomation {
       socket.once('error', () => {
         resolve(false);
       });
-      socket.connect(port, 'localhost');
+      socket.connect(port, process.env.HOST || 'localhost');
     });
   }
 

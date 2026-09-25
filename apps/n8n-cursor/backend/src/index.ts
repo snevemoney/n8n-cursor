@@ -285,8 +285,8 @@ async function startServer() {
     // Start Express server
     app.listen(PORT, () => {
       console.log(`🚀 n8n-cursor backend running on port ${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
-      console.log(`🔄 Workflow endpoint: http://localhost:${PORT}/api/workflows/0/run`);
+      console.log(`📊 Health check: http://${process.env.HOST || 'localhost'}:${PORT}/health`);
+      console.log(`🔄 Workflow endpoint: http://${process.env.HOST || 'localhost'}:${PORT}/api/workflows/0/run`);
     });
 
   } catch (error) {

@@ -21,7 +21,7 @@ let ollamaStartAttempted = false;
 /**
  * Check if Ollama is running by checking the port
  */
-async function isOllamaRunning(ollamaUrl: string = 'http://localhost:11434'): Promise<boolean> {
+async function isOllamaRunning(ollamaUrl: string = process.env.OLLAMA_URL || 'http://localhost:11434'): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
@@ -155,7 +155,7 @@ async function startOllamaServer(): Promise<{ success: boolean; error?: string }
 /**
  * Ensure Ollama is running - checks and starts if needed
  */
-export async function ensureOllamaRunning(ollamaUrl: string = 'http://localhost:11434'): Promise<OllamaStatus> {
+export async function ensureOllamaRunning(ollamaUrl: string = process.env.OLLAMA_URL || 'http://localhost:11434'): Promise<OllamaStatus> {
   // Quick check first
   const isRunning = await isOllamaRunning(ollamaUrl);
   if (isRunning) {
@@ -181,7 +181,7 @@ export async function ensureOllamaRunning(ollamaUrl: string = 'http://localhost:
 /**
  * Get Ollama status without attempting to start
  */
-export async function getOllamaStatus(ollamaUrl: string = 'http://localhost:11434'): Promise<OllamaStatus> {
+export async function getOllamaStatus(ollamaUrl: string = process.env.OLLAMA_URL || 'http://localhost:11434'): Promise<OllamaStatus> {
   const running = await isOllamaRunning(ollamaUrl);
   return { running };
 }

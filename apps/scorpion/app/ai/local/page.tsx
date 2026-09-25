@@ -80,8 +80,8 @@ export default function LocalAIPage() {
                   <h3 className="font-semibold text-white mb-2">Getting Started:</h3>
                   <ol className="list-decimal list-inside space-y-1 ml-2">
                     <li>Make sure Ollama is running: <code className="bg-gray-700 px-2 py-1 rounded">ollama serve</code></li>
-                    <li>Access chat at <code className="bg-gray-700 px-2 py-1 rounded">http://scorpion.local/chat</code> or <code className="bg-gray-700 px-2 py-1 rounded">http://localhost:3003/chat</code></li>
-                    <li>Access document chat at <code className="bg-gray-700 px-2 py-1 rounded">http://scorpion.local/ai/docs</code> or <code className="bg-gray-700 px-2 py-1 rounded">http://localhost:3003/ai/docs</code></li>
+                    <li>Access chat at <code className="bg-gray-700 px-2 py-1 rounded">http://scorpion.local/chat</code></li>
+                    <li>Access document chat at <code className="bg-gray-700 px-2 py-1 rounded">http://scorpion.local/ai/docs</code></li>
                     <li>Upload documents and start chatting with your local LLM</li>
                   </ol>
                 </div>

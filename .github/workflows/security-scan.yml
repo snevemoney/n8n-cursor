@@ -56,11 +56,12 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Find and lint Dockerfiles
+      id: hadolint
       run: |
+        echo "upload=false" >> "$GITHUB_OUTPUT"
         DOCKERFILES=$(find . -name "Dockerfile*" -not -path "*/node_modules/*" -type f 2>/dev/null || true)
         if [ -z "$DOCKERFILES" ]; then
           echo "No Dockerfiles found, skipping hadolint"
-          echo '{"runs":[]}' > hadolint-results.sarif
         else
           echo "Found Dockerfiles:"
           echo "$DOCKERFILES"
@@ -68,12 +69,11 @@ jobs:
             echo "Linting: $df"
             docker run --rm -i hadolint/hadolint < "$df" || true
           done
-          echo '{"runs":[]}' > hadolint-results.sarif
         fi
 
     - name: Upload Hadolint results
       uses: github/codeql-action/upload-sarif@v3
-      if: always()
+      if: always() && steps.hadolint.outputs.upload == 'true'
       with:
         sarif_file: 'hadolint-results.sarif'
 

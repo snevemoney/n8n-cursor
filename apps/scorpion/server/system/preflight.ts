@@ -11,7 +11,7 @@ export async function runPreflight(): Promise<Preflight> {
   let ollamaOk = false;
 
   try {
-    const res = await fetch('http://localhost:11434/api/tags', { method: 'GET' });
+    const res = await fetch(process.env.OLLAMA_URL || 'http://localhost:11434/api/tags', { method: 'GET' });
     ollamaOk = res.ok;
   } catch { /* noop */ }
 

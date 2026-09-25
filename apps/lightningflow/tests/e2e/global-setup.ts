@@ -13,7 +13,7 @@ async function globalSetup(config: FullConfig) {
   try {
     // Wait for the development server to be ready
     console.log('⏳ Waiting for development server...');
-    await page.goto(config.projects[0].use.baseURL || 'http://localhost:3000');
+    await page.goto(config.projects[0].use.baseURL || process.env.BASE_URL || 'http://localhost:3000');
     
     // Wait for the page to load completely
     await page.waitForLoadState('networkidle');

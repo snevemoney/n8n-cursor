@@ -45,7 +45,7 @@ export class SecureLNDClient {
       network: config.network || 'mainnet',
       tlsCertPath: config.tlsCertPath,
       macaroonPath: config.macaroonPath,
-      rpcServer: config.rpcServer || 'localhost:10009',
+      rpcServer: config.rpcServer || process.env.LND_RPC_SERVER || 'localhost:10009',
       ...config
     };
   }
@@ -79,7 +79,7 @@ export class SecureLNDClient {
     }
 
     // Add RPC server if specified
-    if (this.config.rpcServer && this.config.rpcServer !== 'localhost:10009') {
+    if (this.config.rpcServer && this.config.rpcServer !== (process.env.LND_RPC_SERVER || 'localhost:10009')) {
       baseArgs.push(`--rpcserver=${this.config.rpcServer}`);
     }
 

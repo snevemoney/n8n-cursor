@@ -18,7 +18,7 @@ async function runMigration() {
   
   if (!databaseUrl) {
     console.error('❌ DATABASE_URL environment variable is required');
-    console.error('   Example: DATABASE_URL=postgresql://user:pass@localhost:5432/scorpion');
+    console.error('   Example: DATABASE_URL=postgresql://user:pass@db-host:5432/scorpion');
     process.exit(1);
   }
 

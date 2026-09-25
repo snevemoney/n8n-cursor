@@ -25,7 +25,7 @@ export interface OllamaChatRequest {
 export class OllamaClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string = 'http://localhost:11434') {
+  constructor(baseUrl: string = process.env.OLLAMA_URL || 'http://localhost:11434') {
     this.baseUrl = baseUrl.replace(/\/$/, '');
   }
 

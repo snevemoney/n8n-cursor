@@ -43,8 +43,8 @@ const envVarConfigs: EnvVarConfig[] = [
   {
     name: 'OLLAMA_URL',
     required: false,
-    description: 'Ollama service URL - LOCAL service (defaults to http://localhost:11434). Install Ollama locally: https://ollama.ai',
-    defaultValue: 'http://localhost:11434',
+    description: 'Ollama service URL. Local install: https://ollama.ai',
+    defaultValue: process.env.OLLAMA_URL || 'http://localhost:11434',
     validator: (value) => {
       try {
         new URL(value);
@@ -148,7 +148,7 @@ const envVarConfigs: EnvVarConfig[] = [
     name: 'WHISPER_URL',
     required: false,
     description: 'Whisper STT service URL (for voice mode local profile)',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: process.env.WHISPER_URL || 'http://localhost:8000',
     validator: (value) => {
       try {
         new URL(value);
@@ -162,7 +162,7 @@ const envVarConfigs: EnvVarConfig[] = [
     name: 'TTS_URL',
     required: false,
     description: 'TTS service URL (for voice mode local profile)',
-    defaultValue: 'http://localhost:5000',
+    defaultValue: process.env.TTS_URL || 'http://localhost:5000',
     validator: (value) => {
       try {
         new URL(value);
@@ -188,7 +188,7 @@ const envVarConfigs: EnvVarConfig[] = [
     name: 'CHAT_API_URL',
     required: false,
     description: 'Chat API endpoint URL (for voice mode)',
-    defaultValue: 'http://localhost:3003/api/chat/stream',
+    defaultValue: process.env.CHAT_API_URL || 'http://localhost:3003/api/chat/stream',
     validator: (value) => {
       try {
         new URL(value);

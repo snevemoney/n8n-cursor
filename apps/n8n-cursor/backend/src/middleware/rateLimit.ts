@@ -17,7 +17,7 @@ export function extractClientIP(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) {
     const firstIp = forwarded.split(",")[0];
-    return firstIp ? firstIp.trim() : "0.0.0.0";
+    return firstIp ? firstIp.trim() : process.env.RATE_LIMIT_UNKNOWN_IP || "0.0.0.0";
   }
-  return "0.0.0.0";
+  return process.env.RATE_LIMIT_UNKNOWN_IP || "0.0.0.0";
 }

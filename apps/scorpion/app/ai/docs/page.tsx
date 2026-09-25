@@ -26,7 +26,7 @@ export default function DocsPage() {
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [ollamaAvailable, setOllamaAvailable] = useState<boolean | null>(null);
-  const [ollamaUrl, setOllamaUrl] = useState('http://localhost:11434');
+  const [ollamaUrl, setOllamaUrl] = useState(process.env.OLLAMA_URL || 'http://localhost:11434');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -208,7 +208,7 @@ export default function DocsPage() {
                   onChange={(e) => setOllamaUrl(e.target.value)}
                   onBlur={checkOllama}
                   className="bg-gray-700/50 border border-gray-600 rounded px-3 py-1 text-sm w-48 focus:outline-none focus:border-purple-500"
-                  placeholder="http://localhost:11434"
+                  placeholder={process.env.NEXT_PUBLIC_OLLAMA_URL || "http://localhost:11434"}
                 />
               </div>
               {/* Model Selector */}

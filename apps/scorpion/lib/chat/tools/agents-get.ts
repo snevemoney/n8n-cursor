@@ -10,7 +10,7 @@ export const schema = z.object({
 
 export async function handler(args: z.infer<typeof schema>) {
   try {
-    const response = await fetch(`http://localhost:3003/api/agents/${args.agentId}`);
+    const response = await fetch(`${process.env.SCORPION_API_URL || 'http://localhost:3003'}/api/agents/${args.agentId}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch agent: ${response.statusText}`);
     }

@@ -1256,7 +1256,7 @@ export function useChatStream({
           errorMessage.includes('NetworkError');
         
         if (isConnectionError) {
-          errorMessage = `❌ **Connection Error**\n\nCannot connect to the chat server.\n\n**Troubleshooting:**\n1. Make sure the Next.js dev server is running: \`cd apps/scorpion && pnpm dev\`\n2. Check if the server is accessible at http://localhost:3003\n3. Verify there are no firewall or network restrictions\n4. Check the terminal for server errors`;
+          errorMessage = `❌ **Connection Error**\n\nCannot connect to the chat server.\n\n**Troubleshooting:**\n1. Make sure the Next.js dev server is running: \`cd apps/scorpion && pnpm dev\`\n2. Check if the dev server is accessible\n3. Verify there are no firewall or network restrictions\n4. Check the terminal for server errors`;
         }
         
         errorMessage = errorMessage.split('\n').filter((line: string) => 

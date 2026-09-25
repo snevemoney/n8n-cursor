@@ -1,5 +1,5 @@
 name: lfai_int
-x:dflt: &dflt
+x-dflt: &dflt
   restart: unless-stopped
   init: true
   stop_grace_period: 15s

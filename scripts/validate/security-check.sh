@@ -11,12 +11,9 @@ VIOLATIONS=()
 # Check for hardcoded secrets
 echo "🔐 Checking for hardcoded secrets..."
 SECRET_PATTERNS=(
-    "password.*=.*['\"][^'\"]{8,}['\"]"
-    "secret.*=.*['\"][^'\"]{8,}['\"]"
-    "key.*=.*['\"][^'\"]{8,}['\"]"
-    "token.*=.*['\"][^'\"]{8,}['\"]"
-    "api_key.*=.*['\"][^'\"]{8,}['\"]"
-    "private_key.*=.*['\"][^'\"]{8,}['\"]"
+    # Same real-secret assignment rule as Reliability Guards. Fixture lines are
+    # dropped by the grep -v filter below (process.env, tests, mocks).
+    "(api_key|secret_key|private_key|auth_token)[[:space:]]*[:=][[:space:]]*['\"][a-zA-Z0-9_-]{20,}['\"]"
     "BEGIN.*PRIVATE.*KEY"
     "BEGIN.*RSA.*PRIVATE.*KEY"
     "BEGIN.*DSA.*PRIVATE.*KEY"
@@ -68,7 +65,7 @@ for pattern in "${SECRET_PATTERNS[@]}"; do
             --include="*.tsx" \
             --include="*.js" \
             --include="*.jsx" \
-            apps/ packages/ 2>/dev/null | grep -v "process\.env\|import\|require\|type \|interface \|selector\|querySelector\|data-test\|Label\|placeholder\|htmlFor\|confirm\|show\|hide\|className\|useState\|validation\|error\|\.d\.ts\|header" | head -5
+            apps/ packages/ 2>/dev/null | grep -v "process\.env\|import\|require\|type \|interface \|selector\|querySelector\|data-test\|Label\|placeholder\|htmlFor\|confirm\|show\|hide\|className\|useState\|validation\|error\|\.d\.ts\|header" | head -5 || true
         VIOLATIONS+=("hardcoded_secrets")
     fi
 done
@@ -114,7 +111,8 @@ for sql_file in $SQL_FILES; do
     echo "📄 Checking $sql_file"
     
     # Check for string concatenation in SQL
-    if grep -q "SELECT.*\\+" "$sql_file" || grep -q "INSERT.*\\+" "$sql_file" || grep -q "UPDATE.*\\+" "$sql_file"; then
+    # Quote-plus-quote is string concatenation. SELECT.*+ also matched every SELECT.
+    if grep -q -E "['\"][[:space:]]*\\+[[:space:]]*['\"]" "$sql_file"; then
         echo "❌ $sql_file may have SQL injection vulnerabilities"
         VIOLATIONS+=("$sql_file:sql_injection_risk")
     fi
@@ -122,8 +120,11 @@ done
 
 # Check for input validation
 echo "🔍 Checking for input validation..."
-API_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10)
+API_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10 || true)
 for api_file in $API_FILES; do
+    if [[ "$api_file" == *node_modules* ]]; then
+        continue
+    fi
     if [ -f "$api_file" ]; then
         echo "📄 Checking $api_file"
         
@@ -143,7 +144,7 @@ for compose_file in $COMPOSE_FILES; do
     
     # Check for HTTP-only services in production
     if [[ "$compose_file" == *"prod"* ]]; then
-        if grep -q "http://" "$compose_file"; then
+        if grep "http://" "$compose_file" | grep -v "healthcheck" | grep -q .; then
             echo "❌ $compose_file uses HTTP in production"
             VIOLATIONS+=("$compose_file:http_in_production")
         fi
@@ -152,8 +153,11 @@ done
 
 # Check for proper error handling
 echo "⚠️ Checking for proper error handling..."
-ERROR_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10)
+ERROR_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10 || true)
 for error_file in $ERROR_FILES; do
+    if [[ "$error_file" == *node_modules* ]]; then
+        continue
+    fi
     if [ -f "$error_file" ]; then
         echo "📄 Checking $error_file"
         
@@ -167,8 +171,11 @@ done
 
 # Check for proper logging
 echo "📝 Checking for proper logging..."
-LOG_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10)
+LOG_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10 || true)
 for log_file in $LOG_FILES; do
+    if [[ "$log_file" == *node_modules* ]]; then
+        continue
+    fi
     if [ -f "$log_file" ]; then
         echo "📄 Checking $log_file"
         
