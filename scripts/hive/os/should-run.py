@@ -215,6 +215,25 @@ def _another_partial(state: dict[str, Any]) -> bool:
     return partials >= 1 and finished < 1
 
 
+def progress_check_is_avoidable(state: dict[str, Any] | None, event: dict[str, Any] | None = None) -> bool:
+    """A sleep or a Jev call used as an exact progress check is avoidable. A watch is not."""
+    st = state or {}
+    ev = event or {}
+    raw = str(st.get("progress_check") or ev.get("progress_check") or "").strip().lower()
+    via = str(st.get("progress_via") or ev.get("progress_via") or "").strip().lower()
+    if raw == "watch" or via == "watch":
+        return False
+    if raw in {"sleep", "wait", "timer", "jev", "jev_call"}:
+        return True
+    if via in {"sleep", "wait", "timer", "jev", "jev_call"}:
+        return True
+    if st.get("sleep_minutes") or st.get("wait_minutes") or ev.get("sleep_minutes") or ev.get("wait_minutes"):
+        return True
+    if st.get("jev_for_progress") or ev.get("jev_for_progress"):
+        return True
+    return False
+
+
 def _is_morning(question: str) -> bool:
     text = question.lower()
     return any(phrase in text for phrase in _MORNING)
@@ -315,6 +334,19 @@ def assess(
             interrupt=False,
             tax="none",
             event=ev,
+        )
+
+    if progress_check_is_avoidable(st, ev):
+        return _finish(
+            audit,
+            agent,
+            "RUN",
+            "exact progress is a watch, not a sleep and not a Jev call",
+            attention=None,
+            interrupt=False,
+            tax="AVOIDABLE_EVENS_INTERVENTION",
+            event=ev,
+            extra={**(extra or {}), "progress_check": "watch"},
         )
 
     if _declined(st, ev):
@@ -760,6 +792,44 @@ def self_test() -> int:
     check("morning answer is human", morning == HUMAN_MORNING and not _JARGON.search(morning))
     internals = spoken_answer("status?", "Sir. UNKNOWN. pipeline.py is not on disk. READY_FOR_AUTHORITY.")
     check("internals are not spoken", internals == HUMAN_MORNING)
+
+    slept = assess(
+        "Big Boss",
+        None,
+        {"progress_check": "sleep", "sleep_minutes": 10, "ledger_advancing": True, "lifecycle": "production"},
+        audit_path=audit,
+    )
+    check(
+        "sleep progress check is avoidable",
+        slept["decision"] == "RUN"
+        and slept["interrupt"] is False
+        and slept["evens_tax"] == "AVOIDABLE_EVENS_INTERVENTION"
+        and slept.get("progress_check") == "watch"
+        and "watch" in slept["reason"]
+        and "Jev" in slept["reason"],
+    )
+    jev = assess(
+        "Watchdog",
+        None,
+        {"progress_check": "jev", "lifecycle": "production"},
+        audit_path=audit,
+    )
+    check(
+        "jev progress check is avoidable",
+        jev["evens_tax"] == "AVOIDABLE_EVENS_INTERVENTION" and jev["interrupt"] is False,
+    )
+    watching = assess(
+        "Big Boss",
+        None,
+        {"progress_check": "watch", "lifecycle": "production"},
+        audit_path=audit,
+    )
+    check(
+        "a watch is not this tax",
+        watching["evens_tax"] != "AVOIDABLE_EVENS_INTERVENTION",
+    )
+    banned = "82" + "17"
+    check("no process special case", banned not in Path(__file__).read_text(encoding="utf-8"))
 
     worker_pick = assess(
         "Forge",
