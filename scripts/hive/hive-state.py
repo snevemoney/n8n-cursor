@@ -240,11 +240,35 @@ def present_evidence(evidence: list | None, environment: dict | None) -> tuple[s
 
 
 def required_classes(target: str, declared: list | None) -> tuple[str, ...]:
+    """Caller-declared classes are the requirement. The default pair is not added on top."""
     if declared:
         return tuple(str(item).upper() for item in declared)
     if target in TERMINAL_WORDS:
         return ("RUNTIME", "SURFACE")
     return ("RUNTIME", "SURFACE")
+
+
+def _effective_required(declared: list | None, stored: list | None) -> list | None:
+    """A later call cannot drop a class the job already declared. It also cannot invent one."""
+
+    def norm(items: list | None) -> list[str]:
+        if not items:
+            return []
+        return [str(item).upper() for item in items]
+
+    declared_norm = norm(declared)
+    stored_norm = norm(stored)
+    if declared_norm and stored_norm:
+        merged: list[str] = []
+        for item in [*stored_norm, *declared_norm]:
+            if item not in merged:
+                merged.append(item)
+        return merged
+    if declared_norm:
+        return declared_norm
+    if stored_norm:
+        return stored_norm
+    return None
 
 
 def independent_verifier(builder: str, verifier: dict | None) -> bool:
@@ -486,13 +510,20 @@ def transition_job(
     """Canonical job terminal writer. Desk labels call this; they do not set status themselves."""
     data = load(state_path)
     who = builder if builder is not None else actor
+    existing = next((row for row in data.get("jobs") or [] if isinstance(row, dict) and row.get("id") == job_id), None)
+    stored_required = (
+        existing.get("required_evidence")
+        if isinstance(existing, dict) and isinstance(existing.get("required_evidence"), list)
+        else None
+    )
+    effective_required = _effective_required(required, stored_required)
     decision = decide_terminal(
         target,
         builder=who,
         verifier=verifier,
         evidence=evidence,
         environment=environment,
-        required=required,
+        required=effective_required,
         closes_work=closes_work,
         session=session,
         receipt=receipt,
@@ -531,8 +562,8 @@ def transition_job(
         row["verifier"] = verifier or {}
         if environment is not None:
             row["environment"] = environment
-        if required is not None:
-            row["required_evidence"] = list(required)
+        if effective_required is not None:
+            row["required_evidence"] = list(effective_required)
         if session is not None:
             row["session"] = session
         if receipt is not None:
@@ -596,6 +627,46 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
         job["status"] = "VERIFYING"
         job.pop("proofPermit", None)
         job["terminal_rejected"] = "evidence stale"
+        return
+    # An unchanged status string is not proof. A canonical close must still match.
+    status = str(job.get("status") or "")
+    previous_status = str(previous_job.get("status") or "")
+    if status == previous_status and status == _terminal_token(status):
+        decision = _decision_for_job(job)
+        if decision["permitted"] and job.get("proofPermit") == decision["permit"]:
+            return
+        hold = decision["state"] if decision["state"] in NON_TERMINAL_STATES else "BLOCKED"
+        job["status"] = hold
+        job.pop("proofPermit", None)
+        job["terminal_rejected"] = decision["reason"]
+
+
+def _decision_for_job(job: dict) -> dict:
+    status = str(job.get("status") or "")
+    closes = _closes_work_flag(job.get("closes_work", True))
+    word = _is_terminal_word(status, closes_work=closes) or status
+    required = job.get("required_evidence") if isinstance(job.get("required_evidence"), list) else None
+    return decide_terminal(
+        word,
+        builder=str(job.get("builder") or ""),
+        verifier=job.get("verifier") if isinstance(job.get("verifier"), dict) else None,
+        evidence=job.get("evidence") if isinstance(job.get("evidence"), list) else None,
+        environment=job.get("environment") if isinstance(job.get("environment"), dict) else None,
+        required=required,
+        closes_work=closes,
+        session=job.get("session") if isinstance(job.get("session"), dict) else None,
+        receipt=job.get("receipt") if isinstance(job.get("receipt"), dict) else None,
+        job_id=str(job.get("id") or ""),
+    )
+
+
+def _dimension_bound(item: dict, key: str, value: object) -> bool:
+    """A catalog class with the same value is a binding. A note that mentions it is not."""
+    if not isinstance(item, dict) or item.get("stale") is True:
+        return False
+    if key not in item or item.get(key) != value:
+        return False
+    return _evidence_class(item) in EVIDENCE_CLASSES
 
 
 def _added_unbound_dimension(job: dict, previous_job: dict) -> bool:
@@ -609,7 +680,7 @@ def _added_unbound_dimension(job: dict, previous_job: dict) -> bool:
     evidence = job.get("evidence") if isinstance(job.get("evidence"), list) else []
     items = [item for item in evidence if isinstance(item, dict)]
     for key in added:
-        if not any(item.get(key) == env.get(key) and item.get("stale") is not True for item in items):
+        if not any(_dimension_bound(item, key, env.get(key)) for item in items):
             return True
     return False
 
@@ -624,7 +695,7 @@ def _unbound_dimension(evidence: list, environment: dict | None) -> bool:
     items = [item for item in evidence if isinstance(item, dict)]
     if not items:
         return True
-    return any(not any(key in item for item in items) for key in dims)
+    return any(not any(_dimension_bound(item, key, environment.get(key)) for item in items) for key in dims)
 
 
 def _persisted_status(target: str, decision: dict, word: str | None) -> str:
@@ -648,7 +719,7 @@ def guard_outcome_payload(payload: dict, *, state_path: Path | None = None) -> d
     """Register callers cannot stamp done ahead of the canonical writer."""
     out = dict(payload)
     target = str(out.get("status") or "")
-    closes = bool(out.get("closes_work", True))
+    closes = _closes_work_flag(out.get("closes_work", True))
     word = _is_terminal_word(target, closes_work=closes)
     if _terminal_token(target) and word is None:
         out["status"] = "BLOCKED"
@@ -669,7 +740,7 @@ def guard_outcome_payload(payload: dict, *, state_path: Path | None = None) -> d
         evidence=evidence,
         environment=out.get("environment") if isinstance(out.get("environment"), dict) else None,
         required=out.get("required_evidence") if isinstance(out.get("required_evidence"), list) else None,
-        closes_work=bool(out.get("closes_work", True)),
+        closes_work=closes,
         session=out.get("session") if isinstance(out.get("session"), dict) else None,
         receipt=out.get("receipt") if isinstance(out.get("receipt"), dict) else None,
         state_path=state_path,

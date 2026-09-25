@@ -559,6 +559,153 @@ class TerminalProofTest(unittest.TestCase):
             self.assertEqual(disk["jobs"][0]["status"], "BLOCKED")
             self.assertNotIn("proofPermit", disk["jobs"][0])
 
+    def test_unchanged_status_is_not_proof(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            first = HS.transition_job(
+                "job-proof",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(first["permitted"])
+            self.assertEqual(first["job"]["status"], "DONE")
+            kept = HS.load(state)
+            HS.save(kept, state)
+            self.assertEqual(json.loads(state.read_text(encoding="utf-8"))["jobs"][0]["status"], "DONE")
+            gutted = HS.load(state)
+            gutted["jobs"][0]["evidence"] = [{"class": "NOTE", "runtime": "nope"}]
+            gutted["jobs"][0].pop("proofPermit", None)
+            HS.save(gutted, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertNotEqual(disk["jobs"][0]["status"], "DONE")
+            self.assertNotIn(disk["jobs"][0]["status"], HS.TERMINAL_WORDS)
+
+    def test_declared_requirements_are_not_skipped(self) -> None:
+        verifier = {"actor": "Watchdog", "role": "verifier"}
+        diff = [{"class": "DIFF"}]
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            default_close = HS.transition_job(
+                "need-runtime",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=diff,
+                state_path=state,
+            )
+            self.assertFalse(default_close["permitted"])
+            self.assertNotEqual(default_close["job"]["status"], "DONE")
+            declared = HS.transition_job(
+                "diff-only",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=diff,
+                required=["DIFF"],
+                state_path=state,
+            )
+            self.assertTrue(declared["permitted"])
+            self.assertEqual(declared["job"]["status"], "DONE")
+            self.assertEqual(declared["job"]["required_evidence"], ["DIFF"])
+            seeded = HS.load(state)
+            seeded["jobs"].append(
+                {
+                    "id": "declared-runtime",
+                    "name": "declared-runtime",
+                    "status": "IMPLEMENTED",
+                    "required_evidence": ["RUNTIME", "SURFACE"],
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                }
+            )
+            HS.save(seeded, state)
+            weakened = HS.transition_job(
+                "declared-runtime",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=diff,
+                required=["DIFF"],
+                state_path=state,
+            )
+            self.assertFalse(weakened["permitted"])
+            self.assertNotEqual(weakened["job"]["status"], "DONE")
+            evidence, full_verifier, env = _proof()
+            full = HS.transition_job(
+                "full-proof",
+                "DONE",
+                builder="Forge",
+                verifier=full_verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(full["permitted"])
+            self.assertEqual(full["job"]["status"], "DONE")
+
+    def test_guard_treats_string_false_as_not_closing(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            forwarded = HS.guard_outcome_payload(
+                {
+                    "status": "PASS",
+                    "closes_work": "false",
+                    "job_id": "string-false",
+                    "builder": "Forge",
+                    "verifier": verifier,
+                    "evidence": evidence,
+                    "environment": env,
+                    "proofPermit": "not-a-real-permit",
+                },
+                state_path=state,
+            )
+            self.assertEqual(forwarded["status"], "BLOCKED")
+            self.assertNotIn(forwarded["status"], HS.TERMINAL_WORDS)
+            self.assertNotIn("proofPermit", forwarded)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertFalse(any(job.get("status") == "PASS" for job in disk["jobs"]))
+
+    def test_note_mentioning_runtime_is_not_a_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "hist-note",
+                    "name": "hist-note",
+                    "status": "done",
+                    "desk": "forge",
+                    "updated": "2026-08-01",
+                    "evidence": [{"class": "NOTE", "runtime": "rt-new"}],
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            loaded = HS.load(state)
+            loaded["jobs"][0]["environment"] = {"runtime": "rt-new"}
+            HS.save(loaded, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(disk["jobs"][0]["environment"]["runtime"], "rt-new")
+            self.assertNotEqual(disk["jobs"][0]["status"].lower(), "done")
+            self.assertNotIn(disk["jobs"][0]["status"], HS.TERMINAL_WORDS)
+            self.assertEqual(disk["jobs"][0]["status"], "VERIFYING")
+
+    def test_smoke_and_watchdog_do_not_post_done(self) -> None:
+        smoke = (HIVE / "hive-api-smoke.sh").read_text(encoding="utf-8")
+        watchdog = (HIVE / "hive-watchdog.sh").read_text(encoding="utf-8")
+        for name, body in (("hive-api-smoke.sh", smoke), ("hive-watchdog.sh", watchdog)):
+            self.assertNotIn('status":"done"', body, name)
+            self.assertNotIn('"status": "done"', body, name)
+            self.assertNotIn("status: 'done'", body, name)
+            self.assertIn("IMPLEMENTED", body, name)
+        self.assertNotIn("${2:-done}", watchdog)
+        self.assertNotIn('register_outcome "$summary" "done"', watchdog)
+
 
 class SessionReceiptTest(unittest.TestCase):
     def _close(self, store: Path, **extra):
