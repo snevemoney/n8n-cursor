@@ -67,7 +67,7 @@ jobs:
           echo "$DOCKERFILES"
           for df in $DOCKERFILES; do
             echo "Linting: $df"
-            docker run --rm -i hadolint/hadolint < "$df" || true
+            docker run --rm -i hadolint/hadolint < "$df"
           done
         fi
 
