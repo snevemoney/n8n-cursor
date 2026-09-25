@@ -1,8 +1,9 @@
 ---
 name: saylor-mentor-pass
 description: >-
-  Whole sitting: one teaching beat then do the work. LANE + school +
-  SAYS + NOW. End emit PUT-IN-SYSTEM. Not an end stamp. Cursor plus Grok Bot.
+  Whole sitting: one teaching beat then do the work. LANE + catalog
+  namespace + mission graph + SAYS + NOW. School is not the active skill.
+  End emit PUT-IN-SYSTEM. Not an end stamp. Cursor plus Grok Bot.
 ---
 
 # Saylor mentor pass (Cursor)
