@@ -22,6 +22,11 @@ assert _spec and _spec.loader
 vc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(vc)
 
+_bus_spec = importlib.util.spec_from_file_location("event_bus", ROOT / "scripts/hive/os/event-bus.py")
+assert _bus_spec and _bus_spec.loader
+event_bus = importlib.util.module_from_spec(_bus_spec)
+_bus_spec.loader.exec_module(event_bus)
+
 SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
 MAX_BRIEF_CHARS = 4500
 JOB_CARD_MAX_CHARS = 800
@@ -429,8 +434,35 @@ def build_brief(
     return brief
 
 
-def publish_shared_context(brief: dict) -> Path:
-    SHARED_CONTEXT_PATH.parent.mkdir(parents=True, exist_ok=True)
+def publish_shared_context(
+    brief: dict,
+    *,
+    bus_path: Path | None = None,
+    shared_path: Path | None = None,
+) -> Path:
+    """Grok desk projection. The file is not synced until the desk consumer acks the bus."""
+    target = shared_path or SHARED_CONTEXT_PATH
+    log_path = bus_path or event_bus.DEFAULT_PATH
+    agent = str(brief.get("agent") or "UNKNOWN")
+    entity_id = f"grok-desk:{agent}"
+    prior = event_bus.authoritative(entity_id, log_path) if log_path.is_file() else None
+    version = int(prior.get("state_version") or 0) + 1 if prior else 1
+    published = event_bus.publish_grok_desk(
+        agent,
+        {
+            "hash": brief.get("hash"),
+            "markdown": brief.get("markdown") or "",
+            "sourceRoot": brief.get("sourceRoot"),
+        },
+        state_version=version,
+        source_session=str(brief.get("source_session") or "UNKNOWN"),
+        writer="outer-heaven-brief.py",
+        changed_at=str(brief.get("generatedAt") or ""),
+        path=log_path,
+        projection_path=target,
+        supersedes_version=int(prior["state_version"]) if prior else None,
+    )
+    projection = published.get("projection") or {}
     payload = {
         "timestamp": brief["generatedAt"],
         "hash": brief["hash"],
@@ -438,11 +470,20 @@ def publish_shared_context(brief: dict) -> Path:
         "sourceRoot": brief["sourceRoot"],
         "captureFreshness": brief["captureFreshness"],
         "markdown": brief["markdown"],
+        "continuity": {
+            "entity_id": entity_id,
+            "entity_type": "grok_desk_projection",
+            "state_version": version,
+            "synced": bool(projection.get("synced")),
+        },
     }
-    SHARED_CONTEXT_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    cache_brief = vc.cache_root() / "brief.json"
-    cache_brief.write_text(json.dumps(brief, indent=2) + "\n", encoding="utf-8")
-    return SHARED_CONTEXT_PATH
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    if shared_path is None:
+        cache_brief = vc.cache_root() / "brief.json"
+        cache_brief.parent.mkdir(parents=True, exist_ok=True)
+        cache_brief.write_text(json.dumps(brief, indent=2) + "\n", encoding="utf-8")
+    return target
 
 
 def fetch_vps_brief() -> str:

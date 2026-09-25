@@ -142,20 +142,30 @@ def emit_ready(packet: dict[str, Any]) -> str:
     )
 
 
+def _load_hive_state():
+    spec = importlib.util.spec_from_file_location("hive_state", ROOT / "scripts" / "hive" / "hive-state.py")
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def register_mission(packet: dict[str, Any], agent: str = "Researcher") -> dict[str, Any]:
     tool = ROOT / "scripts" / "hive" / "grok-hive-tool.py"
     if not tool.is_file():
         return {"ok": False, "error": "grok-hive-tool.py missing"}
     summary = f"Research packet: {packet['question'][:120]} — action_ready={packet.get('action_ready')}"
-    params = json.dumps(
+    params_obj = _load_hive_state().guard_outcome_payload(
         {
             "correlationId": packet.get("correlation_id"),
             "jobType": "research.packet",
             "status": "done" if packet.get("action_ready") else "pending",
             "summary": summary[:500],
+            "builder": agent,
             "payload": {"packet_id": packet["packet_id"], "requested_by": packet["requested_by"]},
         }
     )
+    params = json.dumps(params_obj)
     proc = subprocess.run(
         [sys.executable, str(tool), "--grok-agent", agent, "--tool", "scorpion_register_outcome", "--params", params],
         capture_output=True,
