@@ -158,12 +158,24 @@ def promote_to_doctrine(note: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _identity(text: str) -> str:
+    """One desk name, with case and extra space folded out."""
+    return " ".join(str(text or "").split()).casefold()
+
+
+def _context_identities(context: str) -> frozenset[str]:
+    """Context names whole desks, separated by '/'. A piece of a name is not a desk."""
+    return frozenset(
+        name for part in str(context or "").split("/") if (name := _identity(part))
+    )
+
+
 def taste_for_desk(note: dict[str, Any], desk: str) -> dict[str, str] | None:
     ok, _ = validate_taste(note)
     if not ok:
         return None
-    context = str(note["context"]).lower()
-    if desk.lower() not in context:
+    asked = _identity(desk)
+    if not asked or asked not in _context_identities(str(note.get("context") or "")):
         return None
     return {key: str(note[key]) for key in TASTE_FIELDS}
 
@@ -485,6 +497,12 @@ def self_test() -> int:
     check(promote_to_doctrine(taste)["promoted"] is False, "taste not doctrine")
     check(taste_for_desk(taste, "Forge") is None, "taste stays off Forge")
     check(taste_for_desk(taste, "Creative Studio") is not None, "taste stays in context")
+    invoice = {**taste, "context": "Creative Studio / invoice-plate landing"}
+    check(taste_for_desk(invoice, "Studio") is None, "shorter desk is a different identity")
+    check(taste_for_desk(invoice, "Creative Studio") is not None, "full desk identity matches")
+    harbor = {**taste, "context": "Harbor Desk / quay note"}
+    check(taste_for_desk(harbor, "Desk") is None, "other shorter desk is a different identity")
+    check(taste_for_desk(harbor, "Harbor Desk") is not None, "other full desk identity matches")
     bad, reason = validate_taste({"accepted_example": "Evens likes dark type", "rejected_example": "x", "reason": "y", "context": "always"})
     check(not bad and "local" in reason, "global context refused")
     check(global_preference_sentence("Evens likes animation"), "preference sentence detected")
