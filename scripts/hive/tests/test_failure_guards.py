@@ -706,6 +706,163 @@ class TerminalProofTest(unittest.TestCase):
         self.assertNotIn("${2:-done}", watchdog)
         self.assertNotIn('register_outcome "$summary" "done"', watchdog)
 
+    def test_noncanonical_spelling_drops_when_proof_is_gone(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            first = HS.transition_job(
+                "job-spell",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(first["permitted"])
+            renamed = HS.load(state)
+            renamed["jobs"][0]["status"] = "Done"
+            HS.save(renamed, state)
+            self.assertEqual(json.loads(state.read_text(encoding="utf-8"))["jobs"][0]["status"], "Done")
+            gutted = HS.load(state)
+            gutted["jobs"][0]["status"] = "done"
+            gutted["jobs"][0]["evidence"] = []
+            gutted["jobs"][0].pop("proofPermit", None)
+            HS.save(gutted, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertNotEqual(disk["jobs"][0]["status"].strip().lower(), "done")
+            self.assertNotIn(disk["jobs"][0]["status"].strip().upper(), HS.TERMINAL_WORDS)
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"].append(
+                {
+                    "id": "spaced-pass",
+                    "name": "spaced-pass",
+                    "status": "PASS ",
+                    "closes_work": True,
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                    "builder": "Forge",
+                    "proofPermit": "old-permit",
+                    "evidence": evidence,
+                    "verifier": verifier,
+                    "environment": env,
+                }
+            )
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            loaded = HS.load(state)
+            row = next(job for job in loaded["jobs"] if job["id"] == "spaced-pass")
+            row["evidence"] = []
+            row.pop("proofPermit", None)
+            HS.save(loaded, state)
+            saved = json.loads(state.read_text(encoding="utf-8"))
+            spaced = next(job for job in saved["jobs"] if job["id"] == "spaced-pass")
+            self.assertNotEqual(spaced["status"].strip().upper(), "PASS")
+            self.assertNotIn(spaced["status"].strip().upper(), HS.TERMINAL_WORDS)
+
+    def test_stricter_close_survives_a_narrower_required_list(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            empty = HS.transition_job(
+                "empty-env",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(empty["permitted"])
+            self.assertNotEqual(empty["job"]["status"], "DONE")
+            closed = HS.transition_job(
+                "job-strict",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(closed["permitted"])
+            self.assertEqual(closed["job"]["status"], "DONE")
+            self.assertEqual(closed["job"]["required_evidence"], ["RUNTIME", "SURFACE"])
+            narrowed = HS.transition_job(
+                "job-strict",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=[{"class": "DIFF"}],
+                required=["DIFF"],
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(narrowed["permitted"])
+            self.assertNotEqual(narrowed["state"], "DONE")
+            self.assertNotEqual(narrowed["job"]["status"], "DONE")
+            self.assertEqual(narrowed["state"], narrowed["job"]["status"])
+            refused = HS.transition_job(
+                "declared-first",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=[{"class": "DIFF"}],
+                required=["RUNTIME", "SURFACE"],
+                state_path=state,
+            )
+            self.assertFalse(refused["permitted"])
+            self.assertEqual(refused["job"]["required_evidence"], ["RUNTIME", "SURFACE"])
+            follow = HS.transition_job(
+                "declared-first",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=[{"class": "DIFF"}],
+                required=["DIFF"],
+                state_path=state,
+            )
+            self.assertFalse(follow["permitted"])
+            self.assertNotEqual(follow["job"]["status"], "DONE")
+
+    def test_payload_matches_demoted_disk_row(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            closed = HS.transition_job(
+                "job-demote",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(closed["permitted"])
+            planted = HS.load(state)
+            planted["jobs"][0]["environment"] = {
+                "runtime": "runtime-2",
+                "config": "config-1",
+                "version": "v1",
+                "changed_at": "2026-09-25T04:00:00+00:00",
+            }
+            state.write_text(json.dumps(planted), encoding="utf-8")
+            forwarded = HS.guard_outcome_payload(
+                {
+                    "status": "DONE",
+                    "job_id": "job-demote",
+                    "builder": "Forge",
+                    "verifier": verifier,
+                    "evidence": evidence,
+                },
+                state_path=state,
+            )
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "job-demote")
+            self.assertEqual(forwarded["status"], row["status"])
+            self.assertNotEqual(forwarded["status"], "DONE")
+            self.assertNotIn(forwarded["status"], HS.TERMINAL_WORDS)
+            self.assertNotIn("proofPermit", forwarded)
+            self.assertNotIn("proofPermit", row)
+
 
 class SessionReceiptTest(unittest.TestCase):
     def _close(self, store: Path, **extra):

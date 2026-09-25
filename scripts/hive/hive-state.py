@@ -203,11 +203,13 @@ def _evidence_class(item: dict) -> str:
 
 
 def _fresh(item: dict, environment: dict | None) -> bool:
-    """Bound evidence matches the environment. A missing binding is not that runtime."""
+    """Bound evidence matches the environment. An empty environment does not vouch for it."""
     if item.get("stale") is True:
         return False
-    if not environment:
+    if environment is None:
         return True
+    if not isinstance(environment, dict) or not any(key in environment for key in ("runtime", "config", "version")):
+        return False
     for key in ("runtime", "config", "version"):
         if key not in environment:
             continue
@@ -562,18 +564,30 @@ def transition_job(
         row["verifier"] = verifier or {}
         if environment is not None:
             row["environment"] = environment
-        if effective_required is not None:
-            row["required_evidence"] = list(effective_required)
         if session is not None:
             row["session"] = session
         if receipt is not None:
             row["receipt"] = receipt
+    justified = list(effective_required) if effective_required is not None else None
+    if word and decision["permitted"] and justified is None:
+        justified = list(required_classes(word, None))
+    if justified is not None:
+        row["required_evidence"] = justified
     if note:
         row["note"] = note
     if not decision["permitted"] and word:
         row["terminal_rejected"] = decision["reason"]
     saved = _upsert_job(data, row)
     save(data, state_path)
+    stored = str(saved.get("status") or "")
+    if stored != decision.get("state") or (decision.get("permitted") and not saved.get("proofPermit")):
+        decision = {
+            "permitted": False,
+            "state": stored if stored in NON_TERMINAL_STATES else "BLOCKED",
+            "reason": saved.get("terminal_rejected") or decision.get("reason") or "evidence stale",
+            "permit": None,
+            "stale": True,
+        }
     return {**decision, "job": saved}
 
 
@@ -628,17 +642,32 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
         job.pop("proofPermit", None)
         job["terminal_rejected"] = "evidence stale"
         return
-    # An unchanged status string is not proof. A canonical close must still match.
+    # Normalize first. "Done", "done", and "PASS " are the same close as the canonical token.
     status = str(job.get("status") or "")
     previous_status = str(previous_job.get("status") or "")
-    if status == previous_status and status == _terminal_token(status):
-        decision = _decision_for_job(job)
-        if decision["permitted"] and job.get("proofPermit") == decision["permit"]:
-            return
-        hold = decision["state"] if decision["state"] in NON_TERMINAL_STATES else "BLOCKED"
-        job["status"] = hold
-        job.pop("proofPermit", None)
-        job["terminal_rejected"] = decision["reason"]
+    token = _terminal_token(status)
+    if not token or _terminal_token(previous_status) != token:
+        return
+    if status != previous_status and status == token and not previous_job.get("proofPermit"):
+        return
+    if status == previous_status and status != token and _untouched_historical(job, previous_job):
+        return
+    decision = _decision_for_job(job)
+    if decision["permitted"] and job.get("proofPermit") == decision["permit"]:
+        return
+    hold = decision["state"] if decision["state"] in NON_TERMINAL_STATES else "BLOCKED"
+    job["status"] = hold
+    job.pop("proofPermit", None)
+    job["terminal_rejected"] = decision["reason"]
+
+
+def _untouched_historical(job: dict, previous_job: dict) -> bool:
+    """A frozen observe-pane label with no proof and no evidence change is not a new close."""
+    if previous_job.get("proofPermit") or job.get("proofPermit"):
+        return False
+    prev_ev = previous_job.get("evidence") if isinstance(previous_job.get("evidence"), list) else []
+    cur_ev = job.get("evidence") if isinstance(job.get("evidence"), list) else []
+    return prev_ev == cur_ev
 
 
 def _decision_for_job(job: dict) -> dict:
