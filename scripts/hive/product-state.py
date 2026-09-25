@@ -49,9 +49,24 @@ AGENT_STATES = frozenset(
         "RECEIPT_UNPROVEN",
         "VERIFYING",
         "PARTIAL",
-        "DONE",
     }
 )
+
+
+def agent_state_for_close(requested: str, decision: dict) -> str:
+    """Existing project derivation. This is not a copy of the job word.
+
+    A permitted COMPLETED is stored as COMPLETED. Any other hive decision is
+    stored only when that word is already in AGENT_STATES. DONE is not an
+    agent state, so a permitted job DONE leaves the project BLOCKED. No
+    child-job rollup exists in this file; one closed job does not clear BLOCKED.
+    """
+    if decision.get("permitted") and str(requested).upper() == "COMPLETED":
+        return "COMPLETED"
+    hold = str(decision.get("state") or "")
+    return hold if hold in AGENT_STATES else "BLOCKED"
+
+
 _CLOSE_AGENT_STATES = frozenset({"COMPLETED", "DONE", "PASS", "VERIFIED", "LIVE", "SHIPPED", "CLOSED"})
 
 
@@ -155,13 +170,7 @@ def transition(
                 desk=actor,
                 state_path=state_path,
             )
-            if decision["permitted"] and str(agent_state).upper() == "COMPLETED":
-                state["agent_state"] = "COMPLETED"
-            elif decision["permitted"]:
-                state["agent_state"] = str(decision["state"])
-            else:
-                hold = str(decision["state"])
-                state["agent_state"] = hold if hold in AGENT_STATES else "BLOCKED"
+            state["agent_state"] = agent_state_for_close(str(agent_state), decision)
             state["terminal_guard"] = {
                 "permitted": decision["permitted"],
                 "state": decision["state"],
