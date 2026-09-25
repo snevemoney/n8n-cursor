@@ -367,12 +367,16 @@ def decide_terminal(
 
 def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
     status = str(job.get("status") or "")
-    word = _is_terminal_word(status, closes_work=bool(job.get("closes_work", True)))
-    if word is None:
-        return True
     # Exact text only. A historical "done" label is not proof of "DONE".
     if previous == status:
         return True
+    token = _terminal_token(status)
+    if token is None:
+        return True
+    word = _is_terminal_word(status, closes_work=bool(job.get("closes_work", True)))
+    # save() is not a second writer. A non-closing PASS is still the word PASS.
+    if word is None:
+        return False
     decision = decide_terminal(
         word,
         builder=str(job.get("builder") or ""),
@@ -553,13 +557,29 @@ def note_environment(job_id: str, environment: dict, *, state_path: Path | None 
     job["evidence"] = evidence
     job["environment"] = environment
     _present, stale = present_evidence(evidence, environment)
-    if stale and _is_terminal_word(str(job.get("status") or ""), closes_work=bool(job.get("closes_work", True))):
+    unbound = _unbound_dimension(evidence, environment)
+    token = _terminal_token(str(job.get("status") or ""))
+    if (stale or unbound) and token:
         job["status"] = "VERIFYING"
         job.pop("proofPermit", None)
         job["terminal_rejected"] = "evidence stale"
+        stale = True
     _upsert_job(data, job)
     save(data, state_path)
     return {"job": job, "stale": stale}
+
+
+def _unbound_dimension(evidence: list, environment: dict | None) -> bool:
+    """A new runtime, config, or version with nothing bound to it cannot keep a close."""
+    if not isinstance(environment, dict):
+        return False
+    dims = [key for key in ("runtime", "config", "version") if key in environment]
+    if not dims:
+        return False
+    items = [item for item in evidence if isinstance(item, dict)]
+    if not items:
+        return True
+    return any(not any(key in item for item in items) for key in dims)
 
 
 def _persisted_status(target: str, decision: dict, word: str | None) -> str:
