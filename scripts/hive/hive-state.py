@@ -16,30 +16,392 @@ Do not migrate this store to n8n Data tables.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE = ROOT / "docs/hive/outer-heaven/.hive/state.json"
-ALLOWED = ("schema_version", "ids", "profile", "jobs", "last_run", "product_factory")
-JOB_STATUSES = ("working", "yellow", "done")
+ALLOWED = (
+    "schema_version",
+    "ids",
+    "profile",
+    "jobs",
+    "last_run",
+    "product_factory",
+    "post_fix_cohort",
+)
+# Historical observe-pane rows use lowercase "done". New terminal writes are uppercase
+# and only land through transition_job. Do not treat the lowercase rows as a cohort.
+JOB_STATUSES = (
+    "working",
+    "yellow",
+    "done",
+    "IMPLEMENTED",
+    "BEHAVIOR_PASS",
+    "RECEIPT_UNPROVEN",
+    "VERIFYING",
+    "BLOCKED",
+    "PARTIAL",
+    "DONE",
+    "PASS",
+    "VERIFIED",
+    "LIVE",
+    "SHIPPED",
+    "CLOSED",
+)
 CORRECTNESS = ("pass", "fail", "untested")
+EVIDENCE_CLASSES = (
+    "PRESENCE",
+    "DIFF",
+    "STATIC",
+    "TEST",
+    "INTEGRATION",
+    "RUNTIME",
+    "SURFACE",
+    "EXTERNAL_RECEIPT",
+    "OUTCOME",
+)
+TERMINAL_WORDS = frozenset({"DONE", "PASS", "VERIFIED", "LIVE", "SHIPPED", "CLOSED"})
+NON_TERMINAL_STATES = frozenset(
+    {
+        "IMPLEMENTED",
+        "BEHAVIOR_PASS",
+        "RECEIPT_UNPROVEN",
+        "VERIFYING",
+        "BLOCKED",
+        "PARTIAL",
+        "working",
+        "yellow",
+    }
+)
+_NOT_A_SURFACE = frozenset({"archive", "replay", "mock"})
+_BEHAVIOR = frozenset({"TEST", "RUNTIME", "INTEGRATION"})
+# Immutable floors. Do not add these together. Do not compare them to cohort counters.
+HISTORICAL_FLOORS = {
+    "unsupported_completion_sessions": 39,
+    "artifact_only_rows": 34,
+    "divergence_instances": 18,
+}
+COHORT_METRICS = (
+    "unsupported_terminal_escape_rate",
+    "missing_receipt_rate",
+    "unresolvable_receipt_rate",
+    "stale_apply_rate",
+    "duplicate_apply_rate",
+    "conflict_rate",
+    "propagation_latency",
+    "manual_Evens_bus_count",
+)
 
 
-def load() -> dict:
-    if not STATE.is_file():
-        raise SystemExit(f"missing {STATE}")
-    data = json.loads(STATE.read_text(encoding="utf-8"))
+def load(path: Path | None = None) -> dict:
+    target = path or STATE
+    if not target.is_file():
+        raise SystemExit(f"missing {target}")
+    data = json.loads(target.read_text(encoding="utf-8"))
     if not data.get("ids", {}).get("monotonic"):
         raise SystemExit("ids.monotonic must stay true (delete ≠ reset)")
     return data
 
 
-def save(data: dict) -> None:
-    STATE.parent.mkdir(parents=True, exist_ok=True)
-    STATE.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+def _is_terminal_word(status: str, *, closes_work: bool = True) -> str | None:
+    raw = str(status or "").strip()
+    upper = raw.upper()
+    if upper == "PASS" and not closes_work:
+        return None
+    if upper in TERMINAL_WORDS:
+        return upper
+    if raw.lower() == "done":
+        return "DONE"
+    return None
+
+
+def _floors(floors: dict | None = None) -> dict:
+    raw = dict(floors or HISTORICAL_FLOORS)
+    if "total" in raw or "sum" in raw:
+        raise SystemExit("historical floors stay immutable and must not be summed")
+    return raw
+
+
+def _zero_counter(metric: str) -> dict:
+    if metric == "propagation_latency":
+        return {"samples": 0, "total_ms": 0}
+    if metric == "manual_Evens_bus_count":
+        return {"count": 0}
+    if metric == "unsupported_terminal_escape_rate":
+        return {"escapes": 0, "attempts": 0}
+    if metric == "missing_receipt_rate":
+        return {"missing": 0, "active_closes": 0}
+    if metric == "unresolvable_receipt_rate":
+        return {"unresolvable": 0, "receipts": 0}
+    if metric == "stale_apply_rate":
+        return {"stale": 0, "applies": 0}
+    if metric == "duplicate_apply_rate":
+        return {"duplicates": 0, "applies": 0}
+    if metric == "conflict_rate":
+        return {"conflicts": 0, "applies": 0}
+    raise SystemExit(f"unknown cohort metric: {metric}")
+
+
+def arm_cohort(data: dict) -> dict:
+    """Post-fix counters only. Historical floors are stored beside them and never added."""
+    floors = _floors()
+    counters = {metric: _zero_counter(metric) for metric in COHORT_METRICS}
+    existing = data.get("post_fix_cohort")
+    if isinstance(existing, dict) and isinstance(existing.get("counters"), dict):
+        for metric in COHORT_METRICS:
+            found = existing["counters"].get(metric)
+            if isinstance(found, dict):
+                base = _zero_counter(metric)
+                base.update({k: found.get(k, base[k]) for k in base})
+                counters[metric] = base
+    data["post_fix_cohort"] = {
+        "armed": True,
+        "adopted": False,
+        "compare_to_historical_floors": False,
+        "historical_floors": floors,
+        "counters": counters,
+    }
+    return data["post_fix_cohort"]
+
+
+def bump_cohort(data: dict, metric: str, **fields: int) -> None:
+    if metric not in COHORT_METRICS:
+        raise SystemExit(f"unknown cohort metric: {metric}")
+    arm_cohort(data)
+    row = data["post_fix_cohort"]["counters"][metric]
+    for key, amount in fields.items():
+        if key not in row:
+            raise SystemExit(f"{metric} has no counter {key}")
+        row[key] = int(row.get(key) or 0) + int(amount)
+
+
+def _evidence_class(item: dict) -> str:
+    raw = str(item.get("class") or item.get("evidence_class") or "").upper()
+    if raw == "PASS_DIFF":
+        return "DIFF"
+    return raw
+
+
+def _fresh(item: dict, environment: dict | None) -> bool:
+    if item.get("stale") is True:
+        return False
+    if not environment:
+        return True
+    checked = str(item.get("checked_at") or "")
+    changed = str(environment.get("changed_at") or "")
+    if not checked or not changed or changed <= checked:
+        return True
+    for key in ("runtime", "config", "version"):
+        if key in item and key in environment and item.get(key) != environment.get(key):
+            return False
+    return True
+
+
+def _real_surface(item: dict) -> bool:
+    kind = str(item.get("kind") or item.get("mode") or item.get("source") or "").lower()
+    return kind not in _NOT_A_SURFACE
+
+
+def present_evidence(evidence: list | None, environment: dict | None) -> tuple[set[str], bool]:
+    present: set[str] = set()
+    stale = False
+    for item in evidence or []:
+        if not isinstance(item, dict):
+            continue
+        cls = _evidence_class(item)
+        if cls not in EVIDENCE_CLASSES:
+            continue
+        if not _fresh(item, environment):
+            stale = True
+            continue
+        if cls == "SURFACE" and not _real_surface(item):
+            continue
+        present.add(cls)
+    return present, stale
+
+
+def required_classes(target: str, declared: list | None) -> tuple[str, ...]:
+    if declared:
+        return tuple(str(item).upper() for item in declared)
+    if target in TERMINAL_WORDS:
+        return ("RUNTIME", "SURFACE")
+    return ("RUNTIME", "SURFACE")
+
+
+def independent_verifier(builder: str, verifier: dict | None) -> bool:
+    if not isinstance(verifier, dict):
+        return False
+    actor = str(verifier.get("actor") or "").strip()
+    if not actor or actor.upper() == "UNKNOWN":
+        return False
+    if actor == str(builder or "").strip():
+        return False
+    if str(verifier.get("role") or "").lower() == "builder":
+        return False
+    return True
+
+
+def _materially_active(session: dict | None) -> bool:
+    if not isinstance(session, dict):
+        return False
+    if session.get("materially_active") is True:
+        return True
+    return bool(session.get("tools") or session.get("actions") or session.get("artifacts"))
+
+
+def _receipt_ok(receipt: dict | None) -> bool:
+    if not isinstance(receipt, dict):
+        return False
+    if receipt.get("completeness") not in ("FULL", "PARTIAL", "UNAVAILABLE"):
+        return False
+    if not receipt.get("receipt_id"):
+        return False
+    errors = receipt.get("validation_errors") or []
+    return not errors
+
+
+def hold_state(
+    present: set[str],
+    required: tuple[str, ...],
+    *,
+    stale: bool,
+    self_verify: bool,
+    active_without_receipt: bool,
+) -> str:
+    req = set(required)
+    if not present and not stale and not self_verify:
+        return "IMPLEMENTED"
+    if active_without_receipt and req <= present and not stale and not self_verify:
+        return "RECEIPT_UNPROVEN"
+    if stale or self_verify:
+        return "VERIFYING"
+    behavior = present & _BEHAVIOR
+    if behavior and "SURFACE" in req and "SURFACE" not in present:
+        return "BEHAVIOR_PASS"
+    if "EXTERNAL_RECEIPT" in req and "EXTERNAL_RECEIPT" not in present and (behavior or "SURFACE" in present):
+        return "RECEIPT_UNPROVEN"
+    if present & req and not req <= present:
+        return "PARTIAL"
+    if not present:
+        return "IMPLEMENTED"
+    return "PARTIAL"
+
+
+def _permit(job_id: str, target: str, evidence: list | None, verifier: dict | None) -> str:
+    blob = json.dumps(
+        {"job_id": job_id, "target": target, "evidence": evidence or [], "verifier": verifier or {}},
+        sort_keys=True,
+        default=str,
+    )
+    return hashlib.sha256(blob.encode()).hexdigest()[:32]
+
+
+def decide_terminal(
+    target: str,
+    *,
+    builder: str,
+    verifier: dict | None = None,
+    evidence: list | None = None,
+    environment: dict | None = None,
+    required: list | None = None,
+    closes_work: bool = True,
+    session: dict | None = None,
+    receipt: dict | None = None,
+    job_id: str = "",
+) -> dict[str, Any]:
+    """Pure guard. A builder cannot verify its own job. DIFF does not prove a surface."""
+    word = _is_terminal_word(target, closes_work=closes_work)
+    if word is None:
+        state = target if target in NON_TERMINAL_STATES else "BLOCKED"
+        return {"permitted": False, "state": state, "reason": "not a closing terminal", "permit": None, "stale": False}
+    needed = required_classes(word, required)
+    present, stale = present_evidence(evidence, environment)
+    verifier_ok = independent_verifier(builder, verifier)
+    named_self = isinstance(verifier, dict) and bool(str(verifier.get("actor") or "")) and not verifier_ok
+    classes_ok = set(needed) <= present and not (word == "LIVE" and "SURFACE" not in present)
+    self_verify = named_self or (classes_ok and not verifier_ok and not stale)
+    active = _materially_active(session)
+    receipt_ok = _receipt_ok(receipt)
+    active_without_receipt = active and not receipt_ok
+    permitted = classes_ok and verifier_ok and not stale and not active_without_receipt
+    if permitted:
+        return {
+            "permitted": True,
+            "state": word,
+            "reason": "evidence and independent verifier",
+            "permit": _permit(job_id, word, evidence, verifier),
+            "stale": False,
+        }
+    state = hold_state(
+        present,
+        needed,
+        stale=stale,
+        self_verify=self_verify,
+        active_without_receipt=active_without_receipt,
+    )
+    if state not in NON_TERMINAL_STATES:
+        state = "BLOCKED"
+    reason = "missing proof"
+    if self_verify and classes_ok and not stale:
+        reason = "builder cannot verify its own job"
+    elif stale:
+        reason = "evidence stale"
+    elif active_without_receipt and classes_ok:
+        reason = "materially active session has no receipt"
+    elif "SURFACE" in needed and "SURFACE" not in present and "DIFF" in present:
+        reason = "diff does not satisfy runtime and surface"
+    return {"permitted": False, "state": state, "reason": reason, "permit": None, "stale": stale}
+
+
+def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
+    status = str(job.get("status") or "")
+    word = _is_terminal_word(status, closes_work=bool(job.get("closes_work", True)))
+    if word is None:
+        return True
+    if previous == status or (previous or "").lower() == "done" and status.lower() == "done":
+        return True
+    decision = decide_terminal(
+        word,
+        builder=str(job.get("builder") or ""),
+        verifier=job.get("verifier") if isinstance(job.get("verifier"), dict) else None,
+        evidence=job.get("evidence") if isinstance(job.get("evidence"), list) else None,
+        environment=job.get("environment") if isinstance(job.get("environment"), dict) else None,
+        required=job.get("required_evidence") if isinstance(job.get("required_evidence"), list) else None,
+        closes_work=bool(job.get("closes_work", True)),
+        session=job.get("session") if isinstance(job.get("session"), dict) else None,
+        receipt=job.get("receipt") if isinstance(job.get("receipt"), dict) else None,
+        job_id=str(job.get("id") or ""),
+    )
+    return bool(decision["permitted"] and job.get("proofPermit") == decision["permit"])
+
+
+def save(data: dict, path: Path | None = None) -> None:
+    target = path or STATE
+    previous: dict[str, str] = {}
+    if target.is_file():
+        try:
+            old = json.loads(target.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            old = {}
+        for row in old.get("jobs") or []:
+            if isinstance(row, dict) and row.get("id"):
+                previous[str(row["id"])] = str(row.get("status") or "")
+    blocked: list[str] = []
+    for row in data.get("jobs") or []:
+        if not isinstance(row, dict):
+            continue
+        job_id = str(row.get("id") or "")
+        if not _terminal_change_allowed(row, previous.get(job_id)):
+            blocked.append(job_id or "?")
+    if blocked:
+        raise SystemExit(f"terminal status without canonical proof: {', '.join(blocked)}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def today() -> str:
@@ -66,12 +428,226 @@ def cmd_get(args: argparse.Namespace) -> int:
     return 0
 
 
+def _upsert_job(data: dict, row: dict) -> dict:
+    jobs = list(data.get("jobs") or [])
+    for i, existing in enumerate(jobs):
+        if existing.get("id") == row.get("id"):
+            merged = dict(existing)
+            merged.update(row)
+            jobs[i] = merged
+            data["jobs"] = jobs
+            return merged
+    jobs.append(row)
+    data["jobs"] = jobs
+    return row
+
+
+def transition_job(
+    job_id: str,
+    target: str,
+    *,
+    actor: str = "builder",
+    builder: str | None = None,
+    verifier: dict | None = None,
+    evidence: list | None = None,
+    environment: dict | None = None,
+    required: list | None = None,
+    closes_work: bool = True,
+    session: dict | None = None,
+    receipt: dict | None = None,
+    name: str | None = None,
+    desk: str | None = None,
+    note: str | None = None,
+    state_path: Path | None = None,
+) -> dict[str, Any]:
+    """Canonical job terminal writer. Desk labels call this; they do not set status themselves."""
+    data = load(state_path)
+    who = builder if builder is not None else actor
+    decision = decide_terminal(
+        target,
+        builder=who,
+        verifier=verifier,
+        evidence=evidence,
+        environment=environment,
+        required=required,
+        closes_work=closes_work,
+        session=session,
+        receipt=receipt,
+        job_id=job_id,
+    )
+    word = _is_terminal_word(target, closes_work=closes_work)
+    bump_cohort(
+        data,
+        "unsupported_terminal_escape_rate",
+        attempts=1,
+        escapes=0 if decision["permitted"] or word is None else 1,
+    )
+    if _materially_active(session):
+        bump_cohort(
+            data,
+            "missing_receipt_rate",
+            active_closes=1,
+            missing=0 if _receipt_ok(receipt) else 1,
+        )
+    if isinstance(receipt, dict) and (receipt.get("validation_errors") or []):
+        bump_cohort(data, "unresolvable_receipt_rate", receipts=1, unresolvable=1)
+    row: dict[str, Any] = {
+        "id": job_id,
+        "name": name or job_id,
+        "status": decision["state"] if word else (target if target in JOB_STATUSES else decision["state"]),
+        "desk": desk or actor,
+        "updated": today(),
+        "builder": who,
+        "closes_work": closes_work,
+    }
+    if word and decision["permitted"]:
+        row["status"] = decision["state"]
+        row["proofPermit"] = decision["permit"]
+        row["evidence"] = evidence or []
+        row["verifier"] = verifier or {}
+        if environment is not None:
+            row["environment"] = environment
+        if required is not None:
+            row["required_evidence"] = list(required)
+        if session is not None:
+            row["session"] = session
+        if receipt is not None:
+            row["receipt"] = receipt
+    if note:
+        row["note"] = note
+    if not decision["permitted"] and word:
+        row["terminal_rejected"] = decision["reason"]
+    saved = _upsert_job(data, row)
+    save(data, state_path)
+    return {**decision, "job": saved}
+
+
+def apply_desk_label(job_id: str, label: str, **kwargs: Any) -> dict[str, Any]:
+    """Legacy desk labels are not a writer. They enter transition_job."""
+    return transition_job(job_id, label, **kwargs)
+
+
+def note_environment(job_id: str, environment: dict, *, state_path: Path | None = None) -> dict[str, Any]:
+    """A runtime, config, or version change after verification makes that evidence stale."""
+    data = load(state_path)
+    job = next((row for row in data.get("jobs") or [] if row.get("id") == job_id), None)
+    if not isinstance(job, dict):
+        raise SystemExit(f"unknown job: {job_id}")
+    evidence = []
+    for item in job.get("evidence") or []:
+        if not isinstance(item, dict):
+            continue
+        cloned = dict(item)
+        if not _fresh(cloned, environment):
+            cloned["stale"] = True
+        evidence.append(cloned)
+    job["evidence"] = evidence
+    job["environment"] = environment
+    _present, stale = present_evidence(evidence, environment)
+    if stale and _is_terminal_word(str(job.get("status") or ""), closes_work=bool(job.get("closes_work", True))):
+        job["status"] = "VERIFYING"
+        job.pop("proofPermit", None)
+        job["terminal_rejected"] = "evidence stale"
+    _upsert_job(data, job)
+    save(data, state_path)
+    return {"job": job, "stale": stale}
+
+
+def guard_outcome_payload(payload: dict, *, state_path: Path | None = None) -> dict:
+    """Register callers cannot stamp done ahead of the canonical writer."""
+    out = dict(payload)
+    target = str(out.get("status") or "")
+    word = _is_terminal_word(target, closes_work=bool(out.get("closes_work", True)))
+    if word is None:
+        return out
+    evidence = out.get("evidence") if isinstance(out.get("evidence"), list) else []
+    verifier = out.get("verifier") if isinstance(out.get("verifier"), dict) else None
+    decision = transition_job(
+        str(out.get("job_id") or out.get("correlationId") or out.get("jobType") or "outcome"),
+        word,
+        actor=str(out.get("source") or "register"),
+        builder=str(out.get("builder") or out.get("source") or "builder"),
+        verifier=verifier,
+        evidence=evidence,
+        environment=out.get("environment") if isinstance(out.get("environment"), dict) else None,
+        required=out.get("required_evidence") if isinstance(out.get("required_evidence"), list) else None,
+        closes_work=bool(out.get("closes_work", True)),
+        session=out.get("session") if isinstance(out.get("session"), dict) else None,
+        receipt=out.get("receipt") if isinstance(out.get("receipt"), dict) else None,
+        state_path=state_path,
+    )
+    out["status"] = decision["state"]
+    if decision["permitted"]:
+        out["proofPermit"] = decision["permit"]
+        out["guard"] = "hive-state.transition_job"
+    else:
+        out.pop("proofPermit", None)
+        out["terminal_rejected"] = decision["reason"]
+        out["guard"] = "hive-state.transition_job"
+    return out
+
+
+def record_owed(
+    job_id: str,
+    *,
+    owner: str,
+    expected_artifact: str,
+    wake_condition: str,
+    stall_timeout: str,
+    note: str,
+    desk: str = "forge",
+    state_path: Path | None = None,
+) -> dict:
+    """Owed artifact rides the job row. It is not a reminder left for Evens."""
+    data = load(state_path)
+    row = {
+        "id": job_id,
+        "name": job_id,
+        "status": "BLOCKED",
+        "desk": desk,
+        "updated": today(),
+        "owner": owner,
+        "expected_artifact": expected_artifact,
+        "wake_condition": wake_condition,
+        "stall_timeout": stall_timeout,
+        "note": note,
+    }
+    saved = _upsert_job(data, row)
+    save(data, state_path)
+    return saved
+
+
 def cmd_set_job(args: argparse.Namespace) -> int:
     if args.status not in JOB_STATUSES:
         print(f"refuse: status must be {JOB_STATUSES}", file=sys.stderr)
         return 2
+    word = _is_terminal_word(args.status, closes_work=True)
+    if word or str(args.status).lower() == "done":
+        evidence = json.loads(args.evidence) if args.evidence else []
+        verifier = json.loads(args.verifier) if args.verifier else None
+        environment = json.loads(args.environment) if args.environment else None
+        receipt = json.loads(args.receipt) if args.receipt else None
+        session = json.loads(args.session) if args.session else None
+        required = json.loads(args.required) if args.required else None
+        decision = transition_job(
+            args.id,
+            word or args.status,
+            actor=args.desk,
+            builder=args.builder or args.desk,
+            verifier=verifier,
+            evidence=evidence,
+            environment=environment,
+            required=required,
+            session=session,
+            receipt=receipt,
+            name=args.name,
+            desk=args.desk,
+            note=args.note,
+        )
+        print(json.dumps({k: v for k, v in decision.items() if k != "job"}, indent=2))
+        print(json.dumps(decision["job"], indent=2))
+        return 0 if decision["permitted"] else 2
     data = load()
-    jobs = list(data.get("jobs") or [])
     row = {
         "id": args.id,
         "name": args.name or args.id,
@@ -81,17 +657,9 @@ def cmd_set_job(args: argparse.Namespace) -> int:
     }
     if args.note:
         row["note"] = args.note
-    replaced = False
-    for i, existing in enumerate(jobs):
-        if existing.get("id") == args.id:
-            jobs[i] = row
-            replaced = True
-            break
-    if not replaced:
-        jobs.append(row)
-    data["jobs"] = jobs
+    saved = _upsert_job(data, row)
     save(data)
-    print(json.dumps(row, indent=2))
+    print(json.dumps(saved, indent=2))
     return 0
 
 
@@ -163,6 +731,13 @@ def main() -> int:
     s.add_argument("--status", required=True, choices=JOB_STATUSES)
     s.add_argument("--desk", required=True)
     s.add_argument("--note")
+    s.add_argument("--builder", help="Desk that built the job. Cannot also be the verifier.")
+    s.add_argument("--evidence", help="JSON list of evidence records")
+    s.add_argument("--verifier", help="JSON verifier {actor, role}")
+    s.add_argument("--environment", help="JSON runtime/config/version binding")
+    s.add_argument("--required", help="JSON list of required evidence classes")
+    s.add_argument("--session", help="JSON session activity")
+    s.add_argument("--receipt", help="JSON session receipt")
 
     lg = sub.add_parser("log-run", help="Append last-run; bump monotonic id")
     lg.add_argument("--job", required=True)

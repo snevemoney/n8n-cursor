@@ -1,0 +1,497 @@
+#!/usr/bin/env python3
+"""Adversarial checks for terminal proof, session receipts, and versioned continuity."""
+from __future__ import annotations
+
+import importlib.util
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+HIVE = HERE.parent
+
+
+def _load(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+HS = _load("hive_state_guards", HIVE / "hive-state.py")
+BUS = _load("event_bus_guards", HIVE / "os" / "event-bus.py")
+SESS = _load("session_matrix_guards", HIVE / "os" / "session-matrix.py")
+PRODUCT = _load("product_state_guards", HIVE / "product-state.py")
+BRIEF = _load("outer_heaven_brief_guards", HIVE / "os" / "outer-heaven-brief.py")
+
+
+def _blank_state(folder: Path) -> Path:
+    path = folder / "state.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "ids": {"monotonic": True, "next_run_id": 1},
+                "jobs": [],
+                "last_run": {"id": None, "job": None, "desk": None, "at": None},
+                "log": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _proof() -> tuple[list[dict], dict, dict]:
+    env = {
+        "runtime": "runtime-1",
+        "config": "config-1",
+        "version": "v1",
+        "changed_at": "2026-09-25T00:00:00+00:00",
+    }
+    evidence = [
+        {
+            "class": "RUNTIME",
+            "kind": "live",
+            "runtime": "runtime-1",
+            "config": "config-1",
+            "version": "v1",
+            "checked_at": "2026-09-25T01:00:00+00:00",
+        },
+        {
+            "class": "SURFACE",
+            "kind": "live",
+            "runtime": "runtime-1",
+            "config": "config-1",
+            "version": "v1",
+            "checked_at": "2026-09-25T01:00:00+00:00",
+        },
+    ]
+    verifier = {"actor": "Watchdog", "role": "verifier"}
+    return evidence, verifier, env
+
+
+def _mutation(version: int, payload: dict, *, entity: str = "job-1") -> dict:
+    return {
+        "entity_id": entity,
+        "entity_type": "job",
+        "state_version": version,
+        "changed_at": f"2026-09-25T00:00:0{version}+00:00",
+        "source_platform": "cursor",
+        "source_session": "sess-cursor-1",
+        "writer": "hive-state.py",
+        "provenance": "hive-state.py",
+        "supersedes_version": version - 1 if version else None,
+        "payload": payload,
+    }
+
+
+class TerminalProofTest(unittest.TestCase):
+    def test_builder_done_without_proof_rejects(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            decision = HS.transition_job("job-a", "DONE", builder="Forge", actor="Forge", state_path=state)
+            self.assertFalse(decision["permitted"])
+            self.assertEqual(decision["state"], "IMPLEMENTED")
+            self.assertNotIn(decision["job"]["status"], HS.TERMINAL_WORDS)
+            self.assertIn(decision["job"]["status"], HS.NON_TERMINAL_STATES)
+
+    def test_diff_only_rejects_when_runtime_and_surface_required(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            decision = HS.transition_job(
+                "job-b",
+                "LIVE",
+                builder="Forge",
+                evidence=[{"class": "PASS_DIFF"}, {"class": "SURFACE", "kind": "archive"}],
+                required=["RUNTIME", "SURFACE"],
+                verifier={"actor": "Watchdog", "role": "verifier"},
+                state_path=state,
+            )
+            self.assertFalse(decision["permitted"])
+            self.assertNotEqual(decision["state"], "LIVE")
+            self.assertIn(decision["state"], HS.NON_TERMINAL_STATES)
+
+    def test_builder_self_verification_rejects(self) -> None:
+        evidence, _verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            decision = HS.transition_job(
+                "job-c",
+                "VERIFIED",
+                builder="Forge",
+                verifier={"actor": "Forge", "role": "builder"},
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertFalse(decision["permitted"])
+            self.assertEqual(decision["state"], "VERIFYING")
+            self.assertEqual(decision["reason"], "builder cannot verify its own job")
+
+    def test_sufficient_evidence_and_independent_verifier_permits(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            decision = HS.transition_job(
+                "job-d",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(decision["permitted"])
+            self.assertEqual(decision["state"], "DONE")
+            self.assertEqual(decision["job"]["status"], "DONE")
+            self.assertTrue(decision["job"].get("proofPermit"))
+
+    def test_environment_mutation_marks_evidence_stale(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            first = HS.transition_job(
+                "job-e",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(first["permitted"])
+            mutated = {
+                "runtime": "runtime-2",
+                "config": "config-1",
+                "version": "v1",
+                "changed_at": "2026-09-25T02:00:00+00:00",
+            }
+            noted = HS.note_environment("job-e", mutated, state_path=state)
+            self.assertTrue(noted["stale"])
+            self.assertEqual(noted["job"]["status"], "VERIFYING")
+            self.assertTrue(any(item.get("stale") for item in noted["job"]["evidence"]))
+
+    def test_legacy_desk_label_cannot_bypass_writer(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            state = _blank_state(folder)
+            decision = HS.apply_desk_label("legacy-desk", "DONE", builder="Forge", desk="forge", state_path=state)
+            self.assertFalse(decision["permitted"])
+            saved = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in saved["jobs"] if job["id"] == "legacy-desk")
+            self.assertNotEqual(row["status"], "DONE")
+            self.assertNotEqual(row["status"].lower(), "done")
+            saved["jobs"].append({"id": "smuggled", "name": "smuggled", "status": "SHIPPED", "desk": "forge", "updated": "2026-09-25"})
+            with self.assertRaises(SystemExit):
+                HS.save(saved, state)
+
+    def test_active_session_without_receipt_stays_unproven(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            decision = HS.transition_job(
+                "job-f",
+                "CLOSED",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                session={"tools": ["shell"], "artifacts": ["diff"]},
+                state_path=state,
+            )
+            self.assertFalse(decision["permitted"])
+            self.assertEqual(decision["state"], "RECEIPT_UNPROVEN")
+
+    def test_historical_floors_are_not_summed(self) -> None:
+        floors = HS._floors()
+        self.assertEqual(floors["unsupported_completion_sessions"], 39)
+        self.assertEqual(floors["artifact_only_rows"], 34)
+        self.assertEqual(floors["divergence_instances"], 18)
+        self.assertNotIn("total", floors)
+        self.assertNotIn("sum", floors)
+        with self.assertRaises(SystemExit):
+            HS._floors({"unsupported_completion_sessions": 39, "total": 91})
+
+
+class SessionReceiptTest(unittest.TestCase):
+    def _close(self, store: Path, **extra):
+        record = {
+            "platform": "cursor",
+            "native_session_id": "cursor-session-9",
+            "mission_id": "mission-1",
+            "job_id": "job-1",
+            "seat": "Forge",
+            "started_at": "2026-09-25T00:00:00Z",
+            "ended_at": "2026-09-25T01:00:00Z",
+            "input_ref": "requirement:failure-guards",
+            "tools": ["shell"],
+            "artifacts": ["hive-state.py"],
+            "final_state": "IMPLEMENTED",
+            "blockers": [],
+        }
+        record.update(extra)
+        return SESS.close_session(record, store=store)
+
+    def test_normal_close_emits_one_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp)
+            transcript = store / "native.jsonl"
+            transcript.write_text("{}\n", encoding="utf-8")
+            receipt = self._close(store, transcript_pointer=str(transcript))
+            self.assertEqual(receipt["completeness"], "FULL")
+            lines = (store / "receipts.jsonl").read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 1)
+            self.assertEqual(receipt["platform"], "cursor")
+            self.assertEqual(receipt["native_session_id"], "cursor-session-9")
+
+    def test_handoff_links_the_receiver(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp)
+            self._close(store, transcript_unavailable=True)
+            linked = SESS.link_handoff(
+                store,
+                platform="cursor",
+                native_session_id="cursor-session-9",
+                mission_id="mission-1",
+                job_id="job-1",
+                handoff_target="Watchdog",
+            )
+            self.assertEqual(linked["handoff_target"], "Watchdog")
+            lines = (store / "receipts.jsonl").read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 1)
+
+    def test_unavailable_transcript_is_partial(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            receipt = self._close(Path(tmp), transcript_unavailable=True)
+            self.assertEqual(receipt["completeness"], "PARTIAL")
+            self.assertNotIn("invented transcript", json.dumps(receipt))
+
+    def test_duplicate_close_is_one_logical_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp)
+            first = self._close(store, transcript_unavailable=True)
+            second = self._close(store, transcript_unavailable=True, final_state="DONE")
+            self.assertEqual(first["receipt_id"], second["receipt_id"])
+            lines = (store / "receipts.jsonl").read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 1)
+
+    def test_pointer_at_missing_evidence_fails_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = str(Path(tmp) / "not-written.txt")
+            receipt = self._close(Path(tmp), evidence_refs=[missing], transcript_pointer=missing)
+            errors = SESS.validate_receipt(receipt)
+            self.assertTrue(errors)
+            self.assertNotEqual(receipt["completeness"], "FULL")
+
+    def test_native_platform_and_session_id_are_preserved(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            store = Path(tmp)
+            cursor = SESS.close_session(
+                {"platform": "cursor", "native_session_id": "abc-123", "mission_id": "m", "job_id": "j", "transcript_unavailable": True},
+                store=store,
+            )
+            codex = SESS.close_session(
+                {"platform": "codex", "native_session_id": "codex-thread-7", "mission_id": "m2", "job_id": "j2", "transcript_unavailable": True},
+                store=store,
+            )
+            self.assertEqual(cursor["platform"], "cursor")
+            self.assertEqual(cursor["native_session_id"], "abc-123")
+            self.assertEqual(codex["platform"], "codex")
+            self.assertEqual(codex["native_session_id"], "codex-thread-7")
+
+
+class VersionedContinuityTest(unittest.TestCase):
+    def test_v2_after_v3_is_stale(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            v3 = _mutation(3, {"value": "new"})
+            self.assertEqual(BUS.publish_state(v3, path=log)["result"], "PUBLISHED")
+            self.assertEqual(BUS.apply_state("desk", v3, path=log)["result"], "APPLIED")
+            stale = BUS.apply_state("desk", _mutation(2, {"value": "old"}), path=log)
+            self.assertEqual(stale["result"], "STALE")
+
+    def test_duplicate_v3_applies_once(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            v3 = _mutation(3, {"value": "once"})
+            BUS.publish_state(v3, path=log)
+            first = BUS.apply_state("desk", v3, path=log)
+            second = BUS.apply_state("desk", v3, path=log)
+            self.assertEqual(first["result"], "APPLIED")
+            self.assertFalse(first.get("duplicate"))
+            self.assertEqual(second["result"], "APPLIED")
+            self.assertTrue(second.get("duplicate"))
+            applied = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("phase") == "APPLIED" and row.get("consumer") == "desk"
+            ]
+            self.assertEqual(len(applied), 1)
+
+    def test_incompatible_successors_conflict(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            original = _mutation(3, {"value": "a"})
+            BUS.publish_state(original, path=log)
+            conflict = BUS.apply_state("desk", _mutation(3, {"value": "b"}), path=log)
+            self.assertEqual(conflict["result"], "CONFLICT")
+            auth = BUS.authoritative("job-1", log)
+            self.assertIsNotNone(auth)
+            assert auth is not None
+            self.assertEqual(auth["payload"]["value"], "a")
+
+    def test_offline_catch_up_is_ordered_and_idempotent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            for version in (1, 2, 3):
+                published = BUS.publish_jarvis(
+                    {"step": version},
+                    state_version=version,
+                    source_session="jarvis-primary-session",
+                    writer="event-bus.py",
+                    path=log,
+                )
+                self.assertEqual(published["published"]["result"], "PUBLISHED")
+            first = BUS.catch_up(BUS.JARVIS_ISOLATED, path=log, entity_id=BUS.JARVIS_ENTITY)
+            self.assertEqual([row["result"] for row in first], ["APPLIED", "APPLIED", "APPLIED"])
+            self.assertEqual([row["state_version"] for row in first], [1, 2, 3])
+            second = BUS.catch_up(BUS.JARVIS_ISOLATED, path=log, entity_id=BUS.JARVIS_ENTITY)
+            self.assertTrue(all(row.get("duplicate") for row in second))
+            applied = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("phase") == "APPLIED" and row.get("consumer") == BUS.JARVIS_ISOLATED
+            ]
+            self.assertEqual(len(applied), 3)
+
+    def test_projection_without_ack_is_not_synced(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            log = folder / "events.jsonl"
+            projection = folder / "grok-desk.json"
+            brief = {
+                "generatedAt": "2026-09-25T03:00:00+00:00",
+                "hash": "abc123",
+                "agent": "Forge",
+                "sourceRoot": "test",
+                "captureFreshness": "test",
+                "markdown": "desk card",
+                "source_session": "grok-session-1",
+            }
+            wrote = BRIEF.publish_shared_context(brief, bus_path=log, shared_path=projection)
+            body = json.loads(wrote.read_text(encoding="utf-8"))
+            self.assertFalse(body["continuity"]["synced"])
+            self.assertFalse(BUS.projection_synced(BUS.GROK_DESK_CONSUMER, "grok-desk:Forge", path=log))
+
+    def test_applied_persists_acknowledgement(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            log = folder / "events.jsonl"
+            cohort = _blank_state(folder)
+            mutation = _mutation(1, {"ok": True}, entity="grok-desk:Forge")
+            mutation["entity_type"] = "grok_desk_projection"
+            mutation["source_platform"] = "grok"
+            BUS.publish_state(mutation, path=log)
+            applied = BUS.apply_state(BUS.GROK_DESK_CONSUMER, mutation, path=log, cohort_path=cohort)
+            self.assertEqual(applied["result"], "APPLIED")
+            ack = BUS.acknowledge(BUS.GROK_DESK_CONSUMER, "grok-desk:Forge", path=log, cohort_path=cohort)
+            self.assertEqual(ack["result"], "ACKNOWLEDGED")
+            phases = [row.get("phase") for row in BUS._read_all(log)]
+            self.assertIn("APPLIED", phases)
+            self.assertIn("ACKNOWLEDGED", phases)
+            again = BUS.write_projection(BUS.GROK_DESK_CONSUMER, "grok-desk:Forge", folder / "proj.json", path=log)
+            self.assertTrue(again["synced"])
+            counters = json.loads(cohort.read_text(encoding="utf-8"))["post_fix_cohort"]["counters"]
+            self.assertGreaterEqual(counters["propagation_latency"]["samples"], 1)
+
+    def test_stale_consumer_cannot_drive_consequential_write(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            BUS.publish_jarvis(
+                {"step": 3},
+                state_version=3,
+                source_session="jarvis-primary-session",
+                writer="event-bus.py",
+                path=log,
+            )
+            stale = BUS.consequential_write(
+                BUS.JARVIS_ISOLATED,
+                {
+                    "entity_id": BUS.JARVIS_ENTITY,
+                    "entity_type": "jarvis_bus",
+                    "state_version": 4,
+                    "changed_at": "2026-09-25T04:00:00+00:00",
+                    "source_platform": "jarvis",
+                    "source_session": "jarvis-isolated-session",
+                    "writer": "jarvis-isolated",
+                    "provenance": "jarvis-isolated",
+                    "supersedes_version": 3,
+                    "payload": {"step": 4},
+                },
+                path=log,
+            )
+            self.assertEqual(stale["result"], "STALE")
+            auth = BUS.authoritative(BUS.JARVIS_ENTITY, log)
+            assert auth is not None
+            self.assertEqual(auth["state_version"], 3)
+
+    def test_paste_is_not_the_bus(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            rejected = BUS.publish_state(
+                {**_mutation(1, {"markdown": "paste pack"}), "source_platform": "paste", "via": "paste"},
+                path=log,
+            )
+            self.assertEqual(rejected["result"], "REJECTED")
+            self.assertIsNone(BUS.authoritative("job-1", log))
+
+
+class ProductAndCohortTest(unittest.TestCase):
+    def test_product_completed_without_proof_does_not_close(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            projects = folder / "projects"
+            projects.mkdir()
+            (projects / "demo.json").write_text(
+                json.dumps({"project_id": "demo", "lifecycle": "development", "agent_state": "WORKING"}) + "\n",
+                encoding="utf-8",
+            )
+            state = _blank_state(folder)
+            previous = PRODUCT.STATE_DIR
+            previous_emit = PRODUCT._load_event_bus
+            PRODUCT.STATE_DIR = projects
+            PRODUCT._load_event_bus = lambda: (lambda *args, **kwargs: "skipped")
+            try:
+                updated = PRODUCT.transition("demo", None, "COMPLETED", "Forge", state_path=state)
+            finally:
+                PRODUCT.STATE_DIR = previous
+                PRODUCT._load_event_bus = previous_emit
+            self.assertNotEqual(updated["agent_state"], "COMPLETED")
+            self.assertEqual(updated["agent_state"], "IMPLEMENTED")
+            self.assertFalse(updated["terminal_guard"]["permitted"])
+
+    def test_post_fix_cohort_is_armed_and_unadopted(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            data = HS.load(state)
+            armed = HS.arm_cohort(data)
+            self.assertTrue(armed["armed"])
+            self.assertFalse(armed["adopted"])
+            self.assertFalse(armed["compare_to_historical_floors"])
+            floors = armed["historical_floors"]
+            self.assertEqual(
+                [floors["unsupported_completion_sessions"], floors["artifact_only_rows"], floors["divergence_instances"]],
+                [39, 34, 18],
+            )
+            self.assertNotIn("total", floors)
+            HS.bump_cohort(data, "unsupported_terminal_escape_rate", attempts=1, escapes=1)
+            blob = json.dumps(data["post_fix_cohort"])
+            self.assertNotIn("91", blob)
+
+
+if __name__ == "__main__":
+    unittest.main()
