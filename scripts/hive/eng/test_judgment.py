@@ -217,6 +217,74 @@ class JudgmentBoundaryTest(unittest.TestCase):
         self.assertEqual(frontier["lane"], "frontier")
         self.assertFalse(frontier["jev_allowed"])
 
+    def test_rising_count_and_live_pid_do_not_call_jev(self) -> None:
+        decision = judgment.evaluate(
+            {
+                "pid_alive": True,
+                "row_count": 12,
+                "previous_row_count": 9,
+                "verb": "select",
+                "confidence": 0.99,
+            }
+        )
+        self.assertEqual(decision["lane"], "deterministic")
+        self.assertEqual(decision["action"], "MONITOR")
+        self.assertFalse(decision["jev_called"])
+        self.assertFalse(decision["jev_allowed"])
+        self.assertIsNone(decision["provider"])
+        self.assertFalse(decision["provider_call"])
+        self.assertTrue(decision["facts"]["row_count_changed"])
+
+    def test_bounded_rank_of_safe_repairs_may_use_jev(self) -> None:
+        decision = judgment.evaluate(
+            {
+                "verb": "rank",
+                "repair_clusters": [
+                    {"id": "restart", "safe": True},
+                    {"id": "retry", "safe": True},
+                ],
+                "clear_winner": False,
+            }
+        )
+        self.assertEqual(decision["lane"], "jev")
+        self.assertEqual(decision["action"], "RANK")
+        self.assertEqual(decision["verb"], "rank")
+        self.assertTrue(decision["jev_allowed"])
+        self.assertFalse(decision["jev_called"])
+        self.assertFalse(decision["provider_call"])
+        self.assertIsNone(decision["provider"])
+
+    def test_artifact_exists_and_process_finished_stay_deterministic(self) -> None:
+        for payload in (
+            {"artifact_exists": True, "verb": "select"},
+            {"process_finished": True, "verb": "rank"},
+            {"row_count_changed": True, "verb": "score"},
+        ):
+            decision = judgment.evaluate(payload)
+            self.assertEqual(decision["lane"], "deterministic", payload)
+            self.assertFalse(decision["jev_called"], payload)
+            self.assertFalse(decision["jev_allowed"], payload)
+            self.assertIsNone(decision["provider"], payload)
+
+    def test_select_is_bounded_and_closed_work_is_not(self) -> None:
+        allowed = judgment.evaluate({"verb": "select"})
+        self.assertEqual(allowed["verb"], "select")
+        self.assertEqual(allowed["action"], "SELECT")
+        self.assertTrue(allowed["jev_allowed"])
+        self.assertFalse(allowed["jev_called"])
+        for role in ("conversation", "research", "architecture", "coding", "merge_authority", "jarvis_model"):
+            decision = judgment.evaluate({"role": role, "verb": "select"})
+            self.assertEqual(decision["action"], "ESCALATE", role)
+            self.assertEqual(decision["lane"], "human", role)
+            self.assertFalse(decision["jev_allowed"], role)
+            self.assertFalse(decision["jev_called"], role)
+        merge = judgment.evaluate({"merge_authority": True, "verb": "rank"})
+        self.assertEqual(merge["action"], "ESCALATE")
+        self.assertFalse(merge["jev_allowed"])
+        brain = judgment.evaluate({"jarvis": True, "model": "jev", "verb": "route"})
+        self.assertEqual(brain["action"], "ESCALATE")
+        self.assertFalse(brain["jev_called"])
+
     def test_module_is_not_a_daemon_or_a_provider_client(self) -> None:
         text = (ENG / "judgment.py").read_text(encoding="utf-8")
         self.assertNotIn("threading", text)
