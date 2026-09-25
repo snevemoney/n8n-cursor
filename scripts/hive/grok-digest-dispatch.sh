@@ -8,15 +8,24 @@ LOG="${GROK_DIGEST_LOG:-/tmp/grok-digest-dispatch.log}"
 
 {
   echo "=== grok-digest-dispatch $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
-  if curl -sS --max-time 30 -X POST "${WEBHOOK_BASE}/hive-operator-digest" \
+  BODY="${TMPDIR:-/tmp}/grok-digest-body.txt"
+  HTTP_CODE="$(curl -sS --max-time 30 -o "$BODY" -w "%{http_code}" -X POST "${WEBHOOK_BASE}/hive-operator-digest" \
     -H "Content-Type: application/json" \
     ${HIVE_WEBHOOK_SECRET:+-H "X-Hive-Secret: ${HIVE_WEBHOOK_SECRET}"} \
-    -d '{"source":"mac-launchd","correlationId":"grok-digest-'$(date -u +%Y%m%d)'"}' \
-    | head -c 2000; then
-    echo ""
-    echo "digest webhook OK"
-  else
-    echo "digest webhook failed (non-fatal) — dispatching from golden-paths only"
+    -d '{"source":"mac-launchd","correlationId":"grok-digest-'$(date -u +%Y%m%d)'"}' || true)"
+  case "$HTTP_CODE" in
+    2*)
+      echo "digest webhook HTTP ${HTTP_CODE}"
+      ;;
+    *)
+      echo "digest webhook failed HTTP ${HTTP_CODE:-000} — child executor not started"
+      exit 0
+      ;;
+  esac
+
+  if ! python3 "$ROOT/scripts/hive/os/fleet-closures.py" --child-executor; then
+    echo "NO_ACTION: gateway cannot dispatch — child executor not started"
+    exit 0
   fi
 
   python3 "$ROOT/scripts/hive/grokbot-dispatch-missions.py" --digest

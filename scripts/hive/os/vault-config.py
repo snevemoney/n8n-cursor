@@ -2,6 +2,7 @@
 """Resolve Obsidian vault + Mac cache paths for Outer Heaven (stdlib-only)."""
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,13 @@ def _cache_path() -> Path:
     return Path.home() / ".grokbot/outer-heaven"
 OS_CONFIG = Path.home() / ".grokbot/os-config.json"
 REPO_MIRROR = Path(__file__).resolve().parents[3] / "docs/hive/outer-heaven"
+
+_fc_spec = importlib.util.spec_from_file_location(
+    "fleet_closures", Path(__file__).with_name("fleet-closures.py")
+)
+_fc = importlib.util.module_from_spec(_fc_spec)
+assert _fc_spec is not None and _fc_spec.loader is not None
+_fc_spec.loader.exec_module(_fc)
 
 
 def _load_os_config() -> dict:
@@ -102,6 +110,26 @@ def vault_path_for_agents() -> str:
 # Back-compat alias used by older imports
 def outer_heaven_root() -> Path:
     return read_root("auto")
+
+
+def vault_access_card() -> str:
+    """Where a desk may read. Not permission to change vault-config."""
+    status = knowledge_status()
+    vault = status["vault"] or "(unset)"
+    return (
+        f"cache={status['cache']} vault={vault} mirror={status['mirror']} "
+        f"write_root={status['write_root']}. "
+        "A desk cannot grant a vault-config mutation."
+    )
+
+
+def resolve_vault() -> dict:
+    return knowledge_status()
+
+
+def mutation_authorized(actor: str, authority: dict | None = None) -> bool:
+    """Big Boss and Publishing Engine cannot grant a vault-config write."""
+    return bool(_fc.mutation_authorized(actor, authority))
 
 
 if __name__ == "__main__":

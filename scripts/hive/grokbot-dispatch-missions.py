@@ -22,6 +22,12 @@ _cookbook_spec.loader.exec_module(_cookbook_mod)
 TOOL_USAGE_RULES = _cookbook_mod.TOOL_USAGE_RULES
 
 CONN_PATH = Path.home() / ".grokbot/local-exec-daemon-connection.json"
+_fc_spec = importlib.util.spec_from_file_location(
+    "fleet_closures", _conn_dir / "os" / "fleet-closures.py"
+)
+_fc = importlib.util.module_from_spec(_fc_spec)
+assert _fc_spec is not None and _fc_spec.loader is not None
+_fc_spec.loader.exec_module(_fc)
 REPO = Path(__file__).resolve().parents[2]
 
 SAFETY_PREAMBLE = """SAFETY (mandatory): Read-only + approved scripts only. NEVER delete/wipe/truncate, edit secrets/.env/openclaw.json, docker volume rm, git force, prod deploy, or pm2 delete. If repair needs destructive action → STOP and tell operator.
@@ -314,12 +320,22 @@ DONE_WHEN: Operator knows what happened and correlationId {correlation_id} is re
 
 
 def load_gateway() -> tuple[str, dict[str, str]]:
-    conn = json.loads(CONN_PATH.read_text())
-    return conn["baseUrl"].rstrip("/"), {
-        "Authorization": f"Bearer {conn['token']}",
-        "Content-Type": "application/json",
-        **conn.get("headers", {}),
-    }
+    if not CONN_PATH.is_file():
+        raise SystemExit(
+            "NO_ACTION: gateway connection has no baseUrl — child executor not started"
+        )
+    try:
+        conn = json.loads(CONN_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(
+            "NO_ACTION: gateway connection has no baseUrl — child executor not started"
+        ) from exc
+    parsed = _fc.gateway_endpoint(conn)
+    if parsed is None:
+        raise SystemExit(
+            "NO_ACTION: gateway connection has no baseUrl — child executor not started"
+        )
+    return parsed
 
 
 def call(base: str, headers: dict, path: str, body: dict | None = None, retries: int = 5) -> dict:

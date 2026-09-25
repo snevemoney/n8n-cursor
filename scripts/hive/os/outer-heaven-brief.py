@@ -22,6 +22,12 @@ assert _spec and _spec.loader
 vc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(vc)
 
+_fc_path = ROOT / "scripts/hive/os/fleet-closures.py"
+_fc_spec = importlib.util.spec_from_file_location("fleet_closures", _fc_path)
+assert _fc_spec and _fc_spec.loader
+fc = importlib.util.module_from_spec(_fc_spec)
+_fc_spec.loader.exec_module(fc)
+
 SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
 MAX_BRIEF_CHARS = 4500
 JOB_CARD_MAX_CHARS = 800
@@ -200,6 +206,17 @@ def _tool_assignment_line(agent: str) -> str:
     if not use:
         return ""
     return f"Use: {use}. Never: {never}."
+
+
+def _focus_icp() -> str:
+    path = ROOT / "docs/hive/outer-heaven/CONTENT/OPERATOR_FOCUS.json"
+    if not path.is_file():
+        return ""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return ""
+    return str(data.get("icp_id") or "").strip()
 
 
 def _operator_focus_line() -> str:
@@ -391,6 +408,8 @@ def build_brief(
     if read_note:
         brief["noteExcerpt"] = _read_note(root, read_note)
 
+    fleet_closure = fc.render_for(agent, icp=_focus_icp())
+    brief["fleetClosure"] = fleet_closure
     job_card = _job_card_brief(root, agent)
     brief["jobCard"] = job_card
     brief["mentor"] = _mentor_block(agent)
@@ -402,6 +421,8 @@ def build_brief(
         f"Capture: {brief['captureFreshness']}",
         "",
     ]
+    if fleet_closure:
+        md_parts.extend(["## Fleet closure", fleet_closure, ""])
     if job_card:
         md_parts.extend(["## Job card", job_card, ""])
     if brief.get("mentor"):
@@ -515,6 +536,10 @@ def self_test() -> list[str]:
         errors.append("brief missing mentor bind")
     if "LIVE this turn" not in (b.get("markdown") or ""):
         errors.append("brief mentor is still an end stamp")
+    if "WAIT_EVENS is not an interrupt" not in (b.get("markdown") or ""):
+        errors.append("brief missing shared WAIT_EVENS closure")
+    if "ENG-14" not in (b.get("markdown") or ""):
+        errors.append("Watchdog brief missing ENG-14 closure")
     c = build_brief(agent="Consultant")
     if "saylor-course-skill" not in (c.get("markdown") or ""):
         errors.append("Consultant brief missing course-skill router")

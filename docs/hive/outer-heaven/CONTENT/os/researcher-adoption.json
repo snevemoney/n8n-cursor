@@ -1,0 +1,8 @@
+{
+  "schema": "hive.researcher-adoption/v0",
+  "batch": "06",
+  "adopted": 0,
+  "status": "NOT_ADOPTED",
+  "provenance": "Durable Mac record of Researcher receipt t466s2 (2026-09-23 22:30:27 EDT): ADOPTED 0. The host JSON and the FS batch index correction were not on this Mac. This file does not adopt a method.",
+  "receipt_text_not_remeasured": "8/5/2 and ranks 21/47/12/0 are receipt text, not a new count."
+}

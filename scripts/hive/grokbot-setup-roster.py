@@ -31,6 +31,7 @@ call = _setup_mod.call
 load_automation_registry = _setup_mod.load_automation_registry
 save_automation_registry = _setup_mod.save_automation_registry
 automation_key = _setup_mod.automation_key
+other_agent_has_routine = _setup_mod.other_agent_has_routine
 list_agent_automation_names = _setup_mod.list_agent_automation_names
 AUTOMATION_REGISTRY = _setup_mod.AUTOMATION_REGISTRY
 
@@ -367,6 +368,9 @@ def main() -> int:
         existing_names = list_agent_automation_names(base, headers, agent_id)
         if auto_name in existing_names or key in registry_keys:
             registry_keys.add(key)
+            continue
+        if other_agent_has_routine(registry_keys, agent_id, auto_name):
+            print(f"  duplicate routine refused: {auto_name} → {auto['agent_name']}")
             continue
         try:
             call(
