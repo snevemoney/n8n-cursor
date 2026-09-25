@@ -469,6 +469,96 @@ class TerminalProofTest(unittest.TestCase):
             disk = json.loads(state.read_text(encoding="utf-8"))
             self.assertEqual(disk["jobs"][0]["status"], "VERIFYING")
 
+    def test_noncatalog_stale_evidence_drops_done(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "note-done",
+                    "name": "note-done",
+                    "status": "DONE",
+                    "closes_work": True,
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                    "proofPermit": "stale-permit",
+                    "evidence": [{"class": "NOTE", "runtime": "old"}],
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            noted = HS.note_environment("note-done", {"runtime": "new"}, state_path=state)
+            self.assertTrue(noted["stale"])
+            self.assertTrue(noted["job"]["evidence"][0]["stale"])
+            self.assertEqual(noted["job"]["status"], "VERIFYING")
+            self.assertNotIn(noted["job"]["status"], HS.TERMINAL_WORDS)
+            self.assertNotIn("proofPermit", noted["job"])
+            plain = json.loads(state.read_text(encoding="utf-8"))
+            plain["jobs"].append(
+                {
+                    "id": "plain-done",
+                    "name": "plain-done",
+                    "status": "done",
+                    "desk": "forge",
+                    "updated": "2026-08-01",
+                    "evidence": [{"runtime": "old"}],
+                }
+            )
+            state.write_text(json.dumps(plain), encoding="utf-8")
+            plain_noted = HS.note_environment("plain-done", {"runtime": "new"}, state_path=state)
+            self.assertTrue(plain_noted["job"]["evidence"][0]["stale"])
+            self.assertNotEqual(plain_noted["job"]["status"].lower(), "done")
+            self.assertNotIn(plain_noted["job"]["status"], HS.TERMINAL_WORDS)
+
+    def test_save_drops_historical_done_when_runtime_is_attached(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "hist-done",
+                    "name": "hist-done",
+                    "status": "done",
+                    "desk": "forge",
+                    "updated": "2026-08-01",
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            loaded = HS.load(state)
+            loaded["jobs"][0]["environment"] = {"runtime": "rt-new"}
+            HS.save(loaded, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(disk["jobs"][0]["environment"]["runtime"], "rt-new")
+            self.assertNotEqual(disk["jobs"][0]["status"], "done")
+            self.assertNotEqual(disk["jobs"][0]["status"].lower(), "done")
+            self.assertNotIn(disk["jobs"][0]["status"], HS.TERMINAL_WORDS)
+            self.assertEqual(disk["jobs"][0]["status"], "VERIFYING")
+
+    def test_flipping_closes_work_off_drops_stored_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "kept-pass",
+                    "name": "kept-pass",
+                    "status": "PASS",
+                    "closes_work": True,
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                    "proofPermit": "old-permit",
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            loaded = HS.load(state)
+            loaded["jobs"][0]["closes_work"] = False
+            HS.save(loaded, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertFalse(disk["jobs"][0]["closes_work"])
+            self.assertNotEqual(disk["jobs"][0]["status"], "PASS")
+            self.assertNotIn(disk["jobs"][0]["status"], HS.TERMINAL_WORDS)
+            self.assertEqual(disk["jobs"][0]["status"], "BLOCKED")
+            self.assertNotIn("proofPermit", disk["jobs"][0])
+
 
 class SessionReceiptTest(unittest.TestCase):
     def _close(self, store: Path, **extra):
