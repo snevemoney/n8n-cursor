@@ -266,16 +266,22 @@ class TerminalProofTest(unittest.TestCase):
             untouched = json.loads(json.dumps(loaded))
             HS.save(untouched, state)
             disk = json.loads(state.read_text(encoding="utf-8"))
-            self.assertEqual(disk["jobs"][0]["status"], "IMPLEMENTED")
-            self.assertNotIn(disk["jobs"][0]["status"], HS.TERMINAL_WORDS)
+            self.assertEqual(disk["jobs"][0]["status"], "done")
             self.assertNotIn("proofPermit", disk["jobs"][0])
             promoted = json.loads(json.dumps(loaded))
             promoted["jobs"][0]["status"] = "DONE"
             with self.assertRaises(SystemExit):
                 HS.save(promoted, state)
             after = json.loads(state.read_text(encoding="utf-8"))
-            self.assertNotEqual(after["jobs"][0]["status"], "DONE")
-            self.assertNotIn(after["jobs"][0]["status"], HS.TERMINAL_WORDS)
+            self.assertEqual(after["jobs"][0]["status"], "done")
+            self.assertNotIn("proofPermit", after["jobs"][0])
+            noted = json.loads(json.dumps(after))
+            noted["jobs"][0]["evidence"] = [{"class": "DIFF", "note": "attached"}]
+            HS.save(noted, state)
+            dropped = json.loads(state.read_text(encoding="utf-8"))
+            self.assertNotEqual(dropped["jobs"][0]["status"], "done")
+            self.assertNotEqual(dropped["jobs"][0]["status"], "DONE")
+            self.assertNotIn(dropped["jobs"][0]["status"], HS.TERMINAL_WORDS)
 
     def test_register_forward_ignores_nonempty_permit(self) -> None:
         source = (HIVE / "philanthropy-hive-tools" / "hive.ts").read_text(encoding="utf-8")
@@ -511,6 +517,25 @@ class TerminalProofTest(unittest.TestCase):
             disk = json.loads(state.read_text(encoding="utf-8"))
             self.assertNotEqual(disk["jobs"][0]["status"].strip().lower(), "done")
             self.assertNotIn("proofPermit", disk["jobs"][0])
+            evidence, verifier, env = _proof()
+            closed = HS.transition_job(
+                "kept-done",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(closed["permitted"])
+            planted = HS.load(state)
+            target = next(job for job in planted["jobs"] if job["id"] == "kept-done")
+            target["evidence"] = list(target.get("evidence") or []) + [{"class": "DIFF", "note": "attached"}]
+            HS.save(planted, state)
+            saved = json.loads(state.read_text(encoding="utf-8"))
+            kept = next(job for job in saved["jobs"] if job["id"] == "kept-done")
+            self.assertNotEqual(kept["status"], "DONE")
+            self.assertNotIn(kept["status"], HS.TERMINAL_WORDS)
 
     def test_noncatalog_stale_evidence_drops_done(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -848,6 +873,8 @@ class TerminalProofTest(unittest.TestCase):
             row = next(job for job in disk["jobs"] if job["id"] == "job-strict")
             self.assertEqual(row["status"], "DONE")
             self.assertEqual(row["proofPermit"], closed["permit"])
+            self.assertEqual(row.get("evidence"), closed["job"].get("evidence"))
+            self.assertEqual(row.get("required_evidence"), ["RUNTIME", "SURFACE"])
             forwarded = HS.guard_outcome_payload(
                 {
                     "status": "DONE",
@@ -889,6 +916,8 @@ class TerminalProofTest(unittest.TestCase):
             )
             self.assertFalse(refused["permitted"])
             self.assertEqual(refused["job"]["required_evidence"], ["RUNTIME", "SURFACE"])
+            before = json.loads(state.read_text(encoding="utf-8"))
+            before_row = next(job for job in before["jobs"] if job["id"] == "declared-first")
             follow = HS.transition_job(
                 "declared-first",
                 "DONE",
@@ -901,9 +930,13 @@ class TerminalProofTest(unittest.TestCase):
             )
             self.assertFalse(follow["permitted"])
             self.assertNotEqual(follow["job"]["status"], "DONE")
-            self.assertNotIn(follow["job"]["status"], HS.TERMINAL_WORDS)
-            self.assertNotIn("proofPermit", follow["job"])
-            self.assertEqual(follow["job"]["required_evidence"], ["RUNTIME", "SURFACE"])
+            after = json.loads(state.read_text(encoding="utf-8"))
+            after_row = next(job for job in after["jobs"] if job["id"] == "declared-first")
+            self.assertEqual(after_row["status"], before_row["status"])
+            self.assertEqual(after_row.get("required_evidence"), before_row.get("required_evidence"))
+            self.assertEqual(after_row.get("evidence"), before_row.get("evidence"))
+            self.assertEqual(after_row.get("proofPermit"), before_row.get("proofPermit"))
+            self.assertEqual(after_row.get("terminal_rejected"), follow["reason"])
             met = HS.transition_job(
                 "declared-first",
                 "DONE",
@@ -1217,17 +1250,28 @@ class ProductAndCohortTest(unittest.TestCase):
             self.assertEqual(updated["agent_state"], "IMPLEMENTED")
             self.assertFalse(updated["terminal_guard"]["permitted"])
 
-    def test_permitted_done_agrees_with_project_state(self) -> None:
+    def test_project_state_is_not_one_job(self) -> None:
         evidence, verifier, env = _proof()
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
             projects = folder / "projects"
             projects.mkdir()
             (projects / "demo.json").write_text(
-                json.dumps({"project_id": "demo", "lifecycle": "development", "agent_state": "WORKING"}) + "\n",
+                json.dumps({"project_id": "demo", "lifecycle": "development", "agent_state": "BLOCKED"}) + "\n",
                 encoding="utf-8",
             )
             state = _blank_state(folder)
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "sibling",
+                    "name": "sibling",
+                    "status": "BLOCKED",
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
             previous = PRODUCT.STATE_DIR
             previous_emit = PRODUCT._load_event_bus
             PRODUCT.STATE_DIR = projects
@@ -1249,12 +1293,14 @@ class ProductAndCohortTest(unittest.TestCase):
                 PRODUCT._load_event_bus = previous_emit
             self.assertTrue(updated["terminal_guard"]["permitted"])
             self.assertEqual(updated["terminal_guard"]["state"], "DONE")
-            self.assertEqual(updated["agent_state"], "DONE")
-            self.assertNotEqual(updated["agent_state"], "BLOCKED")
+            self.assertEqual(updated["agent_state"], "BLOCKED")
+            self.assertNotEqual(updated["agent_state"], "DONE")
             disk = json.loads(state.read_text(encoding="utf-8"))
             row = next(job for job in disk["jobs"] if job["id"] == "demo")
+            sibling = next(job for job in disk["jobs"] if job["id"] == "sibling")
             self.assertEqual(row["status"], "DONE")
-            self.assertEqual(updated["agent_state"], row["status"])
+            self.assertNotEqual(updated["agent_state"], row["status"])
+            self.assertEqual(sibling["status"], "BLOCKED")
 
     def test_post_fix_cohort_is_armed_and_unadopted(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

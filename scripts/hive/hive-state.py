@@ -34,8 +34,8 @@ ALLOWED = (
     "product_factory",
     "post_fix_cohort",
 )
-# Lowercase "done" is still a closing word. A resave without a permit drops it.
-# New terminal writes are uppercase and only land through transition_job.
+# Lowercase "done" is a recorded historical label. Re-saving it does not invent a
+# permit and does not drop it. A new canonical DONE still needs a permit.
 JOB_STATUSES = (
     "working",
     "yellow",
@@ -543,6 +543,27 @@ def transition_job(
             "stale": False,
             "job": kept,
         }
+    if not decision["permitted"] and isinstance(existing, dict) and word:
+        # A refusal may leave an audit reason. It does not rewrite status,
+        # evidence, or the requirement already stored on the row.
+        audited = dict(existing)
+        audited["terminal_rejected"] = decision.get("reason") or "missing proof"
+        bump_cohort(
+            data,
+            "unsupported_terminal_escape_rate",
+            attempts=1,
+            escapes=1,
+        )
+        saved = _upsert_job(data, audited)
+        save(data, state_path)
+        return {
+            "permitted": False,
+            "state": saved.get("status"),
+            "reason": decision.get("reason"),
+            "permit": saved.get("proofPermit"),
+            "stale": bool(decision.get("stale")),
+            "job": saved,
+        }
     bump_cohort(
         data,
         "unsupported_terminal_escape_rate",
@@ -664,6 +685,8 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
         return
     if status != previous_status and status == token and not previous_job.get("proofPermit"):
         return
+    if _untouched_historical(job, previous_job):
+        return
     decision = _decision_for_job(job)
     if decision["permitted"] and job.get("proofPermit") == decision["permit"]:
         return
@@ -671,6 +694,21 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
     job["status"] = hold
     job.pop("proofPermit", None)
     job["terminal_rejected"] = decision["reason"]
+
+
+def _untouched_historical(job: dict, previous_job: dict) -> bool:
+    """A recorded historical label with no permit and no evidence change is not a new close."""
+    if previous_job.get("proofPermit") or job.get("proofPermit"):
+        return False
+    status = str(job.get("status") or "")
+    if status != str(previous_job.get("status") or ""):
+        return False
+    token = _terminal_token(status)
+    if not token or status == token:
+        return False
+    prev_ev = previous_job.get("evidence") if isinstance(previous_job.get("evidence"), list) else []
+    cur_ev = job.get("evidence") if isinstance(job.get("evidence"), list) else []
+    return prev_ev == cur_ev
 
 
 def _close_still_proven(job: dict | None) -> bool:
