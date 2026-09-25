@@ -268,18 +268,99 @@ def _speak_rows_for(agent: str, limit: int = 4) -> list[str]:
     return general[:limit]
 
 
-def _mentor_block(agent: str) -> str:
-    rows = _speak_rows_for(agent, 4)
-    parts = [
-        "LIVE this turn: one school, teach, then do. Not an end stamp. LANE first.",
-        "Router `saylor-course-skill` · pass `saylor-mentor-pass --live` · beats `saylor-live-beats`.",
-    ]
-    if rows:
-        parts.append("This desk: " + " · ".join(rows))
-    block = " ".join(parts)
-    if len(block) > MENTOR_MAX_CHARS:
-        block = block[: MENTOR_MAX_CHARS - 1] + "…"
-    return block
+_MENTOR_MOD = None
+
+
+def _mentor_mod():
+    global _MENTOR_MOD
+    if _MENTOR_MOD is None:
+        path = ROOT / "scripts/hive/os/saylor-mentor-pass.py"
+        spec = importlib.util.spec_from_file_location("saylor_mentor_pass", path)
+        assert spec and spec.loader
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _MENTOR_MOD = mod
+    return _MENTOR_MOD
+
+
+def _lane_for_task(task: str) -> str:
+    if re.search(r"\b(agency|path a|named client)\b", task, re.I):
+        return "agency"
+    return "hive-os"
+
+
+def _method_projection(agent: str, project: str, task: str) -> dict:
+    """One relevant method, or NO_METHOD_NEEDED. Not the desk's school list."""
+    router = (
+        "LIVE this turn: one school only when the task needs it; otherwise NO_METHOD_NEEDED. "
+        "Router `saylor-course-skill`. Pass `saylor-mentor-pass --live`."
+    )
+    pack = {"task": task, "project": project, "role": agent}
+    if not (task or "").strip():
+        trace = {
+            "job": "",
+            "context_pack": pack,
+            "retrieved_method": "NO_METHOD_NEEDED",
+            "why_selected": "no job text; native competence; do not preload schools",
+            "behavior": "do the desk's own work",
+            "authority": "native",
+            "lifecycle": "NO_METHOD_NEEDED",
+            "stored_course_is_learned": False,
+        }
+        return {
+            "method": "NO_METHOD_NEEDED",
+            "lifecycle": "NO_METHOD_NEEDED",
+            "stored_course_is_learned": False,
+            "course": "NO_METHOD_NEEDED",
+            "text": router + " No task, so no course is loaded.",
+            "trace": trace,
+        }
+    beat = _mentor_mod().live_beat(_lane_for_task(task), task, [])
+    trace = dict(beat.get("trace") or {})
+    trace["context_pack"] = pack
+    trace["job"] = task
+    course = beat.get("course") or "NO_METHOD_NEEDED"
+    if course == "NO_METHOD_NEEDED":
+        text = router + " Retrieved method: NO_METHOD_NEEDED."
+    else:
+        why = trace.get("why_selected") or ""
+        behavior = beat.get("says") or beat.get("now") or ""
+        text = (
+            f"{router} Retrieved `{beat.get('slug')}` course {course} "
+            f"lifecycle {beat.get('lifecycle')}. A stored course is not a learned capability. "
+            f"Why: {why} Behavior: {behavior}"
+        )
+    if len(text) > MENTOR_MAX_CHARS:
+        text = text[: MENTOR_MAX_CHARS - 1] + "…"
+    return {
+        "method": beat.get("method") or course,
+        "lifecycle": beat.get("lifecycle") or "CANDIDATE",
+        "stored_course_is_learned": False,
+        "course": course,
+        "text": text,
+        "trace": trace,
+    }
+
+
+def _company_sections_for_task(task: str, include_hunt_stats: bool) -> set[str]:
+    """Company history enters the pack only when the task asks for that section."""
+    t = (task or "").lower()
+    wanted: set[str] = set()
+    if re.search(r"\bnorth stars?\b", t):
+        wanted.add("northStars")
+    if re.search(r"\b(chronicle|what happened)\b", t):
+        wanted.add("chronicleRecent")
+    if re.search(r"\b(graph hubs?|backlinks)\b", t):
+        wanted.add("graphHubs")
+    if re.search(r"\bcursor chats?\b", t):
+        wanted.add("recentCursorChats")
+    if re.search(r"\bproduct state\b", t):
+        wanted.add("productState")
+    if re.search(r"\b(catalog stats|business catalog)\b", t):
+        wanted.add("catalogStats")
+    if include_hunt_stats or re.search(r"\b(hunt pipeline|hunt stats)\b", t):
+        wanted.add("huntStats")
+    return wanted
 
 
 def _job_card_brief(root: Path, agent: str, max_chars: int = JOB_CARD_MAX_CHARS) -> str:
@@ -338,88 +419,150 @@ def build_brief(
     read_note: str | None = None,
     include_hunt_stats: bool = False,
     signals_prompt: str | None = None,
+    task: str | None = None,
 ) -> dict:
     root = vc.read_root(source if source != "auto" else "auto")
-    mem_path = root / "OPERATOR_MEMORY.md"
-    mem_text = mem_path.read_text(encoding="utf-8", errors="replace") if mem_path.is_file() else ""
+    job = (task or "").strip()
+    wanted = _company_sections_for_task(job, include_hunt_stats)
+    mem_text = ""
+    if "northStars" in wanted:
+        mem_path = root / "OPERATOR_MEMORY.md"
+        mem_text = mem_path.read_text(encoding="utf-8", errors="replace") if mem_path.is_file() else ""
 
+    method = _method_projection(agent, project, job)
     brief: dict = {
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "agent": agent,
         "project": project,
+        "task": job,
+        "kind": "context_pack",
+        "projection": "task_project_role",
         "sourceRoot": str(root),
-        "northStars": _extract_section(mem_text, "Four north stars", 900),
-        "decisions": _extract_section(mem_text, "DECISIONS (seeded)", 600),
-        "goals": _extract_section(mem_text, "GOALS (seeded)", 600),
-        "chronicleRecent": _chronicle_summaries(root, 3),
-        "graphHubs": _graph_hubs(root, 10),
-        "recentCursorChats": _cursor_chat_titles(root, 10),
-        "productState": _product_state_lines(),
-        "huntStats": _hunt_stats_lines() if include_hunt_stats or agent in ("Big Boss", "Lead Hunter") else [],
-        "catalogStats": _catalog_stats_lines(),
         "operatorFocus": _operator_focus_line(),
         "captureFreshness": _capture_freshness(root),
-        "vaultAccess": vc.vault_access_card(),
-        "vaultResolve": vc.resolve_vault(),
+        "vaultAccess": vc.vault_access_card() if hasattr(vc, "vault_access_card") else "",
+        "vaultResolve": vc.resolve_vault() if hasattr(vc, "resolve_vault") else "",
+        "withheldFromContextPack": [
+            name
+            for name in (
+                "northStars",
+                "decisions",
+                "goals",
+                "chronicleRecent",
+                "graphHubs",
+                "recentCursorChats",
+                "productState",
+                "catalogStats",
+                "huntStats",
+            )
+            if name not in wanted
+        ],
+        "method": method["method"],
+        "methodLifecycle": method["lifecycle"],
+        "storedCourseIsLearned": False,
+        "retrievalTrace": method["trace"],
     }
+    if "northStars" in wanted:
+        brief["northStars"] = _extract_section(mem_text, "Four north stars", 900)
+    if "chronicleRecent" in wanted:
+        brief["chronicleRecent"] = _chronicle_summaries(root, 3)
+    if "graphHubs" in wanted:
+        brief["graphHubs"] = _graph_hubs(root, 10)
+    if "recentCursorChats" in wanted:
+        brief["recentCursorChats"] = _cursor_chat_titles(root, 10)
+    if "productState" in wanted:
+        brief["productState"] = _product_state_lines()
+    if "catalogStats" in wanted:
+        brief["catalogStats"] = _catalog_stats_lines()
+    if "huntStats" in wanted:
+        brief["huntStats"] = _hunt_stats_lines()
     if read_note:
         brief["noteExcerpt"] = _read_note(root, read_note)
 
     job_card = _job_card_brief(root, agent)
     brief["jobCard"] = job_card
-    brief["mentor"] = _mentor_block(agent)
+    brief["mentor"] = method["text"]
     brief["toolAssignment"] = _tool_assignment_line(agent)
 
     md_parts = [
-        f"# Outer Heaven brief — {agent}",
-        f"Project: {project} | Source: {root}",
+        f"# ContextPack — {agent}",
+        f"Project: {project} | Role: {agent} | Source: {root}",
+        f"Task: {job or '(none)'}",
+        "Projection: task + project + role. Company history stays out unless the task asks for it.",
         f"Capture: {brief['captureFreshness']}",
         "",
     ]
     if job_card:
         md_parts.extend(["## Job card", job_card, ""])
     if brief.get("mentor"):
-        md_parts.extend(["## Mentor (1–3, do not dump)", brief["mentor"], ""])
+        md_parts.extend(["## Method", brief["mentor"], ""])
+    trace = method["trace"]
+    md_parts.extend(
+        [
+            "## Trace",
+            f"job: {trace.get('job') or '(none)'}",
+            f"context_pack: task={job or '(none)'} project={project} role={agent}",
+            f"retrieved_method: {trace.get('retrieved_method')}",
+            f"why_selected: {trace.get('why_selected')}",
+            f"behavior: {trace.get('behavior')}",
+            f"lifecycle: {trace.get('lifecycle')}",
+            "",
+        ]
+    )
     if brief.get("toolAssignment"):
         md_parts.extend(["## Tools", brief["toolAssignment"], ""])
     if brief.get("vaultAccess"):
         md_parts.extend(["## Vault (Mac closed)", brief["vaultAccess"], ""])
-    md_parts.extend(
-        [
-            "## North stars",
-            brief["northStars"] or "(see OPERATOR_MEMORY.md)",
-            "",
-            "## Recent chronicle",
-        ]
-    )
-    for s in brief["chronicleRecent"]:
-        md_parts.append(f"- {s}")
-    if not brief["chronicleRecent"]:
-        md_parts.append("- (none indexed)")
-    md_parts.extend(["", "## Graph hubs", ", ".join(brief["graphHubs"]) or "(no index)", ""])
-    md_parts.extend(["## Recent Cursor chats"])
-    for t in brief["recentCursorChats"]:
-        md_parts.append(f"- {t}")
-    md_parts.extend(["", "## Product state"])
-    for ln in brief["productState"]:
-        md_parts.append(f"- {ln}")
     if brief.get("operatorFocus"):
-        md_parts.extend(["", "## Operator focus", brief["operatorFocus"]])
+        md_parts.extend(["## Operator focus", brief["operatorFocus"], ""])
+    if brief.get("northStars"):
+        md_parts.extend(["## North stars", brief["northStars"], ""])
+    if brief.get("chronicleRecent"):
+        md_parts.append("## Recent chronicle")
+        for s in brief["chronicleRecent"]:
+            md_parts.append(f"- {s}")
+        md_parts.append("")
+    if brief.get("graphHubs"):
+        md_parts.extend(["## Graph hubs", ", ".join(brief["graphHubs"]), ""])
+    if brief.get("recentCursorChats"):
+        md_parts.append("## Recent Cursor chats")
+        for t in brief["recentCursorChats"]:
+            md_parts.append(f"- {t}")
+        md_parts.append("")
+    if brief.get("productState"):
+        md_parts.append("## Product state")
+        for ln in brief["productState"]:
+            md_parts.append(f"- {ln}")
+        md_parts.append("")
     if brief.get("catalogStats"):
-        md_parts.extend(["", "## Catalog"])
+        md_parts.append("## Catalog")
         for ln in brief["catalogStats"]:
             md_parts.append(f"- {ln}")
+        md_parts.append("")
     if brief.get("huntStats"):
-        md_parts.extend(["", "## Hunt pipeline"])
+        md_parts.append("## Hunt pipeline")
         for ln in brief["huntStats"]:
             md_parts.append(f"- {ln}")
+        md_parts.append("")
     if read_note and brief.get("noteExcerpt"):
         md_parts.extend(["", f"## Note: {read_note}", brief["noteExcerpt"]])
     if signals_prompt:
         sig = _signal_retrieve_block(signals_prompt)
+        if sig and sig != "NONE" and "external_signal_not_doctrine" not in sig:
+            sig = (
+                sig.rstrip()
+                + "\nAUTHORITY: external_signal_not_doctrine\nLIFECYCLE: CANDIDATE"
+            )
         brief["signals"] = sig
-        if sig:
-            md_parts.extend(["", "## Signals (retrieve-when-relevant)", sig])
+        brief["signalAuthority"] = "external_signal_not_doctrine"
+        if sig and sig != "NONE":
+            md_parts.extend(
+                [
+                    "",
+                    "## Signals (input, not doctrine)",
+                    sig,
+                ]
+            )
 
     markdown = "\n".join(md_parts)
     if len(markdown) > MAX_BRIEF_CHARS:
@@ -490,6 +633,37 @@ def self_test() -> list[str]:
         errors.append("Consultant brief missing course-skill router")
     if (c.get("markdown") or "").count("`") > 40:
         errors.append("Consultant brief looks like a catalog dump")
+    pack = c.get("markdown") or ""
+    for banned in ("## Recent chronicle", "## Graph hubs", "## Recent Cursor chats", "## North stars"):
+        if banned in pack:
+            errors.append(f"default ContextPack dumped {banned}")
+    if c.get("method") != "NO_METHOD_NEEDED":
+        errors.append(f"taskless Consultant pack loaded {c.get('method')}")
+    if "NO_METHOD_NEEDED" not in pack:
+        errors.append("taskless pack missing NO_METHOD_NEEDED")
+    native = build_brief(agent="Forge", task="open the css file and change the button color")
+    if native.get("method") != "NO_METHOD_NEEDED":
+        errors.append(f"native task loaded {native.get('method')}")
+    dbms = build_brief(
+        agent="Watchdog",
+        task="which DBMS fits and write a data-management plan so retrieval is decision-grade",
+    )
+    trace = dbms.get("retrievalTrace") or {}
+    if trace.get("course") != "BUS611" and "BUS611" not in str(trace):
+        errors.append(f"DBMS trace course {trace.get('course')}")
+    if trace.get("course") == "BUS206" or trace.get("retrieved_method") == "mis-intro-five-components":
+        errors.append("DBMS ContextPack still selected BUS206")
+    if dbms.get("methodLifecycle") == "ADOPTED":
+        errors.append("stored course promoted to ADOPTED")
+    behavior = str(trace.get("behavior") or "")
+    if behavior.startswith("Five components"):
+        errors.append("DBMS behavior is still the BUS206 five-components lecture")
+    systems = build_brief(
+        agent="Forge",
+        task="what systems run this people, process, data, hardware, software",
+    )
+    if (systems.get("retrievalTrace") or {}).get("course") != "BUS206":
+        errors.append("five-components task no longer reaches BUS206")
     cr = vc.cache_root()
     if not cr.is_dir():
         errors.append("cache root missing")
@@ -500,6 +674,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Outer Heaven shared brief for Grok agents")
     ap.add_argument("--agent", default="Big Boss")
     ap.add_argument("--project", default="proofcheck")
+    ap.add_argument("--task", default="", help="Job text. ContextPack is this task, the project, and the role.")
     ap.add_argument("--source", default="auto", choices=["auto", "cache", "vault", "mirror", "vps"])
     ap.add_argument("--read", metavar="REL_PATH", help="Optional vault-relative note to include")
     ap.add_argument("--format", default="markdown", choices=["markdown", "json"])
@@ -536,6 +711,7 @@ def main() -> int:
                 read_note=args.read,
                 include_hunt_stats=args.hunt_stats,
                 signals_prompt=(args.prompt if args.signals else None),
+                task=args.task,
             )
         else:
             print(text)
@@ -548,6 +724,7 @@ def main() -> int:
             read_note=args.read,
             include_hunt_stats=args.hunt_stats,
             signals_prompt=(args.prompt if args.signals else None),
+            task=args.task,
         )
 
     if args.publish:

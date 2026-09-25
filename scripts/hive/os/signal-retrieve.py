@@ -429,19 +429,30 @@ def format_text(result: Result) -> str:
     lines = [f"THEME: {result.theme}"]
     for i, ref in enumerate(result.refs, 1):
         lines.append(f"{i}. {ref.person} · {ref.machine} · {ref.path}")
+    lines.append("AUTHORITY: external_signal_not_doctrine")
+    lines.append("LIFECYCLE: CANDIDATE")
     return "\n".join(lines)
 
 
 def format_json(result: Result) -> str:
     payload = {
         "theme": result.theme,
+        "authority": "external_signal_not_doctrine",
+        "lifecycle": "CANDIDATE",
+        "doctrine": False,
         "refs": [
             {"person": r.person, "machine": r.machine, "path": r.path}
             for r in result.refs
         ],
     }
     if result.theme == "none" or not result.refs:
-        payload = {"theme": "none", "refs": []}
+        payload = {
+            "theme": "none",
+            "refs": [],
+            "authority": "external_signal_not_doctrine",
+            "lifecycle": "NO_METHOD_NEEDED",
+            "doctrine": False,
+        }
     return json.dumps(payload, indent=2)
 
 
