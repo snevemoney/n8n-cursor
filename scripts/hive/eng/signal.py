@@ -19,6 +19,11 @@ import re
 import sys
 from pathlib import Path
 
+_ENG = Path(__file__).resolve().parent
+if str(_ENG) not in sys.path:
+    sys.path.insert(0, str(_ENG))
+from judgment import corpus_features
+
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT = ROOT / "docs/hive/outer-heaven/CONTENT/os/signals"
 PACK_CAP = 12
@@ -119,6 +124,23 @@ def file_candidate(root: Path, candidate_id: str, signal_id: str, kind: str, tex
     path = root / "candidates" / f"{candidate_id}.json"
     if path.is_file():
         return emit({"id": candidate_id, "stored": False, "reason": "candidate already filed"}, True)
+    raw_doc = read_json(raw)
+    source = raw_doc.get("source") if isinstance(raw_doc.get("source"), dict) else {}
+    operator = raw_doc.get("operator") if isinstance(raw_doc.get("operator"), dict) else {}
+    url = str(source.get("url") or "")
+    collection = str(operator.get("collection") or "")
+    demo_corpus = collection == "jev-demos" or "jev-demos" in url or raw_doc.get("corpus") == "external_demos"
+    if kind == "CANDIDATE_PRODUCT" and demo_corpus:
+        demos = raw_doc.get("demos") if isinstance(raw_doc.get("demos"), list) else []
+        decision = corpus_features(
+            {
+                "signal_class": "EXTERNAL_SIGNAL",
+                "kind": "demo_corpus",
+                "url": url,
+                "demos": demos,
+            }
+        )
+        return emit(decision, False)
     doc = {
         "id": candidate_id,
         "kind": kind,
