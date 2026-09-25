@@ -37,6 +37,13 @@ SAFETY_PREAMBLE = _dispatch_mod.SAFETY_PREAMBLE
 load_gateway = _dispatch_mod.load_gateway
 call = _dispatch_mod.call
 
+_session_spec = importlib.util.spec_from_file_location(
+    "session_matrix", Path(__file__).resolve().parent / "os" / "session-matrix.py"
+)
+_session_mod = importlib.util.module_from_spec(_session_spec)
+assert _session_spec.loader is not None
+_session_spec.loader.exec_module(_session_mod)
+
 
 def load_chains() -> dict[str, Any]:
     if not CHAINS_PATH.is_file():
@@ -222,6 +229,23 @@ def process_missions(
                     processed[key] = datetime.now(timezone.utc).isoformat()
                     hop_counts[cid] = hops_so_far + 1
                     dispatched += 1
+                    if not dry_run:
+                        meta = mission.get("metadata") if isinstance(mission.get("metadata"), dict) else {}
+                        store = _session_mod.repo_os_root(ROOT) / "sessions"
+                        _session_mod.link_handoff(
+                            store,
+                            platform=str(mission.get("platform") or meta.get("platform") or "UNKNOWN"),
+                            native_session_id=str(
+                                mission.get("native_session_id")
+                                or meta.get("native_session_id")
+                                or meta.get("sessionId")
+                                or "UNKNOWN"
+                            ),
+                            mission_id=cid,
+                            job_id=str(mission.get("job_id") or mission.get("jobType") or "UNKNOWN"),
+                            handoff_target=target,
+                            seat=str(mission.get("seat") or poll_agent),
+                        )
     state["lastPoll"] = datetime.now(timezone.utc).isoformat()
     return dispatched
 

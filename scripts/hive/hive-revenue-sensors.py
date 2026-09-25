@@ -9,6 +9,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import subprocess
 import sys
@@ -26,6 +27,18 @@ def fetch_json(url: str) -> dict:
     req = urllib.request.Request(url, headers={"Accept": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode())
+
+
+def _hive_state():
+    spec = importlib.util.spec_from_file_location("hive_state", REPO / "scripts/hive/hive-state.py")
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def seal_outcome(payload: dict) -> dict:
+    return _hive_state().guard_outcome_payload(payload)
 
 
 def register_outcome(agent: str, payload: dict, dry_run: bool) -> None:
@@ -79,6 +92,7 @@ def cmd_hourly(args: argparse.Namespace) -> int:
             "ceOpenActions": ce_open,
         },
     }
+    body = seal_outcome(body)
     print(json.dumps(body, indent=2))
     if args.register:
         register_outcome(args.agent, body, args.dry_run)
@@ -99,6 +113,7 @@ def cmd_ingest_signal(args: argparse.Namespace) -> int:
         "summary": summary,
         "metadata": {"source": args.source, "signal": args.signal, "url": args.url or ""},
     }
+    body = seal_outcome(body)
     print(json.dumps(body, indent=2))
     if args.register:
         register_outcome(args.agent, body, args.dry_run)
@@ -143,6 +158,7 @@ def cmd_rank_features(args: argparse.Namespace) -> int:
         "summary": summary,
         "metadata": {"ranked": ranked, "top": top},
     }
+    body = seal_outcome(body)
     print(json.dumps(body, indent=2))
     if args.register:
         register_outcome(args.agent, body, args.dry_run)
