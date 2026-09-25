@@ -4,7 +4,8 @@
 Shared bus and briefs already exist. This module refuses to turn one
 preference into doctrine, refuses to put raw finance or personal data on
 unrelated desks, and refuses to collapse KILL / KEEP / SEND / PUBLISH
-into one flag. It does not open a privacy database.
+into one flag. The bus is the one shared boundary: only an allowlist of
+minimum facts may be persisted. It does not open a privacy database.
 """
 from __future__ import annotations
 
@@ -36,44 +37,62 @@ _FINANCE_LINE = re.compile(
     r"\b(account\s*number|routing\s*number|bank\s*balance|savings\s*rate|runway|social\s*security|\bssn\b)\b",
     re.I,
 )
-_FINANCE_KEY = re.compile(
-    r"(bank[_\s-]?balance|account[_\s-]?number|routing([_\s-]?number)?|savings[_\s-]?rate|"
-    r"(^|[_\s-])(amount|balance|cash|cents)([_\s-]|$)|invoice|transaction([_\s-]?(amount|cash))?)",
-    re.I,
-)
-_FINANCE_KEY_TOKENS = frozenset(
-    {"amount", "amounts", "balance", "balances", "cash", "cents", "invoice", "invoices"}
-)
-_NUMBER_WORD = (
-    r"zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|"
-    r"thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
-    r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|"
-    r"hundred|thousand|million|billion"
-)
-_MONEY_PROSE = re.compile(
-    r"(?:"
-    r"[$€£]\s*\d"
-    r"|\b\d[\d,]*(?:\.\d+)?\s*(?:usd|cad|eur|gbp|dollars?|cents?)\b"
-    r"|\b(?:usd|cad|eur|gbp|dollars?|cents?)\s*[:.]?\s*\d"
-    r"|\b(?:figure|cash|amount|balance|invoice|payment|paid|wire)\b[^.\n]{0,80}\d"
-    r"|\d[^.\n]{0,40}\b(?:figure|dollars?|cents?|usd|cash)\b"
-    r"|\b(?:" + _NUMBER_WORD + r")(?:[\s-](?:and|" + _NUMBER_WORD + r"))*\s+(?:dollars?|cents?|usd)\b"
-    r"|\b\d{1,3}(?:,\d{3})+(?:\.\d{2})?\b"
-    r"|\b\d+\.\d{2}\b"
-    r")",
-    re.I,
-)
-_REDACTION_STUB_KINDS = frozenset({"finance_raw", "personal_raw"})
 _PERSONAL_LINE = re.compile(
     r"\b(home\s*address|date\s*of\s*birth|personal\s*phone|medical\s*record|diagnosis)\b",
     re.I,
 )
-_PERSONAL_KEY = re.compile(
-    r"(home[_\s-]?address|date[_\s-]?of[_\s-]?birth|^dob$|personal[_\s-]?phone|medical|diagnosis|^ssn$)",
-    re.I,
-)
 _FLAG_TOKENS = frozenset({"true", "false", "1", "0", "yes", "no", "on", "off", "y", "n"})
-_FINANCE_EVENT_TYPES = frozenset({"transaction.detected", "subscription.changed"})
+_LIFECYCLE = frozenset(
+    {
+        "idea",
+        "specification",
+        "planning",
+        "development",
+        "testing",
+        "beta",
+        "launch_ready",
+        "production",
+        "maintenance",
+        "deprecated",
+    }
+)
+_AGENT_STATES = frozenset(
+    {
+        "IDLE",
+        "READY",
+        "CLAIMED",
+        "KNOWLEDGE_GAP",
+        "RESEARCHING",
+        "KNOWLEDGE_READY",
+        "WORKING",
+        "BLOCKED",
+        "WAITING",
+        "NEEDS_REVIEW",
+        "NEEDS_HUMAN",
+        "COMPLETED",
+        "FAILED",
+    }
+)
+_SENSITIVITY = frozenset({"internal", "public", "finance_raw", "personal_raw"})
+_PRIORITY = frozenset({"P0", "P1", "P2", "P3"})
+_DERIVED_STATUS: dict[str, frozenset[str]] = {
+    "cash_buffer_status": frozenset({"low", "ok", "high", "unknown", "below", "within", "above"}),
+    "classification": frozenset({"finance_raw", "personal_raw"}),
+    "lifecycle": _LIFECYCLE,
+    "agent_state": _AGENT_STATES,
+}
+_PAYLOAD_BOOL = frozenset({"ok", "action_ready"})
+_PAYLOAD_SLUG = frozenset({"project_id", "packet_id", "entity_id"})
+_PAYLOAD_NAME = frozenset({"requested_by"})
+_PAYLOAD_DELTA = frozenset({"from", "to"})
+_SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_TOKEN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
+_NAME = re.compile(r"^[A-Z][a-z]+(?: [A-Z][a-z]+){0,3}$")
+_ISO_TS = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$")
+_UUID = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
+_EVENT_TYPE = re.compile(r"^[a-z][a-z0-9._]{0,80}$")
 
 
 class CollapseError(ValueError):
@@ -279,83 +298,114 @@ def kill_switch_blocks(data: dict[str, Any] | None) -> tuple[bool, str]:
     return decision == "IGNORE", reason
 
 
-def _finance_key(key: str) -> bool:
-    text = str(key)
-    if _FINANCE_KEY.search(text):
-        return True
-    spaced = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", text)
-    tokens = [part for part in re.split(r"[_\s\-]+", spaced.strip().lower()) if part]
-    return any(part in _FINANCE_KEY_TOKENS for part in tokens)
+def _slug_ok(value: Any) -> str | None:
+    if not isinstance(value, str) or not _SLUG.fullmatch(value) or value.isdigit():
+        return None
+    return value
 
 
-def _is_redaction_stub(payload: Any) -> bool:
-    """The writer stub is redacted plus a classification and nothing else.
+def _token_ok(value: Any) -> str | None:
+    if not isinstance(value, str) or not _TOKEN.fullmatch(value) or value.isdigit():
+        return None
+    return value
 
-    A redacted flag beside an amount, a cash field, or a prose figure is not safe.
+
+def _name_ok(value: Any) -> str | None:
+    if isinstance(value, str) and _NAME.fullmatch(value):
+        return value
+    return _token_ok(value)
+
+
+def _minimize_delta(value: Any) -> dict[str, str] | None:
+    if not isinstance(value, dict):
+        return None
+    kept: dict[str, str] = {}
+    lifecycle = value.get("lifecycle")
+    if isinstance(lifecycle, str) and lifecycle in _LIFECYCLE:
+        kept["lifecycle"] = lifecycle
+    agent_state = value.get("agent_state")
+    if isinstance(agent_state, str) and agent_state in _AGENT_STATES:
+        kept["agent_state"] = agent_state
+    return kept or None
+
+
+def minimize_payload(payload: Any) -> dict[str, Any]:
+    """Facts that may leave the shared bus. Every other key is dropped.
+
+    Cash, amount_cents, prose, and a value beside redacted=true are not on
+    this list. A redacted flag is not on it either. Derived facts such as
+    cash_buffer_status may leave. Raw amounts stay in the caller.
     """
-    if not isinstance(payload, dict) or payload.get("redacted") is not True:
-        return False
-    if set(payload) - {"redacted", "classification"}:
-        return False
-    kind = payload.get("classification")
-    return isinstance(kind, str) and kind in _REDACTION_STUB_KINDS
+    if not isinstance(payload, dict):
+        return {}
+    kept: dict[str, Any] = {}
+    for key, value in payload.items():
+        if key in _PAYLOAD_BOOL and isinstance(value, bool):
+            kept[key] = value
+            continue
+        allowed = _DERIVED_STATUS.get(key)
+        if allowed is not None and isinstance(value, str) and value in allowed:
+            kept[key] = value
+            continue
+        if key in _PAYLOAD_SLUG:
+            slug = _slug_ok(value)
+            if slug is not None:
+                kept[key] = slug
+            continue
+        if key in _PAYLOAD_NAME:
+            name = _name_ok(value)
+            if name is not None:
+                kept[key] = name
+            continue
+        if key in _PAYLOAD_DELTA:
+            delta = _minimize_delta(value)
+            if delta:
+                kept[key] = delta
+    return kept
 
 
-def _scan_mapping(obj: Any) -> str | None:
-    if isinstance(obj, dict):
-        for key, value in obj.items():
-            key_text = str(key)
-            if _PERSONAL_KEY.search(key_text):
-                return "personal_raw"
-            if _finance_key(key_text):
-                return "finance_raw"
-            found = _scan_mapping(value)
-            if found:
-                return found
-        return None
-    if isinstance(obj, list):
-        for item in obj:
-            found = _scan_mapping(item)
-            if found:
-                return found
-        return None
-    if isinstance(obj, str):
-        if _PERSONAL_LINE.search(obj):
-            return "personal_raw"
-        if _FINANCE_LINE.search(obj) or _MONEY_PROSE.search(obj):
-            return "finance_raw"
-    return None
-
-
-def shared_event_classification(event: dict[str, Any]) -> str | None:
-    """Raw finance or personal data, including the default sensitivity and unlabeled payloads."""
-    payload = event.get("payload")
-    if _is_redaction_stub(payload):
-        return None
-    sensitivity = str(event.get("sensitivity") or "internal").lower()
-    if sensitivity in {"personal", "personal_raw"}:
-        return "personal_raw"
-    if sensitivity in {"finance", "finance_raw"}:
-        return "finance_raw"
-    payload = event.get("payload")
-    if event.get("type") in _FINANCE_EVENT_TYPES and payload not in (None, {}, []):
-        return "finance_raw"
-    return _scan_mapping(payload)
+def _project_shared_event(event: dict[str, Any]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    event_id = event.get("event_id")
+    if isinstance(event_id, str) and _UUID.fullmatch(event_id):
+        out["event_id"] = event_id
+    event_type = event.get("type")
+    if isinstance(event_type, str) and _EVENT_TYPE.fullmatch(event_type):
+        out["type"] = event_type
+    for key in ("source", "actor"):
+        token = _token_ok(event.get(key))
+        if token is not None:
+            out[key] = token
+    priority = event.get("priority")
+    if isinstance(priority, str) and priority in _PRIORITY:
+        out["priority"] = priority
+    for key in ("project_id", "entity_id"):
+        slug = _slug_ok(event.get(key))
+        if slug is not None:
+            out[key] = slug
+    timestamp = event.get("timestamp")
+    if isinstance(timestamp, str) and _ISO_TS.fullmatch(timestamp):
+        out["timestamp"] = timestamp
+    sensitivity = event.get("sensitivity")
+    if isinstance(sensitivity, str) and sensitivity in _SENSITIVITY:
+        out["sensitivity"] = sensitivity
+    else:
+        out["sensitivity"] = "internal"
+    out["payload"] = minimize_payload(event.get("payload"))
+    return out
 
 
 def prepare_shared_event(event: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
-    """Shared jsonl is not a privacy store. Raw bodies stay off it.
+    """Project one event onto the shared-bus allowlist before it is stored.
 
-    Consequential external types are not written without a receipt.
-    Default sensitivity and the CLI emit path are included.
+    The receipt check stays in memory. The receipt body, including any exact
+    amount, is not copied onto the bus, into the archive line, or into telemetry.
     """
-    prepared = dict(event)
-    kind = shared_event_classification(prepared)
-    if kind:
-        prepared["sensitivity"] = kind
-        prepared["payload"] = {"redacted": True, "classification": kind}
+    if not isinstance(event, dict):
+        return {"sensitivity": "internal", "payload": {}}, "event must be a record"
+    prepared = _project_shared_event(event)
     if prepared.get("type") in CONSEQUENTIAL_EVENT_TYPES:
-        receipt = prepared.get("receipt") if isinstance(prepared.get("receipt"), dict) else {}
+        receipt = event.get("receipt") if isinstance(event.get("receipt"), dict) else {}
         ok, reason = consequential_receipt_ok(receipt)
         if not ok:
             return prepared, reason
@@ -460,8 +510,8 @@ def self_test() -> int:
     redacted, refuse = prepare_shared_event(
         {"type": "transaction.detected", "sensitivity": "finance_raw", "payload": {"bank_balance": "999"}}
     )
-    check(refuse is None and redacted["payload"].get("redacted") is True, "finance not written raw")
-    check("999" not in json.dumps(redacted), "amount absent from shared event")
+    check(refuse is None and "999" not in json.dumps(redacted), "amount absent from shared event")
+    check("bank_balance" not in redacted["payload"], "raw finance key dropped")
     default_event, default_refuse = prepare_shared_event(
         {"type": "agent.heartbeat", "sensitivity": "internal", "payload": {"amount": 424242}}
     )
@@ -478,8 +528,9 @@ def self_test() -> int:
         ("cash", {"cash": 636363}, "636363"),
         ("amount_cents", {"amount_cents": 747474}, "747474"),
         ("prose figure", {"note": "The prose figure was $818181"}, "818181"),
-        ("prose dollars", {"note": "owed forty-two thousand dollars"}, "forty-two"),
-        ("redacted flag keeps amount", {"redacted": True, "amount": 919191}, "919191"),
+        ("currency word first", {"note": "USD forty-two"}, "forty-two"),
+        ("currency word colon", {"memo": "dollars: forty-two"}, "forty-two"),
+        ("redacted flag keeps amount", {"redacted": True, "amount": 919191, "note": "dollars: forty-two"}, "919191"),
     )
     for label, payload, marker in leaks:
         cleaned, refuse_leak = prepare_shared_event(
@@ -491,12 +542,52 @@ def self_test() -> int:
                 "payload": payload,
             }
         )
-        check(refuse_leak is None and marker not in json.dumps(cleaned), f"cli drops {label}")
-    stub_in = {"redacted": True, "classification": "finance_raw"}
-    stub_out, _ = prepare_shared_event(
-        {"type": "agent.heartbeat", "sensitivity": "internal", "payload": dict(stub_in)}
+        dumped = json.dumps(cleaned)
+        check(refuse_leak is None and marker not in dumped and "redacted" not in cleaned["payload"], f"cli drops {label}")
+    derived, _ = prepare_shared_event(
+        {
+            "type": "agent.heartbeat",
+            "source": "cli",
+            "actor": "operator",
+            "payload": {"cash": 636363, "cash_buffer_status": "low", "note": "USD forty-two"},
+        }
     )
-    check(stub_out["payload"] == stub_in, "writer stub stays")
+    check(derived["payload"] == {"cash_buffer_status": "low"}, "derived fact kept, raw cash dropped")
+    state_event, state_refuse = prepare_shared_event(
+        {
+            "type": "project.state_changed",
+            "source": "product-state.py",
+            "actor": "operator",
+            "priority": "P3",
+            "project_id": "hive-os",
+            "sensitivity": "internal",
+            "payload": {
+                "project_id": "hive-os",
+                "from": {"lifecycle": "development", "agent_state": "WORKING"},
+                "to": {"lifecycle": "testing", "agent_state": "WORKING", "cash": 50},
+            },
+        }
+    )
+    check(state_refuse is None and state_event["payload"]["to"] == {"lifecycle": "testing", "agent_state": "WORKING"}, "state delta kept")
+    check("50" not in json.dumps(state_event), "cash inside a delta dropped")
+    published, publish_ok = prepare_shared_event(
+        {
+            "type": "content.published",
+            "source": "cli",
+            "actor": "operator",
+            "payload": {"amount": 919191},
+            "receipt": {
+                "authorized_by": "Evens",
+                "executed_by": "operator",
+                "target": "post-1",
+                "timestamp": "2026-09-25T01:20:00Z",
+                "result_evidence": "USD forty-two",
+            },
+        }
+    )
+    published_dump = json.dumps(published)
+    check(publish_ok is None and "forty-two" not in published_dump and "919191" not in published_dump, "receipt amount stays off the bus")
+    check("receipt" not in published, "receipt body is not a bus field")
     _, refuse_pub = prepare_shared_event({"type": "content.published", "payload": {"status": "done"}})
     check(refuse_pub is not None, "publish without receipt refused")
     _, refuse_done = prepare_shared_event(

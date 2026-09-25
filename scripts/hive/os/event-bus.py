@@ -73,8 +73,8 @@ def append_event(
 ) -> tuple[bool, str]:
     """Returns (inserted, event_id). Skips if event_id already exists.
 
-    Every writer, including the default path, passes through prepare so a
-    finance amount cannot land because sensitivity was left at internal.
+    Every writer passes through the shared-bus allowlist first. Keys that
+    are not on that list, including raw amounts and prose, are not stored.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     prepared, refuse = _privacy_taste_action().prepare_shared_event(event)
