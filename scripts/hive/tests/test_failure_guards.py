@@ -374,6 +374,101 @@ class TerminalProofTest(unittest.TestCase):
             self.assertNotEqual(mismatched["job"]["status"], "DONE")
             self.assertNotIn(mismatched["job"]["status"], HS.TERMINAL_WORDS)
 
+    def test_save_does_not_write_a_new_nonclosing_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            data = json.loads(state.read_text(encoding="utf-8"))
+            data["jobs"].append(
+                {
+                    "id": "direct-pass",
+                    "name": "direct-pass",
+                    "status": "PASS",
+                    "closes_work": False,
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                }
+            )
+            with self.assertRaises(SystemExit):
+                HS.save(data, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertFalse(any(job.get("status") == "PASS" for job in disk["jobs"]))
+            self.assertFalse(any(job.get("id") == "direct-pass" for job in disk["jobs"]))
+
+    def test_stale_evidence_drops_nonclosing_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "probe-pass",
+                    "name": "probe-pass",
+                    "status": "PASS",
+                    "closes_work": False,
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                    "evidence": [
+                        {"class": "RUNTIME", "kind": "live", "checked_at": "2026-09-25T03:00:00+00:00"},
+                        {"class": "SURFACE", "kind": "live", "checked_at": "2026-09-25T03:00:00+00:00"},
+                    ],
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            noted = HS.note_environment(
+                "probe-pass",
+                {"runtime": "rt-new", "changed_at": "2026-09-25T04:00:00+00:00"},
+                state_path=state,
+            )
+            self.assertTrue(noted["stale"])
+            self.assertEqual(noted["job"]["status"], "VERIFYING")
+            self.assertNotEqual(noted["job"]["status"], "PASS")
+            self.assertNotIn(noted["job"]["status"], HS.TERMINAL_WORDS)
+            self.assertTrue(any(item.get("stale") for item in noted["job"]["evidence"]))
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(disk["jobs"][0]["status"], "VERIFYING")
+
+    def test_catalog_and_report_do_not_send_terminal_status(self) -> None:
+        source = (HIVE / "philanthropy-hive-tools" / "hive.ts").read_text(encoding="utf-8")
+        slices = {
+            "n8n_trigger_catalog_webhook": source[
+                source.index("const n8n_trigger_catalog_webhook") : source.index("const HIVE_REPORT_DEDUPE_MS")
+            ],
+            "hive_send_report": source[source.index("const hive_send_report") : source.index("const hitl_gate_status")],
+        }
+        banned = ("done", "DONE", "PASS", "VERIFIED", "LIVE", "SHIPPED", "CLOSED")
+        for name, body in slices.items():
+            self.assertIn("/api/hive/register", body, name)
+            for word in banned:
+                self.assertNotIn(f"status: '{word}'", body, name)
+                self.assertNotIn(f'status: "{word}"', body, name)
+            self.assertIn("status: 'IMPLEMENTED'", body, name)
+
+    def test_runtime_on_historical_done_without_evidence_drops_label(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "hist-done",
+                    "name": "hist-done",
+                    "status": "done",
+                    "desk": "forge",
+                    "updated": "2026-08-01",
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            noted = HS.note_environment(
+                "hist-done",
+                {"runtime": "rt-new", "changed_at": "2026-09-25T04:00:00+00:00"},
+                state_path=state,
+            )
+            self.assertTrue(noted["stale"])
+            self.assertNotEqual(noted["job"]["status"], "done")
+            self.assertNotEqual(noted["job"]["status"].lower(), "done")
+            self.assertNotIn(noted["job"]["status"], HS.TERMINAL_WORDS)
+            self.assertIn(noted["job"]["status"], HS.NON_TERMINAL_STATES)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(disk["jobs"][0]["status"], "VERIFYING")
+
 
 class SessionReceiptTest(unittest.TestCase):
     def _close(self, store: Path, **extra):
