@@ -80,10 +80,13 @@ def should_run(
     kill_note = ""
     kill_data = read_kill_switch(kill_path)
     if kill_data:
-        blocks, kill_reason = _privacy_taste_action().kill_switch_blocks(kill_data)
-        if blocks:
-            _audit_log(audit, {"agent": agent, "decision": "IGNORE", "reason": kill_reason, "trigger": "kill_switch"})
-            return "IGNORE", kill_reason
+        kill_decision, kill_reason = _privacy_taste_action().kill_switch_decision(kill_data)
+        if kill_decision in ("IGNORE", "WAIT_FOR_HUMAN"):
+            _audit_log(
+                audit,
+                {"agent": agent, "decision": kill_decision, "reason": kill_reason, "trigger": "kill_switch"},
+            )
+            return kill_decision, kill_reason
         if kill_reason:
             kill_note = kill_reason
             _audit_log(
@@ -193,7 +196,29 @@ def self_test() -> int:
             print(f"FAIL {agent}: expected {expected} got {got}")
             fails += 1
     kill = Path("/tmp/os-kill-selftest.json")
-    kill.write_text(json.dumps({"active": True}), encoding="utf-8")
+    for raw in ({"active": True}, {"active": "true"}, {"active": 1}):
+        kill.write_text(json.dumps(raw), encoding="utf-8")
+        got, reason = should_run(
+            "Forge",
+            None,
+            {"lifecycle": "production"},
+            kill_path=kill,
+            audit_path=Path("/tmp/os-audit-selftest.jsonl"),
+        )
+        if got != "WAIT_FOR_HUMAN":
+            print(f"FAIL kill flag stayed {got}: {raw} {reason}")
+            fails += 1
+    kill.write_text(
+        json.dumps(
+            {
+                "verb": "KILL",
+                "recommendation": "propose",
+                "evens_decision": "pending",
+                "execution": "not_executed",
+            }
+        ),
+        encoding="utf-8",
+    )
     got, reason = should_run(
         "Forge",
         None,
@@ -202,8 +227,8 @@ def self_test() -> int:
         audit_path=Path("/tmp/os-audit-selftest.jsonl"),
     )
     kill.unlink(missing_ok=True)
-    if got == "IGNORE" or "one flag" not in reason:
-        print(f"FAIL kill flag executed: {got} {reason}")
+    if got != "RUN":
+        print(f"FAIL recommendation blocked a run: {got} {reason}")
         fails += 1
     if fails:
         return 1

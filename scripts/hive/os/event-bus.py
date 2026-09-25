@@ -71,10 +71,17 @@ def append_event(
     *,
     path: Path = DEFAULT_PATH,
 ) -> tuple[bool, str]:
-    """Returns (inserted, event_id). Skips if event_id already exists."""
+    """Returns (inserted, event_id). Skips if event_id already exists.
+
+    Every writer, including the default path, passes through prepare so a
+    finance amount cannot land because sensitivity was left at internal.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
-    eid = event.get("event_id") or str(uuid.uuid4())
-    event = {**event, "event_id": eid}
+    prepared, refuse = _privacy_taste_action().prepare_shared_event(event)
+    if refuse:
+        raise ValueError(refuse)
+    eid = prepared.get("event_id") or str(uuid.uuid4())
+    event = {**prepared, "event_id": eid}
     if "timestamp" not in event:
         event["timestamp"] = _now_iso()
     existing = {r.get("event_id") for r in _read_all(path)}

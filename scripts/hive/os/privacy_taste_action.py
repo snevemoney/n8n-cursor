@@ -36,10 +36,20 @@ _FINANCE_LINE = re.compile(
     r"\b(account\s*number|routing\s*number|bank\s*balance|savings\s*rate|runway|social\s*security|\bssn\b)\b",
     re.I,
 )
+_FINANCE_KEY = re.compile(
+    r"(bank[_\s-]?balance|account[_\s-]?number|routing([_\s-]?number)?|savings[_\s-]?rate|^amount$|^balance$|invoice|transaction([_\s-]?amount)?)",
+    re.I,
+)
 _PERSONAL_LINE = re.compile(
     r"\b(home\s*address|date\s*of\s*birth|personal\s*phone|medical\s*record|diagnosis)\b",
     re.I,
 )
+_PERSONAL_KEY = re.compile(
+    r"(home[_\s-]?address|date[_\s-]?of[_\s-]?birth|^dob$|personal[_\s-]?phone|medical|diagnosis|^ssn$)",
+    re.I,
+)
+_FLAG_TOKENS = frozenset({"true", "false", "1", "0", "yes", "no", "on", "off", "y", "n"})
+_FINANCE_EVENT_TYPES = frozenset({"transaction.detected", "subscription.changed"})
 
 
 class CollapseError(ValueError):
@@ -147,13 +157,34 @@ def _has_three(raw: dict[str, Any]) -> bool:
     return "recommendation" in raw and "evens_decision" in raw and "execution" in raw
 
 
+def _is_flag_value(value: Any) -> bool:
+    """A boolean, a number, or a flag-shaped string. Not a three-state word."""
+    if isinstance(value, bool):
+        return True
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return True
+    if isinstance(value, str):
+        return value.strip().lower() in _FLAG_TOKENS
+    return False
+
+
+def _collapsed_flag_keys(raw: dict[str, Any]) -> list[str]:
+    found: list[str] = []
+    for name in VERBS:
+        for key in (name, name.lower()):
+            if key in raw and _is_flag_value(raw.get(key)):
+                found.append(key)
+    for key in _ONE_FLAG_KEYS:
+        if key in raw and _is_flag_value(raw.get(key)):
+            found.append(key)
+    return found
+
+
 def parse_verb_state(raw: dict[str, Any]) -> VerbState:
-    """Three fields. A boolean flag is a collapse and is refused."""
+    """Three fields. A boolean, number, or flag string is a collapse and is refused."""
     if not isinstance(raw, dict):
         raise CollapseError("recommendation and execution cannot collapse into one flag")
-    flagged = [name for name in VERBS if isinstance(raw.get(name), bool) or isinstance(raw.get(name.lower()), bool)]
-    one_flag = [key for key in _ONE_FLAG_KEYS if isinstance(raw.get(key), bool)]
-    if flagged or (one_flag and not _has_three(raw)):
+    if _collapsed_flag_keys(raw):
         raise CollapseError("recommendation and execution cannot collapse into one flag")
     verb = raw.get("verb")
     if verb not in VERBS:
@@ -196,33 +227,84 @@ def consequential_receipt_ok(receipt: dict[str, Any] | None) -> tuple[bool, str]
     return True, "ok"
 
 
-def kill_switch_blocks(data: dict[str, Any] | None) -> tuple[bool, str]:
-    """A KILL file blocks work only after Evens's yes, execution, and a receipt."""
+def kill_switch_decision(data: dict[str, Any] | None) -> tuple[str, str]:
+    """IGNORE only when KILL was executed with a receipt.
+
+    A one-flag file is not a decision. Callers must not treat it as RUN.
+    A separate recommendation with execution still not_executed does not block.
+    """
     if not data:
-        return False, ""
+        return "", ""
     payload = data if data.get("verb") in VERBS else {**data, "verb": "KILL"}
     try:
         state = parse_verb_state(payload)
     except CollapseError as exc:
-        return False, str(exc)
+        return "WAIT_FOR_HUMAN", str(exc)
     if state.verb != "KILL" or state.execution != "executed" or state.evens_decision != "yes":
-        return False, "KILL recommendation is not execution"
+        return "", "KILL recommendation is not execution"
     receipt = data.get("receipt") if isinstance(data.get("receipt"), dict) else {}
     ok, reason = consequential_receipt_ok(receipt)
     if not ok:
-        return False, reason
-    return True, "KILL executed with receipt"
+        return "WAIT_FOR_HUMAN", reason
+    return "IGNORE", "KILL executed with receipt"
+
+
+def kill_switch_blocks(data: dict[str, Any] | None) -> tuple[bool, str]:
+    """True only when KILL has actually executed. A collapsed flag does not."""
+    decision, reason = kill_switch_decision(data)
+    return decision == "IGNORE", reason
+
+
+def _scan_mapping(obj: Any) -> str | None:
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            key_text = str(key)
+            if _PERSONAL_KEY.search(key_text):
+                return "personal_raw"
+            if _FINANCE_KEY.search(key_text):
+                return "finance_raw"
+            found = _scan_mapping(value)
+            if found:
+                return found
+        return None
+    if isinstance(obj, list):
+        for item in obj:
+            found = _scan_mapping(item)
+            if found:
+                return found
+        return None
+    if isinstance(obj, str):
+        if _PERSONAL_LINE.search(obj):
+            return "personal_raw"
+        if _FINANCE_LINE.search(obj):
+            return "finance_raw"
+    return None
+
+
+def shared_event_classification(event: dict[str, Any]) -> str | None:
+    """Raw finance or personal data, including the default sensitivity and unlabeled payloads."""
+    if isinstance(event.get("payload"), dict) and event["payload"].get("redacted") is True:
+        return None
+    sensitivity = str(event.get("sensitivity") or "internal").lower()
+    if sensitivity in {"personal", "personal_raw"}:
+        return "personal_raw"
+    if sensitivity in {"finance", "finance_raw"}:
+        return "finance_raw"
+    payload = event.get("payload")
+    if event.get("type") in _FINANCE_EVENT_TYPES and payload not in (None, {}, []):
+        return "finance_raw"
+    return _scan_mapping(payload)
 
 
 def prepare_shared_event(event: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
     """Shared jsonl is not a privacy store. Raw bodies stay off it.
 
     Consequential external types are not written without a receipt.
+    Default sensitivity and the CLI emit path are included.
     """
-    sensitivity = str(event.get("sensitivity") or "internal").lower()
     prepared = dict(event)
-    if sensitivity in {"finance", "finance_raw", "personal", "personal_raw"}:
-        kind = "personal_raw" if "personal" in sensitivity else "finance_raw"
+    kind = shared_event_classification(prepared)
+    if kind:
         prepared["sensitivity"] = kind
         prepared["payload"] = {"redacted": True, "classification": kind}
     if prepared.get("type") in CONSEQUENTIAL_EVENT_TYPES:
@@ -273,6 +355,12 @@ def self_test() -> int:
         check(False, "approved flag should collapse")
     except CollapseError:
         check(True, "approved flag collapsed")
+    for raw in ({"SEND": "true"}, {"SEND": 1}, {"approved": "yes"}, {"active": 1}):
+        try:
+            parse_verb_state(raw)
+            check(False, f"flag should collapse {raw}")
+        except CollapseError:
+            check(True, f"flag collapsed {raw}")
     send = parse_verb_state(
         {
             "verb": "SEND",
@@ -300,6 +388,9 @@ def self_test() -> int:
     check(worker_done_is_receipt("done") is False, "worker done helper")
     blocks, why = kill_switch_blocks({"active": True})
     check(blocks is False and "one flag" in why, "active flag does not execute KILL")
+    for raw in ({"active": True}, {"active": "true"}, {"active": 1}):
+        decision, _why = kill_switch_decision(raw)
+        check(decision == "WAIT_FOR_HUMAN", f"active flag is not RUN {raw}")
 
     receipt = {
         "authorized_by": "Evens",
@@ -324,6 +415,18 @@ def self_test() -> int:
     )
     check(refuse is None and redacted["payload"].get("redacted") is True, "finance not written raw")
     check("999" not in json.dumps(redacted), "amount absent from shared event")
+    default_event, default_refuse = prepare_shared_event(
+        {"type": "agent.heartbeat", "sensitivity": "internal", "payload": {"amount": 424242}}
+    )
+    check(default_refuse is None and "424242" not in json.dumps(default_event), "default path drops amount")
+    cli_event, cli_refuse = prepare_shared_event(
+        {"type": "transaction.detected", "source": "cli", "actor": "operator", "payload": {"amount": 515151}}
+    )
+    check(cli_refuse is None and "515151" not in json.dumps(cli_event), "cli path drops amount")
+    plain, _ = prepare_shared_event(
+        {"type": "agent.heartbeat", "sensitivity": "internal", "payload": {"ok": True}}
+    )
+    check(plain["payload"] == {"ok": True}, "plain payload kept")
     _, refuse_pub = prepare_shared_event({"type": "content.published", "payload": {"status": "done"}})
     check(refuse_pub is not None, "publish without receipt refused")
     _, refuse_done = prepare_shared_event(

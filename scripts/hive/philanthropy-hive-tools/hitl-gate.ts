@@ -102,26 +102,35 @@ const MONEY_PARAM_KEYS = new Set([
 const VERBS = ['KILL', 'KEEP', 'SEND', 'PUBLISH'] as const
 const RECEIPT_KEYS = ['authorized_by', 'executed_by', 'target', 'timestamp', 'result_evidence'] as const
 const ONE_FLAG_KEYS = ['approved', 'done', 'execute', 'active', 'flag'] as const
+const FLAG_TOKENS = new Set(['true', 'false', '1', '0', 'yes', 'no', 'on', 'off', 'y', 'n'])
 const DONE_EVIDENCE = new Set(['done', 'complete', 'completed', 'ok', 'worker said done', 'worker_done'])
+
+function isFlagValue(value: unknown): boolean {
+  if (typeof value === 'boolean') return true
+  if (typeof value === 'number' && Number.isFinite(value)) return true
+  if (typeof value === 'string') return FLAG_TOKENS.has(value.trim().toLowerCase())
+  return false
+}
 
 /**
  * KILL, KEEP, SEND, and PUBLISH keep recommendation, Evens decision, and
- * execution as separate fields. A boolean flag is not an action.
+ * execution as separate fields. A boolean, a number, or a flag string is
+ * not an action. The three fields do not excuse an extra one-flag.
  * Returns a reason when the payload collapses them, otherwise null.
  */
 export function actionStatesCollapsed(params: Record<string, unknown>): string | null {
   for (const verb of VERBS) {
-    if (typeof params[verb] === 'boolean' || typeof params[verb.toLowerCase()] === 'boolean') {
+    if (isFlagValue(params[verb]) || isFlagValue(params[verb.toLowerCase()])) {
+      return 'recommendation and execution cannot collapse into one flag'
+    }
+  }
+  for (const key of ONE_FLAG_KEYS) {
+    if (isFlagValue(params[key])) {
       return 'recommendation and execution cannot collapse into one flag'
     }
   }
   const hasThree =
     'recommendation' in params && 'evens_decision' in params && 'execution' in params
-  for (const key of ONE_FLAG_KEYS) {
-    if (typeof params[key] === 'boolean' && !hasThree) {
-      return 'recommendation and execution cannot collapse into one flag'
-    }
-  }
   if (!hasThree) return null
   if (params.recommendation === params.execution && params.execution !== 'not_executed') {
     return 'recommendation and execution cannot collapse into one flag'
