@@ -27,7 +27,9 @@ services:
   n8n:
     <<: *dflt
     image: n8nio/n8n:1.55.1
-    env_file: [../../.env.local]
+    env_file:
+      - path: ../../.env.local
+        required: false
     environment:
       - N8N_HOST=localhost
       - N8N_PORT=5678

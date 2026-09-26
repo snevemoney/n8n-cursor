@@ -11,7 +11,9 @@ services:
   landing:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-landing:prod
-    env_file: [../../.env.production]
+    env_file:
+      - path: ../../.env.production
+        required: false
     ports: ["127.0.0.1:3000:3000"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3000/healthz"], interval: 15s, timeout: 3s, retries: 10 }
     cpus: "1"
@@ -21,7 +23,9 @@ services:
   web:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-web:prod
-    env_file: [../../.env.production]
+    env_file:
+      - path: ../../.env.production
+        required: false
     ports: ["127.0.0.1:3001:3001"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3001/healthz"], interval: 15s, timeout: 3s, retries: 10 }
     cpus: "2"
@@ -31,7 +35,9 @@ services:
   ops:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-ops:prod
-    env_file: [../../.env.production]
+    env_file:
+      - path: ../../.env.production
+        required: false
     ports: ["127.0.0.1:3002:3002"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3002/healthz"], interval: 15s, timeout: 3s, retries: 10 }
     cpus: "1"
@@ -41,7 +47,9 @@ services:
   api:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-api:prod
-    env_file: [../../.env.production]
+    env_file:
+      - path: ../../.env.production
+        required: false
     ports: ["127.0.0.1:4000:4000"]
     depends_on: { redis: { condition: service_healthy } }
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:4000/health"], interval: 10s, timeout: 2s, retries: 10 }
@@ -54,7 +62,9 @@ services:
   worker:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-worker:prod
-    env_file: [../../.env.production]
+    env_file:
+      - path: ../../.env.production
+        required: false
     depends_on:
       redis: { condition: service_healthy }
       api:   { condition: service_healthy }
@@ -78,7 +88,9 @@ services:
   n8n:
     <<: *dflt
     image: n8nio/n8n:1.55.1
-    env_file: [../../.env.production]
+    env_file:
+      - path: ../../.env.production
+        required: false
     environment:
       - N8N_HOST=n8ncloud.tech
       - N8N_PORT=5678
@@ -98,7 +110,9 @@ services:
   scorpion:
     <<: *dflt
     image: ghcr.io/yourorg/scorpion:prod
-    env_file: [../../.env.production]
+    env_file:
+      - path: ../../.env.production
+        required: false
     ports: ["127.0.0.1:3003:3003"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 15s, timeout: 3s, retries: 10 }
     cpus: "2"
