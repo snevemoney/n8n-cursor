@@ -10,28 +10,36 @@ services:
   landing:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-landing:staging
-    env_file: [../../.env.staging]
+    env_file:
+      - path: ../../.env.staging
+        required: false
     ports: ["127.0.0.1:3100:3000"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3000/healthz"], interval: 15s, timeout: 3s, retries: 10 }
 
   web:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-web:staging
-    env_file: [../../.env.staging]
+    env_file:
+      - path: ../../.env.staging
+        required: false
     ports: ["127.0.0.1:3101:3001"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3001/healthz"], interval: 15s, timeout: 3s, retries: 10 }
 
   ops:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-ops:staging
-    env_file: [../../.env.staging]
+    env_file:
+      - path: ../../.env.staging
+        required: false
     ports: ["127.0.0.1:3102:3002"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3002/healthz"], interval: 15s, timeout: 3s, retries: 10 }
 
   api:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-api:staging
-    env_file: [../../.env.staging]
+    env_file:
+      - path: ../../.env.staging
+        required: false
     ports: ["127.0.0.1:4100:4000"]
     depends_on: { redis: { condition: service_healthy } }
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:4000/health"], interval: 10s, timeout: 2s, retries: 10 }
@@ -41,7 +49,9 @@ services:
   worker:
     <<: *dflt
     image: ghcr.io/yourorg/lfai-worker:staging
-    env_file: [../../.env.staging]
+    env_file:
+      - path: ../../.env.staging
+        required: false
     depends_on:
       redis: { condition: service_healthy }
       api: { condition: service_healthy }
@@ -59,7 +69,9 @@ services:
   n8n:
     <<: *dflt
     image: n8nio/n8n:1.55.1
-    env_file: [../../.env.staging]
+    env_file:
+      - path: ../../.env.staging
+        required: false
     environment:
       - N8N_HOST=staging.n8ncloud.tech
       - N8N_PORT=5678
@@ -70,7 +82,9 @@ services:
   scorpion:
     <<: *dflt
     image: ghcr.io/yourorg/scorpion:staging
-    env_file: [../../.env.staging]
+    env_file:
+      - path: ../../.env.staging
+        required: false
     ports: ["127.0.0.1:3103:3003"]
     healthcheck: { test: ["CMD","curl","-fsS","http://localhost:3003/healthz"], interval: 15s, timeout: 3s, retries: 10 }
     cpus: "1.5"

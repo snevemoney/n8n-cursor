@@ -55,7 +55,9 @@ services:
   api:
     <<: *dflt
     build: ../../apps/n8n-cursor/backend
-    env_file: [../../.env.dev]
+    env_file:
+      - path: ../../.env.dev
+        required: false
     environment:
       - NODE_ENV=development
       - PORT=4000
@@ -67,7 +69,9 @@ services:
   worker:
     <<: *dflt
     build: ../../apps/n8n-cursor/backend
-    env_file: [../../.env.dev]
+    env_file:
+      - path: ../../.env.dev
+        required: false
     environment: 
       - REDIS_URL=redis://redis:6379/0
       - NODE_ENV=development
@@ -78,7 +82,9 @@ services:
   n8n:
     <<: *dflt
     image: n8nio/n8n:1.55.1
-    env_file: [../../.env.dev]
+    env_file:
+      - path: ../../.env.dev
+        required: false
     environment:
       - N8N_PROTOCOL=http
       - N8N_PORT=5678
