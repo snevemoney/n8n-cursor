@@ -1,8 +1,8 @@
 # Multi-stage build for Scorpion
 FROM node:20-alpine AS base
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# lockfileVersion 6.0 was written by pnpm 8.15.9. pnpm 12 rejects that format.
+RUN corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare pnpm@8.15.9 --activate
 
 # Set working directory
 WORKDIR /app
@@ -10,7 +10,15 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/scorpion/package.json ./apps/scorpion/
-COPY packages/*/package.json ./packages/*/
+# A wildcard destination collapses every manifest into packages/*/package.json.
+COPY packages/agent-factory/package.json packages/agent-factory/
+COPY packages/contracts/package.json packages/contracts/
+COPY packages/lf-sdk/package.json packages/lf-sdk/
+COPY packages/lightning-core/package.json packages/lightning-core/
+COPY packages/scorpion-core/package.json packages/scorpion-core/
+COPY packages/shared-config/package.json packages/shared-config/
+COPY packages/shared-helpers/package.json packages/shared-helpers/
+COPY packages/shared-types/package.json packages/shared-types/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -29,13 +37,21 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# lockfileVersion 6.0 was written by pnpm 8.15.9. pnpm 12 rejects that format.
+RUN corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare pnpm@8.15.9 --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/scorpion/package.json ./apps/scorpion/
-COPY packages/*/package.json ./packages/*/
+# A wildcard destination collapses every manifest into packages/*/package.json.
+COPY packages/agent-factory/package.json packages/agent-factory/
+COPY packages/contracts/package.json packages/contracts/
+COPY packages/lf-sdk/package.json packages/lf-sdk/
+COPY packages/lightning-core/package.json packages/lightning-core/
+COPY packages/scorpion-core/package.json packages/scorpion-core/
+COPY packages/shared-config/package.json packages/shared-config/
+COPY packages/shared-helpers/package.json packages/shared-helpers/
+COPY packages/shared-types/package.json packages/shared-types/
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
