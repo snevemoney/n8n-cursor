@@ -1,8 +1,8 @@
 # Multi-stage build for Scorpion
 FROM node:20-alpine AS base
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# lockfileVersion 6.0 was written by pnpm 8.15.9. pnpm 12 rejects that format.
+RUN corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare pnpm@8.15.9 --activate
 
 # Set working directory
 WORKDIR /app
@@ -29,8 +29,8 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# lockfileVersion 6.0 was written by pnpm 8.15.9. pnpm 12 rejects that format.
+RUN corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare pnpm@8.15.9 --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
