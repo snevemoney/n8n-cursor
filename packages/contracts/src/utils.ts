@@ -303,58 +303,70 @@ export class ObjectUtils {
   }
 
   // Deep merge objects
-  static deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
+  static deepMerge<T extends Record<string, unknown>>(target: T, ...sources: Partial<T>[]): T {
     if (!sources.length) return target;
     const source = sources.shift();
 
     if (this.isObject(target) && this.isObject(source)) {
-      for (const key in source) {
-        if (this.isObject(source[key])) {
-          if (!target[key]) Object.assign(target, { [key]: {} });
-          this.deepMerge(target[key], source[key]);
-        } else {
-          Object.assign(target, { [key]: source[key] });
-        }
-      }
+      this.mergeInto(target, source);
     }
 
     return this.deepMerge(target, ...sources);
   }
 
+  private static mergeInto(target: Record<string, unknown>, source: Record<string, unknown>): void {
+    for (const key in source) {
+      const sourceValue = source[key];
+      if (this.isObject(sourceValue)) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        const nested = target[key];
+        if (this.isObject(nested)) {
+          this.mergeInto(nested, sourceValue);
+        }
+      } else {
+        Object.assign(target, { [key]: sourceValue });
+      }
+    }
+  }
+
   // Check if value is an object
-  static isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
+  static isObject(item: unknown): item is Record<string, unknown> {
+    return Boolean(item) && typeof item === 'object' && !Array.isArray(item);
   }
 
   // Get nested property value
-  static getNestedProperty(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+  static getNestedProperty(obj: unknown, path: string): unknown {
+    return path.split('.').reduce<unknown>((current, key) => {
+      if (typeof current !== 'object' || current === null) return undefined;
+      return (current as Record<string, unknown>)[key];
+    }, obj);
   }
 
   // Set nested property value
-  static setNestedProperty(obj: any, path: string, value: any): void {
+  static setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
     const keys = path.split('.');
-    const lastKey = keys.pop()!;
-    const target = keys.reduce((current, key) => {
+    const lastKey = keys.pop();
+    if (lastKey === undefined) return;
+    const target = keys.reduce<Record<string, unknown>>((current, key) => {
       if (!current[key]) current[key] = {};
-      return current[key];
+      return current[key] as Record<string, unknown>;
     }, obj);
     target[lastKey] = value;
   }
 
   // Remove undefined values
-  static removeUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  static removeUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
     const result: Partial<T> = {};
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined) {
-        result[key as keyof T] = value;
+        result[key as keyof T] = value as T[keyof T];
       }
     }
     return result;
   }
 
   // Pick specific properties
-  static pick<T extends Record<string, any>, K extends keyof T>(
+  static pick<T extends Record<string, unknown>, K extends keyof T>(
     obj: T,
     keys: K[]
   ): Pick<T, K> {
@@ -368,7 +380,7 @@ export class ObjectUtils {
   }
 
   // Omit specific properties
-  static omit<T extends Record<string, any>, K extends keyof T>(
+  static omit<T extends Record<string, unknown>, K extends keyof T>(
     obj: T,
     keys: K[]
   ): Omit<T, K> {
@@ -388,7 +400,7 @@ export class ArrayUtils {
   }
 
   // Group array by key
-  static groupBy<T extends Record<string, any>, K extends keyof T>(
+  static groupBy<T extends Record<string, unknown>, K extends keyof T>(
     array: T[],
     key: K
   ): Record<string, T[]> {
@@ -403,15 +415,15 @@ export class ArrayUtils {
   }
 
   // Sort array by key
-  static sortBy<T extends Record<string, any>, K extends keyof T>(
+  static sortBy<T extends Record<string, unknown>, K extends keyof T>(
     array: T[],
     key: K,
     direction: 'asc' | 'desc' = 'asc'
   ): T[] {
     return [...array].sort((a, b) => {
-      const aVal = a[key];
-      const bVal = b[key];
-      
+      const aVal = a[key] as string | number;
+      const bVal = b[key] as string | number;
+
       if (aVal < bVal) return direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return direction === 'asc' ? 1 : -1;
       return 0;

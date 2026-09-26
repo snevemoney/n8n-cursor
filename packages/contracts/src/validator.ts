@@ -1,5 +1,5 @@
 // AJV validator setup for LightningFlow AI contracts
-import Ajv from 'ajv';
+import Ajv, { type ErrorObject, type Schema } from 'ajv';
 import addFormats from 'ajv-formats';
 import { DateTime } from 'luxon';
 import Decimal from 'decimal.js';
@@ -61,7 +61,7 @@ ajv.addFormat('node-pubkey', {
 ajv.addKeyword({
   keyword: 'currency',
   type: 'number',
-  validate: (schema: any, data: number) => {
+  validate: (schema: unknown, data: number) => {
     if (schema === 'sats') {
       return Number.isInteger(data) && data >= 0;
     }
@@ -72,7 +72,8 @@ ajv.addKeyword({
 ajv.addKeyword({
   keyword: 'timezone',
   type: 'string',
-  validate: (schema: any, data: string) => {
+  validate: (schema: unknown, data: string) => {
+    void schema;
     try {
       return DateTime.now().setZone(data).isValid;
     } catch {
@@ -84,33 +85,26 @@ ajv.addKeyword({
 // Validation result type
 export interface ValidationResult {
   valid: boolean;
-  errors?: Array<{
-    instancePath: string;
-    schemaPath: string;
-    keyword: string;
-    params: any;
-    message: string;
-    data?: any;
-  }>;
+  errors?: ErrorObject[] | null | undefined;
 }
 
 // Generic validation function
-export function validate<T>(schema: any, data: T): ValidationResult {
-  const validate = ajv.compile(schema);
-  const valid = validate(data);
+export function validate<T>(schema: Schema, data: T): ValidationResult {
+  const validateFn = ajv.compile(schema);
+  const valid = validateFn(data);
   
   return {
     valid,
-    errors: valid ? undefined : validate.errors || []
+    errors: valid ? undefined : validateFn.errors || []
   };
 }
 
 // Validation error class
 export class ValidationError extends Error {
   public readonly errors: ValidationResult['errors'];
-  public readonly data: any;
+  public readonly data: unknown;
 
-  constructor(message: string, errors: ValidationResult['errors'], data: any) {
+  constructor(message: string, errors: ValidationResult['errors'], data: unknown) {
     super(message);
     this.name = 'ValidationError';
     this.errors = errors;
@@ -123,7 +117,7 @@ export class ValidationError extends Error {
 }
 
 // Utility function to validate and throw on error
-export function validateOrThrow<T>(schema: any, data: T, context?: string): T {
+export function validateOrThrow<T>(schema: Schema, data: T, context?: string): T {
   const result = validate(schema, data);
   
   if (!result.valid) {
