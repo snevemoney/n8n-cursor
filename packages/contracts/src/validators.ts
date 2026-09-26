@@ -1,72 +1,120 @@
 // LightningFlow AI Contracts - Validator Utilities
 // Common validation utilities and helpers
 
-import Ajv from 'ajv';
+import Ajv, { type ErrorObject, type Schema, type ValidateFunction } from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
-// Create configured Ajv instance
-export const ajv = addErrors(addFormats(new Ajv({
-  allErrors: true,
-  strict: false,
-  verbose: true,
+type ValidateOptions = {
+  coerceTypes?: boolean;
+  removeAdditional?: boolean;
+  useDefaults?: boolean;
+};
+
+const defaultValidateOptions = {
+  coerceTypes: true,
   removeAdditional: true,
-  useDefaults: true,
-  coerceTypes: true
-})));
+  useDefaults: true
+} as const;
 
-// Custom formats
-ajv.addFormat('uuid', {
-  type: 'string',
-  validate: (str: string) => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(str);
-  }
-});
+function addContractFormats(instance: Ajv): Ajv {
+  instance.addFormat('uuid', {
+    type: 'string',
+    validate: (str: string) => {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(str);
+    }
+  });
 
-ajv.addFormat('satoshi', {
-  type: 'integer',
-  validate: (value: number) => {
-    return Number.isInteger(value) && value >= 1;
-  }
-});
+  instance.addFormat('satoshi', {
+    type: 'integer',
+    validate: (value: number) => {
+      return Number.isInteger(value) && value >= 1;
+    }
+  });
 
-ajv.addFormat('payment-hash', {
-  type: 'string',
-  validate: (str: string) => {
-    const hashRegex = /^[a-f0-9]{64}$/i;
-    return hashRegex.test(str);
-  }
-});
+  instance.addFormat('payment-hash', {
+    type: 'string',
+    validate: (str: string) => {
+      const hashRegex = /^[a-f0-9]{64}$/i;
+      return hashRegex.test(str);
+    }
+  });
 
-ajv.addFormat('preimage', {
-  type: 'string',
-  validate: (str: string) => {
-    const preimageRegex = /^[a-f0-9]{64}$/i;
-    return preimageRegex.test(str);
-  }
-});
+  instance.addFormat('preimage', {
+    type: 'string',
+    validate: (str: string) => {
+      const preimageRegex = /^[a-f0-9]{64}$/i;
+      return preimageRegex.test(str);
+    }
+  });
+  return instance;
+}
+
+function createAjv(options: { coerceTypes: boolean; removeAdditional: boolean; useDefaults: boolean }): Ajv {
+  return addContractFormats(addErrors(addFormats(new Ajv({
+    allErrors: true,
+    strict: false,
+    verbose: true,
+    removeAdditional: options.removeAdditional,
+    useDefaults: options.useDefaults,
+    coerceTypes: options.coerceTypes
+  }))));
+}
+
+// Create configured Ajv instance
+export const ajv = createAjv(defaultValidateOptions);
+
+type JsonSchema = {
+  properties?: Record<string, JsonSchema>;
+  required?: string[];
+  $ref?: string;
+  [key: string]: unknown;
+};
+
+interface RequestWithBody<T = unknown> {
+  body: unknown;
+  validatedData?: T;
+}
+
+interface JsonResponse {
+  status(code: number): JsonResponse;
+  json(body: unknown): void;
+}
+
+type NextFunction = () => void;
 
 // Validation result type
-export interface ValidationResult<T = any> {
+export interface ValidationResult<T = unknown> {
   valid: boolean;
   data?: T;
-  errors?: Ajv.ErrorObject[];
+  errors?: ErrorObject[];
   errorMessage?: string;
 }
 
+function compilerFor(options: ValidateOptions): Ajv {
+  const coerceTypes = options.coerceTypes ?? defaultValidateOptions.coerceTypes;
+  const removeAdditional = options.removeAdditional ?? defaultValidateOptions.removeAdditional;
+  const useDefaults = options.useDefaults ?? defaultValidateOptions.useDefaults;
+  if (
+    coerceTypes === defaultValidateOptions.coerceTypes &&
+    removeAdditional === defaultValidateOptions.removeAdditional &&
+    useDefaults === defaultValidateOptions.useDefaults
+  ) {
+    return ajv;
+  }
+  return createAjv({ coerceTypes, removeAdditional, useDefaults });
+}
+
 // Generic validator function
-export function validate<T = any>(
-  schema: any,
-  data: any,
-  options: {
-    coerceTypes?: boolean;
-    removeAdditional?: boolean;
-    useDefaults?: boolean;
-  } = {}
+export function validate<T = unknown>(
+  schema: Schema,
+  data: unknown,
+  options: ValidateOptions = {}
 ): ValidationResult<T> {
   try {
-    const validate = ajv.compile(schema);
+    const compiler = compilerFor(options);
+    const validate = compiler.compile(schema);
     const valid = validate(data);
     
     if (valid) {
@@ -78,7 +126,7 @@ export function validate<T = any>(
       return {
         valid: false,
         errors: validate.errors || [],
-        errorMessage: ajv.errorsText(validate.errors)
+        errorMessage: compiler.errorsText(validate.errors)
       };
     }
   } catch (error) {
@@ -89,69 +137,86 @@ export function validate<T = any>(
   }
 }
 
+function failure(
+  error: string,
+  details?: ErrorObject[]
+): { success: false; error: string; details?: ErrorObject[] } {
+  const result: { success: false; error: string; details?: ErrorObject[] } = {
+    success: false,
+    error
+  };
+  if (details !== undefined) {
+    result.details = details;
+  }
+  return result;
+}
+
 // Validation middleware for Express
-export function createValidationMiddleware<T = any>(schema: any) {
-  return (req: any, res: any, next: any) => {
+export function createValidationMiddleware<T = unknown>(schema: Schema) {
+  return (req: RequestWithBody<T>, res: JsonResponse, next: NextFunction): void => {
     const result = validate<T>(schema, req.body);
     
     if (!result.valid) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'LFAI-0100',
         message: 'Invalid request parameters',
         details: result.errors,
         timestamp: new Date().toISOString()
       });
+      return;
     }
     
-    req.validatedData = result.data;
+    req.validatedData = result.data as T;
     next();
   };
 }
 
 // Request validation helper
-export function validateRequest<T = any>(
-  schema: any,
-  data: any
-): { success: true; data: T } | { success: false; error: string; details?: any } {
+export function validateRequest<T = unknown>(
+  schema: Schema,
+  data: unknown
+): { success: true; data: T } | { success: false; error: string; details?: ErrorObject[] } {
   const result = validate<T>(schema, data);
   
+  if (result.valid && result.data !== undefined) {
+    return {
+      success: true,
+      data: result.data
+    };
+  }
   if (result.valid) {
     return {
       success: true,
-      data: result.data!
-    };
-  } else {
-    return {
-      success: false,
-      error: result.errorMessage || 'Validation failed',
-      details: result.errors
+      data: data as T
     };
   }
+  return failure(result.errorMessage || 'Validation failed', result.errors);
 }
 
 // Response validation helper
-export function validateResponse<T = any>(
-  schema: any,
-  data: any
-): { success: true; data: T } | { success: false; error: string; details?: any } {
+export function validateResponse<T = unknown>(
+  schema: Schema,
+  data: unknown
+): { success: true; data: T } | { success: false; error: string; details?: ErrorObject[] } {
   const result = validate<T>(schema, data);
   
+  if (result.valid && result.data !== undefined) {
+    return {
+      success: true,
+      data: result.data
+    };
+  }
   if (result.valid) {
     return {
       success: true,
-      data: result.data!
-    };
-  } else {
-    return {
-      success: false,
-      error: result.errorMessage || 'Response validation failed',
-      details: result.errors
+      data: data as T
     };
   }
+  return failure(result.errorMessage || 'Response validation failed', result.errors);
 }
 
 // Schema compilation helper
-export function compileSchema(schema: any) {
+export function compileSchema(schema: Schema): ValidateFunction {
   try {
     return ajv.compile(schema);
   } catch (error) {
@@ -160,7 +225,7 @@ export function compileSchema(schema: any) {
 }
 
 // Schema validation helper
-export function isValidSchema(schema: any): boolean {
+export function isValidSchema(schema: Schema): boolean {
   try {
     ajv.compile(schema);
     return true;
@@ -241,7 +306,7 @@ export const validators = {
 };
 
 // Validation error formatter
-export function formatValidationErrors(errors: Ajv.ErrorObject[]): string {
+export function formatValidationErrors(errors: ErrorObject[]): string {
   return errors.map(error => {
     const path = error.instancePath || error.schemaPath;
     const message = error.message;
@@ -250,40 +315,41 @@ export function formatValidationErrors(errors: Ajv.ErrorObject[]): string {
 }
 
 // Schema merge helper
-export function mergeSchemas(...schemas: any[]): any {
-  return schemas.reduce((merged, schema) => {
+export function mergeSchemas(...schemas: JsonSchema[]): JsonSchema {
+  return schemas.reduce<JsonSchema>((merged, schema) => {
     return {
       ...merged,
       ...schema,
       properties: {
-        ...merged.properties,
-        ...schema.properties
+        ...(merged.properties ?? {}),
+        ...(schema.properties ?? {})
       },
       required: [
-        ...(merged.required || []),
-        ...(schema.required || [])
+        ...(merged.required ?? []),
+        ...(schema.required ?? [])
       ]
     };
   }, {});
 }
 
 // Schema reference resolver
-export function resolveSchemaReferences(schema: any, definitions: any): any {
+export function resolveSchemaReferences(schema: unknown, definitions: unknown): unknown {
   if (typeof schema !== 'object' || schema === null) {
     return schema;
   }
 
-  if (schema.$ref) {
-    const refPath = schema.$ref.replace('#/', '').split('/');
-    let resolved = definitions;
+  const node = schema as Record<string, unknown>;
+  if (typeof node['$ref'] === 'string') {
+    const refPath = node['$ref'].replace('#/', '').split('/');
+    let resolved: unknown = definitions;
     for (const part of refPath) {
-      resolved = resolved[part];
+      resolved = (resolved as Record<string, unknown>)[part];
     }
     return resolveSchemaReferences(resolved, definitions);
   }
 
-  const resolved: any = {};
-  for (const [key, value] of Object.entries(schema)) {
+  const resolved: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(node)) {
     resolved[key] = resolveSchemaReferences(value, definitions);
   }
 

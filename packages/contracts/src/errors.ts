@@ -22,7 +22,7 @@ export type ErrorCategory =
 
 // Error details interface
 export interface ErrorDetails {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Error response interface
