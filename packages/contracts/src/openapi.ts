@@ -28,7 +28,7 @@ export interface Payment {
   completed_at?: string;
   payment_hash?: string;
   recipient?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface LNbitsWebhook {
@@ -55,7 +55,7 @@ export interface Pagination {
 export interface Error {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -106,7 +106,7 @@ export interface CreatePaymentRequest {
   amount_sats: number;
   description: string;
   recipient?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface WebhookResponse {
@@ -155,7 +155,7 @@ export const defaultApiConfig: ApiConfig = {
 };
 
 // Request/Response helpers
-export interface ApiRequest<T = any> {
+export interface ApiRequest<T = unknown> {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
   headers?: Record<string, string>;
@@ -163,57 +163,69 @@ export interface ApiRequest<T = any> {
   query?: Record<string, string | number | boolean>;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: Error;
   status: number;
   headers: Record<string, string>;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 // Validation helpers
-export function validateUser(user: any): user is User {
+export function validateUser(user: unknown): user is User {
+  if (!isRecord(user)) return false;
+  const tier = user['subscription_tier'];
+  const theme = user['theme'];
   return (
-    typeof user === 'object' &&
-    typeof user.id === 'string' &&
-    typeof user.email === 'string' &&
-    typeof user.created_at === 'string' &&
-    typeof user.updated_at === 'string' &&
-    ['free', 'pro', 'enterprise'].includes(user.subscription_tier) &&
-    ['light', 'dark', 'auto'].includes(user.theme)
+    typeof user['id'] === 'string' &&
+    typeof user['email'] === 'string' &&
+    typeof user['created_at'] === 'string' &&
+    typeof user['updated_at'] === 'string' &&
+    typeof tier === 'string' &&
+    (tier === 'free' || tier === 'pro' || tier === 'enterprise') &&
+    typeof theme === 'string' &&
+    (theme === 'light' || theme === 'dark' || theme === 'auto')
   );
 }
 
-export function validatePayment(payment: any): payment is Payment {
+export function validatePayment(payment: unknown): payment is Payment {
+  if (!isRecord(payment)) return false;
+  const status = payment['status'];
   return (
-    typeof payment === 'object' &&
-    typeof payment.id === 'string' &&
-    typeof payment.amount_sats === 'number' &&
-    typeof payment.description === 'string' &&
-    ['pending', 'completed', 'failed', 'cancelled'].includes(payment.status) &&
-    typeof payment.created_at === 'string' &&
-    typeof payment.updated_at === 'string'
+    typeof payment['id'] === 'string' &&
+    typeof payment['amount_sats'] === 'number' &&
+    typeof payment['description'] === 'string' &&
+    (status === 'pending' || status === 'completed' || status === 'failed' || status === 'cancelled') &&
+    typeof payment['created_at'] === 'string' &&
+    typeof payment['updated_at'] === 'string'
   );
 }
 
-export function validatePagination(pagination: any): pagination is Pagination {
+export function validatePagination(pagination: unknown): pagination is Pagination {
+  if (!isRecord(pagination)) return false;
   return (
-    typeof pagination === 'object' &&
-    typeof pagination.page === 'number' &&
-    typeof pagination.limit === 'number' &&
-    typeof pagination.total === 'number' &&
-    typeof pagination.total_pages === 'number' &&
-    typeof pagination.has_next === 'boolean' &&
-    typeof pagination.has_prev === 'boolean'
+    typeof pagination['page'] === 'number' &&
+    typeof pagination['limit'] === 'number' &&
+    typeof pagination['total'] === 'number' &&
+    typeof pagination['total_pages'] === 'number' &&
+    typeof pagination['has_next'] === 'boolean' &&
+    typeof pagination['has_prev'] === 'boolean'
   );
 }
 
 // Type guards
-export function isErrorResponse(response: any): response is { error: Error } {
-  return response && typeof response.error === 'object' && typeof response.error.code === 'string';
+export function isErrorResponse(response: unknown): response is { error: Error } {
+  if (!isRecord(response)) return false;
+  const error = response['error'];
+  return isRecord(error) && typeof error['code'] === 'string';
 }
 
-export function isSuccessResponse<T>(response: any): response is { data: T } {
-  return response && typeof response.data !== 'undefined' && !response.error;
+export function isSuccessResponse<T>(response: unknown): response is { data: T } {
+  if (!isRecord(response)) return false;
+  return response['data'] !== undefined && !response['error'];
 }
 
 // Export all types

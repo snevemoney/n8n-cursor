@@ -1,7 +1,8 @@
 // LightningFlow AI Event Schema
 // Generated from contracts/events.yaml
 
-import { ajv, validateOrThrow } from './validator';
+import type { Schema, ValidateFunction } from 'ajv';
+import { ajv } from './validator';
 
 // Event types
 export type EventType = 
@@ -39,7 +40,7 @@ export interface UserCreatedEvent extends BaseEvent {
   full_name?: string;
   subscription_tier: SubscriptionTier;
   created_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UserUpdatedEvent extends BaseEvent {
@@ -52,7 +53,7 @@ export interface UserUpdatedEvent extends BaseEvent {
     timezone?: string;
     theme?: 'light' | 'dark' | 'auto';
   };
-  previous_values?: Record<string, any>;
+  previous_values?: Record<string, unknown>;
 }
 
 export interface UserSubscriptionChangedEvent extends BaseEvent {
@@ -75,7 +76,7 @@ export interface PaymentCreatedEvent extends BaseEvent {
   recipient?: string;
   status: PaymentStatus;
   created_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentStatusChangedEvent extends BaseEvent {
@@ -125,7 +126,7 @@ export interface AgentTaskStartedEvent extends BaseEvent {
   agent_id: AgentType;
   user_id: string;
   task_type: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   started_at: string;
   estimated_duration_seconds?: number;
 }
@@ -196,7 +197,7 @@ export type LightningFlowEvent =
   | FeatureFlagChangedEvent;
 
 // Event schemas for validation
-export const eventSchemas: Record<EventType, any> = {
+export const eventSchemas: Record<EventType, Schema> = {
   'user.created': {
     type: 'object',
     required: ['event_id', 'event_type', 'version', 'timestamp', 'source', 'user_id', 'email', 'subscription_tier', 'created_at'],
@@ -468,8 +469,10 @@ export const eventSchemas: Record<EventType, any> = {
 };
 
 // Event validation class
+type EventValidationError = { message?: string };
+
 export class EventValidator {
-  private validators: Map<EventType, any> = new Map();
+  private validators: Map<EventType, ValidateFunction> = new Map();
 
   constructor() {
     // Initialize validators for each event type
@@ -478,9 +481,9 @@ export class EventValidator {
     }
   }
 
-  validate(event: any): { valid: boolean; errors?: any[] } {
-    const eventType = event.event_type as EventType;
-    const validator = this.validators.get(eventType);
+  validate(event: unknown): { valid: boolean; errors?: EventValidationError[] | null | undefined } {
+    const eventType = (event as { event_type?: EventType }).event_type;
+    const validator = eventType === undefined ? undefined : this.validators.get(eventType);
 
     if (!validator) {
       return {
@@ -496,7 +499,7 @@ export class EventValidator {
     };
   }
 
-  validateOrThrow(event: any): LightningFlowEvent {
+  validateOrThrow(event: unknown): LightningFlowEvent {
     const result = this.validate(event);
     if (!result.valid) {
       throw new Error(`Event validation failed: ${JSON.stringify(result.errors)}`);
@@ -511,7 +514,7 @@ export function createUserCreatedEvent(
   email: string,
   subscription_tier: SubscriptionTier = 'free',
   full_name?: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): UserCreatedEvent {
   return {
     event_id: crypto.randomUUID(),
@@ -534,7 +537,7 @@ export function createPaymentCreatedEvent(
   amount_sats: number,
   description: string,
   recipient?: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): PaymentCreatedEvent {
   return {
     event_id: crypto.randomUUID(),
@@ -584,7 +587,7 @@ export function createAgentTaskStartedEvent(
   agent_id: AgentType,
   user_id: string,
   task_type: string,
-  parameters: Record<string, any>,
+  parameters: Record<string, unknown>,
   estimated_duration_seconds?: number
 ): AgentTaskStartedEvent {
   return {
@@ -635,11 +638,11 @@ export function createAgentTaskCompletedEvent(
 export const eventValidator = new EventValidator();
 
 // Utility functions
-export function validateEvent(event: any): { valid: boolean; errors?: any[] } {
+export function validateEvent(event: unknown): { valid: boolean; errors?: EventValidationError[] | null | undefined } {
   return eventValidator.validate(event);
 }
 
-export function validateEventOrThrow(event: any): LightningFlowEvent {
+export function validateEventOrThrow(event: unknown): LightningFlowEvent {
   return eventValidator.validateOrThrow(event);
 }
 
@@ -647,8 +650,12 @@ export function isEventType(eventType: string): eventType is EventType {
   return eventType in eventSchemas;
 }
 
-export function getEventSchema(eventType: EventType): any {
-  return eventSchemas[eventType];
+export function getEventSchema(eventType: EventType): Schema {
+  const schema = eventSchemas[eventType];
+  if (schema === undefined) {
+    throw new Error(`Unknown event type: ${eventType}`);
+  }
+  return schema;
 }
 
 export function listEventTypes(): EventType[] {
