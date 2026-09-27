@@ -295,17 +295,20 @@ export default function ModelComparePage() {
                       {Object.entries(result.similarityScores).map(([model1, scores]) => (
                         <tr key={model1} className="border-b border-white/5">
                           <td className="p-2 font-mono">{model1}</td>
-                          {Object.keys(result.similarityScores).map((model2) => (
-                            <td key={model2} className="text-right p-2">
-                              {model1 === model2 ? (
-                                <span className="text-white/40">-</span>
-                              ) : (
-                                <span className={scores[model2] > 0.7 ? 'text-emerald-400' : scores[model2] > 0.4 ? 'text-yellow-400' : 'text-red-400'}>
-                                  {(scores[model2] * 100).toFixed(0)}%
-                                </span>
-                              )}
-                            </td>
-                          ))}
+                          {Object.keys(result.similarityScores).map((model2) => {
+                            const score = scores[model2];
+                            return (
+                              <td key={model2} className="text-right p-2">
+                                {model1 === model2 || score === undefined ? (
+                                  <span className="text-white/40">-</span>
+                                ) : (
+                                  <span className={score > 0.7 ? 'text-emerald-400' : score > 0.4 ? 'text-yellow-400' : 'text-red-400'}>
+                                    {(score * 100).toFixed(0)}%
+                                  </span>
+                                )}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>
