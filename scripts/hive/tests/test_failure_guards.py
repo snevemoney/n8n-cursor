@@ -1657,6 +1657,33 @@ class VersionedContinuityTest(unittest.TestCase):
             self.assertEqual(consumers["APPLIED"], BUS.JARVIS_PRIMARY)
             self.assertEqual(consumers["ACKNOWLEDGED"], BUS.JARVIS_PRIMARY)
 
+    def test_jarvis_primary_status_reads_recorded_phase(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            empty = BUS.status(path=log)
+            self.assertFalse(log.exists())
+            self.assertEqual(empty["consumer"], BUS.JARVIS_PRIMARY)
+            self.assertEqual(empty["entity_id"], BUS.JARVIS_ENTITY)
+            self.assertIsNone(empty["phase"])
+            self.assertIsNone(empty["result"])
+            self.assertIsNone(empty["state_version"])
+            BUS.publish_jarvis(
+                {"step": 1},
+                state_version=1,
+                source_session="jarvis-primary-session",
+                writer="event-bus.py",
+                changed_at="2026-09-25T04:00:00+00:00",
+                path=log,
+            )
+            snapshot = log.read_text(encoding="utf-8")
+            found = BUS.status(path=log)
+            self.assertEqual(log.read_text(encoding="utf-8"), snapshot)
+            self.assertEqual(found["consumer"], BUS.JARVIS_PRIMARY)
+            self.assertEqual(found["entity_id"], BUS.JARVIS_ENTITY)
+            self.assertEqual(found["phase"], "ACKNOWLEDGED")
+            self.assertEqual(found["result"], "ACKNOWLEDGED")
+            self.assertEqual(found["state_version"], 1)
+
     def test_applied_persists_acknowledgement(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
