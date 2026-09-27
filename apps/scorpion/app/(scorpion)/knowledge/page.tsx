@@ -30,7 +30,7 @@ export default function KnowledgePage() {
   const [knowledge, setKnowledge] = useState<KnowledgeItem[]>([]);
   const [selected, setSelected] = useState<KnowledgeItem | null>(null);
   const [loading, setLoading] = useState(false); // Start false so page renders immediately
-  const [mounted, setMounted] = useState(false);
+  const [, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [autoIngesting, setAutoIngesting] = useState(false);
@@ -50,11 +50,6 @@ export default function KnowledgePage() {
 
   // Use sessionStorage to prevent duplicate auto-ingestion across component instances
   // (handles React StrictMode creating multiple component instances)
-  const getAutoIngestInitiated = () => {
-    if (typeof window === 'undefined') return false;
-    return sessionStorage.getItem('knowledge-auto-ingest-initiated') === 'true';
-  };
-  
   const setAutoIngestInitiated = (value: boolean) => {
     if (typeof window === 'undefined') return;
     if (value) {
@@ -65,7 +60,7 @@ export default function KnowledgePage() {
   };
 
   // Define loadKnowledge before useEffect that uses it
-  const loadKnowledge = useCallback(async (preventAutoIngest: boolean = false) => {
+  const loadKnowledge = useCallback(async (_preventAutoIngest: boolean = false) => {
     setError(null);
     // Only show loading spinner on initial load, not on refresh
     if (knowledge.length === 0) {
@@ -609,7 +604,7 @@ export default function KnowledgePage() {
   }, []); // Empty deps - callback is stable, don't recreate effect
 
   // Utility function to generate friendly names from IDs - memoized to prevent recreation
-  const getFriendlyName = useCallback((id: string, type: string, title: string, description?: string): string => {
+  const getFriendlyName = useCallback((id: string, _type: string, title: string, description?: string): string => {
     // If title exists and is not just the ID, use it
     if (title && title !== id && title.length > 3) {
       return title;
