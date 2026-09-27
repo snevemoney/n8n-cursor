@@ -46,8 +46,15 @@ export default function ModelComparePage() {
   };
 
   const updateModel = (index: number, field: 'name' | 'provider', value: string) => {
+    const current = models[index];
+    if (!current) return;
+
     const updated = [...models];
-    updated[index] = { ...updated[index], [field]: value };
+    if (field === 'name') {
+      updated[index] = { ...current, name: value };
+    } else if (value === 'ollama' || value === 'openai') {
+      updated[index] = { ...current, provider: value };
+    }
     setModels(updated);
   };
 
