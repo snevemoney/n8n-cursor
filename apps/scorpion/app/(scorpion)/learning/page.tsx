@@ -41,9 +41,9 @@ export default function LearningPage() {
     }
   };
 
-  if (loading) return <LoadingState message="Loading learning statistics..." />;
-  if (error) return <ErrorState error={error} retry={fetchStats} />;
-  if (!stats) return <ErrorState error="No statistics available" retry={fetchStats} />;
+  if (loading) return <LoadingState text="Loading learning statistics..." />;
+  if (error) return <ErrorState error={error} onRetry={fetchStats} />;
+  if (!stats) return <ErrorState error="No statistics available" onRetry={fetchStats} />;
 
   return (
     <div className="p-6 space-y-6">
