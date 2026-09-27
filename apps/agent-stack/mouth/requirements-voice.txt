@@ -1,0 +1,4 @@
+# Isolated 3.12 env — Homebrew python3 is 3.14; kokoro-onnx stops at 3.13.
+# uv venv --python 3.12 apps/agent-stack/.venv-voice
+# uv pip install --python apps/agent-stack/.venv-voice/bin/python -r apps/agent-stack/mouth/requirements-voice.txt
+kokoro-onnx>=0.4
