@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Credential scan used by `pnpm run scan-secrets`.
-# Exits 0 only after the scan finishes with no new findings.
+# Exits 0 only after the scan finishes with no findings.
 # A missing gitleaks binary does not skip the check.
 set -euo pipefail
 
@@ -28,20 +28,6 @@ PATTERNS = (
     ("supabase_secret", re.compile(r"(?<![A-Za-z0-9])sb_secret_[A-Za-z0-9_-]{16,}")),
     ("slack_webhook", re.compile(r"https://hooks\.slack\.com/services/[A-Z0-9]+/[A-Z0-9]+/[A-Za-z0-9]+")),
 )
-
-# Path counts already in the tree. Values stay out of this file.
-# A higher count on one of these paths fails. Any other path fails at 1.
-KNOWN_FINDING_COUNTS = {
-    ".env.monitoring": 1,
-    ".env.monitoring.backup": 1,
-    "apps/scorpion/.env.local.backup": 1,
-    "scripts/setup-supabase-complete.mjs": 1,
-    "scripts/setup-supabase-direct.mjs": 1,
-    "scripts/setup-supabase-schema.mjs": 1,
-    "scripts/setup/setup-supabase-db.mjs": 1,
-    "scripts/setup/setup-supabase-simple.mjs": 1,
-    "scripts/setup/setup-zep-mcp.sh": 1,
-}
 
 PLACEHOLDER = re.compile(
     r"example|placeholder|changeme|xxxx+|dummy|redacted|your[-_ ]",
@@ -102,20 +88,18 @@ def main() -> int:
             continue
         scanned += 1
         hits = findings_in(blob.decode("utf-8", "replace"))
-        allowed = KNOWN_FINDING_COUNTS.get(path, 0)
-        if len(hits) > allowed:
-            extra = hits[allowed:]
-            failures.append((path, len(hits), allowed, extra))
+        if hits:
+            failures.append((path, hits))
 
     if failures:
         print("scan-secrets: credential patterns found")
-        for path, count, allowed, extra in failures:
-            print(f"  {path}: {count} finding(s), allowed {allowed}")
-            for name, lineno in extra:
+        for path, hits in failures:
+            print(f"  {path}: {len(hits)} finding(s)")
+            for name, lineno in hits:
                 print(f"    {name} at line {lineno}")
         return 1
 
-    print(f"scan-secrets: no new credential patterns ({scanned} files)")
+    print(f"scan-secrets: no credential patterns ({scanned} files)")
     return 0
 
 

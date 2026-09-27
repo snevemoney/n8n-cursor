@@ -40,8 +40,8 @@ sleep 30
 
 # Step 4: Create environment file
 echo "Step 4: Creating environment configuration..."
-cat > .env << 'EOF'
-OPENAI_API_KEY=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
+cat > .env << EOF
+OPENAI_API_KEY=${OPENAI_API_KEY:-}
 MODEL_NAME=gpt-4o-mini
 NEO4J_URI=bolt://neo4j:7687
 NEO4J_USER=neo4j
