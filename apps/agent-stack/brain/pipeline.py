@@ -67,6 +67,11 @@ NEED_LOGIN = "You need `agent login` for a real talk."
 NO_MODEL = "Cursor is signed out and Grok Bot's gateway is sealed."
 LOCAL_GREET = "Standing by."
 GREET_RE = re.compile(r"^hey[,!]?\s+jarvis[.!?]*$", re.I)
+CONTINUITY_STATUS_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?"
+    r"what is the current continuity status[.!?]*$",
+    re.I,
+)
 PROPOSAL = (
     "Proposal only. I will not send, pay, deploy, book, or publish. "
     "That hard step stays with you."
@@ -122,6 +127,16 @@ PERSONA = _load("agent_stack_persona", STACK / "mouth" / "persona.py")
 SEE = _load("agent_stack_see", STACK / "hands" / "see.py")
 PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
 ONLINE = _load("agent_stack_online", HERE / "online.py")
+_EVENT_BUS = None
+
+
+def event_bus():
+    """The canary bus (scripts/hive/os/event-bus.py). Not a second bus."""
+    global _EVENT_BUS
+    if _EVENT_BUS is not None:
+        return _EVENT_BUS
+    _EVENT_BUS = _load("hive_event_bus_face", ROOT / "scripts" / "hive" / "os" / "event-bus.py")
+    return _EVENT_BUS
 
 
 def now_iso() -> str:
@@ -471,6 +486,34 @@ def local_greeting_reply() -> dict:
 def wants_local_read(utterance: str) -> bool:
     """Explicit local vault read. Does not spend, send, or call a provider."""
     return bool(LOCAL_READ_RE.search(utterance or ""))
+
+
+def wants_continuity_status(utterance: str) -> bool:
+    """Jarvis-primary continuity question. Not the hive/VPS/Cursor status hand."""
+    return bool(CONTINUITY_STATUS_RE.match((utterance or "").strip()))
+
+
+def continuity_status_reply() -> dict:
+    """Speak the current jarvis-primary row from event_bus.status. One read, no append."""
+    bus = event_bus()
+    read = getattr(bus, "status", None) if bus is not None else None
+    if not callable(read):
+        raise RuntimeError("event bus status is missing")
+    snap = read()
+    if not isinstance(snap, dict):
+        raise RuntimeError("event bus status did not return a row")
+    phase = snap.get("phase")
+    version = snap.get("state_version")
+    phase_s = "none" if phase is None else str(phase)
+    version_s = "none" if version is None else str(version)
+    return {
+        "ok": True,
+        "tool": "pipeline",
+        "spoken": f"Continuity phase {phase_s}. state_version {version_s}.",
+        "wires": ["event-bus"],
+        "cites": [],
+        "sent": False,
+    }
 
 
 def _prior_user_mark(turns: list[dict] | None, pattern: re.Pattern[str]) -> str:
@@ -1182,7 +1225,14 @@ def apply_pipeline_iter(
     login_tried = False
     prompt = pick_prompt(pack, spoken_in)
     pack_text = pack.read_text(encoding="utf-8") if pack.is_file() else ""
-    if ONLINE is not None and hasattr(ONLINE, "load_existing_env"):
+    from_bus = False
+    if wants_continuity_status(spoken_in):
+        ran = continuity_status_reply()
+        pick = {"tool": "pipeline", "args": {}, "speak": str(ran.get("spoken") or "")}
+        brain = "store"
+        from_bus = True
+
+    if not from_bus and ONLINE is not None and hasattr(ONLINE, "load_existing_env"):
         try:
             ONLINE.load_existing_env()
         except (OSError, TypeError, AttributeError):
@@ -1284,7 +1334,7 @@ def apply_pipeline_iter(
         or ran.get("from_store")
         or is_dark_cursor(got)
     ) else False
-    if live_cursor_ready():
+    if not from_bus and live_cursor_ready():
         login_said = False
     raw_spoken = str(ran.get("spoken") or "")
     if not raw_spoken.strip():
