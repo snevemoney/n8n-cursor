@@ -387,6 +387,127 @@ class JudgmentBoundaryTest(unittest.TestCase):
         self.assertIsNone(abstained["provider"])
         self.assertEqual(abstained["question_ids"], [])
 
+    def test_empty_credential_does_not_open_a_socket(self) -> None:
+        registry = judgment._registry()
+        key_env = registry.OPENROUTER_API_KEY_ENV
+        saved_guard = os.environ.get(judgment.OPENROUTER_CALL_GUARD)
+        saved_key = os.environ.get(key_env)
+        os.environ[judgment.OPENROUTER_CALL_GUARD] = "1"
+        os.environ.pop(key_env, None)
+        opened: list[object] = []
+        real_socket = socket.socket
+        real_create = socket.create_connection
+        real_urlopen = urllib.request.urlopen
+
+        def fail_socket(*args: object, **kwargs: object) -> object:
+            opened.append(("socket", args))
+            raise AssertionError("socket opened")
+
+        def fail_urlopen(*args: object, **kwargs: object) -> object:
+            opened.append("urlopen")
+            raise AssertionError("urlopen")
+
+        socket.socket = fail_socket  # type: ignore[assignment, misc]
+        socket.create_connection = fail_socket  # type: ignore[assignment]
+        urllib.request.urlopen = fail_urlopen  # type: ignore[assignment]
+        try:
+            decision = judgment.evaluate({"verb": "select"})
+            posted = judgment._post_openrouter_chat(decision["chat_request"])
+        finally:
+            socket.socket = real_socket  # type: ignore[assignment, misc]
+            socket.create_connection = real_create
+            urllib.request.urlopen = real_urlopen
+            if saved_guard is None:
+                os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+            else:
+                os.environ[judgment.OPENROUTER_CALL_GUARD] = saved_guard
+            if saved_key is None:
+                os.environ.pop(key_env, None)
+            else:
+                os.environ[key_env] = saved_key
+        self.assertEqual(opened, [])
+        self.assertFalse(decision["provider_call"])
+        self.assertFalse(decision["jev_called"])
+        self.assertEqual(decision["call_reason"], "credentials_absent")
+        self.assertFalse(posted["provider_call"])
+        self.assertEqual(posted["reason"], "credentials_absent")
+        receipt = json.dumps({"decision": decision, "posted": posted})
+        self.assertNotIn("authorization", receipt.lower())
+        self.assertNotIn("bearer", receipt.lower())
+        if saved_key:
+            self.assertNotIn(saved_key, receipt)
+
+    def test_bearer_header_is_not_receipted_and_does_not_open_a_socket(self) -> None:
+        registry = judgment._registry()
+        key_env = registry.OPENROUTER_API_KEY_ENV
+        fixture = "fixture-not-a-live-credential"
+        saved_guard = os.environ.get(judgment.OPENROUTER_CALL_GUARD)
+        saved_key = os.environ.get(key_env)
+        os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+        decision = judgment.evaluate({"verb": "select"})
+        self.assertFalse(decision["provider_call"])
+        self.assertFalse(decision["jev_called"])
+        os.environ[judgment.OPENROUTER_CALL_GUARD] = "1"
+        os.environ[key_env] = fixture
+        opened: list[object] = []
+        seen: dict[str, str] = {}
+        real_socket = socket.socket
+        real_create = socket.create_connection
+        real_urlopen = urllib.request.urlopen
+
+        def fail_socket(*args: object, **kwargs: object) -> object:
+            opened.append("socket")
+            raise AssertionError("socket opened")
+
+        def capture(req: urllib.request.Request, timeout: int = 60) -> object:
+            header = req.get_header("Authorization")
+            seen["authorization"] = header or ""
+            raise OSError("stopped before network")
+
+        socket.socket = fail_socket  # type: ignore[assignment, misc]
+        socket.create_connection = fail_socket  # type: ignore[assignment]
+        urllib.request.urlopen = capture  # type: ignore[assignment]
+        try:
+            with self.assertRaises(OSError):
+                judgment._post_openrouter_chat(decision["chat_request"])
+        finally:
+            socket.socket = real_socket  # type: ignore[assignment, misc]
+            socket.create_connection = real_create
+            urllib.request.urlopen = real_urlopen
+            if saved_guard is None:
+                os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+            else:
+                os.environ[judgment.OPENROUTER_CALL_GUARD] = saved_guard
+            if saved_key is None:
+                os.environ.pop(key_env, None)
+            else:
+                os.environ[key_env] = saved_key
+        self.assertEqual(opened, [])
+        self.assertEqual(seen["authorization"], f"Bearer {fixture}")
+        self.assertNotIn(fixture, json.dumps(decision))
+        self.assertFalse(decision["provider_call"])
+        self.assertFalse(decision["jev_called"])
+
+    def test_response_record_keeps_status_text_and_usage_without_the_credential(self) -> None:
+        fixture = "fixture-not-a-live-credential"
+        raw = json.dumps(
+            {
+                "usage": {"prompt_tokens": 3, "completion_tokens": 4, "total_tokens": 7},
+                "choices": [{"message": {"content": "kept"}}],
+            }
+        ).encode("utf-8")
+        recorded = judgment._record_chat_response(200, raw, fixture)
+        self.assertEqual(recorded["status"], 200)
+        self.assertIn("kept", recorded["response_text"])
+        self.assertEqual(recorded["usage"]["prompt_tokens"], 3)
+        self.assertEqual(recorded["usage"]["completion_tokens"], 4)
+        self.assertNotIn(fixture, json.dumps(recorded))
+        echoed = json.dumps({"usage": {"note": fixture}, "choices": []}).encode("utf-8")
+        redacted = judgment._record_chat_response(201, echoed, fixture)
+        self.assertEqual(redacted["status"], 201)
+        self.assertNotIn(fixture, redacted["response_text"])
+        self.assertNotIn(fixture, json.dumps(redacted["usage"]))
+
     def test_module_is_not_a_daemon_or_a_provider_client(self) -> None:
         text = (ENG / "judgment.py").read_text(encoding="utf-8")
         self.assertNotIn("threading", text)

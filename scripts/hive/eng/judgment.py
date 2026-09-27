@@ -19,6 +19,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -404,6 +405,46 @@ def _openrouter_call_enabled() -> bool:
     return os.environ.get(OPENROUTER_CALL_GUARD, "") == "1"
 
 
+def _openrouter_token() -> str:
+    """Value of the registry credential slot. Empty when the slot is unset."""
+    registry = _registry()
+    if registry is None:
+        return ""
+    name = str(getattr(registry, "OPENROUTER_API_KEY_ENV", "") or "")
+    if not name:
+        return ""
+    return os.environ.get(name, "").strip()
+
+
+def _redact_secret(value: Any, secret: str) -> Any:
+    if not secret:
+        return value
+    if isinstance(value, str):
+        return value.replace(secret, "")
+    if isinstance(value, list):
+        return [_redact_secret(item, secret) for item in value]
+    if isinstance(value, dict):
+        return {key: _redact_secret(item, secret) for key, item in value.items()}
+    return value
+
+
+def _record_chat_response(status: int, raw: bytes, secret: str) -> dict[str, Any]:
+    """Keep status, response text, and usage. The credential is not kept."""
+    text = raw.decode("utf-8", errors="replace")
+    usage = None
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        parsed = None
+    if isinstance(parsed, dict):
+        usage = _redact_secret(parsed.get("usage"), secret)
+    return {
+        "status": status,
+        "response_text": _redact_secret(text, secret),
+        "usage": usage,
+    }
+
+
 def _build_openrouter_chat_request(questions: list[str]) -> dict[str, Any] | None:
     """Build the openai-completions body the OpenRouter registry describes. Does not send."""
     registry = _registry()
@@ -438,19 +479,36 @@ def _build_openrouter_chat_request(questions: list[str]) -> dict[str, Any] | Non
 
 
 def _post_openrouter_chat(prepared: dict[str, Any]) -> dict[str, Any]:
-    """POST with urllib.request. The guard defaults off and does not open a socket."""
+    """POST with urllib.request. The guard defaults off and does not open a socket.
+
+    When the guard is exactly on, Authorization is Bearer plus the registry
+    credential slot. An empty slot returns before any socket. A response keeps
+    status, response text, and usage. The credential is not returned.
+    """
     if not _openrouter_call_enabled():
         return {"provider_call": False}
+    token = _openrouter_token()
+    if not token:
+        return {"provider_call": False, "reason": "credentials_absent"}
     payload = json.dumps(prepared["body"], separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(
         str(prepared["url"]),
         data=payload,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        resp.read()
-    return {"provider_call": True}
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            raw = resp.read()
+            status = resp.status if getattr(resp, "status", None) is not None else resp.getcode()
+    except urllib.error.HTTPError as exc:
+        raw = exc.read()
+        status = exc.code
+    recorded = _record_chat_response(int(status), raw, token)
+    return {"provider_call": True, **recorded}
 
 
 def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> dict[str, Any]:
@@ -510,33 +568,45 @@ def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> di
             },
         )
     posted = _post_openrouter_chat(prepared)
+    extra: dict[str, Any] = {
+        "provider": prepared["provider"],
+        "provider_call": posted["provider_call"] is True,
+        "model": prepared["body"]["model"],
+        "max_tokens": prepared["body"]["max_tokens"],
+        "api": prepared["api"],
+        "chat_request": prepared,
+        "guard": OPENROUTER_CALL_GUARD,
+        "guard_default": "off",
+        "pack_id": pack_id,
+        "pack_version": corpus["version"],
+        "pack_status": corpus["status"],
+        "question_ids": question_ids,
+        "input_hash": digest,
+        "abstain": False,
+        "confidence_raw": None,
+        "confidence_calibrated": None,
+        "confidence_band": "C0",
+        "recommended_mode": "SHADOW",
+    }
+    if posted.get("reason"):
+        extra["call_reason"] = posted["reason"]
+    if posted.get("provider_call") is True:
+        extra["status"] = posted.get("status")
+        extra["response_text"] = posted.get("response_text")
+        extra["usage"] = posted.get("usage")
+        judgment_reason = "smallest applicable pack was posted; status, response text, and usage are kept"
+    elif posted.get("reason") == "credentials_absent":
+        judgment_reason = "smallest applicable pack is the OpenRouter chat request; credentials are absent so the call is not made"
+    else:
+        judgment_reason = "smallest applicable pack is the OpenRouter chat request; the guard defaults off so the call is not made"
     return _out(
         lane="jev",
         action="SELECT",
-        reason="smallest applicable pack is the OpenRouter chat request; the guard defaults off so the call is not made",
+        reason=judgment_reason,
         evidence=evidence,
         jev_allowed=True,
         verb="select",
-        extra={
-            "provider": prepared["provider"],
-            "provider_call": posted["provider_call"] is True,
-            "model": prepared["body"]["model"],
-            "max_tokens": prepared["body"]["max_tokens"],
-            "api": prepared["api"],
-            "chat_request": prepared,
-            "guard": OPENROUTER_CALL_GUARD,
-            "guard_default": "off",
-            "pack_id": pack_id,
-            "pack_version": corpus["version"],
-            "pack_status": corpus["status"],
-            "question_ids": question_ids,
-            "input_hash": digest,
-            "abstain": False,
-            "confidence_raw": None,
-            "confidence_calibrated": None,
-            "confidence_band": "C0",
-            "recommended_mode": "SHADOW",
-        },
+        extra=extra,
     )
 
 
