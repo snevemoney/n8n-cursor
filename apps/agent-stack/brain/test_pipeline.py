@@ -1077,17 +1077,18 @@ class ContinuityStatusWireTest(unittest.TestCase):
 
 
 class OpenRouterMouthTest(unittest.TestCase):
-    def test_ordinary_question_does_not_invent_an_openrouter_model(self) -> None:
+    def test_ordinary_question_uses_the_named_openrouter_model(self) -> None:
         os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
         online = MOUTH.PIPELINE.ONLINE
+        named = "nex-agi/nex-n2.5-mini:free"
         self.assertEqual(online.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
-        self.assertEqual(online.openrouter_model(), "")
-        self.assertNotIn("nex-agi", Path(online.__file__).read_text(encoding="utf-8"))
+        self.assertEqual(online.openrouter_model(), named)
+        self.assertIn(named, Path(online.__file__).read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory(prefix="pipeline-openrouter-mouth-") as tmp:
             hive = Path(tmp)
             (hive / "bus").mkdir(parents=True)
             (hive / "vault").mkdir(parents=True)
-            with unittest.mock.patch.object(online, "openrouter_api_key", return_value="test-key"):
+            with unittest.mock.patch.object(online, "openrouter_api_key", return_value=""):
                 with unittest.mock.patch.object(online, "_http_json", side_effect=AssertionError("must not post")):
                     with unittest.mock.patch.object(online, "call_xai", side_effect=AssertionError("xai")):
                         events = list(

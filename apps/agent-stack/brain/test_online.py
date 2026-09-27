@@ -341,20 +341,34 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertIn("Hello Evens.", evs[-1]["spoken"])
 
 
-    def test_call_openrouter_does_not_invent_a_model(self) -> None:
+    def test_call_openrouter_uses_the_named_model(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")
+        named = "nex-agi/nex-n2.5-mini:free"
         self.assertEqual(MOD.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
-        self.assertEqual(MOD.openrouter_model(), "")
-        self.assertNotIn("nex-agi", text)
+        self.assertEqual(MOD.openrouter_model(), named)
+        self.assertIn(named, text)
         self.assertNotIn("claude-haiku", text)
         self.assertNotIn("x-ai/grok", text)
+        seen: dict = {}
+
+        def fake_http(url, data=None, headers=None, timeout=20.0):
+            seen["url"] = url
+            seen["model"] = (data or {}).get("model")
+            auth = str((headers or {}).get("Authorization") or "")
+            seen["auth_is_bearer"] = auth.startswith("Bearer ") and len(auth) > len("Bearer ")
+            return {"choices": [{"message": {"content": "Tokyo."}}]}
+
         with mock.patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key"}, clear=False):
-            with mock.patch.object(MOD, "_http_json", side_effect=AssertionError("must not post")):
+            with mock.patch.object(MOD, "_http_json", side_effect=fake_http):
                 out = MOD.call_openrouter("What is the capital of Japan?", "Earlier: none.")
-        self.assertTrue(out["unknown"])
+        self.assertFalse(out["unknown"])
         self.assertEqual(out["wire"], "openrouter")
         self.assertEqual(out["engine"], "openrouter")
-        self.assertEqual(out["model"], "")
+        self.assertEqual(out["model"], named)
+        self.assertEqual(seen.get("model"), named)
+        self.assertEqual(seen.get("url"), MOD.OPENROUTER_URL)
+        self.assertTrue(seen.get("auth_is_bearer"))
+        self.assertEqual(out["spoken"], "Tokyo.")
         self.assertNotIn("test-key", json.dumps(out))
         self.assertNotIn("OPENROUTER_API_KEY", out["spoken"])
 
@@ -365,7 +379,7 @@ class OnlineBrainTest(unittest.TestCase):
                 out = MOD.call_openrouter("How are you?")
         self.assertTrue(out["unknown"])
         self.assertEqual(out["wire"], "openrouter")
-        self.assertEqual(out["model"], "")
+        self.assertEqual(out["model"], "nex-agi/nex-n2.5-mini:free")
         self.assertNotIn("OPENROUTER_API_KEY", out["spoken"])
         self.assertNotIn("test-key", json.dumps(out))
 
