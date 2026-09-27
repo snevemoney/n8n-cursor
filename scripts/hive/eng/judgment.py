@@ -13,8 +13,12 @@ it is not merge authority.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import importlib.util
 import json
+import os
 import sys
+from pathlib import Path
 from typing import Any
 
 EXACT_CHECKS = frozenset(
@@ -53,6 +57,10 @@ CLOSED_KINDS = frozenset({"conversation", "research", "architecture", "coding", 
 QUESTION_PACK_CAP = 12
 LIBRARY_SIZE = 273
 DEMO_CORPUS_URL = "https://webdevcody.github.io/jev-demos/"
+PACK_STATUS = "READY_FOR_IMPLEMENTATION_NOT_LIVE"
+PACK_CORPUS = Path(__file__).with_name("jev-question-packs-v1.yaml")
+BOUNDARY_NAME = "complexity-router"
+BOUNDARY_HOOK = "before_model_resolve"
 
 
 def corpus_features(corpus: dict[str, Any]) -> dict[str, Any]:
@@ -292,8 +300,253 @@ def _rank(request: dict[str, Any], evidence: list[Any], reason: str) -> dict[str
     )
 
 
+def _input_hash(request: dict[str, Any]) -> str:
+    payload = json.dumps(request, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _load_process_packs() -> dict[str, Any] | None:
+    """Read process packs from the reconstructed corpus. Status must stay not-live."""
+    if not PACK_CORPUS.is_file():
+        return None
+    status = ""
+    version = ""
+    packs: dict[str, list[dict[str, str]]] = {}
+    section = ""
+    current = ""
+    open_question: dict[str, str] | None = None
+
+    def finish() -> None:
+        nonlocal open_question
+        if open_question and current:
+            text = open_question["question"]
+            if len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
+                inner = text[1:-1]
+                if text[0] == "'":
+                    inner = inner.replace("''", "'")
+                open_question["question"] = inner
+            packs[current].append(open_question)
+        open_question = None
+
+    for raw in PACK_CORPUS.read_text(encoding="utf-8").splitlines():
+        if raw.startswith("status:"):
+            status = raw.split(":", 1)[1].strip().strip("'\"")
+            continue
+        if raw.startswith("schema_version:"):
+            version = raw.split(":", 1)[1].strip().strip("'\"")
+            continue
+        if raw == "packs:":
+            finish()
+            section = "packs"
+            current = ""
+            continue
+        if section == "packs" and raw and not raw.startswith(" "):
+            finish()
+            section = ""
+            current = ""
+            continue
+        if section != "packs":
+            continue
+        if raw.startswith("  ") and not raw.startswith("   ") and raw.endswith(":") and not raw.strip().startswith("-"):
+            finish()
+            current = raw.strip()[:-1]
+            packs[current] = []
+            continue
+        if raw.startswith("    - id:"):
+            finish()
+            open_question = {"id": raw.split(":", 1)[1].strip(), "question": ""}
+            continue
+        if open_question is not None and raw.startswith("      question:"):
+            open_question["question"] = raw.split(":", 1)[1].strip()
+            continue
+        if open_question is not None and open_question["question"] and raw.startswith("        "):
+            open_question["question"] = f"{open_question['question']} {raw.strip()}"
+    finish()
+    if status != PACK_STATUS or not packs:
+        return None
+    return {"status": status, "version": version, "packs": packs}
+
+
+def _applicable_packs(packs: dict[str, list[dict[str, str]]], request: dict[str, Any]) -> list[str]:
+    stage = str(request.get("process_stage") or "").strip()
+    names = list(packs)
+    if not stage:
+        return names
+    return [name for name in names if name == stage or name.startswith(f"{stage}.")]
+
+
+def _smallest_pack(corpus: dict[str, Any], request: dict[str, Any]) -> tuple[str, list[dict[str, str]]] | None:
+    packs = corpus["packs"]
+    names = _applicable_packs(packs, request)
+    if not names:
+        return None
+    chosen = min(names, key=lambda name: (len(packs[name]), name))
+    questions = packs[chosen]
+    if not questions:
+        return None
+    return chosen, questions
+
+
+def _registry():
+    path = Path(__file__).resolve().parents[1] / "sync-vps-llm-keys.py"
+    spec = importlib.util.spec_from_file_location("hive_sync_vps_llm_keys", path)
+    if spec is None or spec.loader is None:
+        return None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _subprocess_module():
+    """Import stdlib subprocess without binding scripts/hive/eng/signal.py as stdlib signal."""
+    eng = Path(__file__).resolve().parent
+    saved_path = sys.path[:]
+    shadowed = sys.modules.get("signal")
+    shadowed_here = False
+    if shadowed is not None:
+        shadowed_file = getattr(shadowed, "__file__", None)
+        shadowed_here = bool(shadowed_file) and Path(shadowed_file).resolve().parent == eng
+        if shadowed_here:
+            del sys.modules["signal"]
+    sys.path[:] = [item for item in saved_path if not item or Path(item).resolve() != eng]
+    try:
+        import subprocess as subprocess_mod
+    finally:
+        sys.path[:] = saved_path
+        if shadowed_here and shadowed is not None:
+            sys.modules["signal"] = shadowed
+    return subprocess_mod
+
+
+def _resolve_before_model(prompt: str) -> dict[str, Any] | None:
+    """Call complexity-router resolveBeforeModel. Do not perform the provider call that follows the hook."""
+    resolve_js = Path(__file__).resolve().parents[1] / "complexity-router" / "resolve.js"
+    if not resolve_js.is_file():
+        return None
+    code = (
+        "const mod = await import(process.env.RESOLVE_URL);\n"
+        "let raw = '';\n"
+        "for await (const chunk of process.stdin) raw += chunk;\n"
+        "const input = JSON.parse(raw || '{}');\n"
+        "const resolved = mod.resolveBeforeModel(String(input.prompt ?? ''), String(input.agentId ?? ''), {});\n"
+        "process.stdout.write(JSON.stringify(resolved));\n"
+    )
+    env = {"PATH": os.environ.get("PATH", ""), "RESOLVE_URL": resolve_js.resolve().as_uri()}
+    subprocess_mod = _subprocess_module()
+    try:
+        proc = subprocess_mod.run(
+            ["node", "--input-type=module", "--eval", code],
+            input=json.dumps({"prompt": prompt, "agentId": ""}),
+            text=True,
+            capture_output=True,
+            timeout=15,
+            env=env,
+            check=False,
+        )
+    except (OSError, subprocess_mod.TimeoutExpired):
+        return None
+    if proc.returncode != 0 or not proc.stdout.strip():
+        return None
+    try:
+        body = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(body, dict) or not body.get("provider") or not body.get("model"):
+        return None
+    return body
+
+
+def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> dict[str, Any]:
+    """SELECT the smallest applicable pack, then stop at before_model_resolve."""
+    digest = _input_hash(request)
+    corpus = _load_process_packs()
+    if corpus is None:
+        return _out(
+            lane="deterministic",
+            action="NO_ACTION",
+            reason="question pack corpus is not ready for implementation",
+            evidence=evidence,
+            extra={
+                "abstain": True,
+                "confidence_band": "C0",
+                "input_hash": digest,
+                "pack_id": None,
+                "question_ids": [],
+                "recommended_mode": "SHADOW",
+            },
+        )
+    chosen = _smallest_pack(corpus, request)
+    if chosen is None:
+        return _out(
+            lane="deterministic",
+            action="NO_ACTION",
+            reason="no applicable question pack",
+            evidence=evidence,
+            extra={
+                "abstain": True,
+                "confidence_band": "C0",
+                "input_hash": digest,
+                "pack_id": None,
+                "question_ids": [],
+                "pack_status": corpus["status"],
+                "recommended_mode": "SHADOW",
+            },
+        )
+    pack_id, questions = chosen
+    prompt = "\n".join(str(item.get("question") or "") for item in questions)
+    resolved = _resolve_before_model(prompt)
+    if resolved is None:
+        return _out(
+            lane="deterministic",
+            action="NO_ACTION",
+            reason="provider boundary did not resolve",
+            evidence=evidence,
+            extra={
+                "abstain": True,
+                "confidence_band": "C0",
+                "input_hash": digest,
+                "pack_id": pack_id,
+                "question_ids": [str(item.get("id") or "") for item in questions],
+                "pack_status": corpus["status"],
+                "recommended_mode": "SHADOW",
+            },
+        )
+    registry = _registry()
+    entry = registry.model_entry(str(resolved["model"]), str(resolved["model"])) if registry is not None else {}
+    return _out(
+        lane="jev",
+        action="SELECT",
+        reason="smallest applicable pack is prepared for the existing model boundary; the live call is not made",
+        evidence=evidence,
+        jev_allowed=True,
+        verb="select",
+        extra={
+            "provider": resolved["provider"],
+            "provider_call": False,
+            "model": resolved["model"],
+            "tier": resolved.get("tier"),
+            "boundary": BOUNDARY_NAME,
+            "boundary_hook": BOUNDARY_HOOK,
+            "registry_primary": getattr(registry, "MODEL_PRIMARY", None) if registry is not None else None,
+            "max_tokens": entry.get("maxTokens"),
+            "recorded_cost": entry.get("cost"),
+            "pack_id": pack_id,
+            "pack_version": corpus["version"],
+            "pack_status": corpus["status"],
+            "question_ids": [str(item.get("id") or "") for item in questions],
+            "prepared_prompt": prompt,
+            "input_hash": digest,
+            "abstain": False,
+            "confidence_raw": None,
+            "confidence_calibrated": None,
+            "confidence_band": "C0",
+            "recommended_mode": "SHADOW",
+        },
+    )
+
+
 def evaluate(request: dict[str, Any]) -> dict[str, Any]:
-    """Route one judgment. Never calls a provider."""
+    """Route one judgment. Never performs a provider call."""
     if not isinstance(request, dict):
         return _out(lane="deterministic", action="NO_ACTION", reason="request must be an object")
 
@@ -384,6 +637,8 @@ def evaluate(request: dict[str, Any]) -> dict[str, Any]:
         )
 
     verb = str(request.get("verb") or "").lower()
+    if verb == "select":
+        return _select_through_boundary(request, evidence)
     if verb in JEV_VERBS:
         return _out(
             lane="jev",

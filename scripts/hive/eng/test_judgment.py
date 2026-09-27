@@ -2,6 +2,7 @@
 """Exact state never calls Jev. A demo corpus never becomes a feature list."""
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -284,6 +285,52 @@ class JudgmentBoundaryTest(unittest.TestCase):
         brain = judgment.evaluate({"jarvis": True, "model": "jev", "verb": "route"})
         self.assertEqual(brain["action"], "ESCALATE")
         self.assertFalse(brain["jev_called"])
+
+    def test_select_prepares_the_existing_boundary_without_calling_it(self) -> None:
+        request = {"verb": "select"}
+        decision = judgment.evaluate(request)
+        digest = hashlib.sha256(
+            json.dumps(request, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        ).hexdigest()
+        self.assertEqual(decision["action"], "SELECT")
+        self.assertEqual(decision["verb"], "select")
+        self.assertTrue(decision["jev_allowed"])
+        self.assertFalse(decision["jev_called"])
+        self.assertFalse(decision["provider_call"])
+        self.assertEqual(decision["provider"], "openrouter")
+        self.assertEqual(decision["tier"], "simple")
+        self.assertEqual(decision["model"], "anthropic/claude-haiku-4-5")
+        self.assertEqual(decision["boundary"], "complexity-router")
+        self.assertEqual(decision["boundary_hook"], "before_model_resolve")
+        self.assertEqual(decision["pack_id"], "engineering.product")
+        self.assertEqual(decision["pack_status"], "READY_FOR_IMPLEMENTATION_NOT_LIVE")
+        self.assertEqual(
+            decision["question_ids"],
+            [
+                "user_problem",
+                "user_visible_outcome",
+                "business_value",
+                "success_metric",
+                "countermetrics",
+                "not_now",
+            ],
+        )
+        self.assertEqual(decision["input_hash"], digest)
+        self.assertEqual(decision["registry_primary"], "openrouter/anthropic/claude-sonnet-4-6")
+        self.assertEqual(decision["max_tokens"], 1024)
+        self.assertEqual(decision["recorded_cost"], {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0})
+        self.assertFalse(decision["abstain"])
+        self.assertEqual(decision["confidence_band"], "C0")
+        self.assertEqual(decision["recommended_mode"], "SHADOW")
+        self.assertIn("What user problem does this engineering change solve?", decision["prepared_prompt"])
+        self.assertNotIn("api_key", json.dumps(decision).lower())
+        abstained = judgment.evaluate({"verb": "select", "process_stage": "missing-stage"})
+        self.assertEqual(abstained["action"], "NO_ACTION")
+        self.assertTrue(abstained["abstain"])
+        self.assertFalse(abstained["jev_called"])
+        self.assertFalse(abstained["provider_call"])
+        self.assertIsNone(abstained["provider"])
+        self.assertEqual(abstained["question_ids"], [])
 
     def test_module_is_not_a_daemon_or_a_provider_client(self) -> None:
         text = (ENG / "judgment.py").read_text(encoding="utf-8")
