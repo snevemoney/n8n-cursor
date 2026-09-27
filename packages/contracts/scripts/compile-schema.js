@@ -260,6 +260,10 @@ function compile(file) {
   console.log(`compiled ${path.basename(file)}`);
 }
 
-const file = process.argv[2];
-if (!file) fail("usage: node scripts/compile-schema.js <schema.yaml|schema.json>");
-compile(path.resolve(file));
+module.exports = { loadContract, parseYaml };
+
+if (require.main === module) {
+  const file = process.argv[2];
+  if (!file) fail("usage: node scripts/compile-schema.js <schema.yaml|schema.json>");
+  compile(path.resolve(file));
+}
