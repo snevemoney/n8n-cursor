@@ -252,7 +252,7 @@ export default function DiagnosticsPage() {
                       <div className="flex items-center gap-2 mb-2">
                         {getStatusIcon(scenario.status)}
                         <span className="font-semibold">{scenario.label}</span>
-                        <Badge variant={scenario.status === 'passed' ? 'success' : scenario.status === 'failed' ? 'error' : 'default'}>
+                        <Badge variant={scenario.status === 'passed' ? 'success' : scenario.status === 'failed' ? 'danger' : 'default'}>
                           {scenario.status}
                         </Badge>
                       </div>
