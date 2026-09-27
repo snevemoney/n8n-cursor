@@ -22,6 +22,12 @@ HOST = "127.0.0.1"
 PORT = int(os.environ.get("AGENT_STACK_FACE_PORT") or "4018")
 
 
+def _watch_event_path() -> Path | None:
+    """Tests can point the same bus writer at a temp file. Production uses the canonical bus."""
+    raw = (os.environ.get("WATCH_EVENT_PATH") or "").strip()
+    return Path(raw) if raw else None
+
+
 def _load_mouth():
     path = HERE.parent / "mouth" / "turn.py"
     spec = importlib.util.spec_from_file_location("agent_stack_mouth", path)
@@ -224,7 +230,14 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {"ok": True, "bind": f"{HOST}:{PORT}", "kind": "agent-stack-face"})
             return
         if path == "/api/bus":
+            try:
+                mouth().CONTROLS.observe_once(HIVE, event_path=_watch_event_path())
+            except Exception as exc:
+                sys.stderr.write(f"watch observe: {exc}\n")
             self._json(200, load_json(HIVE / "bus" / "state.json") or {"phase": "idle", "job_status": "done"})
+            return
+        if path == "/api/watch/status":
+            self._json(200, mouth().CONTROLS.watch_status(HIVE))
             return
         if path == "/api/jobs":
             self._json(200, {"jobs": observe_jobs()})
@@ -275,6 +288,18 @@ class Handler(BaseHTTPRequestHandler):
                 str(data.get("target") or ""),
                 hive=HIVE,
             )
+            self._json(200, out)
+            return
+        if path == "/api/watch/source":
+            out = live_mouth.CONTROLS.set_local_test_value(HIVE, str(data.get("value") or ""))
+            self._json(200 if out.get("ok") else 400, out)
+            return
+        if path == "/api/watch/tick":
+            out = live_mouth.CONTROLS.observe_once(HIVE, event_path=_watch_event_path())
+            self._json(200, out)
+            return
+        if path == "/api/watch/ack":
+            out = live_mouth.CONTROLS.ack_notice(HIVE, str(data.get("event_id") or ""))
             self._json(200, out)
             return
         if path == "/api/tts":

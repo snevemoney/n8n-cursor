@@ -252,9 +252,13 @@ def apply_turn_iter(
         return
     parsed = CONTROLS.parse_stop(spoken)
     if parsed:
-        scope, target = parsed
+        verb, scope, target = parsed
         receipt = cancel_scoped(scope, target, hive=hive)
         line = str(receipt.get("spoken") or "Stopped.")
+        if verb in ("stop", "cancel") and scope == "speak":
+            stopped = CONTROLS.stop_watch(hive)
+            if stopped.get("stopped"):
+                line = "Stopped."
         yield _turn_event(
             spoken=line,
             verb="stop",
@@ -262,6 +266,19 @@ def apply_turn_iter(
             wires=[f"stop:{scope}"],
             spoken_delta=line,
         )
+        return
+    if CONTROLS.parse_watch_status(spoken):
+        snap = CONTROLS.watch_status(hive)
+        line = str(snap.get("spoken") or "No watch is active.")
+        PIPELINE.write_receipt(hive, turn_input=spoken, turn_output=line)
+        yield _door_speak(hive, spoken, line, "watch_status")
+        return
+    watched = CONTROLS.parse_watch(spoken)
+    if watched:
+        made = CONTROLS.create_watch(hive, target=watched, utterance=spoken)
+        line = str(made.get("spoken") or CONTROLS.WATCHING_LINE)
+        PIPELINE.write_receipt(hive, turn_input=spoken, turn_output=line)
+        yield _door_speak(hive, spoken, line, "watch")
         return
     if PIPELINE.is_hard_step(spoken):
         for out in PIPELINE.apply_pipeline_iter(

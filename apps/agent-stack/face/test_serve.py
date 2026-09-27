@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
+import tempfile
+import threading
 import unittest
+import urllib.request
 from pathlib import Path
 
 os.environ.pop("VOICE_OS_BIND", None)
@@ -24,6 +28,77 @@ MOD = _load()
 
 
 class FaceServeTest(unittest.TestCase):
+    def test_face_speaks_local_change_once(self) -> None:
+        prev_hive = MOD.HIVE
+        prev_event = os.environ.get("WATCH_EVENT_PATH")
+        prev_dry = os.environ.get("AGENT_STACK_CURSOR_DRY")
+        os.environ["AGENT_STACK_CURSOR_DRY"] = "1"
+        tmp = tempfile.TemporaryDirectory(prefix="face-watch-http-")
+        hive = Path(tmp.name)
+        (hive / "bus").mkdir(parents=True)
+        events = hive / "bus" / "events.jsonl"
+        os.environ["WATCH_EVENT_PATH"] = str(events)
+        MOD.HIVE = hive
+        httpd = MOD.ThreadingHTTPServer((MOD.HOST, 0), MOD.Handler)
+        port = int(httpd.server_address[1])
+        thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        thread.start()
+
+        def post(path: str, payload: dict) -> dict:
+            req = urllib.request.Request(
+                f"http://{MOD.HOST}:{port}{path}",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=8) as res:
+                return json.loads(res.read().decode("utf-8"))
+
+        def get(path: str) -> dict:
+            with urllib.request.urlopen(f"http://{MOD.HOST}:{port}{path}", timeout=8) as res:
+                return json.loads(res.read().decode("utf-8"))
+
+        try:
+            made = post("/api/turn", {"utterance": "Watch the local test value and tell me when it changes."})
+            self.assertEqual(made["verb"], "watch")
+            self.assertIn("Watching", made["spoken"])
+            status = get("/api/watch/status")
+            self.assertTrue(status["active"])
+            self.assertEqual(status["current_state"], "A")
+            self.assertEqual(status["source"], "local_test_value")
+            chat = post("/api/turn", {"utterance": "Hey Jarvis."})
+            self.assertNotEqual(chat["verb"], "watch")
+            self.assertEqual(get("/api/watch/status")["watch_id"], status["watch_id"])
+            posted = post("/api/watch/source", {"value": "B"})
+            self.assertEqual(posted["value"], "B")
+            self.assertEqual(get("/api/watch/status")["current_state"], "A")
+            bus = get("/api/bus")
+            self.assertEqual(bus["spoken"], "B")
+            self.assertEqual(bus["watch_notice"]["spoken"], "B")
+            self.assertEqual(bus["watch"]["notify_count"], 1)
+            again = post("/api/watch/tick", {})
+            self.assertFalse(again["notified"])
+            self.assertEqual(again["spoken"], "")
+            self.assertEqual(len([line for line in events.read_text(encoding="utf-8").splitlines() if line.strip()]), 1)
+            stopped = post("/api/turn", {"utterance": "cancel the watch"})
+            self.assertIn("Stopped", stopped["spoken"])
+            final = get("/api/watch/status")
+            self.assertFalse(final["active"])
+            self.assertEqual(final["spoken"], "The watch is stopped.")
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+            MOD.HIVE = prev_hive
+            if prev_event is None:
+                os.environ.pop("WATCH_EVENT_PATH", None)
+            else:
+                os.environ["WATCH_EVENT_PATH"] = prev_event
+            if prev_dry is None:
+                os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
+            else:
+                os.environ["AGENT_STACK_CURSOR_DRY"] = prev_dry
+            tmp.cleanup()
+
     def test_bind_is_localhost(self) -> None:
         self.assertEqual(MOD.HOST, "127.0.0.1")
 

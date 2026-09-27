@@ -147,6 +147,7 @@
       listening: false, starting: false, turning: false, pending: null, greeted: false,
       recGen: 0, restartTimer: 0, lastStartAt: 0, failStreak: 0,
       stack: { name: "J.A.R.V.I.S.", operator: "Evens" },
+      watchNoticeId: "",
     };
     const dotted = (name) => String(name || "JARVIS").replace(/[^A-Za-z0-9]/g, "").toUpperCase().split("").join(".") || "J.A.R.V.I.S.";
     const hasSR = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -295,11 +296,12 @@
       }
     }
     function stopScope(utterance) {
-      const match = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:stop|cancel|never mind|forget it|shut up)(?:\s+(?:the\s+)?(speaking|speech|tool|job|mission)(?:\s+(\S+))?)?\s*[.!]?\s*$/i.exec((utterance || "").trim());
+      const match = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(stop|cancel|never mind|forget it|shut up)(?:\s+(?:the\s+)?(speaking|speech|tool|job|mission|watch|watching)(?:\s+(\S+))?)?\s*[.!]?\s*$/i.exec((utterance || "").trim());
       if (!match) return null;
-      let scope = (match[1] || "speak").toLowerCase();
+      let scope = (match[2] || "speak").toLowerCase();
       if (scope === "speaking" || scope === "speech") scope = "speak";
-      return { scope: scope, target: match[2] || "" };
+      if (scope === "watching") scope = "watch";
+      return { verb: (match[1] || "stop").toLowerCase(), scope: scope, target: match[3] || "" };
     }
     function productMouth() {
       return voiceEngine === "elevenlabs" || voiceEngine === "kokoro" || voiceEngine === "kokoro-dark-python";
@@ -377,6 +379,13 @@
       if (scoped) {
         if (scoped.scope === "speak") {
           pressStop();
+          if (scoped.verb === "stop" || scoped.verb === "cancel") {
+            fetch("/api/stop", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ scope: "watch" }),
+            }).catch(() => {});
+          }
           return;
         }
         stopSpeakingOnly();
@@ -742,6 +751,27 @@
       try {
         const bus = await api("/api/bus");
         if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
+        const notice = bus.watch_notice;
+        if (
+          notice &&
+          notice.event_id &&
+          !notice.delivered &&
+          notice.event_id !== state.watchNoticeId &&
+          !state.turning
+        ) {
+          state.watchNoticeId = notice.event_id;
+          const line = String(notice.spoken || "");
+          if (line) {
+            lastSpoken = line;
+            $("spoken").textContent = line;
+            enqueueSpeak(line);
+            fetch("/api/watch/ack", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ event_id: notice.event_id }),
+            }).catch(() => {});
+          }
+        }
         if ($("mode")) $("mode").textContent = "MODE - " + String(bus.harness_mode || "agent").toUpperCase();
         const wires = await api("/api/wires");
         paintWires(wires);

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import tempfile
 import unittest
@@ -36,6 +37,51 @@ class MouthDoorTest(unittest.TestCase):
         self.assertNotIn("May I hand this to the", text)
         self.assertNotIn("prompt[:4000]", text)
         self.assertIn("PIPELINE.apply_pipeline_iter", text)
+
+    def test_watch_utterance_is_a_real_watch_and_chat_is_not(self) -> None:
+        def fake_cursor(prompt: str, mode: str = "ask", **kwargs):
+            _ = (prompt, mode, kwargs)
+            return {"tool": "converse", "args": {}, "speak": "The hive is quiet today."}
+
+        with tempfile.TemporaryDirectory(prefix="agent-stack-watch-door-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            events = hive / "bus" / "events.jsonl"
+            chat = MOD.apply_turn("What can you do?", hive=hive, cursor_fn=fake_cursor)
+            self.assertNotEqual(chat.get("verb"), "watch")
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+            self.assertNotIn("watches", bus)
+            made = MOD.apply_turn(
+                "Watch the local test value and tell me when it changes.",
+                hive=hive,
+                cursor_fn=fake_cursor,
+            )
+            self.assertEqual(made.get("verb"), "watch")
+            self.assertIn("Watching", made.get("spoken") or "")
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+            watch = bus["watch"]
+            self.assertTrue(watch["active"])
+            self.assertEqual(watch["current_state"], "A")
+            self.assertTrue((hive / "bus" / "receipts.jsonl").is_file())
+            MOD.CONTROLS.set_local_test_value(hive, "B")
+            noticed = MOD.CONTROLS.observe_once(hive, event_path=events)
+            self.assertEqual(noticed["spoken"], "B")
+            again = MOD.CONTROLS.observe_once(hive, event_path=events)
+            self.assertFalse(again["notified"])
+            status = MOD.apply_turn("What is the watch status?", hive=hive, cursor_fn=fake_cursor)
+            self.assertEqual(status.get("verb"), "watch_status")
+            self.assertIn("active", (status.get("spoken") or "").lower())
+            stopped = MOD.apply_turn("stop", hive=hive, cursor_fn=fake_cursor)
+            self.assertEqual(stopped.get("verb"), "stop")
+            self.assertIn("Stopped", stopped.get("spoken") or "")
+            self.assertFalse(MOD.CONTROLS.watch_status(hive)["active"])
+            later = MOD.apply_turn("what's on my watch later", hive=hive, see_fn=lambda text: {
+                "ok": True,
+                "spoken": "Watch Later is open",
+                "wire": "safari_see",
+            })
+            self.assertNotEqual(later.get("verb"), "watch")
+            self.assertEqual(len(MOD.CONTROLS._watches(json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8")))), 1)
 
     def test_stop_and_empty_are_local(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-door-") as tmp:
