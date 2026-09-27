@@ -66,11 +66,11 @@ export function CostDashboard() {
   };
 
   if (loading) {
-    return <LoadingState message="Loading cost data..." />;
+    return <LoadingState text="Loading cost data..." />;
   }
 
   if (error) {
-    return <ErrorState message={error} onRetry={loadCostData} />;
+    return <ErrorState error={error} onRetry={loadCostData} />;
   }
 
   const totalCost = summary.reduce((sum, s) => sum + s.totalCost, 0);
