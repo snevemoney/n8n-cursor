@@ -23,6 +23,10 @@ MOD = _load()
 
 
 class StorePackTest(unittest.TestCase):
+    def test_missing_session_script_does_not_raise(self) -> None:
+        missing = Path("/tmp/jarvis-face-missing-session-script.py")
+        self.assertIsNone(MOD._load("missing_session_script", missing))
+
     def test_hive_block_names_the_four(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-stack-store-") as tmp:
             hive = Path(tmp)

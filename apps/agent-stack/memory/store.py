@@ -21,11 +21,17 @@ CACHE_SEC = 45.0
 
 
 def _load(name: str, path: Path):
+    """Optional session readers. A missing file must not abort the turn."""
+    if not path.is_file():
+        return None
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
         return None
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    try:
+        spec.loader.exec_module(mod)
+    except (OSError, SyntaxError, ImportError, AttributeError):
+        return None
     return mod
 
 
