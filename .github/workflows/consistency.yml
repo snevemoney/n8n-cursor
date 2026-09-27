@@ -80,8 +80,9 @@ jobs:
           # Extract known flags from schema
           KNOWN_FLAGS=$(jq -r '.properties | keys[]' contracts/flags.schema.json | tr '\n' '|' | sed 's/|$//')
           
-          # Check for unknown flags in code
-          if rg -n "FF_[A-Z_]+" apps packages --type ts --type js | grep -v "(${KNOWN_FLAGS})"; then
+          # Check for unknown flags in code.
+          # -E is required: KNOWN_FLAGS is joined with | and must be alternation.
+          if rg -n "FF_[A-Z_]+" apps packages --type ts --type js | grep -E -v "(${KNOWN_FLAGS})"; then
             echo "❌ Found unknown feature flags in code"
             echo "Known flags: ${KNOWN_FLAGS}"
             exit 1
