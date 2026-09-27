@@ -183,28 +183,72 @@ function generate(doc) {
   return { source: lines.join("\n"), spanNames, metricNames };
 }
 
+function telemetryRuntime(existing) {
+  const startMarker = "export const MetricAttributes = {";
+  const start = existing.indexOf(startMarker);
+  if (start < 0) fail("src/telemetry.ts is missing MetricAttributes");
+  const endMarkers = [
+    "export type SpanName = typeof Spans[keyof typeof Spans];",
+    "export type SpanAttributeName =",
+  ];
+  let end = -1;
+  for (const marker of endMarkers) {
+    const at = existing.indexOf(marker, start);
+    if (at >= 0 && (end < 0 || at < end)) end = at;
+  }
+  if (end < 0) fail("src/telemetry.ts runtime block has no end");
+  const block = existing.slice(start, end).trimEnd();
+  const aliases = [
+    "export type SpanAttributeName = keyof SpanAttributes;",
+    "export type MetricAttributeName = typeof MetricAttributes[keyof typeof MetricAttributes];",
+    "export type ResourceAttributeName = typeof ResourceAttributes[keyof typeof ResourceAttributes];",
+    "export type SpanEventName = typeof SpanEvents[keyof typeof SpanEvents];",
+    "export type SpanEventAttributeName = typeof SpanEventAttributes[keyof typeof SpanEventAttributes];",
+  ].join("\n");
+  return `${block}\n\n${aliases}\n`;
+}
+
 function main() {
   if (!fs.existsSync(INPUT)) fail(`cannot read ${INPUT}: file does not exist`);
+  if (!fs.existsSync(OUTPUT)) fail(`cannot read ${OUTPUT}: file does not exist`);
+  const existing = fs.readFileSync(OUTPUT, "utf8");
   const doc = loadContract(INPUT);
   assertCompilable(doc);
   const { source, spanNames, metricNames } = generate(doc);
-  if (!source || source.trim() === "") fail("generator produced no TypeScript");
+  const finalSource = `${source.trimEnd()}\n\n${telemetryRuntime(existing)}`;
+  if (!finalSource || finalSource.trim() === "") fail("generator produced no TypeScript");
   for (const token of [
     "export type SpanName",
     "export type MetricName",
     "export interface SpanAttributes",
     "export interface MetricLabels",
     "export interface LogFields",
+    "export const MetricAttributes",
+    "export const ResourceAttributes",
+    "export const SpanEvents",
+    "export const SpanEventAttributes",
+    "export const defaultTelemetryConfig",
+    "export function createSpanAttributes",
+    "export function createMetricAttributes",
+    "export function createResourceAttributes",
+    "export const defaultSamplingConfig",
+    "export interface TelemetryConfig",
+    "export interface SamplingConfig",
+    "export type SpanAttributeName",
+    "export type MetricAttributeName",
+    "export type ResourceAttributeName",
+    "export type SpanEventName",
+    "export type SpanEventAttributeName",
   ]) {
-    if (!source.includes(token)) fail(`generator omitted ${token}`);
+    if (!finalSource.includes(token)) fail(`generator omitted ${token}`);
   }
   for (const name of [...spanNames, ...metricNames]) {
-    if (!source.includes(literal(name))) fail(`generator omitted ${name}`);
+    if (!finalSource.includes(literal(name))) fail(`generator omitted ${name}`);
   }
   fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
-  fs.writeFileSync(OUTPUT, source);
+  fs.writeFileSync(OUTPUT, finalSource);
   const written = fs.readFileSync(OUTPUT, "utf8");
-  if (written !== source) fail(`failed to write ${OUTPUT}`);
+  if (written !== finalSource) fail(`failed to write ${OUTPUT}`);
   console.log(`generated ${spanNames.length} spans and ${metricNames.length} metrics -> src/telemetry.ts`);
   for (const name of spanNames) console.log(`  span ${name}`);
   for (const name of metricNames) console.log(`  metric ${name}`);

@@ -179,22 +179,46 @@ function generate(doc) {
   return { source: lines.join("\n"), names };
 }
 
+function flagsRuntime(existing) {
+  const startMarker = "export type Environment = 'int' | 'staging' | 'prod';";
+  const start = existing.indexOf(startMarker);
+  if (start < 0) fail("src/flags.ts is missing Environment");
+  let tail = existing.slice(start).trimEnd();
+  const asserted = "} as FeatureFlags;";
+  if (!tail.includes(asserted)) {
+    const needle =
+      "this.getNumberFlag('FF_LIGHTNING_NETWORK_CHECK_INTERVAL_MS', 30000)\n    };";
+    const replacement =
+      "this.getNumberFlag('FF_LIGHTNING_NETWORK_CHECK_INTERVAL_MS', 30000)\n    } as FeatureFlags;";
+    if (!tail.includes(needle)) fail("src/flags.ts loadFlags return is not in the expected shape");
+    tail = tail.replace(needle, replacement);
+  }
+  if (!tail.includes("export class FlagLoader")) fail("src/flags.ts is missing FlagLoader");
+  if (!tail.includes("export function validateFlagSchema")) fail("src/flags.ts is missing validateFlagSchema");
+  return `${tail}\n`;
+}
+
 function main() {
   if (!fs.existsSync(INPUT)) fail(`cannot read ${INPUT}: file does not exist`);
+  if (!fs.existsSync(OUTPUT)) fail(`cannot read ${OUTPUT}: file does not exist`);
+  const existing = fs.readFileSync(OUTPUT, "utf8");
   const doc = loadContract(INPUT);
   assertCompilable(doc);
   const { source, names } = generate(doc);
-  if (!source || source.trim() === "") fail("generator produced no TypeScript");
-  if (!source.includes("export interface FeatureFlags")) fail("generator omitted FeatureFlags");
-  if (!source.includes("export type FlagValue")) fail("generator omitted FlagValue");
-  if (!source.includes("export interface FlagConfig")) fail("generator omitted FlagConfig");
+  const finalSource = `${source.trimEnd()}\n\n${flagsRuntime(existing)}`;
+  if (!finalSource || finalSource.trim() === "") fail("generator produced no TypeScript");
+  if (!finalSource.includes("export interface FeatureFlags")) fail("generator omitted FeatureFlags");
+  if (!finalSource.includes("export type FlagValue")) fail("generator omitted FlagValue");
+  if (!finalSource.includes("export interface FlagConfig")) fail("generator omitted FlagConfig");
+  if (!finalSource.includes("export class FlagLoader")) fail("generator omitted FlagLoader");
+  if (!finalSource.includes("export function validateFlagSchema")) fail("generator omitted validateFlagSchema");
   for (const name of names) {
-    if (!source.includes(name)) fail(`generator omitted ${name}`);
+    if (!finalSource.includes(name)) fail(`generator omitted ${name}`);
   }
   fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
-  fs.writeFileSync(OUTPUT, source);
+  fs.writeFileSync(OUTPUT, finalSource);
   const written = fs.readFileSync(OUTPUT, "utf8");
-  if (written !== source) fail(`failed to write ${OUTPUT}`);
+  if (written !== finalSource) fail(`failed to write ${OUTPUT}`);
   console.log(`generated ${names.length} flags -> src/flags.ts`);
   for (const name of names) console.log(`  ${name}`);
 }

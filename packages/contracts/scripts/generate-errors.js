@@ -172,22 +172,47 @@ function generate(doc) {
   return { source: lines.join("\n"), codes };
 }
 
+function errorsRuntime(existing) {
+  const startMarker = "export function createErrorResponse(";
+  const start = existing.indexOf(startMarker);
+  if (start < 0) fail("src/errors.ts is missing createErrorResponse");
+  const end = existing.indexOf("export const errorCategories", start);
+  const block = (end >= 0 ? existing.slice(start, end) : existing.slice(start)).trimEnd();
+  if (!block.includes("export function createExpressErrorResponse")) {
+    fail("src/errors.ts is missing createExpressErrorResponse");
+  }
+  if (!block.includes("export function validateErrorCode")) fail("src/errors.ts is missing validateErrorCode");
+  return `${block}\n`;
+}
+
 function main() {
   if (!fs.existsSync(INPUT)) fail(`cannot read ${INPUT}: file does not exist`);
+  if (!fs.existsSync(OUTPUT)) fail(`cannot read ${OUTPUT}: file does not exist`);
+  const existing = fs.readFileSync(OUTPUT, "utf8");
   const doc = loadContract(INPUT);
   assertCompilable(doc);
   const { source, codes } = generate(doc);
-  if (!source || source.trim() === "") fail("generator produced no TypeScript");
-  for (const token of ["export type ErrorCode", "export type ErrorCategory", "export interface ErrorResponse", "export interface ErrorDetails"]) {
-    if (!source.includes(token)) fail(`generator omitted ${token}`);
+  const finalSource = `${source.trimEnd()}\n\n${errorsRuntime(existing)}`;
+  if (!finalSource || finalSource.trim() === "") fail("generator produced no TypeScript");
+  for (const token of [
+    "export type ErrorCode",
+    "export type ErrorCategory",
+    "export interface ErrorResponse",
+    "export interface ErrorDetails",
+    "export const errorCatalog",
+    "export function createErrorResponse",
+    "export function createExpressErrorResponse",
+    "export function validateErrorCode",
+  ]) {
+    if (!finalSource.includes(token)) fail(`generator omitted ${token}`);
   }
   for (const code of codes) {
-    if (!source.includes(literal(code))) fail(`generator omitted ${code}`);
+    if (!finalSource.includes(literal(code))) fail(`generator omitted ${code}`);
   }
   fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
-  fs.writeFileSync(OUTPUT, source);
+  fs.writeFileSync(OUTPUT, finalSource);
   const written = fs.readFileSync(OUTPUT, "utf8");
-  if (written !== source) fail(`failed to write ${OUTPUT}`);
+  if (written !== finalSource) fail(`failed to write ${OUTPUT}`);
   console.log(`generated ${codes.length} error codes -> src/errors.ts`);
   for (const code of codes) console.log(`  ${code}`);
 }
