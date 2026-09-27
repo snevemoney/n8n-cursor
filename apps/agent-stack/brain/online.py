@@ -28,15 +28,12 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 GROKBOT_CONN = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 DEFAULT_VPS = "root@69.62.66.78"
 DEFAULT_MODEL = "grok-4"
-# Conversational mouth. Same id the OpenRouter talk path already used.
-DEFAULT_OPENROUTER_MODEL = "nex-agi/nex-n2.5-mini:free"
 SPEAK_CAP = 900
 ALLOWED_ENV = (
     "XAI_API_KEY",
     "GROK_API_KEY",
     "GROK_MODEL",
     "OPENROUTER_API_KEY",
-    "OPENROUTER_MODEL",
     "GROKBOT_BASE_URL",
     "GROKBOT_TOKEN",
 )
@@ -248,7 +245,8 @@ def has_openrouter_key() -> bool:
 
 
 def openrouter_model() -> str:
-    return (os.environ.get("OPENROUTER_MODEL") or DEFAULT_OPENROUTER_MODEL).strip() or DEFAULT_OPENROUTER_MODEL
+    """Ordinary talk has no OpenRouter slug written in this repo. Do not invent one."""
+    return ""
 
 
 def _well_formed_file_key(key_b64: str) -> bool:
@@ -441,10 +439,14 @@ def call_openrouter(
     """Ordinary talk. OpenRouter chat completions. Not xAI. Not the Jev judgment sender.
 
     images / extra_tools / hands keep the historical call signature. Ordinary
-    questions are text. A missing key does not invent one and does not POST.
+    questions are text. No OpenRouter slug for this mouth is written in the
+    repo, so this does not invent one and does not POST. A missing key is
+    not a reason to pick a model.
     """
     _ = (images, extra_tools, hands)
     model = openrouter_model()
+    if not model:
+        return _openrouter_miss(model)
     key = openrouter_api_key()
     if not key:
         return _openrouter_miss(model)

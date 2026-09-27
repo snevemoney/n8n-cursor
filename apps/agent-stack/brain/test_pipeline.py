@@ -1077,26 +1077,18 @@ class ContinuityStatusWireTest(unittest.TestCase):
 
 
 class OpenRouterMouthTest(unittest.TestCase):
-    def test_ordinary_question_speaks_the_openrouter_reply(self) -> None:
+    def test_ordinary_question_does_not_invent_an_openrouter_model(self) -> None:
         os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
-        posts: list[dict] = []
-
-        def fake_json(url, data=None, headers=None, timeout=45.0):
-            _ = (headers, timeout)
-            posts.append({"url": url, "data": data or {}})
-            return {
-                "choices": [
-                    {"message": {"content": "Model line kelp-orbit-44."}}
-                ]
-            }
-
         online = MOUTH.PIPELINE.ONLINE
+        self.assertEqual(online.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
+        self.assertEqual(online.openrouter_model(), "")
+        self.assertNotIn("nex-agi", Path(online.__file__).read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory(prefix="pipeline-openrouter-mouth-") as tmp:
             hive = Path(tmp)
             (hive / "bus").mkdir(parents=True)
             (hive / "vault").mkdir(parents=True)
             with unittest.mock.patch.object(online, "openrouter_api_key", return_value="test-key"):
-                with unittest.mock.patch.object(online, "_http_json", side_effect=fake_json):
+                with unittest.mock.patch.object(online, "_http_json", side_effect=AssertionError("must not post")):
                     with unittest.mock.patch.object(online, "call_xai", side_effect=AssertionError("xai")):
                         events = list(
                             MOUTH.apply_turn_iter(
@@ -1114,20 +1106,12 @@ class OpenRouterMouthTest(unittest.TestCase):
                         )
         done = events[-1]
         spoken = done.get("spoken") or ""
-        deltas = " ".join(str(ev.get("spoken_delta") or "") for ev in events)
-        self.assertEqual(len(posts), 1)
-        self.assertEqual(posts[0]["url"], online.OPENROUTER_URL)
-        self.assertEqual(posts[0]["data"]["model"], "nex-agi/nex-n2.5-mini:free")
-        self.assertIn("kelp-orbit-44", spoken)
-        self.assertIn("kelp-orbit-44", deltas)
-        self.assertEqual(done.get("brain"), "openrouter")
-        self.assertTrue(spoken.startswith("Sir."))
-        self.assertNotIn("agent login", spoken.lower())
+        self.assertIsNone(done.get("brain"))
         self.assertNotIn("Tokyo", spoken)
+        self.assertNotIn("nex-agi", spoken)
         self.assertEqual(stopped.get("verb"), "stop")
         self.assertIn("Standing by", greeted.get("spoken") or "")
         self.assertEqual(watched.get("verb"), "watch")
-        self.assertEqual(len(posts), 1)
 
 
 if __name__ == "__main__":
