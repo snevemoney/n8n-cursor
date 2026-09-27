@@ -9,7 +9,7 @@ description: >-
 
 Load `scripts/hive/grok-skills/saylor-course-skill.md` and follow it.
 
-**Catalog + speak-sheet first.** LANE `hive-os` | `agency`. Pick 1–3 slugs.
+**Catalog namespace first.** `saylor-course-skills` (`catalog_size` stays UNVERIFIED until a contract proves the set) is not the active skill. LANE `hive-os` | `agency`. The mission graph is the sufficient subset.
 **Live mentor:** `saylor-mentor-pass` (beat this turn, emit at end).
 
 Hard step: send / pay / deploy / book / publish stay Evens.

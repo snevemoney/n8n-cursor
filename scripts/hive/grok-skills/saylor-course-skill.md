@@ -15,7 +15,8 @@ description: >-
 **Grok `/` copy:** `~/.grokbot/skills/saylor-course-skill/SKILL.md`
 **Status:** WIRED 2026-09-02 from catalog promote. Not accepted forever.
 
-**Catalog:** `CONTENT/saylor-skill-triggers.md` (repo: `docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md`)
+**Catalog namespace:** `saylor-course-skills`. `catalog_size` stays UNVERIFIED until a catalog contract proves which skills belong in the set. A course-declaring file count and a search hit count are other counts. This file is the router, not the active skill.
+**Catalog index:** `CONTENT/saylor-skill-triggers.md` (repo: `docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md`). Do not load the skill bodies by default.
 **Speak-sheet:** `CONTENT/topics/saylor-trigger-map.md`
 **Data pack:** `CONTENT/topics/live-facts-card.md` → `live-facts-hive-os.md` | `live-facts-agency.md`
 **Live mentor:** `saylor-mentor-pass` (beat this turn, emit at end)
@@ -37,7 +38,7 @@ Evens talks hive / site / money and a harvested university skill should fire. Co
 ```
 SIT: mentor | execute | study-aid
 SAY: plain hive/site/money (not course jargon)
-SKILLS: 1–3 slugs from the speak-sheet
+SKILLS: the mission graph (one skill only when one is sufficient)
 LANE: hive-os | agency
 FACT: that lane's facts card (blank stays blank)
 DESK: mentor=Consultant; execute=lane owner
@@ -57,7 +58,7 @@ No FACT and no named property → mentor with blanks. Do not invent a KPI so a s
 1. Read the speak-sheet row. Operator does not need the course code.
 2. Load the matching `scripts/hive/grok-skills/{slug}.md` (then Cursor pointer / Grok mirror).
 3. Name LANE. Bind that facts card. Empty fields stay empty. Do not merge hive-os $ with agency $.
-4. Run at most 1–3 skills. Anti-triggers on the speak-sheet win (marketing ≠ copy ≠ CS; books ≠ costs ≠ capital).
+4. Build the ActiveSkillGraph on `saylor-mentor-pass`. One skill only when one skill is sufficient. A high-blast mission may use more. Anti-triggers on the speak-sheet win (marketing ≠ copy ≠ CS; books ≠ costs ≠ capital). Do not load the catalog.
 5. Hand execution to the desk on the row. Consultant does not replace the lane owner.
 6. Live this turn: one beat from `saylor-mentor-pass --live`. End: emit the card. Honest skip only if no hive/site/money.
 7. Hard step (send / pay / deploy / book / publish) stays Evens.
@@ -69,6 +70,20 @@ Cursor + Grok Bot only. Box harvest path is `/workspace/research/packets/saylor-
 ## Stop
 
 Send / pay / deploy / book / publish = operator. ACE webcam = never.
+
+## Contract
+
+This declaration is the catalog namespace, not an active node.
+
+- Prerequisites: none.
+- Triggers: a hive, site, or money sitting; a named course skill; a request for the university catalog.
+- Negative triggers: exam reconstruction; dumping the catalog; treating `saylor-course-skills` as the selected skill.
+- Required context: LANE.
+- Outputs: `catalog_namespace` (school). `catalog_size` stays UNVERIFIED until the set is proven. `index_rows()` is retrieval. Bodies stay unloaded.
+- Parallel: no. This router does not run beside the mission as a second skill.
+- Activation depth: 0.
+- Risk relevance: low.
+- Completion: not applicable as a selected skill. The mission graph is the selection.
 
 ## Never
 

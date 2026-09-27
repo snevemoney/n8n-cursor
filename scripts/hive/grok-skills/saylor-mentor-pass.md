@@ -30,14 +30,21 @@ Every hive / site / money turn — start, middle, and end. Evens does not have t
 
 ```
 LANE: hive-os | agency
-SCHOOL: one course (plain name ok)
+SCHOOL: saylor-course-skills catalog · catalog_size: UNVERIFIED until a contract proves the set
+catalog_size: UNVERIFIED. A course-declaring file count is not this field.
+course_declaring_skill_slugs: skill files that declare a course
+unique_course_headers: distinct course headers on those files
+retrieval_hits: what the trigger search returns
+selected_skills: the mission selection
+active_skills: Saylor capabilities on the graph with status active
+GRAPH: the sufficient subset for this mission
 SAYS: what the school means on this exact work (one paragraph)
 NOW: what to decide or put in the system before the next edit
 THEN: do the work through that lens
 WATCH: anti-trigger for this school
 ```
 
-Cap: **one idea this turn**. **1–3 skills this sitting**. No LANE → ask once. No invented KPI. Do not dump the catalog.
+Cap: **one idea this turn**. The mission graph is the sufficient subset (one skill only when one is sufficient). No LANE → ask once. No invented KPI. Do not load the catalog.
 
 ## End card (sitting close)
 
@@ -68,6 +75,19 @@ Always-applied rule: `.cursor/rules/saylor-live-mentor.mdc`. Honest skip only wh
 
 Send / pay / deploy / book / publish = Evens.
 
+## Contract
+
+- Prerequisites: none.
+- Triggers: every hive, site, or money turn.
+- Negative triggers: exam reconstruction; a sitting with no hive, site, or money.
+- Required context: LANE and the sitting.
+- Outputs: `teaching_beat` (card) and `active_skill_graph` (graph).
+- Parallel: no. This pass synthesizes; course skills on the graph may run in parallel inside the concurrency budget.
+- Activation depth: 0. A specialist request is depth + 1, capped by the depth budget.
+- Risk relevance: medium. A high-blast mission widens the graph; it does not load the catalog.
+- Completion: one beat spoken, and the graph lists the sufficient subset with completed, skipped, or not_applicable on each node.
+- May request a specialist. Fan-out stops at the concurrency, cost, context, and depth budgets. `NO_METHOD_NEEDED`, `NOT_APPLICABLE`, and `NEEDS_PREREQUISITE` are real results.
+
 ## Never
 
-Dump 42 skills · invent a KPI · merge hive-os $ with agency $ · exam reconstruction · end-stamp without a live beat · Claude Cowork/Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus
+Dump the catalog · invent a KPI · merge hive-os $ with agency $ · exam reconstruction · end-stamp without a live beat · treat one school label as one selected skill · Claude Cowork/Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus

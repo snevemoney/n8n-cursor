@@ -1,24 +1,114 @@
 #!/usr/bin/env python3
-"""Live mentor: one teaching beat then work. End emit PUT-IN-SYSTEM. No catalog dump."""
+"""Live mentor: one teaching beat, then the mission's ActiveSkillGraph.
+
+School (`saylor-course-skills`) is the curriculum namespace. catalog_size stays
+UNVERIFIED until a catalog contract proves the skill set. A course-declaring
+slug count and a search hit count are other counts. The school is not the
+active skill.
+A mission builds the sufficient subset. Skill bodies are not loaded by default.
+"""
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path("/Users/evenslouis/n8n-cursor")
+ROOT = Path(__file__).resolve().parents[3]
 MAP = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-leverage-map.md"
 SPEAK = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-trigger-map.md"
 CATALOG = ROOT / "docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md"
 BEATS = ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-live-beats.md"
+JUDGMENT = ROOT / "scripts/hive/eng/judgment.py"
+SKILL_DIR = ROOT / "scripts/hive/grok-skills"
 LANES = ("hive-os", "agency")
 CAP = 3
+SCHOOL_NAMESPACE = "saylor-course-skills"
 COURSE_RE = re.compile(r"\b(?:BUS|COMM|ECON|PRDV|CS|ARTH|ENGL|PHIL|MA|POLSC)\d+\b")
+SHELF_RE = re.compile(
+    r"("
+    r"\b164\b|"
+    r"full\s+catalog|"
+    r"entire\s+shelf|"
+    r"all\s+the\s+school\s+skills|"
+    r"not\s+just\s+BUS206|"
+    r"don'?t\s+just\s+(?:focus\s+on\s+)?BUS206|"
+    r"school\s+is\s+the\s+catalog"
+    r")",
+    re.I,
+)
+NOVEL_RE = re.compile(
+    r"\b(novel decomposition|decompose a novel|invent a (?:new )?method|brand new method)\b",
+    re.I,
+)
+EXAM_RE = re.compile(r"\b(reconstruct(?:ing)?|take the exam|exam dump)\b", re.I)
+JOB_TEXT = "read the share"
+RULE_TEXT = "Redacted plugin output is not the file"
+GRAPH_STATUSES = {"active", "waiting", "completed", "dynamically_added", "not_applicable"}
+OCCUPYING = {"active", "dynamically_added"}
+SEARCHED = "docs/hive/outer-heaven/CONTENT/saylor-skill-triggers.md"
+COMPANY_RE = re.compile(
+    r"\b(company-wide|company wide|whole company|across the company)\b",
+    re.I,
+)
+BLAST_RE = re.compile(
+    r"\b(blast(?:\s+radius)?|every desk|send to (?:all|everyone)|deploy everywhere)\b",
+    re.I,
+)
+TOKEN_RE = re.compile(r"[a-z0-9]{5,}")
+STOP = {
+    "which", "write", "their", "about", "would", "could", "should", "there",
+    "these", "those", "under", "where", "while", "other", "being", "after",
+    "before", "every", "still", "named", "course", "school", "saylor", "task",
+    "asks", "running", "reconstructing", "taking", "exam", "dumping", "change",
+}
+DEFAULT_BUDGETS = {"concurrency": 4, "cost": 40, "context": 0, "depth": 2}
+PATH_CONTRACTS = {
+    "saylor-course-skill": {
+        "slug": "saylor-course-skill",
+        "role": "catalog_namespace",
+        "prerequisites": [],
+        "triggers": ["hive/site/money sitting", "named course skill", "university catalog"],
+        "negative_triggers": [
+            "exam reconstruction",
+            "catalog dump",
+            "treating the namespace as the selected skill",
+        ],
+        "required_context": ["lane"],
+        "inputs": [{"name": "sitting", "type": "text"}],
+        "outputs": [{"name": "catalog_namespace", "type": "school"}],
+        "parallel": False,
+        "activation_depth": 0,
+        "risk_relevance": "low",
+        "completion": "not an active skill; the mission graph is the selection",
+    },
+    "saylor-mentor-pass": {
+        "slug": "saylor-mentor-pass",
+        "role": "graph_builder",
+        "prerequisites": [],
+        "triggers": ["hive", "site", "money", "live mentor"],
+        "negative_triggers": ["exam reconstruction", "no hive/site/money"],
+        "required_context": ["lane", "sitting"],
+        "inputs": [
+            {"name": "sitting", "type": "text"},
+            {"name": "lane", "type": "lane"},
+        ],
+        "outputs": [
+            {"name": "teaching_beat", "type": "card"},
+            {"name": "active_skill_graph", "type": "graph"},
+        ],
+        "parallel": False,
+        "activation_depth": 0,
+        "risk_relevance": "medium",
+        "completion": "one beat spoken and the graph lists the sufficient subset",
+        "may_request_specialist": True,
+    },
+}
 
-# sitting keywords → slug (first-match order; cap 3)
+# sitting keywords → slug (deterministic triggers; the graph is not capped at 3)
 HINTS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\b(lane|what is this business|why two)\b", re.I), "intro-biz-survey-checklists"),
     (re.compile(r"\b(venture|toy|viable|idea)\b", re.I), "entrepreneurial-venture-viability-plan-team-market-finance"),
@@ -28,15 +118,682 @@ HINTS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\b(inbox|customer|complaint|cs script)\b", re.I), "custsvc-impression-needs-channel-complaint-experience"),
     (re.compile(r"\b(kpi|baseline|did (this|it) (work|move)|number mean)\b", re.I), "bizstat-describe-sample-infer-regress-checklists"),
     (re.compile(r"\b(dashboard|warehouse|which numbers)\b", re.I), "bi-sources-warehouse-present-model-privacy"),
-    (re.compile(r"\b(people, process|five component|what systems)\b", re.I), "mis-intro-five-components"),
+    (re.compile(r"\b(people, process|five component|what systems|information system)\b", re.I), "mis-intro-five-components"),
     (re.compile(r"\b(fund|refuse|keep or kill|saas|spend)\b", re.I), "strategic-it-when-whether-then-strategy"),
     (re.compile(r"\b(project|slice|done-check|has an end)\b", re.I), "intro-pm-process-groups-people-checklists"),
     (re.compile(r"\b(offer|who (the site|it) is for|stp|ads vs)\b", re.I), "mktg-value-stp-mix-plan-checklists"),
     (re.compile(r"\b(spin|sales process|loyalty|close)\b", re.I), "grad-sales-process-spin-loyalty-brand"),
     (re.compile(r"\b(ethical|hitl|send this)\b", re.I), "bizethics-integrity-stakeholder-csr-dilemma"),
     (re.compile(r"\b(legal|allowed)\b", re.I), "bizlaw-sources-forum-wrongs-assets-entity-checklists"),
-    (re.compile(r"\b(put in the system|where data lives|os)\b", re.I), "mis-intro-five-components"),
+    (re.compile(r"\b(put in the system|where data lives)\b", re.I), "mis-intro-five-components"),
 ]
+
+
+def load_evaluate():
+    """Import the existing Jev gate. Do not open a socket from here."""
+    if not JUDGMENT.is_file():
+        return None
+    spec = importlib.util.spec_from_file_location("hive_eng_judgment", JUDGMENT)
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.evaluate
+
+
+def _call_gate(request: dict, evaluate=None) -> dict:
+    fn = evaluate if evaluate is not None else load_evaluate()
+    if fn is None:
+        return {
+            "lane": "deterministic",
+            "action": "NO_ACTION",
+            "reason": "judgment.py absent; optional activation not ranked",
+            "jev_called": False,
+            "jev_allowed": False,
+            "verb": None,
+            "provider": None,
+            "provider_call": False,
+        }
+    decision = fn(request)
+    decision["jev_called"] = False
+    decision["provider_call"] = False
+    return decision
+
+
+def risk_relevance(slug: str) -> str:
+    text = (slug or "").lower()
+    if any(k in text for k in ("ethic", "law", "legal", "privacy", "security", "lifecycle", "stakeholder", "negotiat")):
+        return "high"
+    if any(
+        k in text
+        for k in (
+            "hrm", "people", "strategy", "polc", "lead", "innov", "ops", "oscm",
+            "pm-", "it-when", "data-mgmt", "bi-", "comm", "mktg", "acct",
+            "finmgmt", "corpfin", "custsvc", "stat", "ob-",
+        )
+    ):
+        return "medium"
+    return "low"
+
+
+def _tokens(text: str) -> set[str]:
+    return {t for t in TOKEN_RE.findall((text or "").lower()) if t not in STOP}
+
+
+COURSE_HEADER_RE = re.compile(r"^\*\*Course:\*\*\s+(\S+)\s*$")
+CATALOG_SIZE_UNVERIFIED = "UNVERIFIED"
+
+
+def _course_header(path: Path) -> str:
+    """Header only. A course declaration is not a body load and not catalog_size."""
+    try:
+        with path.open(encoding="utf-8") as handle:
+            for index, line in enumerate(handle):
+                if index >= 40:
+                    break
+                match = COURSE_HEADER_RE.match(line.rstrip("\n"))
+                if match:
+                    return match.group(1)
+    except OSError:
+        return ""
+    return ""
+
+
+def course_declarations() -> dict[str, str]:
+    """slug -> course header. A cursor copy of the same slug counts once."""
+    found: dict[str, str] = {}
+
+    def take(slug: str, path: Path) -> None:
+        if slug in found:
+            return
+        course = _course_header(path)
+        if course:
+            found[slug] = course
+
+    if SKILL_DIR.is_dir():
+        for path in sorted(SKILL_DIR.glob("*.md")):
+            take(path.stem, path)
+    cursor = ROOT / ".cursor/skills"
+    if cursor.is_dir():
+        for path in sorted(cursor.glob("*/SKILL.md")):
+            take(path.parent.name, path)
+    return found
+
+
+def curriculum_slugs() -> list[str]:
+    return list(course_declarations())
+
+
+def catalog_contract_proves_slug_identity() -> bool:
+    """True only when a catalog contract states the identity.
+
+    Counting files that declare a course is not that statement. The harvest
+    table's own count line is not that statement.
+    """
+    needle = "every valid catalog skill is exactly one course-declaring slug"
+    paths = (
+        SKILL_DIR / "saylor-course-skill.md",
+        ROOT / "docs/hive/outer-heaven/CONTENT/topics/saylor-catalog-complete.md",
+    )
+    for path in paths:
+        if path.is_file() and needle in path.read_text(encoding="utf-8").lower():
+            return True
+    return False
+
+
+def proven_catalog_size() -> int | None:
+    """Direct enumeration of the catalog, only after the identity proof.
+
+    Returns None while the contract does not prove the set. Callers must not
+    substitute a search hit count.
+    """
+    if not catalog_contract_proves_slug_identity():
+        return None
+    return len(course_declarations())
+
+
+def _is_job(text: str) -> bool:
+    return JOB_TEXT in (text or "").lower()
+
+
+def _is_evidence_rule(text: str) -> bool:
+    return RULE_TEXT.lower() in (text or "").lower()
+
+
+def _non_skill(text: str) -> bool:
+    return _is_job(text) or _is_evidence_rule(text)
+
+
+def _evidence_rules(sitting: str, slugs: list[str]) -> list[dict]:
+    blob = " ".join([sitting or "", *slugs])
+    if _is_evidence_rule(blob):
+        return [{"type": "EvidenceRule", "text": RULE_TEXT}]
+    return []
+
+
+def index_rows() -> list[dict[str, str]]:
+    """Trigger search. The length of this list is a discovery result, not catalog_size."""
+    if not CATALOG.is_file():
+        return []
+    rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for line in CATALOG.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("| ") or line.startswith("| course") or line.startswith("|---"):
+            continue
+        parts = [p.strip() for p in line.strip("|").split("|")]
+        if len(parts) < 4:
+            continue
+        slug = parts[1].strip("`")
+        if not slug or slug == "slug" or slug in seen:
+            continue
+        seen.add(slug)
+        rows.append(
+            {
+                "course": parts[0],
+                "slug": slug,
+                "triggers": parts[2],
+                "negative_triggers": parts[3],
+                "risk_relevance": risk_relevance(slug),
+            }
+        )
+    return rows
+
+
+def school_view() -> dict:
+    declarations = course_declarations()
+    proven = proven_catalog_size()
+    return {
+        "namespace": SCHOOL_NAMESPACE,
+        "catalog": SCHOOL_NAMESPACE,
+        "role": "catalog",
+        "catalog_size": proven if proven is not None else CATALOG_SIZE_UNVERIFIED,
+        "course_declaring_skill_slugs": len(declarations),
+        "unique_course_headers": len(set(declarations.values())),
+        "loaded": False,
+        "active_skill": None,
+        "mastered": False,
+    }
+
+
+def school_label(view: dict | None = None) -> str:
+    view = view or school_view()
+    return (
+        f"{view['catalog']} catalog · catalog_size: {view['catalog_size']} · "
+        "not loaded · not the active skill"
+    )
+
+
+def _blank_node(slug: str, *, status: str, depth: int, dynamic: bool, row: dict | None = None) -> dict:
+    row = row or {}
+    relevance = row.get("risk_relevance") or risk_relevance(slug)
+    intensity = "deep" if relevance == "high" else "standard" if relevance == "medium" else "light"
+    triggers = row.get("triggers") or ""
+    negative = row.get("negative_triggers") or ""
+    return {
+        "slug": slug,
+        "course": row.get("course") or "",
+        "status": status,
+        "intensity": intensity,
+        "prerequisites": [],
+        "triggers": [triggers[:280]] if triggers else [],
+        "negative_triggers": [negative[:280]] if negative else [],
+        "required_context": ["lane", "facts_card"],
+        "inputs": [
+            {"name": "sitting", "type": "text"},
+            {"name": "lane_fact", "type": "text"},
+        ],
+        "outputs": [{"name": "put_in_system", "type": "file_or_blank"}],
+        "parallel": True,
+        "parallel_group": None,
+        "activation_depth": depth,
+        "risk_relevance": relevance,
+        "completion": "completed when the checklist is applied to the lane fact",
+        "dynamic": dynamic,
+    }
+
+
+def _layout(graph: dict) -> None:
+    conc = max(1, int(graph["budgets"]["concurrency"]))
+    groups: list[list[str]] = []
+    chunk: list[str] = []
+    for node in graph["nodes"]:
+        if node["status"] != "active":
+            node["parallel_group"] = None
+            continue
+        if not node.get("parallel", True):
+            if chunk:
+                groups.append(chunk)
+                chunk = []
+            groups.append([node["slug"]])
+            node["parallel_group"] = len(groups) - 1
+            continue
+        chunk.append(node["slug"])
+        node["parallel_group"] = len(groups)
+        if len(chunk) >= conc:
+            groups.append(chunk)
+            chunk = []
+    if chunk:
+        groups.append(chunk)
+    graph["parallel_groups"] = groups
+    synthesis = [
+        {
+            "id": f"syn-{i}",
+            "after": group,
+            "produces": {"name": "group_decision", "type": "decision"},
+        }
+        for i, group in enumerate(groups)
+    ]
+    if len(synthesis) > 1:
+        synthesis.append(
+            {
+                "id": "syn-final",
+                "after": [item["id"] for item in synthesis],
+                "produces": {"name": "mission_put", "type": "decision"},
+            }
+        )
+    graph["synthesis"] = synthesis
+    graph["dependencies"] = [
+        {"from": prereq, "to": node["slug"]}
+        for node in graph["nodes"]
+        for prereq in node.get("prerequisites") or []
+        if node["status"] in {"active", "waiting", "completed", "dynamically_added"}
+    ]
+    graph["active"] = [node["slug"] for node in graph["nodes"] if node["status"] == "active"]
+
+
+def _finish_result(graph: dict) -> None:
+    if graph.get("catalog_named"):
+        graph["result"] = None
+        return
+    if graph.get("result") == "FRONTIER":
+        return
+    statuses = [node["status"] for node in graph["nodes"]]
+    if not statuses:
+        graph["result"] = "NO_METHOD_NEEDED"
+        return
+    if any(status in {"active", "completed", "dynamically_added"} for status in statuses):
+        graph["result"] = None
+        return
+    if statuses and all(status == "not_applicable" for status in statuses):
+        graph["result"] = "NOT_APPLICABLE"
+        return
+    if any(status == "waiting" for status in statuses):
+        graph["result"] = "NEEDS_PREREQUISITE"
+        return
+    graph["result"] = None
+
+
+def _new_graph(lane: str, sitting: str) -> dict:
+    return {
+        "mission": sitting,
+        "lane": lane,
+        "school": school_view(),
+        "quality_target": "sufficient_for_risk",
+        "risk_target": "low",
+        "one_skill_sufficient": False,
+        "nodes": [],
+        "dependencies": [],
+        "parallel_groups": [],
+        "synthesis": [],
+        "contracts": PATH_CONTRACTS,
+        "budgets": dict(DEFAULT_BUDGETS),
+        "fanout": [],
+        "bodies_loaded": 0,
+        "refused_body_loads": [],
+        "dynamic": [],
+        "result": None,
+        "catalog_named": False,
+        "frontier": None,
+        "jev": {"jev_called": False, "provider": None, "provider_call": False},
+        "activation_depth": 0,
+        "context_skills": [],
+        "active": [],
+        "evidence_rules": [],
+        "shelf_phrase_tokens": [],
+        "discovery": {
+            "searched": SEARCHED,
+            "candidates_returned": 0,
+            "eligible_after_filter": 0,
+            "selected": [],
+        },
+    }
+
+
+def _attach_discovery(graph: dict, rows: list[dict[str, str]]) -> None:
+    """Search hits stay on SkillDiscovery. They are not written into catalog_size."""
+    selected = [node["slug"] for node in graph["nodes"]]
+    eligible = sum(
+        1
+        for node in graph["nodes"]
+        if node["status"] in {"active", "waiting", "completed", "dynamically_added"}
+    )
+    graph["discovery"] = {
+        "searched": SEARCHED,
+        "candidates_returned": len(rows),
+        "eligible_after_filter": eligible,
+        "selected": selected,
+    }
+    graph["active"] = [node["slug"] for node in graph["nodes"] if node["status"] == "active"]
+
+
+def _distinctive_hits(sitting: str, rows: list[dict[str, str]]) -> list[tuple[int, str]]:
+    doc_freq: dict[str, int] = {}
+    parsed: list[tuple[str, set[str]]] = []
+    for row in rows:
+        tokens = _tokens(row["triggers"])
+        parsed.append((row["slug"], tokens))
+        for token in tokens:
+            doc_freq[token] = doc_freq.get(token, 0) + 1
+    sitting_tokens = _tokens(sitting)
+    scored: list[tuple[int, str]] = []
+    for slug, tokens in parsed:
+        overlap = sitting_tokens & {token for token in tokens if doc_freq.get(token, 0) <= 3}
+        if len(overlap) >= 2:
+            scored.append((len(overlap), slug))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return scored
+
+
+def _hard_slugs(sitting: str) -> list[str]:
+    found: list[str] = []
+    for pattern, slug in HINTS:
+        if pattern.search(sitting or "") and slug not in found:
+            found.append(slug)
+    return found
+
+
+def _mission_shape(sitting: str) -> tuple[str, bool]:
+    risk = "high" if (BLAST_RE.search(sitting or "") or COMPANY_RE.search(sitting or "")) else "low"
+    company = COMPANY_RE.search(sitting or "") is not None
+    return risk, company
+
+
+def _row_map(rows: list[dict[str, str]]) -> dict[str, dict[str, str]]:
+    return {row["slug"]: row for row in rows}
+
+
+def _apply_negative(nodes: list[dict], sitting: str) -> None:
+    if not EXAM_RE.search(sitting or ""):
+        return
+    for node in nodes:
+        blob = " ".join(node.get("negative_triggers") or []).lower()
+        if "exam" in blob:
+            node["status"] = "not_applicable"
+
+
+def build_active_skill_graph(
+    lane: str,
+    sitting: str,
+    explicit: list[str] | None = None,
+    evaluate=None,
+) -> dict:
+    """Sufficient subset for this mission. Does not read skill bodies."""
+    graph = _new_graph(lane, sitting)
+    rows = index_rows()
+    by_slug = _row_map(rows)
+    supplied = [slug.strip() for slug in (explicit or []) if slug.strip()]
+    graph["evidence_rules"] = _evidence_rules(sitting, supplied)
+    risk, company = _mission_shape(sitting)
+    graph["risk_target"] = "high" if risk == "high" else "low"
+    if SHELF_RE.search(sitting or ""):
+        graph["catalog_named"] = True
+        graph["one_skill_sufficient"] = False
+        graph["shelf_phrase_tokens"] = [
+            {
+                "token": token,
+                "status": CATALOG_SIZE_UNVERIFIED,
+                "roles_refused": ["skill", "course", "lesson", "lens"],
+            }
+            for token in re.findall(r"\b\d+\b", sitting or "")
+        ]
+        _layout(graph)
+        _finish_result(graph)
+        _attach_discovery(graph, rows)
+        return graph
+    if NOVEL_RE.search(sitting or ""):
+        decision = _call_gate(
+            {
+                "kind": "generation",
+                "role": "judge",
+                "evidence": ["novel decomposition"],
+            },
+            evaluate,
+        )
+        graph["frontier"] = {
+            "lane": decision.get("lane"),
+            "action": decision.get("action"),
+            "jev_called": False,
+            "provider": decision.get("provider"),
+            "reason": "novel decomposition stays frontier",
+        }
+        graph["jev"] = {
+            "jev_called": False,
+            "jev_allowed": decision.get("jev_allowed"),
+            "verb": decision.get("verb"),
+            "provider": None,
+            "provider_call": False,
+            "lane": decision.get("lane"),
+        }
+        graph["result"] = "FRONTIER"
+        _layout(graph)
+        _attach_discovery(graph, rows)
+        return graph
+
+    requested = [slug for slug in supplied if not _non_skill(slug)]
+    hard = requested or _hard_slugs(sitting)
+    scored = _distinctive_hits(sitting, rows)
+    top_score = scored[0][0] if scored else 0
+    tied = [slug for score, slug in scored if score == top_score] if scored else []
+    optional = [slug for _, slug in scored if slug not in hard]
+
+    if risk == "low" and not requested:
+        if len(hard) == 1 and (not tied or tied == hard or (len(tied) == 1 and tied[0] == hard[0])):
+            graph["one_skill_sufficient"] = True
+        elif not hard and len(tied) == 1:
+            hard = list(tied)
+            graph["one_skill_sufficient"] = True
+        elif not hard and len(tied) > 1:
+            decision = _call_gate(
+                {
+                    "verb": "rank",
+                    "role": "judge",
+                    "evidence": [{"kind": "eligible_bundles", "bundles": tied}],
+                },
+                evaluate,
+            )
+            graph["jev"] = {
+                "jev_called": False,
+                "jev_allowed": decision.get("jev_allowed"),
+                "verb": decision.get("verb"),
+                "provider": None,
+                "provider_call": False,
+                "lane": decision.get("lane"),
+            }
+            if decision.get("jev_allowed"):
+                hard = list(tied)
+            graph["one_skill_sufficient"] = False
+        elif len(hard) > 1:
+            graph["one_skill_sufficient"] = False
+        if graph["one_skill_sufficient"] and optional:
+            decision = _call_gate(
+                {
+                    "verb": "filter",
+                    "role": "judge",
+                    "evidence": [{"kind": "optional", "slugs": optional}],
+                },
+                evaluate,
+            )
+            graph["jev"] = {
+                "jev_called": False,
+                "jev_allowed": decision.get("jev_allowed"),
+                "verb": decision.get("verb"),
+                "provider": None,
+                "provider_call": False,
+                "lane": decision.get("lane"),
+            }
+            # Optional hits stay in discovery. One sufficient skill does not put them on the graph.
+
+    if risk == "high":
+        graph["one_skill_sufficient"] = False
+        decision = _call_gate(
+            {
+                "verb": "rank",
+                "role": "judge",
+                "evidence": [
+                    {
+                        "kind": "eligible_bundles",
+                        "bundles": ["containment", "company_wide"],
+                        "company": company,
+                    }
+                ],
+            },
+            evaluate,
+        )
+        graph["jev"] = {
+            "jev_called": False,
+            "jev_allowed": decision.get("jev_allowed"),
+            "verb": decision.get("verb"),
+            "provider": None,
+            "provider_call": False,
+            "lane": decision.get("lane"),
+        }
+        if decision.get("jev_allowed"):
+            want = {"high", "medium"} if company else {"high"}
+            for row in rows:
+                if row["risk_relevance"] in want and row["slug"] not in hard:
+                    hard.append(row["slug"])
+
+    seen: set[str] = set()
+    cost = graph["budgets"]["cost"]
+    for slug in hard:
+        if slug in seen or _non_skill(slug):
+            continue
+        if len([node for node in graph["nodes"] if node["status"] == "active"]) >= cost:
+            break
+        seen.add(slug)
+        graph["nodes"].append(
+            _blank_node(slug, status="active", depth=0, dynamic=False, row=by_slug.get(slug))
+        )
+    _apply_negative(graph["nodes"], sitting)
+    _layout(graph)
+    _finish_result(graph)
+    _attach_discovery(graph, rows)
+    return graph
+
+
+def request_specialist(
+    graph: dict,
+    slug: str,
+    *,
+    reason: str,
+    prerequisites: list[str] | None = None,
+    from_depth: int = 0,
+) -> dict:
+    """A skill may ask for another specialist. Budgets cap the fan-out."""
+    prerequisites = list(prerequisites or [])
+    depth = int(from_depth) + 1
+    budgets = graph["budgets"]
+    record = {"slug": slug, "reason": reason, "depth": depth}
+    if _non_skill(slug):
+        if _is_evidence_rule(slug):
+            rules = graph.setdefault("evidence_rules", [])
+            if not any(item.get("text") == RULE_TEXT for item in rules):
+                rules.append({"type": "EvidenceRule", "text": RULE_TEXT})
+        record["status"] = "refused"
+        record["skip_reason"] = "not_a_skill"
+        graph["fanout"].append(record)
+        _layout(graph)
+        _finish_result(graph)
+        return graph
+    if depth > budgets["depth"]:
+        record["status"] = "skipped"
+        record["skip_reason"] = "depth_budget"
+        graph["fanout"].append(record)
+        return graph
+    occupying = [node for node in graph["nodes"] if node["status"] in OCCUPYING]
+    if len(occupying) >= budgets["cost"]:
+        record["status"] = "skipped"
+        record["skip_reason"] = "cost_budget"
+        graph["fanout"].append(record)
+        return graph
+    same_depth = [
+        node
+        for node in graph["nodes"]
+        if node["status"] in OCCUPYING and node["activation_depth"] == depth
+    ]
+    if len(same_depth) >= budgets["concurrency"]:
+        record["status"] = "skipped"
+        record["skip_reason"] = "concurrency_budget"
+        graph["fanout"].append(record)
+        return graph
+    satisfied = set(graph.get("context_skills") or [])
+    satisfied |= {
+        node["slug"]
+        for node in graph["nodes"]
+        if node["status"] in {"active", "completed", "dynamically_added"}
+    }
+    row = _row_map(index_rows()).get(slug)
+    if any(prereq not in satisfied for prereq in prerequisites):
+        node = _blank_node(slug, status="waiting", depth=depth, dynamic=True, row=row)
+        node["prerequisites"] = prerequisites
+        graph["nodes"].append(node)
+        record["status"] = "waiting"
+        graph["fanout"].append(record)
+        graph["dynamic"].append(slug)
+        _layout(graph)
+        _finish_result(graph)
+        _refresh_selection(graph)
+        return graph
+    node = _blank_node(slug, status="dynamically_added", depth=depth, dynamic=True, row=row)
+    node["prerequisites"] = prerequisites
+    graph["nodes"].append(node)
+    graph["activation_depth"] = max(int(graph.get("activation_depth", 0)), depth)
+    graph["dynamic"].append(slug)
+    record["status"] = "dynamically_added"
+    graph["fanout"].append(record)
+    graph["one_skill_sufficient"] = False
+    _layout(graph)
+    _finish_result(graph)
+    _refresh_selection(graph)
+    return graph
+
+
+def _refresh_selection(graph: dict) -> None:
+    """Specialist adds change selection. They do not change catalog_size or retrieval_hits."""
+    disc = graph.setdefault("discovery", {})
+    disc["selected"] = [node["slug"] for node in graph["nodes"]]
+    disc["eligible_after_filter"] = sum(
+        1
+        for node in graph["nodes"]
+        if node["status"] in {"active", "waiting", "completed", "dynamically_added"}
+    )
+    graph["active"] = [node["slug"] for node in graph["nodes"] if node["status"] == "active"]
+
+
+def load_skill_body(graph: dict, slug: str) -> str | None:
+    """Context budget gates body loads. The default budget loads nothing."""
+    if graph["bodies_loaded"] >= graph["budgets"]["context"]:
+        graph["refused_body_loads"].append(slug)
+        return None
+    path = SKILL_DIR / f"{slug}.md"
+    if not path.is_file():
+        graph["refused_body_loads"].append(slug)
+        return None
+    graph["bodies_loaded"] += 1
+    return path.read_text(encoding="utf-8")
+
+
+def mark_node(graph: dict, slug: str, status: str) -> dict:
+    allowed = set(GRAPH_STATUSES)
+    if status not in allowed:
+        raise ValueError(status)
+    for node in graph["nodes"]:
+        if node["slug"] == slug:
+            node["status"] = status
+            break
+    _layout(graph)
+    _finish_result(graph)
+    return graph
 
 
 def _parse_map_rows(lane: str) -> list[dict[str, str]]:
@@ -44,10 +801,10 @@ def _parse_map_rows(lane: str) -> list[dict[str, str]]:
         return []
     text = MAP.read_text(encoding="utf-8")
     heading = "## Hive-os" if lane == "hive-os" else "## Agency"
-    m = re.search(rf"^{re.escape(heading)}.*$", text, re.MULTILINE)
-    if not m:
+    match = re.search(rf"^{re.escape(heading)}.*$", text, re.MULTILINE)
+    if not match:
         return []
-    rest = text[m.end() :]
+    rest = text[match.end() :]
     nxt = re.search(r"^## ", rest, re.MULTILINE)
     body = rest[: nxt.start()] if nxt else rest
     rows: list[dict[str, str]] = []
@@ -95,23 +852,25 @@ def _catalog_hits(sitting: str) -> list[str]:
         slug, when = parts[1].strip("`"), parts[2]
         if not slug or slug == "slug":
             continue
-        n = len(tokens & set(re.findall(r"[a-z0-9]{4,}", when.lower())))
-        if n >= 2:
-            scored.append((n, slug))
-    scored.sort(key=lambda x: (-x[0], x[1]))
-    return [s for _, s in scored]
+        overlap = len(tokens & set(re.findall(r"[a-z0-9]{4,}", when.lower())))
+        if overlap >= 2:
+            scored.append((overlap, slug))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return [slug for _, slug in scored]
 
 
 def pick_slugs(sitting: str, explicit: list[str]) -> list[str]:
+    if SHELF_RE.search(sitting or ""):
+        return []
     out: list[str] = []
-    for s in explicit:
-        slug = s.strip().strip("`")
-        if slug and slug not in out:
-            out.append(slug)
+    for slug in explicit:
+        cleaned = slug.strip().strip("`")
+        if cleaned and cleaned not in out:
+            out.append(cleaned)
         if len(out) >= CAP:
             return out
-    for pat, slug in HINTS:
-        if pat.search(sitting or "") and slug not in out:
+    for pattern, slug in HINTS:
+        if pattern.search(sitting or "") and slug not in out:
             out.append(slug)
         if len(out) >= CAP:
             return out
@@ -124,16 +883,17 @@ def pick_slugs(sitting: str, explicit: list[str]) -> list[str]:
 
 
 def render(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
-    slugs = pick_slugs(sitting, slugs or [])
+    explicit = list(slugs or [])
+    chosen = pick_slugs(sitting, explicit)
     rows = _parse_map_rows(lane)
     picked: list[dict[str, str]] = []
-    for slug in slugs:
+    for slug in chosen:
         keys = _keys_for_slug(slug)
         hit = next(
             (
-                r
-                for r in rows
-                if any(k and k in r["skill"] for k in keys) or slug in r["said"]
+                row
+                for row in rows
+                if any(key and key in row["skill"] for key in keys) or slug in row["said"]
             ),
             None,
         )
@@ -154,9 +914,9 @@ def render(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
             {
                 "slug": "(none matched)",
                 "said": sitting or "",
-                "skill": "saylor-course-skill",
+                "skill": "",
                 "put": "name LANE + one fact, or skip this pass",
-                "leverage": "Consultant asks once; do not dump the catalog",
+                "leverage": "the catalog is not a selected skill",
             }
         )
     facts = (
@@ -164,12 +924,15 @@ def render(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
         if lane == "hive-os"
         else "CONTENT/topics/live-facts-agency.md"
     )
+    graph = build_active_skill_graph(lane, sitting, explicit)
     return {
         "lane": lane,
         "sitting": sitting,
         "facts": facts,
-        "skills": [p["slug"] for p in picked if p["slug"] != "(none matched)"][:CAP],
+        "school": graph["school"],
+        "skills": [row["slug"] for row in picked if row["slug"] != "(none matched)"][:CAP],
         "rows": picked[:CAP],
+        "graph": graph,
         "next": "one guided action on the live fact, or HITL if this is send/pay/deploy/book/publish",
     }
 
@@ -182,11 +945,11 @@ def _parse_beats(path: Path | None = None) -> dict[str, dict[str, str]]:
     course = ""
     cur: dict[str, str] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
-        m = re.match(r"^## ([A-Z]{2,6}\d{2,4})\s*$", line)
-        if m:
+        match = re.match(r"^## ([A-Z]{2,6}\d{2,4})\s*$", line)
+        if match:
             if course and cur:
                 out[course] = cur
-            course = m.group(1)
+            course = match.group(1)
             cur = {"course": course}
             continue
         kv = re.match(r"^\*\*(When|Says|Now|Watch):\*\*\s+(.*)$", line)
@@ -198,25 +961,110 @@ def _parse_beats(path: Path | None = None) -> dict[str, dict[str, str]]:
 
 
 def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
-    """One school this turn. Teach, then the caller does the work."""
-    card = render(lane, sitting, slugs)
+    """One teaching idea. The school label is the catalog, not the selected skill."""
+    explicit = list(slugs or [])
+    graph = build_active_skill_graph(lane, sitting, explicit)
+    school = graph["school"]
+    if graph.get("catalog_named"):
+        return {
+            "mode": "live",
+            "lane": lane,
+            "sitting": sitting,
+            "slug": None,
+            "course": None,
+            "school": school,
+            "graph": graph,
+            "says": (
+                "School names the curriculum. catalog_size stays unverified until a contract proves the set. "
+                "A number spoken next to the shelf is a phrase token, not a count of skills, courses, lessons, or lenses. "
+                "The catalog is not a selected skill and the manuals stay closed. "
+                "A mission builds the graph it actually needs."
+            ),
+            "now": "Leave the catalog closed. Name the mission if one skill is not the whole job.",
+            "watch": "A school label is not one selected skill. Hard step stays Evens.",
+            "put": "the mission graph, not a course stamp",
+            "leverage": school_label(school),
+            "then": "do the work through the graph; do not stamp and leave",
+        }
+    if graph.get("result") == "NO_METHOD_NEEDED":
+        return {
+            "mode": "live",
+            "lane": lane,
+            "sitting": sitting,
+            "slug": None,
+            "course": None,
+            "school": school,
+            "graph": graph,
+            "says": (
+                "This sitting does not need a university skill. "
+                "No method is a real result. "
+                "Do not borrow a course label so the card looks filled in."
+            ),
+            "now": "Do the mechanical change. Leave the catalog closed.",
+            "watch": "Do not invent a KPI or a course.",
+            "put": "no course file",
+            "leverage": "NO_METHOD_NEEDED",
+            "then": "do the work; do not stamp a school",
+        }
+    if graph.get("result") == "NOT_APPLICABLE":
+        return {
+            "mode": "live",
+            "lane": lane,
+            "sitting": sitting,
+            "slug": None,
+            "course": None,
+            "school": school,
+            "graph": graph,
+            "says": (
+                "The skill that matched this sitting is not applicable. "
+                "An exam reconstruction does not get that course beat. "
+                "Leave the checklist closed."
+            ),
+            "now": "Do not teach the checklist. The node stays not applicable.",
+            "watch": "A not-applicable node does not become the lens.",
+            "put": "no course beat",
+            "leverage": "NOT_APPLICABLE",
+            "then": "do not teach a course the graph refused",
+            "evidence_scope": "exam_card",
+        }
+    if graph.get("result") == "FRONTIER":
+        return {
+            "mode": "live",
+            "lane": lane,
+            "sitting": sitting,
+            "slug": None,
+            "course": None,
+            "school": school,
+            "graph": graph,
+            "says": (
+                "A novel split is frontier work. "
+                "The judgment gate may say so. "
+                "It does not invent the decomposition and it does not place a call."
+            ),
+            "now": "Keep the novel split on the frontier lane.",
+            "watch": "Do not ask Jev to invent the method.",
+            "put": "frontier note on the graph",
+            "leverage": "frontier, not a course stamp",
+            "then": "do not pretend a catalog skill is the novel method",
+        }
+    card = render(lane, sitting, explicit)
     row = card["rows"][0]
     courses = COURSE_RE.findall(f"{row.get('skill', '')} {row.get('said', '')} {row.get('slug', '')}")
     beats = _parse_beats()
-    beat = {}
-    for c in courses:
-        if c in beats:
-            beat = beats[c]
+    beat: dict[str, str] = {}
+    for course in courses:
+        if course in beats:
+            beat = beats[course]
             break
     if not beat:
-        for c, b in beats.items():
-            when = (b.get("when") or "").lower()
+        for course, candidate in beats.items():
+            when = (candidate.get("when") or "").lower()
             if when and any(tok in (sitting or "").lower() for tok in when.split() if len(tok) > 4):
-                beat = b
+                beat = candidate
                 break
     if not beat:
         beat = {
-            "course": row.get("skill") or "saylor-course-skill",
+            "course": row.get("skill") or "",
             "says": (
                 f"{row.get('said') or sitting}. Decide {row.get('put')} before the next edit. "
                 f"{row.get('leverage')}."
@@ -224,14 +1072,15 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
             "now": row.get("put") or "name LANE + one fact",
             "watch": "Do not dump the catalog. Do not invent a KPI.",
         }
-    says = beat.get("says") or ""
     return {
         "mode": "live",
         "lane": lane,
         "sitting": sitting,
         "slug": row.get("slug"),
         "course": beat.get("course") or (courses[0] if courses else row.get("skill")),
-        "says": says,
+        "school": school,
+        "graph": graph,
+        "says": beat.get("says") or "",
         "now": beat.get("now") or row.get("put"),
         "watch": beat.get("watch") or "marketing ≠ copy ≠ CS; hard step stays Evens",
         "put": row.get("put"),
@@ -240,11 +1089,51 @@ def live_beat(lane: str, sitting: str, slugs: list[str] | None = None) -> dict:
     }
 
 
+def _card_fields(school: dict, graph: dict) -> list[str]:
+    disc = graph.get("discovery") or {}
+    active = list(graph.get("active") or [])
+    selected = list(disc.get("selected") or [])
+    return [
+        f"catalog_size: {school.get('catalog_size')}",
+        f"course_declaring_skill_slugs: {school.get('course_declaring_skill_slugs')}",
+        f"unique_course_headers: {school.get('unique_course_headers')}",
+        f"retrieval_hits: {disc.get('candidates_returned')}",
+        f"selected_skills: {', '.join(selected) or '(none)'}",
+        f"active_skills: {', '.join(active) or '(none)'}",
+    ]
+
+
+def format_live(beat: dict) -> str:
+    school = beat.get("school") or school_view()
+    graph = beat.get("graph") or {}
+    active = list(graph.get("active") or [])
+    lines = [
+        f"# Live mentor · {beat['lane']}",
+        "",
+        f"SITTING: {beat['sitting'] or '(name it)'}",
+        f"SCHOOL: {school_label(school)}",
+        *_card_fields(school, graph),
+        f"LENS: {beat.get('course') or '(none)'}",
+        f"GRAPH: {len(active)} active · loaded {graph.get('bodies_loaded', 0)} · "
+        f"result {graph.get('result') or 'graph'}",
+        f"SAYS: {beat['says']}",
+        f"NOW: {beat['now']}",
+        f"THEN: {beat['then']}",
+        f"WATCH: {beat['watch']}",
+    ]
+    return "\n".join(lines)
+
+
 def emit_vault(card: dict, desk: str, host: str) -> str:
+    graph = card.get("graph") or {}
+    active = [node["slug"] for node in graph.get("nodes") or [] if node.get("status") == "active"]
     items = [
         f"LANE: {card['lane']}",
         f"SITTING: {card['sitting']}",
+        f"SCHOOL: {school_label(card.get('school'))}",
+        *_card_fields(card.get("school") or school_view(), graph),
         f"SKILLS: {', '.join(card['skills']) or 'none'}",
+        f"GRAPH: {len(active)} active · loaded {graph.get('bodies_loaded', 0)}",
     ]
     for row in card["rows"][:CAP]:
         items.append(f"{row['slug']}: PUT {row['put']} · LEV {row['leverage']}")
@@ -290,8 +1179,8 @@ def emit_vault(card: dict, desk: str, host: str) -> str:
             "--title",
             f"Mentor pass · {card['lane']}",
         ]
-        for it in items:
-            cmd.extend(["--item", it])
+        for item in items:
+            cmd.extend(["--item", item])
         subprocess.run(cmd, check=False, cwd=str(ROOT))
     return str(rel)
 
@@ -305,13 +1194,13 @@ def self_test() -> list[str]:
         errs.append("picked more than 3")
     if "bizcomm-audience-purpose-channel-tone-feedback" not in card["skills"]:
         errs.append("copy sitting missed BUS210")
-    put = " ".join(r.get("put", "") for r in card["rows"])
+    put = " ".join(row.get("put", "") for row in card["rows"])
     if "Message line" not in put and "who/why" not in put.lower():
         errs.append("BUS210 row missed leverage-map PUT")
     agency = render("agency", "sales process SPIN for a named client", ["grad-sales-process-spin-loyalty-brand"])
     if agency["lane"] != "agency":
         errs.append("agency lane lost")
-    if "next question" not in " ".join(r.get("put", "") for r in agency["rows"]):
+    if "next question" not in " ".join(row.get("put", "") for row in agency["rows"]):
         errs.append("BUS633 row missed agency PUT")
     dump = render("hive-os", "everything", list(f"slug-{i}" for i in range(8)))
     if len(dump["skills"]) > CAP:
@@ -337,21 +1226,314 @@ def self_test() -> list[str]:
         errs.append("live NOW missed who/why/tone")
     if live.get("mode") != "live":
         errs.append("live mode flag missing")
+    declarations = course_declarations()
+    declaring = len(declarations)
+    headers = len(set(declarations.values()))
+    found = len(index_rows())
+    proven = proven_catalog_size()
+    school = live.get("school") or {}
+    if school.get("catalog") != SCHOOL_NAMESPACE or school.get("namespace") != SCHOOL_NAMESPACE:
+        errs.append("school is not the saylor-course-skills catalog")
+    if school.get("course_declaring_skill_slugs") != declaring:
+        errs.append("course_declaring_skill_slugs is not the declaration count")
+    if school.get("unique_course_headers") != headers:
+        errs.append("unique_course_headers is not the distinct course-header count")
+    if proven == found:
+        if school.get("catalog_size") != proven:
+            errs.append("proven catalog enumeration was not used as catalog_size")
+    elif school.get("catalog_size") == found or school.get("catalog_size") != CATALOG_SIZE_UNVERIFIED:
+        errs.append("search hits were written into catalog_size")
+    if "available" in school:
+        errs.append("school still carries available")
+    if school.get("loaded") or school.get("active_skill") is not None:
+        errs.append("school loaded a skill or selected one")
+    if school.get("mastered") is True:
+        errs.append("school was reported as mastered")
+    live_md = format_live(live)
+    school_line = next((line for line in live_md.splitlines() if line.startswith("SCHOOL:")), "")
+    if re.search(r"^SCHOOL:\s*BUS\d+\s*$", school_line) or "BUS210" in school_line:
+        errs.append("SCHOOL label is a selected course")
+    if "not the active skill" not in school_line or "catalog_size:" not in school_line:
+        errs.append("SCHOOL line missed catalog_size")
+    if re.search(r"available\s*[:=]?\s*\d+", live_md, re.I):
+        errs.append("available carries a naked count")
+    if proven != found and re.search(rf"(?m)^catalog_size:\s*{found}\s*$", live_md):
+        errs.append("card printed the search hit count as catalog_size")
+    if proven is None and "catalog_size: UNVERIFIED" not in live_md:
+        errs.append("card did not print catalog_size: UNVERIFIED")
+    if f"retrieval_hits: {found}" not in live_md:
+        errs.append("card missed retrieval_hits")
+    if "selected_skills:" not in live_md or "active_skills:" not in live_md:
+        errs.append("card missed selected_skills or active_skills")
+    disc = (live.get("graph") or {}).get("discovery") or {}
+    if disc.get("candidates_returned") != found:
+        errs.append("retrieval_hits is not the search result")
+    graph = live.get("graph") or {}
+    active = [node["slug"] for node in graph.get("nodes") or [] if node.get("status") == "active"]
+    if active != ["bizcomm-audience-purpose-channel-tone-feedback"]:
+        errs.append(f"copy graph was not the one sufficient skill ({active})")
+    if graph.get("one_skill_sufficient") is not True:
+        errs.append("copy sitting should be one sufficient skill")
+    if graph.get("bodies_loaded") != 0:
+        errs.append("copy graph loaded skill bodies")
+    wide = build_active_skill_graph(
+        "hive-os",
+        "company-wide blast radius across the lifecycle before this change ships",
+        [],
+    )
+    wide_active = [node["slug"] for node in wide["nodes"] if node["status"] == "active"]
+    if len(wide_active) != 31:
+        errs.append(f"high-blast graph size {len(wide_active)} is not 31")
+    if set(curriculum_slugs()) <= set(wide_active):
+        errs.append("high-blast graph loaded every course-declaring slug")
+    if proven is None and wide["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+        errs.append("high-blast catalog_size left UNVERIFIED")
+    if proven is not None and len(wide_active) >= proven:
+        errs.append("high-blast graph loaded the proven catalog")
+    if wide["bodies_loaded"] != 0 or wide["school"]["loaded"]:
+        errs.append("high-blast graph loaded bodies")
+    if wide["one_skill_sufficient"]:
+        errs.append("high-blast mission collapsed to one skill")
+    if any(slug.startswith("austrian-") or slug.startswith("bitcoin-") or slug.startswith("what-is-money") for slug in wide_active):
+        errs.append("money-theory skills entered the company-wide graph")
+    if not wide["parallel_groups"] or max(len(group) for group in wide["parallel_groups"]) > wide["budgets"]["concurrency"]:
+        errs.append("parallel groups broke the concurrency budget")
+    if not any(item["id"] == "syn-final" for item in wide["synthesis"]):
+        errs.append("high-blast graph missed a synthesis point")
+    if wide["jev"].get("jev_called") or wide["jev"].get("provider") is not None:
+        errs.append("high-blast graph called Jev")
+    if wide["jev"].get("jev_allowed") is not True:
+        errs.append("existing gate did not allow the bundle rank")
+    none = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+    if none.get("result") != "NO_METHOD_NEEDED" or none["nodes"]:
+        errs.append(f"css sitting was not NO_METHOD_NEEDED ({none.get('result')})")
+    hero = build_active_skill_graph("hive-os", "render the hero still to a 6 second clip", [])
+    if hero.get("result") != "NO_METHOD_NEEDED" or hero["nodes"]:
+        errs.append(f"hero still was not NO_METHOD_NEEDED ({hero.get('result')})")
+    exam = build_active_skill_graph("hive-os", "reconstruct the exam and fix the tone", [])
+    if exam.get("result") != "NOT_APPLICABLE":
+        errs.append(f"exam sitting was not NOT_APPLICABLE ({exam.get('result')})")
+    exam_live = live_beat("hive-os", "reconstruct the exam and fix the tone", [])
+    exam_md = format_live(exam_live)
+    if exam_live.get("course") == "BUS210" or "BUS210" in exam_md or "Audience, purpose" in exam_md:
+        errs.append("not-applicable card taught BUS210")
+    if exam_live.get("graph", {}).get("result") != "NOT_APPLICABLE":
+        errs.append("exam card lost NOT_APPLICABLE")
+    if exam_live.get("evidence_scope") != "exam_card":
+        errs.append("exam-card pass was not scoped to the card")
+    if exam_live.get("school", {}).get("mastered") is True or re.search(r"mastered|mastery", exam_md, re.I):
+        errs.append("exam-card pass was reported as the school being mastered")
+    shelf = live_beat("hive-os", "Don't just focus on BUS206. Focus on all the school skills 164 as well.", [])
+    if shelf.get("course") == "BUS206" or shelf.get("school", {}).get("active_skill") is not None:
+        errs.append("shelf sitting selected BUS206 or a skill")
+    shelf_md = format_live(shelf)
+    shelf_school = next(line for line in shelf_md.splitlines() if line.startswith("SCHOOL:"))
+    if proven is None and shelf["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+        errs.append("shelf catalog_size left UNVERIFIED")
+    for token in re.findall(r"\b\d+\b", shelf.get("sitting") or ""):
+        if str(shelf["school"]["catalog_size"]) == token:
+            errs.append("shelf-phrase token was printed as catalog_size")
+        if token in str(shelf.get("course") or ""):
+            errs.append("shelf-phrase token was used as a lens")
+        for node in shelf["graph"]["nodes"]:
+            if token in (node.get("slug") or "") or token == (node.get("course") or ""):
+                errs.append("shelf-phrase token was used as a skill or course")
+        lessons = list(shelf["graph"].get("lessons") or []) + list(shelf["school"].get("lessons") or [])
+        if token in [str(item) for item in lessons]:
+            errs.append("shelf-phrase token was used as a lesson")
+        noted = shelf["graph"].get("shelf_phrase_tokens") or []
+        if not any(item.get("token") == token and item.get("status") == CATALOG_SIZE_UNVERIFIED for item in noted):
+            errs.append("shelf-phrase token was not left UNVERIFIED")
+        if re.search(rf"(?m)^catalog_size:\s*{re.escape(token)}\s*$", shelf_md):
+            errs.append("shelf card printed the phrase token as catalog_size")
+    if "available" in shelf_school.lower() or "mastered" in shelf_school.lower():
+        errs.append("shelf SCHOOL line uses available or mastery")
+    if shelf["graph"]["bodies_loaded"] != 0 or shelf["graph"]["nodes"]:
+        errs.append("shelf sitting loaded the catalog")
+    frontier = build_active_skill_graph("hive-os", "decompose a novel method that no course covers", [])
+    if frontier.get("result") != "FRONTIER" or (frontier.get("frontier") or {}).get("lane") != "frontier":
+        errs.append(f"novel decomposition was not frontier ({frontier.get('result')})")
+    if frontier["jev"].get("jev_called") or frontier["nodes"]:
+        errs.append("novel decomposition was handed to Jev or the catalog")
+    denied = build_active_skill_graph(
+        "hive-os",
+        "company-wide blast radius across the lifecycle before this change ships",
+        [],
+        evaluate=lambda _request: {
+            "lane": "deterministic",
+            "action": "NO_ACTION",
+            "jev_allowed": False,
+            "jev_called": False,
+            "verb": None,
+            "provider": None,
+            "provider_call": False,
+        },
+    )
+    if any(node["status"] == "active" for node in denied["nodes"]):
+        errs.append("denied gate still expanded the high-blast bundle")
+    empty = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+    request_specialist(
+        empty,
+        "bizlaw-sources-forum-wrongs-assets-entity-checklists",
+        reason="need a specialist",
+        prerequisites=["missing-course"],
+    )
+    if empty.get("result") != "NEEDS_PREREQUISITE":
+        errs.append(f"missing prerequisite was {empty.get('result')}")
+    base = build_active_skill_graph("hive-os", "who is this page for and what tone", [])
+    pool = [slug for slug in curriculum_slugs() if not slug.startswith("bizcomm-")]
+    for slug in pool[:6]:
+        request_specialist(base, slug, reason="fan-out")
+    added = [item for item in base["fanout"] if item.get("status") == "dynamically_added"]
+    skipped = [item for item in base["fanout"] if item.get("skip_reason") == "concurrency_budget"]
+    if len(added) != base["budgets"]["concurrency"] or len(skipped) != 2:
+        errs.append(f"fan-out concurrency failed ({len(added)} added, {len(skipped)} skipped)")
+    capped = build_active_skill_graph("hive-os", "who is this page for and what tone", [])
+    capped["budgets"]["cost"] = 1
+    request_specialist(capped, "extra-skill", reason="cost")
+    if not any(item.get("skip_reason") == "cost_budget" for item in capped["fanout"]):
+        errs.append("cost budget did not stop fan-out")
+    request_specialist(capped, "too-deep", reason="depth", from_depth=capped["budgets"]["depth"])
+    if not any(item.get("skip_reason") == "depth_budget" for item in capped["fanout"]):
+        errs.append("depth budget did not stop fan-out")
+    if load_skill_body(base, "bizcomm-audience-purpose-channel-tone-feedback") is not None:
+        errs.append("context budget loaded a skill body")
+    if base["bodies_loaded"] != 0:
+        errs.append("body load incremented under a zero context budget")
+    mark_node(base, "bizcomm-audience-purpose-channel-tone-feedback", "completed")
+    if not any(node["slug"].startswith("bizcomm") and node["status"] == "completed" for node in base["nodes"]):
+        errs.append("completed status did not stick")
+    contract = base["contracts"]["saylor-course-skill"]
+    for key in ("prerequisites", "triggers", "negative_triggers", "required_context", "outputs", "parallel", "activation_depth", "risk_relevance", "completion"):
+        if key not in contract:
+            errs.append(f"path contract missed {key}")
+    if contract.get("role") != "catalog_namespace":
+        errs.append("course skill contract is not the catalog namespace")
+    _regress_distinctions(errs, found)
     return errs
 
 
+def _regress_search_hits_are_not_catalog_size(errs: list[str], hits: int) -> None:
+    """A live search hit count is retrieval_hits. It is not catalog_size without proof."""
+    graph = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+    if (graph.get("discovery") or {}).get("candidates_returned") != hits:
+        errs.append("retrieval_hits did not follow the search")
+    proven = proven_catalog_size()
+    size = graph["school"]["catalog_size"]
+    beat = live_beat("hive-os", "change the css color of the hero", [])
+    md = format_live(beat)
+    if f"retrieval_hits: {hits}" not in md:
+        errs.append("card retrieval_hits did not follow the search")
+    if proven == hits:
+        if size != proven:
+            errs.append("direct enumeration proved N and catalog_size did not use it")
+        return
+    if size == hits:
+        errs.append("a search hit count was written into catalog_size without an enumeration proof")
+    if proven is None and size != CATALOG_SIZE_UNVERIFIED:
+        errs.append("catalog_size was not UNVERIFIED")
+    if re.search(rf"(?m)^catalog_size:\s*{hits}\s*$", md):
+        errs.append("card printed the search hit count as catalog_size")
+    declarations = course_declarations()
+    declaring = len(declarations)
+    header_count = len(set(declarations.values()))
+    if graph["school"].get("course_declaring_skill_slugs") != declaring:
+        errs.append("course_declaring_skill_slugs left the declaration count")
+    if graph["school"].get("unique_course_headers") != header_count:
+        errs.append("unique_course_headers left the distinct header count")
+    if proven is None and size in {declaring, header_count}:
+        errs.append("a course-file count was printed as catalog_size")
+    grouped: dict[str, list[str]] = {}
+    for slug, course in declarations.items():
+        grouped.setdefault(course, []).append(slug)
+    if "BUS401" not in grouped or len(grouped["BUS401"]) < 2:
+        errs.append("BUS401 is not declared by more than one skill file")
+    if declaring == header_count:
+        errs.append("unique course headers were collapsed into skill slugs")
+
+
+def _regress_distinctions(errs: list[str], found: int) -> None:
+    """These fail if a later edit collapses two different objects into one."""
+    _regress_search_hits_are_not_catalog_size(errs, found)
+    original = index_rows
+    extra = {
+        "course": "ZZZ",
+        "slug": "search-only-hit",
+        "triggers": "searchonlyhit tokenone tokentwo",
+        "negative_triggers": "",
+        "risk_relevance": "low",
+    }
+
+    def inflated() -> list[dict[str, str]]:
+        return list(original()) + [extra]
+
+    globals()["index_rows"] = inflated
+    try:
+        view = school_view()
+        graph = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+        hits = (graph.get("discovery") or {}).get("candidates_returned")
+        if hits != found + 1:
+            errs.append(f"retrieval did not follow the search ({hits})")
+        if view.get("catalog_size") == hits or graph["school"]["catalog_size"] == hits:
+            errs.append("SEARCH RESULT collapsed into CATALOG: catalog_size followed retrieval_hits")
+        if proven_catalog_size() is None and graph["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+            errs.append("inflated search changed catalog_size off UNVERIFIED")
+        beat = live_beat("hive-os", "change the css color of the hero", [])
+        md = format_live(beat)
+        if f"retrieval_hits: {found + 1}" not in md:
+            errs.append("card retrieval_hits did not follow the inflated search")
+        if re.search(rf"(?m)^catalog_size:\s*{found + 1}\s*$", md):
+            errs.append("card wrote the inflated retrieval_hits into catalog_size")
+        if re.search(r"available\s*[:=]?\s*\d+", md, re.I):
+            errs.append("available carries a naked count")
+    finally:
+        globals()["index_rows"] = original
+
+    job = build_active_skill_graph("hive-os", JOB_TEXT, [JOB_TEXT])
+    if any(JOB_TEXT in (slug or "").lower() for slug in job.get("active") or []):
+        errs.append("JOB collapsed into SKILL: read the share is in ActiveSkillGraph.active")
+    if any(JOB_TEXT in (node.get("slug") or "").lower() for node in job["nodes"]):
+        errs.append("JOB collapsed into SKILL: read the share is a graph node")
+    if job.get("result") != "NO_METHOD_NEEDED" or job.get("active"):
+        errs.append("a job was treated as a Saylor method")
+
+    rule = build_active_skill_graph("hive-os", RULE_TEXT, [RULE_TEXT])
+    if any(
+        node.get("status") in {"active", "not_applicable"} and _is_evidence_rule(node.get("slug") or "")
+        for node in rule["nodes"]
+    ):
+        errs.append("RULE collapsed into SKILL")
+    if any(_is_evidence_rule(node.get("slug") or "") for node in rule["nodes"]):
+        errs.append("EvidenceRule was stored as a skill node")
+    rules = rule.get("evidence_rules") or []
+    if not any(item.get("type") == "EvidenceRule" and item.get("text") == RULE_TEXT for item in rules):
+        errs.append("EvidenceRule was not recorded separately from skills")
+    if rule.get("active"):
+        errs.append("an evidence rule activated a skill")
+
+    quiet = build_active_skill_graph("hive-os", "change the css color of the hero", [])
+    if quiet.get("result") != "NO_METHOD_NEEDED" or quiet.get("active"):
+        errs.append("CATALOG collapsed into ACTIVE CONTEXT")
+    if proven_catalog_size() is None and quiet["school"]["catalog_size"] != CATALOG_SIZE_UNVERIFIED:
+        errs.append("NO_METHOD mission printed an unproven catalog_size")
+    if curriculum_slugs()[0] in (quiet.get("active") or []):
+        errs.append("a skill in the school was automatically active")
+    if set(quiet.get("active") or []) == set(curriculum_slugs()):
+        errs.append("the catalog was copied into the active context")
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Saylor mentor pass (1–3 skills, no dump)")
-    ap.add_argument("--lane", choices=LANES)
-    ap.add_argument("--sitting", default="")
-    ap.add_argument("--slugs", default="", help="comma-separated slugs (cap 3)")
-    ap.add_argument("--emit", action="store_true")
-    ap.add_argument("--desk", default="consultant")
-    ap.add_argument("--host", default="cursor", choices=("cursor", "grok"))
-    ap.add_argument("--format", default="markdown", choices=("markdown", "json"))
-    ap.add_argument("--live", action="store_true", help="one teaching beat this turn (not the end card)")
-    ap.add_argument("--self-test", action="store_true")
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser(description="Saylor mentor pass (catalog namespace + mission graph)")
+    parser.add_argument("--lane", choices=LANES)
+    parser.add_argument("--sitting", default="")
+    parser.add_argument("--slugs", default="", help="comma-separated slugs (teaching card cap 3)")
+    parser.add_argument("--emit", action="store_true")
+    parser.add_argument("--desk", default="consultant")
+    parser.add_argument("--host", default="cursor", choices=("cursor", "grok"))
+    parser.add_argument("--format", default="markdown", choices=("markdown", "json"))
+    parser.add_argument("--live", action="store_true", help="one teaching beat this turn (not the end card)")
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
     if args.self_test:
         errs = self_test()
         if errs:
@@ -362,26 +1544,13 @@ def main() -> int:
     if not args.lane:
         print("LANE required: hive-os | agency", file=sys.stderr)
         return 2
-    slugs = [s for s in args.slugs.split(",") if s.strip()]
+    slugs = [slug for slug in args.slugs.split(",") if slug.strip()]
     if args.live:
         beat = live_beat(args.lane, args.sitting, slugs)
         if args.format == "json":
             print(json.dumps(beat, indent=2))
             return 0
-        print(
-            "\n".join(
-                [
-                    f"# Live mentor · {beat['lane']}",
-                    "",
-                    f"SITTING: {beat['sitting'] or '(name it)'}",
-                    f"SCHOOL: {beat['course']}",
-                    f"SAYS: {beat['says']}",
-                    f"NOW: {beat['now']}",
-                    f"THEN: {beat['then']}",
-                    f"WATCH: {beat['watch']}",
-                ]
-            )
-        )
+        print(format_live(beat))
         return 0
     card = render(args.lane, args.sitting, slugs)
     if args.emit:
@@ -393,10 +1562,19 @@ def main() -> int:
         f"# Mentor pass · {card['lane']}",
         "",
         f"SITTING: {card['sitting'] or '(name it)'}",
+        f"SCHOOL: {school_label(card.get('school'))}",
+        *_card_fields(card.get("school") or school_view(), card.get("graph") or {}),
         f"FACTS: {card['facts']}",
         f"SKILLS: {', '.join(card['skills']) or '(none — skip or say one fact)'}",
         "",
     ]
+    graph = card.get("graph") or {}
+    active = list(graph.get("active") or [])
+    lines.append(
+        f"GRAPH: {len(active)} active · result {graph.get('result') or 'graph'} · "
+        f"loaded {graph.get('bodies_loaded', 0)}"
+    )
+    lines.append("")
     for row in card["rows"]:
         lines += [
             f"## {row['slug']}",
