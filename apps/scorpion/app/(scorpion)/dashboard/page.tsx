@@ -67,15 +67,17 @@ export default function DashboardPage() {
       setTimeout(loadData, 0); // Immediate fallback
     }
     
-    if (autoRefresh) {
-      // Only refresh when tab is visible to avoid unnecessary requests
-      const interval = setInterval(() => {
-        if (document.visibilityState === 'visible') {
-          loadHealth();
-        }
-      }, 15000); // 15 seconds - health check has 15s cache, so no need to poll more frequently
-      return () => clearInterval(interval);
+    if (!autoRefresh) {
+      return undefined;
     }
+
+    // Only refresh when tab is visible to avoid unnecessary requests
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadHealth();
+      }
+    }, 15000); // 15 seconds - health check has 15s cache, so no need to poll more frequently
+    return () => clearInterval(interval);
   }, [autoRefresh]);
 
   const loadHealth = async () => {
