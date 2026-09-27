@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Configuration
 const SUPABASE_URL = 'https://xlrxpfptulcugoqjccyf.supabase.co';
-const SUPABASE_SERVICE_KEY = 'sb_secret_9aSbJTovjd0XFH5hz1qB2A_AS5wmDpx';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
 // Create Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
