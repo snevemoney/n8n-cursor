@@ -1,0 +1,51 @@
+{
+  "signal_id": "SIG-20260922-VOK",
+  "depth": "L2",
+  "claims": [
+    {
+      "id": "SIG-20260922-VOK-001",
+      "text": "AI feature development decays when requirements are not persisted.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-002",
+      "text": "Scope and architecture should be separate decisions.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-003",
+      "text": "Every produced value should have a known provenance.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-004",
+      "text": "Development should stop when a required decision has no source.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-005",
+      "text": "Existing code should be audited before modifying legacy systems.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-006",
+      "text": "Tests do not prove the user-facing feature exists.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-007",
+      "text": "Runtime verification should execute the actual application.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-008",
+      "text": "The implementation model should not review its own work.",
+      "signal_id": "SIG-20260922-VOK"
+    },
+    {
+      "id": "SIG-20260922-VOK-009",
+      "text": "Debugging should test one root-cause hypothesis at a time.",
+      "signal_id": "SIG-20260922-VOK"
+    }
+  ]
+}
