@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Panel, PageLoadingBar } from '@/components/scorpion';
-import { BookOpen, Clock, Folder, FileText, Package, Link as LinkIcon, Layers } from 'lucide-react';
 import Link from 'next/link';
 
 interface KnowledgeCard {
@@ -84,20 +83,6 @@ export default function KnowledgeRecommendationsPage() {
     }
   };
 
-  const getIcon = (iconName: string) => {
-    const icons: Record<string, any> = {
-      folder: Folder,
-      clock: Clock,
-      book: BookOpen,
-      'file-text': FileText,
-      package: Package,
-      link: LinkIcon,
-      layers: Layers,
-      tag: FileText,
-    };
-    return icons[iconName] || FileText;
-  };
-
   return (
     <>
       <PageLoadingBar loading={loading && !data} />
@@ -142,7 +127,6 @@ export default function KnowledgeRecommendationsPage() {
         <h2 className="text-lg font-semibold mb-4">Knowledge Cards</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.cards.map((card, idx) => {
-            const Icon = getIcon(card.icon);
             return (
               <Panel key={idx} title={card.title} className="h-full transition-all duration-100 ease-out hover:scale-[1.02] hover:shadow-lg">
                 <p className="text-xs text-white/60 mb-4">{card.description}</p>
@@ -183,7 +167,6 @@ export default function KnowledgeRecommendationsPage() {
         <h2 className="text-lg font-semibold mb-4">Knowledge Bundles</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {data.bundles.map((bundle) => {
-            const Icon = getIcon(bundle.icon);
             return (
               <Panel key={bundle.id} title={bundle.title} className="h-full">
                 <p className="text-xs text-white/60 mb-4">{bundle.description}</p>

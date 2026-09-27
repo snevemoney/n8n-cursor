@@ -1,11 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState, useCallback, useMemo, useRef, useTransition } from 'react';
-import { ErrorBoundary } from '@/components/scorpion/ErrorBoundary';
+import { useEffect, useState } from 'react';
 import { ToastProvider } from '@/components/scorpion';
-import { StorageModeIndicator } from '@/components/scorpion/StorageModeIndicator';
 import { ErrorOverlay } from './components/ErrorOverlay';
 import { NavLink } from '@/components/navigation/nav-link';
 import { BreadcrumbNav } from '@/components/navigation/breadcrumb-nav';
@@ -13,14 +10,12 @@ import {
   Home,
   LayoutDashboard,
   FolderKanban,
-  Settings2,
   Workflow,
   Hammer,
   Database,
   BookOpen,
   Network,
   Search,
-  Camera,
   Users,
   Bot,
   MessageSquare,
@@ -133,39 +128,6 @@ const navigationSections: NavSection[] = [
   },
 ];
 
-// Throttle function for resize events
-function throttle<T extends (...args: any[]) => void>(func: T, wait: number): T {
-  let timeout: NodeJS.Timeout | null = null;
-  let previous = 0;
-  return ((...args: Parameters<T>) => {
-    const now = Date.now();
-    const remaining = wait - (now - previous);
-    if (remaining <= 0 || remaining > wait) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
-      previous = now;
-      func(...args);
-    } else if (!timeout) {
-      timeout = setTimeout(() => {
-        previous = Date.now();
-        timeout = null;
-        func(...args);
-      }, remaining);
-    }
-  }) as T;
-}
-
-// Debounce function for localStorage writes
-function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T {
-  let timeout: NodeJS.Timeout | null = null;
-  return ((...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  }) as T;
-}
-
 // SIMPLIFIED LAYOUT - Remove most hooks
 export default function ScorpionLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -175,7 +137,7 @@ export default function ScorpionLayout({ children }: { children: React.ReactNode
   // Minimal error handler - only essential suppression
   useEffect(() => {
     const originalWindowError = window.onerror;
-    window.onerror = function (msg, url, line, col, error) {
+    window.onerror = function (msg) {
       const msgStr = String(msg || '').toLowerCase();
       if (msgStr.includes('nextjs') || msgStr.includes('portal') || msgStr.includes('__next') ||
         msgStr.includes('element not found') || msgStr.includes('script failed')) {

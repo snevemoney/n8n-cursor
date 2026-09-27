@@ -1095,7 +1095,7 @@ export default function KnowledgePage() {
                         src={`${contentData.url}#page=${pdfPage}`}
                         className="w-full h-[600px] border-0"
                         title={`PDF Page ${pdfPage}`}
-                        onError={(e) => {
+                        onError={() => {
                           console.error('PDF iframe failed to load');
                         }}
                       />
