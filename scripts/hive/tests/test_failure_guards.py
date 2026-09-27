@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -1683,6 +1684,98 @@ class VersionedContinuityTest(unittest.TestCase):
             self.assertEqual(found["phase"], "ACKNOWLEDGED")
             self.assertEqual(found["result"], "ACKNOWLEDGED")
             self.assertEqual(found["state_version"], 1)
+
+    def test_jarvis_cli_process_reads_ack_and_keeps_stale_replay_off(self) -> None:
+        script = HIVE / "os" / "event-bus.py"
+        cid = "w3-1-cli"
+        payload = json.dumps({"fact": "canary", "correlation_id": cid})
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+
+            def run(*extra: str) -> subprocess.CompletedProcess[str]:
+                return subprocess.run(
+                    [sys.executable, str(script), "--path", str(log), *extra],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+
+            empty = run("--status")
+            self.assertEqual(empty.returncode, 0, empty.stderr)
+            self.assertFalse(log.exists())
+            self.assertIsNone(json.loads(empty.stdout)["phase"])
+
+            published = run(
+                "--jarvis",
+                "--state-version",
+                "1",
+                "--source",
+                cid,
+                "--actor",
+                "event-bus.py",
+                "--payload",
+                payload,
+            )
+            self.assertEqual(published.returncode, 0, published.stderr)
+            body = json.loads(published.stdout)
+            self.assertEqual(body["published"]["result"], "PUBLISHED")
+            self.assertEqual(body["applied"]["result"], "APPLIED")
+            self.assertEqual(
+                [row.get("phase") for row in BUS._read_all(log)],
+                ["PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED"],
+            )
+            sessions = {row.get("source_session") for row in BUS._read_all(log)}
+            self.assertEqual(sessions, {cid})
+
+            snap = json.loads(run("--status").stdout)
+            self.assertEqual(snap["phase"], "ACKNOWLEDGED")
+            self.assertEqual(snap["result"], "ACKNOWLEDGED")
+            self.assertEqual(snap["state_version"], 1)
+
+            stale = run(
+                "--jarvis",
+                "--state-version",
+                "0",
+                "--source",
+                cid,
+                "--actor",
+                "event-bus.py",
+                "--payload",
+                json.dumps({"fact": "older", "correlation_id": cid}),
+            )
+            self.assertEqual(stale.returncode, 0, stale.stderr)
+            self.assertEqual(json.loads(stale.stdout)["published"]["result"], "STALE")
+            self.assertIsNone(json.loads(stale.stdout)["applied"])
+            auth = BUS.authoritative(BUS.JARVIS_ENTITY, log)
+            assert auth is not None
+            self.assertEqual(auth["state_version"], 1)
+            self.assertEqual(json.loads(run("--status").stdout)["state_version"], 1)
+
+            replay = run(
+                "--jarvis",
+                "--state-version",
+                "1",
+                "--source",
+                cid,
+                "--actor",
+                "event-bus.py",
+                "--payload",
+                payload,
+            )
+            self.assertEqual(replay.returncode, 0, replay.stderr)
+            replay_body = json.loads(replay.stdout)
+            self.assertTrue(replay_body["published"].get("duplicate"))
+            self.assertTrue(replay_body["applied"].get("duplicate"))
+            self.assertFalse(replay_body["applied"].get("inserted"))
+            applied = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("phase") == "APPLIED" and row.get("consumer") == BUS.JARVIS_PRIMARY
+            ]
+            self.assertEqual(len(applied), 1)
+            fresh = json.loads(run("--status").stdout)
+            self.assertEqual(fresh["phase"], "ACKNOWLEDGED")
+            self.assertEqual(fresh["state_version"], 1)
 
     def test_applied_persists_acknowledgement(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

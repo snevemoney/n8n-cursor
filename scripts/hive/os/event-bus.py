@@ -594,13 +594,41 @@ def status(*, path: Path = DEFAULT_PATH) -> dict[str, Any]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--emit", metavar="TYPE", help="Emit standard event type")
-    ap.add_argument("--source", default="cli")
-    ap.add_argument("--actor", default="operator")
+    ap.add_argument("--source", default="cli", help="source_session for --jarvis; correlation id for one canary")
+    ap.add_argument("--actor", default="operator", help="writer for --jarvis")
     ap.add_argument("--payload", default="{}")
     ap.add_argument("--project-id")
     ap.add_argument("--tail", type=int, default=0, help="Print last N events")
     ap.add_argument("--path", type=Path, default=DEFAULT_PATH)
+    ap.add_argument("--status", action="store_true", help="Print JARVIS_PRIMARY phase, result, and state_version")
+    ap.add_argument("--jarvis", action="store_true", help="Publish one versioned fact on the primary Jarvis consumer")
+    ap.add_argument("--state-version", type=int, help="state_version for --jarvis")
     args = ap.parse_args()
+
+    if args.jarvis or args.status:
+        if args.jarvis:
+            if args.state_version is None:
+                print("jarvis publish requires --state-version", file=sys.stderr)
+                return 1
+            try:
+                payload = json.loads(args.payload)
+            except json.JSONDecodeError as exc:
+                print(f"payload is not JSON: {exc}", file=sys.stderr)
+                return 1
+            if not isinstance(payload, dict):
+                print("payload must be a JSON object", file=sys.stderr)
+                return 1
+            result = publish_jarvis(
+                payload,
+                state_version=args.state_version,
+                source_session=args.source,
+                writer=args.actor,
+                path=args.path,
+            )
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+        if args.status:
+            print(json.dumps(status(path=args.path), indent=2, ensure_ascii=False))
+        return 0
 
     if args.tail:
         for row in tail(args.path, args.tail):
