@@ -39,15 +39,23 @@ HARD_STEP_RE = re.compile(
 )
 JSON_RE = re.compile(r"\{.*\}", re.S)
 LOCAL_READ_RE = re.compile(
-    r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?read the local (?:store|vault|operator memory)\b",
+    r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?read (?:the|my) local (?:store|vault|operator memory)\b",
     re.I,
 )
 RECALL_ASK_RE = re.compile(
     r"\b(?:what|which)\s+token\b|\btoken\s+did\s+i\b|\bwhat\s+did\s+i\s+just\s+(?:give|say|tell)\b",
     re.I,
 )
+WORD_ASK_RE = re.compile(
+    r"\bwhat\s+word\s+did\s+i\s+(?:give|say|tell)\b",
+    re.I,
+)
 TOKEN_STATED_RE = re.compile(
     r"\btoken\b(?:\s+[A-Za-z0-9'-]+){0,8}?\s+is\s+([A-Za-z0-9][A-Za-z0-9-]{1,64})",
+    re.I,
+)
+WORD_STATED_RE = re.compile(
+    r"\b(?:test\s+)?word\s+is\s+([A-Za-z0-9][A-Za-z0-9-]{1,64})",
     re.I,
 )
 UNKNOWN = "UNKNOWN. Cursor harness returned no reply."
@@ -442,25 +450,42 @@ def wants_local_read(utterance: str) -> bool:
     return bool(LOCAL_READ_RE.search(utterance or ""))
 
 
-def prior_user_token(turns: list[dict] | None) -> str:
-    """Token the prior user line already stored. Not a model guess."""
+def _prior_user_mark(turns: list[dict] | None, pattern: re.Pattern[str]) -> str:
+    """Value a prior user line already stored. Not a model guess."""
     for row in reversed(turns or []):
         if not isinstance(row, dict):
             continue
-        match = TOKEN_STATED_RE.search(str(row.get("user") or ""))
+        match = pattern.search(str(row.get("user") or ""))
         if match:
             return match.group(1)
     return ""
 
 
+def prior_user_token(turns: list[dict] | None) -> str:
+    """Token the prior user line already stored. Not a model guess."""
+    return _prior_user_mark(turns, TOKEN_STATED_RE)
+
+
+def prior_user_word(turns: list[dict] | None) -> str:
+    """Test word the prior user line already stored. Not a model guess."""
+    return _prior_user_mark(turns, WORD_STATED_RE)
+
+
 def store_recall(utterance: str, turns: list[dict] | None) -> str:
-    """Speak a sitting token the bus already has. Not a model, and not an echo kiosk."""
-    if not RECALL_ASK_RE.search(utterance or ""):
-        return ""
-    token = prior_user_token(turns)
-    if not token:
-        return ""
-    return f"The sitting token is {token}."
+    """Speak a sitting token or a stored test word the bus already has.
+
+    Not a model, and not an echo kiosk. The token sentence stays the old line.
+    """
+    heard = utterance or ""
+    if RECALL_ASK_RE.search(heard):
+        token = prior_user_token(turns)
+        if token:
+            return f"The sitting token is {token}."
+    if WORD_ASK_RE.search(heard):
+        word = prior_user_word(turns)
+        if word:
+            return f"The word is {word}."
+    return ""
 
 
 def runtime_identity() -> tuple[str, str]:
