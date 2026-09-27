@@ -13,6 +13,7 @@ import importlib.util
 import json
 import os
 import re
+import subprocess
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,6 +40,14 @@ HARD_STEP_RE = re.compile(
 JSON_RE = re.compile(r"\{.*\}", re.S)
 LOCAL_READ_RE = re.compile(
     r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?read the local (?:store|vault|operator memory)\b",
+    re.I,
+)
+RECALL_ASK_RE = re.compile(
+    r"\b(?:what|which)\s+token\b|\btoken\s+did\s+i\b|\bwhat\s+did\s+i\s+just\s+(?:give|say|tell)\b",
+    re.I,
+)
+TOKEN_STATED_RE = re.compile(
+    r"\btoken\b(?:\s+[A-Za-z0-9'-]+){0,8}?\s+is\s+([A-Za-z0-9][A-Za-z0-9-]{1,64})",
     re.I,
 )
 UNKNOWN = "UNKNOWN. Cursor harness returned no reply."
@@ -316,12 +325,15 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
 
 
 def write_receipt(hive: Path, *, turn_input: str, turn_output: str) -> dict:
-    """One reconstructable close. sha covers id, input, output, and timestamp."""
+    """One reconstructable close. sha covers id, input, output, time, host, and commit."""
+    host, commit = runtime_identity()
     body = {
         "turn_id": str(uuid.uuid4()),
         "input": turn_input,
         "output": turn_output,
         "timestamp": now_iso(),
+        "host": host,
+        "commit": commit,
     }
     canonical = json.dumps(body, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
     body["sha"] = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -430,6 +442,45 @@ def wants_local_read(utterance: str) -> bool:
     return bool(LOCAL_READ_RE.search(utterance or ""))
 
 
+def prior_user_token(turns: list[dict] | None) -> str:
+    """Token the prior user line already stored. Not a model guess."""
+    for row in reversed(turns or []):
+        if not isinstance(row, dict):
+            continue
+        match = TOKEN_STATED_RE.search(str(row.get("user") or ""))
+        if match:
+            return match.group(1)
+    return ""
+
+
+def store_recall(utterance: str, turns: list[dict] | None) -> str:
+    """Speak a sitting token the bus already has. Not a model, and not an echo kiosk."""
+    if not RECALL_ASK_RE.search(utterance or ""):
+        return ""
+    token = prior_user_token(turns)
+    if not token:
+        return ""
+    return f"The sitting token is {token}."
+
+
+def runtime_identity() -> tuple[str, str]:
+    host = (os.environ.get("HOSTNAME") or "localhost").strip() or "localhost"
+    commit = (os.environ.get("JARVIS_FACE_COMMIT") or "").strip()
+    if not commit:
+        try:
+            proc = subprocess.run(
+                ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            proc = None
+        if proc is not None and proc.returncode == 0:
+            commit = (proc.stdout or "").strip()
+    return host, commit or "unknown"
+
+
 def wants_safari(utterance: str) -> bool:
     """Only explicit Safari hands. Do not treat a greeting as safari_front."""
     return bool(SAFARI_WANT_RE.search(utterance or ""))
@@ -533,9 +584,24 @@ def no_model_reply(
     *,
     hive: Path,
     see_fn=None,
+    turns: list[dict] | None = None,
 ) -> dict:
-    """Safari hands, or one honest line. Not echo, lanes, wiki, or a login kiosk."""
+    """Safari hands, a stored token, or one honest line. Not a model and not an echo kiosk."""
     heard = (utterance or "").strip()
+    recall = store_recall(heard, turns)
+    if recall:
+        return {
+            "ok": True,
+            "tool": "converse",
+            "spoken": recall,
+            "wires": ["store"],
+            "cites": [],
+            "sent": False,
+            "from_store": True,
+            "brain": None,
+            "unknown": False,
+            "model_available": False,
+        }
     if wants_safari(heard) and (see_fn is not None or SEE is not None):
         if see_fn is not None:
             try:
@@ -582,9 +648,9 @@ def dark_cursor_reply(
     retrieve_roots: list[Path] | None,
     see_fn=None,
 ) -> dict:
-    """Kept for tests. Dark Cursor is not a fake brain."""
-    _ = (turns, retrieve_roots)
-    return no_model_reply(utterance, hive=hive, see_fn=see_fn)
+    """Kept for tests. Dark Cursor is not a fake brain. The store still recalls a stated token."""
+    _ = retrieve_roots
+    return no_model_reply(utterance, hive=hive, see_fn=see_fn, turns=turns)
 
 
 def _as_pick(tool: str, args: dict, speak: str) -> dict | None:
@@ -1105,7 +1171,7 @@ def apply_pipeline_iter(
             if pick is not None:
                 brain = "cursor"
         if pick is None:
-            ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn)
+            ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn, turns=prior_turns)
             pick = {
                 "tool": str(ran.get("tool") or "pipeline"),
                 "args": {},
@@ -1153,7 +1219,7 @@ def apply_pipeline_iter(
             cursor_ask_fn=cursor_ask_fn,
         )
         if not str(ran.get("spoken") or "").strip() and not brain:
-            ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn)
+            ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn, turns=prior_turns)
     tool = str(ran.get("tool") or (pick or {}).get("tool") or "pipeline")
     wires = ran.get("wires") if isinstance(ran.get("wires"), list) else [tool]
     cites = ran.get("cites") if isinstance(ran.get("cites"), list) else []
