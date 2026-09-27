@@ -2,10 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-interface ErrorOverlayProps {
-  eventStream?: EventSource; // if you manage this externally, you can pass signals another way
-}
-
 interface Signal {
   id: string;
   message: string;

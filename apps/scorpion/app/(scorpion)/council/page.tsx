@@ -35,7 +35,7 @@ interface CouncilCommunication {
 
 export default function CouncilPage() {
   const [topic, setTopic] = useState('How should we integrate the local model?');
-  const [result, setResult] = useState<CouncilResult | null>(null);
+  const [, setResult] = useState<CouncilResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [councilError, setCouncilError] = useState<Error | null>(null);
   const [members, setMembers] = useState<CouncilMember[]>([]);

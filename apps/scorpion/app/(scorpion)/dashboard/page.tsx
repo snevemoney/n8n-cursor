@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Panel } from '@/components/scorpion/Panel';
-import { Metric } from '@/components/scorpion/Metric';
-import { LoadingState, ErrorState, EmptyState, PageLoadingBar } from '@/components/scorpion';
+import { LoadingState, ErrorState, PageLoadingBar } from '@/components/scorpion';
 import { CheckCircle, XCircle, AlertTriangle, Activity, Database, Workflow, Brain, Shield, TrendingUp, Zap, Radio } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
