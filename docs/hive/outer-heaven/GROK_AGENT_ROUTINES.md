@@ -26,6 +26,6 @@ Provision: `python3 scripts/hive/grokbot-setup-routines.py --core --force-update
 | Communications Manager | daily_morning | Inbox triage |
 | Publishing Engine | weekly_monday | Publishing pipeline check |
 
-All routines open with can-act gate. When blocked, explain + ask — never silent skip.
+All routines open with can-act gate. When blocked, continue the owned path. Ask Evens only for a send, pay, deploy, book, or publish.
 
 Handoff chains: `scripts/hive/grok-handoff-chains.json`
