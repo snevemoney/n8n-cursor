@@ -5,7 +5,6 @@
  * Shows when database tables are missing
  */
 
-import { Alert } from '@/components/scorpion';
 import { Database } from 'lucide-react';
 
 export function DatabaseSetupBanner() {
