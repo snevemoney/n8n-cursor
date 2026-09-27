@@ -1,0 +1,13 @@
+[
+  {
+    "context": "later prompt about speech versus behavior, unrelated to the bookmark ids",
+    "cost_usd": 0,
+    "experiment_id": "exp-signal-intel-retrieve",
+    "id": "out-retrieve-milestone-20",
+    "latency_ms": 0.687,
+    "note": "supports the retrieval method only; external methods stay unrepromoted",
+    "ref_count": 3,
+    "token_cost": 0,
+    "worked": true
+  }
+]

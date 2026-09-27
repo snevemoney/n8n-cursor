@@ -1,0 +1,45 @@
+[
+  {
+    "contradiction_id": "con-K-HNKlFTd1maM-03-eFOTQpbGcy8",
+    "cross_source": true,
+    "executed": false,
+    "hypothesis": "Two stored claims disagree. Do not average them. Left: First deals came from posting builds for fun with email in the description; he was not offering paid work. Target: eFOTQpbGcy8.",
+    "id": "exp-recommended-1",
+    "measure": [
+      "success_rate",
+      "latency",
+      "token_cost",
+      "recovery_rate"
+    ],
+    "owners": {
+      "forge": "not_run",
+      "jev": "not_authority",
+      "matrix": "decides_when_this_becomes_real_work",
+      "watchdog": "not_run"
+    },
+    "results": null,
+    "status": "EXPERIMENT_REQUIRED"
+  },
+  {
+    "executed": true,
+    "hypothesis": "A later unrelated prompt returns at most 3 graph refs, or none.",
+    "id": "exp-signal-intel-retrieve",
+    "measure": [
+      "hit",
+      "ref_count",
+      "latency_ms",
+      "token_cost"
+    ],
+    "owners": {
+      "forge": "ran_local_retrieve",
+      "watchdog": "not_run"
+    },
+    "results": {
+      "hit": true,
+      "latency_ms": 0.687,
+      "ref_count": 3,
+      "token_cost": 0
+    },
+    "status": "EXPERIMENTING"
+  }
+]

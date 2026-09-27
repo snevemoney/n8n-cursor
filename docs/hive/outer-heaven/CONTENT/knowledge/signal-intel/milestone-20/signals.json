@@ -1,0 +1,1498 @@
+[
+  {
+    "claim_ids": [
+      "quote-sig-x-text-2071996301311381827"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/GYjkaiWOW2",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
+        "reason": "post text from the bookmark export; thread not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "partial_native",
+    "id": "sig-x-text-2071996301311381827",
+    "kind": "x_text",
+    "locator": {
+      "author": "Zephyr_hg",
+      "bookmark_id": "2071996301311381827"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-text-2071996301311381827",
+        "text": "Jacob Bank, former Google product lead: \n\n\"I built up this team of 40 AI marketing agents to work with me. I'm the only marketing person.\"\n\nIn a 15-minute talk, he shows what one person with the right setup now runs alone.\n\nForty agents. One human. His AI bill is $500 a month, https://t.co/GYjkaiWOW2 https://t.co/gYp19WiEAC",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2071996301311381827"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-text-2072001793492763022"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "no link in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
+        "reason": "post text from the bookmark export; thread not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "partial_native",
+    "id": "sig-x-text-2072001793492763022",
+    "kind": "x_text",
+    "locator": {
+      "author": "tryrevyl",
+      "bookmark_id": "2072001793492763022"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-text-2072001793492763022",
+        "text": "claude code and codex can now drive iOS features on a live device. \n\nno scripts. no selectors. no xcode. \n\none prompt",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2072001793492763022"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-text-2072255044544512004"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/H2g9Pjovu2",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
+        "reason": "post text from the bookmark export; thread not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "partial_native",
+    "id": "sig-x-text-2072255044544512004",
+    "kind": "x_text",
+    "locator": {
+      "author": "sandy4kad",
+      "bookmark_id": "2072255044544512004"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-text-2072255044544512004",
+        "text": "This guy built a space station of AI agents that made him $20,000 last month for $400 in costs\n\n20 agents live inside it. They don't leave until they generate $1,000,000,000.\n\nIn the center sits Ultron. A Hermes agent on GPT-5.5. His only job: keep the other agents working.\n\n3 https://t.co/H2g9Pjovu2 https://t.co/snMDXiZ3nl",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2072255044544512004"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-text-2072364163054395409"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/6g6kCmMAfx",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
+        "reason": "post text from the bookmark export; thread not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "partial_native",
+    "id": "sig-x-text-2072364163054395409",
+    "kind": "x_text",
+    "locator": {
+      "author": "JafarNajafov",
+      "bookmark_id": "2072364163054395409"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-text-2072364163054395409",
+        "text": "I found a tool that turns a single character image into fully animated sprite sheets in seconds.\n\nAI just killed the most annoying part of game development. And honestly this is getting kind of crazy \ud83d\udc47\n\nAutoSprite uses AI to generate walk cycles, attacks, idles, and basically https://t.co/6g6kCmMAfx",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2072364163054395409"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-text-2072498082819014925"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/PTYCA4LKTd",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/ai-only.json",
+        "reason": "post text from the bookmark export; thread not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "not part of recovered x_text body",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "partial_native",
+    "id": "sig-x-text-2072498082819014925",
+    "kind": "x_text",
+    "locator": {
+      "author": "oldgamesnob",
+      "bookmark_id": "2072498082819014925"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-text-2072498082819014925",
+        "text": "I Built an AI Game Development Toolkit &amp; Game Engine (and you can use it too) link in the comments\n\nThis has been my every waking hour for the last 5 months... I think it's coming along nicely, with a lot still planned, Basically: it's an ever-expanding toolkit to help make asset https://t.co/PTYCA4LKTd",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2072498082819014925"
+  },
+  {
+    "claim_ids": [
+      "K-x-2088007687149601254-01",
+      "K-x-2088007687149601254-02",
+      "K-x-2088007687149601254-03",
+      "K-x-2088007687149601254-04",
+      "K-x-2088007687149601254-05"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/watch-later/packets/x-2088007687149601254/xclip-speech.txt",
+        "reason": "speech file present; duration not re-checked this run",
+        "status": "PARTIAL"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "external docs linked from the clip were not fetched",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no watch.json frame list",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://api.fxtwitter.com/realcolegordon/status/2088007687149601254",
+        "reason": "url seen; linked body not fetched",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/watch-later/packets/x-2088007687149601254/full.txt",
+        "reason": "caption window plus clip speech; pixels unobserved",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "X video file not in the packet; pixels unobserved",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-x-video-x-2088007687149601254",
+    "kind": "x_video",
+    "locator": {
+      "video_id": "x-2088007687149601254"
+    },
+    "outputs": [
+      {
+        "claim_id": "K-x-2088007687149601254-01",
+        "text": "Outbound \u201cI can help you automate your business\u201d (or cold \u201cAI consulting\u201d) means a million and a half things. Nobody bites.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-x-2088007687149601254-02",
+        "text": "Post examples of builds already made (videos + threads). Heads turn: inbound \u201coh now could you do this actually.\u201d",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-x-2088007687149601254-03",
+        "text": "Most people don\u2019t like the term AI. Lead with the outcome, not the word \u2014 unless the prospect is AI-native.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-x-2088007687149601254-04",
+        "text": "If you must enter rooms / outbound anyway: offer free work. The only exchange is you get to document what you built and post it.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-x-2088007687149601254-05",
+        "text": "A no-audience beginner posted builds, partnered with another of Fazio\u2019s people, and they are at 200\u2013300k a month.",
+        "type": "metric"
+      }
+    ],
+    "pipeline_gaps": [],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CAPABILITY_MAPPED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2088007687149601254"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-video-2073272122508513702"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no speech file for this post",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_video body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no frames extracted",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/0E1BhDb5KF",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/latest.json",
+        "reason": "post text only; the video file was not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "video/demo mentioned; media file absent",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-x-video-2073272122508513702",
+    "kind": "x_video",
+    "locator": {
+      "author": "VictorTaelin",
+      "bookmark_id": "2073272122508513702"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-video-2073272122508513702",
+        "text": "8 hours of work with Fable:\n\n- Implemented this game prototype from scratch. Fable built the demo with fluid movements, robust rollback netcode, and US/BR servers it deployed itself. Try it (links below).\n\n- Investigated and solved a paradox in Bend2. This led us to a new, https://t.co/0E1BhDb5KF",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort",
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2073272122508513702"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-video-2074119000137601528"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no speech file for this post",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_video body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no frames extracted",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/4YQq5d3E7g",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/latest.json",
+        "reason": "post text only; the video file was not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "video/demo mentioned; media file absent",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-x-video-2074119000137601528",
+    "kind": "x_video",
+    "locator": {
+      "author": "rom1trs",
+      "bookmark_id": "2074119000137601528"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-video-2074119000137601528",
+        "text": "I built a Claude skill that makes motion-style animation.\n\n&gt; Paste a reference image\n&gt; It generates frames with Nano Banana 2 \n&gt; and animates the video with Seedance 2.0\n\nEverything runs in Claude through the Arcads MCP\n\nComment \"Motion\", and I'll send you the skill https://t.co/4YQq5d3E7g",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort",
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2074119000137601528"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-video-2074158868142194898"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no speech file for this post",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_video body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no frames extracted",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/thTUi1YAya",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/latest.json",
+        "reason": "post text only; the video file was not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "video/demo mentioned; media file absent",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-x-video-2074158868142194898",
+    "kind": "x_video",
+    "locator": {
+      "author": "monokern",
+      "bookmark_id": "2074158868142194898"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-video-2074158868142194898",
+        "text": "This site looks like it was built by a team of 3D developers\n\nIt wasn't. It's just video. And that's the part nobody expects\n\n&gt; he generated two frames with AI\n&gt; turned them into a clip with Seedance 2.0\n&gt; then gave it to Claude 4.8 to wrap into a full immersive scrollable https://t.co/thTUi1YAya https://t.co/yVeHkUSqkP",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort",
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2074158868142194898"
+  },
+  {
+    "claim_ids": [
+      "quote-sig-x-video-2075754077074620467"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no speech file for this post",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "not part of recovered x_video body",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no frames extracted",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://t.co/tBjadoFUxD",
+        "reason": "short link seen; target body not recovered",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/x-bookmarks/latest.json",
+        "reason": "post text only; the video file was not recovered",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "video/demo mentioned; media file absent",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-x-video-2075754077074620467",
+    "kind": "x_video",
+    "locator": {
+      "author": "hollowearthterf",
+      "bookmark_id": "2075754077074620467"
+    },
+    "outputs": [
+      {
+        "claim_id": "quote-sig-x-video-2075754077074620467",
+        "text": "This is a very interesting video. If you\u2019re a young man, and especially if you\u2019re struggling with dating, it\u2019s actually in your interest to be shaming age gaps, these older men have you completely bamboozled. No one would benefit more from making age gaps taboo than young men. https://t.co/tBjadoFUxD",
+        "type": "raw_quote"
+      }
+    ],
+    "pipeline_gaps": [
+      "SYNTHESIZED: fewer than two independent sources share this domain in the cohort",
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "CLAIMS_EXTRACTED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://x.com/i/web/status/2075754077074620467"
+  },
+  {
+    "claim_ids": [
+      "K-HNKlFTd1maM-01",
+      "K-HNKlFTd1maM-02",
+      "K-HNKlFTd1maM-03",
+      "K-HNKlFTd1maM-04",
+      "K-HNKlFTd1maM-05",
+      "K-HNKlFTd1maM-06",
+      "K-HNKlFTd1maM-07",
+      "K-HNKlFTd1maM-08",
+      "K-HNKlFTd1maM-09"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no separate full-duration audio artifact",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "linked docs were not fetched",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no adaptive frame list; transcript is not visual evidence",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "no link in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/watch-later/packets/HNKlFTd1maM/full.txt",
+        "reason": "caption transcript on disk; not the whole video",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "no native video file; transcript is not the video",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-yt-HNKlFTd1maM",
+    "kind": "youtube",
+    "locator": {
+      "video_id": "HNKlFTd1maM"
+    },
+    "outputs": [
+      {
+        "claim_id": "K-HNKlFTd1maM-01",
+        "text": "The $1,650 outreach system researched contacts and wrote outreach + follow-up; the client plugged copy into email/DM sequences. It did not send or run campaigns.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-02",
+        "text": "Price was \u201cpretty random\u201d off a $1,200 baseline; ROI math (2\u20133h \u00d7 $50 \u2248 $400/mo, ~4 months, ~$5k/year) is a later story, not how he priced.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-03",
+        "text": "First deals came from posting builds for fun with email in the description; he was not offering paid work.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-04",
+        "text": "After Milan/Tyler, they stopped guessing and sat with the client to break time/money cost, then priced so both sides saw an investment.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-05",
+        "text": "They charged $6,000 for Slack PA vs $4,000 for sales agent; in hindsight sales should have been higher because usage compounds with leads.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-06",
+        "text": "Closing over ~50% (later: way above 40\u201350%) means clients see a steal; B2B consulting strong is 20\u201330%; no friction \u2192 CLV too low.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-07",
+        "text": "Silent killers: underpricing (wrong clients, hard to raise later); saying yes to one more feature without rescope; chasing small retainers too early. One $10k project often beats five $2k/mo retainers. Stability = lead pipeline, not retainers.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-08",
+        "text": "True Horizon: one week internal QA (sample + real data, edge cases, fix before client sees) then one week client real-world QA + iterate.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-HNKlFTd1maM-09",
+        "text": "On the $12k concierge they \u201ctransition[ed] the scope and architect to incorporate\u201d MCP because it was a big deal online \u2014 a value lever: we stay bleeding edge.",
+        "type": "metric"
+      }
+    ],
+    "pipeline_gaps": [
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "EXPERIMENT_CANDIDATE",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://www.youtube.com/watch?v=HNKlFTd1maM"
+  },
+  {
+    "claim_ids": [
+      "K-eFOTQpbGcy8-01",
+      "K-eFOTQpbGcy8-02"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no separate full-duration audio artifact",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "linked docs were not fetched",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no adaptive frame list; transcript is not visual evidence",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "no link in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/watch-later/packets/eFOTQpbGcy8/full.txt",
+        "reason": "caption transcript on disk; not the whole video",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "no native video file; transcript is not the video",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-yt-eFOTQpbGcy8",
+    "kind": "youtube",
+    "locator": {
+      "video_id": "eFOTQpbGcy8"
+    },
+    "outputs": [
+      {
+        "claim_id": "K-eFOTQpbGcy8-01",
+        "text": "Start on your own hours-heavy tasks where a miss is harmless; prove numbers; then audit the business for the thing that breaks if demand doubles \u2014 that is the paid constraint.",
+        "type": "unclassified"
+      },
+      {
+        "claim_id": "K-eFOTQpbGcy8-02",
+        "text": "The title prices a $200K AI job. The spoken body never prices $200k; it walks a safe-hours then constraint loop.",
+        "type": "metric"
+      }
+    ],
+    "pipeline_gaps": [
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "SYNTHESIZED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://www.youtube.com/watch?v=eFOTQpbGcy8"
+  },
+  {
+    "claim_ids": [
+      "K-glM8godEcic-01",
+      "K-glM8godEcic-02"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no separate full-duration audio artifact",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "linked docs were not fetched",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no adaptive frame list; transcript is not visual evidence",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "no link in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/watch-later/packets/glM8godEcic/full.txt",
+        "reason": "caption transcript on disk; not the whole video",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "no native video file; transcript is not the video",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-yt-glM8godEcic",
+    "kind": "youtube",
+    "locator": {
+      "video_id": "glM8godEcic"
+    },
+    "outputs": [
+      {
+        "claim_id": "K-glM8godEcic-01",
+        "text": "The MCP server is seven single-purpose workflows; the voice layer only chooses.",
+        "type": "method"
+      },
+      {
+        "claim_id": "K-glM8godEcic-02",
+        "text": "First question is email lookup; \u201cI\u2019m new\u201d switches to collect+CRM create, then availability+book.",
+        "type": "method"
+      }
+    ],
+    "pipeline_gaps": [
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "SYNTHESIZED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://www.youtube.com/watch?v=glM8godEcic"
+  },
+  {
+    "claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no separate full-duration audio artifact",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "linked docs were not fetched",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no adaptive frame list; transcript is not visual evidence",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "no link in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/watch-later/packets/w9-gfaV5vlM/full.txt",
+        "reason": "caption transcript on disk; not the whole video",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "no native video file; transcript is not the video",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-yt-w9-gfaV5vlM",
+    "kind": "youtube",
+    "locator": {
+      "video_id": "w9-gfaV5vlM"
+    },
+    "outputs": [
+      {
+        "claim_id": "K-w9-gfaV5vlM-01",
+        "text": "Every sale is four moves: find the leak (time/money/focus), build the fix, translate to hours/$ /revenue, anchor price as a fraction of that value.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-02",
+        "text": "first deal predates the SOP.",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-03",
+        "text": "Businesses care about three things; delivery vehicle (AI, VA, duct tape) is secondary.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-04",
+        "text": "he also sells flashy multi-agent YouTube because it performs.",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-05",
+        "text": "Best-performing YouTube = flashy multi-agent; most practical / highest-ROI builds = some of his lowest-performing videos.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-06",
+        "text": "he still makes flashy videos.",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-07",
+        "text": "On 5\u201310 \u201cinformational\u201d calls, listen to the week, repeat the pattern, poke until hours/cost/errors/focus/trigger are numbered.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-08",
+        "text": "\u201cno pitch unless you ask\u201d vs later price step.",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-09",
+        "text": "15 min draw flow \u2192 60 min rough build on one platform \u2192 15 min 3-min Loom (before / solution / result) with camera on.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-10",
+        "text": "Often you do not need a custom n8n agent; a platform or the CRM already does it. Do not multi-agent, five-vendor, or build a platform for Tuesday\u2019s bottleneck.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-11",
+        "text": "YouTube still celebrates agents.",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-12",
+        "text": "Cost the process (hours \u00d7 wage \u00d7 4 \u00d7 12), take the automatable fraction, charge a fraction of yearly savings; write objective / in / out / timeline / client duties / payment or you underscope.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-13",
+        "text": "First three to five projects are paid practice. Either work free/cheap (system is theirs; optimize reps/proof) or offer money-back if value isn\u2019t delivered. Then you can climb $1\u20132k \u2192 $30k+.",
+        "type": "metric"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-14",
+        "text": "later tapes scold underpricing.",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-15",
+        "text": "Ordered procedure from LEARNED \u00a7D \u2014 do not slogan-compress.",
+        "type": "principle"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-16",
+        "text": "Situation: First $1,200 LinkedIn/content workflow, ~2 hours. Action: Pitched hours saved, not 15 nodes. Outcome: Paid; he calls $600/h the wrong frame.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-17",
+        "text": "Situation: Pedagogy onboarding. Action: 5h/week, 80%, $50/h, $10k/year, charge $3k. Outcome: \u201cnot a cost.\u201d",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-18",
+        "text": "Situation: LinkedIn outreach bot as product. Action: Reframe to qualified leads without ads. Outcome: \u201csuddenly people see the value.\u201d",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-19",
+        "text": "Situation: Imposter, would have worked free. Action: Free/cheap or money-back for reps. Outcome: He claims $1\u20132k \u2192 $30k+ later.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-20",
+        "text": "IF the pitch names the tool (agent, chatbot, LinkedIn bot) \u2192 rewrite to T/M/F outcome.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-21",
+        "text": "IF a template bundle is the product \u2192 he says race to the bottom (learn; do not resell his).",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-22",
+        "text": "IF niche fails repeat / pay-fast / language \u2192 pick another (hive: catalog only, no new id).",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-23",
+        "text": "IF they describe a week \u2192 LRP until numbers exist.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-24",
+        "text": "IF Tuesday\u2019s bottleneck fits CRM-native \u2192 do not custom-agent.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-25",
+        "text": "IF building >90 min for a POC \u2192 he says you drifted.",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-26",
+        "text": "IF scope is vague \u2192 write the ten functionalities / definition of done (his underscope scar).",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-27",
+        "text": "IF no proof yet \u2192 he chooses free/cheap or guarantee (hive: Evens only; else steal the proof artifacts only).",
+        "type": "gtm_technique"
+      },
+      {
+        "claim_id": "K-w9-gfaV5vlM-28",
+        "text": "Stop selling agents (while his other titles sell agents). Lowest-view videos can be the money videos. Do not build custom n8n by default. Informational / no-pitch opener (then a priced solution). Free work as strategy vs `HNKlFTd1maM` raise-if-high-close \u2014 keep both. AI-OS and \u201cregular automations\u201d are explicitly not what he means by solutions.",
+        "type": "gtm_technique"
+      }
+    ],
+    "pipeline_gaps": [
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "SYNTHESIZED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://www.youtube.com/watch?v=w9-gfaV5vlM"
+  },
+  {
+    "claim_ids": [
+      "K-CB5bG4mvnS0-01",
+      "K-CB5bG4mvnS0-02",
+      "K-CB5bG4mvnS0-03",
+      "K-CB5bG4mvnS0-04",
+      "K-CB5bG4mvnS0-05",
+      "K-CB5bG4mvnS0-06"
+    ],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "no separate full-duration audio artifact",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "linked docs were not fetched",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "no adaptive frame list; transcript is not visual evidence",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "no link in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no repository url in the recovered text",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/watch-later/packets/CB5bG4mvnS0/full.txt",
+        "reason": "caption transcript on disk; not the whole video",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "no native video file; transcript is not the video",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-yt-CB5bG4mvnS0",
+    "kind": "youtube",
+    "locator": {
+      "video_id": "CB5bG4mvnS0"
+    },
+    "outputs": [
+      {
+        "claim_id": "K-CB5bG4mvnS0-01",
+        "text": "Browser-use is the last resort. If an API exists, use it. If the clicks never change, a pixel macro is cheaper and safer than a model that looks. Vision is for UIs that branch.",
+        "type": "method"
+      },
+      {
+        "claim_id": "K-CB5bG4mvnS0-02",
+        "text": "Annotate seeded layout bugs; then a break-it pass finds data-integrity and mobile issues a human five-case test misses. Headed so you can see; headless for long background. Then \u201cgo fix.\u201d",
+        "type": "method"
+      },
+      {
+        "claim_id": "K-CB5bG4mvnS0-03",
+        "text": "Codex keeps cookies for Skool/X/IG. Banks boot you. Password manager CSV is \u201cmore secure than chat\u201d and still a file of secrets. Computer-use paints a blue frame; it refused an OS Bluetooth permission then did the in-app toggle.",
+        "type": "anti_pattern"
+      },
+      {
+        "claim_id": "K-CB5bG4mvnS0-04",
+        "text": "\u201cliterally anything\u201d vs 2FA wall + \u201cwatch it 10 times.\u201d",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-CB5bG4mvnS0-05",
+        "text": "seeded bugs vs \u201cfound a ton.\u201d",
+        "type": "contradiction_note"
+      },
+      {
+        "claim_id": "K-CB5bG4mvnS0-06",
+        "text": "\u201cI will review\u201d the X draft vs title \u201cautomates literally anything.\u201d",
+        "type": "contradiction_note"
+      }
+    ],
+    "pipeline_gaps": [
+      "CAPABILITY_MAPPED: no existing capability match"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "SYNTHESIZED",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://www.youtube.com/watch?v=CB5bG4mvnS0"
+  },
+  {
+    "claim_ids": [],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://github.com/figma/mcp-server-guide",
+        "reason": "github url seen; not fetched",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no local clone or tree hash",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/website-building/design-to-code.md",
+        "reason": "local note cites the url; repository text was not copied",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-repo-figma-mcp-server-guide",
+    "kind": "repo",
+    "locator": {
+      "cited_in": "docs/hive/outer-heaven/CONTENT/website-building/design-to-code.md",
+      "name": "mcp-server-guide",
+      "org": "figma",
+      "url": "https://github.com/figma/mcp-server-guide"
+    },
+    "outputs": [],
+    "pipeline_gaps": [
+      "SOURCE_RECOVERED: required source body is not on disk"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "RAW",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://github.com/figma/mcp-server-guide"
+  },
+  {
+    "claim_ids": [],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://github.com/vercel-labs/agent-skills",
+        "reason": "github url seen; not fetched",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no local clone or tree hash",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/website-building/website-skills-dossier.md",
+        "reason": "local note cites the url; repository text was not copied",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-repo-vercel-labs-agent-skills",
+    "kind": "repo",
+    "locator": {
+      "cited_in": "docs/hive/outer-heaven/CONTENT/website-building/website-skills-dossier.md",
+      "name": "agent-skills",
+      "org": "vercel-labs",
+      "url": "https://github.com/vercel-labs/agent-skills"
+    },
+    "outputs": [],
+    "pipeline_gaps": [
+      "SOURCE_RECOVERED: required source body is not on disk"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "RAW",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://github.com/vercel-labs/agent-skills"
+  },
+  {
+    "claim_ids": [],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": "https://github.com/coleam00/skills",
+        "reason": "github url seen; not fetched",
+        "status": "PARTIAL"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "no local clone or tree hash",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/website-building/website-skills-dossier.md",
+        "reason": "local note cites the url; repository text was not copied",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "repository body not recovered",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-repo-coleam00-skills",
+    "kind": "repo",
+    "locator": {
+      "cited_in": "docs/hive/outer-heaven/CONTENT/website-building/website-skills-dossier.md",
+      "name": "skills",
+      "org": "coleam00",
+      "url": "https://github.com/coleam00/skills"
+    },
+    "outputs": [],
+    "pipeline_gaps": [
+      "SOURCE_RECOVERED: required source body is not on disk"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "RAW",
+    "source_completeness": "PARTIAL",
+    "source_ref": "https://github.com/coleam00/skills"
+  },
+  {
+    "claim_ids": [],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "external article/docs body not stored",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/website-building/vercel-next-patterns.md",
+        "reason": "local note only; external article body not stored",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-article-vercel-next-patterns",
+    "kind": "article",
+    "locator": {
+      "local_note": "docs/hive/outer-heaven/CONTENT/website-building/vercel-next-patterns.md"
+    },
+    "outputs": [],
+    "pipeline_gaps": [
+      "SOURCE_RECOVERED: required source body is not on disk"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "RAW",
+    "source_completeness": "PARTIAL",
+    "source_ref": "docs/hive/outer-heaven/CONTENT/website-building/vercel-next-patterns.md"
+  },
+  {
+    "claim_ids": [],
+    "coverage": {
+      "AUDIO": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "DOCS": {
+        "artifact": null,
+        "reason": "external article/docs body not stored",
+        "status": "UNAVAILABLE"
+      },
+      "FRAMES": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "LINKS": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "REPO": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      },
+      "TEXT": {
+        "artifact": "docs/hive/outer-heaven/CONTENT/website-building/design-to-code.md",
+        "reason": "local note only; external article body not stored",
+        "status": "PARTIAL"
+      },
+      "VIDEO": {
+        "artifact": null,
+        "reason": "external article not recovered",
+        "status": "UNAVAILABLE"
+      }
+    },
+    "evidence_basis": "pointer_only",
+    "id": "sig-article-design-to-code",
+    "kind": "article",
+    "locator": {
+      "local_note": "docs/hive/outer-heaven/CONTENT/website-building/design-to-code.md"
+    },
+    "outputs": [],
+    "pipeline_gaps": [
+      "SOURCE_RECOVERED: required source body is not on disk"
+    ],
+    "popularity_ignored_for_adoption": true,
+    "processing_state": "RAW",
+    "source_completeness": "PARTIAL",
+    "source_ref": "docs/hive/outer-heaven/CONTENT/website-building/design-to-code.md"
+  }
+]

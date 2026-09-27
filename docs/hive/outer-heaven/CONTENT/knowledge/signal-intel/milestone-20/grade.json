@@ -1,0 +1,42 @@
+{
+  "author": "forge",
+  "counts": {
+    "claims": 61,
+    "clusters": 4,
+    "complete_channels": [],
+    "contradictions": 36,
+    "contradictions_in_cohort": 17,
+    "kinds": {
+      "article": 2,
+      "repo": 3,
+      "x_text": 5,
+      "x_video": 5,
+      "youtube": 5
+    },
+    "method_atoms": 1,
+    "methods": 30,
+    "signals": 20
+  },
+  "external_methods_blocked": [],
+  "invariants_ok": true,
+  "milestone": "PARTIAL",
+  "note": "PARTIAL is the result. Files existing is not adoption. The recommended experiment was not run.",
+  "quote_claims_are_source_text": true,
+  "ready_to_scale": false,
+  "stages": {
+    "capability_mapping": "PASS",
+    "claims": "PASS",
+    "clustering": "PASS",
+    "contradictions": "PASS",
+    "dedupe": "PASS",
+    "experiment_execution": "BLOCKED",
+    "later_retrieval": "PASS",
+    "measured_outcome": "PASS",
+    "method_atoms": "PASS",
+    "method_status_update": "PASS",
+    "recommended_experiment": "PASS",
+    "source_completeness": "PASS",
+    "typed_outputs": "PASS"
+  },
+  "watchdog_grade": "ABSENT"
+}
