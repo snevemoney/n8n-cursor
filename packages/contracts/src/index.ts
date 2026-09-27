@@ -1,25 +1,20 @@
 // LightningFlow AI Contracts - Generated Types and Validators
 // This file exports all generated types and validators from contracts
 
-// OpenAPI types and validators
+// OpenAPI types
 export * from './openapi';
-export * from './openapi-validators';
 
-// Event types and validators
+// Event types
 export * from './events';
-export * from './event-validators';
 
-// Feature flag types and loader
+// Feature flag types
 export * from './flags';
-export * from './flag-loader';
 
-// Error types and helpers
+// Error types
 export * from './errors';
-export * from './error-helpers';
 
-// Telemetry types and helpers
+// Telemetry types
 export * from './telemetry';
-export * from './telemetry-helpers';
 
 // Common utilities
 export * from './utils';
@@ -28,18 +23,7 @@ export * from './validators';
 // Re-export commonly used types
 export type {
   // OpenAPI types
-  HealthResponse,
-  Agent,
-  CreateAgentRequest,
-  UpdateAgentRequest,
-  ExecuteAgentRequest,
-  ExecuteAgentResponse,
-  AgentHealthResponse,
-  LNbitsWebhookRequest,
-  LightningWebhookRequest,
-  WebhookResponse,
-  MetricsResponse,
-  ErrorResponse
+  WebhookResponse
 } from './openapi';
 
 export type {

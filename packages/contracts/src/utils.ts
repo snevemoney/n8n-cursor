@@ -1,21 +1,70 @@
 // LightningFlow AI Contracts Utilities
 // Common utility functions for working with contracts
 
-import { DateTime } from 'luxon';
-import Decimal from 'decimal.js';
+const SATS_PER_BTC = 100000000n;
+
+const DURATION_MS: Record<string, number> = {
+  millisecond: 1,
+  milliseconds: 1,
+  second: 1000,
+  seconds: 1000,
+  minute: 60 * 1000,
+  minutes: 60 * 1000,
+  hour: 60 * 60 * 1000,
+  hours: 60 * 60 * 1000,
+  day: 24 * 60 * 60 * 1000,
+  days: 24 * 60 * 60 * 1000,
+  week: 7 * 24 * 60 * 60 * 1000,
+  weeks: 7 * 24 * 60 * 60 * 1000
+};
+
+function formatUtc(date: Date, format: string): string {
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  const tokens: Record<string, string> = {
+    yyyy: String(date.getUTCFullYear()),
+    MM: pad(date.getUTCMonth() + 1),
+    dd: pad(date.getUTCDate()),
+    HH: pad(date.getUTCHours()),
+    mm: pad(date.getUTCMinutes()),
+    ss: pad(date.getUTCSeconds())
+  };
+  return format.replace(/yyyy|MM|dd|HH|mm|ss/g, (token) => tokens[token] ?? token);
+}
+
+function shiftTimestamp(timestamp: string, duration: string, sign: 1 | -1): string {
+  const date = new Date(timestamp);
+  const unit = DURATION_MS[duration];
+  if (unit === undefined || Number.isNaN(date.getTime())) {
+    return timestamp;
+  }
+  return new Date(date.getTime() + sign * unit).toISOString();
+}
 
 // Currency utilities
 export class CurrencyUtils {
   // Convert satoshis to BTC
   static satsToBtc(sats: number): string {
-    const decimal = new Decimal(sats).div(100000000);
-    return decimal.toFixed(8);
+    const negative = sats < 0;
+    const abs = BigInt(Math.trunc(Math.abs(sats)));
+    const whole = abs / SATS_PER_BTC;
+    const fraction = (abs % SATS_PER_BTC).toString().padStart(8, '0');
+    return `${negative ? '-' : ''}${whole.toString()}.${fraction}`;
   }
 
   // Convert BTC to satoshis
   static btcToSats(btc: string | number): number {
-    const decimal = new Decimal(btc).mul(100000000);
-    return decimal.toNumber();
+    const text = String(btc).trim();
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(text)) {
+      throw new Error(`Invalid BTC amount: ${text}`);
+    }
+    const negative = text.startsWith('-');
+    const unsigned = text.replace(/^[+-]/, '');
+    const [whole = '0', fraction = ''] = unsigned.split('.');
+    const wholeDigits = whole.length > 0 ? whole : '0';
+    const padded = `${fraction}00000000`.slice(0, 8);
+    const sats = BigInt(wholeDigits) * SATS_PER_BTC + BigInt(padded);
+    const value = Number(sats);
+    return negative ? -value : value;
   }
 
   // Format satoshis for display
@@ -31,22 +80,22 @@ export class CurrencyUtils {
 
   // Add satoshis (safe math)
   static addSats(a: number, b: number): number {
-    return new Decimal(a).add(b).toNumber();
+    return a + b;
   }
 
   // Subtract satoshis (safe math)
   static subtractSats(a: number, b: number): number {
-    return new Decimal(a).sub(b).toNumber();
+    return a - b;
   }
 
   // Multiply satoshis (safe math)
   static multiplySats(amount: number, multiplier: number): number {
-    return new Decimal(amount).mul(multiplier).toNumber();
+    return amount * multiplier;
   }
 
   // Divide satoshis (safe math)
   static divideSats(amount: number, divisor: number): number {
-    return new Decimal(amount).div(divisor).toNumber();
+    return amount / divisor;
   }
 }
 
@@ -54,67 +103,87 @@ export class CurrencyUtils {
 export class TimeUtils {
   // Get current UTC timestamp
   static now(): string {
-    return DateTime.utc().toISO();
+    return new Date().toISOString();
   }
 
-  // Parse timestamp to DateTime
-  static parse(timestamp: string): DateTime {
-    return DateTime.fromISO(timestamp, { zone: 'utc' });
+  // Parse timestamp
+  static parse(timestamp: string): Date {
+    return new Date(timestamp);
   }
 
   // Format timestamp for display
   static format(timestamp: string, format: string = 'yyyy-MM-dd HH:mm:ss'): string {
-    return this.parse(timestamp).toFormat(format);
+    const date = this.parse(timestamp);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    return formatUtc(date, format);
   }
 
   // Check if timestamp is valid
   static isValid(timestamp: string): boolean {
-    return this.parse(timestamp).isValid;
+    return !Number.isNaN(this.parse(timestamp).getTime());
   }
 
   // Add duration to timestamp
   static add(timestamp: string, duration: string): string {
-    return this.parse(timestamp).plus({ [duration]: 1 }).toISO();
+    return shiftTimestamp(timestamp, duration, 1);
   }
 
   // Subtract duration from timestamp
   static subtract(timestamp: string, duration: string): string {
-    return this.parse(timestamp).minus({ [duration]: 1 }).toISO();
+    return shiftTimestamp(timestamp, duration, -1);
   }
 
   // Get time difference in seconds
   static diffInSeconds(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'seconds').seconds;
+    return (this.parse(end).getTime() - this.parse(start).getTime()) / 1000;
   }
 
   // Get time difference in minutes
   static diffInMinutes(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'minutes').minutes;
+    return this.diffInSeconds(start, end) / 60;
   }
 
   // Get time difference in hours
   static diffInHours(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'hours').hours;
+    return this.diffInMinutes(start, end) / 60;
   }
 
   // Get time difference in days
   static diffInDays(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'days').days;
+    return this.diffInHours(start, end) / 24;
   }
 
   // Check if timestamp is in the past
   static isPast(timestamp: string): boolean {
-    return this.parse(timestamp) < DateTime.utc();
+    return this.parse(timestamp).getTime() < Date.now();
   }
 
   // Check if timestamp is in the future
   static isFuture(timestamp: string): boolean {
-    return this.parse(timestamp) > DateTime.utc();
+    return this.parse(timestamp).getTime() > Date.now();
   }
 
   // Get relative time (e.g., "2 hours ago")
   static relative(timestamp: string): string {
-    return this.parse(timestamp).toRelative() || '';
+    const date = this.parse(timestamp);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const seconds = Math.round((date.getTime() - Date.now()) / 1000);
+    const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+    const absSeconds = Math.abs(seconds);
+    if (absSeconds < 60) return formatter.format(seconds, 'second');
+    const minutes = Math.round(seconds / 60);
+    if (Math.abs(minutes) < 60) return formatter.format(minutes, 'minute');
+    const hours = Math.round(minutes / 60);
+    if (Math.abs(hours) < 24) return formatter.format(hours, 'hour');
+    const days = Math.round(hours / 24);
+    if (Math.abs(days) < 30) return formatter.format(days, 'day');
+    const months = Math.round(days / 30);
+    if (Math.abs(months) < 12) return formatter.format(months, 'month');
+    return formatter.format(Math.round(months / 12), 'year');
   }
 }
 
@@ -193,7 +262,8 @@ export class ValidationUtils {
   // Validate timezone
   static isValidTimezone(timezone: string): boolean {
     try {
-      return DateTime.now().setZone(timezone).isValid;
+      Intl.DateTimeFormat('en-US', { timeZone: timezone });
+      return true;
     } catch {
       return false;
     }
@@ -456,22 +526,17 @@ export class ArrayUtils {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      const left = shuffled[i];
+      const right = shuffled[j];
+      if (left === undefined || right === undefined) {
+        continue;
+      }
+      shuffled[i] = right;
+      shuffled[j] = left;
     }
     return shuffled;
   }
 }
-
-// Export all utility classes
-export {
-  CurrencyUtils,
-  TimeUtils,
-  UuidUtils,
-  ValidationUtils,
-  StringUtils,
-  ObjectUtils,
-  ArrayUtils
-};
 
 
 

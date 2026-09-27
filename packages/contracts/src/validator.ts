@@ -1,8 +1,6 @@
 // AJV validator setup for LightningFlow AI contracts
 import Ajv, { type ErrorObject, type Schema } from 'ajv';
 import addFormats from 'ajv-formats';
-import { DateTime } from 'luxon';
-import Decimal from 'decimal.js';
 
 // Configure AJV with formats and custom keywords
 export const ajv = addFormats(new Ajv({ 
@@ -16,12 +14,7 @@ export const ajv = addFormats(new Ajv({
 ajv.addFormat('date-time-utc', {
   type: 'string',
   validate: (data: string) => {
-    try {
-      const dt = DateTime.fromISO(data);
-      return dt.isValid && dt.zoneName === 'UTC';
-    } catch {
-      return false;
-    }
+    return validateUTCTimestamp(data);
   }
 });
 
@@ -74,11 +67,7 @@ ajv.addKeyword({
   type: 'string',
   validate: (schema: unknown, data: string) => {
     void schema;
-    try {
-      return DateTime.now().setZone(data).isValid;
-    } catch {
-      return false;
-    }
+    return validateTimezone(data);
   }
 });
 
@@ -111,7 +100,7 @@ export class ValidationError extends Error {
     this.data = data;
   }
 
-  toString(): string {
+  override toString(): string {
     return `${this.message}\n${this.errors?.map(e => `  ${e.instancePath}: ${e.message}`).join('\n') || ''}`;
   }
 }
@@ -134,27 +123,29 @@ export function validateSatoshis(amount: number): boolean {
 }
 
 export function validateDecimalAmount(amount: string | number): boolean {
-  try {
-    const decimal = new Decimal(amount);
-    return decimal.gte(0) && decimal.isFinite();
-  } catch {
+  if (typeof amount === 'number') {
+    return Number.isFinite(amount) && amount >= 0;
+  }
+  const text = amount.trim();
+  if (!/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(text)) {
     return false;
   }
+  const decimal = Number(text);
+  return Number.isFinite(decimal) && decimal >= 0;
 }
 
 // Time validation utilities
 export function validateUTCTimestamp(timestamp: string): boolean {
-  try {
-    const dt = DateTime.fromISO(timestamp);
-    return dt.isValid && dt.zoneName === 'UTC';
-  } catch {
+  if (!/(?:Z|\+00:00)$/.test(timestamp)) {
     return false;
   }
+  return !Number.isNaN(Date.parse(timestamp));
 }
 
 export function validateTimezone(timezone: string): boolean {
   try {
-    return DateTime.now().setZone(timezone).isValid;
+    Intl.DateTimeFormat('en-US', { timeZone: timezone });
+    return true;
   } catch {
     return false;
   }

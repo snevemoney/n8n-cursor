@@ -27,7 +27,7 @@ function addContractFormats(instance: Ajv): Ajv {
   });
 
   instance.addFormat('satoshi', {
-    type: 'integer',
+    type: 'number',
     validate: (value: number) => {
       return Number.isInteger(value) && value >= 1;
     }

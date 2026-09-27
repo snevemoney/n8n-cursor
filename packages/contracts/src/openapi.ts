@@ -228,26 +228,6 @@ export function isSuccessResponse<T>(response: unknown): response is { data: T }
   return response['data'] !== undefined && !response['error'];
 }
 
-// Export all types
-export type {
-  User,
-  Payment,
-  LNbitsWebhook,
-  Pagination,
-  Error,
-  HealthCheckResponse,
-  LoginRequest,
-  LoginResponse,
-  UpdateUserRequest,
-  ListPaymentsRequest,
-  ListPaymentsResponse,
-  CreatePaymentRequest,
-  WebhookResponse,
-  ApiConfig,
-  ApiRequest,
-  ApiResponse
-};
-
 
 
 
