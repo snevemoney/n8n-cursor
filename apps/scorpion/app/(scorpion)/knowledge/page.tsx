@@ -654,7 +654,7 @@ export default function KnowledgePage() {
     // Use description if available
     if (description && description.length > 0) {
       const firstLine = description.split('\n')[0];
-      if (firstLine.length < 60) {
+      if (firstLine !== undefined && firstLine.length < 60) {
         return firstLine;
       }
     }
