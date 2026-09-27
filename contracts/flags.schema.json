@@ -15,6 +15,16 @@
       },
       "sunsetOn": "2024-06-01T00:00:00Z"
     },
+    "AI_SECTIONS": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable AI sections in the Lightning UI (env NEXT_PUBLIC_FF_AI_SECTIONS)",
+      "environments": {
+        "int": true,
+        "staging": true,
+        "prod": true
+      }
+    },
     "BITCOIN_LIGHTNING_INTEGRATION": {
       "type": "boolean",
       "default": true,
@@ -435,6 +445,7 @@
   "additionalProperties": false,
   "required": [
     "NEW_DASHBOARD",
+    "AI_SECTIONS",
     "BITCOIN_LIGHTNING_INTEGRATION",
     "LNbits_WEBHOOK_VALIDATION",
     "AGENT_AUTO_SCALING",
