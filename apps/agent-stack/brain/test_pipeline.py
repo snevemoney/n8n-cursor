@@ -5,6 +5,8 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
 import unittest.mock
@@ -246,6 +248,106 @@ class PipelineDarkCursorTest(unittest.TestCase):
             canonical = json.dumps(body, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
             import hashlib
             self.assertEqual(receipt["sha"], hashlib.sha256(canonical.encode("utf-8")).hexdigest())
+
+    def test_dark_followup_speaks_maple_from_the_bus_after_restart(self) -> None:
+        calls: list[str] = []
+
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            calls.append(prompt)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": PIPE.LOGIN_UNKNOWN,
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-maple-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            first = MOUTH.apply_turn(
+                "Remember that my test word is maple.",
+                hive=hive,
+                cursor_fn=dark_cursor,
+            )
+            self.assertNotIn("maple", (first.get("spoken") or "").lower())
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+            users = [str(row.get("user") or "") for row in bus.get("turns") or [] if isinstance(row, dict)]
+            self.assertIn("Remember that my test word is maple.", users)
+
+            second = MOUTH.apply_turn(
+                "What word did I give you?",
+                hive=hive,
+                cursor_fn=dark_cursor,
+            )
+            spoken = second.get("spoken") or ""
+            self.assertIn("maple", spoken.lower())
+            self.assertNotIn("i am a model", spoken.lower())
+            self.assertNotIn("i'm a model", spoken.lower())
+            self.assertFalse(second.get("model_available"))
+            self.assertEqual(second.get("verb"), "converse")
+
+            child = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    (
+                        "import importlib.util, sys\n"
+                        "from pathlib import Path\n"
+                        "hive = Path(sys.argv[1])\n"
+                        "turn = Path(sys.argv[2])\n"
+                        "spec = importlib.util.spec_from_file_location('mouth_restart', turn)\n"
+                        "mod = importlib.util.module_from_spec(spec)\n"
+                        "spec.loader.exec_module(mod)\n"
+                        "def dark(prompt, mode='ask', **kw):\n"
+                        "    return {'ok': False, 'unknown': True, 'wire': 'cursor', 'spoken': 'UNKNOWN'}\n"
+                        "out = mod.apply_turn('What word did I give you?', hive=hive, cursor_fn=dark)\n"
+                        "sys.stdout.write((out.get('spoken') or '') + '\\n')\n"
+                        "sys.stdout.write(str(out.get('verb') or '') + '\\n')\n"
+                        "sys.stdout.write('model=' + str(bool(out.get('model_available'))) + '\\n')\n"
+                    ),
+                    str(hive),
+                    str(TURN),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            self.assertEqual(child.returncode, 0, child.stderr)
+            lines = [line for line in child.stdout.splitlines() if line]
+            self.assertGreaterEqual(len(lines), 3)
+            self.assertIn("maple", lines[0].lower())
+            self.assertEqual(lines[1], "converse")
+            self.assertEqual(lines[2], "model=False")
+            self.assertEqual(len(calls), 1)
+
+    def test_read_my_local_operator_memory_uses_the_existing_file(self) -> None:
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            raise AssertionError("operator memory read must not call the model")
+
+        vault = Path(__file__).resolve().parents[3] / "docs/hive/outer-heaven"
+        memory = vault / "OPERATOR_MEMORY.md"
+        self.assertTrue(memory.is_file())
+        before = memory.read_bytes()
+        needle = "Forge builds → Product GTM sells."
+        self.assertIn(needle, memory.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory(prefix="pipeline-my-memory-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            out = MOUTH.apply_turn(
+                "Read my local operator memory.",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+            )
+        self.assertEqual(memory.read_bytes(), before)
+        spoken = out.get("spoken") or ""
+        self.assertEqual(out.get("verb"), "vault_read")
+        self.assertIn("vault_read", out.get("wires") or [])
+        self.assertIn("Forge builds", spoken)
+        self.assertNotIn("agent login", spoken.lower())
 
     def test_safari_see_calls_see_py_front(self) -> None:
         called: list[str] = []
