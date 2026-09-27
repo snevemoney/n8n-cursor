@@ -12,15 +12,12 @@ import importlib.util
 import json
 import os
 import re
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
-STOP_RE = re.compile(
-    r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(stop|cancel|never mind|forget it|shut up)\s*[.!]?\s*$",
-    re.I,
-)
 ASK_LEAK = re.compile(
     r"say yes to (approve|send)|send this to the grok desk|"
     r"hand this to the \w+ desk|do you want me to send this",
@@ -43,6 +40,35 @@ VOICE = _load_mod("agent_stack_voice", Path(__file__).resolve().parent / "voice.
 PIPELINE = _load_mod("agent_stack_pipeline", Path(__file__).resolve().parent.parent / "brain" / "pipeline.py")
 _ONLINE_PATH = Path(__file__).resolve().parent.parent / "brain" / "online.py"
 ONLINE = _load_mod("agent_stack_online", _ONLINE_PATH) if _ONLINE_PATH.is_file() else None
+
+
+def _load_controls():
+    name = "agent_stack_controls"
+    existing = sys.modules.get(name)
+    if existing is not None:
+        return existing
+    path = Path(__file__).resolve().parent.parent / "face" / "controls.py"
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+CONTROLS = _load_controls()
+
+
+def _kill_owned_tool(tool_id: str) -> bool:
+    if tool_id != "cursor" or ONLINE is None or not hasattr(ONLINE, "cancel_cursor"):
+        return False
+    return bool(ONLINE.cancel_cursor())
+
+
+def cancel_scoped(scope: str, target: str = "", *, hive: Path = HIVE) -> dict:
+    """One scoped cancel. Speaking does not take the tool killer."""
+    return CONTROLS.cancel_once(scope, target, hive=hive, killer=_kill_owned_tool)
 
 
 def now_iso() -> str:
@@ -224,10 +250,18 @@ def apply_turn_iter(
     if not spoken:
         yield _door_speak(hive, spoken, "Holding. Say Jarvis, or tap Space.", "idle")
         return
-    if STOP_RE.match(spoken):
-        if ONLINE is not None and hasattr(ONLINE, "cancel_cursor"):
-            ONLINE.cancel_cursor()
-        yield _door_speak(hive, spoken, "Stopped. Standing by.", "stop")
+    parsed = CONTROLS.parse_stop(spoken)
+    if parsed:
+        scope, target = parsed
+        receipt = cancel_scoped(scope, target, hive=hive)
+        line = str(receipt.get("spoken") or "Stopped.")
+        yield _turn_event(
+            spoken=line,
+            verb="stop",
+            host="local",
+            wires=[f"stop:{scope}"],
+            spoken_delta=line,
+        )
         return
     if PIPELINE.is_hard_step(spoken):
         for out in PIPELINE.apply_pipeline_iter(

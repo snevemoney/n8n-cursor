@@ -80,6 +80,21 @@
       display: none;
     }
     input#typed.on { display: block; }
+    .controls {
+      position: fixed; z-index: 6; left: 28px; bottom: 48px;
+      display: flex; gap: 8px; pointer-events: auto;
+    }
+    .controls button {
+      background: rgba(2, 10, 6, .8); color: var(--mint);
+      border: 1px solid rgba(61, 255, 106, .45);
+      font: 11px "Share Tech Mono", ui-monospace, monospace;
+      letter-spacing: .16em; padding: 6px 10px; cursor: pointer;
+    }
+    body.presentation-hidden #board,
+    body.presentation-hidden .hud,
+    body.presentation-hidden .chip,
+    body.presentation-hidden #typed { visibility: hidden; }
+    body.presentation-hidden .controls { visibility: visible; }
     @media (prefers-reduced-motion: reduce) {
       .orb, #board { animation: none !important; }
     }
@@ -104,6 +119,11 @@
       <div class="clock" id="clock">00:00:00</div>
     </div>
     <div class="orb" aria-hidden="true"></div>
+  </div>
+  <div class="controls" id="controls">
+    <button type="button" id="mic">Mic</button>
+    <button type="button" id="stop">Stop</button>
+    <button type="button" id="hide">Hide</button>
   </div>
   <div class="hud bl" id="micline">MIC - TAP TO ARM</div>
   <div class="hud br" id="hint">TAP BOARD OR SPACE TO TALK</div>
@@ -236,13 +256,50 @@
         }
       }
     }
-    function stopSpeech() {
+    let speakHeld = false;
+    function clearSpeechAudio() {
       ttsGen += 1;
       ttsQueue.length = 0;
       ttsBusy = false;
-      stopListen();
       if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
       if (synth) synth.cancel();
+    }
+    function stopSpeakingOnly() {
+      speakHeld = true;
+      clearSpeechAudio();
+    }
+    function stopSpeech() {
+      clearSpeechAudio();
+      stopListen();
+    }
+    function pressStop() {
+      stopSpeakingOnly();
+      fetch("/api/stop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scope: "speak", target: "mouth" }),
+      }).catch(() => {});
+      $("spoken").textContent = "Stopped speaking.";
+    }
+    function hidePresentation() {
+      document.body.classList.toggle("presentation-hidden");
+      const hidden = document.body.classList.contains("presentation-hidden");
+      $("hide").textContent = hidden ? "Show" : "Hide";
+      $("hide").setAttribute("aria-pressed", hidden ? "true" : "false");
+    }
+    function pressMic() {
+      if (hasSR()) armMic();
+      else {
+        $("typed").classList.add("on");
+        $("typed").focus();
+      }
+    }
+    function stopScope(utterance) {
+      const match = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:stop|cancel|never mind|forget it|shut up)(?:\s+(?:the\s+)?(speaking|speech|tool|job|mission)(?:\s+(\S+))?)?\s*[.!]?\s*$/i.exec((utterance || "").trim());
+      if (!match) return null;
+      let scope = (match[1] || "speak").toLowerCase();
+      if (scope === "speaking" || scope === "speech") scope = "speak";
+      return { scope: scope, target: match[2] || "" };
     }
     function productMouth() {
       return voiceEngine === "elevenlabs" || voiceEngine === "kokoro" || voiceEngine === "kokoro-dark-python";
@@ -278,7 +335,7 @@
       return true;
     }
     function enqueueSpeak(text) {
-      if (!text) return;
+      if (speakHeld || !text) return;
       ttsQueue.push(text);
       pumpTts();
     }
@@ -316,8 +373,29 @@
     let turnAbort = null;
     let turnGen = 0;
     async function turn(utterance, approved) {
+      const scoped = stopScope(utterance || "");
+      if (scoped) {
+        if (scoped.scope === "speak") {
+          pressStop();
+          return;
+        }
+        stopSpeakingOnly();
+        if (scoped.scope === "tool" && turnAbort) {
+          try { turnAbort.abort(); } catch (e) {}
+        }
+        const payload = { scope: scoped.scope };
+        if (scoped.target) payload.target = scoped.target;
+        fetch("/api/stop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+        $("spoken").textContent = "Stopped that " + scoped.scope + ".";
+        return;
+      }
       const isStop = STOP_RE.test(utterance || "");
       if (!utterance) return;
+      speakHeld = false;
       if (state.turning && turnAbort) {
         try { turnAbort.abort(); } catch (e) {}
       }
@@ -700,6 +778,21 @@
     });
     $("chip").addEventListener("click", onArmGesture);
     $("board").addEventListener("click", onArmGesture);
+    $("mic").addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      pressMic();
+    });
+    $("stop").addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      pressStop();
+    });
+    $("hide").addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      hidePresentation();
+    });
 
     (async () => {
       try {
