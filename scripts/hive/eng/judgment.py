@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Provider-neutral judgment boundary.
 
-`evaluate` decides who may judge. It does not call a model, start a watcher,
+`evaluate` decides who may judge. SELECT builds the OpenRouter chat request
+the hive registry already describes. The network call stays behind
+HIVE_OPENROUTER_CALL, which defaults off. evaluate does not start a watcher
 or turn an external demo corpus into features.
 
 Exact checks stay deterministic: pid alive, row count changed, artifact exists,
@@ -17,7 +19,7 @@ import hashlib
 import importlib.util
 import json
 import os
-import sys
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -59,8 +61,8 @@ LIBRARY_SIZE = 273
 DEMO_CORPUS_URL = "https://webdevcody.github.io/jev-demos/"
 PACK_STATUS = "READY_FOR_IMPLEMENTATION_NOT_LIVE"
 PACK_CORPUS = Path(__file__).with_name("jev-question-packs-v1.yaml")
-BOUNDARY_NAME = "complexity-router"
-BOUNDARY_HOOK = "before_model_resolve"
+OPENROUTER_CALL_GUARD = "HIVE_OPENROUTER_CALL"
+SELECT_MODEL_ID = "anthropic/claude-haiku-4-5"
 
 
 def corpus_features(corpus: dict[str, Any]) -> dict[str, Any]:
@@ -397,67 +399,62 @@ def _registry():
     return module
 
 
-def _subprocess_module():
-    """Import stdlib subprocess without binding scripts/hive/eng/signal.py as stdlib signal."""
-    eng = Path(__file__).resolve().parent
-    saved_path = sys.path[:]
-    shadowed = sys.modules.get("signal")
-    shadowed_here = False
-    if shadowed is not None:
-        shadowed_file = getattr(shadowed, "__file__", None)
-        shadowed_here = bool(shadowed_file) and Path(shadowed_file).resolve().parent == eng
-        if shadowed_here:
-            del sys.modules["signal"]
-    sys.path[:] = [item for item in saved_path if not item or Path(item).resolve() != eng]
-    try:
-        import subprocess as subprocess_mod
-    finally:
-        sys.path[:] = saved_path
-        if shadowed_here and shadowed is not None:
-            sys.modules["signal"] = shadowed
-    return subprocess_mod
+def _openrouter_call_enabled() -> bool:
+    """Default off. Only the exact env value "1" would open the network call."""
+    return os.environ.get(OPENROUTER_CALL_GUARD, "") == "1"
 
 
-def _resolve_before_model(prompt: str) -> dict[str, Any] | None:
-    """Call complexity-router resolveBeforeModel. Do not perform the provider call that follows the hook."""
-    resolve_js = Path(__file__).resolve().parents[1] / "complexity-router" / "resolve.js"
-    if not resolve_js.is_file():
+def _build_openrouter_chat_request(questions: list[str]) -> dict[str, Any] | None:
+    """Build the openai-completions body the OpenRouter registry describes. Does not send."""
+    registry = _registry()
+    if registry is None:
         return None
-    code = (
-        "const mod = await import(process.env.RESOLVE_URL);\n"
-        "let raw = '';\n"
-        "for await (const chunk of process.stdin) raw += chunk;\n"
-        "const input = JSON.parse(raw || '{}');\n"
-        "const resolved = mod.resolveBeforeModel(String(input.prompt ?? ''), String(input.agentId ?? ''), {});\n"
-        "process.stdout.write(JSON.stringify(resolved));\n"
+    provider = registry.openrouter_provider()
+    if provider.get("api") != "openai-completions" or not provider.get("baseUrl"):
+        return None
+    chosen = next(
+        ((model_id, name) for model_id, name in registry.OPENROUTER_MODELS if model_id == SELECT_MODEL_ID),
+        None,
     )
-    env = {"PATH": os.environ.get("PATH", ""), "RESOLVE_URL": resolve_js.resolve().as_uri()}
-    subprocess_mod = _subprocess_module()
-    try:
-        proc = subprocess_mod.run(
-            ["node", "--input-type=module", "--eval", code],
-            input=json.dumps({"prompt": prompt, "agentId": ""}),
-            text=True,
-            capture_output=True,
-            timeout=15,
-            env=env,
-            check=False,
-        )
-    except (OSError, subprocess_mod.TimeoutExpired):
+    if chosen is None:
         return None
-    if proc.returncode != 0 or not proc.stdout.strip():
+    model_id, name = chosen
+    entry = registry.model_entry(model_id, name)
+    max_tokens = entry.get("maxTokens")
+    if not isinstance(max_tokens, int):
         return None
-    try:
-        body = json.loads(proc.stdout)
-    except json.JSONDecodeError:
-        return None
-    if not isinstance(body, dict) or not body.get("provider") or not body.get("model"):
-        return None
-    return body
+    body = {
+        "model": model_id,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": text} for text in questions],
+    }
+    return {
+        "provider": "openrouter",
+        "api": provider["api"],
+        "method": "POST",
+        "url": str(provider["baseUrl"]).rstrip("/") + "/chat/completions",
+        "body": body,
+    }
+
+
+def _post_openrouter_chat(prepared: dict[str, Any]) -> dict[str, Any]:
+    """POST with urllib.request. The guard defaults off and does not open a socket."""
+    if not _openrouter_call_enabled():
+        return {"provider_call": False}
+    payload = json.dumps(prepared["body"], separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        str(prepared["url"]),
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        resp.read()
+    return {"provider_call": True}
 
 
 def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> dict[str, Any]:
-    """SELECT the smallest applicable pack, then stop at before_model_resolve."""
+    """SELECT the smallest applicable pack, then build the registry chat request."""
     digest = _input_hash(request)
     corpus = _load_process_packs()
     if corpus is None:
@@ -493,48 +490,46 @@ def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> di
             },
         )
     pack_id, questions = chosen
-    prompt = "\n".join(str(item.get("question") or "") for item in questions)
-    resolved = _resolve_before_model(prompt)
-    if resolved is None:
+    question_ids = [str(item.get("id") or "") for item in questions]
+    question_texts = [str(item.get("question") or "") for item in questions]
+    prepared = _build_openrouter_chat_request(question_texts)
+    if prepared is None:
         return _out(
             lane="deterministic",
             action="NO_ACTION",
-            reason="provider boundary did not resolve",
+            reason="openrouter registry did not describe a chat request",
             evidence=evidence,
             extra={
                 "abstain": True,
                 "confidence_band": "C0",
                 "input_hash": digest,
                 "pack_id": pack_id,
-                "question_ids": [str(item.get("id") or "") for item in questions],
+                "question_ids": question_ids,
                 "pack_status": corpus["status"],
                 "recommended_mode": "SHADOW",
             },
         )
-    registry = _registry()
-    entry = registry.model_entry(str(resolved["model"]), str(resolved["model"])) if registry is not None else {}
+    posted = _post_openrouter_chat(prepared)
     return _out(
         lane="jev",
         action="SELECT",
-        reason="smallest applicable pack is prepared for the existing model boundary; the live call is not made",
+        reason="smallest applicable pack is the OpenRouter chat request; the guard defaults off so the call is not made",
         evidence=evidence,
         jev_allowed=True,
         verb="select",
         extra={
-            "provider": resolved["provider"],
-            "provider_call": False,
-            "model": resolved["model"],
-            "tier": resolved.get("tier"),
-            "boundary": BOUNDARY_NAME,
-            "boundary_hook": BOUNDARY_HOOK,
-            "registry_primary": getattr(registry, "MODEL_PRIMARY", None) if registry is not None else None,
-            "max_tokens": entry.get("maxTokens"),
-            "recorded_cost": entry.get("cost"),
+            "provider": prepared["provider"],
+            "provider_call": posted["provider_call"] is True,
+            "model": prepared["body"]["model"],
+            "max_tokens": prepared["body"]["max_tokens"],
+            "api": prepared["api"],
+            "chat_request": prepared,
+            "guard": OPENROUTER_CALL_GUARD,
+            "guard_default": "off",
             "pack_id": pack_id,
             "pack_version": corpus["version"],
             "pack_status": corpus["status"],
-            "question_ids": [str(item.get("id") or "") for item in questions],
-            "prepared_prompt": prompt,
+            "question_ids": question_ids,
             "input_hash": digest,
             "abstain": False,
             "confidence_raw": None,
@@ -546,7 +541,7 @@ def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> di
 
 
 def evaluate(request: dict[str, Any]) -> dict[str, Any]:
-    """Route one judgment. Never performs a provider call."""
+    """Route one judgment. The OpenRouter call stays behind a guard that defaults off."""
     if not isinstance(request, dict):
         return _out(lane="deterministic", action="NO_ACTION", reason="request must be an object")
 

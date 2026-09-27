@@ -5,10 +5,13 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
+import socket
 import subprocess
 import sys
 import tempfile
 import unittest
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -286,22 +289,60 @@ class JudgmentBoundaryTest(unittest.TestCase):
         self.assertEqual(brain["action"], "ESCALATE")
         self.assertFalse(brain["jev_called"])
 
-    def test_select_prepares_the_existing_boundary_without_calling_it(self) -> None:
+    def test_select_builds_the_registry_chat_request_and_the_guard_stays_off(self) -> None:
         request = {"verb": "select"}
-        decision = judgment.evaluate(request)
+        os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+        opened: list[object] = []
+        real_socket = socket.socket
+        real_create = socket.create_connection
+        real_urlopen = urllib.request.urlopen
+
+        def fail_socket(*args: object, **kwargs: object) -> object:
+            opened.append(("socket", args))
+            raise AssertionError("socket opened")
+
+        def fail_connect(address: object, *args: object, **kwargs: object) -> object:
+            opened.append(("connect", address))
+            raise AssertionError("connect opened")
+
+        def fail_urlopen(*args: object, **kwargs: object) -> object:
+            opened.append("urlopen")
+            raise AssertionError("urlopen")
+
+        socket.socket = fail_socket  # type: ignore[assignment, misc]
+        socket.create_connection = fail_connect  # type: ignore[assignment]
+        urllib.request.urlopen = fail_urlopen  # type: ignore[assignment]
+        try:
+            decision = judgment.evaluate(request)
+            guarded = judgment._post_openrouter_chat(decision["chat_request"])
+        finally:
+            socket.socket = real_socket  # type: ignore[assignment, misc]
+            socket.create_connection = real_create
+            urllib.request.urlopen = real_urlopen
         digest = hashlib.sha256(
             json.dumps(request, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         ).hexdigest()
+        questions = [
+            "What user problem does this engineering change solve?",
+            "What changes for the user when it works?",
+            "Why does this matter now?",
+            "What metric or observation proves product success?",
+            "What guardrail metrics prevent optimizing the primary metric badly?",
+            "What related improvements are explicitly not part of this slice?",
+        ]
+        self.assertEqual(opened, [])
+        self.assertFalse(guarded["provider_call"])
         self.assertEqual(decision["action"], "SELECT")
         self.assertEqual(decision["verb"], "select")
         self.assertTrue(decision["jev_allowed"])
         self.assertFalse(decision["jev_called"])
         self.assertFalse(decision["provider_call"])
         self.assertEqual(decision["provider"], "openrouter")
-        self.assertEqual(decision["tier"], "simple")
         self.assertEqual(decision["model"], "anthropic/claude-haiku-4-5")
-        self.assertEqual(decision["boundary"], "complexity-router")
-        self.assertEqual(decision["boundary_hook"], "before_model_resolve")
+        self.assertEqual(decision["max_tokens"], 1024)
+        self.assertEqual(decision["api"], "openai-completions")
+        self.assertEqual(decision["guard"], "HIVE_OPENROUTER_CALL")
+        self.assertEqual(decision["guard_default"], "off")
         self.assertEqual(decision["pack_id"], "engineering.product")
         self.assertEqual(decision["pack_status"], "READY_FOR_IMPLEMENTATION_NOT_LIVE")
         self.assertEqual(
@@ -316,14 +357,28 @@ class JudgmentBoundaryTest(unittest.TestCase):
             ],
         )
         self.assertEqual(decision["input_hash"], digest)
-        self.assertEqual(decision["registry_primary"], "openrouter/anthropic/claude-sonnet-4-6")
-        self.assertEqual(decision["max_tokens"], 1024)
-        self.assertEqual(decision["recorded_cost"], {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0})
+        chat = decision["chat_request"]
+        self.assertEqual(chat["provider"], "openrouter")
+        self.assertEqual(chat["api"], "openai-completions")
+        self.assertEqual(chat["method"], "POST")
+        self.assertEqual(chat["url"], "https://openrouter.ai/api/v1/chat/completions")
+        body = chat["body"]
+        self.assertEqual(set(body), {"model", "max_tokens", "messages"})
+        self.assertEqual(body["model"], "anthropic/claude-haiku-4-5")
+        self.assertEqual(body["max_tokens"], 1024)
+        self.assertEqual(
+            body["messages"],
+            [{"role": "user", "content": text} for text in questions],
+        )
         self.assertFalse(decision["abstain"])
         self.assertEqual(decision["confidence_band"], "C0")
         self.assertEqual(decision["recommended_mode"], "SHADOW")
-        self.assertIn("What user problem does this engineering change solve?", decision["prepared_prompt"])
-        self.assertNotIn("api_key", json.dumps(decision).lower())
+        receipt = json.dumps(decision)
+        lowered = receipt.lower()
+        self.assertNotIn("api_key", lowered)
+        self.assertNotIn("authorization", lowered)
+        self.assertNotIn("bearer", lowered)
+        self.assertNotIn("sk-", lowered)
         abstained = judgment.evaluate({"verb": "select", "process_stage": "missing-stage"})
         self.assertEqual(abstained["action"], "NO_ACTION")
         self.assertTrue(abstained["abstain"])
@@ -339,6 +394,9 @@ class JudgmentBoundaryTest(unittest.TestCase):
         self.assertNotIn("typesafe", text.lower())
         self.assertNotIn("4018", text)
         self.assertNotIn("apps/scorpion", text)
+        self.assertNotIn("runOpenAI", text)
+        self.assertNotIn("api.openai.com", text)
+        self.assertNotIn("openclaw", text.lower())
 
 
 if __name__ == "__main__":
