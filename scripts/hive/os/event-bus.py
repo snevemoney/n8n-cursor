@@ -561,7 +561,10 @@ def publish_jarvis(
     published = publish_state(mutation, path=path, cohort_path=cohort_path)
     if published.get("result") != "PUBLISHED":
         return {"published": published, "applied": None}
+    receive_state(JARVIS_PRIMARY, mutation, path=path)
     applied = apply_state(JARVIS_PRIMARY, mutation, path=path, cohort_path=cohort_path)
+    if applied.get("result") == "APPLIED":
+        acknowledge(JARVIS_PRIMARY, JARVIS_ENTITY, path=path, cohort_path=cohort_path)
     return {"published": published, "applied": applied}
 
 

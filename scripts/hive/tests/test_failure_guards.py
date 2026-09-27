@@ -1637,6 +1637,26 @@ class VersionedContinuityTest(unittest.TestCase):
             self.assertEqual(consumers["ACKNOWLEDGED"], BUS.GROK_DESK_CONSUMER)
             self.assertTrue(BUS.projection_synced(BUS.GROK_DESK_CONSUMER, "grok-desk:Forge", path=log))
 
+    def test_publish_jarvis_receives_applies_and_acks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            result = BUS.publish_jarvis(
+                {"step": 1},
+                state_version=1,
+                source_session="jarvis-primary-session",
+                writer="event-bus.py",
+                changed_at="2026-09-25T04:00:00+00:00",
+                path=log,
+            )
+            phases = [row.get("phase") for row in BUS._read_all(log)]
+            self.assertEqual(phases, ["PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED"])
+            self.assertEqual(result["published"]["result"], "PUBLISHED")
+            self.assertEqual(result["applied"]["result"], "APPLIED")
+            consumers = {row.get("phase"): row.get("consumer") for row in BUS._read_all(log)}
+            self.assertEqual(consumers["RECEIVED"], BUS.JARVIS_PRIMARY)
+            self.assertEqual(consumers["APPLIED"], BUS.JARVIS_PRIMARY)
+            self.assertEqual(consumers["ACKNOWLEDGED"], BUS.JARVIS_PRIMARY)
+
     def test_applied_persists_acknowledgement(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
