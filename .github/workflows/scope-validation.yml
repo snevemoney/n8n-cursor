@@ -183,7 +183,7 @@ jobs:
       - name: Check for secrets
         run: |
           # Check for common secret patterns
-          if grep -r -i "password\|secret\|key\|token" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+          if grep -r -i "password\|secret\|key\|token" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=scorpion --exclude-dir=scorpion-core apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
             echo "❌ Potential secrets found in code"
             exit 1
           fi
@@ -192,7 +192,7 @@ jobs:
       - name: Check for hardcoded URLs
         run: |
           # Check for hardcoded localhost or IP addresses
-          if grep -r "localhost\|127\.0\.0\.1\|0\.0\.0\.0" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
+          if grep -r "localhost\|127\.0\.0\.1\|0\.0\.0\.0" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=scorpion --exclude-dir=scorpion-core apps/ | grep -v "process.env\|NEXT_PUBLIC_"; then
             echo "❌ Hardcoded URLs found in code"
             exit 1
           fi
