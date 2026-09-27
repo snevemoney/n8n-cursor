@@ -523,6 +523,11 @@ def publish_grok_desk(
         "payload": payload,
     }
     published = publish_state(mutation, path=path, cohort_path=cohort_path)
+    if published.get("result") == "PUBLISHED":
+        receive_state(GROK_DESK_CONSUMER, mutation, path=path)
+        applied = apply_state(GROK_DESK_CONSUMER, mutation, path=path, cohort_path=cohort_path)
+        if applied.get("result") == "APPLIED":
+            acknowledge(GROK_DESK_CONSUMER, entity_id, path=path, cohort_path=cohort_path)
     projection = None
     if projection_path is not None and published.get("result") == "PUBLISHED":
         projection = write_projection(GROK_DESK_CONSUMER, entity_id, projection_path, path=path)
