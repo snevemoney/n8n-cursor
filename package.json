@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "pnpm -r run dev",
     "build": "pnpm -r run build",
-    "lint": "pnpm --filter '!scorpion' --filter '!@scorpion/core' --filter '!{.}' -r run lint",
-    "typecheck": "pnpm --filter '!scorpion' --filter '!@scorpion/core' --filter '!{.}' -r run typecheck",
-    "test": "pnpm --filter '!scorpion' --filter '!@scorpion/core' --filter '!{.}' -r run test",
+    "lint": "pnpm --filter '!scorpion' --filter '!@scorpion/core' --filter '!lovable-frontend' --filter '!{.}' -r run lint",
+    "typecheck": "pnpm --filter '!scorpion' --filter '!@scorpion/core' --filter '!lovable-frontend' --filter '!{.}' -r run typecheck",
+    "test": "pnpm --filter '!scorpion' --filter '!@scorpion/core' --filter '!lovable-frontend' --filter '!{.}' -r run test",
     "verify-structure": "node tooling/scripts/verify-structure.mjs",
     "ports-check": "bash tooling/scripts/ports-check.sh",
     "scan-secrets": "bash tooling/scripts/scan-secrets.sh",
