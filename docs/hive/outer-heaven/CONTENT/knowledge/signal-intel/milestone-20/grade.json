@@ -1,6 +1,18 @@
 {
   "author": "forge",
   "counts": {
+    "candidate_types": [
+      "ANTI_PATTERN",
+      "EVAL",
+      "GTM_PATTERN",
+      "METRIC",
+      "PROCESS",
+      "PROOF_PATTERN",
+      "REFERENCE",
+      "TOOL_USAGE",
+      "WORKFLOW"
+    ],
+    "candidates": 61,
     "claims": 61,
     "clusters": 4,
     "complete_channels": [],
@@ -24,17 +36,20 @@
   "quote_claims_are_source_text": true,
   "ready_to_scale": false,
   "stages": {
+    "applicability_guard": "PASS",
     "capability_mapping": "PASS",
     "claims": "PASS",
     "clustering": "PASS",
     "contradictions": "PASS",
     "dedupe": "PASS",
     "experiment_execution": "BLOCKED",
+    "improvement_candidates": "PASS",
     "later_retrieval": "PASS",
     "measured_outcome": "PASS",
     "method_atoms": "PASS",
     "method_status_update": "PASS",
     "recommended_experiment": "PASS",
+    "signal_not_method": "PASS",
     "source_completeness": "PASS",
     "typed_outputs": "PASS"
   },

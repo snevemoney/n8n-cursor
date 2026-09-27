@@ -350,6 +350,436 @@
     "to": "atom-speech-ne-behavior"
   },
   {
+    "from": "quote-sig-x-text-2071996301311381827",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-text-2071996301311381827"
+  },
+  {
+    "from": "cand-quote-sig-x-text-2071996301311381827",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "quote-sig-x-text-2072001793492763022",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-text-2072001793492763022"
+  },
+  {
+    "from": "cand-quote-sig-x-text-2072001793492763022",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "quote-sig-x-text-2072255044544512004",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-text-2072255044544512004"
+  },
+  {
+    "from": "cand-quote-sig-x-text-2072255044544512004",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "quote-sig-x-text-2072364163054395409",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-text-2072364163054395409"
+  },
+  {
+    "from": "cand-quote-sig-x-text-2072364163054395409",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "quote-sig-x-text-2072498082819014925",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-text-2072498082819014925"
+  },
+  {
+    "from": "cand-quote-sig-x-text-2072498082819014925",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "K-x-2088007687149601254-01",
+    "rel": "decomposes_to",
+    "to": "cand-K-x-2088007687149601254-01"
+  },
+  {
+    "from": "cand-K-x-2088007687149601254-01",
+    "rel": "applies_to",
+    "to": "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+  },
+  {
+    "from": "K-x-2088007687149601254-02",
+    "rel": "decomposes_to",
+    "to": "cand-K-x-2088007687149601254-02"
+  },
+  {
+    "from": "cand-K-x-2088007687149601254-02",
+    "rel": "applies_to",
+    "to": "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+  },
+  {
+    "from": "K-x-2088007687149601254-03",
+    "rel": "decomposes_to",
+    "to": "cand-K-x-2088007687149601254-03"
+  },
+  {
+    "from": "cand-K-x-2088007687149601254-03",
+    "rel": "applies_to",
+    "to": "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+  },
+  {
+    "from": "K-x-2088007687149601254-04",
+    "rel": "decomposes_to",
+    "to": "cand-K-x-2088007687149601254-04"
+  },
+  {
+    "from": "cand-K-x-2088007687149601254-04",
+    "rel": "applies_to",
+    "to": "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+  },
+  {
+    "from": "K-x-2088007687149601254-05",
+    "rel": "decomposes_to",
+    "to": "cand-K-x-2088007687149601254-05"
+  },
+  {
+    "from": "cand-K-x-2088007687149601254-05",
+    "rel": "applies_to",
+    "to": "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+  },
+  {
+    "from": "quote-sig-x-video-2073272122508513702",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-video-2073272122508513702"
+  },
+  {
+    "from": "cand-quote-sig-x-video-2073272122508513702",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "quote-sig-x-video-2074119000137601528",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-video-2074119000137601528"
+  },
+  {
+    "from": "cand-quote-sig-x-video-2074119000137601528",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "quote-sig-x-video-2074158868142194898",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-video-2074158868142194898"
+  },
+  {
+    "from": "cand-quote-sig-x-video-2074158868142194898",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "quote-sig-x-video-2075754077074620467",
+    "rel": "decomposes_to",
+    "to": "cand-quote-sig-x-video-2075754077074620467"
+  },
+  {
+    "from": "cand-quote-sig-x-video-2075754077074620467",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "K-HNKlFTd1maM-01",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-01"
+  },
+  {
+    "from": "K-HNKlFTd1maM-02",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-02"
+  },
+  {
+    "from": "K-HNKlFTd1maM-03",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-03"
+  },
+  {
+    "from": "K-HNKlFTd1maM-04",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-04"
+  },
+  {
+    "from": "K-HNKlFTd1maM-05",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-05"
+  },
+  {
+    "from": "K-HNKlFTd1maM-06",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-06"
+  },
+  {
+    "from": "K-HNKlFTd1maM-07",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-07"
+  },
+  {
+    "from": "K-HNKlFTd1maM-08",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-08"
+  },
+  {
+    "from": "K-HNKlFTd1maM-09",
+    "rel": "decomposes_to",
+    "to": "cand-K-HNKlFTd1maM-09"
+  },
+  {
+    "from": "K-eFOTQpbGcy8-01",
+    "rel": "decomposes_to",
+    "to": "cand-K-eFOTQpbGcy8-01"
+  },
+  {
+    "from": "cand-K-eFOTQpbGcy8-01",
+    "rel": "applies_to",
+    "to": "signal-retrieve"
+  },
+  {
+    "from": "K-eFOTQpbGcy8-02",
+    "rel": "decomposes_to",
+    "to": "cand-K-eFOTQpbGcy8-02"
+  },
+  {
+    "from": "K-glM8godEcic-01",
+    "rel": "decomposes_to",
+    "to": "cand-K-glM8godEcic-01"
+  },
+  {
+    "from": "K-glM8godEcic-02",
+    "rel": "decomposes_to",
+    "to": "cand-K-glM8godEcic-02"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-01",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-01"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-02",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-02"
+  },
+  {
+    "from": "cand-K-w9-gfaV5vlM-02",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-03",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-03"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-04",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-04"
+  },
+  {
+    "from": "cand-K-w9-gfaV5vlM-04",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-05",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-05"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-06",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-06"
+  },
+  {
+    "from": "cand-K-w9-gfaV5vlM-06",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-07",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-07"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-08",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-08"
+  },
+  {
+    "from": "cand-K-w9-gfaV5vlM-08",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-09",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-09"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-10",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-10"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-11",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-11"
+  },
+  {
+    "from": "cand-K-w9-gfaV5vlM-11",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-12",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-12"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-13",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-13"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-14",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-14"
+  },
+  {
+    "from": "cand-K-w9-gfaV5vlM-14",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-15",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-15"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-16",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-16"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-17",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-17"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-18",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-18"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-19",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-19"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-20",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-20"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-21",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-21"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-22",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-22"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-23",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-23"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-24",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-24"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-25",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-25"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-26",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-26"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-27",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-27"
+  },
+  {
+    "from": "K-w9-gfaV5vlM-28",
+    "rel": "decomposes_to",
+    "to": "cand-K-w9-gfaV5vlM-28"
+  },
+  {
+    "from": "K-CB5bG4mvnS0-01",
+    "rel": "decomposes_to",
+    "to": "cand-K-CB5bG4mvnS0-01"
+  },
+  {
+    "from": "K-CB5bG4mvnS0-02",
+    "rel": "decomposes_to",
+    "to": "cand-K-CB5bG4mvnS0-02"
+  },
+  {
+    "from": "cand-K-CB5bG4mvnS0-02",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-CB5bG4mvnS0-03",
+    "rel": "decomposes_to",
+    "to": "cand-K-CB5bG4mvnS0-03"
+  },
+  {
+    "from": "K-CB5bG4mvnS0-04",
+    "rel": "decomposes_to",
+    "to": "cand-K-CB5bG4mvnS0-04"
+  },
+  {
+    "from": "cand-K-CB5bG4mvnS0-04",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-CB5bG4mvnS0-05",
+    "rel": "decomposes_to",
+    "to": "cand-K-CB5bG4mvnS0-05"
+  },
+  {
+    "from": "cand-K-CB5bG4mvnS0-05",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
+    "from": "K-CB5bG4mvnS0-06",
+    "rel": "decomposes_to",
+    "to": "cand-K-CB5bG4mvnS0-06"
+  },
+  {
+    "from": "cand-K-CB5bG4mvnS0-06",
+    "rel": "applies_to",
+    "to": "separate-verifier"
+  },
+  {
     "from": "sig-yt-w9-gfaV5vlM",
     "rel": "suggests",
     "to": "method-90-minute-camera-on-poc-offer-positioning"

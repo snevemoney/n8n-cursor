@@ -42,6 +42,59 @@ REQUIRED = {
 }
 METHOD_TYPES = frozenset({"method", "gtm_technique", "anti_pattern", "principle"})
 ADOPTION_BLOCKED = frozenset({"ADOPTED", "VERIFIED", "SUPERSEDED"})
+BEHAVIOR_CHANGING = frozenset({"MANDATORY", "DEFAULT"})
+CANDIDATE_TYPES = (
+    "TOOL",
+    "TOOL_USAGE",
+    "SKILL",
+    "REASONING_PATTERN",
+    "JUDGMENT_HEURISTIC",
+    "PROCESS",
+    "WORKFLOW",
+    "CODE_PATTERN",
+    "ARCHITECTURE_PATTERN",
+    "BEHAVIOR",
+    "OPTIONAL_PATTERN",
+    "ANTI_PATTERN",
+    "PROOF_PATTERN",
+    "EVAL",
+    "TEST_PATTERN",
+    "REFERENCE",
+    "EXAMPLE",
+    "PROMPT_PATTERN",
+    "CONTEXT_PATTERN",
+    "MEMORY_PATTERN",
+    "DESIGN_PATTERN",
+    "CREATIVE_PATTERN",
+    "GTM_PATTERN",
+    "BUSINESS_PATTERN",
+    "METRIC",
+    "FAILURE_MODE",
+    "RECOVERY_PATTERN",
+    "CAPABILITY_GAP",
+    "PRODUCT_IDEA",
+    "CUSTOMER_PAIN",
+    "COMPETITOR_SIGNAL",
+    "MARKET_SIGNAL",
+)
+CARE_FOR = {
+    "GTM_PATTERN": "product-gtm",
+    "BUSINESS_PATTERN": "product-gtm",
+    "METRIC": "product-gtm",
+    "PROOF_PATTERN": "watchdog",
+    "EVAL": "watchdog",
+    "TEST_PATTERN": "watchdog",
+    "ANTI_PATTERN": "watchdog",
+    "CONTEXT_PATTERN": "librarian",
+    "MEMORY_PATTERN": "librarian",
+    "REFERENCE": "librarian",
+    "EXAMPLE": "librarian",
+    "TOOL": "forge",
+    "TOOL_USAGE": "forge",
+    "CODE_PATTERN": "forge",
+    "CREATIVE_PATTERN": "creative-studio",
+    "DESIGN_PATTERN": "creative-studio",
+}
 STOP = frozenset(
     """
     this that with from your have been were they them what when where into
@@ -207,7 +260,22 @@ def load_capabilities(root: Path = ROOT) -> list[dict[str, Any]]:
                 "status": "WIRED",
                 "path": _rel(retrieve),
                 "match_domains": ["retrieval", "rag", "knowledge-ops"],
+                "match_types": ["CONTEXT_PATTERN", "MEMORY_PATTERN", "REFERENCE"],
                 "origin": "existing-code",
+            }
+        )
+    verifier = root / ".cursor/skills/separate-verifier/SKILL.md"
+    if verifier.is_file():
+        found.append(
+            {
+                "capability_id": "separate-verifier",
+                "name": "separate-verifier",
+                "source_video_id": "",
+                "status": "WIRED",
+                "path": _rel(verifier),
+                "match_domains": [],
+                "match_types": ["PROOF_PATTERN", "EVAL", "TEST_PATTERN"],
+                "origin": "existing-skill",
             }
         )
     return found
@@ -403,7 +471,9 @@ def _signal_shell(signal_id: str, kind: str, source_ref: str, locator: dict[str,
         "coverage": {},
         "source_completeness": "UNAVAILABLE",
         "evidence_basis": "pointer_only",
+        "origin": "external",
         "claim_ids": [],
+        "candidate_ids": [],
         "outputs": [],
         "popularity_ignored_for_adoption": True,
     }
@@ -531,6 +601,111 @@ def _match_capabilities(claim: dict[str, Any], capabilities: list[dict[str, Any]
 def _method_id(concept: str, domain: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", f"{concept}-{domain}".lower()).strip("-")
     return f"method-{slug or 'unscoped'}"
+
+
+def candidate_type_for(claim: dict[str, Any]) -> str:
+    output = claim.get("output_type") or ""
+    domain = (claim.get("domain") or "").lower()
+    concept = (claim.get("concept") or "").lower()
+    if output in {"raw_quote", "unclassified"}:
+        return "REFERENCE"
+    if output == "contradiction_note":
+        return "PROOF_PATTERN"
+    if output == "metric":
+        return "METRIC"
+    if output == "anti_pattern":
+        return "ANTI_PATTERN"
+    if output == "customer_pain":
+        return "CUSTOMER_PAIN"
+    if output == "gtm_technique":
+        return "GTM_PATTERN"
+    if output == "principle":
+        return "WORKFLOW"
+    if "eval" in domain or "eval" in concept:
+        return "EVAL"
+    if domain in {"retrieval", "rag", "knowledge-ops"}:
+        return "CONTEXT_PATTERN"
+    if domain in {"cinematic-pages", "media-gen", "content-ops"}:
+        return "CREATIVE_PATTERN"
+    if domain == "tooling":
+        return "TOOL_USAGE"
+    if domain == "safety":
+        return "BEHAVIOR"
+    if domain == "workflow-build":
+        return "WORKFLOW"
+    if output == "method":
+        return "PROCESS"
+    return "REFERENCE"
+
+
+def set_applicability(
+    candidate: dict[str, Any],
+    state: str,
+    *,
+    evens_promote: bool = False,
+    tested_locally: bool = False,
+) -> None:
+    if state in BEHAVIOR_CHANGING and not (evens_promote and tested_locally):
+        raise PromotionError("an external signal cannot become MANDATORY or DEFAULT behavior")
+    if state == "CONDITIONAL" and not tested_locally:
+        raise PromotionError("CONDITIONAL behavior requires a local test")
+    if state in {"REJECTED", "SUPERSEDED"} and not evens_promote:
+        raise PromotionError(f"{state} requires an explicit decision")
+    candidate["applicability"] = state
+    candidate["mandatory_or_optional"] = state
+
+
+def _assets_for(claim: dict[str, Any], candidate_type: str, capabilities: list[dict[str, Any]]) -> list[str]:
+    matched = _match_capabilities(claim, capabilities)
+    for cap in capabilities:
+        if candidate_type in (cap.get("match_types") or []):
+            matched.append(cap["capability_id"])
+    return sorted(set(matched))
+
+
+def build_candidates(
+    claims: list[dict[str, Any]],
+    capabilities: list[dict[str, Any]],
+    *,
+    origin: str = "external",
+) -> list[dict[str, Any]]:
+    candidates = []
+    for claim in claims:
+        if not claim.get("text"):
+            continue
+        candidate_type = candidate_type_for(claim)
+        if candidate_type not in CANDIDATE_TYPES:
+            raise PromotionError(f"unknown candidate type {candidate_type}")
+        assets = _assets_for(claim, candidate_type, capabilities)
+        domain = claim.get("domain") or ""
+        if domain.startswith("offer"):
+            who = "product-gtm"
+        else:
+            who = CARE_FOR.get(candidate_type, "researcher")
+        reference_only = candidate_type == "REFERENCE" or claim.get("extractor") == "bookmark-text-quote"
+        candidate = {
+            "id": f"cand-{claim['id']}",
+            "signal_id": claim["signal_id"],
+            "claim_id": claim["id"],
+            "origin": origin,
+            "candidate_type": candidate_type,
+            "what_is_it": claim["text"],
+            "what_problem_does_it_solve": domain or "unspecified",
+            "where_does_it_apply": domain or "unspecified",
+            "what_existing_asset_does_it_improve": assets,
+            "who_should_care": who,
+            "when_should_it_be_used": claim.get("conditions") or "not a behavior yet",
+            "when_should_it_not_be_used": claim.get("exceptions") or "not a behavior yet",
+            "what_evidence_supports_it": f"{claim.get('extractor')}; {claim.get('evidence_status')}",
+            "what_conflicts_with_it": list(claim.get("conflicts_with") or []),
+            "has_it_been_tested_locally": False,
+            "what_would_prove_it_useful": "a named local measure plus a Watchdog grade",
+            "inject_globally": False,
+            "creates_new_subsystem": False,
+        }
+        set_applicability(candidate, "REFERENCE_ONLY" if reference_only else "EXPERIMENTAL")
+        candidates.append(candidate)
+    return candidates
 
 
 def synthesize(
@@ -734,10 +909,18 @@ def synthesize(
             signal["processing_state"] = "EXPERIMENT_CANDIDATE"
         signal["pipeline_gaps"] = gaps
 
+    candidates = build_candidates(claims, capabilities, origin="external")
+    by_signal: dict[str, list[str]] = defaultdict(list)
+    for candidate in candidates:
+        by_signal[candidate["signal_id"]].append(candidate["id"])
+    for signal in signals:
+        signal["candidate_ids"] = by_signal.get(signal["id"], [])
+
     return {
         "contradictions": contradictions,
         "method_atoms": method_atoms,
         "methods": methods,
+        "candidates": candidates,
         "clusters": clusters,
         "recommended_experiment": recommended,
     }
@@ -792,15 +975,42 @@ def retrieve(graph: dict[str, Any], prompt: str, cap: int = 3) -> list[dict[str,
                     },
                 )
             )
+    for candidate in graph.get("candidates") or []:
+        blob = " ".join(
+            str(candidate.get(key) or "")
+            for key in ("what_is_it", "candidate_type", "where_does_it_apply", "who_should_care")
+        )
+        overlap = tokens & set(_tokens(blob))
+        if len(overlap) >= 2:
+            scored.append(
+                (
+                    len(overlap),
+                    {
+                        "kind": "candidate",
+                        "id": candidate["id"],
+                        "claim_id": candidate["claim_id"],
+                        "path": candidate["id"],
+                        "score": len(overlap),
+                        "candidate_type": candidate["candidate_type"],
+                        "applicability": candidate["applicability"],
+                        "text": candidate["what_is_it"][:240],
+                    },
+                )
+            )
     scored.sort(key=lambda item: (-item[0], item[1]["id"]))
     refs = []
     seen: set[str] = set()
+    covered_claims: set[str] = set()
     for _score, ref in scored:
         if ref["id"] in seen:
+            continue
+        if ref["kind"] == "claim" and ref["id"] in covered_claims:
             continue
         if "SIGNAL_INDEX" in str(ref["path"]):
             continue
         seen.add(ref["id"])
+        if ref["kind"] == "candidate" and ref.get("claim_id"):
+            covered_claims.add(ref["claim_id"])
         refs.append(ref)
         if len(refs) >= cap:
             break
@@ -812,8 +1022,12 @@ def answer(graph: dict[str, Any], prompt: str) -> dict[str, Any]:
     if not refs:
         return {"answer": "NONE", "refs": []}
     claim_ids = {ref["id"] for ref in refs if ref["kind"] == "claim"}
+    claim_ids.update(ref["claim_id"] for ref in refs if ref["kind"] == "candidate" and ref.get("claim_id"))
     claims = [claim for claim in graph["claims"] if claim["id"] in claim_ids]
+    picked = [row for row in graph.get("candidates") or [] if row["id"] in {ref["id"] for ref in refs}]
     domains = sorted({claim["domain"] for claim in claims if claim.get("domain")})
+    domains.extend(row["where_does_it_apply"] for row in picked if row.get("where_does_it_apply") not in {"", "unspecified"})
+    domains = sorted(set(domains))
     contradictions = [
         row["id"]
         for row in graph.get("contradictions") or []
@@ -825,6 +1039,10 @@ def answer(graph: dict[str, Any], prompt: str) -> dict[str, Any]:
         "answer": "GRAPH",
         "problems": domains,
         "methods": [ref["id"] for ref in refs if ref["kind"] == "method"][:3],
+        "candidates": [
+            {"id": row["id"], "type": row["candidate_type"], "applicability": row["applicability"]}
+            for row in picked
+        ][:3],
         "contradictions": contradictions[:3],
         "local_status": maturities,
         "next_experiment": None if not experiment else {
@@ -1039,6 +1257,7 @@ def build_milestone(root: Path = ROOT, *, retrieve_latency_ms: float | None = No
     probe_graph = {
         "claims": claims,
         "methods": synthesized["methods"],
+        "candidates": synthesized["candidates"],
         "contradictions": synthesized["contradictions"],
         "recommended_experiment": synthesized["recommended_experiment"],
     }
@@ -1058,6 +1277,7 @@ def build_milestone(root: Path = ROOT, *, retrieve_latency_ms: float | None = No
         "claims": claims,
         "method_atoms": synthesized["method_atoms"],
         "methods": methods,
+        "candidates": synthesized["candidates"],
         "contradictions": synthesized["contradictions"],
         "clusters": synthesized["clusters"],
         "experiments": experiments,
@@ -1072,7 +1292,16 @@ def build_milestone(root: Path = ROOT, *, retrieve_latency_ms: float | None = No
             }
             for cap in capabilities
         ],
-        "edges": _edges(signals, claims, synthesized["method_atoms"], methods, synthesized["contradictions"], experiments, outcome),
+        "edges": _edges(
+            signals,
+            claims,
+            synthesized["method_atoms"],
+            methods,
+            synthesized["candidates"],
+            synthesized["contradictions"],
+            experiments,
+            outcome,
+        ),
     }
     graph["grade"] = grade_milestone(graph)
     graph["synthesis_md"] = render_synthesis(graph)
@@ -1084,6 +1313,7 @@ def _edges(
     claims: list[dict[str, Any]],
     method_atoms: list[dict[str, Any]],
     methods: list[dict[str, Any]],
+    candidates: list[dict[str, Any]],
     contradictions: list[dict[str, Any]],
     experiments: list[dict[str, Any]],
     outcome: dict[str, Any],
@@ -1095,6 +1325,10 @@ def _edges(
     for atom in method_atoms:
         for claim_id in atom["claim_ids"]:
             edges.append({"from": claim_signal.get(claim_id, claim_id), "rel": "supports", "to": atom["id"]})
+    for candidate in candidates:
+        edges.append({"from": candidate["claim_id"], "rel": "decomposes_to", "to": candidate["id"]})
+        for cap_id in candidate["what_existing_asset_does_it_improve"]:
+            edges.append({"from": candidate["id"], "rel": "applies_to", "to": cap_id})
     for method in methods:
         for atom_id in method["composed_of"]:
             edges.append({"from": method["id"], "rel": "composed_of", "to": atom_id})
@@ -1132,6 +1366,22 @@ def grade_milestone(graph: dict[str, Any]) -> dict[str, Any]:
         if claim["extractor"] == "bookmark-text-quote"
     )
     both = [row for row in graph["contradictions"] if row["both_in_cohort"]]
+    candidates = graph.get("candidates") or []
+    candidate_types = {row["candidate_type"] for row in candidates}
+    forced_behavior = [
+        row["id"]
+        for row in candidates
+        if row.get("applicability") in BEHAVIOR_CHANGING or row.get("inject_globally") or row.get("creates_new_subsystem")
+    ]
+    method_claim_ids = {claim_id for method in graph["methods"] for claim_id in method.get("claim_ids") or []}
+    quote_without_method = [
+        signal["id"]
+        for signal in signals
+        if signal["kind"] == "x_text"
+        and signal["claim_ids"]
+        and signal.get("candidate_ids")
+        and not (set(signal["claim_ids"]) & method_claim_ids)
+    ]
     dinner = retrieve(graph, "what's for dinner tonight")
     later = retrieve(graph, "do not average speech and behavior mismatches")
     recommended = graph.get("recommended_experiment")
@@ -1149,6 +1399,9 @@ def grade_milestone(graph: dict[str, Any]) -> dict[str, Any]:
         "measured_outcome": "PASS" if graph["outcomes"] and graph["outcomes"][0]["token_cost"] == 0 else "FAIL",
         "method_status_update": "PASS" if not adopted else "FAIL",
         "later_retrieval": "PASS" if later and not dinner and len(later) <= 3 else "FAIL",
+        "improvement_candidates": "PASS" if len(candidate_types) >= 3 else "FAIL",
+        "signal_not_method": "PASS" if quote_without_method else "FAIL",
+        "applicability_guard": "PASS" if candidates and not forced_behavior else "FAIL",
     }
     if recommended and recommended["results"] is not None:
         stages["experiment_execution"] = "FAIL"
@@ -1183,6 +1436,8 @@ def grade_milestone(graph: dict[str, Any]) -> dict[str, Any]:
             "contradictions_in_cohort": len(both),
             "method_atoms": len(graph["method_atoms"]),
             "methods": len(graph["methods"]),
+            "candidates": len(candidates),
+            "candidate_types": sorted(candidate_types),
             "complete_channels": complete_channels,
         },
         "stages": stages,
@@ -1217,7 +1472,22 @@ def render_synthesis(graph: dict[str, Any]) -> str:
         "",
         "The vision-versus-accessibility browser example is not this cohort. Those sources were not recovered here.",
         "",
+        "CANDIDATES",
     ]
+    type_counts: dict[str, int] = defaultdict(int)
+    for candidate in graph.get("candidates") or []:
+        type_counts[candidate["candidate_type"]] += 1
+    if not type_counts:
+        lines.append("- none")
+    for name, count in sorted(type_counts.items()):
+        lines.append(f"- {name}: {count}")
+    lines.extend(
+        [
+            "applicability: EXPERIMENTAL or REFERENCE_ONLY. None are MANDATORY or DEFAULT.",
+            "A quote can be a REFERENCE and contain zero methods.",
+            "",
+        ]
+    )
     if not top:
         lines.append("PROBLEM")
         lines.append("none — no domain has two independent sources in this cohort")
@@ -1281,7 +1551,7 @@ def render_synthesis(graph: dict[str, Any]) -> str:
         [
             "",
             "MILESTONE",
-            "PARTIAL. Recommended experiment is not executed. Retrieval has one local outcome. Nothing is ADOPTED.",
+            "PARTIAL. Recommended experiment is not executed. Retrieval has one local outcome. Nothing is ADOPTED. Candidates are not behavior.",
             "",
         ]
     )
@@ -1295,6 +1565,7 @@ def write_milestone(graph: dict[str, Any], out_dir: Path) -> None:
         ("claims.json", "claims"),
         ("method-atoms.json", "method_atoms"),
         ("methods.json", "methods"),
+        ("candidates.json", "candidates"),
         ("contradictions.json", "contradictions"),
         ("clusters.json", "clusters"),
         ("experiments.json", "experiments"),
@@ -1320,6 +1591,8 @@ def format_answer(payload: dict[str, Any]) -> str:
         ", ".join(payload["problems"]) or "none",
         "METHODS",
         ", ".join(payload["methods"]) or "none",
+        "CANDIDATES",
+        ", ".join(f"{row['type']}:{row['applicability']}" for row in payload.get("candidates") or []) or "none",
         "CONTRADICTIONS",
         ", ".join(payload["contradictions"]) or "none",
         "LOCAL STATUS",
@@ -1369,6 +1642,46 @@ def self_test(root: Path = ROOT) -> list[str]:
         errs.append("an unrecovered repo was marked recovered")
     if any(method["maturity"] == "ADOPTED" for method in graph["methods"]):
         errs.append("a method was adopted")
+    try:
+        set_applicability({"id": "x"}, "MANDATORY")
+        errs.append("MANDATORY applicability was allowed")
+    except PromotionError:
+        pass
+    try:
+        set_applicability({"id": "x"}, "CONDITIONAL")
+        errs.append("CONDITIONAL applicability was allowed without a local test")
+    except PromotionError:
+        pass
+    internal = build_candidates(
+        [
+            {
+                "id": "internal-fixture",
+                "signal_id": "sig-internal-fixture",
+                "text": "a fresh grade disagreed with the builder",
+                "extractor": "internal-outcome",
+                "output_type": "contradiction_note",
+                "concept": "independent-grade",
+                "domain": "evaluation",
+                "conditions": "after a builder claims pass",
+                "exceptions": "do not inject into every desk",
+                "conflicts_with": [],
+                "evidence_status": "observed",
+                "source_id": "fixture",
+            }
+        ],
+        [],
+        origin="internal",
+    )
+    if len(internal) != 1 or internal[0]["origin"] != "internal":
+        errs.append("internal signal did not become one candidate")
+    if internal and (
+        internal[0]["applicability"] != "EXPERIMENTAL"
+        or internal[0]["has_it_been_tested_locally"]
+        or internal[0]["candidate_type"] != "PROOF_PATTERN"
+    ):
+        errs.append("internal disagreement was promoted into behavior")
+    if any(row["applicability"] in BEHAVIOR_CHANGING for row in graph["candidates"]):
+        errs.append("a cohort candidate is mandatory or default")
     return errs
 
 

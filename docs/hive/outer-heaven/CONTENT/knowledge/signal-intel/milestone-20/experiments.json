@@ -36,7 +36,7 @@
     },
     "results": {
       "hit": true,
-      "latency_ms": 0.687,
+      "latency_ms": 1.093,
       "ref_count": 3,
       "token_cost": 0
     },

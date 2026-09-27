@@ -1,5 +1,8 @@
 [
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-text-2071996301311381827"
+    ],
     "claim_ids": [
       "quote-sig-x-text-2071996301311381827"
     ],
@@ -47,6 +50,7 @@
       "author": "Zephyr_hg",
       "bookmark_id": "2071996301311381827"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-text-2071996301311381827",
@@ -63,6 +67,9 @@
     "source_ref": "https://x.com/i/web/status/2071996301311381827"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-text-2072001793492763022"
+    ],
     "claim_ids": [
       "quote-sig-x-text-2072001793492763022"
     ],
@@ -110,6 +117,7 @@
       "author": "tryrevyl",
       "bookmark_id": "2072001793492763022"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-text-2072001793492763022",
@@ -126,6 +134,9 @@
     "source_ref": "https://x.com/i/web/status/2072001793492763022"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-text-2072255044544512004"
+    ],
     "claim_ids": [
       "quote-sig-x-text-2072255044544512004"
     ],
@@ -173,6 +184,7 @@
       "author": "sandy4kad",
       "bookmark_id": "2072255044544512004"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-text-2072255044544512004",
@@ -189,6 +201,9 @@
     "source_ref": "https://x.com/i/web/status/2072255044544512004"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-text-2072364163054395409"
+    ],
     "claim_ids": [
       "quote-sig-x-text-2072364163054395409"
     ],
@@ -236,6 +251,7 @@
       "author": "JafarNajafov",
       "bookmark_id": "2072364163054395409"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-text-2072364163054395409",
@@ -252,6 +268,9 @@
     "source_ref": "https://x.com/i/web/status/2072364163054395409"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-text-2072498082819014925"
+    ],
     "claim_ids": [
       "quote-sig-x-text-2072498082819014925"
     ],
@@ -299,6 +318,7 @@
       "author": "oldgamesnob",
       "bookmark_id": "2072498082819014925"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-text-2072498082819014925",
@@ -315,6 +335,13 @@
     "source_ref": "https://x.com/i/web/status/2072498082819014925"
   },
   {
+    "candidate_ids": [
+      "cand-K-x-2088007687149601254-01",
+      "cand-K-x-2088007687149601254-02",
+      "cand-K-x-2088007687149601254-03",
+      "cand-K-x-2088007687149601254-04",
+      "cand-K-x-2088007687149601254-05"
+    ],
     "claim_ids": [
       "K-x-2088007687149601254-01",
       "K-x-2088007687149601254-02",
@@ -365,6 +392,7 @@
     "locator": {
       "video_id": "x-2088007687149601254"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "K-x-2088007687149601254-01",
@@ -399,6 +427,9 @@
     "source_ref": "https://x.com/i/web/status/2088007687149601254"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-video-2073272122508513702"
+    ],
     "claim_ids": [
       "quote-sig-x-video-2073272122508513702"
     ],
@@ -446,6 +477,7 @@
       "author": "VictorTaelin",
       "bookmark_id": "2073272122508513702"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-video-2073272122508513702",
@@ -463,6 +495,9 @@
     "source_ref": "https://x.com/i/web/status/2073272122508513702"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-video-2074119000137601528"
+    ],
     "claim_ids": [
       "quote-sig-x-video-2074119000137601528"
     ],
@@ -510,6 +545,7 @@
       "author": "rom1trs",
       "bookmark_id": "2074119000137601528"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-video-2074119000137601528",
@@ -527,6 +563,9 @@
     "source_ref": "https://x.com/i/web/status/2074119000137601528"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-video-2074158868142194898"
+    ],
     "claim_ids": [
       "quote-sig-x-video-2074158868142194898"
     ],
@@ -574,6 +613,7 @@
       "author": "monokern",
       "bookmark_id": "2074158868142194898"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-video-2074158868142194898",
@@ -591,6 +631,9 @@
     "source_ref": "https://x.com/i/web/status/2074158868142194898"
   },
   {
+    "candidate_ids": [
+      "cand-quote-sig-x-video-2075754077074620467"
+    ],
     "claim_ids": [
       "quote-sig-x-video-2075754077074620467"
     ],
@@ -638,6 +681,7 @@
       "author": "hollowearthterf",
       "bookmark_id": "2075754077074620467"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "quote-sig-x-video-2075754077074620467",
@@ -655,6 +699,17 @@
     "source_ref": "https://x.com/i/web/status/2075754077074620467"
   },
   {
+    "candidate_ids": [
+      "cand-K-HNKlFTd1maM-01",
+      "cand-K-HNKlFTd1maM-02",
+      "cand-K-HNKlFTd1maM-03",
+      "cand-K-HNKlFTd1maM-04",
+      "cand-K-HNKlFTd1maM-05",
+      "cand-K-HNKlFTd1maM-06",
+      "cand-K-HNKlFTd1maM-07",
+      "cand-K-HNKlFTd1maM-08",
+      "cand-K-HNKlFTd1maM-09"
+    ],
     "claim_ids": [
       "K-HNKlFTd1maM-01",
       "K-HNKlFTd1maM-02",
@@ -709,6 +764,7 @@
     "locator": {
       "video_id": "HNKlFTd1maM"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "K-HNKlFTd1maM-01",
@@ -765,6 +821,10 @@
     "source_ref": "https://www.youtube.com/watch?v=HNKlFTd1maM"
   },
   {
+    "candidate_ids": [
+      "cand-K-eFOTQpbGcy8-01",
+      "cand-K-eFOTQpbGcy8-02"
+    ],
     "claim_ids": [
       "K-eFOTQpbGcy8-01",
       "K-eFOTQpbGcy8-02"
@@ -812,6 +872,7 @@
     "locator": {
       "video_id": "eFOTQpbGcy8"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "K-eFOTQpbGcy8-01",
@@ -833,6 +894,10 @@
     "source_ref": "https://www.youtube.com/watch?v=eFOTQpbGcy8"
   },
   {
+    "candidate_ids": [
+      "cand-K-glM8godEcic-01",
+      "cand-K-glM8godEcic-02"
+    ],
     "claim_ids": [
       "K-glM8godEcic-01",
       "K-glM8godEcic-02"
@@ -880,6 +945,7 @@
     "locator": {
       "video_id": "glM8godEcic"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "K-glM8godEcic-01",
@@ -901,6 +967,36 @@
     "source_ref": "https://www.youtube.com/watch?v=glM8godEcic"
   },
   {
+    "candidate_ids": [
+      "cand-K-w9-gfaV5vlM-01",
+      "cand-K-w9-gfaV5vlM-02",
+      "cand-K-w9-gfaV5vlM-03",
+      "cand-K-w9-gfaV5vlM-04",
+      "cand-K-w9-gfaV5vlM-05",
+      "cand-K-w9-gfaV5vlM-06",
+      "cand-K-w9-gfaV5vlM-07",
+      "cand-K-w9-gfaV5vlM-08",
+      "cand-K-w9-gfaV5vlM-09",
+      "cand-K-w9-gfaV5vlM-10",
+      "cand-K-w9-gfaV5vlM-11",
+      "cand-K-w9-gfaV5vlM-12",
+      "cand-K-w9-gfaV5vlM-13",
+      "cand-K-w9-gfaV5vlM-14",
+      "cand-K-w9-gfaV5vlM-15",
+      "cand-K-w9-gfaV5vlM-16",
+      "cand-K-w9-gfaV5vlM-17",
+      "cand-K-w9-gfaV5vlM-18",
+      "cand-K-w9-gfaV5vlM-19",
+      "cand-K-w9-gfaV5vlM-20",
+      "cand-K-w9-gfaV5vlM-21",
+      "cand-K-w9-gfaV5vlM-22",
+      "cand-K-w9-gfaV5vlM-23",
+      "cand-K-w9-gfaV5vlM-24",
+      "cand-K-w9-gfaV5vlM-25",
+      "cand-K-w9-gfaV5vlM-26",
+      "cand-K-w9-gfaV5vlM-27",
+      "cand-K-w9-gfaV5vlM-28"
+    ],
     "claim_ids": [
       "K-w9-gfaV5vlM-01",
       "K-w9-gfaV5vlM-02",
@@ -974,6 +1070,7 @@
     "locator": {
       "video_id": "w9-gfaV5vlM"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "K-w9-gfaV5vlM-01",
@@ -1125,6 +1222,14 @@
     "source_ref": "https://www.youtube.com/watch?v=w9-gfaV5vlM"
   },
   {
+    "candidate_ids": [
+      "cand-K-CB5bG4mvnS0-01",
+      "cand-K-CB5bG4mvnS0-02",
+      "cand-K-CB5bG4mvnS0-03",
+      "cand-K-CB5bG4mvnS0-04",
+      "cand-K-CB5bG4mvnS0-05",
+      "cand-K-CB5bG4mvnS0-06"
+    ],
     "claim_ids": [
       "K-CB5bG4mvnS0-01",
       "K-CB5bG4mvnS0-02",
@@ -1176,6 +1281,7 @@
     "locator": {
       "video_id": "CB5bG4mvnS0"
     },
+    "origin": "external",
     "outputs": [
       {
         "claim_id": "K-CB5bG4mvnS0-01",
@@ -1217,6 +1323,7 @@
     "source_ref": "https://www.youtube.com/watch?v=CB5bG4mvnS0"
   },
   {
+    "candidate_ids": [],
     "claim_ids": [],
     "coverage": {
       "AUDIO": {
@@ -1264,6 +1371,7 @@
       "org": "figma",
       "url": "https://github.com/figma/mcp-server-guide"
     },
+    "origin": "external",
     "outputs": [],
     "pipeline_gaps": [
       "SOURCE_RECOVERED: required source body is not on disk"
@@ -1274,6 +1382,7 @@
     "source_ref": "https://github.com/figma/mcp-server-guide"
   },
   {
+    "candidate_ids": [],
     "claim_ids": [],
     "coverage": {
       "AUDIO": {
@@ -1321,6 +1430,7 @@
       "org": "vercel-labs",
       "url": "https://github.com/vercel-labs/agent-skills"
     },
+    "origin": "external",
     "outputs": [],
     "pipeline_gaps": [
       "SOURCE_RECOVERED: required source body is not on disk"
@@ -1331,6 +1441,7 @@
     "source_ref": "https://github.com/vercel-labs/agent-skills"
   },
   {
+    "candidate_ids": [],
     "claim_ids": [],
     "coverage": {
       "AUDIO": {
@@ -1378,6 +1489,7 @@
       "org": "coleam00",
       "url": "https://github.com/coleam00/skills"
     },
+    "origin": "external",
     "outputs": [],
     "pipeline_gaps": [
       "SOURCE_RECOVERED: required source body is not on disk"
@@ -1388,6 +1500,7 @@
     "source_ref": "https://github.com/coleam00/skills"
   },
   {
+    "candidate_ids": [],
     "claim_ids": [],
     "coverage": {
       "AUDIO": {
@@ -1432,6 +1545,7 @@
     "locator": {
       "local_note": "docs/hive/outer-heaven/CONTENT/website-building/vercel-next-patterns.md"
     },
+    "origin": "external",
     "outputs": [],
     "pipeline_gaps": [
       "SOURCE_RECOVERED: required source body is not on disk"
@@ -1442,6 +1556,7 @@
     "source_ref": "docs/hive/outer-heaven/CONTENT/website-building/vercel-next-patterns.md"
   },
   {
+    "candidate_ids": [],
     "claim_ids": [],
     "coverage": {
       "AUDIO": {
@@ -1486,6 +1601,7 @@
     "locator": {
       "local_note": "docs/hive/outer-heaven/CONTENT/website-building/design-to-code.md"
     },
+    "origin": "external",
     "outputs": [],
     "pipeline_gaps": [
       "SOURCE_RECOVERED: required source body is not on disk"

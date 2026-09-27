@@ -10,7 +10,7 @@ status: filed · milestone PARTIAL · not adopted
 
 # Signal intelligence
 
-A saved URL is not company intelligence. This compiler turns a bounded cohort into a method graph on the knowledge store that already exists. It does not start a second archive, a signals app, or a new capability.
+A saved URL is not company intelligence. One signal may contain zero methods and still produce a proof requirement, a reference, a metric, or a workflow candidate. This compiler writes those candidates onto the knowledge store that already exists. It does not start a second archive, and it does not silently rewrite a layer.
 
 **Code:** `scripts/hive/os/signal_intel.py`  
 **This cohort:** `signal-intel/milestone-20/`  
@@ -24,30 +24,37 @@ COST: local python · no billed model · no network fetch
 STOP-KIND: metric
 ```
 
-`PARTIAL` is the result. A green file tree is not adoption.
+`PARTIAL` is the result. A green file tree is not adoption. Knowledge sitting in a file is not organizational learning. Learning is a later change in behavior that a measured outcome supports.
 
 ## Pipeline
 
 ```
-RAW
-→ SOURCE_RECOVERED   only when every required channel is at least PARTIAL
-→ PARSED
-→ CLAIMS_EXTRACTED   copied atoms, or the bookmark sentence unchanged
-→ SYNTHESIZED        two or more independent sources in one domain
-→ CAPABILITY_MAPPED  an existing capability id only
-→ EXPERIMENT_CANDIDATE
-→ EXPERIMENTING      only after a local run
-→ VERIFIED           only with a Watchdog grade file
-→ ADOPTED            only when Evens promotes it
+SIGNAL
+→ recover evidence
+→ CLAIM
+→ IMPROVEMENT_CANDIDATE   typed; mapped to an existing asset or left unmatched
+→ compare with other signals and local evidence
+→ experiment where a measure is named
+→ VERIFIED                only with a Watchdog grade file
+→ adopt / keep optional / reject / supersede
+→ retrieve during later work
+→ outcome
+→ learn again
 ```
 
-Method maturity, separate from that pipeline:
+Evidence maturity stays:
 
 ```
 RECOVERED → CANDIDATE → EXPERIMENT_REQUIRED → LOCALLY_SUPPORTED → VERIFIED → ADOPTED
 ```
 
-External methods stop at `EXPERIMENT_REQUIRED` when two claims disagree. The retrieval method can reach `LOCALLY_SUPPORTED` because this cohort measured it. Nothing here is `VERIFIED` or `ADOPTED`.
+Applicability is a separate field:
+
+```
+MANDATORY · DEFAULT · CONDITIONAL · OPTIONAL · EXPERIMENTAL · REFERENCE_ONLY · REJECTED · SUPERSEDED
+```
+
+This cohort uses `EXPERIMENTAL` or `REFERENCE_ONLY`. `MANDATORY` and `DEFAULT` raise. `CONDITIONAL` requires a local test. Nothing is injected into every desk.
 
 ## Evidence
 
@@ -57,35 +64,33 @@ Every signal carries `TEXT`, `VIDEO`, `AUDIO`, `FRAMES`, `LINKS`, `REPO`, `DOCS`
 - A preview cannot be marked `COMPLETE`.
 - A GitHub URL in a local note is not a recovered repo. Those three slots stay `RAW`.
 - A local dossier is not the external article. Those two slots stay `RAW`.
-- Bookmark text is stored as a quote. Thread, media, and `t.co` targets stay unrecovered.
+- Bookmark text is a `REFERENCE` quote. It is not a method.
 
-## Graph
+## Candidates
 
-`SIGNAL contains CLAIM`. A claim may `suggest` a `METHOD` and `support` a `METHOD_ATOM`. A method is `composed_of` atoms, `applies_to` an existing capability, `contradicts` another stored claim, and is `tested_by` an experiment. An executed experiment `produced` an outcome.
+A claim decomposes to one candidate. The type comes from the atom's existing domain and output, not from a new subsystem. Each candidate records what it is, where it applies, which existing asset it improves, who should care, when it should and should not be used, the evidence, the conflicts, whether it was tested locally, and what would prove it.
 
-Shared concepts keep `conditions_by_source`. They are not averaged. Contradictions store `winner: null`.
+Quote-only X posts have candidates and zero methods. Proof-shaped atoms can map to `separate-verifier`. Retrieval-shaped atoms can map to `signal-retrieve`. An unmatched candidate keeps a gap. It does not create an engine.
 
-One signal may emit several typed outputs (`method`, `principle`, `anti_pattern`, `metric`, `gtm_technique`, `raw_quote`, and so on). A quote is not a method.
+Internal signals use the same builder (`origin: internal`). This 20 are external. An internal disagreement stays `EXPERIMENTAL` until a local measure and a Watchdog grade exist. A tweet plus a bad PR is not automatically `VERIFIED`.
 
 ## Desks
 
 | Desk | Owns |
 |---|---|
 | Researcher | source recovery, claims, comparison, contradictions |
-| Librarian | provenance, dedupe, identity, graph links, retrieval quality |
-| Consultant | assumptions and tradeoffs — not run on this cohort |
-| Watchdog | independent grade — `ABSENT` on this cohort |
-| Forge | the local retrieval measurement only |
+| Librarian | provenance, dedupe, references, retrieval |
+| Watchdog | proof candidates — grade on this cohort is `ABSENT` |
+| Forge | tool and code candidates; the local retrieval measurement only |
+| Product GTM | pricing, GTM, and metric candidates |
+| Creative Studio | creative and design candidates, when the type says so |
 | Jev | not authority |
 | Matrix | decides when the recommended experiment becomes real work |
-| Jarvis | not wired; `retrieve --prompt` is the question shape |
 
 ## This 20
 
-The browser-grounding illustration (vision, accessibility, hybrid, planner/verifier) is not in the recovered 20. The compiler says so in `synthesis.md` instead of writing that essay from memory.
+The browser-grounding illustration is not in the recovered 20. `synthesis.md` says so. Counts and applicability are in `grade.json` and `candidates.json`.
 
-What the 20 actually contain is in `grade.json` and `synthesis.md`. The recommended experiment is a cross-source disagreement already stored on the atoms. It was not executed. Measures are named and `results` is null.
-
-The local test that did run: a later prompt about speech versus behavior returns at most three graph refs, and an unrelated dinner prompt returns `NONE`. That outcome updates `method-signal-intel-retrieve` only.
+The recommended experiment is a cross-source disagreement already stored on the atoms. It was not executed. The retrieval check did run, and it updates only `method-signal-intel-retrieve`.
 
 Scale to 100 only after this cohort is `ready_to_scale`. It is not.

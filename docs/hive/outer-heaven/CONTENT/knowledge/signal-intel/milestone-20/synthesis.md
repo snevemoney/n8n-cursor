@@ -4,6 +4,19 @@ Generated from stored claims. Not averaged. Not adopted.
 
 The vision-versus-accessibility browser example is not this cohort. Those sources were not recovered here.
 
+CANDIDATES
+- ANTI_PATTERN: 1
+- EVAL: 1
+- GTM_PATTERN: 23
+- METRIC: 13
+- PROCESS: 1
+- PROOF_PATTERN: 9
+- REFERENCE: 10
+- TOOL_USAGE: 1
+- WORKFLOW: 2
+applicability: EXPERIMENTAL or REFERENCE_ONLY. None are MANDATORY or DEFAULT.
+A quote can be a REFERENCE and contain zero methods.
+
 PROBLEM
 offer-pricing
 
@@ -105,4 +118,4 @@ success_rate, latency, token_cost, recovery_rate
 results: null — not run
 
 MILESTONE
-PARTIAL. Recommended experiment is not executed. Retrieval has one local outcome. Nothing is ADOPTED.
+PARTIAL. Recommended experiment is not executed. Retrieval has one local outcome. Nothing is ADOPTED. Candidates are not behavior.
