@@ -8,10 +8,12 @@ Grok Bot is a desk, not a new spawn. An already-running local gateway is a mouth
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import os
 import re
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,6 +37,10 @@ HARD_STEP_RE = re.compile(
     re.I,
 )
 JSON_RE = re.compile(r"\{.*\}", re.S)
+LOCAL_READ_RE = re.compile(
+    r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?read the local (?:store|vault|operator memory)\b",
+    re.I,
+)
 UNKNOWN = "UNKNOWN. Cursor harness returned no reply."
 LOGIN_UNKNOWN = (
     "UNKNOWN. Cursor agent needs a one-time login. "
@@ -157,6 +163,7 @@ def write_bus(
     cursor_login_said: bool | None = None,
     agent_login_tried: bool | None = None,
     brain: str | None = None,
+    receipt: dict | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
     bus = load_json(path)
@@ -178,6 +185,8 @@ def write_bus(
         bus["turns"] = turns
     elif "turns" not in bus:
         bus["turns"] = []
+    if receipt is not None:
+        bus["receipt"] = receipt
     if cursor_login_said is True:
         bus["cursor_login_said"] = True
     elif cursor_login_said is False:
@@ -306,6 +315,23 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
     )
 
 
+def write_receipt(hive: Path, *, turn_input: str, turn_output: str) -> dict:
+    """One reconstructable close. sha covers id, input, output, and timestamp."""
+    body = {
+        "turn_id": str(uuid.uuid4()),
+        "input": turn_input,
+        "output": turn_output,
+        "timestamp": now_iso(),
+    }
+    canonical = json.dumps(body, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    body["sha"] = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    path = hive / "bus" / "receipts.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(body, ensure_ascii=True) + "\n")
+    return body
+
+
 def first_sentence(text: str) -> tuple[str, str]:
     """Split the first speakable sentence from the rest. TTS starts on the first.
 
@@ -397,6 +423,11 @@ def should_skip_cursor(hive: Path, cursor_fn) -> bool:
 def wants_login_why(utterance: str) -> bool:
     """Honest login line when he asks why the brain is dark."""
     return bool(WHY_THINK_RE.search(utterance or ""))
+
+
+def wants_local_read(utterance: str) -> bool:
+    """Explicit local vault read. Does not spend, send, or call a provider."""
+    return bool(LOCAL_READ_RE.search(utterance or ""))
 
 
 def wants_safari(utterance: str) -> bool:
@@ -947,6 +978,7 @@ def _commit_spoken(
             turns=prior_turns,
         )
     next_turns = append_turn(prior_turns, spoken_in, text)
+    receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
     write_bus(
         hive,
         phase="speak",
@@ -960,6 +992,7 @@ def _commit_spoken(
         cursor_login_said=login_said,
         agent_login_tried=True if login_tried else None,
         brain=brain,
+        receipt=receipt,
     )
     note_wire(hive, tool, text, spoken_in, ok=ok, wire=wire)
     first, rest = first_sentence(text)
@@ -1039,7 +1072,11 @@ def apply_pipeline_iter(
         except (OSError, TypeError, AttributeError):
             pass
 
-    if not should_skip_cursor(hive, cursor_fn):
+    if pick is None and wants_local_read(spoken_in):
+        pick = {"tool": "vault_read", "args": {"query": spoken_in}, "speak": ""}
+        brain = "store"
+
+    if pick is None and not should_skip_cursor(hive, cursor_fn):
         pick, got = cursor_pick(pack, spoken_in, cursor_fn)
         if pick is not None:
             brain = "cursor"
