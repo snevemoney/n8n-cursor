@@ -932,11 +932,14 @@ class TerminalProofTest(unittest.TestCase):
             self.assertNotEqual(follow["job"]["status"], "DONE")
             after = json.loads(state.read_text(encoding="utf-8"))
             after_row = next(job for job in after["jobs"] if job["id"] == "declared-first")
-            self.assertEqual(after_row["status"], before_row["status"])
-            self.assertEqual(after_row.get("required_evidence"), before_row.get("required_evidence"))
-            self.assertEqual(after_row.get("evidence"), before_row.get("evidence"))
-            self.assertEqual(after_row.get("proofPermit"), before_row.get("proofPermit"))
-            self.assertEqual(after_row.get("terminal_rejected"), follow["reason"])
+            self.assertEqual(after_row, before_row)
+            follow_lines = [
+                entry
+                for entry in after.get("log") or []
+                if entry.get("job") == "declared-first" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertTrue(follow_lines)
+            self.assertEqual(follow_lines[-1].get("done_check"), follow["reason"])
             met = HS.transition_job(
                 "declared-first",
                 "DONE",
@@ -995,9 +998,15 @@ class TerminalProofTest(unittest.TestCase):
             self.assertEqual(row["status"], prior["status"])
             self.assertEqual(row["required_evidence"], prior["required_evidence"])
             self.assertNotEqual(row["status"], "VERIFYING")
-            for key, value in prior.items():
-                self.assertEqual(row.get(key), value, key)
-            self.assertEqual(row.get("terminal_rejected"), refused["reason"])
+            self.assertEqual(row, prior)
+            self.assertNotIn("terminal_rejected", row)
+            open_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "open-job" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(open_lines), 1)
+            self.assertEqual(open_lines[0].get("done_check"), refused["reason"])
             hist = HS.transition_job(
                 "coverage-loop",
                 "DONE",
@@ -1011,9 +1020,18 @@ class TerminalProofTest(unittest.TestCase):
             self.assertFalse(hist["permitted"])
             disk = json.loads(state.read_text(encoding="utf-8"))
             kept = next(job for job in disk["jobs"] if job["id"] == "coverage-loop")
+            prior_hist = next(job for job in before["jobs"] if job["id"] == "coverage-loop")
+            self.assertEqual(kept, prior_hist)
             self.assertEqual(kept["status"], "done")
             self.assertEqual(kept["required_evidence"], ["RUNTIME", "SURFACE"])
             self.assertNotIn("proofPermit", kept)
+            hist_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "coverage-loop" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(hist_lines), 1)
+            self.assertEqual(hist_lines[0].get("done_check"), hist["reason"])
             reloaded = HS.load(state)
             HS.save(reloaded, state)
             again = json.loads(state.read_text(encoding="utf-8"))
@@ -1060,6 +1078,276 @@ class TerminalProofTest(unittest.TestCase):
             self.assertNotIn(forwarded["status"], HS.TERMINAL_WORDS)
             self.assertNotIn("proofPermit", forwarded)
             self.assertNotIn("proofPermit", row)
+
+    def test_done_label_without_permit_is_absent_from_the_done_total(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "historical",
+                    "name": "historical",
+                    "status": "done",
+                    "desk": "parent",
+                    "updated": "2026-08-14",
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            reloaded = HS.load(state)
+            HS.save(reloaded, state)
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "historical")
+            self.assertEqual(row["status"], "done")
+            self.assertNotIn("proofPermit", row)
+            self.assertFalse(HS.counts_as_done(row))
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            self.assertEqual(HS.done_jobs(disk["jobs"]), [])
+
+    def test_permitted_close_is_present_in_the_done_total(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            closed = HS.transition_job(
+                "proven",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(closed["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(HS.done_total(disk["jobs"]), 1)
+            self.assertEqual([job["id"] for job in HS.done_jobs(disk["jobs"])], ["proven"])
+            self.assertEqual(disk["jobs"][0]["status"], "DONE")
+
+    def test_refused_transition_does_not_mutate_the_job(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "open-job",
+                    "name": "open-job",
+                    "status": "working",
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                    "required_evidence": ["RUNTIME", "SURFACE"],
+                }
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            before = json.loads(state.read_text(encoding="utf-8"))
+            prior = next(job for job in before["jobs"] if job["id"] == "open-job")
+            refused = HS.transition_job(
+                "open-job",
+                "DONE",
+                builder="Forge",
+                verifier={"actor": "Watchdog", "role": "verifier"},
+                evidence=[{"class": "DIFF"}],
+                state_path=state,
+            )
+            self.assertFalse(refused["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "open-job")
+            self.assertEqual(row, prior)
+            self.assertEqual(set(row), set(prior))
+            self.assertNotIn("terminal_rejected", row)
+            self.assertEqual(row["status"], "working")
+            self.assertNotEqual(row["status"], "DONE")
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "open-job" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(lines), 1)
+            self.assertEqual(lines[0].get("done_check"), refused["reason"])
+            self.assertTrue(lines[0].get("done_check"))
+
+    def test_refused_exact_done_without_permit_keeps_the_label(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            seeded = json.loads(state.read_text(encoding="utf-8"))
+            seeded["jobs"] = [
+                {
+                    "id": "canonical-unproven",
+                    "name": "canonical-unproven",
+                    "status": "DONE",
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                },
+                {
+                    "id": "sibling",
+                    "name": "sibling",
+                    "status": "working",
+                    "desk": "forge",
+                    "updated": "2026-09-25",
+                },
+            ]
+            state.write_text(json.dumps(seeded), encoding="utf-8")
+            before = json.loads(state.read_text(encoding="utf-8"))
+            prior = next(job for job in before["jobs"] if job["id"] == "canonical-unproven")
+            refused = HS.transition_job(
+                "canonical-unproven",
+                "DONE",
+                builder="Forge",
+                verifier={"actor": "Watchdog", "role": "verifier"},
+                evidence=[{"class": "DIFF"}],
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(refused["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "canonical-unproven")
+            self.assertEqual(row, prior)
+            self.assertEqual(row["status"], "DONE")
+            self.assertNotIn("terminal_rejected", row)
+            self.assertNotIn("proofPermit", row)
+            self.assertFalse(HS.counts_as_done(row))
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "canonical-unproven" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(lines), 1)
+            self.assertEqual(lines[0].get("done_check"), refused["reason"])
+            owed = HS.record_owed(
+                "other-owed",
+                owner="Forge",
+                expected_artifact="apps/scorpion/app/api/hive/register/route.ts",
+                wake_condition="next change that ships scorpion_register_outcome",
+                stall_timeout="2 register attempts while the route file is absent",
+                note="route file is absent",
+                state_path=state,
+            )
+            self.assertEqual(owed["status"], "BLOCKED")
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "canonical-unproven")
+            self.assertEqual(row, prior)
+            self.assertEqual(row["status"], "DONE")
+            self.assertNotIn("terminal_rejected", row)
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            kept_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "canonical-unproven" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(kept_lines, lines)
+            other = HS.transition_job(
+                "sibling",
+                "DONE",
+                builder="Forge",
+                verifier={"actor": "Watchdog", "role": "verifier"},
+                evidence=[{"class": "DIFF"}],
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(other["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "canonical-unproven")
+            self.assertEqual(row, prior)
+            self.assertNotIn("terminal_rejected", row)
+            self.assertEqual(HS.done_total(disk["jobs"]), 0)
+            sibling_lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "sibling" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(sibling_lines), 1)
+
+    def test_refused_reclose_of_proven_job_appends_the_log(self) -> None:
+        evidence, verifier, env = _proof()
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            closed = HS.transition_job(
+                "proven",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=evidence,
+                environment=env,
+                state_path=state,
+            )
+            self.assertTrue(closed["permitted"])
+            before = json.loads(state.read_text(encoding="utf-8"))
+            prior = next(job for job in before["jobs"] if job["id"] == "proven")
+            log_before = list(before.get("log") or [])
+            refused = HS.transition_job(
+                "proven",
+                "DONE",
+                builder="Forge",
+                verifier=verifier,
+                evidence=[{"class": "DIFF"}],
+                environment={},
+                state_path=state,
+            )
+            self.assertFalse(refused["permitted"])
+            disk = json.loads(state.read_text(encoding="utf-8"))
+            row = next(job for job in disk["jobs"] if job["id"] == "proven")
+            self.assertEqual(row, prior)
+            self.assertEqual(row["status"], "DONE")
+            self.assertEqual(row.get("proofPermit"), closed["permit"])
+            self.assertNotIn("terminal_rejected", row)
+            self.assertEqual(HS.done_total(disk["jobs"]), 1)
+            lines = [
+                entry
+                for entry in disk.get("log") or []
+                if entry.get("job") == "proven" and entry.get("stop_kind") == "terminal_rejected"
+            ]
+            self.assertEqual(len(lines), 1)
+            self.assertEqual(len(disk.get("log") or []), len(log_before) + 1)
+            self.assertEqual(lines[-1].get("done_check"), refused["reason"])
+
+    def test_stalled_owed_artifact_has_owner_and_wake_not_founder_wait(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = _blank_state(Path(tmp))
+            owed = HS.record_owed(
+                "hive-register-route",
+                owner="Forge",
+                expected_artifact="apps/scorpion/app/api/hive/register/route.ts",
+                wake_condition="next change that ships scorpion_register_outcome",
+                stall_timeout="2 register attempts while the route file is absent",
+                note="route file is absent",
+                state_path=state,
+            )
+            held = HS.stall_disposition(owed)
+            self.assertEqual(owed["status"], "BLOCKED")
+            self.assertEqual(held["owner"], "Forge")
+            self.assertEqual(held["wake_condition"], owed["wake_condition"])
+            self.assertNotEqual(held["wait"], "WAIT_EVENS")
+            self.assertFalse(held["founder_wait"])
+            missing_owner = {
+                "status": "BLOCKED",
+                "expected_artifact": "route.ts",
+                "wake_condition": "file appears",
+                "stall_timeout": "2 attempts",
+                "authority_class": "send",
+            }
+            self.assertFalse(HS.stall_disposition(missing_owner)["founder_wait"])
+            self.assertNotEqual(HS.stall_disposition(missing_owner)["wait"], "WAIT_EVENS")
+            stale = {
+                "status": "done",
+                "owner": "Forge",
+                "expected_artifact": "route.ts",
+                "wake_condition": "file appears",
+                "stall_timeout": "2 attempts",
+                "authority_class": "send",
+            }
+            self.assertFalse(HS.stall_disposition(stale)["founder_wait"])
+            self.assertNotEqual(HS.stall_disposition(stale)["wait"], "WAIT_EVENS")
+            consequential = {
+                "status": "BLOCKED",
+                "owner": "HITL Operator",
+                "expected_artifact": "sent receipt",
+                "wake_condition": "Evens approves the send",
+                "stall_timeout": "1 unanswered send",
+                "authority_class": "send",
+            }
+            sent = HS.stall_disposition(consequential)
+            self.assertTrue(sent["founder_wait"])
+            self.assertEqual(sent["wait"], "WAIT_EVENS")
 
 
 class SessionReceiptTest(unittest.TestCase):

@@ -426,8 +426,9 @@ def _terminal_change_allowed(job: dict, previous: str | None) -> bool:
     return bool(decision["permitted"] and job.get("proofPermit") == decision["permit"])
 
 
-def save(data: dict, path: Path | None = None) -> None:
+def save(data: dict, path: Path | None = None, *, preserve_ids: set[str] | None = None) -> None:
     target = path or STATE
+    keep = preserve_ids or set()
     previous: dict[str, dict] = {}
     if target.is_file():
         try:
@@ -443,7 +444,9 @@ def save(data: dict, path: Path | None = None) -> None:
             continue
         job_id = str(row.get("id") or "")
         prior = previous.get(job_id)
-        _demote_invalid_close(row, prior if isinstance(prior, dict) else None)
+        # A refusal names the row so save does not demote a label the caller left in place.
+        if job_id not in keep:
+            _demote_invalid_close(row, prior if isinstance(prior, dict) else None)
         prior_status = str(prior.get("status") or "") if isinstance(prior, dict) else None
         if not _terminal_change_allowed(row, prior_status):
             blocked.append(job_id or "?")
@@ -469,7 +472,11 @@ def cmd_get(args: argparse.Namespace) -> int:
     if args.key == "jobs":
         rows = list(slice_ or [])
         if args.status:
-            rows = [r for r in rows if r.get("status") == args.status]
+            # The done rollup is the permitted close. A historical "done" label is not that total.
+            if _terminal_token(args.status) == "DONE":
+                rows = [r for r in rows if counts_as_done(r)]
+            else:
+                rows = [r for r in rows if r.get("status") == args.status]
         if args.job:
             rows = [r for r in rows if r.get("id") == args.job or r.get("name") == args.job]
         slice_ = rows
@@ -535,34 +542,36 @@ def transition_job(
     token = _terminal_token(target)
     if not decision["permitted"] and _close_still_proven(existing):
         kept = existing if isinstance(existing, dict) else {}
+        reason = str(decision.get("reason") or "narrower declaration does not replace a proven close")
+        if isinstance(existing, dict):
+            _append_refusal_log(data, existing, reason, desk=str(who or existing.get("desk") or "builder"))
+            save(data, state_path, preserve_ids={str(existing.get("id") or "")})
         return {
             "permitted": False,
             "state": kept.get("status"),
-            "reason": decision.get("reason") or "narrower declaration does not replace a proven close",
+            "reason": reason,
             "permit": kept.get("proofPermit"),
             "stale": False,
             "job": kept,
         }
     if not decision["permitted"] and isinstance(existing, dict) and word:
-        # A refusal may leave an audit reason. It does not rewrite status,
-        # evidence, or the requirement already stored on the row.
-        audited = dict(existing)
-        audited["terminal_rejected"] = decision.get("reason") or "missing proof"
+        # A refusal leaves the job row as it was. The reason is an append on the run log.
+        reason = str(decision.get("reason") or "missing proof")
         bump_cohort(
             data,
             "unsupported_terminal_escape_rate",
             attempts=1,
             escapes=1,
         )
-        saved = _upsert_job(data, audited)
-        save(data, state_path)
+        _append_refusal_log(data, existing, reason, desk=str(who or existing.get("desk") or "builder"))
+        save(data, state_path, preserve_ids={str(existing.get("id") or "")})
         return {
             "permitted": False,
-            "state": saved.get("status"),
-            "reason": decision.get("reason"),
-            "permit": saved.get("proofPermit"),
+            "state": existing.get("status"),
+            "reason": reason,
+            "permit": existing.get("proofPermit"),
             "stale": bool(decision.get("stale")),
-            "job": saved,
+            "job": existing,
         }
     bump_cohort(
         data,
@@ -686,6 +695,14 @@ def _demote_invalid_close(job: dict, previous_job: dict | None) -> None:
     if status != previous_status and status == token and not previous_job.get("proofPermit"):
         return
     if _untouched_historical(job, previous_job):
+        return
+    # Exact DONE with no permit is a label. A later save that does not name the id leaves it.
+    if (
+        status == "DONE"
+        and status == previous_status
+        and not previous_job.get("proofPermit")
+        and not job.get("proofPermit")
+    ):
         return
     decision = _decision_for_job(job)
     if decision["permitted"] and job.get("proofPermit") == decision["permit"]:
@@ -843,6 +860,79 @@ def guard_outcome_payload(payload: dict, *, state_path: Path | None = None) -> d
     return out
 
 
+# Founder wait is a disposition on the job row, not a second status machine.
+# These are the consequential classes a stall may surface as WAIT_EVENS.
+CONSEQUENTIAL_AUTHORITY = frozenset(
+    {
+        "send",
+        "pay",
+        "trade",
+        "public publish",
+        "destructive irreversible action",
+        "strategic conflict",
+    }
+)
+
+
+def counts_as_done(job: dict) -> bool:
+    """Work done is a close the terminal guard permitted. A bare done label is not."""
+    if not isinstance(job, dict):
+        return False
+    if _terminal_token(str(job.get("status") or "")) != "DONE":
+        return False
+    return _close_still_proven(job)
+
+
+def done_jobs(jobs: list | None) -> list[dict]:
+    return [job for job in jobs or [] if counts_as_done(job)]
+
+
+def done_total(jobs: list | None) -> int:
+    """Jobs the canonical close permitted. Historical done strings are absent."""
+    return len(done_jobs(jobs))
+
+
+def _authority_class(value: object) -> str | None:
+    text = " ".join(str(value or "").casefold().split())
+    if text in CONSEQUENTIAL_AUTHORITY:
+        return text
+    return None
+
+
+def _stale_progress_label(job: dict) -> bool:
+    """A stale or unpermitted terminal label is not a founder wait."""
+    if job.get("stale") is True:
+        return True
+    status = str(job.get("status") or "").strip()
+    if status.casefold() == "stale":
+        return True
+    if _terminal_token(status) and not _close_still_proven(job):
+        return True
+    return False
+
+
+def stall_disposition(job: dict, *, authority_class: str | None = None) -> dict:
+    """A stalled owed artifact stays with its owner unless the class is consequential.
+
+    WAIT_EVENS is not the fallback for a missing owner or a stale label.
+    """
+    owner = str(job.get("owner") or "").strip()
+    expected = str(job.get("expected_artifact") or "").strip()
+    wake = str(job.get("wake_condition") or "").strip()
+    stall = str(job.get("stall_timeout") or "").strip()
+    named = _authority_class(authority_class if authority_class is not None else job.get("authority_class"))
+    complete = bool(owner and expected and wake and stall)
+    founder = complete and named is not None and not _stale_progress_label(job)
+    return {
+        "owner": owner,
+        "expected_artifact": expected,
+        "wake_condition": wake,
+        "stall_timeout": stall,
+        "wait": "WAIT_EVENS" if founder else owner,
+        "founder_wait": founder,
+    }
+
+
 def record_owed(
     job_id: str,
     *,
@@ -917,6 +1007,26 @@ def cmd_set_job(args: argparse.Namespace) -> int:
     save(data)
     print(json.dumps(saved, indent=2))
     return 0
+
+
+def _append_refusal_log(data: dict, job: dict, reason: str, *, desk: str) -> dict:
+    """Audit a refused close on the append-only run log. The job row is not a log."""
+    ids = data.setdefault("ids", {"monotonic": True, "next_run_id": 1})
+    ids["monotonic"] = True
+    run_id = int(ids.get("next_run_id") or 1)
+    entry = {
+        "id": run_id,
+        "job": str(job.get("id") or ""),
+        "desk": desk or str(job.get("desk") or "builder"),
+        "at": today(),
+        "done_check": reason,
+        "stop_kind": "terminal_rejected",
+    }
+    log = list(data.get("log") or [])
+    log.append(entry)
+    data["log"] = log
+    ids["next_run_id"] = run_id + 1
+    return entry
 
 
 def cmd_log_run(args: argparse.Namespace) -> int:
