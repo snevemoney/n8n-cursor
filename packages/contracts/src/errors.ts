@@ -472,17 +472,22 @@ export function createErrorResponse(
   requestId?: string
 ): ErrorResponse {
   const errorInfo = errorCatalog[code];
-  
-  return {
+
+  const response: ErrorResponse = {
     error: code,
     message: errorInfo.message,
     description: errorInfo.description,
     category: errorInfo.category,
     retryable: errorInfo.retryable,
     timestamp: new Date().toISOString(),
-    requestId,
-    details
   };
+  if (requestId !== undefined) {
+    response.requestId = requestId;
+  }
+  if (details !== undefined) {
+    response.details = details;
+  }
+  return response;
 }
 
 export function getErrorInfo(code: ErrorCode) {
@@ -519,7 +524,7 @@ export function createNextResponse(
   code: ErrorCode,
   details?: ErrorDetails,
   requestId?: string
-) {
+): Response {
   const errorInfo = errorCatalog[code];
   
   return new Response(

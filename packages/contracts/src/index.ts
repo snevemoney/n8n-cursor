@@ -13,8 +13,30 @@ export * from './flags';
 // Error types
 export * from './errors';
 
-// Telemetry types
-export * from './telemetry';
+// Telemetry types. Environment already comes from flags.
+export {
+  Spans,
+  Metrics,
+  SpanAttributes,
+  MetricAttributes,
+  ResourceAttributes,
+  SpanEvents,
+  SpanEventAttributes,
+  defaultTelemetryConfig,
+  createSpanAttributes,
+  createMetricAttributes,
+  createResourceAttributes,
+  defaultSamplingConfig,
+} from './telemetry';
+export type {
+  TelemetryConfig,
+  SamplingConfig,
+  SpanAttributeName,
+  MetricAttributeName,
+  ResourceAttributeName,
+  SpanEventName,
+  SpanEventAttributeName,
+} from './telemetry';
 
 // Common utilities
 export * from './utils';
@@ -60,9 +82,6 @@ export type {
   // Telemetry types
   SpanName,
   MetricName,
-  SpanAttributes,
-  MetricLabels,
-  LogFields
 } from './telemetry';
 
 
