@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useChatStore } from '@/lib/chat/chatStore';
 import { MessageList } from '@/components/chat/MessageList';
@@ -29,25 +29,15 @@ export default function ChatPage() {
     conversations,
     messages,
     setInputValue,
-    streamingContent,
     setStreamingContent,
-    planSteps,
     setPlanSteps,
-    plans,
     setPlans,
-    councilVotes,
     setCouncilVotes,
-    councilThinking,
     setCouncilThinking,
-    councilCommunications,
     setCouncilCommunications,
-    councilConsensus,
     setCouncilConsensus,
-    knowledgeHits,
     setKnowledgeHits,
-    knowledgeSearchQuery,
     setKnowledgeSearchQuery,
-    toolCalls,
     setToolCalls,
     activePanel,
     setActivePanel,
@@ -60,7 +50,6 @@ export default function ChatPage() {
     availableModels,
     isMobile,
     isTablet,
-    progress,
     setProgress,
     toolProgress,
     setToolProgress,
@@ -85,7 +74,6 @@ export default function ChatPage() {
     dataWorkflow,
     setDataWorkflow,
     addConversation,
-    setCurrentConversation,
     appendAudit,
   } = state;
 
@@ -112,7 +100,6 @@ export default function ChatPage() {
     setProgress,
     setToolProgress,
     setShowRightPanel,
-    activePanel,
     setNextBestAction,
     setCouncilResult,
     setCreativePipeline,
@@ -628,7 +615,7 @@ export default function ChatPage() {
             setShowRightPanel(prev => !prev);
           }}
           onPanelChange={setActivePanel}
-          onToolSelect={(toolName, slashCommand) => {
+          onToolSelect={(_toolName, slashCommand) => {
             setInputValue(slashCommand + ' ');
             // Use requestAnimationFrame for immediate focus without delay
             // Add multiple retries with delays to ensure textarea is mounted
