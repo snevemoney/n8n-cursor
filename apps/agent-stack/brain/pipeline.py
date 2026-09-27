@@ -607,11 +607,11 @@ def _talk_ok(got) -> dict | None:
 
 
 def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
-    """Cursor-dark mouth: existing xAI key, then an already-running Grok Bot gateway.
+    """Ordinary mouth is OpenRouter. An injected talk_fn stays the test door.
 
-    Do not print a missing key. Do not spawn a desk. Do not treat UNKNOWN/queued
-    as talk. Tests that set AGENT_STACK_CURSOR_DRY skip live HTTP unless talk_fn
-    is injected.
+    Do not print a missing key. Do not call xAI. Do not spawn a desk.
+    Do not treat UNKNOWN/queued as talk. AGENT_STACK_CURSOR_DRY skips live HTTP
+    unless talk_fn is injected.
     """
     if talk_fn is not None:
         try:
@@ -628,16 +628,14 @@ def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
         return None
     if ONLINE is None:
         return None
+    if hasattr(ONLINE, "call_openrouter"):
+        try:
+            got = ONLINE.call_openrouter(prompt, pack_text)
+        except TypeError:
+            got = ONLINE.call_openrouter(prompt)
+        return _talk_ok(got)
     if hasattr(ONLINE, "call_grok"):
         return _talk_ok(ONLINE.call_grok(prompt, pack_text))
-    if hasattr(ONLINE, "call_xai"):
-        key_fn = getattr(ONLINE, "has_xai_key", None) or getattr(ONLINE, "grok_api_key", None)
-        try:
-            present = bool(key_fn()) if key_fn is not None else False
-        except (OSError, TypeError, AttributeError):
-            present = False
-        if present:
-            return _talk_ok(ONLINE.call_xai(prompt, pack_text))
     if hasattr(ONLINE, "call_grokbot"):
         return _talk_ok(ONLINE.call_grokbot(prompt, pack_text))
     return None
@@ -1247,16 +1245,42 @@ def apply_pipeline_iter(
         pick = {"tool": "pipeline", "args": {}, "speak": LOCAL_GREET}
         brain = None
 
-    if pick is None and not should_skip_cursor(hive, cursor_fn):
+    if pick is None:
+        recall = store_recall(spoken_in, prior_turns)
+        if recall:
+            ran = {
+                "ok": True,
+                "tool": "converse",
+                "spoken": recall,
+                "wires": ["store"],
+                "cites": [],
+                "sent": False,
+                "from_store": True,
+                "brain": None,
+                "unknown": False,
+                "model_available": False,
+            }
+            pick = {"tool": "converse", "args": {}, "speak": recall}
+            brain = None
+
+    # Live ordinary talk is OpenRouter. An injected cursor_fn stays the test door.
+    if pick is None and cursor_fn is None:
+        talked = online_talk(prompt, pack_text, talk_fn=talk_fn)
+        pick = extract_pick(talked) if talked else None
+        if pick is not None:
+            brain = str((talked or {}).get("engine") or (talked or {}).get("wire") or "openrouter")
+            got = talked or got
+
+    if pick is None and cursor_fn is not None and not should_skip_cursor(hive, cursor_fn):
         pick, got = cursor_pick(pack, spoken_in, cursor_fn)
         if pick is not None:
             brain = "cursor"
 
-    if pick is None:
+    if pick is None and cursor_fn is not None:
         talked = online_talk(prompt, pack_text, talk_fn=talk_fn)
         pick = extract_pick(talked) if talked else None
         if pick is not None:
-            brain = str((talked or {}).get("engine") or (talked or {}).get("wire") or "xai")
+            brain = str((talked or {}).get("engine") or (talked or {}).get("wire") or "openrouter")
             got = talked or got
 
     if pick is None and wants_safari(spoken_in):
