@@ -70,9 +70,6 @@ export class FlagLoader {
   }
 
   private loadFlags(): FeatureFlags {
-    // Load flags from environment variables
-    const env = process.env;
-    
     return {
       NEW_DASHBOARD: this.getBooleanFlag('NEXT_PUBLIC_FF_NEW_DASHBOARD', false),
       BITCOIN_LIGHTNING_INTEGRATION: this.getBooleanFlag('FF_BITCOIN_LIGHTNING_INTEGRATION', true),
@@ -164,20 +161,22 @@ export class FlagLoader {
     return this.flags[key];
   }
 
-  // Check if flag is sunset
+  // Check if flag is sunset. Sunset dates are not loaded with flag values.
   public isSunset(key: keyof FeatureFlags): boolean {
-    // This would need to be implemented based on the sunsetOn field
-    // For now, return false
-    return false;
+    const sunsetOn: Partial<Record<keyof FeatureFlags, string>> = {};
+    const date = sunsetOn[key];
+    return date !== undefined && Date.parse(date) <= Date.now();
   }
 
-  // Get environment-specific flag value
+  // Get environment-specific flag value. Per-environment overrides are not loaded.
   public getEnvironmentValue<K extends keyof FeatureFlags>(
     key: K,
     environment: Environment
   ): FeatureFlags[K] {
-    // This would need to be implemented based on the environments field
-    // For now, return the current value
+    const overrides: Partial<Record<Environment, FeatureFlags[K]>> = {};
+    if (environment !== this.environment) {
+      return overrides[environment] ?? this.flags[key];
+    }
     return this.flags[key];
   }
 

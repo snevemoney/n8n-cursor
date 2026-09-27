@@ -15,10 +15,10 @@
     "generate:telemetry": "node scripts/generate-telemetry.js",
     "validate": "npm run validate:openapi && npm run validate:events && npm run validate:flags && npm run validate:errors && npm run validate:telemetry",
     "validate:openapi": "swagger-jsdoc -d ../../contracts/openapi.yaml",
-    "validate:events": "ajv validate -s ../../contracts/events.yaml",
-    "validate:flags": "ajv validate -s ../../contracts/flags.schema.json",
-    "validate:errors": "ajv validate -s ../../contracts/errors.yaml",
-    "validate:telemetry": "ajv validate -s ../../contracts/telemetry.yaml",
+    "validate:events": "node scripts/compile-schema.js ../../contracts/events.yaml",
+    "validate:flags": "node scripts/compile-schema.js ../../contracts/flags.schema.json",
+    "validate:errors": "node scripts/compile-schema.js ../../contracts/errors.yaml",
+    "validate:telemetry": "node scripts/compile-schema.js ../../contracts/telemetry.yaml",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
@@ -38,7 +38,8 @@
   "dependencies": {
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
-    "ajv-errors": "^3.0.0"
+    "ajv-errors": "^3.0.0",
+    "decimal.js": "10.6.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

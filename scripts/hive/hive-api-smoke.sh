@@ -34,7 +34,7 @@ fi
 
 # Register outcome
 reg_body=$(cat <<EOF
-{"correlationId":"${cid}","jobType":"audit.smoke","goal":"Hive API smoke test","source":"hive-api-smoke.sh","status":"done","registerTo":"scorpion","summary":"automated smoke"}
+{"correlationId":"${cid}","jobType":"audit.smoke","goal":"Hive API smoke test","source":"hive-api-smoke.sh","status":"IMPLEMENTED","registerTo":"scorpion","summary":"automated smoke"}
 EOF
 )
 reg=$(curl -sS --max-time 15 -X POST "${SCORPION}/api/hive/register" -H "$AUTH" -H "Content-Type: application/json" -d "$reg_body")

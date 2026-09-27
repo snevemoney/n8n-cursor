@@ -240,7 +240,6 @@ export const MetricAttributes = {
   SystemMountPoint: 'system.mount_point',
   
   // Business attributes
-  UserSubscriptionTier: 'user.subscription_tier',
   UserSource: 'user.source',
   RevenueSource: 'revenue.source',
   UserTenantId: 'user.tenant_id'
@@ -332,7 +331,7 @@ export const defaultTelemetryConfig: TelemetryConfig = {
 };
 
 // Utility functions for span creation
-export function createSpanAttributes(attributes: Record<string, any>): Record<string, string | number | boolean> {
+export function createSpanAttributes(attributes: Record<string, unknown>): Record<string, string | number | boolean> {
   const result: Record<string, string | number | boolean> = {};
   
   for (const [key, value] of Object.entries(attributes)) {
@@ -347,7 +346,7 @@ export function createSpanAttributes(attributes: Record<string, any>): Record<st
 }
 
 // Utility functions for metric creation
-export function createMetricAttributes(attributes: Record<string, any>): Record<string, string> {
+export function createMetricAttributes(attributes: Record<string, unknown>): Record<string, string> {
   const result: Record<string, string> = {};
   
   for (const [key, value] of Object.entries(attributes)) {

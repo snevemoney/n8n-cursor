@@ -1,8 +1,44 @@
 // LightningFlow AI Contracts Utilities
 // Common utility functions for working with contracts
 
-import { DateTime } from 'luxon';
 import Decimal from 'decimal.js';
+
+const DURATION_MS: Record<string, number> = {
+  millisecond: 1,
+  milliseconds: 1,
+  second: 1000,
+  seconds: 1000,
+  minute: 60 * 1000,
+  minutes: 60 * 1000,
+  hour: 60 * 60 * 1000,
+  hours: 60 * 60 * 1000,
+  day: 24 * 60 * 60 * 1000,
+  days: 24 * 60 * 60 * 1000,
+  week: 7 * 24 * 60 * 60 * 1000,
+  weeks: 7 * 24 * 60 * 60 * 1000
+};
+
+function formatUtc(date: Date, format: string): string {
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  const tokens: Record<string, string> = {
+    yyyy: String(date.getUTCFullYear()),
+    MM: pad(date.getUTCMonth() + 1),
+    dd: pad(date.getUTCDate()),
+    HH: pad(date.getUTCHours()),
+    mm: pad(date.getUTCMinutes()),
+    ss: pad(date.getUTCSeconds())
+  };
+  return format.replace(/yyyy|MM|dd|HH|mm|ss/g, (token) => tokens[token] ?? token);
+}
+
+function shiftTimestamp(timestamp: string, duration: string, sign: 1 | -1): string {
+  const date = new Date(timestamp);
+  const unit = DURATION_MS[duration];
+  if (unit === undefined || Number.isNaN(date.getTime())) {
+    return timestamp;
+  }
+  return new Date(date.getTime() + sign * unit).toISOString();
+}
 
 // Currency utilities
 export class CurrencyUtils {
@@ -54,67 +90,87 @@ export class CurrencyUtils {
 export class TimeUtils {
   // Get current UTC timestamp
   static now(): string {
-    return DateTime.utc().toISO();
+    return new Date().toISOString();
   }
 
-  // Parse timestamp to DateTime
-  static parse(timestamp: string): DateTime {
-    return DateTime.fromISO(timestamp, { zone: 'utc' });
+  // Parse timestamp
+  static parse(timestamp: string): Date {
+    return new Date(timestamp);
   }
 
   // Format timestamp for display
   static format(timestamp: string, format: string = 'yyyy-MM-dd HH:mm:ss'): string {
-    return this.parse(timestamp).toFormat(format);
+    const date = this.parse(timestamp);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    return formatUtc(date, format);
   }
 
   // Check if timestamp is valid
   static isValid(timestamp: string): boolean {
-    return this.parse(timestamp).isValid;
+    return !Number.isNaN(this.parse(timestamp).getTime());
   }
 
   // Add duration to timestamp
   static add(timestamp: string, duration: string): string {
-    return this.parse(timestamp).plus({ [duration]: 1 }).toISO();
+    return shiftTimestamp(timestamp, duration, 1);
   }
 
   // Subtract duration from timestamp
   static subtract(timestamp: string, duration: string): string {
-    return this.parse(timestamp).minus({ [duration]: 1 }).toISO();
+    return shiftTimestamp(timestamp, duration, -1);
   }
 
   // Get time difference in seconds
   static diffInSeconds(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'seconds').seconds;
+    return (this.parse(end).getTime() - this.parse(start).getTime()) / 1000;
   }
 
   // Get time difference in minutes
   static diffInMinutes(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'minutes').minutes;
+    return this.diffInSeconds(start, end) / 60;
   }
 
   // Get time difference in hours
   static diffInHours(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'hours').hours;
+    return this.diffInMinutes(start, end) / 60;
   }
 
   // Get time difference in days
   static diffInDays(start: string, end: string): number {
-    return this.parse(end).diff(this.parse(start), 'days').days;
+    return this.diffInHours(start, end) / 24;
   }
 
   // Check if timestamp is in the past
   static isPast(timestamp: string): boolean {
-    return this.parse(timestamp) < DateTime.utc();
+    return this.parse(timestamp).getTime() < Date.now();
   }
 
   // Check if timestamp is in the future
   static isFuture(timestamp: string): boolean {
-    return this.parse(timestamp) > DateTime.utc();
+    return this.parse(timestamp).getTime() > Date.now();
   }
 
   // Get relative time (e.g., "2 hours ago")
   static relative(timestamp: string): string {
-    return this.parse(timestamp).toRelative() || '';
+    const date = this.parse(timestamp);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const seconds = Math.round((date.getTime() - Date.now()) / 1000);
+    const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+    const absSeconds = Math.abs(seconds);
+    if (absSeconds < 60) return formatter.format(seconds, 'second');
+    const minutes = Math.round(seconds / 60);
+    if (Math.abs(minutes) < 60) return formatter.format(minutes, 'minute');
+    const hours = Math.round(minutes / 60);
+    if (Math.abs(hours) < 24) return formatter.format(hours, 'hour');
+    const days = Math.round(hours / 24);
+    if (Math.abs(days) < 30) return formatter.format(days, 'day');
+    const months = Math.round(days / 30);
+    if (Math.abs(months) < 12) return formatter.format(months, 'month');
+    return formatter.format(Math.round(months / 12), 'year');
   }
 }
 
@@ -193,7 +249,8 @@ export class ValidationUtils {
   // Validate timezone
   static isValidTimezone(timezone: string): boolean {
     try {
-      return DateTime.now().setZone(timezone).isValid;
+      Intl.DateTimeFormat('en-US', { timeZone: timezone });
+      return true;
     } catch {
       return false;
     }
@@ -303,58 +360,70 @@ export class ObjectUtils {
   }
 
   // Deep merge objects
-  static deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
+  static deepMerge<T extends Record<string, unknown>>(target: T, ...sources: Partial<T>[]): T {
     if (!sources.length) return target;
     const source = sources.shift();
 
     if (this.isObject(target) && this.isObject(source)) {
-      for (const key in source) {
-        if (this.isObject(source[key])) {
-          if (!target[key]) Object.assign(target, { [key]: {} });
-          this.deepMerge(target[key], source[key]);
-        } else {
-          Object.assign(target, { [key]: source[key] });
-        }
-      }
+      this.mergeInto(target, source);
     }
 
     return this.deepMerge(target, ...sources);
   }
 
+  private static mergeInto(target: Record<string, unknown>, source: Record<string, unknown>): void {
+    for (const key in source) {
+      const sourceValue = source[key];
+      if (this.isObject(sourceValue)) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        const nested = target[key];
+        if (this.isObject(nested)) {
+          this.mergeInto(nested, sourceValue);
+        }
+      } else {
+        Object.assign(target, { [key]: sourceValue });
+      }
+    }
+  }
+
   // Check if value is an object
-  static isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
+  static isObject(item: unknown): item is Record<string, unknown> {
+    return Boolean(item) && typeof item === 'object' && !Array.isArray(item);
   }
 
   // Get nested property value
-  static getNestedProperty(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+  static getNestedProperty(obj: unknown, path: string): unknown {
+    return path.split('.').reduce<unknown>((current, key) => {
+      if (typeof current !== 'object' || current === null) return undefined;
+      return (current as Record<string, unknown>)[key];
+    }, obj);
   }
 
   // Set nested property value
-  static setNestedProperty(obj: any, path: string, value: any): void {
+  static setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
     const keys = path.split('.');
-    const lastKey = keys.pop()!;
-    const target = keys.reduce((current, key) => {
+    const lastKey = keys.pop();
+    if (lastKey === undefined) return;
+    const target = keys.reduce<Record<string, unknown>>((current, key) => {
       if (!current[key]) current[key] = {};
-      return current[key];
+      return current[key] as Record<string, unknown>;
     }, obj);
     target[lastKey] = value;
   }
 
   // Remove undefined values
-  static removeUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  static removeUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
     const result: Partial<T> = {};
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined) {
-        result[key as keyof T] = value;
+        result[key as keyof T] = value as T[keyof T];
       }
     }
     return result;
   }
 
   // Pick specific properties
-  static pick<T extends Record<string, any>, K extends keyof T>(
+  static pick<T extends Record<string, unknown>, K extends keyof T>(
     obj: T,
     keys: K[]
   ): Pick<T, K> {
@@ -368,7 +437,7 @@ export class ObjectUtils {
   }
 
   // Omit specific properties
-  static omit<T extends Record<string, any>, K extends keyof T>(
+  static omit<T extends Record<string, unknown>, K extends keyof T>(
     obj: T,
     keys: K[]
   ): Omit<T, K> {
@@ -388,7 +457,7 @@ export class ArrayUtils {
   }
 
   // Group array by key
-  static groupBy<T extends Record<string, any>, K extends keyof T>(
+  static groupBy<T extends Record<string, unknown>, K extends keyof T>(
     array: T[],
     key: K
   ): Record<string, T[]> {
@@ -403,15 +472,15 @@ export class ArrayUtils {
   }
 
   // Sort array by key
-  static sortBy<T extends Record<string, any>, K extends keyof T>(
+  static sortBy<T extends Record<string, unknown>, K extends keyof T>(
     array: T[],
     key: K,
     direction: 'asc' | 'desc' = 'asc'
   ): T[] {
     return [...array].sort((a, b) => {
-      const aVal = a[key];
-      const bVal = b[key];
-      
+      const aVal = a[key] as string | number;
+      const bVal = b[key] as string | number;
+
       if (aVal < bVal) return direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return direction === 'asc' ? 1 : -1;
       return 0;
@@ -444,22 +513,17 @@ export class ArrayUtils {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      const left = shuffled[i];
+      const right = shuffled[j];
+      if (left === undefined || right === undefined) {
+        continue;
+      }
+      shuffled[i] = right;
+      shuffled[j] = left;
     }
     return shuffled;
   }
 }
-
-// Export all utility classes
-export {
-  CurrencyUtils,
-  TimeUtils,
-  UuidUtils,
-  ValidationUtils,
-  StringUtils,
-  ObjectUtils,
-  ArrayUtils
-};
 
 
 

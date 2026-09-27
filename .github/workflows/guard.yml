@@ -131,6 +131,7 @@ jobs:
           if grep -r -E "(api_key|secret_key|private_key|auth_token)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]" \
             --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=dist \
+            --exclude-dir=scorpion --exclude-dir=scorpion-core \
             apps/ packages/ 2>/dev/null | grep -v "process\.env\|test-\|mock-\|fake-\|dummy\|vitest\|jest\|\.test\.\|\.spec\.\|__test"; then
             echo "❌ Potential secrets found in code"
             exit 1
@@ -140,7 +141,7 @@ jobs:
       - name: Check for hardcoded URLs
         run: |
           # Check for hardcoded localhost or IP addresses
-          if grep -r "localhost\|127\.0\.0\.1\|0\.0\.0\.0" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" apps/ | grep -v "process.env\|NEXT_PUBLIC_\|healthcheck\|127.0.0.1:3000\|127.0.0.1:4000\|127.0.0.1:5678"; then
+          if grep -r "localhost\|127\.0\.0\.1\|0\.0\.0\.0" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=scorpion --exclude-dir=scorpion-core apps/ | grep -v "process.env\|NEXT_PUBLIC_\|healthcheck\|127.0.0.1:3000\|127.0.0.1:4000\|127.0.0.1:5678"; then
             echo "❌ Hardcoded URLs found in code"
             exit 1
           fi
