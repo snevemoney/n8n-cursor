@@ -568,6 +568,29 @@ def publish_jarvis(
     return {"published": published, "applied": applied}
 
 
+def status(*, path: Path = DEFAULT_PATH) -> dict[str, Any]:
+    """Read the latest continuity row already stored for JARVIS_PRIMARY. Does not append."""
+    latest: dict[str, Any] | None = None
+    for row in _continuity_rows(path):
+        if row.get("consumer") == JARVIS_PRIMARY and row.get("entity_id") == JARVIS_ENTITY:
+            latest = row
+    if latest is None:
+        return {
+            "consumer": JARVIS_PRIMARY,
+            "entity_id": JARVIS_ENTITY,
+            "phase": None,
+            "result": None,
+            "state_version": None,
+        }
+    return {
+        "consumer": latest.get("consumer"),
+        "entity_id": latest.get("entity_id"),
+        "phase": latest.get("phase"),
+        "result": latest.get("result"),
+        "state_version": latest.get("state_version"),
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--emit", metavar="TYPE", help="Emit standard event type")
