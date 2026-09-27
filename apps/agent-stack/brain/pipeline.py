@@ -65,6 +65,8 @@ LOGIN_UNKNOWN = (
 )
 NEED_LOGIN = "You need `agent login` for a real talk."
 NO_MODEL = "Cursor is signed out and Grok Bot's gateway is sealed."
+LOCAL_GREET = "Standing by."
+GREET_RE = re.compile(r"^hey[,!]?\s+jarvis[.!?]*$", re.I)
 PROPOSAL = (
     "Proposal only. I will not send, pay, deploy, book, or publish. "
     "That hard step stays with you."
@@ -445,6 +447,27 @@ def wants_login_why(utterance: str) -> bool:
     return bool(WHY_THINK_RE.search(utterance or ""))
 
 
+def is_bare_greeting(utterance: str) -> bool:
+    """Only 'Hey Jarvis.' A longer sentence is not this greeting."""
+    return bool(GREET_RE.match((utterance or "").strip()))
+
+
+def local_greeting_reply() -> dict:
+    """Short local mouth line. Not a model, and not the agent-login line."""
+    return {
+        "ok": True,
+        "tool": "pipeline",
+        "spoken": LOCAL_GREET,
+        "wires": ["pipeline"],
+        "cites": [],
+        "sent": False,
+        "from_store": True,
+        "brain": None,
+        "unknown": True,
+        "model_available": False,
+    }
+
+
 def wants_local_read(utterance: str) -> bool:
     """Explicit local vault read. Does not spend, send, or call a provider."""
     return bool(LOCAL_READ_RE.search(utterance or ""))
@@ -613,6 +636,8 @@ def no_model_reply(
 ) -> dict:
     """Safari hands, a stored token, or one honest line. Not a model and not an echo kiosk."""
     heard = (utterance or "").strip()
+    if is_bare_greeting(heard):
+        return local_greeting_reply()
     recall = store_recall(heard, turns)
     if recall:
         return {
@@ -1166,6 +1191,11 @@ def apply_pipeline_iter(
     if pick is None and wants_local_read(spoken_in):
         pick = {"tool": "vault_read", "args": {"query": spoken_in}, "speak": ""}
         brain = "store"
+
+    if pick is None and is_bare_greeting(spoken_in):
+        ran = local_greeting_reply()
+        pick = {"tool": "pipeline", "args": {}, "speak": LOCAL_GREET}
+        brain = None
 
     if pick is None and not should_skip_cursor(hive, cursor_fn):
         pick, got = cursor_pick(pack, spoken_in, cursor_fn)
