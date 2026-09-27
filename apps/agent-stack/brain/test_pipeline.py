@@ -249,6 +249,31 @@ class PipelineDarkCursorTest(unittest.TestCase):
             import hashlib
             self.assertEqual(receipt["sha"], hashlib.sha256(canonical.encode("utf-8")).hexdigest())
 
+    def test_hey_jarvis_is_a_short_local_greeting(self) -> None:
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            raise AssertionError("greeting must not call a provider")
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-greet-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            out = MOUTH.apply_turn("Hey Jarvis.", hive=hive, cursor_fn=dark_cursor)
+            spoken = out.get("spoken") or ""
+            self.assertIn("Standing by", spoken)
+            self.assertTrue(spoken.startswith("Sir."))
+            self.assertNotIn("agent login", spoken.lower())
+            self.assertNotIn(PIPE.NEED_LOGIN, spoken)
+            self.assertNotIn("model", spoken.lower())
+            self.assertNotIn("grok", spoken.lower())
+            self.assertFalse(out.get("model_available"))
+            self.assertIsNone(out.get("brain"))
+            self.assertLess(len(spoken), 40)
+            self.assertFalse(PIPE.is_bare_greeting("Hey Jarvis. The token for this sitting is maple-leaf."))
+            self.assertFalse(PIPE.is_bare_greeting("Remember that my test word is maple."))
+            self.assertFalse(PIPE.is_bare_greeting("Read my local operator memory."))
+            self.assertFalse(PIPE.is_bare_greeting("Watch X."))
+            self.assertFalse(PIPE.is_bare_greeting("Hello Jarvis"))
+
     def test_dark_followup_speaks_maple_from_the_bus_after_restart(self) -> None:
         calls: list[str] = []
 
