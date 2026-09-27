@@ -1601,19 +1601,41 @@ class VersionedContinuityTest(unittest.TestCase):
             folder = Path(tmp)
             log = folder / "events.jsonl"
             projection = folder / "grok-desk.json"
-            brief = {
-                "generatedAt": "2026-09-25T03:00:00+00:00",
-                "hash": "abc123",
-                "agent": "Forge",
-                "sourceRoot": "test",
-                "captureFreshness": "test",
-                "markdown": "desk card",
-                "source_session": "grok-session-1",
-            }
-            wrote = BRIEF.publish_shared_context(brief, bus_path=log, shared_path=projection)
-            body = json.loads(wrote.read_text(encoding="utf-8"))
-            self.assertFalse(body["continuity"]["synced"])
+            mutation = _mutation(1, {"hash": "abc123", "markdown": "desk card"}, entity="grok-desk:Forge")
+            mutation["entity_type"] = "grok_desk_projection"
+            mutation["source_platform"] = "grok"
+            published = BUS.publish_state(mutation, path=log)
+            self.assertEqual(published["result"], "PUBLISHED")
+            body = BUS.write_projection(BUS.GROK_DESK_CONSUMER, "grok-desk:Forge", projection, path=log)
+            self.assertFalse(body["synced"])
             self.assertFalse(BUS.projection_synced(BUS.GROK_DESK_CONSUMER, "grok-desk:Forge", path=log))
+            self.assertNotIn("ACKNOWLEDGED", [row.get("phase") for row in BUS._read_all(log)])
+
+    def test_publish_grok_desk_receives_applies_and_acks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            log = folder / "events.jsonl"
+            projection = folder / "grok-desk.json"
+            result = BUS.publish_grok_desk(
+                "Forge",
+                {"hash": "abc123", "markdown": "desk card"},
+                state_version=1,
+                source_session="grok-session-1",
+                writer="outer-heaven-brief.py",
+                changed_at="2026-09-25T03:00:00+00:00",
+                path=log,
+                projection_path=projection,
+            )
+            phases = [row.get("phase") for row in BUS._read_all(log)]
+            self.assertEqual(phases, ["PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED"])
+            self.assertEqual(result["published"]["result"], "PUBLISHED")
+            self.assertTrue(result["synced"])
+            self.assertTrue(result["projection"]["synced"])
+            consumers = {row.get("phase"): row.get("consumer") for row in BUS._read_all(log)}
+            self.assertEqual(consumers["RECEIVED"], BUS.GROK_DESK_CONSUMER)
+            self.assertEqual(consumers["APPLIED"], BUS.GROK_DESK_CONSUMER)
+            self.assertEqual(consumers["ACKNOWLEDGED"], BUS.GROK_DESK_CONSUMER)
+            self.assertTrue(BUS.projection_synced(BUS.GROK_DESK_CONSUMER, "grok-desk:Forge", path=log))
 
     def test_applied_persists_acknowledgement(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
