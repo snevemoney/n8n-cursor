@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Provider-neutral judgment boundary.
 
-`evaluate` decides who may judge. It does not call a model, start a watcher,
+`evaluate` decides who may judge. SELECT builds the OpenRouter chat request
+the hive registry already describes. The network call stays behind
+HIVE_OPENROUTER_CALL, which defaults off. evaluate does not start a watcher
 or turn an external demo corpus into features.
 
 Exact checks stay deterministic: pid alive, row count changed, artifact exists,
@@ -13,8 +15,13 @@ it is not merge authority.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import importlib.util
 import json
-import sys
+import os
+import urllib.error
+import urllib.request
+from pathlib import Path
 from typing import Any
 
 EXACT_CHECKS = frozenset(
@@ -53,6 +60,10 @@ CLOSED_KINDS = frozenset({"conversation", "research", "architecture", "coding", 
 QUESTION_PACK_CAP = 12
 LIBRARY_SIZE = 273
 DEMO_CORPUS_URL = "https://webdevcody.github.io/jev-demos/"
+PACK_STATUS = "READY_FOR_IMPLEMENTATION_NOT_LIVE"
+PACK_CORPUS = Path(__file__).with_name("jev-question-packs-v1.yaml")
+OPENROUTER_CALL_GUARD = "HIVE_OPENROUTER_CALL"
+SELECT_MODEL_ID = "anthropic/claude-haiku-4-5"
 
 
 def corpus_features(corpus: dict[str, Any]) -> dict[str, Any]:
@@ -292,8 +303,315 @@ def _rank(request: dict[str, Any], evidence: list[Any], reason: str) -> dict[str
     )
 
 
+def _input_hash(request: dict[str, Any]) -> str:
+    payload = json.dumps(request, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _load_process_packs() -> dict[str, Any] | None:
+    """Read process packs from the reconstructed corpus. Status must stay not-live."""
+    if not PACK_CORPUS.is_file():
+        return None
+    status = ""
+    version = ""
+    packs: dict[str, list[dict[str, str]]] = {}
+    section = ""
+    current = ""
+    open_question: dict[str, str] | None = None
+
+    def finish() -> None:
+        nonlocal open_question
+        if open_question and current:
+            text = open_question["question"]
+            if len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
+                inner = text[1:-1]
+                if text[0] == "'":
+                    inner = inner.replace("''", "'")
+                open_question["question"] = inner
+            packs[current].append(open_question)
+        open_question = None
+
+    for raw in PACK_CORPUS.read_text(encoding="utf-8").splitlines():
+        if raw.startswith("status:"):
+            status = raw.split(":", 1)[1].strip().strip("'\"")
+            continue
+        if raw.startswith("schema_version:"):
+            version = raw.split(":", 1)[1].strip().strip("'\"")
+            continue
+        if raw == "packs:":
+            finish()
+            section = "packs"
+            current = ""
+            continue
+        if section == "packs" and raw and not raw.startswith(" "):
+            finish()
+            section = ""
+            current = ""
+            continue
+        if section != "packs":
+            continue
+        if raw.startswith("  ") and not raw.startswith("   ") and raw.endswith(":") and not raw.strip().startswith("-"):
+            finish()
+            current = raw.strip()[:-1]
+            packs[current] = []
+            continue
+        if raw.startswith("    - id:"):
+            finish()
+            open_question = {"id": raw.split(":", 1)[1].strip(), "question": ""}
+            continue
+        if open_question is not None and raw.startswith("      question:"):
+            open_question["question"] = raw.split(":", 1)[1].strip()
+            continue
+        if open_question is not None and open_question["question"] and raw.startswith("        "):
+            open_question["question"] = f"{open_question['question']} {raw.strip()}"
+    finish()
+    if status != PACK_STATUS or not packs:
+        return None
+    return {"status": status, "version": version, "packs": packs}
+
+
+def _applicable_packs(packs: dict[str, list[dict[str, str]]], request: dict[str, Any]) -> list[str]:
+    stage = str(request.get("process_stage") or "").strip()
+    names = list(packs)
+    if not stage:
+        return names
+    return [name for name in names if name == stage or name.startswith(f"{stage}.")]
+
+
+def _smallest_pack(corpus: dict[str, Any], request: dict[str, Any]) -> tuple[str, list[dict[str, str]]] | None:
+    packs = corpus["packs"]
+    names = _applicable_packs(packs, request)
+    if not names:
+        return None
+    chosen = min(names, key=lambda name: (len(packs[name]), name))
+    questions = packs[chosen]
+    if not questions:
+        return None
+    return chosen, questions
+
+
+def _registry():
+    path = Path(__file__).resolve().parents[1] / "sync-vps-llm-keys.py"
+    spec = importlib.util.spec_from_file_location("hive_sync_vps_llm_keys", path)
+    if spec is None or spec.loader is None:
+        return None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _openrouter_call_enabled() -> bool:
+    """Default off. Only the exact env value "1" would open the network call."""
+    return os.environ.get(OPENROUTER_CALL_GUARD, "") == "1"
+
+
+def _openrouter_token() -> str:
+    """Value of the registry credential slot. Empty when the slot is unset."""
+    registry = _registry()
+    if registry is None:
+        return ""
+    name = str(getattr(registry, "OPENROUTER_API_KEY_ENV", "") or "")
+    if not name:
+        return ""
+    return os.environ.get(name, "").strip()
+
+
+def _redact_secret(value: Any, secret: str) -> Any:
+    if not secret:
+        return value
+    if isinstance(value, str):
+        return value.replace(secret, "")
+    if isinstance(value, list):
+        return [_redact_secret(item, secret) for item in value]
+    if isinstance(value, dict):
+        return {key: _redact_secret(item, secret) for key, item in value.items()}
+    return value
+
+
+def _record_chat_response(status: int, raw: bytes, secret: str) -> dict[str, Any]:
+    """Keep status, response text, and usage. The credential is not kept."""
+    text = raw.decode("utf-8", errors="replace")
+    usage = None
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        parsed = None
+    if isinstance(parsed, dict):
+        usage = _redact_secret(parsed.get("usage"), secret)
+    return {
+        "status": status,
+        "response_text": _redact_secret(text, secret),
+        "usage": usage,
+    }
+
+
+def _build_openrouter_chat_request(questions: list[str]) -> dict[str, Any] | None:
+    """Build the openai-completions body the OpenRouter registry describes. Does not send."""
+    registry = _registry()
+    if registry is None:
+        return None
+    provider = registry.openrouter_provider()
+    if provider.get("api") != "openai-completions" or not provider.get("baseUrl"):
+        return None
+    chosen = next(
+        ((model_id, name) for model_id, name in registry.OPENROUTER_MODELS if model_id == SELECT_MODEL_ID),
+        None,
+    )
+    if chosen is None:
+        return None
+    model_id, name = chosen
+    entry = registry.model_entry(model_id, name)
+    max_tokens = entry.get("maxTokens")
+    if not isinstance(max_tokens, int):
+        return None
+    body = {
+        "model": model_id,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": text} for text in questions],
+    }
+    return {
+        "provider": "openrouter",
+        "api": provider["api"],
+        "method": "POST",
+        "url": str(provider["baseUrl"]).rstrip("/") + "/chat/completions",
+        "body": body,
+    }
+
+
+def _post_openrouter_chat(prepared: dict[str, Any]) -> dict[str, Any]:
+    """POST with urllib.request. The guard defaults off and does not open a socket.
+
+    When the guard is exactly on, Authorization is Bearer plus the registry
+    credential slot. An empty slot returns before any socket. A response keeps
+    status, response text, and usage. The credential is not returned.
+    """
+    if not _openrouter_call_enabled():
+        return {"provider_call": False}
+    token = _openrouter_token()
+    if not token:
+        return {"provider_call": False, "reason": "credentials_absent"}
+    payload = json.dumps(prepared["body"], separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        str(prepared["url"]),
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            raw = resp.read()
+            status = resp.status if getattr(resp, "status", None) is not None else resp.getcode()
+    except urllib.error.HTTPError as exc:
+        raw = exc.read()
+        status = exc.code
+    recorded = _record_chat_response(int(status), raw, token)
+    return {"provider_call": True, **recorded}
+
+
+def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> dict[str, Any]:
+    """SELECT the smallest applicable pack, then build the registry chat request."""
+    digest = _input_hash(request)
+    corpus = _load_process_packs()
+    if corpus is None:
+        return _out(
+            lane="deterministic",
+            action="NO_ACTION",
+            reason="question pack corpus is not ready for implementation",
+            evidence=evidence,
+            extra={
+                "abstain": True,
+                "confidence_band": "C0",
+                "input_hash": digest,
+                "pack_id": None,
+                "question_ids": [],
+                "recommended_mode": "SHADOW",
+            },
+        )
+    chosen = _smallest_pack(corpus, request)
+    if chosen is None:
+        return _out(
+            lane="deterministic",
+            action="NO_ACTION",
+            reason="no applicable question pack",
+            evidence=evidence,
+            extra={
+                "abstain": True,
+                "confidence_band": "C0",
+                "input_hash": digest,
+                "pack_id": None,
+                "question_ids": [],
+                "pack_status": corpus["status"],
+                "recommended_mode": "SHADOW",
+            },
+        )
+    pack_id, questions = chosen
+    question_ids = [str(item.get("id") or "") for item in questions]
+    question_texts = [str(item.get("question") or "") for item in questions]
+    prepared = _build_openrouter_chat_request(question_texts)
+    if prepared is None:
+        return _out(
+            lane="deterministic",
+            action="NO_ACTION",
+            reason="openrouter registry did not describe a chat request",
+            evidence=evidence,
+            extra={
+                "abstain": True,
+                "confidence_band": "C0",
+                "input_hash": digest,
+                "pack_id": pack_id,
+                "question_ids": question_ids,
+                "pack_status": corpus["status"],
+                "recommended_mode": "SHADOW",
+            },
+        )
+    posted = _post_openrouter_chat(prepared)
+    extra: dict[str, Any] = {
+        "provider": prepared["provider"],
+        "provider_call": posted["provider_call"] is True,
+        "model": prepared["body"]["model"],
+        "max_tokens": prepared["body"]["max_tokens"],
+        "api": prepared["api"],
+        "chat_request": prepared,
+        "guard": OPENROUTER_CALL_GUARD,
+        "guard_default": "off",
+        "pack_id": pack_id,
+        "pack_version": corpus["version"],
+        "pack_status": corpus["status"],
+        "question_ids": question_ids,
+        "input_hash": digest,
+        "abstain": False,
+        "confidence_raw": None,
+        "confidence_calibrated": None,
+        "confidence_band": "C0",
+        "recommended_mode": "SHADOW",
+    }
+    if posted.get("reason"):
+        extra["call_reason"] = posted["reason"]
+    if posted.get("provider_call") is True:
+        extra["status"] = posted.get("status")
+        extra["response_text"] = posted.get("response_text")
+        extra["usage"] = posted.get("usage")
+        judgment_reason = "smallest applicable pack was posted; status, response text, and usage are kept"
+    elif posted.get("reason") == "credentials_absent":
+        judgment_reason = "smallest applicable pack is the OpenRouter chat request; credentials are absent so the call is not made"
+    else:
+        judgment_reason = "smallest applicable pack is the OpenRouter chat request; the guard defaults off so the call is not made"
+    return _out(
+        lane="jev",
+        action="SELECT",
+        reason=judgment_reason,
+        evidence=evidence,
+        jev_allowed=True,
+        verb="select",
+        extra=extra,
+    )
+
+
 def evaluate(request: dict[str, Any]) -> dict[str, Any]:
-    """Route one judgment. Never calls a provider."""
+    """Route one judgment. The OpenRouter call stays behind a guard that defaults off."""
     if not isinstance(request, dict):
         return _out(lane="deterministic", action="NO_ACTION", reason="request must be an object")
 
@@ -384,6 +702,8 @@ def evaluate(request: dict[str, Any]) -> dict[str, Any]:
         )
 
     verb = str(request.get("verb") or "").lower()
+    if verb == "select":
+        return _select_through_boundary(request, evidence)
     if verb in JEV_VERBS:
         return _out(
             lane="jev",

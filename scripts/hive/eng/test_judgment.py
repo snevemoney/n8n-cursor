@@ -2,12 +2,16 @@
 """Exact state never calls Jev. A demo corpus never becomes a feature list."""
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
+import os
+import socket
 import subprocess
 import sys
 import tempfile
 import unittest
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -285,6 +289,225 @@ class JudgmentBoundaryTest(unittest.TestCase):
         self.assertEqual(brain["action"], "ESCALATE")
         self.assertFalse(brain["jev_called"])
 
+    def test_select_builds_the_registry_chat_request_and_the_guard_stays_off(self) -> None:
+        request = {"verb": "select"}
+        os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+        opened: list[object] = []
+        real_socket = socket.socket
+        real_create = socket.create_connection
+        real_urlopen = urllib.request.urlopen
+
+        def fail_socket(*args: object, **kwargs: object) -> object:
+            opened.append(("socket", args))
+            raise AssertionError("socket opened")
+
+        def fail_connect(address: object, *args: object, **kwargs: object) -> object:
+            opened.append(("connect", address))
+            raise AssertionError("connect opened")
+
+        def fail_urlopen(*args: object, **kwargs: object) -> object:
+            opened.append("urlopen")
+            raise AssertionError("urlopen")
+
+        socket.socket = fail_socket  # type: ignore[assignment, misc]
+        socket.create_connection = fail_connect  # type: ignore[assignment]
+        urllib.request.urlopen = fail_urlopen  # type: ignore[assignment]
+        try:
+            decision = judgment.evaluate(request)
+            guarded = judgment._post_openrouter_chat(decision["chat_request"])
+        finally:
+            socket.socket = real_socket  # type: ignore[assignment, misc]
+            socket.create_connection = real_create
+            urllib.request.urlopen = real_urlopen
+        digest = hashlib.sha256(
+            json.dumps(request, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        ).hexdigest()
+        questions = [
+            "What user problem does this engineering change solve?",
+            "What changes for the user when it works?",
+            "Why does this matter now?",
+            "What metric or observation proves product success?",
+            "What guardrail metrics prevent optimizing the primary metric badly?",
+            "What related improvements are explicitly not part of this slice?",
+        ]
+        self.assertEqual(opened, [])
+        self.assertFalse(guarded["provider_call"])
+        self.assertEqual(decision["action"], "SELECT")
+        self.assertEqual(decision["verb"], "select")
+        self.assertTrue(decision["jev_allowed"])
+        self.assertFalse(decision["jev_called"])
+        self.assertFalse(decision["provider_call"])
+        self.assertEqual(decision["provider"], "openrouter")
+        self.assertEqual(decision["model"], "anthropic/claude-haiku-4-5")
+        self.assertEqual(decision["max_tokens"], 1024)
+        self.assertEqual(decision["api"], "openai-completions")
+        self.assertEqual(decision["guard"], "HIVE_OPENROUTER_CALL")
+        self.assertEqual(decision["guard_default"], "off")
+        self.assertEqual(decision["pack_id"], "engineering.product")
+        self.assertEqual(decision["pack_status"], "READY_FOR_IMPLEMENTATION_NOT_LIVE")
+        self.assertEqual(
+            decision["question_ids"],
+            [
+                "user_problem",
+                "user_visible_outcome",
+                "business_value",
+                "success_metric",
+                "countermetrics",
+                "not_now",
+            ],
+        )
+        self.assertEqual(decision["input_hash"], digest)
+        chat = decision["chat_request"]
+        self.assertEqual(chat["provider"], "openrouter")
+        self.assertEqual(chat["api"], "openai-completions")
+        self.assertEqual(chat["method"], "POST")
+        self.assertEqual(chat["url"], "https://openrouter.ai/api/v1/chat/completions")
+        body = chat["body"]
+        self.assertEqual(set(body), {"model", "max_tokens", "messages"})
+        self.assertEqual(body["model"], "anthropic/claude-haiku-4-5")
+        self.assertEqual(body["max_tokens"], 1024)
+        self.assertEqual(
+            body["messages"],
+            [{"role": "user", "content": text} for text in questions],
+        )
+        self.assertFalse(decision["abstain"])
+        self.assertEqual(decision["confidence_band"], "C0")
+        self.assertEqual(decision["recommended_mode"], "SHADOW")
+        receipt = json.dumps(decision)
+        lowered = receipt.lower()
+        self.assertNotIn("api_key", lowered)
+        self.assertNotIn("authorization", lowered)
+        self.assertNotIn("bearer", lowered)
+        self.assertNotIn("sk-", lowered)
+        abstained = judgment.evaluate({"verb": "select", "process_stage": "missing-stage"})
+        self.assertEqual(abstained["action"], "NO_ACTION")
+        self.assertTrue(abstained["abstain"])
+        self.assertFalse(abstained["jev_called"])
+        self.assertFalse(abstained["provider_call"])
+        self.assertIsNone(abstained["provider"])
+        self.assertEqual(abstained["question_ids"], [])
+
+    def test_empty_credential_does_not_open_a_socket(self) -> None:
+        registry = judgment._registry()
+        key_env = registry.OPENROUTER_API_KEY_ENV
+        saved_guard = os.environ.get(judgment.OPENROUTER_CALL_GUARD)
+        saved_key = os.environ.get(key_env)
+        os.environ[judgment.OPENROUTER_CALL_GUARD] = "1"
+        os.environ.pop(key_env, None)
+        opened: list[object] = []
+        real_socket = socket.socket
+        real_create = socket.create_connection
+        real_urlopen = urllib.request.urlopen
+
+        def fail_socket(*args: object, **kwargs: object) -> object:
+            opened.append(("socket", args))
+            raise AssertionError("socket opened")
+
+        def fail_urlopen(*args: object, **kwargs: object) -> object:
+            opened.append("urlopen")
+            raise AssertionError("urlopen")
+
+        socket.socket = fail_socket  # type: ignore[assignment, misc]
+        socket.create_connection = fail_socket  # type: ignore[assignment]
+        urllib.request.urlopen = fail_urlopen  # type: ignore[assignment]
+        try:
+            decision = judgment.evaluate({"verb": "select"})
+            posted = judgment._post_openrouter_chat(decision["chat_request"])
+        finally:
+            socket.socket = real_socket  # type: ignore[assignment, misc]
+            socket.create_connection = real_create
+            urllib.request.urlopen = real_urlopen
+            if saved_guard is None:
+                os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+            else:
+                os.environ[judgment.OPENROUTER_CALL_GUARD] = saved_guard
+            if saved_key is None:
+                os.environ.pop(key_env, None)
+            else:
+                os.environ[key_env] = saved_key
+        self.assertEqual(opened, [])
+        self.assertFalse(decision["provider_call"])
+        self.assertFalse(decision["jev_called"])
+        self.assertEqual(decision["call_reason"], "credentials_absent")
+        self.assertFalse(posted["provider_call"])
+        self.assertEqual(posted["reason"], "credentials_absent")
+        receipt = json.dumps({"decision": decision, "posted": posted})
+        self.assertNotIn("authorization", receipt.lower())
+        self.assertNotIn("bearer", receipt.lower())
+        if saved_key:
+            self.assertNotIn(saved_key, receipt)
+
+    def test_bearer_header_is_not_receipted_and_does_not_open_a_socket(self) -> None:
+        registry = judgment._registry()
+        key_env = registry.OPENROUTER_API_KEY_ENV
+        fixture = "fixture-not-a-live-credential"
+        saved_guard = os.environ.get(judgment.OPENROUTER_CALL_GUARD)
+        saved_key = os.environ.get(key_env)
+        os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+        decision = judgment.evaluate({"verb": "select"})
+        self.assertFalse(decision["provider_call"])
+        self.assertFalse(decision["jev_called"])
+        os.environ[judgment.OPENROUTER_CALL_GUARD] = "1"
+        os.environ[key_env] = fixture
+        opened: list[object] = []
+        seen: dict[str, str] = {}
+        real_socket = socket.socket
+        real_create = socket.create_connection
+        real_urlopen = urllib.request.urlopen
+
+        def fail_socket(*args: object, **kwargs: object) -> object:
+            opened.append("socket")
+            raise AssertionError("socket opened")
+
+        def capture(req: urllib.request.Request, timeout: int = 60) -> object:
+            header = req.get_header("Authorization")
+            seen["authorization"] = header or ""
+            raise OSError("stopped before network")
+
+        socket.socket = fail_socket  # type: ignore[assignment, misc]
+        socket.create_connection = fail_socket  # type: ignore[assignment]
+        urllib.request.urlopen = capture  # type: ignore[assignment]
+        try:
+            with self.assertRaises(OSError):
+                judgment._post_openrouter_chat(decision["chat_request"])
+        finally:
+            socket.socket = real_socket  # type: ignore[assignment, misc]
+            socket.create_connection = real_create
+            urllib.request.urlopen = real_urlopen
+            if saved_guard is None:
+                os.environ.pop(judgment.OPENROUTER_CALL_GUARD, None)
+            else:
+                os.environ[judgment.OPENROUTER_CALL_GUARD] = saved_guard
+            if saved_key is None:
+                os.environ.pop(key_env, None)
+            else:
+                os.environ[key_env] = saved_key
+        self.assertEqual(opened, [])
+        self.assertEqual(seen["authorization"], f"Bearer {fixture}")
+        self.assertNotIn(fixture, json.dumps(decision))
+        self.assertFalse(decision["provider_call"])
+        self.assertFalse(decision["jev_called"])
+
+    def test_response_record_keeps_status_text_and_usage_without_the_credential(self) -> None:
+        fixture = "fixture-not-a-live-credential"
+        raw = json.dumps(
+            {
+                "usage": {"prompt_tokens": 3, "completion_tokens": 4, "total_tokens": 7},
+                "choices": [{"message": {"content": "kept"}}],
+            }
+        ).encode("utf-8")
+        recorded = judgment._record_chat_response(200, raw, fixture)
+        self.assertEqual(recorded["status"], 200)
+        self.assertIn("kept", recorded["response_text"])
+        self.assertEqual(recorded["usage"]["prompt_tokens"], 3)
+        self.assertEqual(recorded["usage"]["completion_tokens"], 4)
+        self.assertNotIn(fixture, json.dumps(recorded))
+        echoed = json.dumps({"usage": {"note": fixture}, "choices": []}).encode("utf-8")
+        redacted = judgment._record_chat_response(201, echoed, fixture)
+        self.assertEqual(redacted["status"], 201)
+        self.assertNotIn(fixture, redacted["response_text"])
+        self.assertNotIn(fixture, json.dumps(redacted["usage"]))
+
     def test_module_is_not_a_daemon_or_a_provider_client(self) -> None:
         text = (ENG / "judgment.py").read_text(encoding="utf-8")
         self.assertNotIn("threading", text)
@@ -292,6 +515,9 @@ class JudgmentBoundaryTest(unittest.TestCase):
         self.assertNotIn("typesafe", text.lower())
         self.assertNotIn("4018", text)
         self.assertNotIn("apps/scorpion", text)
+        self.assertNotIn("runOpenAI", text)
+        self.assertNotIn("api.openai.com", text)
+        self.assertNotIn("openclaw", text.lower())
 
 
 if __name__ == "__main__":

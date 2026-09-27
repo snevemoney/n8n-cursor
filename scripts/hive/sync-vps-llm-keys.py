@@ -21,6 +21,9 @@ MODEL_FALLBACKS = [
     "openrouter/openai/gpt-4o-mini",
 ]
 
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_API = "openai-completions"
+OPENROUTER_API_KEY_ENV = "OPENROUTER_API_KEY"
 OPENROUTER_MODELS = [
     ("anthropic/claude-sonnet-4-6", "Claude Sonnet 4.6"),
     ("anthropic/claude-haiku-4-5", "Claude Haiku 4.5"),
@@ -29,6 +32,15 @@ OPENROUTER_MODELS = [
     ("openai/gpt-4o-mini", "GPT-4o mini"),
     ("openrouter/free", "OpenRouter Free"),
 ]
+
+
+def openrouter_provider() -> dict[str, str]:
+    """Fields patch_models_json writes onto providers.openrouter. No key value."""
+    return {
+        "baseUrl": OPENROUTER_BASE_URL,
+        "api": OPENROUTER_API,
+        "apiKey": OPENROUTER_API_KEY_ENV,
+    }
 
 
 def model_entry(model_id: str, name: str) -> dict:
@@ -54,9 +66,10 @@ def patch_models_json(path: str) -> None:
         if model_id not in existing:
             models.append(model_entry(model_id, name))
     provider["models"] = models
-    provider.setdefault("baseUrl", "https://openrouter.ai/api/v1")
-    provider.setdefault("api", "openai-completions")
-    provider.setdefault("apiKey", "OPENROUTER_API_KEY")
+    described = openrouter_provider()
+    provider.setdefault("baseUrl", described["baseUrl"])
+    provider.setdefault("api", described["api"])
+    provider.setdefault("apiKey", described["apiKey"])
     json.dump(data, open(path, "w", encoding="utf-8"), indent=2)
 
 

@@ -1,0 +1,678 @@
+schema_version: '1.0'
+name: jev-question-packs-v1
+status: READY_FOR_IMPLEMENTATION_NOT_LIVE
+base_questions:
+- id: intent_exact
+  question: What is the operator actually asking for, in one sentence?
+- id: intent_non_goals
+  question: What did the operator not ask for that we must avoid inventing?
+- id: intent_success
+  question: What observable outcome would prove the request was satisfied?
+- id: intent_alignment
+  question: Does the proposed next action materially advance that outcome?
+- id: scope_expansion
+  question: Does this action expand scope, create a subsystem, or add ceremony not required by the outcome?
+- id: current_truth
+  question: What is the freshest authoritative evidence about the current state?
+- id: stale_context
+  question: Is any material context stale, historical, title-only, inferred, or contradicted?
+- id: authority_owner
+  question: Who actually owns the decision or hard step?
+- id: missing_info
+  question: What missing fact could change the decision?
+- id: reversibility
+  question: How reversible is the action if wrong?
+- id: risk
+  question: What is the downside of a wrong judgment?
+- id: proof
+  question: How will we know the real-world outcome occurred, independently of the action response?
+packs:
+  intake.core:
+    questions:
+    - id: request_kind
+      question: Is this conversation, research, engineering, business, creative, operational, financial, publishing,
+        or mixed?
+    - id: goal_type
+      question: Is the user asking for an answer, a decision, a plan, a build, an action, a verification, or monitoring?
+    - id: outcome_measurable
+      question: Can success be expressed as a measurable or directly observable outcome?
+    - id: ambiguity_material
+      question: Is ambiguity material enough that acting now could produce the wrong outcome?
+    - id: hard_step
+      question: Would fulfillment include send, pay, deploy, book, publish, credential change, destructive Git,
+        public port, or other consequential action?
+    - id: existing_project
+      question: Does this belong to an existing project/capability rather than a new subsystem?
+    - id: bottleneck_relevance
+      question: Is this request addressing the current bottleneck or merely an inefficiency?
+    - id: wip_creation
+      question: Would starting this create new WIP while higher-value unresolved WIP already exists?
+  context.select:
+    questions:
+    - id: context_domain
+      question: 'Which context domains are necessary: product, engineering, runtime, business, creative, research,
+        authority, history?'
+    - id: context_minimality
+      question: What is the smallest context pack that is sufficient?
+    - id: context_authority
+      question: Are authority and current-state sources included before historical discussion?
+    - id: context_conflict
+      question: Are there conflicting sources that must be preserved rather than flattened?
+    - id: context_freshness
+      question: How fresh must each source be for this task?
+    - id: context_omission
+      question: What important context was omitted because of token budget?
+    - id: context_contamination
+      question: Is irrelevant historical material likely to bias the decision?
+    - id: context_platform
+      question: Is the context correctly attributed to Cursor, Grok, Claude, Codex, ChatGPT, Jarvis, Jev, or another
+        source?
+  route.select:
+    questions:
+    - id: capability_id
+      question: What semantic capability is actually required?
+    - id: capability_confidence
+      question: How confident are we that the capability ID matches the natural-language intent?
+    - id: native_owner
+      question: Which platform/seat natively owns this capability best?
+    - id: path_available
+      question: Is the preferred implementation path actually available, authenticated, healthy, and permitted now?
+    - id: existing_session
+      question: Is there an existing live session with relevant context that should be continued instead of starting
+        fresh?
+    - id: route_reliability
+      question: Which candidate path has the strongest proven success history for this class?
+    - id: route_cost_latency
+      question: Do latency/cost matter enough to change the preferred route?
+    - id: route_risk
+      question: Which route minimizes irreversible or high-impact failure risk?
+    - id: fallback
+      question: What is the next-best route if the preferred route fails?
+    - id: fake_symmetry
+      question: Are we pretending two platforms have equivalent controls that have not independently been proven?
+  engineering.product:
+    questions:
+    - id: user_problem
+      question: What user problem does this engineering change solve?
+    - id: user_visible_outcome
+      question: What changes for the user when it works?
+    - id: business_value
+      question: Why does this matter now?
+    - id: success_metric
+      question: What metric or observation proves product success?
+    - id: countermetrics
+      question: What guardrail metrics prevent optimizing the primary metric badly?
+    - id: not_now
+      question: What related improvements are explicitly not part of this slice?
+  engineering.architecture:
+    questions:
+    - id: existing_architecture
+      question: What architecture already owns this concern?
+    - id: canonical_owner
+      question: Which component is the canonical owner of this concern?
+    - id: reuse_boundary
+      question: What inherited implementation can be reused rather than regenerated?
+    - id: new_abstraction
+      question: Does this proposal introduce a new abstraction? Is it necessary?
+    - id: platform_native
+      question: Does this preserve the native pipeline of the owning platform?
+    - id: data_authority
+      question: Where is authoritative state stored and who may write it?
+    - id: failure_boundary
+      question: Where does failure stop propagating?
+    - id: dependency_impact
+      question: What depends on this boundary and what could become stale if it changes?
+    - id: simpler_option
+      question: What is the simplest architecture that satisfies the accepted requirements?
+  engineering.program_design:
+    questions:
+    - id: file_placement
+      question: Where should the change live and why?
+    - id: call_path
+      question: What is the intended call path from entrypoint to outcome?
+    - id: state_owner
+      question: Which function/module/service owns state at each step?
+    - id: interface
+      question: What interfaces/types/signatures must be stable before coding?
+    - id: failure_semantics
+      question: What happens on timeout, unavailable dependency, stale state, or partial failure?
+    - id: consequential_choices
+      question: Which choices would the builder otherwise make implicitly?
+    - id: low_confidence_choices
+      question: Which consequential choices are low-confidence and should be resolved before code?
+    - id: test_shape
+      question: What tests should fail before the change and pass after it?
+    - id: vertical_slice
+      question: What is the smallest end-to-end slice that can prove the direction?
+  engineering.prebuild:
+    questions:
+    - id: scope_bounded
+      question: Is the diff/job bounded enough to review and revert?
+    - id: allowed_paths
+      question: Are allowed paths explicit?
+    - id: forbidden_paths
+      question: Are protected or unrelated paths explicit?
+    - id: acceptance_defined
+      question: Is acceptance defined before implementation?
+    - id: verification_defined
+      question: Is the verification method defined before implementation?
+    - id: builder_verifier_sep
+      question: Is the verifier independent from the builder where required?
+    - id: current_head
+      question: Is the exact current branch/HEAD/worktree known?
+    - id: dirty_state
+      question: Could existing dirty state be confused with this change?
+    - id: regression_plan
+      question: What historical failure must become a regression test?
+  execution.refocus:
+    questions:
+    - id: intent_chain
+      question: Can the worker state Operator Ask → Project → Mission → Slice → Current Action?
+    - id: still_aligned
+      question: Does the current action still serve the slice and original ask?
+    - id: moonbase
+      question: Has a locally defensible addition started turning the doghouse into a moonbase?
+    - id: ceremony_ratio
+      question: Is coordination/proof/planning activity growing faster than accepted outcome movement?
+    - id: new_system
+      question: Has the worker started inventing a new subsystem that was not authorized?
+    - id: duplicate_work
+      question: Is another worker or existing implementation already solving this?
+    - id: stuck_loop
+      question: Are we repeating the same hypothesis, check, handoff, or proof loop?
+    - id: current_bottleneck
+      question: Are we still working on the actual constraint to progress?
+    - id: stop_or_continue
+      question: Should we continue, re-scope, escalate, or stop?
+  completion.preclose:
+    questions:
+    - id: acceptance_met
+      question: Are all acceptance criteria actually satisfied?
+    - id: live_vs_tested
+      question: Is the capability live, merely implemented, merely tested, or independently verified?
+    - id: proof_sufficient
+      question: Is required proof sufficient already, so further proof work would be ceremony?
+    - id: residual_blocker
+      question: What remains blocked or unknown?
+    - id: scope_clean
+      question: Did the worker change anything outside the authorized slice?
+    - id: docs_truth
+      question: Do status/docs claims match actual implementation/runtime state?
+    - id: operator_needed
+      question: Is an Evens-owned hard step still required?
+    - id: handoff_owner
+      question: Who owns the next real obligation?
+  verification.proof:
+    questions:
+    - id: claim_exact
+      question: What exact claim is being verified?
+    - id: target_identity
+      question: Is the exact target identity proven?
+    - id: environment_identity
+      question: Is the exact environment/runtime identity proven?
+    - id: fresh_after_act
+      question: Was the observation captured after the action and is it fresh?
+    - id: independent_observation
+      question: Is verification independent of the action transport/response?
+    - id: expected_value_provenance
+      question: Where did the expected value come from?
+    - id: wrong_outcome_trap
+      question: Could a wrong real-world outcome still satisfy this recipe?
+    - id: falsifier
+      question: What observation would prove the claim false?
+    - id: builder_self_cert
+      question: Is the builder grading itself?
+    - id: simulation_only
+      question: Is the evidence simulated/mocked rather than live?
+    - id: headed_required
+      question: Does this behavior require headed/visual/user-flow proof?
+  outcome.learn:
+    questions:
+    - id: real_outcome
+      question: What actually happened in the real world?
+    - id: intent_match
+      question: Did the outcome satisfy the original operator intent?
+    - id: judgment_helped
+      question: Which Jev judgments materially improved the result?
+    - id: false_block
+      question: Did Jev unnecessarily block or escalate?
+    - id: missed_risk
+      question: Did Jev miss a risk, contradiction, or authority issue?
+    - id: route_regret
+      question: Would a different platform/path have produced a better outcome?
+    - id: method_update
+      question: Which method was validated, rejected, or superseded?
+    - id: eval_candidate
+      question: Should this interaction become an eval/regression case?
+    - id: confidence_recalibration
+      question: Did observed correctness match Jev's stated confidence?
+  signal.triage:
+    questions:
+    - id: source_type
+      question: Is this a demo, anecdote, benchmark, production report, theory, marketing claim, repo, paper, or
+        local result?
+    - id: novelty
+      question: How much is genuinely new versus already known?
+    - id: method_bearing
+      question: Does this contain a reusable method rather than just an interesting claim?
+    - id: capability_match
+      question: Which existing capability/process/eval/behavior does it map to?
+    - id: contradiction
+      question: Does it contradict an existing method or local evidence?
+    - id: incentives
+      question: Does the source have commercial or promotional incentives that affect interpretation?
+    - id: experiment_worth
+      question: Is the idea worth a local experiment now?
+    - id: authority_boundary
+      question: Could this signal accidentally be promoted into policy without local evidence?
+    - id: source_preserved
+      question: Is the exact source/provenance preserved before extraction?
+  research.deep:
+    questions:
+    - id: question_clear
+      question: What decision will this research inform?
+    - id: evidence_needed
+      question: What evidence types are required to answer it?
+    - id: source_diversity
+      question: Are we over-relying on one source class or community?
+    - id: counterevidence
+      question: What evidence would contradict the current thesis?
+    - id: freshness
+      question: How time-sensitive is the claim?
+    - id: primary_source
+      question: Can we obtain primary/first-party evidence?
+    - id: synthesis
+      question: What changes when the sources are combined, not merely summarized?
+    - id: local_test
+      question: What part can be tested locally rather than believed?
+  business.opportunity:
+    questions:
+    - id: customer
+      question: Who has the problem?
+    - id: pain
+      question: How painful/frequent/expensive is it?
+    - id: current_alternative
+      question: How is the problem solved today?
+    - id: willingness
+      question: What evidence exists that someone will pay or switch?
+    - id: differentiation
+      question: Why could Evens's solution win?
+    - id: distribution
+      question: How could this reach customers?
+    - id: product_shape
+      question: Should this be SaaS, service, template, automation, content product, agent, API, or internal tool?
+    - id: proof_before_build
+      question: What demand proof can be obtained before heavy engineering?
+    - id: business_bottleneck
+      question: Is demand, product, distribution, trust, delivery, or economics the current bottleneck?
+  gtm.readiness:
+    questions:
+    - id: verified_claim
+      question: Is every marketed capability actually verified?
+    - id: icp
+      question: Is the ICP specific enough to target?
+    - id: positioning
+      question: What category/problem/outcome should the product own in the buyer's mind?
+    - id: offer
+      question: What exactly is being sold?
+    - id: pricing
+      question: What evidence supports the pricing hypothesis?
+    - id: proof_assets
+      question: What demo, case study, metric, testimonial, or before/after proof exists?
+    - id: cta
+      question: What is the single next action for the prospect?
+    - id: channel_fit
+      question: Which channel fits the ICP and offer?
+    - id: measurement
+      question: What funnel metric determines whether the experiment worked?
+  creative.reference:
+    questions:
+    - id: communication_goal
+      question: What must the viewer understand/feel/do?
+    - id: technique
+      question: What specific reusable technique is present?
+    - id: novelty
+      question: Is the technique novel to our existing creative method library?
+    - id: pacing
+      question: How does pacing contribute to attention or comprehension?
+    - id: hierarchy
+      question: What creates visual hierarchy?
+    - id: motion_function
+      question: Does motion communicate state/causality or merely decorate?
+    - id: product_visibility
+      question: Is the product/service/logo sufficiently visible and legible?
+    - id: voice_script_sync
+      question: Does voice/script rhythm align with visual transitions?
+    - id: reusability
+      question: Can this technique become a reusable Remotion/component method?
+    - id: taste_match
+      question: Does it match Evens's demonstrated taste or need an experiment?
+  infrastructure.change:
+    questions:
+    - id: target_exact
+      question: Which VPS/domain/DNS zone/service/environment is the exact target?
+    - id: current_state
+      question: What is the observed current state before change?
+    - id: blast_radius
+      question: What could break if this change is wrong?
+    - id: rollback
+      question: What is the rollback procedure?
+    - id: dns_ttl
+      question: Do propagation/TTL delays affect verification?
+    - id: credential_scope
+      question: Are required credentials scoped and appropriate for this environment?
+    - id: maintenance_window
+      question: Does the change require a controlled window?
+    - id: postcondition
+      question: What fresh independent observation proves the new state?
+    - id: public_impact
+      question: Could this expose a service or public port unintentionally?
+  memory.provenance:
+    questions:
+    - id: object_type
+      question: Is this a decision, requirement, behavior, method, failure, runtime observation, handoff, or reference?
+    - id: origin
+      question: Where did it originate?
+    - id: authority
+      question: What authority level does it have?
+    - id: freshness
+      question: Is it current, stale, superseded, historical, or unknown?
+    - id: derived_consumers
+      question: What downstream knowledge/decisions depend on it?
+    - id: conflict
+      question: Does it conflict with fresher or higher-authority evidence?
+    - id: promotion
+      question: Is it eligible for durable promotion or should it remain candidate/reference-only?
+    - id: contact_trace
+      question: If wrong, which consumers need re-evaluation?
+  incident.triage:
+    questions:
+    - id: user_impact
+      question: What real user/business impact is occurring?
+    - id: current_symptom
+      question: What is directly observed, not inferred?
+    - id: first_bad_event
+      question: What is the earliest known divergence from expected behavior?
+    - id: single_hypothesis
+      question: What single falsifiable root-cause hypothesis should be tested next?
+    - id: recent_change
+      question: What changed recently in code, config, model, data, dependency, or environment?
+    - id: containment
+      question: What reversible containment reduces harm without destroying evidence?
+    - id: evidence_preserve
+      question: What evidence must be captured before mutation?
+    - id: regression
+      question: What permanent regression/eval should result if root cause is confirmed?
+  hitl.authority:
+    questions:
+    - id: decision_owner
+      question: Who owns the decision?
+    - id: effect
+      question: What exact external effect will occur?
+    - id: reversible
+      question: Is the action reversible, and how?
+    - id: risk
+      question: What are the meaningful downside scenarios?
+    - id: local_context
+      question: Does the approver have the street-level context?
+    - id: global_context
+      question: Does the approver have the project/business intent?
+    - id: alternatives
+      question: What safer/reversible alternatives exist?
+    - id: approval_specific
+      question: Is approval scoped to this exact action rather than a vague class?
+  publishing.preflight:
+    questions:
+    - id: claim_truth
+      question: Are all claims supported by verified source/product evidence?
+    - id: audience
+      question: Who is this for?
+    - id: platform
+      question: Is format adapted to the native platform?
+    - id: asset_complete
+      question: Are script, visuals, captions, links, CTA, and metadata ready?
+    - id: approval
+      question: Is human approval required before publish?
+    - id: tracking
+      question: How will performance be attributed and measured?
+    - id: feedback_loop
+      question: What outcome will feed back into the content method library?
+  finance.decision:
+    questions:
+    - id: decision_type
+      question: Is this cashflow, investing, portfolio, pricing, budgeting, or capital allocation?
+    - id: horizon
+      question: What is the relevant time horizon?
+    - id: source_freshness
+      question: Are market/financial inputs current enough?
+    - id: downside
+      question: What is the plausible downside and liquidity impact?
+    - id: assumptions
+      question: Which assumptions drive the result most?
+    - id: scenario
+      question: What happens under base/upside/downside scenarios?
+    - id: conflict
+      question: Does this recommendation conflict with a higher-priority cash need or constraint?
+    - id: evidence_vs_speculation
+      question: Which parts are evidence versus speculation?
+role_overlays:
+  big_boss:
+  - id: big_boss_01
+    question: Is this actually the highest-value work now?
+  - id: big_boss_02
+    question: Who is the natural owner?
+  - id: big_boss_03
+    question: Are we routing because of capability ownership or merely tool availability?
+  - id: big_boss_04
+    question: Is the organization duplicating work?
+  - id: big_boss_05
+    question: Does this require Evens, or can the organization proceed safely?
+  - id: big_boss_06
+    question: What is the current system bottleneck?
+  day_planner:
+  - id: day_planner_01
+    question: What can materially move today?
+  - id: day_planner_02
+    question: What is blocked by dependency versus merely unstarted?
+  - id: day_planner_03
+    question: What should remain idle rather than manufacture work?
+  - id: day_planner_04
+    question: Which unfinished commitment should be resumed before new WIP?
+  - id: day_planner_05
+    question: What is background-safe?
+  watchdog:
+  - id: watchdog_01
+    question: Does evidence prove the exact claim?
+  - id: watchdog_02
+    question: Is evidence live, simulated, stale, or self-certified?
+  - id: watchdog_03
+    question: What wrong outcome could still fool this proof?
+  - id: watchdog_04
+    question: Has acceptance already been met, making more proof ceremony?
+  - id: watchdog_05
+    question: What should become a regression case?
+  hitl_operator:
+  - id: hitl_operator_01
+    question: Is this truly an operator-owned hard step?
+  - id: hitl_operator_02
+    question: What exact approval packet is required?
+  - id: hitl_operator_03
+    question: Does the approver have both local and global context?
+  - id: hitl_operator_04
+    question: Would a narrower approval be safer?
+  money_desk:
+  - id: money_desk_01
+    question: What is sourced versus inferred?
+  - id: money_desk_02
+    question: What catalyst/risk actually matters now?
+  - id: money_desk_03
+    question: What would falsify the thesis?
+  - id: money_desk_04
+    question: Is this tactical or strategic?
+  lead_hunter:
+  - id: lead_hunter_01
+    question: Does this prospect fit the current offer?
+  - id: lead_hunter_02
+    question: Is there evidence of need/timing/budget/access?
+  - id: lead_hunter_03
+    question: Is this lead stale or duplicated?
+  - id: lead_hunter_04
+    question: What is the smallest useful next contact step?
+  product_gtm:
+  - id: product_gtm_01
+    question: Is the capability verified enough to market?
+  - id: product_gtm_02
+    question: What ICP and painful job does it serve?
+  - id: product_gtm_03
+    question: What proof makes the promise credible?
+  - id: product_gtm_04
+    question: What experiment can validate positioning before a full campaign?
+  researcher:
+  - id: researcher_01
+    question: Is this source truly novel?
+  - id: researcher_02
+    question: What reusable method can be extracted?
+  - id: researcher_03
+    question: What contradicts it?
+  - id: researcher_04
+    question: What should be locally tested rather than believed?
+  - id: researcher_05
+    question: Which existing capability/process/eval does it improve?
+  forge:
+  - id: forge_01
+    question: Is this a repair, extension, or new system?
+  - id: forge_02
+    question: What inherited implementation should be reused?
+  - id: forge_03
+    question: What consequential decision is unresolved?
+  - id: forge_04
+    question: Is the diff bounded?
+  - id: forge_05
+    question: What is the smallest vertical slice?
+  - id: forge_06
+    question: What must an independent verifier prove?
+  creative_studio:
+  - id: creative_studio_01
+    question: What communication job is the creative doing?
+  - id: creative_studio_02
+    question: Which visual/motion technique is actually reusable?
+  - id: creative_studio_03
+    question: Is this premium because it communicates better or only because it is flashy?
+  - id: creative_studio_04
+    question: Can it become a reusable component/method?
+  consultant:
+  - id: consultant_01
+    question: Which statements are facts, inferences, recommendations, or counterfactuals?
+  - id: consultant_02
+    question: What contradictions or hidden assumptions exist?
+  - id: consultant_03
+    question: Can two proposed systems be collapsed into one existing primitive?
+  - id: consultant_04
+    question: What second-order effect is being ignored?
+  librarian:
+  - id: librarian_01
+    question: Is this durable knowledge or transient chatter?
+  - id: librarian_02
+    question: What provenance/freshness/authority is missing?
+  - id: librarian_03
+    question: Is this object discoverable by future workers?
+  - id: librarian_04
+    question: If this belief is wrong, what inherited knowledge must be contact-traced?
+  wealth_manager:
+  - id: wealth_manager_01
+    question: What is the portfolio-level implication?
+  - id: wealth_manager_02
+    question: Is the method supported by outcomes or only theory?
+  - id: wealth_manager_03
+    question: What risk budget does this consume?
+  personal_cfo:
+  - id: personal_cfo_01
+    question: What is current cash reality versus stale plan?
+  - id: personal_cfo_02
+    question: What opportunity cost does this decision create?
+  - id: personal_cfo_03
+    question: Does this preserve required buffers and future obligations?
+  career_strategist:
+  - id: career_strategist_01
+    question: Does this skill/certificate unlock a concrete capability?
+  - id: career_strategist_02
+    question: What must Evens personally understand versus what AI can safely compensate for?
+  - id: career_strategist_03
+    question: Is this credibility, mastery, or both?
+  communications_manager:
+  - id: communications_manager_01
+    question: What relationship/context/tone governs this message?
+  - id: communications_manager_02
+    question: Are underlying facts verified?
+  - id: communications_manager_03
+    question: Does sending require approval?
+  - id: communications_manager_04
+    question: What prior conversation materially changes the wording?
+  publishing_engine:
+  - id: publishing_engine_01
+    question: Is the source content verified and approved?
+  - id: publishing_engine_02
+    question: Is the package native to the destination platform?
+  - id: publishing_engine_03
+    question: What performance signal will be captured after publishing?
+  - id: publishing_engine_04
+    question: What learned method should update after outcome data arrives?
+confidence_policy:
+  principle: Confidence is calibrated evidence-backed probability of a judgment being correct, not model self-assurance.
+  bands:
+  - id: C0
+    range: 0.00-0.54
+    meaning: unknown/abstain
+  - id: C1
+    range: 0.55-0.69
+    meaning: low; advisory only
+  - id: C2
+    range: 0.70-0.84
+    meaning: moderate; assist with guardrails
+  - id: C3
+    range: 0.85-0.94
+    meaning: high; eligible for validated low-risk automation
+  - id: C4
+    range: 0.95-1.00
+    meaning: very high; still cannot override authority or missing prerequisites
+  caps:
+  - No authoritative current-state evidence for a live-state question => cap at 0.79.
+  - Material source conflict unresolved => cap at 0.69.
+  - Capability identity unresolved => route confidence cap at 0.69.
+  - Required environment identity unknown => action/readiness confidence cap at 0.54.
+  - Operator authority missing for a hard step => action is BLOCKED regardless of confidence.
+  - Verification prerequisite unavailable => completion confidence cannot exceed 0.69.
+  - Only builder/self-report evidence => verification confidence cannot exceed 0.69.
+  - Simulation/mock only for a live-behavior claim => live confidence cannot exceed 0.54.
+  decision_rule: For critical decisions, use the minimum confidence among critical questions, not the average. Preserve
+    abstain/unknown.
+  calibration_required:
+  - Per-pack expert-labeled offline cases
+  - historical replay
+  - counterfactual and mutation tests
+  - shadow live judgments
+  - outcome labels
+  - Brier score / ECE / reliability curve per pack
+  - false-block and missed-risk rates
+  - latency/cost/ceremony overhead
+modes:
+- SHADOW
+- ADVISORY
+- ASSIST
+- GATE
+selection_dimensions:
+- process_stage
+- role
+- semantic_capability
+- risk
+- action_class
+- evidence_state
+- freshness
+- environment
+non_authorities:
+- Jev cannot invent authority
+- Jev cannot authorize operator-owned hard steps
+- Jev cannot declare implementation complete
+- Jev cannot replace independent verification
+- Jev cannot silently rewrite shared memory
+- Jev cannot become Jarvis's conversational mouth
