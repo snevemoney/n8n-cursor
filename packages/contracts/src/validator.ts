@@ -1,6 +1,7 @@
 // AJV validator setup for LightningFlow AI contracts
 import Ajv, { type ErrorObject, type Schema } from 'ajv';
 import addFormats from 'ajv-formats';
+import Decimal from 'decimal.js';
 
 // Configure AJV with formats and custom keywords
 export const ajv = addFormats(new Ajv({ 
@@ -123,15 +124,12 @@ export function validateSatoshis(amount: number): boolean {
 }
 
 export function validateDecimalAmount(amount: string | number): boolean {
-  if (typeof amount === 'number') {
-    return Number.isFinite(amount) && amount >= 0;
-  }
-  const text = amount.trim();
-  if (!/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(text)) {
+  try {
+    const decimal = new Decimal(amount);
+    return decimal.gte(0) && decimal.isFinite();
+  } catch {
     return false;
   }
-  const decimal = Number(text);
-  return Number.isFinite(decimal) && decimal >= 0;
 }
 
 // Time validation utilities

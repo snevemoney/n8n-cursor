@@ -1,7 +1,7 @@
 // LightningFlow AI Contracts Utilities
 // Common utility functions for working with contracts
 
-const SATS_PER_BTC = 100000000n;
+import Decimal from 'decimal.js';
 
 const DURATION_MS: Record<string, number> = {
   millisecond: 1,
@@ -44,27 +44,14 @@ function shiftTimestamp(timestamp: string, duration: string, sign: 1 | -1): stri
 export class CurrencyUtils {
   // Convert satoshis to BTC
   static satsToBtc(sats: number): string {
-    const negative = sats < 0;
-    const abs = BigInt(Math.trunc(Math.abs(sats)));
-    const whole = abs / SATS_PER_BTC;
-    const fraction = (abs % SATS_PER_BTC).toString().padStart(8, '0');
-    return `${negative ? '-' : ''}${whole.toString()}.${fraction}`;
+    const decimal = new Decimal(sats).div(100000000);
+    return decimal.toFixed(8);
   }
 
   // Convert BTC to satoshis
   static btcToSats(btc: string | number): number {
-    const text = String(btc).trim();
-    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(text)) {
-      throw new Error(`Invalid BTC amount: ${text}`);
-    }
-    const negative = text.startsWith('-');
-    const unsigned = text.replace(/^[+-]/, '');
-    const [whole = '0', fraction = ''] = unsigned.split('.');
-    const wholeDigits = whole.length > 0 ? whole : '0';
-    const padded = `${fraction}00000000`.slice(0, 8);
-    const sats = BigInt(wholeDigits) * SATS_PER_BTC + BigInt(padded);
-    const value = Number(sats);
-    return negative ? -value : value;
+    const decimal = new Decimal(btc).mul(100000000);
+    return decimal.toNumber();
   }
 
   // Format satoshis for display
@@ -80,22 +67,22 @@ export class CurrencyUtils {
 
   // Add satoshis (safe math)
   static addSats(a: number, b: number): number {
-    return a + b;
+    return new Decimal(a).add(b).toNumber();
   }
 
   // Subtract satoshis (safe math)
   static subtractSats(a: number, b: number): number {
-    return a - b;
+    return new Decimal(a).sub(b).toNumber();
   }
 
   // Multiply satoshis (safe math)
   static multiplySats(amount: number, multiplier: number): number {
-    return amount * multiplier;
+    return new Decimal(amount).mul(multiplier).toNumber();
   }
 
   // Divide satoshis (safe math)
   static divideSats(amount: number, divisor: number): number {
-    return amount / divisor;
+    return new Decimal(amount).div(divisor).toNumber();
   }
 }
 
