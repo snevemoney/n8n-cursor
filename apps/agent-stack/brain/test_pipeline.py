@@ -200,6 +200,52 @@ class PipelineDarkCursorTest(unittest.TestCase):
             self.assertTrue(receipt["turn_id"])
             self.assertTrue(receipt["timestamp"])
             self.assertEqual(len(receipt["sha"]), 64)
+            self.assertTrue(receipt.get("commit"))
+            self.assertTrue(receipt.get("host"))
+
+    def test_dark_followup_speaks_the_sitting_token(self) -> None:
+        calls: list[str] = []
+
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (mode, kw)
+            calls.append(prompt)
+            return {
+                "ok": False,
+                "unknown": True,
+                "wire": "cursor",
+                "spoken": PIPE.LOGIN_UNKNOWN,
+            }
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-recall-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            first = MOUTH.apply_turn(
+                "Hello Jarvis. The token for this sitting is maple-leaf.",
+                hive=hive,
+                cursor_fn=dark_cursor,
+            )
+            second = MOUTH.apply_turn(
+                "What token did I just give you?",
+                hive=hive,
+                cursor_fn=dark_cursor,
+            )
+            spoken = second.get("spoken") or ""
+            self.assertIn("agent login", first.get("spoken") or "")
+            self.assertNotIn("maple-leaf", (first.get("spoken") or "").lower())
+            self.assertIn("maple-leaf", spoken.lower())
+            self.assertNotIn("last you said", spoken.lower())
+            self.assertNotIn("i am a model", spoken.lower())
+            self.assertNotIn("i'm a model", spoken.lower())
+            self.assertFalse(second.get("model_available"))
+            self.assertEqual(len(calls), 1)
+            receipt = json.loads((hive / "bus" / "receipts.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+            self.assertIn("maple-leaf", receipt["output"].lower())
+            self.assertEqual(receipt["input"], "What token did I just give you?")
+            self.assertTrue(receipt.get("commit"))
+            body = {k: receipt[k] for k in ("turn_id", "input", "output", "timestamp", "host", "commit")}
+            canonical = json.dumps(body, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+            import hashlib
+            self.assertEqual(receipt["sha"], hashlib.sha256(canonical.encode("utf-8")).hexdigest())
 
     def test_safari_see_calls_see_py_front(self) -> None:
         called: list[str] = []
