@@ -967,5 +967,114 @@ class Live4018MouthContractTest(unittest.TestCase):
             self.assertFalse(PIPE.should_skip_cursor(hive, lambda p: {}))
 
 
+class ContinuityStatusWireTest(unittest.TestCase):
+    """The continuity question reads event-bus status. Not the hive/VPS/Cursor hand."""
+
+    def test_continuity_question_speaks_current_bus_row(self) -> None:
+        self.assertTrue(MOUTH.PIPELINE.wants_continuity_status("What is the current continuity status?"))
+        self.assertFalse(MOUTH.PIPELINE.wants_continuity_status("What is the status"))
+        self.assertFalse(MOUTH.PIPELINE.wants_continuity_status("What is the current status?"))
+
+        bus_mod = MOUTH.PIPELINE.event_bus()
+        self.assertTrue(str(getattr(bus_mod, "__file__", "")).endswith("event-bus.py"))
+        self.assertEqual(bus_mod.JARVIS_PRIMARY, "jarvis-primary")
+        real_status = bus_mod.status
+        seen: list[dict] = []
+
+        def status_on_log():
+            snap = real_status(path=log)
+            seen.append(dict(snap))
+            return snap
+
+        def provider(*_args, **_kwargs):
+            raise AssertionError("provider")
+
+        def status_hand(which: str = "all") -> dict:
+            raise AssertionError(f"status hand {which}")
+
+        bus_mod.status = status_on_log
+        try:
+            with tempfile.TemporaryDirectory(prefix="pipeline-continuity-") as tmp:
+                folder = Path(tmp)
+                log = folder / "events.jsonl"
+                hive = folder / "hive"
+                (hive / "bus").mkdir(parents=True)
+                (hive / "vault").mkdir(parents=True)
+
+                def ask() -> dict:
+                    before = log.read_bytes() if log.is_file() else b""
+                    out = MOUTH.apply_turn(
+                        "What is the current continuity status?",
+                        hive=hive,
+                        retrieve_roots=[hive / "vault"],
+                        cursor_fn=provider,
+                        talk_fn=provider,
+                        login_fn=provider,
+                        status_fn=status_hand,
+                    )
+                    self.assertEqual(log.read_bytes() if log.is_file() else b"", before)
+                    return out
+
+                bus_mod.publish_jarvis(
+                    {"fact": "canary"},
+                    state_version=1,
+                    source_session="jarvis-primary-session",
+                    writer="event-bus.py",
+                    path=log,
+                )
+                first = ask()
+                first_spoken = first.get("spoken") or ""
+                self.assertEqual(seen[-1]["phase"], "ACKNOWLEDGED")
+                self.assertEqual(seen[-1]["state_version"], 1)
+                self.assertIn("phase ACKNOWLEDGED", first_spoken)
+                self.assertIn("state_version 1", first_spoken)
+                self.assertNotIn("agent login", first_spoken.lower())
+                self.assertNotEqual(first.get("verb"), "status")
+                self.assertIn("event-bus", first.get("wires") or [])
+                self.assertNotIn("hive", first.get("wires") or [])
+                self.assertNotIn("vps", first.get("wires") or [])
+                self.assertNotIn("cursor", first.get("wires") or [])
+
+                bus_mod.publish_jarvis(
+                    {"fact": "canary", "step": 2},
+                    state_version=2,
+                    source_session="jarvis-primary-session",
+                    writer="event-bus.py",
+                    path=log,
+                )
+                second = ask()
+                second_spoken = second.get("spoken") or ""
+                self.assertEqual(seen[-1]["state_version"], 2)
+                self.assertEqual(seen[-1]["phase"], "ACKNOWLEDGED")
+                self.assertIn("phase ACKNOWLEDGED", second_spoken)
+                self.assertIn("state_version 2", second_spoken)
+                self.assertNotIn("state_version 1", second_spoken)
+                self.assertEqual(real_status(path=log)["state_version"], 2)
+
+                stale = bus_mod.publish_jarvis(
+                    {"fact": "older"},
+                    state_version=0,
+                    source_session="jarvis-primary-session",
+                    writer="event-bus.py",
+                    path=log,
+                )
+                self.assertEqual(stale["published"]["result"], "STALE")
+                third = ask()
+                third_spoken = third.get("spoken") or ""
+                current = real_status(path=log)
+                self.assertEqual(current["state_version"], 2)
+                self.assertEqual(current["phase"], "ACKNOWLEDGED")
+                self.assertEqual(seen[-1]["state_version"], current["state_version"])
+                self.assertEqual(seen[-1]["phase"], current["phase"])
+                self.assertIn(f"phase {current['phase']}", third_spoken)
+                self.assertIn(f"state_version {current['state_version']}", third_spoken)
+                self.assertNotIn("state_version 0", third_spoken)
+                self.assertNotIn("state_version 1", third_spoken)
+                self.assertNotIn("agent login", third_spoken.lower())
+                self.assertFalse(third.get("login_tried"))
+        finally:
+            bus_mod.status = real_status
+
+
 if __name__ == "__main__":
     unittest.main()
