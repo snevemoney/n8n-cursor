@@ -168,6 +168,39 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertIn(PIPE.NO_MODEL.lower(), second_spoken.lower())
         self.assertNotIn("Still need", second_spoken)
 
+    def test_dark_local_read_uses_the_vault_and_writes_a_receipt(self) -> None:
+        def dark_cursor(prompt: str, mode: str = "ask", **kw):
+            _ = (prompt, mode, kw)
+            raise AssertionError("local read must not call the model")
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-local-read-") as tmp:
+            hive = Path(tmp)
+            vault = hive / "vault"
+            vault.mkdir(parents=True)
+            (vault / "OPERATOR_MEMORY.md").write_text(
+                "# Operator Memory\n\nLocal operator memory token is birch.\n",
+                encoding="utf-8",
+            )
+            (hive / "bus").mkdir(parents=True)
+            out = MOUTH.apply_turn(
+                "read the local operator memory",
+                hive=hive,
+                retrieve_roots=[vault],
+                cursor_fn=dark_cursor,
+            )
+            spoken = out.get("spoken") or ""
+            self.assertEqual(out.get("verb"), "vault_read")
+            self.assertIn("birch", spoken.lower())
+            self.assertNotIn("agent login", spoken.lower())
+            receipt_path = hive / "bus" / "receipts.jsonl"
+            self.assertTrue(receipt_path.is_file())
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8").splitlines()[-1])
+            self.assertEqual(receipt["input"], "read the local operator memory")
+            self.assertIn("birch", receipt["output"].lower())
+            self.assertTrue(receipt["turn_id"])
+            self.assertTrue(receipt["timestamp"])
+            self.assertEqual(len(receipt["sha"]), 64)
+
     def test_safari_see_calls_see_py_front(self) -> None:
         called: list[str] = []
 

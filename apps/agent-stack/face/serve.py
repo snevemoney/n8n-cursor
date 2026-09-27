@@ -337,7 +337,36 @@ class Handler(BaseHTTPRequestHandler):
                 pass
             if dropped:
                 return
-            raise
+            line = "Sir. That turn failed before it could speak."
+            try:
+                bus_path = HIVE / "bus" / "state.json"
+                bus = load_json(bus_path)
+                if bus.get("job_status") == "working":
+                    bus["phase"] = "speak"
+                    bus["job_status"] = "done"
+                    bus["spoken"] = line
+                    if hasattr(live_mouth, "write_json"):
+                        live_mouth.write_json(bus_path, bus)
+            except Exception:
+                pass
+            try:
+                fail = {
+                    "ok": False,
+                    "verb": "pipeline",
+                    "ask": False,
+                    "spoken": line,
+                    "host": "pipeline",
+                    "done": True,
+                    "partial": False,
+                    "spoken_delta": line,
+                    "unknown": True,
+                    "error": str(exc)[:200],
+                }
+                self.wfile.write((f"data: {json.dumps(fail)}\n\n").encode("utf-8"))
+                self.wfile.flush()
+            except Exception:
+                return
+            return
 
 
 def serve(port: int = PORT) -> None:
