@@ -22,7 +22,6 @@ interface UseChatStreamProps {
   setProgress: React.Dispatch<React.SetStateAction<Record<string, { phase: string; progress: number; message: string; step?: string }>>>;
   setToolProgress: React.Dispatch<React.SetStateAction<Record<string, Record<string, { tool: string; progress: string; status: string }>>>>;
   setShowRightPanel: React.Dispatch<React.SetStateAction<boolean>>;
-  activePanel: 'plan' | 'council' | 'tools' | 'knowledge' | 'user-tools';
   setNextBestAction?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
   setCouncilResult?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
   setCreativePipeline?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
@@ -49,7 +48,6 @@ export function useChatStream({
   setProgress,
   setToolProgress,
   setShowRightPanel,
-  activePanel,
   setNextBestAction,
   setCouncilResult,
   setCreativePipeline,
