@@ -1,0 +1,122 @@
+[
+  {
+    "id": "sig-x-text-2071996301311381827",
+    "kind": "x_text",
+    "source_ref": "https://x.com/i/web/status/2071996301311381827",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-text-2072001793492763022",
+    "kind": "x_text",
+    "source_ref": "https://x.com/i/web/status/2072001793492763022",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-text-2072255044544512004",
+    "kind": "x_text",
+    "source_ref": "https://x.com/i/web/status/2072255044544512004",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-text-2072364163054395409",
+    "kind": "x_text",
+    "source_ref": "https://x.com/i/web/status/2072364163054395409",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-text-2072498082819014925",
+    "kind": "x_text",
+    "source_ref": "https://x.com/i/web/status/2072498082819014925",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-video-x-2088007687149601254",
+    "kind": "x_video",
+    "source_ref": "https://x.com/i/web/status/2088007687149601254",
+    "state": "CAPABILITY_MAPPED"
+  },
+  {
+    "id": "sig-x-video-2073272122508513702",
+    "kind": "x_video",
+    "source_ref": "https://x.com/i/web/status/2073272122508513702",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-video-2074119000137601528",
+    "kind": "x_video",
+    "source_ref": "https://x.com/i/web/status/2074119000137601528",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-video-2074158868142194898",
+    "kind": "x_video",
+    "source_ref": "https://x.com/i/web/status/2074158868142194898",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-x-video-2075754077074620467",
+    "kind": "x_video",
+    "source_ref": "https://x.com/i/web/status/2075754077074620467",
+    "state": "CLAIMS_EXTRACTED"
+  },
+  {
+    "id": "sig-yt-HNKlFTd1maM",
+    "kind": "youtube",
+    "source_ref": "https://www.youtube.com/watch?v=HNKlFTd1maM",
+    "state": "EXPERIMENT_CANDIDATE"
+  },
+  {
+    "id": "sig-yt-eFOTQpbGcy8",
+    "kind": "youtube",
+    "source_ref": "https://www.youtube.com/watch?v=eFOTQpbGcy8",
+    "state": "SYNTHESIZED"
+  },
+  {
+    "id": "sig-yt-glM8godEcic",
+    "kind": "youtube",
+    "source_ref": "https://www.youtube.com/watch?v=glM8godEcic",
+    "state": "SYNTHESIZED"
+  },
+  {
+    "id": "sig-yt-w9-gfaV5vlM",
+    "kind": "youtube",
+    "source_ref": "https://www.youtube.com/watch?v=w9-gfaV5vlM",
+    "state": "SYNTHESIZED"
+  },
+  {
+    "id": "sig-yt-CB5bG4mvnS0",
+    "kind": "youtube",
+    "source_ref": "https://www.youtube.com/watch?v=CB5bG4mvnS0",
+    "state": "SYNTHESIZED"
+  },
+  {
+    "id": "sig-repo-figma-mcp-server-guide",
+    "kind": "repo",
+    "source_ref": "https://github.com/figma/mcp-server-guide",
+    "state": "RAW"
+  },
+  {
+    "id": "sig-repo-vercel-labs-agent-skills",
+    "kind": "repo",
+    "source_ref": "https://github.com/vercel-labs/agent-skills",
+    "state": "RAW"
+  },
+  {
+    "id": "sig-repo-coleam00-skills",
+    "kind": "repo",
+    "source_ref": "https://github.com/coleam00/skills",
+    "state": "RAW"
+  },
+  {
+    "id": "sig-article-vercel-next-patterns",
+    "kind": "article",
+    "source_ref": "docs/hive/outer-heaven/CONTENT/website-building/vercel-next-patterns.md",
+    "state": "RAW"
+  },
+  {
+    "id": "sig-article-design-to-code",
+    "kind": "article",
+    "source_ref": "docs/hive/outer-heaven/CONTENT/website-building/design-to-code.md",
+    "state": "RAW"
+  }
+]

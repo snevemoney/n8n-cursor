@@ -1,0 +1,812 @@
+[
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-x-2088007687149601254-01",
+    "id": "con-K-x-2088007687149601254-01-playbook-before-send",
+    "left_text": "Outbound \u201cI can help you automate your business\u201d (or cold \u201cAI consulting\u201d) means a million and a half things. Nobody bites.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "playbook-before-send",
+      "x-2088007687149601254"
+    ],
+    "target_ref": "playbook-before-send",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-x-2088007687149601254-01",
+    "id": "con-K-x-2088007687149601254-01-yt-nS2FrgXN-EY",
+    "left_text": "Outbound \u201cI can help you automate your business\u201d (or cold \u201cAI consulting\u201d) means a million and a half things. Nobody bites.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "x-2088007687149601254",
+      "yt:nS2FrgXN-EY"
+    ],
+    "target_ref": "yt:nS2FrgXN-EY",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-02",
+    "id": "con-K-HNKlFTd1maM-02-ySl-SyboPa4",
+    "left_text": "Price was \u201cpretty random\u201d off a $1,200 baseline; ROI math (2\u20133h \u00d7 $50 \u2248 $400/mo, ~4 months, ~$5k/year) is a later story, not how he priced.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "ySl-SyboPa4"
+    ],
+    "target_ref": "ySl-SyboPa4",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-03",
+    "id": "con-K-HNKlFTd1maM-03-8C6iCpJ9HPo",
+    "left_text": "First deals came from posting builds for fun with email in the description; he was not offering paid work.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "8C6iCpJ9HPo",
+      "HNKlFTd1maM"
+    ],
+    "target_ref": "8C6iCpJ9HPo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-HNKlFTd1maM-03",
+    "id": "con-K-HNKlFTd1maM-03-eFOTQpbGcy8",
+    "left_text": "First deals came from posting builds for fun with email in the description; he was not offering paid work.",
+    "other_claim_ids": [
+      "K-eFOTQpbGcy8-01",
+      "K-eFOTQpbGcy8-02"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "eFOTQpbGcy8"
+    ],
+    "target_ref": "eFOTQpbGcy8",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-03",
+    "id": "con-K-HNKlFTd1maM-03-vY0EzTP-7EA",
+    "left_text": "First deals came from posting builds for fun with email in the description; he was not offering paid work.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "vY0EzTP-7EA"
+    ],
+    "target_ref": "vY0EzTP-7EA",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-HNKlFTd1maM-06",
+    "id": "con-K-HNKlFTd1maM-06-w9-gfaV5vlM",
+    "left_text": "Closing over ~50% (later: way above 40\u201350%) means clients see a steal; B2B consulting strong is 20\u201330%; no friction \u2192 CLV too low.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "w9-gfaV5vlM",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-06",
+    "id": "con-K-HNKlFTd1maM-06-8C6iCpJ9HPo",
+    "left_text": "Closing over ~50% (later: way above 40\u201350%) means clients see a steal; B2B consulting strong is 20\u201330%; no friction \u2192 CLV too low.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "8C6iCpJ9HPo",
+      "HNKlFTd1maM"
+    ],
+    "target_ref": "8C6iCpJ9HPo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-07",
+    "id": "con-K-HNKlFTd1maM-07-8C6iCpJ9HPo",
+    "left_text": "Silent killers: underpricing (wrong clients, hard to raise later); saying yes to one more feature without rescope; chasing small retainers too early. One $10k project often beats five $2k/mo retainers. Stability = lead pipeline, not retainers.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "8C6iCpJ9HPo",
+      "HNKlFTd1maM"
+    ],
+    "target_ref": "8C6iCpJ9HPo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-08",
+    "id": "con-K-HNKlFTd1maM-08-8C6iCpJ9HPo",
+    "left_text": "True Horizon: one week internal QA (sample + real data, edge cases, fix before client sees) then one week client real-world QA + iterate.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "8C6iCpJ9HPo",
+      "HNKlFTd1maM"
+    ],
+    "target_ref": "8C6iCpJ9HPo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-09",
+    "id": "con-K-HNKlFTd1maM-09-9IzGe0BBj-c",
+    "left_text": "On the $12k concierge they \u201ctransition[ed] the scope and architect to incorporate\u201d MCP because it was a big deal online \u2014 a value lever: we stay bleeding edge.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "9IzGe0BBj_c",
+      "HNKlFTd1maM"
+    ],
+    "target_ref": "9IzGe0BBj_c",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-HNKlFTd1maM-09",
+    "id": "con-K-HNKlFTd1maM-09-mPflFTQUCGk",
+    "left_text": "On the $12k concierge they \u201ctransition[ed] the scope and architect to incorporate\u201d MCP because it was a big deal online \u2014 a value lever: we stay bleeding edge.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "mPflFTQUCGk"
+    ],
+    "target_ref": "mPflFTQUCGk",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-HNKlFTd1maM-09",
+    "id": "con-K-HNKlFTd1maM-09-glM8godEcic",
+    "left_text": "On the $12k concierge they \u201ctransition[ed] the scope and architect to incorporate\u201d MCP because it was a big deal online \u2014 a value lever: we stay bleeding edge.",
+    "other_claim_ids": [
+      "K-glM8godEcic-01",
+      "K-glM8godEcic-02"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "glM8godEcic"
+    ],
+    "target_ref": "glM8godEcic",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-eFOTQpbGcy8-01",
+    "id": "con-K-eFOTQpbGcy8-01-vY0EzTP-7EA",
+    "left_text": "Start on your own hours-heavy tasks where a miss is harmless; prove numbers; then audit the business for the thing that breaks if demand doubles \u2014 that is the paid constraint.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "eFOTQpbGcy8",
+      "vY0EzTP-7EA"
+    ],
+    "target_ref": "vY0EzTP-7EA",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-eFOTQpbGcy8-01",
+    "id": "con-K-eFOTQpbGcy8-01-8C6iCpJ9HPo",
+    "left_text": "Start on your own hours-heavy tasks where a miss is harmless; prove numbers; then audit the business for the thing that breaks if demand doubles \u2014 that is the paid constraint.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "8C6iCpJ9HPo",
+      "eFOTQpbGcy8"
+    ],
+    "target_ref": "8C6iCpJ9HPo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-eFOTQpbGcy8-02",
+    "id": "con-K-eFOTQpbGcy8-02-vY0EzTP-7EA",
+    "left_text": "The title prices a $200K AI job. The spoken body never prices $200k; it walks a safe-hours then constraint loop.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "eFOTQpbGcy8",
+      "vY0EzTP-7EA"
+    ],
+    "target_ref": "vY0EzTP-7EA",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-eFOTQpbGcy8-02",
+    "id": "con-K-eFOTQpbGcy8-02-8C6iCpJ9HPo",
+    "left_text": "The title prices a $200K AI job. The spoken body never prices $200k; it walks a safe-hours then constraint loop.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "8C6iCpJ9HPo",
+      "eFOTQpbGcy8"
+    ],
+    "target_ref": "8C6iCpJ9HPo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-eFOTQpbGcy8-02",
+    "id": "con-K-eFOTQpbGcy8-02-K-eFOTQpbGcy8-01",
+    "left_text": "The title prices a $200K AI job. The spoken body never prices $200k; it walks a safe-hours then constraint loop.",
+    "other_claim_ids": [
+      "K-eFOTQpbGcy8-01"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "eFOTQpbGcy8"
+    ],
+    "target_ref": "K-eFOTQpbGcy8-01",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-glM8godEcic-01",
+    "id": "con-K-glM8godEcic-01-y-cq-Qo4zVo",
+    "left_text": "The MCP server is seven single-purpose workflows; the voice layer only chooses.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "glM8godEcic",
+      "y-cq_Qo4zVo"
+    ],
+    "target_ref": "y-cq_Qo4zVo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-glM8godEcic-01",
+    "id": "con-K-glM8godEcic-01-9IzGe0BBj-c",
+    "left_text": "The MCP server is seven single-purpose workflows; the voice layer only chooses.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "9IzGe0BBj_c",
+      "glM8godEcic"
+    ],
+    "target_ref": "9IzGe0BBj_c",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-glM8godEcic-02",
+    "id": "con-K-glM8godEcic-02-y-cq-Qo4zVo",
+    "left_text": "First question is email lookup; \u201cI\u2019m new\u201d switches to collect+CRM create, then availability+book.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "glM8godEcic",
+      "y-cq_Qo4zVo"
+    ],
+    "target_ref": "y-cq_Qo4zVo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-glM8godEcic-02",
+    "id": "con-K-glM8godEcic-02-9IzGe0BBj-c",
+    "left_text": "First question is email lookup; \u201cI\u2019m new\u201d switches to collect+CRM create, then availability+book.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "9IzGe0BBj_c",
+      "glM8godEcic"
+    ],
+    "target_ref": "9IzGe0BBj_c",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-01",
+    "id": "con-K-w9-gfaV5vlM-01-HNKlFTd1maM",
+    "left_text": "Every sale is four moves: find the leak (time/money/focus), build the fix, translate to hours/$ /revenue, anchor price as a fraction of that value.",
+    "other_claim_ids": [
+      "K-HNKlFTd1maM-01",
+      "K-HNKlFTd1maM-02",
+      "K-HNKlFTd1maM-03",
+      "K-HNKlFTd1maM-04",
+      "K-HNKlFTd1maM-05",
+      "K-HNKlFTd1maM-06",
+      "K-HNKlFTd1maM-07",
+      "K-HNKlFTd1maM-08",
+      "K-HNKlFTd1maM-09"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "HNKlFTd1maM",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-02",
+    "id": "con-K-w9-gfaV5vlM-02-K-w9-gfaV5vlM-01",
+    "left_text": "first deal predates the SOP.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "K-w9-gfaV5vlM-01",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-03",
+    "id": "con-K-w9-gfaV5vlM-03-HNKlFTd1maM",
+    "left_text": "Businesses care about three things; delivery vehicle (AI, VA, duct tape) is secondary.",
+    "other_claim_ids": [
+      "K-HNKlFTd1maM-01",
+      "K-HNKlFTd1maM-02",
+      "K-HNKlFTd1maM-03",
+      "K-HNKlFTd1maM-04",
+      "K-HNKlFTd1maM-05",
+      "K-HNKlFTd1maM-06",
+      "K-HNKlFTd1maM-07",
+      "K-HNKlFTd1maM-08",
+      "K-HNKlFTd1maM-09"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "HNKlFTd1maM",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-04",
+    "id": "con-K-w9-gfaV5vlM-04-K-w9-gfaV5vlM-03",
+    "left_text": "he also sells flashy multi-agent YouTube because it performs.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "K-w9-gfaV5vlM-03",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-06",
+    "id": "con-K-w9-gfaV5vlM-06-K-w9-gfaV5vlM-05",
+    "left_text": "he still makes flashy videos.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "K-w9-gfaV5vlM-05",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-08",
+    "id": "con-K-w9-gfaV5vlM-08-K-w9-gfaV5vlM-07",
+    "left_text": "\u201cno pitch unless you ask\u201d vs later price step.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "K-w9-gfaV5vlM-07",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-11",
+    "id": "con-K-w9-gfaV5vlM-11-K-w9-gfaV5vlM-10",
+    "left_text": "YouTube still celebrates agents.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "K-w9-gfaV5vlM-10",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-13",
+    "id": "con-K-w9-gfaV5vlM-13-HNKlFTd1maM",
+    "left_text": "First three to five projects are paid practice. Either work free/cheap (system is theirs; optimize reps/proof) or offer money-back if value isn\u2019t delivered. Then you can climb $1\u20132k \u2192 $30k+.",
+    "other_claim_ids": [
+      "K-HNKlFTd1maM-01",
+      "K-HNKlFTd1maM-02",
+      "K-HNKlFTd1maM-03",
+      "K-HNKlFTd1maM-04",
+      "K-HNKlFTd1maM-05",
+      "K-HNKlFTd1maM-06",
+      "K-HNKlFTd1maM-07",
+      "K-HNKlFTd1maM-08",
+      "K-HNKlFTd1maM-09"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "HNKlFTd1maM",
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "HNKlFTd1maM",
+    "winner": null
+  },
+  {
+    "both_in_cohort": false,
+    "claim_id": "K-w9-gfaV5vlM-13",
+    "id": "con-K-w9-gfaV5vlM-13-8C6iCpJ9HPo",
+    "left_text": "First three to five projects are paid practice. Either work free/cheap (system is theirs; optimize reps/proof) or offer money-back if value isn\u2019t delivered. Then you can climb $1\u20132k \u2192 $30k+.",
+    "other_claim_ids": [],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "8C6iCpJ9HPo",
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "8C6iCpJ9HPo",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-14",
+    "id": "con-K-w9-gfaV5vlM-14-K-w9-gfaV5vlM-13",
+    "left_text": "later tapes scold underpricing.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "K-w9-gfaV5vlM-13",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-w9-gfaV5vlM-28",
+    "id": "con-K-w9-gfaV5vlM-28-K-w9-gfaV5vlM-01",
+    "left_text": "Stop selling agents (while his other titles sell agents). Lowest-view videos can be the money videos. Do not build custom n8n by default. Informational / no-pitch opener (then a priced solution). Free work as strategy vs `HNKlFTd1maM` raise-if-high-close \u2014 keep both. AI-OS and \u201cregular automations\u201d are explicitly not what he means by solutions.",
+    "other_claim_ids": [
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "target_ref": "K-w9-gfaV5vlM-01",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-CB5bG4mvnS0-04",
+    "id": "con-K-CB5bG4mvnS0-04-K-CB5bG4mvnS0-01",
+    "left_text": "\u201cliterally anything\u201d vs 2FA wall + \u201cwatch it 10 times.\u201d",
+    "other_claim_ids": [
+      "K-CB5bG4mvnS0-01",
+      "K-CB5bG4mvnS0-02",
+      "K-CB5bG4mvnS0-03",
+      "K-CB5bG4mvnS0-05",
+      "K-CB5bG4mvnS0-06"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "CB5bG4mvnS0"
+    ],
+    "target_ref": "K-CB5bG4mvnS0-01",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-CB5bG4mvnS0-05",
+    "id": "con-K-CB5bG4mvnS0-05-K-CB5bG4mvnS0-01",
+    "left_text": "seeded bugs vs \u201cfound a ton.\u201d",
+    "other_claim_ids": [
+      "K-CB5bG4mvnS0-01",
+      "K-CB5bG4mvnS0-02",
+      "K-CB5bG4mvnS0-03",
+      "K-CB5bG4mvnS0-04",
+      "K-CB5bG4mvnS0-06"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "CB5bG4mvnS0"
+    ],
+    "target_ref": "K-CB5bG4mvnS0-01",
+    "winner": null
+  },
+  {
+    "both_in_cohort": true,
+    "claim_id": "K-CB5bG4mvnS0-06",
+    "id": "con-K-CB5bG4mvnS0-06-K-CB5bG4mvnS0-01",
+    "left_text": "\u201cI will review\u201d the X draft vs title \u201cautomates literally anything.\u201d",
+    "other_claim_ids": [
+      "K-CB5bG4mvnS0-01",
+      "K-CB5bG4mvnS0-02",
+      "K-CB5bG4mvnS0-03",
+      "K-CB5bG4mvnS0-04",
+      "K-CB5bG4mvnS0-05"
+    ],
+    "owner": "researcher",
+    "resolution": "EXPERIMENT_REQUIRED",
+    "sources": [
+      "CB5bG4mvnS0"
+    ],
+    "target_ref": "K-CB5bG4mvnS0-01",
+    "winner": null
+  }
+]
