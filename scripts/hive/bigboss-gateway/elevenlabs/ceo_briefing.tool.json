@@ -1,0 +1,24 @@
+{
+  "type": "webhook",
+  "name": "ceo_briefing",
+  "description": "Tiny orientation for the operator. Returns caller role, current focus, recent projects, at most two urgent spoken lines, building mode. Built from live GitHub plus a small static org pack. Do not invent PRs. Do not dump the org vault.",
+  "response_timeout_secs": 20,
+  "api_schema": {
+    "url": "https://YOUR_PUBLIC_HOST/v1/ceo_briefing",
+    "method": "POST",
+    "request_headers": {
+      "Content-Type": "application/json",
+      "Authorization": { "env_var_label": "BIGBOSS_GATEWAY_SECRET" }
+    },
+    "request_body_schema": {
+      "type": "object",
+      "description": "Empty object is fine. Auth is the header.",
+      "properties": {}
+    }
+  },
+  "required_headers_note": {
+    "Authorization": "Bearer <BIGBOSS_GATEWAY_SECRET> — store in ElevenLabs secrets / env_var_label BIGBOSS_GATEWAY_SECRET. Never paste a real secret into this file.",
+    "x-voice-signature": "Optional HMAC-SHA256 hex of the raw JSON body. Local curl uses this. EL wire uses Bearer.",
+    "Content-Type": "application/json"
+  }
+}

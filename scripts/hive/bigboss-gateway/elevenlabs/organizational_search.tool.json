@@ -1,0 +1,50 @@
+{
+  "type": "webhook",
+  "name": "organizational_search",
+  "description": "One broad read of organizational memory. Returns compact spoken facts with evidence. Use for questions like look at my signals, what is open, what did we attempt. Do not invent pull requests. Memory, Grok, and Obsidian are not wired. Prefer material PRs over leftover cron drafts (HITL inbox, goal/gap board, Watchdog NO-WAITING, Factory OS reminder). If a title says fix but the PR is still open, treat it as attempted not completed.",
+  "response_timeout_secs": 20,
+  "api_schema": {
+    "url": "https://YOUR_PUBLIC_HOST/v1/organizational_search",
+    "method": "POST",
+    "request_headers": {
+      "Content-Type": "application/json",
+      "Authorization": { "env_var_label": "BIGBOSS_GATEWAY_SECRET" }
+    },
+    "request_body_schema": {
+      "type": "object",
+      "description": "Organizational search request",
+      "required": ["query"],
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Natural-language question from the caller"
+        },
+        "scope": {
+          "type": "string",
+          "description": "github = live GitHub only. memory = unwired (returns unavailable). all = GitHub plus unavailable memory/grok/obsidian.",
+          "enum": ["github", "memory", "all"]
+        },
+        "time_range": {
+          "type": "string",
+          "description": "How far back to look at GitHub updates",
+          "enum": ["24h", "7d", "30d", "any"]
+        },
+        "depth": {
+          "type": "string",
+          "description": "brief = fewer evidence rows. standard = up to 20.",
+          "enum": ["brief", "standard"]
+        },
+        "caller_class": {
+          "type": "string",
+          "description": "CEO for the operator. PUBLIC for anyone else.",
+          "enum": ["CEO", "PUBLIC"]
+        }
+      }
+    }
+  },
+  "required_headers_note": {
+    "Authorization": "Bearer <BIGBOSS_GATEWAY_SECRET> — ElevenLabs should store the secret in env/secrets and send it as this header. Do not paste the secret into this JSON.",
+    "x-voice-signature": "Optional HMAC-SHA256 hex of the raw JSON body using BIGBOSS_GATEWAY_SECRET. Used by curl/local callers. ElevenLabs webhook tools typically cannot compute HMAC of the body, so use Bearer for the EL wire.",
+    "Content-Type": "application/json"
+  }
+}
