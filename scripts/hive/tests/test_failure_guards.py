@@ -1658,6 +1658,148 @@ class VersionedContinuityTest(unittest.TestCase):
             self.assertEqual(consumers["APPLIED"], BUS.JARVIS_PRIMARY)
             self.assertEqual(consumers["ACKNOWLEDGED"], BUS.JARVIS_PRIMARY)
 
+    def test_acknowledged_projection_is_current_for_a_later_process(self) -> None:
+        script = HIVE / "os" / "event-bus.py"
+        fixture_mission = "mission-local-harmless"
+        fixture_session = "session-local-harmless"
+        operator_log = Path.home() / ".grokbot" / "os-events.jsonl"
+        operator_existed = operator_log.exists()
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            projection = BUS.jarvis_projection_path(log)
+            self.assertEqual(projection.parent, log.parent)
+            self.assertFalse(str(projection).startswith(str(Path.home() / ".grokbot")))
+
+            def run(*extra: str) -> subprocess.CompletedProcess[str]:
+                return subprocess.run(
+                    [sys.executable, str(script), "--path", str(log), *extra],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+
+            started = run(
+                "--start",
+                "--mission-id",
+                fixture_mission,
+                "--session-id",
+                fixture_session,
+                "--source",
+                "local-test",
+                "--actor",
+                "event-bus.py",
+            )
+            self.assertEqual(started.returncode, 0, started.stderr)
+            self.assertEqual(
+                [row.get("phase") for row in BUS._read_all(log) if row.get("phase")],
+                ["PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED"],
+            )
+
+            reader = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    "import json,sys; print(json.dumps(json.load(open(sys.argv[1], encoding='utf-8'))))",
+                    str(projection),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(reader.returncode, 0, reader.stderr)
+            held = json.loads(reader.stdout)
+            self.assertEqual(held["consumer"], BUS.JARVIS_PRIMARY)
+            self.assertEqual(held["entity_id"], BUS.JARVIS_ENTITY)
+            self.assertTrue(held["synced"])
+            payload = held["authoritative"]["payload"]
+            self.assertEqual(payload["mission_id"], fixture_mission)
+            self.assertEqual(payload["session_id"], fixture_session)
+            self.assertTrue(payload["local"])
+            self.assertTrue(payload["harmless"])
+
+            log_snapshot = log.read_bytes()
+            projection_snapshot = projection.read_bytes()
+            later = run("--status", "--mission-id", fixture_mission)
+            self.assertEqual(later.returncode, 0, later.stderr)
+            self.assertEqual(log.read_bytes(), log_snapshot)
+            self.assertEqual(projection.read_bytes(), projection_snapshot)
+            seen = json.loads(later.stdout)
+            self.assertNotIn("payload", seen)
+            self.assertEqual(seen["mission_id"], fixture_mission)
+            self.assertEqual(seen["session_id"], fixture_session)
+            self.assertEqual(seen["phase"], "ACKNOWLEDGED")
+
+            hidden = projection.with_name(projection.name + ".hidden")
+            projection.rename(hidden)
+            without_hold = run("--status", "--mission-id", fixture_mission)
+            self.assertEqual(without_hold.returncode, 0, without_hold.stderr)
+            self.assertEqual(log.read_bytes(), log_snapshot)
+            still = json.loads(without_hold.stdout)
+            self.assertEqual(still["mission_id"], fixture_mission)
+            self.assertEqual(still["session_id"], fixture_session)
+            self.assertNotIn("payload", still)
+            hidden.rename(projection)
+            self.assertEqual(projection.read_bytes(), projection_snapshot)
+
+            again = run(
+                "--start",
+                "--mission-id",
+                fixture_mission,
+                "--session-id",
+                "session-not-stored",
+                "--source",
+                "local-test",
+                "--actor",
+                "event-bus.py",
+            )
+            self.assertEqual(again.returncode, 0, again.stderr)
+            self.assertEqual(log.read_bytes(), log_snapshot)
+            self.assertEqual(projection.read_bytes(), projection_snapshot)
+            repeated = json.loads(again.stdout)
+            self.assertEqual(repeated["mission_id"], fixture_mission)
+            self.assertEqual(repeated["session_id"], fixture_session)
+
+            published = [
+                row
+                for row in BUS._continuity_rows(log)
+                if row.get("phase") == "PUBLISHED"
+            ]
+            self.assertEqual(len(published), 1)
+            replay = BUS.publish_jarvis(
+                {
+                    "mission_id": fixture_mission,
+                    "session_id": fixture_session,
+                    "local": True,
+                    "harmless": True,
+                },
+                state_version=1,
+                source_session=fixture_session,
+                writer="event-bus.py",
+                path=log,
+                changed_at=str(published[0]["changed_at"]),
+            )
+            self.assertTrue(replay["published"].get("duplicate"))
+            self.assertTrue(replay["applied"].get("duplicate"))
+            self.assertIsNotNone(replay["projection"])
+            self.assertTrue(replay["projection"]["synced"])
+            self.assertEqual(replay["projection"]["authoritative"]["payload"], payload)
+            self.assertEqual(
+                [row.get("phase") for row in BUS._read_all(log) if row.get("phase")],
+                ["PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED"],
+            )
+            receipts = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("type") == "continuity.receipt" and row.get("operation") == "start"
+            ]
+            self.assertEqual(len(receipts), 1)
+            reread = json.loads(projection.read_text(encoding="utf-8"))
+            self.assertEqual(reread["authoritative"]["payload"], payload)
+            self.assertEqual(reread["consumer"], BUS.JARVIS_PRIMARY)
+            self.assertTrue(reread["synced"])
+            if not operator_existed:
+                self.assertFalse(operator_log.exists())
+
     def test_jarvis_primary_status_reads_recorded_phase(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "events.jsonl"
