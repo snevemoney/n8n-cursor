@@ -1,0 +1,3 @@
+# Preview only. Drop noindex / allow indexing only if/when this URL actually ships.
+User-agent: *
+Disallow: /

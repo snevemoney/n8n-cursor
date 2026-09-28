@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<!--
+  Preview of intended https://evenslouis.ca/  — hive OS walkthrough.
+  Live hire source is not in this git (see SOURCE.md). Merge ≠ ship. HITL later.
+  Preview keeps noindex. Drop noindex only if/when this URL actually ships.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hive OS — walkthrough</title>
+  <meta name="description" content="A record of the hive OS. Building mode. Not an offer.">
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f5;
+      --muted: #a3a3a3;
+      --dim: #737373;
+      --line: rgba(38, 38, 38, 0.8);
+      --card: #171717;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.55;
+    }
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .bar {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+    }
+    .mark {
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+      text-decoration: none;
+    }
+    main {
+      flex: 1;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 5rem;
+    }
+    .kicker {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-weight: 300;
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .lead {
+      color: var(--muted);
+      font-size: 1.125rem;
+      margin-bottom: 2.5rem;
+    }
+    h2 {
+      font-weight: 400;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin: 2.25rem 0 0.75rem;
+    }
+    p, li { color: var(--muted); }
+    p + p { margin-top: 0.75rem; }
+    .desks {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .desk-group {
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+      padding: 1rem 1.1rem;
+      background: var(--card);
+    }
+    .desk-group dt {
+      color: var(--fg);
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+    .desk-group dd { font-size: 0.95rem; }
+    .routine {
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+      padding: 1rem 1.1rem;
+    }
+    .routine strong { color: var(--fg); font-weight: 500; }
+    .note { font-size: 0.95rem; }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 2rem 1.5rem;
+      color: var(--dim);
+      font-size: 0.875rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <span class="mark">evenslouis</span>
+    </div>
+  </header>
+  <main>
+    <p class="kicker">Record</p>
+    <h1>Hive OS — walkthrough</h1>
+    <p class="lead">This page is a record, not an offer. Building mode.</p>
+
+    <h2>What it is</h2>
+    <p>Evens Louis runs a 17-desk operator OS on Grok Bot + Cursor. Memory lives in Outer Heaven.</p>
+    <p class="note">Building mode. No outbound this cycle.</p>
+
+    <h2>Desks</h2>
+    <dl class="desks">
+      <div class="desk-group">
+        <dt>Command</dt>
+        <dd>Big Boss, Day Planner, HITL Operator, Watchdog</dd>
+      </div>
+      <div class="desk-group">
+        <dt>Make</dt>
+        <dd>Forge, Creative Studio, Publishing Engine</dd>
+      </div>
+      <div class="desk-group">
+        <dt>Research</dt>
+        <dd>Consultant, Researcher, Lead Hunter, Product GTM</dd>
+      </div>
+      <div class="desk-group">
+        <dt>Comms / memory</dt>
+        <dd>Communications Manager, Librarian</dd>
+      </div>
+      <div class="desk-group">
+        <dt>Money / life</dt>
+        <dd>Money Desk, Personal CFO, Wealth Manager, Career Strategist</dd>
+      </div>
+    </dl>
+
+    <h2>One routine</h2>
+    <p class="routine">Publishing Engine <strong>“Publishing pipeline check”</strong>, Mondays 9:00 AM America/Toronto. It packages; it does not auto-publish.</p>
+
+    <h2>What this is not</h2>
+    <p>A services pitch, a booking page, or a traffic claim. No Book/Buy.</p>
+    <p class="note">Ironlane Studio, Ashford &amp; Vale, and Quay Team already sit on this domain as Proof / concept static landing craft. No app, no repo, no product. They are not this OS.</p>
+  </main>
+  <footer>© 2026 Evens Louis</footer>
+</body>
+</html>
