@@ -42,3 +42,41 @@ export function isTimeoutError(error: any): boolean {
          error?.message?.includes('timeout');
 }
 
+export interface FetchWithRetryOptions extends FetchWithTimeoutOptions {
+  retries?: number;
+  backoffMs?: number;
+}
+
+/**
+ * Fetch with timeout plus bounded retry on 5xx / network failure.
+ */
+export async function fetchWithRetry(
+  url: string,
+  options: FetchWithRetryOptions = {}
+): Promise<Response> {
+  const { retries = 2, backoffMs = 200, ...timeoutOptions } = options;
+  let lastResponse: Response | undefined;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url, timeoutOptions);
+      if (response.ok || response.status < 500 || attempt === retries) {
+        return response;
+      }
+      lastResponse = response;
+    } catch (error) {
+      lastError = error;
+      if (attempt === retries) {
+        throw error;
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, backoffMs * (attempt + 1)));
+  }
+
+  if (lastResponse) {
+    return lastResponse;
+  }
+  throw lastError instanceof Error ? lastError : new Error('fetchWithRetry failed');
+}
+

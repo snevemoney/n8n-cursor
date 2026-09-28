@@ -114,9 +114,22 @@ const envVarConfigs: EnvVarConfig[] = [
     }
   },
   {
+    name: 'JWT_SECRET',
+    required: true,
+    description: 'HS256 secret for Scorpion operator JWTs. Privileged /api returns 503 until set.',
+    validator: (value) => value.length >= 16 || 'Must be at least 16 characters',
+  },
+  {
     name: 'SCORPION_API_KEY',
-    required: false,
-    description: 'Scorpion API key (for external API access)',
+    required: true,
+    description: 'Scorpion API key for privileged /api access (Authorization: Bearer or X-API-Key)',
+    validator: (value) => value.length >= 16 || 'Must be at least 16 characters',
+  },
+  {
+    name: 'SCORPION_OPERATOR_PASSWORD',
+    required: true,
+    description: 'Operator password for POST /api/security/auth/login. Login returns 503 until set.',
+    validator: (value) => value.length >= 8 || 'Must be at least 8 characters',
   },
   {
     name: 'SCORPION_SSD_PATH',

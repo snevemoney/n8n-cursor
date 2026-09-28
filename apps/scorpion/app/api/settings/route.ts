@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { requireAuth } from '@/lib/security/auth';
 import { z } from 'zod';
 
 const SETTINGS_FILE = path.join(process.cwd(), 'data', 'scorpion', 'settings.json');
@@ -50,7 +51,7 @@ const settingsSchema = z.object({
 /**
  * GET /api/settings - Load user settings
  */
-export const GET = withErrorHandling(async () => {
+export const GET = withErrorHandling(requireAuth(async () => {
   // Ensure directory exists
   await fs.mkdir(path.dirname(SETTINGS_FILE), { recursive: true });
   
@@ -63,12 +64,12 @@ export const GET = withErrorHandling(async () => {
     // File doesn't exist, return defaults
     return createSuccessResponse(DEFAULT_SETTINGS);
   }
-});
+}));
 
 /**
  * POST /api/settings - Save user settings
  */
-export const POST = withErrorHandling(async (request: NextRequest) => {
+export const POST = withErrorHandling(requireAuth(async (request: NextRequest) => {
   const validation = await validateRequest(request, settingsSchema);
   if (!validation.success) {
     return validation.error;
@@ -115,12 +116,12 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   return createSuccessResponse({
     settings: mergedSettings
   });
-});
+}));
 
 /**
  * DELETE /api/settings - Reset to defaults
  */
-export const DELETE = withErrorHandling(async () => {
+export const DELETE = withErrorHandling(requireAuth(async () => {
   try {
     await fs.unlink(SETTINGS_FILE);
   } catch (error) {
@@ -130,5 +131,5 @@ export const DELETE = withErrorHandling(async () => {
   return createSuccessResponse({
     settings: DEFAULT_SETTINGS
   });
-});
+}));
 
