@@ -412,6 +412,11 @@ def write_projection(consumer: str, entity_id: str, dest: Path, *, path: Path = 
     return body
 
 
+def jarvis_projection_path(path: Path) -> Path:
+    """write_projection dest for jarvis-primary. Sits beside the log named by --path."""
+    return path.with_name(f"{path.name}.jarvis-primary.projection.json")
+
+
 def _replay_published(
     consumer: str,
     published_row: dict[str, Any],
@@ -545,7 +550,11 @@ def publish_jarvis(
     supersedes_version: int | None = None,
     changed_at: str | None = None,
 ) -> dict[str, Any]:
-    """Primary Jarvis consumer on this bus. Isolated catch-up uses the same log."""
+    """Primary Jarvis consumer on this bus. Isolated catch-up uses the same log.
+
+    After ACKNOWLEDGED, write_projection holds that payload beside --path.
+    status() does not read the hold. Mission identity stays on the event log.
+    """
     mutation = {
         "entity_id": JARVIS_ENTITY,
         "entity_type": "jarvis_bus",
@@ -563,9 +572,18 @@ def publish_jarvis(
         return {"published": published, "applied": None}
     receive_state(JARVIS_PRIMARY, mutation, path=path)
     applied = apply_state(JARVIS_PRIMARY, mutation, path=path, cohort_path=cohort_path)
+    acked = None
     if applied.get("result") == "APPLIED":
-        acknowledge(JARVIS_PRIMARY, JARVIS_ENTITY, path=path, cohort_path=cohort_path)
-    return {"published": published, "applied": applied}
+        acked = acknowledge(JARVIS_PRIMARY, JARVIS_ENTITY, path=path, cohort_path=cohort_path)
+    projection = None
+    if acked is not None and acked.get("result") == "ACKNOWLEDGED":
+        projection = write_projection(
+            JARVIS_PRIMARY,
+            JARVIS_ENTITY,
+            jarvis_projection_path(path),
+            path=path,
+        )
+    return {"published": published, "applied": applied, "projection": projection}
 
 
 _KNOWN_PHASES = frozenset(
