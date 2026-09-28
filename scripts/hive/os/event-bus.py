@@ -602,9 +602,13 @@ def _continue_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
     return _operation_receipt(path, mission_id, "continue")
 
 
+def _cancel_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
+    return _operation_receipt(path, mission_id, "cancel")
+
+
 def _mission_from_log(path: Path, mission_id: str) -> tuple[str, str] | None:
     """Recover one mission from the log. Not from the latest head payload."""
-    for operation in ("start", "continue"):
+    for operation in ("start", "continue", "cancel"):
         receipt = _operation_receipt(path, mission_id, operation)
         if not receipt:
             continue
@@ -625,7 +629,8 @@ def status(*, path: Path = DEFAULT_PATH, mission_id: str | None = None) -> dict[
     """Read the latest continuity row already stored for JARVIS_PRIMARY. Does not append.
 
     Mission identity is recovered from the log by mission_id. The head payload
-    is not the mission address.
+    is not the mission address. A stored cancel for that mission_id is reported
+    on the existing result field. Phase stays the phase already on the log.
     """
     latest = _latest_primary_row(path)
     resolved_mission: str | None = None
@@ -635,7 +640,7 @@ def status(*, path: Path = DEFAULT_PATH, mission_id: str | None = None) -> dict[
         if found:
             resolved_mission, resolved_session = found
     if latest is None:
-        return {
+        snapshot = {
             "consumer": JARVIS_PRIMARY,
             "entity_id": JARVIS_ENTITY,
             "phase": None,
@@ -644,15 +649,19 @@ def status(*, path: Path = DEFAULT_PATH, mission_id: str | None = None) -> dict[
             "mission_id": resolved_mission,
             "session_id": resolved_session,
         }
-    return {
-        "consumer": latest.get("consumer"),
-        "entity_id": latest.get("entity_id"),
-        "phase": latest.get("phase"),
-        "result": latest.get("result"),
-        "state_version": latest.get("state_version"),
-        "mission_id": resolved_mission,
-        "session_id": resolved_session,
-    }
+    else:
+        snapshot = {
+            "consumer": latest.get("consumer"),
+            "entity_id": latest.get("entity_id"),
+            "phase": latest.get("phase"),
+            "result": latest.get("result"),
+            "state_version": latest.get("state_version"),
+            "mission_id": resolved_mission,
+            "session_id": resolved_session,
+        }
+    if mission_id and _cancel_receipt(path, mission_id):
+        snapshot["result"] = "cancelled"
+    return snapshot
 
 
 def start(
@@ -737,6 +746,9 @@ def continue_mission(
     Resumes that mission_id and its stored session_id. Does not generate a
     replacement mission. Not a phase. Not cancel or result. A replay of the
     same continue returns the stored receipt and does not append.
+
+    This file has no accepted post-cancel resume. Continue after cancel is
+    rejected and inserts nothing.
     """
     mission_id = (mission_id or "").strip()
     if not mission_id:
@@ -754,6 +766,13 @@ def continue_mission(
             "inserted": False,
         }
     stored_mission, stored_session = existing
+    if _cancel_receipt(path, stored_mission):
+        return {
+            "result": "REJECTED",
+            "reason": "cancelled mission cannot continue",
+            "mission_id": stored_mission,
+            "inserted": False,
+        }
     # session_id is accepted and ignored. The stored session is the one resumed.
     prior = _continue_receipt(path, stored_mission)
     if prior:
@@ -807,6 +826,72 @@ def continue_mission(
     }
 
 
+def cancel_mission(
+    *,
+    mission_id: str | None = None,
+    session_id: str | None = None,
+    source: str = "cli",
+    caller: str = "operator",
+    path: Path = DEFAULT_PATH,
+) -> dict[str, Any]:
+    """CANCEL the mission already stored for this mission_id.
+
+    Stops that mission_id on this bus. Another mission on the same log stays
+    addressable. Not a phase and not a result control. Does not publish a new
+    continuity phase. A replay returns the stored receipt and does not append.
+    """
+    mission_id = (mission_id or "").strip()
+    if not mission_id:
+        return {
+            "result": "REJECTED",
+            "reason": "cancel requires the mission_id of the mission being stopped",
+            "inserted": False,
+        }
+    existing = _mission_from_log(path, mission_id)
+    if not existing:
+        return {
+            "result": "REJECTED",
+            "reason": "no mission to cancel",
+            "mission_id": mission_id,
+            "inserted": False,
+        }
+    stored_mission, stored_session = existing
+    # session_id is accepted and ignored. The stored session is the one stopped.
+    prior = _cancel_receipt(path, stored_mission)
+    if prior:
+        return {
+            "mission_id": stored_mission,
+            "session_id": stored_session,
+            "receipt": prior,
+        }
+    previous_state = status(path=path, mission_id=stored_mission)
+    phase = previous_state.get("phase")
+    if phase is not None and phase not in _KNOWN_PHASES:
+        raise RuntimeError(f"cancel saw an unknown phase {phase}")
+    stamp = _now_iso()
+    new_state = {**previous_state, "result": "cancelled"}
+    receipt = {
+        "type": "continuity.receipt",
+        "mission_id": stored_mission,
+        "session_id": stored_session,
+        "operation": "cancel",
+        "source": source,
+        "caller": caller,
+        "state_version": new_state.get("state_version"),
+        "timestamp": stamp,
+        "result": "cancelled",
+        "previous_state": previous_state,
+        "new_state": new_state,
+        "event_id": f"{JARVIS_ENTITY}:{stored_mission}:cancel",
+    }
+    append_event(receipt, path=path)
+    return {
+        "mission_id": stored_mission,
+        "session_id": stored_session,
+        "receipt": receipt,
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--emit", metavar="TYPE", help="Emit standard event type")
@@ -824,11 +909,34 @@ def main() -> int:
         action="store_true",
         help="CONTINUE the mission named by --mission-id on this bus",
     )
-    ap.add_argument("--mission-id", default=None, help="mission_id for --start, --continue, or --status")
-    ap.add_argument("--session-id", default=None, help="session_id for --start; continue keeps the stored session")
+    ap.add_argument(
+        "--cancel",
+        action="store_true",
+        help="CANCEL the mission named by --mission-id on this bus",
+    )
+    ap.add_argument("--mission-id", default=None, help="mission_id for --start, --continue, --cancel, or --status")
+    ap.add_argument("--session-id", default=None, help="session_id for --start; continue and cancel keep the stored session")
     ap.add_argument("--jarvis", action="store_true", help="Publish one versioned fact on the primary Jarvis consumer")
     ap.add_argument("--state-version", type=int, help="state_version for --jarvis")
     args = ap.parse_args()
+
+    if args.cancel:
+        if not (args.mission_id or "").strip():
+            print("cancel requires --mission-id of the mission being stopped", file=sys.stderr)
+            return 1
+        stopped = cancel_mission(
+            mission_id=args.mission_id,
+            session_id=args.session_id,
+            source=args.source,
+            caller=args.actor,
+            path=args.path,
+        )
+        print(json.dumps(stopped, indent=2, ensure_ascii=False))
+        if stopped.get("result") == "REJECTED":
+            return 1
+        if args.status:
+            print(json.dumps(status(path=args.path, mission_id=stopped.get("mission_id")), indent=2, ensure_ascii=False))
+        return 0
 
     if args.continue_mission:
         if not (args.mission_id or "").strip():
