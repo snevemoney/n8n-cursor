@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Provider-neutral judgment boundary.
+"""JEV_JUDGMENT on shared OpenRouter transport.
 
+OpenRouter is not a conversation-only provider. This lane has its own model
+and the bounded-judgment contract. Ordinary conversation does not enter here.
 `evaluate` decides who may judge. SELECT builds the OpenRouter chat request
 the hive registry already describes. The network call stays behind
 HIVE_OPENROUTER_CALL, which defaults off. evaluate does not start a watcher
@@ -9,8 +11,8 @@ or turn an external demo corpus into features.
 Exact checks stay deterministic: pid alive, row count changed, artifact exists,
 process finished, plus the earlier count, output, batch, and error-code reads.
 Jev is not called for that state. Jev may only be allowed for a bounded verb:
-route, rank, gate, filter, score, react, select. It is not Jarvis's model and
-it is not merge authority.
+route, rank, gate, filter, score, react, select. It is not the conversational
+model and it is not merge authority. A conversation result does not close it.
 """
 from __future__ import annotations
 
@@ -570,8 +572,10 @@ def _select_through_boundary(request: dict[str, Any], evidence: list[Any]) -> di
     posted = _post_openrouter_chat(prepared)
     extra: dict[str, Any] = {
         "provider": prepared["provider"],
+        "capability": "jev",
         "provider_call": posted["provider_call"] is True,
         "model": prepared["body"]["model"],
+        "closure": "OPEN",
         "max_tokens": prepared["body"]["max_tokens"],
         "api": prepared["api"],
         "chat_request": prepared,

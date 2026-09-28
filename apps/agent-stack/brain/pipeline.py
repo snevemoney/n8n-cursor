@@ -349,11 +349,11 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
     )
 
 
-def write_receipt(hive: Path, *, turn_input: str, turn_output: str) -> dict:
+def write_receipt(hive: Path, *, turn_input: str, turn_output: str, turn_id: str | None = None) -> dict:
     """One reconstructable close. sha covers id, input, output, time, host, and commit."""
     host, commit = runtime_identity()
     body = {
-        "turn_id": str(uuid.uuid4()),
+        "turn_id": (turn_id or "").strip() or str(uuid.uuid4()),
         "input": turn_input,
         "output": turn_output,
         "timestamp": now_iso(),
@@ -606,12 +606,36 @@ def _talk_ok(got) -> dict | None:
     return got
 
 
-def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
-    """Cursor-dark mouth: existing xAI key, then an already-running Grok Bot gateway.
+def append_conversation_receipt(hive: Path, receipt: dict) -> None:
+    """Lane receipt beside the turn receipt. The turn sha stays on its own fields."""
+    path = hive / "bus" / "conversation-receipts.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(receipt, ensure_ascii=True) + "\n")
 
-    Do not print a missing key. Do not spawn a desk. Do not treat UNKNOWN/queued
-    as talk. Tests that set AGENT_STACK_CURSOR_DRY skip live HTTP unless talk_fn
-    is injected.
+
+def face_correlation(hive: Path, turn_id: str, utterance: str) -> dict:
+    """Tie a provider result to the Face session already on the bus."""
+    bus = load_json(hive / "bus" / "state.json")
+    session = str(bus.get("jarvis_chat_id") or bus.get("session_id") or "").strip() or None
+    return {
+        "turn_id": turn_id,
+        "conversation_id": session,
+        "face": {
+            "surface": "face",
+            "session_id": session,
+            "turn_id": turn_id,
+            "utterance": utterance,
+        },
+    }
+
+
+def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
+    """NORMAL_CONVERSATION mouth. Transport is OpenRouter. Jev is not called.
+
+    An injected talk_fn stays the test door. Do not print a missing key.
+    Do not call xAI. Do not spawn a desk. Do not treat UNKNOWN/queued as talk.
+    AGENT_STACK_CURSOR_DRY skips live HTTP unless talk_fn is injected.
     """
     if talk_fn is not None:
         try:
@@ -628,19 +652,44 @@ def online_talk(prompt: str, pack_text: str, talk_fn=None) -> dict | None:
         return None
     if ONLINE is None:
         return None
+    if hasattr(ONLINE, "call_openrouter"):
+        try:
+            got = ONLINE.call_openrouter(prompt, pack_text)
+        except TypeError:
+            got = ONLINE.call_openrouter(prompt)
+        return _talk_ok(got)
     if hasattr(ONLINE, "call_grok"):
         return _talk_ok(ONLINE.call_grok(prompt, pack_text))
-    if hasattr(ONLINE, "call_xai"):
-        key_fn = getattr(ONLINE, "has_xai_key", None) or getattr(ONLINE, "grok_api_key", None)
-        try:
-            present = bool(key_fn()) if key_fn is not None else False
-        except (OSError, TypeError, AttributeError):
-            present = False
-        if present:
-            return _talk_ok(ONLINE.call_xai(prompt, pack_text))
     if hasattr(ONLINE, "call_grokbot"):
         return _talk_ok(ONLINE.call_grokbot(prompt, pack_text))
     return None
+
+
+def ordinary_mouth(
+    prompt: str,
+    pack_text: str,
+    *,
+    talk_fn=None,
+    hive: Path | None = None,
+    correlation: dict | None = None,
+) -> dict | None:
+    """Ordinary question on NORMAL_CONVERSATION. Does not enter JEV_JUDGMENT."""
+    dry = os.environ.get("AGENT_STACK_CURSOR_DRY") == "1"
+    if (
+        talk_fn is None
+        and not dry
+        and hive is not None
+        and ONLINE is not None
+        and hasattr(ONLINE, "call_openrouter")
+    ):
+        try:
+            raw = ONLINE.call_openrouter(prompt, pack_text, correlation=correlation)
+        except TypeError:
+            raw = ONLINE.call_openrouter(prompt)
+        if isinstance(raw, dict) and isinstance(raw.get("receipt"), dict):
+            append_conversation_receipt(hive, raw["receipt"])
+        return _talk_ok(raw)
+    return online_talk(prompt, pack_text, talk_fn=talk_fn)
 
 
 def try_login_once(hive: Path, login_fn=None) -> dict:
@@ -1123,6 +1172,7 @@ def _commit_spoken(
     wire: dict | None = None,
     brain: str | None = None,
     login_tried: bool = False,
+    turn_id: str | None = None,
 ):
     text = dress(raw, tool=tool, utterance=spoken_in, turns=prior_turns)
     if _is_speak_leak(text) or is_lanes_default(text):
@@ -1137,7 +1187,7 @@ def _commit_spoken(
             turns=prior_turns,
         )
     next_turns = append_turn(prior_turns, spoken_in, text)
-    receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
+    receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text, turn_id=turn_id)
     write_bus(
         hive,
         phase="speak",
@@ -1172,6 +1222,8 @@ def apply_pipeline_iter(
 ):
     """Yield first speakable sentence, then the finished turn. Do not wait for done to speak."""
     spoken_in = (utterance or "").strip()
+    turn_id = str(uuid.uuid4())
+    correlation = face_correlation(hive, turn_id, spoken_in)
     bus_now = load_json(hive / "bus" / "state.json")
     prior_turns = load_turns(bus_now)
     if is_hard_step(spoken_in):
@@ -1185,6 +1237,7 @@ def apply_pipeline_iter(
             cites=[],
             ok=True,
             pack=None,
+            turn_id=turn_id,
         )
         if first and rest:
             yield _pipeline_event(
@@ -1247,16 +1300,54 @@ def apply_pipeline_iter(
         pick = {"tool": "pipeline", "args": {}, "speak": LOCAL_GREET}
         brain = None
 
-    if pick is None and not should_skip_cursor(hive, cursor_fn):
+    if pick is None:
+        recall = store_recall(spoken_in, prior_turns)
+        if recall:
+            ran = {
+                "ok": True,
+                "tool": "converse",
+                "spoken": recall,
+                "wires": ["store"],
+                "cites": [],
+                "sent": False,
+                "from_store": True,
+                "brain": None,
+                "unknown": False,
+                "model_available": False,
+            }
+            pick = {"tool": "converse", "args": {}, "speak": recall}
+            brain = None
+
+    # Ordinary questions use NORMAL_CONVERSATION. OpenRouter is the transport.
+    if pick is None and cursor_fn is None:
+        talked = ordinary_mouth(
+            prompt,
+            pack_text,
+            talk_fn=talk_fn,
+            hive=hive,
+            correlation=correlation,
+        )
+        pick = extract_pick(talked) if talked else None
+        if pick is not None:
+            brain = str((talked or {}).get("capability") or (talked or {}).get("engine") or "conversation")
+            got = talked or got
+
+    if pick is None and cursor_fn is not None and not should_skip_cursor(hive, cursor_fn):
         pick, got = cursor_pick(pack, spoken_in, cursor_fn)
         if pick is not None:
             brain = "cursor"
 
-    if pick is None:
-        talked = online_talk(prompt, pack_text, talk_fn=talk_fn)
+    if pick is None and cursor_fn is not None:
+        talked = ordinary_mouth(
+            prompt,
+            pack_text,
+            talk_fn=talk_fn,
+            hive=hive,
+            correlation=correlation,
+        )
         pick = extract_pick(talked) if talked else None
         if pick is not None:
-            brain = str((talked or {}).get("engine") or (talked or {}).get("wire") or "xai")
+            brain = str((talked or {}).get("capability") or (talked or {}).get("engine") or "conversation")
             got = talked or got
 
     if pick is None and wants_safari(spoken_in):
@@ -1355,6 +1446,7 @@ def apply_pipeline_iter(
         login_tried=login_tried,
         unknown=not bool(brain),
         wire={"path": brain or ("cursor" if got else "pipeline"), "error": None if brain else raw_spoken},
+        turn_id=turn_id,
     )
     extra = ""
     if early:

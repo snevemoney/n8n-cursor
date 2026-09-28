@@ -7,6 +7,7 @@ Talk harness is Cursor CLI (cloud). Memory is the store
 from __future__ import annotations
 
 import base64
+import importlib.util
 import json
 import os
 import re
@@ -24,6 +25,20 @@ GOLDEN = "https://evenslouis.ca/scorpion/api/hive/golden-paths"
 SCORPION_HEALTH = "https://evenslouis.ca/scorpion/healthz"
 PRO_HEALTH = "https://evenslouis.ca/pro/api/health"
 XAI_URL = "https://api.x.ai/v1/chat/completions"
+
+
+def _load_lanes():
+    path = Path(__file__).resolve().parent / "openrouter_lanes.py"
+    spec = importlib.util.spec_from_file_location("agent_stack_openrouter_lanes", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+LANES = _load_lanes()
+OPENROUTER_URL = LANES.chat_completions_url()
 GROKBOT_CONN = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 DEFAULT_VPS = "root@69.62.66.78"
 DEFAULT_MODEL = "grok-4"
@@ -32,6 +47,7 @@ ALLOWED_ENV = (
     "XAI_API_KEY",
     "GROK_API_KEY",
     "GROK_MODEL",
+    "OPENROUTER_API_KEY",
     "GROKBOT_BASE_URL",
     "GROKBOT_TOKEN",
 )
@@ -233,6 +249,21 @@ def grok_model() -> str:
     return (os.environ.get("GROK_MODEL") or DEFAULT_MODEL).strip() or DEFAULT_MODEL
 
 
+def openrouter_api_key() -> str:
+    """Registry credential slot. Not a second secret, and not a model id."""
+    return LANES.credential_value()
+
+
+def has_openrouter_key() -> bool:
+    """Yes/no only. Never log or return the secret. Presence does not prove a model."""
+    return LANES.credential_present()
+
+
+def openrouter_model() -> str:
+    """Pinned NORMAL_CONVERSATION model. The credential does not select it."""
+    return LANES.conversation_model()
+
+
 def _well_formed_file_key(key_b64: str) -> bool:
     raw = (key_b64 or "").strip()
     if not raw:
@@ -370,6 +401,15 @@ def wire_report() -> dict:
         "wires": {
             "brain": "store",
             "store": "vault+repo+sessions+hive",
+            "openrouter": {
+                "role": "transport",
+                "credential": "present" if has_openrouter_key() else "absent",
+                "lane": LANES.LANE_CONVERSATION,
+                "model": openrouter_model(),
+                "model_proven": False,
+                "closure": LANES.CONVERSATION_CLOSURE,
+                "jev_called": False,
+            },
             "grok": "talk" if grok_api_key() else "off",
             "grokbot": grokbot,
             "hive": "http",
@@ -395,6 +435,143 @@ def unknown_grok() -> dict:
         "spoken": "UNKNOWN. Grok is a desk host, not the store.",
         "engine": "unknown",
     }
+
+
+def _conversation_body(
+    *,
+    ok: bool,
+    unknown: bool,
+    model: str,
+    spoken: str,
+    provider_call: bool,
+    context: str,
+    response: str,
+    correlation: dict | None,
+    usage=None,
+) -> dict:
+    secret = openrouter_api_key()
+    receipt = LANES.conversation_receipt(
+        provider_call=provider_call,
+        model=model,
+        context_used=context,
+        response=response,
+        correlation=correlation,
+        usage=usage,
+        secret=secret,
+    )
+    return {
+        "ok": ok,
+        "unknown": unknown,
+        "wire": "openrouter",
+        "engine": "openrouter",
+        "provider": receipt["provider"],
+        "capability": receipt["capability"],
+        "lane": receipt["lane"],
+        "model": model,
+        "provider_call": provider_call,
+        "jev_called": False,
+        "spoken": spoken,
+        "receipt": receipt,
+    }
+
+
+def _openrouter_miss(
+    model: str,
+    detail: str = "",
+    *,
+    context: str = "",
+    correlation: dict | None = None,
+    provider_call: bool = False,
+) -> dict:
+    spoken = "UNKNOWN. OpenRouter returned no text."
+    extra = (detail or "").strip()
+    secret = openrouter_api_key()
+    if extra and "OPENROUTER_API_KEY" not in extra and (not secret or secret not in extra):
+        spoken = f"{spoken} {extra}."
+    return _conversation_body(
+        ok=False,
+        unknown=True,
+        model=model,
+        spoken=spoken,
+        provider_call=provider_call,
+        context=context,
+        response="",
+        correlation=correlation,
+    )
+
+
+def call_openrouter(
+    prompt: str,
+    context: str = "",
+    images=None,
+    extra_tools=None,
+    hands: bool = True,
+    *,
+    correlation: dict | None = None,
+) -> dict:
+    """NORMAL_CONVERSATION on shared OpenRouter transport.
+
+    Selects the pinned conversational model and the conversation contract.
+    Does not load Jev question packs. Does not call the judgment lane.
+    A present credential does not prove the model id. A missing credential
+    does not POST.
+    """
+    _ = (images, extra_tools, hands)
+    route = LANES.route_conversation()
+    model = str(route["model"] or "")
+    brief = (context or "").strip()
+    if route["lane"] != LANES.LANE_CONVERSATION or route["jev_called"] is not False:
+        return _openrouter_miss(model, context=brief, correlation=correlation)
+    if not model or not OPENROUTER_URL:
+        return _openrouter_miss(model, context=brief, correlation=correlation)
+    key = openrouter_api_key()
+    if not key:
+        return _openrouter_miss(model, context=brief, correlation=correlation)
+    ask = prompt.strip()
+    user = f"Live context:\n{brief}\n\nCurrent ask:\n{ask}" if brief else ask
+    try:
+        data = _http_json(
+            OPENROUTER_URL,
+            data={
+                "model": model,
+                "temperature": LANES.CONVERSATION_TEMPERATURE,
+                "max_tokens": LANES.CONVERSATION_MAX_TOKENS,
+                "messages": [
+                    {"role": "system", "content": SYS},
+                    {"role": "user", "content": user},
+                ],
+            },
+            headers={"Authorization": f"Bearer {key}"},
+            timeout=45.0,
+        )
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as exc:
+        return _openrouter_miss(
+            model,
+            type(exc).__name__,
+            context=brief,
+            correlation=correlation,
+            provider_call=True,
+        )
+    choices = data.get("choices") if isinstance(data, dict) else None
+    text = ""
+    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+        msg = choices[0].get("message") if isinstance(choices[0].get("message"), dict) else {}
+        text = str((msg or {}).get("content") or "").strip()
+    if not text:
+        return _openrouter_miss(model, context=brief, correlation=correlation, provider_call=True)
+    text = clip_spoken(text)
+    usage = data.get("usage") if isinstance(data, dict) else None
+    return _conversation_body(
+        ok=True,
+        unknown=False,
+        model=model,
+        spoken=text,
+        provider_call=True,
+        context=brief,
+        response=text,
+        correlation=correlation,
+        usage=usage,
+    )
 
 
 def call_xai(prompt: str, context: str = "") -> dict:

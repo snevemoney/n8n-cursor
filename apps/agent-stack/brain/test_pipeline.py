@@ -1076,5 +1076,117 @@ class ContinuityStatusWireTest(unittest.TestCase):
             bus_mod.status = real_status
 
 
+class OpenRouterMouthTest(unittest.TestCase):
+    def test_ordinary_question_uses_the_named_openrouter_model(self) -> None:
+        os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
+        online = MOUTH.PIPELINE.ONLINE
+        named = "qwen/qwen3.8-27b:free"
+        self.assertEqual(online.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
+        self.assertEqual(online.openrouter_model(), named)
+        self.assertIn(named, Path(online.LANES.__file__).read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory(prefix="pipeline-openrouter-mouth-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            with unittest.mock.patch.object(online, "openrouter_api_key", return_value=""):
+                with unittest.mock.patch.object(online, "_http_json", side_effect=AssertionError("must not post")):
+                    with unittest.mock.patch.object(online, "call_xai", side_effect=AssertionError("xai")):
+                        events = list(
+                            MOUTH.apply_turn_iter(
+                                "What is the capital of Japan?",
+                                hive=hive,
+                                retrieve_roots=[hive / "vault"],
+                            )
+                        )
+                        stopped = MOUTH.apply_turn("stop", hive=hive, retrieve_roots=[hive / "vault"])
+                        greeted = MOUTH.apply_turn("Hey Jarvis.", hive=hive, retrieve_roots=[hive / "vault"])
+                        watched = MOUTH.apply_turn(
+                            "Watch the local value and tell me when it changes.",
+                            hive=hive,
+                            retrieve_roots=[hive / "vault"],
+                        )
+            lane_lines = (hive / "bus" / "conversation-receipts.jsonl").read_text(encoding="utf-8").splitlines()
+            face_rows = [
+                json.loads(line)
+                for line in (hive / "bus" / "receipts.jsonl").read_text(encoding="utf-8").splitlines()
+            ]
+        done = events[-1]
+        spoken = done.get("spoken") or ""
+        self.assertIsNone(done.get("brain"))
+        self.assertNotIn("Tokyo", spoken)
+        self.assertNotIn("nex-agi", spoken)
+        self.assertEqual(stopped.get("verb"), "stop")
+        self.assertIn("Standing by", greeted.get("spoken") or "")
+        self.assertEqual(watched.get("verb"), "watch")
+        self.assertEqual(len(lane_lines), 1)
+        receipt = json.loads(lane_lines[0])
+        self.assertEqual(receipt["provider"], "openrouter")
+        self.assertEqual(receipt["capability"], "conversation")
+        self.assertEqual(receipt["lane"], "NORMAL_CONVERSATION")
+        self.assertEqual(receipt["model"], named)
+        self.assertFalse(receipt["provider_call"])
+        self.assertFalse(receipt["jev_called"])
+        self.assertIsNone(receipt["question_pack"])
+        self.assertFalse(receipt["question_packs_loaded"])
+        self.assertEqual(receipt["closure"], "OPEN")
+        self.assertFalse(receipt["model_proven"])
+        japan = next(row for row in face_rows if row["input"] == "What is the capital of Japan?")
+        self.assertEqual(receipt["turn_id"], japan["turn_id"])
+        self.assertEqual(receipt["face_correlation"]["surface"], "face")
+        self.assertEqual(receipt["face_correlation"]["turn_id"], japan["turn_id"])
+
+    def test_ordinary_question_calls_conversation_lane_not_jev(self) -> None:
+        os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
+        online = MOUTH.PIPELINE.ONLINE
+        named = "qwen/qwen3.8-27b:free"
+        seen: dict = {}
+
+        def fake_http(url, data=None, headers=None, timeout=20.0):
+            seen["model"] = (data or {}).get("model")
+            seen["url"] = url
+            return {"choices": [{"message": {"content": "Tokyo."}}]}
+
+        with tempfile.TemporaryDirectory(prefix="pipeline-openrouter-live-mouth-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps({"jarvis_chat_id": "face-session-9"}),
+                encoding="utf-8",
+            )
+            with unittest.mock.patch.object(online, "openrouter_api_key", return_value="test-key"):
+                with unittest.mock.patch.object(online, "_http_json", side_effect=fake_http):
+                    with unittest.mock.patch.object(online, "call_xai", side_effect=AssertionError("xai")):
+                        events = list(
+                            MOUTH.apply_turn_iter(
+                                "What is the capital of Japan?",
+                                hive=hive,
+                                retrieve_roots=[hive / "vault"],
+                            )
+                        )
+            lane_text = (hive / "bus" / "conversation-receipts.jsonl").read_text(encoding="utf-8")
+            face_text = (hive / "bus" / "receipts.jsonl").read_text(encoding="utf-8")
+        done = events[-1]
+        self.assertEqual(done.get("brain"), "conversation")
+        self.assertIn("Tokyo", done.get("spoken") or "")
+        self.assertEqual(seen.get("model"), named)
+        self.assertEqual(seen.get("url"), online.OPENROUTER_URL)
+        receipt = json.loads(lane_text.splitlines()[-1])
+        face_turn = json.loads(face_text.splitlines()[-1])
+        self.assertEqual(receipt["provider"], "openrouter")
+        self.assertEqual(receipt["capability"], "conversation")
+        self.assertEqual(receipt["model"], named)
+        self.assertTrue(receipt["provider_call"])
+        self.assertFalse(receipt["jev_called"])
+        self.assertFalse(receipt["question_packs_loaded"])
+        self.assertEqual(receipt["closure"], "OPEN")
+        self.assertFalse(receipt["model_proven"])
+        self.assertEqual(receipt["conversation_id"], "face-session-9")
+        self.assertEqual(receipt["response"], "Tokyo.")
+        self.assertEqual(receipt["face_correlation"]["session_id"], "face-session-9")
+        self.assertEqual(receipt["turn_id"], face_turn["turn_id"])
+        self.assertNotIn("test-key", json.dumps(receipt))
+
+
 if __name__ == "__main__":
     unittest.main()
