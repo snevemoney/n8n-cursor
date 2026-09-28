@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Walk the line — Outer Heaven · SAMPLE</title>
+  <meta name="description" content="SAMPLE factory walkthrough. Six stations from spec to HITL hold, artifacts revealed per station. Not an agency pitch. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%238f7114%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EOH%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/outer-heaven.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Outer Heaven home">
+      <span class="mark" aria-hidden="true">OH</span>
+      <span class="name">Outer Heaven<small>Craft · Factory · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Factory</a></li>
+        <li><a href="walkthrough.html" aria-current="page">The line</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="line-title">
+    <p class="eyebrow">Walk the line</p>
+    <h2 id="line-title">Six benches. <span class="hi">One artifact each.</span></h2>
+    <p class="sub">
+      Load a spec and advance. Every station leaves something on the bench you can read. Hold-outs stay
+      sealed until Grade. The line ends at a human hold — Ship is locked from this page. Merge ≠ ship.
+      Sample run, sample artifacts.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="line" data-state="empty" aria-labelledby="line-label">
+        <div class="stage-head">
+          <span class="label" id="line-label">Factory line · SAMPLE RUN</span>
+          <span class="state" id="line-state" aria-live="polite">empty · no run</span>
+        </div>
+
+        <ol class="stations" id="stations" aria-label="Stations on the line"></ol>
+
+        <div class="artifact" id="artifact" aria-live="polite" aria-label="Artifact on the current bench"></div>
+
+        <div class="actions line-actions">
+          <button class="btn btn-ghost" type="button" id="back-btn" disabled>← Back</button>
+          <button class="btn btn-brand" type="button" id="advance-btn" disabled>Advance →</button>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Agency talk</p>
+          <div class="msg"><s>“We do AI. Let’s hop on a call and explore synergies.”</s></div>
+          <p class="muted-line" id="friction-line">The pitch with no artifact. Not what the line shows.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">Who holds what</p>
+          <ul class="legend">
+            <li><strong>Evens</strong> plans, validates, holds ship</li>
+            <li><strong>Forge</strong> builds — never grades itself</li>
+            <li><strong>Watchdog</strong> writes hold-outs first, grades after</li>
+            <li>Merge ≠ ship · live / HOLD</li>
+          </ul>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load example spec</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Line complete · held at HITL</span>
+  </div>
+
+  <footer class="foot">
+    <span>Outer Heaven · SAMPLE · CapEx / preview</span>
+    <span>Merge ≠ ship · No deploy · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/line-ui.js"></script>
+</body>
+</html>

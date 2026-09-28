@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>The shelf — Working Volumes · SAMPLE</title>
+  <meta name="description" content="SAMPLE pull-a-volume shelf. Eight spines, pull to the desk, reshelve. Reduced motion safe. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%238f2a25%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EWV%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/working-volumes.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Working Volumes home">
+      <span class="mark" aria-hidden="true">WV</span>
+      <span class="name">Working Volumes<small>Craft · Shelf · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Volumes</a></li>
+        <li><a href="shelf.html" aria-current="page">The shelf</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="shelf-title">
+    <p class="eyebrow">The shelf</p>
+    <h2 id="shelf-title">Pull one. <span class="hi">It opens.</span></h2>
+    <p class="sub">
+      Eight spines. Tap one — it pulls forward and opens on the desk with its chapters. Tap another; the desk
+      stacks. Reshelve slides it back. Nothing here is a thumbnail. Sample volumes.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="shelf-stage" data-state="empty" aria-labelledby="shelf-label">
+        <div class="stage-head">
+          <span class="label" id="shelf-label">Working volumes · SAMPLE</span>
+          <span class="state" id="shelf-state" aria-live="polite">shelved · nothing pulled</span>
+        </div>
+
+        <div class="shelf-wrap">
+          <div class="shelf" id="shelf" role="group" aria-label="Spines on the shelf"></div>
+          <div class="shelf-board" aria-hidden="true"></div>
+        </div>
+
+        <div class="desk-head">
+          <span class="field-label">On the desk</span>
+          <button class="btn btn-ghost btn-small" type="button" id="reshelve-all" disabled>Reshelve all</button>
+        </div>
+        <div class="desk" id="desk" aria-live="polite" aria-label="Volumes open on the desk">
+          <div class="empty-note">Nothing pulled. Tap a spine.</div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Dead shelves</p>
+          <div class="msg">Eight cover thumbnails · hover does nothing · click does nothing · “coming soon”</div>
+          <p class="muted-line" id="friction-line">The shelf that is only a picture. Not what this one does.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">Reading the spines</p>
+          <ul class="legend">
+            <li><span class="status" data-status="working">working</span> volume still being written</li>
+            <li><span class="status" data-status="done">done</span> volume closed for now</li>
+            <li>Tap a pulled spine to reshelve it</li>
+          </ul>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Pull III + VI</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reshelve everything</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Pulled</span>
+  </div>
+
+  <footer class="foot">
+    <span>Working Volumes · SAMPLE · CapEx / preview</span>
+    <span>No dead links · No store · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/shelf-ui.js"></script>
+</body>
+</html>

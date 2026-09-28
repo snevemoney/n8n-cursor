@@ -1,0 +1,11 @@
+{
+  "name": "working-volumes-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Working Volumes SAMPLE \u2014 shelf pull-a-volume interaction behind the brand shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Proofs — Evens Louis · SAMPLE</title>
+  <meta name="description" content="SAMPLE soft proofs door. Open, filter by building / graded / held, read what is proven and what is not. Artifacts, not a pitch. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%238f887a%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EEL%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/business.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Evens Louis home">
+      <span class="mark" aria-hidden="true">EL</span>
+      <span class="name">Evens Louis<small>Business · Building · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Building</a></li>
+        <li><a href="proofs.html" aria-current="page">Proofs</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="door-title">
+    <p class="eyebrow">The soft door</p>
+    <h2 id="door-title">Building mode. <span class="hi">Read what is proven.</span></h2>
+    <p class="sub">
+      Closed on load. Open the door and proof cards appear — what shipped, what is proven, what is not,
+      and who fills the grade. Filter by building, graded, held. Nothing here books anything. Sample records.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="door" data-state="closed" aria-labelledby="door-label">
+        <div class="stage-head">
+          <span class="label" id="door-label">Proofs · Building mode · SAMPLE</span>
+          <span class="state" id="door-state" aria-live="polite">closed · building mode</span>
+        </div>
+
+        <button class="door-leaf" id="door-leaf" type="button" aria-label="Open the door to the proofs">
+          <span class="knob" aria-hidden="true"></span>
+          <span class="leaf-text">Building mode</span>
+          <span class="leaf-hint">tap to open</span>
+        </button>
+
+        <div class="door-controls">
+          <div class="chips" id="filters" role="group" aria-label="Filter proofs by status"></div>
+          <div class="actions">
+            <button class="btn btn-brand" type="button" id="open-btn">Open the door</button>
+            <button class="btn btn-ghost" type="button" id="close-btn" disabled>Close</button>
+          </div>
+        </div>
+
+        <div class="cards" id="cards" aria-live="polite" aria-label="Proof cards"></div>
+        <div class="detail" id="detail" aria-live="polite" hidden></div>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Agency fog</p>
+          <div class="msg"><s>“Full-service AI partner. Book a discovery call. Let’s explore how we can help.”</s></div>
+          <p class="muted-line" id="friction-line">The services page with no artifact. Not what the door opens onto.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">Reading a card</p>
+          <ul class="legend">
+            <li><span class="status" data-status="building">building</span> in progress, grade unfilled</li>
+            <li><span class="status" data-status="graded">graded</span> sample stamp for the story</li>
+            <li><span class="status" data-status="held">held</span> a human step, not started</li>
+            <li>Cards are sample records — no live links</li>
+          </ul>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Open on graded</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Close the door</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Door open</span>
+  </div>
+
+  <footer class="foot">
+    <span>Evens Louis · SAMPLE · CapEx / preview</span>
+    <span>No deck · No call booking · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/proofs-ui.js"></script>
+</body>
+</html>

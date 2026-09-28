@@ -1,0 +1,11 @@
+{
+  "name": "proofcheck-qc-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "ProofCheck QC SAMPLE \u2014 sources \u2192 Verify Now \u2192 voice-kept draft gate behind the brand shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Verify a draft — ProofCheck QC · SAMPLE</title>
+  <meta name="description" content="SAMPLE verify gate. Attach sources, Verify Now, gate opens when every claim cites a source. Local, deterministic, no generate. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%230f8a7e%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EPQ%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/proofcheck.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="ProofCheck QC home">
+      <span class="mark" aria-hidden="true">PQ</span>
+      <span class="name">ProofCheck QC<small>Tools · QC · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Gate</a></li>
+        <li><a href="verify.html" aria-current="page">Verify</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="verify-title">
+    <p class="eyebrow">Verify Now</p>
+    <h2 id="verify-title">Every claim points <span class="hi">home.</span></h2>
+    <p class="sub">
+      Attach the sources you actually have, paste the draft you actually wrote, tap Verify Now.
+      Nothing here generates, rewrites, or leaves this page. Sample sources, sample draft.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="gate" data-state="empty" aria-labelledby="gate-label">
+        <div class="stage-head">
+          <span class="label" id="gate-label">Draft gate</span>
+          <span class="state" id="gate-state" aria-live="polite">empty</span>
+        </div>
+
+        <form id="verify-form" class="panel" novalidate>
+          <div>
+            <span class="field-label" id="attached-label">Attached sources</span>
+            <div class="chips" id="attached" role="group" aria-labelledby="attached-label"></div>
+          </div>
+          <div>
+            <span class="field-label" id="pool-label">Sample sources</span>
+            <div class="chips" id="source-pool" role="group" aria-labelledby="pool-label"></div>
+          </div>
+          <div>
+            <label for="draft">Your draft</label>
+            <textarea class="textarea" id="draft" name="draft" spellcheck="false"
+              placeholder="Paste a draft. Cite a source as [S1]."></textarea>
+          </div>
+          <div class="actions">
+            <button class="btn btn-brand" type="submit" id="verify-btn" disabled>Verify Now</button>
+            <span class="voice" id="voice-meter" data-kept="true" aria-live="polite">Words changed: 0 · nothing verified yet</span>
+          </div>
+        </form>
+
+        <div class="claims" id="claims" aria-live="polite" aria-label="Claims checked against sources"></div>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Voice washout</p>
+          <div class="msg">“Here is a polished, professional version of your text…”</div>
+          <p class="muted-line" id="friction-line">The rewrite that sounds like everyone. Not what Verify Now does.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">How the gate reads</p>
+          <ul class="legend">
+            <li><span class="badge" data-status="cited">cited S1</span> claim points at an attached source</li>
+            <li><span class="badge" data-status="uncited">uncited</span> no source, or cites one you did not attach</li>
+            <li><strong>Gate open</strong> when 0 uncited — your words unchanged</li>
+          </ul>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load example draft</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Gate open · voice kept</span>
+  </div>
+
+  <footer class="foot">
+    <span>ProofCheck QC · SAMPLE · CapEx / preview</span>
+    <span>No generate · No rewrite · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/verify-ui.js"></script>
+</body>
+</html>
