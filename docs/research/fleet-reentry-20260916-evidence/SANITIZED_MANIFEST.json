@@ -1,0 +1,65 @@
+{
+  "packet": "fleet-reentry-20260916-IMMUTABLE-SNAPSHOT",
+  "policy": "Full snapshot NOT pushed to Git \u2014 may contain env-sensitive census. Evidence = manifest + per-file SHA-256 only.",
+  "tree_sha256": "ae1210668052478fe24d908412f21bbb9c7b5511bf52115bd1d5c994a071af13",
+  "files": [
+    {
+      "name": "DO_NOT_EDIT.md",
+      "sha256": "61151fe12650ed45e83221331b282e4d96f46e9607b0efc5d058b3cef813fe37"
+    },
+    {
+      "name": "FLEET_REPORT.md",
+      "sha256": "84db03b2f7a99004fcdde1f1cc20aa6d105c1bd9fdf30876670938b942cec706"
+    },
+    {
+      "name": "JARVIS_NOTES.md",
+      "sha256": "445a5429670c8aead4af38dc9591f2a4f7961f60ce5f6f8b45fd4d56c1661caf"
+    },
+    {
+      "name": "SNAPSHOT_MANIFEST.json",
+      "sha256": "ed21dd8c2455c032793d32219e5e45bc66e4137595fe765cdc82225736136a7d"
+    },
+    {
+      "name": "agents-directory.md",
+      "sha256": "8e3de07d6583b781e22b4b0570f1d2b40e2efca5cad6055537540b93e841e448"
+    },
+    {
+      "name": "agents-raw.json",
+      "sha256": "72e79aa70e96d3cae6b190dc1d270174540a55a5fe17e577959f17e611a9786a"
+    },
+    {
+      "name": "capability-graph.schema.json",
+      "sha256": "aa711be9afb93702bfc6dd77fcdf702540538e4e7cf84cba02ec73fc453f2200"
+    },
+    {
+      "name": "capability-graph.seed.json",
+      "sha256": "553babcb84e38a8875c7b34336cfc1e4e79a9cff5e37dcd80b07d08ff6a0c00d"
+    },
+    {
+      "name": "live-probes-20260916.md",
+      "sha256": "284c1f62e578268663df584c751cc211b9d17001f7b5c32dd356d4f7b4cd024e"
+    },
+    {
+      "name": "shared-surface.json",
+      "sha256": "34cb0aa215b21650dbba7ed3bb8c4061351e9f94665baa7c5b175b9f6d992b02"
+    },
+    {
+      "name": "shared-surface.md",
+      "sha256": "4ca32d99368a29b763c81dbc49618116dc1af6b8a449a11e555a6a0fc4e0e15d"
+    }
+  ],
+  "omitted_from_git": [
+    "agents-directory.md",
+    "shared-surface.md",
+    "FLEET_REPORT.md",
+    "SNAPSHOT_MANIFEST.json",
+    "live-probes-20260916.md",
+    "agents-raw.json",
+    "capability-graph.schema.json",
+    "JARVIS_NOTES.md",
+    "DO_NOT_EDIT.md",
+    "capability-graph.seed.json",
+    "shared-surface.json"
+  ],
+  "reason": "agents-raw / shared-surface contain credential_refs and environment census inappropriate for public/docs push; originals preserved on box immutable path."
+}

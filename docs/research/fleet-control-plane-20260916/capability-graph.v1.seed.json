@@ -1,0 +1,3748 @@
+{
+  "meta": {
+    "schema_version": "1.0.0",
+    "census_id": "fleet-reentry-20260916",
+    "generated_at": "2026-09-16T17:45:00-04:00",
+    "migrated_from": "fleet-reentry-20260916-IMMUTABLE-SNAPSHOT/capability-graph.seed.json",
+    "notes": "Phase 2 multi-path seed. Live-probes evidence only. No secrets. No MCP connects performed this phase. WRITE target: fleet-control-plane-20260916."
+  },
+  "nodes": [
+    {
+      "id": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "type": "Agent",
+      "name": "Big Boss",
+      "title": "Chief of staff",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "shared_box": true,
+      "hitl_level": "Tier-3 HITL | HITL; organic only | HITL",
+      "metadata": {
+        "serverId": "1201022",
+        "harness": "box",
+        "stage_text": "ALIGNED: Stage 5 harness default (per profile)",
+        "not_for": "Deep implementation, long research digs, client send, money movement, live `/` ship, desk\u2194desk fan-out, stacked Monday burns, inventing autonomy %"
+      },
+      "owning_agent_ids": [
+        "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ]
+    },
+    {
+      "id": "agent:fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+      "type": "Agent",
+      "name": "Career Strategist",
+      "title": "Work & compensation",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "fe2669ee-3d55-41f0-ad59-d3aaf54704df"
+      ],
+      "shared_box": true,
+      "hitl_level": "L2 \u2014 Never send employment email without HITL Operator L3 approval.",
+      "metadata": {
+        "serverId": "1201480",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Employment email send without HITL, client outreach, trading, deploy, live `/` ship, forging code as primary builder"
+      },
+      "owning_agent_ids": [
+        "fe2669ee-3d55-41f0-ad59-d3aaf54704df"
+      ]
+    },
+    {
+      "id": "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "type": "Agent",
+      "name": "Communications Manager",
+      "title": "Email triage & drafts",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "b33e7134-3c30-4304-adf3-7eb7ad7e8514"
+      ],
+      "shared_box": true,
+      "hitl_level": "L3 \u2014 Send matrix: read/classify/draft=yes; business/employment/financial send=always HITL.",
+      "metadata": {
+        "serverId": "1200823",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Client/business/financial send, employment send, money move, deploy, live `/` ship, autonomous publish"
+      },
+      "owning_agent_ids": [
+        "b33e7134-3c30-4304-adf3-7eb7ad7e8514"
+      ]
+    },
+    {
+      "id": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "type": "Agent",
+      "name": "Consultant",
+      "title": "Strategic client advisor",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "2206818c-7588-4a21-966c-f6cea5c981d7"
+      ],
+      "shared_box": true,
+      "hitl_level": "Tier-3 HITL | HITL",
+      "metadata": {
+        "serverId": "39739",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Building/shipping code as implementer, self-PASS of own work, client sell/send, money move, live `/` ship"
+      },
+      "owning_agent_ids": [
+        "2206818c-7588-4a21-966c-f6cea5c981d7"
+      ]
+    },
+    {
+      "id": "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "type": "Agent",
+      "name": "Creative Studio",
+      "title": "Visual & media creation",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "ca873245-23a8-4368-9dec-bfaa4566c3de"
+      ],
+      "shared_box": true,
+      "hitl_level": "L2 \u2014 Wait when product lifecycle too early; never CE money tools.",
+      "metadata": {
+        "serverId": "1199827",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Shipping hire page / live `/`, CE money tools, paid ads default, public Ironlane publish, game-studio SKU this cycle"
+      },
+      "owning_agent_ids": [
+        "ca873245-23a8-4368-9dec-bfaa4566c3de"
+      ]
+    },
+    {
+      "id": "agent:d95578f0-443f-40c6-b63c-cd83c2f93606",
+      "type": "Agent",
+      "name": "Day Planner",
+      "title": "Daily schedule architect",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "d95578f0-443f-40c6-b63c-cd83c2f93606"
+      ],
+      "shared_box": true,
+      "hitl_level": "L1 \u2014 Draft-only \u2014 never send email or accept invites (Tier 3).",
+      "metadata": {
+        "serverId": "1201408",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Sending email, accepting invites, client send, money move, deploy, acting as critic/builder for L4 gates"
+      },
+      "owning_agent_ids": [
+        "d95578f0-443f-40c6-b63c-cd83c2f93606"
+      ]
+    },
+    {
+      "id": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "type": "Agent",
+      "name": "Forge",
+      "title": "Autonomous engineer",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "298d4dd9-f402-4525-8fca-50e8c474dd85"
+      ],
+      "shared_box": true,
+      "hitl_level": "L2 \u2014 Assess confidence before unfamiliar stacks; delegate deep research to Researcher.",
+      "metadata": {
+        "serverId": "1200263",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Self-PASS / critic of own slice, shipping live `/`, click-live-site verification ownership, deep OSINT (delegate Researcher), money/send"
+      },
+      "owning_agent_ids": [
+        "298d4dd9-f402-4525-8fca-50e8c474dd85"
+      ]
+    },
+    {
+      "id": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "type": "Agent",
+      "name": "HITL Operator",
+      "title": "Approval gateway",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "91144bc2-f1ed-47cb-b17e-cd115ac40ef0"
+      ],
+      "shared_box": true,
+      "hitl_level": "L3 \u2014 Never approves money/send/deploy \u2014 operator on https://evenslouis.ca/pro only.",
+      "metadata": {
+        "serverId": "1201789",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Auto-approving money/send/deploy, acting as operator on /pro, building/shipping product, client outreach"
+      },
+      "owning_agent_ids": [
+        "91144bc2-f1ed-47cb-b17e-cd115ac40ef0"
+      ]
+    },
+    {
+      "id": "agent:9c99e066-d13a-4fa5-ac08-841e809eb774",
+      "type": "Agent",
+      "name": "Lead Hunter",
+      "title": "Prospect discovery",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "9c99e066-d13a-4fa5-ac08-841e809eb774"
+      ],
+      "shared_box": true,
+      "hitl_level": "Tier-3 HITL | HITL only; no send in building mode | HITL",
+      "metadata": {
+        "serverId": "1201202",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Sending outreach in building mode, client sell, money move, deploy, live `/` ship, inventing pipeline KPI"
+      },
+      "owning_agent_ids": [
+        "9c99e066-d13a-4fa5-ac08-841e809eb774"
+      ]
+    },
+    {
+      "id": "agent:5ef2fff1-80fc-4923-8e32-e2914617475d",
+      "type": "Agent",
+      "name": "Librarian",
+      "title": "Memory & chronicle",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "5ef2fff1-80fc-4923-8e32-e2914617475d"
+      ],
+      "shared_box": true,
+      "hitl_level": "L1 \u2014 Never delete chronicle or vault notes without operator Tier 3.",
+      "metadata": {
+        "serverId": "1200047",
+        "harness": "box",
+        "stage_text": "ALIGNED: Stage 5 harness default (per profile)",
+        "not_for": "Deleting chronicle/vault without Tier-3, building/shipping product, client send, money move, acting as primary orchestrator"
+      },
+      "owning_agent_ids": [
+        "5ef2fff1-80fc-4923-8e32-e2914617475d"
+      ]
+    },
+    {
+      "id": "agent:25eb230a-9e90-4353-aae8-349eb82d4c15",
+      "type": "Agent",
+      "name": "Money Desk",
+      "title": "Business finance ops",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ],
+      "shared_box": true,
+      "hitl_level": "L4 \u2014 OBSERVE + ADVISE only \u2014 never move money or mutate CE deals (read /pro).",
+      "metadata": {
+        "serverId": "1200622",
+        "harness": "box",
+        "stage_text": "PARTIAL: mentions Stage harness / Stage 5 without full SSOT wording",
+        "not_for": "Moving money, mutating CE deals, inventing KPI/$, chasing Squarespace/elou, client send, live `/` ship"
+      },
+      "owning_agent_ids": [
+        "25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ]
+    },
+    {
+      "id": "agent:2e8ab86d-35e4-4415-8143-71c51cfe960e",
+      "type": "Agent",
+      "name": "Personal CFO",
+      "title": "Personal finance strategy",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "2e8ab86d-35e4-4415-8143-71c51cfe960e"
+      ],
+      "shared_box": true,
+      "hitl_level": "L2 \u2014 Advise only \u2014 no account access or money movement.",
+      "metadata": {
+        "serverId": "1201670",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Account access, money movement, trades, business CE mutations, client send, deploy"
+      },
+      "owning_agent_ids": [
+        "2e8ab86d-35e4-4415-8143-71c51cfe960e"
+      ]
+    },
+    {
+      "id": "agent:f379dc7f-3216-47bd-8778-005370331008",
+      "type": "Agent",
+      "name": "Product GTM",
+      "title": "Product owner & launch",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "f379dc7f-3216-47bd-8778-005370331008"
+      ],
+      "shared_box": true,
+      "hitl_level": "L2 \u2014 Suppressed while lifecycle \u2208 {idea, planning, specification, development} unless asked.",
+      "metadata": {
+        "serverId": "1201314",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Selling in building mode, quoting autonomy/$ tweets, treating live `/` as Stage-5 clear, paid ads default, money move"
+      },
+      "owning_agent_ids": [
+        "f379dc7f-3216-47bd-8778-005370331008"
+      ]
+    },
+    {
+      "id": "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+      "type": "Agent",
+      "name": "Publishing Engine",
+      "title": "Content distribution",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83"
+      ],
+      "shared_box": true,
+      "hitl_level": "L3 \u2014 Suppressed until beta/launch_ready; brand-sensitive content always HITL.",
+      "metadata": {
+        "serverId": "1201579",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Autonomous publish / brand-sensitive post without HITL, autonomy marketing claims, live `/` ship, money move"
+      },
+      "owning_agent_ids": [
+        "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83"
+      ]
+    },
+    {
+      "id": "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "type": "Agent",
+      "name": "Researcher",
+      "title": "Evidence & OSINT",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b"
+      ],
+      "shared_box": true,
+      "hitl_level": "L0 \u2014 Browser read-only \u2014 bounded budgets; never stop at summary without system implementation.",
+      "metadata": {
+        "serverId": "1199934",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Client send, Tier-3 send, stopping at summary without system implementation, money move, deploy, self-PASS of Forge work"
+      },
+      "owning_agent_ids": [
+        "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b"
+      ]
+    },
+    {
+      "id": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "type": "Agent",
+      "name": "Watchdog",
+      "title": "Control plane & uptime",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "b9c12f93-dda8-45db-983d-2cf129fea8e0"
+      ],
+      "shared_box": true,
+      "hitl_level": "L0 \u2014 Always may RUN on heartbeat; read-only heal unless operator approves.",
+      "metadata": {
+        "serverId": "1200919",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Mutating heal without operator approve, building as Forge, self-PASS of builder work, client send, money move"
+      },
+      "owning_agent_ids": [
+        "b9c12f93-dda8-45db-983d-2cf129fea8e0"
+      ]
+    },
+    {
+      "id": "agent:3939593d-65c8-4c55-b3a5-db07063221d1",
+      "type": "Agent",
+      "name": "Wealth Manager",
+      "title": "Portfolio intelligence",
+      "evidence_level": "declared",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "3939593d-65c8-4c55-b3a5-db07063221d1"
+      ],
+      "shared_box": true,
+      "hitl_level": "L4 \u2014 No autonomous trading \u2014 execution always human on /pro or broker.",
+      "metadata": {
+        "serverId": "1200150",
+        "harness": "box",
+        "stage_text": "DRIFT: profile still says \"late mid-4 not Stage 5\"; Big Boss / standing-locks SSOT = Stage 5 harness default",
+        "not_for": "Autonomous trading, money movement without human, CE deal mutate, client send, deploy"
+      },
+      "owning_agent_ids": [
+        "3939593d-65c8-4c55-b3a5-db07063221d1"
+      ]
+    },
+    {
+      "id": "integration:shared-box",
+      "type": "Integration",
+      "name": "shared-linux-box",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "healthy",
+      "metadata": {
+        "model": "one machine many desks; separate desktops"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:gh",
+      "type": "Tool",
+      "name": "gh",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/usr/bin/gh",
+        "version": "gh version 2.46.0 (2025-01-13 Debian 2.46.0-3)"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:claude",
+      "type": "Tool",
+      "name": "claude",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/home/box/.local/bin/claude",
+        "version": "2.1.250 (Claude Code)"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:codex",
+      "type": "Tool",
+      "name": "codex",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/home/box/.local/bin/codex",
+        "version": "codex-cli 0.150.1"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:playwright",
+      "type": "Tool",
+      "name": "playwright",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/home/box/.local/bin/playwright",
+        "version": "Version 1.62.0"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:docker",
+      "type": "Tool",
+      "name": "docker",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "CLI OK; daemon socket permission denied (runtime)",
+      "metadata": {
+        "path": "/usr/bin/docker",
+        "version": "Docker version 26.1.5+dfsg1"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:vercel",
+      "type": "Tool",
+      "name": "vercel",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/home/box/.local/bin/vercel",
+        "version": "Vercel CLI 59.16.0"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:stripe",
+      "type": "Tool",
+      "name": "stripe",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/home/box/.local/bin/stripe",
+        "version": "stripe version 1.50.5"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:aws",
+      "type": "Tool",
+      "name": "aws",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/home/box/.local/bin/aws",
+        "version": "aws-cli/2.36.44"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:cli:gcloud",
+      "type": "Tool",
+      "name": "gcloud",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "ok",
+      "metadata": {
+        "path": "/home/box/.local/bin/gcloud",
+        "version": "Google Cloud SDK 584.0.0"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Prisma-Local",
+      "type": "Integration",
+      "name": "mcp:Prisma-Local",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 3
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Gmail",
+      "type": "Integration",
+      "name": "mcp:Gmail",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 31
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Playwright",
+      "type": "Integration",
+      "name": "mcp:Playwright",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 24
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Github",
+      "type": "Integration",
+      "name": "mcp:Github",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 45
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Browser-use",
+      "type": "Integration",
+      "name": "mcp:Browser-use",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 2
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-hosting",
+      "type": "Integration",
+      "name": "mcp:Hostinger-hosting",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 58
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-wordpress",
+      "type": "Integration",
+      "name": "mcp:Hostinger-wordpress",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 38
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-domains",
+      "type": "Integration",
+      "name": "mcp:Hostinger-domains",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 40
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-dns",
+      "type": "Integration",
+      "name": "mcp:Hostinger-dns",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 8
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-billing",
+      "type": "Integration",
+      "name": "mcp:Hostinger-billing",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 9
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-reach",
+      "type": "Integration",
+      "name": "mcp:Hostinger-reach",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 49
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-ecommerce",
+      "type": "Integration",
+      "name": "mcp:Hostinger-ecommerce",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 29
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Hostinger-vps",
+      "type": "Integration",
+      "name": "mcp:Hostinger-vps",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 63
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Higgsfield",
+      "type": "Integration",
+      "name": "mcp:Higgsfield",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 98
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Slack--evenslouis",
+      "type": "Integration",
+      "name": "mcp:Slack--evenslouis",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 27
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:X",
+      "type": "Integration",
+      "name": "mcp:X",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "tool_count": 41
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "tool:mcp:Github",
+      "type": "Tool",
+      "name": "MCP Github",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "connected",
+      "metadata": {
+        "auth_plane": "mcp",
+        "cli_plane": "logged_out",
+        "tool_count": 45
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Prisma-Remote",
+      "type": "Integration",
+      "name": "mcp:Prisma-Remote",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "needsAuth",
+      "metadata": {
+        "tool_count": 0
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Canva",
+      "type": "Integration",
+      "name": "mcp:Canva",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "needsAuth",
+      "metadata": {
+        "tool_count": 0
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Lovable",
+      "type": "Integration",
+      "name": "mcp:Lovable",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "needsAuth",
+      "metadata": {
+        "tool_count": 0
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Heygen",
+      "type": "Integration",
+      "name": "mcp:Heygen",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "needsAuth",
+      "metadata": {
+        "tool_count": 0
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Vercel",
+      "type": "Integration",
+      "name": "mcp:Vercel",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "needsAuth",
+      "metadata": {
+        "tool_count": 0
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "integration:mcp:Amplitude",
+      "type": "Integration",
+      "name": "mcp:Amplitude",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "needsAuth",
+      "metadata": {
+        "tool_count": 0
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:Codex_ChatGPT_OAuth_REF",
+      "type": "CredentialRef",
+      "name": "Codex ChatGPT OAuth REF",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "store": "~/.codex/auth.json",
+        "note": "auth_mode=chatgpt; JWT email claim present"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:Claude_Pro_REF",
+      "type": "CredentialRef",
+      "name": "Claude Pro REF",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "store": "~/.claude/.credentials.json",
+        "note": "subscriptionType=pro; claude.ai"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:Claude_config_REF",
+      "type": "CredentialRef",
+      "name": "Claude config REF",
+      "evidence_level": "unknown",
+      "last_verified_at": null,
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "store": "~/.claude.json",
+        "note": null
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:Hostinger_token_file_REF",
+      "type": "CredentialRef",
+      "name": "Hostinger token file REF",
+      "evidence_level": "discovered",
+      "last_verified_at": null,
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "store": "/workspace/.hostinger_token",
+        "note": "filename only; value not read"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:gcloud_credentials.db_REF",
+      "type": "CredentialRef",
+      "name": "gcloud credentials.db REF",
+      "evidence_level": "broken",
+      "last_verified_at": null,
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "store": "~/.config/gcloud/credentials.db",
+        "note": "no credentialed accounts"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:n8n_credentials_dir_REF",
+      "type": "CredentialRef",
+      "name": "n8n credentials dir REF",
+      "evidence_level": "discovered",
+      "last_verified_at": null,
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "store": "/home/box/n8n-cursor/credentials",
+        "note": "directory present; contents not enumerated for secrets"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:1Password",
+      "type": "CredentialRef",
+      "name": "1Password",
+      "evidence_level": "broken",
+      "last_verified_at": null,
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "store": null,
+        "note": "no op/1password connect status files found"
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "credential:provider",
+      "type": "CredentialRef",
+      "name": "CredentialProvider",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "status": "not_connected",
+      "metadata": {
+        "saved_count": 0
+      },
+      "owning_agent_ids": []
+    },
+    {
+      "id": "capability:github",
+      "type": "Capability",
+      "name": "github",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": {
+            "class": "low",
+            "notes": "MCP tool calls"
+          },
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0"
+          ],
+          "shared_box": true,
+          "notes": "GetMcpServerStatus: Github connected tools=45. Auth plane separate from gh CLI.",
+          "id": "path:github:mcp",
+          "kind": "mcp",
+          "label": "MCP Github",
+          "integration_ref": "integration:mcp:Github",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": {
+            "class": "low",
+            "notes": "local CLI"
+          },
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "gh auth status: not logged into any hosts; hosts.yml missing. Prefer MCP path.",
+          "id": "path:github:cli",
+          "kind": "cli",
+          "label": "gh CLI",
+          "integration_ref": "tool:cli:gh",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0"
+          ],
+          "shared_box": true,
+          "notes": "API access mediated by MCP Github session; no direct token in graph.",
+          "id": "path:github:api",
+          "kind": "api",
+          "label": "GitHub REST/GraphQL via MCP",
+          "integration_ref": "tool:mcp:Github",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0"
+      ],
+      "owning_agent_ids": [
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:gh_cli_auth"
+        ],
+        "note": "Multi-path replaces single broken gh_cli_auth as sole GitHub signal."
+      }
+    },
+    {
+      "id": "capability:vercel",
+      "type": "Capability",
+      "name": "vercel",
+      "access_paths": [
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "CLI present (59.16.0) but whoami logged out. Deploy remains HITL + HOLD-aware.",
+          "id": "path:vercel:cli",
+          "kind": "cli",
+          "label": "Vercel CLI",
+          "integration_ref": "tool:cli:vercel",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        },
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "needsAuth tools=0. Reconnect MCP before any deploy routing.",
+          "id": "path:vercel:mcp",
+          "kind": "mcp",
+          "label": "MCP Vercel",
+          "integration_ref": "integration:mcp:Vercel",
+          "evidence_level": "broken",
+          "authentication_state": "needs_auth",
+          "health": "down"
+        }
+      ],
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "owning_agent_ids": [],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:vercel_deploy"
+        ],
+        "note": "No reliable owner until MCP reconnect; live `/` HOLD still applies."
+      }
+    },
+    {
+      "id": "capability:aws",
+      "type": "Capability",
+      "name": "aws",
+      "access_paths": [
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "aws-cli/2.36.44 installed; NoCredentials; credentials/config files MISSING.",
+          "id": "path:aws:cli",
+          "kind": "cli",
+          "label": "AWS CLI",
+          "integration_ref": "tool:cli:aws",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        }
+      ],
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "owning_agent_ids": [],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:aws_cli_auth"
+        ]
+      }
+    },
+    {
+      "id": "capability:gcloud",
+      "type": "Capability",
+      "name": "gcloud",
+      "access_paths": [
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "SDK 584.0.0 present; no credentialed accounts; credentials.db REF broken.",
+          "id": "path:gcloud:cli",
+          "kind": "cli",
+          "label": "gcloud CLI",
+          "integration_ref": "tool:cli:gcloud",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        }
+      ],
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "owning_agent_ids": [],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:gcloud_cli_auth"
+        ]
+      }
+    },
+    {
+      "id": "capability:stripe",
+      "type": "Capability",
+      "name": "stripe",
+      "access_paths": [
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:25eb230a-9e90-4353-aae8-349eb82d4c15"
+          ],
+          "shared_box": true,
+          "notes": "CLI 1.50.5 present; API keys ABSENT in config.toml. Money Desk observe-only until key.",
+          "id": "path:stripe:cli",
+          "kind": "cli",
+          "label": "Stripe CLI",
+          "integration_ref": "tool:cli:stripe",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        },
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:25eb230a-9e90-4353-aae8-349eb82d4c15"
+          ],
+          "shared_box": true,
+          "notes": "No API key REF in graph; never store secret values here.",
+          "id": "path:stripe:api",
+          "kind": "api",
+          "label": "Stripe API",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        }
+      ],
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ],
+      "owning_agent_ids": [
+        "agent:25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:stripe_api"
+        ]
+      }
+    },
+    {
+      "id": "capability:docker",
+      "type": "Capability",
+      "name": "docker",
+      "access_paths": [
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "CLI VERIFIED (26.1.5); daemon path separate.",
+          "id": "path:docker:cli",
+          "kind": "cli",
+          "label": "Docker CLI",
+          "integration_ref": "tool:cli:docker",
+          "evidence_level": "verified",
+          "authentication_state": "none",
+          "health": "degraded"
+        },
+        {
+          "permissions": [
+            "admin"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "socket permission denied \u2014 runtime broken despite CLI OK.",
+          "id": "path:docker:local_service",
+          "kind": "local_service",
+          "label": "Docker daemon socket",
+          "evidence_level": "broken",
+          "authentication_state": "none",
+          "health": "down"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "owning_agent_ids": [],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:docker_daemon"
+        ]
+      }
+    },
+    {
+      "id": "capability:gmail",
+      "type": "Capability",
+      "name": "gmail",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": {
+            "class": "low"
+          },
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=31. Draft/triage OK; client/business send always HITL; building mode.",
+          "id": "path:gmail:mcp",
+          "kind": "mcp",
+          "label": "MCP Gmail",
+          "integration_ref": "integration:mcp:Gmail",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514"
+      ],
+      "owning_agent_ids": [
+        "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "role_capability_link": "capability:email_triage"
+      }
+    },
+    {
+      "id": "capability:x",
+      "type": "Capability",
+      "name": "x",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+            "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=41. Publish/brand posts require HITL; no autonomy marketing claims.",
+          "id": "path:x:mcp",
+          "kind": "mcp",
+          "label": "MCP X",
+          "integration_ref": "integration:mcp:X",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+        "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b"
+      ],
+      "owning_agent_ids": [
+        "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+        "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true
+      }
+    },
+    {
+      "id": "capability:slack",
+      "type": "Capability",
+      "name": "slack",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=27 (Slack--evenslouis). External send \u2192 HITL.",
+          "id": "path:slack:mcp",
+          "kind": "mcp",
+          "label": "MCP Slack (evenslouis)",
+          "integration_ref": "integration:mcp:Slack--evenslouis",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "owning_agent_ids": [
+        "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true
+      }
+    },
+    {
+      "id": "capability:higgsfield",
+      "type": "Capability",
+      "name": "higgsfield",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": {
+            "class": "high",
+            "notes": "media gen / credits"
+          },
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+            "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=98. CapEx/sample craft OK; Ironlane public HOLD; paid spend \u2192 HITL.",
+          "id": "path:higgsfield:mcp",
+          "kind": "mcp",
+          "label": "MCP Higgsfield",
+          "integration_ref": "integration:mcp:Higgsfield",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+        "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83"
+      ],
+      "owning_agent_ids": [
+        "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+        "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true
+      }
+    },
+    {
+      "id": "capability:hostinger",
+      "type": "Capability",
+      "name": "hostinger",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=58. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:hosting:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-hosting",
+          "integration_ref": "integration:mcp:Hostinger-hosting",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=38. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:wordpress:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-wordpress",
+          "integration_ref": "integration:mcp:Hostinger-wordpress",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=40. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:domains:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-domains",
+          "integration_ref": "integration:mcp:Hostinger-domains",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=8. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:dns:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-dns",
+          "integration_ref": "integration:mcp:Hostinger-dns",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write",
+            "admin"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=9. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:billing:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-billing",
+          "integration_ref": "integration:mcp:Hostinger-billing",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=49. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:reach:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-reach",
+          "integration_ref": "integration:mcp:Hostinger-reach",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=29. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:ecommerce:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-ecommerce",
+          "integration_ref": "integration:mcp:Hostinger-ecommerce",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write",
+            "admin"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:f379dc7f-3216-47bd-8778-005370331008",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "Connected tools=63. Mutating hosting/DNS/billing/VPS \u2192 HITL; live `/` HOLD.",
+          "id": "path:hostinger:vps:mcp",
+          "kind": "mcp",
+          "label": "MCP Hostinger-vps",
+          "integration_ref": "integration:mcp:Hostinger-vps",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": null,
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "Filename REF /workspace/.hostinger_token only; value not read. Prefer MCP paths.",
+          "id": "path:hostinger:token_file:local_service",
+          "kind": "local_service",
+          "label": "Hostinger token file REF",
+          "integration_ref": "credential:Hostinger_token_file_REF",
+          "evidence_level": "discovered",
+          "authentication_state": "unknown",
+          "health": "unknown"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:f379dc7f-3216-47bd-8778-005370331008",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "owning_agent_ids": [
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:f379dc7f-3216-47bd-8778-005370331008",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "family": "Hostinger-*",
+        "prefer_paths": "mcp over local token file"
+      }
+    },
+    {
+      "id": "capability:codex",
+      "type": "Capability",
+      "name": "codex",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "codex-cli 0.150.1; login status ChatGPT OAuth REF (auth_mode=chatgpt). No secret dump.",
+          "id": "path:codex:cli",
+          "kind": "cli",
+          "label": "Codex CLI",
+          "integration_ref": "tool:cli:codex",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "owning_agent_ids": [
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "credential_ref": "credential:Codex_ChatGPT_OAuth_REF"
+      }
+    },
+    {
+      "id": "capability:claude",
+      "type": "Capability",
+      "name": "claude",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [
+            "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+            "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+          ],
+          "shared_box": true,
+          "notes": "2.1.250; claude auth status loggedIn; subscriptionType=pro. Credential REF only.",
+          "id": "path:claude:cli",
+          "kind": "cli",
+          "label": "Claude Code CLI",
+          "integration_ref": "tool:cli:claude",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "owning_agent_ids": [
+        "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+        "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "credential_ref": "credential:Claude_Pro_REF"
+      }
+    },
+    {
+      "id": "capability:credential_provider",
+      "type": "Capability",
+      "name": "credential_provider",
+      "access_paths": [
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "not connected; saved item count 0. VERIFIED probe result.",
+          "id": "path:credential_provider:local_service",
+          "kind": "local_service",
+          "label": "GetCredentialProviderStatus",
+          "integration_ref": "credential:provider",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        },
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": null,
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "No op/1password connect status files found. Broker later; never request secret values.",
+          "id": "path:credential_provider:1password",
+          "kind": "local_service",
+          "label": "1Password connect REF",
+          "integration_ref": "credential:1Password",
+          "evidence_level": "broken",
+          "authentication_state": "logged_out",
+          "health": "down"
+        }
+      ],
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "owning_agent_ids": [],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:credential_provider"
+        ]
+      }
+    },
+    {
+      "id": "capability:browser_computer_use",
+      "type": "Capability",
+      "name": "browser_computer_use",
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": {
+            "class": "medium"
+          },
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "Connected tools=24.",
+          "id": "path:browser:playwright_mcp",
+          "kind": "mcp",
+          "label": "MCP Playwright",
+          "integration_ref": "integration:mcp:Playwright",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "Connected tools=2.",
+          "id": "path:browser:browser_use_mcp",
+          "kind": "mcp",
+          "label": "MCP Browser-use",
+          "integration_ref": "integration:mcp:Browser-use",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "Version 1.62.0 on PATH.",
+          "id": "path:browser:cli_playwright",
+          "kind": "cli",
+          "label": "playwright CLI",
+          "integration_ref": "tool:cli:playwright",
+          "evidence_level": "verified",
+          "authentication_state": "none",
+          "health": "healthy"
+        },
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": null,
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "DISCOVERED for all agents on shared box; per-agent desktops; DISPLAY=:14.",
+          "id": "path:computer_use:box_desktop",
+          "kind": "computer_use",
+          "label": "box-desktop / computerUse",
+          "evidence_level": "discovered",
+          "authentication_state": "unknown",
+          "health": "unknown"
+        },
+        {
+          "permissions": [
+            "unknown"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-2",
+          "latency_cost": null,
+          "last_verified_at": null,
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "chrome-profile* dirs + webauthn-proxy markers present; do not scrape session cookies.",
+          "id": "path:browser:chrome_profiles",
+          "kind": "browser",
+          "label": "Chrome profile sessions",
+          "evidence_level": "discovered",
+          "authentication_state": "unknown",
+          "health": "unknown"
+        }
+      ],
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "owning_agent_ids": [],
+      "shared_box": true,
+      "hitl_level": null,
+      "metadata": {
+        "rollup_policy": "usable_path_wins_else_worst",
+        "migrated_from_v0": true,
+        "v0_aliases": [
+          "capability:box_desktop"
+        ]
+      }
+    },
+    {
+      "id": "capability:orchestration",
+      "type": "Capability",
+      "name": "orchestration",
+      "evidence_level": "declared",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "blurb": "Chief of staff / commander; token-meter owner; prefer me+subagents",
+        "not_for": "Deep implementation, long research digs, client send, money movement, live `/` ship, desk\u2194desk fan-out, stacked Monday burns, inventing autonomy %",
+        "v1_note": "Role capability; routing via owning_agent_ids, not access_paths.",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10"
+      ]
+    },
+    {
+      "id": "capability:autonomous_engineer",
+      "type": "Capability",
+      "name": "autonomous_engineer",
+      "evidence_level": "declared",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "298d4dd9-f402-4525-8fca-50e8c474dd85"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "blurb": "Implementer; stop at critic; distinct L4 evidence",
+        "not_for": "Self-PASS / critic of own slice, shipping live `/`, click-live-site verification ownership, deep OSINT (delegate Researcher), money/send",
+        "v1_note": "Role capability; routing via owning_agent_ids, not access_paths.",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "298d4dd9-f402-4525-8fca-50e8c474dd85"
+      ]
+    },
+    {
+      "id": "capability:approval_gateway",
+      "type": "Capability",
+      "name": "approval_gateway",
+      "evidence_level": "declared",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "91144bc2-f1ed-47cb-b17e-cd115ac40ef0"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "blurb": "Tier-3 gate surfaces only; never auto-approve",
+        "not_for": "Auto-approving money/send/deploy, acting as operator on /pro, building/shipping product, client outreach",
+        "v1_note": "Role capability; routing via owning_agent_ids, not access_paths.",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "91144bc2-f1ed-47cb-b17e-cd115ac40ef0"
+      ]
+    },
+    {
+      "id": "capability:email_triage",
+      "type": "Capability",
+      "name": "email_triage",
+      "evidence_level": "declared",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "b33e7134-3c30-4304-adf3-7eb7ad7e8514"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "blurb": "Email triage & drafts; never client send",
+        "not_for": "Client/business/financial send, employment send, money move, deploy, live `/` ship, autonomous publish",
+        "v1_note": "Role capability; routing via owning_agent_ids, not access_paths.",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "b33e7134-3c30-4304-adf3-7eb7ad7e8514"
+      ]
+    },
+    {
+      "id": "capability:visual_media",
+      "type": "Capability",
+      "name": "visual_media",
+      "evidence_level": "declared",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "ca873245-23a8-4368-9dec-bfaa4566c3de"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "blurb": "Visual & media craft; CapEx samples \u2260 public hire ship",
+        "not_for": "Shipping hire page / live `/`, CE money tools, paid ads default, public Ironlane publish, game-studio SKU this cycle",
+        "v1_note": "Role capability; routing via owning_agent_ids, not access_paths.",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "ca873245-23a8-4368-9dec-bfaa4566c3de"
+      ]
+    },
+    {
+      "id": "capability:business_finance",
+      "type": "Capability",
+      "name": "business_finance",
+      "evidence_level": "declared",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "blurb": "Observe/advise business finance; token-meter co-steward history",
+        "not_for": "Moving money, mutating CE deals, inventing KPI/$, chasing Squarespace/elou, client send, live `/` ship",
+        "v1_note": "Role capability; routing via owning_agent_ids, not access_paths.",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ]
+    },
+    {
+      "id": "capability:control_plane",
+      "type": "Capability",
+      "name": "control_plane",
+      "evidence_level": "declared",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "b9c12f93-dda8-45db-983d-2cf129fea8e0"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "blurb": "Control plane & uptime; check-forge-done / CapEx gates",
+        "not_for": "Mutating heal without operator approve, building as Forge, self-PASS of builder work, client send, money move",
+        "v1_note": "Role capability; routing via owning_agent_ids, not access_paths.",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "b9c12f93-dda8-45db-983d-2cf129fea8e0"
+      ]
+    },
+    {
+      "id": "capability:live_root_ship",
+      "type": "Capability",
+      "name": "live_root_ship",
+      "evidence_level": "blocked",
+      "last_verified_at": null,
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "live / HOLD intentional",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [
+        {
+          "permissions": [
+            "admin"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": null,
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "Intentional HOLD \u2014 no agent may own ship to https://evenslouis.ca/ live root.",
+          "id": "path:live_root_ship:blocked",
+          "kind": "api",
+          "label": "live / ship",
+          "evidence_level": "blocked",
+          "authentication_state": "none",
+          "health": "down"
+        }
+      ]
+    },
+    {
+      "id": "capability:ironlane_public_publish",
+      "type": "Capability",
+      "name": "ironlane_public_publish",
+      "evidence_level": "blocked",
+      "last_verified_at": null,
+      "owner_agent_ids": [
+        "ca873245-23a8-4368-9dec-bfaa4566c3de",
+        "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+        "f379dc7f-3216-47bd-8778-005370331008"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "note": "Ironlane public HOLD; CapEx craft OK",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [
+        {
+          "permissions": [
+            "write"
+          ],
+          "requires_hitl": true,
+          "hitl_tier": "tier-3",
+          "latency_cost": null,
+          "last_verified_at": null,
+          "owning_agent_ids": [
+            "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+            "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+            "agent:f379dc7f-3216-47bd-8778-005370331008"
+          ],
+          "shared_box": true,
+          "notes": "Public HOLD; CapEx samples \u2260 public publish.",
+          "id": "path:ironlane_public:blocked",
+          "kind": "api",
+          "label": "Ironlane public publish",
+          "evidence_level": "blocked",
+          "authentication_state": "none",
+          "health": "down"
+        }
+      ],
+      "owning_agent_ids": [
+        "ca873245-23a8-4368-9dec-bfaa4566c3de",
+        "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+        "f379dc7f-3216-47bd-8778-005370331008"
+      ]
+    },
+    {
+      "id": "capability:mcp_connected",
+      "type": "Capability",
+      "name": "mcp_connected",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "session MCP connected set",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [
+        {
+          "permissions": [
+            "read"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "Aggregated connected MCP set from live probes 2026-09-16.",
+          "id": "path:mcp_connected:session",
+          "kind": "mcp",
+          "label": "Session MCP catalog",
+          "evidence_level": "verified",
+          "authentication_state": "authenticated",
+          "health": "healthy"
+        }
+      ]
+    },
+    {
+      "id": "capability:path_clis",
+      "type": "Capability",
+      "name": "path_clis",
+      "evidence_level": "verified",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "27 CLIs on shared PATH",
+        "migrated_from_v0": true,
+        "rollup_policy": "usable_path_wins_else_worst"
+      },
+      "access_paths": [
+        {
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "requires_hitl": false,
+          "hitl_tier": null,
+          "latency_cost": null,
+          "last_verified_at": "2026-09-16T17:31:00-04:00",
+          "owning_agent_ids": [],
+          "shared_box": true,
+          "notes": "27 CLIs verified on PATH; auth planes tracked per capability.",
+          "id": "path:path_clis:shared_path",
+          "kind": "cli",
+          "label": "Shared PATH CLIs (27)",
+          "evidence_level": "verified",
+          "authentication_state": "none",
+          "health": "healthy"
+        }
+      ]
+    },
+    {
+      "id": "capability:gh_cli_auth",
+      "type": "Capability",
+      "name": "gh_cli_auth",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "gh CLI logged out; MCP Github separate",
+        "deprecated": true,
+        "superseded_by": "capability:github",
+        "migrated_from_v0": true,
+        "v1_note": "Deprecated stub retained for edge compatibility; use superseded_by multi-path capability."
+      },
+      "access_paths": [],
+      "owning_agent_ids": []
+    },
+    {
+      "id": "capability:vercel_deploy",
+      "type": "Capability",
+      "name": "vercel_deploy",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "CLI logged out + MCP Vercel needsAuth",
+        "deprecated": true,
+        "superseded_by": "capability:vercel",
+        "migrated_from_v0": true,
+        "v1_note": "Deprecated stub retained for edge compatibility; use superseded_by multi-path capability."
+      },
+      "access_paths": [],
+      "owning_agent_ids": []
+    },
+    {
+      "id": "capability:aws_cli_auth",
+      "type": "Capability",
+      "name": "aws_cli_auth",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "NoCredentials",
+        "deprecated": true,
+        "superseded_by": "capability:aws",
+        "migrated_from_v0": true,
+        "v1_note": "Deprecated stub retained for edge compatibility; use superseded_by multi-path capability."
+      },
+      "access_paths": [],
+      "owning_agent_ids": []
+    },
+    {
+      "id": "capability:gcloud_cli_auth",
+      "type": "Capability",
+      "name": "gcloud_cli_auth",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "no credentialed accounts",
+        "deprecated": true,
+        "superseded_by": "capability:gcloud",
+        "migrated_from_v0": true,
+        "v1_note": "Deprecated stub retained for edge compatibility; use superseded_by multi-path capability."
+      },
+      "access_paths": [],
+      "owning_agent_ids": []
+    },
+    {
+      "id": "capability:docker_daemon",
+      "type": "Capability",
+      "name": "docker_daemon",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [],
+      "shared_box": true,
+      "metadata": {
+        "note": "socket permission denied",
+        "deprecated": true,
+        "superseded_by": "capability:docker",
+        "migrated_from_v0": true,
+        "v1_note": "Deprecated stub retained for edge compatibility; use superseded_by multi-path capability."
+      },
+      "access_paths": [],
+      "owning_agent_ids": []
+    },
+    {
+      "id": "capability:stripe_api",
+      "type": "Capability",
+      "name": "stripe_api",
+      "evidence_level": "broken",
+      "last_verified_at": "2026-09-16T17:31:00-04:00",
+      "owner_agent_ids": [
+        "25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ],
+      "shared_box": true,
+      "metadata": {
+        "note": "CLI present; API key absent",
+        "deprecated": true,
+        "superseded_by": "capability:stripe",
+        "migrated_from_v0": true,
+        "v1_note": "Deprecated stub retained for edge compatibility; use superseded_by multi-path capability."
+      },
+      "access_paths": [],
+      "owning_agent_ids": [
+        "25eb230a-9e90-4353-aae8-349eb82d4c15"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "type": "shares_computer",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e2",
+      "type": "shares_computer",
+      "from": "agent:fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e3",
+      "type": "shares_computer",
+      "from": "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e4",
+      "type": "shares_computer",
+      "from": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e5",
+      "type": "shares_computer",
+      "from": "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e6",
+      "type": "shares_computer",
+      "from": "agent:d95578f0-443f-40c6-b63c-cd83c2f93606",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e7",
+      "type": "shares_computer",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e8",
+      "type": "shares_computer",
+      "from": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e9",
+      "type": "shares_computer",
+      "from": "agent:9c99e066-d13a-4fa5-ac08-841e809eb774",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e10",
+      "type": "shares_computer",
+      "from": "agent:5ef2fff1-80fc-4923-8e32-e2914617475d",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e11",
+      "type": "shares_computer",
+      "from": "agent:25eb230a-9e90-4353-aae8-349eb82d4c15",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e12",
+      "type": "shares_computer",
+      "from": "agent:2e8ab86d-35e4-4415-8143-71c51cfe960e",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e13",
+      "type": "shares_computer",
+      "from": "agent:f379dc7f-3216-47bd-8778-005370331008",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e14",
+      "type": "shares_computer",
+      "from": "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e15",
+      "type": "shares_computer",
+      "from": "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e16",
+      "type": "shares_computer",
+      "from": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e17",
+      "type": "shares_computer",
+      "from": "agent:3939593d-65c8-4c55-b3a5-db07063221d1",
+      "to": "integration:shared-box",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e18",
+      "type": "owns",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "capability:orchestration",
+      "evidence_level": "declared"
+    },
+    {
+      "id": "e20",
+      "type": "owns",
+      "from": "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "to": "capability:email_triage",
+      "evidence_level": "declared"
+    },
+    {
+      "id": "e22",
+      "type": "owns",
+      "from": "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "to": "capability:visual_media",
+      "evidence_level": "declared"
+    },
+    {
+      "id": "e24",
+      "type": "owns",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "capability:autonomous_engineer",
+      "evidence_level": "declared"
+    },
+    {
+      "id": "e25",
+      "type": "owns",
+      "from": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "to": "capability:approval_gateway",
+      "evidence_level": "declared"
+    },
+    {
+      "id": "e28",
+      "type": "owns",
+      "from": "agent:25eb230a-9e90-4353-aae8-349eb82d4c15",
+      "to": "capability:business_finance",
+      "evidence_level": "declared"
+    },
+    {
+      "id": "e33",
+      "type": "owns",
+      "from": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "to": "capability:control_plane",
+      "evidence_level": "declared"
+    },
+    {
+      "id": "e35",
+      "type": "can_use",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e36",
+      "type": "can_use",
+      "from": "agent:fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e37",
+      "type": "can_use",
+      "from": "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e38",
+      "type": "can_use",
+      "from": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e39",
+      "type": "can_use",
+      "from": "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e40",
+      "type": "can_use",
+      "from": "agent:d95578f0-443f-40c6-b63c-cd83c2f93606",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e41",
+      "type": "can_use",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e42",
+      "type": "can_use",
+      "from": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e43",
+      "type": "can_use",
+      "from": "agent:9c99e066-d13a-4fa5-ac08-841e809eb774",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e44",
+      "type": "can_use",
+      "from": "agent:5ef2fff1-80fc-4923-8e32-e2914617475d",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e45",
+      "type": "can_use",
+      "from": "agent:25eb230a-9e90-4353-aae8-349eb82d4c15",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e46",
+      "type": "can_use",
+      "from": "agent:2e8ab86d-35e4-4415-8143-71c51cfe960e",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e47",
+      "type": "can_use",
+      "from": "agent:f379dc7f-3216-47bd-8778-005370331008",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e48",
+      "type": "can_use",
+      "from": "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e49",
+      "type": "can_use",
+      "from": "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e50",
+      "type": "can_use",
+      "from": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e51",
+      "type": "can_use",
+      "from": "agent:3939593d-65c8-4c55-b3a5-db07063221d1",
+      "to": "capability:path_clis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e52",
+      "type": "can_use",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e53",
+      "type": "can_use",
+      "from": "agent:fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e54",
+      "type": "can_use",
+      "from": "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e55",
+      "type": "can_use",
+      "from": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e56",
+      "type": "can_use",
+      "from": "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e57",
+      "type": "can_use",
+      "from": "agent:d95578f0-443f-40c6-b63c-cd83c2f93606",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e58",
+      "type": "can_use",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e59",
+      "type": "can_use",
+      "from": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e60",
+      "type": "can_use",
+      "from": "agent:9c99e066-d13a-4fa5-ac08-841e809eb774",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e61",
+      "type": "can_use",
+      "from": "agent:5ef2fff1-80fc-4923-8e32-e2914617475d",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e62",
+      "type": "can_use",
+      "from": "agent:25eb230a-9e90-4353-aae8-349eb82d4c15",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e63",
+      "type": "can_use",
+      "from": "agent:2e8ab86d-35e4-4415-8143-71c51cfe960e",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e64",
+      "type": "can_use",
+      "from": "agent:f379dc7f-3216-47bd-8778-005370331008",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e65",
+      "type": "can_use",
+      "from": "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e66",
+      "type": "can_use",
+      "from": "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e67",
+      "type": "can_use",
+      "from": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e68",
+      "type": "can_use",
+      "from": "agent:3939593d-65c8-4c55-b3a5-db07063221d1",
+      "to": "capability:mcp_connected",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e138",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:gh",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e147",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:claude",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e148",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:codex",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e149",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:playwright",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e150",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:docker",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e153",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:vercel",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e157",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:stripe",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e158",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:aws",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e159",
+      "type": "depends_on",
+      "from": "capability:path_clis",
+      "to": "tool:cli:gcloud",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e164",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Prisma-Local",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e166",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Gmail",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e169",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Playwright",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e170",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Github",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e171",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Browser-use",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e173",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-hosting",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e174",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-wordpress",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e175",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-domains",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e176",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-dns",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e177",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-billing",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e178",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-reach",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e179",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-ecommerce",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e180",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Hostinger-vps",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e182",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Higgsfield",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e184",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:Slack--evenslouis",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e185",
+      "type": "depends_on",
+      "from": "capability:mcp_connected",
+      "to": "integration:mcp:X",
+      "evidence_level": "verified"
+    },
+    {
+      "id": "e186",
+      "type": "can_use",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "tool:mcp:Github",
+      "evidence_level": "discovered"
+    },
+    {
+      "id": "e187",
+      "type": "can_use",
+      "from": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "to": "tool:mcp:Github",
+      "evidence_level": "discovered"
+    },
+    {
+      "id": "e188",
+      "type": "can_use",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "tool:mcp:Github",
+      "evidence_level": "discovered"
+    },
+    {
+      "id": "e243",
+      "type": "requires_hitl",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e244",
+      "type": "requires_hitl",
+      "from": "agent:fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e245",
+      "type": "requires_hitl",
+      "from": "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e246",
+      "type": "requires_hitl",
+      "from": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e247",
+      "type": "requires_hitl",
+      "from": "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e248",
+      "type": "requires_hitl",
+      "from": "agent:d95578f0-443f-40c6-b63c-cd83c2f93606",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e249",
+      "type": "requires_hitl",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e250",
+      "type": "requires_hitl",
+      "from": "agent:9c99e066-d13a-4fa5-ac08-841e809eb774",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e251",
+      "type": "requires_hitl",
+      "from": "agent:5ef2fff1-80fc-4923-8e32-e2914617475d",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e252",
+      "type": "requires_hitl",
+      "from": "agent:25eb230a-9e90-4353-aae8-349eb82d4c15",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e253",
+      "type": "requires_hitl",
+      "from": "agent:2e8ab86d-35e4-4415-8143-71c51cfe960e",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e254",
+      "type": "requires_hitl",
+      "from": "agent:f379dc7f-3216-47bd-8778-005370331008",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e255",
+      "type": "requires_hitl",
+      "from": "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e256",
+      "type": "requires_hitl",
+      "from": "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e257",
+      "type": "requires_hitl",
+      "from": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e258",
+      "type": "requires_hitl",
+      "from": "agent:3939593d-65c8-4c55-b3a5-db07063221d1",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "scope": "tier3_money_send_deploy_secrets"
+      }
+    },
+    {
+      "id": "e259",
+      "type": "delegates_to",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "implementation"
+      }
+    },
+    {
+      "id": "e260",
+      "type": "delegates_to",
+      "from": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "to": "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "research"
+      }
+    },
+    {
+      "id": "e261",
+      "type": "delegates_to",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "agent:34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "deep_research"
+      }
+    },
+    {
+      "id": "e262",
+      "type": "delegates_to",
+      "from": "agent:298d4dd9-f402-4525-8fca-50e8c474dd85",
+      "to": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "critic_stop"
+      }
+    },
+    {
+      "id": "e263",
+      "type": "delegates_to",
+      "from": "agent:b9c12f93-dda8-45db-983d-2cf129fea8e0",
+      "to": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "missing_critic_fail"
+      }
+    },
+    {
+      "id": "e264",
+      "type": "delegates_to",
+      "from": "agent:d95578f0-443f-40c6-b63c-cd83c2f93606",
+      "to": "agent:2206818c-7588-4a21-966c-f6cea5c981d7",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "monday_audit_ladder"
+      }
+    },
+    {
+      "id": "e265",
+      "type": "delegates_to",
+      "from": "agent:ca873245-23a8-4368-9dec-bfaa4566c3de",
+      "to": "agent:f379dc7f-3216-47bd-8778-005370331008",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "gtm_proof_attach"
+      }
+    },
+    {
+      "id": "e266",
+      "type": "delegates_to",
+      "from": "agent:e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "publish_gate"
+      }
+    },
+    {
+      "id": "e267",
+      "type": "delegates_to",
+      "from": "agent:9c99e066-d13a-4fa5-ac08-841e809eb774",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "outreach_send"
+      }
+    },
+    {
+      "id": "e268",
+      "type": "delegates_to",
+      "from": "agent:b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "business_send"
+      }
+    },
+    {
+      "id": "e269",
+      "type": "delegates_to",
+      "from": "agent:fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+      "to": "agent:91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "employment_send"
+      }
+    },
+    {
+      "id": "e270",
+      "type": "delegates_to",
+      "from": "agent:5ef2fff1-80fc-4923-8e32-e2914617475d",
+      "to": "agent:dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+      "evidence_level": "declared",
+      "metadata": {
+        "for_role": "om_promotion_sync"
+      }
+    },
+    {
+      "id": "e273",
+      "type": "depends_on",
+      "from": "capability:vercel_deploy",
+      "to": "integration:mcp:Vercel",
+      "evidence_level": "broken"
+    },
+    {
+      "id": "e274",
+      "type": "depends_on",
+      "from": "capability:gh_cli_auth",
+      "to": "tool:cli:gh",
+      "evidence_level": "broken"
+    },
+    {
+      "id": "e10000",
+      "type": "has_path",
+      "from": "capability:github",
+      "to": "integration:mcp:Github",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:github:mcp"
+      }
+    },
+    {
+      "id": "e10001",
+      "type": "has_path",
+      "from": "capability:github",
+      "to": "tool:cli:gh",
+      "evidence_level": "broken",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:github:cli"
+      }
+    },
+    {
+      "id": "e10002",
+      "type": "has_path",
+      "from": "capability:github",
+      "to": "tool:mcp:Github",
+      "evidence_level": "verified",
+      "path_kind": "api",
+      "metadata": {
+        "path_id": "path:github:api"
+      }
+    },
+    {
+      "id": "e10003",
+      "type": "has_path",
+      "from": "capability:vercel",
+      "to": "tool:cli:vercel",
+      "evidence_level": "broken",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:vercel:cli"
+      }
+    },
+    {
+      "id": "e10004",
+      "type": "has_path",
+      "from": "capability:vercel",
+      "to": "integration:mcp:Vercel",
+      "evidence_level": "broken",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:vercel:mcp"
+      }
+    },
+    {
+      "id": "e10005",
+      "type": "has_path",
+      "from": "capability:aws",
+      "to": "tool:cli:aws",
+      "evidence_level": "broken",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:aws:cli"
+      }
+    },
+    {
+      "id": "e10006",
+      "type": "has_path",
+      "from": "capability:gcloud",
+      "to": "tool:cli:gcloud",
+      "evidence_level": "broken",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:gcloud:cli"
+      }
+    },
+    {
+      "id": "e10007",
+      "type": "has_path",
+      "from": "capability:stripe",
+      "to": "tool:cli:stripe",
+      "evidence_level": "broken",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:stripe:cli"
+      }
+    },
+    {
+      "id": "e10008",
+      "type": "has_path",
+      "from": "capability:docker",
+      "to": "tool:cli:docker",
+      "evidence_level": "verified",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:docker:cli"
+      }
+    },
+    {
+      "id": "e10009",
+      "type": "has_path",
+      "from": "capability:gmail",
+      "to": "integration:mcp:Gmail",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:gmail:mcp"
+      }
+    },
+    {
+      "id": "e10010",
+      "type": "has_path",
+      "from": "capability:x",
+      "to": "integration:mcp:X",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:x:mcp"
+      }
+    },
+    {
+      "id": "e10011",
+      "type": "has_path",
+      "from": "capability:slack",
+      "to": "integration:mcp:Slack--evenslouis",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:slack:mcp"
+      }
+    },
+    {
+      "id": "e10012",
+      "type": "has_path",
+      "from": "capability:higgsfield",
+      "to": "integration:mcp:Higgsfield",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:higgsfield:mcp"
+      }
+    },
+    {
+      "id": "e10013",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-hosting",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:hosting:mcp"
+      }
+    },
+    {
+      "id": "e10014",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-wordpress",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:wordpress:mcp"
+      }
+    },
+    {
+      "id": "e10015",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-domains",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:domains:mcp"
+      }
+    },
+    {
+      "id": "e10016",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-dns",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:dns:mcp"
+      }
+    },
+    {
+      "id": "e10017",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-billing",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:billing:mcp"
+      }
+    },
+    {
+      "id": "e10018",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-reach",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:reach:mcp"
+      }
+    },
+    {
+      "id": "e10019",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-ecommerce",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:ecommerce:mcp"
+      }
+    },
+    {
+      "id": "e10020",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "integration:mcp:Hostinger-vps",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:hostinger:vps:mcp"
+      }
+    },
+    {
+      "id": "e10021",
+      "type": "has_path",
+      "from": "capability:hostinger",
+      "to": "credential:Hostinger_token_file_REF",
+      "evidence_level": "discovered",
+      "path_kind": "local_service",
+      "metadata": {
+        "path_id": "path:hostinger:token_file:local_service"
+      }
+    },
+    {
+      "id": "e10022",
+      "type": "has_path",
+      "from": "capability:codex",
+      "to": "tool:cli:codex",
+      "evidence_level": "verified",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:codex:cli"
+      }
+    },
+    {
+      "id": "e10023",
+      "type": "has_path",
+      "from": "capability:claude",
+      "to": "tool:cli:claude",
+      "evidence_level": "verified",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:claude:cli"
+      }
+    },
+    {
+      "id": "e10024",
+      "type": "has_path",
+      "from": "capability:credential_provider",
+      "to": "credential:provider",
+      "evidence_level": "broken",
+      "path_kind": "local_service",
+      "metadata": {
+        "path_id": "path:credential_provider:local_service"
+      }
+    },
+    {
+      "id": "e10025",
+      "type": "has_path",
+      "from": "capability:credential_provider",
+      "to": "credential:1Password",
+      "evidence_level": "broken",
+      "path_kind": "local_service",
+      "metadata": {
+        "path_id": "path:credential_provider:1password"
+      }
+    },
+    {
+      "id": "e10026",
+      "type": "has_path",
+      "from": "capability:browser_computer_use",
+      "to": "integration:mcp:Playwright",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:browser:playwright_mcp"
+      }
+    },
+    {
+      "id": "e10027",
+      "type": "has_path",
+      "from": "capability:browser_computer_use",
+      "to": "integration:mcp:Browser-use",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "path_id": "path:browser:browser_use_mcp"
+      }
+    },
+    {
+      "id": "e10028",
+      "type": "has_path",
+      "from": "capability:browser_computer_use",
+      "to": "tool:cli:playwright",
+      "evidence_level": "verified",
+      "path_kind": "cli",
+      "metadata": {
+        "path_id": "path:browser:cli_playwright"
+      }
+    },
+    {
+      "id": "e10029",
+      "type": "falls_back_to",
+      "from": "capability:github",
+      "to": "capability:github",
+      "evidence_level": "verified",
+      "path_kind": "mcp",
+      "metadata": {
+        "from_path": "path:github:cli",
+        "to_path": "path:github:mcp",
+        "reason": "CLI logged out; MCP authenticated"
+      }
+    },
+    {
+      "id": "e10030",
+      "type": "falls_back_to",
+      "from": "capability:docker",
+      "to": "capability:docker",
+      "evidence_level": "broken",
+      "path_kind": "cli",
+      "metadata": {
+        "from_path": "path:docker:local_service",
+        "to_path": "path:docker:cli",
+        "reason": "daemon down; CLI alone insufficient for runtime"
+      }
+    },
+    {
+      "id": "e10031",
+      "type": "depends_on",
+      "from": "capability:gh_cli_auth",
+      "to": "capability:github",
+      "evidence_level": "declared",
+      "metadata": {
+        "migration": "v0_stub_to_v1_multipath"
+      }
+    },
+    {
+      "id": "e10032",
+      "type": "depends_on",
+      "from": "capability:vercel_deploy",
+      "to": "capability:vercel",
+      "evidence_level": "declared",
+      "metadata": {
+        "migration": "v0_stub_to_v1_multipath"
+      }
+    },
+    {
+      "id": "e10033",
+      "type": "depends_on",
+      "from": "capability:aws_cli_auth",
+      "to": "capability:aws",
+      "evidence_level": "declared",
+      "metadata": {
+        "migration": "v0_stub_to_v1_multipath"
+      }
+    },
+    {
+      "id": "e10034",
+      "type": "depends_on",
+      "from": "capability:gcloud_cli_auth",
+      "to": "capability:gcloud",
+      "evidence_level": "declared",
+      "metadata": {
+        "migration": "v0_stub_to_v1_multipath"
+      }
+    },
+    {
+      "id": "e10035",
+      "type": "depends_on",
+      "from": "capability:docker_daemon",
+      "to": "capability:docker",
+      "evidence_level": "declared",
+      "metadata": {
+        "migration": "v0_stub_to_v1_multipath"
+      }
+    },
+    {
+      "id": "e10036",
+      "type": "depends_on",
+      "from": "capability:stripe_api",
+      "to": "capability:stripe",
+      "evidence_level": "declared",
+      "metadata": {
+        "migration": "v0_stub_to_v1_multipath"
+      }
+    }
+  ]
+}
