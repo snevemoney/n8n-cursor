@@ -245,8 +245,8 @@ def has_openrouter_key() -> bool:
 
 
 def openrouter_model() -> str:
-    """Ordinary talk uses the OpenRouter model Evens named: nex-agi/nex-n2.5-mini:free."""
-    return "nex-agi/nex-n2.5-mini:free"
+    """Ordinary talk uses the OpenRouter model Evens named: x-ai/grok-4."""
+    return "x-ai/grok-4"
 
 
 def _well_formed_file_key(key_b64: str) -> bool:
@@ -440,7 +440,7 @@ def call_openrouter(
 
     images / extra_tools / hands keep the historical call signature. Ordinary
     questions are text. The OpenRouter model for this mouth is
-    nex-agi/nex-n2.5-mini:free. A missing key does not POST.
+    x-ai/grok-4. A missing key does not POST.
     """
     _ = (images, extra_tools, hands)
     model = openrouter_model()
