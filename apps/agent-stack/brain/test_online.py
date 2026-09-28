@@ -343,34 +343,78 @@ class OnlineBrainTest(unittest.TestCase):
 
     def test_call_openrouter_uses_the_named_model(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")
+        lane_text = Path(MOD.LANES.__file__).read_text(encoding="utf-8")
         named = "qwen/qwen3.8-27b:free"
         self.assertEqual(MOD.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
         self.assertEqual(MOD.openrouter_model(), named)
-        self.assertIn(named, text)
+        self.assertIn(named, lane_text)
         self.assertNotIn("claude-haiku", text)
+        self.assertNotIn("claude-haiku", lane_text)
         self.assertNotIn("x-ai/grok-4", text)
         self.assertNotIn("nex-agi/nex-n2.5-mini:free", text)
         self.assertNotIn("openrouter/free", text)
+        self.assertNotIn("jev-question-packs", text)
+        self.assertNotIn("jev-question-packs", lane_text)
         seen: dict = {}
 
         def fake_http(url, data=None, headers=None, timeout=20.0):
             seen["url"] = url
             seen["model"] = (data or {}).get("model")
+            seen["messages"] = (data or {}).get("messages")
             auth = str((headers or {}).get("Authorization") or "")
             seen["auth_is_bearer"] = auth.startswith("Bearer ") and len(auth) > len("Bearer ")
-            return {"choices": [{"message": {"content": "Tokyo."}}]}
+            return {"choices": [{"message": {"content": "Tokyo."}}], "usage": {"total_tokens": 3}}
 
+        correlation = {
+            "turn_id": "turn-face-1",
+            "conversation_id": "face-session-1",
+            "face": {
+                "surface": "face",
+                "session_id": "face-session-1",
+                "turn_id": "turn-face-1",
+                "utterance": "What is the capital of Japan?",
+            },
+        }
         with mock.patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key"}, clear=False):
             with mock.patch.object(MOD, "_http_json", side_effect=fake_http):
-                out = MOD.call_openrouter("What is the capital of Japan?", "Earlier: none.")
+                out = MOD.call_openrouter(
+                    "What is the capital of Japan?",
+                    "Earlier: none.",
+                    correlation=correlation,
+                )
         self.assertFalse(out["unknown"])
         self.assertEqual(out["wire"], "openrouter")
         self.assertEqual(out["engine"], "openrouter")
+        self.assertEqual(out["provider"], "openrouter")
+        self.assertEqual(out["capability"], "conversation")
+        self.assertEqual(out["lane"], "NORMAL_CONVERSATION")
+        self.assertFalse(out["jev_called"])
+        self.assertTrue(out["provider_call"])
         self.assertEqual(out["model"], named)
         self.assertEqual(seen.get("model"), named)
         self.assertEqual(seen.get("url"), MOD.OPENROUTER_URL)
         self.assertTrue(seen.get("auth_is_bearer"))
         self.assertEqual(out["spoken"], "Tokyo.")
+        blob = json.dumps(seen.get("messages"))
+        self.assertNotIn("question pack", blob.lower())
+        self.assertNotIn("user problem", blob.lower())
+        receipt = out["receipt"]
+        self.assertEqual(receipt["provider"], "openrouter")
+        self.assertEqual(receipt["capability"], "conversation")
+        self.assertEqual(receipt["model"], named)
+        self.assertTrue(receipt["provider_call"])
+        self.assertFalse(receipt["jev_called"])
+        self.assertFalse(receipt["model_proven"])
+        self.assertEqual(receipt["closure"], "OPEN")
+        self.assertIsNone(receipt["question_pack"])
+        self.assertFalse(receipt["question_packs_loaded"])
+        self.assertEqual(receipt["turn_id"], "turn-face-1")
+        self.assertEqual(receipt["conversation_id"], "face-session-1")
+        self.assertEqual(receipt["context_used"]["text"], "Earlier: none.")
+        self.assertEqual(receipt["response"], "Tokyo.")
+        self.assertEqual(receipt["face_correlation"]["surface"], "face")
+        self.assertEqual(receipt["face_correlation"]["turn_id"], "turn-face-1")
+        self.assertEqual(receipt["usage"]["total_tokens"], 3)
         self.assertNotIn("test-key", json.dumps(out))
         self.assertNotIn("OPENROUTER_API_KEY", out["spoken"])
 
@@ -381,9 +425,38 @@ class OnlineBrainTest(unittest.TestCase):
                 out = MOD.call_openrouter("How are you?")
         self.assertTrue(out["unknown"])
         self.assertEqual(out["wire"], "openrouter")
+        self.assertEqual(out["capability"], "conversation")
+        self.assertFalse(out["provider_call"])
+        self.assertFalse(out["jev_called"])
         self.assertEqual(out["model"], "qwen/qwen3.8-27b:free")
+        self.assertEqual(out["receipt"]["closure"], "OPEN")
+        self.assertFalse(out["receipt"]["model_proven"])
+        self.assertFalse(MOD.LANES.conversation_closed())
+        self.assertFalse(MOD.LANES.jev_closed())
         self.assertNotIn("OPENROUTER_API_KEY", out["spoken"])
         self.assertNotIn("test-key", json.dumps(out))
+
+    def test_openrouter_key_does_not_prove_the_conversation_model(self) -> None:
+        judgment_path = Path(__file__).resolve().parents[3] / "scripts" / "hive" / "eng" / "judgment.py"
+        spec = importlib.util.spec_from_file_location("hive_eng_judgment_lane_check", judgment_path)
+        if spec is None or spec.loader is None:
+            self.fail("judgment module missing")
+        judgment = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(judgment)
+        with mock.patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key"}, clear=False):
+            report = MOD.wire_report()["wires"]["openrouter"]
+            route = MOD.LANES.route_conversation()
+        self.assertEqual(report["role"], "transport")
+        self.assertEqual(report["credential"], "present")
+        self.assertFalse(report["model_proven"])
+        self.assertEqual(report["closure"], "OPEN")
+        self.assertFalse(report["jev_called"])
+        self.assertEqual(report["lane"], "NORMAL_CONVERSATION")
+        self.assertEqual(route["model"], "qwen/qwen3.8-27b:free")
+        self.assertNotEqual(route["model"], judgment.SELECT_MODEL_ID)
+        self.assertTrue(route["credential_present"])
+        self.assertFalse(route["model_proven"])
+        self.assertNotIn("test-key", json.dumps(report))
 
 
 if __name__ == "__main__":

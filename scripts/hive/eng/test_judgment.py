@@ -338,6 +338,8 @@ class JudgmentBoundaryTest(unittest.TestCase):
         self.assertFalse(decision["jev_called"])
         self.assertFalse(decision["provider_call"])
         self.assertEqual(decision["provider"], "openrouter")
+        self.assertEqual(decision["capability"], "jev")
+        self.assertEqual(decision["closure"], "OPEN")
         self.assertEqual(decision["model"], "anthropic/claude-haiku-4-5")
         self.assertEqual(decision["max_tokens"], 1024)
         self.assertEqual(decision["api"], "openai-completions")
