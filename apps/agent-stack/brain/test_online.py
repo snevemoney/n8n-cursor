@@ -343,12 +343,11 @@ class OnlineBrainTest(unittest.TestCase):
 
     def test_call_openrouter_uses_the_named_model(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")
-        named = "x-ai/grok-4"
+        named = "x-ai/grok-4.7"
         self.assertEqual(MOD.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
         self.assertEqual(MOD.openrouter_model(), named)
         self.assertIn(named, text)
         self.assertNotIn("claude-haiku", text)
-        self.assertNotIn("x-ai/grok-4.7", text)
         self.assertNotIn("x-ai/grok-4.20", text)
         seen: dict = {}
 
@@ -380,7 +379,7 @@ class OnlineBrainTest(unittest.TestCase):
                 out = MOD.call_openrouter("How are you?")
         self.assertTrue(out["unknown"])
         self.assertEqual(out["wire"], "openrouter")
-        self.assertEqual(out["model"], "x-ai/grok-4")
+        self.assertEqual(out["model"], "x-ai/grok-4.7")
         self.assertNotIn("OPENROUTER_API_KEY", out["spoken"])
         self.assertNotIn("test-key", json.dumps(out))
 

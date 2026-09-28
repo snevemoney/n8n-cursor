@@ -1080,7 +1080,7 @@ class OpenRouterMouthTest(unittest.TestCase):
     def test_ordinary_question_uses_the_named_openrouter_model(self) -> None:
         os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
         online = MOUTH.PIPELINE.ONLINE
-        named = "x-ai/grok-4"
+        named = "x-ai/grok-4.7"
         self.assertEqual(online.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
         self.assertEqual(online.openrouter_model(), named)
         self.assertIn(named, Path(online.__file__).read_text(encoding="utf-8"))
