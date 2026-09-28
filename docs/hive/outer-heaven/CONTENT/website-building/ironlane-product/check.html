@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Check book path — Ironlane Studio · SAMPLE</title>
+  <meta name="description" content="Paste a site address and see whether members can book without texting. Local example doors only. No live site is fetched." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23d97b00%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EIS%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/ironlane.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Ironlane Studio home">
+      <span class="mark" aria-hidden="true">IS</span>
+      <span class="name">Ironlane Studio<small>Fitness · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#floor">Floor</a></li>
+        <li><a href="check.html" aria-current="page">Proof</a></li>
+        <li><a href="book.html">Times</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-amber btn-small" href="book.html">Book a session</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="check-title">
+    <p class="eyebrow">One check</p>
+    <h2 id="check-title">Or your site <span class="hi">books</span> them.</h2>
+    <p class="sub">
+      Paste a site address. We tell you whether a member can book without texting the owner.
+      This demo only knows a few example doors — nothing is fetched from the internet.
+    </p>
+
+    <div class="two-up">
+      <form class="card panel" id="check-form" novalidate>
+        <div>
+          <label for="site-url">Site address</label>
+          <input class="input" id="site-url" name="url" type="text" inputmode="url" autocomplete="off"
+                 spellcheck="false" placeholder="yoursite.com" aria-describedby="url-help" />
+          <p class="sr-only" id="url-help">Example doors: ironlane.example passes, dm-only-gym.example hits a wall.</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-amber" type="submit" id="check-btn">Check book path</button>
+          <button class="btn btn-ghost btn-small" type="reset" id="check-reset">Clear</button>
+        </div>
+        <div>
+          <p class="eyebrow">Try an example door</p>
+          <div class="chips" id="chips" role="group" aria-label="Example site addresses"></div>
+        </div>
+      </form>
+
+      <section class="result" id="result" data-status="idle" hidden aria-live="polite" aria-atomic="true">
+        <p class="eyebrow" id="result-eyebrow">Result</p>
+        <h3 class="headline" id="result-headline"></h3>
+        <p class="detail" id="result-detail"></p>
+        <p class="path" id="result-path"></p>
+        <div class="wall" id="wall" hidden>
+          <div class="code">404</div>
+          <div>Page not found</div>
+          <span class="tag">Dead end</span>
+        </div>
+        <div class="actions" id="result-actions" hidden>
+          <a class="btn btn-green" href="book.html" id="result-book">Open the calendar</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>Ironlane Studio · SAMPLE · CapEx / preview</span>
+    <span>No fetch · No crawl · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/door-check-ui.js"></script>
+</body>
+</html>
