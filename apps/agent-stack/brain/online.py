@@ -245,8 +245,8 @@ def has_openrouter_key() -> bool:
 
 
 def openrouter_model() -> str:
-    """Ordinary talk uses the OpenRouter model Evens named: qwen/qwen3.8-27b:free."""
-    return "qwen/qwen3.8-27b:free"
+    """Ordinary talk uses the OpenRouter model Evens named: google/gemma-4-31b-it:free."""
+    return "google/gemma-4-31b-it:free"
 
 
 def _well_formed_file_key(key_b64: str) -> bool:
@@ -440,7 +440,7 @@ def call_openrouter(
 
     images / extra_tools / hands keep the historical call signature. Ordinary
     questions are text. The OpenRouter model for this mouth is
-    qwen/qwen3.8-27b:free. A missing key does not POST.
+    google/gemma-4-31b-it:free. A missing key does not POST.
     """
     _ = (images, extra_tools, hands)
     model = openrouter_model()
