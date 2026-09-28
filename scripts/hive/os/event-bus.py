@@ -581,12 +581,12 @@ def _latest_primary_row(path: Path) -> dict[str, Any] | None:
     return latest
 
 
-def _start_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
+def _operation_receipt(path: Path, mission_id: str, operation: str) -> dict[str, Any] | None:
     found: dict[str, Any] | None = None
     for row in _read_all(path):
         if row.get("type") != "continuity.receipt":
             continue
-        if row.get("operation") != "start":
+        if row.get("operation") != operation:
             continue
         if row.get("mission_id") != mission_id:
             continue
@@ -594,10 +594,20 @@ def _start_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
     return found
 
 
+def _start_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
+    return _operation_receipt(path, mission_id, "start")
+
+
+def _continue_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
+    return _operation_receipt(path, mission_id, "continue")
+
+
 def _mission_from_log(path: Path, mission_id: str) -> tuple[str, str] | None:
     """Recover one mission from the log. Not from the latest head payload."""
-    receipt = _start_receipt(path, mission_id)
-    if receipt:
+    for operation in ("start", "continue"):
+        receipt = _operation_receipt(path, mission_id, operation)
+        if not receipt:
+            continue
         session_id = receipt.get("session_id")
         if isinstance(session_id, str) and session_id:
             return mission_id, session_id
@@ -714,6 +724,89 @@ def start(
     }
 
 
+def continue_mission(
+    *,
+    mission_id: str | None = None,
+    session_id: str | None = None,
+    source: str = "cli",
+    caller: str = "operator",
+    path: Path = DEFAULT_PATH,
+) -> dict[str, Any]:
+    """CONTINUE the mission already stored for this mission_id.
+
+    Resumes that mission_id and its stored session_id. Does not generate a
+    replacement mission. Not a phase. Not cancel or result. A replay of the
+    same continue returns the stored receipt and does not append.
+    """
+    mission_id = (mission_id or "").strip()
+    if not mission_id:
+        return {
+            "result": "REJECTED",
+            "reason": "continue requires the mission_id of the mission being resumed",
+            "inserted": False,
+        }
+    existing = _mission_from_log(path, mission_id)
+    if not existing:
+        return {
+            "result": "REJECTED",
+            "reason": "no mission to resume",
+            "mission_id": mission_id,
+            "inserted": False,
+        }
+    stored_mission, stored_session = existing
+    # session_id is accepted and ignored. The stored session is the one resumed.
+    prior = _continue_receipt(path, stored_mission)
+    if prior:
+        return {
+            "mission_id": stored_mission,
+            "session_id": stored_session,
+            "receipt": prior,
+        }
+    auth = authoritative(JARVIS_ENTITY, path)
+    previous_state = status(path=path, mission_id=stored_mission)
+    version = int(auth["state_version"]) + 1 if auth else 1
+    stamp = _now_iso()
+    published = publish_jarvis(
+        {
+            "mission_id": stored_mission,
+            "session_id": stored_session,
+            "local": True,
+            "harmless": True,
+            "resumed": True,
+        },
+        state_version=version,
+        source_session=stored_session,
+        writer=caller,
+        path=path,
+        changed_at=stamp,
+    )
+    new_state = status(path=path, mission_id=stored_mission)
+    landed = published.get("published") if isinstance(published, dict) else None
+    phase = str((landed or {}).get("phase") or (landed or {}).get("result") or "")
+    if phase and phase not in _KNOWN_PHASES:
+        raise RuntimeError(f"continue used an unknown phase {phase}")
+    receipt = {
+        "type": "continuity.receipt",
+        "mission_id": stored_mission,
+        "session_id": stored_session,
+        "operation": "continue",
+        "source": source,
+        "caller": caller,
+        "state_version": new_state.get("state_version"),
+        "timestamp": stamp,
+        "result": new_state.get("result"),
+        "previous_state": previous_state,
+        "new_state": new_state,
+        "event_id": f"{JARVIS_ENTITY}:{stored_mission}:continue",
+    }
+    append_event(receipt, path=path)
+    return {
+        "mission_id": stored_mission,
+        "session_id": stored_session,
+        "receipt": receipt,
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--emit", metavar="TYPE", help="Emit standard event type")
@@ -725,11 +818,35 @@ def main() -> int:
     ap.add_argument("--path", type=Path, default=DEFAULT_PATH)
     ap.add_argument("--status", action="store_true", help="Print JARVIS_PRIMARY phase, result, and state_version")
     ap.add_argument("--start", action="store_true", help="START one harmless local mission on this bus")
-    ap.add_argument("--mission-id", default=None, help="mission_id for --start or --status")
-    ap.add_argument("--session-id", default=None, help="session_id for --start")
+    ap.add_argument(
+        "--continue",
+        dest="continue_mission",
+        action="store_true",
+        help="CONTINUE the mission named by --mission-id on this bus",
+    )
+    ap.add_argument("--mission-id", default=None, help="mission_id for --start, --continue, or --status")
+    ap.add_argument("--session-id", default=None, help="session_id for --start; continue keeps the stored session")
     ap.add_argument("--jarvis", action="store_true", help="Publish one versioned fact on the primary Jarvis consumer")
     ap.add_argument("--state-version", type=int, help="state_version for --jarvis")
     args = ap.parse_args()
+
+    if args.continue_mission:
+        if not (args.mission_id or "").strip():
+            print("continue requires --mission-id of the mission being resumed", file=sys.stderr)
+            return 1
+        resumed = continue_mission(
+            mission_id=args.mission_id,
+            session_id=args.session_id,
+            source=args.source,
+            caller=args.actor,
+            path=args.path,
+        )
+        print(json.dumps(resumed, indent=2, ensure_ascii=False))
+        if resumed.get("result") == "REJECTED":
+            return 1
+        if args.status:
+            print(json.dumps(status(path=args.path, mission_id=resumed.get("mission_id")), indent=2, ensure_ascii=False))
+        return 0
 
     if args.start:
         started = start(
