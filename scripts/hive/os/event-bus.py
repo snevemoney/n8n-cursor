@@ -606,9 +606,13 @@ def _cancel_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
     return _operation_receipt(path, mission_id, "cancel")
 
 
+def _result_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
+    return _operation_receipt(path, mission_id, "result")
+
+
 def _mission_from_log(path: Path, mission_id: str) -> tuple[str, str] | None:
     """Recover one mission from the log. Not from the latest head payload."""
-    for operation in ("start", "continue", "cancel"):
+    for operation in ("start", "continue", "cancel", "result"):
         receipt = _operation_receipt(path, mission_id, operation)
         if not receipt:
             continue
@@ -892,6 +896,107 @@ def cancel_mission(
     }
 
 
+def _result_correlation(
+    *,
+    mission_id: str,
+    session_id: str,
+    source: str,
+    caller: str,
+    recorded: dict[str, Any],
+    stamp: str,
+    event_id: str | None = None,
+) -> dict[str, Any]:
+    phase = recorded.get("phase")
+    if phase is not None and phase not in _KNOWN_PHASES:
+        raise RuntimeError(f"result saw an unknown phase {phase}")
+    return {
+        "type": "continuity.receipt",
+        "mission_id": mission_id,
+        "session_id": session_id,
+        "operation": "result",
+        "source": source,
+        "caller": caller,
+        "state_version": recorded.get("state_version"),
+        "timestamp": stamp,
+        "result": recorded.get("result"),
+        "previous_state": dict(recorded),
+        "new_state": dict(recorded),
+        "event_id": event_id or f"{JARVIS_ENTITY}:{mission_id}:result",
+    }
+
+
+def result(
+    *,
+    mission_id: str | None = None,
+    session_id: str | None = None,
+    source: str = "cli",
+    caller: str = "operator",
+    path: Path = DEFAULT_PATH,
+) -> dict[str, Any]:
+    """RESULT for the mission already stored for this mission_id.
+
+    Reports the current recorded state for that mission. After cancel, reports
+    the cancelled terminal state already stored. Not a phase. Does not publish,
+    resume, or stop. A replay of the same result returns the stored receipt and
+    does not append. Identity comes from the log, not the latest head payload.
+
+    session_id is accepted and ignored. The stored session is the one reported.
+    """
+    mission_id = (mission_id or "").strip()
+    if not mission_id:
+        return {
+            "result": "REJECTED",
+            "reason": "result requires the mission_id of the mission being reported",
+            "inserted": False,
+        }
+    existing = _mission_from_log(path, mission_id)
+    if not existing:
+        return {
+            "result": "REJECTED",
+            "reason": "no mission to report",
+            "mission_id": mission_id,
+            "inserted": False,
+        }
+    stored_mission, stored_session = existing
+    recorded = status(path=path, mission_id=stored_mission)
+    prior = _result_receipt(path, stored_mission)
+    if prior:
+        if recorded.get("result") == "cancelled" and prior.get("result") != "cancelled":
+            reported = _result_correlation(
+                mission_id=stored_mission,
+                session_id=stored_session,
+                source=str(prior.get("source") or source),
+                caller=str(prior.get("caller") or caller),
+                recorded=recorded,
+                stamp=str(prior.get("timestamp") or _now_iso()),
+                event_id=str(prior.get("event_id") or ""),
+            )
+            return {
+                "mission_id": stored_mission,
+                "session_id": stored_session,
+                "receipt": reported,
+            }
+        return {
+            "mission_id": stored_mission,
+            "session_id": stored_session,
+            "receipt": prior,
+        }
+    receipt = _result_correlation(
+        mission_id=stored_mission,
+        session_id=stored_session,
+        source=source,
+        caller=caller,
+        recorded=recorded,
+        stamp=_now_iso(),
+    )
+    append_event(receipt, path=path)
+    return {
+        "mission_id": stored_mission,
+        "session_id": stored_session,
+        "receipt": receipt,
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--emit", metavar="TYPE", help="Emit standard event type")
@@ -914,8 +1019,14 @@ def main() -> int:
         action="store_true",
         help="CANCEL the mission named by --mission-id on this bus",
     )
-    ap.add_argument("--mission-id", default=None, help="mission_id for --start, --continue, --cancel, or --status")
-    ap.add_argument("--session-id", default=None, help="session_id for --start; continue and cancel keep the stored session")
+    ap.add_argument(
+        "--result",
+        dest="result_flag",
+        action="store_true",
+        help="RESULT the mission named by --mission-id on this bus",
+    )
+    ap.add_argument("--mission-id", default=None, help="mission_id for --start, --continue, --cancel, --result, or --status")
+    ap.add_argument("--session-id", default=None, help="session_id for --start; continue, cancel, and result keep the stored session")
     ap.add_argument("--jarvis", action="store_true", help="Publish one versioned fact on the primary Jarvis consumer")
     ap.add_argument("--state-version", type=int, help="state_version for --jarvis")
     args = ap.parse_args()
@@ -936,6 +1047,24 @@ def main() -> int:
             return 1
         if args.status:
             print(json.dumps(status(path=args.path, mission_id=stopped.get("mission_id")), indent=2, ensure_ascii=False))
+        return 0
+
+    if args.result_flag:
+        if not (args.mission_id or "").strip():
+            print("result requires --mission-id of the mission being reported", file=sys.stderr)
+            return 1
+        reported = result(
+            mission_id=args.mission_id,
+            session_id=args.session_id,
+            source=args.source,
+            caller=args.actor,
+            path=args.path,
+        )
+        print(json.dumps(reported, indent=2, ensure_ascii=False))
+        if reported.get("result") == "REJECTED":
+            return 1
+        if args.status:
+            print(json.dumps(status(path=args.path, mission_id=reported.get("mission_id")), indent=2, ensure_ascii=False))
         return 0
 
     if args.continue_mission:
@@ -982,14 +1111,14 @@ def main() -> int:
             if not isinstance(payload, dict):
                 print("payload must be a JSON object", file=sys.stderr)
                 return 1
-            result = publish_jarvis(
+            published_jarvis = publish_jarvis(
                 payload,
                 state_version=args.state_version,
                 source_session=args.source,
                 writer=args.actor,
                 path=args.path,
             )
-            print(json.dumps(result, indent=2, ensure_ascii=False))
+            print(json.dumps(published_jarvis, indent=2, ensure_ascii=False))
         if args.status:
             print(json.dumps(status(path=args.path, mission_id=args.mission_id), indent=2, ensure_ascii=False))
         return 0
