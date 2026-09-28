@@ -1076,5 +1076,44 @@ class ContinuityStatusWireTest(unittest.TestCase):
             bus_mod.status = real_status
 
 
+class OpenRouterMouthTest(unittest.TestCase):
+    def test_ordinary_question_uses_the_named_openrouter_model(self) -> None:
+        os.environ.pop("AGENT_STACK_CURSOR_DRY", None)
+        online = MOUTH.PIPELINE.ONLINE
+        named = "google/gemma-4-31b-it:free"
+        self.assertEqual(online.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
+        self.assertEqual(online.openrouter_model(), named)
+        self.assertIn(named, Path(online.__file__).read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory(prefix="pipeline-openrouter-mouth-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "vault").mkdir(parents=True)
+            with unittest.mock.patch.object(online, "openrouter_api_key", return_value=""):
+                with unittest.mock.patch.object(online, "_http_json", side_effect=AssertionError("must not post")):
+                    with unittest.mock.patch.object(online, "call_xai", side_effect=AssertionError("xai")):
+                        events = list(
+                            MOUTH.apply_turn_iter(
+                                "What is the capital of Japan?",
+                                hive=hive,
+                                retrieve_roots=[hive / "vault"],
+                            )
+                        )
+                        stopped = MOUTH.apply_turn("stop", hive=hive, retrieve_roots=[hive / "vault"])
+                        greeted = MOUTH.apply_turn("Hey Jarvis.", hive=hive, retrieve_roots=[hive / "vault"])
+                        watched = MOUTH.apply_turn(
+                            "Watch the local value and tell me when it changes.",
+                            hive=hive,
+                            retrieve_roots=[hive / "vault"],
+                        )
+        done = events[-1]
+        spoken = done.get("spoken") or ""
+        self.assertIsNone(done.get("brain"))
+        self.assertNotIn("Tokyo", spoken)
+        self.assertNotIn("nex-agi", spoken)
+        self.assertEqual(stopped.get("verb"), "stop")
+        self.assertIn("Standing by", greeted.get("spoken") or "")
+        self.assertEqual(watched.get("verb"), "watch")
+
+
 if __name__ == "__main__":
     unittest.main()

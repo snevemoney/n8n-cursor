@@ -24,6 +24,7 @@ GOLDEN = "https://evenslouis.ca/scorpion/api/hive/golden-paths"
 SCORPION_HEALTH = "https://evenslouis.ca/scorpion/healthz"
 PRO_HEALTH = "https://evenslouis.ca/pro/api/health"
 XAI_URL = "https://api.x.ai/v1/chat/completions"
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 GROKBOT_CONN = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 DEFAULT_VPS = "root@69.62.66.78"
 DEFAULT_MODEL = "grok-4"
@@ -32,6 +33,7 @@ ALLOWED_ENV = (
     "XAI_API_KEY",
     "GROK_API_KEY",
     "GROK_MODEL",
+    "OPENROUTER_API_KEY",
     "GROKBOT_BASE_URL",
     "GROKBOT_TOKEN",
 )
@@ -233,6 +235,20 @@ def grok_model() -> str:
     return (os.environ.get("GROK_MODEL") or DEFAULT_MODEL).strip() or DEFAULT_MODEL
 
 
+def openrouter_api_key() -> str:
+    return (os.environ.get("OPENROUTER_API_KEY") or "").strip()
+
+
+def has_openrouter_key() -> bool:
+    """Yes/no only. Never log or return the secret."""
+    return bool(openrouter_api_key())
+
+
+def openrouter_model() -> str:
+    """Ordinary talk uses the OpenRouter model Evens named: google/gemma-4-31b-it:free."""
+    return "google/gemma-4-31b-it:free"
+
+
 def _well_formed_file_key(key_b64: str) -> bool:
     raw = (key_b64 or "").strip()
     if not raw:
@@ -370,6 +386,7 @@ def wire_report() -> dict:
         "wires": {
             "brain": "store",
             "store": "vault+repo+sessions+hive",
+            "openrouter": "talk" if has_openrouter_key() else "off",
             "grok": "talk" if grok_api_key() else "off",
             "grokbot": grokbot,
             "hive": "http",
@@ -394,6 +411,79 @@ def unknown_grok() -> dict:
         "wire": "grok",
         "spoken": "UNKNOWN. Grok is a desk host, not the store.",
         "engine": "unknown",
+    }
+
+
+def _openrouter_miss(model: str, detail: str = "") -> dict:
+    spoken = "UNKNOWN. OpenRouter returned no text."
+    extra = (detail or "").strip()
+    if extra and "OPENROUTER_API_KEY" not in extra and openrouter_api_key() not in extra:
+        spoken = f"{spoken} {extra}."
+    return {
+        "ok": False,
+        "unknown": True,
+        "wire": "openrouter",
+        "engine": "openrouter",
+        "model": model,
+        "spoken": spoken,
+    }
+
+
+def call_openrouter(
+    prompt: str,
+    context: str = "",
+    images=None,
+    extra_tools=None,
+    hands: bool = True,
+) -> dict:
+    """Ordinary talk. OpenRouter chat completions. Not xAI. Not the Jev judgment sender.
+
+    images / extra_tools / hands keep the historical call signature. Ordinary
+    questions are text. The OpenRouter model for this mouth is
+    google/gemma-4-31b-it:free. A missing key does not POST.
+    """
+    _ = (images, extra_tools, hands)
+    model = openrouter_model()
+    if not model:
+        return _openrouter_miss(model)
+    key = openrouter_api_key()
+    if not key:
+        return _openrouter_miss(model)
+    ask = prompt.strip()
+    brief = (context or "").strip()
+    user = f"Live context:\n{brief}\n\nCurrent ask:\n{ask}" if brief else ask
+    try:
+        data = _http_json(
+            OPENROUTER_URL,
+            data={
+                "model": model,
+                "temperature": 0.2,
+                "max_tokens": 512,
+                "messages": [
+                    {"role": "system", "content": SYS},
+                    {"role": "user", "content": user},
+                ],
+            },
+            headers={"Authorization": f"Bearer {key}"},
+            timeout=45.0,
+        )
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as exc:
+        return _openrouter_miss(model, type(exc).__name__)
+    choices = data.get("choices") if isinstance(data, dict) else None
+    text = ""
+    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+        msg = choices[0].get("message") if isinstance(choices[0].get("message"), dict) else {}
+        text = str((msg or {}).get("content") or "").strip()
+    if not text:
+        return _openrouter_miss(model)
+    text = clip_spoken(text)
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "openrouter",
+        "engine": "openrouter",
+        "spoken": text,
+        "model": model,
     }
 
 
