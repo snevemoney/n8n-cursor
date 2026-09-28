@@ -568,12 +568,41 @@ def publish_jarvis(
     return {"published": published, "applied": applied}
 
 
-def status(*, path: Path = DEFAULT_PATH) -> dict[str, Any]:
-    """Read the latest continuity row already stored for JARVIS_PRIMARY. Does not append."""
+# One harmless local mission. Ids stay fixed so a later process reads the same pair.
+LOCAL_MISSION_ID = "mission-local-harmless"
+LOCAL_SESSION_ID = "session-local-harmless"
+_KNOWN_PHASES = frozenset(
+    {"PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED", "CONFLICT", "STALE", "REJECTED"}
+)
+
+
+def _mission_ids(row: dict[str, Any] | None) -> tuple[str | None, str | None]:
+    if not row:
+        return None, None
+    payload = row.get("payload")
+    if not isinstance(payload, dict):
+        return None, None
+    mission_id = payload.get("mission_id")
+    session_id = payload.get("session_id")
+    if not isinstance(mission_id, str) or not mission_id:
+        return None, None
+    if not isinstance(session_id, str) or not session_id:
+        return None, None
+    return mission_id, session_id
+
+
+def _latest_primary_row(path: Path) -> dict[str, Any] | None:
     latest: dict[str, Any] | None = None
     for row in _continuity_rows(path):
         if row.get("consumer") == JARVIS_PRIMARY and row.get("entity_id") == JARVIS_ENTITY:
             latest = row
+    return latest
+
+
+def status(*, path: Path = DEFAULT_PATH) -> dict[str, Any]:
+    """Read the latest continuity row already stored for JARVIS_PRIMARY. Does not append."""
+    latest = _latest_primary_row(path)
+    mission_id, session_id = _mission_ids(latest)
     if latest is None:
         return {
             "consumer": JARVIS_PRIMARY,
@@ -581,6 +610,8 @@ def status(*, path: Path = DEFAULT_PATH) -> dict[str, Any]:
             "phase": None,
             "result": None,
             "state_version": None,
+            "mission_id": mission_id,
+            "session_id": session_id,
         }
     return {
         "consumer": latest.get("consumer"),
@@ -588,6 +619,85 @@ def status(*, path: Path = DEFAULT_PATH) -> dict[str, Any]:
         "phase": latest.get("phase"),
         "result": latest.get("result"),
         "state_version": latest.get("state_version"),
+        "mission_id": mission_id,
+        "session_id": session_id,
+    }
+
+
+def _start_receipt(path: Path, mission_id: str) -> dict[str, Any] | None:
+    found: dict[str, Any] | None = None
+    for row in _read_all(path):
+        if row.get("type") != "continuity.receipt":
+            continue
+        if row.get("operation") != "start":
+            continue
+        if row.get("mission_id") != mission_id:
+            continue
+        found = row
+    return found
+
+
+def start(
+    *,
+    source: str = "cli",
+    caller: str = "operator",
+    path: Path = DEFAULT_PATH,
+) -> dict[str, Any]:
+    """START one harmless local mission on this bus.
+
+    Persists stable mission_id and session_id on the jarvis-primary row and
+    appends one receipt. Not a phase. Not continue, cancel, or result.
+    A second call returns the stored object and does not append.
+    """
+    auth = authoritative(JARVIS_ENTITY, path)
+    payload = auth.get("payload") if isinstance(auth, dict) else None
+    if isinstance(payload, dict) and payload.get("mission_id") == LOCAL_MISSION_ID:
+        mission_id, session_id = _mission_ids(auth)
+        return {
+            "mission_id": mission_id,
+            "session_id": session_id,
+            "receipt": _start_receipt(path, LOCAL_MISSION_ID),
+        }
+    previous_state = status(path=path)
+    version = int(auth["state_version"]) + 1 if auth else 1
+    stamp = _now_iso()
+    published = publish_jarvis(
+        {
+            "mission_id": LOCAL_MISSION_ID,
+            "session_id": LOCAL_SESSION_ID,
+            "local": True,
+            "harmless": True,
+        },
+        state_version=version,
+        source_session=LOCAL_SESSION_ID,
+        writer=caller,
+        path=path,
+        changed_at=stamp,
+    )
+    new_state = status(path=path)
+    landed = published.get("published") if isinstance(published, dict) else None
+    phase = str((landed or {}).get("phase") or (landed or {}).get("result") or "")
+    if phase and phase not in _KNOWN_PHASES:
+        raise RuntimeError(f"start used an unknown phase {phase}")
+    receipt = {
+        "type": "continuity.receipt",
+        "mission_id": LOCAL_MISSION_ID,
+        "session_id": LOCAL_SESSION_ID,
+        "operation": "start",
+        "source": source,
+        "caller": caller,
+        "state_version": new_state.get("state_version"),
+        "timestamp": stamp,
+        "result": new_state.get("result"),
+        "previous_state": previous_state,
+        "new_state": new_state,
+        "event_id": f"{JARVIS_ENTITY}:{version}:{LOCAL_MISSION_ID}:start",
+    }
+    append_event(receipt, path=path)
+    return {
+        "mission_id": LOCAL_MISSION_ID,
+        "session_id": LOCAL_SESSION_ID,
+        "receipt": receipt,
     }
 
 
@@ -601,9 +711,17 @@ def main() -> int:
     ap.add_argument("--tail", type=int, default=0, help="Print last N events")
     ap.add_argument("--path", type=Path, default=DEFAULT_PATH)
     ap.add_argument("--status", action="store_true", help="Print JARVIS_PRIMARY phase, result, and state_version")
+    ap.add_argument("--start", action="store_true", help="START one harmless local mission on this bus")
     ap.add_argument("--jarvis", action="store_true", help="Publish one versioned fact on the primary Jarvis consumer")
     ap.add_argument("--state-version", type=int, help="state_version for --jarvis")
     args = ap.parse_args()
+
+    if args.start:
+        started = start(source=args.source, caller=args.actor, path=args.path)
+        print(json.dumps(started, indent=2, ensure_ascii=False))
+        if args.status:
+            print(json.dumps(status(path=args.path), indent=2, ensure_ascii=False))
+        return 0
 
     if args.jarvis or args.status:
         if args.jarvis:
