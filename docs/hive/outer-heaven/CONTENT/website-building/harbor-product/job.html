@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Request a job — Harbor &amp; Co. · SAMPLE</title>
+  <meta name="description" content="SAMPLE job request. Describe the job, pick an AM or PM visit window, it lands on the calendar. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23b5561a%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EHC%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/product.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept · DEMO</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Harbor and Co home">
+      <span class="mark" aria-hidden="true">HC</span>
+      <span class="name">Harbor &amp; Co.<small>Home services · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#services">Services</a></li>
+        <li><a href="job.html" aria-current="page">Request</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#services">Back to services</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="job-title">
+    <p class="eyebrow">Request a job</p>
+    <h2 id="job-title">Write it once. <span class="hi">Pick the visit.</span></h2>
+    <p class="sub">
+      Two steps. The job: service, address, one line. The visit: an AM or PM window this week.
+      Nothing here dials, texts, quotes, or leaves this page. Sample week, sample homeowner.
+    </p>
+
+    <div class="layout">
+      <section class="frame" id="job-frame" data-state="empty" aria-labelledby="job-label">
+        <div class="frame-head">
+          <span class="label" id="job-label">Visits · <span id="week-label"></span></span>
+          <span class="state-pill" id="job-state" aria-live="polite">empty · describe the job</span>
+        </div>
+
+        <ol class="stepper" id="stepper" aria-label="Request steps"></ol>
+
+        <form class="panel" id="job-form" novalidate>
+          <fieldset class="step panel" id="step-job">
+            <legend class="eyebrow">1 · The job</legend>
+            <div class="field">
+              <label for="service">Service</label>
+              <select class="select" id="service" data-job="service"></select>
+            </div>
+            <div class="field">
+              <label for="address">Address (sample)</label>
+              <input class="input" id="address" data-job="address" type="text" autocomplete="off" placeholder="12 Sample Street" />
+            </div>
+            <div class="field">
+              <label for="note">One line about it (optional)</label>
+              <textarea class="textarea" id="note" data-job="note" placeholder="Back gutter overflowing at the corner."></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset class="step" id="step-visit" hidden>
+            <legend class="eyebrow">2 · Pick a visit</legend>
+            <div class="grid" id="grid" role="group" aria-label="Business-week grid of AM and PM visit windows"></div>
+          </fieldset>
+
+          <div class="card panel" style="margin-top:12px">
+            <p class="eyebrow">Your visit</p>
+            <p class="selection empty" id="selection" aria-live="polite">Describe the job first.</p>
+            <div class="field">
+              <label for="homeowner">Name (sample)</label>
+              <input class="input" id="homeowner" name="homeowner" type="text" autocomplete="off" placeholder="Sample homeowner" />
+            </div>
+            <div class="actions">
+              <button class="btn btn-ghost btn-small" type="button" id="back-btn" hidden>Back</button>
+              <button class="btn btn-brand" type="button" id="next-btn" disabled>Pick a visit</button>
+              <button class="btn btn-green" type="submit" id="book-btn" hidden disabled>Book visit</button>
+            </div>
+          </div>
+        </form>
+
+        <section class="outcome" id="outcome" hidden aria-live="polite" aria-atomic="true" style="margin-top:12px">
+          <p class="eyebrow">Booked</p>
+          <h3 class="headline" id="outcome-headline"></h3>
+          <p class="detail" id="outcome-detail"></p>
+        </section>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Phone tag (the old door)</p>
+          <div class="msg">Missed call · homeowner → office · 08:05</div>
+          <div class="msg">Voicemail · office → homeowner · “what’s the address again?”</div>
+          <div class="msg">Missed call · homeowner → office · 17:52</div>
+          <p class="muted-line" id="friction-line">Phone tag: three calls to describe one gutter.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load booked visit</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Visit booked · on the calendar</span>
+  </div>
+
+  <footer class="foot">
+    <span>Harbor &amp; Co. · SAMPLE · CapEx / preview</span>
+    <span>No call · No send · No quote · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/job-ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Book a demo — Ledgerline · SAMPLE</title>
+  <meta name="description" content="SAMPLE demo booking. Pick a slot, pick your role, booked on the calendar. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%232a4fc4%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3ELL%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/product.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept · DEMO</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Ledgerline home">
+      <span class="mark" aria-hidden="true">LL</span>
+      <span class="name">Ledgerline<small>Finance software · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#clarity-section">What it is</a></li>
+        <li><a href="demo.html" aria-current="page">Demo</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#clarity-section">Read the three lines</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="demo-title">
+    <p class="eyebrow">Book a demo</p>
+    <h2 id="demo-title">Pick a slot. <span class="hi">Booked.</span></h2>
+    <p class="sub">
+      Business week, four slots a day, thirty sample minutes. Pick one, say who you are, book.
+      Nothing here sends an invite, writes a CRM, or leaves this page.
+    </p>
+
+    <div class="layout">
+      <section class="frame" id="demo-frame" data-state="empty" aria-labelledby="demo-label">
+        <div class="frame-head">
+          <span class="label" id="demo-label">Demo calendar · <span id="week-label"></span></span>
+          <span class="state-pill" id="demo-state" aria-live="polite">empty</span>
+        </div>
+        <div class="grid" id="grid" role="group" aria-label="Business-week grid of demo slots"></div>
+      </section>
+
+      <aside class="panel">
+        <form class="card panel" id="demo-form" novalidate>
+          <p class="eyebrow">Your demo</p>
+          <p class="selection empty" id="selection" aria-live="polite">Pick a slot on the calendar.</p>
+          <div class="field">
+            <label for="role">Your role</label>
+            <select class="select" id="role" name="role"></select>
+          </div>
+          <div class="field">
+            <label for="lead">Name (sample)</label>
+            <input class="input" id="lead" name="lead" type="text" autocomplete="off" placeholder="Sample finance lead" />
+          </div>
+          <div class="actions">
+            <button class="btn btn-green" type="submit" id="book-btn" disabled>Book demo</button>
+            <button class="btn btn-ghost btn-small" type="button" id="clear-btn">Clear</button>
+          </div>
+        </form>
+
+        <section class="outcome" id="outcome" hidden aria-live="polite" aria-atomic="true">
+          <p class="eyebrow">Booked</p>
+          <h3 class="headline" id="outcome-headline"></h3>
+          <p class="detail" id="outcome-detail"></p>
+        </section>
+
+        <div class="card">
+          <p class="eyebrow">The three lines, again</p>
+          <ul class="lines" id="clarity-recap" style="font-size:13px"></ul>
+        </div>
+
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Feature fog (the old page)</p>
+          <div class="msg">Tab 1 of 24 · “Reconciliation engine”</div>
+          <div class="msg">Tab 9 of 24 · “Budget vs actual”</div>
+          <div class="msg">Tab 24 of 24 · “Integrations marketplace”</div>
+          <p class="muted-line" id="friction-line">Feature fog: twenty-four tabs and still no idea what it does.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load booked demo</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Demo booked · on the calendar</span>
+  </div>
+
+  <footer class="foot">
+    <span>Ledgerline · SAMPLE · CapEx / preview</span>
+    <span>No send · No CRM · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/demo-ui.js"></script>
+</body>
+</html>

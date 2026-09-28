@@ -1,0 +1,11 @@
+{
+  "name": "quay-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Quay Team SAMPLE — request showing → approve → calendar behind the harbour-blue shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}
