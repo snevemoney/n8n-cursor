@@ -2379,6 +2379,419 @@ class VersionedContinuityTest(unittest.TestCase):
             self.assertEqual(spared["session_id"], other["session_id"])
             self.assertNotEqual(spared["result"], "cancelled")
 
+    def test_result_reports_recorded_state_and_replay_inserts_nothing(self) -> None:
+        script = HIVE / "os" / "event-bus.py"
+        known_phases = {"PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED", "CONFLICT", "STALE", "REJECTED"}
+        self.assertEqual(BUS._KNOWN_PHASES, known_phases)
+        home = BUS.DEFAULT_PATH
+        home_before = home.read_bytes() if home.is_file() else None
+        correlation = (
+            "mission_id",
+            "session_id",
+            "operation",
+            "source",
+            "caller",
+            "state_version",
+            "timestamp",
+            "result",
+            "previous_state",
+            "new_state",
+        )
+
+        def result_rows(log: Path, mission_id: str | None = None) -> list[dict]:
+            rows = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("type") == "continuity.receipt" and row.get("operation") == "result"
+            ]
+            if mission_id is None:
+                return rows
+            return [row for row in rows if row.get("mission_id") == mission_id]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+
+            def run(*extra: str) -> subprocess.CompletedProcess[str]:
+                return subprocess.run(
+                    [sys.executable, str(script), "--path", str(log), *extra],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+
+            missing = BUS.result(
+                mission_id="mission-not-on-the-log",
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            self.assertEqual(missing["result"], "REJECTED")
+            self.assertEqual(missing["inserted"], False)
+            self.assertFalse(log.exists())
+            blank = BUS.result(source="local-test", caller="event-bus.py", path=log)
+            self.assertEqual(blank["result"], "REJECTED")
+            self.assertEqual(blank["inserted"], False)
+            self.assertNotIn("mission_id", blank)
+            self.assertFalse(log.exists())
+
+            started = BUS.start(source="local-test", caller="event-bus.py", path=log)
+            mission_a = started["mission_id"]
+            session_a = started["session_id"]
+            self.assertNotEqual(mission_a, "mission-local-harmless")
+            self.assertNotEqual(session_a, "session-local-harmless")
+            self.assertTrue(mission_a)
+            self.assertTrue(session_a)
+
+            before_stranger = log.read_bytes()
+            stranger = run(
+                "--result",
+                "--mission-id",
+                "mission-not-on-the-log",
+                "--source",
+                "local-test",
+                "--actor",
+                "event-bus.py",
+            )
+            self.assertEqual(stranger.returncode, 1, stranger.stdout)
+            self.assertEqual(log.read_bytes(), before_stranger)
+            self.assertEqual(json.loads(stranger.stdout)["result"], "REJECTED")
+            self.assertEqual(json.loads(stranger.stdout)["inserted"], False)
+            omitted = run("--result", "--source", "local-test", "--actor", "event-bus.py")
+            self.assertEqual(omitted.returncode, 1)
+            self.assertEqual(log.read_bytes(), before_stranger)
+
+            recorded = BUS.status(path=log, mission_id=mission_a)
+            phase_rows_before = [row for row in BUS._read_all(log) if row.get("phase")]
+            reported = run(
+                "--result",
+                "--mission-id",
+                mission_a,
+                "--session-id",
+                "session-not-the-stored-one",
+                "--source",
+                "local-test",
+                "--actor",
+                "event-bus.py",
+            )
+            self.assertEqual(reported.returncode, 0, reported.stderr)
+            body = json.loads(reported.stdout)
+            self.assertEqual(body["mission_id"], mission_a)
+            self.assertEqual(body["session_id"], session_a)
+            receipt = body["receipt"]
+            for key in correlation:
+                self.assertIn(key, receipt)
+            self.assertEqual(receipt["operation"], "result")
+            self.assertEqual(receipt["source"], "local-test")
+            self.assertEqual(receipt["caller"], "event-bus.py")
+            self.assertEqual(receipt["mission_id"], mission_a)
+            self.assertEqual(receipt["session_id"], session_a)
+            self.assertEqual(receipt["result"], recorded["result"])
+            self.assertEqual(receipt["result"], "ACKNOWLEDGED")
+            self.assertNotIn(receipt["result"], {"completed", "success", "SUCCESS", "cancelled"})
+            self.assertEqual(receipt["previous_state"]["mission_id"], mission_a)
+            self.assertEqual(receipt["previous_state"]["session_id"], session_a)
+            self.assertEqual(receipt["new_state"]["mission_id"], mission_a)
+            self.assertEqual(receipt["new_state"]["session_id"], session_a)
+            self.assertEqual(receipt["new_state"]["phase"], receipt["previous_state"]["phase"])
+            self.assertIn(receipt["new_state"]["phase"], known_phases)
+            self.assertEqual(receipt["state_version"], recorded["state_version"])
+            self.assertEqual(receipt["new_state"]["state_version"], recorded["state_version"])
+            self.assertEqual(
+                [row for row in BUS._read_all(log) if row.get("phase")],
+                phase_rows_before,
+            )
+            self.assertEqual(result_rows(log, mission_a), [receipt])
+            phases = {row.get("phase") for row in BUS._read_all(log) if row.get("phase")}
+            self.assertTrue(phases <= known_phases)
+            self.assertNotIn("RESULT", phases)
+
+            snapshot = log.read_bytes()
+            later = run("--status", "--mission-id", mission_a)
+            self.assertEqual(later.returncode, 0, later.stderr)
+            self.assertEqual(log.read_bytes(), snapshot)
+            seen = json.loads(later.stdout)
+            self.assertEqual(seen["mission_id"], mission_a)
+            self.assertEqual(seen["session_id"], session_a)
+            self.assertEqual(seen["phase"], recorded["phase"])
+            self.assertEqual(seen["result"], recorded["result"])
+
+            replay = run(
+                "--result",
+                "--mission-id",
+                mission_a,
+                "--session-id",
+                "session-not-the-stored-one",
+                "--source",
+                "other-source",
+                "--actor",
+                "other-caller",
+            )
+            self.assertEqual(replay.returncode, 0, replay.stderr)
+            self.assertEqual(log.read_bytes(), snapshot)
+            repeated = json.loads(replay.stdout)
+            self.assertEqual(repeated["mission_id"], mission_a)
+            self.assertEqual(repeated["session_id"], session_a)
+            self.assertEqual(repeated["receipt"], receipt)
+            self.assertEqual(result_rows(log, mission_a), [receipt])
+
+            BUS.publish_jarvis(
+                {"fact": "unrelated"},
+                state_version=int(recorded["state_version"]) + 1,
+                source_session="other-session",
+                writer="event-bus.py",
+                path=log,
+            )
+            head = BUS.authoritative(BUS.JARVIS_ENTITY, log)
+            assert head is not None
+            self.assertNotEqual((head.get("payload") or {}).get("mission_id"), mission_a)
+            held = log.read_bytes()
+            after_publish = run(
+                "--result",
+                "--mission-id",
+                mission_a,
+                "--source",
+                "local-test",
+                "--actor",
+                "event-bus.py",
+            )
+            self.assertEqual(after_publish.returncode, 0, after_publish.stderr)
+            self.assertEqual(log.read_bytes(), held)
+            addressed = json.loads(after_publish.stdout)
+            self.assertEqual(addressed["mission_id"], mission_a)
+            self.assertEqual(addressed["session_id"], session_a)
+            self.assertEqual(addressed["receipt"], receipt)
+            self.assertEqual(len(result_rows(log)), 1)
+
+            cancelled = run(
+                "--cancel",
+                "--mission-id",
+                mission_a,
+                "--source",
+                "local-test",
+                "--actor",
+                "event-bus.py",
+            )
+            self.assertEqual(cancelled.returncode, 0, cancelled.stderr)
+            self.assertEqual(json.loads(cancelled.stdout)["mission_id"], mission_a)
+            after_cancel = log.read_bytes()
+            terminal = run(
+                "--result",
+                "--mission-id",
+                mission_a,
+                "--session-id",
+                "session-replacement",
+                "--source",
+                "local-test",
+                "--actor",
+                "event-bus.py",
+            )
+            self.assertEqual(terminal.returncode, 0, terminal.stderr)
+            self.assertEqual(log.read_bytes(), after_cancel)
+            terminal_body = json.loads(terminal.stdout)
+            self.assertEqual(terminal_body["mission_id"], mission_a)
+            self.assertEqual(terminal_body["session_id"], session_a)
+            self.assertNotEqual(terminal_body["mission_id"], "session-replacement")
+            terminal_receipt = terminal_body["receipt"]
+            self.assertEqual(terminal_receipt["operation"], "result")
+            self.assertEqual(terminal_receipt["result"], "cancelled")
+            self.assertEqual(terminal_receipt["mission_id"], mission_a)
+            self.assertEqual(terminal_receipt["session_id"], session_a)
+            self.assertEqual(terminal_receipt["new_state"]["result"], "cancelled")
+            self.assertEqual(terminal_receipt["previous_state"]["result"], "cancelled")
+            self.assertEqual(terminal_receipt["new_state"]["phase"], terminal_receipt["previous_state"]["phase"])
+            self.assertIn(terminal_receipt["new_state"]["phase"], known_phases)
+            self.assertEqual(result_rows(log, mission_a), [receipt])
+            self.assertNotEqual(receipt["result"], "cancelled")
+            cancels = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("type") == "continuity.receipt" and row.get("operation") == "cancel"
+            ]
+            self.assertEqual(len(cancels), 1)
+            self.assertEqual(cancels[0]["mission_id"], mission_a)
+            missions = {
+                row.get("mission_id")
+                for row in BUS._read_all(log)
+                if row.get("type") == "continuity.receipt"
+            }
+            self.assertEqual(missions, {mission_a})
+            self.assertNotIn("session-replacement", log.read_text(encoding="utf-8"))
+
+            replay_terminal = BUS.result(
+                mission_id=mission_a,
+                session_id="session-not-the-stored-one",
+                source="other-source",
+                caller="other-caller",
+                path=log,
+            )
+            self.assertEqual(log.read_bytes(), after_cancel)
+            self.assertEqual(replay_terminal["mission_id"], mission_a)
+            self.assertEqual(replay_terminal["receipt"]["result"], "cancelled")
+            self.assertEqual(len(cancels), 1)
+
+            started_b = BUS.start(source="local-test", caller="event-bus.py", path=log)
+            mission_b = started_b["mission_id"]
+            session_b = started_b["session_id"]
+            self.assertNotEqual(mission_b, mission_a)
+            self.assertNotEqual(mission_b, "mission-local-harmless")
+            still_a = BUS.result(
+                mission_id=mission_a,
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            self.assertEqual(still_a["mission_id"], mission_a)
+            self.assertEqual(still_a["session_id"], session_a)
+            self.assertEqual(still_a["receipt"]["result"], "cancelled")
+            self.assertEqual(result_rows(log, mission_a), [receipt])
+            self.assertEqual(
+                len(
+                    [
+                        row
+                        for row in BUS._read_all(log)
+                        if row.get("operation") == "cancel" and row.get("mission_id") == mission_a
+                    ]
+                ),
+                1,
+            )
+            open_b = BUS.status(path=log, mission_id=mission_b)
+            reported_b = BUS.result(
+                mission_id=mission_b,
+                session_id="session-not-the-stored-one",
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            self.assertEqual(reported_b["mission_id"], mission_b)
+            self.assertEqual(reported_b["session_id"], session_b)
+            self.assertEqual(reported_b["receipt"]["result"], open_b["result"])
+            self.assertNotEqual(reported_b["receipt"]["result"], "cancelled")
+            self.assertEqual(reported_b["receipt"]["operation"], "result")
+            for key in correlation:
+                self.assertIn(key, reported_b["receipt"])
+            self.assertEqual(len(result_rows(log, mission_b)), 1)
+            self.assertEqual({row["mission_id"] for row in result_rows(log)}, {mission_a, mission_b})
+            held_b = log.read_bytes()
+            BUS.result(mission_id=mission_b, source="local-test", caller="event-bus.py", path=log)
+            self.assertEqual(log.read_bytes(), held_b)
+            self.assertEqual(
+                BUS.result(mission_id=mission_a, source="local-test", caller="event-bus.py", path=log)["receipt"]["result"],
+                "cancelled",
+            )
+            self.assertEqual(log.read_bytes(), held_b)
+
+        home_after = home.read_bytes() if home.is_file() else None
+        self.assertEqual(home_after, home_before)
+
+    def test_result_after_continue_reports_recorded_state(self) -> None:
+        known_phases = {"PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED", "CONFLICT", "STALE", "REJECTED"}
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            started = BUS.start(source="local-test", caller="event-bus.py", path=log)
+            resumed = BUS.continue_mission(
+                mission_id=started["mission_id"],
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            self.assertEqual(resumed["mission_id"], started["mission_id"])
+            recorded = BUS.status(path=log, mission_id=started["mission_id"])
+            phase_rows = [row for row in BUS._read_all(log) if row.get("phase")]
+            reported = BUS.result(
+                mission_id=started["mission_id"],
+                session_id="session-not-the-stored-one",
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            self.assertEqual(reported["mission_id"], started["mission_id"])
+            self.assertEqual(reported["session_id"], started["session_id"])
+            self.assertEqual(reported["receipt"]["result"], recorded["result"])
+            self.assertEqual(reported["receipt"]["result"], "ACKNOWLEDGED")
+            self.assertNotIn(reported["receipt"]["result"], {"completed", "success", "SUCCESS"})
+            self.assertEqual(reported["receipt"]["state_version"], recorded["state_version"])
+            self.assertEqual(reported["receipt"]["new_state"]["phase"], recorded["phase"])
+            self.assertIn(reported["receipt"]["new_state"]["phase"], known_phases)
+            self.assertEqual([row for row in BUS._read_all(log) if row.get("phase")], phase_rows)
+            self.assertEqual(
+                len(
+                    [
+                        row
+                        for row in BUS._read_all(log)
+                        if row.get("operation") == "result"
+                    ]
+                ),
+                1,
+            )
+
+    def test_result_after_cancel_records_cancelled_once(self) -> None:
+        known_phases = {"PUBLISHED", "RECEIVED", "APPLIED", "ACKNOWLEDGED", "CONFLICT", "STALE", "REJECTED"}
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "events.jsonl"
+            started = BUS.start(
+                mission_id="mission-to-stop",
+                session_id="session-to-stop",
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            BUS.cancel_mission(
+                mission_id=started["mission_id"],
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            cancels_before = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("operation") == "cancel"
+            ]
+            self.assertEqual(len(cancels_before), 1)
+            reported = BUS.result(
+                mission_id=started["mission_id"],
+                session_id="session-replacement",
+                source="local-test",
+                caller="event-bus.py",
+                path=log,
+            )
+            self.assertEqual(reported["mission_id"], "mission-to-stop")
+            self.assertEqual(reported["session_id"], "session-to-stop")
+            self.assertEqual(reported["receipt"]["operation"], "result")
+            self.assertEqual(reported["receipt"]["result"], "cancelled")
+            self.assertEqual(reported["receipt"]["new_state"]["result"], "cancelled")
+            self.assertIn(reported["receipt"]["new_state"]["phase"], known_phases)
+            self.assertNotIn("session-replacement", log.read_text(encoding="utf-8"))
+            result_receipts = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("operation") == "result"
+            ]
+            self.assertEqual(len(result_receipts), 1)
+            self.assertEqual(result_receipts[0]["result"], "cancelled")
+            self.assertEqual(result_receipts[0], reported["receipt"])
+            cancels_after = [
+                row
+                for row in BUS._read_all(log)
+                if row.get("operation") == "cancel"
+            ]
+            self.assertEqual(cancels_after, cancels_before)
+            missions = {
+                row.get("mission_id")
+                for row in BUS._read_all(log)
+                if row.get("type") == "continuity.receipt"
+            }
+            self.assertEqual(missions, {"mission-to-stop"})
+            snapshot = log.read_bytes()
+            replay = BUS.result(
+                mission_id=started["mission_id"],
+                source="other-source",
+                caller="other-caller",
+                path=log,
+            )
+            self.assertEqual(log.read_bytes(), snapshot)
+            self.assertEqual(replay["receipt"], reported["receipt"])
+            self.assertEqual(replay["mission_id"], "mission-to-stop")
+
     def test_jarvis_cli_process_reads_ack_and_keeps_stale_replay_off(self) -> None:
         script = HIVE / "os" / "event-bus.py"
         cid = "w3-1-cli"
