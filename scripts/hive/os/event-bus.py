@@ -647,12 +647,13 @@ def _mission_from_log(path: Path, mission_id: str) -> tuple[str, str] | None:
     return None
 
 
-def status(*, path: Path = DEFAULT_PATH, mission_id: str | None = None) -> dict[str, Any]:
-    """Read the latest continuity row already stored for JARVIS_PRIMARY. Does not append.
+def _recorded_head_snapshot(*, path: Path = DEFAULT_PATH, mission_id: str | None = None) -> dict[str, Any]:
+    """Latest jarvis-primary row, plus optional mission identity.
 
-    Mission identity is recovered from the log by mission_id. The head payload
-    is not the mission address. A stored cancel for that mission_id is reported
-    on the existing result field. Phase stays the phase already on the log.
+    Start, continue, cancel, and result receipts keep this snapshot. Phase,
+    result, and state_version stay the latest primary row. A stored cancel
+    for that mission_id is reported on the existing result field. This is not
+    the mission-scoped status read.
     """
     latest = _latest_primary_row(path)
     resolved_mission: str | None = None
@@ -686,6 +687,183 @@ def status(*, path: Path = DEFAULT_PATH, mission_id: str | None = None) -> dict[
     return snapshot
 
 
+def _start_published_row(path: Path, mission_id: str) -> dict[str, Any] | None:
+    """Earliest PUBLISHED continuity row for this mission's START. Not continue."""
+    found: dict[str, Any] | None = None
+    for row in _continuity_rows(path):
+        if row.get("phase") != "PUBLISHED" or row.get("entity_id") != JARVIS_ENTITY:
+            continue
+        payload = row.get("payload")
+        if not isinstance(payload, dict) or payload.get("mission_id") != mission_id:
+            continue
+        if payload.get("resumed"):
+            continue
+        if found is None:
+            found = row
+    return found
+
+
+def _primary_row_for_version(path: Path, version: int, *, before: bool = False) -> dict[str, Any] | None:
+    found: dict[str, Any] | None = None
+    for row in _continuity_rows(path):
+        if row.get("consumer") != JARVIS_PRIMARY or row.get("entity_id") != JARVIS_ENTITY:
+            continue
+        row_version = int(row.get("state_version") or 0)
+        if before:
+            if row_version < version:
+                found = row
+        elif row_version == version:
+            found = row
+    return found
+
+
+def _snapshot_from_primary_row(row: dict[str, Any] | None) -> dict[str, Any]:
+    if row is None:
+        return {
+            "consumer": JARVIS_PRIMARY,
+            "entity_id": JARVIS_ENTITY,
+            "phase": None,
+            "result": None,
+            "state_version": None,
+            "mission_id": None,
+            "session_id": None,
+        }
+    return {
+        "consumer": row.get("consumer"),
+        "entity_id": row.get("entity_id"),
+        "phase": row.get("phase"),
+        "result": row.get("result"),
+        "state_version": row.get("state_version"),
+        "mission_id": None,
+        "session_id": None,
+    }
+
+
+def _mission_from_start(path: Path, mission_id: str) -> dict[str, Any] | None:
+    """This mission's START receipt, or the published START rows if the receipt is missing.
+
+    Does not read the bus head and does not append.
+    """
+    receipt = _start_receipt(path, mission_id)
+    if receipt:
+        new_state = receipt.get("new_state") if isinstance(receipt.get("new_state"), dict) else {}
+        phase = new_state.get("phase")
+        if phase is not None and phase not in _KNOWN_PHASES:
+            phase = None
+        mission = {
+            "found": True,
+            "mission_id": receipt.get("mission_id"),
+            "session_id": receipt.get("session_id"),
+            "state_version": receipt.get("state_version"),
+            "phase": phase,
+            "result": receipt.get("result"),
+        }
+    else:
+        published = _start_published_row(path, mission_id)
+        if published is None:
+            return None
+        payload = published.get("payload") if isinstance(published.get("payload"), dict) else {}
+        version = int(published.get("state_version") or 0)
+        primary = _primary_row_for_version(path, version)
+        if primary is not None:
+            phase = primary.get("phase")
+            result = primary.get("result")
+            state_version = primary.get("state_version")
+        else:
+            phase = published.get("phase")
+            result = published.get("result")
+            state_version = published.get("state_version")
+        if phase is not None and phase not in _KNOWN_PHASES:
+            phase = None
+        if result is not None and result not in _KNOWN_PHASES:
+            result = None
+        mission = {
+            "found": True,
+            "mission_id": payload.get("mission_id"),
+            "session_id": payload.get("session_id"),
+            "state_version": state_version,
+            "phase": phase,
+            "result": result,
+        }
+    if _cancel_receipt(path, mission_id):
+        mission["result"] = "cancelled"
+    return mission
+
+
+def _repair_start_receipt(path: Path, mission_id: str, session_id: str) -> dict[str, Any] | None:
+    """Append the missing START receipt once, built only from published rows."""
+    published = _start_published_row(path, mission_id)
+    if published is None:
+        return None
+    payload = published.get("payload") if isinstance(published.get("payload"), dict) else {}
+    stored_session = payload.get("session_id")
+    if not isinstance(stored_session, str) or not stored_session:
+        stored_session = session_id
+    version = int(published.get("state_version") or 0)
+    primary = _primary_row_for_version(path, version)
+    if primary is not None:
+        new_state = _snapshot_from_primary_row(primary)
+    else:
+        phase = published.get("phase")
+        result = published.get("result")
+        new_state = {
+            "consumer": JARVIS_PRIMARY,
+            "entity_id": JARVIS_ENTITY,
+            "phase": phase if phase in _KNOWN_PHASES else None,
+            "result": result if result in _KNOWN_PHASES else None,
+            "state_version": published.get("state_version"),
+            "mission_id": None,
+            "session_id": None,
+        }
+    phase = new_state.get("phase")
+    if phase is not None and phase not in _KNOWN_PHASES:
+        return None
+    receipt = {
+        "type": "continuity.receipt",
+        "mission_id": mission_id,
+        "session_id": stored_session,
+        "operation": "start",
+        "source": str(published.get("source_platform") or ""),
+        "caller": str(published.get("writer") or ""),
+        "state_version": new_state.get("state_version"),
+        "timestamp": str(published.get("changed_at") or ""),
+        "result": new_state.get("result"),
+        "previous_state": _snapshot_from_primary_row(_primary_row_for_version(path, version, before=True)),
+        "new_state": new_state,
+        "event_id": f"{JARVIS_ENTITY}:{mission_id}:start",
+    }
+    append_event(receipt, path=path)
+    return _start_receipt(path, mission_id)
+
+
+def status(*, path: Path = DEFAULT_PATH, mission_id: str | None = None) -> dict[str, Any]:
+    """Read continuity already stored. Does not append.
+
+    With no mission_id, return the jarvis-primary head. phase and state_version
+    are that head. Does not invent a mission.
+
+    With mission_id, return that mission's own START receipt apart from the
+    current bus head. An unknown mission is found false. Phase is never NOT_FOUND.
+    """
+    if not mission_id:
+        return _recorded_head_snapshot(path=path)
+    mission = _mission_from_start(path, mission_id)
+    if mission is None:
+        mission = {
+            "found": False,
+            "mission_id": mission_id,
+            "session_id": None,
+            "state_version": None,
+            "phase": None,
+            "result": None,
+        }
+    return {
+        "found": bool(mission["found"]),
+        "mission": mission,
+        "bus_head": _recorded_head_snapshot(path=path),
+    }
+
+
 def start(
     *,
     mission_id: str | None = None,
@@ -699,20 +877,34 @@ def start(
     Accepts mission_id and session_id, or generates a pair when omitted.
     Persists that pair and appends one receipt. Not a phase. Not continue,
     cancel, or result. A replay of the same mission_id returns the stored
-    session and does not append.
+    session and does not append. If phases were published and the process
+    died before that receipt was appended, replay repairs the one receipt
+    from those published rows. A second replay appends nothing. Repair never
+    returns success with a null receipt.
     """
     mission_id = (mission_id or "").strip() or f"mission-{uuid.uuid4()}"
     session_id = (session_id or "").strip() or f"session-{uuid.uuid4()}"
     existing = _mission_from_log(path, mission_id)
     if existing:
         stored_mission, stored_session = existing
+        receipt = _start_receipt(path, stored_mission)
+        if receipt is None:
+            receipt = _repair_start_receipt(path, stored_mission, stored_session)
+        if receipt is None:
+            return {
+                "result": "INCOMPLETE_START",
+                "mission_id": stored_mission,
+                "session_id": stored_session,
+                "receipt": None,
+                "incomplete": True,
+            }
         return {
             "mission_id": stored_mission,
             "session_id": stored_session,
-            "receipt": _start_receipt(path, stored_mission),
+            "receipt": receipt,
         }
     auth = authoritative(JARVIS_ENTITY, path)
-    previous_state = status(path=path)
+    previous_state = _recorded_head_snapshot(path=path)
     version = int(auth["state_version"]) + 1 if auth else 1
     stamp = _now_iso()
     published = publish_jarvis(
@@ -728,7 +920,7 @@ def start(
         path=path,
         changed_at=stamp,
     )
-    new_state = status(path=path)
+    new_state = _recorded_head_snapshot(path=path)
     landed = published.get("published") if isinstance(published, dict) else None
     phase = str((landed or {}).get("phase") or (landed or {}).get("result") or "")
     if phase and phase not in _KNOWN_PHASES:
@@ -804,7 +996,7 @@ def continue_mission(
             "receipt": prior,
         }
     auth = authoritative(JARVIS_ENTITY, path)
-    previous_state = status(path=path, mission_id=stored_mission)
+    previous_state = _recorded_head_snapshot(path=path, mission_id=stored_mission)
     version = int(auth["state_version"]) + 1 if auth else 1
     stamp = _now_iso()
     published = publish_jarvis(
@@ -821,7 +1013,7 @@ def continue_mission(
         path=path,
         changed_at=stamp,
     )
-    new_state = status(path=path, mission_id=stored_mission)
+    new_state = _recorded_head_snapshot(path=path, mission_id=stored_mission)
     landed = published.get("published") if isinstance(published, dict) else None
     phase = str((landed or {}).get("phase") or (landed or {}).get("result") or "")
     if phase and phase not in _KNOWN_PHASES:
@@ -886,7 +1078,7 @@ def cancel_mission(
             "session_id": stored_session,
             "receipt": prior,
         }
-    previous_state = status(path=path, mission_id=stored_mission)
+    previous_state = _recorded_head_snapshot(path=path, mission_id=stored_mission)
     phase = previous_state.get("phase")
     if phase is not None and phase not in _KNOWN_PHASES:
         raise RuntimeError(f"cancel saw an unknown phase {phase}")
@@ -976,7 +1168,7 @@ def result(
             "inserted": False,
         }
     stored_mission, stored_session = existing
-    recorded = status(path=path, mission_id=stored_mission)
+    recorded = _recorded_head_snapshot(path=path, mission_id=stored_mission)
     prior = _result_receipt(path, stored_mission)
     if prior:
         if recorded.get("result") == "cancelled" and prior.get("result") != "cancelled":
