@@ -18,7 +18,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Build CE Lead alert message\nconst body = $json.body || $json;\n\nconst leadId = body.leadId || body.id || `lead_${Date.now()}`;\nconst source = body.source || 'unknown';\nconst name = body.name || body.leadName || 'Anonymous';\nconst email = body.email || 'N/A';\nconst score = body.score || body.leadScore || 0;\nconst channel = body.channel || 'direct';\nconst notes = body.notes || body.message || '';\n\nconst text = [\n  `🎯 NEW CE LEAD`,\n  ``,\n  `Lead: ${name}`,\n  `Email: ${email}`,\n  `Score: ${score}`,\n  `Source: ${source}`,\n  `Channel: ${channel}`,\n  notes ? `Notes: ${notes}` : '',\n  ``,\n  `ID: ${leadId}`,\n  `Time: ${new Date().toISOString()}`\n].filter(Boolean).join('\\n');\n\nreturn [{ json: { text, leadId, name, score } }];"
+        "jsCode": "// Build CE Lead alert payload for Grok Watchdog\nconst body = $json.body || $json;\n\nconst leadId = body.leadId || body.id || `lead_${Date.now()}`;\nconst correlationId = body.correlationId || body.correlation_id || `ce-lead-${Date.now()}`;\nconst source = body.source || 'unknown';\nconst name = body.name || body.leadName || 'Anonymous';\nconst email = body.email || 'N/A';\nconst score = body.score || body.leadScore || 0;\nconst channel = body.channel || 'direct';\nconst notes = body.notes || body.message || '';\nconst status = body.status || 'new';\n\nconst text = [\n  `NEW CE LEAD`,\n  ``,\n  `Lead: ${name}`,\n  `Email: ${email}`,\n  `Score: ${score}`,\n  `Source: ${source}`,\n  `Channel: ${channel}`,\n  notes ? `Notes: ${notes}` : '',\n  ``,\n  `ID: ${leadId}`,\n  `cid: ${correlationId}`,\n  `Time: ${new Date().toISOString()}`\n].filter(Boolean).join('\\n');\n\nreturn [{ json: { text, leadId, name, score, correlationId, status, error: null } }];"
       },
       "id": "build-alert",
       "name": "Build Alert",
@@ -28,62 +28,26 @@
     },
     {
       "parameters": {
-        "jsCode": "// Preflight: verify TELEGRAM_BOT_TOKEN is configured\nconst token = $env.TELEGRAM_BOT_TOKEN;\nif (!token || token === '' || token === 'undefined' || token === 'null') {\n  return [{\n    json: {\n      sent: false,\n      error: 'TELEGRAM_BOT_TOKEN is not set or empty. This causes HTTP 404 from Telegram API.',\n      hint: 'Operator: Set TELEGRAM_BOT_TOKEN in n8n Settings > Variables. The token format is 123456789:ABCdefGHI...',\n      originalMessage: $json.text\n    }\n  }];\n}\n\nconst chatId = $env.HIVE_CE_LEAD_CHAT_ID || $env.HIVE_TELEGRAM_CHAT_ID;\nif (!chatId) {\n  return [{\n    json: {\n      sent: false,\n      error: 'HIVE_CE_LEAD_CHAT_ID (or HIVE_TELEGRAM_CHAT_ID) is not set.',\n      hint: 'Operator: Set the chat_id env var in n8n Settings > Variables.',\n      originalMessage: $json.text\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...$json,\n    _telegram: { token, chatId, ready: true }\n  }\n}];"
-      },
-      "id": "telegram-preflight",
-      "name": "Telegram Preflight",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [700, 400]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict"
-          },
-          "conditions": [
-            {
-              "id": "ready-check",
-              "leftValue": "={{ $json._telegram?.ready }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "equals"
-              }
-            }
-          ]
-        }
-      },
-      "id": "token-check",
-      "name": "Token Ready?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [950, 400]
-    },
-    {
-      "parameters": {
-        "url": "=https://api.telegram.org/bot{{ $json._telegram.token }}/sendMessage",
+        "method": "POST",
+        "url": "={{ $env.GROK_WATCHDOG_WEBHOOK_URL }}",
         "sendBody": true,
         "contentType": "json",
-        "jsonBody": "={\n  \"chat_id\": \"{{ $json._telegram.chatId }}\",\n  \"text\": {{ JSON.stringify($json.text) }},\n  \"parse_mode\": \"Markdown\"\n}",
+        "jsonBody": "={{ JSON.stringify({ workflow: $workflow.name, status: $json.status, error: $json.error, correlationId: $json.correlationId, executionId: $execution.id }) }}",
         "options": {
           "timeout": 10000
         }
       },
-      "id": "telegram-alert",
-      "name": "Telegram Alert",
+      "id": "alert-grok-watchdog",
+      "name": "Alert Grok Watchdog",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, 300],
+      "position": [700, 400],
       "continueOnFail": true
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"received\": true,\n  \"leadId\": \"{{ $json.leadId || '' }}\",\n  \"notified\": {{ $json._telegram?.ready || false }}\n}",
+        "responseBody": "={\n  \"received\": true,\n  \"leadId\": \"{{ $('Build Alert').first().json.leadId || '' }}\",\n  \"correlationId\": \"{{ $('Build Alert').first().json.correlationId || '' }}\",\n  \"sink\": \"grok-watchdog\"\n}",
         "options": {
           "responseCode": 200
         }
@@ -92,21 +56,7 @@
       "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1450, 300]
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ $json }}",
-        "options": {
-          "responseCode": 200
-        }
-      },
-      "id": "respond-skipped",
-      "name": "Respond Skipped",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [1200, 550]
+      "position": [950, 400]
     }
   ],
   "connections": {
@@ -120,28 +70,11 @@
     "Build Alert": {
       "main": [
         [
-          { "node": "Telegram Preflight", "type": "main", "index": 0 }
+          { "node": "Alert Grok Watchdog", "type": "main", "index": 0 }
         ]
       ]
     },
-    "Telegram Preflight": {
-      "main": [
-        [
-          { "node": "Token Ready?", "type": "main", "index": 0 }
-        ]
-      ]
-    },
-    "Token Ready?": {
-      "main": [
-        [
-          { "node": "Telegram Alert", "type": "main", "index": 0 }
-        ],
-        [
-          { "node": "Respond Skipped", "type": "main", "index": 0 }
-        ]
-      ]
-    },
-    "Telegram Alert": {
+    "Alert Grok Watchdog": {
       "main": [
         [
           { "node": "Respond OK", "type": "main", "index": 0 }
@@ -154,13 +87,14 @@
   },
   "staticData": null,
   "id": "131918c7-1ca3-4205-8d42-cfc802c19a30",
+  "active": false,
   "meta": {
-    "instanceId": "hive-ops"
+    "instanceId": "hive-ops",
+    "notes": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL. Register Scorpion leftover if present — NOT the audit sink. Telegram send removed. Do not import or activate from this PR."
   },
   "tags": [
     { "name": "hive" },
     { "name": "ce-lead" },
-    { "name": "telegram" },
     { "name": "priority-1" }
   ]
 }
