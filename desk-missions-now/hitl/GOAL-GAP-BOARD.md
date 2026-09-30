@@ -1,6 +1,6 @@
 ---
 tags: [os, factory, hitl, automation, board]
-at: 2026-08-25
+at: 2026-09-06
 desk: hitl-operator
 machine: dark-factory
 status: living board · OBSERVED only · not a GRADE
@@ -16,12 +16,12 @@ clock: parked
 
 Yellow orphans = **8** (named in `memories.md`). Continue.
 
-| Gap | On disk | Daily move | Last OBSERVED (2026-08-25) | Stop |
+| Gap | On disk | Daily move | Last OBSERVED (2026-09-06) | Stop |
 |-----|---------|------------|----------------------------|------|
 | **`/workspace` missing** | Grok remotion trees MISSING on the Mac. SIGNAL_INDEX `/workspace` transcripts here = **0**. | TRIAGE any `/workspace` path. Copy stays Evens. | Still missing. Do not invent packets. | Never fabricate HOW THEY BUILT |
-| **16 steal/caption leftovers** | Ledger `steal_gap` **16**. 1803 is a count, not a to-do. | Prefer steal_gap + packet + `full.txt` + ACTION TRACE **on this checkout**. Else TRIAGE. | TRAIN-2 named: `X80ljdCPM_U` (packet committed on the Cloud-host fix). | Do not flip `COVERAGE_LEDGER.json` |
+| **16 steal/caption leftovers** | Ledger `steal_gap` **16**. 1803 is a count, not a to-do. | Prefer steal_gap + packet + `full.txt` + ACTION TRACE **on this checkout**. Else TRIAGE. | TRAIN-3 named unused: `2J3uX8iRNng` (`same-prompt-bench` · TRAIN). On-disk pick was still PASS `X80ljdCPM_U`. | Do not flip `COVERAGE_LEDGER.json` |
 | **Consultant dark** | Default five skips Consultant. | Wake only if TASK is consult-vs-build / doctor-vs-pharmacist / audit-first. | Still cold. Not a bug. | Do not “fix dark” by waking 17 |
-| **Hold-outs Watchdog-first** | Watchdog wrote `watchdog/hold-outs/X80ljdCPM_U.md`. Forge attempt + GRADE now on disk. | Watchdog writes hold-outs before Forge. GRADE only in a sitting that did not write those hold-outs. | **OBSERVED 2026-08-25:** Watchdog GRADE `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` = **pass**. Next = Researcher pick or HITL leftover. Do not start TRAIN-3 unless Evens names it. | Builder does not fill GRADE |
+| **Hold-outs Watchdog-first** | Watchdog wrote `watchdog/hold-outs/X80ljdCPM_U.md`. Forge attempt + GRADE now on disk. | Watchdog writes hold-outs before Forge. GRADE only in a sitting that did not write those hold-outs. | **OBSERVED 2026-09-06:** Researcher named unused `2J3uX8iRNng`. Hold-outs for that id are **not** on this `origin/main` checkout (open [PR 89](https://github.com/snevemoney/n8n-cursor/pull/89)). Next sitting after pick merge = Watchdog hold-outs. Prefer merge PR 89 over rewrite. | Builder does not fill GRADE |
 | **Retrieve default-off** | `scripts/hive/os/signal-retrieve.py` on `main` after merge. | Retrieve only if TASK matches a domain → ≤3 refs. No match → NONE. | Default-off still the law. | Never dump SIGNAL_INDEX |
 | **Factory OS / Grok chat reader** | `forge/FACTORY-OS-NEXT.md` stub on SSOT. Cloud cannot see Grok persistence. | Reminder / draft brief only on Cloud. | Named gap. REMINDER stub present. | No buyer surface this week |
 | **Hive Automations pack** | Six named jobs + `CLOUD-HOST.md` on SSOT. Slack leftover unused. | Evens Saves each job. MCP cannot enable. | [PR 48](https://github.com/snevemoney/n8n-cursor/pull/48) merged `48982b9d1`. Invented slug retired. 90% not actuated. | Do not hijack Slack daily |
@@ -31,7 +31,7 @@ Yellow orphans = **8** (named in `memories.md`). Continue.
 **TRIAGE decoy:** `karpathy-wiki-nate-herk` — no ACTION TRACE heading.  
 **Retired invent:** `factory-os-train-plane` — PR 47. Do not merge. Do not hold-out.
 
-**Last OBSERVED (2026-08-25 · Watchdog GRADE):** `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` = **pass** vs hold-outs + ACTION TRACE. Leftovers named (skill `.md` missing on main · retrieve holes · caption UNKNOWN). Next sitting = Researcher pick or HITL leftover. Do not start TRAIN-3 unless Evens names it. Yellow orphans = 8, continue.
+**Last OBSERVED (2026-09-06 · daily TRAIN Stage 1):** Researcher named unused `2J3uX8iRNng` (`same-prompt-bench` · TRAIN). On-disk pick was still PASS `X80ljdCPM_U`. Did not write hold-outs. Did not attempt. Did not GRADE. Next sitting after this pick is on `main` = Watchdog hold-outs (prefer merge [PR 89](https://github.com/snevemoney/n8n-cursor/pull/89)). Yellow orphans = 8, continue.
 
 **Last OBSERVED (2026-08-25 · Evens lock):** This stretch = build the system (Factory OS / dark-factory). Not Path A/C, not a buyer site, not a virtual-CTO SKU. Next = host hygiene (Mine one-of-each, files on origin/main, Grok reader on Mac, TRAIN only if Evens names an id). Yellow orphans = 8, continue.
 
