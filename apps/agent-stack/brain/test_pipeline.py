@@ -967,6 +967,44 @@ class Live4018MouthContractTest(unittest.TestCase):
             self.assertFalse(PIPE.should_skip_cursor(hive, lambda p: {}))
 
 
+class PublishedLineWallTest(unittest.TestCase):
+    def test_wall_does_not_replace_a_committed_model_line(self) -> None:
+        """A dark wall arriving after the model sentence must leave that sentence."""
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        with tempfile.TemporaryDirectory(prefix="pipeline-wall-keep-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps(
+                    {
+                        "turn_gen": 3878,
+                        "utterance": asked,
+                        "spoken": line,
+                        "jarvis_chat_id": "chat-wire-1",
+                        "brain": "openrouter",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            calls: list[dict] = []
+
+            def record(**kw):
+                calls.append(kw)
+                return []
+
+            with unittest.mock.patch.object(PIPE.CHATS, "archive_turn", side_effect=record):
+                closed = PIPE.cancel_turn_scoped(hive, 3878, spoken=PIPE.TALK_DARK, request=asked)
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+        self.assertFalse(closed)
+        self.assertEqual(calls, [])
+        self.assertEqual(bus["spoken"], line)
+        self.assertNotIn("cancel_gen", bus)
+
+
 class ContinuityStatusWireTest(unittest.TestCase):
     """The continuity question reads event-bus status. Not the hive/VPS/Cursor hand."""
 

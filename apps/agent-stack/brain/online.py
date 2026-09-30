@@ -11,6 +11,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import threading
 import time
@@ -86,6 +87,77 @@ def was_cancelled() -> bool:
     return _CURSOR_CANCELLED
 
 
+def _response_socket(res):
+    """Socket that `HTTPResponse.read` is blocked on, when this is a real urlopen body."""
+    fp = getattr(res, "fp", None)
+    raw = getattr(fp, "raw", None)
+    sock = getattr(raw, "_sock", None)
+    return sock if sock is not None else raw
+
+
+def _abort_response(res) -> None:
+    """Unblock a body read that ignored the socket timeout. Same urllib response."""
+    sock = _response_socket(res)
+    if sock is not None:
+        shutdown = getattr(sock, "shutdown", None)
+        if callable(shutdown):
+            try:
+                shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+        closer = getattr(sock, "close", None)
+        if callable(closer):
+            try:
+                closer()
+            except OSError:
+                pass
+    closer = getattr(res, "close", None)
+    if callable(closer):
+        try:
+            closer()
+        except OSError:
+            pass
+
+
+def _read_http_body(res, timeout: float) -> bytes:
+    """Read one response body. A stall raises TimeoutError within `timeout`.
+
+    `urlopen(..., timeout=)` bounds the handshake and headers. A chunked TLS
+    body can stay inside `ssl.read` after that, which is what the Face wall
+    caught. The body uses the same deadline. If the read is still blocked,
+    the socket is closed so `ssl.read` returns.
+    """
+    limit = max(0.0, float(timeout))
+    if limit == 0.0:
+        return res.read()
+    sock = _response_socket(res)
+    if sock is not None:
+        try:
+            sock.settimeout(limit)
+        except OSError:
+            pass
+    box: dict = {}
+
+    def _run() -> None:
+        try:
+            box["body"] = res.read()
+        except Exception as exc:
+            box["err"] = exc
+
+    worker = threading.Thread(target=_run, name="http-body", daemon=True)
+    worker.start()
+    worker.join(limit)
+    if not worker.is_alive():
+        if "err" in box:
+            raise box["err"]
+        return box.get("body", b"")
+    _abort_response(res)
+    worker.join(1.0)
+    if not worker.is_alive() and "body" in box and "err" not in box:
+        return box["body"]
+    raise TimeoutError("response body stalled")
+
+
 def _http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
     raw = None if data is None else json.dumps(data).encode("utf-8")
     req = urllib.request.Request(
@@ -95,7 +167,7 @@ def _http_json(url: str, *, data: dict | None = None, headers: dict | None = Non
         method="POST" if data is not None else "GET",
     )
     with urllib.request.urlopen(req, timeout=timeout) as res:
-        body = res.read().decode("utf-8", errors="replace")
+        body = _read_http_body(res, timeout).decode("utf-8", errors="replace")
         code = res.status
     if not body.strip():
         return {"ok": True, "http": code}

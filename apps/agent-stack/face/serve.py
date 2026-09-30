@@ -20,6 +20,8 @@ HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 OS_DIR = ROOT / "docs/hive/outer-heaven/CONTENT/os"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("AGENT_STACK_FACE_PORT") or "4018")
+TURN_WALL_SEC = 25.0
+TALK_DARK = "The talk wire is dark this turn."
 
 
 def _watch_event_path() -> Path | None:
@@ -111,6 +113,81 @@ def voice():
 
 
 VOICE = voice()
+
+
+def butler_only(text: str) -> bool:
+    """The wrap by itself. Not a sentence."""
+    body = " ".join((text or "").split()).lower()
+    return body in {"sir.", "sir", "sir,"}
+
+
+def provider_sentence(ev: dict) -> str:
+    """Speakable provider text. The standing dark line is not that text."""
+    if not isinstance(ev, dict):
+        return ""
+    text = str(ev.get("spoken") or "").strip()
+    if not text or text == TALK_DARK or butler_only(text):
+        return ""
+    if str(ev.get("verb") or "") == "think":
+        return ""
+    return text
+
+
+def wire_dark_event(utterance: str = "") -> dict:
+    return {
+        "ok": False,
+        "verb": "converse",
+        "spoken": TALK_DARK,
+        "spoken_delta": TALK_DARK,
+        "outcome": "WIRE_FAILURE",
+        "done": True,
+        "job_status": "done",
+        "phase": "speak",
+        "utterance": utterance,
+        "unknown": True,
+    }
+
+
+def committed_model_event(bus: dict, utterance: str, gen: int, wire: dict | None = None) -> dict | None:
+    """The line this generation already published. A later wall must not replace it."""
+    try:
+        if int((bus or {}).get("turn_gen") or 0) != int(gen):
+            return None
+    except (TypeError, ValueError):
+        return None
+    asked = (utterance or "").strip()
+    if str((bus or {}).get("utterance") or "").strip() != asked:
+        return None
+    spoken = str((bus or {}).get("spoken") or "").strip()
+    if not provider_sentence({"spoken": spoken, "verb": str((bus or {}).get("tool") or "converse")}):
+        return None
+    outcome = "MODEL_TALK"
+    row = wire if isinstance(wire, dict) else {}
+    nested = row.get("wire") if isinstance(row.get("wire"), dict) else {}
+    if str(row.get("utterance") or "").strip() == asked:
+        got = str(nested.get("outcome") or "")
+        if got and got != "WIRE_FAILURE":
+            outcome = got
+    return {
+        "ok": True,
+        "verb": str((bus or {}).get("tool") or "converse"),
+        "tool": str((bus or {}).get("tool") or "converse"),
+        "ask": False,
+        "spoken": spoken,
+        "spoken_delta": spoken,
+        "outcome": outcome,
+        "status": outcome,
+        "done": True,
+        "job_status": "done",
+        "phase": "speak",
+        "utterance": asked,
+        "unknown": False,
+        "brain": (bus or {}).get("brain"),
+        "wires": (bus or {}).get("wires") or [],
+        "cites": (bus or {}).get("cites") or [],
+        "turn_gen": int(gen),
+        "gen": int(gen),
+    }
 
 
 def load_json(path: Path) -> dict:
@@ -320,13 +397,77 @@ class Handler(BaseHTTPRequestHandler):
         if want_stream and hasattr(live_mouth, "apply_turn_iter"):
             self._sse_turn(live_mouth, utterance, bool(data.get("approved")))
             return
-        out = live_mouth.apply_turn(
-            utterance,
-            approved=bool(data.get("approved")),
-            hive=HIVE,
-            speak=False,
-        )
-        self._json(200, self._scrub_turn(live_mouth, out))
+        box: dict = {}
+
+        def run_turn() -> None:
+            try:
+                box["out"] = live_mouth.apply_turn(
+                    utterance,
+                    approved=bool(data.get("approved")),
+                    hive=HIVE,
+                    speak=False,
+                )
+            except Exception as exc:  # noqa: BLE001 — named dark, do not hang the socket
+                box["err"] = exc
+
+        pipe_plain = getattr(live_mouth, "PIPELINE", None)
+        arrival_plain = 0
+        if pipe_plain is not None and hasattr(pipe_plain, "peek_gen"):
+            arrival_plain = int(pipe_plain.peek_gen(HIVE) or 0)
+        worker = threading.Thread(target=run_turn, daemon=True)
+        worker.start()
+        worker.join(TURN_WALL_SEC)
+        if worker.is_alive():
+            own_gen = arrival_plain + 1
+            current = (
+                int(pipe_plain.peek_gen(HIVE) or 0)
+                if pipe_plain is not None and hasattr(pipe_plain, "peek_gen")
+                else 0
+            )
+            body = self._alive_wall_body(pipe_plain, utterance, own_gen, current)
+            self._json(200, self._scrub_turn(live_mouth, body))
+            return
+        if "err" in box:
+            raise box["err"]
+        self._json(200, self._scrub_turn(live_mouth, box.get("out") or {}))
+
+    def _abort_inflight(self) -> None:
+        if hasattr(ONLINE, "cancel_cursor"):
+            ONLINE.cancel_cursor()
+
+    def _alive_wall_body(self, pipe, utterance: str, own_gen: int, current: int) -> dict:
+        """Worker still alive at the wall. A published model line is the client body."""
+        if pipe is not None and current == own_gen:
+            closed = False
+            if hasattr(pipe, "cancel_turn_scoped"):
+                closed = bool(
+                    pipe.cancel_turn_scoped(HIVE, own_gen, spoken=TALK_DARK, request=utterance)
+                )
+            if closed:
+                self._abort_inflight()
+            else:
+                kept = self._committed_model_event(utterance, own_gen)
+                if kept:
+                    return kept
+        return wire_dark_event(utterance)
+
+    def _committed_model_event(self, utterance: str, gen: int) -> dict | None:
+        pipe = getattr(mouth(), "PIPELINE", None)
+        bus: dict = {}
+        if pipe is not None and hasattr(pipe, "load_json"):
+            try:
+                bus = pipe.load_json(HIVE / "bus" / "state.json") or {}
+            except (OSError, TypeError):
+                bus = {}
+        else:
+            bus = load_json(HIVE / "bus" / "state.json")
+        wire: dict = {}
+        if pipe is not None and hasattr(pipe, "LAST_WIRE") and pipe.LAST_WIRE is not None:
+            try:
+                wire = pipe.LAST_WIRE.read(HIVE) or {}
+            except (OSError, TypeError):
+                wire = {}
+        return committed_model_event(bus if isinstance(bus, dict) else {}, utterance, gen, wire)
 
     def _scrub_turn(self, live_mouth, out: dict) -> dict:
         spoken = str(out.get("spoken") or "")

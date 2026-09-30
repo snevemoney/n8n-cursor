@@ -7,6 +7,8 @@ import importlib.util
 import json
 import os
 import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -339,6 +341,37 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertEqual(deltas, ["Hello Evens. ", "Standing by."])
         self.assertTrue(evs[-1]["done"])
         self.assertIn("Hello Evens.", evs[-1]["spoken"])
+
+    def test_stalled_chunked_body_raises_before_the_face_wall(self) -> None:
+        """A body read that ignores the socket timeout cannot sit until 25s."""
+        released = threading.Event()
+
+        class Stall:
+            status = 200
+            fp = None
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                self.close()
+                return False
+
+            def read(self):
+                # Proven failure: ssl.read stays blocked after urlopen's timeout.
+                if not released.wait(30):
+                    return b""
+                raise TimeoutError("aborted")
+
+            def close(self):
+                released.set()
+
+        started = time.monotonic()
+        with mock.patch.object(MOD.urllib.request, "urlopen", return_value=Stall()):
+            with self.assertRaises(TimeoutError):
+                MOD._http_json("https://openrouter.ai/api/v1/chat/completions", timeout=0.4)
+        self.assertLess(time.monotonic() - started, 2.0)
+        self.assertTrue(released.is_set())
 
 
 if __name__ == "__main__":

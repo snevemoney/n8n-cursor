@@ -182,6 +182,44 @@ class FaceServeTest(unittest.TestCase):
         self.assertNotIn('bus.get("permission_ask") or bus.get("utterance")', text)
         self.assertNotIn("May I hand this to the grok desk", text)
 
+    def test_alive_wall_returns_the_committed_model_line(self) -> None:
+        """The plain 25s wall must hand the client the sentence already on the bus."""
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        old = MOD.HIVE
+        with tempfile.TemporaryDirectory(prefix="serve-alive-wall-") as tmp:
+            hive = Path(tmp)
+            MOD.HIVE = hive
+            try:
+                pipe = MOD.MOUTH.PIPELINE
+                pipe.begin_turn(hive)
+                gen = int(pipe.peek_gen(hive) or 0)
+
+                def publish(bus: dict) -> dict:
+                    bus["utterance"] = asked
+                    bus["spoken"] = line
+                    bus["tool"] = "converse"
+                    bus["brain"] = "openrouter"
+                    bus["wires"] = ["converse", "store"]
+                    return bus
+
+                pipe.mutate_bus(hive, publish)
+                handler = MOD.Handler.__new__(MOD.Handler)
+                handler._abort_inflight = lambda: (_ for _ in ()).throw(AssertionError("abort"))
+                kept = handler._alive_wall_body(pipe, asked, gen, gen)
+                bus = pipe.load_json(hive / "bus" / "state.json")
+            finally:
+                MOD.HIVE = old
+        self.assertEqual(kept.get("spoken"), line)
+        self.assertEqual(kept.get("outcome"), "MODEL_TALK")
+        self.assertNotEqual(kept.get("spoken"), MOD.TALK_DARK)
+        self.assertEqual(bus.get("spoken"), line)
+        self.assertFalse(int(bus.get("cancel_gen") or 0) >= gen)
+        self.assertEqual(MOD.TURN_WALL_SEC, 25.0)
+
 
 if __name__ == "__main__":
     unittest.main()
