@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-09-12
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: named pick · TRAIN · unused · Evens validates · halt
 send: removed
 clock: parked
 ---
@@ -14,24 +14,44 @@ clock: parked
 
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
+| **id** | `2J3uX8iRNng` |
 | **steal \| learn** | steal |
 | **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
+| **Spoken machine** | `same-prompt-bench` |
+| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/full.txt` (6825 words, OBSERVED) |
 | **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **Skip?** | no — not TRAIN-1 PASS, not TRAIN-2 PASS, not the TRIAGE decoy, not `/workspace` |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** Nate Herk “I Tested Opus 5 vs. Fable 5…” is the only unused steal_gap row on this checkout that already has packet + caption `full.txt` + LEARNED ACTION TRACE. Spoken machine is same-prompt-bench: same prompt, same harness, label the model, write the stop before you start, referee the patch, blame stale context before you swap models. Tape $ and vendor benches stay UNVERIFIED. Not a weight train. Not a buyer surface.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**This stage (this Cloud run):** Researcher propose-only. Reaffirm of the unused pick already named in sibling drafts. `origin/main` pick file still shows PASS `X80ljdCPM_U`. No Forge. No Watchdog GRADE. No TASK.
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+**Retrieve:** theme `same-prompt-bench` → **NONE**. No second shop. No `SIGNAL_INDEX` dump.
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+**Ledger:** `COVERAGE_LEDGER.json` **MISSING-ON-CHECKOUT**. steal_gap not confirmed from JSON. Not flipped. Not invented.
 
-Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
+**Checkout ACTION TRACE packets (four only):**
+
+| id | full.txt | ACTION TRACE | this pick |
+|----|----------|--------------|-----------|
+| `kwSVtQ7dziU` | LEARNED TRACE yes; root `full.txt` MISSING-ON-CHECKOUT | yes | skip — TRAIN-1 PASS |
+| `X80ljdCPM_U` | yes (4440) | yes | skip — TRAIN-2 PASS (`watchdog/X80ljdCPM_U-GRADE.md`) |
+| `2J3uX8iRNng` | yes (6825) | yes | **this row** — unused until Evens validates |
+| `FFWtxjvW2ts` | yes | yes | parked — buyer-surface / anti-slop sites (this stretch = Factory OS) |
+
+**Skip remains:** `kwSVtQ7dziU` · `X80ljdCPM_U` · `karpathy-wiki-nate-herk` (ABSENT / no ACTION TRACE) · `factory-os-train-plane` (invent, retired) · 1803 walk · `/workspace` · 4823 · buyer surface.
+
+**GitHub MCP:** not attached this run. Persist = this file + draft PR. Do not comment on sibling unused-pick drafts. Do not merge.
+
+**EVENS leftover:** validate `2J3uX8iRNng` before any TRAIN sitting. Merge **one** unused-pick draft (do not start TRAIN from this agent). Connect `browser-use` on cursor.com first — do not start OAuth inside Automations.
 
 Yellow `grokbot_orphans` = 8. Continue.
+
+```
+DONE-CHECK: this file has id + TRAIN
+CAP: 1 row · no /loop · no 1803 walk
+COST: this Cloud Agent run only
+STOP-KIND: metric + cap
+```
 
 [[CLOUD-HOST]] · [[GOAL-GAP-BOARD]] · [[SIGNAL-TRAIN-LOOP]]
