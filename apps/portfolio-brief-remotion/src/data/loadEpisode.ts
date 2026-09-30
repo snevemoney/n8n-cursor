@@ -1,9 +1,11 @@
 import {episode as episode20260825} from './episodes/2026-08-25';
+import {episode as episode20260906} from './episodes/2026-09-06';
 /* new-episode:imports */
 import type {DailyReport} from './schema';
 
 const registry: Record<string, DailyReport> = {
   '2026-08-25': episode20260825,
+  '2026-09-06': episode20260906,
   /* new-episode:registry */
 };
 
