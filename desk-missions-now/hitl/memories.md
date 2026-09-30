@@ -30,7 +30,7 @@ HOST = git. A Cloud run is a cold checkout of origin/main + GitHub persist. It d
 
 Context = committed briefs + memories. Cloud will never see sitting JSONL (01a6b95f or any other). Read desk-missions-now/hitl/briefs/INDEX.md, then the one brief for this job. Grow that store. Do not dump transcripts.
 
-Pick is a real packet id already on main (full.txt + LEARNED ACTION TRACE) or TRIAGE with no invented slug. Current TRAIN id: X80ljdCPM_U. Never mint / reuse factory-os-train-plane (PR 47 invent, retired).
+Pick is a real packet id already on main (full.txt + LEARNED ACTION TRACE) or TRIAGE with no invented slug. Current TRAIN id: 2J3uX8iRNng (unused Stage 1 pick 2026-08-27). Skip PASS kwSVtQ7dziU · X80ljdCPM_U. Never mint / reuse factory-os-train-plane (PR 47 invent, retired).
 
 Tools match the host. GitHub = persist. Slack never. browser-use = Mac stdio (uvx) only — never the Cloud web plan. Do not attach tools that only exist on Evens’s laptop. cursor-ide-browser is Cursor-chat only, not Automations-eligible.
 
