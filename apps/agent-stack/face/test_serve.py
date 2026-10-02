@@ -182,6 +182,209 @@ class FaceServeTest(unittest.TestCase):
         self.assertNotIn('bus.get("permission_ask") or bus.get("utterance")', text)
         self.assertNotIn("May I hand this to the grok desk", text)
 
+    def test_alive_wall_returns_the_committed_model_line(self) -> None:
+        """The plain 25s wall must hand the client the sentence already on the bus."""
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        old = MOD.HIVE
+        with tempfile.TemporaryDirectory(prefix="serve-alive-wall-") as tmp:
+            hive = Path(tmp)
+            MOD.HIVE = hive
+            try:
+                pipe = MOD.MOUTH.PIPELINE
+                pipe.begin_turn(hive)
+                gen = int(pipe.peek_gen(hive) or 0)
+
+                def publish(bus: dict) -> dict:
+                    bus["utterance"] = asked
+                    bus["spoken"] = line
+                    bus["tool"] = "converse"
+                    bus["brain"] = "openrouter"
+                    bus["wires"] = ["converse", "store"]
+                    return bus
+
+                pipe.mutate_bus(hive, publish)
+                handler = MOD.Handler.__new__(MOD.Handler)
+                handler._abort_inflight = lambda: (_ for _ in ()).throw(AssertionError("abort"))
+                kept = handler._alive_wall_body(pipe, asked, gen, gen)
+                bus = pipe.load_json(hive / "bus" / "state.json")
+            finally:
+                MOD.HIVE = old
+        self.assertEqual(kept.get("spoken"), line)
+        self.assertEqual(kept.get("outcome"), "MODEL_TALK")
+        self.assertNotEqual(kept.get("spoken"), MOD.TALK_DARK)
+        self.assertEqual(bus.get("spoken"), line)
+        self.assertFalse(int(bus.get("cancel_gen") or 0) >= gen)
+        self.assertEqual(MOD.TURN_WALL_SEC, 25.0)
+
+    def test_alive_wall_returns_line_when_generation_was_not_opened(self) -> None:
+        """Predicted gen is arrival+1. This turn path does not bump turn_gen."""
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        old = MOD.HIVE
+        with tempfile.TemporaryDirectory(prefix="serve-wall-nogen-") as tmp:
+            hive = Path(tmp)
+            MOD.HIVE = hive
+            try:
+                pipe = MOD.MOUTH.PIPELINE
+                (hive / "bus").mkdir(parents=True)
+                (hive / "bus" / "state.json").write_text(
+                    json.dumps(
+                        {
+                            "turn_gen": 3878,
+                            "utterance": asked,
+                            "spoken": line,
+                            "tool": "converse",
+                            "brain": "openrouter",
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                handler = MOD.Handler.__new__(MOD.Handler)
+                handler._abort_inflight = lambda: (_ for _ in ()).throw(AssertionError("abort"))
+                kept = handler._alive_wall_body(pipe, asked, 3879, 3878)
+                bus = pipe.load_json(hive / "bus" / "state.json")
+            finally:
+                MOD.HIVE = old
+        self.assertEqual(kept.get("spoken"), line)
+        self.assertEqual(kept.get("outcome"), "MODEL_TALK")
+        self.assertEqual(bus.get("spoken"), line)
+        self.assertNotIn("cancel_gen", bus)
+
+    def test_alive_wall_stays_dark_when_nothing_is_published(self) -> None:
+        """Turn 3887: 25s and no sentence. The client stays dark."""
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        old = MOD.HIVE
+        with tempfile.TemporaryDirectory(prefix="serve-wall-empty-") as tmp:
+            hive = Path(tmp)
+            MOD.HIVE = hive
+            try:
+                pipe = MOD.MOUTH.PIPELINE
+                pipe.begin_turn(hive)
+                gen = int(pipe.peek_gen(hive) or 0)
+                pipe.mutate_bus(
+                    hive,
+                    lambda bus: {**bus, "utterance": asked, "spoken": "", "phase": "think", "job_status": "working"},
+                )
+                handler = MOD.Handler.__new__(MOD.Handler)
+                handler._abort_inflight = lambda: None
+                body = handler._alive_wall_body(pipe, asked, gen, gen)
+                bus = pipe.load_json(hive / "bus" / "state.json")
+            finally:
+                MOD.HIVE = old
+        self.assertEqual(body.get("spoken"), MOD.TALK_DARK)
+        self.assertEqual(bus.get("spoken"), MOD.TALK_DARK)
+        self.assertEqual(MOD.TURN_WALL_SEC, 25.0)
+
+    def test_plain_turn_returns_remembered_line_while_worker_is_alive(self) -> None:
+        """POST /api/turn, no stream. Sentence remembered, bus spoken not written, worker still in archive."""
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        old_hive = MOD.HIVE
+        old_wall = MOD.TURN_WALL_SEC
+        live = MOD.mouth()
+        orig = live.apply_turn
+        release = threading.Event()
+        started = threading.Event()
+
+        def stalled(utterance, **_kwargs):
+            started.set()
+            release.wait(3)
+            return {"ok": True, "verb": "converse", "spoken": "WORKER_FINISHED", "ask": False}
+
+        live.apply_turn = stalled
+        MOD.TURN_WALL_SEC = 0.3
+        tmp = tempfile.TemporaryDirectory(prefix="serve-plain-wall-")
+        hive = Path(tmp.name)
+        (hive / "bus").mkdir(parents=True)
+        MOD.HIVE = hive
+        live.PIPELINE.remember_published_line(hive, asked, line)
+        httpd = MOD.ThreadingHTTPServer((MOD.HOST, 0), MOD.Handler)
+        port = int(httpd.server_address[1])
+        self.assertNotEqual(port, 4018)
+        thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        thread.start()
+        try:
+            req = urllib.request.Request(
+                f"http://{MOD.HOST}:{port}/api/turn",
+                data=json.dumps({"utterance": asked}).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=3) as res:
+                body = json.loads(res.read().decode("utf-8"))
+            self.assertTrue(started.is_set())
+            bus_path = hive / "bus" / "state.json"
+            raw = bus_path.read_text(encoding="utf-8") if bus_path.is_file() else ""
+        finally:
+            release.set()
+            httpd.shutdown()
+            httpd.server_close()
+            live.apply_turn = orig
+            MOD.HIVE = old_hive
+            MOD.TURN_WALL_SEC = old_wall
+            tmp.cleanup()
+        self.assertEqual(body.get("spoken"), line)
+        self.assertNotEqual(body.get("spoken"), MOD.TALK_DARK)
+        self.assertNotIn(MOD.TALK_DARK, raw)
+        self.assertEqual(MOD.TURN_WALL_SEC, 25.0)
+
+    def test_stream_error_after_remember_emits_the_line(self) -> None:
+        """Stream path: archive raises after the sentence is stored. Do not hide it."""
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        old_hive = MOD.HIVE
+        live = MOD.mouth()
+        orig = live.apply_turn_iter
+
+        def boom(utterance, **_kwargs):
+            live.PIPELINE.remember_published_line(MOD.HIVE, utterance, line)
+            raise RuntimeError("multi-root archive still in flight")
+
+        live.apply_turn_iter = boom
+        tmp = tempfile.TemporaryDirectory(prefix="serve-stream-wall-")
+        hive = Path(tmp.name)
+        (hive / "bus").mkdir(parents=True)
+        MOD.HIVE = hive
+        httpd = MOD.ThreadingHTTPServer((MOD.HOST, 0), MOD.Handler)
+        port = int(httpd.server_address[1])
+        self.assertNotEqual(port, 4018)
+        thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        thread.start()
+        try:
+            req = urllib.request.Request(
+                f"http://{MOD.HOST}:{port}/api/turn",
+                data=json.dumps({"utterance": asked, "stream": True}).encode("utf-8"),
+                headers={"Content-Type": "application/json", "Accept": "text/event-stream"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=3) as res:
+                payload = res.read().decode("utf-8")
+            bus_path = hive / "bus" / "state.json"
+            raw = bus_path.read_text(encoding="utf-8") if bus_path.is_file() else ""
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+            live.apply_turn_iter = orig
+            MOD.HIVE = old_hive
+            tmp.cleanup()
+        self.assertIn(line, payload)
+        self.assertNotIn(MOD.TALK_DARK, payload)
+        self.assertNotIn("That turn failed before it could speak.", payload)
+        self.assertNotIn(MOD.TALK_DARK, raw)
+
 
 if __name__ == "__main__":
     unittest.main()

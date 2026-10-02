@@ -14,6 +14,7 @@ import json
 import os
 import re
 import subprocess
+import threading
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -66,6 +67,7 @@ LOGIN_UNKNOWN = (
 NEED_LOGIN = "You need `agent login` for a real talk."
 NO_MODEL = "Cursor is signed out and Grok Bot's gateway is sealed."
 LOCAL_GREET = "Standing by."
+TALK_DARK = "The talk wire is dark this turn."
 GREET_RE = re.compile(r"^hey[,!]?\s+jarvis[.!?]*$", re.I)
 CONTINUITY_STATUS_RE = re.compile(
     r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?"
@@ -123,6 +125,21 @@ def _load(name: str, path: Path):
 STORE = _load("agent_stack_store", STACK / "memory" / "store.py")
 RETRIEVE = _load("agent_stack_retrieve", STACK / "memory" / "retrieve.py")
 LAST_WIRE = _load("agent_stack_last_wire", STACK / "memory" / "last_wire.py")
+_CHATS_PATH = STACK / "memory" / "chats.py"
+
+
+class _WallReceipts:
+    """Receipt hook when memory/chats.py is not on this tree.
+
+    A refused wall does not call archive_turn. A real dark cancel does,
+    with outcome WIRE_FAILURE.
+    """
+
+    def archive_turn(self, **_kwargs):
+        return []
+
+
+CHATS = _load("agent_stack_chats", _CHATS_PATH) if _CHATS_PATH.is_file() else _WallReceipts()
 PERSONA = _load("agent_stack_persona", STACK / "mouth" / "persona.py")
 SEE = _load("agent_stack_see", STACK / "hands" / "see.py")
 PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
@@ -154,8 +171,19 @@ def load_json(path: Path) -> dict:
 
 
 def write_json(path: Path, data: dict) -> None:
+    """Atomic replace so a reader never sees a torn bus mid-append."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    payload = json.dumps(data, indent=2) + "\n"
+    tmp = path.parent / f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp"
+    try:
+        tmp.write_text(payload, encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
 
 
 def is_hard_step(text: str) -> bool:
@@ -183,6 +211,56 @@ def append_turn(turns: list[dict], user: str, jarvis: str) -> list[dict]:
     return next_turns[-MAX_TURNS:]
 
 
+_BUS_GUARD = threading.Lock()
+_BUS_LOCKS: dict[str, threading.RLock] = {}
+_PUBLISHED: dict[tuple[str, str], str] = {}
+
+
+def _hive_key(hive: Path) -> str:
+    return str(Path(hive).resolve())
+
+
+def bus_lock(hive: Path) -> threading.RLock:
+    """One lock per hive. The wall and the append share it."""
+    key = _hive_key(hive)
+    with _BUS_GUARD:
+        lock = _BUS_LOCKS.get(key)
+        if lock is None:
+            lock = threading.RLock()
+            _BUS_LOCKS[key] = lock
+        return lock
+
+
+def _published_key(hive: Path, utterance: str) -> tuple[str, str]:
+    return (_hive_key(hive), (utterance or "").strip())
+
+
+def remember_published_line(hive: Path, utterance: str, spoken: str) -> None:
+    """The sentence exists. Later bus IO must not be required for the wall to see it."""
+    asked = (utterance or "").strip()
+    line = " ".join((spoken or "").split())
+    if not asked or not produced_model_line(line):
+        return
+    with bus_lock(hive):
+        _PUBLISHED[_published_key(hive, asked)] = line
+
+
+def published_model_line(hive: Path, utterance: str) -> str:
+    """Model sentence for this request. Memory first, then the bus file."""
+    asked = (utterance or "").strip()
+    if not asked:
+        return ""
+    with bus_lock(hive):
+        remembered = _PUBLISHED.get(_published_key(hive, asked), "")
+        if produced_model_line(remembered):
+            return remembered
+        bus = load_json(Path(hive) / "bus" / "state.json")
+        if str(bus.get("utterance") or "").strip() != asked:
+            return ""
+        spoken = str(bus.get("spoken") or "").strip()
+        return spoken if produced_model_line(spoken) else ""
+
+
 def write_bus(
     hive: Path,
     *,
@@ -200,37 +278,44 @@ def write_bus(
     receipt: dict | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
-    bus = load_json(path)
-    bus.update(
-        {
-            "schema_version": 1,
-            "phase": phase,
-            "job_status": job_status,
-            "utterance": utterance,
-            "permission_ask": None,
-            "spoken": spoken,
-            "cites": cites or [],
-            "wires": wires or [],
-            "tool": tool,
-            "updated_at": now_iso(),
-        }
-    )
-    if turns is not None:
-        bus["turns"] = turns
-    elif "turns" not in bus:
-        bus["turns"] = []
-    if receipt is not None:
-        bus["receipt"] = receipt
-    if cursor_login_said is True:
-        bus["cursor_login_said"] = True
-    elif cursor_login_said is False:
-        bus.pop("cursor_login_said", None)
-    if agent_login_tried is True:
-        bus["agent_login_tried"] = True
-    if brain:
-        bus["brain"] = brain
-    write_json(path, bus)
-    return bus
+    asked = (utterance or "").strip()
+    with bus_lock(hive):
+        bus = load_json(path)
+        bus.update(
+            {
+                "schema_version": 1,
+                "phase": phase,
+                "job_status": job_status,
+                "utterance": utterance,
+                "permission_ask": None,
+                "spoken": spoken,
+                "cites": cites or [],
+                "wires": wires or [],
+                "tool": tool,
+                "updated_at": now_iso(),
+            }
+        )
+        if turns is not None:
+            bus["turns"] = turns
+        elif "turns" not in bus:
+            bus["turns"] = []
+        if receipt is not None:
+            bus["receipt"] = receipt
+        if cursor_login_said is True:
+            bus["cursor_login_said"] = True
+        elif cursor_login_said is False:
+            bus.pop("cursor_login_said", None)
+        if agent_login_tried is True:
+            bus["agent_login_tried"] = True
+        if brain:
+            bus["brain"] = brain
+        line = " ".join(str(spoken or "").split())
+        if spoken is None:
+            _PUBLISHED.pop(_published_key(hive, asked), None)
+        elif produced_model_line(line):
+            _PUBLISHED[_published_key(hive, asked)] = line
+        write_json(path, bus)
+        return bus
 
 
 def pack_path_for(hive: Path) -> Path:
@@ -514,6 +599,146 @@ def continuity_status_reply() -> dict:
         "cites": [],
         "sent": False,
     }
+
+
+def produced_model_line(text: str) -> bool:
+    """A sentence already stored for this generation. Not the dark wire, not a lone Sir."""
+    body = " ".join((text or "").split())
+    if not body or body == TALK_DARK:
+        return False
+    if body.lower() in {"sir.", "sir", "sir,"}:
+        return False
+    return True
+
+
+def _bus_gen(bus: dict | None) -> int:
+    try:
+        return int((bus or {}).get("turn_gen") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _bus_cancel_gen(bus: dict | None) -> int:
+    try:
+        return int((bus or {}).get("cancel_gen") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def mutate_bus(hive: Path, apply) -> dict:
+    path = hive / "bus" / "state.json"
+    with bus_lock(hive):
+        bus = load_json(path)
+        out = apply(bus)
+        if not isinstance(out, dict):
+            out = bus
+        write_json(path, out)
+        return out
+
+
+def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
+    """Open a generation. Does not first-arm Watch."""
+
+    def apply(bus: dict) -> dict:
+        gen = _bus_gen(bus) + 1
+        bus["turn_gen"] = gen
+        bus["updated_at"] = now_iso()
+        if arm_watch:
+            watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
+            if bool(watch.get("armed")):
+                watch["armed"] = True
+                watch["updated_at"] = now_iso()
+                bus["watch"] = watch
+        return bus
+
+    return _bus_gen(mutate_bus(hive, apply))
+
+
+def peek_gen(hive: Path) -> int:
+    return _bus_gen(load_json(hive / "bus" / "state.json"))
+
+
+def _record_wall_failure(hive: Path, gen: int, line: str) -> None:
+    """WIRE_FAILURE receipt for a dark cancel that actually replaced the line."""
+    bus = load_json(hive / "bus" / "state.json")
+    heard = str(bus.get("utterance") or "").strip()
+    note_wire(
+        hive,
+        "converse",
+        line,
+        heard,
+        ok=False,
+        wire={"path": "wall", "error": "WIRE_FAILURE"},
+    )
+    if CHATS is not None and hasattr(CHATS, "archive_turn"):
+        CHATS.archive_turn(
+            hive=hive,
+            retrieve_roots=None,
+            utterance=heard,
+            spoken=line,
+            verb="converse",
+            tool="converse",
+            wires=["converse"],
+            gen=int(gen),
+            turn_gen=int(gen),
+            jarvis_chat_id=str(bus.get("jarvis_chat_id") or "") or None,
+            outcome="WIRE_FAILURE",
+            closed=True,
+        )
+
+
+def cancel_turn_scoped(
+    hive: Path,
+    gen: int,
+    spoken: str | None = None,
+    request: str | None = None,
+) -> bool:
+    """Cancel `gen` only while it still owns the bus.
+
+    A dark wall for the same request does not replace a model sentence already
+    stored. That path returns False and writes no WIRE_FAILURE receipt.
+    """
+    try:
+        token = int(gen)
+    except (TypeError, ValueError):
+        return False
+    if token <= 0:
+        return False
+    line = (spoken or "").strip() or "Stopped. Standing by."
+    hit = {"ok": False}
+
+    def apply(bus: dict) -> dict:
+        running = _bus_gen(bus)
+        if running != token or _bus_cancel_gen(bus) >= running:
+            return bus
+        asked = (request or "").strip()
+        remembered = _PUBLISHED.get(_published_key(hive, asked), "") if asked else ""
+        on_bus = (
+            asked
+            and str(bus.get("utterance") or "").strip() == asked
+            and produced_model_line(str(bus.get("spoken") or ""))
+        )
+        if line == TALK_DARK and (produced_model_line(remembered) or on_bus):
+            return bus
+        hit["ok"] = True
+        bus["cancel_gen"] = running
+        bus["phase"] = "idle"
+        bus["job_status"] = "done"
+        bus["spoken"] = line
+        bus["permission_ask"] = None
+        watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
+        watch["armed"] = False
+        watch["held"] = False
+        watch["spoken"] = "Watch off."
+        watch["updated_at"] = now_iso()
+        bus["watch"] = watch
+        bus["updated_at"] = now_iso()
+        return bus
+
+    mutate_bus(hive, apply)
+    if hit["ok"] and line == TALK_DARK:
+        _record_wall_failure(hive, token, line)
+    return hit["ok"]
 
 
 def _prior_user_mark(turns: list[dict] | None, pattern: re.Pattern[str]) -> str:
@@ -1136,6 +1361,7 @@ def _commit_spoken(
             utterance=spoken_in,
             turns=prior_turns,
         )
+    remember_published_line(hive, spoken_in, text)
     next_turns = append_turn(prior_turns, spoken_in, text)
     receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
     write_bus(
