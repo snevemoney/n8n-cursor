@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 import unittest.mock
 from pathlib import Path
@@ -1002,6 +1003,94 @@ class PublishedLineWallTest(unittest.TestCase):
         self.assertFalse(closed)
         self.assertEqual(calls, [])
         self.assertEqual(bus["spoken"], line)
+        self.assertNotIn("cancel_gen", bus)
+
+    def test_remembered_line_blocks_dark_cancel_before_bus_spoken(self) -> None:
+        """Archive still in flight: the sentence is stored, bus spoken is not written yet."""
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        with tempfile.TemporaryDirectory(prefix="pipeline-wall-remember-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps({"turn_gen": 3878, "utterance": asked, "spoken": ""}),
+                encoding="utf-8",
+            )
+            calls: list[dict] = []
+
+            def record(**kw):
+                calls.append(kw)
+                return []
+
+            PIPE.remember_published_line(hive, asked, line)
+            with unittest.mock.patch.object(PIPE.CHATS, "archive_turn", side_effect=record):
+                closed = PIPE.cancel_turn_scoped(hive, 3878, spoken=PIPE.TALK_DARK, request=asked)
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+        self.assertFalse(closed)
+        self.assertEqual(calls, [])
+        self.assertNotEqual(bus.get("spoken"), PIPE.TALK_DARK)
+        self.assertNotIn("cancel_gen", bus)
+        self.assertEqual(PIPE.published_model_line(hive, asked), line)
+
+    def test_cancel_during_append_keeps_the_model_line(self) -> None:
+        """Cancel that arrives inside the bus append must not replace the sentence."""
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        with tempfile.TemporaryDirectory(prefix="pipeline-wall-append-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps({"turn_gen": 3878, "utterance": asked, "spoken": ""}),
+                encoding="utf-8",
+            )
+            entered = threading.Event()
+            release = threading.Event()
+            real_write = PIPE.write_json
+
+            def gated(path, data):
+                if data.get("spoken") == line:
+                    entered.set()
+                    self.assertTrue(release.wait(3))
+                real_write(path, data)
+
+            result: dict = {}
+
+            def append() -> None:
+                PIPE.write_bus(
+                    hive,
+                    phase="speak",
+                    job_status="done",
+                    utterance=asked,
+                    spoken=line,
+                    tool="converse",
+                    brain="openrouter",
+                )
+
+            def cancel() -> None:
+                result["closed"] = PIPE.cancel_turn_scoped(
+                    hive, 3878, spoken=PIPE.TALK_DARK, request=asked
+                )
+
+            with unittest.mock.patch.object(PIPE, "write_json", side_effect=gated):
+                writer = threading.Thread(target=append)
+                writer.start()
+                self.assertTrue(entered.wait(3))
+                canceller = threading.Thread(target=cancel)
+                canceller.start()
+                canceller.join(0.3)
+                self.assertTrue(canceller.is_alive())
+                release.set()
+                writer.join(3)
+                canceller.join(3)
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+        self.assertFalse(result.get("closed"))
+        self.assertEqual(bus.get("spoken"), line)
         self.assertNotIn("cancel_gen", bus)
 
 

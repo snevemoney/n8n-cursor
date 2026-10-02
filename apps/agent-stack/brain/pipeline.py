@@ -14,6 +14,7 @@ import json
 import os
 import re
 import subprocess
+import threading
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -170,8 +171,19 @@ def load_json(path: Path) -> dict:
 
 
 def write_json(path: Path, data: dict) -> None:
+    """Atomic replace so a reader never sees a torn bus mid-append."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    payload = json.dumps(data, indent=2) + "\n"
+    tmp = path.parent / f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp"
+    try:
+        tmp.write_text(payload, encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
 
 
 def is_hard_step(text: str) -> bool:
@@ -199,6 +211,56 @@ def append_turn(turns: list[dict], user: str, jarvis: str) -> list[dict]:
     return next_turns[-MAX_TURNS:]
 
 
+_BUS_GUARD = threading.Lock()
+_BUS_LOCKS: dict[str, threading.RLock] = {}
+_PUBLISHED: dict[tuple[str, str], str] = {}
+
+
+def _hive_key(hive: Path) -> str:
+    return str(Path(hive).resolve())
+
+
+def bus_lock(hive: Path) -> threading.RLock:
+    """One lock per hive. The wall and the append share it."""
+    key = _hive_key(hive)
+    with _BUS_GUARD:
+        lock = _BUS_LOCKS.get(key)
+        if lock is None:
+            lock = threading.RLock()
+            _BUS_LOCKS[key] = lock
+        return lock
+
+
+def _published_key(hive: Path, utterance: str) -> tuple[str, str]:
+    return (_hive_key(hive), (utterance or "").strip())
+
+
+def remember_published_line(hive: Path, utterance: str, spoken: str) -> None:
+    """The sentence exists. Later bus IO must not be required for the wall to see it."""
+    asked = (utterance or "").strip()
+    line = " ".join((spoken or "").split())
+    if not asked or not produced_model_line(line):
+        return
+    with bus_lock(hive):
+        _PUBLISHED[_published_key(hive, asked)] = line
+
+
+def published_model_line(hive: Path, utterance: str) -> str:
+    """Model sentence for this request. Memory first, then the bus file."""
+    asked = (utterance or "").strip()
+    if not asked:
+        return ""
+    with bus_lock(hive):
+        remembered = _PUBLISHED.get(_published_key(hive, asked), "")
+        if produced_model_line(remembered):
+            return remembered
+        bus = load_json(Path(hive) / "bus" / "state.json")
+        if str(bus.get("utterance") or "").strip() != asked:
+            return ""
+        spoken = str(bus.get("spoken") or "").strip()
+        return spoken if produced_model_line(spoken) else ""
+
+
 def write_bus(
     hive: Path,
     *,
@@ -216,37 +278,44 @@ def write_bus(
     receipt: dict | None = None,
 ) -> dict:
     path = hive / "bus" / "state.json"
-    bus = load_json(path)
-    bus.update(
-        {
-            "schema_version": 1,
-            "phase": phase,
-            "job_status": job_status,
-            "utterance": utterance,
-            "permission_ask": None,
-            "spoken": spoken,
-            "cites": cites or [],
-            "wires": wires or [],
-            "tool": tool,
-            "updated_at": now_iso(),
-        }
-    )
-    if turns is not None:
-        bus["turns"] = turns
-    elif "turns" not in bus:
-        bus["turns"] = []
-    if receipt is not None:
-        bus["receipt"] = receipt
-    if cursor_login_said is True:
-        bus["cursor_login_said"] = True
-    elif cursor_login_said is False:
-        bus.pop("cursor_login_said", None)
-    if agent_login_tried is True:
-        bus["agent_login_tried"] = True
-    if brain:
-        bus["brain"] = brain
-    write_json(path, bus)
-    return bus
+    asked = (utterance or "").strip()
+    with bus_lock(hive):
+        bus = load_json(path)
+        bus.update(
+            {
+                "schema_version": 1,
+                "phase": phase,
+                "job_status": job_status,
+                "utterance": utterance,
+                "permission_ask": None,
+                "spoken": spoken,
+                "cites": cites or [],
+                "wires": wires or [],
+                "tool": tool,
+                "updated_at": now_iso(),
+            }
+        )
+        if turns is not None:
+            bus["turns"] = turns
+        elif "turns" not in bus:
+            bus["turns"] = []
+        if receipt is not None:
+            bus["receipt"] = receipt
+        if cursor_login_said is True:
+            bus["cursor_login_said"] = True
+        elif cursor_login_said is False:
+            bus.pop("cursor_login_said", None)
+        if agent_login_tried is True:
+            bus["agent_login_tried"] = True
+        if brain:
+            bus["brain"] = brain
+        line = " ".join(str(spoken or "").split())
+        if spoken is None:
+            _PUBLISHED.pop(_published_key(hive, asked), None)
+        elif produced_model_line(line):
+            _PUBLISHED[_published_key(hive, asked)] = line
+        write_json(path, bus)
+        return bus
 
 
 def pack_path_for(hive: Path) -> Path:
@@ -558,12 +627,13 @@ def _bus_cancel_gen(bus: dict | None) -> int:
 
 def mutate_bus(hive: Path, apply) -> dict:
     path = hive / "bus" / "state.json"
-    bus = load_json(path)
-    out = apply(bus)
-    if not isinstance(out, dict):
-        out = bus
-    write_json(path, out)
-    return out
+    with bus_lock(hive):
+        bus = load_json(path)
+        out = apply(bus)
+        if not isinstance(out, dict):
+            out = bus
+        write_json(path, out)
+        return out
 
 
 def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
@@ -642,12 +712,13 @@ def cancel_turn_scoped(
         if running != token or _bus_cancel_gen(bus) >= running:
             return bus
         asked = (request or "").strip()
-        if (
-            line == TALK_DARK
-            and asked
+        remembered = _PUBLISHED.get(_published_key(hive, asked), "") if asked else ""
+        on_bus = (
+            asked
             and str(bus.get("utterance") or "").strip() == asked
             and produced_model_line(str(bus.get("spoken") or ""))
-        ):
+        )
+        if line == TALK_DARK and (produced_model_line(remembered) or on_bus):
             return bus
         hit["ok"] = True
         bus["cancel_gen"] = running
@@ -1290,6 +1361,7 @@ def _commit_spoken(
             utterance=spoken_in,
             turns=prior_turns,
         )
+    remember_published_line(hive, spoken_in, text)
     next_turns = append_turn(prior_turns, spoken_in, text)
     receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
     write_bus(
