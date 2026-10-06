@@ -1,9 +1,9 @@
 ---
 tags: [os, factory, researcher, signal-train]
-at: 2026-08-25
+at: 2026-10-06
 desk: researcher
 machine: dark-factory
-status: named pick · TRAIN · Forge attempted · Watchdog GRADE pass · halt
+status: named pick · TRAIN · unused leftover reaffirm · halt
 send: removed
 clock: parked
 ---
@@ -14,24 +14,40 @@ clock: parked
 
 | Field | Value |
 |-------|--------|
-| **id** | `X80ljdCPM_U` |
+| **id** | `2J3uX8iRNng` |
 | **steal \| learn** | steal |
 | **Verdict** | **TRAIN** |
-| **Spoken machine** | `eval-then-wrap-tools` |
-| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/X80ljdCPM_U/full.txt` (4440 words, OBSERVED) |
+| **Spoken machine** | `same-prompt-bench` |
+| **full.txt** | yes — `docs/hive/outer-heaven/CONTENT/watch-later/packets/2J3uX8iRNng/full.txt` (6825 words, OBSERVED) |
 | **ACTION TRACE** | yes — `LEARNED.md` heading `## ACTION TRACE` (OBSERVED) |
-| **Skip?** | no — not TRAIN-1, not the TRIAGE decoy, not `/workspace` |
+| **Skip?** | no — not TRAIN-1/2 PASS, not the TRIAGE decoy, not `/workspace` |
 
-**Why:** Nate Herk “Build ANYTHING…” is a steal_gap row already on this checkout. Caption `full.txt` plus LEARNED ACTION TRACE exist. Spoken machine is same-prompt eval, then wrap existing tools (native node can lie; tool sprawl breaks a flat brain). Not a weight train. Not a buyer surface.
+**Why:** Nate Herk same-prompt bench (one prompt, two brains, a referee) is the last Factory-OS steal row on this checkout that still has packet + caption `full.txt` + LEARNED ACTION TRACE and no Watchdog GRADE. Spoken machine is label the run, write the stop before you start, referee the patch, then blame stale context before tokens before the model. Verify-until is the story; the stop condition is the product. Not a weight train. Not a buyer surface. Tape $ UNVERIFIED.
 
-**Do not use `factory-os-train-plane`.** That slug is an invent from PR 47 (cold `origin/main` had no pack / packet / retrieve). It is not a YouTube id. It has no `full.txt`. It has no ACTION TRACE. Never write hold-outs for it. Never mint it.
+**Retrieve (theme already named):** `same-prompt bench verify-until stop condition` → **eval-harness** · 3 refs (cap): `kwSVtQ7dziU` · `X80ljdCPM_U` · `2J3uX8iRNng`. No SIGNAL_INDEX dump.
 
-**This stage (done):** Watchdog GRADE → `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` (**pass**). Forge attempt and hold-outs were not rewritten.
+**Filter this sitting (then LLM):**
+```
+STORE: LEARNED.md with ## ACTION TRACE on this checkout
+FILTER: not PASS · not buyer-surface · not decoy · packet + full.txt present
+ROWS: 4 → 1
+```
 
-**Next stage (one sitting):** Researcher pick **or** HITL leftover → **stop**. Do **not** start TRAIN-3 unless Evens names an id. Do not re-grade `X80ljdCPM_U`. Do not remint.
+| id | ACTION TRACE | GRADE | This sitting |
+|----|--------------|-------|----------------|
+| `kwSVtQ7dziU` | yes | TRAIN-1 **PASS** | skip |
+| `X80ljdCPM_U` | yes | TRAIN-2 **PASS** | skip — on-disk pick at wake |
+| `FFWtxjvW2ts` | yes | none | skip — anti-slop / buyer surface; this week Factory OS |
+| `2J3uX8iRNng` | yes | none | **TRAIN** |
 
-Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · 1803 walk · `/workspace` · 4823 · buyer surface.
+**Do not use `factory-os-train-plane`.** Retired invent. Not a YouTube id. No `full.txt`. No ACTION TRACE.
 
-Yellow `grokbot_orphans` = 8. Continue.
+**This stage (done):** Researcher propose only. `COVERAGE_LEDGER.json` **MISSING-ON-CHECKOUT** — do not invent the steal_gap-16 list. Ledger not flipped. Packets for the four TRACE ids are on this checkout.
+
+**Next stage (HITL leftover → Evens):** validate this id on the Mac or commit any hive drafts still off `main`. Do **not** start TRAIN unless Evens names `2J3uX8iRNng`. Forge / Watchdog stay halted. No mint. Connect browser-use on cursor.com before any live URL confirm (not this sitting).
+
+Skip remains: `kwSVtQ7dziU` (TRAIN-1 PASS) · `X80ljdCPM_U` (TRAIN-2 PASS) · `karpathy-wiki-nate-herk` (no ACTION TRACE) · `FFWtxjvW2ts` (buyer surface) · 1803 walk · `/workspace` · 4823 · buyer surface.
+
+Yellow `grokbot_orphans` = 8. Continue. Do not restore.
 
 [[CLOUD-HOST]] · [[GOAL-GAP-BOARD]] · [[SIGNAL-TRAIN-LOOP]]
