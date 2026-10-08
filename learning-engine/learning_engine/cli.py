@@ -88,7 +88,10 @@ def cmd_validate(args: argparse.Namespace) -> int:
         "warnings": warnings,
     }
     if args.output:
-        write_json(Path(args.output), report)
+        try:
+            write_json(Path(args.output), report)
+        except Exception as exc:
+            return _emit_cli_error(exc, path=args.output)
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1
 

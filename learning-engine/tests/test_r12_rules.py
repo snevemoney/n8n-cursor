@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import sqlite3
 import tempfile
 import unittest
@@ -160,6 +161,10 @@ class N111JsonlErrors(unittest.TestCase):
             self.assertIn("not found", err["error"].lower())
             self.assertNotIn("line", err)
 
+    @unittest.skipIf(
+        os.geteuid() == 0,
+        "chmod 0555 does not block the superuser (os.geteuid()==0)",
+    )
     def test_readonly_directory_is_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -181,27 +186,26 @@ class N111JsonlErrors(unittest.TestCase):
             self.assertFalse(db.exists())
 
     def test_leftover_temp_directory_is_json_when_not_cleared(self) -> None:
-        import learning_engine.storage.sqlite_index as idx
-
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             db = root / "idx.sqlite"
             index_packets(db, [_ok(signal_id="keep")])
+            before = db.read_bytes()
             stale = db.with_name(db.name + ".rebuilding")
             stale.mkdir()
-            (stale / "junk").write_text("x", encoding="utf-8")
+            junk = stale / "junk"
+            junk.write_text("x", encoding="utf-8")
             jsonl = root / "p.jsonl"
             write_jsonl(jsonl, [_ok(signal_id="new")])
-            idx.FAIL_CLEANUP = True
-            try:
-                rc, err = _cli_err(
-                    ["store", "--packets", str(jsonl), "--sqlite", str(db), "--rebuild"]
-                )
-            finally:
-                idx.FAIL_CLEANUP = False
+            rc, err = _cli_err(
+                ["store", "--packets", str(jsonl), "--sqlite", str(db), "--rebuild"]
+            )
             self.assertEqual(rc, 1)
-            self.assertIn("directory", err["error"].lower())
-            self.assertIn("cleanup_warning", err)
+            self.assertIn("not a regular file", err["error"])
+            self.assertEqual(err["path"], str(stale))
+            self.assertTrue(stale.is_dir())
+            self.assertEqual(junk.read_text(encoding="utf-8"), "x")
+            self.assertEqual(db.read_bytes(), before)
 
 
 class N112CleanupNeverRaises(unittest.TestCase):
@@ -247,26 +251,28 @@ class N113NoEmptyDbAndStaleClear(unittest.TestCase):
             self.assertIn("no database was created", err["error"])
             self.assertNotIn("database left unchanged", err["error"])
 
-    def test_stale_rebuilding_dir_is_cleared(self) -> None:
+    def test_stale_rebuilding_dir_aborts_and_leaves_decoys(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             db = Path(tmp) / "idx.sqlite"
             index_packets(db, [_ok(signal_id="old")])
+            before = db.read_bytes()
             stale = db.with_name(db.name + ".rebuilding")
             stale.mkdir()
-            (stale / "junk").write_text("x", encoding="utf-8")
+            (stale / "junk").write_text("keep", encoding="utf-8")
             stray = Path(tmp) / (db.name + ".tmp-old")
             stray.write_text("stale", encoding="utf-8")
             jsonl = Path(tmp) / "p.jsonl"
             write_jsonl(jsonl, [_ok(signal_id="new")])
-            stderr = io.StringIO()
-            with mock.patch("sys.stderr", stderr):
-                rc = cli_main(
-                    ["store", "--packets", str(jsonl), "--sqlite", str(db), "--rebuild"]
-                )
-            self.assertEqual(rc, 0)
-            self.assertFalse(stale.exists())
-            self.assertFalse(stray.exists())
-            self.assertNotIn("Traceback", stderr.getvalue())
+            rc, err = _cli_err(
+                ["store", "--packets", str(jsonl), "--sqlite", str(db), "--rebuild"]
+            )
+            self.assertEqual(rc, 1)
+            self.assertEqual(err["path"], str(stale))
+            self.assertTrue(stale.is_dir())
+            self.assertEqual((stale / "junk").read_text(encoding="utf-8"), "keep")
+            self.assertTrue(stray.is_file())
+            self.assertEqual(stray.read_text(encoding="utf-8"), "stale")
+            self.assertEqual(db.read_bytes(), before)
 
 
 class N114IsolationTraversal(unittest.TestCase):

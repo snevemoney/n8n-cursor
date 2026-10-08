@@ -21,6 +21,7 @@ from learning_engine.io_util import read_jsonl
 LEGACY_MIGRATED_RUN_ID = "legacy-migrated"
 FAIL_MIGRATION_AFTER: str | None = None
 FAIL_REBUILD_AFTER: str | None = None
+FAIL_INDEX_AFTER: str | None = None
 FAIL_CLEANUP: bool = False
 REBUILD_TMP_SUFFIX = ".rebuilding"
 REBUILD_SIDE_SUFFIXES = (
@@ -319,34 +320,28 @@ def connect(path: Path) -> sqlite3.Connection:
 
 
 def index_packets(path: Path, packets: Iterable[dict[str, Any]]) -> int:
-    conn = connect(path)
-    n = 0
-    with conn:
-        for packet in packets:
-            conn.execute(
-                """
-                INSERT OR REPLACE INTO packets (
-                    source_type, signal_id, content_access, analysis_scope,
-                    verification_state, processing_status, lifecycle_state,
-                    source_url, adapter, body_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    packet.get("source_type"),
-                    packet.get("signal_id"),
-                    packet.get("content_access"),
-                    packet.get("analysis_scope"),
-                    packet.get("verification_state"),
-                    packet.get("processing_status"),
-                    packet.get("lifecycle_state"),
-                    packet.get("source_url"),
-                    packet.get("adapter"),
-                    json.dumps(packet, ensure_ascii=False),
-                ),
-            )
-            n += 1
-    conn.close()
-    return n
+    existed = path.exists()
+    conn: sqlite3.Connection | None = None
+    try:
+        conn = connect(path)
+        if FAIL_INDEX_AFTER == "after_connect":
+            raise RuntimeError("simulated insert failure")
+        n = 0
+        with conn:
+            for packet in packets:
+                _insert_packet_row(conn, packet)
+                n += 1
+        conn.close()
+        return n
+    except Exception:
+        if conn is not None:
+            try:
+                conn.close()
+            except sqlite3.Error:
+                pass
+        if not existed:
+            _remove_new_db(path)
+        raise
 
 
 def packet_counts_by_source_type(path: Path) -> dict[str, int]:
@@ -414,43 +409,38 @@ def _rebuild_tmp_path(sqlite_path: Path) -> Path:
 
 
 def _stale_rebuild_candidates(sqlite_path: Path) -> list[Path]:
-    """Exact temp/journal names only: <db>.rebuilding{,-journal,-wal,-shm} and <db>.tmp*."""
+    """Exact names this code creates: <db>.rebuilding{,-journal,-wal,-shm}."""
     parent = sqlite_path.parent
     name = sqlite_path.name
-    found: list[Path] = []
-    seen: set[str] = set()
-    for suffix in REBUILD_SIDE_SUFFIXES:
-        path = parent / f"{name}{suffix}"
-        key = str(path)
-        if key not in seen:
-            found.append(path)
-            seen.add(key)
-    if parent.is_dir():
-        prefix = name + ".tmp"
-        for child in parent.iterdir():
-            if child.name.startswith(prefix) and str(child) not in seen:
-                found.append(child)
-                seen.add(str(child))
-    return found
+    return [parent / f"{name}{suffix}" for suffix in REBUILD_SIDE_SUFFIXES]
+
+
+def _first_non_file_temp(sqlite_path: Path) -> Path | None:
+    """Return the first expected temp path that exists and is not a regular file."""
+    for path in _stale_rebuild_candidates(sqlite_path):
+        try:
+            if not path.exists() and not path.is_symlink():
+                continue
+        except OSError:
+            continue
+        if path.is_dir() or not path.is_file():
+            return path
+    return None
 
 
 def _safe_remove(path: Path) -> str | None:
-    """Unlink a temp file or rmtree an exact leftover dir. Never raise."""
+    """Unlink a regular file only. Never rmtree. Never raise."""
     try:
         exists = path.exists() or path.is_symlink()
     except OSError as exc:
         return f"{path}: {exc}"
     if not exists:
         return None
+    if path.is_dir() or not (path.is_file() or path.is_symlink()):
+        return None
     if FAIL_CLEANUP:
         return f"{path}: simulated cleanup failure"
     try:
-        if path.is_symlink() or path.is_file():
-            path.unlink(missing_ok=True)
-            return None
-        if path.is_dir():
-            shutil.rmtree(path)
-            return None
         path.unlink(missing_ok=True)
         return None
     except OSError as exc:
@@ -501,16 +491,16 @@ def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
     no file if the target did not exist.
     """
     existed = sqlite_path.exists()
+    blocked = _first_non_file_temp(sqlite_path)
+    if blocked is not None:
+        raise IndexSchemaError(
+            f"SQLite rebuild aborted; leftover temp path is not a regular file: {blocked}",
+            path=str(blocked),
+        )
     stale_warning = _clear_stale_rebuild_temps(sqlite_path)
     tmp = _rebuild_tmp_path(sqlite_path)
     packets: list[dict[str, Any]] = []
     try:
-        if tmp.exists() and tmp.is_dir():
-            raise IndexSchemaError(
-                f"SQLite rebuild failed; leftover temp path is a directory: {tmp}",
-                path=str(tmp),
-                cleanup_warning=stale_warning,
-            )
         packets = list(read_jsonl(jsonl_path))
         types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
         if existed:
