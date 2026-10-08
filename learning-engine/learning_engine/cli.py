@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 from pathlib import Path
 from typing import Any
@@ -81,7 +82,7 @@ def cmd_store(args: argparse.Namespace) -> int:
         n = index_packets(sqlite_path, packets)
         print(json.dumps({"ok": True, "indexed": n, "sqlite": args.sqlite}))
         return 0
-    except IndexSchemaError as exc:
+    except (IndexSchemaError, sqlite3.OperationalError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}), file=sys.stderr)
         return 1
 

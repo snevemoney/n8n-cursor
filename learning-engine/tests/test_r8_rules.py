@@ -329,9 +329,9 @@ class R8N77DisagreementRefs(unittest.TestCase):
             pack = youtube_l2.convert(folder)[0]
             validate_packets([pack])
             refs = pack["scores"]["disagreement_refs"]
-            self.assertEqual(refs[0], Path(pack["preferred_source"]).name)
-            self.assertIn("TRANSCRIPT.md", refs)
-            self.assertIn("captions_clean.txt", refs)
+            self.assertEqual(refs[0], pack["preferred_source"])
+            self.assertTrue(any(Path(item).name == "TRANSCRIPT.md" for item in refs))
+            self.assertTrue(any(Path(item).name == "captions_clean.txt" for item in refs))
 
 
 class R8Reg4NotApplicable(unittest.TestCase):

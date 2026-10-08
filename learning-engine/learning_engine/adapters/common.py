@@ -70,7 +70,8 @@ TIER_A_EXACT = {
     "player-caption-samples.json",
     "transcript-burnin.json",
 }
-TIER_B_EXACT = {"whisper.txt", "transcript.txt", "transcript.json"}
+TIER_WHISPER_EXACT = {"whisper.txt", "transcript.txt", "transcript.json"}
+TIER_B_EXACT = TIER_WHISPER_EXACT
 PROVENANCE_LINE = re.compile(r"^_source:\s*(.+?)_\s*$", re.IGNORECASE)
 INLINE_VTT_TAGS = re.compile(
     r"<\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?>|"
@@ -78,6 +79,8 @@ INLINE_VTT_TAGS = re.compile(
     re.IGNORECASE,
 )
 CUE_SETTING_TOKEN = re.compile(r"^[A-Za-z][A-Za-z0-9-]*:\S+$")
+FILENAME_TOKEN_SPLIT = re.compile(r"[-_.\s]+")
+WINDOW_IN_NAME = re.compile(r"win\d+", re.IGNORECASE)
 
 
 def existing_files(folder: Path, suffixes: set[str] | None = None) -> list[Path]:
@@ -137,7 +140,7 @@ def existing_transcripts(folder: Path) -> list[Path]:
             match = True
         elif name.startswith("captions") and path.suffix.lower() in CAPTION_SUFFIXES:
             match = True
-        elif "ocr" in name:
+        elif is_ocr_file(path):
             match = True
         elif "burnin" in name and name.endswith(".json"):
             match = True
@@ -262,11 +265,33 @@ def clean_transcript(raw: str) -> dict[str, Any]:
         if stripped:
             in_header = False
             lines_out.append(stripped)
+    if in_vtt:
+        lines_out = dedupe_rolling_caption_lines(lines_out)
     return {
         "text": "\n".join(lines_out).strip(),
         "transcript_source": provenance[0] if provenance else None,
         "provenance": provenance,
     }
+
+
+def dedupe_rolling_caption_lines(lines: list[str]) -> list[str]:
+    """Drop YouTube rolling-cue repeats. Result has no consecutive duplicate lines."""
+    emitted: list[str] = []
+    for line in lines:
+        text = line.strip()
+        if not text:
+            continue
+        recent = emitted[-3:]
+        if text in recent:
+            continue
+        if emitted and text.startswith(emitted[-1]):
+            rest = text[len(emitted[-1]) :]
+            if rest[:1].isspace():
+                text = rest.strip()
+                if not text or text in emitted[-3:]:
+                    continue
+        emitted.append(text)
+    return emitted
 
 
 def spoken_text(raw: str) -> str:
@@ -381,8 +406,22 @@ def read_transcript_payload(path: Path) -> str:
     return "\n".join(fields) if fields else ""
 
 
+def filename_stem_tokens(path: Path) -> list[str]:
+    """Basename without extension, split on [-_.\\s], lowercased."""
+    return [token.lower() for token in FILENAME_TOKEN_SPLIT.split(path.stem) if token]
+
+
 def is_ocr_file(path: Path) -> bool:
-    return "ocr" in path.name.lower()
+    """OCR only when a filename token is exactly 'ocr'. Video ids with 'ocr' letters are not."""
+    return "ocr" in filename_stem_tokens(path)
+
+
+def is_windowed_caption(path: Path) -> bool:
+    return bool(WINDOW_IN_NAME.search(path.name))
+
+
+def distinct_token_count(text: str) -> int:
+    return len({token.lower() for token in unicode_word_tokens(text)})
 
 
 def is_burnin_caption_json(path: Path) -> bool:
@@ -404,16 +443,16 @@ def is_transcript_md(path: Path) -> bool:
 
 
 def speech_source_tier(path: Path) -> int | None:
-    """Fixed speech order. None = not a speech source (OCR, gap notes, other)."""
+    """Speech order: (0) TRANSCRIPT.md (1) whisper/transcript files (2) caption formats."""
     if is_ocr_file(path):
         return None
     if is_transcript_md(path):
-        return 2
-    name = path.name.lower()
-    if is_caption_format_file(path) or name in TIER_A_EXACT or is_burnin_caption_json(path):
         return 0
-    if name in TIER_B_EXACT:
+    name = path.name.lower()
+    if name in TIER_WHISPER_EXACT:
         return 1
+    if is_caption_format_file(path) or name in TIER_A_EXACT or is_burnin_caption_json(path):
+        return 2
     return None
 
 
@@ -557,19 +596,51 @@ def _file_is_speech(raw: str) -> tuple[bool, str | None, str]:
     return (caption_file_is_speech(raw) or quality == "short"), quality, text
 
 
-def _disagreement_refs(preferred: Path | None, differing: list[Path]) -> tuple[str, ...]:
-    names: list[str] = []
+def _path_ref(folder: Path | None, path: Path) -> str:
+    if folder is not None:
+        return rel_ref(folder, path)
+    return path.name
+
+
+def _disagreement_refs(
+    folder: Path | None,
+    preferred: Path | None,
+    differing: list[Path],
+) -> tuple[str, ...]:
+    refs: list[str] = []
     if preferred is not None:
-        names.append(preferred.name)
+        refs.append(_path_ref(folder, preferred))
     for path in differing:
-        if path.name not in names:
-            names.append(path.name)
-    return tuple(names)
+        item = _path_ref(folder, path)
+        if item not in refs:
+            refs.append(item)
+    return tuple(refs)
+
+
+def _pick_in_tier(
+    paths: list[Path],
+    texts: dict[Path, str],
+    qualities: dict[Path, str],
+    *,
+    ok_only: bool,
+) -> Path | None:
+    cand = [path for path in paths if (not ok_only or qualities.get(path) == "ok")]
+    if not cand:
+        return None
+    windowed = [path for path in cand if is_windowed_caption(path)]
+    if len(windowed) >= 2:
+        return sorted(
+            windowed,
+            key=lambda item: (-distinct_token_count(texts.get(item, "")), item.name.lower()),
+        )[0]
+    return sorted(cand, key=lambda item: item.name.lower())[0]
 
 
 def youtube_speech_files(
     paths: list[Path],
     read_text: Callable[[Path], str],
+    *,
+    folder: Path | None = None,
 ) -> YoutubeSpeechScan:
     """YouTube speech scan. Fixed tier order. OCR is never speech. Gap notes never are."""
     other: list[Path] = []
@@ -580,6 +651,7 @@ def youtube_speech_files(
     gap_note_with_content = False
     short_paths: list[Path] = []
     texts: dict[Path, str] = {}
+    qualities: dict[Path, str] = {}
     by_tier: dict[int, list[Path]] = {0: [], 1: [], 2: []}
     for path in paths:
         raw = read_text(path)
@@ -605,9 +677,11 @@ def youtube_speech_files(
             continue
         by_tier[tier].append(path)
         texts[path] = text
+        if quality:
+            qualities[path] = quality
         if quality == "short":
             short_paths.append(path)
-        if tier == 2:
+        if is_transcript_md(path):
             clean_md = path
 
     speech: list[Path] = []
@@ -615,10 +689,16 @@ def youtube_speech_files(
         speech.extend(sorted(by_tier[tier], key=lambda item: item.name.lower()))
     preferred: Path | None = None
     for tier in (0, 1, 2):
-        hits = sorted(by_tier[tier], key=lambda item: item.name.lower())
-        if hits:
-            preferred = hits[0]
+        hit = _pick_in_tier(by_tier[tier], texts, qualities, ok_only=True)
+        if hit is not None:
+            preferred = hit
             break
+    if preferred is None:
+        for tier in (0, 1, 2):
+            hit = _pick_in_tier(by_tier[tier], texts, qualities, ok_only=False)
+            if hit is not None:
+                preferred = hit
+                break
 
     content_disagreement = None
     differing: list[Path] = []
@@ -632,15 +712,15 @@ def youtube_speech_files(
     if gap_note_paths and speech:
         content_disagreement = (
             "TRANSCRIPT.md is a gap note; caption file has speech; "
-            f"preferred={preferred.name if preferred else '?'}"
+            f"preferred={_path_ref(folder, preferred) if preferred else '?'}"
         )
         differing.extend(gap_note_paths)
     elif differing:
         content_disagreement = (
-            f"speech files differ; preferred={preferred.name if preferred else '?'}"
+            f"speech files differ; preferred={_path_ref(folder, preferred) if preferred else '?'}"
         )
     disagreement_refs = (
-        _disagreement_refs(preferred, differing) if content_disagreement else tuple()
+        _disagreement_refs(folder, preferred, differing) if content_disagreement else tuple()
     )
 
     return YoutubeSpeechScan(

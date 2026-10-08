@@ -9,6 +9,7 @@ youtube_l2 are three rows. Judgments are unique per
 from __future__ import annotations
 
 import json
+import shutil
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,6 +17,9 @@ from typing import Any, Iterable
 
 from learning_engine.errors import IndexSchemaError
 from learning_engine.io_util import read_jsonl
+
+LEGACY_MIGRATED_RUN_ID = "legacy-migrated"
+FAIL_MIGRATION_AFTER: str | None = None
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS packets (
@@ -80,43 +84,176 @@ def _current_packets_schema(conn: sqlite3.Connection) -> bool:
     ]
 
 
-def _migrate_packets_keep_judgments(conn: sqlite3.Connection) -> None:
+def _judgments_columns(conn: sqlite3.Connection) -> list[str]:
+    if "judgments" not in _table_names(conn):
+        return []
+    return [str(row[1]) for row in conn.execute("PRAGMA table_info(judgments)")]
+
+
+def _judgments_need_migrate(conn: sqlite3.Connection) -> bool:
+    cols = _judgments_columns(conn)
+    return bool(cols) and "run_id" not in cols
+
+
+def _packets_need_migrate(conn: sqlite3.Connection) -> bool:
+    if "packets" not in _table_names(conn):
+        return False
+    cols = set(_packets_columns(conn))
+    if "signal_id" not in cols:
+        return False
+    return not _current_packets_schema(conn)
+
+
+def _source_type_sql(cols: list[str]) -> str:
+    infer = """
+        CASE
+            WHEN lower(signal_id) LIKE 'yt:%' THEN 'youtube_l2'
+            WHEN lower(signal_id) LIKE 'youtube%' THEN 'youtube_l2'
+            WHEN lower(signal_id) LIKE 'bm:%' THEN 'bookmark'
+            WHEN lower(signal_id) LIKE 'bookmark%' THEN 'bookmark'
+            WHEN lower(signal_id) LIKE 'corpus%' THEN 'corpus'
+            ELSE 'unknown'
+        END
+    """
+    if "source_type" in cols:
+        return f"""
+            CASE
+                WHEN source_type IS NOT NULL AND TRIM(source_type) != '' THEN source_type
+                ELSE {infer}
+            END
+        """
+    return infer
+
+
+def _maybe_fail_migration(point: str) -> None:
+    if FAIL_MIGRATION_AFTER == point:
+        raise RuntimeError(f"simulated mid-migration failure after {point}")
+
+
+def _apply_schema(conn: sqlite3.Connection) -> None:
+    """Apply SCHEMA without executescript's implicit commit."""
+    for raw in SCHEMA.split(";"):
+        stmt = raw.strip()
+        if stmt:
+            conn.execute(stmt)
+
+
+def _migrate_legacy_txn(conn: sqlite3.Connection) -> None:
+    """One transaction: packets → composite key, judgments → legacy-migrated run, then runs."""
     cols = _packets_columns(conn)
     if "signal_id" not in cols:
         raise IndexSchemaError(
             "SQLite packets table has no signal_id. Refusing to drop tables. "
             "Rebuild into a new file from JSONL."
         )
-    select_cols = {
-        "source_type": "source_type" if "source_type" in cols else "'unknown'",
-        "signal_id": "signal_id",
-        "content_access": "content_access" if "content_access" in cols else "NULL",
-        "analysis_scope": "analysis_scope" if "analysis_scope" in cols else "NULL",
-        "verification_state": "verification_state" if "verification_state" in cols else "NULL",
-        "processing_status": "processing_status" if "processing_status" in cols else "NULL",
-        "lifecycle_state": "lifecycle_state" if "lifecycle_state" in cols else "NULL",
-        "source_url": "source_url" if "source_url" in cols else "NULL",
-        "adapter": "adapter" if "adapter" in cols else "NULL",
-        "body_json": "body_json" if "body_json" in cols else "'{}'",
-    }
-    conn.execute("ALTER TABLE packets RENAME TO packets_legacy")
-    conn.executescript(SCHEMA)
-    conn.execute(
-        f"""
-        INSERT OR REPLACE INTO packets (
-            source_type, signal_id, content_access, analysis_scope,
-            verification_state, processing_status, lifecycle_state,
-            source_url, adapter, body_json
+    packet_migrate = _packets_need_migrate(conn)
+    judgment_migrate = _judgments_need_migrate(conn)
+    if packet_migrate:
+        conn.execute("ALTER TABLE packets RENAME TO packets_legacy")
+        _maybe_fail_migration("after_packets_rename")
+    if judgment_migrate:
+        conn.execute("ALTER TABLE judgments RENAME TO judgments_legacy")
+    _apply_schema(conn)
+    if packet_migrate:
+        select_cols = {
+            "source_type": _source_type_sql(cols),
+            "signal_id": "signal_id",
+            "content_access": "content_access" if "content_access" in cols else "NULL",
+            "analysis_scope": "analysis_scope" if "analysis_scope" in cols else "NULL",
+            "verification_state": "verification_state" if "verification_state" in cols else "NULL",
+            "processing_status": "processing_status" if "processing_status" in cols else "NULL",
+            "lifecycle_state": "lifecycle_state" if "lifecycle_state" in cols else "NULL",
+            "source_url": "source_url" if "source_url" in cols else "NULL",
+            "adapter": "adapter" if "adapter" in cols else "NULL",
+            "body_json": "body_json" if "body_json" in cols else "'{}'",
+        }
+        conn.execute(
+            f"""
+            INSERT OR REPLACE INTO packets (
+                source_type, signal_id, content_access, analysis_scope,
+                verification_state, processing_status, lifecycle_state,
+                source_url, adapter, body_json
+            )
+            SELECT {select_cols['source_type']}, {select_cols['signal_id']},
+                   {select_cols['content_access']}, {select_cols['analysis_scope']},
+                   {select_cols['verification_state']}, {select_cols['processing_status']},
+                   {select_cols['lifecycle_state']}, {select_cols['source_url']},
+                   {select_cols['adapter']}, {select_cols['body_json']}
+            FROM packets_legacy
+            """
         )
-        SELECT {select_cols['source_type']}, {select_cols['signal_id']},
-               {select_cols['content_access']}, {select_cols['analysis_scope']},
-               {select_cols['verification_state']}, {select_cols['processing_status']},
-               {select_cols['lifecycle_state']}, {select_cols['source_url']},
-               {select_cols['adapter']}, {select_cols['body_json']}
-        FROM packets_legacy
-        """
-    )
-    conn.execute("DROP TABLE packets_legacy")
+        _maybe_fail_migration("after_packets_copy")
+        conn.execute("DROP TABLE packets_legacy")
+    if judgment_migrate:
+        jcols = {
+            str(row[1]) for row in conn.execute("PRAGMA table_info(judgments_legacy)")
+        }
+        provider = "provider" if "provider" in jcols else "'unknown'"
+        flagged = "flagged" if "flagged" in jcols else "0"
+        label = "label" if "label" in jcols else "NULL"
+        latency = "latency_ms" if "latency_ms" in jcols else "NULL"
+        cost = "cost_usd" if "cost_usd" in jcols else "NULL"
+        body = "body_json" if "body_json" in jcols else "'{}'"
+        infer = _source_type_sql([])
+        conn.execute(
+            f"""
+            INSERT OR REPLACE INTO judgments (
+                run_id, source_type, signal_id, provider,
+                flagged, label, latency_ms, cost_usd, body_json
+            )
+            SELECT ?,
+                   COALESCE(
+                       (SELECT p.source_type FROM packets p
+                        WHERE p.signal_id = judgments_legacy.signal_id LIMIT 1),
+                       {infer}
+                   ),
+                   signal_id, {provider}, {flagged}, {label}, {latency}, {cost}, {body}
+            FROM judgments_legacy
+            """,
+            (LEGACY_MIGRATED_RUN_ID,),
+        )
+        started = datetime.now(timezone.utc).isoformat()
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO runs (run_id, started_at, provider, notes)
+            VALUES (?, ?, '', 'migrated from pre-composite schema')
+            """,
+            (LEGACY_MIGRATED_RUN_ID, started),
+        )
+        conn.execute("DROP TABLE judgments_legacy")
+    _maybe_fail_migration("before_commit")
+
+
+def _migrate_legacy_file(path: Path) -> None:
+    """Migrate on a copy. Original bytes stay until the transaction commits."""
+    tmp = path.with_name(path.name + ".migrating")
+    try:
+        shutil.copy2(path, tmp)
+        conn = sqlite3.connect(str(tmp))
+        conn.isolation_level = None
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            _migrate_legacy_txn(conn)
+            conn.execute("COMMIT")
+        except Exception as exc:
+            try:
+                conn.execute("ROLLBACK")
+            except sqlite3.Error:
+                pass
+            conn.close()
+            tmp.unlink(missing_ok=True)
+            raise IndexSchemaError(
+                f"SQLite migration failed; database left unchanged. {exc}"
+            ) from exc
+        conn.close()
+        tmp.replace(path)
+    except IndexSchemaError:
+        raise
+    except Exception as exc:
+        tmp.unlink(missing_ok=True)
+        raise IndexSchemaError(
+            f"SQLite migration failed; database left unchanged. {exc}"
+        ) from exc
 
 
 def connect(path: Path) -> sqlite3.Connection:
@@ -126,13 +263,14 @@ def connect(path: Path) -> sqlite3.Connection:
     if "packets" not in names:
         conn.executescript(SCHEMA)
         return conn
-    if _current_packets_schema(conn):
+    if _current_packets_schema(conn) and not _judgments_need_migrate(conn):
         conn.executescript(SCHEMA)
         return conn
     cols = set(_packets_columns(conn))
-    if "signal_id" in cols:
-        _migrate_packets_keep_judgments(conn)
-        return conn
+    if "signal_id" in cols or _judgments_need_migrate(conn):
+        conn.close()
+        _migrate_legacy_file(path)
+        return sqlite3.connect(str(path))
     raise IndexSchemaError(
         "SQLite index has an unrecognized packets schema. "
         "Refusing to drop tables or judgments. Recreate the index from JSONL in a new file."

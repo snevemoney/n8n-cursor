@@ -26,6 +26,7 @@ from learning_engine.adapters.common import (
     existing_transcripts,
     existing_videos,
     is_caption_format_file,
+    is_ocr_file,
     is_transcript_md,
     packet_evidence_base,
     pick_youtube_cleaned,
@@ -164,7 +165,7 @@ def pack_to_packet(folder: Path, *, convert_root: Path | None = None) -> dict[st
 
     frames = existing_frames(folder)
     discovered = existing_transcripts(folder)
-    scan = youtube_speech_files(discovered, _read_transcript_text)
+    scan = youtube_speech_files(discovered, _read_transcript_text, folder=folder)
     usable_transcripts = scan.speech
     placeholders = [p for p in scan.other if p not in scan.gap_note_paths]
     file_gap = scan.gap_note
@@ -213,7 +214,10 @@ def pack_to_packet(folder: Path, *, convert_root: Path | None = None) -> dict[st
                 note="gap_note",
             )
         )
-    for path in scan.ocr_paths:
+    ocr_paths = [path for path in scan.ocr_paths if is_ocr_file(path)]
+    for path in ocr_paths:
+        if not is_ocr_file(path):
+            continue
         evidence.append(
             evidence_item(kind="file", source_ref=rel_ref(folder, path), note="ocr")
         )
@@ -238,7 +242,11 @@ def pack_to_packet(folder: Path, *, convert_root: Path | None = None) -> dict[st
 
     cleaned = pick_youtube_cleaned(scan.preferred, _read_transcript_text)
     source_text, source_chars, truncated = clip_source_text(str(cleaned["text"]))
-    ocr_raw = "\n".join(spoken_text(_read_transcript_text(path)) for path in scan.ocr_paths)
+    ocr_raw = "\n".join(
+        spoken_text(_read_transcript_text(path))
+        for path in ocr_paths
+        if is_ocr_file(path)
+    )
     ocr_text, _, _ = clip_source_text(ocr_raw, OCR_TEXT_MAX_CHARS)
 
     if frames and videos:
@@ -336,8 +344,16 @@ def pack_to_packet(folder: Path, *, convert_root: Path | None = None) -> dict[st
     if scan.preferred is not None:
         extra["preferred_source"] = rel_ref(folder, scan.preferred)
         scores["preferred_source"] = rel_ref(folder, scan.preferred)
-    if scan.disagreement_refs:
-        scores["disagreement_refs"] = list(scan.disagreement_refs)
+    refs = list(scan.disagreement_refs)
+    if disagreement and not refs:
+        if scan.preferred is not None:
+            refs.append(rel_ref(folder, scan.preferred))
+        for path in (*scan.gap_note_paths, *scan.speech):
+            item = rel_ref(folder, path)
+            if item not in refs:
+                refs.append(item)
+    if disagreement:
+        scores["disagreement_refs"] = refs
     derived: dict[str, Any] = {}
     if ocr_text:
         derived["ocr_text"] = ocr_text
