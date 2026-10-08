@@ -11,7 +11,7 @@ from pathlib import Path
 
 from tests.helpers import ROOT
 
-from fixtures.tiny_png import PNG_1X1
+from fixtures.tiny_png import MINIMAL_FTYP_MP4, PNG_1X1
 from learning_engine.adapters import bookmark_review, youtube_l2
 from learning_engine.adapters.common import is_ocr_file
 from learning_engine.cli import main as cli_main
@@ -210,7 +210,7 @@ class R8N75EvidenceBase(unittest.TestCase):
                 encoding="utf-8",
             )
             (folder / "frame-t001.jpg").write_bytes(PNG_1X1)
-            (folder / "source.mp4").write_bytes(b"synthetic-not-a-video")
+            (folder / "source.mp4").write_bytes(MINIMAL_FTYP_MP4)
             (folder / "whisper.txt").write_text(
                 "spoken words from the synthetic caption file here\n",
                 encoding="utf-8",

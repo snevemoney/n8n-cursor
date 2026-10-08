@@ -29,11 +29,8 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Isolation guard
         working-directory: ${{ github.workspace }}
+        env:
+          PYTHONPATH: learning-engine
         run: |
-          git diff --stat origin/${{ github.base_ref || 'main' }}... -- . ':!learning-engine' ':!.github/workflows/learning-engine.yml' \
-            | tee /tmp/le-outside.txt
-          if [ -s /tmp/le-outside.txt ]; then
-            echo "learning-engine CI may only change learning-engine/ and this workflow"
-            cat /tmp/le-outside.txt
-            exit 1
-          fi
+          git diff --name-only origin/${{ github.base_ref || 'main' }}...HEAD \
+            | python3 -m learning_engine.isolation

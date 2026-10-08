@@ -13,6 +13,15 @@ import re
 from pathlib import Path
 from typing import Any, Iterable
 
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+JPEG_MAGIC = b"\xff\xd8\xff"
+GIF87_MAGIC = b"GIF87a"
+GIF89_MAGIC = b"GIF89a"
+EBML_MAGIC = b"\x1a\x45\xdf\xa3"
+FULL_VISUAL_NEEDS_ROOT = (
+    "full_visual requires --root so image and video evidence can be checked on disk"
+)
+
 from learning_engine.constants import (
     ANALYSIS_SCOPE,
     CONTENT_ACCESS,
@@ -88,6 +97,53 @@ def evidence_on_disk(
     ).is_file()
 
 
+def looks_like_image(data: bytes) -> bool:
+    """True when bytes are PNG, JPEG, GIF, or WebP. Extension need not match."""
+    if data.startswith(PNG_MAGIC) or data.startswith(JPEG_MAGIC):
+        return True
+    if data.startswith(GIF87_MAGIC) or data.startswith(GIF89_MAGIC):
+        return True
+    return len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP"
+
+
+def looks_like_video(data: bytes, suffix: str) -> bool:
+    """MP4/MOV need ftyp; WebM/MKV need EBML; AVI needs RIFF AVI. Else non-empty."""
+    if not data:
+        return False
+    if suffix in {".mp4", ".mov", ".m4v"}:
+        return len(data) >= 8 and data[4:8] == b"ftyp"
+    if suffix in {".webm", ".mkv"}:
+        return data.startswith(EBML_MAGIC)
+    if suffix == ".avi":
+        return len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"AVI "
+    return True
+
+
+def evidence_media_ok(
+    item: dict[str, Any],
+    root: Path | None,
+    evidence_base: str | None = None,
+) -> bool:
+    if root is None:
+        return True
+    path = _resolve_evidence_path(
+        str(item.get("source_ref") or ""),
+        root,
+        evidence_base,
+    )
+    if not path.is_file():
+        return False
+    data = path.read_bytes()
+    if not data:
+        return False
+    suffix = evidence_suffix(item)
+    if suffix in IMAGE_EXTENSIONS:
+        return looks_like_image(data)
+    if suffix in VIDEO_EXTENSIONS:
+        return looks_like_video(data, suffix)
+    return True
+
+
 def has_frame_evidence(packet: dict[str, Any]) -> bool:
     evidence = packet.get("evidence")
     if not isinstance(evidence, list):
@@ -117,7 +173,7 @@ def has_full_visual_media(
             continue
         if not evidence_exists_true(item):
             continue
-        if root is not None and not evidence_on_disk(
+        if root is not None and not evidence_media_ok(
             item, root, packet.get("evidence_base") if isinstance(packet.get("evidence_base"), str) else None
         ):
             continue
@@ -282,12 +338,16 @@ def validate_packet(
             )
 
     if packet.get("content_access") == "full_visual" or packet.get("analysis_scope") == "full_visual":
+        if disk_root is None:
+            raise PacketValidationError(FULL_VISUAL_NEEDS_ROOT, path)
         if not has_full_visual_media(packet, root=disk_root):
             raise PacketValidationError(
                 "full_visual requires at least one image-extension evidence ref "
                 "(jpg/jpeg/png/webp) and one video-extension evidence ref "
-                "(mp4/webm/mov/mkv), both exists=true"
-                + (" and present on disk" if disk_root is not None else ""),
+                "(mp4/webm/mov/mkv), both exists=true, present on disk, non-empty, "
+                "and with recognisable media bytes "
+                "(image: PNG/JPEG/GIF/WebP magic; video: MP4/MOV ftyp, WebM/MKV EBML, "
+                "AVI RIFF; other video extensions: non-empty)",
                 path,
             )
 

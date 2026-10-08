@@ -10,7 +10,7 @@ from pathlib import Path
 
 from tests.helpers import ROOT
 
-from fixtures.tiny_png import PNG_1X1
+from fixtures.tiny_png import MINIMAL_FTYP_MP4, PNG_1X1
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
 from learning_engine.adapters.common import (
     TRANSCRIPT_EXACT,
@@ -97,7 +97,7 @@ class R7ValidatorFullVisual(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "frame.jpg").write_bytes(PNG_1X1)
-            (root / "clip.mp4").write_bytes(b"synthetic-not-a-video")
+            (root / "clip.mp4").write_bytes(MINIMAL_FTYP_MP4)
             packet = _ok(
                 content_access="full_visual",
                 analysis_scope="full_visual",

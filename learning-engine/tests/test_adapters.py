@@ -44,7 +44,7 @@ class AdapterTest(unittest.TestCase):
     def test_corpus_only_refs_files_on_disk(self) -> None:
         packets = corpus_reingest.convert(ROOT / "fixtures" / "corpus")
         self.assertGreaterEqual(len(packets), 2)
-        validate_packets(packets)
+        validate_packets(packets, root=ROOT / "fixtures" / "corpus")
         rich = next(p for p in packets if p["signal_id"].endswith("0010"))
         refs = [e["source_ref"] for e in rich["evidence"]]
         self.assertTrue(any("META.json" in r for r in refs))

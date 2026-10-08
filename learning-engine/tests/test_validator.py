@@ -8,6 +8,7 @@ from learning_engine.errors import PacketValidationError
 from learning_engine.io_util import read_jsonl
 from learning_engine.packet import base_packet, evidence_item
 from learning_engine.validator import (
+    FULL_VISUAL_NEEDS_ROOT,
     SCHEMA_PATH,
     count_false_full_visual,
     load_schema,
@@ -56,9 +57,20 @@ class ValidatorTest(unittest.TestCase):
         path = ROOT / "fixtures" / "packets" / "fifty_valid.jsonl"
         packets = list(read_jsonl(path))
         self.assertGreaterEqual(len(packets), 50)
-        validate_packets(packets)
+        plain = [
+            p
+            for p in packets
+            if p.get("content_access") != "full_visual"
+            and p.get("analysis_scope") != "full_visual"
+        ]
+        validate_packets(plain)
         self.assertEqual(count_false_full_visual(packets), 0)
         self.assertTrue(any(p.get("content_access") == "full_visual" for p in packets))
+        fv = next(p for p in packets if p.get("content_access") == "full_visual")
+        with self.assertRaises(PacketValidationError) as ctx:
+            validate_packet(fv)
+        self.assertIn("--root", str(ctx.exception))
+        self.assertIn("full_visual", str(ctx.exception))
 
     def test_rejects_full_visual_without_frames(self) -> None:
         packet = _ok(content_access="full_visual", analysis_scope="full_visual")
@@ -93,7 +105,9 @@ class ValidatorTest(unittest.TestCase):
                 evidence_item(kind="file", source_ref="source.mp4", note="video"),
             ],
         )
-        validate_packet(packet)
+        with self.assertRaises(PacketValidationError) as ctx:
+            validate_packet(packet)
+        self.assertIn(FULL_VISUAL_NEEDS_ROOT, str(ctx.exception))
 
     def test_rejects_exists_false_evidence(self) -> None:
         packet = _ok(evidence=[{"kind": "file", "source_ref": "missing.jpg", "exists": False}])

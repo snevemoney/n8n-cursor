@@ -31,7 +31,7 @@ class NoNetworkGuardTest(unittest.TestCase):
                 bookmarks = bookmark_review.convert(ROOT / "fixtures" / "bookmark_review")
                 validate_packets(bookmarks)
                 corpus = corpus_reingest.convert(ROOT / "fixtures" / "corpus")
-                validate_packets(corpus)
+                validate_packets(corpus, root=ROOT / "fixtures" / "corpus")
                 yt = youtube_l2.convert(ROOT / "fixtures" / "youtube_l2")
                 validate_packets(yt)
                 rows = load_labelled(

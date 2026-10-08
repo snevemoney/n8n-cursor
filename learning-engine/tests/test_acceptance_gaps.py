@@ -12,7 +12,7 @@ from unittest import mock
 
 from tests.helpers import ROOT
 
-from fixtures.tiny_png import PNG_1X1
+from fixtures.tiny_png import MINIMAL_FTYP_MP4, PNG_1X1
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
 from learning_engine.adapters.common import (
     SOURCE_TEXT_MAX_CHARS,
@@ -80,14 +80,15 @@ class D3AnyLocalVideo(unittest.TestCase):
                 encoding="utf-8",
             )
             (folder / "frame-t001.jpg").write_bytes(PNG_1X1)
-            (folder / "source_vid.mp4").write_bytes(b"synthetic-not-a-video")
+            (folder / "source_vid.mp4").write_bytes(MINIMAL_FTYP_MP4)
             (folder / "captions.json").write_text('{"text": "synthetic caption"}', encoding="utf-8")
             pack = youtube_l2.convert(folder)[0]
             self.assertEqual(pack["content_access"], "full_visual")
             self.assertTrue(any(e["kind"] == "frame" for e in pack["evidence"]))
             self.assertTrue(any(e["source_ref"].endswith("source_vid.mp4") for e in pack["evidence"]))
-            validate_packets([pack])
+            validate_packets([pack], root=folder)
             self.assertEqual(count_false_full_visual([pack]), 0)
+            self.assertEqual(count_false_full_visual([pack], root=folder), 0)
 
     def test_youtube_frames_without_video_are_not_full_visual(self) -> None:
         packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_l2")

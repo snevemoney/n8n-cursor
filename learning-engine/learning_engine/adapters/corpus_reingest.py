@@ -333,7 +333,7 @@ def convert_report(input_path: Path, *, strict: bool = False) -> dict[str, Any]:
                 raise ValueError(f"{path}: META.json must be an object")
             return meta_to_packet(path, meta, convert_root=root)
 
-        if not collect_packet(report, str(meta_path), _build, strict=strict) and strict:
+        if not collect_packet(report, str(meta_path), _build, strict=strict, root=root) and strict:
             break
     return report
 

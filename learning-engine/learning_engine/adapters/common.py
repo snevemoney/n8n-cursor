@@ -840,14 +840,17 @@ def collect_packet(
     builder: Callable[[], dict[str, Any]],
     *,
     strict: bool,
+    root: Path | None = None,
 ) -> bool:
     """Validate and keep a packet. Return False when this item failed.
 
     Default path records the reason and continues. `--strict` still records
     the reason; callers stop the walk when this returns False.
+    Pass `root` (the convert input) so full_visual packets can be checked
+    on disk. Without it, a full_visual claim is an error.
     """
     try:
-        packet = validate_packet(builder())
+        packet = validate_packet(builder(), root=root)
         report["packets"].append(packet)
         return True
     except (PacketValidationError, ValueError, OSError, json.JSONDecodeError) as exc:

@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent))
 
-from fixtures.tiny_png import PNG_1X1  # noqa: E402
+from fixtures.tiny_png import MINIMAL_FTYP_MP4, PNG_1X1  # noqa: E402
 from learning_engine.io_util import write_jsonl  # noqa: E402
 from learning_engine.packet import base_packet, claim, evidence_item  # noqa: E402
 from learning_engine.validator import validate_packet  # noqa: E402
@@ -91,7 +91,7 @@ def write_frames() -> None:
     corpus = ROOT / "corpus" / "artifacts" / "9000000000000000010"
     (corpus / "frame-t001.jpg").write_bytes(PNG_1X1)
     (corpus / "still-t002.png").write_bytes(PNG_1X1)
-    (corpus / "clip.mp4").write_bytes(b"synthetic-not-a-video")
+    (corpus / "clip.mp4").write_bytes(MINIMAL_FTYP_MP4)
     yt = ROOT / "youtube_l2" / "l2-20260927" / "SYNTHETIC01"
     (yt / "frame-t001.jpg").write_bytes(PNG_1X1)
     (yt / "still-t002.png").write_bytes(PNG_1X1)

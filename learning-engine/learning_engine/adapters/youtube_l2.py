@@ -392,6 +392,7 @@ def convert_report(input_path: Path, *, strict: bool = False) -> dict[str, Any]:
                 str(folder),
                 lambda f=folder: pack_to_packet(f, convert_root=root),
                 strict=strict,
+                root=root,
             )
             and strict
         ):

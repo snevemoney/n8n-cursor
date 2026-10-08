@@ -20,6 +20,7 @@ from learning_engine.io_util import read_jsonl
 
 LEGACY_MIGRATED_RUN_ID = "legacy-migrated"
 FAIL_MIGRATION_AFTER: str | None = None
+FAIL_REBUILD_AFTER: str | None = None
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS packets (
@@ -349,17 +350,81 @@ def packet_counts_by_source_type(path: Path) -> dict[str, int]:
     return {str(source): int(count) for source, count in rows}
 
 
-def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
-    """Replace packet rows only for source_types present in JSONL. Judgments stay."""
-    packets = list(read_jsonl(jsonl_path))
-    types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
-    conn = connect(sqlite_path)
-    with conn:
+def _insert_packet_row(conn: sqlite3.Connection, packet: dict[str, Any]) -> None:
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO packets (
+            source_type, signal_id, content_access, analysis_scope,
+            verification_state, processing_status, lifecycle_state,
+            source_url, adapter, body_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            packet.get("source_type"),
+            packet.get("signal_id"),
+            packet.get("content_access"),
+            packet.get("analysis_scope"),
+            packet.get("verification_state"),
+            packet.get("processing_status"),
+            packet.get("lifecycle_state"),
+            packet.get("source_url"),
+            packet.get("adapter"),
+            json.dumps(packet, ensure_ascii=False),
+        ),
+    )
+
+
+def _rebuild_into(path: Path, packets: list[dict[str, Any]], types: list[str]) -> int:
+    conn = connect(path)
+    conn.isolation_level = None
+    conn.execute("BEGIN IMMEDIATE")
+    try:
         if types:
             placeholders = ",".join("?" for _ in types)
-            conn.execute(f"DELETE FROM packets WHERE source_type IN ({placeholders})", types)
+            conn.execute(
+                f"DELETE FROM packets WHERE source_type IN ({placeholders})",
+                types,
+            )
+        if FAIL_REBUILD_AFTER == "after_delete":
+            raise RuntimeError("simulated rebuild failure after delete")
+        for packet in packets:
+            _insert_packet_row(conn, packet)
+        conn.execute("COMMIT")
+    except Exception:
+        try:
+            conn.execute("ROLLBACK")
+        except sqlite3.Error:
+            pass
+        conn.close()
+        raise
     conn.close()
-    indexed = index_packets(sqlite_path, packets)
+    return len(packets)
+
+
+def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
+    """Replace packet rows only for source_types present in JSONL. Judgments stay.
+
+    Delete + reinsert run on a temp copy. The original file is replaced only
+    after commit. Any failure leaves the original byte-identical.
+    """
+    packets = list(read_jsonl(jsonl_path))
+    types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
+    existed = sqlite_path.exists()
+    tmp = sqlite_path.with_name(sqlite_path.name + ".rebuilding")
+    try:
+        if existed:
+            shutil.copy2(sqlite_path, tmp)
+            target = tmp
+        else:
+            target = sqlite_path
+        indexed = _rebuild_into(target, packets, types)
+        if existed:
+            tmp.replace(sqlite_path)
+    except Exception as exc:
+        tmp.unlink(missing_ok=True)
+        raise IndexSchemaError(
+            f"SQLite rebuild failed; database left unchanged. {exc}"
+        ) from exc
     counts: dict[str, int] = {}
     for packet in packets:
         key = str(packet.get("source_type") or "unknown")
