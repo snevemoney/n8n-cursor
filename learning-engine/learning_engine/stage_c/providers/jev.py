@@ -9,13 +9,11 @@ No live calls in tests or CI. State is source_text only (untrusted).
 from __future__ import annotations
 
 import json
-import os
 import time
 from typing import Any
 from urllib.request import Request
 
-from learning_engine.errors import ProviderRefused
-from learning_engine.network import ALLOW_NETWORK_ENV, guarded_urlopen, require_live_call
+from learning_engine.network import guarded_urlopen, require_live_call
 from learning_engine.stage_c.contract import Judgment
 
 JEV_URL = "https://openrouter.ai/api/alpha/decisions"
@@ -77,7 +75,6 @@ class JevOpenRouterProvider:
 
     def evaluate(self, packet: dict[str, Any]) -> Judgment:
         key = require_live_call(flag=self.opt_in_live, env_var=KEY_ENV)
-        os.environ[ALLOW_NETWORK_ENV] = "1"
         source_text = str(packet.get("source_text") or "")
         # Hard cap: drop characters rather than guess a tokenizer.
         # ~4 chars/token is only used as a cap, not as a billed cost.
@@ -99,12 +96,9 @@ class JevOpenRouterProvider:
             method="POST",
         )
         started = time.perf_counter()
-        try:
-            with guarded_urlopen(request, timeout=self.timeout_sec) as resp:
-                raw = resp.read().decode("utf-8")
-                payload = json.loads(raw) if raw else {}
-        except ProviderRefused:
-            raise
+        with guarded_urlopen(request, timeout=self.timeout_sec, authorized=True) as resp:
+            raw = resp.read().decode("utf-8")
+            payload = json.loads(raw) if raw else {}
         latency = (time.perf_counter() - started) * 1000.0
         if not isinstance(payload, dict):
             payload = {"raw": payload}

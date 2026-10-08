@@ -17,20 +17,34 @@ from learning_engine.errors import PacketValidationError
 
 def cmd_adapt(args: argparse.Namespace) -> int:
     input_path = Path(args.input)
+    strict = bool(getattr(args, "strict", False))
     if args.kind == "bookmark":
-        packets = bookmark_review.convert(input_path)
+        report = bookmark_review.convert_report(input_path, strict=strict)
         adapter = "bookmark_review"
     elif args.kind == "corpus":
-        packets = corpus_reingest.convert(input_path)
+        report = corpus_reingest.convert_report(input_path, strict=strict)
         adapter = "corpus_reingest"
     elif args.kind in {"youtube-l2", "youtube_l2"}:
-        packets = youtube_l2.convert(input_path)
+        report = youtube_l2.convert_report(input_path, strict=strict)
         adapter = "youtube_l2"
     else:
         raise SystemExit(f"unknown adapter {args.kind}")
-    n = write_jsonl(Path(args.output), packets)
-    print(json.dumps({"ok": True, "adapter": adapter, "packets": n, "output": args.output}))
-    return 0
+    n = write_jsonl(Path(args.output), report["packets"])
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "adapter": adapter,
+                "packets": n,
+                "invalid": len(report["invalid"]),
+                "invalid_items": report["invalid"],
+                "output": args.output,
+            }
+        )
+    )
+    if strict and report["invalid"]:
+        return 1
+    return 0 if report["packets"] or not report["invalid"] else 1
 
 
 def cmd_validate(args: argparse.Namespace) -> int:
@@ -72,6 +86,7 @@ def build_parser() -> argparse.ArgumentParser:
     adapt.add_argument("kind", choices=["bookmark", "corpus", "youtube-l2"])
     adapt.add_argument("--input", required=True)
     adapt.add_argument("--output", required=True)
+    adapt.add_argument("--strict", action="store_true", help="Fail on the first invalid packet")
     adapt.set_defaults(func=cmd_adapt)
 
     validate = sub.add_parser("validate", help="Validate packet JSONL")

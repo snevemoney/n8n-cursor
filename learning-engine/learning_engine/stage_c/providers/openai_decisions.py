@@ -8,12 +8,11 @@ Cost is taken from the API response when present; never estimated.
 from __future__ import annotations
 
 import json
-import os
 import time
 from typing import Any
 from urllib.request import Request
 
-from learning_engine.network import ALLOW_NETWORK_ENV, guarded_urlopen, require_live_call
+from learning_engine.network import guarded_urlopen, require_live_call
 from learning_engine.stage_c.contract import Judgment
 
 OPENAI_URL = "https://api.openai.com/v1/decisions"
@@ -87,7 +86,6 @@ class OpenAIDecisionsProvider:
 
     def evaluate(self, packet: dict[str, Any]) -> Judgment:
         key = require_live_call(flag=self.opt_in_live, env_var=KEY_ENV)
-        os.environ[ALLOW_NETWORK_ENV] = "1"
         source_text = str(packet.get("source_text") or "")
         cap_chars = max(32, self.max_input_tokens * 4)
         if len(source_text) > cap_chars:
@@ -107,7 +105,7 @@ class OpenAIDecisionsProvider:
             method="POST",
         )
         started = time.perf_counter()
-        with guarded_urlopen(request, timeout=self.timeout_sec) as resp:
+        with guarded_urlopen(request, timeout=self.timeout_sec, authorized=True) as resp:
             raw = resp.read().decode("utf-8")
             payload = json.loads(raw) if raw else {}
         latency = (time.perf_counter() - started) * 1000.0

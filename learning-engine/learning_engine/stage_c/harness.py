@@ -12,8 +12,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from learning_engine.errors import ProviderRefused
 from learning_engine.io_util import read_jsonl, write_json, write_jsonl
+from learning_engine.network import require_live_call
 from learning_engine.stage_c.contract import Judgment, Provider, evaluate
+from learning_engine.stage_c.providers.jev import KEY_ENV as JEV_KEY_ENV
+from learning_engine.stage_c.providers.openai_decisions import KEY_ENV as OPENAI_KEY_ENV
 from learning_engine.stage_c.labelled import labelled_to_packet, load_labelled
 from learning_engine.stage_c.metrics import score_rows, split_done
 from learning_engine.stage_c.providers.jev import JevOpenRouterProvider
@@ -129,14 +133,30 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _live_key_env(provider: str) -> str | None:
+    key = provider.strip().lower()
+    if key in {"jev", "jev_openrouter"}:
+        return JEV_KEY_ENV
+    if key in {"openai", "openai_decisions"}:
+        return OPENAI_KEY_ENV
+    return None
+
+
+def _refuse(message: str) -> int:
+    print(json.dumps({"ok": False, "error": message}), file=sys.stderr)
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    if args.provider in {"jev", "jev_openrouter", "openai", "openai_decisions"} and not args.opt_in_live:
-        print(
-            json.dumps({"ok": False, "error": "live provider refused: pass --opt-in-live"}),
-            file=sys.stderr,
-        )
-        return 2
+    live_key = _live_key_env(args.provider)
+    if live_key is not None:
+        if not args.opt_in_live:
+            return _refuse("live provider refused: pass --opt-in-live")
+        try:
+            require_live_call(flag=True, env_var=live_key)
+        except ProviderRefused as exc:
+            return _refuse(str(exc))
     provider = resolve_provider(
         args.provider,
         mode=args.mode,
@@ -152,7 +172,10 @@ def main(argv: list[str] | None = None) -> int:
         rows = _rows_from_packets(packets)
     else:
         raise SystemExit("provide --review REVIEW.csv or --packets packets.jsonl")
-    result = run_eval(provider, rows, max_items=args.max_items)
+    try:
+        result = run_eval(provider, rows, max_items=args.max_items)
+    except ProviderRefused as exc:
+        return _refuse(str(exc))
     write_json(Path(args.output), result["report"])
     if args.judgments:
         write_jsonl(Path(args.judgments), result["judgments"])

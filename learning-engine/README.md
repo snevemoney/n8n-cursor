@@ -26,6 +26,12 @@ Honesty rules the validator enforces:
 
 Bookmark `source=full-text` maps to `content_access=transcript` (the gist/post text was present; it is not a speech transcript). `preview-only` maps to `preview_only`. Adapters never invent a URL from an id.
 
+Corpus `status=OK` maps to `processing_status=ok`, then becomes `partial` when `classification` contains `PARTIAL` (for example `INGEST_PARTIAL`). That is a cautious choice: META said OK and also said the ingest was incomplete. It is not a guess that the job failed.
+
+Transcript discovery is case-insensitive. `TRANSCRIPT.md`, `*.vtt`, and caption files (`captions.json`, `captions_clean.txt`, `captions_timeline.txt`, `captions_w1.txt`, …) are cited as transcript evidence. Their text is copied into `source_text` (truncated at 50k characters, with `scores.source_text_chars` / `source_text_truncated`). Corpus `raw/` files that exist on disk are cited. YouTube `full_visual` requires frame evidence refs **and** a video file that exists in the pack (`source.mp4`, `source_vid.mp4`, section clips, or any other local video). Missing files are omitted, never invented.
+
+Adapters collect invalid packets and keep going. Pass `--strict` to stop after the first invalid item. The JSON summary always includes `packets`, `invalid`, and `invalid_items` with reasons.
+
 ## Setup
 
 Python 3.11+. Standard library only. From repo root:
@@ -57,9 +63,12 @@ python3 -m learning_engine.adapters.bookmark_review --input /path/to/bookmark-re
 python3 -m learning_engine adapt corpus --input /path/to/corpus-reingest --output /tmp/le/corpus.jsonl
 python3 -m learning_engine.adapters.corpus_reingest --input /path/to/corpus-reingest --output /tmp/le/corpus.jsonl
 
-# YouTube l2 packs: parent of l2-<date>/<videoId>/, a date folder, or one pack with AE_STATUS.md
+# YouTube l2 or repass packs: parent of l2-<date>/ or repass-YYYYMMDD/<videoId>/, or one pack with AE_STATUS.md
 python3 -m learning_engine adapt youtube-l2 --input /path/to/youtube-daily --output /tmp/le/youtube.jsonl
 python3 -m learning_engine.adapters.youtube_l2 --input /path/to/youtube-daily --output /tmp/le/youtube.jsonl
+
+# Default: write valid packets and report invalid counts. --strict stops at the first invalid packet.
+python3 -m learning_engine adapt corpus --input /path/to/corpus-reingest --output /tmp/le/corpus.jsonl --strict
 ```
 
 Validate and count false `full_visual` (must be 0):
@@ -109,13 +118,15 @@ Reference on the real 1,201-row set (operator box, not in this repo): flagged 56
 ## Live providers (off by default)
 
 ```bash
-# Refuses unless BOTH --opt-in-live AND the env var are set. No live calls in tests/CI.
-LEARNING_ENGINE_ALLOW_NETWORK=1 python3 -m learning_engine eval \
+# Live call = explicit --opt-in-live AND the matching key. Nothing else authorizes.
+# LEARNING_ENGINE_OPT_IN_LIVE / LEARNING_ENGINE_ALLOW_NETWORK are not a bypass.
+# Missing flag or missing key → JSON refusal on stderr, exit 2. No live calls in tests/CI.
+python3 -m learning_engine eval \
   --provider jev --opt-in-live --max-items 24 --max-input-tokens 2000 \
   --packets /tmp/le/labelled-packets.jsonl \
   --output /tmp/le/jev.json
 
-LEARNING_ENGINE_ALLOW_NETWORK=1 python3 -m learning_engine eval \
+python3 -m learning_engine eval \
   --provider openai --opt-in-live --max-items 24 --max-input-tokens 2000 \
   --packets /tmp/le/labelled-packets.jsonl \
   --output /tmp/le/openai.json

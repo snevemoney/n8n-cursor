@@ -15,10 +15,15 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from learning_engine.adapters.common import map_status, map_verified
+from learning_engine.adapters.common import (
+    collect_packet,
+    convert_summary,
+    empty_convert_report,
+    map_status,
+    map_verified,
+)
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, claim, evidence_item
-from learning_engine.validator import validate_packet
 
 REVIEW_HEADER = [
     "id",
@@ -152,38 +157,53 @@ def row_to_packet(row: dict[str, str], state: dict[str, Any] | None, *, input_re
     )
 
 
-def convert(input_path: Path) -> list[dict[str, Any]]:
+def convert_report(input_path: Path, *, strict: bool = False) -> dict[str, Any]:
     review_path, state_path = _resolve_inputs(input_path)
     state_by_id = load_state(state_path)
-    packets: list[dict[str, Any]] = []
+    report = empty_convert_report()
     with review_path.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
         if reader.fieldnames is None:
             raise ValueError("REVIEW.csv has no header")
-        for row in reader:
-            sid = str(row.get("id") or "").strip()
-            packet = row_to_packet(
-                {k: (v if v is not None else "") for k, v in row.items()},
-                state_by_id.get(sid),
-                input_ref=str(review_path),
+        for index, row in enumerate(reader, start=2):
+            sid = str(row.get("id") or "").strip() or f"row-{index}"
+            ok = collect_packet(
+                report,
+                f"{review_path}:{sid}",
+                lambda r=row, s=sid: row_to_packet(
+                    {k: (v if v is not None else "") for k, v in r.items()},
+                    state_by_id.get(s),
+                    input_ref=str(review_path),
+                ),
+                strict=strict,
             )
-            packets.append(validate_packet(packet))
-    return packets
+            if strict and not ok:
+                break
+    return report
+
+
+def convert(input_path: Path, *, strict: bool = False) -> list[dict[str, Any]]:
+    return convert_report(input_path, strict=strict)["packets"]
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Convert REVIEW.csv + STATE.jsonl into packets")
     parser.add_argument("--input", required=True, help="Directory with REVIEW.csv, or path to REVIEW.csv")
     parser.add_argument("--output", required=True, help="JSONL output path")
+    parser.add_argument("--strict", action="store_true", help="Fail on the first invalid packet")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    packets = convert(Path(args.input))
-    n = write_jsonl(Path(args.output), packets)
-    print(json.dumps({"ok": True, "packets": n, "adapter": "bookmark_review"}))
-    return 0
+    report = convert_report(Path(args.input), strict=args.strict)
+    n = write_jsonl(Path(args.output), report["packets"])
+    summary = convert_summary("bookmark_review", report, args.output)
+    summary["packets"] = n
+    print(json.dumps(summary))
+    if args.strict and report["invalid"]:
+        return 1
+    return 0 if report["packets"] or not report["invalid"] else 1
 
 
 if __name__ == "__main__":
