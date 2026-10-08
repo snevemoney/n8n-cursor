@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Any
 
 from learning_engine.adapters.common import (
+    ae_denies_transcript,
+    clean_transcript,
     clip_source_text,
     collect_packet,
     convert_summary,
@@ -24,7 +26,6 @@ from learning_engine.adapters.common import (
     existing_videos,
     pick_source_transcript,
     rel_ref,
-    spoken_text,
     split_transcripts,
 )
 from learning_engine.io_util import write_jsonl
@@ -45,8 +46,12 @@ BULLET_FIELD = re.compile(
 )
 NOTE_LINE = re.compile(r"^-\s+(?P<note>.+?)\s*$", re.MULTILINE)
 LETTER_BULLET = re.compile(
-    r"^-\s+(?P<letter>[A-E])\s+(?P<status>[A-Za-z]+)\s+[—–\-]+\s+(?P<artifact>\S.+?)\s*$",
+    r"^-\s+(?P<letter>[A-E])\s+(?P<status>[A-Za-z]+(?:\s*\([^)]*\))?)\s+[—–\-]+\s+(?P<artifact>\S.+?)\s*$",
     re.MULTILINE,
+)
+TRANSCRIPT_SOURCE_NOTE = re.compile(
+    r"^transcript_source\s*[=:]\s*(?P<val>.+?)\s*$",
+    re.IGNORECASE,
 )
 
 
@@ -82,9 +87,15 @@ def parse_ae_status(text: str) -> dict[str, Any]:
         notes_block = text[notes_idx.end() :]
     notes = [m.group("note").strip() for m in NOTE_LINE.finditer(notes_block)]
     transcript_source = None
+    if bullets.get("transcript_source"):
+        transcript_source = bullets["transcript_source"].strip()
     for note in notes:
+        hit = TRANSCRIPT_SOURCE_NOTE.match(note)
+        if hit:
+            transcript_source = transcript_source or hit.group("val").strip()
+            break
         if note.lower().startswith("transcript_source="):
-            transcript_source = note.split("=", 1)[1].strip()
+            transcript_source = transcript_source or note.split("=", 1)[1].strip()
             break
     if bullets or notes:
         out["overall"] = {
@@ -179,6 +190,11 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     real_transcripts, placeholders, file_gap = split_transcripts(
         discovered, _read_transcript_text
     )
+    denies_transcript = ae_denies_transcript(ae)
+    usable_transcripts = [] if denies_transcript else real_transcripts
+    caption_gap = file_gap
+    if denies_transcript:
+        caption_gap = caption_gap or str(ae.get("transcript_source") or "CAPTION_GAP")
     videos = existing_videos(folder)
     evidence: list[dict[str, Any]] = [
         evidence_item(kind="file", source_ref=rel_ref(folder, ae_path), note="AE_STATUS.md")
@@ -196,7 +212,7 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
                 cited.add(ref)
     for path in frames:
         evidence.append(evidence_item(kind="frame", source_ref=rel_ref(folder, path)))
-    for path in real_transcripts:
+    for path in usable_transcripts:
         evidence.append(evidence_item(kind="transcript", source_ref=rel_ref(folder, path)))
     for path in placeholders:
         evidence.append(
@@ -206,15 +222,23 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
                 note="caption_gap_placeholder",
             )
         )
+    if denies_transcript:
+        for path in real_transcripts:
+            evidence.append(
+                evidence_item(
+                    kind="file",
+                    source_ref=rel_ref(folder, path),
+                    note="ae_has_no_transcript",
+                )
+            )
     for path in videos:
         ref = rel_ref(folder, path)
         if ref not in cited:
             evidence.append(evidence_item(kind="file", source_ref=ref, note="video"))
             cited.add(ref)
 
-    source_text, source_chars, truncated = clip_source_text(
-        spoken_text(_source_text(real_transcripts))
-    )
+    cleaned = clean_transcript(_source_text(usable_transcripts))
+    source_text, source_chars, truncated = clip_source_text(str(cleaned["text"]))
 
     if frames and videos:
         content_access = "full_visual"
@@ -222,7 +246,7 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     elif frames:
         content_access = "frames"
         analysis_scope = "frames"
-    elif real_transcripts or source_text:
+    elif usable_transcripts or source_text:
         content_access = "transcript"
         analysis_scope = "transcript"
     else:
@@ -246,7 +270,7 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         "frames_on_disk": len(frames),
         "videos_on_disk": len(videos),
         "transcripts_on_disk": len(discovered),
-        "transcripts_usable": len(real_transcripts),
+        "transcripts_usable": len(usable_transcripts),
         "ae_letters_parsed": len(letters),
         "source_text_chars": source_chars,
         "source_text_truncated": truncated,
@@ -264,8 +288,10 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         scores["ae_batch"] = overall["batch"]
     if ae.get("transcript_source"):
         scores["ae_transcript_source"] = ae["transcript_source"]
-    if file_gap:
-        scores["caption_gap"] = file_gap
+    if cleaned.get("transcript_source"):
+        scores["transcript_source"] = cleaned["transcript_source"]
+    if caption_gap:
+        scores["caption_gap"] = caption_gap
 
     processing = "unknown"
     if letters:
@@ -283,6 +309,12 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
             processing = "failed"
 
     has_ae = bool(letters or overall)
+    extra: dict[str, Any] = {}
+    if ae:
+        extra["ae_status"] = ae
+    if caption_gap:
+        extra["caption_gap"] = caption_gap
+        extra["notes"] = [f"caption_gap: {caption_gap}"]
     return base_packet(
         signal_id=signal_id,
         source_type="youtube_l2",
@@ -299,7 +331,7 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         source_author=source_author,
         adapter="youtube_l2",
         input_ref=str(folder),
-        extra={"ae_status": ae} if ae else None,
+        extra=extra or None,
     )
 
 

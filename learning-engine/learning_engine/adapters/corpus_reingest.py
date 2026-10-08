@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from learning_engine.adapters.common import (
+    clean_transcript,
     clip_source_text,
     collect_packet,
     convert_summary,
@@ -29,7 +30,6 @@ from learning_engine.adapters.common import (
     meta_denies_transcript,
     pick_source_transcript,
     rel_ref,
-    spoken_text,
     split_transcripts,
 )
 from learning_engine.io_util import write_jsonl
@@ -167,8 +167,8 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         cited.add(ref)
 
     picked = pick_source_transcript(usable_transcripts)
-    source_text = spoken_text(_read_transcript_text(picked)) if picked else ""
-    source_text, source_chars, truncated = clip_source_text(source_text)
+    cleaned = clean_transcript(_read_transcript_text(picked)) if picked else {"text": "", "transcript_source": None}
+    source_text, source_chars, truncated = clip_source_text(str(cleaned["text"]))
 
     if frames and videos:
         content_access = "full_visual"
@@ -211,6 +211,8 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     scores["source_text_truncated"] = truncated
     if caption_gap:
         scores["caption_gap"] = caption_gap
+    if cleaned.get("transcript_source"):
+        scores["transcript_source"] = cleaned["transcript_source"]
 
     extra_completeness = {
         "has_local_video": has_video if has_video is not None else "unknown",

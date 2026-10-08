@@ -29,12 +29,21 @@ TRANSCRIPT_EXACT = {
     "whisper.txt",
 }
 SOURCE_TEXT_MAX_CHARS = 50_000
-VTT_TIMESTAMP = re.compile(
-    r"^\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\s+-->\s+\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?"
+ARROW_TIMESTAMP = re.compile(
+    r"^\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\s+-->\s+\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\s*"
 )
+BRACKET_TIMESTAMP = re.compile(r"^\[\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\]\s*")
 VTT_CUE_NUMBER = re.compile(r"^\d+$")
 MD_HEADING = re.compile(r"^#{1,6}\s+\S")
-CAPTION_GAP_LINE = re.compile(r"^_+\s*CAPTION_GAP\b.*_+\s*$", re.IGNORECASE)
+CAPTION_GAP_TOKEN = re.compile(r"CAPTION_GAP", re.IGNORECASE)
+PROVENANCE_LINE = re.compile(r"^_source:\s*(.+?)_\s*$", re.IGNORECASE)
+VTT_KIND_OR_LANGUAGE = re.compile(r"^(?:Kind|Language)\s*:", re.IGNORECASE)
+INLINE_VTT_TAGS = re.compile(
+    r"<\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?>|"
+    r"</?(?:c|v|lang|ruby|rt)(?:\s+[^>]*)?>",
+    re.IGNORECASE,
+)
+CUE_SETTING_TOKEN = re.compile(r"^[A-Za-z][A-Za-z0-9-]*:\S+$")
 
 
 def existing_files(folder: Path, suffixes: set[str] | None = None) -> list[Path]:
@@ -140,46 +149,117 @@ def pick_source_transcript(paths: list[Path]) -> Path | None:
     return sorted(paths, key=rank)[0]
 
 
-def spoken_text(raw: str) -> str:
-    """Spoken words only. Evidence refs still point at the original file."""
+def looks_like_vtt(raw: str) -> bool:
+    for line in raw.replace("\r\n", "\n").split("\n"):
+        if line.strip().upper().startswith("WEBVTT"):
+            return True
+    return False
+
+
+def strip_leading_timestamp(line: str) -> str:
+    """Drop a leading cue or bracket timestamp; keep words on the same line."""
+    rest = ARROW_TIMESTAMP.sub("", line, count=1)
+    rest = BRACKET_TIMESTAMP.sub("", rest, count=1)
+    return rest.strip()
+
+
+def remainder_is_cue_settings(text: str) -> bool:
+    if not text:
+        return True
+    return all(CUE_SETTING_TOKEN.match(token) for token in text.split())
+
+
+def is_vtt_block_header(line: str) -> bool:
+    """VTT NOTE/STYLE/REGION headers only. Never match spoken 'region, which…'."""
+    upper = line.upper()
+    if upper in {"NOTE", "STYLE", "REGION"}:
+        return True
+    return upper.startswith("NOTE ")
+
+
+def clean_transcript(raw: str) -> dict[str, Any]:
+    """Spoken words plus optional provenance. Evidence refs stay on the original file."""
+    in_vtt = looks_like_vtt(raw)
     lines_out: list[str] = []
+    provenance: list[str] = []
+    skip_until_blank = False
     for line in raw.replace("\r\n", "\n").split("\n"):
         stripped = line.strip()
+        if skip_until_blank:
+            if not stripped:
+                skip_until_blank = False
+            continue
         if not stripped:
+            continue
+        prov = PROVENANCE_LINE.match(stripped)
+        if prov:
+            provenance.append(prov.group(1).strip())
             continue
         upper = stripped.upper()
         if upper.startswith("WEBVTT"):
             continue
-        if upper.startswith("NOTE") or upper.startswith("STYLE") or upper.startswith("REGION"):
+        if in_vtt and VTT_KIND_OR_LANGUAGE.match(stripped):
             continue
-        if VTT_TIMESTAMP.match(stripped):
+        if in_vtt and is_vtt_block_header(stripped):
+            if stripped.upper() in {"NOTE", "STYLE", "REGION"}:
+                skip_until_blank = True
             continue
-        if VTT_CUE_NUMBER.match(stripped):
+        if in_vtt and VTT_CUE_NUMBER.match(stripped):
             continue
         if MD_HEADING.match(stripped):
             continue
-        lines_out.append(stripped)
-    return "\n".join(lines_out).strip()
+        if contains_caption_gap_token(stripped):
+            continue
+        body = strip_leading_timestamp(stripped)
+        if body != stripped and remainder_is_cue_settings(body):
+            continue
+        stripped = body
+        if not stripped:
+            continue
+        stripped = INLINE_VTT_TAGS.sub("", stripped)
+        stripped = re.sub(r"\s+", " ", stripped).strip()
+        if stripped:
+            lines_out.append(stripped)
+    return {
+        "text": "\n".join(lines_out).strip(),
+        "transcript_source": provenance[0] if provenance else None,
+        "provenance": provenance,
+    }
+
+
+def spoken_text(raw: str) -> str:
+    """Spoken words only. Evidence refs still point at the original file."""
+    return str(clean_transcript(raw)["text"])
+
+
+def contains_caption_gap_token(raw: str) -> bool:
+    return bool(CAPTION_GAP_TOKEN.search(raw))
 
 
 def is_caption_gap_line(line: str) -> bool:
-    return bool(CAPTION_GAP_LINE.match(line.strip()))
+    return contains_caption_gap_token(line)
 
 
 def extract_caption_gap(raw: str) -> str | None:
     for line in raw.replace("\r\n", "\n").split("\n"):
         stripped = line.strip()
-        if is_caption_gap_line(stripped):
-            return stripped.strip("_").strip()
+        if not contains_caption_gap_token(stripped):
+            continue
+        cleaned = re.sub(r"[*_]+", "", stripped).strip()
+        return cleaned or "CAPTION_GAP"
     return None
 
 
 def is_placeholder_transcript(raw: str) -> bool:
-    """Gap markers or heading-only bodies are not transcript evidence."""
-    spoken = spoken_text(raw)
-    if not spoken:
+    """Gap notes or empty-after-clean bodies are not transcript evidence.
+
+    Placeholder detection runs on cleaned text so a timeline of real words
+    is never called a placeholder. A CAPTION_GAP token anywhere still wins:
+    that file is a pipeline note, including diagnostic dumps.
+    """
+    if contains_caption_gap_token(raw):
         return True
-    return all(is_caption_gap_line(line) or extract_caption_gap(line) for line in spoken.splitlines())
+    return not spoken_text(raw)
 
 
 def split_transcripts(
@@ -202,6 +282,10 @@ def split_transcripts(
     return real, placeholders, gap
 
 
+def source_declares_caption_gap(value: Any) -> bool:
+    return isinstance(value, str) and contains_caption_gap_token(value)
+
+
 def meta_denies_transcript(meta: dict[str, Any], has_transcript_flag: bool | None) -> bool:
     """META is the filter: has_transcript false or transcript_chars 0 means no speech."""
     if has_transcript_flag is False:
@@ -210,6 +294,14 @@ def meta_denies_transcript(meta: dict[str, Any], has_transcript_flag: bool | Non
     if isinstance(chars, (int, float)) and chars == 0:
         return True
     return False
+
+
+def ae_denies_transcript(ae: dict[str, Any]) -> bool:
+    """AE_STATUS is the filter: transcript_source CAPTION_GAP means no speech."""
+    if source_declares_caption_gap(ae.get("transcript_source")):
+        return True
+    overall = ae.get("overall") if isinstance(ae.get("overall"), dict) else {}
+    return source_declares_caption_gap(overall.get("transcript_source"))
 
 
 def clip_source_text(text: str, limit: int = SOURCE_TEXT_MAX_CHARS) -> tuple[str, int, bool]:

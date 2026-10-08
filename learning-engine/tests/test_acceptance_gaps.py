@@ -16,6 +16,7 @@ from fixtures.tiny_png import PNG_1X1
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
 from learning_engine.adapters.common import (
     SOURCE_TEXT_MAX_CHARS,
+    ae_denies_transcript,
     clip_source_text,
     convert_summary,
     is_placeholder_transcript,
@@ -264,6 +265,7 @@ class D4LetterBullets(unittest.TestCase):
         self.assertEqual(pack["ae_status"]["A"]["artifact"], "COVERAGE.md")
         self.assertEqual(pack["ae_status"]["B"]["status"], "PARTIAL")
         self.assertEqual(pack["ae_status"]["D"]["status"], "FAIL")
+        self.assertEqual(pack["ae_status"]["E"]["status"], "PASS (file store)")
         self.assertEqual(pack["processing_status"], "partial")
         refs = [e["source_ref"] for e in pack["evidence"] if e["kind"] == "transcript"]
         self.assertTrue(any(r.endswith(".en.vtt") for r in refs))
@@ -349,3 +351,165 @@ class N3StrictOkFalse(unittest.TestCase):
             cli_payload = json.loads(buf2.getvalue())
             self.assertFalse(cli_payload["ok"])
             self.assertEqual(cli_payload["invalid"], 1)
+
+
+class R3YoutubeCaptionGap(unittest.TestCase):
+    def test_ae_transcript_source_caption_gap_is_authoritative(self) -> None:
+        packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_repass_gap")
+        pack = next(p for p in packets if p["signal_id"] == "SYNTHETIC04")
+        validate_packets([pack])
+        self.assertEqual(pack["source_text"], "")
+        self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+        self.assertTrue(pack.get("caption_gap"))
+        self.assertIn("CAPTION_GAP", pack["caption_gap"].upper())
+        self.assertTrue(
+            any(
+                e.get("note") == "caption_gap_placeholder"
+                and e["source_ref"].upper().endswith("TRANSCRIPT.MD")
+                for e in pack["evidence"]
+            )
+        )
+        self.assertEqual(pack["scores"]["transcripts_usable"], 0)
+        self.assertEqual(count_false_full_visual(packets), 0)
+
+    def test_file_caption_gap_token_is_not_speech(self) -> None:
+        packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_repass_gap")
+        pack = next(p for p in packets if p["signal_id"] == "SYNTHETIC05")
+        validate_packets([pack])
+        self.assertEqual(pack["source_text"], "")
+        self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+        self.assertIn("CAPTION_GAP", pack.get("caption_gap", "").upper())
+        self.assertFalse(is_placeholder_transcript("# Transcript\n\nreal spoken words\n"))
+        self.assertTrue(is_placeholder_transcript("Source: CAPTION_GAP\nyt-dlp: no subs\n"))
+
+    def test_ae_gap_ignores_file_that_looks_like_speech(self) -> None:
+        parsed = youtube_l2.parse_ae_status(
+            "- **status**: PARTIAL\n\n## Notes\n- transcript_source=CAPTION_GAP\n"
+        )
+        self.assertTrue(ae_denies_transcript(parsed))
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "SYNTHGAP"
+            folder.mkdir()
+            (folder / "AE_STATUS.md").write_text(
+                "# AE_STATUS — SYNTHGAP\n\n"
+                "- **status**: PARTIAL\n\n"
+                "## Notes\n- transcript_source=CAPTION_GAP\n",
+                encoding="utf-8",
+            )
+            (folder / "TRANSCRIPT.md").write_text(
+                "# Transcript\n\nthis looks like speech but AE said CAPTION_GAP\n",
+                encoding="utf-8",
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(any(e.get("note") == "ae_has_no_transcript" for e in pack["evidence"]))
+            self.assertTrue(pack.get("caption_gap"))
+
+    def test_table_mention_of_caption_gap_is_not_pack_gap(self) -> None:
+        packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_l2")
+        one = next(p for p in packets if p["signal_id"] == "SYNTHETIC01")
+        self.assertFalse(ae_denies_transcript(one.get("ae_status") or {}))
+        self.assertIn("burnt-in caption", one["source_text"])
+
+
+class R3SpokenNoteNotDropped(unittest.TestCase):
+    def test_spoken_region_and_note_lines_survive_markdown(self) -> None:
+        md = "region, which was received\nNOTE to self: run the verifier\nstyle guide says keep this\n"
+        spoken = spoken_text(md)
+        self.assertIn("region, which was received", spoken)
+        self.assertIn("NOTE to self: run the verifier", spoken)
+        self.assertIn("style guide says keep this", spoken)
+
+    def test_vtt_block_headers_only_are_stripped(self) -> None:
+        vtt = (
+            "WEBVTT\n\n"
+            "NOTE this is a comment\n"
+            "00:00:00.000 --> 00:00:01.000\n"
+            "region, which was received\n"
+        )
+        spoken = spoken_text(vtt)
+        self.assertIn("region, which was received", spoken)
+        self.assertNotIn("this is a comment", spoken)
+        block = "WEBVTT\n\nSTYLE\n::cue { color: red }\n\n00:00:00.000 --> 00:00:01.000\nhello\n"
+        self.assertEqual(spoken_text(block), "hello")
+
+
+class R3TimelineKeepsWords(unittest.TestCase):
+    def test_timestamp_prefix_keeps_words_and_is_not_placeholder(self) -> None:
+        raw = "00:00:01.000 --> 00:00:03.000 actual words\n[00:01] more words\n"
+        self.assertEqual(spoken_text(raw), "actual words\nmore words")
+        self.assertFalse(is_placeholder_transcript(raw))
+        self.assertTrue(is_placeholder_transcript("00:00:01.000 --> 00:00:03.000\n# Transcript\n"))
+
+    def test_captions_timeline_file_is_speech(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "SYNTL"
+            folder.mkdir()
+            (folder / "AE_STATUS.md").write_text(
+                "# AE_STATUS — SYNTL\n\n- **status**: PASS\n",
+                encoding="utf-8",
+            )
+            (folder / "captions_timeline.txt").write_text(
+                "00:00:01.000 --> 00:00:03.000 actual words on the timeline\n"
+                "[00:01] second spoken line\n",
+                encoding="utf-8",
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertIn("actual words on the timeline", pack["source_text"])
+            self.assertIn("second spoken line", pack["source_text"])
+            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertNotIn("caption_gap", pack)
+
+
+class R3ProvenanceAndTags(unittest.TestCase):
+    def test_strips_provenance_kind_language_and_inline_tags(self) -> None:
+        raw = (
+            "_source: whisper small_\n"
+            "# Transcript\n"
+            "<v Speaker>hello <c>from</c> the <00:00:01.234>cue</v>\n"
+        )
+        self.assertEqual(spoken_text(raw), "hello from the cue")
+        vtt = (
+            "WEBVTT\n"
+            "Kind: captions\n"
+            "Language: en\n\n"
+            "1\n"
+            "00:00:00.000 --> 00:00:01.000 align:start\n"
+            "<v Speaker>tagged speech</v>\n"
+        )
+        self.assertEqual(spoken_text(vtt), "tagged speech")
+        self.assertNotIn("Kind:", spoken_text(vtt))
+        self.assertNotIn("Language:", spoken_text(vtt))
+
+    def test_adapter_records_provenance_and_drops_it_from_source_text(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "SYNPROV"
+            folder.mkdir()
+            (folder / "AE_STATUS.md").write_text(
+                "# AE_STATUS — SYNPROV\n\n- **status**: PASS\n",
+                encoding="utf-8",
+            )
+            (folder / "TRANSCRIPT.md").write_text(
+                "_source: yt-dlp auto/subs (CAPTION_SOURCE)_\n"
+                "# Transcript\n\n"
+                "spoken after provenance\n",
+                encoding="utf-8",
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "spoken after provenance")
+            self.assertIn("yt-dlp", pack["scores"].get("transcript_source", ""))
+            self.assertNotIn("_source:", pack["source_text"])
+
+
+class R3LetterParenthetical(unittest.TestCase):
+    def test_letter_bullet_allows_parenthetical_after_status(self) -> None:
+        parsed = youtube_l2.parse_ae_status(
+            "- E PASS (file store) — SKILL_DELTA.md\n- A PASS — COVERAGE.md\n"
+        )
+        self.assertEqual(parsed["E"]["status"], "PASS (file store)")
+        self.assertEqual(parsed["E"]["artifact"], "SKILL_DELTA.md")
+        self.assertEqual(parsed["A"]["artifact"], "COVERAGE.md")

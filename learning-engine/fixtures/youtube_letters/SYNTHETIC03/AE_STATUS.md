@@ -4,4 +4,4 @@
 - B PARTIAL — EVIDENCE_INDEX.md
 - C PASS — METHOD.md
 - D FAIL — RECREATION.md
-- E PASS — SKILL_DELTA.md
+- E PASS (file store) — SKILL_DELTA.md
