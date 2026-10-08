@@ -245,7 +245,8 @@ def extract_caption_gap(raw: str) -> str | None:
         stripped = line.strip()
         if not contains_caption_gap_token(stripped):
             continue
-        cleaned = re.sub(r"[*_]+", "", stripped).strip()
+        cleaned = stripped.strip("*_ ").strip()
+        cleaned = re.sub(r"^\*+|\*+$", "", cleaned).strip()
         return cleaned or "CAPTION_GAP"
     return None
 

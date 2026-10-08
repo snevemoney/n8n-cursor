@@ -397,7 +397,7 @@ class R3YoutubeCaptionGap(unittest.TestCase):
                 encoding="utf-8",
             )
             (folder / "TRANSCRIPT.md").write_text(
-                "# Transcript\n\nthis looks like speech but AE said CAPTION_GAP\n",
+                "# Transcript\n\nthis looks like speech but AE said no\n",
                 encoding="utf-8",
             )
             pack = youtube_l2.convert(folder)[0]
