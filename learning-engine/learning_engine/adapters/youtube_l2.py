@@ -327,7 +327,7 @@ def pack_to_packet(folder: Path, *, convert_root: Path | None = None) -> dict[st
     if caption_gap:
         extra["caption_gap"] = caption_gap
         notes.append(f"caption_gap: {caption_gap}")
-    if disagreement:
+    if disagreement and scan.preferred is not None:
         extra["transcript_disagreement"] = disagreement
     if file_gap:
         extra["gap_note"] = file_gap
@@ -352,7 +352,7 @@ def pack_to_packet(folder: Path, *, convert_root: Path | None = None) -> dict[st
             item = rel_ref(folder, path)
             if item not in refs:
                 refs.append(item)
-    if disagreement:
+    if refs:
         scores["disagreement_refs"] = refs
     derived: dict[str, Any] = {}
     if ocr_text:

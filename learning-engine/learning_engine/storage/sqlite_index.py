@@ -138,8 +138,31 @@ def _apply_schema(conn: sqlite3.Connection) -> None:
             conn.execute(stmt)
 
 
+def _legacy_judgment_run_id_sql(jcols: set[str]) -> str:
+    """Distinct run_id per legacy row so the same provider cannot overwrite itself."""
+    for col in (
+        "run_id",
+        "run_marker",
+        "run",
+        "started_at",
+        "created_at",
+        "timestamp",
+        "ts",
+    ):
+        if col in jcols:
+            return (
+                "CASE "
+                f"WHEN {col} IS NOT NULL AND TRIM(CAST({col} AS TEXT)) != '' "
+                f"THEN '{LEGACY_MIGRATED_RUN_ID}-' || TRIM(CAST({col} AS TEXT)) "
+                f"ELSE '{LEGACY_MIGRATED_RUN_ID}-' || CAST(rowid AS TEXT) "
+                "END"
+            )
+    key = "id" if "id" in jcols else "rowid"
+    return f"'{LEGACY_MIGRATED_RUN_ID}-' || CAST({key} AS TEXT)"
+
+
 def _migrate_legacy_txn(conn: sqlite3.Connection) -> None:
-    """One transaction: packets → composite key, judgments → legacy-migrated run, then runs."""
+    """One transaction: packets → composite key, judgments → distinct legacy run_ids, then runs."""
     cols = _packets_columns(conn)
     if "signal_id" not in cols:
         raise IndexSchemaError(
@@ -195,13 +218,15 @@ def _migrate_legacy_txn(conn: sqlite3.Connection) -> None:
         cost = "cost_usd" if "cost_usd" in jcols else "NULL"
         body = "body_json" if "body_json" in jcols else "'{}'"
         infer = _source_type_sql([])
+        run_id_sql = _legacy_judgment_run_id_sql(jcols)
+        legacy_n = int(conn.execute("SELECT COUNT(*) FROM judgments_legacy").fetchone()[0])
         conn.execute(
             f"""
-            INSERT OR REPLACE INTO judgments (
+            INSERT INTO judgments (
                 run_id, source_type, signal_id, provider,
                 flagged, label, latency_ms, cost_usd, body_json
             )
-            SELECT ?,
+            SELECT {run_id_sql},
                    COALESCE(
                        (SELECT p.source_type FROM packets p
                         WHERE p.signal_id = judgments_legacy.signal_id LIMIT 1),
@@ -209,16 +234,23 @@ def _migrate_legacy_txn(conn: sqlite3.Connection) -> None:
                    ),
                    signal_id, {provider}, {flagged}, {label}, {latency}, {cost}, {body}
             FROM judgments_legacy
-            """,
-            (LEGACY_MIGRATED_RUN_ID,),
+            """
         )
+        migrated_n = int(conn.execute("SELECT COUNT(*) FROM judgments").fetchone()[0])
+        if migrated_n != legacy_n:
+            raise IndexSchemaError(
+                "SQLite migration lost judgments: "
+                f"legacy={legacy_n} migrated={migrated_n}. Database left unchanged."
+            )
         started = datetime.now(timezone.utc).isoformat()
         conn.execute(
             """
-            INSERT OR REPLACE INTO runs (run_id, started_at, provider, notes)
-            VALUES (?, ?, '', 'migrated from pre-composite schema')
+            INSERT INTO runs (run_id, started_at, provider, notes)
+            SELECT DISTINCT run_id, ?, '', 'migrated from pre-composite schema'
+            FROM judgments
+            WHERE run_id LIKE ?
             """,
-            (LEGACY_MIGRATED_RUN_ID, started),
+            (started, LEGACY_MIGRATED_RUN_ID + "%"),
         )
         conn.execute("DROP TABLE judgments_legacy")
     _maybe_fail_migration("before_commit")

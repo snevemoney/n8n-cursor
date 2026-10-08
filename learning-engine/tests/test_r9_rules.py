@@ -275,7 +275,9 @@ class N83R6Migration(unittest.TestCase):
             ]
             opened.close()
             self.assertEqual(n_p, 10)
-            self.assertEqual(rows, [(LEGACY_MIGRATED_RUN_ID, 1)])
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0][1], 1)
+            self.assertTrue(str(rows[0][0]).startswith(LEGACY_MIGRATED_RUN_ID))
             self.assertEqual(pk, ["source_type", "signal_id"])
             extra = [_ok(signal_id="after-migrate", source_type="bookmark")]
             self.assertEqual(index_packets(db, extra), 1)

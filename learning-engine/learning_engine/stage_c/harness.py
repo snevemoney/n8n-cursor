@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 import uuid
 from pathlib import Path
@@ -20,7 +21,7 @@ from learning_engine.constants import (
     LIVE_MAX_ITEMS_DEFAULT,
     SOURCE_TEXT_UNAVAILABLE,
 )
-from learning_engine.errors import ProviderRefused
+from learning_engine.errors import IndexSchemaError, ProviderRefused
 from learning_engine.io_util import read_jsonl, write_json, write_jsonl
 from learning_engine.network import require_live_call
 from learning_engine.stage_c.contract import Judgment, Provider, evaluate
@@ -289,9 +290,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.judgments:
         write_jsonl(Path(args.judgments), result["judgments"])
     if args.sqlite:
-        start_run(Path(args.sqlite), result["run_id"], provider=result["report"]["provider"])
-        index_judgments(Path(args.sqlite), result["judgments"], run_id=result["run_id"])
-        index_harness_result(Path(args.sqlite), result["run_id"], result["report"])
+        try:
+            start_run(Path(args.sqlite), result["run_id"], provider=result["report"]["provider"])
+            index_judgments(Path(args.sqlite), result["judgments"], run_id=result["run_id"])
+            index_harness_result(Path(args.sqlite), result["run_id"], result["report"])
+        except (IndexSchemaError, sqlite3.OperationalError) as exc:
+            print(json.dumps({"ok": False, "error": str(exc)}), file=sys.stderr)
+            return 1
     summary = {
         "ok": True,
         "output": args.output,

@@ -523,6 +523,7 @@ def normalize_speech(text: str) -> str:
 
 
 def texts_differ_materially(left: str, right: str) -> bool:
+    """True when candidate (right) is not a ≥95% token subset of preferred (left)."""
     a = normalize_speech(left)
     b = normalize_speech(right)
     if not a or not b or a == b:
@@ -531,6 +532,8 @@ def texts_differ_materially(left: str, right: str) -> bool:
     tb = set(unicode_word_tokens(b))
     if not ta or not tb:
         return True
+    if (len(tb & ta) / len(tb)) >= 0.95:
+        return False
     return (len(ta & tb) / len(ta | tb)) < 0.8
 
 
@@ -709,19 +712,25 @@ def youtube_speech_files(
                 continue
             if texts_differ_materially(pref_text, texts.get(path, "")):
                 differing.append(path)
-    if gap_note_paths and speech:
+    extra_refs = list(differing)
+    if preferred is None:
+        extra_refs.extend(gap_note_paths)
+        extra_refs.extend(speech)
+        disagreement_refs = _disagreement_refs(folder, None, extra_refs)
+    elif gap_note_paths and speech:
         content_disagreement = (
             "TRANSCRIPT.md is a gap note; caption file has speech; "
-            f"preferred={_path_ref(folder, preferred) if preferred else '?'}"
+            f"preferred={_path_ref(folder, preferred)}"
         )
-        differing.extend(gap_note_paths)
+        extra_refs.extend(gap_note_paths)
+        disagreement_refs = _disagreement_refs(folder, preferred, extra_refs)
     elif differing:
         content_disagreement = (
-            f"speech files differ; preferred={_path_ref(folder, preferred) if preferred else '?'}"
+            f"speech files differ; preferred={_path_ref(folder, preferred)}"
         )
-    disagreement_refs = (
-        _disagreement_refs(folder, preferred, differing) if content_disagreement else tuple()
-    )
+        disagreement_refs = _disagreement_refs(folder, preferred, extra_refs)
+    else:
+        disagreement_refs = tuple()
 
     return YoutubeSpeechScan(
         speech=speech,
