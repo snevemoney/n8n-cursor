@@ -113,6 +113,11 @@
       "type": "string",
       "description": "Path or field that produced this packet. Not a URL guess."
     },
+    "evidence_base": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Directory the evidence source_ref paths are relative to. Validator joins --root + evidence_base + ref."
+    },
     "ae_status": {
       "type": "object",
       "additionalProperties": {
@@ -143,8 +148,8 @@
     },
     "transcript_quality": {
       "type": "string",
-      "enum": ["suspect_hallucination", "short", "meta_missing"],
-      "description": "suspect_hallucination: Whisper leftovers (not a demotion). short: YouTube caption with 1–4 real tokens. meta_missing: corpus META lacked both has_transcript and transcript_chars; content fallback."
+      "enum": ["suspect_hallucination", "short", "meta_missing", "gap_note_with_content"],
+      "description": "suspect_hallucination: Whisper leftovers (not a demotion). short: YouTube caption with 1–4 real tokens. meta_missing: corpus META lacked both has_transcript and transcript_chars; content fallback. gap_note_with_content: CAPTION_GAP TRANSCRIPT.md also has leftover prose; still not speech."
     },
     "gap_note": {
       "type": "string",
@@ -167,6 +172,10 @@
         "reviewer_authored": {
           "type": "boolean",
           "const": true
+        },
+        "ocr_text": {
+          "type": "string",
+          "description": "Visual-text from ocr-frames.txt / *ocr* files. Never source_text. Never speech."
         }
       }
     },
@@ -176,7 +185,7 @@
     },
     "preferred_source": {
       "type": "string",
-      "description": "YouTube preferred speech file (clean TRANSCRIPT.md, else largest caption)."
+      "description": "YouTube preferred speech file from the fixed tier order (caption formats, then whisper/transcript files, then non-gap TRANSCRIPT.md). Ties break by filename."
     }
   },
   "$defs": {

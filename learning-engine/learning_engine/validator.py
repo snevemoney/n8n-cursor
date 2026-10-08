@@ -16,6 +16,7 @@ from typing import Any, Iterable
 from learning_engine.constants import (
     ANALYSIS_SCOPE,
     CONTENT_ACCESS,
+    DISK_CHECK_SKIPPED,
     EVIDENCE_KINDS,
     IMAGE_EXTENSIONS,
     INJECTION_RE,
@@ -56,19 +57,35 @@ def is_video_evidence(item: dict[str, Any]) -> bool:
     return evidence_exists_true(item) and evidence_suffix(item) in VIDEO_EXTENSIONS
 
 
-def _resolve_evidence_path(ref: str, root: Path | None) -> Path:
+def _resolve_evidence_path(
+    ref: str,
+    root: Path | None,
+    evidence_base: str | None = None,
+) -> Path:
     path = Path(ref)
     if path.is_absolute():
         return path
-    if root is not None:
-        return (root / path).resolve()
-    return path
+    if root is None:
+        return path
+    base = evidence_base or "."
+    base_path = Path(base)
+    if base_path.is_absolute():
+        return (base_path / path).resolve()
+    return (root / base_path / path).resolve()
 
 
-def evidence_on_disk(item: dict[str, Any], root: Path | None) -> bool:
+def evidence_on_disk(
+    item: dict[str, Any],
+    root: Path | None,
+    evidence_base: str | None = None,
+) -> bool:
     if root is None:
         return True
-    return _resolve_evidence_path(str(item.get("source_ref") or ""), root).is_file()
+    return _resolve_evidence_path(
+        str(item.get("source_ref") or ""),
+        root,
+        evidence_base,
+    ).is_file()
 
 
 def has_frame_evidence(packet: dict[str, Any]) -> bool:
@@ -100,7 +117,9 @@ def has_full_visual_media(
             continue
         if not evidence_exists_true(item):
             continue
-        if root is not None and not evidence_on_disk(item, root):
+        if root is not None and not evidence_on_disk(
+            item, root, packet.get("evidence_base") if isinstance(packet.get("evidence_base"), str) else None
+        ):
             continue
         suffix = evidence_suffix(item)
         if suffix in IMAGE_EXTENSIONS:
@@ -178,6 +197,9 @@ def validate_packet(
     raw_root = root if root is not None else evidence_root
     if raw_root is not None:
         disk_root = Path(raw_root)
+    elif warnings is not None:
+        if DISK_CHECK_SKIPPED not in warn:
+            warn.append(DISK_CHECK_SKIPPED)
     for field in REQUIRED_PACKET_FIELDS:
         if field not in packet:
             raise PacketValidationError(f"missing required field {field}", path)

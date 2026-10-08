@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
+from learning_engine.errors import IndexSchemaError
 from learning_engine.io_util import read_jsonl
 
 SCHEMA = """
@@ -58,26 +59,84 @@ CREATE INDEX IF NOT EXISTS idx_judgments_run ON judgments(run_id);
 """
 
 
-def _packets_schema_ok(conn: sqlite3.Connection) -> bool:
-    cols = {row[1] for row in conn.execute("PRAGMA table_info(packets)")}
-    if not cols:
-        return True
-    pks = [row[1] for row in conn.execute("PRAGMA table_info(packets)") if row[5]]
-    return "source_type" in cols and pks == ["source_type", "signal_id"]
+def _table_names(conn: sqlite3.Connection) -> set[str]:
+    rows = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    return {str(row[0]) for row in rows}
+
+
+def _packets_columns(conn: sqlite3.Connection) -> list[str]:
+    return [str(row[1]) for row in conn.execute("PRAGMA table_info(packets)")]
+
+
+def _packets_pk(conn: sqlite3.Connection) -> list[str]:
+    return [str(row[1]) for row in conn.execute("PRAGMA table_info(packets)") if row[5]]
+
+
+def _current_packets_schema(conn: sqlite3.Connection) -> bool:
+    cols = set(_packets_columns(conn))
+    return "source_type" in cols and "signal_id" in cols and _packets_pk(conn) == [
+        "source_type",
+        "signal_id",
+    ]
+
+
+def _migrate_packets_keep_judgments(conn: sqlite3.Connection) -> None:
+    cols = _packets_columns(conn)
+    if "signal_id" not in cols:
+        raise IndexSchemaError(
+            "SQLite packets table has no signal_id. Refusing to drop tables. "
+            "Rebuild into a new file from JSONL."
+        )
+    select_cols = {
+        "source_type": "source_type" if "source_type" in cols else "'unknown'",
+        "signal_id": "signal_id",
+        "content_access": "content_access" if "content_access" in cols else "NULL",
+        "analysis_scope": "analysis_scope" if "analysis_scope" in cols else "NULL",
+        "verification_state": "verification_state" if "verification_state" in cols else "NULL",
+        "processing_status": "processing_status" if "processing_status" in cols else "NULL",
+        "lifecycle_state": "lifecycle_state" if "lifecycle_state" in cols else "NULL",
+        "source_url": "source_url" if "source_url" in cols else "NULL",
+        "adapter": "adapter" if "adapter" in cols else "NULL",
+        "body_json": "body_json" if "body_json" in cols else "'{}'",
+    }
+    conn.execute("ALTER TABLE packets RENAME TO packets_legacy")
+    conn.executescript(SCHEMA)
+    conn.execute(
+        f"""
+        INSERT OR REPLACE INTO packets (
+            source_type, signal_id, content_access, analysis_scope,
+            verification_state, processing_status, lifecycle_state,
+            source_url, adapter, body_json
+        )
+        SELECT {select_cols['source_type']}, {select_cols['signal_id']},
+               {select_cols['content_access']}, {select_cols['analysis_scope']},
+               {select_cols['verification_state']}, {select_cols['processing_status']},
+               {select_cols['lifecycle_state']}, {select_cols['source_url']},
+               {select_cols['adapter']}, {select_cols['body_json']}
+        FROM packets_legacy
+        """
+    )
+    conn.execute("DROP TABLE packets_legacy")
 
 
 def connect(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path))
-    if not _packets_schema_ok(conn):
-        conn.executescript(
-            "DROP TABLE IF EXISTS harness_results;"
-            "DROP TABLE IF EXISTS judgments;"
-            "DROP TABLE IF EXISTS runs;"
-            "DROP TABLE IF EXISTS packets;"
-        )
-    conn.executescript(SCHEMA)
-    return conn
+    names = _table_names(conn)
+    if "packets" not in names:
+        conn.executescript(SCHEMA)
+        return conn
+    if _current_packets_schema(conn):
+        conn.executescript(SCHEMA)
+        return conn
+    cols = set(_packets_columns(conn))
+    if "signal_id" in cols:
+        _migrate_packets_keep_judgments(conn)
+        return conn
+    raise IndexSchemaError(
+        "SQLite index has an unrecognized packets schema. "
+        "Refusing to drop tables or judgments. Recreate the index from JSONL in a new file."
+    )
 
 
 def index_packets(path: Path, packets: Iterable[dict[str, Any]]) -> int:
@@ -121,11 +180,14 @@ def packet_counts_by_source_type(path: Path) -> dict[str, int]:
 
 
 def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
-    """Rebuild the packets table from JSONL. JSONL is the source of truth."""
+    """Replace packet rows only for source_types present in JSONL. Judgments stay."""
     packets = list(read_jsonl(jsonl_path))
+    types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
     conn = connect(sqlite_path)
     with conn:
-        conn.execute("DELETE FROM packets")
+        if types:
+            placeholders = ",".join("?" for _ in types)
+            conn.execute(f"DELETE FROM packets WHERE source_type IN ({placeholders})", types)
     conn.close()
     indexed = index_packets(sqlite_path, packets)
     counts: dict[str, int] = {}
@@ -136,6 +198,7 @@ def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
         "ok": True,
         "indexed": indexed,
         "jsonl_lines": len(packets),
+        "replaced_source_types": types,
         "by_source_type": packet_counts_by_source_type(sqlite_path),
         "jsonl_by_source_type": counts,
         "sqlite": str(sqlite_path),

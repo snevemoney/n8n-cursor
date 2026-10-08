@@ -27,11 +27,14 @@ from learning_engine.adapters.common import (
     existing_videos,
     is_caption_format_file,
     is_transcript_md,
+    packet_evidence_base,
     pick_youtube_cleaned,
     read_transcript_payload,
     rel_ref,
+    spoken_text,
     youtube_speech_files,
 )
+from learning_engine.constants import OCR_TEXT_MAX_CHARS
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, claim, evidence_item
 
@@ -151,19 +154,19 @@ def _signal_id(ae_text: str, folder: Path, info: dict[str, Any]) -> str:
     return folder.name
 
 
-def pack_to_packet(folder: Path) -> dict[str, Any]:
+def pack_to_packet(folder: Path, *, convert_root: Path | None = None) -> dict[str, Any]:
     ae_path = folder / "AE_STATUS.md"
     ae_text = ae_path.read_text(encoding="utf-8")
     ae = parse_ae_status(ae_text)
     info = _info_json(folder)
     signal_id = _signal_id(ae_text, folder, info)
+    root = convert_root or folder
 
     frames = existing_frames(folder)
     discovered = existing_transcripts(folder)
     scan = youtube_speech_files(discovered, _read_transcript_text)
     usable_transcripts = scan.speech
-    placeholders = scan.other
-    clean_md = scan.clean_md
+    placeholders = [p for p in scan.other if p not in scan.gap_note_paths]
     file_gap = scan.gap_note
     declared_label = str(ae["transcript_source"]) if ae.get("transcript_source") else None
     has_speech = bool(usable_transcripts)
@@ -203,18 +206,21 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     for path in usable_transcripts:
         evidence.append(evidence_item(kind="transcript", source_ref=rel_ref(folder, path)))
     for path in scan.gap_note_paths:
-        if path in usable_transcripts:
-            evidence.append(
-                evidence_item(
-                    kind="file",
-                    source_ref=rel_ref(folder, path),
-                    note="gap_note",
-                )
+        evidence.append(
+            evidence_item(
+                kind="file",
+                source_ref=rel_ref(folder, path),
+                note="gap_note",
             )
+        )
+    for path in scan.ocr_paths:
+        evidence.append(
+            evidence_item(kind="file", source_ref=rel_ref(folder, path), note="ocr")
+        )
     for path in placeholders:
         note = (
             "caption_gap_placeholder"
-            if is_transcript_md(path) or is_caption_format_file(path) or path in scan.gap_note_paths
+            if is_transcript_md(path) or is_caption_format_file(path)
             else None
         )
         evidence.append(
@@ -230,8 +236,10 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
             evidence.append(evidence_item(kind="file", source_ref=ref, note="video"))
             cited.add(ref)
 
-    cleaned = pick_youtube_cleaned(clean_md, usable_transcripts, _read_transcript_text)
+    cleaned = pick_youtube_cleaned(scan.preferred, _read_transcript_text)
     source_text, source_chars, truncated = clip_source_text(str(cleaned["text"]))
+    ocr_raw = "\n".join(spoken_text(_read_transcript_text(path)) for path in scan.ocr_paths)
+    ocr_text, _, _ = clip_source_text(ocr_raw, OCR_TEXT_MAX_CHARS)
 
     if frames and videos:
         content_access = "full_visual"
@@ -315,7 +323,11 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         extra["transcript_disagreement"] = disagreement
     if file_gap:
         extra["gap_note"] = file_gap
-    if scan.short_paths and (not usable_transcripts or all(p in scan.short_paths for p in usable_transcripts)):
+    if scan.gap_note_with_content:
+        extra["transcript_quality"] = "gap_note_with_content"
+        scores["transcript_quality"] = "gap_note_with_content"
+        notes.append("transcript_quality: gap_note_with_content")
+    elif scan.preferred is not None and scan.preferred in scan.short_paths:
         extra["transcript_quality"] = "short"
         scores["transcript_quality"] = "short"
         notes.append("transcript_quality: short")
@@ -326,6 +338,12 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         scores["preferred_source"] = rel_ref(folder, scan.preferred)
     if scan.disagreement_refs:
         scores["disagreement_refs"] = list(scan.disagreement_refs)
+    derived: dict[str, Any] = {}
+    if ocr_text:
+        derived["ocr_text"] = ocr_text
+    if derived:
+        extra["derived"] = derived
+    extra["evidence_base"] = packet_evidence_base(folder, root)
     if notes:
         extra["notes"] = notes
     return base_packet(
@@ -350,8 +368,17 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
 
 def convert_report(input_path: Path, *, strict: bool = False) -> dict[str, Any]:
     report = empty_convert_report()
+    root = input_path if input_path.is_dir() else input_path.parent
     for folder in find_pack_dirs(input_path):
-        if not collect_packet(report, str(folder), lambda f=folder: pack_to_packet(f), strict=strict) and strict:
+        if (
+            not collect_packet(
+                report,
+                str(folder),
+                lambda f=folder: pack_to_packet(f, convert_root=root),
+                strict=strict,
+            )
+            and strict
+        ):
             break
     return report
 

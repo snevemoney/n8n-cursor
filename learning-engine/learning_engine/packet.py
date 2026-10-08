@@ -44,6 +44,7 @@ def base_packet(
     retrieved_at: str | None = None,
     adapter: str | None = None,
     input_ref: str | None = None,
+    evidence_base: str | None = None,
     extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     packet: dict[str, Any] = {
@@ -70,6 +71,8 @@ def base_packet(
         packet["adapter"] = adapter
     if input_ref:
         packet["input_ref"] = input_ref
+    if evidence_base:
+        packet["evidence_base"] = evidence_base
     if extra:
         for key, value in extra.items():
             if value is not None:

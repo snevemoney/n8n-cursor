@@ -24,6 +24,7 @@ from learning_engine.adapters.common import (
     clean_transcript,
     clip_source_text,
     collect_packet,
+    contains_caption_gap_token,
     convert_summary,
     empty_convert_report,
     existing_frames,
@@ -31,18 +32,22 @@ from learning_engine.adapters.common import (
     existing_transcripts,
     existing_videos,
     extract_caption_gap,
+    gap_note_prose_text,
+    is_ocr_file,
     is_suspect_hallucination,
     is_transcript_md,
     map_status,
     meta_affirms_transcript,
     meta_denies_transcript,
     meta_signals_absent,
+    packet_evidence_base,
     pick_source_transcript,
     read_transcript_payload,
     rel_ref,
     spoken_text,
     unicode_word_tokens,
 )
+from learning_engine.constants import OCR_TEXT_MAX_CHARS
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, evidence_item
 
@@ -79,8 +84,14 @@ def _resolve_declared_raw(folder: Path, name: str) -> Path | None:
     return None
 
 
-def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
+def meta_to_packet(
+    meta_path: Path,
+    meta: dict[str, Any],
+    *,
+    convert_root: Path | None = None,
+) -> dict[str, Any]:
     folder = meta_path.parent
+    root = convert_root or folder
     signal_id = str(meta.get("id") or folder.name)
     completeness = meta.get("completeness") if isinstance(meta.get("completeness"), dict) else None
     has_video = _completeness_flag(completeness, "has_local_video")
@@ -96,25 +107,37 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     meta_missing = meta_signals_absent(meta, has_transcript_flag)
     usable_transcripts: list[Path] = []
     placeholders: list[Path] = []
+    ocr_paths: list[Path] = []
+    gap_note_paths: list[Path] = []
     quality: str | None = None
+    for path in discovered:
+        if is_ocr_file(path):
+            ocr_paths.append(path)
+    speech_candidates = [path for path in discovered if not is_ocr_file(path)]
     if affirms:
-        usable_transcripts = list(discovered)
+        usable_transcripts = list(speech_candidates)
     elif denies:
-        placeholders = list(discovered)
+        placeholders = list(speech_candidates)
     elif meta_missing:
-        for path in discovered:
+        for path in speech_candidates:
+            raw = _read_transcript_text(path)
+            if is_transcript_md(path) and contains_caption_gap_token(raw):
+                gap_note_paths.append(path)
+                if len(unicode_word_tokens(gap_note_prose_text(raw))) >= 5:
+                    quality = "gap_note_with_content"
+                continue
             if not is_transcript_md(path):
                 placeholders.append(path)
                 continue
-            tokens = unicode_word_tokens(spoken_text(_read_transcript_text(path)))
+            tokens = unicode_word_tokens(spoken_text(raw))
             if len(tokens) >= 5:
                 usable_transcripts.append(path)
             else:
                 placeholders.append(path)
-        if usable_transcripts:
+        if usable_transcripts and quality != "gap_note_with_content":
             quality = "meta_missing"
     else:
-        placeholders = list(discovered)
+        placeholders = list(speech_candidates)
     file_gap = None
     for path in discovered:
         file_gap = file_gap or extract_caption_gap(_read_transcript_text(path))
@@ -144,7 +167,15 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         evidence.append(evidence_item(kind="frame", source_ref=rel_ref(folder, path)))
     for path in usable_transcripts:
         evidence.append(evidence_item(kind="transcript", source_ref=rel_ref(folder, path)))
+    for path in gap_note_paths:
+        evidence.append(
+            evidence_item(kind="file", source_ref=rel_ref(folder, path), note="gap_note")
+        )
+    for path in ocr_paths:
+        evidence.append(evidence_item(kind="file", source_ref=rel_ref(folder, path), note="ocr"))
     for path in placeholders:
+        if path in gap_note_paths:
+            continue
         evidence.append(
             evidence_item(
                 kind="file",
@@ -187,6 +218,8 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     picked = pick_source_transcript(usable_transcripts)
     cleaned = clean_transcript(_read_transcript_text(picked)) if picked else {"text": "", "transcript_source": None}
     source_text, source_chars, truncated = clip_source_text(str(cleaned["text"]))
+    ocr_raw = "\n".join(spoken_text(_read_transcript_text(path)) for path in ocr_paths)
+    ocr_text, _, _ = clip_source_text(ocr_raw, OCR_TEXT_MAX_CHARS)
 
     if frames and videos:
         content_access = "full_visual"
@@ -242,7 +275,12 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         "videos_found": len(videos),
     }
 
-    extra: dict[str, Any] = {"completeness": extra_completeness}
+    extra: dict[str, Any] = {
+        "completeness": extra_completeness,
+        "evidence_base": packet_evidence_base(folder, root),
+    }
+    if ocr_text:
+        extra["derived"] = {"ocr_text": ocr_text}
     notes = list(gap_notes)
     if caption_gap:
         extra["caption_gap"] = caption_gap
@@ -287,12 +325,13 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
 
 def convert_report(input_path: Path, *, strict: bool = False) -> dict[str, Any]:
     report = empty_convert_report()
+    root = input_path if input_path.is_dir() else input_path.parent
     for meta_path in find_meta_files(input_path):
         def _build(path: Path = meta_path) -> dict[str, Any]:
             meta = json.loads(path.read_text(encoding="utf-8"))
             if not isinstance(meta, dict):
                 raise ValueError(f"{path}: META.json must be an object")
-            return meta_to_packet(path, meta)
+            return meta_to_packet(path, meta, convert_root=root)
 
         if not collect_packet(report, str(meta_path), _build, strict=strict) and strict:
             break

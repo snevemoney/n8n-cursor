@@ -15,3 +15,7 @@ class NetworkDisabled(RuntimeError):
 
 class ProviderRefused(RuntimeError):
     """Live provider missing opt-in flag and/or API key."""
+
+
+class IndexSchemaError(RuntimeError):
+    """SQLite index schema is older or unknown. Never drop tables silently."""

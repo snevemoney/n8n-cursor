@@ -24,6 +24,23 @@ KEYWORD_REPLAY_REFERENCE = {
     "precision": 0.2232,
 }
 LIVE_MAX_ITEMS_DEFAULT = 25
+OCR_TEXT_MAX_CHARS = 50_000
+DISK_CHECK_SKIPPED = (
+    "disk check skipped: pass --root to resolve evidence refs against each "
+    "packet evidence_base"
+)
+SOURCE_TEXT_UNAVAILABLE = "not_applicable: source_text unavailable"
+SYNTHETIC_YOUTUBE_IDS = frozenset(
+    {
+        "SYNTHETIC01",
+        "SYNTHETIC02",
+        "SYNTHETIC03",
+        "SYNTHETIC04",
+        "SYNTHETIC05",
+        "SYNTHETIC06",
+        "SYNTHBURN001",
+    }
+)
 INJECTION_RE = (
     r"ignore\s+(?:(?:all|any|previous|prior|above)\s+)+(?:instructions|prompts|rules)"
 )

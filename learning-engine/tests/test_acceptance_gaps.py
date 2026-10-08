@@ -110,7 +110,8 @@ class D4BulletAeStatus(unittest.TestCase):
         self.assertTrue(any(r.endswith("TRANSCRIPT.md") for r in refs))
         self.assertTrue(any(r.endswith(".en-orig.vtt") for r in refs))
         self.assertTrue(any(r.endswith("captions_clean.txt") for r in refs))
-        self.assertIn("repass transcript", pack["source_text"])
+        self.assertIn("synthetic captions_clean line", pack["source_text"])
+        self.assertEqual(Path(pack["preferred_source"]).name, "captions_clean.txt")
         self.assertNotIn("# Transcript", pack["source_text"])
         self.assertEqual(pack["processing_status"], "partial")
         self.assertEqual(pack["content_access"], "frames")
@@ -373,7 +374,7 @@ class R3YoutubeCaptionGap(unittest.TestCase):
         self.assertIn("CAPTION_GAP", pack["caption_gap"].upper())
         self.assertTrue(
             any(
-                e.get("note") == "caption_gap_placeholder"
+                e.get("note") == "gap_note"
                 and e["source_ref"].upper().endswith("TRANSCRIPT.MD")
                 for e in pack["evidence"]
             )
@@ -536,7 +537,7 @@ class B1RecoveredVttNotWiped(unittest.TestCase):
         self.assertTrue(any(k == "transcript" and r.endswith("TRANSCRIPT.md") for k, r in kinds))
         self.assertTrue(any(k == "transcript" and r.endswith(".en.vtt") for k, r in kinds))
         self.assertTrue(pack["source_text"])
-        self.assertIn("recovered speech", pack["source_text"])
+        self.assertIn("recovered vtt speech", pack["source_text"])
         self.assertNotIn("caption_gap", pack)
         self.assertIn("transcript_disagreement", pack)
         self.assertTrue(any("CAPTION_GAP" in n for n in pack.get("notes", [])))
@@ -754,7 +755,7 @@ class R5ExactRules(unittest.TestCase):
             self.assertIn("CAPTION_GAP", pack.get("gap_note", "").upper())
             self.assertTrue(
                 any(
-                    e.get("note") == "caption_gap_placeholder"
+                    e.get("note") == "gap_note"
                     and e["source_ref"].upper().endswith("TRANSCRIPT.MD")
                     for e in pack["evidence"]
                 )
@@ -789,7 +790,7 @@ class R5ExactRules(unittest.TestCase):
         pack = next(p for p in packets if p["signal_id"] == "SYNTHETIC06")
         validate_packets([pack])
         self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
-        self.assertIn("recovered speech", pack["source_text"])
+        self.assertIn("recovered vtt speech", pack["source_text"])
         self.assertNotIn("caption_gap", pack)
         self.assertIn("transcript_disagreement", pack)
 

@@ -11,9 +11,10 @@ from typing import Any
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
 from learning_engine.adapters.common import convert_summary
 from learning_engine.io_util import read_jsonl, write_json, write_jsonl
+from learning_engine.constants import DISK_CHECK_SKIPPED
 from learning_engine.storage.sqlite_index import index_packets, rebuild_from_jsonl
 from learning_engine.validator import count_false_full_visual, validate_packet
-from learning_engine.errors import PacketValidationError
+from learning_engine.errors import IndexSchemaError, PacketValidationError
 
 
 def cmd_adapt(args: argparse.Namespace) -> int:
@@ -45,6 +46,8 @@ def cmd_validate(args: argparse.Namespace) -> int:
     warnings: list[str] = []
     valid: list[dict[str, Any]] = []
     root = Path(args.root) if getattr(args, "root", None) else None
+    if root is None:
+        warnings.append(DISK_CHECK_SKIPPED)
     for i, packet in enumerate(packets):
         try:
             valid.append(validate_packet(packet, path=f"$[{i}]", root=root, warnings=warnings))
@@ -69,14 +72,18 @@ def cmd_validate(args: argparse.Namespace) -> int:
 def cmd_store(args: argparse.Namespace) -> int:
     sqlite_path = Path(args.sqlite)
     packets_path = Path(args.packets)
-    if getattr(args, "rebuild", False):
-        summary = rebuild_from_jsonl(sqlite_path, packets_path)
-        print(json.dumps(summary))
-        return 0 if summary.get("ok") else 1
-    packets = list(read_jsonl(packets_path))
-    n = index_packets(sqlite_path, packets)
-    print(json.dumps({"ok": True, "indexed": n, "sqlite": args.sqlite}))
-    return 0
+    try:
+        if getattr(args, "rebuild", False):
+            summary = rebuild_from_jsonl(sqlite_path, packets_path)
+            print(json.dumps(summary))
+            return 0 if summary.get("ok") else 1
+        packets = list(read_jsonl(packets_path))
+        n = index_packets(sqlite_path, packets)
+        print(json.dumps({"ok": True, "indexed": n, "sqlite": args.sqlite}))
+        return 0
+    except IndexSchemaError as exc:
+        print(json.dumps({"ok": False, "error": str(exc)}), file=sys.stderr)
+        return 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -100,7 +107,11 @@ def build_parser() -> argparse.ArgumentParser:
     store = sub.add_parser("store", help="Index packets into SQLite (derived; JSONL is source of truth)")
     store.add_argument("--packets", required=True)
     store.add_argument("--sqlite", required=True)
-    store.add_argument("--rebuild", action="store_true", help="Delete packets rows and rebuild from JSONL")
+    store.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Replace packet rows only for source_types present in the JSONL; leave other types and judgments",
+    )
     store.set_defaults(func=cmd_store)
 
     return parser

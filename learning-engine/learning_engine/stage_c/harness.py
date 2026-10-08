@@ -18,6 +18,7 @@ from learning_engine.constants import (
     KEYWORD_REPLAY_KIND,
     KEYWORD_REPLAY_REFERENCE,
     LIVE_MAX_ITEMS_DEFAULT,
+    SOURCE_TEXT_UNAVAILABLE,
 )
 from learning_engine.errors import ProviderRefused
 from learning_engine.io_util import read_jsonl, write_json, write_jsonl
@@ -96,6 +97,19 @@ def packet_flag_names(packet: dict[str, Any]) -> list[str]:
     return flags
 
 
+def provider_source_text_unavailable(provider: Provider, packets: list[dict[str, Any]]) -> bool:
+    reads = getattr(provider, "reads", ("source_text",))
+    if "source_text" not in reads:
+        return False
+    if not packets:
+        return False
+    return all(not str(packet.get("source_text") or "").strip() for packet in packets)
+
+
+def not_applicable_slice(n: int) -> dict[str, Any]:
+    return {"n": n, "status": SOURCE_TEXT_UNAVAILABLE}
+
+
 def flag_counts(packets: list[dict[str, Any]]) -> dict[str, int]:
     counts = {name: 0 for name in (*PACKET_FLAGS, "injection_suspect")}
     for packet in packets:
@@ -166,19 +180,27 @@ def run_eval(
     kind = getattr(provider, "kind", None)
     if kind is None and getattr(provider, "name", "") == "keyword_replay":
         kind = KEYWORD_REPLAY_KIND
+    unavailable = provider_source_text_unavailable(provider, packets)
     report: dict[str, Any] = {
         "provider": getattr(provider, "name", "unknown"),
         "run_id": rid,
         "n_input": len(rows),
         "n_scored": len(items),
         "leaky": leaky,
-        "all": score_rows(all_rows),
-        "done_only": score_rows(done_rows),
-        "all_excluding_flagged": score_rows(unflagged),
-        "done_only_excluding_flagged": score_rows(done_unflagged),
         "flagged_packets": flag_counts(packets),
         "items": items,
     }
+    if unavailable:
+        report["status"] = SOURCE_TEXT_UNAVAILABLE
+        report["all"] = not_applicable_slice(len(all_rows))
+        report["done_only"] = not_applicable_slice(len(done_rows))
+        report["all_excluding_flagged"] = not_applicable_slice(len(unflagged))
+        report["done_only_excluding_flagged"] = not_applicable_slice(len(done_unflagged))
+    else:
+        report["all"] = score_rows(all_rows)
+        report["done_only"] = score_rows(done_rows)
+        report["all_excluding_flagged"] = score_rows(unflagged)
+        report["done_only_excluding_flagged"] = score_rows(done_unflagged)
     if kind:
         report["provider_kind"] = kind
     if getattr(provider, "name", "") == "keyword_replay":
@@ -188,8 +210,12 @@ def run_eval(
         report["leaky_reason"] = "provider reads derived.reviewer_summary (reviewer-authored, not source)"
     if getattr(provider, "name", "") == "lexicon_gate":
         dev, held = split_held_out(items)
-        report["dev"] = score_rows(dev)
-        report["held_out"] = score_rows(held)
+        if unavailable:
+            report["dev"] = not_applicable_slice(len(dev))
+            report["held_out"] = not_applicable_slice(len(held))
+        else:
+            report["dev"] = score_rows(dev)
+            report["held_out"] = score_rows(held)
         report["split"] = {"seed": 0, "train_frac": 0.7, "dev_n": len(dev), "held_out_n": len(held)}
     return {"report": report, "judgments": judged, "run_id": rid}
 

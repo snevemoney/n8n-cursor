@@ -152,6 +152,7 @@ def row_to_packet(row: dict[str, str], state: dict[str, Any] | None, *, input_re
         adapter="bookmark_review",
         input_ref=input_ref,
         extra={
+            "evidence_base": ".",
             "source_text_status": "unavailable",
             "derived": {
                 "reviewer_summary": row.get("gist") or "",

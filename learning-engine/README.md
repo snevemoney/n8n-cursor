@@ -33,9 +33,17 @@ Transcript discovery is case-insensitive. Cleaning is shared; speech vs gap is n
 
 **Corpus (META is authoritative).** `has_transcript` true or `transcript_chars` > 0: every discovered transcript file is transcript evidence and its cleaned text is `source_text`. No word threshold. If that cleaned text is only Whisper leftovers (`Thanks for watching`, `you`, `music`, `🎵`), keep the transcript and set `transcript_quality: suspect_hallucination`. Do not demote it. META says no transcript: gap, same as N1. File prose cannot override META.
 
-**YouTube (no META booleans).** Every name in `TRANSCRIPT_EXACT` (`whisper.txt`, `ocr-frames.txt`, `transcript-burnin.json`, …) plus caption-format files (`*.vtt`, `captions*`, `stills_captions.json`, `player-caption-samples.json`) is a speech source judged by **content** through `caption_file_is_speech` (same path as caption formats). After format cleaning, ≥5 Unicode word tokens that are not all hallucination → speech. 1–4 real tokens → speech with `transcript_quality=short`. Hallucination-only (`you`/`you`) is not speech. JSON uses caption-text fields only. Bracket timings such as `[ 0.1- 4.5]` and `[00:01.2 - 00:04.5]` are stripped.
+**YouTube (no META booleans).** Speech sources are judged by content through `caption_file_is_speech` (same quality path as caption formats). After format cleaning, ≥5 Unicode word tokens that are not all hallucination → speech. 1–4 real tokens → speech with `transcript_quality=short`. Hallucination-only (`you`/`you`) is not speech. JSON uses caption-text fields only. Bracket timings such as `[ 0.1- 4.5]` and `[00:01.2 - 00:04.5]` are stripped.
 
-`TRANSCRIPT.md`: empty / heading-only / metadata-only after stripping is not speech. A `CAPTION_GAP` token plus ≥5 tokens of non-metadata, non-gap-note speech keeps the speech, sets `transcript_disagreement`, and cites a `gap_note` evidence ref. Pack has speech when any caption/exact file counts as speech **or** a `TRANSCRIPT.md` has speech lines. `source_text` comes from the clean `TRANSCRIPT.md` if it has speech, otherwise the largest qualifying caption file (`preferred_source` records the choice). `caption_gap` only when the pack has no speech. `transcript_disagreement` also when metadata and content disagree, or when TRANSCRIPT.md and a caption file differ materially.
+**N7-1 (supersedes R7 / Consultant 4c):** a `TRANSCRIPT.md` that contains any `CAPTION_GAP` token is a gap note. It contributes **no** `source_text`, ever. Evidence is `kind=file`, `note=gap_note`. If it also has ≥5-token leftover prose (not tables, bullets, headings, metadata, URLs, or check lines), set `transcript_quality=gap_note_with_content` so the leftover is flagged, not lost. It is still not speech.
+
+**N7-2:** `ocr-frames.txt` and any `*ocr*` file are visual-text. They go in `derived.ocr_text` (truncated) plus an evidence ref. They never go in `source_text` and never count as speech for `caption_gap`. Speech precedence is a fixed order, never longest-file-wins: (a) caption formats (`*.vtt`, `captions*`, `captions_timeline`, `stills_captions.json`, `player-caption-samples.json`, `transcript-burnin.json`, other `*burnin*` caption JSON); (b) `whisper.txt`, `transcript.txt`, `transcript.json`; (c) a non-gap `TRANSCRIPT.md`. The first tier with speech wins. Ties within a tier break by filename sort. `source_text` is exactly the preferred file's caption lines.
+
+`TRANSCRIPT.md` without `CAPTION_GAP`: empty / heading-only / metadata-only after stripping is not speech. Pack has speech when a tier-(a)/(b) file counts as speech **or** a non-gap `TRANSCRIPT.md` has speech lines. `caption_gap` only when the pack has no speech. `transcript_disagreement` when metadata and content disagree, or when preferred and another speech file differ. `disagreement_refs` names the preferred file and each differing file.
+
+`--root` resolves each ref as `root / evidence_base / source_ref`. Adapters write `evidence_base` (relative to the convert input, or absolute). Without `--root` the disk check is skipped and the validator warns. `--rebuild` replaces only the `source_type`s present in the given JSONL; other types and all judgments stay. An older-schema DB is migrated in place (judgments kept) or refused with a non-zero exit — tables are never dropped silently.
+
+A lexicon or `keyword_rules` run whose `source_text` is empty on every packet reports `status: not_applicable: source_text unavailable` instead of recall 0.0.
 
 **Corpus META missing both signals.** If META has neither `has_transcript` nor `transcript_chars`, fall back to TRANSCRIPT.md speech lines (≥5 tokens) and set `transcript_quality=meta_missing`.
 
@@ -84,13 +92,14 @@ python3 -m learning_engine.adapters.youtube_l2 --input /path/to/youtube-daily --
 python3 -m learning_engine adapt corpus --input /path/to/corpus-reingest --output /tmp/le/corpus.jsonl --strict
 ```
 
-Validate and count false `full_visual` (must be 0):
+Validate and count false `full_visual` (must be 0). Pass `--root` so image/video refs resolve as `root / evidence_base / ref`:
 
 ```bash
 python3 -m learning_engine validate --input /tmp/le/bookmark.jsonl --min-packets 50
+python3 -m learning_engine validate --input /tmp/le/youtube.jsonl --root "$YOUTUBE_L2_DIR" --min-packets 50
 ```
 
-JSONL is the source of truth. SQLite is a derived index (primary key `(source_type, signal_id)`). Rebuild from JSONL:
+JSONL is the source of truth. SQLite is a derived index (primary key `(source_type, signal_id)`). `--rebuild` replaces only the source types in that JSONL:
 
 ```bash
 python3 -m learning_engine store --packets /tmp/le/bookmark.jsonl --sqlite /tmp/le/index.sqlite
@@ -122,7 +131,7 @@ Report JSON includes `all` and `done_only` slices, the same slices `*_excluding_
 
 Keyword replay is labelled `replay of stored kw_category (not a classifier)`. It does not read reviewer text. Operator-box reference on the real 1,201-row set: flagged 569, useful 180, TP 127, recall 0.7056, precision 0.2232.
 
-Lexicon is a local gate over generic building words (no project/repo/desk names). It reports `dev` and `held_out` from a deterministic 70/30 split (seeded hash of id).
+Lexicon is a local gate over generic building words (no project/repo/desk names). It reports `dev` and `held_out` from a deterministic 70/30 split (seeded hash of id). On bookmark packets (`source_text` empty) lexicon and `keyword_rules` report `not_applicable: source_text unavailable`.
 
 Keyword replay definition (must match FORMATS-SYNTHETIC.md):
 

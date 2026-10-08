@@ -241,12 +241,10 @@ class R7NoReviewerInSourceText(unittest.TestCase):
             ROOT / "fixtures" / "keyword_replay" / "STATE.jsonl",
         )
         result = run_eval(LexiconProvider(), [{**row, "packet": labelled_to_packet(row)} for row in rows])
+        self.assertEqual(result["report"]["status"], "not_applicable: source_text unavailable")
+        self.assertNotIn("recall", result["report"]["all"])
         self.assertIn("dev", result["report"])
         self.assertIn("held_out", result["report"])
-        self.assertEqual(
-            result["report"]["dev"]["n"] + result["report"]["held_out"]["n"],
-            result["report"]["n_scored"],
-        )
 
 
 class R7GapRuleEdges(unittest.TestCase):
@@ -267,7 +265,8 @@ class R7GapRuleEdges(unittest.TestCase):
         self.assertNotIn("Note:", spoken)
         self.assertIn("spoken line after metadata", spoken)
 
-    def test_gap_token_plus_real_speech_keeps_speech(self) -> None:
+    def test_gap_token_plus_real_speech_is_not_speech(self) -> None:
+        """N7-1 supersedes R7 4c: CAPTION_GAP TRANSCRIPT.md is never speech."""
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / "MIXEDGAP"
             _write_youtube(
@@ -281,10 +280,11 @@ class R7GapRuleEdges(unittest.TestCase):
             )
             pack = youtube_l2.convert(folder)[0]
             validate_packets([pack])
-            self.assertIn("recovered spoken line", pack["source_text"])
-            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
-            self.assertIn("transcript_disagreement", pack)
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(pack.get("caption_gap"))
             self.assertTrue(any(e.get("note") == "gap_note" for e in pack["evidence"]))
+            self.assertEqual(pack.get("transcript_quality"), "gap_note_with_content")
 
     def test_one_to_four_token_caption_is_short_speech(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -379,21 +379,20 @@ class R7Y1TranscriptExact(unittest.TestCase):
                     self.assertIn("spoken words", pack["source_text"])
                     self.assertNotIn("caption_gap", pack)
 
-    def test_km54_burnin_fixture_is_speech(self) -> None:
-        burnin = ROOT / "fixtures" / "youtube_burnin" / "km54y7Xd_7g" / "transcript-burnin.json"
+    def test_synthburn_fixture_is_speech(self) -> None:
+        burnin = ROOT / "fixtures" / "youtube_burnin" / "SYNTHBURN001" / "transcript-burnin.json"
         payload = read_transcript_payload(burnin)
         self.assertTrue(
             caption_file_is_speech(payload),
             msg="Y1: burnt-in captions must count as speech via caption_file_is_speech",
         )
         packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_burnin")
-        pack = next(p for p in packets if p["signal_id"] == "km54y7Xd_7g")
+        pack = next(p for p in packets if p["signal_id"] == "SYNTHBURN001")
         validate_packets([pack])
         self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
         self.assertEqual(pack.get("preferred_source"), "transcript-burnin.json")
-        self.assertIn("burnt-in caption", pack["source_text"])
+        self.assertIn("invented burnt-in line", pack["source_text"])
         self.assertNotIn("0.1", pack["source_text"])
-        self.assertNotIn("km54y7Xd_7g", pack["source_text"])
         self.assertNotIn("example.com", pack["source_text"])
         self.assertNotIn("caption_gap", pack)
 

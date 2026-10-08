@@ -1,9 +1,0 @@
-{
-  "video_id": "km54y7Xd_7g",
-  "description": "do not leak this description or the watch URL",
-  "url": "https://example.com/watch?v=km54y7Xd_7g",
-  "captions": [
-    {"id": "c1", "text": "[ 0.1- 4.5] burnt-in caption from the video stills"},
-    {"id": "c2", "text": "[00:01.2 - 00:04.5] second burnt-in line on screen"}
-  ]
-}

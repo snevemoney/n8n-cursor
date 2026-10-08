@@ -19,7 +19,6 @@ TRANSCRIPT_EXACT = {
     "transcript.json",
     "transcript.vtt",
     "transcript-burnin.json",
-    "ocr-frames.txt",
     "stills_captions.json",
     "player-caption-samples.json",
     "captions.json",
@@ -60,7 +59,18 @@ BRACKET_TIMESTAMP = re.compile(
 )
 VTT_CUE_NUMBER = re.compile(r"^\d+$")
 MD_HEADING = re.compile(r"^#{1,6}\s+\S")
+MD_TABLE_LINE = re.compile(r"^\|")
+CHECK_LINE = re.compile(r"^[-*]\s+\[[ xX]\]")
+URL_TOKEN = re.compile(r"https?://\S+", re.IGNORECASE)
+HANDLE_TOKEN = re.compile(r"@\w+")
 CAPTION_GAP_TOKEN = re.compile(r"CAPTION_GAP", re.IGNORECASE)
+TIER_A_EXACT = {
+    "captions_timeline.txt",
+    "stills_captions.json",
+    "player-caption-samples.json",
+    "transcript-burnin.json",
+}
+TIER_B_EXACT = {"whisper.txt", "transcript.txt", "transcript.json"}
 PROVENANCE_LINE = re.compile(r"^_source:\s*(.+?)_\s*$", re.IGNORECASE)
 INLINE_VTT_TAGS = re.compile(
     r"<\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?>|"
@@ -126,6 +136,10 @@ def existing_transcripts(folder: Path) -> list[Path]:
         elif name.endswith(".vtt"):
             match = True
         elif name.startswith("captions") and path.suffix.lower() in CAPTION_SUFFIXES:
+            match = True
+        elif "ocr" in name:
+            match = True
+        elif "burnin" in name and name.endswith(".json"):
             match = True
         if match and path not in seen:
             seen.add(path)
@@ -367,11 +381,20 @@ def read_transcript_payload(path: Path) -> str:
     return "\n".join(fields) if fields else ""
 
 
+def is_ocr_file(path: Path) -> bool:
+    return "ocr" in path.name.lower()
+
+
+def is_burnin_caption_json(path: Path) -> bool:
+    name = path.name.lower()
+    return "burnin" in name and name.endswith(".json")
+
+
 def is_caption_format_file(path: Path) -> bool:
     name = path.name.lower()
     if name.endswith(".vtt"):
         return True
-    if name in {"captions_timeline.txt", "stills_captions.json", "player-caption-samples.json"}:
+    if name in TIER_A_EXACT or is_burnin_caption_json(path):
         return True
     return name.startswith("captions") and path.suffix.lower() in CAPTION_SUFFIXES
 
@@ -380,18 +403,64 @@ def is_transcript_md(path: Path) -> bool:
     return path.name.lower() == "transcript.md"
 
 
+def speech_source_tier(path: Path) -> int | None:
+    """Fixed speech order. None = not a speech source (OCR, gap notes, other)."""
+    if is_ocr_file(path):
+        return None
+    if is_transcript_md(path):
+        return 2
+    name = path.name.lower()
+    if is_caption_format_file(path) or name in TIER_A_EXACT or is_burnin_caption_json(path):
+        return 0
+    if name in TIER_B_EXACT:
+        return 1
+    return None
+
+
 def is_youtube_speech_source(path: Path) -> bool:
-    """Y1: TRANSCRIPT_EXACT names, caption-format files, and TRANSCRIPT.md."""
-    return path.name.lower() in TRANSCRIPT_EXACT or is_caption_format_file(path) or is_transcript_md(path)
+    """Y1 speech names after OCR exclusion. Gap TRANSCRIPT.md is not speech."""
+    return speech_source_tier(path) is not None
+
+
+def is_non_prose_gap_line(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return True
+    if MD_TABLE_LINE.match(stripped) or CHECK_LINE.match(stripped):
+        return True
+    if OPERATOR_BULLET.match(stripped):
+        return True
+    if MD_HEADING.match(stripped) or METADATA_LINE.match(stripped):
+        return True
+    if URL_TOKEN.search(stripped) and not unicode_word_tokens(URL_TOKEN.sub(" ", stripped)):
+        return True
+    if HANDLE_TOKEN.fullmatch(stripped):
+        return True
+    return False
+
+
+def gap_note_prose_text(raw: str) -> str:
+    """Leftover prose on a CAPTION_GAP note. Never source_text. Never speech."""
+    kept: list[str] = []
+    for line in raw.replace("\r\n", "\n").split("\n"):
+        stripped = line.strip()
+        if not stripped or contains_caption_gap_token(stripped):
+            continue
+        if is_non_prose_gap_line(stripped):
+            continue
+        body = HANDLE_TOKEN.sub(" ", URL_TOKEN.sub(" ", stripped))
+        body = re.sub(r"\s+", " ", body).strip()
+        if not body or is_non_prose_gap_line(body):
+            continue
+        kept.append(body)
+    return "\n".join(kept).strip()
 
 
 def speech_lines_from_transcript_md(raw: str) -> str:
-    """Spoken lines only. Gap-note files drop operator bullets so leftover prose is not speech."""
-    cleaned = spoken_text(raw)
-    if not contains_caption_gap_token(raw):
-        return cleaned
-    kept = [line for line in cleaned.split("\n") if line and not OPERATOR_BULLET.match(line)]
-    return "\n".join(kept).strip()
+    """Spoken lines only. Any CAPTION_GAP token makes the file a gap note (N7-1)."""
+    if contains_caption_gap_token(raw):
+        return ""
+    return spoken_text(raw)
 
 
 def caption_speech_quality(raw: str) -> str | None:
@@ -471,121 +540,148 @@ def ae_affirms_transcript(ae: dict[str, Any]) -> bool:
 class YoutubeSpeechScan(NamedTuple):
     speech: list[Path]
     other: list[Path]
+    ocr_paths: list[Path]
     clean_md: Path | None
     gap_note: str | None
     gap_note_paths: list[Path]
+    gap_note_with_content: bool
     short_paths: list[Path]
     preferred: Path | None
     content_disagreement: str | None
     disagreement_refs: tuple[str, ...]
 
 
+def _file_is_speech(raw: str) -> tuple[bool, str | None, str]:
+    quality = caption_speech_quality(raw)
+    text = spoken_text(raw)
+    return (caption_file_is_speech(raw) or quality == "short"), quality, text
+
+
+def _disagreement_refs(preferred: Path | None, differing: list[Path]) -> tuple[str, ...]:
+    names: list[str] = []
+    if preferred is not None:
+        names.append(preferred.name)
+    for path in differing:
+        if path.name not in names:
+            names.append(path.name)
+    return tuple(names)
+
+
 def youtube_speech_files(
     paths: list[Path],
     read_text: Callable[[Path], str],
 ) -> YoutubeSpeechScan:
-    """YouTube speech scan. TRANSCRIPT_EXACT names are speech sources (Y1)."""
-    speech: list[Path] = []
+    """YouTube speech scan. Fixed tier order. OCR is never speech. Gap notes never are."""
     other: list[Path] = []
+    ocr_paths: list[Path] = []
     clean_md: Path | None = None
     gap_note: str | None = None
     gap_note_paths: list[Path] = []
+    gap_note_with_content = False
     short_paths: list[Path] = []
     texts: dict[Path, str] = {}
+    by_tier: dict[int, list[Path]] = {0: [], 1: [], 2: []}
     for path in paths:
         raw = read_text(path)
-        if is_transcript_md(path):
-            text = speech_lines_from_transcript_md(raw)
-            tokens = unicode_word_tokens(text)
-            gap = extract_caption_gap(raw) if contains_caption_gap_token(raw) else None
-            has_speech = bool(tokens) and not is_suspect_hallucination(text)
-            if has_speech:
-                speech.append(path)
-                texts[path] = text
-                if gap is None:
-                    clean_md = path
-            else:
-                other.append(path)
-            if gap:
-                gap_note = gap_note or gap
-                gap_note_paths.append(path)
+        if is_ocr_file(path):
+            ocr_paths.append(path)
             continue
-        # Y1: TRANSCRIPT_EXACT / caption-format names are judged by content
-        # through caption_file_is_speech (same path as caption formats).
-        # Short (1–4 tokens) is still speech at pack level via quality.
-        quality = caption_speech_quality(raw)
-        if caption_file_is_speech(raw) or quality == "short":
-            speech.append(path)
-            texts[path] = spoken_text(raw)
-            if quality == "short":
-                short_paths.append(path)
-        else:
+        if is_transcript_md(path) and contains_caption_gap_token(raw):
+            gap = extract_caption_gap(raw)
+            gap_note = gap_note or gap
+            gap_note_paths.append(path)
             other.append(path)
+            prose = gap_note_prose_text(raw)
+            if len(unicode_word_tokens(prose)) >= YT_CAPTION_MIN_TOKENS:
+                gap_note_with_content = True
+            continue
+        tier = speech_source_tier(path)
+        if tier is None:
+            other.append(path)
+            continue
+        is_speech, quality, text = _file_is_speech(raw)
+        if not is_speech:
+            other.append(path)
+            continue
+        by_tier[tier].append(path)
+        texts[path] = text
+        if quality == "short":
+            short_paths.append(path)
+        if tier == 2:
+            clean_md = path
 
-    preferred = clean_md
-    if preferred is None and speech:
-        preferred = max(speech, key=lambda p: len(texts.get(p, "")))
+    speech: list[Path] = []
+    for tier in (0, 1, 2):
+        speech.extend(sorted(by_tier[tier], key=lambda item: item.name.lower()))
+    preferred: Path | None = None
+    for tier in (0, 1, 2):
+        hits = sorted(by_tier[tier], key=lambda item: item.name.lower())
+        if hits:
+            preferred = hits[0]
+            break
 
     content_disagreement = None
-    disagreement_refs: list[str] = []
-    md_speech = [p for p in speech if is_transcript_md(p)]
-    cap_speech = [p for p in speech if not is_transcript_md(p)]
-    if md_speech and cap_speech:
-        md_text = texts.get(md_speech[0], "")
-        cap_text = max((texts.get(p, "") for p in cap_speech), key=len, default="")
-        if texts_differ_materially(md_text, cap_text):
-            content_disagreement = (
-                f"TRANSCRIPT.md and caption file differ; preferred={preferred.name if preferred else '?'}"
-            )
-            disagreement_refs = [md_speech[0].name, cap_speech[0].name]
-    elif gap_note_paths and cap_speech and not md_speech:
+    differing: list[Path] = []
+    pref_text = texts.get(preferred, "") if preferred is not None else ""
+    if preferred is not None:
+        for path in speech:
+            if path == preferred:
+                continue
+            if texts_differ_materially(pref_text, texts.get(path, "")):
+                differing.append(path)
+    if gap_note_paths and speech:
         content_disagreement = (
             "TRANSCRIPT.md is a gap note; caption file has speech; "
             f"preferred={preferred.name if preferred else '?'}"
         )
-        disagreement_refs = [gap_note_paths[0].name, cap_speech[0].name]
-    elif gap_note_paths and md_speech:
+        differing.extend(gap_note_paths)
+    elif differing:
         content_disagreement = (
-            "TRANSCRIPT.md has CAPTION_GAP and speech lines; "
-            f"preferred={preferred.name if preferred else '?'}"
+            f"speech files differ; preferred={preferred.name if preferred else '?'}"
         )
-        disagreement_refs = [gap_note_paths[0].name]
+    disagreement_refs = (
+        _disagreement_refs(preferred, differing) if content_disagreement else tuple()
+    )
 
     return YoutubeSpeechScan(
         speech=speech,
         other=other,
+        ocr_paths=ocr_paths,
         clean_md=clean_md,
         gap_note=gap_note,
         gap_note_paths=gap_note_paths,
+        gap_note_with_content=gap_note_with_content,
         short_paths=short_paths,
         preferred=preferred,
         content_disagreement=content_disagreement,
-        disagreement_refs=tuple(disagreement_refs),
+        disagreement_refs=disagreement_refs,
     )
 
 
 def pick_youtube_cleaned(
-    clean_md: Path | None,
-    speech: list[Path],
+    preferred: Path | None,
     read_text: Callable[[Path], str],
 ) -> dict[str, Any]:
     empty: dict[str, Any] = {"text": "", "transcript_source": None, "provenance": []}
-    if clean_md is not None:
-        return clean_transcript(read_text(clean_md))
-    best = empty
-    for path in speech:
-        cleaned = clean_transcript(read_text(path))
-        if len(str(cleaned["text"])) > len(str(best["text"])):
-            best = cleaned
-    return best
+    if preferred is None:
+        return empty
+    return clean_transcript(read_text(preferred))
 
 
 def pick_youtube_source_text(
-    clean_md: Path | None,
-    speech: list[Path],
+    preferred: Path | None,
     read_text: Callable[[Path], str],
 ) -> str:
-    return str(pick_youtube_cleaned(clean_md, speech, read_text)["text"])
+    return str(pick_youtube_cleaned(preferred, read_text)["text"])
+
+
+def packet_evidence_base(folder: Path, convert_root: Path) -> str:
+    """Pack folder relative to the convert root, or an absolute path."""
+    try:
+        rel = folder.resolve().relative_to(convert_root.resolve())
+        return "." if str(rel) == "." else str(rel)
+    except ValueError:
+        return str(folder.resolve())
 
 
 def bidirectional_disagreement(
